@@ -645,12 +645,6 @@ out:
 	return ret;
 }
 
-static void free_path_data(void *data)
-{
-	char *path = (char *)data;
-	free_string(&path);
-}
-
 /* This function is meant to be called while staging file to fix any missing/incorrect paths.
  * While staging a file, if its parent directory is missing, this would try to create the path
  * by breaking it into sub-paths and fixing them top down.
@@ -767,7 +761,7 @@ end:
 	free_string(&target);
 	free_string(&tar_dotfile);
 	free_string(&url);
-	list_free_list_and_data(path_list, free_path_data);
+	list_free_list_and_data(path_list, free);
 	return ret;
 }
 

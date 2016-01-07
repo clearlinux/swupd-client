@@ -98,11 +98,11 @@ SWUPD_CERTS = certs/157753a5.0 \
 	certs/d6325660.0 \
 	certs/d6325660.1
 swupdcerts_DATA = $(SWUPD_CERTS)
-dist_swupdcerts_DATA = $(SWUPD_CERTS)
 
 EXTRA_DIST += \
 	data/check-update.service \
-	data/check-update.timer
+	data/check-update.timer \
+	$(SWUPD_CERTS)
 
 DISTCHECK_CONFIGURE_FLAGS = \
         --with-systemdsystemunitdir=$$dc_install_base/$(systemdunitdir)

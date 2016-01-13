@@ -21,11 +21,13 @@ PKG_CHECK_MODULES([bsdiff], [bsdiff])
 PKG_CHECK_MODULES([lzma], [liblzma])
 PKG_CHECK_MODULES([zlib], [zlib])
 AC_ARG_ENABLE(
-	bzip2,
-	AS_HELP_STRING([--disable-bzip2],[Do not use bzip2 compression (uses bzip2 by default)]),
-	AC_DEFINE(SWUPD_WITHOUT_BZIP2,1,[Do not use bzip2 compression]) ,
-	AC_DEFINE(SWUPD_WITH_BZIP2,1,[Use bzip2 compression])
-	AC_CHECK_LIB([bz2], [BZ2_bzBuffToBuffCompress], [], [AC_MSG_ERROR([the libbz2 library is missing])])
+	[bzip2],
+	AS_HELP_STRING([--disable-bzip2],[Do not use bzip2 compression (uses bzip2 by default)])
+)
+AS_IF([test "x$enable_bzip2" != "xno" ],
+  [AC_DEFINE(SWUPD_WITH_BZIP2,1,[Use bzip2 compression])
+	 AC_CHECK_LIB([bz2], [BZ2_bzBuffToBuffCompress], [], [AC_MSG_ERROR([the libbz2 library is missing])])],
+  [AC_DEFINE(SWUPD_WITHOUT_BZIP2,1,[Do not use bzip2 compression])]
 )
 
 AC_ARG_ENABLE(

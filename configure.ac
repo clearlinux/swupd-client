@@ -54,6 +54,15 @@ if test "$enable_coverage" = "yes" ; then
 fi
 AM_CONDITIONAL([COVERAGE], [test "$have_coverage" = "yes"])
 
+AC_ARG_ENABLE(
+	[bsdtar],
+	AS_HELP_STRING([--enable-bsdtar], [Use alternative bsdtar command (uses tar by default)])
+)
+AS_IF([test "x$enable_bsdtar" = "xyes" ],
+	[AC_DEFINE(SWUPD_WITH_BSDTAR, 1, [Use bsdtar])],
+	[AC_DEFINE(SWUPD_WITHOUT_BSDTAR, 1, [Use default tar])]
+)
+
 AC_ARG_WITH([systemdsystemunitdir], AS_HELP_STRING([--with-systemdsystemunitdir=DIR],
             [path to systemd system service dir @<:@default=/usr/lib/systemd/system@:>@]), [unitpath=${withval}],
             [unitpath="$($PKG_CONFIG --variable=systemdsystemunitdir systemd)"])

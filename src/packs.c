@@ -76,7 +76,7 @@ static int download_pack(int oldversion, int newversion, char *module)
 	free(url);
 
 	printf("Extracting pack.\n");
-	string_or_die(&tar, "tar -C %s " TAR_PERM_ATTR_ARGS " -xf %s/pack-%s-from-%i-to-%i.tar 2> /dev/null",
+	string_or_die(&tar, TAR_COMMAND " -C %s " TAR_PERM_ATTR_ARGS " -xf %s/pack-%s-from-%i-to-%i.tar 2> /dev/null",
 		      STATE_DIR, STATE_DIR, module, oldversion, newversion);
 
 	err = system(tar);

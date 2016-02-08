@@ -37,6 +37,7 @@
 #include "config.h"
 #include "signature.h"
 #include "swupd.h"
+#include "swupd-build-variant.h"
 #include "xattrs.h"
 
 #define MANIFEST_LINE_MAXLEN 8192
@@ -521,7 +522,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		goto out;
 	}
 
-	string_or_die(&tar, "tar -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",
+	string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",
 		      STATE_DIR, version, STATE_DIR, version, component);
 
 	/* this is is historically a point of odd errors */

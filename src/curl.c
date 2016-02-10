@@ -156,7 +156,7 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 {
 	CURLcode curl_ret;
 	long ret = 0;
-	int err;
+	int err = -1;
 	struct file *local = NULL;
 
 	if (!curl) {
@@ -247,21 +247,39 @@ exit:
 	} else { /* download failed but let our caller do it */
 		switch (curl_ret) {
 			case CURLE_COULDNT_RESOLVE_PROXY:
+				printf("Curl: Could not resolve proxy\n");
+				err = -1;
+				break;
 			case CURLE_COULDNT_RESOLVE_HOST:
+				printf("Curl: Could not resolve host - '%s'\n", url);
+				err = -1;
+				break;
 			case CURLE_COULDNT_CONNECT:
 				err = -ENONET;
 				break;
 			case CURLE_PARTIAL_FILE:
+				printf("Curl: File incompletely downloaded from '%s' to '%s'\n",
+							url, filename);
+				err = -1;
+				break;
 			case CURLE_RECV_ERROR:
+				printf("Curl: Failure receiving data from server\n");
 				err = -ENOLINK;
 				break;
 			case CURLE_WRITE_ERROR:
+				printf("Curl: Error downloading to local file - %s\n", filename);
 				err = -EIO;
 				break;
 			case CURLE_OPERATION_TIMEDOUT:
+				printf("Curl: Communicating with server timed out.\n");
 				err = -ETIMEDOUT;
 				break;
+			case CURLE_SSL_CACERT_BADFILE:
+				printf("Curl: Bad SSL Cert file, cannot ensure secure connection\n");
+				err = -1;
+				break;
 			default :
+				printf("Curl error: %d - see curl.h for details\n", curl_ret);
 				err = -1;
 				break;
 		}

@@ -89,6 +89,57 @@ void swupd_curl_set_requested_version(int v)
 	req_version = v;
 }
 
+static size_t filesize_from_header_cb(void *func, size_t size, size_t nmemb, void *data)
+{
+	/* Drop the header, we just want file size */
+	return (size_t)(size * nmemb);
+}
+
+double swupd_query_url_content_size(char *url)
+{
+	CURLcode curl_ret;
+	double content_size;
+
+	if (!curl) {
+		return -1;
+	}
+
+	curl_easy_reset(curl);
+
+	/* Set buffer for error string */
+	curl_ret = curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
+	curl_ret = curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, filesize_from_header_cb);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
+	curl_ret = curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
+	curl_ret = curl_easy_setopt(curl, CURLOPT_URL, url);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
+	curl_ret = curl_easy_perform(curl);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
+	curl_ret = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &content_size);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
+	return content_size;
+}
+
 static size_t swupd_download_version_to_memory(void *ptr, size_t size, size_t nmemb, void *userdata)
 {
 	char *tmp_version = (char *)userdata;

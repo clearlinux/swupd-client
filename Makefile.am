@@ -12,7 +12,8 @@ swupd_SOURCES = \
 	$(swupd_check_update_SOURCES) \
 	$(swupd_verify_SOURCES) \
 	$(clr_bundle_add_SOURCES) \
-	$(clr_bundle_rm_SOURCES)
+	$(clr_bundle_rm_SOURCES) \
+	$(swupd_search_SOURCES)
 
 check_PROGRAMS = \
 	swupd_bsdiff_bench \
@@ -59,6 +60,7 @@ libswupd_la_LDFLAGS = \
 swupd_update_SOURCES = src/main.c
 swupd_verify_SOURCES = src/verify.c
 swupd_check_update_SOURCES = src/check_update.c
+swupd_search_SOURCES = src/search.c
 
 clr_bundle_add_SOURCES = src/clr_bundle_add.c
 clr_bundle_rm_SOURCES = src/clr_bundle_rm.c

@@ -180,6 +180,7 @@ extern int swupd_curl_init(void);
 extern void swupd_curl_cleanup(void);
 extern void swupd_curl_set_current_version(int v);
 extern void swupd_curl_set_requested_version(int v);
+extern double swupd_query_url_content_size(char *url);
 extern size_t swupd_download_file(void *ptr, size_t size, size_t nmemb, void *userdata);
 extern int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 			    char *tmp_version, bool pack);

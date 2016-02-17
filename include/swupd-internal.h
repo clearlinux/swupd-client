@@ -7,5 +7,6 @@ extern int hashdump_main(int argc, char **argv);
 extern int update_main(int argc, char **argv);
 extern int verify_main(int argc, char **argv);
 extern int check_update_main(int argc, char **argv);
+extern int search_main(int argc, char **argv);
 
 #endif

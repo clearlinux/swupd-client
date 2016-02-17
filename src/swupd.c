@@ -39,6 +39,7 @@ static struct subcmd commands[] = {
 	{ "update", "Update to latest OS version", update_main },
 	{ "verify", "Verify content for OS version", verify_main },
 	{ "check-update", "Checks if a new OS version is available", check_update_main},
+	{ "search", "Search Clear Linux for a binary or library", search_main },
 	{ 0 }
 };
 

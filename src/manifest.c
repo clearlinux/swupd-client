@@ -642,8 +642,8 @@ void link_submanifests(struct manifest *m1, struct manifest *m2)
 	struct list *list1, *list2;
 	struct file *file1, *file2;
 
-	m1->files = list_sort(m1->files, file_sort_filename);
-	m2->files = list_sort(m2->files, file_sort_filename);
+	m1->manifests = list_sort(m1->manifests, file_sort_filename);
+	m2->manifests = list_sort(m2->manifests, file_sort_filename);
 
 	list1 = list_head(m1->manifests);
 	list2 = list_head(m2->manifests);

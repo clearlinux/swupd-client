@@ -1,0 +1,5 @@
+The swupd-client package provides a reference implementation of a software
+update client which performs file level updates of an OS, preferentially
+using binary deltas whenever possible for efficiency under an assumption
+that the OS develops with a release process aimed at rapidly deploying
+small incremental changes.

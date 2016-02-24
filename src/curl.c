@@ -156,7 +156,7 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 {
 	CURLcode curl_ret;
 	long ret = 0;
-	int err;
+	int err = -1;
 	struct file *local = NULL;
 
 	if (!curl) {
@@ -252,6 +252,7 @@ exit:
 				break;
 			case CURLE_COULDNT_RESOLVE_HOST:
 				printf("Curl: Could not resolve host - '%s'\n", url);
+				err = -1;
 				break;
 			case CURLE_COULDNT_CONNECT:
 				err = -ENONET;
@@ -259,6 +260,7 @@ exit:
 			case CURLE_PARTIAL_FILE:
 				printf("Curl: File incompletely downloaded from '%s' to '%s'\n",
 							url, swupd_download_file);
+				err = -1;
 				break;
 			case CURLE_RECV_ERROR:
 				printf("Curl: Failure receiving data from server\n");

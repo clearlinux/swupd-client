@@ -266,6 +266,10 @@ exit:
 				printf("Curl: Failure receiving data from server\n");
 				err = -ENOLINK;
 				break;
+			case CURLE_WRITE_ERROR:
+				printf("Curl: Error downloading to local file - %s\n", filename);
+				err = -EIO;
+				break;
 			case CURLE_OPERATION_TIMEDOUT:
 				printf("Curl: Communicating with server timed out.\n");
 				err = -ETIMEDOUT;

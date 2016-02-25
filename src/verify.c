@@ -406,7 +406,9 @@ static void add_missing_files(struct manifest *official_manifest)
 		/* compare the hash and report mismatch */
 		if (hash_is_zeros(local.hash)) {
 			file_missing_count++;
-			printf("Missing file: %s\n", fullname);
+			if (cmdline_option_install == false) {
+				printf("Missing file: %s\n", fullname);
+			}
 		} else {
 			free(fullname);
 			continue;
@@ -431,7 +433,9 @@ static void add_missing_files(struct manifest *official_manifest)
 		} else {
 			file_replaced_count++;
 			file->do_not_update = 1;
-			printf("\tfixed\n");
+			if (cmdline_option_install == false) {
+				printf("\tfixed\n");
+			}
 		}
 		free(fullname);
 	}

@@ -103,8 +103,9 @@ double swupd_query_url_content_size(char *url)
 	double content_size;
 	char errbuf[CURL_ERROR_SIZE];
 
-	if (!curl)
+	if (!curl) {
 		return -1;
+	}
 
 	curl_easy_reset(curl);
 	errbuf[0] = 0;

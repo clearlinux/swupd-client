@@ -259,7 +259,7 @@ exit:
 				break;
 			case CURLE_PARTIAL_FILE:
 				printf("Curl: File incompletely downloaded from '%s' to '%s'\n",
-							url, swupd_download_file);
+							url, filename);
 				err = -1;
 				break;
 			case CURLE_RECV_ERROR:

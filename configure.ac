@@ -33,6 +33,25 @@ AC_ARG_ENABLE(
   [AS_HELP_STRING([--disable-tests], [Do not enable unit or functional test framework (enabled by default)])]
 )
 
+have_coverage=no
+AC_ARG_ENABLE(coverage, AS_HELP_STRING([--enable-coverage], [enable test coverage]))
+if test "$enable_coverage" = "yes" ; then
+        AC_CHECK_PROG(lcov_found, [lcov], [yes], [no])
+        if test "$lcov_found" = "no" ; then
+                AC_MSG_ERROR([*** lcov support requested but the program was not found])
+        else
+                lcov_version_major="`lcov --version | cut -d ' ' -f 4 | cut -d '.' -f 1`"
+                lcov_version_minor="`lcov --version | cut -d ' ' -f 4 | cut -d '.' -f 2`"
+                if test "$lcov_version_major" -eq 1 -a "$lcov_version_minor" -lt 10; then
+                        AC_MSG_ERROR([*** lcov version is too old. 1.10 required])
+                else
+			have_coverage=yes
+			AC_DEFINE([COVERAGE], [1], [Coverage enabled])
+                fi
+        fi
+fi
+AM_CONDITIONAL([COVERAGE], [test "$have_coverage" = "yes"])
+
 AC_ARG_WITH([systemdsystemunitdir], AS_HELP_STRING([--with-systemdsystemunitdir=DIR],
             [path to systemd system service dir @<:@default=/usr/lib/systemd/system@:>@]), [unitpath=${withval}],
             [unitpath="$($PKG_CONFIG --variable=systemdsystemunitdir systemd)"])

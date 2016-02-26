@@ -144,6 +144,18 @@ dist_check_SCRIPTS = \
 	functional-tests.py
 endif
 
+if COVERAGE
+AM_CFLAGS += --coverage
+
+coverage: coverage-clean
+	mkdir -p coverage
+	lcov --compat-libtool --directory . --capture --output-file coverage/report
+	genhtml -o coverage/ coverage/report
+
+coverage-clean:
+	rm -rf coverage
+endif
+
 release:
 	@git rev-parse v$(PACKAGE_VERSION) &> /dev/null; \
 	if [ "$$?" -eq 0 ]; then \

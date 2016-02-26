@@ -52,9 +52,9 @@ char *bin_paths[] = {
 
 static void print_help(const char *name) {
 	printf("Usage:\n");
-	printf("	swupd %s 'search_term'\n", basename((char*)name));
-	printf("		'search_term': A substring of a binary or library name\n");
-	printf("		Return: Name of bundle or bundles in which this binary is found\n\n");
+	printf("	swupd %s [Options] 'search_term'\n", basename((char*)name));
+	printf("		'search_term': A substring of a binary, library or filename (default)\n");
+	printf("		Return: Bundle name : filename matching search term\n\n");
 
 	printf("Help Options:\n");
 	printf("   -h, --help              Display this help\n");

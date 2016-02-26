@@ -30,7 +30,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 
-#include <swupd.h>
+#include "swupd.h"
 #include "config.h"
 
 char *search_string;
@@ -46,7 +46,7 @@ char *lib_paths[] = {
 };
 
 char *bin_paths[] = {
-	"/bin",
+	"/usr/bin/",
 	NULL
 };
 
@@ -107,12 +107,8 @@ static bool parse_options(int argc, char **argv)
 			if (content_server_urls[0]) {
 				free(content_server_urls[0]);
 			}
-			if (asprintf(&version_server_urls[0], "%s", optarg) < 0) {
-				abort();
-			}
-			if (asprintf(&content_server_urls[0], "%s", optarg) < 0) {
-				abort();
-			}
+			string_or_die(&version_server_urls[0], "%s", optarg);
+			string_or_die(&content_server_urls[0], "%s", optarg);
 
 			break;
 		case 'p': /* default empty path_prefix verifies the running OS */
@@ -124,9 +120,7 @@ static bool parse_options(int argc, char **argv)
 				/* multiple -p options */
 				free(path_prefix);
 			}
-			if (asprintf(&path_prefix, "%s", optarg) <= 0) {
-				abort();
-			}
+			string_or_die(&path_prefix, "%s", optarg);
 
 			break;
 		case 'F':
@@ -282,8 +276,9 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 				if (file_search(subfile->filename, "", search_term)) {
 					report_find(file->filename, subfile->filename);
 					hit = true;
-					if (!display_all)
+					if (!display_all) {
 						done = true;
+					}
 
 					done_with_bundle = true;
 					break;
@@ -294,8 +289,9 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 					if (file_search(subfile->filename, lib_paths[i], search_term)) {
 						report_find(file->filename, subfile->filename);
 						hit = true;
-						if (!display_all)
+						if (!display_all) {
 							done = true;
+						}
 
 						done_with_bundle = true;
 						break;
@@ -307,8 +303,9 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 					if (file_search(subfile->filename, bin_paths[i], search_term)) {
 						report_find(file->filename, subfile->filename);
 						hit = true;
-						if (!display_all)
+						if (!display_all) {
 							done = true;
+						}
 
 						done_with_bundle = true;
 						break;
@@ -375,7 +372,7 @@ int download_manifests(struct manifest **MoM)
 	struct list *list;
 	struct file *file;
 	char *tarfile, *untard_file, *url;
-	struct manifest *tmpMoM = NULL;
+	struct manifest *subMan = NULL;
 	int current_version;
 	int ret = 0;
 	double size;
@@ -404,11 +401,7 @@ int download_manifests(struct manifest **MoM)
 		file = list->data;
 		list = list->next;
 
-		if (manifest_has_component(*MoM, file->filename)) {
-			create_and_append_subscription(file->filename);
-		} else {
-			continue;
-		}
+		create_and_append_subscription(file->filename);
 
 		string_or_die(&untard_file, "%s/%i/Manifest.%s", STATE_DIR, file->last_change,
 						file->filename);
@@ -420,26 +413,12 @@ int download_manifests(struct manifest **MoM)
 			/* Do download */
 			printf(" '%s' manifest...\n", file->filename);
 
-			ret = load_manifests(current_version, file->last_change, file->filename, NULL, &tmpMoM);
+			ret = load_manifests(current_version, file->last_change, file->filename, NULL, &subMan);
 			if (ret != 0) {
 				printf("Cannot load official manifest MoM for version %i\n", current_version);
 			}
 
-/*	TEST		 ret = do_staging(file); */
-
-			/* A do_staging return code of -7 translates to the dot file not getting created.
-			 * 	As search does not need the dot file, this is a success */
-/* TEST			if ((ret == 0) || (ret == -7)) {
-				rename_staged_file_to_final(file);
-			} else {
-*/
-				/* Download from alt path - get last version updated*/
-			/*	printf("\n\nManifest Download failure. Component '%s' Version: '%d'\n\n",
-						file->filename, file->last_change);
-			*/
-/* TEST			} */
-
-			free_manifest(tmpMoM);
+			free_manifest(subMan);
 		}
 
 		if (access(untard_file, F_OK) == -1) {
@@ -468,6 +447,11 @@ int search_main(int argc, char **argv)
 		create_required_dirs()) {
 		free_globals();
 		return EXIT_FAILURE;
+	}
+
+	if (search_type == '0') {
+		/* Default to a system-side search */
+		search_type = 'e';
 	}
 
 	if (!init_globals()) {

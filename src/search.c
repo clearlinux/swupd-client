@@ -237,11 +237,10 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 	struct file *file;
 	struct file *subfile;
 	struct manifest *subman = NULL;
-	int i, ret, current_version;
+	int i, ret;
 	bool done_with_bundle, done = false;
 	bool hit = false;
 
-	current_version = read_version_from_subvol_file(path_prefix);
 	list = MoM->manifests;
 	while (list && !done) {
 		file = list->data;
@@ -332,7 +331,7 @@ static double query_total_download_size(struct list *list)
 	double ret;
 	double size_sum = 0;
 	struct file *file;
-	char *tarfile, *untard_file, *url;
+	char *untard_file, *url;
 
 	while (list) {
 		file = list->data;

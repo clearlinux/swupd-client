@@ -17,6 +17,7 @@ autom4te.cache/
 compile
 config.*
 configure
+coverage/
 cscope.*
 data/check-update.service
 data/check-update.timer
@@ -31,11 +32,14 @@ ltmain.sh
 m4/
 missing
 regression/*.out
+src/*.gcda
+src/*.gcno
 stamp-h1
 swupd
 swupd-client*tar.gz
 swupd_*
 tap-driver.sh
 test-suite.log
+test/*.gcno
 test/functional/*/*/*/*/*.tar
 test/functional/*/*/*/*/*/*.tar

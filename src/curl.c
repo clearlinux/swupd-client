@@ -105,7 +105,6 @@ double swupd_query_url_content_size(char *url)
 	}
 
 	curl_easy_reset(curl);
-	errbuf[0] = 0;
 
 	/* Set buffer for error string */
 	curl_ret = curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);

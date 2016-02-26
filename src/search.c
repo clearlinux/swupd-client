@@ -57,12 +57,13 @@ static void print_help(const char *name) {
 	printf("		Return: Name of bundle or bundles in which this binary is found\n\n");
 
 	printf("Help Options:\n");
+	printf("   -h, --help              Display this help\n");
 	printf("   -l, --library           Search paths where libraries are located for a match\n");
 	printf("   -b, --binary            Search paths where binaries are located for a match\n"); 
 	printf("   -e, --everywhere        Search system-wide for a match\n");
 	printf("   -a, --all               Display all matches. Default is to show the first only\n");
-	printf("   -d, --display-files	   Display all files, no search done\n");
-	printf("   -i, --init              Initiate download of all manifests, then immediately return\n");
+	printf("   -d, --display-files	   Output full file list, no search done\n");
+	printf("   -i, --init              Download all manifests then return, no search done\n");
 	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
@@ -79,7 +80,7 @@ static const struct option prog_opts[] = {
 	{"format", required_argument, 0, 'F'},
 	{"init", no_argument, 0, 'i'},
 	{"all", no_argument, 0, 'a'},
-	{"display-all", no_argument, 0, 'd'},
+	{"display-files", no_argument, 0, 'd'},
 	{0, 0, 0, 0}
 };
 
@@ -90,12 +91,12 @@ static bool parse_options(int argc, char **argv)
 
 	set_format_string(NULL);
 
-	while ((opt = getopt_long(argc, argv, "hu:p:F:lbeViad", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hu:p:F:lbeiad", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
 			print_help(argv[0]);
-			return false;
+			exit(0);
 		case 'u':
 			if (!optarg) {
 				printf("error: invalid --url argument\n\n");
@@ -222,7 +223,7 @@ bool file_search(char *filename, char *path, char *search_term)
  */
 void report_find(char *bundle, char *file)
 {
-	printf("%s provided by bundle %s\n", file, bundle);
+	printf("'%s'  :  '%s'\n", bundle, file);
 }
 
 /* do_search()
@@ -240,6 +241,7 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 	bool done_with_bundle, done = false;
 	bool hit = false;
 
+	current_version = read_version_from_subvol_file(path_prefix);
 	list = MoM->manifests;
 	while (list && !done) {
 		file = list->data;
@@ -247,8 +249,7 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 		done_with_bundle = false;
 
 		/* Load sub-manifest */
-		current_version = read_version_from_subvol_file(path_prefix);
-		ret = load_manifests(current_version, file->last_change, file->filename, NULL, &subman);
+		ret = load_manifests(file->last_change, file->last_change, file->filename, NULL, &subman);
 		if (ret != 0) {
 			printf("Failed to load manifest %s\n", file->filename);
 			continue;
@@ -340,9 +341,6 @@ static double query_total_download_size(struct list *list)
 		string_or_die(&untard_file, "%s/%i/Manifest.%s", STATE_DIR, file->last_change,
 						file->filename);
 
-		string_or_die(&tarfile, "%s/%i/Manifest.%s.tar", STATE_DIR, file->last_change,
-						file->filename);
-
 		if (access(untard_file, F_OK) == -1) {
 			/* Does not exist client-side. Must download */
 			string_or_die(&url, "%s/%i/Manifest.%s.tar", preferred_content_url,
@@ -359,6 +357,7 @@ static double query_total_download_size(struct list *list)
 		}
 	}
 
+	free(untard_file);
 	return size_sum;
 }
 
@@ -445,7 +444,6 @@ int search_main(int argc, char **argv)
 
 	if (!parse_options(argc, argv) ||
 		create_required_dirs()) {
-		free_globals();
 		return EXIT_FAILURE;
 	}
 
@@ -472,7 +470,7 @@ int search_main(int argc, char **argv)
 	}
 
 	if (!init) {
-		printf("Searching for %s\n", search_string);
+		printf("Searching for '%s'\n\n", search_string);
 	}
 
 	ret = download_manifests(&MoM);

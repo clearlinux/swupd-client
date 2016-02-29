@@ -44,8 +44,7 @@ static void print_help(const char *name)
 	printf("\n");
 }
 
-static const struct option prog_opts[] =
-{
+static const struct option prog_opts[] = {
 	{"help", no_argument, 0, 'h'},
 	{"url", required_argument, 0, 'u'},
 	{"port", required_argument, 0, 'P'},

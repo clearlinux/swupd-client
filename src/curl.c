@@ -385,11 +385,13 @@ static CURLcode swupd_curl_set_security_opts(CURL *curl)
 		goto exit;
 	}
 
+#if 0
 	// TODO: add the below when you know the paths:
-	//curl_easy_setopt(curl, CURLOPT_CRLFILE, path-to-cert-revoc-list);
-	//if (curl_ret != CURLE_OK) {
-	//	goto exit;
-	//}
+	curl_easy_setopt(curl, CURLOPT_CRLFILE, path-to-cert-revoc-list);
+	if (curl_ret != CURLE_OK) {
+		goto exit;
+	}
+#endif
 
 exit:
 	return curl_ret;

@@ -40,7 +40,7 @@ static int data_compare(const void *a, const void *b)
 
 	A = (unsigned int*)a;
 	B = (unsigned int*)b;
-//	printf("comparing data %d > %d\n", *A, *B);
+	// printf("comparing data %d > %d\n", *A, *B);
 	return (*A - *B);
 }
 
@@ -50,7 +50,7 @@ static int data_compare_reverse(const void *a, const void *b)
 
 	A = (unsigned int*)a;
 	B = (unsigned int*)b;
-//	printf("comparing data %d > %d\n", *A, *B);
+	// printf("comparing data %d > %d\n", *A, *B);
 	return (*B - *A);
 }
 

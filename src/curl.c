@@ -399,7 +399,7 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url)
 	}
 
 	if (strncmp(url, content_server_urls[1], strlen(content_server_urls[1])) == 0) {
-#warning SECURITY HOLE since we can't SSL pin arbitrary servers
+#warning "SECURITY HOLE since we can't SSL pin arbitrary servers"
 		curl_ret = swupd_curl_set_security_opts(curl);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
@@ -425,7 +425,7 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url)
 		goto exit;
 	}
 
-#warning setup a means to validate IPv6 works end to end
+#warning "setup a means to validate IPv6 works end to end"
 	curl_ret = curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 	if (curl_ret != CURLE_OK) {
 		goto exit;

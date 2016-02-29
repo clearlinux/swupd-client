@@ -402,7 +402,7 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 	struct stat buf;
 
 	if (strcmp(component, "MoM") == 0) {
-#warning need to crypto validate MoM and allow delta
+#warning "need to crypto validate MoM and allow delta"
 		return -1;
 	}
 

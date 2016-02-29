@@ -1128,3 +1128,21 @@ bool manifest_has_component(struct manifest *manifest, const char *component)
 
 	return false;
 }
+
+/* This performs a linear search through the files list. */
+struct file *search_file_in_manifest(struct manifest *manifest, const char *filename)
+{
+	struct list *iter = NULL;
+	struct file *file;
+
+	iter = manifest->files;
+	while(iter) {
+		file = iter->data;
+		iter = iter->next;
+
+		if (strcmp(file->filename, filename) == 0) {
+			return file;
+		}
+	}
+	return NULL;
+}

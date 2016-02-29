@@ -89,7 +89,7 @@ static struct list *full_download_loop(struct list *updates, int isfailed)
 	return end_full_download();
 }
 
-static int update_loop(struct list *updates)
+static int update_loop(struct list *updates, struct manifest *server_manifest)
 {
 	int ret;
 	struct file *file;
@@ -160,7 +160,7 @@ TRY_DOWNLOAD:
 		/* for each file: check hash value; on mismatch delete and queue full download */
 		/* todo: hash check */
 
-		ret = do_staging(file);
+		ret = do_staging(file, server_manifest);
 		if (ret < 0) {
 			printf("File staging failed: %s\n", file->filename);
 			return ret;
@@ -360,7 +360,7 @@ download_packs:
 
 	/* Step 7: apply the update */
 
-	ret = update_loop(updates);
+	ret = update_loop(updates, server_manifest);
 	if (ret == 0) {
 		ret = update_device_latest_version(server_version);
 		printf("Update was applied.\n");

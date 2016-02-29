@@ -71,8 +71,9 @@ static void corrupt_file(int thread)
 	assert(inp != NULL);
 	ret = fread(buf, statb.st_size, 1, inp);
 	fclose(inp);
-	if (ret != 1)
+	if (ret != 1) {
 		return;
+	}
 
 	/* corrupt at least 1 byte, with 1/2 chance of doing one more byte etc */
 	do {
@@ -135,8 +136,9 @@ static void *do_fuzz(void *data)
 		corrupt_file(thread);
 		/* step 4: run valgrind on the bspatch program with the "corrupt" file */
 		if (asprintf(&command, "valgrind --leak-check=no --log-file=" OUTDIR "valgrind.log.%i bspatch %s " OUTDIR "output.%i " OUTDIR "corrupt.%i > /dev/null",
-			     thread, from_files[thread], thread, thread) <= 0)
+			     thread, from_files[thread], thread, thread) <= 0) {
 			assert(0);
+		}
 
 		ret = system(command);
 		free(command);
@@ -148,27 +150,31 @@ static void *do_fuzz(void *data)
 
 			t = time(NULL);
 			if (asprintf(&command2, "mv " OUTDIR "corrupt.%i " OUTDIR "failed/corrupt.%i-%i",
-				     thread, thread, t) <= 0)
+				     thread, thread, t) <= 0) {
 				assert(0);
+			}
 			ret = system(command2);
 			assert(ret == 0);
 			free(command2);
 			if (asprintf(&command2, "mv " OUTDIR "valgrind.log.%i " OUTDIR "failed/valgrind.%i-%i",
-				     thread, thread, t) <= 0)
+				     thread, thread, t) <= 0) {
 				assert(0);
+			}
 			ret = system(command2);
 			assert(ret == 0);
 			free(command2);
 			if (asprintf(&command2, "cp %s " OUTDIR "failed/original.%i-%i",
-				     from_files[thread], thread, t) <= 0)
+				     from_files[thread], thread, t) <= 0) {
 				assert(0);
+			}
 			ret = system(command2);
 			assert(ret == 0);
 			free(command2);
 			printf("x");
 			sleep(1); /* make sure no duplicates exist */
-		} else if (i % 10 == 0)
+		} else if (i % 10 == 0) {
 			printf(".");
+		}
 		fflush(stdout);
 	}
 	return NULL;
@@ -181,8 +187,9 @@ int main(int argc, char **argv)
 	int p;
 	int q;
 
-	if (argc < 2)
+	if (argc < 2) {
 		banner();
+	}
 
 	srand(time(NULL));
 

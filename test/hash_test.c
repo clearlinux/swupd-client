@@ -102,23 +102,27 @@ static char *hmac_sha_for_data(int method, const unsigned char *key, size_t key_
 		return NULL;
 	}
 
-	if ((data == NULL) || (data_len == 0))
+	if ((data == NULL) || (data_len == 0)) {
 		return NULL;
+	}
 
-	if (HMAC(evp_method, (const void *)key, key_len, data, data_len, digest, &digest_len) == NULL)
+	if (HMAC(evp_method, (const void *)key, key_len, data, data_len, digest, &digest_len) == NULL) {
 		return NULL;
+	}
 
 	digest_str = bin2hex(digest, digest_len);
-	if (digest_str == NULL)
+	if (digest_str == NULL) {
 		return NULL;
+	}
 
 	return digest_str;
 }
 
 static char *hmac_sha_for_string(int method, const unsigned char *key, size_t key_len, const char *str)
 {
-	if (str == NULL)
+	if (str == NULL) {
 		return NULL;
+	}
 
 	return hmac_sha_for_data(method, key, key_len, (const unsigned char *)str, strlen(str));
 }
@@ -128,8 +132,9 @@ static void print_xattr_list(const unsigned char *list, size_t len)
 	char *hexstr;
 
 	hexstr = bin2hex(list, len);
-	if (!hexstr)
+	if (!hexstr) {
 		assert(0);
+	}
 
 	printf("- X-Attribute-Blob: Length=[%lu], Value=[0x%s]\n", (long unsigned int)len, hexstr);
 	free(hexstr);
@@ -165,8 +170,9 @@ static void hmac_compute_key(int method, const char *file,
 				file, strerror(errno));
 		}
 
-		if (len != 0)
+		if (len != 0) {
 			free(xattrs_blob);
+		}
 	} else {
 		*key = calloc(1, sizeof(*updt_stat));
 		if (*key != NULL) {
@@ -175,8 +181,9 @@ static void hmac_compute_key(int method, const char *file,
 
 			if (verbose) {
 				key_str = bin2hex((const unsigned char *)key, *key_len);
-				if (!key_str)
+				if (!key_str) {
 					assert(0);
+				}
 				printf("- Stat Key: Length=[%lu], Value=[0x%s]\n", (long unsigned int)(*key_len), (const char *)key_str);
 				free(key_str);
 			}
@@ -204,21 +211,26 @@ static void compute_hmac_sha(int method, char *dirpath, int verbose, unsigned in
 	size_t key_len;
 
 	dir = opendir(dirpath);
-	if (dir == NULL)
+	if (dir == NULL) {
 		return;
+	}
 
 	while ((entry = readdir(dir)) != NULL) {
-		if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+		if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
 			continue;
+		}
 
-		if (asprintf(&statfile, "%s/%s", dirpath, entry->d_name) <= 0)
+		if (asprintf(&statfile, "%s/%s", dirpath, entry->d_name) <= 0) {
 			assert(0);
+		}
 
-		if (entry->d_type == DT_DIR)
+		if (entry->d_type == DT_DIR) {
 			compute_hmac_sha(method, statfile, verbose, hashcount);
+		}
 
-		if (verbose)
+		if (verbose) {
 			printf("File: %s\n", statfile);
+		}
 
 		memset(&stat, 0, sizeof(stat));
 		ret = lstat(statfile, &stat);
@@ -267,10 +279,12 @@ static void compute_hmac_sha(int method, char *dirpath, int verbose, unsigned in
 			fclose(fl);
 		}
 
-		if (!hash)
+		if (!hash) {
 			assert(0);
-		if (verbose)
+		}
+		if (verbose) {
 			printf("- Hash: 0x%s\n", hash);
+		}
 
 		free(key);
 		key = NULL;
@@ -310,8 +324,9 @@ static void bench_hmac_sha(int argc, char *argv[])
 	int verbose = 0;
 
 	if (argc > 3) {
-		if ((argc > 4) && (strcmp(argv[4], "-v") == 0))
+		if ((argc > 4) && (strcmp(argv[4], "-v") == 0)) {
 			verbose = 1;
+		}
 
 		if (strcmp(argv[2], "hmac-sha1") == 0) {
 			printf("[bench hmac sha1]\n");
@@ -335,8 +350,9 @@ static void *multithreads_do_hash(void *threadid)
 
 	tid = (long)threadid;
 	hash = hmac_sha_for_string(HMAC_SHA256, (const unsigned char *)&threadid, sizeof(threadid), "The quick brown fox jumps over the lazy dog");
-	if (!hash)
+	if (!hash) {
 		assert(0);
+	}
 
 	printf("multithreads: do_hash - Thread[#%ld] - hash = %s\n", tid, hash);
 
@@ -372,11 +388,12 @@ static void xattrs_set_cmd(char *file, char *attr_name, char *attr_value)
 
 	ret = setxattr(file, attr_name, (void *)&attr_value,
 		       strlen(attr_value) + 1, 0);
-	if (ret < 0)
+	if (ret < 0) {
 		printf("Set Extended attribute for file %s FAILED: %s\n", file,
 		       strerror(errno));
-	else
+	} else {
 		printf("Set Extended attribute for file %s SUCCESS\n", file);
+	}
 }
 
 static void xattrs_get_blob_cmd(char *file)
@@ -394,8 +411,9 @@ static void xattrs_get_blob_cmd(char *file)
 		       file);
 	}
 
-	if (len != 0)
+	if (len != 0) {
 		free(xattrs_blob);
+	}
 }
 
 static void xattrs_copy_cmd(char *src, char *dst)
@@ -421,11 +439,13 @@ static void xattrs_test(char *dirpath)
 	printf("Extended attribute test working dir %s:\n", dirpath);
 
 	/* step 4: run valgrind on the patch program with the "corrupt" file */
-	if (asprintf(&src, "%s/testfile1.txt", dirpath) <= 0)
+	if (asprintf(&src, "%s/testfile1.txt", dirpath) <= 0) {
 		assert(0);
+	}
 
-	if (asprintf(&dst, "%s/testfile2.txt", dirpath) <= 0)
+	if (asprintf(&dst, "%s/testfile2.txt", dirpath) <= 0) {
 		assert(0);
+	}
 
 	file = fopen(src, "w+");
 	if (file != NULL) {
@@ -443,24 +463,28 @@ static void xattrs_test(char *dirpath)
 
 	ret = setxattr(src, "user.xattr_test", (void *)"xattr_test_val",
 		       strlen("xattr_test_val") + 1, 0);
-	if (ret < 0)
+	if (ret < 0) {
 		printf("Set Extended attribute for file %s FAILED: %s\n", src,
 		       strerror(errno));
-	else
+	} else {
 		printf("Set Extended attribute for file %s SUCCESS\n", src);
+	}
 
 	xattrs_copy(src, dst);
 
-	if (xattrs_compare(src, dst) != 0)
+	if (xattrs_compare(src, dst) != 0) {
 		printf("TEST FAILURE\n");
-	else
+	} else {
 		printf("TEST SUCCESS\n");
+	}
 
-	if (src != NULL)
+	if (src != NULL) {
 		unlink(src);
+	}
 
-	if (dst != NULL)
+	if (dst != NULL) {
 		unlink(dst);
+	}
 
 	free(src);
 	free(dst);
@@ -472,23 +496,27 @@ static void xattrs(int argc, char *argv[])
 
 	if (argc > 3) {
 		if (strcmp(argv[2], "set") == 0) {
-			if (argc != 6)
+			if (argc != 6) {
 				return print_usage();
+			}
 			printf("[set]\n");
 			return xattrs_set_cmd(argv[3], argv[4], argv[5]);
 		} else if (strcmp(argv[2], "get_blob") == 0) {
-			if (argc != 4)
+			if (argc != 4) {
 				return print_usage();
+			}
 			printf("[get_blob]\n");
 			return xattrs_get_blob_cmd(argv[3]);
 		} else if (strcmp(argv[2], "copy") == 0) {
-			if (argc != 5)
+			if (argc != 5) {
 				return print_usage();
+			}
 			printf("[copy]\n");
 			return xattrs_copy_cmd(argv[3], argv[4]);
 		} else if (strcmp(argv[2], "test") == 0) {
-			if (argc != 4)
+			if (argc != 4) {
 				return print_usage();
+			}
 			printf("[test]\n");
 			return xattrs_test(argv[3]);
 		}

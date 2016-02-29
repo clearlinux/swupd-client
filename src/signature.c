@@ -45,7 +45,7 @@
 #define IMPL_FORGIVE 1
 #define IMPL_REAL    2
 
-#warning TODO pick signing scheme
+#warning "TODO pick signing scheme"
 #if defined(SWUPD_LINUX_ROOTFS)
 #define IMPL IMPL_FAKE
 #endif

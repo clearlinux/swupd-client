@@ -55,12 +55,12 @@ static void print_help(const char *name) {
 	printf("   -h, --help              Show help options\n\n");
 	printf("Application Options:\n");
 	printf("   -d, --download          Download all content, but do not actually install the update\n");
-#warning remove user configurable url when alternative exists
+#warning "remove user configurable url when alternative exists"
 	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
 	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
-#warning remove user configurable content url when alternative exists
+#warning "remove user configurable content url when alternative exists"
 	printf("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
-#warning remove user configurable version url when alternative exists
+#warning "remove user configurable version url when alternative exists"
 	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
 	printf("   -s, --status            Show current OS version and latest version available on server\n");
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");

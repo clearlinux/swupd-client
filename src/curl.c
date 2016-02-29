@@ -89,7 +89,7 @@ void swupd_curl_set_requested_version(int v)
 	req_version = v;
 }
 
-static size_t filesize_from_header_cb(void *func, size_t size, size_t nmemb, void *data)
+static size_t filesize_from_header_cb(void UNUSED_PARAM *func, size_t size, size_t nmemb, void UNUSED_PARAM *data)
 {
 	/* Drop the header, we just want file size */
 	return (size_t)(size * nmemb);

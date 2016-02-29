@@ -113,10 +113,11 @@ TRY_DOWNLOAD:
 		failed = full_download_loop(updates, 0);
 	}
 
-	/* if (rm_staging_dir_contents("download")) {
+#if 0
+	if (rm_staging_dir_contents("download")) {
 		return -1;
-	   }
-	 */
+	}
+#endif
 
 	/* Set retries only if failed downloads exist, and only retry a fixed
 	   amount of times */
@@ -185,8 +186,8 @@ TRY_DOWNLOAD:
 
 	sync();
 
-//NOTE: critical section starts when update_loop() calls do_staging()
-/*************************************************** critical section ends ***************************************************/
+	/* NOTE: critical section starts when update_loop() calls do_staging() */
+	/*********** critical section ends *************************************/
 
 
 	return ret;
@@ -249,9 +250,9 @@ int main_update()
 		goto clean_curl;
 	}
 
+load_current_manifests:
 	/* Step 3: setup manifests */
 
-load_current_manifests:
 	/* get the from/to MoM manifests */
 	printf("Querying current manifest.\n");
 	ret = load_manifests(latest_version, latest_version, "MoM", NULL, &current_manifest);

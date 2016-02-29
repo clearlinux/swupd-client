@@ -319,9 +319,9 @@ static int get_missing_files(struct manifest *official_manifest)
 	int retries = 0; /* We only want to go through the download loop once */
 	int timeout = 10; /* Amount of seconds for first download retry */
 
+RETRY_DOWNLOADS:
 	/* when fixing (not installing): queue download and mark any files
 	 * which are already verified OK */
-RETRY_DOWNLOADS:
 	ret = start_full_download(true);
 	if (ret != 0) {
 		/* If we hit this point, the network is accessible but we were
@@ -700,13 +700,12 @@ int verify_main(int argc, char **argv)
 		deal_with_hash_mismatches(official_manifest, repair);
 	}
 
+brick_the_system_and_clean_curl:
 	/* clean up */
 
 	/*
 	 * naming convention: All exit goto labels must follow the "brick_the_system_and_FOO:" pattern
 	 */
-
-brick_the_system_and_clean_curl:
 
 	/* report a summary of what we managed to do and not do */
 	printf("Inspected %i files\n", file_checked_count);

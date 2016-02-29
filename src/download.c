@@ -393,12 +393,14 @@ static int perform_curl_io_and_complete(int *left)
 			file->staging = NULL;
 		}
 
-/* NOTE: Intentionally no removal of file from hashmap.  All needed files
- * need determined and queued in one complete preparation phase.  Once all
- * needed files are all present, they can be staged.  Otherwise a complex
- * datastructure and retries are needed to insure only one download of a file
- * happens fully to success AND a HASH.tar is uncompressed to and HASH and
- * staged to the _multiple_ filenames with that hash. */
+		/* NOTE: Intentionally no removal of file from hashmap.  All
+		 * needed files need determined and queued in one complete
+		 * preparation phase.  Once all needed files are all present,
+		 * they can be staged.  Otherwise a complex datastructure and
+		 * retries are needed to insure only one download of a file
+		 * happens fully to success AND a HASH.tar is uncompressed to
+		 * and HASH and staged to the _multiple_ filenames with that
+		 * hash. */
 
 		curl_multi_remove_handle(mcurl, handle);
 		curl_easy_cleanup(handle);

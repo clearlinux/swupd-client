@@ -49,11 +49,13 @@ int main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 	struct file *file1, *file2;
 
 	ret = stat(argv[1], &st1);
-	if (ret)
+	if (ret) {
 		exit(0);
+	}
 	ret = stat(argv[2], &st2);
-	if (ret)
+	if (ret) {
 		exit(0);
+	}
 
 	file1 = calloc(1, sizeof(struct file));
 	assert(file1);
@@ -86,8 +88,9 @@ int main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 		gettimeofday(&before, NULL);
 		for (i = 0; i < 10000; i++) {
 			ret = apply_bsdiff_delta(argv[1], "result", "output.bsdiff");
-			if (i > 500 && time(NULL) - start > 5)
+			if (i > 500 && time(NULL) - start > 5) {
 				break;
+			}
 		}
 		gettimeofday(&after, NULL);
 		populate_file_struct(file1, "result");

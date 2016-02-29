@@ -35,22 +35,23 @@
 static bool cmd_line_status = false;
 
 static const struct option prog_opts[] = {
-	{"download", no_argument, 0, 'd'},
-	{"help", no_argument, 0, 'h'},
-	{"url", required_argument, 0, 'u'},
-	{"port", required_argument, 0, 'P'},
-	{"contenturl", required_argument, 0, 'c'},
-	{"versionurl", required_argument, 0, 'v'},
-	{"status", no_argument, 0, 's'},
-	{"format", required_argument, 0, 'F'},
-	{"path", required_argument, 0, 'p'},
-	{"force", no_argument, 0, 'x'},
-	{0, 0, 0, 0}
+	{ "download", no_argument, 0, 'd' },
+	{ "help", no_argument, 0, 'h' },
+	{ "url", required_argument, 0, 'u' },
+	{ "port", required_argument, 0, 'P' },
+	{ "contenturl", required_argument, 0, 'c' },
+	{ "versionurl", required_argument, 0, 'v' },
+	{ "status", no_argument, 0, 's' },
+	{ "format", required_argument, 0, 'F' },
+	{ "path", required_argument, 0, 'p' },
+	{ "force", no_argument, 0, 'x' },
+	{ 0, 0, 0, 0 }
 };
 
-static void print_help(const char *name) {
+static void print_help(const char *name)
+{
 	printf("Usage:\n");
-	printf("   swupd %s [OPTION...]\n\n", basename((char*)name));
+	printf("   swupd %s [OPTION...]\n\n", basename((char *)name));
 	printf("Help Options:\n");
 	printf("   -h, --help              Show help options\n\n");
 	printf("Application Options:\n");

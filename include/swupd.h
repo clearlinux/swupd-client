@@ -10,23 +10,23 @@
 #include <dirent.h>
 #include "swupd-error.h"
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
 /* WARNING: keep SWUPD_VERSION_INCR in sync with server definition  */
-#define SWUPD_VERSION_INCR		10
+#define SWUPD_VERSION_INCR 10
 #define SWUPD_VERSION_IS_DEVEL(v) (((v) % SWUPD_VERSION_INCR) == 8)
 #define SWUPD_VERSION_IS_RESVD(v) (((v) % SWUPD_VERSION_INCR) == 9)
 
 #ifndef LINE_MAX
-#define LINE_MAX	_POSIX2_LINE_MAX
+#define LINE_MAX _POSIX2_LINE_MAX
 #endif
 
 #define PATH_MAXLEN 4096
 #define CURRENT_OS_VERSION -1
 
-#define UNUSED_PARAM  __attribute__ ((__unused__))
+#define UNUSED_PARAM __attribute__((__unused__))
 
 #define MAX_TRIES 3
 
@@ -48,7 +48,7 @@ struct manifest {
 	int manifest_version;
 	uint64_t contentsize;
 	struct list *files;
-	struct list *manifests; /* struct file for possible manifests */
+	struct list *manifests;    /* struct file for possible manifests */
 	struct list *submanifests; /* struct manifest for subscribed manifests */
 	char *component;
 };
@@ -64,43 +64,43 @@ extern bool need_update_boot;
 extern bool need_update_bootloader;
 
 struct update_stat {
-	uint64_t	st_mode;
-	uint64_t	st_uid;
-	uint64_t	st_gid;
-	uint64_t	st_rdev;
-	uint64_t	st_size;
+	uint64_t st_mode;
+	uint64_t st_uid;
+	uint64_t st_gid;
+	uint64_t st_rdev;
+	uint64_t st_size;
 };
 
 #define DIGEST_LEN_SHA256 64
 /* +1 for null termination */
-#define SWUPD_HASH_LEN (DIGEST_LEN_SHA256+1)
+#define SWUPD_HASH_LEN (DIGEST_LEN_SHA256 + 1)
 
 struct file {
 	char *filename;
 	char hash[SWUPD_HASH_LEN];
 	bool use_xattrs;
-	int  last_change;
+	int last_change;
 	struct update_stat stat;
 
-	unsigned int is_dir		: 1;
-	unsigned int is_file		: 1;
-	unsigned int is_link		: 1;
-	unsigned int is_deleted		: 1;
-	unsigned int is_manifest	: 1;
+	unsigned int is_dir : 1;
+	unsigned int is_file : 1;
+	unsigned int is_link : 1;
+	unsigned int is_deleted : 1;
+	unsigned int is_manifest : 1;
 
-	unsigned int is_config		: 1;
-	unsigned int is_state		: 1;
-	unsigned int is_boot		: 1;
-	unsigned int is_rename		: 1;
-	unsigned int is_orphan		: 1;
-	unsigned int do_not_update	: 1;
+	unsigned int is_config : 1;
+	unsigned int is_state : 1;
+	unsigned int is_boot : 1;
+	unsigned int is_rename : 1;
+	unsigned int is_orphan : 1;
+	unsigned int do_not_update : 1;
 
-	struct file *peer;	/* same file in another manifest */
-	struct file *deltapeer;	/* the file to do the binary delta against; often same as "peer" except in rename cases */
+	struct file *peer;      /* same file in another manifest */
+	struct file *deltapeer; /* the file to do the binary delta against; often same as "peer" except in rename cases */
 	struct header *header;
 
-	char *staging;		/* output name used during download & staging */
-	CURL *curl;		/* curl handle if downloading */
+	char *staging; /* output name used during download & staging */
+	CURL *curl;    /* curl handle if downloading */
 };
 
 extern bool download_only;
@@ -183,10 +183,10 @@ extern void swupd_curl_set_requested_version(int v);
 extern double swupd_query_url_content_size(char *url);
 extern size_t swupd_download_file(void *ptr, size_t size, size_t nmemb, void *userdata);
 extern int swupd_curl_get_file(const char *url, char *filename, struct file *file,
-			    char *tmp_version, bool pack);
-#define SWUPD_CURL_LOW_SPEED_LIMIT	1
-#define SWUPD_CURL_CONNECT_TIMEOUT	30
-#define SWUPD_CURL_RCV_TIMEOUT		120
+			       char *tmp_version, bool pack);
+#define SWUPD_CURL_LOW_SPEED_LIMIT 1
+#define SWUPD_CURL_CONNECT_TIMEOUT 30
+#define SWUPD_CURL_RCV_TIMEOUT 120
 extern CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url);
 
 extern struct list *subs;
@@ -207,11 +207,11 @@ extern int recurse_manifest(struct manifest *manifest, const char *component);
 extern void consolidate_submanifests(struct manifest *manifest);
 extern void debug_write_manifest(struct manifest *manifest, char *filename);
 extern void populate_file_struct(struct file *file, char *filename);
-extern bool verify_file(struct file* file, char *filename);
+extern bool verify_file(struct file *file, char *filename);
 extern void unlink_all_staged_content(struct file *file);
 extern void link_renames(struct list *newfiles, struct manifest *from_manifest);
 extern void dump_file_descriptor_leaks(void);
-extern FILE * fopen_exclusive(const char *filename); /* no mode, opens for write only */
+extern FILE *fopen_exclusive(const char *filename); /* no mode, opens for write only */
 extern int rm_staging_dir_contents(const char *rel_path);
 extern int create_required_dirs(void);
 extern void dump_file_info(struct file *file);
@@ -257,12 +257,12 @@ extern int install_bundles(char **bundles);
 /* some disk sizes constants for the various features:
  *   ...consider adding build automation to catch at build time
  *      if the build's artifacts are larger than these thresholds */
-#define MANIFEST_REQUIRED_SIZE (1024 * 1024 * 100) 	/* 100M */
-#define FREE_MARGIN 10					/* 10%  */
+#define MANIFEST_REQUIRED_SIZE (1024 * 1024 * 100) /* 100M */
+#define FREE_MARGIN 10				   /* 10%  */
 
 /****************************************************************/
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

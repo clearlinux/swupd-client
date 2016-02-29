@@ -38,9 +38,10 @@
 
 static char *bundle_name = NULL;
 
-static void print_help(const char *name) {
+static void print_help(const char *name)
+{
 	printf("Usage:\n");
-	printf("   swupd %s [options] bundlename\n\n", basename((char*)name));
+	printf("   swupd %s [options] bundlename\n\n", basename((char *)name));
 	printf("Help Options:\n");
 	printf("   -h, --help              Show help options\n");
 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
@@ -51,12 +52,12 @@ static void print_help(const char *name) {
 }
 
 static const struct option prog_opts[] = {
-	{"help", no_argument, 0, 'h'},
-	{"path", required_argument, 0, 'p'},
-	{"url", required_argument, 0, 'u'},
-	{"port", required_argument, 0, 'P'},
-	{"force", no_argument, 0, 'x'},
-	{0, 0, 0, 0}
+	{ "help", no_argument, 0, 'h' },
+	{ "path", required_argument, 0, 'p' },
+	{ "url", required_argument, 0, 'u' },
+	{ "port", required_argument, 0, 'P' },
+	{ "force", no_argument, 0, 'x' },
+	{ 0, 0, 0, 0 }
 };
 
 static bool parse_options(int argc, char **argv)
@@ -118,7 +119,6 @@ static bool parse_options(int argc, char **argv)
 err:
 	print_help(argv[0]);
 	return false;
-
 }
 
 int bundle_remove_main(int argc, char **argv)

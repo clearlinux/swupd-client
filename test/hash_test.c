@@ -28,16 +28,16 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <dirent.h> 
+#include <dirent.h>
 #include <errno.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/time.h>
 #include <sys/mman.h>
-#include <sys/stat.h> 
+#include <sys/stat.h>
 #include <sys/xattr.h>
 #include <errno.h>
 #include <assert.h>
@@ -47,9 +47,9 @@
 
 static void print_usage(void);
 
-#define HMAC_SHA1 	1
-#define HMAC_SHA256	4
-#define HMAC_SHA512	8
+#define HMAC_SHA1 1
+#define HMAC_SHA256 4
+#define HMAC_SHA512 8
 
 struct hmac_sha_stat {
 	uint64_t st_mode;
@@ -86,20 +86,20 @@ static char *hmac_sha_for_data(int method, const unsigned char *key, size_t key_
 	unsigned char digest[EVP_MAX_MD_SIZE];
 	unsigned int digest_len = 0;
 	char *digest_str;
-	const EVP_MD* evp_method;
+	const EVP_MD *evp_method;
 
 	switch (method) {
-		case HMAC_SHA1:
-			evp_method = EVP_sha1();
-			break;
-		case HMAC_SHA256:
-			evp_method = EVP_sha256();
-			break;
-		case HMAC_SHA512:
-			evp_method = EVP_sha512();
-			break;
-		default:
-			return NULL;
+	case HMAC_SHA1:
+		evp_method = EVP_sha1();
+		break;
+	case HMAC_SHA256:
+		evp_method = EVP_sha256();
+		break;
+	case HMAC_SHA512:
+		evp_method = EVP_sha512();
+		break;
+	default:
+		return NULL;
 	}
 
 	if ((data == NULL) || (data_len == 0))
@@ -128,7 +128,8 @@ static void print_xattr_list(const unsigned char *list, size_t len)
 	char *hexstr;
 
 	hexstr = bin2hex(list, len);
-	if (!hexstr) assert(0);
+	if (!hexstr)
+		assert(0);
 
 	printf("- X-Attribute-Blob: Length=[%lu], Value=[0x%s]\n", (long unsigned int)len, hexstr);
 	free(hexstr);
@@ -140,7 +141,7 @@ static void hmac_compute_key(int method, const char *file,
 {
 	char *xattrs_blob = NULL;
 	size_t len = 0;
-	char* key_str;
+	char *key_str;
 
 	*key_len = 0;
 
@@ -152,9 +153,9 @@ static void hmac_compute_key(int method, const char *file,
 					 (const unsigned char *)xattrs_blob,
 					 len);
 		if (*key != NULL) {
-			*key_len = strlen((const char*)*key);
+			*key_len = strlen((const char *)*key);
 			if (verbose) {
-				print_xattr_list((const unsigned char*)xattrs_blob, len);
+				print_xattr_list((const unsigned char *)xattrs_blob, len);
 				printf("- Hash Key: Length=[%lu], Value=[0x%s]\n", (long unsigned int)(*key_len), *key);
 			}
 		} else {
@@ -163,7 +164,6 @@ static void hmac_compute_key(int method, const char *file,
 			fprintf(stderr, "computing hash key: error while computing key for file %s: %s\n",
 				file, strerror(errno));
 		}
-
 
 		if (len != 0)
 			free(xattrs_blob);
@@ -174,8 +174,9 @@ static void hmac_compute_key(int method, const char *file,
 			memcpy(*key, updt_stat, *key_len);
 
 			if (verbose) {
-				key_str = bin2hex((const unsigned char*)key, *key_len);
-				if (!key_str) assert(0);
+				key_str = bin2hex((const unsigned char *)key, *key_len);
+				if (!key_str)
+					assert(0);
 				printf("- Stat Key: Length=[%lu], Value=[0x%s]\n", (long unsigned int)(*key_len), (const char *)key_str);
 				free(key_str);
 			}
@@ -188,7 +189,7 @@ static void hmac_compute_key(int method, const char *file,
 }
 
 static void compute_hmac_sha(int method, char *dirpath, int verbose, unsigned int *hashcount)
-{ 
+{
 	DIR *dir;
 	struct dirent *entry;
 	struct stat stat;
@@ -266,7 +267,8 @@ static void compute_hmac_sha(int method, char *dirpath, int verbose, unsigned in
 			fclose(fl);
 		}
 
-		if (!hash) assert(0);
+		if (!hash)
+			assert(0);
 		if (verbose)
 			printf("- Hash: 0x%s\n", hash);
 
@@ -283,14 +285,14 @@ on_exit:
 	free(hash);
 	free(statfile);
 	closedir(dir);
-} 
+}
 
 static void bench_compute_hmac_sha(int method, char *dirpath, int verbose)
 {
 	struct timeval start;
 	struct timeval end;
 	double diff_us;
-	
+
 	unsigned int hashcount = 0;
 
 	gettimeofday(&start, NULL);
@@ -312,13 +314,13 @@ static void bench_hmac_sha(int argc, char *argv[])
 			verbose = 1;
 
 		if (strcmp(argv[2], "hmac-sha1") == 0) {
-		  	printf("[bench hmac sha1]\n");
+			printf("[bench hmac sha1]\n");
 			return bench_compute_hmac_sha(HMAC_SHA1, argv[3], verbose);
 		} else if (strcmp(argv[2], "hmac-sha256") == 0) {
-		  	printf("[bench hmac sha256]\n");
+			printf("[bench hmac sha256]\n");
 			return bench_compute_hmac_sha(HMAC_SHA256, argv[3], verbose);
 		} else if (strcmp(argv[2], "hmac-sha512") == 0) {
-		  	printf("[bench hmac sha512]\n");
+			printf("[bench hmac sha512]\n");
 			return bench_compute_hmac_sha(HMAC_SHA512, argv[3], verbose);
 		}
 	}
@@ -333,7 +335,8 @@ static void *multithreads_do_hash(void *threadid)
 
 	tid = (long)threadid;
 	hash = hmac_sha_for_string(HMAC_SHA256, (const unsigned char *)&threadid, sizeof(threadid), "The quick brown fox jumps over the lazy dog");
-	if (!hash) assert(0);
+	if (!hash)
+		assert(0);
 
 	printf("multithreads: do_hash - Thread[#%ld] - hash = %s\n", tid, hash);
 
@@ -344,7 +347,7 @@ static void *multithreads_do_hash(void *threadid)
 	return NULL;
 }
 
-#define NUM_THREADS	4
+#define NUM_THREADS 4
 static void multithreads(void)
 {
 	pthread_t threads[NUM_THREADS];
@@ -359,7 +362,7 @@ static void multithreads(void)
 			exit(-1);
 		}
 	}
-	
+
 	pthread_exit(NULL);
 }
 
@@ -367,7 +370,7 @@ static void xattrs_set_cmd(char *file, char *attr_name, char *attr_value)
 {
 	int ret;
 
-	ret = setxattr(file, attr_name, (void*)&attr_value,
+	ret = setxattr(file, attr_name, (void *)&attr_value,
 		       strlen(attr_value) + 1, 0);
 	if (ret < 0)
 		printf("Set Extended attribute for file %s FAILED: %s\n", file,
@@ -385,7 +388,7 @@ static void xattrs_get_blob_cmd(char *file)
 
 	if ((xattrs_blob != NULL) && (len != 0)) {
 		printf("Extended attributes data blob for file %s:\n", file);
-		print_xattr_list((const unsigned char*)xattrs_blob, len);
+		print_xattr_list((const unsigned char *)xattrs_blob, len);
 	} else {
 		printf("Extended attributes data blob for file %s is EMPTY\n",
 		       file);
@@ -438,7 +441,7 @@ static void xattrs_test(char *dirpath)
 		fclose(file);
 	}
 
-	ret = setxattr(src, "user.xattr_test", (void*)"xattr_test_val",
+	ret = setxattr(src, "user.xattr_test", (void *)"xattr_test_val",
 		       strlen("xattr_test_val") + 1, 0);
 	if (ret < 0)
 		printf("Set Extended attribute for file %s FAILED: %s\n", src,
@@ -465,7 +468,7 @@ static void xattrs_test(char *dirpath)
 
 static void xattrs(int argc, char *argv[])
 {
-  printf("[xattrs argc %d]\n", argc);
+	printf("[xattrs argc %d]\n", argc);
 
 	if (argc > 3) {
 		if (strcmp(argv[2], "set") == 0) {
@@ -483,7 +486,7 @@ static void xattrs(int argc, char *argv[])
 				return print_usage();
 			printf("[copy]\n");
 			return xattrs_copy_cmd(argv[3], argv[4]);
-		}  else if (strcmp(argv[2], "test") == 0) {
+		} else if (strcmp(argv[2], "test") == 0) {
 			if (argc != 4)
 				return print_usage();
 			printf("[test]\n");

@@ -30,7 +30,6 @@
 
 #include "swupd.h"
 
-
 void dump_file_descriptor_leaks(void)
 {
 	DIR *dir;

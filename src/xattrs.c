@@ -55,7 +55,7 @@ static int xattr_get_value(const char *path, const char *name, char **blob,
 	/* realloc needed len + 1 in case we need to add final zero
 	 * to ensure consistent blob */
 	value = realloc(*blob, *blob_len + len +
-			(action == XATTRS_ACTION_GET_BLOB ? 1 : 0));
+				   (action == XATTRS_ACTION_GET_BLOB ? 1 : 0));
 	if (!value) {
 		abort();
 	}
@@ -101,7 +101,7 @@ static int get_xattr_name_count(const char *names_list, ssize_t len)
 
 static int cmp_xattr_name_ptrs(const void *ptr1, const void *ptr2)
 {
-	return strcmp(*(char * const *)ptr1, *(char * const *)ptr2);
+	return strcmp(*(char *const *)ptr1, *(char *const *)ptr2);
 }
 
 static const char **get_sorted_xattr_name_table(const char *names, int n)
@@ -109,7 +109,7 @@ static const char **get_sorted_xattr_name_table(const char *names, int n)
 	const char **table;
 	int i;
 
-	table = calloc(1, n * sizeof(char*));
+	table = calloc(1, n * sizeof(char *));
 	if (!table) {
 		abort();
 	}
@@ -119,7 +119,7 @@ static const char **get_sorted_xattr_name_table(const char *names, int n)
 		names += strlen(names) + 1;
 	}
 
-	qsort(table, n, sizeof(char*), cmp_xattr_name_ptrs);
+	qsort(table, n, sizeof(char *), cmp_xattr_name_ptrs);
 
 	return table;
 }
@@ -134,7 +134,8 @@ static const char **get_sorted_xattr_name_table(const char *names, int n)
 static void xattrs_do_action(xattrs_action_type_t action,
 			     const char *src_filename,
 			     const char *dst_filename,
-			     char **blob, size_t *blob_len) {
+			     char **blob, size_t *blob_len)
+{
 	ssize_t len;
 	char *list;
 	int ret = 0;

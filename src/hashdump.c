@@ -34,14 +34,15 @@
 
 static struct option opts[] = {
 	{ "no-xattrs", 0, NULL, 'n' },
-	{ "basepath",  1, NULL, 'b' },
-	{ "help",      0, NULL, 'h' },
+	{ "basepath", 1, NULL, 'b' },
+	{ "help", 0, NULL, 'h' },
 	{ 0, 0, NULL, 0 }
 };
 
-static void usage(const char *name) {
+static void usage(const char *name)
+{
 	printf("Usage:\n");
-	printf("   swupd %s [OPTION...] filename\n\n", basename((char*)name));
+	printf("   swupd %s [OPTION...] filename\n\n", basename((char *)name));
 	printf("Help Options:\n");
 	printf("   -h, --help              Show help options\n\n");
 	printf("Application Options:\n");
@@ -54,7 +55,7 @@ static void usage(const char *name) {
 
 int hashdump_main(int argc, char **argv)
 {
-	struct file* file;
+	struct file *file;
 	char *fullname;
 	int ret;
 
@@ -74,7 +75,7 @@ int hashdump_main(int argc, char **argv)
 			break;
 		}
 
-		switch(c) {
+		switch (c) {
 		case 'n':
 			file->use_xattrs = false;
 			break;
@@ -122,7 +123,7 @@ int hashdump_main(int argc, char **argv)
 	}
 
 	printf("Calculating hash %s xattrs for: (%s) ... %s\n",
-	       (file->use_xattrs ? "with":"without"), path_prefix, file->filename);
+	       (file->use_xattrs ? "with" : "without"), path_prefix, file->filename);
 	fullname = mk_full_filename(path_prefix, file->filename);
 	printf("fullname=%s\n", fullname);
 	populate_file_struct(file, fullname);

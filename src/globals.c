@@ -46,7 +46,7 @@ bool ignore_state = true;
 bool ignore_orphans = true;
 bool fix = false;
 char *format_string = NULL;
-char *path_prefix = NULL;      /* must always end in '/' */
+char *path_prefix = NULL; /* must always end in '/' */
 char *mounted_dirs = NULL;
 char *bundle_to_add = NULL;
 struct timeval start_time;
@@ -58,7 +58,7 @@ struct timeval start_time;
  */
 bool download_only;
 bool have_manifest_diskspace = false; /* assume no until checked */
-bool have_network = false; /* assume no access until proved */
+bool have_network = false;	    /* assume no access until proved */
 #define URL_COUNT 2
 char *version_server_urls[URL_COUNT] = {
 	NULL,
@@ -149,7 +149,7 @@ bool init_globals(void)
 		}
 
 		len = strlen(path_prefix);
-		if (!len || (path_prefix[len-1] != '/')) {
+		if (!len || (path_prefix[len - 1] != '/')) {
 			string_or_die(&tmp, "%s/", path_prefix);
 			free(path_prefix);
 			path_prefix = tmp;
@@ -160,7 +160,7 @@ bool init_globals(void)
 	ret = stat(path_prefix, &statbuf);
 	if (ret != 0 || !S_ISDIR(statbuf.st_mode)) {
 		printf("Bad path_prefix %s (%s), cannot continue.\n",
-			path_prefix, strerror(errno));
+		       path_prefix, strerror(errno));
 		return false;
 	}
 

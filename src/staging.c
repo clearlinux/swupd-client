@@ -126,7 +126,7 @@ int do_staging(struct file *file)
 	memset(&s, 0, sizeof(struct stat));
 	ret = lstat(statfile, &s);
 	if (ret == 0) {
-		if ((file->is_dir  && !S_ISDIR(s.st_mode)) ||
+		if ((file->is_dir && !S_ISDIR(s.st_mode)) ||
 		    (file->is_link && !S_ISLNK(s.st_mode)) ||
 		    (file->is_file && !S_ISREG(s.st_mode))) {
 			//file type changed, move old out of the way for new
@@ -162,8 +162,8 @@ int do_staging(struct file *file)
 			goto out;
 		}
 		string_or_die(&tarcommand, "tar -C %s " TAR_PERM_ATTR_ARGS " -cf - '%s' 2> /dev/null | "
-			"tar -C %s%s " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-			rename_tmpdir, base, path_prefix, rel_dir);
+					   "tar -C %s%s " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
+			      rename_tmpdir, base, path_prefix, rel_dir);
 		ret = system(tarcommand);
 		if (WIFEXITED(ret)) {
 			ret = WEXITSTATUS(ret);
@@ -200,8 +200,8 @@ int do_staging(struct file *file)
 				goto out;
 			}
 			string_or_die(&tarcommand, "tar -C %s/staged " TAR_PERM_ATTR_ARGS " -cf - '.update.%s' 2> /dev/null | "
-				"tar -C %s%s " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-				STATE_DIR, base, path_prefix, rel_dir);
+						   "tar -C %s%s " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
+				      STATE_DIR, base, path_prefix, rel_dir);
 			ret = system(tarcommand);
 			if (WIFEXITED(ret)) {
 				ret = WEXITSTATUS(ret);
@@ -246,7 +246,8 @@ out:
 }
 
 /* caller should not call this function for do_not_update marked files */
-int rename_staged_file_to_final(struct file *file) {
+int rename_staged_file_to_final(struct file *file)
+{
 	int ret;
 	char *target;
 
@@ -296,14 +297,14 @@ int rename_staged_file_to_final(struct file *file) {
 			ret = rename(target, lostnfound);
 			if (ret < 0 && errno != ENOTEMPTY && errno != EEXIST) {
 				printf("Error: failed to move %s to lost+found: %s\n",
-					base, strerror(errno));
+				       base, strerror(errno));
 			}
 			free(lostnfound);
 		} else {
 			ret = rename(file->staging, target);
 			if (ret < 0) {
 				printf("Error: failed to rename staged %s to final: %s\n",
-					file->hash, strerror(errno));
+				       file->hash, strerror(errno));
 			}
 			unlink(file->staging);
 		}

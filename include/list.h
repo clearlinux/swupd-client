@@ -10,7 +10,7 @@ struct list {
 };
 
 typedef int (*comparison_fn_t)(const void *a, const void *b);
-typedef void (*list_free_data_fn_t) (void *data);
+typedef void (*list_free_data_fn_t)(void *data);
 
 /* creates a new list item, store data, and inserts item in list (which can
  * be NULL). Returns created link, or NULL if failure. Created link can be

@@ -38,8 +38,8 @@ static int data_compare(const void *a, const void *b)
 {
 	unsigned int *A, *B;
 
-	A = (unsigned int*)a;
-	B = (unsigned int*)b;
+	A = (unsigned int *)a;
+	B = (unsigned int *)b;
 	// printf("comparing data %d > %d\n", *A, *B);
 	return (*A - *B);
 }
@@ -48,8 +48,8 @@ static int data_compare_reverse(const void *a, const void *b)
 {
 	unsigned int *A, *B;
 
-	A = (unsigned int*)a;
-	B = (unsigned int*)b;
+	A = (unsigned int *)a;
+	B = (unsigned int *)b;
 	// printf("comparing data %d > %d\n", *A, *B);
 	return (*B - *A);
 }
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
 
 	/* seed the random generator so that we get different lists each time */
 	gettimeofday(&tod, NULL);
-	seed = (unsigned int) tod.tv_sec;
+	seed = (unsigned int)tod.tv_sec;
 	srand(seed);
 
 	/* create a list with random data between 0 and len */
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 			printf("data allocation failed\n");
 			exit(-1);
 		}
-		*data = (unsigned int) rand() % len;
+		*data = (unsigned int)rand() % len;
 		list = list_append_data(list, data);
 	}
 	printf("List constructed, seed = %d, len = %d\n", seed, list_len(list));
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
 
 	/* check list elements are in right order */
 	if (check_list_order(list, 1) != 0) {
-		printf ("Sorted (1) List is in wrong order\n");
+		printf("Sorted (1) List is in wrong order\n");
 		return EXIT_FAILURE;
 	}
 
@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	// dump_list(list);
-	printf("List sorted in %f seconds\n", (float) t / CLOCKS_PER_SEC);
+	printf("List sorted in %f seconds\n", (float)t / CLOCKS_PER_SEC);
 
 	/* sort again on sorted list to check special case */
 
@@ -157,7 +157,7 @@ int main(int argc, char **argv)
 	t = clock() - t;
 
 	if (check_list_order(list, 1) != 0) {
-		printf ("Sorted (2) List is in wrong order\n");
+		printf("Sorted (2) List is in wrong order\n");
 		return EXIT_FAILURE;
 	}
 	if (list_len(list) != len) {
@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	// dump_list(list);
-	printf("Sorted list sorted again in %f seconds\n", (float) t / CLOCKS_PER_SEC);
+	printf("Sorted list sorted again in %f seconds\n", (float)t / CLOCKS_PER_SEC);
 
 	/* reverse sort from sorted state */
 
@@ -174,7 +174,7 @@ int main(int argc, char **argv)
 	t = clock() - t;
 
 	if (check_list_order(list, -1) != 0) {
-		printf ("Sorted (3) List is in wrong order\n");
+		printf("Sorted (3) List is in wrong order\n");
 		return EXIT_FAILURE;
 	}
 	if (list_len(list) != len) {
@@ -182,7 +182,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	// dump_list(list);
-	printf("Sorted list sorted reverse in %f seconds\n", (float) t / CLOCKS_PER_SEC);
+	printf("Sorted list sorted reverse in %f seconds\n", (float)t / CLOCKS_PER_SEC);
 
 	/* Check freeing the head item.
 	 * This must return the 2nd item, which must be the new head */
@@ -201,7 +201,7 @@ int main(int argc, char **argv)
 		printf("removing head item did not result in the right list len\n");
 		return EXIT_FAILURE;
 	}
-	printf ("Removing head correctly returned 2nd item as new head\n");
+	printf("Removing head correctly returned 2nd item as new head\n");
 
 	/* Check freeing middle item, must return previous item */
 	head = list_head(list);
@@ -221,7 +221,7 @@ int main(int argc, char **argv)
 		printf("removing 2nd item did not result in the right list len\n");
 		return EXIT_FAILURE;
 	}
-	printf ("Removing middle item correctly returned previous item\n");
+	printf("Removing middle item correctly returned previous item\n");
 
 	/* Check freeing tail, must return new tail */
 	tail = list_tail(list);
@@ -240,7 +240,7 @@ int main(int argc, char **argv)
 		printf("removing tail did not result in the right list len\n");
 		return EXIT_FAILURE;
 	}
-	printf ("Removing tail correctly returned previous item as new tail\n");
+	printf("Removing tail correctly returned previous item as new tail\n");
 
 	list_free_list_and_data(list, free);
 	list = NULL;
@@ -255,7 +255,7 @@ int main(int argc, char **argv)
 			printf("data allocation failed\n");
 			exit(-1);
 		}
-		*data = (unsigned int) i;
+		*data = (unsigned int)i;
 		list1 = list_prepend_data(list1, data);
 	}
 
@@ -265,7 +265,7 @@ int main(int argc, char **argv)
 			printf("data allocation failed\n");
 			exit(-1);
 		}
-		*data = (unsigned int) i;
+		*data = (unsigned int)i;
 		list2 = list_prepend_data(list2, data);
 	}
 
@@ -283,11 +283,11 @@ int main(int argc, char **argv)
 		printf("concat(list1, NULL) did not return list1 head\n");
 		return EXIT_FAILURE;
 	}
-	if (*((unsigned int*)(list->data)) != 1) {
+	if (*((unsigned int *)(list->data)) != 1) {
 		printf("concat(list1, NULL) head is wrong\n");
 		return EXIT_FAILURE;
 	}
-	printf ("concat(list1, NULL) is OK\n");
+	printf("concat(list1, NULL) is OK\n");
 	// dump_list(list);
 
 	/* Check concat empty list with one list*/
@@ -304,11 +304,11 @@ int main(int argc, char **argv)
 		printf("concat(NULL, list2) did not return list2 head\n");
 		return EXIT_FAILURE;
 	}
-	if (*((unsigned int*)(list->data)) != 4) {
+	if (*((unsigned int *)(list->data)) != 4) {
 		printf("concat(NULL, list2) head is wrong\n");
 		return EXIT_FAILURE;
 	}
-	printf ("concat(NULL, list2) is OK\n");
+	printf("concat(NULL, list2) is OK\n");
 	// dump_list(list);
 
 	/* Check concat two lists */
@@ -317,20 +317,20 @@ int main(int argc, char **argv)
 		printf("concat(list1, list2) did not result in a list len of 6\n");
 		return EXIT_FAILURE;
 	}
-	if (*((unsigned int*)(list->data)) != 1) {
+	if (*((unsigned int *)(list->data)) != 1) {
 		printf("concat(list1, list2) did not return list1 head\n");
 		return EXIT_FAILURE;
 	}
-	if (*((unsigned int*)(list->next->next->next->data)) != 4) {
+	if (*((unsigned int *)(list->next->next->next->data)) != 4) {
 		printf("concat(list1, list2) 4th item is not 4\n");
 		return EXIT_FAILURE;
 	}
-	printf ("concat(list1, list2) is OK\n");
+	printf("concat(list1, list2) is OK\n");
 	// dump_list(list);
 
 	list_free_list_and_data(list, free);
 
-	printf ("*** ALL LIST TESTS COMPLETED OK***\n");
+	printf("*** ALL LIST TESTS COMPLETED OK***\n");
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }

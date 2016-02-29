@@ -36,7 +36,6 @@
 #include "swupd.h"
 #include "signature.h"
 
-
 static bool cmdline_option_fix = false;
 static bool cmdline_option_install = false;
 static bool cmdline_option_quick = false;
@@ -55,26 +54,26 @@ static int file_extraneous_count;
 static int file_deleted_count;
 static int file_not_deleted_count;
 
-
 static const struct option prog_opts[] = {
-	{"help", no_argument, 0, 'h'},
-	{"manifest", required_argument, 0, 'm'},
-	{"path", required_argument, 0, 'p'},
-	{"url", required_argument, 0, 'u'},
-	{"port", required_argument, 0, 'P'},
-	{"contenturl", required_argument, 0, 'c'},
-	{"versionurl", required_argument, 0, 'v'},
-	{"fix", no_argument, 0, 'f'},
-	{"install", no_argument, 0, 'i'},
-	{"format", required_argument, 0, 'F'},
-	{"quick", no_argument, 0, 'q'},
-	{"force", no_argument, 0, 'x'},
-	{0, 0, 0, 0}
+	{ "help", no_argument, 0, 'h' },
+	{ "manifest", required_argument, 0, 'm' },
+	{ "path", required_argument, 0, 'p' },
+	{ "url", required_argument, 0, 'u' },
+	{ "port", required_argument, 0, 'P' },
+	{ "contenturl", required_argument, 0, 'c' },
+	{ "versionurl", required_argument, 0, 'v' },
+	{ "fix", no_argument, 0, 'f' },
+	{ "install", no_argument, 0, 'i' },
+	{ "format", required_argument, 0, 'F' },
+	{ "quick", no_argument, 0, 'q' },
+	{ "force", no_argument, 0, 'x' },
+	{ 0, 0, 0, 0 }
 };
 
-static void print_help(const char *name) {
+static void print_help(const char *name)
+{
 	printf("Usage:\n");
-	printf("   swupd %s [OPTION...]\n\n", basename((char*)name));
+	printf("   swupd %s [OPTION...]\n\n", basename((char *)name));
 	printf("Help Options:\n");
 	printf("   -h, --help              Show help options\n\n");
 	printf("Application Options:\n");
@@ -316,7 +315,7 @@ static int get_missing_files(struct manifest *official_manifest)
 {
 	int ret;
 	struct list *failed = NULL;
-	int retries = 0; /* We only want to go through the download loop once */
+	int retries = 0;  /* We only want to go through the download loop once */
 	int timeout = 10; /* Amount of seconds for first download retry */
 
 RETRY_DOWNLOADS:
@@ -555,7 +554,7 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 				file_not_deleted_count++;
 				if (errno != ENOTEMPTY) {
 					printf("Failed to remove empty folder %s (%i: %s)\n",
-						fullname, errno, strerror(errno));
+					       fullname, errno, strerror(errno));
 				} else {
 					//FIXME: Add force removal option?
 					printf("Couldn't remove directory containing untracked files: %s\n", fullname);

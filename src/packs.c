@@ -35,7 +35,6 @@
 #include "swupd.h"
 #include "signature.h"
 
-
 static int download_pack(int oldversion, int newversion, char *module)
 {
 	FILE *tarfile = NULL;
@@ -78,7 +77,7 @@ static int download_pack(int oldversion, int newversion, char *module)
 
 	printf("Extracting pack.\n");
 	string_or_die(&tar, "tar -C %s " TAR_PERM_ATTR_ARGS " -xf %s/pack-%s-from-%i-to-%i.tar 2> /dev/null",
-			STATE_DIR, STATE_DIR, module, oldversion, newversion);
+		      STATE_DIR, STATE_DIR, module, oldversion, newversion);
 
 	err = system(tar);
 	if (WIFEXITED(err)) {

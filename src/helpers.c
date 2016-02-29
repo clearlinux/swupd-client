@@ -38,7 +38,6 @@
 #include "config.h"
 #include "swupd.h"
 
-
 void check_root(void)
 {
 	if (getuid() != 0) {
@@ -122,17 +121,17 @@ void unlink_all_staged_content(struct file *file)
 	/* delta file */
 	if (file->peer) {
 		string_or_die(&filename, "%s/delta/%i-%i-%s", STATE_DIR,
-		    file->peer->last_change, file->last_change, file->hash);
+			      file->peer->last_change, file->last_change, file->hash);
 		unlink(filename);
 		free(filename);
 	}
 }
 
-FILE * fopen_exclusive(const char *filename) /* no mode, opens for write only */
+FILE *fopen_exclusive(const char *filename) /* no mode, opens for write only */
 {
 	int fd;
 
-	fd = open(filename,O_CREAT | O_EXCL | O_RDWR , 00600);
+	fd = open(filename, O_CREAT | O_EXCL | O_RDWR, 00600);
 	if (fd < 0) {
 		return NULL;
 	}
@@ -145,7 +144,7 @@ int create_required_dirs(void)
 	int i;
 	char *dir;
 #define STATE_DIR_COUNT 3
-	const char *dirs[] = {"delta","staged","download"};
+	const char *dirs[] = { "delta", "staged", "download" };
 	struct stat buf;
 	bool missing = false;
 
@@ -280,7 +279,7 @@ char *mk_full_filename(const char *prefix, const char *path)
 		if (fname == NULL) {
 			abort();
 		}
-	} else if (strcmp(&prefix[strlen(prefix)-1], "/") == 0) {
+	} else if (strcmp(&prefix[strlen(prefix) - 1], "/") == 0) {
 		// chroot and need to strip trailing "/" from prefix
 		char *tmp = strdup(prefix);
 		if (tmp == NULL) {
@@ -302,7 +301,7 @@ char *mk_full_filename(const char *prefix, const char *path)
 bool is_directory_mounted(const char *filename)
 {
 	char *fname;
-	bool  ret = false;
+	bool ret = false;
 	char *tmp;
 
 	if (mounted_dirs == NULL) {
@@ -325,8 +324,8 @@ bool is_directory_mounted(const char *filename)
 // expects filename w/o path_prefix prepended
 bool is_under_mounted_directory(const char *filename)
 {
-	bool  ret = false;
-	int   err;
+	bool ret = false;
+	int err;
 	char *token;
 	char *mountpoint;
 	char *dir;
@@ -436,7 +435,8 @@ exit:
 	return ret;
 }
 
-int swupd_rm(const char *filename) {
+int swupd_rm(const char *filename)
+{
 	struct stat stat;
 	int ret;
 
@@ -483,7 +483,6 @@ int rm_bundle_file(const char *bundle)
 out:
 	free(filename);
 	return ret;
-
 }
 
 #if 0
@@ -544,7 +543,7 @@ void dump_file_info(struct file *file)
 
 void free_file_data(void *data)
 {
-	struct file *file = (struct file *) data;
+	struct file *file = (struct file *)data;
 
 	if (!file) {
 		return;
@@ -602,7 +601,6 @@ out_fds:
 	dump_file_descriptor_leaks();
 
 	return ret;
-
 }
 
 /* this function prints the initial message for all utils
@@ -647,20 +645,20 @@ void delete_motd(void)
 
 int is_dirname_link(const char *fullname)
 {
-    int ret = -1;
-    char *real_path = NULL;
-    real_path = realpath(fullname, NULL);
-    if (!real_path) {
-        printf("Failed to get real path of %s\n", fullname);
-        return -1;
-    }
-
-    if (strcmp(real_path, fullname) != 0) {
-        ret = 1;
-    } else {
-        ret = 0;
+	int ret = -1;
+	char *real_path = NULL;
+	real_path = realpath(fullname, NULL);
+	if (!real_path) {
+		printf("Failed to get real path of %s\n", fullname);
+		return -1;
 	}
 
-    free(real_path);
-    return ret;
+	if (strcmp(real_path, fullname) != 0) {
+		ret = 1;
+	} else {
+		ret = 0;
+	}
+
+	free(real_path);
+	return ret;
 }

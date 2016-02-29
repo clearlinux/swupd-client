@@ -65,7 +65,8 @@ static struct list *list_alloc_item(void *data)
 }
 
 // Merges two sorted lists
-static struct list *list_merge(struct list *list1, struct list *list2, comparison_fn_t comparison_fn) {
+static struct list *list_merge(struct list *list1, struct list *list2, comparison_fn_t comparison_fn)
+{
 	struct list *merged_list = NULL;
 	struct list *merged_list_head = NULL;
 	while (list1 && list2) {

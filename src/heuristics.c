@@ -89,7 +89,7 @@ static void boot_file_heuristics(struct file *file)
 {
 	if ((strncmp(file->filename, "/boot/", 6) == 0) ||
 	    (strncmp(file->filename, "/usr/lib/modules/", 17) == 0)) {
-			file->is_boot = 1;
+		file->is_boot = 1;
 	}
 
 	if (strncmp(file->filename, "/usr/lib/kernel/", 16) == 0) {
@@ -118,8 +118,8 @@ bool ignore(struct file *file)
 	if ((file->is_config) ||
 	    is_config(file->filename) || // ideally we trust the manifest but short term reapply check here
 	    (file->is_state) ||
-	    is_state(file->filename) || // ideally we trust the manifest but short term reapply check here
-	    (file->is_boot &&  fix &&  file->is_deleted) || // shouldn't happen
+	    is_state(file->filename) ||			    // ideally we trust the manifest but short term reapply check here
+	    (file->is_boot && fix && file->is_deleted) ||   // shouldn't happen
 	    (file->is_boot && !fix && !file->is_deleted) || // default ignore
 	    (ignore_orphans && file->is_orphan)) {
 		update_skip++;

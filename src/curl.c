@@ -143,7 +143,7 @@ static size_t swupd_download_version_to_memory(void *ptr, size_t size, size_t nm
 /* curl easy CURLOPT_WRITEFUNCTION callback */
 size_t swupd_download_file(void *ptr, size_t size, size_t nmemb, void *userdata)
 {
-	struct file *file = (struct file*)userdata;
+	struct file *file = (struct file *)userdata;
 	const char *outfile;
 	int fd;
 	FILE *f;
@@ -151,7 +151,7 @@ size_t swupd_download_file(void *ptr, size_t size, size_t nmemb, void *userdata)
 
 	outfile = file->staging;
 
-	fd = open(outfile, O_CREAT | O_RDWR , 00600);
+	fd = open(outfile, O_CREAT | O_RDWR, 00600);
 	if (fd < 0) {
 		printf("Error: Cannot open %s for write: %s\n",
 		       outfile, strerror(errno));
@@ -166,7 +166,7 @@ size_t swupd_download_file(void *ptr, size_t size, size_t nmemb, void *userdata)
 		return -1;
 	}
 
-	written = fwrite(ptr, size*nmemb, 1, f);
+	written = fwrite(ptr, size * nmemb, 1, f);
 
 	fflush(f);
 	fclose(f);
@@ -175,7 +175,7 @@ size_t swupd_download_file(void *ptr, size_t size, size_t nmemb, void *userdata)
 		return -1;
 	}
 
-	return size*nmemb;
+	return size * nmemb;
 }
 
 /* Download a single file SYNCHRONOUSLY
@@ -216,13 +216,13 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 
 		if (lstat(filename, &stat) == 0) {
 			if (pack) {
-				curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t) stat.st_size);
+				curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
 			} else {
 				unlink(filename);
 			}
 		}
 
-		curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void*)local);
+		curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void *)local);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
@@ -230,7 +230,7 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
-		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)local);
+		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)local);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
@@ -242,7 +242,7 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
-		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)in_memory_version_string);
+		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)in_memory_version_string);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
@@ -266,58 +266,58 @@ exit:
 	if (curl_ret == CURLE_OK) {
 		/* curl command succeeded, download might've failed, let our caller handle */
 		switch (ret) {
-			case 200:
-			case 206:
-				err = 0;
-				break;
-			case 403:
-				err = -EACCES;
-				break;
-			case 404:
-				err = -ENET404;
-				break;
-			default:
-				err = -1;
-				break;
+		case 200:
+		case 206:
+			err = 0;
+			break;
+		case 403:
+			err = -EACCES;
+			break;
+		case 404:
+			err = -ENET404;
+			break;
+		default:
+			err = -1;
+			break;
 		}
 	} else { /* download failed but let our caller do it */
 		switch (curl_ret) {
-			case CURLE_COULDNT_RESOLVE_PROXY:
-				printf("Curl: Could not resolve proxy\n");
-				err = -1;
-				break;
-			case CURLE_COULDNT_RESOLVE_HOST:
-				printf("Curl: Could not resolve host - '%s'\n", url);
-				err = -1;
-				break;
-			case CURLE_COULDNT_CONNECT:
-				err = -ENONET;
-				break;
-			case CURLE_PARTIAL_FILE:
-				printf("Curl: File incompletely downloaded from '%s' to '%s'\n",
-							url, filename);
-				err = -1;
-				break;
-			case CURLE_RECV_ERROR:
-				printf("Curl: Failure receiving data from server\n");
-				err = -ENOLINK;
-				break;
-			case CURLE_WRITE_ERROR:
-				printf("Curl: Error downloading to local file - %s\n", filename);
-				err = -EIO;
-				break;
-			case CURLE_OPERATION_TIMEDOUT:
-				printf("Curl: Communicating with server timed out.\n");
-				err = -ETIMEDOUT;
-				break;
-			case CURLE_SSL_CACERT_BADFILE:
-				printf("Curl: Bad SSL Cert file, cannot ensure secure connection\n");
-				err = -1;
-				break;
-			default :
-				printf("Curl error: %d - see curl.h for details\n", curl_ret);
-				err = -1;
-				break;
+		case CURLE_COULDNT_RESOLVE_PROXY:
+			printf("Curl: Could not resolve proxy\n");
+			err = -1;
+			break;
+		case CURLE_COULDNT_RESOLVE_HOST:
+			printf("Curl: Could not resolve host - '%s'\n", url);
+			err = -1;
+			break;
+		case CURLE_COULDNT_CONNECT:
+			err = -ENONET;
+			break;
+		case CURLE_PARTIAL_FILE:
+			printf("Curl: File incompletely downloaded from '%s' to '%s'\n",
+			       url, filename);
+			err = -1;
+			break;
+		case CURLE_RECV_ERROR:
+			printf("Curl: Failure receiving data from server\n");
+			err = -ENOLINK;
+			break;
+		case CURLE_WRITE_ERROR:
+			printf("Curl: Error downloading to local file - %s\n", filename);
+			err = -EIO;
+			break;
+		case CURLE_OPERATION_TIMEDOUT:
+			printf("Curl: Communicating with server timed out.\n");
+			err = -ETIMEDOUT;
+			break;
+		case CURLE_SSL_CACERT_BADFILE:
+			printf("Curl: Bad SSL Cert file, cannot ensure secure connection\n");
+			err = -1;
+			break;
+		default:
+			printf("Curl error: %d - see curl.h for details\n", curl_ret);
+			err = -1;
+			break;
 		}
 	}
 
@@ -333,7 +333,6 @@ exit:
 
 	return err;
 }
-
 
 static CURLcode swupd_curl_set_security_opts(CURL *curl)
 {
@@ -365,7 +364,7 @@ static CURLcode swupd_curl_set_security_opts(CURL *curl)
 		goto exit;
 	}
 
-	curl_ret = curl_easy_setopt(curl, CURLOPT_CAPATH , UPDATE_CA_CERTS_PATH);
+	curl_ret = curl_easy_setopt(curl, CURLOPT_CAPATH, UPDATE_CA_CERTS_PATH);
 	if (curl_ret != CURLE_OK) {
 		goto exit;
 	}

@@ -33,7 +33,7 @@
 static void print_help(const char *name)
 {
 	printf("Usage:\n");
-	printf("   swupd %s [options] bundlename\n\n", basename((char*)name));
+	printf("   swupd %s [options] bundlename\n\n", basename((char *)name));
 	printf("Help Options:\n");
 	printf("   -h, --help              Show help options\n");
 	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
@@ -45,13 +45,13 @@ static void print_help(const char *name)
 }
 
 static const struct option prog_opts[] = {
-	{"help", no_argument, 0, 'h'},
-	{"url", required_argument, 0, 'u'},
-	{"port", required_argument, 0, 'P'},
-	{"format", required_argument, 0, 'F'},
-	{"force", no_argument, 0, 'x'},
-	{"path", required_argument, 0, 'p'},
-	{0, 0, 0, 0}
+	{ "help", no_argument, 0, 'h' },
+	{ "url", required_argument, 0, 'u' },
+	{ "port", required_argument, 0, 'P' },
+	{ "format", required_argument, 0, 'F' },
+	{ "force", no_argument, 0, 'x' },
+	{ "path", required_argument, 0, 'p' },
+	{ 0, 0, 0, 0 }
 };
 
 static bool parse_options(int argc, char **argv)
@@ -62,48 +62,48 @@ static bool parse_options(int argc, char **argv)
 
 	while ((opt = getopt_long(argc, argv, "hxu:P:F:p:", prog_opts, NULL)) != -1) {
 		switch (opt) {
-			case '?':
-			case 'h':
-				print_help(argv[0]);
-				exit(EXIT_SUCCESS);
-			case 'u':
-				if (!optarg) {
-					printf("error: invalid --url argument\n\n");
-					goto err;
-				}
-				if (version_server_urls[0]) {
-					free(version_server_urls[0]);
-				}
-				string_or_die(&version_server_urls[0], "%s", optarg);
-				break;
-			case 'P':
-				if (sscanf(optarg, "%ld", &update_server_port) != 1) {
-					printf("Invalid --port argument\n\n");
-					goto err;
-				}
-				break;
-			case 'F':
-				if (!optarg || !set_format_string(optarg)) {
-					printf("Invalid --format argument\n\n");
-					goto err;
-				}
-				break;
-			case 'p': /* default empty path_prefix checks the running OS */
-				if (!optarg) {
-					printf("Invalid --path argument\n\n");
-					goto err;
-				}
-				if (path_prefix) { /* multiple -p options */
-					free(path_prefix);
-				}
-				string_or_die(&path_prefix, "%s", optarg);
-				break;
-			case 'x':
-				force = true;
-				break;
-			default:
-				printf("error: unrecognized option\n\n");
+		case '?':
+		case 'h':
+			print_help(argv[0]);
+			exit(EXIT_SUCCESS);
+		case 'u':
+			if (!optarg) {
+				printf("error: invalid --url argument\n\n");
 				goto err;
+			}
+			if (version_server_urls[0]) {
+				free(version_server_urls[0]);
+			}
+			string_or_die(&version_server_urls[0], "%s", optarg);
+			break;
+		case 'P':
+			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
+				printf("Invalid --port argument\n\n");
+				goto err;
+			}
+			break;
+		case 'F':
+			if (!optarg || !set_format_string(optarg)) {
+				printf("Invalid --format argument\n\n");
+				goto err;
+			}
+			break;
+		case 'p': /* default empty path_prefix checks the running OS */
+			if (!optarg) {
+				printf("Invalid --path argument\n\n");
+				goto err;
+			}
+			if (path_prefix) { /* multiple -p options */
+				free(path_prefix);
+			}
+			string_or_die(&path_prefix, "%s", optarg);
+			break;
+		case 'x':
+			force = true;
+			break;
+		default:
+			printf("error: unrecognized option\n\n");
+			goto err;
 		}
 	}
 
@@ -114,7 +114,6 @@ static bool parse_options(int argc, char **argv)
 err:
 	print_help(argv[0]);
 	return false;
-
 }
 
 static int check_update()
@@ -142,7 +141,8 @@ static int check_update()
 	}
 }
 
-int check_update_main(int argc, char **argv) {
+int check_update_main(int argc, char **argv)
+{
 	int ret;
 	copyright_header("software update checker");
 

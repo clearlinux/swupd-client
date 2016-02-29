@@ -37,13 +37,13 @@
 
 void hash_assign(char *src, char *dst)
 {
-	memcpy(dst, src, SWUPD_HASH_LEN-1);
-	dst[SWUPD_HASH_LEN-1] = '\0';
+	memcpy(dst, src, SWUPD_HASH_LEN - 1);
+	dst[SWUPD_HASH_LEN - 1] = '\0';
 }
 
 bool hash_compare(char *hash1, char *hash2)
 {
-	if (bcmp(hash1, hash2, SWUPD_HASH_LEN-1) == 0) {
+	if (bcmp(hash1, hash2, SWUPD_HASH_LEN - 1) == 0) {
 		return true;
 	} else {
 		return false;
@@ -128,14 +128,14 @@ static void hmac_compute_key(const char *filename,
 	}
 
 	hmac_sha256_for_data(key, (const unsigned char *)updt_stat,
-				    sizeof(struct update_stat),
-				    (const unsigned char *)xattrs_blob,
-				    xattrs_blob_len);
+			     sizeof(struct update_stat),
+			     (const unsigned char *)xattrs_blob,
+			     xattrs_blob_len);
 
 	if (hash_is_zeros(key)) {
 		*key_len = 0;
 	} else {
-		*key_len = SWUPD_HASH_LEN-1;
+		*key_len = SWUPD_HASH_LEN - 1;
 	}
 
 	if (xattrs_blob_len != 0) {
@@ -187,9 +187,9 @@ int compute_hash(struct file *file, char *filename)
 		if (ret >= 0) {
 			hmac_compute_key(filename, &file->stat, key, &key_len, file->use_xattrs);
 			hmac_sha256_for_string(file->hash,
-					(const unsigned char *)key,
-					key_len,
-					link);
+					       (const unsigned char *)key,
+					       key_len,
+					       link);
 			return 0;
 		} else {
 			return -1;
@@ -199,9 +199,9 @@ int compute_hash(struct file *file, char *filename)
 	if (file->is_dir) {
 		hmac_compute_key(filename, &file->stat, key, &key_len, file->use_xattrs);
 		hmac_sha256_for_string(file->hash,
-					(const unsigned char *)key,
-					key_len,
-					file->filename);	//file->filename not filename
+				       (const unsigned char *)key,
+				       key_len,
+				       file->filename); //file->filename not filename
 		return 0;
 	}
 
@@ -217,10 +217,10 @@ int compute_hash(struct file *file, char *filename)
 
 	hmac_compute_key(filename, &file->stat, key, &key_len, file->use_xattrs);
 	hmac_sha256_for_data(file->hash,
-				(const unsigned char *)key,
-				key_len,
-				blob,
-				file->stat.st_size);
+			     (const unsigned char *)key,
+			     key_len,
+			     blob,
+			     file->stat.st_size);
 	munmap(blob, file->stat.st_size);
 	fclose(fl);
 	return 0;

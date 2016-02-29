@@ -38,9 +38,7 @@
 #include "swupd.h"
 #include "xattrs.h"
 
-
-static void do_delta(struct file* file);
-
+static void do_delta(struct file *file);
 
 void try_delta(struct file *file)
 {
@@ -84,7 +82,7 @@ static void do_delta(struct file *file)
 	struct stat stat;
 
 	string_or_die(&deltafile, "%s/delta/%i-%i-%s", STATE_DIR,
-			file->deltapeer->last_change, file->last_change, file->hash);
+		      file->deltapeer->last_change, file->last_change, file->hash);
 
 	/* check if the full file is there already, because if it is, don't do the delta */
 	string_or_die(&filename, "%s/staged/%s", STATE_DIR, file->hash);

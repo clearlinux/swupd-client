@@ -54,12 +54,12 @@ static int file_sort_hash(const void* a, const void* b)
 #endif
 
 /* sort by full path filename */
-int file_sort_filename(const void* a, const void* b)
+int file_sort_filename(const void *a, const void *b)
 {
 	struct file *A, *B;
 	int ret;
-	A = (struct file *) a;
-	B = (struct file *) b;
+	A = (struct file *)a;
+	B = (struct file *)b;
 
 	ret = strcmp(A->filename, B->filename);
 	if (ret) {
@@ -75,11 +75,11 @@ int file_sort_filename(const void* a, const void* b)
 	return 0;
 }
 
-static int file_sort_version(const void* a, const void* b)
+static int file_sort_version(const void *a, const void *b)
 {
 	struct file *A, *B;
-	A = (struct file *) a;
-	B = (struct file *) b;
+	A = (struct file *)a;
+	B = (struct file *)b;
 
 	if (A->last_change < B->last_change) {
 		return -1;
@@ -126,7 +126,7 @@ static int file_has_different_hash_in_older_manifest(struct manifest *from_manif
 			continue;
 		}
 		if (!strcmp(file->filename, searched_file->filename) &&
-				hash_compare(file->hash, searched_file->hash)) {
+		    hash_compare(file->hash, searched_file->hash)) {
 			return 1;
 		}
 	}
@@ -176,7 +176,7 @@ static struct manifest *manifest_from_file(int version, char *component)
 		goto err_close;
 	}
 
-	if (strncmp(line, "MANIFEST\t", 9)!=0) {
+	if (strncmp(line, "MANIFEST\t", 9) != 0) {
 		goto err_close;
 	}
 
@@ -187,7 +187,7 @@ static struct manifest *manifest_from_file(int version, char *component)
 	}
 
 	line[0] = 0;
-	while (strcmp(line, "\n")!=0) {
+	while (strcmp(line, "\n") != 0) {
 		/* read the header */
 		line[0] = 0;
 		if (fgets(line, MANIFEST_LINE_MAXLEN - 1, infile) == NULL) {
@@ -210,13 +210,13 @@ static struct manifest *manifest_from_file(int version, char *component)
 			goto err_close;
 		}
 
-		if (strncmp(line,"version:", 8) == 0) {
+		if (strncmp(line, "version:", 8) == 0) {
 			manifest_hdr_version = strtoull(c, NULL, 10);
 			if (manifest_hdr_version != version) {
 				goto err_close;
 			}
 		}
-		if (strncmp(line,"contentsize:", 12) == 0) {
+		if (strncmp(line, "contentsize:", 12) == 0) {
 			contentsize = strtoull(c, NULL, 10);
 		}
 	}
@@ -336,7 +336,7 @@ static struct manifest *manifest_from_file(int version, char *component)
 		} else {
 			manifest->files = list_prepend_data(manifest->files, file);
 		}
-		count ++;
+		count++;
 	}
 
 	fclose(infile);
@@ -346,7 +346,6 @@ err:
 err_close:
 	fclose(infile);
 	return NULL;
-
 }
 
 #if 0
@@ -370,7 +369,7 @@ void print_manifest_filenames(struct manifest *m)
 
 static void free_manifest_data(void *data)
 {
-	struct manifest *manifest = (struct manifest *) data;
+	struct manifest *manifest = (struct manifest *)data;
 
 	free_manifest(manifest);
 }
@@ -512,7 +511,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	}
 
 	string_or_die(&tar, "tar -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",
-			STATE_DIR, version, STATE_DIR, version, component);
+		      STATE_DIR, version, STATE_DIR, version, component);
 
 	/* this is is historically a point of odd errors */
 	ret = system(tar);
@@ -567,7 +566,7 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 		list = list->next;
 
 		if ((file->last_change > current->version) ||
-				(file->is_rename && file_has_different_hash_in_older_manifest(current, file))) {
+		    (file->is_rename && file_has_different_hash_in_older_manifest(current, file))) {
 
 			/* check and if needed mark as do_not_update */
 			ignore(file);
@@ -680,7 +679,6 @@ void link_submanifests(struct manifest *m1, struct manifest *m2)
 	}
 }
 
-
 /* if component is specified explicitly, pull in submanifest only for that
  * if component is not specified, pull in any tracked component submanifest */
 int recurse_manifest(struct manifest *manifest, const char *component)
@@ -727,7 +725,6 @@ int recurse_manifest(struct manifest *manifest, const char *component)
 
 	return 0;
 }
-
 
 void consolidate_submanifests(struct manifest *manifest)
 {

@@ -49,7 +49,6 @@ static void banner(void)
 	exit(0);
 }
 
-
 static void corrupt_file(int thread)
 {
 	struct stat statb;
@@ -58,7 +57,7 @@ static void corrupt_file(int thread)
 	char filename[PATH_MAXLEN];
 	int ret;
 
-	int r,b;
+	int r, b;
 
 	sprintf(filename, OUTDIR "tempfile.%i", thread);
 	ret = stat(filename, &statb);
@@ -113,7 +112,6 @@ static int check_valgrind(int thread)
 	return 1;
 }
 
-
 static void *do_fuzz(void *data)
 {
 	int i = 1000;
@@ -136,10 +134,8 @@ static void *do_fuzz(void *data)
 		/* step 3: randomly corrupt the "tempfile" into a "corrupt" file*/
 		corrupt_file(thread);
 		/* step 4: run valgrind on the bspatch program with the "corrupt" file */
-		if (asprintf(&command, "valgrind --leak-check=no --log-file="
-				OUTDIR "valgrind.log.%i bspatch %s "
-				OUTDIR "output.%i " OUTDIR "corrupt.%i > /dev/null",
-				thread, from_files[thread], thread, thread) <= 0)
+		if (asprintf(&command, "valgrind --leak-check=no --log-file=" OUTDIR "valgrind.log.%i bspatch %s " OUTDIR "output.%i " OUTDIR "corrupt.%i > /dev/null",
+			     thread, from_files[thread], thread, thread) <= 0)
 			assert(0);
 
 		ret = system(command);
@@ -152,30 +148,28 @@ static void *do_fuzz(void *data)
 
 			t = time(NULL);
 			if (asprintf(&command2, "mv " OUTDIR "corrupt.%i " OUTDIR "failed/corrupt.%i-%i",
-					thread, thread, t) <= 0)
+				     thread, thread, t) <= 0)
 				assert(0);
 			ret = system(command2);
-			assert(ret==0);
+			assert(ret == 0);
 			free(command2);
 			if (asprintf(&command2, "mv " OUTDIR "valgrind.log.%i " OUTDIR "failed/valgrind.%i-%i",
-					thread, thread, t) <= 0)
+				     thread, thread, t) <= 0)
 				assert(0);
 			ret = system(command2);
-			assert(ret==0);
+			assert(ret == 0);
 			free(command2);
 			if (asprintf(&command2, "cp %s " OUTDIR "failed/original.%i-%i",
-					from_files[thread], thread, t) <= 0)
+				     from_files[thread], thread, t) <= 0)
 				assert(0);
 			ret = system(command2);
-			assert(ret==0);
+			assert(ret == 0);
 			free(command2);
 			printf("x");
 			sleep(1); /* make sure no duplicates exist */
-		} else
-			if (i % 10 == 0)
-				printf(".");
+		} else if (i % 10 == 0)
+			printf(".");
 		fflush(stdout);
-
 	}
 	return NULL;
 }
@@ -192,7 +186,6 @@ int main(int argc, char **argv)
 
 	srand(time(NULL));
 
-
 	/* step 1: make a "failed" directory */
 	mkdir(OUTDIR, S_IRWXU);
 	mkdir(OUTDIR "failed", S_IRWXU);
@@ -200,7 +193,8 @@ int main(int argc, char **argv)
 	while (1) {
 
 		for (i = 1; i <= THREAD_COUNT; i++) {
-			p = 0; q = 0;
+			p = 0;
+			q = 0;
 			while (p == 0 || q == 0) {
 				p = (rand() % argc);
 				q = (rand() % argc);

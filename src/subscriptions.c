@@ -36,12 +36,11 @@ struct list *subs;
 
 static void free_subscription_data(void *data)
 {
-	struct sub *sub = (struct sub *) data;
+	struct sub *sub = (struct sub *)data;
 
 	free(sub->component);
 	free(sub);
 }
-
 
 void free_subscriptions(void)
 {
@@ -75,12 +74,11 @@ void read_subscriptions_alt(void)
 			}
 			if (ent->d_type == DT_REG) {
 				if (component_subscribed(ent->d_name)) {
-				/*  This is considered odd since means two files same name on same folder */
+					/*  This is considered odd since means two files same name on same folder */
 					continue;
 				}
 
 				create_and_append_subscription(ent->d_name);
-
 			}
 		}
 

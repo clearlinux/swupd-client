@@ -38,7 +38,7 @@ static struct subcmd commands[] = {
 	{ "hashdump", "Dumps the HMAC hash of a file", hashdump_main },
 	{ "update", "Update to latest OS version", update_main },
 	{ "verify", "Verify content for OS version", verify_main },
-	{ "check-update", "Checks if a new OS version is available", check_update_main},
+	{ "check-update", "Checks if a new OS version is available", check_update_main },
 	{ "search", "Search Clear Linux for a binary or library", search_main },
 	{ 0 }
 };
@@ -49,10 +49,11 @@ static const struct option prog_opts[] = {
 	{ 0 }
 };
 
-static void print_help(const char *name) {
+static void print_help(const char *name)
+{
 	printf("Usage:\n");
-	printf("    %s [OPTION...]\n", basename((char*)name));
-	printf(" or %s [OPTION...] SUBCOMMAND [OPTION...]\n\n", basename((char*)name));
+	printf("    %s [OPTION...]\n", basename((char *)name));
+	printf(" or %s [OPTION...] SUBCOMMAND [OPTION...]\n\n", basename((char *)name));
 	printf("Help Options:\n");
 	printf("   -h, --help              Show help options\n");
 	printf("   -v, --version           Output version information and exit\n\n");
@@ -65,7 +66,7 @@ static void print_help(const char *name) {
 		entry++;
 	}
 	printf("\n");
-	printf("To view subcommand options, run `%s SUBCOMMAND --help'\n", basename((char*)name));
+	printf("To view subcommand options, run `%s SUBCOMMAND --help'\n", basename((char *)name));
 }
 
 static int subcmd_index(char *arg)

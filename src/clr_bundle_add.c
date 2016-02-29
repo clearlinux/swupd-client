@@ -38,9 +38,10 @@
 bool list = false;
 static char **bundles;
 
-static void print_help(const char *name) {
+static void print_help(const char *name)
+{
 	printf("Usage:\n");
-	printf("   swupd %s [options] [bundle1 bundle2 (...)]\n\n", basename((char*)name));
+	printf("   swupd %s [options] [bundle1 bundle2 (...)]\n\n", basename((char *)name));
 	printf("Help Options:\n");
 	printf("   -h, --help              Show help options\n");
 	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
@@ -53,14 +54,14 @@ static void print_help(const char *name) {
 }
 
 static const struct option prog_opts[] = {
-	{"help", no_argument, 0, 'h'},
-	{"url", required_argument, 0, 'u'},
-	{"port", required_argument, 0, 'P'},
-	{"list", no_argument, 0, 'l'},
-	{"path", required_argument, 0, 'p'},
-	{"format", required_argument, 0, 'F'},
-	{"force", no_argument, 0, 'x'},
-	{0, 0, 0, 0}
+	{ "help", no_argument, 0, 'h' },
+	{ "url", required_argument, 0, 'u' },
+	{ "port", required_argument, 0, 'P' },
+	{ "list", no_argument, 0, 'l' },
+	{ "path", required_argument, 0, 'p' },
+	{ "format", required_argument, 0, 'F' },
+	{ "force", no_argument, 0, 'x' },
+	{ 0, 0, 0, 0 }
 };
 
 static bool parse_options(int argc, char **argv)

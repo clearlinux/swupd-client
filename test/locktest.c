@@ -46,7 +46,7 @@ static void work(int id)
 	int lock_fd;
 	int successes = 0;
 
-	FILE * file;
+	FILE *file;
 	char buffer[LINE_MAX];
 
 	while (successes < NUM_ACCESS) {
@@ -70,7 +70,6 @@ static void work(int id)
 		printf("process %i acquired lock\n", id);
 
 		file = fopen(PROTECTED_FILE, "a+");
-
 
 		fseek(file, 0, SEEK_END);
 
@@ -149,7 +148,7 @@ int main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 	int ret = EXIT_FAILURE;
 	int t_cnt;
 	pid_t pid[NUM_THREADS];
-	FILE * file;
+	FILE *file;
 	int id, prev_id = -1;
 	char action, prev_action = ' ';
 	char buffer[LINE_MAX];

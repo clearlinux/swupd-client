@@ -34,16 +34,15 @@
 #include "signature.h"
 #include "swupd.h"
 
-
 /*
  * Implementation flavors:
  *   FAKE ..... do nothing, always return success
  *   FORGIVE .. do everything, always return success
  *   REAL ..... do everything, return the real status
  */
-#define IMPL_FAKE    0
+#define IMPL_FAKE 0
 #define IMPL_FORGIVE 1
-#define IMPL_REAL    2
+#define IMPL_REAL 2
 
 #warning "TODO pick signing scheme"
 #if defined(SWUPD_LINUX_ROOTFS)
@@ -82,8 +81,8 @@ void signature_terminate(void)
 {
 	if (initialized) {
 		X509_STORE_free(x509_store); // undocumented...
-		ERR_free_strings(); // undoes ERR_load_crypto_strings
-		EVP_cleanup();      // undoes OpenSSL_add_all_algorithms
+		ERR_free_strings();	  // undoes ERR_load_crypto_strings
+		EVP_cleanup();		     // undoes OpenSSL_add_all_algorithms
 		initialized = false;
 	}
 }
@@ -129,7 +128,7 @@ exit:
 }
 
 static X509_STORE *create_store(const char *ca_filename, const char *ca_dirname,
-			 const char *crl_filename)
+				const char *crl_filename)
 {
 	X509_STORE *store = X509_STORE_new();
 

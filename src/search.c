@@ -35,7 +35,7 @@
 
 char *search_string;
 char search_type = '0';
-bool display_all = false; /* Show all hits, or simplify output and show just first bundle match */
+bool display_all = false;   /* Show all hits, or simplify output and show just first bundle match */
 bool display_files = false; /* Just display all files found in Manifest set */
 bool init = false;
 
@@ -50,16 +50,17 @@ char *bin_paths[] = {
 	NULL
 };
 
-static void print_help(const char *name) {
+static void print_help(const char *name)
+{
 	printf("Usage:\n");
-	printf("	swupd %s [Options] 'search_term'\n", basename((char*)name));
+	printf("	swupd %s [Options] 'search_term'\n", basename((char *)name));
 	printf("		'search_term': A substring of a binary, library or filename (default)\n");
 	printf("		Return: Bundle name : filename matching search term\n\n");
 
 	printf("Help Options:\n");
 	printf("   -h, --help              Display this help\n");
 	printf("   -l, --library           Search paths where libraries are located for a match\n");
-	printf("   -b, --binary            Search paths where binaries are located for a match\n"); 
+	printf("   -b, --binary            Search paths where binaries are located for a match\n");
 	printf("   -e, --everywhere        Search system-wide for a match\n");
 	printf("   -a, --all               Display all matches. Default is to show the first only\n");
 	printf("   -d, --display-files	   Output full file list, no search done\n");
@@ -71,19 +72,18 @@ static void print_help(const char *name) {
 }
 
 static const struct option prog_opts[] = {
-	{"help", no_argument, 0, 'h'},
-	{"url", required_argument, 0, 'u'},
-	{"library", no_argument, 0, 'l'},
-	{"binary", no_argument, 0, 'b'},
-	{"everywhere", no_argument, 0, 'e'},
-	{"path", required_argument, 0, 'p'},
-	{"format", required_argument, 0, 'F'},
-	{"init", no_argument, 0, 'i'},
-	{"all", no_argument, 0, 'a'},
-	{"display-files", no_argument, 0, 'd'},
-	{0, 0, 0, 0}
+	{ "help", no_argument, 0, 'h' },
+	{ "url", required_argument, 0, 'u' },
+	{ "library", no_argument, 0, 'l' },
+	{ "binary", no_argument, 0, 'b' },
+	{ "everywhere", no_argument, 0, 'e' },
+	{ "path", required_argument, 0, 'p' },
+	{ "format", required_argument, 0, 'F' },
+	{ "init", no_argument, 0, 'i' },
+	{ "all", no_argument, 0, 'a' },
+	{ "display-files", no_argument, 0, 'd' },
+	{ 0, 0, 0, 0 }
 };
-
 
 static bool parse_options(int argc, char **argv)
 {
@@ -133,7 +133,7 @@ static bool parse_options(int argc, char **argv)
 		case 'l':
 			if (search_type != '0') {
 				printf("Error, cannot specify multiple search types "
-							"(-l, -b, and -e are mutually exclusive)\n");
+				       "(-l, -b, and -e are mutually exclusive)\n");
 				goto err;
 			}
 
@@ -145,7 +145,7 @@ static bool parse_options(int argc, char **argv)
 		case 'b':
 			if (search_type != '0') {
 				printf("Error, cannot specify multiple search types "
-							"(-l, -b, and -e are mutually exclusive)\n");
+				       "(-l, -b, and -e are mutually exclusive)\n");
 				goto err;
 			}
 
@@ -154,7 +154,7 @@ static bool parse_options(int argc, char **argv)
 		case 'e':
 			if (search_type != '0') {
 				printf("Error, cannot specify multiple search types "
-							"(-l, -b, and -e are mutually exclusive)\n");
+				       "(-l, -b, and -e are mutually exclusive)\n");
 				goto err;
 			}
 
@@ -206,7 +206,7 @@ bool file_search(char *filename, char *path, char *search_term)
 	}
 
 	pos = strstr(filename, path);
-	if (pos == NULL ) {
+	if (pos == NULL) {
 		return false;
 	}
 
@@ -254,7 +254,6 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 			continue;
 		}
 
-
 		if (display_files) {
 			/* Display bundle name. Marked up for pattern matchability */
 			printf("--Bundle: %s--\n", file->filename);
@@ -266,7 +265,9 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 			subfile = sublist->data;
 			sublist = sublist->next;
 
-			if (!subfile->is_file) { continue; }
+			if (!subfile->is_file) {
+				continue;
+			}
 
 			if (display_files) {
 				/* Just display filename */
@@ -338,17 +339,17 @@ static double query_total_download_size(struct list *list)
 		list = list->next;
 
 		string_or_die(&untard_file, "%s/%i/Manifest.%s", STATE_DIR, file->last_change,
-						file->filename);
+			      file->filename);
 
 		if (access(untard_file, F_OK) == -1) {
 			/* Does not exist client-side. Must download */
 			string_or_die(&url, "%s/%i/Manifest.%s.tar", preferred_content_url,
-							file->last_change, file->filename);
+				      file->last_change, file->filename);
 
 			ret = swupd_query_url_content_size(url);
 			if (ret != -1) {
 				/* Convert file size from bytes to MB */
-				ret = ret/1000000;
+				ret = ret / 1000000;
 				size_sum += ret;
 			} else {
 				return ret;
@@ -359,7 +360,6 @@ static double query_total_download_size(struct list *list)
 	free(untard_file);
 	return size_sum;
 }
-
 
 /* download_manifests()
  * Description: To search Clear bundles for a particular entry, a complete set of
@@ -402,10 +402,10 @@ int download_manifests(struct manifest **MoM)
 		create_and_append_subscription(file->filename);
 
 		string_or_die(&untard_file, "%s/%i/Manifest.%s", STATE_DIR, file->last_change,
-						file->filename);
+			      file->filename);
 
 		string_or_die(&tarfile, "%s/%i/Manifest.%s.tar", STATE_DIR, file->last_change,
-						file->filename);
+			      file->filename);
 
 		if (access(untard_file, F_OK) == -1) {
 			/* Do download */
@@ -421,7 +421,7 @@ int download_manifests(struct manifest **MoM)
 
 		if (access(untard_file, F_OK) == -1) {
 			string_or_die(&url, "%s/%i/Manifest.%s.tar", preferred_content_url, current_version,
-							file->filename);
+				      file->filename);
 
 			printf("Error: Failure reading from %s\n", url);
 			free(url);
@@ -442,7 +442,7 @@ int search_main(int argc, char **argv)
 	struct manifest *MoM = NULL;
 
 	if (!parse_options(argc, argv) ||
-		create_required_dirs()) {
+	    create_required_dirs()) {
 		return EXIT_FAILURE;
 	}
 
@@ -486,7 +486,7 @@ int search_main(int argc, char **argv)
 
 	/* Arbitrary upper limit to ensure we aren't getting handed garbage */
 	if (!display_files &&
-		((strlen(search_string) <= 0) || (strlen(search_string) > NAME_MAX))) {
+	    ((strlen(search_string) <= 0) || (strlen(search_string) > NAME_MAX))) {
 		printf("Error - search string invalid\n");
 		ret = EXIT_FAILURE;
 		goto clean_exit;

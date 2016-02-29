@@ -80,7 +80,7 @@ int main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 		unlink("output.bsdiff");
 		make_bsdiff_delta(argv[1], argv[2], "output.bsdiff", algo);
 
-		stat("output.bsdiff", &bu); 
+		stat("output.bsdiff", &bu);
 
 		start = time(NULL);
 		gettimeofday(&before, NULL);
@@ -109,13 +109,12 @@ int main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 	}
 
 	printf("file, %s, orgsize, %i, best, %i, unc, %i, %5.3f, bzip, %i, %5.3f, gzip, %i, %5.3f, xz, %i, %5.3f, zeros, %i, %5.3f\n",
-		argv[1], (int)(st1.st_size+st2.st_size)/2,  size[0], 
-		size[1], (a[1] - b[1])/count[1],
-		size[2], (a[2] - b[2])/count[2],
-		size[3], (a[3] - b[3])/count[3],
-		size[4], (a[4] - b[4])/count[4],
-		size[5], (a[5] - b[5])/count[5]);
-
+	       argv[1], (int)(st1.st_size + st2.st_size) / 2, size[0],
+	       size[1], (a[1] - b[1]) / count[1],
+	       size[2], (a[2] - b[2]) / count[2],
+	       size[3], (a[3] - b[3]) / count[3],
+	       size[4], (a[4] - b[4]) / count[4],
+	       size[5], (a[5] - b[5]) / count[5]);
 
 	return ret;
 }

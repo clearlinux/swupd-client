@@ -20,7 +20,6 @@
  *
  */
 
-
 /*
  * Usage: thisprogram <data> <data-sig> <ca-cert>
  *
@@ -39,7 +38,7 @@
 
 #include "signature.h"
 
-static void usage(char*);
+static void usage(char *);
 
 int main(int argc, char **argv)
 {

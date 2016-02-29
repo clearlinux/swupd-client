@@ -72,7 +72,8 @@ static struct swupd_curl_hashbucket swupd_curl_hashmap[SWUPD_CURL_HASH_BUCKETS];
  * returns 1 if no download is needed
  * returns 0 if download is needed
  * returns -1 if error */
-static int swupd_curl_hashmap_insert(struct file *file) {
+static int swupd_curl_hashmap_insert(struct file *file)
+{
 	struct list *iter;
 	struct file *tmp;
 	char *tar_dotfile;
@@ -162,7 +163,7 @@ int start_full_download(bool pipelining)
 
 static void free_curl_list_data(void *data)
 {
-	struct file *file = (struct file*)data;
+	struct file *file = (struct file *)data;
 	CURL *curl = file->curl;
 	if (curl != NULL) {
 		curl_multi_remove_handle(mcurl, curl);
@@ -173,7 +174,7 @@ static void free_curl_list_data(void *data)
 void clean_curl_multi_queue(void)
 {
 	int i;
-	struct swupd_curl_hashbucket* bucket;
+	struct swupd_curl_hashbucket *bucket;
 
 	for (i = 0; i < SWUPD_CURL_HASH_BUCKETS; i++) {
 		bucket = &swupd_curl_hashmap[i];
@@ -220,11 +221,11 @@ static int check_tarfile_content(struct file *file, const char *tarfilename)
 
 		c = strchr(buffer, '\n');
 		if (c) {
-			*c  = 0;
+			*c = 0;
 		}
-		if (c && (c != buffer) && (*(c-1)=='/')) {
+		if (c && (c != buffer) && (*(c - 1) == '/')) {
 			/* strip trailing '/' from directory tar */
-			*(c-1) = 0;
+			*(c - 1) = 0;
 		}
 		if (strcmp(buffer, file->hash) != 0) {
 			err = -1;
@@ -290,7 +291,7 @@ static void untar_full_download(void *data)
 
 	/* modern tar will automatically determine the compression type used */
 	string_or_die(&tarcommand, "tar -C %s/staged/ " TAR_PERM_ATTR_ARGS " -xf %s 2> /dev/null",
-			STATE_DIR, tarfile);
+		      STATE_DIR, tarfile);
 
 	err = system(tarcommand);
 	if (WIFEXITED(err)) {
@@ -455,11 +456,11 @@ void full_download(struct file *file)
 	CURLcode curl_ret = CURLE_OK;
 
 	ret = swupd_curl_hashmap_insert(file);
-	if (ret > 0) {		/* no download needed */
+	if (ret > 0) { /* no download needed */
 		/* File already exists - report success */
 		ret = 0;
 		goto out_good;
-	} else if (ret < 0) {	/* error */
+	} else if (ret < 0) { /* error */
 		goto out_bad;
 	} /* else (ret == 0)	   download needed */
 
@@ -485,7 +486,7 @@ void full_download(struct file *file)
 		goto out_bad;
 	}
 
-	curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void*)file);
+	curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void *)file);
 	if (curl_ret != CURLE_OK) {
 		goto out_bad;
 	}
@@ -493,7 +494,7 @@ void full_download(struct file *file)
 	if (curl_ret != CURLE_OK) {
 		goto out_bad;
 	}
-	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)file);
+	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)file);
 	if (curl_ret != CURLE_OK) {
 		goto out_bad;
 	}

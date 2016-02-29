@@ -96,7 +96,7 @@ static int update_loop(struct list *updates)
 	struct list *iter;
 	struct list *failed = NULL;
 	int err;
-	int retries = 0; /* We only want to go through the download loop once */
+	int retries = 0;  /* We only want to go through the download loop once */
 	int timeout = 10; /* Amount of seconds for first download retry */
 
 TRY_DOWNLOAD:
@@ -188,7 +188,6 @@ TRY_DOWNLOAD:
 
 	/* NOTE: critical section starts when update_loop() calls do_staging() */
 	/*********** critical section ends *************************************/
-
 
 	return ret;
 }
@@ -369,7 +368,7 @@ download_packs:
 
 	if ((latest_version < server_version) && (ret == 0)) {
 		printf("Update successful. System updated from version %d to version %d\n",
-					latest_version, server_version);
+		       latest_version, server_version);
 	} else if (ret == 0) {
 		printf("Update complete. System already up-to-date at version %d\n", latest_version);
 	}

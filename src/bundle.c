@@ -268,7 +268,6 @@ int remove_bundle(const char *bundle_name)
 		goto out_free_curl;
 	}
 
-
 	ret = load_manifests(current_version, current_version, "MoM", NULL, &current_mom);
 	if (ret != 0) {
 		goto out_free_curl;
@@ -277,7 +276,7 @@ int remove_bundle(const char *bundle_name)
 	/* load all tracked bundles into memory */
 	read_subscriptions_alt();
 	/* now popout the one to be removed */
-	ret =  unload_tracked_bundle(bundle_name);
+	ret = unload_tracked_bundle(bundle_name);
 	if (ret != 0) {
 		goto out_free_mom;
 	}
@@ -356,7 +355,6 @@ int install_bundles(char **bundles)
 		goto clean_and_exit;
 	}
 
-
 	ret = load_manifests(current_version, current_version, "MoM", NULL, &mom);
 	if (ret != 0) {
 		printf("Cannot load official manifest MoM for version %i\n", current_version);
@@ -398,7 +396,7 @@ int install_bundles(char **bundles)
 
 	/* step 3: download neccessary packs */
 
-	ret  = rm_staging_dir_contents("download");
+	ret = rm_staging_dir_contents("download");
 
 	printf("Downloading required packs...\n");
 	ret = download_subscribed_packs(0, current_version, true);

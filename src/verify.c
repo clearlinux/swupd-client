@@ -414,7 +414,7 @@ static void add_missing_files(struct manifest *official_manifest)
 		}
 
 		/* install the new file (on miscompare + fix) */
-		ret = do_staging(file);
+		ret = do_staging(file, official_manifest);
 		if (ret == 0) {
 			rename_staged_file_to_final(file);
 		}
@@ -486,7 +486,7 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 		}
 
 		/* install the new file (on miscompare + fix) */
-		ret = do_staging(file);
+		ret = do_staging(file, official_manifest);
 		if (ret == 0) {
 			rename_staged_file_to_final(file);
 		}

@@ -243,7 +243,7 @@ free_tarcommand:
 
 /* This function will break if the same HASH.tar full file is downloaded
  * multiple times in parallel. */
-static void untar_full_download(void *data)
+int untar_full_download(void *data)
 {
 	struct file *file = data;
 	char *tarfile;
@@ -267,7 +267,7 @@ static void untar_full_download(void *data)
 			free(tar_dotfile);
 			free(tarfile);
 			free(targetfile);
-			return;
+			return 0;
 		} else {
 			unlink(tarfile);
 			unlink(targetfile);
@@ -323,6 +323,7 @@ exit:
 	if (err) {
 		unlink_all_staged_content(file);
 	}
+	return err;
 }
 
 static int perform_curl_io_and_complete(int *left)

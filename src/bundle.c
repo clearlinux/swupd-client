@@ -417,7 +417,7 @@ int install_bundles(char **bundles)
 			continue;
 		}
 
-		ret = do_staging(file);
+		ret = do_staging(file, mom);
 		if (ret == 0) {
 			rename_staged_file_to_final(file);
 		}

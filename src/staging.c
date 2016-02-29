@@ -65,7 +65,7 @@ static int create_staging_renamedir(char *rename_tmpdir)
 #warning "do_staging is currently not able to be run in parallel"
 /* Consider adding a remove_leftovers() that runs in verify/fix in order to
  * allow this function to mkdtemp create folders for parallel build */
-int do_staging(struct file *file)
+int do_staging(struct file *file, struct manifest *MoM)
 {
 	char *statfile = NULL, *tmp = NULL, *tmp2 = NULL;
 	char *dir, *base, *rel_dir;
@@ -94,10 +94,9 @@ int do_staging(struct file *file)
 	string_or_die(&targetpath, "%s%s", path_prefix, rel_dir);
 	ret = stat(targetpath, &s);
 
-	/* For now, just report on error conditions. Once we implement
-	* verify_fix_path(char *path, int targetversion), we'll want to call it here */
 	if ((ret == -1) && (errno == ENOENT)) {
-		printf("Error: Update target directory does not exist: %s\n", targetpath);
+		printf("Update target directory does not exist: %s. Trying to fix it\n", targetpath);
+		verify_fix_path(dir, MoM);
 	} else if (!S_ISDIR(s.st_mode)) {
 		printf("Error: Update target exists but is NOT a directory: %s\n", targetpath);
 	}

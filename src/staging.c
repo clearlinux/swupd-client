@@ -73,7 +73,6 @@ int do_staging(struct file *file)
 	char *original = NULL;
 	char *target = NULL;
 	char *targetpath = NULL;
-	char *symbase = NULL;
 	char *rename_target = NULL;
 	char *rename_tmpdir = NULL;
 	int ret;
@@ -94,17 +93,6 @@ int do_staging(struct file *file)
 
 	string_or_die(&targetpath, "%s%s", path_prefix, rel_dir);
 	ret = stat(targetpath, &s);
-
-	if (S_ISLNK(s.st_mode)) {
-		/* Follow symlink to ultimate target and redo stat */
-		symbase = realpath(targetpath, NULL);
-		if (symbase != NULL) {
-			free(targetpath);
-			targetpath = strdup(symbase);
-			ret = stat(targetpath, &s);
-			free(symbase);
-		}
-	}
 
 	/* For now, just report on error conditions. Once we implement
 	* verify_fix_path(char *path, int targetversion), we'll want to call it here */

@@ -169,8 +169,9 @@ extern void try_delta(struct file *file);
 extern void full_download(struct file *file);
 extern int start_full_download(bool pipelining);
 extern struct list *end_full_download(void);
+extern int untar_full_download(void *data);
 
-extern int do_staging(struct file *file);
+extern int do_staging(struct file *file, struct manifest *manifest);
 extern int rename_all_files_to_final(struct list *updates);
 extern int rename_staged_file_to_final(struct file *file);
 
@@ -219,6 +220,7 @@ void free_file_data(void *data);
 void remove_files_in_manifest_from_fs(struct manifest *m);
 void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2);
 bool manifest_has_component(struct manifest *manifest, const char *component);
+extern struct file *search_file_in_manifest(struct manifest *manifest, const char *filename);
 
 extern char *mounted_dirs;
 extern void get_mounted_directories(void);
@@ -243,6 +245,7 @@ extern void string_or_die(char **strp, const char *fmt, ...);
 void update_motd(int new_release);
 void delete_motd(void);
 extern int is_dirname_link(const char *fullname);
+extern int verify_fix_path(char* targetpath, struct manifest *manifest);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);

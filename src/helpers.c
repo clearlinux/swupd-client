@@ -34,6 +34,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <libgen.h>
 
 #include "config.h"
 #include "swupd.h"
@@ -660,5 +661,124 @@ int is_dirname_link(const char *fullname)
 	}
 
 	free(real_path);
+	return ret;
+}
+
+void free_path_data(void *data)
+{
+        char *path = (char *) data;
+        free(path);
+}
+
+/* This function is meant to be called while staging file to fix any missing/incorrect paths.
+ * While staging a file, if its parent directory is missing, this would try to create the path
+ * by breaking it into sub-paths and fixing them top down.
+ * Here, target_MoM is the consolidated manifest for the version you are trying to update/verify.
+ */
+int verify_fix_path(char* targetpath, struct manifest *target_MoM)
+{
+	struct list *path_list = NULL;    /* path_list contains the subparts in the path */
+	char *path;
+	char *tmp = NULL, *target = NULL;
+	char *url = NULL;
+	struct stat sb;
+	int ret = 0;
+	struct file *file;
+	char *tar_dotfile = NULL;
+	struct list *list1 = NULL;
+
+	/* This shouldn't happen */
+	if (strcmp(targetpath, "/") == 0) {
+		return ret;
+	}
+
+	/* Removing trailing '/' from the path */
+	path = strdup(targetpath);
+	if (path[strlen(path) - 1] == '/') {
+		path[strlen(path) - 1] = '\0';
+	}
+
+	/* Breaking down the path into parts.
+	 * eg. Path /usr/bin/foo will be broken into /usr,/usr/bin and /usr/bin/foo
+	 */
+	while (strcmp(path, "/") != 0) {
+		path_list = list_prepend_data(path_list, strdup(path));
+		tmp = strdup(dirname(path));
+		free(path);
+		path = tmp;
+	}
+	free(path);
+
+	list1 = list_head(path_list);
+	while(list1) {
+		path = list1->data;
+		list1 = list1->next;
+
+		target = mk_full_filename(path_prefix, path);
+
+		/* Search for the file in the manifest, to get the hash for the file */
+		file = search_file_in_manifest(target_MoM, path);
+		if (file == NULL) {
+			printf("Error: Path %s not found in any of the subscribed manifests"
+				"in verify_fix_path for path_prefix %s\n", path, path_prefix);
+			ret = -1;
+			goto end;
+		}
+
+		if (file->is_deleted) {
+			printf("Error: Path %s found deleted in verify_fix_path\n", path);
+			ret = -1;
+			goto end;
+		}
+
+		ret = stat(target, &sb);
+		if (ret == 0) {
+			if (verify_file(file, target)) {
+				continue;
+			}
+			printf("Hash did not match for path : %s\n", path);
+		} else if (ret == -1 && errno == ENOENT) {
+			printf("Path %s is missing on the file system\n", path);
+		} else {
+			goto end;
+		}
+
+		string_or_die(&tar_dotfile, "%s/download/.%s.tar", STATE_DIR, file->hash);
+
+		// clean up in case any prior download failed in a partial state
+		unlink(tar_dotfile);
+
+		string_or_die(&url, "%s/%i/files/%s.tar", preferred_content_url, file->last_change, file->hash);
+		ret = swupd_curl_get_file(url, tar_dotfile, NULL, NULL, false);
+
+		if (ret != 0) {
+			printf("Error: Failed to download file %s in verify_fix_path\n", file->filename);
+			unlink(tar_dotfile);
+			goto end;
+		}
+		if (untar_full_download(file) != 0) {
+			printf("Error: Failed to untar file %s\n", file->filename);
+			ret = -1;
+			goto end;
+		}
+
+		ret = do_staging(file, target_MoM);
+		if ( ret != 0) {
+			printf("Error: Path %s failed to stage in verify_fix_path\n", path);
+			goto end;
+		}
+
+	}
+end:
+	if (target) {
+		free(target);
+	}
+	if (tar_dotfile) {
+		free(tar_dotfile);
+	}
+	if (url) {
+		 free(url);
+	}
+	list_free_list_and_data(path_list, free_path_data);
 	return ret;
 }

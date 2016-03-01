@@ -454,6 +454,7 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 		file = iter->data;
 		iter = iter->next;
 
+		// Note: boot files not marked as deleted are candidates for verify/fix
 		if (file->is_deleted ||
 		    ignore(file)) {
 			continue;
@@ -519,6 +520,14 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 
 		if ((!file->is_deleted) ||
 		    (file->is_config)) {
+			continue;
+		}
+
+		/* Note: boot files marked as deleted should not be deleted by
+		 * verify/fix; this task is delegated to an external program
+		 * (currently /usr/bin/kernel_updater.sh).
+		 */
+		if (ignore(file)) {
 			continue;
 		}
 

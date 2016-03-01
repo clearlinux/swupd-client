@@ -44,7 +44,6 @@ bool ignore_config = true;
 bool ignore_state = true;
 #endif
 bool ignore_orphans = true;
-bool fix = false;
 char *format_string = NULL;
 char *path_prefix = NULL; /* must always end in '/' */
 char *mounted_dirs = NULL;

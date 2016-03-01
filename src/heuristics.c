@@ -113,14 +113,19 @@ void apply_heuristics(struct file *file)
 	config_file_heuristics(file);
 }
 
+/* Determines whether or not FILE should be ignored for this swupd action. Note
+ * that boot files are ignored only if they are marked as deleted; this does
+ * not happen in current manifests produced by swupd-server, but this check is
+ * enabled in case swupd-server ever allows for deleted boot files in manifests
+ * in the future.
+ */
 bool ignore(struct file *file)
 {
 	if ((file->is_config) ||
 	    is_config(file->filename) || // ideally we trust the manifest but short term reapply check here
 	    (file->is_state) ||
 	    is_state(file->filename) ||			    // ideally we trust the manifest but short term reapply check here
-	    (file->is_boot && fix && file->is_deleted) ||   // shouldn't happen
-	    (file->is_boot && !fix && !file->is_deleted) || // default ignore
+	    (file->is_boot && file->is_deleted) ||
 	    (ignore_orphans && file->is_orphan)) {
 		update_skip++;
 		file->do_not_update = 1;

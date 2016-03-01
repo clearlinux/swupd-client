@@ -438,7 +438,7 @@ int download_manifests(struct manifest **MoM)
 int search_main(int argc, char **argv)
 {
 	int ret = 0;
-	int lock_fd;
+	int lock_fd = 0;
 	struct manifest *MoM = NULL;
 
 	if (!parse_options(argc, argv) ||
@@ -498,6 +498,7 @@ clean_exit:
 	free_manifest(MoM);
 	free_globals();
 	swupd_curl_cleanup();
+	v_lockfile(lock_fd);
 
 	return ret;
 }

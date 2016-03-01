@@ -108,16 +108,31 @@ double swupd_query_url_content_size(char *url)
 
 	/* Set buffer for error string */
 	curl_ret = curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
-	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, filesize_from_header_cb);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
+	curl_ret = curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, filesize_from_header_cb);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
 	curl_ret = curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
 	curl_ret = curl_easy_setopt(curl, CURLOPT_URL, url);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
 
 	curl_ret = curl_easy_perform(curl);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
 
-	curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &content_size);
+	curl_ret = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &content_size);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}

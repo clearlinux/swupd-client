@@ -4,7 +4,7 @@ TMPDIR=$(mktemp -d)
 PKG="swupd-client"
 LIB="libswupd"
 
-OLDVERSION=$(git tag -l 'swupd-client*' | sort -t . -k 1,1n -k 2,2n | tail -1)
+OLDVERSION=$(git tag -l 'v*' | sort -t . -k 1.2,1n -k 2,2n -k 3,3n | tail -1)
 NEWVERSION="HEAD"
 
 OLDCOMMIT=$(git rev-list -n 1 --abbrev-commit ${OLDVERSION})

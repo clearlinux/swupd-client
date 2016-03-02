@@ -34,6 +34,7 @@ from tap import TAPTestRunner
 COMMAND_MAP = {'bundleadd': 'bundle-add',
                'bundleremove': 'bundle-remove',
                'checkupdate': 'check-update',
+               'hashdump': 'hashdump',
                'update': 'update',
                'verify': 'verify'}
 PATH_PREFIX = 'test/functional'
@@ -168,6 +169,18 @@ class checkupdate_no_target_content(unittest.TestCase):
         self.assertIn('Unable to determine current OS version', test_output)
 
 
+class hashdump_file_hash(unittest.TestCase):
+    def runTest(self):
+        target_path = path_from_name(self.__class__.__name__, 'target')
+        subcommand = COMMAND_MAP[self.__class__.__name__.split('_')[0]]
+        command = ['./swupd', subcommand, "--basepath={0}/{1}"
+                   .format(os.getcwd(), target_path), "/test-hash"]
+        process = subprocess.run(command, stdout=subprocess.PIPE,
+                                 universal_newlines=True)
+        test_output = process.stdout.splitlines()
+        self.assertIn('b03e11e3307de4d4f3f545c8a955c2208507dbc1927e9434d1da42917712c15b', test_output)
+
+
 @http_command(option="--download")
 class update_download(unittest.TestCase):
     def validate(self, test_output):
@@ -257,7 +270,8 @@ class verify_install_directory(unittest.TestCase):
 
 
 def get_test_cases():
-    tests = ['bundleadd', 'bundleremove', 'checkupdate', 'update', 'verify']
+    tests = ['bundleadd', 'bundleremove', 'checkupdate', 'hashdump', 'update',
+             'verify']
     test_cases = []
     class_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
     for (name, cls) in class_members:

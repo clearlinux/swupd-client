@@ -66,6 +66,7 @@ static void print_help(const char *name)
 	printf("   -d, --display-files	   Output full file list, no search done\n");
 	printf("   -i, --init              Download all manifests then return, no search done\n");
 	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
+	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	printf("\n");
@@ -77,6 +78,7 @@ static const struct option prog_opts[] = {
 	{ "library", no_argument, 0, 'l' },
 	{ "binary", no_argument, 0, 'b' },
 	{ "everywhere", no_argument, 0, 'e' },
+	{ "port", required_argument, 0, 'P' },
 	{ "path", required_argument, 0, 'p' },
 	{ "format", required_argument, 0, 'F' },
 	{ "init", no_argument, 0, 'i' },
@@ -91,12 +93,18 @@ static bool parse_options(int argc, char **argv)
 
 	set_format_string(NULL);
 
-	while ((opt = getopt_long(argc, argv, "hu:p:F:lbeiad", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hu:P:p:F:lbeiad", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
 			print_help(argv[0]);
 			exit(0);
+		case 'P':
+			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
+				printf("Invalid --port argument\n\n");
+				goto err;
+			}
+			break;
 		case 'u':
 			if (!optarg) {
 				printf("error: invalid --url argument\n\n");
@@ -207,9 +215,11 @@ bool file_search(char *filename, char *path, char *search_term)
 
 	pos = strstr(filename, path);
 	if (pos == NULL) {
+        printf("in file_search, substr path search failed. Returning, false\n");
 		return false;
 	}
 
+    printf("Checking for match: File: %s, term: %s\n", filename, search_term);
 	/* match filename or substring of filename */
 	if (strcasestr(pos + strlen(path), search_term)) {
 		return true;
@@ -265,7 +275,10 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 			subfile = sublist->data;
 			sublist = sublist->next;
 
+            printf("Searching bundle manifest, on file: %s\n", subfile->filename);
+
 			if (!subfile->is_file) {
+                printf("Man listing is not a file - skipping\n");
 				continue;
 			}
 

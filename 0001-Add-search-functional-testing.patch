@@ -1,0 +1,1238 @@
+From c2c1d6775f02d48a5e74e4a6ddc409e0c5729ea7 Mon Sep 17 00:00:00 2001
+From: "Brad T. Peters" <brad.t.peters@intel.com>
+Date: Thu, 3 Mar 2016 15:35:34 -0800
+Subject: [PATCH] Add search functional testing
+
+Also adds support for a -P flag, required for testing
+
+Signed-off-by: Brad T. Peters <brad.t.peters@intel.com>
+---
+ functional-tests.py                                | 54 +++++++++++++++++++++-
+ src/search.c                                       | 15 +++++-
+ .../search/content-check-negfull-path/setup.sh     | 10 ++++
+ .../target-dir/usr/lib/os-release                  |  9 ++++
+ .../target-dir/usr/share/clear/bundles/os-core     |  0
+ .../web-dir/10/Manifest.MoM                        |  9 ++++
+ .../web-dir/10/Manifest.MoM.signed                 |  3 ++
+ .../web-dir/10/Manifest.os-core                    |  8 ++++
+ .../web-dir/10/Manifest.os-core.signed             |  3 ++
+ .../web-dir/10/Manifest.test-bundle                | 12 +++++
+ .../web-dir/10/Manifest.test-bundle.signed         |  3 ++
+ .../web-dir/version/format3/latest                 |  1 +
+ .../search/content-check-neglib32/setup.sh         | 10 ++++
+ .../target-dir/usr/lib/os-release                  |  9 ++++
+ .../target-dir/usr/share/clear/bundles/os-core     |  0
+ .../content-check-neglib32/web-dir/10/Manifest.MoM |  9 ++++
+ .../web-dir/10/Manifest.MoM.signed                 |  3 ++
+ .../web-dir/10/Manifest.os-core                    |  8 ++++
+ .../web-dir/10/Manifest.os-core.signed             |  3 ++
+ .../web-dir/10/Manifest.test-bundle                | 12 +++++
+ .../web-dir/10/Manifest.test-bundle.signed         |  3 ++
+ .../web-dir/version/format3/latest                 |  1 +
+ .../search/content-check-neglibtest/setup.sh       | 10 ++++
+ .../target-dir/usr/lib/os-release                  |  9 ++++
+ .../target-dir/usr/share/clear/bundles/os-core     |  0
+ .../web-dir/10/Manifest.MoM                        |  9 ++++
+ .../web-dir/10/Manifest.MoM.signed                 |  3 ++
+ .../web-dir/10/Manifest.os-core                    |  8 ++++
+ .../web-dir/10/Manifest.os-core.signed             |  3 ++
+ .../web-dir/10/Manifest.test-bundle                | 12 +++++
+ .../web-dir/10/Manifest.test-bundle.signed         |  3 ++
+ .../web-dir/version/format3/latest                 |  1 +
+ .../search/content-check-negwrongpath/setup.sh     | 10 ++++
+ .../target-dir/usr/lib/os-release                  |  9 ++++
+ .../target-dir/usr/share/clear/bundles/os-core     |  0
+ .../web-dir/10/Manifest.MoM                        |  9 ++++
+ .../web-dir/10/Manifest.MoM.signed                 |  3 ++
+ .../web-dir/10/Manifest.os-core                    |  8 ++++
+ .../web-dir/10/Manifest.os-core.signed             |  3 ++
+ .../web-dir/10/Manifest.test-bundle                | 12 +++++
+ .../web-dir/10/Manifest.test-bundle.signed         |  3 ++
+ .../web-dir/version/format3/latest                 |  1 +
+ .../search/content-check-posfull-path/setup.sh     | 10 ++++
+ .../target-dir/usr/lib/os-release                  |  9 ++++
+ .../target-dir/usr/share/clear/bundles/os-core     |  0
+ .../web-dir/10/Manifest.MoM                        |  9 ++++
+ .../web-dir/10/Manifest.MoM.signed                 |  3 ++
+ .../web-dir/10/Manifest.os-core                    |  8 ++++
+ .../web-dir/10/Manifest.os-core.signed             |  3 ++
+ .../web-dir/10/Manifest.test-bundle                | 12 +++++
+ .../web-dir/10/Manifest.test-bundle.signed         |  3 ++
+ .../web-dir/version/format3/latest                 |  1 +
+ .../search/content-check-poslib32/setup.sh         | 10 ++++
+ .../target-dir/usr/lib/os-release                  |  9 ++++
+ .../target-dir/usr/share/clear/bundles/os-core     |  0
+ .../content-check-poslib32/web-dir/10/Manifest.MoM |  9 ++++
+ .../web-dir/10/Manifest.MoM.signed                 |  3 ++
+ .../web-dir/10/Manifest.os-core                    |  8 ++++
+ .../web-dir/10/Manifest.os-core.signed             |  3 ++
+ .../web-dir/10/Manifest.test-bundle                | 12 +++++
+ .../web-dir/10/Manifest.test-bundle.signed         |  3 ++
+ .../web-dir/version/format3/latest                 |  1 +
+ .../search/content-check-poslib64/setup.sh         | 10 ++++
+ .../target-dir/usr/lib/os-release                  |  9 ++++
+ .../target-dir/usr/share/clear/bundles/os-core     |  0
+ .../content-check-poslib64/web-dir/10/Manifest.MoM |  9 ++++
+ .../web-dir/10/Manifest.MoM.signed                 |  3 ++
+ .../web-dir/10/Manifest.os-core                    |  8 ++++
+ .../web-dir/10/Manifest.os-core.signed             |  3 ++
+ .../web-dir/10/Manifest.test-bundle                | 12 +++++
+ .../web-dir/10/Manifest.test-bundle.signed         |  3 ++
+ .../web-dir/version/format3/latest                 |  1 +
+ test/functional/search/content-check/setup.sh      | 10 ++++
+ .../content-check/target-dir/usr/lib/os-release    |  9 ++++
+ .../target-dir/usr/share/clear/bundles/os-core     |  0
+ .../search/content-check/web-dir/10/Manifest.MoM   |  9 ++++
+ .../content-check/web-dir/10/Manifest.MoM.signed   |  3 ++
+ .../content-check/web-dir/10/Manifest.os-core      |  8 ++++
+ .../web-dir/10/Manifest.os-core.signed             |  3 ++
+ .../content-check/web-dir/10/Manifest.test-bundle  | 12 +++++
+ .../web-dir/10/Manifest.test-bundle.signed         |  3 ++
+ .../content-check/web-dir/version/format3/latest   |  1 +
+ 82 files changed, 531 insertions(+), 2 deletions(-)
+ create mode 100755 test/functional/search/content-check-negfull-path/setup.sh
+ create mode 100644 test/functional/search/content-check-negfull-path/target-dir/usr/lib/os-release
+ create mode 100644 test/functional/search/content-check-negfull-path/target-dir/usr/share/clear/bundles/os-core
+ create mode 100644 test/functional/search/content-check-negfull-path/web-dir/10/Manifest.MoM
+ create mode 100644 test/functional/search/content-check-negfull-path/web-dir/10/Manifest.MoM.signed
+ create mode 100644 test/functional/search/content-check-negfull-path/web-dir/10/Manifest.os-core
+ create mode 100644 test/functional/search/content-check-negfull-path/web-dir/10/Manifest.os-core.signed
+ create mode 100644 test/functional/search/content-check-negfull-path/web-dir/10/Manifest.test-bundle
+ create mode 100644 test/functional/search/content-check-negfull-path/web-dir/10/Manifest.test-bundle.signed
+ create mode 100644 test/functional/search/content-check-negfull-path/web-dir/version/format3/latest
+ create mode 100755 test/functional/search/content-check-neglib32/setup.sh
+ create mode 100644 test/functional/search/content-check-neglib32/target-dir/usr/lib/os-release
+ create mode 100644 test/functional/search/content-check-neglib32/target-dir/usr/share/clear/bundles/os-core
+ create mode 100644 test/functional/search/content-check-neglib32/web-dir/10/Manifest.MoM
+ create mode 100644 test/functional/search/content-check-neglib32/web-dir/10/Manifest.MoM.signed
+ create mode 100644 test/functional/search/content-check-neglib32/web-dir/10/Manifest.os-core
+ create mode 100644 test/functional/search/content-check-neglib32/web-dir/10/Manifest.os-core.signed
+ create mode 100644 test/functional/search/content-check-neglib32/web-dir/10/Manifest.test-bundle
+ create mode 100644 test/functional/search/content-check-neglib32/web-dir/10/Manifest.test-bundle.signed
+ create mode 100644 test/functional/search/content-check-neglib32/web-dir/version/format3/latest
+ create mode 100755 test/functional/search/content-check-neglibtest/setup.sh
+ create mode 100644 test/functional/search/content-check-neglibtest/target-dir/usr/lib/os-release
+ create mode 100644 test/functional/search/content-check-neglibtest/target-dir/usr/share/clear/bundles/os-core
+ create mode 100644 test/functional/search/content-check-neglibtest/web-dir/10/Manifest.MoM
+ create mode 100644 test/functional/search/content-check-neglibtest/web-dir/10/Manifest.MoM.signed
+ create mode 100644 test/functional/search/content-check-neglibtest/web-dir/10/Manifest.os-core
+ create mode 100644 test/functional/search/content-check-neglibtest/web-dir/10/Manifest.os-core.signed
+ create mode 100644 test/functional/search/content-check-neglibtest/web-dir/10/Manifest.test-bundle
+ create mode 100644 test/functional/search/content-check-neglibtest/web-dir/10/Manifest.test-bundle.signed
+ create mode 100644 test/functional/search/content-check-neglibtest/web-dir/version/format3/latest
+ create mode 100755 test/functional/search/content-check-negwrongpath/setup.sh
+ create mode 100644 test/functional/search/content-check-negwrongpath/target-dir/usr/lib/os-release
+ create mode 100644 test/functional/search/content-check-negwrongpath/target-dir/usr/share/clear/bundles/os-core
+ create mode 100644 test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.MoM
+ create mode 100644 test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.MoM.signed
+ create mode 100644 test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.os-core
+ create mode 100644 test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.os-core.signed
+ create mode 100644 test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.test-bundle
+ create mode 100644 test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.test-bundle.signed
+ create mode 100644 test/functional/search/content-check-negwrongpath/web-dir/version/format3/latest
+ create mode 100755 test/functional/search/content-check-posfull-path/setup.sh
+ create mode 100644 test/functional/search/content-check-posfull-path/target-dir/usr/lib/os-release
+ create mode 100644 test/functional/search/content-check-posfull-path/target-dir/usr/share/clear/bundles/os-core
+ create mode 100644 test/functional/search/content-check-posfull-path/web-dir/10/Manifest.MoM
+ create mode 100644 test/functional/search/content-check-posfull-path/web-dir/10/Manifest.MoM.signed
+ create mode 100644 test/functional/search/content-check-posfull-path/web-dir/10/Manifest.os-core
+ create mode 100644 test/functional/search/content-check-posfull-path/web-dir/10/Manifest.os-core.signed
+ create mode 100644 test/functional/search/content-check-posfull-path/web-dir/10/Manifest.test-bundle
+ create mode 100644 test/functional/search/content-check-posfull-path/web-dir/10/Manifest.test-bundle.signed
+ create mode 100644 test/functional/search/content-check-posfull-path/web-dir/version/format3/latest
+ create mode 100755 test/functional/search/content-check-poslib32/setup.sh
+ create mode 100644 test/functional/search/content-check-poslib32/target-dir/usr/lib/os-release
+ create mode 100644 test/functional/search/content-check-poslib32/target-dir/usr/share/clear/bundles/os-core
+ create mode 100644 test/functional/search/content-check-poslib32/web-dir/10/Manifest.MoM
+ create mode 100644 test/functional/search/content-check-poslib32/web-dir/10/Manifest.MoM.signed
+ create mode 100644 test/functional/search/content-check-poslib32/web-dir/10/Manifest.os-core
+ create mode 100644 test/functional/search/content-check-poslib32/web-dir/10/Manifest.os-core.signed
+ create mode 100644 test/functional/search/content-check-poslib32/web-dir/10/Manifest.test-bundle
+ create mode 100644 test/functional/search/content-check-poslib32/web-dir/10/Manifest.test-bundle.signed
+ create mode 100644 test/functional/search/content-check-poslib32/web-dir/version/format3/latest
+ create mode 100755 test/functional/search/content-check-poslib64/setup.sh
+ create mode 100644 test/functional/search/content-check-poslib64/target-dir/usr/lib/os-release
+ create mode 100644 test/functional/search/content-check-poslib64/target-dir/usr/share/clear/bundles/os-core
+ create mode 100644 test/functional/search/content-check-poslib64/web-dir/10/Manifest.MoM
+ create mode 100644 test/functional/search/content-check-poslib64/web-dir/10/Manifest.MoM.signed
+ create mode 100644 test/functional/search/content-check-poslib64/web-dir/10/Manifest.os-core
+ create mode 100644 test/functional/search/content-check-poslib64/web-dir/10/Manifest.os-core.signed
+ create mode 100644 test/functional/search/content-check-poslib64/web-dir/10/Manifest.test-bundle
+ create mode 100644 test/functional/search/content-check-poslib64/web-dir/10/Manifest.test-bundle.signed
+ create mode 100644 test/functional/search/content-check-poslib64/web-dir/version/format3/latest
+ create mode 100755 test/functional/search/content-check/setup.sh
+ create mode 100644 test/functional/search/content-check/target-dir/usr/lib/os-release
+ create mode 100644 test/functional/search/content-check/target-dir/usr/share/clear/bundles/os-core
+ create mode 100644 test/functional/search/content-check/web-dir/10/Manifest.MoM
+ create mode 100644 test/functional/search/content-check/web-dir/10/Manifest.MoM.signed
+ create mode 100644 test/functional/search/content-check/web-dir/10/Manifest.os-core
+ create mode 100644 test/functional/search/content-check/web-dir/10/Manifest.os-core.signed
+ create mode 100644 test/functional/search/content-check/web-dir/10/Manifest.test-bundle
+ create mode 100644 test/functional/search/content-check/web-dir/10/Manifest.test-bundle.signed
+ create mode 100644 test/functional/search/content-check/web-dir/version/format3/latest
+
+diff --git a/functional-tests.py b/functional-tests.py
+index 072ebb3..7165e04 100755
+--- a/functional-tests.py
++++ b/functional-tests.py
+@@ -35,6 +35,7 @@ COMMAND_MAP = {'bundleadd': 'bundle-add',
+                'bundleremove': 'bundle-remove',
+                'checkupdate': 'check-update',
+                'hashdump': 'hashdump',
++               'search': 'search',
+                'update': 'update',
+                'verify': 'verify'}
+ PATH_PREFIX = 'test/functional'
+@@ -136,6 +137,57 @@ class bundleadd_list(unittest.TestCase):
+         self.assertIn('os-core', test_output)
+ 
+ 
++# Positive test for a library in lib32/
++@http_command(option="-l -a test-lib32")
++class search_content_check_poslib32(unittest.TestCase):
++    def validate(self, test_output):
++        self.assertIn('\'test-bundle\'  :  \'/usr/lib/test-lib32\'', test_output)
++        self.assertNotIn('/libtest-nohit', test_output)
++
++# Positive test for a library in lib64/
++@http_command(option="-l -a test-lib64")
++class search_content_check_poslib64(unittest.TestCase):
++    def validate(self, test_output):
++        self.assertIn('\'test-bundle\'  :  \'/usr/lib64/test-lib64\'', test_output)
++        self.assertNotIn('/libtest-nohit', test_output)
++
++#Negative test for a non-existent library
++@http_command(option="-a -l test-lib36")
++class search_content_check_neglib32(unittest.TestCase):
++    def validate(self, test_output):
++        self.assertNotIn('\'test-bundle\'  :  \'test-lib36\'', test_output)
++        self.assertNotIn('/libtest-nohit', test_output)
++
++# Negative test for a file which exists but is not a library
++@http_command(option="-l -a libtest-nohit")
++class search_content_check_neglibtest(unittest.TestCase):
++    def validate(self, test_output):
++        self.assertNotIn('\'test-bundle\'  :  \'libtest-nohit\'', test_output)
++        self.assertNotIn('/libtest-nohit', test_output)
++
++# Positive test for a file, specifying full path
++@http_command(option="/usr/lib64/test-lib64")
++class search_content_check_posfull_path(unittest.TestCase):
++    def validate(self, test_output):
++        self.assertIn('\'test-bundle\'  :  \'/usr/lib64/test-lib64\'', test_output)
++        self.assertNotIn('/libtest-nohit', test_output)
++
++# Nagative test for a non-existent file, specifying full path
++@http_command(option="/usr/lib64/test-lib100")
++class search_content_check_negfull_path(unittest.TestCase):
++    def validate(self, test_output):
++        self.assertNotIn('\'test-bundle\'  :  \'/usr/lib64/test-lib100\'', test_output)
++        self.assertNotIn('\'test-bundle\'  :  \'/usr/lib64/test-lib64\'', test_output)
++        self.assertNotIn('/libtest-nohit', test_output)
++
++# Negative test for a file which exists, but providing incorrect path
++@http_command(option="/usr/lib/test-lib64")
++class search_content_check_posfull_path(unittest.TestCase):
++    def validate(self, test_output):
++        self.assertNotIn('\'test-bundle\'  :  \'/usr/lib/test-lib64\'', test_output)
++        self.assertNotIn('/libtest-nohit', test_output)
++
++
+ @http_command(option="test-bundle")
+ class bundleremove_remove_file(unittest.TestCase):
+     def validate(self, test_output):
+@@ -271,7 +323,7 @@ class verify_install_directory(unittest.TestCase):
+ 
+ def get_test_cases():
+     tests = ['bundleadd', 'bundleremove', 'checkupdate', 'hashdump', 'update',
+-             'verify']
++             'verify', 'search']
+     test_cases = []
+     class_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+     for (name, cls) in class_members:
+diff --git a/src/search.c b/src/search.c
+index 1a2e519..cf25681 100644
+--- a/src/search.c
++++ b/src/search.c
+@@ -66,6 +66,7 @@ static void print_help(const char *name)
+ 	printf("   -d, --display-files	   Output full file list, no search done\n");
+ 	printf("   -i, --init              Download all manifests then return, no search done\n");
+ 	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
++	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
+ 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
+ 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
+ 	printf("\n");
+@@ -77,6 +78,7 @@ static const struct option prog_opts[] = {
+ 	{ "library", no_argument, 0, 'l' },
+ 	{ "binary", no_argument, 0, 'b' },
+ 	{ "everywhere", no_argument, 0, 'e' },
++	{ "port", required_argument, 0, 'P' },
+ 	{ "path", required_argument, 0, 'p' },
+ 	{ "format", required_argument, 0, 'F' },
+ 	{ "init", no_argument, 0, 'i' },
+@@ -91,12 +93,18 @@ static bool parse_options(int argc, char **argv)
+ 
+ 	set_format_string(NULL);
+ 
+-	while ((opt = getopt_long(argc, argv, "hu:p:F:lbeiad", prog_opts, NULL)) != -1) {
++	while ((opt = getopt_long(argc, argv, "hu:P:p:F:lbeiad", prog_opts, NULL)) != -1) {
+ 		switch (opt) {
+ 		case '?':
+ 		case 'h':
+ 			print_help(argv[0]);
+ 			exit(0);
++		case 'P':
++			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
++				printf("Invalid --port argument\n\n");
++				goto err;
++			}
++			break;
+ 		case 'u':
+ 			if (!optarg) {
+ 				printf("error: invalid --url argument\n\n");
+@@ -207,9 +215,11 @@ bool file_search(char *filename, char *path, char *search_term)
+ 
+ 	pos = strstr(filename, path);
+ 	if (pos == NULL) {
++        printf("in file_search, substr path search failed. Returning, false\n");
+ 		return false;
+ 	}
+ 
++    printf("Checking for match: File: %s, term: %s\n", filename, search_term);
+ 	/* match filename or substring of filename */
+ 	if (strcasestr(pos + strlen(path), search_term)) {
+ 		return true;
+@@ -265,7 +275,10 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
+ 			subfile = sublist->data;
+ 			sublist = sublist->next;
+ 
++            printf("Searching bundle manifest, on file: %s\n", subfile->filename);
++
+ 			if (!subfile->is_file) {
++                printf("Man listing is not a file - skipping\n");
+ 				continue;
+ 			}
+ 
+diff --git a/test/functional/search/content-check-negfull-path/setup.sh b/test/functional/search/content-check-negfull-path/setup.sh
+new file mode 100755
+index 0000000..cc98577
+--- /dev/null
++++ b/test/functional/search/content-check-negfull-path/setup.sh
+@@ -0,0 +1,10 @@
++#!/bin/bash
++
++set -e
++
++rm -f web-dir/*/*.tar
++touch target-dir/test-file
++touch target-dir/usr/share/clear/bundles/test-bundle
++tar -C web-dir/10  -cf web-dir/10/Manifest.MoM.tar Manifest.MoM Manifest.MoM.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.os-core.tar Manifest.os-core Manifest.os-core.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.test-bundle.tar Manifest.test-bundle Manifest.test-bundle.signed
+diff --git a/test/functional/search/content-check-negfull-path/target-dir/usr/lib/os-release b/test/functional/search/content-check-negfull-path/target-dir/usr/lib/os-release
+new file mode 100644
+index 0000000..d20f387
+--- /dev/null
++++ b/test/functional/search/content-check-negfull-path/target-dir/usr/lib/os-release
+@@ -0,0 +1,9 @@
++NAME="Clear Linux Software for Intel Architecture"
++VERSION=1
++ID=clear-linux-os
++VERSION_ID=10
++PRETTY_NAME="Clear Linux Software for Intel Architecture"
++ANSI_COLOR="1;35"
++HOME_URL="https://clearlinux.org"
++SUPPORT_URL="https://clearlinux.org"
++BUG_REPORT_URL="https://bugs.clearlinux.org/jira"
+diff --git a/test/functional/search/content-check-negfull-path/target-dir/usr/share/clear/bundles/os-core b/test/functional/search/content-check-negfull-path/target-dir/usr/share/clear/bundles/os-core
+new file mode 100644
+index 0000000..e69de29
+diff --git a/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.MoM b/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.MoM
+new file mode 100644
+index 0000000..96b2a8b
+--- /dev/null
++++ b/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.MoM
+@@ -0,0 +1,9 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451940175
++contentsize:	13805671819
++
++M...	6259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	os-core
++M...	0259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	test-bundle
+diff --git a/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.MoM.signed b/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.MoM.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.MoM.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.os-core b/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.os-core
+new file mode 100644
+index 0000000..ce24dee
+--- /dev/null
++++ b/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.os-core
+@@ -0,0 +1,8 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++D...	a4d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/usr/bin
+diff --git a/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.os-core.signed b/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.os-core.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.os-core.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.test-bundle b/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.test-bundle
+new file mode 100644
+index 0000000..1abccdd
+--- /dev/null
++++ b/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.test-bundle
+@@ -0,0 +1,12 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/libtest-nohit
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/test-lib32
++F.b.	a898be783f560f3f3b301c5ca8ee6847595152eb4efc91d5bef4846f9b055e26	10	/usr/lib/test-lib32
++F.b.	2e5cac2ded0632fb4f8e849c8f24a5e061cefc46bd17bd0529233c143cecbb21	10	/usr/bin/test-bin
++F.b.	ba38be783f560f3f32F01c5ca8ee6847595152eb4efc91d5bef4846f9b050f23	10	/usr/lib64/test-lib64
+diff --git a/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.test-bundle.signed b/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.test-bundle.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-negfull-path/web-dir/10/Manifest.test-bundle.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-negfull-path/web-dir/version/format3/latest b/test/functional/search/content-check-negfull-path/web-dir/version/format3/latest
+new file mode 100644
+index 0000000..f599e28
+--- /dev/null
++++ b/test/functional/search/content-check-negfull-path/web-dir/version/format3/latest
+@@ -0,0 +1 @@
++10
+diff --git a/test/functional/search/content-check-neglib32/setup.sh b/test/functional/search/content-check-neglib32/setup.sh
+new file mode 100755
+index 0000000..cc98577
+--- /dev/null
++++ b/test/functional/search/content-check-neglib32/setup.sh
+@@ -0,0 +1,10 @@
++#!/bin/bash
++
++set -e
++
++rm -f web-dir/*/*.tar
++touch target-dir/test-file
++touch target-dir/usr/share/clear/bundles/test-bundle
++tar -C web-dir/10  -cf web-dir/10/Manifest.MoM.tar Manifest.MoM Manifest.MoM.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.os-core.tar Manifest.os-core Manifest.os-core.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.test-bundle.tar Manifest.test-bundle Manifest.test-bundle.signed
+diff --git a/test/functional/search/content-check-neglib32/target-dir/usr/lib/os-release b/test/functional/search/content-check-neglib32/target-dir/usr/lib/os-release
+new file mode 100644
+index 0000000..d20f387
+--- /dev/null
++++ b/test/functional/search/content-check-neglib32/target-dir/usr/lib/os-release
+@@ -0,0 +1,9 @@
++NAME="Clear Linux Software for Intel Architecture"
++VERSION=1
++ID=clear-linux-os
++VERSION_ID=10
++PRETTY_NAME="Clear Linux Software for Intel Architecture"
++ANSI_COLOR="1;35"
++HOME_URL="https://clearlinux.org"
++SUPPORT_URL="https://clearlinux.org"
++BUG_REPORT_URL="https://bugs.clearlinux.org/jira"
+diff --git a/test/functional/search/content-check-neglib32/target-dir/usr/share/clear/bundles/os-core b/test/functional/search/content-check-neglib32/target-dir/usr/share/clear/bundles/os-core
+new file mode 100644
+index 0000000..e69de29
+diff --git a/test/functional/search/content-check-neglib32/web-dir/10/Manifest.MoM b/test/functional/search/content-check-neglib32/web-dir/10/Manifest.MoM
+new file mode 100644
+index 0000000..96b2a8b
+--- /dev/null
++++ b/test/functional/search/content-check-neglib32/web-dir/10/Manifest.MoM
+@@ -0,0 +1,9 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451940175
++contentsize:	13805671819
++
++M...	6259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	os-core
++M...	0259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	test-bundle
+diff --git a/test/functional/search/content-check-neglib32/web-dir/10/Manifest.MoM.signed b/test/functional/search/content-check-neglib32/web-dir/10/Manifest.MoM.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-neglib32/web-dir/10/Manifest.MoM.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-neglib32/web-dir/10/Manifest.os-core b/test/functional/search/content-check-neglib32/web-dir/10/Manifest.os-core
+new file mode 100644
+index 0000000..ce24dee
+--- /dev/null
++++ b/test/functional/search/content-check-neglib32/web-dir/10/Manifest.os-core
+@@ -0,0 +1,8 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++D...	a4d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/usr/bin
+diff --git a/test/functional/search/content-check-neglib32/web-dir/10/Manifest.os-core.signed b/test/functional/search/content-check-neglib32/web-dir/10/Manifest.os-core.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-neglib32/web-dir/10/Manifest.os-core.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-neglib32/web-dir/10/Manifest.test-bundle b/test/functional/search/content-check-neglib32/web-dir/10/Manifest.test-bundle
+new file mode 100644
+index 0000000..f3a6261
+--- /dev/null
++++ b/test/functional/search/content-check-neglib32/web-dir/10/Manifest.test-bundle
+@@ -0,0 +1,12 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/libtest-nohit
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/test-lib32
++F...	a898be783f560f3f3b301c5ca8ee6847595152eb4efc91d5bef4846f9b055e26	10	/usr/lib/test-lib32
++F...	2e5cac2ded0632fb4f8e849c8f24a5e061cefc46bd17bd0529233c143cecbb21	10	/usr/bin/test-bin
++F...	ba38be783f560f3f32F01c5ca8ee6847595152eb4efc91d5bef4846f9b050f23	10	/usr/lib64/test-lib64
+diff --git a/test/functional/search/content-check-neglib32/web-dir/10/Manifest.test-bundle.signed b/test/functional/search/content-check-neglib32/web-dir/10/Manifest.test-bundle.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-neglib32/web-dir/10/Manifest.test-bundle.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-neglib32/web-dir/version/format3/latest b/test/functional/search/content-check-neglib32/web-dir/version/format3/latest
+new file mode 100644
+index 0000000..f599e28
+--- /dev/null
++++ b/test/functional/search/content-check-neglib32/web-dir/version/format3/latest
+@@ -0,0 +1 @@
++10
+diff --git a/test/functional/search/content-check-neglibtest/setup.sh b/test/functional/search/content-check-neglibtest/setup.sh
+new file mode 100755
+index 0000000..cc98577
+--- /dev/null
++++ b/test/functional/search/content-check-neglibtest/setup.sh
+@@ -0,0 +1,10 @@
++#!/bin/bash
++
++set -e
++
++rm -f web-dir/*/*.tar
++touch target-dir/test-file
++touch target-dir/usr/share/clear/bundles/test-bundle
++tar -C web-dir/10  -cf web-dir/10/Manifest.MoM.tar Manifest.MoM Manifest.MoM.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.os-core.tar Manifest.os-core Manifest.os-core.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.test-bundle.tar Manifest.test-bundle Manifest.test-bundle.signed
+diff --git a/test/functional/search/content-check-neglibtest/target-dir/usr/lib/os-release b/test/functional/search/content-check-neglibtest/target-dir/usr/lib/os-release
+new file mode 100644
+index 0000000..d20f387
+--- /dev/null
++++ b/test/functional/search/content-check-neglibtest/target-dir/usr/lib/os-release
+@@ -0,0 +1,9 @@
++NAME="Clear Linux Software for Intel Architecture"
++VERSION=1
++ID=clear-linux-os
++VERSION_ID=10
++PRETTY_NAME="Clear Linux Software for Intel Architecture"
++ANSI_COLOR="1;35"
++HOME_URL="https://clearlinux.org"
++SUPPORT_URL="https://clearlinux.org"
++BUG_REPORT_URL="https://bugs.clearlinux.org/jira"
+diff --git a/test/functional/search/content-check-neglibtest/target-dir/usr/share/clear/bundles/os-core b/test/functional/search/content-check-neglibtest/target-dir/usr/share/clear/bundles/os-core
+new file mode 100644
+index 0000000..e69de29
+diff --git a/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.MoM b/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.MoM
+new file mode 100644
+index 0000000..96b2a8b
+--- /dev/null
++++ b/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.MoM
+@@ -0,0 +1,9 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451940175
++contentsize:	13805671819
++
++M...	6259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	os-core
++M...	0259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	test-bundle
+diff --git a/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.MoM.signed b/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.MoM.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.MoM.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.os-core b/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.os-core
+new file mode 100644
+index 0000000..ce24dee
+--- /dev/null
++++ b/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.os-core
+@@ -0,0 +1,8 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++D...	a4d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/usr/bin
+diff --git a/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.os-core.signed b/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.os-core.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.os-core.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.test-bundle b/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.test-bundle
+new file mode 100644
+index 0000000..1abccdd
+--- /dev/null
++++ b/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.test-bundle
+@@ -0,0 +1,12 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/libtest-nohit
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/test-lib32
++F.b.	a898be783f560f3f3b301c5ca8ee6847595152eb4efc91d5bef4846f9b055e26	10	/usr/lib/test-lib32
++F.b.	2e5cac2ded0632fb4f8e849c8f24a5e061cefc46bd17bd0529233c143cecbb21	10	/usr/bin/test-bin
++F.b.	ba38be783f560f3f32F01c5ca8ee6847595152eb4efc91d5bef4846f9b050f23	10	/usr/lib64/test-lib64
+diff --git a/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.test-bundle.signed b/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.test-bundle.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-neglibtest/web-dir/10/Manifest.test-bundle.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-neglibtest/web-dir/version/format3/latest b/test/functional/search/content-check-neglibtest/web-dir/version/format3/latest
+new file mode 100644
+index 0000000..f599e28
+--- /dev/null
++++ b/test/functional/search/content-check-neglibtest/web-dir/version/format3/latest
+@@ -0,0 +1 @@
++10
+diff --git a/test/functional/search/content-check-negwrongpath/setup.sh b/test/functional/search/content-check-negwrongpath/setup.sh
+new file mode 100755
+index 0000000..cc98577
+--- /dev/null
++++ b/test/functional/search/content-check-negwrongpath/setup.sh
+@@ -0,0 +1,10 @@
++#!/bin/bash
++
++set -e
++
++rm -f web-dir/*/*.tar
++touch target-dir/test-file
++touch target-dir/usr/share/clear/bundles/test-bundle
++tar -C web-dir/10  -cf web-dir/10/Manifest.MoM.tar Manifest.MoM Manifest.MoM.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.os-core.tar Manifest.os-core Manifest.os-core.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.test-bundle.tar Manifest.test-bundle Manifest.test-bundle.signed
+diff --git a/test/functional/search/content-check-negwrongpath/target-dir/usr/lib/os-release b/test/functional/search/content-check-negwrongpath/target-dir/usr/lib/os-release
+new file mode 100644
+index 0000000..d20f387
+--- /dev/null
++++ b/test/functional/search/content-check-negwrongpath/target-dir/usr/lib/os-release
+@@ -0,0 +1,9 @@
++NAME="Clear Linux Software for Intel Architecture"
++VERSION=1
++ID=clear-linux-os
++VERSION_ID=10
++PRETTY_NAME="Clear Linux Software for Intel Architecture"
++ANSI_COLOR="1;35"
++HOME_URL="https://clearlinux.org"
++SUPPORT_URL="https://clearlinux.org"
++BUG_REPORT_URL="https://bugs.clearlinux.org/jira"
+diff --git a/test/functional/search/content-check-negwrongpath/target-dir/usr/share/clear/bundles/os-core b/test/functional/search/content-check-negwrongpath/target-dir/usr/share/clear/bundles/os-core
+new file mode 100644
+index 0000000..e69de29
+diff --git a/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.MoM b/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.MoM
+new file mode 100644
+index 0000000..96b2a8b
+--- /dev/null
++++ b/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.MoM
+@@ -0,0 +1,9 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451940175
++contentsize:	13805671819
++
++M...	6259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	os-core
++M...	0259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	test-bundle
+diff --git a/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.MoM.signed b/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.MoM.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.MoM.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.os-core b/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.os-core
+new file mode 100644
+index 0000000..ce24dee
+--- /dev/null
++++ b/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.os-core
+@@ -0,0 +1,8 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++D...	a4d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/usr/bin
+diff --git a/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.os-core.signed b/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.os-core.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.os-core.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.test-bundle b/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.test-bundle
+new file mode 100644
+index 0000000..1abccdd
+--- /dev/null
++++ b/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.test-bundle
+@@ -0,0 +1,12 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/libtest-nohit
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/test-lib32
++F.b.	a898be783f560f3f3b301c5ca8ee6847595152eb4efc91d5bef4846f9b055e26	10	/usr/lib/test-lib32
++F.b.	2e5cac2ded0632fb4f8e849c8f24a5e061cefc46bd17bd0529233c143cecbb21	10	/usr/bin/test-bin
++F.b.	ba38be783f560f3f32F01c5ca8ee6847595152eb4efc91d5bef4846f9b050f23	10	/usr/lib64/test-lib64
+diff --git a/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.test-bundle.signed b/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.test-bundle.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-negwrongpath/web-dir/10/Manifest.test-bundle.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-negwrongpath/web-dir/version/format3/latest b/test/functional/search/content-check-negwrongpath/web-dir/version/format3/latest
+new file mode 100644
+index 0000000..f599e28
+--- /dev/null
++++ b/test/functional/search/content-check-negwrongpath/web-dir/version/format3/latest
+@@ -0,0 +1 @@
++10
+diff --git a/test/functional/search/content-check-posfull-path/setup.sh b/test/functional/search/content-check-posfull-path/setup.sh
+new file mode 100755
+index 0000000..cc98577
+--- /dev/null
++++ b/test/functional/search/content-check-posfull-path/setup.sh
+@@ -0,0 +1,10 @@
++#!/bin/bash
++
++set -e
++
++rm -f web-dir/*/*.tar
++touch target-dir/test-file
++touch target-dir/usr/share/clear/bundles/test-bundle
++tar -C web-dir/10  -cf web-dir/10/Manifest.MoM.tar Manifest.MoM Manifest.MoM.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.os-core.tar Manifest.os-core Manifest.os-core.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.test-bundle.tar Manifest.test-bundle Manifest.test-bundle.signed
+diff --git a/test/functional/search/content-check-posfull-path/target-dir/usr/lib/os-release b/test/functional/search/content-check-posfull-path/target-dir/usr/lib/os-release
+new file mode 100644
+index 0000000..d20f387
+--- /dev/null
++++ b/test/functional/search/content-check-posfull-path/target-dir/usr/lib/os-release
+@@ -0,0 +1,9 @@
++NAME="Clear Linux Software for Intel Architecture"
++VERSION=1
++ID=clear-linux-os
++VERSION_ID=10
++PRETTY_NAME="Clear Linux Software for Intel Architecture"
++ANSI_COLOR="1;35"
++HOME_URL="https://clearlinux.org"
++SUPPORT_URL="https://clearlinux.org"
++BUG_REPORT_URL="https://bugs.clearlinux.org/jira"
+diff --git a/test/functional/search/content-check-posfull-path/target-dir/usr/share/clear/bundles/os-core b/test/functional/search/content-check-posfull-path/target-dir/usr/share/clear/bundles/os-core
+new file mode 100644
+index 0000000..e69de29
+diff --git a/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.MoM b/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.MoM
+new file mode 100644
+index 0000000..96b2a8b
+--- /dev/null
++++ b/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.MoM
+@@ -0,0 +1,9 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451940175
++contentsize:	13805671819
++
++M...	6259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	os-core
++M...	0259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	test-bundle
+diff --git a/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.MoM.signed b/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.MoM.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.MoM.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.os-core b/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.os-core
+new file mode 100644
+index 0000000..ce24dee
+--- /dev/null
++++ b/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.os-core
+@@ -0,0 +1,8 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++D...	a4d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/usr/bin
+diff --git a/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.os-core.signed b/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.os-core.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.os-core.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.test-bundle b/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.test-bundle
+new file mode 100644
+index 0000000..1abccdd
+--- /dev/null
++++ b/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.test-bundle
+@@ -0,0 +1,12 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/libtest-nohit
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/test-lib32
++F.b.	a898be783f560f3f3b301c5ca8ee6847595152eb4efc91d5bef4846f9b055e26	10	/usr/lib/test-lib32
++F.b.	2e5cac2ded0632fb4f8e849c8f24a5e061cefc46bd17bd0529233c143cecbb21	10	/usr/bin/test-bin
++F.b.	ba38be783f560f3f32F01c5ca8ee6847595152eb4efc91d5bef4846f9b050f23	10	/usr/lib64/test-lib64
+diff --git a/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.test-bundle.signed b/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.test-bundle.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-posfull-path/web-dir/10/Manifest.test-bundle.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-posfull-path/web-dir/version/format3/latest b/test/functional/search/content-check-posfull-path/web-dir/version/format3/latest
+new file mode 100644
+index 0000000..f599e28
+--- /dev/null
++++ b/test/functional/search/content-check-posfull-path/web-dir/version/format3/latest
+@@ -0,0 +1 @@
++10
+diff --git a/test/functional/search/content-check-poslib32/setup.sh b/test/functional/search/content-check-poslib32/setup.sh
+new file mode 100755
+index 0000000..cc98577
+--- /dev/null
++++ b/test/functional/search/content-check-poslib32/setup.sh
+@@ -0,0 +1,10 @@
++#!/bin/bash
++
++set -e
++
++rm -f web-dir/*/*.tar
++touch target-dir/test-file
++touch target-dir/usr/share/clear/bundles/test-bundle
++tar -C web-dir/10  -cf web-dir/10/Manifest.MoM.tar Manifest.MoM Manifest.MoM.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.os-core.tar Manifest.os-core Manifest.os-core.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.test-bundle.tar Manifest.test-bundle Manifest.test-bundle.signed
+diff --git a/test/functional/search/content-check-poslib32/target-dir/usr/lib/os-release b/test/functional/search/content-check-poslib32/target-dir/usr/lib/os-release
+new file mode 100644
+index 0000000..d20f387
+--- /dev/null
++++ b/test/functional/search/content-check-poslib32/target-dir/usr/lib/os-release
+@@ -0,0 +1,9 @@
++NAME="Clear Linux Software for Intel Architecture"
++VERSION=1
++ID=clear-linux-os
++VERSION_ID=10
++PRETTY_NAME="Clear Linux Software for Intel Architecture"
++ANSI_COLOR="1;35"
++HOME_URL="https://clearlinux.org"
++SUPPORT_URL="https://clearlinux.org"
++BUG_REPORT_URL="https://bugs.clearlinux.org/jira"
+diff --git a/test/functional/search/content-check-poslib32/target-dir/usr/share/clear/bundles/os-core b/test/functional/search/content-check-poslib32/target-dir/usr/share/clear/bundles/os-core
+new file mode 100644
+index 0000000..e69de29
+diff --git a/test/functional/search/content-check-poslib32/web-dir/10/Manifest.MoM b/test/functional/search/content-check-poslib32/web-dir/10/Manifest.MoM
+new file mode 100644
+index 0000000..96b2a8b
+--- /dev/null
++++ b/test/functional/search/content-check-poslib32/web-dir/10/Manifest.MoM
+@@ -0,0 +1,9 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451940175
++contentsize:	13805671819
++
++M...	6259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	os-core
++M...	0259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	test-bundle
+diff --git a/test/functional/search/content-check-poslib32/web-dir/10/Manifest.MoM.signed b/test/functional/search/content-check-poslib32/web-dir/10/Manifest.MoM.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-poslib32/web-dir/10/Manifest.MoM.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-poslib32/web-dir/10/Manifest.os-core b/test/functional/search/content-check-poslib32/web-dir/10/Manifest.os-core
+new file mode 100644
+index 0000000..ce24dee
+--- /dev/null
++++ b/test/functional/search/content-check-poslib32/web-dir/10/Manifest.os-core
+@@ -0,0 +1,8 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++D...	a4d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/usr/bin
+diff --git a/test/functional/search/content-check-poslib32/web-dir/10/Manifest.os-core.signed b/test/functional/search/content-check-poslib32/web-dir/10/Manifest.os-core.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-poslib32/web-dir/10/Manifest.os-core.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-poslib32/web-dir/10/Manifest.test-bundle b/test/functional/search/content-check-poslib32/web-dir/10/Manifest.test-bundle
+new file mode 100644
+index 0000000..1abccdd
+--- /dev/null
++++ b/test/functional/search/content-check-poslib32/web-dir/10/Manifest.test-bundle
+@@ -0,0 +1,12 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/libtest-nohit
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/test-lib32
++F.b.	a898be783f560f3f3b301c5ca8ee6847595152eb4efc91d5bef4846f9b055e26	10	/usr/lib/test-lib32
++F.b.	2e5cac2ded0632fb4f8e849c8f24a5e061cefc46bd17bd0529233c143cecbb21	10	/usr/bin/test-bin
++F.b.	ba38be783f560f3f32F01c5ca8ee6847595152eb4efc91d5bef4846f9b050f23	10	/usr/lib64/test-lib64
+diff --git a/test/functional/search/content-check-poslib32/web-dir/10/Manifest.test-bundle.signed b/test/functional/search/content-check-poslib32/web-dir/10/Manifest.test-bundle.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-poslib32/web-dir/10/Manifest.test-bundle.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-poslib32/web-dir/version/format3/latest b/test/functional/search/content-check-poslib32/web-dir/version/format3/latest
+new file mode 100644
+index 0000000..f599e28
+--- /dev/null
++++ b/test/functional/search/content-check-poslib32/web-dir/version/format3/latest
+@@ -0,0 +1 @@
++10
+diff --git a/test/functional/search/content-check-poslib64/setup.sh b/test/functional/search/content-check-poslib64/setup.sh
+new file mode 100755
+index 0000000..cc98577
+--- /dev/null
++++ b/test/functional/search/content-check-poslib64/setup.sh
+@@ -0,0 +1,10 @@
++#!/bin/bash
++
++set -e
++
++rm -f web-dir/*/*.tar
++touch target-dir/test-file
++touch target-dir/usr/share/clear/bundles/test-bundle
++tar -C web-dir/10  -cf web-dir/10/Manifest.MoM.tar Manifest.MoM Manifest.MoM.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.os-core.tar Manifest.os-core Manifest.os-core.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.test-bundle.tar Manifest.test-bundle Manifest.test-bundle.signed
+diff --git a/test/functional/search/content-check-poslib64/target-dir/usr/lib/os-release b/test/functional/search/content-check-poslib64/target-dir/usr/lib/os-release
+new file mode 100644
+index 0000000..d20f387
+--- /dev/null
++++ b/test/functional/search/content-check-poslib64/target-dir/usr/lib/os-release
+@@ -0,0 +1,9 @@
++NAME="Clear Linux Software for Intel Architecture"
++VERSION=1
++ID=clear-linux-os
++VERSION_ID=10
++PRETTY_NAME="Clear Linux Software for Intel Architecture"
++ANSI_COLOR="1;35"
++HOME_URL="https://clearlinux.org"
++SUPPORT_URL="https://clearlinux.org"
++BUG_REPORT_URL="https://bugs.clearlinux.org/jira"
+diff --git a/test/functional/search/content-check-poslib64/target-dir/usr/share/clear/bundles/os-core b/test/functional/search/content-check-poslib64/target-dir/usr/share/clear/bundles/os-core
+new file mode 100644
+index 0000000..e69de29
+diff --git a/test/functional/search/content-check-poslib64/web-dir/10/Manifest.MoM b/test/functional/search/content-check-poslib64/web-dir/10/Manifest.MoM
+new file mode 100644
+index 0000000..96b2a8b
+--- /dev/null
++++ b/test/functional/search/content-check-poslib64/web-dir/10/Manifest.MoM
+@@ -0,0 +1,9 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451940175
++contentsize:	13805671819
++
++M...	6259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	os-core
++M...	0259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	test-bundle
+diff --git a/test/functional/search/content-check-poslib64/web-dir/10/Manifest.MoM.signed b/test/functional/search/content-check-poslib64/web-dir/10/Manifest.MoM.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-poslib64/web-dir/10/Manifest.MoM.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-poslib64/web-dir/10/Manifest.os-core b/test/functional/search/content-check-poslib64/web-dir/10/Manifest.os-core
+new file mode 100644
+index 0000000..ce24dee
+--- /dev/null
++++ b/test/functional/search/content-check-poslib64/web-dir/10/Manifest.os-core
+@@ -0,0 +1,8 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++D...	a4d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/usr/bin
+diff --git a/test/functional/search/content-check-poslib64/web-dir/10/Manifest.os-core.signed b/test/functional/search/content-check-poslib64/web-dir/10/Manifest.os-core.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-poslib64/web-dir/10/Manifest.os-core.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-poslib64/web-dir/10/Manifest.test-bundle b/test/functional/search/content-check-poslib64/web-dir/10/Manifest.test-bundle
+new file mode 100644
+index 0000000..1abccdd
+--- /dev/null
++++ b/test/functional/search/content-check-poslib64/web-dir/10/Manifest.test-bundle
+@@ -0,0 +1,12 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/libtest-nohit
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/test-lib32
++F.b.	a898be783f560f3f3b301c5ca8ee6847595152eb4efc91d5bef4846f9b055e26	10	/usr/lib/test-lib32
++F.b.	2e5cac2ded0632fb4f8e849c8f24a5e061cefc46bd17bd0529233c143cecbb21	10	/usr/bin/test-bin
++F.b.	ba38be783f560f3f32F01c5ca8ee6847595152eb4efc91d5bef4846f9b050f23	10	/usr/lib64/test-lib64
+diff --git a/test/functional/search/content-check-poslib64/web-dir/10/Manifest.test-bundle.signed b/test/functional/search/content-check-poslib64/web-dir/10/Manifest.test-bundle.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check-poslib64/web-dir/10/Manifest.test-bundle.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check-poslib64/web-dir/version/format3/latest b/test/functional/search/content-check-poslib64/web-dir/version/format3/latest
+new file mode 100644
+index 0000000..f599e28
+--- /dev/null
++++ b/test/functional/search/content-check-poslib64/web-dir/version/format3/latest
+@@ -0,0 +1 @@
++10
+diff --git a/test/functional/search/content-check/setup.sh b/test/functional/search/content-check/setup.sh
+new file mode 100755
+index 0000000..cc98577
+--- /dev/null
++++ b/test/functional/search/content-check/setup.sh
+@@ -0,0 +1,10 @@
++#!/bin/bash
++
++set -e
++
++rm -f web-dir/*/*.tar
++touch target-dir/test-file
++touch target-dir/usr/share/clear/bundles/test-bundle
++tar -C web-dir/10  -cf web-dir/10/Manifest.MoM.tar Manifest.MoM Manifest.MoM.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.os-core.tar Manifest.os-core Manifest.os-core.signed
++tar -C web-dir/10 -cf web-dir/10/Manifest.test-bundle.tar Manifest.test-bundle Manifest.test-bundle.signed
+diff --git a/test/functional/search/content-check/target-dir/usr/lib/os-release b/test/functional/search/content-check/target-dir/usr/lib/os-release
+new file mode 100644
+index 0000000..d20f387
+--- /dev/null
++++ b/test/functional/search/content-check/target-dir/usr/lib/os-release
+@@ -0,0 +1,9 @@
++NAME="Clear Linux Software for Intel Architecture"
++VERSION=1
++ID=clear-linux-os
++VERSION_ID=10
++PRETTY_NAME="Clear Linux Software for Intel Architecture"
++ANSI_COLOR="1;35"
++HOME_URL="https://clearlinux.org"
++SUPPORT_URL="https://clearlinux.org"
++BUG_REPORT_URL="https://bugs.clearlinux.org/jira"
+diff --git a/test/functional/search/content-check/target-dir/usr/share/clear/bundles/os-core b/test/functional/search/content-check/target-dir/usr/share/clear/bundles/os-core
+new file mode 100644
+index 0000000..e69de29
+diff --git a/test/functional/search/content-check/web-dir/10/Manifest.MoM b/test/functional/search/content-check/web-dir/10/Manifest.MoM
+new file mode 100644
+index 0000000..96b2a8b
+--- /dev/null
++++ b/test/functional/search/content-check/web-dir/10/Manifest.MoM
+@@ -0,0 +1,9 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451940175
++contentsize:	13805671819
++
++M...	6259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	os-core
++M...	0259043bcbac93ffff65097ec52ba0e8658e8b2b7cdb99bd2939d639ee23209e	10	test-bundle
+diff --git a/test/functional/search/content-check/web-dir/10/Manifest.MoM.signed b/test/functional/search/content-check/web-dir/10/Manifest.MoM.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check/web-dir/10/Manifest.MoM.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check/web-dir/10/Manifest.os-core b/test/functional/search/content-check/web-dir/10/Manifest.os-core
+new file mode 100644
+index 0000000..ce24dee
+--- /dev/null
++++ b/test/functional/search/content-check/web-dir/10/Manifest.os-core
+@@ -0,0 +1,8 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++D...	a4d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/usr/bin
+diff --git a/test/functional/search/content-check/web-dir/10/Manifest.os-core.signed b/test/functional/search/content-check/web-dir/10/Manifest.os-core.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check/web-dir/10/Manifest.os-core.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check/web-dir/10/Manifest.test-bundle b/test/functional/search/content-check/web-dir/10/Manifest.test-bundle
+new file mode 100644
+index 0000000..1abccdd
+--- /dev/null
++++ b/test/functional/search/content-check/web-dir/10/Manifest.test-bundle
+@@ -0,0 +1,12 @@
++MANIFEST	3
++version:	10
++previous:	0
++filecount:	1
++timestamp:	1451936779
++contentsize:	17929151
++
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/libtest-nohit
++F...	24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af	10	/test-lib32
++F.b.	a898be783f560f3f3b301c5ca8ee6847595152eb4efc91d5bef4846f9b055e26	10	/usr/lib/test-lib32
++F.b.	2e5cac2ded0632fb4f8e849c8f24a5e061cefc46bd17bd0529233c143cecbb21	10	/usr/bin/test-bin
++F.b.	ba38be783f560f3f32F01c5ca8ee6847595152eb4efc91d5bef4846f9b050f23	10	/usr/lib64/test-lib64
+diff --git a/test/functional/search/content-check/web-dir/10/Manifest.test-bundle.signed b/test/functional/search/content-check/web-dir/10/Manifest.test-bundle.signed
+new file mode 100644
+index 0000000..8b0f8fc
+--- /dev/null
++++ b/test/functional/search/content-check/web-dir/10/Manifest.test-bundle.signed
+@@ -0,0 +1,3 @@
++-----BEGIN PKCS7-----
++Empty
++-----END PKCS7-----
+diff --git a/test/functional/search/content-check/web-dir/version/format3/latest b/test/functional/search/content-check/web-dir/version/format3/latest
+new file mode 100644
+index 0000000..f599e28
+--- /dev/null
++++ b/test/functional/search/content-check/web-dir/version/format3/latest
+@@ -0,0 +1 @@
++10
+-- 
+2.1.0
+

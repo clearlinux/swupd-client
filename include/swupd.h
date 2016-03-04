@@ -104,6 +104,7 @@ struct file {
 };
 
 extern bool download_only;
+extern bool local_download;
 extern bool verify_esp_only;
 extern bool have_manifest_diskspace;
 extern bool have_network;
@@ -246,6 +247,7 @@ void update_motd(int new_release);
 void delete_motd(void);
 extern int is_dirname_link(const char *fullname);
 extern int verify_fix_path(char* targetpath, struct manifest *manifest);
+extern void set_local_download(char *url);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);

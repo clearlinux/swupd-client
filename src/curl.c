@@ -285,6 +285,16 @@ exit:
 		case 206:
 			err = 0;
 			break;
+		case 0:
+			/* When using the FILE:// protocol, 0 indicates success.
+			 * Otherwise, it means the web server hasn't responded yet.
+			 */
+			if (local_download) {
+				err = 0;
+			} else {
+				err = -ETIMEDOUT;
+			}
+			break;
 		case 403:
 			err = -EACCES;
 			break;
@@ -307,6 +317,9 @@ exit:
 			break;
 		case CURLE_COULDNT_CONNECT:
 			err = -ENONET;
+			break;
+		case CURLE_FILE_COULDNT_READ_FILE:
+			err = -1;
 			break;
 		case CURLE_PARTIAL_FILE:
 			printf("Curl: File incompletely downloaded from '%s' to '%s'\n",

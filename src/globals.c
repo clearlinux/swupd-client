@@ -57,6 +57,7 @@ struct timeval start_time;
  * different quality of server and control of the servers
  */
 bool download_only;
+bool local_download = false;
 bool have_manifest_diskspace = false; /* assume no until checked */
 bool have_network = false;	    /* assume no access until proved */
 #define URL_COUNT 2

@@ -374,13 +374,16 @@ static int perform_curl_io_and_complete(int *left)
 			 * proceed to uncompress. */
 			untar_full_download(file);
 		} else if (ret == 0) {
-			/* For this case, the CURLINFO_RESPONSE_CODE(3) man page states:
-			 * "The stored value will be zero if no server response has been received."
-			 * This seems to indicate misuse of libcurl, so report this condition.
+			/* When using the FILE:// protocol, 0 indicates success.
+			 * Otherwise, it means the web server hasn't responded yet.
 			 */
-			printf("error: received http \"0\" response for %s download\n",
-			       file->hash);
-			failed = list_prepend_data(failed, file);
+			if (local_download) {
+				untar_full_download(file);
+			} else {
+				printf("error: received http \"0\" response for %s download\n",
+				       file->hash);
+				failed = list_prepend_data(failed, file);
+			}
 		} else {
 			char *url = NULL;
 

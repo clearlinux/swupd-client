@@ -782,3 +782,15 @@ end:
 	list_free_list_and_data(path_list, free_path_data);
 	return ret;
 }
+
+/* In case URL has the file:// prefix, use libcurl's file protocol to copy
+ * files from the local filesystem instead of downloading from a web server.
+ * The local_download global variable defaults to false and is used to
+ * determine how to handle libcurl results after a *_perform.
+ */
+void set_local_download(char *url)
+{
+	if (strncmp(url, "file://", 7) == 0) {
+		local_download = true;
+	}
+}

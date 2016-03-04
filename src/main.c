@@ -91,6 +91,7 @@ static bool parse_options(int argc, char **argv)
 				printf("Invalid --url argument\n\n");
 				goto err;
 			}
+			set_local_download(optarg);
 			if (version_server_urls[0]) {
 				free(version_server_urls[0]);
 			}

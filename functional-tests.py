@@ -219,6 +219,31 @@ class update_use_full_file(unittest.TestCase):
         self.assertIn('Update was applied.', test_output)
         self.assertIn('Update successful. System updated from version 10 to version 100', test_output)
 
+@http_command(option="")
+class update_verify_fix_path_missing_dir(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('    changed files     : 1', test_output)
+        self.assertIn('    changed manifests : 1', test_output)
+        self.assertIn('Staging file content', test_output)
+        target_path = os.path.join(os.getcwd(), path_from_name(__class__.__name__, 'target') , 'usr/bin')
+        self.assertIn('Update target directory does not exist: ' + target_path + '. Trying to fix it', test_output)
+        self.assertIn('Update was applied.', test_output)
+        self.assertIn('Update successful. System updated from version 10 to version 100', test_output)
+
+
+@http_command(option="")
+class update_verify_fix_path_hash_mismatch(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('    changed files     : 1', test_output)
+        self.assertIn('    changed manifests : 1', test_output)
+        self.assertIn('Staging file content', test_output)
+        target_path = os.path.join(os.getcwd(), path_from_name(__class__.__name__, 'target') , 'usr/bin')
+        self.assertIn('Update target directory does not exist: ' + target_path + '. Trying to fix it', test_output)
+        self.assertIn('Hash did not match for path : /usr', test_output)
+        self.assertIn('Path /usr/bin is missing on the file system', test_output)
+        self.assertIn('Update was applied.', test_output)
+        self.assertIn('Update successful. System updated from version 10 to version 100', test_output)
+
 
 @http_command(option="")
 class update_use_pack(unittest.TestCase):

@@ -113,14 +113,21 @@ void apply_heuristics(struct file *file)
 	config_file_heuristics(file);
 }
 
-bool ignore(struct file *file)
+/* Determines whether or not FILE should be ignored for this swupd action. The
+ * value of FIX_MISSING depends on which action is being run; for actions that
+ * may modify the filesystem (e.g. update, bundle-add), FIX_MISSING should be
+ * true; otherwise, it should be false. Note that a 'verify' action (without
+ * --fix) does not modify the filesystem, so FIX_MISSING must be false unless
+ *  --fix is specified.
+ */
+bool ignore(struct file *file, bool fix_missing)
 {
 	if ((file->is_config) ||
 	    is_config(file->filename) || // ideally we trust the manifest but short term reapply check here
 	    (file->is_state) ||
 	    is_state(file->filename) ||			    // ideally we trust the manifest but short term reapply check here
-	    (file->is_boot && fix && file->is_deleted) ||   // shouldn't happen
-	    (file->is_boot && !fix && !file->is_deleted) || // default ignore
+	    (file->is_boot && fix_missing && file->is_deleted) ||   // shouldn't happen
+	    (file->is_boot && !fix_missing && !file->is_deleted) || // default ignore
 	    (ignore_orphans && file->is_orphan)) {
 		update_skip++;
 		file->do_not_update = 1;

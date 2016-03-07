@@ -554,9 +554,7 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 {
 	struct list *output = NULL;
 	struct list *list;
-	bool fix_tmp = fix;
 
-	fix = true;
 	update_count = 0;
 	update_skip = 0;
 	list = list_head(server->files);
@@ -569,7 +567,7 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 		    (file->is_rename && file_has_different_hash_in_older_manifest(current, file))) {
 
 			/* check and if needed mark as do_not_update */
-			ignore(file);
+			ignore(file, true);
 			/* check if we need to run scripts/update the bootloader/etc */
 			apply_heuristics(file);
 
@@ -578,7 +576,6 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 	}
 	update_count = list_len(output) - update_skip;
 
-	fix = fix_tmp;
 	return output;
 }
 

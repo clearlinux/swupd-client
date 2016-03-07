@@ -111,7 +111,6 @@ extern bool verify_bundles_only;
 extern bool ignore_config;
 extern bool ignore_state;
 extern bool ignore_orphans;
-extern bool fix;
 extern char *format_string;
 extern char *path_prefix;
 extern bool set_format_string(char *userinput);
@@ -141,7 +140,7 @@ extern int read_version_from_subvol_file(char *path_prefix);
 
 extern bool check_network(void);
 
-extern bool ignore(struct file *file);
+extern bool ignore(struct file *file, bool fix);
 extern bool is_config(char *filename);
 extern bool is_state(char *filename);
 extern void apply_heuristics(struct file *file);

@@ -413,7 +413,7 @@ int install_bundles(char **bundles)
 		file = iter->data;
 		iter = iter->next;
 
-		if (file->is_deleted || file->do_not_update || ignore(file)) {
+		if (file->is_deleted || file->do_not_update || ignore(file, true)) {
 			continue;
 		}
 

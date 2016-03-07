@@ -455,7 +455,7 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 		iter = iter->next;
 
 		if (file->is_deleted ||
-		    ignore(file)) {
+		    ignore(file, false)) {
 			continue;
 		}
 

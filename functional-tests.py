@@ -130,10 +130,40 @@ class bundleadd_add_directory(unittest.TestCase):
         self.assertIn('Tracking test-bundle bundle on the system', test_output)
 
 
+@http_command(option="test-bundle")
+class bundleadd_boot_file(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('Downloading test-bundle pack for version 10',
+                      test_output)
+        self.assertIn('Installing bundle(s) files...', test_output)
+        self.assertIn('Tracking test-bundle bundle on the system', test_output)
+        # bundle-add output does not list files it did or did not install,
+        # so check for the file existence in the target directory.
+        newfile = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/lib/kernel/testfile')
+        self.assertTrue(os.path.isfile(newfile))
+
+
 @http_command(option="--list")
 class bundleadd_list(unittest.TestCase):
     def validate(self, test_output):
         self.assertIn('os-core', test_output)
+
+
+@http_command(option="test-bundle")
+class bundleremove_boot_file(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('Deleting bundle files...', test_output)
+        self.assertIn('Total deleted files: 1', test_output)
+        self.assertIn('Untracking bundle from system...', test_output)
+        self.assertIn('Success: Bundle removed', test_output)
+        # bundle-remove output does not list files it removed,
+        # so check for the file absence in the target directory.
+        newfile = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/lib/kernel/testfile')
+        self.assertFalse(os.path.isfile(newfile))
 
 
 @http_command(option="test-bundle")
@@ -179,6 +209,18 @@ class hashdump_file_hash(unittest.TestCase):
                                  universal_newlines=True)
         test_output = process.stdout.splitlines()
         self.assertIn('b03e11e3307de4d4f3f545c8a955c2208507dbc1927e9434d1da42917712c15b', test_output)
+
+
+@http_command(option="")
+class update_boot_file(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('    new files         : 1', test_output)
+        # update must always add a new boot file, so check for the file
+        # existence in the target directory.
+        newfile = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/lib/kernel/testfile')
+        self.assertTrue(os.path.isfile(newfile))
 
 
 @http_command(option="--download")
@@ -278,11 +320,44 @@ class verify_add_missing_directory(unittest.TestCase):
 
 
 @http_command(option="")
+class verify_boot_file_mismatch(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('Verifying version 10', test_output)
+        corruptfile = os.path.join(os.getcwd(),
+                                   path_from_name(__class__.__name__, 'target'),
+                                   'usr/lib/kernel/testfile')
+        self.assertIn('Hash mismatch for file: ' + corruptfile, test_output)
+        self.assertIn('  1 files did not match', test_output)
+        self.assertIn('Verify successful', test_output)
+
+
+@http_command(option="")
 class verify_check_missing_directory(unittest.TestCase):
     def validate(self, test_output):
         self.assertIn('Verifying version 10', test_output)
         self.assertIn('  1 files did not match', test_output)
         self.assertIn('Verify successful', test_output)
+
+
+@http_command(option="--fix")
+class verify_boot_file_deleted(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('Verifying version 10', test_output)
+        # Deleted boot files should be ignored completely
+        self.assertNotIn('  1 files found which should be deleted', test_output)
+        self.assertIn('Fix successful', test_output)
+
+
+@http_command(option="--fix")
+class verify_boot_file_mismatch_fix(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('Verifying version 10', test_output)
+        corruptfile = os.path.join(os.getcwd(),
+                                   path_from_name(__class__.__name__, 'target'),
+                                   'usr/lib/kernel/testfile')
+        self.assertIn('Hash mismatch for file: ' + corruptfile, test_output)
+        self.assertIn('    1 of 1 files were fixed', test_output)
+        self.assertIn('Fix successful', test_output)
 
 
 @http_command(option="--install -m 10")

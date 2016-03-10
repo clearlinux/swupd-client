@@ -325,6 +325,7 @@ out_free_curl:
  */
 int install_bundles(char **bundles)
 {
+	bool new_bundles = false;
 	int lock_fd;
 	int ret = 0;
 	int current_version;
@@ -364,8 +365,7 @@ int install_bundles(char **bundles)
 
 	/* step 2: check bundle args are valid if so populate subs struct */
 
-	int i;
-	for (i = 0; *bundles; ++bundles) {
+	for (; *bundles; ++bundles) {
 		if (is_tracked_bundle(*bundles)) {
 			printf("%s bundle already installed, skipping it\n", *bundles);
 			continue;
@@ -380,11 +380,11 @@ int install_bundles(char **bundles)
 			continue;
 		}
 		create_and_append_subscription(*bundles);
-		i++;
+		new_bundles = true;
 		printf("Added bundle %s for installation\n", *bundles);
 	}
 
-	if (i == 0) {
+	if (!new_bundles) {
 		printf("There are no pending bundles to install, exiting now\n");
 		ret = EBUNDLE_INSTALL;
 		goto clean_manifest_and_exit;

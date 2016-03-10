@@ -51,7 +51,7 @@ libswupd_la_SOURCES = $(SWUPD_COMMON_SOURCES)
 libswupd_la_LIBADD = $(SWUPD_COMPRESSION_LIBS) $(openssl_LIBS) $(curl_LIBS) $(bsdiff_LIBS)
 # Library version changes according to the libtool convention:
 # http://www.gnu.org/software/libtool/manual/libtool.html#Updating-version-info
-LIBSWUPD_CURRENT=1
+LIBSWUPD_CURRENT=2
 LIBSWUPD_REVISION=0
 LIBSWUPD_AGE=0
 libswupd_la_LDFLAGS = \

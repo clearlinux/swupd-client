@@ -345,6 +345,10 @@ class verify_boot_file_deleted(unittest.TestCase):
         self.assertIn('Verifying version 10', test_output)
         # Deleted boot files should be ignored completely
         self.assertNotIn('  1 files found which should be deleted', test_output)
+        bootfile = os.path.join(os.getcwd(),
+                                path_from_name(__class__.__name__, 'target'),
+                                'usr/lib/kernel/testfile')
+        self.assertTrue(os.path.isfile(bootfile))
         self.assertIn('Fix successful', test_output)
 
 

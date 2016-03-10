@@ -22,22 +22,22 @@
  */
 
 #define _GNU_SOURCE
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
+#include <bsdiff.h>
+#include <curl/curl.h>
 #include <errno.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <fcntl.h>
 #include <linux/fs.h>
-#include <curl/curl.h>
 #include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "swupd-build-variant.h"
 #include "swupd.h"
-#include "bsdiff.h"
 
 /* This file provides a managed download facility for code that needs a set of
  * update tar files.  Such code starts with one call to "start_full_download()",

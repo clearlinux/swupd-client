@@ -22,18 +22,18 @@
  */
 
 #define _GNU_SOURCE
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <errno.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "config.h"
+#include "signature.h"
 #include "swupd-build-variant.h"
 #include "swupd.h"
-#include "signature.h"
 
 static int download_pack(int oldversion, int newversion, char *module)
 {

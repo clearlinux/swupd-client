@@ -24,15 +24,15 @@
 /* list test */
 
 #define _GNU_SOURCE
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <assert.h>
-#include "list.h"
-
-#include "swupd.h"
+#include <unistd.h>
 #include <time.h>
+
+#include "list.h"
+#include "swupd.h"
 
 static int data_compare(const void *a, const void *b)
 {

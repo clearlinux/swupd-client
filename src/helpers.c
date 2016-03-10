@@ -22,19 +22,19 @@
  */
 
 #define _GNU_SOURCE
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/mount.h>
-#include <sys/statvfs.h>
 #include <dirent.h>
 #include <errno.h>
-#include <stdarg.h>
+#include <fcntl.h>
 #include <libgen.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mount.h>
+#include <sys/stat.h>
+#include <sys/statvfs.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "swupd.h"
@@ -666,8 +666,8 @@ int is_dirname_link(const char *fullname)
 
 void free_path_data(void *data)
 {
-        char *path = (char *) data;
-        free(path);
+	char *path = (char *)data;
+	free(path);
 }
 
 /* This function is meant to be called while staging file to fix any missing/incorrect paths.
@@ -675,9 +675,9 @@ void free_path_data(void *data)
  * by breaking it into sub-paths and fixing them top down.
  * Here, target_MoM is the consolidated manifest for the version you are trying to update/verify.
  */
-int verify_fix_path(char* targetpath, struct manifest *target_MoM)
+int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 {
-	struct list *path_list = NULL;    /* path_list contains the subparts in the path */
+	struct list *path_list = NULL; /* path_list contains the subparts in the path */
 	char *path;
 	char *tmp = NULL, *target = NULL;
 	char *url = NULL;
@@ -710,7 +710,7 @@ int verify_fix_path(char* targetpath, struct manifest *target_MoM)
 	free(path);
 
 	list1 = list_head(path_list);
-	while(list1) {
+	while (list1) {
 		path = list1->data;
 		list1 = list1->next;
 
@@ -720,7 +720,8 @@ int verify_fix_path(char* targetpath, struct manifest *target_MoM)
 		file = search_file_in_manifest(target_MoM, path);
 		if (file == NULL) {
 			printf("Error: Path %s not found in any of the subscribed manifests"
-				"in verify_fix_path for path_prefix %s\n", path, path_prefix);
+			       "in verify_fix_path for path_prefix %s\n",
+			       path, path_prefix);
 			ret = -1;
 			goto end;
 		}
@@ -763,11 +764,10 @@ int verify_fix_path(char* targetpath, struct manifest *target_MoM)
 		}
 
 		ret = do_staging(file, target_MoM);
-		if ( ret != 0) {
+		if (ret != 0) {
 			printf("Error: Path %s failed to stage in verify_fix_path\n", path);
 			goto end;
 		}
-
 	}
 end:
 	if (target) {
@@ -777,7 +777,7 @@ end:
 		free(tar_dotfile);
 	}
 	if (url) {
-		 free(url);
+		free(url);
 	}
 	list_free_list_and_data(path_list, free_path_data);
 	return ret;

@@ -22,19 +22,19 @@
  */
 
 #define _GNU_SOURCE
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <assert.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <getopt.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "config.h"
-#include "swupd.h"
 #include "signature.h"
+#include "swupd.h"
 
 static bool cmdline_option_fix = false;
 static bool cmdline_option_install = false;

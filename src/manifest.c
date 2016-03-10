@@ -23,21 +23,21 @@
 
 #define _GNU_SOURCE
 #include <bsdiff.h>
+#include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <unistd.h>
 #include <string.h>
-#include <errno.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <ctype.h>
-#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "config.h"
+#include "signature.h"
 #include "swupd.h"
 #include "xattrs.h"
-#include "signature.h"
 
 #define MANIFEST_LINE_MAXLEN 8192
 
@@ -1130,7 +1130,7 @@ struct file *search_file_in_manifest(struct manifest *manifest, const char *file
 	struct file *file;
 
 	iter = manifest->files;
-	while(iter) {
+	while (iter) {
 		file = iter->data;
 		iter = iter->next;
 

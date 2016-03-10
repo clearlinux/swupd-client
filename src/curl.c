@@ -34,15 +34,14 @@
  */
 
 #define _GNU_SOURCE
+#include <curl/curl.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <errno.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-
-#include <curl/curl.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "swupd.h"

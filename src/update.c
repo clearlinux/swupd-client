@@ -22,19 +22,19 @@
  */
 
 #define _GNU_SOURCE
+#include <errno.h>
+#include <fcntl.h>
+#include <libgen.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <unistd.h>
 #include <string.h>
 #include <time.h>
-#include <errno.h>
-#include <libgen.h>
-#include <fcntl.h>
+#include <unistd.h>
 
 #include "config.h"
-#include "swupd.h"
 #include "signature.h"
+#include "swupd.h"
 
 void increment_retries(int *retries, int *timeout)
 {

@@ -21,11 +21,11 @@
  */
 
 #define _GNU_SOURCE
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <assert.h>
+#include <unistd.h>
 
 #include "swupd.h"
 
@@ -124,7 +124,7 @@ bool ignore(struct file *file)
 	if ((file->is_config) ||
 	    is_config(file->filename) || // ideally we trust the manifest but short term reapply check here
 	    (file->is_state) ||
-	    is_state(file->filename) ||			    // ideally we trust the manifest but short term reapply check here
+	    is_state(file->filename) || // ideally we trust the manifest but short term reapply check here
 	    (file->is_boot && file->is_deleted) ||
 	    (ignore_orphans && file->is_orphan)) {
 		update_skip++;

@@ -23,15 +23,15 @@
  */
 
 #define _GNU_SOURCE
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
 #include <fcntl.h>
 #include <getopt.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-#include "swupd.h"
 #include "config.h"
+#include "swupd.h"
 
 char *search_string;
 char search_type = '0';

@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
 {
 	void *mem = malloc(atoi(argv[1]));
 
- 	if (!mem) {
+	if (!mem) {
 		fprintf(stderr, "failed to allocate, mem = %p\n", mem);
 		exit(1);
 	}

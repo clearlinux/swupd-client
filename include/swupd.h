@@ -1,13 +1,14 @@
 #ifndef __INCLUDE_GUARD_SWUPD_H
 #define __INCLUDE_GUARD_SWUPD_H
 
+#include <curl/curl.h>
+#include <dirent.h>
+#include <limits.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdbool.h>
-#include <curl/curl.h>
+
 #include "list.h"
-#include <limits.h>
-#include <dirent.h>
 #include "swupd-error.h"
 
 #ifdef __cplusplus
@@ -245,7 +246,7 @@ extern void string_or_die(char **strp, const char *fmt, ...);
 void update_motd(int new_release);
 void delete_motd(void);
 extern int is_dirname_link(const char *fullname);
-extern int verify_fix_path(char* targetpath, struct manifest *manifest);
+extern int verify_fix_path(char *targetpath, struct manifest *manifest);
 extern void set_local_download(char *url);
 
 /* subscription.c */

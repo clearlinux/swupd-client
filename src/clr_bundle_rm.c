@@ -23,14 +23,14 @@
  */
 
 #define _GNU_SOURCE
-#include <string.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <libgen.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <getopt.h>
+#include <libgen.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "swupd.h"
 

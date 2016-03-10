@@ -320,50 +320,15 @@ out_free_curl:
 	return ret;
 }
 
-/* Bundle install one ore more bundles passed in bundles
- * param as a null terminated array of strings
- */
-int install_bundles(char **bundles)
+int install_bundles(char **bundles, int current_version, struct manifest *mom)
 {
 	bool new_bundles = false;
-	int lock_fd;
-	int ret = 0;
-	int current_version;
-	struct manifest *mom;
+	int ret;
 	struct list *iter;
 	struct sub *sub;
 	struct file *file;
 
-	/* step 1: initialize swupd and get current version from OS */
-
-	if (!init_globals()) {
-		return EINIT_GLOBALS;
-	}
-
-	ret = swupd_init(&lock_fd);
-	if (ret != 0) {
-		printf("Failed updater initialization, exiting now.\n");
-		return ret;
-	}
-
-	current_version = read_version_from_subvol_file(path_prefix);
-	swupd_curl_set_current_version(current_version);
-
-	/* first of all, make sure STATE_DIR is there, recreate if necessary*/
-	ret = create_required_dirs();
-	if (ret != 0) {
-		printf("State directory %s cannot be recreated, aborting installation\n", STATE_DIR);
-		goto clean_and_exit;
-	}
-
-	ret = load_manifests(current_version, current_version, "MoM", NULL, &mom);
-	if (ret != 0) {
-		printf("Cannot load official manifest MoM for version %i\n", current_version);
-		ret = EMOM_NOTFOUND;
-		goto clean_and_exit;
-	}
-
-	/* step 2: check bundle args are valid if so populate subs struct */
+	/* step 1: check bundle args are valid if so populate subs struct */
 
 	for (; *bundles; ++bundles) {
 		if (is_tracked_bundle(*bundles)) {
@@ -387,25 +352,26 @@ int install_bundles(char **bundles)
 	if (!new_bundles) {
 		printf("There are no pending bundles to install, exiting now\n");
 		ret = EBUNDLE_INSTALL;
-		goto clean_manifest_and_exit;
+		goto out;
 	}
 
-	subscription_versions_from_MoM(mom, 0);
+	/* This can fail only if a subscribed bundle is not in mom which is already checked in manifest_has_component run prior */
+	(void)subscription_versions_from_MoM(mom, 0);
 	recurse_manifest(mom, NULL);
 	consolidate_submanifests(mom);
 
-	/* step 3: download neccessary packs */
+	/* step 2: download neccessary packs */
 
-	ret = rm_staging_dir_contents("download");
+	(void)rm_staging_dir_contents("download");
 
 	printf("Downloading required packs...\n");
 	ret = download_subscribed_packs(0, current_version, true);
 	if (ret != 0) {
 		printf("pack downloads failed, cannot proceed with the installation, exiting.\n");
-		goto clean_subs_and_exit;
+		goto out;
 	}
 
-	/* step 4: Install all bundle(s) files into the fs */
+	/* step 3: Install all bundle(s) files into the fs */
 
 	printf("Installing bundle(s) files...\n");
 	iter = list_head(mom->files);
@@ -425,7 +391,7 @@ int install_bundles(char **bundles)
 
 	sync();
 
-	/* step 5: create bundle(s) subscription entries to track them
+	/* step 4: create bundle(s) subscription entries to track them
 	 *
 	 * Strictly speaking each manifest has an entry to write its own bundle filename
 	 * and thus tracking automagically, here just making sure.
@@ -443,15 +409,57 @@ int install_bundles(char **bundles)
 		}
 	}
 
-	/* Run any scripts that are needed to complete update */
+	/* step 5: Run any scripts that are needed to complete update */
 	run_scripts();
 
 	ret = 0;
 	printf("Bundle(s) installation done.\n");
 
-clean_subs_and_exit:
+out:
 	free_subscriptions();
-clean_manifest_and_exit:
+	return ret;
+}
+
+/* Bundle install one ore more bundles passed in bundles
+ * param as a null terminated array of strings
+ */
+int install_bundles_frontend(char **bundles)
+{
+	int lock_fd;
+	int ret = 0;
+	int current_version;
+	struct manifest *mom;
+
+	/* initialize swupd and get current version from OS */
+
+	if (!init_globals()) {
+		return EINIT_GLOBALS;
+	}
+
+	ret = swupd_init(&lock_fd);
+	if (ret != 0) {
+		printf("Failed updater initialization, exiting now.\n");
+		return ret;
+	}
+
+	current_version = read_version_from_subvol_file(path_prefix);
+	swupd_curl_set_current_version(current_version);
+
+	ret = create_required_dirs();
+	if (ret != 0) {
+		printf("State directory %s cannot be recreated, aborting installation\n", STATE_DIR);
+		goto clean_and_exit;
+	}
+
+	ret = load_manifests(current_version, current_version, "MoM", NULL, &mom);
+	if (ret != 0) {
+		printf("Cannot load official manifest MoM for version %i\n", current_version);
+		ret = EMOM_NOTFOUND;
+		goto clean_and_exit;
+	}
+
+	ret = install_bundles(bundles, current_version, mom);
+
 	free_manifest(mom);
 clean_and_exit:
 	swupd_curl_cleanup();

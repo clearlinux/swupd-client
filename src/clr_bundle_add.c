@@ -151,6 +151,6 @@ int bundle_add_main(int argc, char **argv)
 	if (list) {
 		return list_installable_bundles();
 	} else {
-		return install_bundles(bundles);
+		return install_bundles_frontend(bundles);
 	}
 }

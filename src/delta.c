@@ -23,16 +23,16 @@
 
 #define _GNU_SOURCE
 #include <bsdiff.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <linux/fs.h>
 #include <libgen.h>
+#include <linux/fs.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "swupd.h"

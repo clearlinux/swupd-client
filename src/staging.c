@@ -22,15 +22,15 @@
  */
 
 #define _GNU_SOURCE
+#include <assert.h>
+#include <errno.h>
+#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <errno.h>
-#include <assert.h>
-#include <libgen.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "swupd-build-variant.h"

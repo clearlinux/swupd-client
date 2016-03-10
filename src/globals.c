@@ -22,13 +22,14 @@
  */
 
 #define _GNU_SOURCE
-#include "config.h"
-#include "swupd.h"
+#include <dlfcn.h>
 #include <errno.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <dlfcn.h>
 #include <unistd.h>
+
+#include "config.h"
+#include "swupd.h"
 
 bool force = false;
 bool verify_esp_only;

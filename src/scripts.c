@@ -23,12 +23,12 @@
  */
 
 #define _GNU_SOURCE
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <assert.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "swupd.h"
 

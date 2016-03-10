@@ -23,8 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "swupd.h"
 #include "swupd-internal.h"
+#include "swupd.h"
 
 struct subcmd {
 	char *name;

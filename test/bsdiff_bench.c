@@ -24,15 +24,15 @@
  */
 
 #define _GNU_SOURCE
+#include <assert.h>
 #include <bsdiff.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
-#include <sys/stat.h>
 #include <string.h>
-#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/time.h>
 #include <time.h>
-#include <assert.h>
+#include <unistd.h>
 
 #include "swupd.h"
 

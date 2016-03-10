@@ -24,8 +24,9 @@
 #define _GNU_SOURCE
 
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
+
 #include "list.h"
 
 static struct list *list_append_item(struct list *list, struct list *item)

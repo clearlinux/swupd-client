@@ -22,13 +22,13 @@
  */
 
 #define _GNU_SOURCE
-#include <stdio.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <string.h>
+#include <errno.h>
 #include <getopt.h>
 #include <libgen.h>
-#include <errno.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "swupd.h"
 

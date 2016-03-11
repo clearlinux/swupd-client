@@ -134,28 +134,26 @@ int read_version_from_subvol_file(char *path_prefix)
 }
 
 void read_versions(int *current_version,
-		   int *latest_version,
 		   int *server_version,
 		   char *path_prefix)
 {
-	*current_version = *latest_version = read_version_from_subvol_file(path_prefix);
+	*current_version = read_version_from_subvol_file(path_prefix);
 
 	printf("Querying server version.\n");
 	*server_version = try_version_download();
 }
 
 int check_versions(int *current_version,
-		   int *latest_version,
 		   int *server_version,
 		   char *path_prefix)
 {
 
-	read_versions(current_version, latest_version, server_version, path_prefix);
+	read_versions(current_version, server_version, path_prefix);
 
-	if (*latest_version < 0) {
+	if (*current_version < 0) {
 		return -1;
 	}
-	if (*latest_version == 0) {
+	if (*current_version == 0) {
 		printf("Update from version 0 not supported yet.\n");
 		return -1;
 	}
@@ -163,10 +161,10 @@ int check_versions(int *current_version,
 		printf("Update of dev build not supported %d\n", *current_version);
 		return -1;
 	}
-	swupd_curl_set_current_version(*latest_version);
+	swupd_curl_set_current_version(*current_version);
 
 	/* set preferred version and content server urls */
-	if (*server_version < 0) {
+	if (*current_version < 0) {
 		have_network = false;
 		return -1;
 	}

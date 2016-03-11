@@ -137,8 +137,8 @@ extern void increment_retries(int *retries, int *timeout);
 extern int main_update(void);
 extern int main_verify(int current_version);
 
-extern void read_versions(int *current_version, int *latest_version, int *server_version, char *path_prefix);
-extern int check_versions(int *current_version, int *latest_version, int *server_version, char *path_prefix);
+extern void read_versions(int *current_version, int *server_version, char *path_prefix);
+extern int check_versions(int *current_version, int *server_version, char *path_prefix);
 extern int read_version_from_subvol_file(char *path_prefix);
 
 extern bool check_network(void);

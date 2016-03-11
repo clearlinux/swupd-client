@@ -123,7 +123,7 @@ static int check_update()
 
 	check_root();
 	swupd_curl_init();
-	read_versions(&current_version, &current_version, &server_version, path_prefix);
+	read_versions(&current_version, &server_version, path_prefix);
 
 	if (server_version < 0) {
 		printf("Cannot reach update server\n");

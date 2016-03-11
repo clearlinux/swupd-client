@@ -170,7 +170,7 @@ static void print_versions()
 	int current_version, server_version;
 
 	swupd_curl_init();
-	read_versions(&current_version, &current_version, &server_version, path_prefix);
+	read_versions(&current_version, &server_version, path_prefix);
 
 	if (current_version < 0) {
 		printf("Cannot determine current OS version\n");

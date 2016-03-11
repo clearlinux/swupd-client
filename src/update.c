@@ -194,7 +194,7 @@ TRY_DOWNLOAD:
 
 int main_update()
 {
-	int current_version = -1, server_version = -1, latest_version = -1;
+	int current_version = -1, server_version = -1;
 	struct manifest *current_manifest = NULL, *server_manifest = NULL;
 	struct list *updates = NULL;
 	int ret;
@@ -226,18 +226,18 @@ int main_update()
 
 	/* Step 1: get versions */
 
-	ret = check_versions(&current_version, &latest_version, &server_version, path_prefix);
+	ret = check_versions(&current_version, &server_version, path_prefix);
 
 	if (ret < 0) {
 		goto clean_curl;
 	}
-	if (server_version <= latest_version) {
-		printf("Version on server (%i) is not newer than system version (%i)\n", server_version, latest_version);
+	if (server_version <= current_version) {
+		printf("Version on server (%i) is not newer than system version (%i)\n", server_version, current_version);
 		ret = EXIT_SUCCESS;
 		goto clean_curl;
 	}
 
-	printf("Preparing to update from %i to %i\n", latest_version, server_version);
+	printf("Preparing to update from %i to %i\n", current_version, server_version);
 
 	/* Step 2: housekeeping */
 
@@ -254,7 +254,7 @@ load_current_manifests:
 
 	/* get the from/to MoM manifests */
 	printf("Querying current manifest.\n");
-	ret = load_manifests(latest_version, latest_version, "MoM", NULL, &current_manifest);
+	ret = load_manifests(current_version, current_version, "MoM", NULL, &current_manifest);
 	if (ret) {
 		/* TODO: possibly remove this as not getting a "from" manifest is not fatal
 		 * - we just don't apply deltas */
@@ -276,7 +276,7 @@ load_current_manifests:
 load_server_manifests:
 	printf("Querying server manifest.\n");
 
-	ret = load_manifests(latest_version, server_version, "MoM", NULL, &server_manifest);
+	ret = load_manifests(current_version, server_version, "MoM", NULL, &server_manifest);
 	if (ret) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
@@ -336,7 +336,7 @@ load_server_manifests:
 
 download_packs:
 	/* Step 5: get the packs and untar */
-	ret = download_subscribed_packs(latest_version, server_version, false);
+	ret = download_subscribed_packs(current_version, server_version, false);
 	if (ret == -ENONET) {
 		// packs don't always exist, tolerate that but not ENONET
 		if (retries < MAX_TRIES) {
@@ -356,7 +356,7 @@ download_packs:
 
 	link_renames(updates, current_manifest); /* TODO: Have special lists for candidate and renames */
 
-	print_statistics(latest_version, server_version);
+	print_statistics(current_version, server_version);
 
 	/* Step 7: apply the update */
 
@@ -366,11 +366,11 @@ download_packs:
 		printf("Update was applied.\n");
 	}
 
-	if ((latest_version < server_version) && (ret == 0)) {
+	if ((current_version < server_version) && (ret == 0)) {
 		printf("Update successful. System updated from version %d to version %d\n",
-		       latest_version, server_version);
+		       current_version, server_version);
 	} else if (ret == 0) {
-		printf("Update complete. System already up-to-date at version %d\n", latest_version);
+		printf("Update complete. System already up-to-date at version %d\n", current_version);
 	}
 
 	delete_motd();

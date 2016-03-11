@@ -320,33 +320,38 @@ out_free_curl:
 	return ret;
 }
 
-int install_bundles(char **bundles, int current_version, struct manifest *mom)
+int install_bundles(struct list *bundles, int current_version, struct manifest *mom)
 {
 	bool new_bundles = false;
+	char *bundle;
 	int ret;
+	struct file *file;
 	struct list *iter;
 	struct sub *sub;
-	struct file *file;
 
 	/* step 1: check bundle args are valid if so populate subs struct */
 
-	for (; *bundles; ++bundles) {
-		if (is_tracked_bundle(*bundles)) {
-			printf("%s bundle already installed, skipping it\n", *bundles);
+	iter = list_head(bundles);
+	while (iter) {
+		bundle = iter->data;
+		iter = iter->next;
+
+		if (is_tracked_bundle(bundle)) {
+			printf("%s bundle already installed, skipping it\n", bundle);
 			continue;
 		}
 
-		if (!manifest_has_component(mom, *bundles)) {
-			printf("%s bundle name is invalid, skipping it...\n", *bundles);
+		if (!manifest_has_component(mom, bundle)) {
+			printf("%s bundle name is invalid, skipping it...\n", bundle);
 			continue;
 		}
 
-		if (component_subscribed(*bundles)) {
+		if (component_subscribed(bundle)) {
 			continue;
 		}
-		create_and_append_subscription(*bundles);
+		create_and_append_subscription(bundle);
 		new_bundles = true;
-		printf("Added bundle %s for installation\n", *bundles);
+		printf("Added bundle %s for installation\n", bundle);
 	}
 
 	if (!new_bundles) {
@@ -428,6 +433,7 @@ int install_bundles_frontend(char **bundles)
 	int lock_fd;
 	int ret = 0;
 	int current_version;
+	struct list *bundles_list = NULL;
 	struct manifest *mom;
 
 	/* initialize swupd and get current version from OS */
@@ -458,7 +464,12 @@ int install_bundles_frontend(char **bundles)
 		goto clean_and_exit;
 	}
 
-	ret = install_bundles(bundles, current_version, mom);
+	for (; *bundles; ++bundles) {
+		bundles_list = list_prepend_data(bundles_list, *bundles);
+	}
+
+	ret = install_bundles(bundles_list, current_version, mom);
+	list_free_list(bundles_list);
 
 	free_manifest(mom);
 clean_and_exit:

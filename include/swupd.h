@@ -51,6 +51,7 @@ struct manifest {
 	struct list *files;
 	struct list *manifests;    /* struct file for possible manifests */
 	struct list *submanifests; /* struct manifest for subscribed manifests */
+	struct list *includes;     /* manifest names included in manifest */
 	char *component;
 };
 

@@ -156,6 +156,7 @@ static struct manifest *manifest_from_file(int version, char *component)
 	int count = 0;
 	int deleted = 0;
 	struct manifest *manifest;
+	struct list *includes = NULL;
 	char *filename;
 	uint64_t contentsize = 0;
 	int manifest_hdr_version;
@@ -219,6 +220,12 @@ static struct manifest *manifest_from_file(int version, char *component)
 		if (strncmp(line, "contentsize:", 12) == 0) {
 			contentsize = strtoull(c, NULL, 10);
 		}
+		if (strncmp(line, "includes:", 9) == 0) {
+			includes = list_prepend_data(includes, strdup(c));
+			if (!includes->data) {
+				abort();
+			}
+		}
 	}
 
 	manifest = alloc_manifest(version, component);
@@ -228,6 +235,7 @@ static struct manifest *manifest_from_file(int version, char *component)
 
 	manifest->contentsize = contentsize;
 	manifest->manifest_version = manifest_enc_version;
+	manifest->includes = includes;
 
 	/* empty line */
 	while (!feof(infile)) {
@@ -386,6 +394,9 @@ void free_manifest(struct manifest *manifest)
 	}
 	if (manifest->submanifests) {
 		list_free_list_and_data(manifest->submanifests, free_manifest_data);
+	}
+	if (manifest->includes) {
+		list_free_list_and_data(manifest->includes, free);
 	}
 	free(manifest->component);
 	free(manifest);

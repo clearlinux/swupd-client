@@ -1117,7 +1117,7 @@ void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2)
 	bmanifest->files = preserver;
 }
 
-bool manifest_has_component(struct manifest *manifest, const char *component)
+struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bundlename)
 {
 	struct list *iter = NULL;
 	struct file *file;
@@ -1126,12 +1126,12 @@ bool manifest_has_component(struct manifest *manifest, const char *component)
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
-		if (strcmp(file->filename, component) == 0) {
-			return true;
+		if (strcmp(file->filename, bundlename) == 0) {
+			return file;
 		}
 	}
 
-	return false;
+	return NULL;
 }
 
 /* This performs a linear search through the files list. */

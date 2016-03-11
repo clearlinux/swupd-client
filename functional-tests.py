@@ -130,6 +130,19 @@ class bundleadd_add_directory(unittest.TestCase):
         self.assertIn('Tracking test-bundle bundle on the system', test_output)
 
 
+@http_command(option="test-bundle1 test-bundle2")
+class bundleadd_add_multiple(unittest.TestCase):
+    def validate(self, test_output):
+        newfile = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/foo')
+        newdir = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/bin')
+        self.assertTrue(os.path.isfile(newfile))
+        self.assertTrue(os.path.isdir(newdir))
+
+
 @http_command(option="test-bundle")
 class bundleadd_boot_file(unittest.TestCase):
     def validate(self, test_output):
@@ -143,6 +156,21 @@ class bundleadd_boot_file(unittest.TestCase):
                                path_from_name(__class__.__name__, 'target'),
                                'usr/lib/kernel/testfile')
         self.assertTrue(os.path.isfile(newfile))
+
+
+@http_command(option="test-bundle")
+class bundleadd_include(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('Added bundle test-bundle for installation', test_output)
+        self.assertIn('Added bundle os-core for installation', test_output)
+        newfile = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/foo')
+        newdir = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/bin')
+        self.assertTrue(os.path.isfile(newfile))
+        self.assertTrue(os.path.isdir(newdir))
 
 
 @http_command(option="--list")

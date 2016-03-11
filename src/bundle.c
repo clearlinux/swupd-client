@@ -320,29 +320,47 @@ out_free_curl:
 	return ret;
 }
 
-int install_bundles(struct list *bundles, int current_version, struct manifest *mom)
+/* tristate return, -1 for errors, 1 for no errors but no new subscriptions, 0 for no errors and new subscriptions */
+int add_subscriptions(struct list *bundles, int current_version, struct manifest *mom)
 {
 	bool new_bundles = false;
 	char *bundle;
-	int ret;
+	int ret = 1;
 	struct file *file;
 	struct list *iter;
-	struct sub *sub;
-
-	/* step 1: check bundle args are valid if so populate subs struct */
+	struct manifest *manifest;
 
 	iter = list_head(bundles);
 	while (iter) {
 		bundle = iter->data;
 		iter = iter->next;
 
-		if (is_tracked_bundle(bundle)) {
-			printf("%s bundle already installed, skipping it\n", bundle);
+		file = search_bundle_in_manifest(mom, bundle);
+		if (!file) {
+			printf("%s bundle name is invalid, skipping it...\n", bundle);
 			continue;
 		}
 
-		if (!manifest_has_component(mom, bundle)) {
-			printf("%s bundle name is invalid, skipping it...\n", bundle);
+		ret = load_manifests(current_version, file->last_change, bundle, file, &manifest);
+		if (ret) {
+			printf("Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
+			ret = -1;
+			goto out;
+		}
+
+		if (manifest->includes) {
+			ret = add_subscriptions(manifest->includes, current_version, mom);
+			if (ret == -1) {
+				free_manifest(manifest);
+				goto out;
+			} else if (ret == 0) {
+				new_bundles = true;
+			}
+		}
+		free(manifest);
+
+		if (is_tracked_bundle(bundle)) {
+			printf("%s bundle already installed, skipping it\n", bundle);
 			continue;
 		}
 
@@ -353,14 +371,33 @@ int install_bundles(struct list *bundles, int current_version, struct manifest *
 		new_bundles = true;
 		printf("Added bundle %s for installation\n", bundle);
 	}
+	if (new_bundles) {
+		ret = 0;
+	}
 
-	if (!new_bundles) {
-		printf("There are no pending bundles to install, exiting now\n");
+out:
+	return ret;
+}
+
+int install_bundles(struct list *bundles, int current_version, struct manifest *mom)
+{
+	int ret;
+	struct file *file;
+	struct list *iter;
+	struct sub *sub;
+
+	/* step 1: check bundle args are valid if so populate subs struct */
+	ret = add_subscriptions(bundles, current_version, mom);
+
+	if (ret) {
+		if (ret == 1) {
+			printf("There are no pending bundles to install, exiting now\n");
+		}
 		ret = EBUNDLE_INSTALL;
 		goto out;
 	}
 
-	/* This can fail only if a subscribed bundle is not in mom which is already checked in manifest_has_component run prior */
+	/* This can fail only if a subscribed bundle is not in mom, this should be checked in add_subscriptions */
 	(void)subscription_versions_from_MoM(mom, 0);
 	recurse_manifest(mom, NULL);
 	consolidate_submanifests(mom);

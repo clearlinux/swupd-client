@@ -221,7 +221,7 @@ extern void dump_file_info(struct file *file);
 void free_file_data(void *data);
 void remove_files_in_manifest_from_fs(struct manifest *m);
 void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2);
-bool manifest_has_component(struct manifest *manifest, const char *component);
+extern struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bundlename);
 extern struct file *search_file_in_manifest(struct manifest *manifest, const char *filename);
 
 extern char *mounted_dirs;

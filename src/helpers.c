@@ -166,26 +166,26 @@ int create_required_dirs(void)
 	if (missing) { // (re)create dirs
 		char *cmd;
 
-		// laziness here for want of a simple "mkdir -p"
-		string_or_die(&cmd, "mkdir -p %s/{delta,staged,download}", STATE_DIR);
-		ret = system(cmd);
-		if (ret) {
-			return -1;
-		}
-		free(cmd);
-
-		// chmod 700
-		ret = chmod(STATE_DIR, S_IRWXU);
-		if (ret) {
-			return -1;
-		}
 		for (i = 0; i < STATE_DIR_COUNT; i++) {
+			string_or_die(&cmd, "mkdir -p %s/%s", STATE_DIR, dirs[i]);
+			ret = system(cmd);
+			if (ret) {
+				return -1;
+			}
+			free(cmd);
+
 			string_or_die(&dir, "%s/%s", STATE_DIR, dirs[i]);
 			ret = chmod(dir, S_IRWXU);
 			if (ret) {
 				return -1;
 			}
 			free(dir);
+		}
+
+		// chmod 700
+		ret = chmod(STATE_DIR, S_IRWXU);
+		if (ret) {
+			return -1;
 		}
 	}
 

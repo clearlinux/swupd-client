@@ -268,10 +268,8 @@ load_current_manifests:
 	}
 
 	/*  Reset the retries and timeout for subsequent download calls */
-	if (retries != 0) {
-		retries = 0;
-		timeout = 10;
-	}
+	retries = 0;
+	timeout = 10;
 
 load_server_manifests:
 	printf("Querying server manifest.\n");
@@ -292,10 +290,8 @@ load_server_manifests:
 		goto clean_exit;
 	}
 
-	if (retries != 0) {
-		retries = 0;
-		timeout = 10;
-	}
+	retries = 0;
+	timeout = 10;
 
 	subscription_versions_from_MoM(current_manifest, 1);
 	subscription_versions_from_MoM(server_manifest, 0);

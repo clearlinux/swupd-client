@@ -36,6 +36,7 @@ COMMAND_MAP = {'bundleadd': 'bundle-add',
                'checkupdate': 'check-update',
                'hashdump': 'hashdump',
                'update': 'update',
+               'search': 'search',
                'verify': 'verify'}
 PATH_PREFIX = 'test/functional'
 PORT = '8089'
@@ -202,6 +203,76 @@ class bundleremove_remove_file(unittest.TestCase):
         self.assertIn('Untracking bundle from system...', test_output)
         self.assertIn('Success: Bundle removed', test_output)
 
+# Positive test for a library in lib32/
+@http_command(option="-l -a test-lib32")
+class search_content_check_poslib32(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('\'test-bundle\'  :  \'/usr/lib/test-lib32\'', test_output)
+        self.assertNotIn('/libtest-nohit', test_output)
+
+# Positive test for a binary
+@http_command(option="-b test-bin")
+class search_content_check_posbin(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('\'test-bundle\'  :  \'/usr/bin/test-bin\'', test_output)
+        self.assertNotIn('/libtest-nohit', test_output)
+
+# Posititve test for a binary using the -e everywhere flag
+@http_command(option="-e test-bin")
+class search_content_check_posebin(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('\'test-bundle\'  :  \'/usr/bin/test-bin\'', test_output)
+        self.assertNotIn('/libtest-nohit', test_output)
+
+# Negative test for a binary using the -l library flag
+@http_command(option="-l test-bin")
+class search_content_check_poslbin(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertNotIn('\'test-bundle\'  :  \'/usr/bin/test-bin\'', test_output)
+        self.assertNotIn('/libtest-nohit', test_output)
+
+# Positive test for a library in lib64/
+@http_command(option="-l -a test-lib64")
+class search_content_check_poslib64(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('\'test-bundle\'  :  \'/usr/lib64/test-lib64\'', test_output)
+        self.assertNotIn('/libtest-nohit', test_output)
+
+#Negative test for a non-existent library
+@http_command(option="-a -l test-lib36")
+class search_content_check_neglib32(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertNotIn('\'test-bundle\'  :  \'test-lib36\'', test_output)
+        self.assertNotIn('/libtest-nohit', test_output)
+
+# Negative test for a file which exists but is not a library
+@http_command(option="-l -a libtest-nohit")
+class search_content_check_neglibtest(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertNotIn('\'test-bundle\'  :  \'libtest-nohit\'', test_output)
+        self.assertNotIn('/libtest-nohit', test_output)
+
+# Positive test for a file, specifying full path
+@http_command(option="/usr/lib64/test-lib64")
+class search_content_check_posfull_path(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('\'test-bundle\'  :  \'/usr/lib64/test-lib64\'', test_output)
+        self.assertNotIn('/libtest-nohit', test_output)
+
+# Nagative test for a non-existent file, specifying full path
+@http_command(option="/usr/lib64/test-lib100")
+class search_content_check_negfull_path(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertNotIn('\'test-bundle\'  :  \'/usr/lib64/test-lib100\'', test_output)
+        self.assertNotIn('\'test-bundle\'  :  \'/usr/lib64/test-lib64\'', test_output)
+        self.assertNotIn('/libtest-nohit', test_output)
+
+# Negative test for a file which exists, but providing incorrect path
+@http_command(option="/usr/lib/test-lib64")
+class search_content_check_negwrongpath(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertNotIn('\'test-bundle\'  :  \'/usr/lib/test-lib64\'', test_output)
+        self.assertNotIn('/libtest-nohit', test_output)
 
 @http_command(option="")
 class checkupdate_version_match(unittest.TestCase):
@@ -403,7 +474,7 @@ class verify_install_directory(unittest.TestCase):
 
 def get_test_cases():
     tests = ['bundleadd', 'bundleremove', 'checkupdate', 'hashdump', 'update',
-             'verify']
+             'verify', 'search']
     test_cases = []
     class_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
     for (name, cls) in class_members:

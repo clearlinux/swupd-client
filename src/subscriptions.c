@@ -115,14 +115,13 @@ int component_subscribed(char *component)
 	return 0;
 }
 
-int subscription_versions_from_MoM(struct manifest *MoM, int is_old)
+void subscription_versions_from_MoM(struct manifest *MoM, int is_old)
 {
 	struct list *list;
 	struct list *list2;
 	struct file *file;
 	struct sub *sub;
 	bool bundle_found;
-	int ret = 0;
 
 	list = list_head(subs);
 	while (list) {
@@ -144,15 +143,7 @@ int subscription_versions_from_MoM(struct manifest *MoM, int is_old)
 				bundle_found = true;
 			}
 		}
-
-		if (!bundle_found) {
-			sub->version = -1;
-			printf("ERROR: Bundle not in MoM |\"component=%s\"\n", sub->component);
-			ret = EBUNDLE_MISMATCH;
-		}
 	}
-
-	return ret;
 }
 
 void create_and_append_subscription(const char *component)

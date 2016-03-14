@@ -197,7 +197,7 @@ extern void free_subscriptions(void);
 extern void read_subscriptions(void);
 extern void read_subscriptions_alt(void);
 extern int component_subscribed(char *component);
-extern int subscription_versions_from_MoM(struct manifest *MoM, int is_old);
+extern void subscription_versions_from_MoM(struct manifest *MoM, int is_old);
 
 extern void hash_assign(char *src, char *dest);
 extern bool hash_compare(char *hash1, char *hash2);

@@ -60,6 +60,7 @@ struct list *free_list_file(struct list *item)
 
 void read_subscriptions_alt(void)
 {
+	bool have_os_core = false;
 	char *path = NULL;
 	DIR *dir;
 	struct dirent *ent;
@@ -77,6 +78,9 @@ void read_subscriptions_alt(void)
 					/*  This is considered odd since means two files same name on same folder */
 					continue;
 				}
+				if (strcmp(ent->d_name, "os-core") == 0) {
+					have_os_core = true;
+				}
 
 				create_and_append_subscription(ent->d_name);
 			}
@@ -87,8 +91,8 @@ void read_subscriptions_alt(void)
 
 	free(path);
 
-	/* if nothing was picked up from bundles directory then add os-core by default */
-	if (list_len(subs) == 0) {
+	/* Always add os-core */
+	if (!have_os_core) {
 		create_and_append_subscription("os-core");
 	}
 }

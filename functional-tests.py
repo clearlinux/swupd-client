@@ -258,6 +258,15 @@ class update_download(unittest.TestCase):
         self.assertIn('    changed manifests : 1', test_output)
 
 
+@http_command(option="")
+class update_missing_os_core(unittest.TestCase):
+    def validate(self, test_output):
+        os_core_dir = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/bin')
+        self.assertTrue(os.path.isdir(os_core_dir))
+
+
 @http_command(option="--status")
 class update_status(unittest.TestCase):
     def validate(self, test_output):

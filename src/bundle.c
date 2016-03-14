@@ -397,8 +397,7 @@ int install_bundles(struct list *bundles, int current_version, struct manifest *
 		goto out;
 	}
 
-	/* This can fail only if a subscribed bundle is not in mom, this should be checked in add_subscriptions */
-	(void)subscription_versions_from_MoM(mom, 0);
+	subscription_versions_from_MoM(mom, 0);
 	recurse_manifest(mom, NULL);
 	consolidate_submanifests(mom);
 

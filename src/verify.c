@@ -228,13 +228,13 @@ static bool hash_needs_work(struct file *file, char *hash)
 	}
 }
 
-static int get_all_files(int version, struct manifest *official_manifest)
+static int get_all_files(struct manifest *official_manifest)
 {
 	int ret;
 	struct list *iter;
 
 	/* for install we need everything so synchronously download zero packs */
-	ret = download_subscribed_packs(0, version, true);
+	ret = download_subscribed_packs(true);
 	if (ret < 0) { // require zero pack
 		/* If we hit this point, we know we have a network connection, therefore
 		 * 	the error is server-side. This is also a critical error, so detailed
@@ -356,10 +356,10 @@ RETRY_DOWNLOADS:
 }
 
 /* allow optimization of install case */
-static int get_required_files(int version, struct manifest *official_manifest)
+static int get_required_files(struct manifest *official_manifest)
 {
 	if (cmdline_option_install) {
-		return get_all_files(version, official_manifest);
+		return get_all_files(official_manifest);
 	}
 
 	if (cmdline_option_fix) {
@@ -671,7 +671,7 @@ int verify_main(int argc, char **argv)
 
 	if (cmdline_option_fix || cmdline_option_install) {
 		/* when fixing or installing we need input files. */
-		ret = get_required_files(version, official_manifest);
+		ret = get_required_files(official_manifest);
 		if (ret != 0) {
 			goto brick_the_system_and_clean_curl;
 		}

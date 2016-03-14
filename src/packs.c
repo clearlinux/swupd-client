@@ -96,7 +96,7 @@ static int download_pack(int oldversion, int newversion, char *module)
 }
 
 /* pull in packs for base and any subscription */
-int download_subscribed_packs(int oldversion, int UNUSED_PARAM newversion, bool required)
+int download_subscribed_packs(bool required)
 {
 	struct list *iter;
 	struct sub *sub = NULL;
@@ -115,11 +115,7 @@ int download_subscribed_packs(int oldversion, int UNUSED_PARAM newversion, bool 
 			continue;
 		}
 
-		if (oldversion != 0) {
-			oldversion = sub->oldversion;
-		}
-
-		err = download_pack(oldversion, sub->version, sub->component);
+		err = download_pack(sub->oldversion, sub->version, sub->component);
 		if (err < 0) {
 			if (required) {
 				return err;

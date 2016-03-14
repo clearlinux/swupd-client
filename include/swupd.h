@@ -165,7 +165,7 @@ extern void account_delta_hit(void);
 extern void account_delta_miss(void);
 extern void print_statistics(int version1, int version2);
 
-extern int download_subscribed_packs(int oldversion, int newversion, bool required);
+extern int download_subscribed_packs(bool required);
 
 extern void try_delta(struct file *file);
 extern void full_download(struct file *file);

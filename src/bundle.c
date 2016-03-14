@@ -406,7 +406,7 @@ int install_bundles(struct list *bundles, int current_version, struct manifest *
 	(void)rm_staging_dir_contents("download");
 
 	printf("Downloading required packs...\n");
-	ret = download_subscribed_packs(0, current_version, true);
+	ret = download_subscribed_packs(true);
 	if (ret != 0) {
 		printf("pack downloads failed, cannot proceed with the installation, exiting.\n");
 		goto out;

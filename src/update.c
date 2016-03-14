@@ -332,7 +332,7 @@ load_server_manifests:
 
 download_packs:
 	/* Step 5: get the packs and untar */
-	ret = download_subscribed_packs(current_version, server_version, false);
+	ret = download_subscribed_packs(false);
 	if (ret == -ENONET) {
 		// packs don't always exist, tolerate that but not ENONET
 		if (retries < MAX_TRIES) {

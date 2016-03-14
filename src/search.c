@@ -66,6 +66,7 @@ static void print_help(const char *name)
 	printf("   -d, --display-files	   Output full file list, no search done\n");
 	printf("   -i, --init              Download all manifests then return, no search done\n");
 	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
+	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	printf("\n");
@@ -77,6 +78,7 @@ static const struct option prog_opts[] = {
 	{ "library", no_argument, 0, 'l' },
 	{ "binary", no_argument, 0, 'b' },
 	{ "everywhere", no_argument, 0, 'e' },
+	{ "port", required_argument, 0, 'P' },
 	{ "path", required_argument, 0, 'p' },
 	{ "format", required_argument, 0, 'F' },
 	{ "init", no_argument, 0, 'i' },
@@ -91,7 +93,7 @@ static bool parse_options(int argc, char **argv)
 
 	set_format_string(NULL);
 
-	while ((opt = getopt_long(argc, argv, "hu:p:F:lbeiad", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hu:P:p:F:lbeiad", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -112,6 +114,12 @@ static bool parse_options(int argc, char **argv)
 			string_or_die(&version_server_urls[0], "%s", optarg);
 			string_or_die(&content_server_urls[0], "%s", optarg);
 
+			break;
+		case 'P':
+			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
+				printf("Invalid --port argument\n\n");
+				goto err;
+			}
 			break;
 		case 'p': /* default empty path_prefix verifies the running OS */
 			if (!optarg) {

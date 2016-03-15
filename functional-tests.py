@@ -330,6 +330,54 @@ class update_download(unittest.TestCase):
 
 
 @http_command(option="")
+class update_include(unittest.TestCase):
+    def validate(self, test_output):
+        core = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/core')
+        self.assertTrue(os.path.isfile(core))
+        test1 = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/bin')
+        self.assertTrue(os.path.isdir(test1))
+        test2 = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/foo2')
+        self.assertTrue(os.path.isfile(test2))
+        test3 = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/foo3')
+        self.assertTrue(os.path.isfile(test3))
+        test4 = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/foo4')
+        self.assertTrue(os.path.isfile(test4))
+        test4 = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/foo4')
+        self.assertTrue(os.path.isfile(test4))
+        test5 = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/foo5')
+        self.assertTrue(os.path.isfile(test5))
+        test6 = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/foo6')
+        self.assertTrue(os.path.isfile(test6))
+        test7 = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'usr/foo7')
+        self.assertTrue(os.path.isfile(test7))
+        self.assertIn('os-core bundle already installed, skipping it', test_output)
+        self.assertIn('Added bundle test-bundle2 for installation', test_output)
+        self.assertIn('Added bundle test-bundle3 for installation', test_output)
+        self.assertIn('Added bundle test-bundle4 for installation', test_output)
+        self.assertIn('Added bundle test-bundle5 for installation', test_output)
+        self.assertIn('Added bundle test-bundle6 for installation', test_output)
+        self.assertIn('Added bundle test-bundle7 for installation', test_output)
+
+
+@http_command(option="")
 class update_missing_os_core(unittest.TestCase):
     def validate(self, test_output):
         os_core_dir = os.path.join(os.getcwd(),

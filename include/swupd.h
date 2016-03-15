@@ -259,6 +259,7 @@ extern void create_and_append_subscription(const char *component);
 extern int remove_bundle(const char *bundle_name);
 extern int list_installable_bundles();
 extern int install_bundles_frontend(char **bundles);
+extern int add_subscriptions(struct list *bundles, int current_version, struct manifest *mom);
 
 /* some disk sizes constants for the various features:
  *   ...consider adding build automation to catch at build time

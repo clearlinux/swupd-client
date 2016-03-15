@@ -1,0 +1,11 @@
+MANIFEST	3
+version:	100
+previous:	10
+filecount:	1
+timestamp:	1451936779
+contentsize:	17929151
+includes:	os-core
+includes:	test-bundle5
+includes:	test-bundle6
+
+F...	6e5658ceb83e69365ded0684df8f38bcc632f71780ae10ff19b87616a03d6337	100	/usr/foo4

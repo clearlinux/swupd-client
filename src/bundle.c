@@ -326,9 +326,13 @@ int add_subscriptions(struct list *bundles, int current_version, struct manifest
 	bool new_bundles = false;
 	char *bundle;
 	int ret = 1;
+        int retries = 0;
+        int timeout = 10;
 	struct file *file;
 	struct list *iter;
 	struct manifest *manifest;
+
+	srand(time(NULL));
 
 	iter = list_head(bundles);
 	while (iter) {
@@ -341,12 +345,23 @@ int add_subscriptions(struct list *bundles, int current_version, struct manifest
 			continue;
 		}
 
+retry_manifest_download:
 		ret = load_manifests(current_version, file->last_change, bundle, file, &manifest);
 		if (ret) {
-			printf("Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
-			ret = -1;
-			goto out;
+                        if (retries < MAX_TRIES) {
+                                increment_retries(&retries, &timeout);
+                                goto retry_manifest_download;
+                        }
+                        printf("Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
+                        ret = -1;
+                        goto out;
 		}
+
+                if (!manifest) {
+                        printf("Unable to load manifest %s version %d, exiting now\n", bundle, file->last_change);
+                        ret = -1;
+                        goto out;
+                }
 
 		if (manifest->includes) {
 			ret = add_subscriptions(manifest->includes, current_version, mom);

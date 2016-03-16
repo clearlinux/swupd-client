@@ -269,7 +269,7 @@ class search_content_check_negfull_path(unittest.TestCase):
 
 # Negative test for a file which exists, but providing incorrect path
 @http_command(option="/usr/lib/test-lib64")
-class search_content_check_posfull_path(unittest.TestCase):
+class search_content_check_negwrongpath(unittest.TestCase):
     def validate(self, test_output):
         self.assertNotIn('\'test-bundle\'  :  \'/usr/lib/test-lib64\'', test_output)
         self.assertNotIn('/libtest-nohit', test_output)

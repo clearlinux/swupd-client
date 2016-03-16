@@ -2,8 +2,6 @@
 
 set -e
 
-rm -f web-dir/*/*.tar
-touch target-dir/test-file
 touch target-dir/usr/share/clear/bundles/test-bundle
 tar -C web-dir/10  -cf web-dir/10/Manifest.MoM.tar Manifest.MoM Manifest.MoM.signed
 tar -C web-dir/10 -cf web-dir/10/Manifest.os-core.tar Manifest.os-core Manifest.os-core.signed

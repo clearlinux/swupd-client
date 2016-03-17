@@ -148,8 +148,8 @@ int do_staging(struct file *file, struct manifest *MoM)
 			ret = -errno;
 			goto out;
 		}
-		string_or_die(&tarcommand, "tar -C %s " TAR_PERM_ATTR_ARGS " -cf - '%s' 2> /dev/null | "
-					   "tar -C %s%s " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
+		string_or_die(&tarcommand, TAR_COMMAND " -C %s " TAR_PERM_ATTR_ARGS " -cf - %s 2> /dev/null | "
+			      TAR_COMMAND " -C %s%s " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
 			      rename_tmpdir, base, path_prefix, rel_dir);
 		ret = system(tarcommand);
 		if (WIFEXITED(ret)) {
@@ -186,8 +186,8 @@ int do_staging(struct file *file, struct manifest *MoM)
 				ret = -errno;
 				goto out;
 			}
-			string_or_die(&tarcommand, "tar -C %s/staged " TAR_PERM_ATTR_ARGS " -cf - '.update.%s' 2> /dev/null | "
-						   "tar -C %s%s " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
+			string_or_die(&tarcommand, TAR_COMMAND " -C %s/staged " TAR_PERM_ATTR_ARGS " -cf - .update.%s 2> /dev/null | "
+				      TAR_COMMAND " -C %s%s " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
 				      STATE_DIR, base, path_prefix, rel_dir);
 			ret = system(tarcommand);
 			if (WIFEXITED(ret)) {

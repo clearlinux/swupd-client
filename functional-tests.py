@@ -204,7 +204,7 @@ class bundleremove_remove_file(unittest.TestCase):
         self.assertIn('Success: Bundle removed', test_output)
 
 # Positive test for a library in lib32/
-@http_command(option="-l -a test-lib32")
+@http_command(option="-l test-lib32")
 class search_content_check_poslib32(unittest.TestCase):
     def validate(self, test_output):
         self.assertIn('\'test-bundle\'  :  \'/usr/lib/test-lib32\'', test_output)
@@ -218,7 +218,7 @@ class search_content_check_posbin(unittest.TestCase):
         self.assertNotIn('/libtest-nohit', test_output)
 
 # Posititve test for a binary using the -e everywhere flag
-@http_command(option="-e test-bin")
+@http_command(option="test-bin")
 class search_content_check_posebin(unittest.TestCase):
     def validate(self, test_output):
         self.assertIn('\'test-bundle\'  :  \'/usr/bin/test-bin\'', test_output)
@@ -232,21 +232,21 @@ class search_content_check_poslbin(unittest.TestCase):
         self.assertNotIn('/libtest-nohit', test_output)
 
 # Positive test for a library in lib64/
-@http_command(option="-l -a test-lib64")
+@http_command(option="-l test-lib64")
 class search_content_check_poslib64(unittest.TestCase):
     def validate(self, test_output):
         self.assertIn('\'test-bundle\'  :  \'/usr/lib64/test-lib64\'', test_output)
         self.assertNotIn('/libtest-nohit', test_output)
 
 #Negative test for a non-existent library
-@http_command(option="-a -l test-lib36")
+@http_command(option="-l test-lib36")
 class search_content_check_neglib32(unittest.TestCase):
     def validate(self, test_output):
         self.assertNotIn('\'test-bundle\'  :  \'test-lib36\'', test_output)
         self.assertNotIn('/libtest-nohit', test_output)
 
 # Negative test for a file which exists but is not a library
-@http_command(option="-l -a libtest-nohit")
+@http_command(option="-l libtest-nohit")
 class search_content_check_neglibtest(unittest.TestCase):
     def validate(self, test_output):
         self.assertNotIn('\'test-bundle\'  :  \'libtest-nohit\'', test_output)

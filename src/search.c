@@ -35,9 +35,9 @@
 
 char *search_string;
 char search_type = '0';
-bool display_all = false;   /* Show all hits, or simplify output and show just first bundle match */
 bool display_files = false; /* Just display all files found in Manifest set */
 bool init = false;
+char scope = '0';
 
 /* Supported default search paths */
 char *lib_paths[] = {
@@ -61,14 +61,16 @@ static void print_help(const char *name)
 	printf("   -h, --help              Display this help\n");
 	printf("   -l, --library           Search paths where libraries are located for a match\n");
 	printf("   -b, --binary            Search paths where binaries are located for a match\n");
-	printf("   -e, --everywhere        Search system-wide for a match\n");
-	printf("   -a, --all               Display all matches. Default is to show the first only\n");
+	printf("   -s, --scope=[query type] 'b' or 'o' for first hit per (b)undle, or one hit total across the (o)s\n");
 	printf("   -d, --display-files	   Output full file list, no search done\n");
 	printf("   -i, --init              Download all manifests then return, no search done\n");
 	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
 	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
+
+	printf("\nResults format:\n");
+	printf(" 'Bundle Name'  :  'File matching search term'\n\n");
 	printf("\n");
 }
 
@@ -77,12 +79,11 @@ static const struct option prog_opts[] = {
 	{ "url", required_argument, 0, 'u' },
 	{ "library", no_argument, 0, 'l' },
 	{ "binary", no_argument, 0, 'b' },
-	{ "everywhere", no_argument, 0, 'e' },
+	{ "scope", required_argument, 0, 's' },
 	{ "port", required_argument, 0, 'P' },
 	{ "path", required_argument, 0, 'p' },
 	{ "format", required_argument, 0, 'F' },
 	{ "init", no_argument, 0, 'i' },
-	{ "all", no_argument, 0, 'a' },
 	{ "display-files", no_argument, 0, 'd' },
 	{ 0, 0, 0, 0 }
 };
@@ -93,7 +94,7 @@ static bool parse_options(int argc, char **argv)
 
 	set_format_string(NULL);
 
-	while ((opt = getopt_long(argc, argv, "hu:P:p:F:lbeiad", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hu:P:p:F:s:lbid", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -133,6 +134,20 @@ static bool parse_options(int argc, char **argv)
 			string_or_die(&path_prefix, "%s", optarg);
 
 			break;
+		case 's':
+			if (!optarg || (strcmp(optarg, "b") && (strcmp(optarg, "o")))) {
+				printf("Invalid --scope argument. Must be 'b' or 'o'\n\n");
+				goto err;
+			}
+
+			if (!strcmp(optarg, "b")) {
+				scope = 'b';
+			}
+			else if (!strcmp(optarg, "o")) {
+				scope = 'o';
+			}
+
+			break;
 		case 'F':
 			if (!optarg || !set_format_string(optarg)) {
 				printf("Invalid --format argument\n\n");
@@ -142,7 +157,7 @@ static bool parse_options(int argc, char **argv)
 		case 'l':
 			if (search_type != '0') {
 				printf("Error, cannot specify multiple search types "
-				       "(-l, -b, and -e are mutually exclusive)\n");
+				       "(-l and -b are mutually exclusive)\n");
 				goto err;
 			}
 
@@ -154,23 +169,11 @@ static bool parse_options(int argc, char **argv)
 		case 'b':
 			if (search_type != '0') {
 				printf("Error, cannot specify multiple search types "
-				       "(-l, -b, and -e are mutually exclusive)\n");
+				       "(-l and -b are mutually exclusive)\n");
 				goto err;
 			}
 
 			search_type = 'b';
-			break;
-		case 'e':
-			if (search_type != '0') {
-				printf("Error, cannot specify multiple search types "
-				       "(-l, -b, and -e are mutually exclusive)\n");
-				goto err;
-			}
-
-			search_type = 'e';
-			break;
-		case 'a':
-			display_all = true;
 			break;
 		case 'd':
 			display_files = true;
@@ -184,6 +187,11 @@ static bool parse_options(int argc, char **argv)
 	if ((optind == argc) && (!init) && (!display_files)) {
 		printf("Error: Search term missing\n\n");
 		print_help(argv[0]);
+		return false;
+	}
+
+	if ((optind == argc - 1) && (display_files)) {
+		printf("Error: Cannot supply a search term and -d, --display-files together\n");
 		return false;
 	}
 
@@ -247,11 +255,12 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 	struct file *subfile;
 	struct manifest *subman = NULL;
 	int i, ret;
-	bool done_with_bundle, done = false;
+	bool done_with_bundle, done_with_search = false;
 	bool hit = false;
+	long hit_count = 0;
 
 	list = MoM->manifests;
-	while (list && !done) {
+	while (list && !done_with_search) {
 		file = list->data;
 		list = list->next;
 		done_with_bundle = false;
@@ -281,17 +290,11 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 			if (display_files) {
 				/* Just display filename */
 				file_search(subfile->filename, NULL, NULL);
-			} else if (search_type == 'e') {
+			} else if (search_type == '0') {
 				/* Search for exact match, not path addition */
 				if (file_search(subfile->filename, "", search_term)) {
 					report_find(file->filename, subfile->filename);
 					hit = true;
-					if (!display_all) {
-						done = true;
-					}
-
-					done_with_bundle = true;
-					break;
 				}
 			} else if (search_type == 'l') {
 				/* Check each supported library path for a match */
@@ -299,12 +302,6 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 					if (file_search(subfile->filename, lib_paths[i], search_term)) {
 						report_find(file->filename, subfile->filename);
 						hit = true;
-						if (!display_all) {
-							done = true;
-						}
-
-						done_with_bundle = true;
-						break;
 					}
 				}
 			} else if (search_type == 'b') {
@@ -313,25 +310,32 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 					if (file_search(subfile->filename, bin_paths[i], search_term)) {
 						report_find(file->filename, subfile->filename);
 						hit = true;
-						if (!display_all) {
-							done = true;
-						}
-
-						done_with_bundle = true;
-						break;
 					}
 				}
 			} else {
 				printf("Unrecognized search type. -b or -l supported\n");
-				done = true;
+				done_with_search = true;
 				break;
 			}
+
+			/* Determine the level of completion we've reached */
+			if (hit) {
+				if (scope == 'b') {
+					done_with_bundle = true;
+				} else if (scope == 'o') {
+					done_with_bundle = true;
+					done_with_search = true;
+				}
+
+				hit_count++;
+			}
+			hit = false;
 		}
 
 		free_manifest(subman);
 	}
 
-	if (!hit) {
+	if (!hit_count) {
 		printf("Search term not found.\n");
 	}
 }
@@ -383,6 +387,7 @@ int download_manifests(struct manifest **MoM)
 	int current_version;
 	int ret = 0;
 	double size;
+	bool did_download = false;
 
 	current_version = read_version_from_subvol_file(path_prefix);
 	swupd_curl_set_current_version(current_version);
@@ -423,6 +428,8 @@ int download_manifests(struct manifest **MoM)
 			ret = load_manifests(current_version, file->last_change, file->filename, NULL, &subMan);
 			if (ret != 0) {
 				printf("Cannot load official manifest MoM for version %i\n", current_version);
+			} else {
+				did_download = true;
 			}
 
 			free_manifest(subMan);
@@ -441,6 +448,10 @@ int download_manifests(struct manifest **MoM)
 		free(tarfile);
 	}
 
+	if (did_download) {
+		printf("Completed manifests download.\n\n");
+	}
+
 	return ret;
 }
 
@@ -453,11 +464,6 @@ int search_main(int argc, char **argv)
 	if (!parse_options(argc, argv) ||
 	    create_required_dirs()) {
 		return EXIT_FAILURE;
-	}
-
-	if (search_type == '0') {
-		/* Default to a system-side search */
-		search_type = 'e';
 	}
 
 	if (!init_globals()) {

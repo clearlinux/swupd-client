@@ -136,9 +136,9 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 's':
 			if (!optarg || (strcmp(optarg, "b") && (strcmp(optarg, "o")))) {
-                printf("Invalid --scope argument. Must be 'b' or 'o'\n\n");
-                goto err;
-            }
+				printf("Invalid --scope argument. Must be 'b' or 'o'\n\n");
+				goto err;
+			}
 
 			if (!strcmp(optarg, "b")) {
 				scope = 'b';

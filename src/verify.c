@@ -644,10 +644,17 @@ int verify_main(int argc, char **argv)
 	ret = load_manifests(version, version, "MoM", NULL, &official_manifest);
 
 	if (ret != 0) {
-		/* This should never get hit, since network issues are identified by the
-		 * 	check_network() call earlier */
+		/* This is hit when or if an OS version is specified for --fix which
+		 * is not available, or if there is a server error and a manifest is
+		 * not provided.
+		 */
 		printf("Unable to download %d Manifest.MoM\n", version);
-		goto brick_the_system_and_clean_curl;
+		ret = EXIT_FAILURE;
+
+		/* No repair is possible without a manifest, nor is accurate reporting
+		 * of the state of the system. Therefore cleanup, report failure and exit
+		 */
+		goto clean_and_exit;
 	}
 
 	subscription_versions_from_MoM(official_manifest, 0);
@@ -763,6 +770,7 @@ brick_the_system_and_clean_curl:
 
 	/* this concludes the critical section, after this point it's clean up time, the disk content is finished and final */
 
+clean_and_exit:
 	if (ret == EXIT_SUCCESS) {
 		if (cmdline_option_fix || cmdline_option_install) {
 			printf("Fix successful\n");

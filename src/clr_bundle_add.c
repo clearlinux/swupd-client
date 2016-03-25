@@ -45,6 +45,8 @@ static void print_help(const char *name)
 	printf("Help Options:\n");
 	printf("   -h, --help              Show help options\n");
 	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
+	printf("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
+	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
 	printf("   -P, --port=[port #]        Port number to connect to at the url for version string and content file downloads\n");
 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
@@ -56,6 +58,8 @@ static void print_help(const char *name)
 static const struct option prog_opts[] = {
 	{ "help", no_argument, 0, 'h' },
 	{ "url", required_argument, 0, 'u' },
+	{ "contenturl", required_argument, 0, 'c' },
+	{ "versionurl", required_argument, 0, 'v' },
 	{ "port", required_argument, 0, 'P' },
 	{ "list", no_argument, 0, 'l' },
 	{ "path", required_argument, 0, 'p' },
@@ -68,7 +72,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxu:P:p:F:l", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxu:c:v:P:p:F:l", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -81,6 +85,20 @@ static bool parse_options(int argc, char **argv)
 			}
 			set_version_url(optarg);
 			set_content_url(optarg);
+			break;
+		case 'c':
+			if (!optarg) {
+				printf("Invalid --contenturl argument\n\n");
+				goto err;
+			}
+			set_content_url(optarg);
+			break;
+		case 'v':
+			if (!optarg) {
+				printf("Invalid --versionurl argument\n\n");
+				goto err;
+			}
+			set_version_url(optarg);
 			break;
 		case 'p': /* default empty path_prefix verifies the running OS */
 			if (!optarg) {

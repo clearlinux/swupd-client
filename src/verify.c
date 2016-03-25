@@ -122,7 +122,6 @@ static bool parse_options(int argc, char **argv)
 				printf("Invalid --url argument\n\n");
 				goto err;
 			}
-			set_local_download(optarg);
 			set_version_url(optarg);
 			set_content_url(optarg);
 			break;

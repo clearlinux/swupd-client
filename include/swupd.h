@@ -248,7 +248,7 @@ void update_motd(int new_release);
 void delete_motd(void);
 extern int is_dirname_link(const char *fullname);
 extern int verify_fix_path(char *targetpath, struct manifest *manifest);
-extern void set_local_download(char *url);
+extern void set_local_download(void);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);

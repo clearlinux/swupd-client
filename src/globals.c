@@ -202,6 +202,8 @@ bool init_globals(void)
 	set_version_url(NULL);
 	set_content_url(NULL);
 
+	set_local_download();
+
 	/* insure path_prefix is absolute, at least '/', ends in '/',
 	 * and is a valid dir */
 	if (path_prefix != NULL) {

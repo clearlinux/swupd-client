@@ -783,14 +783,34 @@ end:
 	return ret;
 }
 
-/* In case URL has the file:// prefix, use libcurl's file protocol to copy
- * files from the local filesystem instead of downloading from a web server.
- * The local_download global variable defaults to false and is used to
- * determine how to handle libcurl results after a *_perform.
+/* In case both version_url and content_url have the file:// prefix, use
+ * libcurl's file protocol to copy files from the local filesystem instead of
+ * downloading from a web server.  The local_download global variable defaults
+ * to false and is used to determine how to handle libcurl results after a
+ * curl_*_perform.
  */
-void set_local_download(char *url)
+void set_local_download(void)
 {
-	if (strncmp(url, "file://", 7) == 0) {
+	bool version_local = false;
+	bool content_local = false;
+
+	if (strncmp(version_url, "file://", 7) == 0) {
+		version_local = true;
+	}
+	if (strncmp(content_url, "file://", 7) == 0) {
+		content_local = true;
+	}
+
+	/* protocols must match for download logic */
+	if (version_local != content_local) {
+		printf("\nVersion and content URLs must both use the HTTP/HTTPS protocols"
+		       " or the libcurl FILE protocol.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if (version_local && content_local) {
 		local_download = true;
 	}
+
+	return;
 }

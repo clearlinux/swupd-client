@@ -69,7 +69,6 @@ static bool parse_options(int argc, char **argv)
 				printf("error: invalid --url argument\n\n");
 				goto err;
 			}
-			set_local_download(optarg);
 			set_version_url(optarg);
 			break;
 		case 'P':

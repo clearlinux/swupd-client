@@ -149,9 +149,21 @@ void set_version_url(char *url) {
 	}
 }
 
-bool set_format_string(char *userinput)
+static bool is_valid_integer_format(char *str)
 {
 	int version;
+	errno = 0;
+
+	version = strtoull(str, NULL, 10);
+	if ((errno < 0) || (version <= 0)) {
+		return false;
+	}
+
+	return true;
+}
+
+bool set_format_string(char *userinput)
+{
 	int ret;
 
 	if (userinput) {
@@ -165,15 +177,13 @@ bool set_format_string(char *userinput)
 		}
 
 		// otherwise, expect a positive integer
-		errno = 0;
-		version = strtoull(userinput, NULL, 10);
-		if ((errno < 0) || (version <= 0)) {
+		if (!is_valid_integer_format(userinput)) {
 			return false;
 		}
 		if (format_string) {
 			free(format_string);
 		}
-		string_or_die(&format_string, "%d", version);
+		string_or_die(&format_string, "%s", userinput);
 	} else {
 		if (format_string) {
 			/* option passed on command line previously */
@@ -183,6 +193,10 @@ bool set_format_string(char *userinput)
 			ret = set_default_value(&format_string, default_format_path);
 			if (ret < 0) {
 				printf("\nDefault format cannot be read. Use the -F option instead.\n");
+				exit(EXIT_FAILURE);
+			}
+			if (!is_valid_integer_format(format_string)) {
+				printf("\nDefault format must be a positive integer value.\n");
 				exit(EXIT_FAILURE);
 			}
 		}

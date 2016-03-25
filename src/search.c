@@ -106,15 +106,8 @@ static bool parse_options(int argc, char **argv)
 				goto err;
 			}
 			set_local_download(optarg);
-			if (version_server_urls[0]) {
-				free(version_server_urls[0]);
-			}
-			if (content_server_urls[0]) {
-				free(content_server_urls[0]);
-			}
-			string_or_die(&version_server_urls[0], "%s", optarg);
-			string_or_die(&content_server_urls[0], "%s", optarg);
-
+			set_version_url(optarg);
+			set_content_url(optarg);
 			break;
 		case 'P':
 			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
@@ -356,7 +349,7 @@ static double query_total_download_size(struct list *list)
 
 		if (access(untard_file, F_OK) == -1) {
 			/* Does not exist client-side. Must download */
-			string_or_die(&url, "%s/%i/Manifest.%s.tar", preferred_content_url,
+			string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url,
 				      file->last_change, file->filename);
 
 			ret = swupd_query_url_content_size(url);
@@ -436,7 +429,7 @@ int download_manifests(struct manifest **MoM)
 		}
 
 		if (access(untard_file, F_OK) == -1) {
-			string_or_die(&url, "%s/%i/Manifest.%s.tar", preferred_content_url, current_version,
+			string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url, current_version,
 				      file->filename);
 
 			printf("Error: Failure reading from %s\n", url);

@@ -73,23 +73,27 @@ static int set_default_value(char **global, const char *path)
 	char line[LINE_MAX];
 	FILE *file;
 	char *c;
+	char *rel_path;
+	int ret = -1;
 
-	file = fopen(path, "r");
+	string_or_die(&rel_path, "%s%s", path_prefix, path);
+
+	file = fopen(rel_path, "r");
 	if (!file) {
-		printf("Error: Unable to open %s\n", path);
-		return -1;
+		printf("Error: Unable to open %s\n", rel_path);
+		goto fail;
 	}
 
 	/* the file should contain exactly one line */
 	line[0] = 0;
 	if (fgets(line, LINE_MAX, file) == NULL) {
 		if (ferror(file)) {
-			printf("Error: Unable to read data from %s\n", path);
-			return -1;
+			printf("Error: Unable to read data from %s\n", rel_path);
+			goto fail;
 		}
 		if (feof(file)) {
-			printf("Error: Contents of %s are empty\n", path);
-			return -1;
+			printf("Error: Contents of %s are empty\n", rel_path);
+			goto fail;
 		}
 	}
 
@@ -100,8 +104,11 @@ static int set_default_value(char **global, const char *path)
 	}
 
 	string_or_die(global, "%s", line);
+	ret = 0;
+fail:
+	free(rel_path);
+	return ret;
 
-	return 0;
 }
 
 static int set_url(char **global, char *url, const char *path)
@@ -212,12 +219,6 @@ bool init_globals(void)
 
 	gettimeofday(&start_time, NULL);
 
-	(void)set_format_string(NULL);
-	set_version_url(NULL);
-	set_content_url(NULL);
-
-	set_local_download();
-
 	/* insure path_prefix is absolute, at least '/', ends in '/',
 	 * and is a valid dir */
 	if (path_prefix != NULL) {
@@ -254,6 +255,14 @@ bool init_globals(void)
 		       path_prefix, strerror(errno));
 		return false;
 	}
+
+	/* must set these globals after path_prefix */
+	(void)set_format_string(NULL);
+	set_version_url(NULL);
+	set_content_url(NULL);
+
+	/* must set this global after version_url and content_url */
+	set_local_download();
 
 	return true;
 }

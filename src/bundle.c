@@ -232,7 +232,6 @@ int remove_bundle(const char *bundle_name)
 	 * to the caller to properly initialize in case those opts
 	 * passed to the command.
 	 */
-	set_format_string(NULL);
 	if (!init_globals()) {
 		return EINIT_GLOBALS;
 	}

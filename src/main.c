@@ -74,9 +74,6 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	//set default initial values
-	set_format_string(NULL);
-
 	while ((opt = getopt_long(argc, argv, "hxdu:P:c:v:sF:p:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':

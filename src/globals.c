@@ -64,9 +64,9 @@ char *version_url = NULL;
 char *content_url = NULL;
 long update_server_port = -1;
 
-#define SWUPD_DEFAULT_FORMAT "3"
 static const char *default_version_url_path = "/usr/share/defaults/swupd/versionurl";
 static const char *default_content_url_path = "/usr/share/defaults/swupd/contenturl";
+static const char *default_format_path = "/usr/share/defaults/swupd/format";
 
 static int set_default_value(char **global, const char *path)
 {
@@ -152,34 +152,41 @@ void set_version_url(char *url) {
 bool set_format_string(char *userinput)
 {
 	int version;
+	int ret;
 
-	if (userinput == NULL) {
+	if (userinput) {
+		// allow "staging" as a format string
+		if ((strcmp(userinput, "staging") == 0)) {
+			if (format_string) {
+				free(format_string);
+			}
+			string_or_die(&format_string, "%s", userinput);
+			return true;
+		}
+
+		// otherwise, expect a positive integer
+		errno = 0;
+		version = strtoull(userinput, NULL, 10);
+		if ((errno < 0) || (version <= 0)) {
+			return false;
+		}
 		if (format_string) {
 			free(format_string);
 		}
-		string_or_die(&format_string, "%s", SWUPD_DEFAULT_FORMAT);
-		return true;
-	}
-
-	// allow "staging" as a format string
-	if ((strcmp(userinput, "staging") == 0)) {
+		string_or_die(&format_string, "%d", version);
+	} else {
 		if (format_string) {
-			free(format_string);
+			/* option passed on command line previously */
+			return true;
+		} else {
+			/* no option passed; use the default value */
+			ret = set_default_value(&format_string, default_format_path);
+			if (ret < 0) {
+				printf("\nDefault format cannot be read. Use the -F option instead.\n");
+				exit(EXIT_FAILURE);
+			}
 		}
-		string_or_die(&format_string, "%s", userinput);
-		return true;
 	}
-
-	// otherwise, expect a positive integer
-	errno = 0;
-	version = strtoull(userinput, NULL, 10);
-	if ((errno < 0) || (version <= 0)) {
-		return false;
-	}
-	if (format_string) {
-		free(format_string);
-	}
-	string_or_die(&format_string, "%d", version);
 
 	return true;
 }
@@ -191,6 +198,7 @@ bool init_globals(void)
 
 	gettimeofday(&start_time, NULL);
 
+	(void)set_format_string(NULL);
 	set_version_url(NULL);
 	set_content_url(NULL);
 

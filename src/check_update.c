@@ -36,7 +36,8 @@ static void print_help(const char *name)
 	printf("   swupd %s [options] bundlename\n\n", basename((char *)name));
 	printf("Help Options:\n");
 	printf("   -h, --help              Show help options\n");
-	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
+	printf("   -u, --url=[URL]         (deprecated) RFC-3986 encoded url for version string and content file downloads\n");
+	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
 	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
@@ -47,6 +48,7 @@ static void print_help(const char *name)
 static const struct option prog_opts[] = {
 	{ "help", no_argument, 0, 'h' },
 	{ "url", required_argument, 0, 'u' },
+	{ "versionurl", required_argument, 0, 'v' },
 	{ "port", required_argument, 0, 'P' },
 	{ "format", required_argument, 0, 'F' },
 	{ "force", no_argument, 0, 'x' },
@@ -58,15 +60,24 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxu:P:F:p:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxu:v:P:F:p:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
 			print_help(argv[0]);
 			exit(EXIT_SUCCESS);
 		case 'u':
+			// TODO: This check-update option is deprecated in favor of -v.
+			// Remove the option after a grace period.
 			if (!optarg) {
 				printf("error: invalid --url argument\n\n");
+				goto err;
+			}
+			set_version_url(optarg);
+			break;
+		case 'v':
+			if (!optarg) {
+				printf("Invalid --versionurl argument\n\n");
 				goto err;
 			}
 			set_version_url(optarg);

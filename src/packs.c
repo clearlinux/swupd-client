@@ -54,7 +54,7 @@ static int download_pack(int oldversion, int newversion, char *module)
 
 	printf("Downloading %s pack for version %i\n", module, newversion);
 
-	string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", preferred_content_url, newversion, module, oldversion);
+	string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, newversion, module, oldversion);
 
 	err = swupd_curl_get_file(url, filename, NULL, NULL, true);
 	if (err) {

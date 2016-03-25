@@ -479,7 +479,7 @@ void full_download(struct file *file)
 		goto out_bad;
 	}
 
-	string_or_die(&url, "%s/%i/files/%s.tar", preferred_content_url, file->last_change, file->hash);
+	string_or_die(&url, "%s/%i/files/%s.tar", content_url, file->last_change, file->hash);
 
 	string_or_die(&filename, "%s/download/.%s.tar", STATE_DIR, file->hash);
 	file->staging = filename;

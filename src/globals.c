@@ -60,20 +60,95 @@ bool download_only;
 bool local_download = false;
 bool have_manifest_diskspace = false; /* assume no until checked */
 bool have_network = false;	    /* assume no access until proved */
-#define URL_COUNT 2
-char *version_server_urls[URL_COUNT] = {
-	NULL,
-	"https://download.clearlinux.org/update",
-};
-char *content_server_urls[URL_COUNT] = {
-	NULL,
-	"https://download.clearlinux.org/update",
-};
-char *preferred_version_url;
-char *preferred_content_url;
+char *version_url = NULL;
+char *content_url = NULL;
 long update_server_port = -1;
 
 #define SWUPD_DEFAULT_FORMAT "3"
+static const char *default_version_url_path = "/usr/share/defaults/swupd/versionurl";
+static const char *default_content_url_path = "/usr/share/defaults/swupd/contenturl";
+
+static int set_default_value(char **global, const char *path)
+{
+	char line[LINE_MAX];
+	FILE *file;
+	char *c;
+
+	file = fopen(path, "r");
+	if (!file) {
+		printf("Error: Unable to open %s\n", path);
+		return -1;
+	}
+
+	/* the file should contain exactly one line */
+	line[0] = 0;
+	if (fgets(line, LINE_MAX, file) == NULL) {
+		if (ferror(file)) {
+			printf("Error: Unable to read data from %s\n", path);
+			return -1;
+		}
+		if (feof(file)) {
+			printf("Error: Contents of %s are empty\n", path);
+			return -1;
+		}
+	}
+
+	/* remove newline if present */
+	c = strchr(line, '\n');
+	if (c) {
+		*c = '\0';
+	}
+
+	string_or_die(global, "%s", line);
+
+	return 0;
+}
+
+static int set_url(char **global, char *url, const char *path)
+{
+	int ret = 0;
+
+	if (url) {
+		if (*global) {
+			free(*global);
+		}
+		string_or_die(global, "%s", url);
+	} else {
+		if (*global) {
+			/* option passed on command line previously */
+			return ret;
+		} else {
+			/* no option passed; use the default value */
+			ret = set_default_value(global, path);
+			if (ret < 0) {
+				return ret;
+			}
+		}
+	}
+
+	return ret;
+}
+
+void set_content_url(char *url) {
+	int ret;
+
+	ret = set_url(&content_url, url, default_content_url_path);
+	if (ret < 0) {
+		printf("\nDefault content URL cannot be read. Use the -c option instead.\n");
+		exit(EXIT_FAILURE);
+	}
+}
+
+void set_version_url(char *url) {
+	int ret;
+
+	ret = set_url(&version_url, url, default_version_url_path);
+	if (ret < 0) {
+		printf("\nDefault version URL cannot be read. Use the -v option instead.\n");
+		exit(EXIT_FAILURE);
+	}
+}
+
 bool set_format_string(char *userinput)
 {
 	int version;
@@ -116,17 +191,8 @@ bool init_globals(void)
 
 	gettimeofday(&start_time, NULL);
 
-	/* pick urls simply from user specified or default */
-	if (version_server_urls[0] != NULL) {
-		preferred_version_url = version_server_urls[0];
-	} else {
-		preferred_version_url = version_server_urls[1];
-	}
-	if (content_server_urls[0] != NULL) {
-		preferred_content_url = content_server_urls[0];
-	} else {
-		preferred_content_url = content_server_urls[1];
-	}
+	set_version_url(NULL);
+	set_content_url(NULL);
 
 	/* insure path_prefix is absolute, at least '/', ends in '/',
 	 * and is a valid dir */
@@ -170,8 +236,8 @@ bool init_globals(void)
 
 void free_globals(void)
 {
-	free(content_server_urls[0]);
-	free(version_server_urls[0]);
+	free(content_url);
+	free(version_url);
 	free(path_prefix);
 	free(format_string);
 	free(mounted_dirs);

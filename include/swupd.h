@@ -124,11 +124,11 @@ extern void *tm_dlhandle;
 extern char *bundle_to_add;
 extern struct timeval start_time;
 
-extern char *version_server_urls[];
-extern char *preferred_version_url;
-extern char *content_server_urls[];
-extern char *preferred_content_url;
+extern char *version_url;
+extern char *content_url;
 extern long update_server_port;
+extern void set_content_url(char *url);
+extern void set_version_url(char *url);
 
 extern void check_root(void);
 extern void clean_curl_multi_queue(void);

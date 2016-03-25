@@ -82,14 +82,8 @@ static bool parse_options(int argc, char **argv)
 				goto err;
 			}
 			set_local_download(optarg);
-			if (version_server_urls[0]) {
-				free(version_server_urls[0]);
-			}
-			if (content_server_urls[0]) {
-				free(content_server_urls[0]);
-			}
-			string_or_die(&version_server_urls[0], "%s", optarg);
-			string_or_die(&content_server_urls[0], "%s", optarg);
+			set_version_url(optarg);
+			set_content_url(optarg);
 			break;
 		case 'p': /* default empty path_prefix verifies the running OS */
 			if (!optarg) {

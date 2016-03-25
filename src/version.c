@@ -46,7 +46,7 @@ static int try_version_download(void)
 		abort();
 	}
 
-	string_or_die(&url, "%s/version/format%s/latest", preferred_version_url, format_string);
+	string_or_die(&url, "%s/version/format%s/latest", version_url, format_string);
 
 	string_or_die(&path, "%s/server_version", STATE_DIR);
 

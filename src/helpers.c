@@ -749,7 +749,7 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		// clean up in case any prior download failed in a partial state
 		unlink(tar_dotfile);
 
-		string_or_die(&url, "%s/%i/files/%s.tar", preferred_content_url, file->last_change, file->hash);
+		string_or_die(&url, "%s/%i/files/%s.tar", content_url, file->last_change, file->hash);
 		ret = swupd_curl_get_file(url, tar_dotfile, NULL, NULL, false);
 
 		if (ret != 0) {

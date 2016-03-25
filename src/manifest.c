@@ -437,7 +437,7 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 	memset(&buf, 0, sizeof(struct stat));
 	ret = stat(deltafile, &buf);
 	if (ret || buf.st_size == 0) {
-		string_or_die(&url, "%s/%i/Manifest-%s-delta-from-%i", preferred_content_url, new, component, current);
+		string_or_die(&url, "%s/%i/Manifest-%s-delta-from-%i", content_url, new, component, current);
 
 		ret = swupd_curl_get_file(url, deltafile, NULL, NULL, false);
 		if (ret != 0) {
@@ -509,7 +509,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 
 	string_or_die(&filename, "%s/%i/Manifest.%s.tar", STATE_DIR, version, component);
 
-	string_or_die(&url, "%s/%i/Manifest.%s.tar", preferred_content_url, version, component);
+	string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url, version, component);
 
 	ret = swupd_curl_get_file(url, filename, NULL, NULL, false);
 	if (ret) {

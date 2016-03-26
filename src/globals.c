@@ -81,7 +81,8 @@ static int set_default_value(char **global, const char *path)
 	file = fopen(rel_path, "r");
 	if (!file) {
 		printf("Error: Unable to open %s\n", rel_path);
-		goto fail;
+		free(rel_path);
+		return ret;
 	}
 
 	/* the file should contain exactly one line */
@@ -106,6 +107,7 @@ static int set_default_value(char **global, const char *path)
 	string_or_die(global, "%s", line);
 	ret = 0;
 fail:
+	fclose(file);
 	free(rel_path);
 	return ret;
 

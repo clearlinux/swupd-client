@@ -36,7 +36,7 @@ static void print_help(const char *name)
 	printf("   swupd %s [options] bundlename\n\n", basename((char *)name));
 	printf("Help Options:\n");
 	printf("   -h, --help              Show help options\n");
-	printf("   -u, --url=[URL]         (deprecated) RFC-3986 encoded url for version string and content file downloads\n");
+	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
 	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
 	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
@@ -67,12 +67,11 @@ static bool parse_options(int argc, char **argv)
 			print_help(argv[0]);
 			exit(EXIT_SUCCESS);
 		case 'u':
-			// TODO: This check-update option is deprecated in favor of -v.
-			// Remove the option after a grace period.
 			if (!optarg) {
 				printf("error: invalid --url argument\n\n");
 				goto err;
 			}
+			set_content_url(optarg);
 			set_version_url(optarg);
 			break;
 		case 'v':

@@ -91,7 +91,7 @@ def with_command(func):
         target_path = path_from_name(args[0].__class__.__name__, 'target')
         subcommand = COMMAND_MAP[args[0].__class__.__name__.split('_')[0]]
         command = ['sudo', './swupd', subcommand, '-u', 'http://localhost/',
-                   '-P', PORT, '-p', target_path]
+                   '-P', PORT, '-p', target_path, '-F', 'staging']
         func(*args, command)
     return wrapper
 

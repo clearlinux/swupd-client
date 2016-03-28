@@ -49,6 +49,7 @@ static void print_help(const char *name)
 	printf("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
 	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
 	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
+	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	printf("\n");
 }
@@ -60,6 +61,7 @@ static const struct option prog_opts[] = {
 	{ "contenturl", required_argument, 0, 'c' },
 	{ "versionurl", required_argument, 0, 'v' },
 	{ "port", required_argument, 0, 'P' },
+	{ "format", required_argument, 0, 'F' },
 	{ "force", no_argument, 0, 'x' },
 	{ 0, 0, 0, 0 }
 };
@@ -68,7 +70,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxp:u:c:v:P:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxp:u:c:v:P:F:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -109,6 +111,12 @@ static bool parse_options(int argc, char **argv)
 		case 'P':
 			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
 				printf("Invalid --port argument\n\n");
+				goto err;
+			}
+			break;
+		case 'F':
+			if (!optarg || !set_format_string(optarg)) {
+				printf("Invalid --format argument\n\n");
 				goto err;
 			}
 			break;

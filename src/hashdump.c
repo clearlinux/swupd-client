@@ -101,11 +101,6 @@ int hashdump_main(int argc, char **argv)
 		}
 	}
 
-	if (!init_globals()) {
-		free_globals();
-		exit(-1);
-	}
-
 	if (optind >= argc) {
 		usage(argv[0]);
 		free_globals();
@@ -142,6 +137,5 @@ int hashdump_main(int argc, char **argv)
 	free(fullname);
 	free(file->filename);
 	free(file);
-	free_globals();
 	return 0;
 }

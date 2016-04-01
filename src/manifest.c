@@ -36,8 +36,8 @@
 
 #include "config.h"
 #include "signature.h"
-#include "swupd.h"
 #include "swupd-build-variant.h"
+#include "swupd.h"
 #include "xattrs.h"
 
 #define MANIFEST_LINE_MAXLEN 8192
@@ -343,6 +343,7 @@ static struct manifest *manifest_from_file(int version, char *component)
 		if (file->is_manifest) {
 			manifest->manifests = list_prepend_data(manifest->manifests, file);
 		} else {
+			file->is_tracked = 1;
 			manifest->files = list_prepend_data(manifest->files, file);
 		}
 		count++;
@@ -542,6 +543,23 @@ out:
 	return ret;
 }
 
+static void set_untracked_manifest_files(struct manifest *manifest)
+{
+	struct list *files;
+
+	if (!manifest || is_tracked_bundle(manifest->component)) {
+		return;
+	}
+
+	files = manifest->files;
+
+	while (files) {
+		struct file *file = files->data;
+		file->is_tracked = 0;
+		files = files->next;
+	}
+}
+
 //NOTE: file==NULL when component=="MoM", else file->hash is needed
 int load_manifests(int current, int version, char *component, struct file *file, struct manifest **manifest)
 {
@@ -554,6 +572,14 @@ int load_manifests(int current, int version, char *component, struct file *file,
 		if (ret != 0) {
 			ret = EMANIFEST_LOAD;
 		}
+	}
+
+	if (component) {
+		/*
+		 * When component is "MoM" this is a noop due to the MoM not
+		 * having a files list.
+		 */
+		set_untracked_manifest_files(*manifest);
 	}
 
 	return ret;
@@ -576,8 +602,8 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 		list = list->next;
 
 		if ((file->last_change > current->version) ||
-		    (file->is_rename && file_has_different_hash_in_older_manifest(current, file))) {
-
+		    (file->is_rename && file_has_different_hash_in_older_manifest(current, file)) ||
+		    !file->is_tracked) {
 			/* check and if needed mark as do_not_update */
 			ignore(file);
 			/* check if we need to run scripts/update the bootloader/etc */
@@ -808,8 +834,13 @@ void consolidate_submanifests(struct manifest *manifest)
 		/* (case 1) C and C'               : choose file1
 		 * this is the most common case, so test it first */
 		if (!file1->is_deleted && !file2->is_deleted && hash_compare(file1->hash, file2->hash)) {
-			/* drop the newer of the two */
-			if (file1->last_change <= file2->last_change) {
+			/* always drop the untracked file if there is a tracked file */
+			if (file1->is_tracked && !file2->is_tracked) {
+				list_free_item(next, free_file_data);
+			} else if (!file1->is_tracked && file2->is_tracked) {
+				list_free_item(list, free_file_data);
+				list = next;
+			} else if (file1->last_change <= file2->last_change) { /* drop the newer of the two */
 				list_free_item(next, free_file_data);
 			} else {
 				list_free_item(list, free_file_data);

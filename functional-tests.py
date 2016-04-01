@@ -378,6 +378,24 @@ class update_include(unittest.TestCase):
 
 
 @http_command(option="")
+class update_include_old_bundle(unittest.TestCase):
+    def validate(self, test_output):
+        core = os.path.join(os.getcwd(),
+                            path_from_name(__class__.__name__, 'target'),
+                            'os-core')
+        self.assertTrue(os.path.isfile(core))
+        test1 = os.path.join(os.getcwd(),
+                             path_from_name(__class__.__name__, 'target'),
+                             'test-bundle1')
+        self.assertTrue(os.path.isfile(test1))
+        test2 = os.path.join(os.getcwd(),
+                             path_from_name(__class__.__name__, 'target'),
+                             'test-bundle2')
+        self.assertTrue(os.path.isfile(test2))
+        self.assertIn('Added bundle test-bundle2 for installation', test_output)
+
+
+@http_command(option="")
 class update_missing_os_core(unittest.TestCase):
     def validate(self, test_output):
         os_core_dir = os.path.join(os.getcwd(),

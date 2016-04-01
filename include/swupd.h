@@ -88,6 +88,7 @@ struct file {
 	unsigned int is_file : 1;
 	unsigned int is_link : 1;
 	unsigned int is_deleted : 1;
+	unsigned int is_tracked : 1;
 	unsigned int is_manifest : 1;
 
 	unsigned int is_config : 1;
@@ -256,6 +257,7 @@ struct list *free_bundle(struct list *item);
 extern void create_and_append_subscription(const char *component);
 
 /* bundle.c */
+extern bool is_tracked_bundle(const char *bundle_name);
 extern int remove_bundle(const char *bundle_name);
 extern int list_installable_bundles();
 extern int install_bundles_frontend(char **bundles);

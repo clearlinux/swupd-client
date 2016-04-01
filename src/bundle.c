@@ -138,7 +138,7 @@ out:
 /* Finds out whether bundle_name is tracked bundle on
 *  current system.
 */
-static bool is_tracked_bundle(const char *bundle_name)
+bool is_tracked_bundle(const char *bundle_name)
 {
 	struct stat statb;
 	char *filename = NULL;

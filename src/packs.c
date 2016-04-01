@@ -111,7 +111,9 @@ int download_subscribed_packs(bool required)
 		sub = iter->data;
 		iter = iter->next;
 
-		if (sub->oldversion == sub->version) { // pack didn't change in this release
+		/* pack didn't change in this release and it isn't a new pack */
+		if (sub->oldversion == sub->version &&
+		    is_tracked_bundle(sub->component)) {
 			continue;
 		}
 

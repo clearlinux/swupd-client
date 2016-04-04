@@ -88,6 +88,7 @@ struct file {
 	unsigned int is_file : 1;
 	unsigned int is_link : 1;
 	unsigned int is_deleted : 1;
+	unsigned int is_tracked : 1;
 	unsigned int is_manifest : 1;
 
 	unsigned int is_config : 1;
@@ -135,6 +136,7 @@ extern void clean_curl_multi_queue(void);
 extern void increment_retries(int *retries, int *timeout);
 
 extern int main_update(void);
+extern int add_included_manifests(struct manifest *mom);
 extern int main_verify(int current_version);
 
 extern void read_versions(int *current_version, int *server_version, char *path_prefix);
@@ -256,6 +258,7 @@ struct list *free_bundle(struct list *item);
 extern void create_and_append_subscription(const char *component);
 
 /* bundle.c */
+extern bool is_tracked_bundle(const char *bundle_name);
 extern int remove_bundle(const char *bundle_name);
 extern int list_installable_bundles();
 extern int install_bundles_frontend(char **bundles);

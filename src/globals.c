@@ -90,12 +90,10 @@ static int set_default_value(char **global, const char *path)
 	if (fgets(line, LINE_MAX, file) == NULL) {
 		if (ferror(file)) {
 			printf("Error: Unable to read data from %s\n", rel_path);
-			goto fail;
-		}
-		if (feof(file)) {
+		} else if (feof(file)) {
 			printf("Error: Contents of %s are empty\n", rel_path);
-			goto fail;
 		}
+		goto fail;
 	}
 
 	/* remove newline if present */

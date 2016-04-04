@@ -158,11 +158,11 @@ void set_version_url(char *url) {
 
 static bool is_valid_integer_format(char *str)
 {
-	int version;
+	unsigned long long int version;
 	errno = 0;
 
 	version = strtoull(str, NULL, 10);
-	if ((errno < 0) || (version <= 0)) {
+	if ((errno < 0) || (version == 0)) {
 		return false;
 	}
 

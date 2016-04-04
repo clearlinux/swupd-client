@@ -2,7 +2,7 @@
 #
 #   Software Updater - autocompletion script
 #
-#      Copyright © 2015-2016 Intel Corporation.
+#      Copyright © 2016 Intel Corporation.
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -105,7 +105,7 @@ cat > $SCRIPTNAME << EOM
 #!/bin/bash
 #   Software Updater - autocompletion script
 #
-#      Copyright © 2015-2016 Intel Corporation.
+#      Copyright © 2016 Intel Corporation.
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by

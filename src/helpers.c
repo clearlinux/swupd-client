@@ -802,7 +802,7 @@ void set_local_download(void)
 	}
 
 	/* protocols must match for download logic */
-	if ((version_local && !content_local) || (!version_local && content_local)) {
+	if (version_local != content_local) {
 		printf("\nVersion and content URLs must both use the HTTP/HTTPS protocols"
 		       " or the libcurl FILE protocol.\n");
 		exit(EXIT_FAILURE);

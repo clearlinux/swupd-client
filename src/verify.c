@@ -641,6 +641,11 @@ int verify_main(int argc, char **argv)
 		goto clean_and_exit;
 	}
 
+	ret = add_included_manifests(official_manifest);
+	if (ret) {
+		goto clean_and_exit;
+	}
+
 	subscription_versions_from_MoM(official_manifest, 0);
 	recurse_manifest(official_manifest, NULL);
 	consolidate_submanifests(official_manifest);

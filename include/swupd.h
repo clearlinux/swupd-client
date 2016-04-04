@@ -136,6 +136,7 @@ extern void clean_curl_multi_queue(void);
 extern void increment_retries(int *retries, int *timeout);
 
 extern int main_update(void);
+extern int add_included_manifests(struct manifest *mom);
 extern int main_verify(int current_version);
 
 extern void read_versions(int *current_version, int *server_version, char *path_prefix);

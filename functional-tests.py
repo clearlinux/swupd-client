@@ -493,6 +493,42 @@ class verify_add_missing_directory(unittest.TestCase):
         self.assertIn('Fix successful', test_output)
 
 
+@http_command(option="--fix")
+class verify_add_missing_include(unittest.TestCase):
+    def validate(self, test_output):
+        core = os.path.join(os.getcwd(),
+                            path_from_name(__class__.__name__, 'target'),
+                            'os-core')
+        self.assertTrue(os.path.isfile(core))
+        test1 = os.path.join(os.getcwd(),
+                             path_from_name(__class__.__name__, 'target'),
+                             'test-bundle1')
+        self.assertTrue(os.path.isfile(test1))
+        test2 = os.path.join(os.getcwd(),
+                             path_from_name(__class__.__name__, 'target'),
+                             'test-bundle2')
+        self.assertTrue(os.path.isfile(test2))
+        self.assertIn('    3 of 3 missing files were replaced', test_output)
+
+
+@http_command(option="--fix")
+class verify_add_missing_include_old(unittest.TestCase):
+    def validate(self, test_output):
+        core = os.path.join(os.getcwd(),
+                            path_from_name(__class__.__name__, 'target'),
+                            'os-core')
+        self.assertTrue(os.path.isfile(core))
+        test1 = os.path.join(os.getcwd(),
+                             path_from_name(__class__.__name__, 'target'),
+                             'test-bundle1')
+        self.assertTrue(os.path.isfile(test1))
+        test2 = os.path.join(os.getcwd(),
+                             path_from_name(__class__.__name__, 'target'),
+                             'test-bundle2')
+        self.assertTrue(os.path.isfile(test2))
+        self.assertIn('    3 of 3 missing files were replaced', test_output)
+
+
 @http_command(option="")
 class verify_boot_file_mismatch(unittest.TestCase):
     def validate(self, test_output):

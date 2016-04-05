@@ -533,13 +533,13 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 			continue;
 		}
 
-		if (!file->is_dir) {
+		if (!S_ISDIR(sb.st_mode)) {
 			ret = unlink(fullname);
-			if (!ret && errno != ENOENT && errno != EISDIR) {
+			if (!ret && errno != ENOENT) {
 				printf("Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));
 				file_not_deleted_count++;
 			} else {
-				printf("Deleted %s \n", fullname);
+				printf("Deleted %s\n", fullname);
 				file_deleted_count++;
 			}
 		} else {
@@ -553,6 +553,9 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 					//FIXME: Add force removal option?
 					printf("Couldn't remove directory containing untracked files: %s\n", fullname);
 				}
+			} else {
+				printf("Deleted %s\n", fullname);
+				file_deleted_count++;
 			}
 		}
 		free(fullname);

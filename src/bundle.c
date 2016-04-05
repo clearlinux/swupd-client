@@ -272,6 +272,12 @@ int remove_bundle(const char *bundle_name)
 		goto out_free_curl;
 	}
 
+	if (!search_bundle_in_manifest(current_mom, bundle_name)) {
+		printf("Bundle name is invalid, aborting removal\n");
+		ret = EBUNDLE_REMOVE;
+		goto out_free_mom;
+	}
+
 	/* load all tracked bundles into memory */
 	read_subscriptions_alt();
 	/* now popout the one to be removed */

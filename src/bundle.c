@@ -281,13 +281,21 @@ int remove_bundle(const char *bundle_name)
 	}
 
 	subscription_versions_from_MoM(current_mom, 0);
+
 	/* load all submanifest minus the one to be removed */
-	recurse_manifest(current_mom, NULL);
+	ret = recurse_manifest(current_mom, NULL);
+	if (ret != 0) {
+		printf("Error: Cannot load MoM sub-manifests (ret = %d)\n", ret);
+		ret = ERECURSE_MANIFEST;
+		goto out_free_mom;
+	}
+
 	consolidate_submanifests(current_mom);
 
 	/* Now that we have the consolidated list of all files, load bundle to be removed submanifest*/
 	ret = load_bundle_manifest(bundle_name, current_version, &bundle_manifest);
 	if (ret != 0) {
+		printf("Error: Cannot load %s sub-manifest (ret = %d)\n", bundle_name, ret);
 		goto out_free_mom;
 	}
 
@@ -412,7 +420,14 @@ int install_bundles(struct list *bundles, int current_version, struct manifest *
 	}
 
 	subscription_versions_from_MoM(mom, 0);
-	recurse_manifest(mom, NULL);
+
+	ret = recurse_manifest(mom, NULL);
+	if (ret != 0) {
+		printf("Error: Cannot load MoM sub-manifests (ret = %d)\n", ret);
+		ret = ERECURSE_MANIFEST;
+		goto out;
+	}
+
 	consolidate_submanifests(mom);
 
 	/* step 2: download neccessary packs */

@@ -650,7 +650,14 @@ int verify_main(int argc, char **argv)
 	}
 
 	subscription_versions_from_MoM(official_manifest, 0);
-	recurse_manifest(official_manifest, NULL);
+
+	ret = recurse_manifest(official_manifest, NULL);
+	if (ret != 0) {
+		printf("Error: Cannot load MoM sub-manifests (ret = %d)\n", ret);
+		ret = ERECURSE_MANIFEST;
+		goto clean_and_exit;
+	}
+
 	consolidate_submanifests(official_manifest);
 
 	/* preparation work complete. */

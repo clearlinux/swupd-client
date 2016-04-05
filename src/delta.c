@@ -100,7 +100,7 @@ static void do_delta(struct file *file)
 	dir = dirname(tmp);
 	base = basename(tmp2);
 
-	string_or_die(&origin, "%s/%s/%s", STAGING_SUBVOL, dir, base);
+	string_or_die(&origin, "%s/%s/%s", path_prefix, dir, base);
 
 	ret = apply_bsdiff_delta(origin, filename, deltafile);
 	if (ret) {

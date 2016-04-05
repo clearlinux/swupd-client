@@ -311,6 +311,17 @@ class hashdump_file_hash(unittest.TestCase):
 
 
 @http_command(option="")
+class update_apply_full_file_delta(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('Extracting pack.', test_output)
+        self.assertIn('    changed files     : 1', test_output)
+        self.assertIn('    changed manifests : 1', test_output)
+        self.assertIn('Staging file content', test_output)
+        self.assertIn('Update was applied.', test_output)
+        self.assertIn('Update successful. System updated from version 10 to version 100', test_output)
+
+
+@http_command(option="")
 class update_boot_file(unittest.TestCase):
     def validate(self, test_output):
         self.assertIn('    new files         : 1', test_output)

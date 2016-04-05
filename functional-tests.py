@@ -574,6 +574,18 @@ class verify_boot_file_mismatch_fix(unittest.TestCase):
         self.assertIn('Fix successful', test_output)
 
 
+@http_command(option="--fix")
+class verify_empty_dir_deleted(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('Verifying version 10', test_output)
+        testdir = os.path.join(os.getcwd(),
+                               path_from_name(__class__.__name__, 'target'),
+                               'testdir')
+        self.assertIn('Deleted {}'.format(testdir), test_output)
+        self.assertFalse(os.path.isfile(testdir))
+        self.assertIn('Fix successful', test_output)
+
+
 @http_command(option="--install -m 10")
 class verify_install_directory(unittest.TestCase):
     def validate(self, test_output):

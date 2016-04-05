@@ -582,7 +582,7 @@ class verify_empty_dir_deleted(unittest.TestCase):
                                path_from_name(__class__.__name__, 'target'),
                                'testdir')
         self.assertIn('Deleted {}'.format(testdir), test_output)
-        self.assertFalse(os.path.isfile(testdir))
+        self.assertFalse(os.path.isdir(testdir))
         self.assertIn('Fix successful', test_output)
 
 

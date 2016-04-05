@@ -652,7 +652,7 @@ int get_dirfd_path(const char *fullname)
 	char *dir;
 	char *real_path = NULL;
 
-	tmp = strdup(fullname);
+	string_or_die(&tmp, "%s", fullname);
 	dir = dirname(tmp);
 
 	fd = open(dir, O_RDONLY);

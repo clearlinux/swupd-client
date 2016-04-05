@@ -644,23 +644,46 @@ void delete_motd(void)
 	}
 }
 
-int is_dirname_link(const char *fullname)
+int get_dirfd_path(const char *fullname)
 {
 	int ret = -1;
+	int fd;
+	char *tmp = NULL;
+	char *dir;
 	char *real_path = NULL;
-	real_path = realpath(fullname, NULL);
-	if (!real_path) {
-		printf("Failed to get real path of %s\n", fullname);
-		return -1;
+
+	string_or_die(&tmp, "%s", fullname);
+	dir = dirname(tmp);
+
+	fd = open(dir, O_RDONLY);
+	if (fd < 0) {
+		printf("Failed to open dir %s (%s)\n", dir, strerror(errno));
+		goto out;
 	}
 
-	if (strcmp(real_path, fullname) != 0) {
-		ret = 1;
+	real_path = realpath(dir, NULL);
+	if (!real_path) {
+		printf("Failed to get real path of %s (%s)\n", dir, strerror(errno));
+		close(fd);
+		goto out;
+	}
+
+	if (strcmp(real_path, dir) != 0) {
+		/* FIXME: Should instead check to see if real_path is marked
+		 * non-deleted in the consolidated manifest. If it is
+		 * non-deleted, then we must not delete the file (and also not
+		 * flag an error); otherwise, it can be safely deleted. Until
+		 * that check is implemented, always skip the file, because we
+		 * cannot safely determine if it can be deleted. */
+		ret = -1;
+		close(fd);
 	} else {
-		ret = 0;
+		ret = fd;
 	}
 
 	free(real_path);
+out:
+	free(tmp);
 	return ret;
 }
 

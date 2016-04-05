@@ -248,7 +248,7 @@ extern void copyright_header(const char *name);
 extern void string_or_die(char **strp, const char *fmt, ...);
 void update_motd(int new_release);
 void delete_motd(void);
-extern int is_dirname_link(const char *fullname);
+extern int get_dirfd_path(const char *fullname);
 extern int verify_fix_path(char *targetpath, struct manifest *manifest);
 extern void set_local_download(void);
 

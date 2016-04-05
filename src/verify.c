@@ -498,7 +498,9 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 	while (iter) {
 		struct file *file;
 		char *fullname;
+		char *base;
 		struct stat sb;
+		int fd;
 
 		file = iter->data;
 		iter = iter->next;
@@ -528,13 +530,19 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 		}
 
 		file_extraneous_count++;
-		if (is_dirname_link(fullname)) {
+
+		fd = get_dirfd_path(fullname);
+		if (fd < 0) {
+			printf("Not safe to delete: %s\n", fullname);
 			free(fullname);
+			file_not_deleted_count++;
 			continue;
 		}
 
+		base = basename(fullname);
+
 		if (!S_ISDIR(sb.st_mode)) {
-			ret = unlink(fullname);
+			ret = unlinkat(fd, base, 0);
 			if (!ret && errno != ENOENT) {
 				printf("Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));
 				file_not_deleted_count++;
@@ -543,7 +551,7 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 				file_deleted_count++;
 			}
 		} else {
-			ret = rmdir(fullname);
+			ret = unlinkat(fd, base, AT_REMOVEDIR);
 			if (ret) {
 				file_not_deleted_count++;
 				if (errno != ENOTEMPTY) {
@@ -559,6 +567,7 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 			}
 		}
 		free(fullname);
+		close(fd);
 	}
 }
 

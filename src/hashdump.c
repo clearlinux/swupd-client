@@ -114,6 +114,8 @@ int hashdump_main(int argc, char **argv)
 		string_or_die(&file->filename, "/%s", argv[optind]);
 	}
 
+	set_path_prefix(NULL);
+
 	printf("Calculating hash %s xattrs for: (%s) ... %s\n",
 	       (file->use_xattrs ? "with" : "without"), path_prefix, file->filename);
 	fullname = mk_full_filename(path_prefix, file->filename);

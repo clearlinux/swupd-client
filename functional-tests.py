@@ -309,6 +309,15 @@ class hashdump_file_hash(unittest.TestCase):
         test_output = process.stdout.splitlines()
         self.assertIn('b03e11e3307de4d4f3f545c8a955c2208507dbc1927e9434d1da42917712c15b', test_output)
 
+class hashdump_file_hash_no_path_prefix(unittest.TestCase):
+    def runTest(self):
+        target_path = path_from_name(self.__class__.__name__, 'target')
+        subcommand = COMMAND_MAP[self.__class__.__name__.split('_')[0]]
+        command = ['./swupd', subcommand, "{0}/{1}/test-hash".format(os.getcwd(), target_path)]
+        process = subprocess.run(command, stdout=subprocess.PIPE,
+                                 universal_newlines=True)
+        test_output = process.stdout.splitlines()
+        self.assertIn('b03e11e3307de4d4f3f545c8a955c2208507dbc1927e9434d1da42917712c15b', test_output)
 
 @http_command(option="")
 class update_apply_full_file_delta(unittest.TestCase):

@@ -62,7 +62,7 @@ int list_installable_bundles()
 
 	ret = create_required_dirs();
 	if (ret != 0) {
-		printf("State directory %s cannot be recreated, aborting removal\n", STATE_DIR);
+		printf("State directory %s cannot be recreated, aborting removal\n", state_dir);
 		v_lockfile(lock_fd);
 		return EXIT_FAILURE;
 	}
@@ -260,10 +260,10 @@ int remove_bundle(const char *bundle_name)
 	current_version = read_version_from_subvol_file(path_prefix);
 	swupd_curl_set_current_version(current_version);
 
-	/* first of all, make sure STATE_DIR is there, recreate if necessary*/
+	/* first of all, make sure state_dir is there, recreate if necessary*/
 	ret = create_required_dirs();
 	if (ret != 0) {
-		printf("State directory %s cannot be recreated, aborting removal\n", STATE_DIR);
+		printf("State directory %s cannot be recreated, aborting removal\n", state_dir);
 		goto out_free_curl;
 	}
 
@@ -524,7 +524,7 @@ int install_bundles_frontend(char **bundles)
 
 	ret = create_required_dirs();
 	if (ret != 0) {
-		printf("State directory %s cannot be recreated, aborting installation\n", STATE_DIR);
+		printf("State directory %s cannot be recreated, aborting installation\n", state_dir);
 		goto clean_and_exit;
 	}
 

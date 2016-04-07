@@ -95,7 +95,7 @@ static int swupd_curl_hashmap_insert(struct file *file)
 	}
 
 	// if valid target file is already here, no need to download
-	string_or_die(&targetfile, "%s/staged/%s", STATE_DIR, file->hash);
+	string_or_die(&targetfile, "%s/staged/%s", state_dir, file->hash);
 
 	if (lstat(targetfile, &stat) == 0) {
 		if (verify_file(file, targetfile)) {
@@ -109,7 +109,7 @@ static int swupd_curl_hashmap_insert(struct file *file)
 	// hash not in queue and not present in staged
 
 	// clean up in case any prior download failed in a partial state
-	string_or_die(&tar_dotfile, "%s/download/.%s.tar", STATE_DIR, file->hash);
+	string_or_die(&tar_dotfile, "%s/download/.%s.tar", state_dir, file->hash);
 	unlink(tar_dotfile);
 	free(tar_dotfile);
 
@@ -194,7 +194,7 @@ static int check_tarfile_content(struct file *file, const char *tarfilename)
 	FILE *tar;
 	int count = 0;
 
-	string_or_die(&tarcommand, TAR_COMMAND " -tf %s/download/%s.tar 2> /dev/null", STATE_DIR, file->hash);
+	string_or_die(&tarcommand, TAR_COMMAND " -tf %s/download/%s.tar 2> /dev/null", state_dir, file->hash);
 
 	err = access(tarfilename, R_OK);
 	if (err) {
@@ -252,9 +252,9 @@ int untar_full_download(void *data)
 	int err;
 	char *tarcommand;
 
-	string_or_die(&tar_dotfile, "%s/download/.%s.tar", STATE_DIR, file->hash);
-	string_or_die(&tarfile, "%s/download/%s.tar", STATE_DIR, file->hash);
-	string_or_die(&targetfile, "%s/staged/%s", STATE_DIR, file->hash);
+	string_or_die(&tar_dotfile, "%s/download/.%s.tar", state_dir, file->hash);
+	string_or_die(&tarfile, "%s/download/%s.tar", state_dir, file->hash);
+	string_or_die(&targetfile, "%s/staged/%s", state_dir, file->hash);
 
 	/* If valid target file already exists, we're done.
 	 * NOTE: this should NEVER happen given the checking that happens
@@ -290,7 +290,7 @@ int untar_full_download(void *data)
 
 	/* modern tar will automatically determine the compression type used */
 	string_or_die(&tarcommand, TAR_COMMAND " -C %s/staged/ " TAR_PERM_ATTR_ARGS " -xf %s 2> /dev/null",
-		      STATE_DIR, tarfile);
+		      state_dir, tarfile);
 
 	err = system(tarcommand);
 	if (WIFEXITED(err)) {
@@ -481,7 +481,7 @@ void full_download(struct file *file)
 
 	string_or_die(&url, "%s/%i/files/%s.tar", content_url, file->last_change, file->hash);
 
-	string_or_die(&filename, "%s/download/.%s.tar", STATE_DIR, file->hash);
+	string_or_die(&filename, "%s/download/.%s.tar", state_dir, file->hash);
 	file->staging = filename;
 
 	curl_ret = curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);

@@ -67,6 +67,7 @@ static const struct option prog_opts[] = {
 	{ "format", required_argument, 0, 'F' },
 	{ "quick", no_argument, 0, 'q' },
 	{ "force", no_argument, 0, 'x' },
+	{ "statedir", required_argument, 0, 'S' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -88,6 +89,7 @@ static void print_help(const char *name)
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	printf("   -q, --quick             Don't compare hashes, only fix missing files\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
+	printf("   -S, --statedir          Specify alternate swupd state directory\n");
 	printf("\n");
 }
 
@@ -95,7 +97,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxm:p:u:P:c:v:fiF:q", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxm:p:u:P:c:v:fiF:qS:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -152,6 +154,12 @@ static bool parse_options(int argc, char **argv)
 		case 'F':
 			if (!optarg || !set_format_string(optarg)) {
 				printf("Invalid --format argument\n\n");
+				goto err;
+			}
+			break;
+		case 'S':
+			if (!optarg || !set_state_dir(optarg)) {
+				printf("Invalid --statedir argument\n\n");
 				goto err;
 			}
 			break;

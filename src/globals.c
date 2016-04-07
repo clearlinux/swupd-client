@@ -50,6 +50,7 @@ char *path_prefix = NULL; /* must always end in '/' */
 char *mounted_dirs = NULL;
 char *bundle_to_add = NULL;
 struct timeval start_time;
+char *state_dir = NULL;
 
 /* NOTE: Today the content and version server urls are the same in
  * all cases.  It is highly likely these will eventually differ, eg:
@@ -169,6 +170,29 @@ static bool is_valid_integer_format(char *str)
 	return true;
 }
 
+bool set_state_dir(char *path)
+{
+	if (path) {
+		if (path[0] != '/') {
+			printf("statepath must be a full path starting with '/', not '%c'\n", path[0]);
+			return false;
+		}
+
+		if (state_dir) {
+			free(state_dir);
+		}
+
+		string_or_die(&state_dir, "%s", path);
+	} else {
+		if (state_dir) {
+			return true;
+		}
+		string_or_die(&state_dir, "%s", STATE_DIR);
+	}
+
+	return true;
+}
+
 bool set_format_string(char *userinput)
 {
 	int ret;
@@ -282,6 +306,11 @@ bool init_globals(void)
 
 	gettimeofday(&start_time, NULL);
 
+	ret = set_state_dir(NULL);
+	if (!ret) {
+		return false;
+	}
+
 	ret = set_path_prefix(NULL);
 	/* a valid path prefix must be set to continue */
 	if (!ret) {
@@ -306,6 +335,7 @@ void free_globals(void)
 	free(path_prefix);
 	free(format_string);
 	free(mounted_dirs);
+	free(state_dir);
 	if (bundle_to_add != NULL) {
 		free(bundle_to_add);
 	}

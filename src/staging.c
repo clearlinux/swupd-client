@@ -89,7 +89,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 		rel_dir = dir + 1;
 	}
 
-	string_or_die(&original, "%s/staged/%s", STATE_DIR, file->hash);
+	string_or_die(&original, "%s/staged/%s", state_dir, file->hash);
 
 	string_or_die(&targetpath, "%s%s", path_prefix, rel_dir);
 	ret = stat(targetpath, &s);
@@ -138,7 +138,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 		 * pre-existing: */
 		/* In order to avoid tar transforms with directories, rename
 		 * the directory before and after the tar command */
-		string_or_die(&rename_tmpdir, "%s/tmprenamedir", STATE_DIR);
+		string_or_die(&rename_tmpdir, "%s/tmprenamedir", state_dir);
 		ret = create_staging_renamedir(rename_tmpdir);
 		if (ret) {
 			goto out;
@@ -180,7 +180,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 			/* either the hardlink failed, or it was undesirable (config), do a tar-tar dance */
 			/* In order to avoid tar transforms, rename the file
 			 * before and after the tar command */
-			string_or_die(&rename_target, "%s/staged/.update.%s", STATE_DIR, base);
+			string_or_die(&rename_target, "%s/staged/.update.%s", state_dir, base);
 			ret = rename(original, rename_target);
 			if (ret) {
 				ret = -errno;
@@ -188,7 +188,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 			}
 			string_or_die(&tarcommand, TAR_COMMAND " -C %s/staged " TAR_PERM_ATTR_ARGS " -cf - '.update.%s' 2> /dev/null | "
 				      TAR_COMMAND " -C %s%s " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-				      STATE_DIR, base, path_prefix, rel_dir);
+				      state_dir, base, path_prefix, rel_dir);
 			ret = system(tarcommand);
 			if (WIFEXITED(ret)) {
 				ret = WEXITSTATUS(ret);

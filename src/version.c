@@ -48,7 +48,7 @@ static int try_version_download(void)
 
 	string_or_die(&url, "%s/version/format%s/latest", version_url, format_string);
 
-	string_or_die(&path, "%s/server_version", STATE_DIR);
+	string_or_die(&path, "%s/server_version", state_dir);
 
 	unlink(path);
 
@@ -183,7 +183,7 @@ int update_device_latest_version(int version)
 	FILE *file = NULL;
 	char *path = NULL;
 
-	string_or_die(&path, "%s/version", STATE_DIR);
+	string_or_die(&path, "%s/version", state_dir);
 	file = fopen(path, "w");
 	if (!file) {
 		free(path);

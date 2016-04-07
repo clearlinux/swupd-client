@@ -44,7 +44,7 @@ static int download_pack(int oldversion, int newversion, char *module)
 	char *filename;
 	struct stat stat;
 
-	string_or_die(&filename, "%s/pack-%s-from-%i-to-%i.tar", STATE_DIR, module, oldversion, newversion);
+	string_or_die(&filename, "%s/pack-%s-from-%i-to-%i.tar", state_dir, module, oldversion, newversion);
 
 	err = lstat(filename, &stat);
 	if (err == 0 && stat.st_size == 0) {
@@ -77,7 +77,7 @@ static int download_pack(int oldversion, int newversion, char *module)
 
 	printf("Extracting pack.\n");
 	string_or_die(&tar, TAR_COMMAND " -C %s " TAR_PERM_ATTR_ARGS " -xf %s/pack-%s-from-%i-to-%i.tar 2> /dev/null",
-		      STATE_DIR, STATE_DIR, module, oldversion, newversion);
+		      state_dir, state_dir, module, oldversion, newversion);
 
 	err = system(tar);
 	if (WIFEXITED(err)) {

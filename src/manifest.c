@@ -163,7 +163,7 @@ static struct manifest *manifest_from_file(int version, char *component)
 	int manifest_hdr_version;
 	int manifest_enc_version;
 
-	string_or_die(&filename, "%s/%i/Manifest.%s", STATE_DIR, version, component);
+	string_or_die(&filename, "%s/%i/Manifest.%s", state_dir, version, component);
 
 	infile = fopen(filename, "rb");
 	if (infile == NULL) {
@@ -422,7 +422,7 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 		goto out;
 	}
 
-	string_or_die(&original, "%s/%i/Manifest.%s", STATE_DIR, current, component);
+	string_or_die(&original, "%s/%i/Manifest.%s", state_dir, current, component);
 
 	populate_file_struct(file, original);
 	ret = compute_hash(file, original);
@@ -433,7 +433,7 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 		goto out;
 	}
 
-	string_or_die(&deltafile, "%s/Manifest-%s-delta-from-%i-to-%i", STATE_DIR, component, current, new);
+	string_or_die(&deltafile, "%s/Manifest-%s-delta-from-%i-to-%i", state_dir, component, current, new);
 
 	memset(&buf, 0, sizeof(struct stat));
 	ret = stat(deltafile, &buf);
@@ -455,7 +455,7 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 
 	/* Now apply the manifest delta */
 
-	string_or_die(&newfile, "%s/%i/Manifest.%s", STATE_DIR, new, component);
+	string_or_die(&newfile, "%s/%i/Manifest.%s", state_dir, new, component);
 
 	ret = apply_bsdiff_delta(original, newfile, deltafile);
 	xattrs_copy(original, newfile);
@@ -492,7 +492,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		return -ENOSWUPDSERVER;
 	}
 
-	string_or_die(&dir, "%s/%i", STATE_DIR, version);
+	string_or_die(&dir, "%s/%i", state_dir, version);
 	ret = mkdir(dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if ((ret != 0) && (errno != EEXIST)) {
 		return ret;
@@ -508,7 +508,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		}
 	}
 
-	string_or_die(&filename, "%s/%i/Manifest.%s.tar", STATE_DIR, version, component);
+	string_or_die(&filename, "%s/%i/Manifest.%s.tar", state_dir, version, component);
 
 	string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url, version, component);
 
@@ -524,7 +524,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	}
 
 	string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",
-		      STATE_DIR, version, STATE_DIR, version, component);
+		      state_dir, version, state_dir, version, component);
 
 	/* this is is historically a point of odd errors */
 	ret = system(tar);
@@ -938,7 +938,7 @@ void debug_write_manifest(struct manifest *manifest, char *filename)
 	FILE *out;
 	char *fullfile = NULL;
 
-	string_or_die(&fullfile, "%s/%s", STATE_DIR, filename);
+	string_or_die(&fullfile, "%s/%s", state_dir, filename);
 
 	out = fopen(fullfile, "w");
 	if (out == NULL) {

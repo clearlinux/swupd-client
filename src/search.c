@@ -70,6 +70,7 @@ static void print_help(const char *name)
 	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
+	printf("   -S, --statedir          Specify alternate swupd state directory\n");
 
 	printf("\nResults format:\n");
 	printf(" 'Bundle Name'  :  'File matching search term'\n\n");
@@ -89,6 +90,7 @@ static const struct option prog_opts[] = {
 	{ "format", required_argument, 0, 'F' },
 	{ "init", no_argument, 0, 'i' },
 	{ "display-files", no_argument, 0, 'd' },
+	{ "statedir", required_argument, 0, 'S' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -96,7 +98,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hu:c:v:P:p:F:s:lbid", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hu:c:v:P:p:F:s:lbidS:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -154,6 +156,12 @@ static bool parse_options(int argc, char **argv)
 		case 'F':
 			if (!optarg || !set_format_string(optarg)) {
 				printf("Invalid --format argument\n\n");
+				goto err;
+			}
+			break;
+		case 'S':
+			if (!optarg || !set_state_dir(optarg)) {
+				printf("Invalid --statedir argument\n\n");
 				goto err;
 			}
 			break;
@@ -354,7 +362,7 @@ static double query_total_download_size(struct list *list)
 		file = list->data;
 		list = list->next;
 
-		string_or_die(&untard_file, "%s/%i/Manifest.%s", STATE_DIR, file->last_change,
+		string_or_die(&untard_file, "%s/%i/Manifest.%s", state_dir, file->last_change,
 			      file->filename);
 
 		if (access(untard_file, F_OK) == -1) {
@@ -418,10 +426,10 @@ int download_manifests(struct manifest **MoM)
 
 		create_and_append_subscription(file->filename);
 
-		string_or_die(&untard_file, "%s/%i/Manifest.%s", STATE_DIR, file->last_change,
+		string_or_die(&untard_file, "%s/%i/Manifest.%s", state_dir, file->last_change,
 			      file->filename);
 
-		string_or_die(&tarfile, "%s/%i/Manifest.%s.tar", STATE_DIR, file->last_change,
+		string_or_die(&tarfile, "%s/%i/Manifest.%s.tar", state_dir, file->last_change,
 			      file->filename);
 
 		if (access(untard_file, F_OK) == -1) {

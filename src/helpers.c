@@ -63,7 +63,7 @@ int rm_staging_dir_contents(const char *rel_path)
 	char *abs_path;
 	int ret;
 
-	string_or_die(&abs_path, "%s/%s", STATE_DIR, rel_path);
+	string_or_die(&abs_path, "%s/%s", state_dir, rel_path);
 
 	dir = opendir(abs_path);
 	if (dir == NULL) {
@@ -103,15 +103,15 @@ void unlink_all_staged_content(struct file *file)
 	char *filename;
 
 	/* downloaded tar file */
-	string_or_die(&filename, "%s/download/%s.tar", STATE_DIR, file->hash);
+	string_or_die(&filename, "%s/download/%s.tar", state_dir, file->hash);
 	unlink(filename);
 	free(filename);
-	string_or_die(&filename, "%s/download/.%s.tar", STATE_DIR, file->hash);
+	string_or_die(&filename, "%s/download/.%s.tar", state_dir, file->hash);
 	unlink(filename);
 	free(filename);
 
 	/* downloaded and un-tar'd file */
-	string_or_die(&filename, "%s/staged/%s", STATE_DIR, file->hash);
+	string_or_die(&filename, "%s/staged/%s", state_dir, file->hash);
 	if (file->is_dir) {
 		rmdir(filename);
 	} else {
@@ -121,7 +121,7 @@ void unlink_all_staged_content(struct file *file)
 
 	/* delta file */
 	if (file->peer) {
-		string_or_die(&filename, "%s/delta/%i-%i-%s", STATE_DIR,
+		string_or_die(&filename, "%s/delta/%i-%i-%s", state_dir,
 			      file->peer->last_change, file->last_change, file->hash);
 		unlink(filename);
 		free(filename);
@@ -150,12 +150,12 @@ int create_required_dirs(void)
 	bool missing = false;
 
 	// check for existance
-	ret = stat(STATE_DIR, &buf);
+	ret = stat(state_dir, &buf);
 	if (ret && (errno == ENOENT)) {
 		missing = true;
 	}
 	for (i = 0; i < STATE_DIR_COUNT; i++) {
-		string_or_die(&dir, "%s/%s", STATE_DIR, dirs[i]);
+		string_or_die(&dir, "%s/%s", state_dir, dirs[i]);
 		ret = stat(dir, &buf);
 		if (ret) {
 			missing = true;
@@ -167,14 +167,14 @@ int create_required_dirs(void)
 		char *cmd;
 
 		for (i = 0; i < STATE_DIR_COUNT; i++) {
-			string_or_die(&cmd, "mkdir -p %s/%s", STATE_DIR, dirs[i]);
+			string_or_die(&cmd, "mkdir -p %s/%s", state_dir, dirs[i]);
 			ret = system(cmd);
 			if (ret) {
 				return -1;
 			}
 			free(cmd);
 
-			string_or_die(&dir, "%s/%s", STATE_DIR, dirs[i]);
+			string_or_die(&dir, "%s/%s", state_dir, dirs[i]);
 			ret = chmod(dir, S_IRWXU);
 			if (ret) {
 				return -1;
@@ -183,7 +183,7 @@ int create_required_dirs(void)
 		}
 
 		// chmod 700
-		ret = chmod(STATE_DIR, S_IRWXU);
+		ret = chmod(state_dir, S_IRWXU);
 		if (ret) {
 			return -1;
 		}
@@ -767,7 +767,7 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 			goto end;
 		}
 
-		string_or_die(&tar_dotfile, "%s/download/.%s.tar", STATE_DIR, file->hash);
+		string_or_die(&tar_dotfile, "%s/download/.%s.tar", state_dir, file->hash);
 
 		// clean up in case any prior download failed in a partial state
 		unlink(tar_dotfile);

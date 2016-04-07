@@ -348,7 +348,6 @@ int add_subscriptions(struct list *bundles, int current_version, struct manifest
 
 		file = search_bundle_in_manifest(mom, bundle);
 		if (!file) {
-			printf("%s bundle name is invalid, skipping it...\n", bundle);
 			continue;
 		}
 
@@ -382,7 +381,6 @@ retry_manifest_download:
 		free(manifest);
 
 		if (is_tracked_bundle(bundle)) {
-			printf("%s bundle already installed, skipping it\n", bundle);
 			continue;
 		}
 
@@ -391,7 +389,6 @@ retry_manifest_download:
 		}
 		create_and_append_subscription(bundle);
 		new_bundles = true;
-		printf("Added bundle %s for installation\n", bundle);
 	}
 	if (new_bundles) {
 		ret = 0;
@@ -413,7 +410,7 @@ int install_bundles(struct list *bundles, int current_version, struct manifest *
 
 	if (ret) {
 		if (ret == 1) {
-			printf("There are no pending bundles to install, exiting now\n");
+			printf("%s bundle already installed, exiting now\n", bundle);
 		}
 		ret = EBUNDLE_INSTALL;
 		goto out;

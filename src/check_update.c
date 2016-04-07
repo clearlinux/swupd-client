@@ -98,10 +98,7 @@ static bool parse_options(int argc, char **argv)
 				printf("Invalid --path argument\n\n");
 				goto err;
 			}
-			if (path_prefix) { /* multiple -p options */
-				free(path_prefix);
-			}
-			string_or_die(&path_prefix, "%s", optarg);
+			set_path_prefix(optarg);
 			break;
 		case 'x':
 			force = true;

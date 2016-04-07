@@ -212,47 +212,79 @@ bool set_format_string(char *userinput)
 	return true;
 }
 
-bool init_globals(void)
+/* Passing NULL for PATH will either use the last --path argument given on the command
+ * line, or sets the default value ("/").
+ */
+bool set_path_prefix(char *path)
 {
 	struct stat statbuf;
 	int ret;
 
-	gettimeofday(&start_time, NULL);
-
-	/* insure path_prefix is absolute, at least '/', ends in '/',
-	 * and is a valid dir */
-	if (path_prefix != NULL) {
+	if (path != NULL) {
 		int len;
 		char *tmp;
 
-		if (path_prefix[0] != '/') {
+		/* in case multiple -p options are passed */
+		if (path_prefix) {
+			free(path_prefix);
+		}
+
+		string_or_die(&tmp, "%s", path);
+
+		/* ensure path_prefix is absolute, at least '/', ends in '/',
+		 * and is a valid dir */
+		if (tmp[0] != '/') {
 			char *cwd;
 
 			cwd = get_current_dir_name();
 			if (cwd == NULL) {
 				printf("Unable to getwd() (%s)\n", strerror(errno));
+				free(tmp);
 				return false;
 			}
-			string_or_die(&tmp, "%s/%s", cwd, path_prefix);
 
-			free(path_prefix);
-			path_prefix = tmp;
+			free(tmp);
+			string_or_die(&tmp, "%s/%s", cwd, path);
+
 			free(cwd);
 		}
 
-		len = strlen(path_prefix);
-		if (!len || (path_prefix[len - 1] != '/')) {
-			string_or_die(&tmp, "%s/", path_prefix);
-			free(path_prefix);
-			path_prefix = tmp;
+		len = strlen(tmp);
+		if (!len || (tmp[len - 1] != '/')) {
+			char *tmp_old = tmp;
+			string_or_die(&tmp, "%s/", tmp_old);
+			free(tmp_old);
 		}
+
+		path_prefix = tmp;
+
 	} else {
-		string_or_die(&path_prefix, "/");
+		if (path_prefix) {
+			/* option passed on command line previously */
+			return true;
+		} else {
+			string_or_die(&path_prefix, "/");
+		}
 	}
 	ret = stat(path_prefix, &statbuf);
 	if (ret != 0 || !S_ISDIR(statbuf.st_mode)) {
 		printf("Bad path_prefix %s (%s), cannot continue.\n",
 		       path_prefix, strerror(errno));
+		return false;
+	}
+
+	return true;
+}
+
+bool init_globals(void)
+{
+	int ret;
+
+	gettimeofday(&start_time, NULL);
+
+	ret = set_path_prefix(NULL);
+	/* a valid path prefix must be set to continue */
+	if (!ret) {
 		return false;
 	}
 

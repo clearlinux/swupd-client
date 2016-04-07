@@ -85,10 +85,7 @@ int hashdump_main(int argc, char **argv)
 				free(file);
 				return EXIT_FAILURE;
 			}
-			if (path_prefix) { /* multiple -p options */
-				free(path_prefix);
-			}
-			string_or_die(&path_prefix, "%s", optarg);
+			set_path_prefix(optarg);
 			break;
 		case 'h':
 			usage(argv[0]);

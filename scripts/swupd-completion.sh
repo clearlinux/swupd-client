@@ -31,73 +31,77 @@ subcommandsfromhelp=()
 optionsfromsubcommand=()
 
 #Checks if swupd commad exists in current shell
-if [ -a $SWUPDCOMMAND ] ; then
+if [ -e $SWUPDCOMMAND ] ; then
+  currenttype=""
+  nexttype=""
+  array=()
+  #reads "swupd --help" line by line
+  while read line
+  do
+  #For each line checks in what section is
+  if [[ $line == "Help Options:" ]]; then
+    nexttype="options"
+  fi
+  if [[ $line == "Subcommands:" ]]; then
+    nexttype="subcommand"
+  fi
+  if [[ $line == "" ]]; then
     currenttype=""
+  fi
+  case $currenttype in
+    #In case of subcommand it inserts first word of line in an array
+    "subcommand" )
+    array=( $line )
+    subcommandsfromhelp+=(${array[0]}) ;;
+    #In case of options it reads short and long options
+    "options" )
+    array=( $line )
+    optionsfromhelp="${optionsfromhelp} ${array[0]%?} ${array[1]}" ;;
+    #For the rest do nothing
+    "" ) : ;;
+  esac
+  if [[ -n $nexttype ]]; then
+    currenttype=$nexttype
     nexttype=""
-    array=()
-    #reads "swupd --help" line by line
-    while read line
-    do
-	#For each line checks in what section is
-	if [[ $line == "Help Options:" ]]; then
-	    nexttype="options"
-	fi
-	if [[ $line == "Subcommands:" ]]; then
-	    nexttype="subcommand"
-	fi
-	if [[ $line == "" ]]; then
-	    currenttype=""
-	fi
-	case $currenttype in
-	    #In case of subcommand it inserts first word of line in an array
-	    "subcommand" )
-		array=( $line )
-		subcommandsfromhelp+=(${array[0]}) ;;
-	    #In case of options it reads short and long options
-	    "options" )
-		array=( $line )
-		optionsfromhelp="${optionsfromhelp} ${array[0]%?} ${array[1]}" ;;
-	esac
-	if [[ -n $nexttype ]]; then
-	    currenttype=$nexttype
-	    nexttype=""
-	fi
-    done < <($SWUPDCOMMAND --help)
+  fi
+  done < <($SWUPDCOMMAND --help)
 else
-    echo "Error: No swupd found"
-    exit 1
+  echo "Error: No swupd found"
+  exit 1
 fi
 
 #Now it is time to read options for each subcommand
 for i in "${subcommandsfromhelp[@]}"; do
-    substring=""
+  substring=""
+  currenttype=""
+  nexttype=""
+  array=()
+  #Reads "swupd subcommand --help" line by line
+  while read line
+  do
+  # Check when is inside of help options to start read them
+  if [[ $line == "Help Options:" || $line == "Application Options:" ]]; then
+    nexttype="options"
+  fi
+  if [[ $line == "" ]]; then
     currenttype=""
+  fi
+  case $currenttype in
+    #In options, reads both, short and long ways
+    "options" )
+    array=( $line )
+    longopt=${array[1]}
+    substring="${substring} ${array[0]%?} ${longopt%=*}" ;;
+    #For anithing else do nothing
+    "" ) : ;;
+  esac
+  if [[ -n $nexttype ]]; then
+    currenttype=$nexttype
     nexttype=""
-    array=()
-    #Reads "swupd subcommand --help" line by line
-    while read line
-    do
-	# Check when is inside of help options to start read them
-	if [[ $line == "Help Options:" || $line == "Application Options:" ]]; then
-	    nexttype="options"
-	fi
-	if [[ $line == "" ]]; then
-	    currenttype=""
-	fi
-	case $currenttype in
-	    #In options, reads both, short and long ways
-	    "options" )
-		array=( $line )
-		longopt=${array[1]}
-		substring="${substring} ${array[0]%?} ${longopt%=*}" ;;
-	esac
-	if [[ -n $nexttype ]]; then
-	    currenttype=$nexttype
-	    nexttype=""
-	fi
-    done < <($SWUPDCOMMAND $i --help)
-    #Options are added to an array
-    optionsfromsubcommand+=("$substring")
+  fi
+  done < <($SWUPDCOMMAND $i --help)
+  #Options are added to an array
+  optionsfromsubcommand+=("$substring")
 done
 
 #Autocomplete scrit creation
@@ -124,46 +128,46 @@ cat > $SCRIPTNAME << EOM
 #declares the completion function
 ${COMPLETIONFUNCTION}()
 {
-    local cur prev opts index suboptions mainsubcommands
-    local mainopts="$optionsfromhelp"
-    COMPREPLY=()
-    cur="\${COMP_WORDS[COMP_CWORD]}"
-    prev="\${COMP_WORDS[COMP_CWORD-1]}"
-    #Adding all options for subcommands in an array
-    mainsubcommands+=("${subcommandsfromhelp[@]}")
-    suboptions+=("\$mainopts")
+  local cur prev opts index suboptions mainsubcommands
+  local mainopts="$optionsfromhelp"
+  COMPREPLY=()
+  cur="\${COMP_WORDS[COMP_CWORD]}"
+  prev="\${COMP_WORDS[COMP_CWORD-1]}"
+  #Adding all options for subcommands in an array
+  mainsubcommands+=("${subcommandsfromhelp[@]}")
+  suboptions+=("\$mainopts")
 EOM
-    #This adds options for all subcommands
-    for i in ${!optionsfromsubcommand[@]}; do
-	echo -e "    suboptions+=(\"${optionsfromsubcommand[$i]}\")" >> $SCRIPTNAME
-	echo -e "    mainsubcommands+=(\" \")" >> $SCRIPTNAME
-    done
+  #This adds options for all subcommands
+  for i in ${!optionsfromsubcommand[@]}; do
+  echo -e "  suboptions+=(\"${optionsfromsubcommand[$i]}\")" >> $SCRIPTNAME
+  echo -e "  mainsubcommands+=(\" \")" >> $SCRIPTNAME
+  done
 
 cat >> $SCRIPTNAME << EOM
 
-    #Need to get last subcommand entered by the user
-    index=COMP_CWORD-1
-    while [[ " swupd \$mainsubcommands " != *" \$prev "* ]]; do
-	((index--))
-	prev="\${COMP_WORDS[\$index]}"
-    done
-    #Now need to calculate the index of the subcommand in order to
-    #retreive options
-    index=0
-    for subc in swupd \${mainsubcommands[0]}
-    do
-	if [[ \$subc == \$prev ]]; then
-	    break
-	fi
-	((index++))
-    done
+  #Need to get last subcommand entered by the user
+  index=COMP_CWORD-1
+  while [[ " swupd \$mainsubcommands " != *" \$prev "* ]]; do
+    ((index--))
+    prev="\${COMP_WORDS[\$index]}"
+  done
+  #Now need to calculate the index of the subcommand in order to
+  #retreive options
+  index=0
+  for subc in swupd \${mainsubcommands[0]}
+  do
+    if [[ \$subc == \$prev ]]; then
+      break
+    fi
+    ((index++))
+  done
 
-    #Get all options for last subcommand entered
-    opts="\${suboptions[\$index]} \${mainsubcommands[\$index]}"
+  #Get all options for last subcommand entered
+  opts="\${suboptions[\$index]} \${mainsubcommands[\$index]}"
 
-    COMPREPLY=( \$(compgen -W "\${opts}" -- \${cur}) )
+  COMPREPLY=( \$(compgen -W "\${opts}" -- \${cur}) )
 
-    return 0
+  return 0
 }
 
 complete -F ${COMPLETIONFUNCTION} swupd

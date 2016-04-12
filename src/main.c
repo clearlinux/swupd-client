@@ -121,6 +121,7 @@ static bool parse_options(int argc, char **argv)
 				printf("Invalid --format argument\n\n");
 				goto err;
 			}
+			break;
 		case 'S':
 			if (!optarg || !set_state_dir(optarg)) {
 				printf("Invalid --statedir argument\n\n");

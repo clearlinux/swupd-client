@@ -420,6 +420,19 @@ class update_missing_os_core(unittest.TestCase):
         self.assertTrue(os.path.isdir(os_core_dir))
 
 
+@http_command(option="")
+class update_newest_deleted(unittest.TestCase):
+    def validate(self, test_output):
+        # If a file is deleted in all bundles in the latest version, but it was
+        # deleted in different versions, make sure the newest deleted version
+        # is considered for the update.
+        self.assertIn('    deleted files     : 1', test_output)
+        deleted_file = os.path.join(os.getcwd(),
+                                    path_from_name(__class__.__name__, 'target'),
+                                    'testfile')
+        self.assertFalse(os.path.isfile(deleted_file))
+
+
 @http_command(option="--status")
 class update_status(unittest.TestCase):
     def validate(self, test_output):

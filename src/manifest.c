@@ -849,6 +849,17 @@ void consolidate_submanifests(struct manifest *manifest)
 			continue;
 		}
 
+		if (file1->is_deleted && file2->is_deleted) {
+			/* keep the newer of the two */
+			if (file1->last_change > file2->last_change) {
+				list_free_item(next, free_file_data);
+			} else {
+				list_free_item(list, free_file_data);
+				list = next;
+			}
+			continue;
+		}
+
 		/* (case 2) A'                     : choose file1 */
 		if (file2->is_deleted && !file2->is_rename) {
 			list_free_item(next, free_file_data);

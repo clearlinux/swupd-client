@@ -38,32 +38,6 @@
 #include "config.h"
 #include "swupd.h"
 
-static int mklockdir(void)
-{
-	char *cmd;
-	int ret;
-	struct stat buf;
-
-	memset(&buf, 0, sizeof(struct stat));
-	ret = stat(LOCK_DIR, &buf);
-	if ((ret == 0) && (S_ISDIR(buf.st_mode))) {
-		return 0;
-	} else if (force) {
-		/* lock dir is not a directory, so with force, clean it up */
-		unlink(LOCK_DIR);
-	}
-
-	string_or_die(&cmd, "mkdir -m 755 -p %s", LOCK_DIR);
-
-	ret = system(cmd);
-	free(cmd);
-	if (ret) {
-		return -1;
-	}
-
-	return 0;
-}
-
 /* Try to get a write lock region on the lock file. Returns:
 * >= 0 an fcntl region lock'd fd or exits with a positive error
 * code and a recommended course of action for user.
@@ -81,18 +55,7 @@ int p_lockfile(void)
 	};
 	char *lockfile;
 
-	if (mklockdir() < 0) {
-		printf("Error: Unable to create lock dir: '%s'\n", LOCK_DIR);
-		if (!force) {
-			printf("  Solution: Create manually or re-run with '--force'\n");
-			printf("Operation Failed\n");
-			exit(EXIT_FAILURE);
-		}
-
-		printf(" --force used. Attempting to continue\n");
-	}
-
-	string_or_die(&lockfile, "%s/swupd_lock", LOCK_DIR);
+	string_or_die(&lockfile, "%s/swupd_lock", state_dir);
 
 	/* open lock file */
 	lock_fd = open(lockfile, O_RDWR | O_CREAT | O_CLOEXEC, 0600);

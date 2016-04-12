@@ -1,4 +1,4 @@
-EXTRA_DIST = COPYING findstatic.pl
+EXTRA_DIST = COPYING scripts/findstatic.pl
 
 AM_CFLAGS = -fPIC -Iinclude/ -O2 -g -Wall -W -Wformat-security -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99
 ACLOCAL_AMFLAGS = -I m4
@@ -126,7 +126,7 @@ distclean-local:
 	rm -rf aclocal.m4 ar-lib autom4te.cache config.guess config.h.in config.h.in~ config.sub configure depcomp install-sh ltmain.sh m4 Makefile.in missing compile
 
 install-exec-hook:
-	perl findstatic.pl */*.o | grep -v Checking ||:
+	perl scripts/findstatic.pl */*.o | grep -v Checking ||:
 
 
 TEST_EXTENSIONS = .py

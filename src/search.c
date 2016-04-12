@@ -472,13 +472,18 @@ int search_main(int argc, char **argv)
 	int lock_fd = 0;
 	struct manifest *MoM = NULL;
 
-	if (!parse_options(argc, argv) ||
-	    create_required_dirs()) {
+	if (!parse_options(argc, argv)) {
 		return EXIT_FAILURE;
 	}
 
 	if (!init_globals()) {
 		ret = EINIT_GLOBALS;
+		goto clean_exit;
+	}
+
+	ret = create_required_dirs();
+	if (ret != 0) {
+		printf("State directory %s cannot be recreated\n", state_dir);
 		goto clean_exit;
 	}
 

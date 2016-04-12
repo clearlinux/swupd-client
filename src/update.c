@@ -263,10 +263,6 @@ int main_update()
 
 	/* Step 2: housekeeping */
 
-	if (create_required_dirs()) {
-		goto clean_curl;
-	}
-
 	if (rm_staging_dir_contents("download")) {
 		goto clean_curl;
 	}
@@ -410,6 +406,7 @@ clean_curl:
 	signature_terminate();
 	swupd_curl_cleanup();
 	free_subscriptions();
+	free_globals();
 
 	printf("Update exiting.\n");
 

@@ -117,9 +117,6 @@ static bool parse_options(int argc, char **argv)
 		}
 	}
 
-	if (!init_globals()) {
-		return false;
-	}
 	return true;
 err:
 	print_help(argv[0]);
@@ -131,7 +128,9 @@ static int check_update()
 	int current_version, server_version;
 
 	check_root();
+	set_path_prefix(NULL);
 	swupd_curl_init();
+
 	read_versions(&current_version, &server_version, path_prefix);
 
 	if (server_version < 0) {
@@ -157,7 +156,6 @@ int check_update_main(int argc, char **argv)
 	copyright_header("software update checker");
 
 	if (!parse_options(argc, argv)) {
-		free_globals();
 		return EXIT_FAILURE;
 	}
 

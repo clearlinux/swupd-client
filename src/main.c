@@ -144,10 +144,6 @@ static bool parse_options(int argc, char **argv)
 		}
 	}
 
-	if (!init_globals()) {
-		return false;
-	}
-
 	return true;
 err:
 	print_help(argv[0]);
@@ -158,7 +154,10 @@ static void print_versions()
 {
 	int current_version, server_version;
 
+	check_root();
+	set_path_prefix(NULL);
 	swupd_curl_init();
+
 	read_versions(&current_version, &server_version, path_prefix);
 
 	if (current_version < 0) {
@@ -180,7 +179,6 @@ int update_main(int argc, char **argv)
 	copyright_header("software update");
 
 	if (!parse_options(argc, argv)) {
-		free_globals();
 		return EXIT_FAILURE;
 	}
 
@@ -189,6 +187,5 @@ int update_main(int argc, char **argv)
 	} else {
 		ret = main_update();
 	}
-	free_globals();
 	return ret;
 }

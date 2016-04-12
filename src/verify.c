@@ -195,10 +195,6 @@ static bool parse_options(int argc, char **argv)
 		return false;
 	}
 
-	if (!init_globals()) {
-		return false;
-	}
-
 	return true;
 err:
 	print_help(argv[0]);
@@ -596,15 +592,19 @@ int verify_main(int argc, char **argv)
 
 	copyright_header("software verify");
 
-	if (!parse_options(argc, argv) ||
-	    create_required_dirs()) {
-		free_globals();
+	if (!parse_options(argc, argv)) {
 		return EXIT_FAILURE;
 	}
 
 	/* parse command line options */
 	assert(argc >= 0);
 	assert(argv != NULL);
+
+	ret = swupd_init(&lock_fd);
+	if (ret != 0) {
+		printf("Failed verify initialization, exiting now.\n");
+		return ret;
+	}
 
 	/* Gather current manifests */
 	if (!version) {
@@ -614,12 +614,6 @@ int verify_main(int argc, char **argv)
 			free_globals();
 			return EXIT_FAILURE;
 		}
-	}
-
-	ret = swupd_init(&lock_fd);
-	if (ret != 0) {
-		printf("Failed verify initialization, exiting now.\n");
-		return ret;
 	}
 
 	if (version == -1) {
@@ -640,7 +634,6 @@ int verify_main(int argc, char **argv)
 	}
 
 	read_subscriptions_alt();
-	get_mounted_directories();
 
 	/*
 	 * FIXME: We need a command line option to override this in case the

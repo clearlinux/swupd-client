@@ -100,7 +100,6 @@ int hashdump_main(int argc, char **argv)
 
 	if (optind >= argc) {
 		usage(argv[0]);
-		free_globals();
 		exit(-1);
 	}
 

@@ -581,13 +581,24 @@ int swupd_init(int *lock_fd)
 	int ret = 0;
 
 	check_root();
+
+	if (!init_globals()) {
+		ret = EINIT_GLOBALS;
+		goto out_fds;
+	}
+
+	get_mounted_directories();
+
+	if (create_required_dirs()) {
+		ret = EREQUIRED_DIRS;
+		goto out_fds;
+	}
+
 	*lock_fd = p_lockfile();
 	if (*lock_fd < 0) {
 		ret = ELOCK_FILE;
 		goto out_fds;
 	}
-
-	get_mounted_directories();
 
 	if (swupd_curl_init() != 0) {
 		ret = ECURL_INIT;

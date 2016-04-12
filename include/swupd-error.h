@@ -19,5 +19,6 @@
 #define EFULLDOWNLOAD 17	/* full_download problem */
 #define ENET404 404		/* download 404'd */
 #define EBUNDLE_INSTALL 18      /* Cannot install bundles */
+#define EREQUIRED_DIRS 19	/* Cannot create required dirs */
 
 #endif

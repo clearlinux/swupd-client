@@ -1,4 +1,4 @@
-EXTRA_DIST = COPYING scripts/findstatic.pl
+EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash
 
 AM_CFLAGS = -fPIC -Iinclude/ -O2 -g -Wall -W -Wformat-security -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99
 ACLOCAL_AMFLAGS = -I m4

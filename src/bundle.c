@@ -49,30 +49,19 @@ int list_installable_bundles()
 	int lock_fd;
 	int ret;
 
-	if (!init_globals()) {
-		return EINIT_GLOBALS;
-	}
-
-	current_version = read_version_from_subvol_file(path_prefix);
-
-	if (swupd_init(&lock_fd) != 0) {
-		printf("Error: Failed updater initialization. Exiting now\n");
-		return ECURL_INIT;
-	}
-
-	ret = create_required_dirs();
+	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
-		printf("State directory %s cannot be recreated, aborting removal\n", state_dir);
-		v_lockfile(lock_fd);
-		return EXIT_FAILURE;
+		printf("Error: Failed updater initialization. Exiting now\n");
+		return ret;
 	}
-	get_mounted_directories();
 
 	if (!check_network()) {
 		printf("Error: Network issue, unable to download manifest\n");
 		v_lockfile(lock_fd);
 		return EXIT_FAILURE;
 	}
+
+	current_version = read_version_from_subvol_file(path_prefix);
 
 	swupd_curl_set_current_version(current_version);
 
@@ -226,16 +215,6 @@ int remove_bundle(const char *bundle_name)
 	int current_version = CURRENT_OS_VERSION;
 	struct manifest *current_mom, *bundle_manifest;
 
-	/* Initially we don't support format nor path_prefix
-	 * for bundle_rm but eventually that will be added, then
-	 * set_format_string() and init_globals() must be pulled out
-	 * to the caller to properly initialize in case those opts
-	 * passed to the command.
-	 */
-	if (!init_globals()) {
-		return EINIT_GLOBALS;
-	}
-
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
 		printf("Failed updater initialization, exiting now.\n");
@@ -259,13 +238,6 @@ int remove_bundle(const char *bundle_name)
 
 	current_version = read_version_from_subvol_file(path_prefix);
 	swupd_curl_set_current_version(current_version);
-
-	/* first of all, make sure state_dir is there, recreate if necessary*/
-	ret = create_required_dirs();
-	if (ret != 0) {
-		printf("State directory %s cannot be recreated, aborting removal\n", state_dir);
-		goto out_free_curl;
-	}
 
 	ret = load_manifests(current_version, current_version, "MoM", NULL, &current_mom);
 	if (ret != 0) {
@@ -508,11 +480,6 @@ int install_bundles_frontend(char **bundles)
 	struct manifest *mom;
 
 	/* initialize swupd and get current version from OS */
-
-	if (!init_globals()) {
-		return EINIT_GLOBALS;
-	}
-
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
 		printf("Failed updater initialization, exiting now.\n");
@@ -521,12 +488,6 @@ int install_bundles_frontend(char **bundles)
 
 	current_version = read_version_from_subvol_file(path_prefix);
 	swupd_curl_set_current_version(current_version);
-
-	ret = create_required_dirs();
-	if (ret != 0) {
-		printf("State directory %s cannot be recreated, aborting installation\n", state_dir);
-		goto clean_and_exit;
-	}
 
 	ret = load_manifests(current_version, current_version, "MoM", NULL, &mom);
 	if (ret != 0) {

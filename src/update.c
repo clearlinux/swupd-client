@@ -263,10 +263,6 @@ int main_update()
 
 	/* Step 2: housekeeping */
 
-	if (create_required_dirs()) {
-		goto clean_curl;
-	}
-
 	if (rm_staging_dir_contents("download")) {
 		goto clean_curl;
 	}

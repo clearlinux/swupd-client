@@ -40,7 +40,7 @@ static bool cmdline_option_fix = false;
 static bool cmdline_option_install = false;
 static bool cmdline_option_quick = false;
 
-static int version;
+static int version = 0;
 
 /* Count of how many files we managed to not fix */
 static int file_checked_count;
@@ -104,7 +104,9 @@ static bool parse_options(int argc, char **argv)
 			print_help(argv[0]);
 			exit(EXIT_SUCCESS);
 		case 'm':
-			if (sscanf(optarg, "%i", &version) != 1) {
+			if (strcmp("latest", optarg) == 0) {
+				version = -1;
+			} else if (sscanf(optarg, "%i", &version) != 1) {
 				printf("Invalid --manifest argument\n\n");
 				goto err;
 			}
@@ -188,6 +190,9 @@ static bool parse_options(int argc, char **argv)
 			printf("--install and --fix options are mutually exclusive\n");
 			return false;
 		}
+	} else if (version == -1) {
+		printf("-m latest only supported with --install\n");
+		return false;
 	}
 
 	if (!init_globals()) {
@@ -615,6 +620,15 @@ int verify_main(int argc, char **argv)
 	if (ret != 0) {
 		printf("Failed verify initialization, exiting now.\n");
 		return ret;
+	}
+
+	if (version == -1) {
+		version = try_version_download();
+		if (version == -1) {
+			printf("Unable to get latest version for install\n");
+			v_lockfile(lock_fd);
+			return EXIT_FAILURE;
+		}
 	}
 
 	printf("Verifying version %i\n", version);

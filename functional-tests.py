@@ -611,6 +611,15 @@ class verify_install_directory(unittest.TestCase):
         self.assertIn('Fix successful', test_output)
 
 
+@http_command(option="--install -m latest")
+class verify_install_latest_directory(unittest.TestCase):
+    def validate(self, test_output):
+        self.assertIn('Verifying version 100', test_output)
+        self.assertIn('  1 files were missing', test_output)
+        self.assertIn('    1 of 1 missing files were replaced', test_output)
+        self.assertIn('Fix successful', test_output)
+
+
 def get_test_cases():
     tests = ['bundleadd', 'bundleremove', 'checkupdate', 'hashdump', 'update',
              'verify', 'search']

@@ -34,7 +34,7 @@
 /* this function attempts to download the latest server version string file from
  * the preferred server to a memory buffer, returning either a negative integer
  * error code or >= 0 representing the server version */
-static int try_version_download(void)
+int try_version_download(void)
 {
 	char *url = NULL;
 	char *path = NULL;

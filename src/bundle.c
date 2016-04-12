@@ -354,6 +354,7 @@ int add_subscriptions(struct list *bundles, int current_version, struct manifest
 
 		file = search_bundle_in_manifest(mom, bundle);
 		if (!file) {
+			printf("%s bundle name is invalid, skipping it...\n", bundle);
 			continue;
 		}
 

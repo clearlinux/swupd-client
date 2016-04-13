@@ -406,6 +406,7 @@ clean_curl:
 	signature_terminate();
 	swupd_curl_cleanup();
 	free_subscriptions();
+	free_globals();
 
 	printf("Update exiting.\n");
 

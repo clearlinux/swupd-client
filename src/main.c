@@ -187,6 +187,5 @@ int update_main(int argc, char **argv)
 	} else {
 		ret = main_update();
 	}
-	free_globals();
 	return ret;
 }

@@ -385,13 +385,6 @@ download_packs:
 		printf("Update was applied.\n");
 	}
 
-	if ((current_version < server_version) && (ret == 0)) {
-		printf("Update successful. System updated from version %d to version %d\n",
-		       current_version, server_version);
-	} else if (ret == 0) {
-		printf("Update complete. System already up-to-date at version %d\n", current_version);
-	}
-
 	delete_motd();
 
 	/* Run any scripts that are needed to complete update */
@@ -407,12 +400,15 @@ clean_curl:
 	swupd_curl_cleanup();
 	free_subscriptions();
 	free_globals();
-
-	printf("Update exiting.\n");
-
 	v_lockfile(lock_fd);
-
 	dump_file_descriptor_leaks();
+
+	if ((current_version < server_version) && (ret == 0)) {
+		printf("Update successful. System updated from version %d to version %d\n",
+		       current_version, server_version);
+	} else if (ret == 0) {
+		printf("Update complete. System already up-to-date at version %d\n", current_version);
+	}
 
 	return ret;
 }

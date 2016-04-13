@@ -791,6 +791,13 @@ brick_the_system_and_clean_curl:
 	/* this concludes the critical section, after this point it's clean up time, the disk content is finished and final */
 
 clean_and_exit:
+	swupd_curl_cleanup();
+	free_subscriptions();
+	free_manifest(official_manifest);
+	v_lockfile(lock_fd);
+	dump_file_descriptor_leaks();
+	free_globals();
+
 	if (ret == EXIT_SUCCESS) {
 		if (cmdline_option_fix || cmdline_option_install) {
 			printf("Fix successful\n");
@@ -806,12 +813,6 @@ clean_and_exit:
 			printf("Error: Verify did not fully succeed\n");
 		}
 	}
-	swupd_curl_cleanup();
-	free_subscriptions();
-	free_manifest(official_manifest);
 
-	v_lockfile(lock_fd);
-	dump_file_descriptor_leaks();
-	free_globals();
 	return ret;
 }

@@ -165,35 +165,57 @@ size_t swupd_download_file(void *ptr, size_t size, size_t nmemb, void *userdata)
 	const char *outfile;
 	int fd;
 	FILE *f;
-	size_t written;
+	size_t written, remaining;
 
 	outfile = file->staging;
+	if (file->fd_valid) {
+		fd = file->fd;
+	} else {
+		fd = open(outfile, O_CREAT | O_RDWR | O_CLOEXEC | O_APPEND, 00600);
+		if (fd < 0) {
+			fprintf(stderr, "Cannot open file for write \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
+				outfile, strerror(errno));
+			return -1;
+		}
+		file->fd = fd;
+		file->fd_valid = 1;
+	}
 
-	fd = open(outfile, O_CREAT | O_RDWR, 00600);
-	if (fd < 0) {
-		printf("Error: Cannot open %s for write: %s\n",
-		       outfile, strerror(errno));
+	/* handle short writes with repeated write() calls */
+	for (remaining = size * nmemb; remaining; remaining -= written) {
+		written = write(fd, ptr, size*nmemb);
+		if (written < 0) {
+			if (errno == EINTR) {
+				written = 0;
+				continue;
+			}
+			fprintf(stderr, "write error \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
+				outfile, strerror(errno));
+			return -1;
+		}
+	}
+
+	if (fdatasync(fd)) {
+		fprintf(stderr, "fdatasync \\*outfile=\"%s\",strerror=\"%s\"*\\\n", outfile, strerror(errno));
 		return -1;
 	}
 
-	f = fdopen(fd, "a");
-	if (!f) {
-		printf("Error: Cannot fdopen %s for write: %s\n",
-		       outfile, strerror(errno));
-		close(fd);
-		return -1;
+	return size*nmemb;
+}
+
+CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file)
+{
+	if (file->fd_valid) {
+		if (close(file->fd)) {
+			fprintf(stderr, "Cannot close file after write \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
+				file->staging, strerror(errno));
+			if (curl_ret == CURLE_OK) {
+				curl_ret = CURLE_WRITE_ERROR;
+			}
+		}
+		file->fd_valid = 0;
 	}
-
-	written = fwrite(ptr, size * nmemb, 1, f);
-
-	fflush(f);
-	fclose(f);
-
-	if (written != 1) {
-		return -1;
-	}
-
-	return size * nmemb;
+	return curl_ret;
 }
 
 /* Download a single file SYNCHRONOUSLY
@@ -281,6 +303,9 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 	}
 
 exit:
+	if (local) {
+		curl_ret = swupd_download_file_complete(curl_ret, local);
+	}
 	if (curl_ret == CURLE_OK) {
 		/* curl command succeeded, download might've failed, let our caller handle */
 		switch (ret) {

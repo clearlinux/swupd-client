@@ -84,6 +84,7 @@ struct file {
 	int last_change;
 	struct update_stat stat;
 
+	unsigned int fd_valid : 1;
 	unsigned int is_dir : 1;
 	unsigned int is_file : 1;
 	unsigned int is_link : 1;
@@ -104,6 +105,7 @@ struct file {
 
 	char *staging; /* output name used during download & staging */
 	CURL *curl;    /* curl handle if downloading */
+	int fd;        /* file written into during downloading, unset when fd_valid is false */
 };
 
 extern bool download_only;
@@ -192,6 +194,7 @@ extern void swupd_curl_set_current_version(int v);
 extern void swupd_curl_set_requested_version(int v);
 extern double swupd_query_url_content_size(char *url);
 extern size_t swupd_download_file(void *ptr, size_t size, size_t nmemb, void *userdata);
+extern CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file);
 extern int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 			       char *tmp_version, bool pack);
 #define SWUPD_CURL_LOW_SPEED_LIMIT 1

@@ -164,6 +164,7 @@ static void free_curl_list_data(void *data)
 {
 	struct file *file = (struct file *)data;
 	CURL *curl = file->curl;
+	(void) swupd_download_file_complete(CURLE_OK, file);
 	if (curl != NULL) {
 		curl_multi_remove_handle(mcurl, curl);
 		curl_easy_cleanup(curl);
@@ -362,9 +363,14 @@ static int perform_curl_io_and_complete(int *left)
 			continue;
 		}
 
+		/* Get error code from easy handle and augment it if
+		 * completing the download encounters further problems. */
+		curl_ret = msg->data.result;
+		curl_ret = swupd_download_file_complete(curl_ret, file);
+
 		/* The easy handle may have an error set, even if the server returns
 		 * HTTP 200, so retry the download for this case. */
-		if (ret == 200 && msg->data.result != CURLE_OK) {
+		if (ret == 200 && curl_ret != CURLE_OK) {
 			printf("Error for %s download: %s\n", file->hash,
 			       curl_easy_strerror(msg->data.result));
 			failed = list_prepend_data(failed, file);

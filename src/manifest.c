@@ -654,14 +654,19 @@ void link_manifests(struct manifest *m1, struct manifest *m2)
 			if (((file2->last_change == m2->version) || (file2->last_change > m1->version)) && !file2->is_deleted) {
 				account_changed_file();
 			}
-			if (file2->last_change == m2->version && file2->is_deleted) {
+			if (file2->last_change > m1->version && file2->is_deleted) {
 				account_deleted_file();
 			}
 			continue;
 		}
 		if (ret < 0) { /*  m1/file1 is before m2/file2 */
+			/* File is absent in m2, indicating that a format bump
+			 * happened, removing deleted file entries from the
+			 * previous format(s). Do not account the deleted file
+			 * in this case, since an update will not delete the
+			 * file.
+			 */
 			list1 = list1->next;
-			account_deleted_file();
 			continue;
 		} /* else ret > 0  m1/file1 is after m2/file2 */
 		list2 = list2->next;

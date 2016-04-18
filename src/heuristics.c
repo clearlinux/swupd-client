@@ -27,6 +27,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "config.h"
 #include "swupd.h"
 
 /* trailing slash is to indicate dir itself is expected to exist, but
@@ -121,8 +122,8 @@ void apply_heuristics(struct file *file)
  */
 bool ignore(struct file *file)
 {
-	if ((file->is_config) ||
-	    is_config(file->filename) || // ideally we trust the manifest but short term reapply check here
+	if ((OS_IS_STATELESS && file->is_config) ||
+	    (OS_IS_STATELESS && is_config(file->filename)) || // ideally we trust the manifest but short term reapply check here
 	    (file->is_state) ||
 	    is_state(file->filename) || // ideally we trust the manifest but short term reapply check here
 	    (file->is_boot && file->is_deleted) ||

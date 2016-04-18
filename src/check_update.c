@@ -129,7 +129,7 @@ static int check_update()
 
 	check_root();
 	if (!init_globals()) {
-		return -1;
+		return EINIT_GLOBALS;
 	}
 	swupd_curl_init();
 
@@ -137,7 +137,7 @@ static int check_update()
 
 	if (server_version < 0) {
 		printf("Cannot reach update server\n");
-		return -1;
+		return ENOSWUPDSERVER;
 	} else if (current_version < 0) {
 		printf("Unable to determine current OS version\n");
 		return ECURRENT_VERSION;

@@ -150,6 +150,15 @@ AS_IF([test "x$enable_tar_selinux" = "xyes"],
 	    [TARSELINUX=no]
 )
 
+AC_ARG_ENABLE(
+        [stateless],
+        AS_HELP_STRING([--disable-stateless],[OS is not stateless, do not ignore configuration files (stateless by default)])
+)
+AS_IF([test "x$enable_stateless" = "xno"],
+            [AC_DEFINE(OS_IS_STATELESS,0,[OS is not stateless])],
+            [AC_DEFINE(OS_IS_STATELESS,1,[OS is stateless])]
+)
+
 AC_ARG_WITH([systemdsystemunitdir], AS_HELP_STRING([--with-systemdsystemunitdir=DIR],
             [path to systemd system service dir @<:@default=/usr/lib/systemd/system@:>@]), [unitpath=${withval}],
             [unitpath="$($PKG_CONFIG --variable=systemdsystemunitdir systemd)"])

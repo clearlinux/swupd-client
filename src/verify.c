@@ -609,10 +609,10 @@ int verify_main(int argc, char **argv)
 	/* Gather current manifests */
 	if (!version) {
 		version = read_version_from_subvol_file(path_prefix);
-		if (!version) {
-			printf("Cannot determine current version\n");
+		if (version < 0) {
+			printf("Error: Unable to determine current OS version\n");
 			free_globals();
-			return EXIT_FAILURE;
+			return ECURRENT_VERSION;
 		}
 	}
 

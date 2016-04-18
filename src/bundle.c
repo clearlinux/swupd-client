@@ -62,6 +62,10 @@ int list_installable_bundles()
 	}
 
 	current_version = read_version_from_subvol_file(path_prefix);
+	if (current_version < 0) {
+		printf("Error: Unable to determine current OS version\n");
+		return ECURRENT_VERSION;
+	}
 
 	swupd_curl_set_current_version(current_version);
 
@@ -237,6 +241,11 @@ int remove_bundle(const char *bundle_name)
 	}
 
 	current_version = read_version_from_subvol_file(path_prefix);
+	if (current_version < 0) {
+		printf("Error: Unable to determine current OS version\n");
+		return ECURRENT_VERSION;
+	}
+
 	swupd_curl_set_current_version(current_version);
 
 	ret = load_manifests(current_version, current_version, "MoM", NULL, &current_mom);
@@ -487,6 +496,11 @@ int install_bundles_frontend(char **bundles)
 	}
 
 	current_version = read_version_from_subvol_file(path_prefix);
+	if (current_version < 0) {
+		printf("Error: Unable to determine current OS version\n");
+		return ECURRENT_VERSION;
+	}
+
 	swupd_curl_set_current_version(current_version);
 
 	ret = load_manifests(current_version, current_version, "MoM", NULL, &mom);

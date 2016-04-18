@@ -140,7 +140,7 @@ static int check_update()
 		return -1;
 	} else if (current_version < 0) {
 		printf("Unable to determine current OS version\n");
-		return -1;
+		return ECURRENT_VERSION;
 	} else {
 		if (current_version != -1 && current_version < server_version) {
 			printf("There is a new OS version available: %d\n", server_version);

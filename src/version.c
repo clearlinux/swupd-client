@@ -151,6 +151,7 @@ int check_versions(int *current_version,
 	read_versions(current_version, server_version, path_prefix);
 
 	if (*current_version < 0) {
+		printf("Error: Unable to determine current OS version\n");
 		return -1;
 	}
 	if (*current_version == 0) {

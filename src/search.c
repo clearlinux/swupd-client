@@ -401,6 +401,11 @@ int download_manifests(struct manifest **MoM)
 	bool did_download = false;
 
 	current_version = read_version_from_subvol_file(path_prefix);
+	if (current_version < 0) {
+		printf("Error: Unable to determine current OS version\n");
+		return ECURRENT_VERSION;
+	}
+
 	swupd_curl_set_current_version(current_version);
 
 	ret = load_manifests(current_version, current_version, "MoM", NULL, MoM);

@@ -128,7 +128,9 @@ static int check_update()
 	int current_version, server_version;
 
 	check_root();
-	set_path_prefix(NULL);
+	if (!init_globals()) {
+		return -1;
+	}
 	swupd_curl_init();
 
 	read_versions(&current_version, &server_version, path_prefix);

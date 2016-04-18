@@ -608,7 +608,7 @@ int verify_main(int argc, char **argv)
 
 	/* Gather current manifests */
 	if (!version) {
-		version = read_version_from_subvol_file(path_prefix);
+		version = get_current_version(path_prefix);
 		if (version < 0) {
 			printf("Error: Unable to determine current OS version\n");
 			free_globals();
@@ -617,7 +617,7 @@ int verify_main(int argc, char **argv)
 	}
 
 	if (version == -1) {
-		version = try_version_download();
+		version = get_latest_version();
 		if (version == -1) {
 			printf("Unable to get latest version for install\n");
 			v_lockfile(lock_fd);

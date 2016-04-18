@@ -34,7 +34,7 @@
 /* this function attempts to download the latest server version string file from
  * the preferred server to a memory buffer, returning either a negative integer
  * error code or >= 0 representing the server version */
-int try_version_download(void)
+int get_latest_version(void)
 {
 	char *url = NULL;
 	char *path = NULL;
@@ -71,7 +71,7 @@ bool check_network(void)
 	int ret;
 
 	if (!have_network) {
-		ret = try_version_download();
+		ret = get_latest_version();
 		if (ret < 0) {
 			have_network = false;
 		} else {
@@ -82,7 +82,7 @@ bool check_network(void)
 	return have_network;
 }
 
-int read_version_from_subvol_file(char *path_prefix)
+int get_current_version(char *path_prefix)
 {
 	char line[LINE_MAX];
 	FILE *file;
@@ -137,10 +137,10 @@ void read_versions(int *current_version,
 		   int *server_version,
 		   char *path_prefix)
 {
-	*current_version = read_version_from_subvol_file(path_prefix);
+	*current_version = get_current_version(path_prefix);
 
 	printf("Querying server version.\n");
-	*server_version = try_version_download();
+	*server_version = get_latest_version();
 }
 
 int check_versions(int *current_version,

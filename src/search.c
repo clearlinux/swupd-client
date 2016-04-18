@@ -400,7 +400,7 @@ int download_manifests(struct manifest **MoM)
 	double size;
 	bool did_download = false;
 
-	current_version = read_version_from_subvol_file(path_prefix);
+	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
 		printf("Error: Unable to determine current OS version\n");
 		return ECURRENT_VERSION;

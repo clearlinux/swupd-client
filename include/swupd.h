@@ -142,10 +142,10 @@ extern int main_update(void);
 extern int add_included_manifests(struct manifest *mom);
 extern int main_verify(int current_version);
 
-extern int try_version_download(void);
+extern int get_latest_version(void);
 extern void read_versions(int *current_version, int *server_version, char *path_prefix);
 extern int check_versions(int *current_version, int *server_version, char *path_prefix);
-extern int read_version_from_subvol_file(char *path_prefix);
+extern int get_current_version(char *path_prefix);
 
 extern bool check_network(void);
 

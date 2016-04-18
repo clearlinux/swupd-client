@@ -155,7 +155,7 @@ static void print_versions()
 	int current_version, server_version;
 
 	check_root();
-	set_path_prefix(NULL);
+	(void)init_globals();
 	swupd_curl_init();
 
 	read_versions(&current_version, &server_version, path_prefix);

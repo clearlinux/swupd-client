@@ -68,6 +68,7 @@ static const struct option prog_opts[] = {
 	{ "quick", no_argument, 0, 'q' },
 	{ "force", no_argument, 0, 'x' },
 	{ "statedir", required_argument, 0, 'S' },
+	{ "verify-sign", no_argument, 0, 'V' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -90,6 +91,7 @@ static void print_help(const char *name)
 	printf("   -q, --quick             Don't compare hashes, only fix missing files\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
+	printf("   -V, --verify-sign       Enable signature verification, default value is disabled\n");
 	printf("\n");
 }
 
@@ -97,7 +99,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxm:p:u:P:c:v:fiF:qS:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "Vhxm:p:u:P:c:v:fiF:qS:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -171,6 +173,9 @@ static bool parse_options(int argc, char **argv)
 		case 'x':
 			force = true;
 			break;
+        case 'V':
+            signing_enabled = true;
+            break;
 		default:
 			printf("Unrecognized option\n\n");
 			goto err;

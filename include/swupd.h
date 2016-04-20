@@ -106,6 +106,7 @@ struct file {
 	CURL *curl;    /* curl handle if downloading */
 };
 
+extern bool signing_enabled;
 extern bool download_only;
 extern bool local_download;
 extern bool verify_esp_only;

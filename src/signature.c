@@ -46,10 +46,14 @@
 
 #warning "TODO pick signing scheme"
 #if defined(SWUPD_LINUX_ROOTFS)
-#define IMPL IMPL_FAKE
+#define IMPL IMPL_REAL
 #endif
 
 #if IMPL != IMPL_FAKE
+
+
+bool signing_enabled = false;
+
 
 static X509_STORE *create_store(const char *, const char *, const char *);
 

@@ -109,7 +109,6 @@ fail:
 	fclose(file);
 	free(rel_path);
 	return ret;
-
 }
 
 static int set_url(char **global, char *url, const char *path)
@@ -137,7 +136,8 @@ static int set_url(char **global, char *url, const char *path)
 	return ret;
 }
 
-void set_content_url(char *url) {
+void set_content_url(char *url)
+{
 	int ret;
 
 	ret = set_url(&content_url, url, default_content_url_path);
@@ -147,7 +147,8 @@ void set_content_url(char *url) {
 	}
 }
 
-void set_version_url(char *url) {
+void set_version_url(char *url)
+{
 	int ret;
 
 	ret = set_url(&version_url, url, default_version_url_path);

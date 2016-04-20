@@ -147,8 +147,7 @@ static bool parse_options(int argc, char **argv)
 
 			if (!strcmp(optarg, "b")) {
 				scope = 'b';
-			}
-			else if (!strcmp(optarg, "o")) {
+			} else if (!strcmp(optarg, "o")) {
 				scope = 'o';
 			}
 
@@ -355,8 +354,9 @@ static double query_total_download_size(struct list *list)
 {
 	double ret;
 	double size_sum = 0;
-	struct file *file;
-	char *untard_file, *url;
+	struct file *file = NULL;
+	char *untard_file = NULL;
+	char *url = NULL;
 
 	while (list) {
 		file = list->data;
@@ -391,9 +391,9 @@ static double query_total_download_size(struct list *list)
  *		the curl_multi interface */
 int download_manifests(struct manifest **MoM)
 {
-	struct list *list;
-	struct file *file;
-	char *tarfile, *untard_file, *url;
+	struct list *list = NULL;
+	struct file *file = NULL;
+	char *tarfile, *untard_file, *url = NULL;
 	struct manifest *subMan = NULL;
 	int current_version;
 	int ret = 0;

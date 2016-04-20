@@ -217,7 +217,7 @@ int remove_bundle(const char *bundle_name)
 	int lock_fd;
 	int ret = 0;
 	int current_version = CURRENT_OS_VERSION;
-	struct manifest *current_mom, *bundle_manifest;
+	struct manifest *current_mom, *bundle_manifest = NULL;
 
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
@@ -281,7 +281,7 @@ int remove_bundle(const char *bundle_name)
 
 	/* Now that we have the consolidated list of all files, load bundle to be removed submanifest*/
 	ret = load_bundle_manifest(bundle_name, current_version, &bundle_manifest);
-	if (ret != 0) {
+	if (ret != 0 || !bundle_manifest) {
 		printf("Error: Cannot load %s sub-manifest (ret = %d)\n", bundle_name, ret);
 		goto out_free_mom;
 	}
@@ -320,8 +320,8 @@ int add_subscriptions(struct list *bundles, int current_version, struct manifest
 	bool new_bundles = false;
 	char *bundle;
 	int ret;
-        int retries = 0;
-        int timeout = 10;
+	int retries = 0;
+	int timeout = 10;
 	struct file *file;
 	struct list *iter;
 	struct manifest *manifest;
@@ -339,23 +339,23 @@ int add_subscriptions(struct list *bundles, int current_version, struct manifest
 			continue;
 		}
 
-retry_manifest_download:
+	retry_manifest_download:
 		ret = load_manifests(current_version, file->last_change, bundle, file, &manifest);
 		if (ret) {
-                        if (retries < MAX_TRIES) {
-                                increment_retries(&retries, &timeout);
-                                goto retry_manifest_download;
-                        }
-                        printf("Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
-                        ret = -1;
-                        goto out;
+			if (retries < MAX_TRIES) {
+				increment_retries(&retries, &timeout);
+				goto retry_manifest_download;
+			}
+			printf("Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
+			ret = -1;
+			goto out;
 		}
 
-                if (!manifest) {
-                        printf("Unable to load manifest %s version %d, exiting now\n", bundle, file->last_change);
-                        ret = -1;
-                        goto out;
-                }
+		if (!manifest) {
+			printf("Unable to load manifest %s version %d, exiting now\n", bundle, file->last_change);
+			ret = -1;
+			goto out;
+		}
 
 		if (manifest->includes) {
 			ret = add_subscriptions(manifest->includes, current_version, mom);

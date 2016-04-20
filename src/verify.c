@@ -173,9 +173,9 @@ static bool parse_options(int argc, char **argv)
 		case 'x':
 			force = true;
 			break;
-        case 'V':
-            signing_enabled = true;
-            break;
+		case 'V':
+			signing_enabled = true;
+			break;
 		default:
 			printf("Unrecognized option\n\n");
 			goto err;
@@ -793,7 +793,7 @@ brick_the_system_and_clean_curl:
 		ret = EXIT_FAILURE;
 	}
 
-	/* this concludes the critical section, after this point it's clean up time, the disk content is finished and final */
+/* this concludes the critical section, after this point it's clean up time, the disk content is finished and final */
 
 clean_and_exit:
 	swupd_curl_cleanup();

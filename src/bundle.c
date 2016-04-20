@@ -217,7 +217,7 @@ int remove_bundle(const char *bundle_name)
 	int lock_fd;
 	int ret = 0;
 	int current_version = CURRENT_OS_VERSION;
-	struct manifest *current_mom, *bundle_manifest;
+	struct manifest *current_mom, *bundle_manifest = NULL;
 
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
@@ -281,7 +281,7 @@ int remove_bundle(const char *bundle_name)
 
 	/* Now that we have the consolidated list of all files, load bundle to be removed submanifest*/
 	ret = load_bundle_manifest(bundle_name, current_version, &bundle_manifest);
-	if (ret != 0) {
+	if (ret != 0 || !bundle_manifest) {
 		printf("Error: Cannot load %s sub-manifest (ret = %d)\n", bundle_name, ret);
 		goto out_free_mom;
 	}

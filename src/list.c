@@ -104,7 +104,7 @@ static struct list *list_merge(struct list *list1, struct list *list2, compariso
 /* Splits a list into two halves to be merged */
 static struct list *list_merge_sort(struct list *left, unsigned int len, comparison_fn_t comparison_fn)
 {
-	struct list *right;
+	struct list *right = NULL;
 	unsigned int left_len = len / 2;
 	unsigned int right_len = len / 2 + len % 2;
 	unsigned int i;

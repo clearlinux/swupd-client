@@ -147,8 +147,7 @@ static bool parse_options(int argc, char **argv)
 
 			if (!strcmp(optarg, "b")) {
 				scope = 'b';
-			}
-			else if (!strcmp(optarg, "o")) {
+			} else if (!strcmp(optarg, "o")) {
 				scope = 'o';
 			}
 

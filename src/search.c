@@ -293,7 +293,7 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 			subfile = sublist->data;
 			sublist = sublist->next;
 
-			if (!subfile->is_file) {
+			if ((!subfile->is_file) && (!subfile->is_link)) {
 				continue;
 			}
 

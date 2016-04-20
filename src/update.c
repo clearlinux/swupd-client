@@ -194,24 +194,24 @@ TRY_DOWNLOAD:
 
 int add_included_manifests(struct manifest *mom)
 {
-        struct list *subbed = NULL;
-        struct list *iter;
-        int ret;
+	struct list *subbed = NULL;
+	struct list *iter;
+	int ret;
 
-        iter = list_head(subs);
-        while (iter) {
-                subbed = list_prepend_data(subbed, ((struct sub *)iter->data)->component);
-                iter = iter->next;
-        }
+	iter = list_head(subs);
+	while (iter) {
+		subbed = list_prepend_data(subbed, ((struct sub *)iter->data)->component);
+		iter = iter->next;
+	}
 
-        if (add_subscriptions(subbed, mom->version, mom) >= 0) {
-                ret = 0;
-        } else {
-                ret = -1;
-        }
-        list_free_list(subbed);
+	if (add_subscriptions(subbed, mom->version, mom) >= 0) {
+		ret = 0;
+	} else {
+		ret = -1;
+	}
+	list_free_list(subbed);
 
-        return ret;
+	return ret;
 }
 
 int main_update()
@@ -311,10 +311,10 @@ load_server_manifests:
 	retries = 0;
 	timeout = 10;
 
-        ret = add_included_manifests(server_manifest);
-        if (ret) {
-                goto clean_exit;
-        }
+	ret = add_included_manifests(server_manifest);
+	if (ret) {
+		goto clean_exit;
+	}
 
 	subscription_versions_from_MoM(current_manifest, 1);
 	subscription_versions_from_MoM(server_manifest, 0);

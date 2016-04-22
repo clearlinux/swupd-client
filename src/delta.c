@@ -81,8 +81,8 @@ static void do_delta(struct file *file)
 	int ret;
 	struct stat stat;
 
-	string_or_die(&deltafile, "%s/delta/%i-%i-%s", state_dir,
-		      file->deltapeer->last_change, file->last_change, file->hash);
+	string_or_die(&deltafile, "%s/delta/%i-%i-%s-%s", state_dir,
+		      file->deltapeer->last_change, file->last_change, file->deltapeer->hash, file->hash);
 
 	/* check if the full file is there already, because if it is, don't do the delta */
 	string_or_die(&filename, "%s/staged/%s", state_dir, file->hash);

@@ -1170,7 +1170,7 @@ struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bu
 	struct list *iter = NULL;
 	struct file *file;
 
-	iter = manifest->manifests;
+	iter = list_head(manifest->manifests);
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
@@ -1188,7 +1188,7 @@ struct file *search_file_in_manifest(struct manifest *manifest, const char *file
 	struct list *iter = NULL;
 	struct file *file;
 
-	iter = manifest->files;
+	iter = list_head(manifest->files);
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;

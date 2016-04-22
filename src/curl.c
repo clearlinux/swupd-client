@@ -57,11 +57,13 @@ int swupd_curl_init(void)
 
 	curl_ret = curl_global_init(CURL_GLOBAL_ALL);
 	if (curl_ret != CURLE_OK) {
+		printf("Error: failed to initialize CURL environment\n");
 		return -1;
 	}
 
 	curl = curl_easy_init();
 	if (curl == NULL) {
+		printf("Error: failed to initialize CURL session\n");
 		curl_global_cleanup();
 		return -1;
 	}

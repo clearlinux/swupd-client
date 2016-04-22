@@ -59,11 +59,14 @@ int p_lockfile(void)
 
 	/* open lock file */
 	lock_fd = open(lockfile, O_RDWR | O_CREAT | O_CLOEXEC, 0600);
-	free(lockfile);
 
 	if (lock_fd < 0) {
+		printf("Error: failed to open %s: %s\n", lockfile, strerror(errno));
+		free(lockfile);
 		return -1;
 	}
+
+	free(lockfile);
 
 	/* try to get an advisory region lock for the file */
 	ret = fcntl(lock_fd, F_SETLK, &fl);
@@ -71,6 +74,7 @@ int p_lockfile(void)
 		if ((errno == EAGAIN) || (errno == EACCES)) {
 			ret = -EAGAIN;
 		}
+		printf("Error: cannot acquire lock file. Another swupd process is already running.\n");
 		close(lock_fd);
 		return ret;
 	} else {

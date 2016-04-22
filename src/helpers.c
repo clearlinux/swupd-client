@@ -170,6 +170,7 @@ int create_required_dirs(void)
 			string_or_die(&cmd, "mkdir -p %s/%s", state_dir, dirs[i]);
 			ret = system(cmd);
 			if (ret) {
+				printf("Error: failed to create %s/%s\n", state_dir, dirs[i]);
 				return -1;
 			}
 			free(cmd);
@@ -177,6 +178,7 @@ int create_required_dirs(void)
 			string_or_die(&dir, "%s/%s", state_dir, dirs[i]);
 			ret = chmod(dir, S_IRWXU);
 			if (ret) {
+				printf("Error: failed to set mode for %s/%s\n", state_dir, dirs[i]);
 				return -1;
 			}
 			free(dir);
@@ -185,6 +187,7 @@ int create_required_dirs(void)
 		// chmod 700
 		ret = chmod(state_dir, S_IRWXU);
 		if (ret) {
+			printf("Error: failed to set mode for state dir (%s)\n", state_dir);
 			return -1;
 		}
 	}

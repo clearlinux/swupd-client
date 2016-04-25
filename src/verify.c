@@ -549,7 +549,7 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 
 		if (!S_ISDIR(sb.st_mode)) {
 			ret = unlinkat(fd, base, 0);
-			if (!ret && errno != ENOENT) {
+			if (ret && errno != ENOENT) {
 				printf("Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));
 				file_not_deleted_count++;
 			} else {

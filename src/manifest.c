@@ -76,6 +76,21 @@ int file_sort_filename(const void *a, const void *b)
 	return 0;
 }
 
+int file_sort_filename_reverse(const void *a, const void *b)
+{
+	struct file *A, *B;
+	int ret;
+	A = (struct file *)a;
+	B = (struct file *)b;
+
+	ret = strcmp(A->filename, B->filename);
+	if (ret) {
+		return -ret;
+	}
+
+	return 0;
+}
+
 static int file_sort_version(const void *a, const void *b)
 {
 	struct file *A, *B;

@@ -500,6 +500,8 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 	int ret;
 	struct list *iter;
 
+	official_manifest->files = list_sort(official_manifest->files, file_sort_filename_reverse);
+
 	iter = list_head(official_manifest->files);
 	while (iter) {
 		struct file *file;

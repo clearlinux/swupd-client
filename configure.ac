@@ -75,6 +75,10 @@ AS_IF([test "$enable_tests" != "no"], [
   AS_IF([test -z "${have_python3}"], [
     AC_MSG_ERROR([Must have Python 3 installed to run functional tests])
   ])
+  AC_PATH_PROG([have_bats], [bats])
+  AS_IF([test -z "${have_bats}"], [
+    AC_MSG_ERROR([Must have the Bash Automated Testing System (bats) installed to run functional tests])
+  ])
 ])
 AM_CONDITIONAL([ENABLE_TESTS], [test "$enable_tests" != "no"])
 

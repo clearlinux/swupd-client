@@ -41,5 +41,7 @@ swupd_*
 tap-driver.sh
 test-suite.log
 test/*.gcno
-test/functional/*/*/*/*/*.tar
-test/functional/*/*/*/*/*/*.tar
+test/functional/*/*/web-dir/*/*.tar
+test/functional/*/*/web-dir/*/staged/*.tar
+test/functional/*/*/web-dir/*/files/*.tar
+test/functional/*/*/test.log

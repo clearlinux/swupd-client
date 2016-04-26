@@ -129,19 +129,65 @@ install-exec-hook:
 	perl scripts/findstatic.pl */*.o | grep -v Checking ||:
 
 
-TEST_EXTENSIONS = .py
+TEST_EXTENSIONS = .bats
 
 if ENABLE_TESTS
 tap_driver = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 	$(top_srcdir)/tap-driver.sh
 
 LOG_DRIVER = $(tap_driver)
-PY_LOG_DRIVER = $(tap_driver)
+BATS_LOG_DRIVER = $(tap_driver)
 
 TESTS = $(dist_check_SCRIPTS)
 
 dist_check_SCRIPTS = \
-	functional-tests.py
+	test/functional/bundleadd/add-directory/test.bats \
+	test/functional/bundleadd/add-existing/test.bats \
+	test/functional/bundleadd/add-multiple/test.bats \
+	test/functional/bundleadd/boot-file/test.bats \
+	test/functional/bundleadd/include/test.bats \
+	test/functional/bundleadd/list/test.bats \
+	test/functional/bundleremove/boot-file/test.bats \
+	test/functional/bundleremove/remove-file/test.bats \
+	test/functional/checkupdate/new-version/test.bats \
+	test/functional/checkupdate/no-server-content/test.bats \
+	test/functional/checkupdate/no-target-content/test.bats \
+	test/functional/checkupdate/version-match/test.bats \
+	test/functional/hashdump/file-hash/test.bats \
+	test/functional/hashdump/file-hash-no-path-prefix/test.bats \
+	test/functional/search/content-check-negfull-path/test.bats \
+	test/functional/search/content-check-neglibtest/test.bats \
+	test/functional/search/content-check-posbin/test.bats \
+	test/functional/search/content-check-posebin/test.bats \
+	test/functional/search/content-check-posfull-path/test.bats \
+	test/functional/search/content-check-poslib32/test.bats \
+	test/functional/search/content-check-poslib64/test.bats \
+	test/functional/update/apply-full-file-delta/test.bats \
+	test/functional/update/boot-file/test.bats \
+	test/functional/update/download/test.bats \
+	test/functional/update/include/test.bats \
+	test/functional/update/include-old-bundle/test.bats \
+	test/functional/update/missing-os-core/test.bats \
+	test/functional/update/newest-deleted/test.bats \
+	test/functional/update/status/test.bats \
+	test/functional/update/status-no-server-content/test.bats \
+	test/functional/update/status-no-target-content/test.bats \
+	test/functional/update/status-version-double-quote/test.bats \
+	test/functional/update/status-version-single-quote/test.bats \
+	test/functional/update/use-full-file/test.bats \
+	test/functional/update/use-pack/test.bats \
+	test/functional/update/verify-fix-path-hash-mismatch/test.bats \
+	test/functional/update/verify-fix-path-missing-dir/test.bats \
+	test/functional/verify/add-missing-directory/test.bats \
+	test/functional/verify/add-missing-include/test.bats \
+	test/functional/verify/add-missing-include-old/test.bats \
+	test/functional/verify/boot-file-deleted/test.bats \
+	test/functional/verify/boot-file-mismatch/test.bats \
+	test/functional/verify/boot-file-mismatch-fix/test.bats \
+	test/functional/verify/check-missing-directory/test.bats \
+	test/functional/verify/empty-dir-deleted/test.bats \
+	test/functional/verify/install-directory/test.bats \
+	test/functional/verify/install-latest-directory/test.bats
 endif
 
 if COVERAGE

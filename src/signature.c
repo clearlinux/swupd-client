@@ -113,8 +113,6 @@ bool get_certificates(void)
 
 
 	return true;
-error:
-	return false;
 }
 
 bool signature_verify(const char *data_filename, const char *sig_filename)
@@ -141,12 +139,18 @@ bool signature_verify(const char *data_filename, const char *sig_filename)
     }
 
     result = validate_signature(fp_data, fp_sig);
+    fclose(fp_data);
+    fclose(fp_sig);
 
     return result;
 
 error:
-    fclose(fp_data);
-    fclose(fp_sig);
+	if (fp_data) {
+		fclose(fp_data);
+	}
+    if (fp_sig) {
+    	fclose(fp_sig);
+    }
     return result || (IMPL == IMPL_FORGIVE);
 }
 

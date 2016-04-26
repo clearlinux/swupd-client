@@ -1,0 +1,5 @@
+[D-BUS Service]
+Name=org.O1.swupdd.Client
+Exec=/usr/bin/swupdd
+User=root
+

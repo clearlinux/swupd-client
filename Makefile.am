@@ -46,6 +46,13 @@ SWUPD_COMMON_SOURCES = \
 	src/scripts.c \
 	src/bundle.c
 
+SUBDIRS = dbus-wrapper
+swupddconfdir=$(datadir)/dbus-1/system.d
+swupddconf_DATA = data/org.O1.swupdd.conf
+
+swupddservicedir=$(datadir)/dbus-1/system-services
+swupddservice_DATA = data/org.O1.swupdd.Client.service
+
 lib_LTLIBRARIES = libswupd.la
 libswupd_la_SOURCES = $(SWUPD_COMMON_SOURCES)
 libswupd_la_LIBADD = $(SWUPD_COMPRESSION_LIBS) $(openssl_LIBS) $(curl_LIBS) $(bsdiff_LIBS)

@@ -16,6 +16,13 @@ AC_CONFIG_HEADERS([config.h])
 PKG_CHECK_MODULES([bsdiff], [bsdiff])
 PKG_CHECK_MODULES([lzma], [liblzma])
 PKG_CHECK_MODULES([zlib], [zlib])
+
+PKG_CHECK_MODULES(
+		  [SWUPDD],
+		  [libsystemd >= 221])
+AC_SUBST(SWUPDD_CFLAGS)
+AC_SUBST(SWUPDD_LIBS)
+
 AC_ARG_ENABLE(
 	[bzip2],
 	AS_HELP_STRING([--disable-bzip2],[Do not use bzip2 compression (uses bzip2 by default)])
@@ -130,6 +137,6 @@ fi
 
 AC_SUBST([update_ca_certs_path], ["$certs_path"])
 
-AC_CONFIG_FILES([Makefile data/check-update.service data/check-update.timer])
+AC_CONFIG_FILES([Makefile dbus-wrapper/Makefile data/check-update.service data/check-update.timer])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])
 AC_OUTPUT

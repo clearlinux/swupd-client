@@ -81,6 +81,7 @@ static bool parse_options(int argc, char **argv)
 				printf("Invalid --versionurl argument\n\n");
 				goto err;
 			}
+			set_content_url(optarg);
 			set_version_url(optarg);
 			break;
 		case 'P':

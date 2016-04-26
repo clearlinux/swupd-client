@@ -443,6 +443,10 @@ int install_bundles(struct list *bundles, int current_version, struct manifest *
 		ret = do_staging(file, mom);
 		if (ret == 0) {
 			rename_staged_file_to_final(file);
+		} else {
+			printf("Failed to stage file: %s (ret = %d). Aborting bundle-add\n",
+			       file->filename, ret);
+			goto out;
 		}
 	}
 

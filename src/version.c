@@ -76,6 +76,8 @@ bool check_network(void)
 			have_network = false;
 		} else {
 			have_network = true;
+			/* check if server supports Range command (resume) */
+			swupd_curl_test_resume();
 		}
 	}
 

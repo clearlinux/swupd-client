@@ -3,7 +3,7 @@ EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash
 AM_CFLAGS = -fPIC -Iinclude/ -O2 -g -Wall -W -Wformat-security -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99
 ACLOCAL_AMFLAGS = -I m4
 
-bin_PROGRAMS = swupd
+bin_PROGRAMS = swupd swupdd swupdctl
 
 swupd_SOURCES = \
 	src/swupd.c \
@@ -46,7 +46,42 @@ SWUPD_COMMON_SOURCES = \
 	src/scripts.c \
 	src/bundle.c
 
-SUBDIRS = dbus-wrapper
+swupdd_SOURCES = \
+	src/list.c \
+	dbus-wrapper/swupdd-main.c \
+	$(NULL)
+
+swupdd_CFLAGS = \
+	$(SWUPDD_CFLAGS) \
+	$(NULL)
+
+swupdd_LDADD = \
+	$(SWUPDD_LIBS) \
+	$(NULL)
+
+swupdctl_SOURCES = \
+	src/list.c \
+	dbus-wrapper/swupdctl.c \
+	dbus-wrapper/helpers.c \
+	dbus-wrapper/dbus_client.c \
+	dbus-wrapper/option.c \
+	dbus-wrapper/cmd_bundle_add.c \
+	dbus-wrapper/cmd_bundle_remove.c \
+	dbus-wrapper/cmd_hashdump.c \
+	dbus-wrapper/cmd_verify.c \
+	dbus-wrapper/cmd_update.c \
+	dbus-wrapper/cmd_check_update.c \
+	dbus-wrapper/cmd_search.c \
+	$(NULL)
+
+swupdctl_CFLAGS = \
+	$(SWUPDD_CFLAGS) \
+	$(NULL)
+
+swupdctl_LDADD = \
+	$(SWUPDD_LIBS) \
+	$(NULL)
+
 swupddconfdir=$(datadir)/dbus-1/system.d
 swupddconf_DATA = data/org.O1.swupdd.conf
 

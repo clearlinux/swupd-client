@@ -137,6 +137,6 @@ fi
 
 AC_SUBST([update_ca_certs_path], ["$certs_path"])
 
-AC_CONFIG_FILES([Makefile dbus-wrapper/Makefile data/check-update.service data/check-update.timer])
+AC_CONFIG_FILES([Makefile data/check-update.service data/check-update.timer])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])
 AC_OUTPUT

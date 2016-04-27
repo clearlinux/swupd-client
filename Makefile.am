@@ -185,6 +185,7 @@ dist_check_SCRIPTS = \
 	test/functional/verify/boot-file-mismatch/test.bats \
 	test/functional/verify/boot-file-mismatch-fix/test.bats \
 	test/functional/verify/check-missing-directory/test.bats \
+	test/functional/verify/directory-tree-deleted/test.bats \
 	test/functional/verify/empty-dir-deleted/test.bats \
 	test/functional/verify/install-directory/test.bats \
 	test/functional/verify/install-latest-directory/test.bats

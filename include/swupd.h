@@ -155,6 +155,7 @@ extern bool is_state(char *filename);
 extern void apply_heuristics(struct file *file);
 
 extern int file_sort_filename(const void *a, const void *b);
+extern int file_sort_filename_reverse(const void *a, const void *b);
 extern int load_manifests(int current, int version, char *component, struct file *file, struct manifest **manifest);
 extern struct list *create_update_list(struct manifest *current, struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);

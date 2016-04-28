@@ -34,23 +34,7 @@
 #include "signature.h"
 #include "swupd.h"
 
-/*
- * Implementation flavors:
- *   FAKE ..... do nothing, always return success
- *   FORGIVE .. do everything, always return success
- *   REAL ..... do everything, return the real status
- */
-#define IMPL_FAKE 0
-#define IMPL_FORGIVE 1
-#define IMPL_REAL 2
-
 #warning "TODO pick signing scheme"
-#if defined(SWUPD_LINUX_ROOTFS)
-#define IMPL IMPL_REAL
-#endif
-
-#if IMPL != IMPL_FAKE
-
 
 bool signing_enabled = false;
 
@@ -85,11 +69,11 @@ bool signature_initialize(const char *ca_cert_filename)
 	if (!validate_certificate()) {
 		ERR_free_strings(); // undoes ERR_load_crypto_strings
 		EVP_cleanup();      // undoes OpenSSL_add_all_algorithms
-		return false || (IMPL == IMPL_FORGIVE);
+		return false;
 	}
 
 	if (!get_pubkey(ca_cert_filename)) {
-		return false || (IMPL == IMPL_FORGIVE);
+		return false;
 	}
 
 	initialized = true;
@@ -122,7 +106,7 @@ bool signature_verify(const char *data_filename, const char *sig_filename)
 	bool result = false;
 
     if (!initialized) {
-        return false || (IMPL == IMPL_FORGIVE);
+        return false;
     }
 
     fp_sig = fopen(sig_filename, "r");
@@ -151,7 +135,7 @@ error:
     if (fp_sig) {
     	fclose(fp_sig);
     }
-    return result || (IMPL == IMPL_FORGIVE);
+    return result;
 }
 
 static bool get_pubkey(const char *ca_cert_filename)
@@ -365,7 +349,7 @@ bool signature_download_and_verify(const char *data_url, const char *data_filena
 	}
 	free(sig_filename);
 	free(sig_url);
-	return result || (IMPL == IMPL_FORGIVE);
+	return result;
 }
 
 void signature_delete(const char *data_filename)
@@ -379,29 +363,3 @@ void signature_delete(const char *data_filename)
 	free(sig_filename);
 }
 
-#else // IMPL == IMPL_FAKE
-
-bool signature_initialize(const char UNUSED_PARAM *ca_cert_filename)
-{
-	return true;
-}
-
-void signature_terminate(void)
-{
-}
-
-bool signature_verify(const char UNUSED_PARAM *data_filename, const char UNUSED_PARAM *sig_filename)
-{
-	return true;
-}
-
-bool signature_download_and_verify(const char UNUSED_PARAM *data_url, const char UNUSED_PARAM *data_filename)
-{
-	return true;
-}
-
-void signature_delete(const char UNUSED_PARAM *data_filename)
-{
-}
-
-#endif // IMPL == IMPL_FAKE

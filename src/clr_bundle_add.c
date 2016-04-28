@@ -53,7 +53,7 @@ static void print_help(const char *name)
 	printf("   -l, --list              List all available bundles for the current version of Clear Linux\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
-    printf("   -V, --verify-sign       Enable signature verification, default value is disabled\n");
+	printf("   -V, --verify-sign       Enable signature verification, default value is disabled\n");
 	printf("\n");
 }
 
@@ -68,7 +68,7 @@ static const struct option prog_opts[] = {
 	{ "format", required_argument, 0, 'F' },
 	{ "force", no_argument, 0, 'x' },
 	{ "statedir", required_argument, 0, 'S' },
-    { "verify-sign", no_argument, 0, 'V' },
+	{ "verify-sign", no_argument, 0, 'V' },
 	{ 0, 0, 0, 0 }
 };
 

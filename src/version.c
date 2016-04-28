@@ -41,7 +41,7 @@ int get_latest_version(void)
 	int ret = 0;
 	char *tmp_version;
 
-	tmp_version = malloc(LINE_MAX);
+	tmp_version = calloc(LINE_MAX, 1);
 	if (tmp_version == NULL) {
 		abort();
 	}

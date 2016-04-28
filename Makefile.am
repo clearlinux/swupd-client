@@ -152,6 +152,7 @@ dist_check_SCRIPTS = \
 	test/functional/checkupdate/new-version/test.bats \
 	test/functional/checkupdate/no-server-content/test.bats \
 	test/functional/checkupdate/no-target-content/test.bats \
+	test/functional/checkupdate/slow-server/test.bats \
 	test/functional/checkupdate/version-match/test.bats \
 	test/functional/hashdump/file-hash/test.bats \
 	test/functional/hashdump/file-hash-no-path-prefix/test.bats \

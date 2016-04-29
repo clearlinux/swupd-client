@@ -31,6 +31,12 @@ AS_IF([test "x$enable_bzip2" != "xno" ],
 )
 
 AC_ARG_ENABLE(
+  [signing],
+  [AS_HELP_STRING([--enable-signing], [Enable signature check (disabled by default)])],
+  [AC_DEFINE([SIGNING], [], [Enable signature check as default])]
+)
+
+AC_ARG_ENABLE(
   [tests],
   [AS_HELP_STRING([--disable-tests], [Do not enable unit or functional test framework (enabled by default)])]
 )

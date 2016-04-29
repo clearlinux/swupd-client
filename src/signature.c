@@ -36,7 +36,11 @@
 
 #warning "TODO pick signing scheme"
 
-bool signing_enabled = false;
+#ifdef SIGNING
+	bool signing_enabled = true;
+#else
+	bool signing_enabled = false;
+#endif
 
 static bool validate_signature(FILE *, FILE *);
 static bool validate_certificate(void);

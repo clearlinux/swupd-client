@@ -58,6 +58,18 @@ struct list *free_list_file(struct list *item)
 	return list_free_item(item, free_file_data);
 }
 
+static int subscription_sort_component(const void *a, const void *b)
+{
+	struct sub *A, *B;
+	int ret;
+	A = (struct sub *)a;
+	B = (struct sub *)b;
+
+	ret = strcmp(A->component, B->component);
+
+	return ret;
+}
+
 void read_subscriptions_alt(void)
 {
 	bool have_os_core = false;
@@ -95,6 +107,8 @@ void read_subscriptions_alt(void)
 	if (!have_os_core) {
 		create_and_append_subscription("os-core");
 	}
+
+	subs = list_sort(subs, subscription_sort_component);
 }
 
 int component_subscribed(char *component)

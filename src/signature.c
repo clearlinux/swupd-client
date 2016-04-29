@@ -101,64 +101,65 @@ bool get_certificates(void)
 
 bool signature_verify(const char *data_filename, const char *sig_filename)
 {
-    FILE *fp_data = NULL;
-    FILE *fp_sig = NULL;
+	FILE *fp_data = NULL;
+	FILE *fp_sig = NULL;
 	bool result = false;
 
-    if (!initialized) {
-        return false;
-    }
+	if (!initialized) {
+		return false;
+	}
 
-    fp_sig = fopen(sig_filename, "r");
-    if (!fp_sig) {
-        fprintf(stderr, "Failed fopen %s\n", sig_filename);
-        goto error;
-    }
+	fp_sig = fopen(sig_filename, "r");
+	if (!fp_sig) {
+		fprintf(stderr, "Failed fopen %s\n", sig_filename);
+		goto error;
+	}
 
-    /* read data from file */
-    fp_data = fopen(data_filename, "r");
-    if (!fp_data) {
-        fprintf(stderr, "Failed fopen %s\n", data_filename);
-        goto error;
-    }
+	/* read data from file */
+	fp_data = fopen(data_filename, "r");
+	if (!fp_data) {
+		fprintf(stderr, "Failed fopen %s\n", data_filename);
+		goto error;
+	}
 
-    result = validate_signature(fp_data, fp_sig);
-    fclose(fp_data);
-    fclose(fp_sig);
+	result = validate_signature(fp_data, fp_sig);
+	fclose(fp_data);
+	fclose(fp_sig);
 
-    return result;
+	return result;
 
 error:
 	if (fp_data) {
 		fclose(fp_data);
 	}
-    if (fp_sig) {
-    	fclose(fp_sig);
-    }
+	if (fp_sig) {
+		fclose(fp_sig);
+	}
     return result;
 }
 
 static bool get_pubkey(const char *ca_cert_filename)
 {
-    FILE *fp_pubkey = NULL;
+	FILE *fp_pubkey = NULL;
 
-    /* Read public key */
-    fp_pubkey = fopen(ca_cert_filename, "r");
-    if (!fp_pubkey) {
-        fprintf(stderr, "Failed fopen %s\n", ca_cert_filename);
-        goto error;
-    }
+	/* Read public key */
+	fp_pubkey = fopen(ca_cert_filename, "r");
+	if (!fp_pubkey) {
+	fprintf(stderr, "Failed fopen %s\n", ca_cert_filename);
+	goto error;
+	}
 
-    cert = PEM_read_X509(fp_pubkey, NULL, NULL, NULL);
-    if (!cert) {
-        goto error;
-    }
+	cert = PEM_read_X509(fp_pubkey, NULL, NULL, NULL);
+	if (!cert) {
+	goto error;
+	}
 
-    pkey = X509_get_pubkey(cert);
-    if (!pkey) {
-        goto error;
-    }
-    return true;
+	pkey = X509_get_pubkey(cert);
+	if (!pkey) {
+		goto error;
+	}
+
+	return true;
 
 error:
 	ERR_print_errors_fp(stderr);
@@ -178,48 +179,48 @@ error:
 #define BUFFER_SIZE   4096
 static bool validate_signature(FILE *fp_data, FILE *fp_sig)
 {
-    char buffer[BUFFER_SIZE];
-    unsigned char sig_buffer[BUFFER_SIZE];
-    EVP_MD_CTX md_ctx;
+	char buffer[BUFFER_SIZE];
+	unsigned char sig_buffer[BUFFER_SIZE];
+	EVP_MD_CTX md_ctx;
 
-    size_t sig_len = fread(sig_buffer, 1, BUFFER_SIZE, fp_sig);
-    printf("size of signature: %lu\n", sig_len);
+	size_t sig_len = fread(sig_buffer, 1, BUFFER_SIZE, fp_sig);
+	printf("size of signature: %lu\n", sig_len);
 
 
-    /* get size of file */
-    fseek(fp_data, 0, SEEK_END);
-    size_t data_size = ftell(fp_data);
-    fseek(fp_data, 0, SEEK_SET);
+	/* get size of file */
+	fseek(fp_data, 0, SEEK_END);
+	size_t data_size = ftell(fp_data);
+	fseek(fp_data, 0, SEEK_SET);
 
-    if (!EVP_VerifyInit(&md_ctx, EVP_sha256())) {
-        goto error;
-    }
+	if (!EVP_VerifyInit(&md_ctx, EVP_sha256())) {
+		goto error;
+	}
 
-    /* read all bytes from file to calculate digest using sha256 and then sign it */
-    size_t len = 0;
-    size_t bytes_left = data_size;
-    while (bytes_left > 0) {
-        const size_t count = (bytes_left > BUFFER_SIZE ? BUFFER_SIZE : bytes_left);
-        len = fread(buffer, 1, count, fp_data);
-        if (len != count) {
-            fprintf(stderr, "Failed len!= count\n");
-            goto error;
-        }
+	/* read all bytes from file to calculate digest using sha256 and then sign it */
+	size_t len = 0;
+	size_t bytes_left = data_size;
+	while (bytes_left > 0) {
+		const size_t count = (bytes_left > BUFFER_SIZE ? BUFFER_SIZE : bytes_left);
+		len = fread(buffer, 1, count, fp_data);
+		if (len != count) {
+			fprintf(stderr, "Failed len!= count\n");
+			goto error;
+		}
 
-        if (!EVP_VerifyUpdate(&md_ctx, buffer, len)) {
-            goto error;
-        }
-        bytes_left -= len;
-    }
+		if (!EVP_VerifyUpdate(&md_ctx, buffer, len)) {
+			goto error;
+		}
+		bytes_left -= len;
+	}
 
-    /* Do the signature */
-    if (!EVP_VerifyFinal(&md_ctx, sig_buffer, sig_len, pkey)) {
-        goto error;
-    } else {
-        printf("Correct signature\n");
-    }
+	/* Do the signature */
+	if (!EVP_VerifyFinal(&md_ctx, sig_buffer, sig_len, pkey)) {
+		goto error;
+	} else {
+		printf("Correct signature\n");
+	}
 
-    return true;
+	return true;
 
 error:
 	ERR_print_errors_fp(stderr);
@@ -229,102 +230,102 @@ error:
 static bool validate_certificate(void)
 {
 
-    X509_STORE *store = NULL;
-    FILE *fp = NULL;
-    X509_LOOKUP *lookup = NULL;
-    X509_STORE_CTX *verify_ctx = NULL;
+	X509_STORE *store = NULL;
+	FILE *fp = NULL;
+	X509_LOOKUP *lookup = NULL;
+	X509_STORE_CTX *verify_ctx = NULL;
 
-    if (!crl) {
-    	printf("No certificate revocation list provided\n");
-    }
-    if (!chain) {
-        fprintf(stderr, "No certificate chain provided\n");
-        goto error;
-    }
-    if (!certificate) {
-        fprintf(stderr, "No certificate provided\n");
-        goto error;
-    }
+	if (!crl) {
+		printf("No certificate revocation list provided\n");
+	}
+	if (!chain) {
+		fprintf(stderr, "No certificate chain provided\n");
+		goto error;
+	}
+	if (!certificate) {
+		fprintf(stderr, "No certificate provided\n");
+		goto error;
+	}
 
-    if (!(fp = fopen(certificate, "r"))) {
-        fprintf(stderr, "Cannot open certificate\n");
-        goto error;
-    }
-    if (!(cert = PEM_read_X509(fp, NULL, NULL, NULL))) {
-        fprintf(stderr, "Cannot read x509 from certificate\n");
-        goto error;
-    }
+	if (!(fp = fopen(certificate, "r"))) {
+		fprintf(stderr, "Cannot open certificate\n");
+		goto error;
+	}
+	if (!(cert = PEM_read_X509(fp, NULL, NULL, NULL))) {
+		fprintf(stderr, "Cannot read x509 from certificate\n");
+		goto error;
+	}
 
-    /* create the cert store and set the verify callback */
-    if (!(store = X509_STORE_new())) {
-        goto error;
-    }
+	/* create the cert store and set the verify callback */
+	if (!(store = X509_STORE_new())) {
+		goto error;
+	}
 
-    X509_STORE_set_verify_cb_func(store, verify_callback);
+	X509_STORE_set_verify_cb_func(store, verify_callback);
 
-    /* load the CA certificates and CRLs */
+	/* load the CA certificates and CRLs */
 	if (X509_STORE_load_locations(store, chain, ca_dirname) != 1) {
-        goto error;
+		goto error;
 	}
 
 	if (X509_STORE_set_default_paths(store) != 1) {
-        goto error;
+		goto error;
 	}
 
-    if (crl) {
-	    if (!(lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file()))) {
-            goto error;
-        }
+	if (crl) {
+		if (!(lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file()))) {
+			goto error;
+ 		}
 
-	    if (X509_load_crl_file(lookup, crl, X509_FILETYPE_PEM) != 1) {
-            goto error;
-	    }
+		if (X509_load_crl_file(lookup, crl, X509_FILETYPE_PEM) != 1) {
+			goto error;
+		}
 
-        /* set the flags of the store so that CLRs are consulted */
-	    X509_STORE_set_flags(store, X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
-    }
+		/* set the flags of the store so that CLRs are consulted */
+		X509_STORE_set_flags(store, X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
+	}
 
-    /* create a verification context and initialize it */
-    if (!(verify_ctx = X509_STORE_CTX_new())) {
-        goto error;
-    }
+	/* create a verification context and initialize it */
+	if (!(verify_ctx = X509_STORE_CTX_new())) {
+		goto error;
+	}
 
-    if (X509_STORE_CTX_init(verify_ctx, store, cert, NULL) != 1) {
-        goto error;
-    }
+	if (X509_STORE_CTX_init(verify_ctx, store, cert, NULL) != 1) {
+		goto error;
+	}
 
-    /* verify the certificate */
-    if (X509_verify_cert(verify_ctx) != 1) {
-        goto error;
-    } else {
-        printf("Certificate verified correctly!\n");
-    	goto error;
-    }
+	/* verify the certificate */
+	if (X509_verify_cert(verify_ctx) != 1) {
+		goto error;
+	} else {
+		printf("Certificate verified correctly!\n");
+		goto error;
+	}
 
 	return true;
 
 error:
-    ERR_print_errors_fp(stderr);
+	ERR_print_errors_fp(stderr);
 
-    if (fp) {
-        fclose(fp);
-    }
-    if (store) {
-    	X509_STORE_free(store);
-    }
-    if (lookup) {
-    	X509_LOOKUP_free(lookup);
-    }
+	if (fp) {
+		fclose(fp);
+	}
+	if (store) {
+		X509_STORE_free(store);
+	}
+	if (lookup) {
+		X509_LOOKUP_free(lookup);
+	}
 	return false;
 }
 
 int verify_callback(int ok, X509_STORE_CTX *stor)
 {
-    if (!ok) {
-        fprintf(stderr, "Error: %s\n",
-            X509_verify_cert_error_string(stor->error));
-    }
-    return ok;
+	if (!ok) {
+		fprintf(stderr, "Error: %s\n",
+		X509_verify_cert_error_string(stor->error));
+	}
+	return ok;
 }
 
 bool signature_download_and_verify(const char *data_url, const char *data_filename)
@@ -357,9 +358,7 @@ void signature_delete(const char *data_filename)
 	char *sig_filename;
 
 	string_or_die(&sig_filename, "%s.signed", data_filename);
-
 	unlink(sig_filename);
-
 	free(sig_filename);
 }
 

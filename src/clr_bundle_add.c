@@ -135,9 +135,9 @@ static bool parse_options(int argc, char **argv)
 		case 'x':
 			force = true;
 			break;
-        case 'V':
-            signing_enabled = true;
-            break;
+		case 'V':
+			signing_enabled = true;
+			break;
 		default:
 			printf("error: unrecognized option\n\n");
 			goto err;

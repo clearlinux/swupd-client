@@ -59,7 +59,7 @@ bool signature_initialize(const char *ca_cert_filename)
 		return true;
 	}
 
-	OpenSSL_add_all_algorithms();
+	OpenSSL_add_all_ciphers();
 	ERR_load_crypto_strings();
 
 	if (!get_certificates()) {

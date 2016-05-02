@@ -134,8 +134,8 @@ static bool parse_options(int argc, char **argv)
 		}
 	}
 
-	if (argc == optind) {
-		printf("error: bundle name missing\n\n");
+	if (argc != optind + 1) {
+		printf("error: invalid arguments\n\n");
 		goto err;
 	}
 	string_or_die(&bundle_name, "%s", argv[optind]);

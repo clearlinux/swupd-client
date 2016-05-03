@@ -190,7 +190,8 @@ dist_check_SCRIPTS = \
 	test/functional/verify/directory-tree-deleted/test.bats \
 	test/functional/verify/empty-dir-deleted/test.bats \
 	test/functional/verify/install-directory/test.bats \
-	test/functional/verify/install-latest-directory/test.bats
+	test/functional/verify/install-latest-directory/test.bats \
+	test/functional/verify/latest-missing/test.bats
 endif
 
 if COVERAGE

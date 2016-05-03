@@ -198,6 +198,7 @@ extern int swupd_curl_get_file(const char *url, char *filename, struct file *fil
 #define SWUPD_CURL_CONNECT_TIMEOUT 30
 #define SWUPD_CURL_RCV_TIMEOUT 120
 extern CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url);
+void swupd_curl_test_resume(void);
 
 extern struct list *subs;
 extern void free_subscriptions(void);

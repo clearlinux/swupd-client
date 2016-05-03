@@ -50,6 +50,7 @@ static CURL *curl = NULL;
 
 static int curr_version = -1;
 static int req_version = -1;
+static bool resume_download_enabled = true;
 
 struct version_container {
 	size_t offset;
@@ -237,7 +238,7 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 		local->staging = filename;
 
 		if (lstat(filename, &stat) == 0) {
-			if (pack) {
+			if (pack && resume_download_enabled) {
 				curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
 			} else {
 				unlink(filename);
@@ -370,6 +371,62 @@ exit:
 	}
 
 	return err;
+}
+
+void swupd_curl_test_resume(void)
+{
+#define RESUME_BYTE_RANGE 2
+
+	CURLcode curl_ret;
+	char *version_string = NULL;
+	char *url = NULL;
+
+	if (!curl) {
+		abort();
+	}
+
+	curl_easy_reset(curl);
+	version_string = malloc(LINE_MAX);
+	if (version_string == NULL) {
+		abort();
+	}
+
+	string_or_die(&url, "%s/version/format%s/latest", version_url, format_string);
+
+	curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)RESUME_BYTE_RANGE);
+	if (curl_ret != CURLE_OK) {
+		goto exit;
+	}
+
+	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, swupd_download_version_to_memory);
+	if (curl_ret != CURLE_OK) {
+		goto exit;
+	}
+	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)version_string);
+	if (curl_ret != CURLE_OK) {
+		goto exit;
+	}
+	curl_ret = curl_easy_setopt(curl, CURLOPT_COOKIE, "request=uncached");
+	if (curl_ret != CURLE_OK) {
+		goto exit;
+	}
+
+	curl_ret = swupd_curl_set_basic_options(curl, url);
+	if (curl_ret != CURLE_OK) {
+		goto exit;
+	}
+
+	curl_ret = curl_easy_perform(curl);
+
+	if (curl_ret == CURLE_RANGE_ERROR) {
+		printf("Range command not supported by server, download resume disabled.\n");
+		resume_download_enabled = false;
+	}
+exit:
+	free(version_string);
+	free(url);
+
+	return;
 }
 
 static CURLcode swupd_curl_set_security_opts(CURL *curl)

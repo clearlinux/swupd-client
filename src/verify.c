@@ -620,7 +620,7 @@ int verify_main(int argc, char **argv)
 
 	if (version == -1) {
 		version = get_latest_version();
-		if (version == -1) {
+		if (version < 0) {
 			printf("Unable to get latest version for install\n");
 			v_lockfile(lock_fd);
 			return EXIT_FAILURE;

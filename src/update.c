@@ -324,24 +324,28 @@ load_server_manifests:
 	/* updating subscribed manifests is done as part of recurse_manifest */
 
 	/* read the current collective of manifests that we are subscribed to */
-	ret = recurse_manifest(current_manifest, NULL);
-	if (ret != 0) {
-		printf("Cannot load current MoM sub-manifests, ret = %d (%s), exiting\n", ret, strerror(errno));
+	current_manifest->submanifests = recurse_manifest(current_manifest, NULL);
+	if (!current_manifest->submanifests) {
+		printf("Cannot load current MoM sub-manifests, (%s), exiting\n", strerror(errno));
 		goto clean_exit;
 	}
 
 	/* consolidate the current collective manifests down into one in memory */
-	consolidate_submanifests(current_manifest);
+	current_manifest->files = files_from_bundles(current_manifest->submanifests);
+
+	current_manifest->files = consolidate_files(current_manifest->files);
 
 	/* read the new collective of manifests that we are subscribed to */
-	ret = recurse_manifest(server_manifest, NULL);
-	if (ret != 0) {
-		printf("Error: Cannot load server MoM sub-manifests, ret = %d (%s), exiting\n", ret, strerror(errno));
+	server_manifest->submanifests = recurse_manifest(server_manifest, NULL);
+	if (!server_manifest->submanifests) {
+		printf("Error: Cannot load server MoM sub-manifests, (%s), exiting\n", strerror(errno));
 		goto clean_exit;
 	}
 
 	/* consolidate the new collective manifests down into one in memory */
-	consolidate_submanifests(server_manifest);
+	server_manifest->files = files_from_bundles(server_manifest->submanifests);
+
+	server_manifest->files = consolidate_files(server_manifest->files);
 
 	/* prepare for an update process based on comparing two in memory manifests */
 	link_manifests(current_manifest, server_manifest);

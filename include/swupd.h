@@ -213,8 +213,8 @@ extern int compute_hash_lazy(struct file *file, char *filename);
 extern int compute_hash(struct file *file, char *filename) __attribute__((warn_unused_result));
 
 /* manifest.c */
-extern int recurse_manifest(struct manifest *manifest, const char *component);
-extern void consolidate_submanifests(struct manifest *manifest);
+extern struct list *recurse_manifest(struct manifest *manifest, const char *component);
+extern struct list *consolidate_files(struct list *files);
 extern void debug_write_manifest(struct manifest *manifest, char *filename);
 extern void populate_file_struct(struct file *file, char *filename);
 extern bool verify_file(struct file *file, char *filename);

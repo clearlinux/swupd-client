@@ -851,3 +851,24 @@ void set_local_download(void)
 
 	return;
 }
+
+struct list *files_from_bundles(struct list *bundles)
+{
+	struct list *files = NULL;
+	struct list *list;
+	struct manifest *bundle;
+
+	list = list_head(bundles);
+	while (list) {
+		struct list *bfiles;
+		bundle = list->data;
+		list = list->next;
+		if (!bundle) {
+			continue;
+		}
+		bfiles = list_clone(bundle->files);
+		files = list_concat(bfiles, files);
+	}
+
+	return files;
+}

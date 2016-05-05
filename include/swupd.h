@@ -256,6 +256,7 @@ void delete_motd(void);
 extern int get_dirfd_path(const char *fullname);
 extern int verify_fix_path(char *targetpath, struct manifest *manifest);
 extern void set_local_download(void);
+extern struct list *files_from_bundles(struct list *bundles);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);

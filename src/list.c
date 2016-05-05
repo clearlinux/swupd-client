@@ -285,3 +285,17 @@ void list_free_list(struct list *list)
 {
 	list_free_list_and_data(list, NULL);
 }
+
+struct list *list_clone(struct list *list)
+{
+	struct list *clone = NULL;
+	struct list *item;
+
+	item = list_tail(list);
+	while (item) {
+		clone = list_prepend_data(clone, item->data);
+		item = item->prev;
+	}
+
+	return clone;
+}

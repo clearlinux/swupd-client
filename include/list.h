@@ -51,4 +51,7 @@ void list_free_list_and_data(struct list *list, list_free_data_fn_t list_free_da
 /* destroy all items in the list without disposing item data */
 void list_free_list(struct list *list);
 
+/* shallow copy of the the list */
+struct list *list_clone(struct list *list);
+
 #endif

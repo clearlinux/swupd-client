@@ -37,7 +37,7 @@ teardown() {
   [ "${lines[6]}" = "Downloading os-core pack for version 10" ]
   [ "${lines[7]}" = "Extracting pack." ]
   [ "${lines[8]}" = "Installing bundle(s) files..." ]
-  [ "${lines[16]}" = "Bundle(s) installation done." ]
+  [ "${lines[12]}" = "Bundle(s) installation done." ]
   ls "$DIR/target-dir/usr/bin"
   ls "$DIR/target-dir/usr/foo"
 }

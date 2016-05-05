@@ -7,6 +7,7 @@ dir_hash="24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af"
 setup() {
   clean_test_dir
   tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
+  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
   tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.test-bundle.tar" Manifest.test-bundle Manifest.test-bundle.signed
   sudo chown root:root "$DIR/web-dir/10/staged/$dir_hash"
   tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/pack-test-bundle-from-0.tar" staged/$dir_hash --exclude=staged/$dir_hash/*
@@ -29,7 +30,7 @@ teardown() {
   [ "${lines[4]}" = "Downloading test-bundle pack for version 10" ]
   [ "${lines[5]}" = "Extracting pack." ]
   [ "${lines[6]}" = "Installing bundle(s) files..." ]
-  [ "${lines[12]}" = "Bundle(s) installation done." ]
+  [ "${lines[10]}" = "Bundle(s) installation done." ]
   [ -d "$DIR/target-dir/usr/bin" ]
 }
 

@@ -402,12 +402,14 @@ void free_manifest(struct manifest *manifest)
 		return;
 	}
 
-	list_free_list_and_data(manifest->files, free_file_data);
 	if (manifest->manifests) {
 		list_free_list_and_data(manifest->manifests, free_file_data);
 	}
 	if (manifest->submanifests) {
+		list_free_list(manifest->files);
 		list_free_list_and_data(manifest->submanifests, free_manifest_data);
+	} else {
+		list_free_list_and_data(manifest->files, free_file_data);
 	}
 	if (manifest->includes) {
 		list_free_list_and_data(manifest->includes, free);
@@ -733,8 +735,9 @@ void link_submanifests(struct manifest *m1, struct manifest *m2)
 
 /* if component is specified explicitly, pull in submanifest only for that
  * if component is not specified, pull in any tracked component submanifest */
-int recurse_manifest(struct manifest *manifest, const char *component)
+struct list *recurse_manifest(struct manifest *manifest, const char *component)
 {
+	struct list *bundles = NULL;
 	struct list *list;
 	struct file *file;
 	struct manifest *sub;
@@ -767,36 +770,23 @@ int recurse_manifest(struct manifest *manifest, const char *component)
 
 		err = load_manifests(version1, version2, file->filename, file, &sub);
 		if (err) {
-			return err;
+			list_free_list_and_data(bundles, free_manifest_data);
+			return NULL;
 		}
 		if (sub != NULL) {
-			manifest->submanifests = list_prepend_data(manifest->submanifests, sub);
-			manifest->contentsize += sub->contentsize;
+			bundles = list_prepend_data(bundles, sub);
 		}
 	}
 
-	return 0;
+	return bundles;
 }
 
-void consolidate_submanifests(struct manifest *manifest)
+struct list *consolidate_files(struct list *files)
 {
 	struct list *list, *next, *tmp;
-	struct manifest *sub;
 	struct file *file1, *file2;
 
-	/* Create a consolidated, sorted list of files from all of the
-	 * manifests' lists of files.  */
-	list = list_head(manifest->submanifests);
-	while (list) {
-		sub = list->data;
-		list = list->next;
-		if (!sub) {
-			continue;
-		}
-		manifest->files = list_concat(sub->files, manifest->files);
-		sub->files = NULL;
-	}
-	manifest->files = list_sort(manifest->files, file_sort_filename);
+	files = list_sort(files, file_sort_filename);
 
 	/* Two pointers ("list" and "next") traverse the consolidated, filename sorted
 	 * struct list of files.  The "list" pointer is marched forward through the
@@ -834,7 +824,7 @@ void consolidate_submanifests(struct manifest *manifest)
 	 *       and concreteness here are of utmost importance if we are to correctly
 	 *       maintain the installed system's state in the filesystem across updates
 	 */
-	list = list_head(manifest->files);
+	list = list_head(files);
 	while (list) {
 		next = list->next;
 		if (next == NULL) {
@@ -853,14 +843,14 @@ void consolidate_submanifests(struct manifest *manifest)
 		if (!file1->is_deleted && !file2->is_deleted && hash_compare(file1->hash, file2->hash)) {
 			/* always drop the untracked file if there is a tracked file */
 			if (file1->is_tracked && !file2->is_tracked) {
-				list_free_item(next, free_file_data);
+				list_free_item(next, NULL);
 			} else if (!file1->is_tracked && file2->is_tracked) {
-				list_free_item(list, free_file_data);
+				list_free_item(list, NULL);
 				list = next;
 			} else if (file1->last_change <= file2->last_change) { /* drop the newer of the two */
-				list_free_item(next, free_file_data);
+				list_free_item(next, NULL);
 			} else {
-				list_free_item(list, free_file_data);
+				list_free_item(list, NULL);
 				list = next;
 			}
 			continue;
@@ -869,9 +859,9 @@ void consolidate_submanifests(struct manifest *manifest)
 		if (file1->is_deleted && file2->is_deleted) {
 			/* keep the newer of the two */
 			if (file1->last_change > file2->last_change) {
-				list_free_item(next, free_file_data);
+				list_free_item(next, NULL);
 			} else {
-				list_free_item(list, free_file_data);
+				list_free_item(list, NULL);
 				list = next;
 			}
 			continue;
@@ -879,40 +869,36 @@ void consolidate_submanifests(struct manifest *manifest)
 
 		/* (case 2) A'                     : choose file1 */
 		if (file2->is_deleted && !file2->is_rename) {
-			list_free_item(next, free_file_data);
+			list_free_item(next, NULL);
 			continue;
 		}
 		/* (case 3) A                      : choose file2 */
 		if (file1->is_deleted && !file1->is_rename) {
-			list_free_item(list, free_file_data);
+			list_free_item(list, NULL);
 			list = next;
 			continue;
 		}
 		/* (case 4) B' AND NOT A           : choose file 1*/
 		if (file2->is_deleted && file2->is_rename) { // && !(file1->is_deleted && !file1->is_rename)
-			list_free_item(next, free_file_data);
+			list_free_item(next, NULL);
 			continue;
 		}
 
 		/* (case 5) B AND NOT (A' OR B')   : choose file2 */
 		if (file1->is_deleted && file1->is_rename) { // && !(file2->is_deleted)
-			list_free_item(list, free_file_data);
+			list_free_item(list, NULL);
 			list = next;
 			continue;
 		}
 
 		/* (case 6) all others constitute errors */
 		tmp = next->next;
-		list_free_item(list, free_file_data);
-		list_free_item(next, free_file_data);
+		list_free_item(list, NULL);
+		list_free_item(next, NULL);
 		list = tmp;
 	}
 
-	/* In our prior while loop we have various cases where we call list_free_item() having that
-	 * is a potential lose of our manifest->files pointerm, just matter of luck and time.
-	 * To avoid loosing manifest->files pointer we just reasign from list 'sane' pointer.
-	 */
-	manifest->files = list;
+	return list;
 }
 
 #if 0

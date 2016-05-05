@@ -109,18 +109,15 @@ static int load_bundle_manifest(const char *bundle_name, int version, struct man
 		goto out;
 	}
 
-	ret = recurse_manifest(mom, bundle_name);
-	if (ret != 0) {
+	sub_list = recurse_manifest(mom, bundle_name);
+	if (!sub_list) {
 		ret = ERECURSE_MANIFEST;
 		goto free_out;
 	}
 
-	sub_list = list_head(mom->submanifests);
-	if (sub_list != NULL) {
-		*submanifest = sub_list->data;
-		sub_list->data = NULL;
-		ret = 0;
-	}
+	*submanifest = sub_list->data;
+	sub_list->data = NULL;
+	ret = 0;
 
 free_out:
 	free_manifest(mom);
@@ -172,29 +169,6 @@ static int unload_tracked_bundle(const char *bundle_name)
 	}
 
 	return EBUNDLE_NOT_TRACKED;
-}
-
-/* touch bundle filename in system bundles directory,
- * this is called after bundle installation to make sure bundle is kept tracked
- */
-static int track_bundle_in_system(char *bundle)
-{
-	char *filename;
-	int f;
-	int ret = 0;
-
-	string_or_die(&filename, "%s/%s/%s", path_prefix, BUNDLES_DIR, bundle);
-
-	f = open(filename, O_WRONLY | O_CREAT | O_NONBLOCK | O_NOCTTY, MODE_RW_O);
-	if (f < 0) {
-		ret = EBUNDLE_NOT_TRACKED;
-	} else {
-		close(f);
-	}
-
-	free(filename);
-
-	return ret;
 }
 
 /*  This function is a fresh new implementation for a bundle
@@ -270,14 +244,16 @@ int remove_bundle(const char *bundle_name)
 	subscription_versions_from_MoM(current_mom, 0);
 
 	/* load all submanifest minus the one to be removed */
-	ret = recurse_manifest(current_mom, NULL);
-	if (ret != 0) {
-		printf("Error: Cannot load MoM sub-manifests (ret = %d)\n", ret);
+	current_mom->submanifests = recurse_manifest(current_mom, NULL);
+	if (!current_mom->submanifests) {
+		printf("Error: Cannot load MoM sub-manifests\n");
 		ret = ERECURSE_MANIFEST;
 		goto out_free_mom;
 	}
 
-	consolidate_submanifests(current_mom);
+	current_mom->files = files_from_bundles(current_mom->submanifests);
+
+	current_mom->files = consolidate_files(current_mom->files);
 
 	/* Now that we have the consolidated list of all files, load bundle to be removed submanifest*/
 	ret = load_bundle_manifest(bundle_name, current_version, &bundle_manifest);
@@ -393,7 +369,7 @@ int install_bundles(struct list *bundles, int current_version, struct manifest *
 	int ret;
 	struct file *file;
 	struct list *iter;
-	struct sub *sub;
+	struct list *to_install_bundles, *to_install_files;
 
 	/* step 1: check bundle args are valid if so populate subs struct */
 	ret = add_subscriptions(bundles, current_version, mom);
@@ -408,14 +384,15 @@ int install_bundles(struct list *bundles, int current_version, struct manifest *
 
 	subscription_versions_from_MoM(mom, 0);
 
-	ret = recurse_manifest(mom, NULL);
-	if (ret != 0) {
-		printf("Error: Cannot load MoM sub-manifests (ret = %d)\n", ret);
+	to_install_bundles = recurse_manifest(mom, NULL);
+	if (!to_install_bundles) {
+		printf("Error: Cannot load to install bundles\n");
 		ret = ERECURSE_MANIFEST;
 		goto out;
 	}
 
-	consolidate_submanifests(mom);
+	to_install_files = files_from_bundles(to_install_bundles);
+	to_install_files = consolidate_files(to_install_files);
 
 	/* step 2: download neccessary packs */
 
@@ -428,10 +405,23 @@ int install_bundles(struct list *bundles, int current_version, struct manifest *
 		goto out;
 	}
 
-	/* step 3: Install all bundle(s) files into the fs */
+	/* step 3: Add tracked bundles */
+	read_subscriptions_alt();
+	subscription_versions_from_MoM(mom, 0);
+	mom->submanifests = recurse_manifest(mom, NULL);
+	if (!mom->submanifests) {
+		printf("Error: Cannot load installed bundles\n");
+		ret = ERECURSE_MANIFEST;
+		goto out;
+	}
+
+	mom->files = files_from_bundles(mom->submanifests);
+	mom->files = consolidate_files(mom->files);
+
+	/* step 4: Install all bundle(s) files into the fs */
 
 	printf("Installing bundle(s) files...\n");
-	iter = list_head(mom->files);
+	iter = list_head(to_install_files);
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
@@ -451,24 +441,6 @@ int install_bundles(struct list *bundles, int current_version, struct manifest *
 	}
 
 	sync();
-
-	/* step 4: create bundle(s) subscription entries to track them
-	 *
-	 * Strictly speaking each manifest has an entry to write its own bundle filename
-	 * and thus tracking automagically, here just making sure.
-	 */
-
-	iter = list_head(subs);
-	while (iter) {
-		sub = iter->data;
-		iter = iter->next;
-
-		printf("Tracking %s bundle on the system\n", sub->component);
-		ret = track_bundle_in_system(sub->component);
-		if (ret != 0) {
-			printf("Cannot track %s bundle on the system\n", sub->component);
-		}
-	}
 
 	/* step 5: Run any scripts that are needed to complete update */
 	run_scripts();

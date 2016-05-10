@@ -139,7 +139,7 @@ static int file_has_different_hash_in_older_manifest(struct manifest *from_manif
 			continue;
 		}
 		if (!strcmp(file->filename, searched_file->filename) &&
-		    hash_compare(file->hash, searched_file->hash)) {
+		    hash_equal(file->hash, searched_file->hash)) {
 			return 1;
 		}
 	}
@@ -443,7 +443,7 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 	if (ret != 0) {
 		goto out;
 	}
-	if (!hash_compare(file->peer->hash, file->hash)) {
+	if (!hash_equal(file->peer->hash, file->hash)) {
 		goto out;
 	}
 
@@ -658,7 +658,7 @@ void link_manifests(struct manifest *m1, struct manifest *m2)
 				file2->deltapeer = file1;
 			}
 
-			if (!file1->is_deleted && !file2->is_deleted && hash_compare(file1->hash, file2->hash)) {
+			if (!file1->is_deleted && !file2->is_deleted && hash_equal(file1->hash, file2->hash)) {
 				file2->last_change = file1->last_change;
 			}
 
@@ -840,7 +840,7 @@ struct list *consolidate_files(struct list *files)
 
 		/* (case 1) C and C'               : choose file1
 		 * this is the most common case, so test it first */
-		if (!file1->is_deleted && !file2->is_deleted && hash_compare(file1->hash, file2->hash)) {
+		if (!file1->is_deleted && !file2->is_deleted && hash_equal(file1->hash, file2->hash)) {
 			/* always drop the untracked file if there is a tracked file */
 			if (file1->is_tracked && !file2->is_tracked) {
 				list_free_item(next, NULL);
@@ -1022,7 +1022,7 @@ void link_renames(struct list *newfiles, struct manifest *from_manifest)
 			if (!file_found_in_older_manifest(from_manifest, file2)) {
 				continue;
 			}
-			if (hash_compare(file2->hash, file1->hash)) {
+			if (hash_equal(file2->hash, file1->hash)) {
 				file1->deltapeer = file2->peer;
 				file1->peer = file2->peer;
 				file2->peer->deltapeer = file1;

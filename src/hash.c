@@ -41,7 +41,7 @@ void hash_assign(char *src, char *dst)
 	dst[SWUPD_HASH_LEN - 1] = '\0';
 }
 
-bool hash_compare(char *hash1, char *hash2)
+bool hash_equal(char *hash1, char *hash2)
 {
 	if (bcmp(hash1, hash2, SWUPD_HASH_LEN - 1) == 0) {
 		return true;
@@ -52,7 +52,7 @@ bool hash_compare(char *hash1, char *hash2)
 
 bool hash_is_zeros(char *hash)
 {
-	return hash_compare("0000000000000000000000000000000000000000000000000000000000000000", hash);
+	return hash_equal("0000000000000000000000000000000000000000000000000000000000000000", hash);
 }
 
 static void hash_set_zeros(char *hash)
@@ -63,7 +63,7 @@ static void hash_set_zeros(char *hash)
 #if 0
 static bool hash_is_ones(char *hash)
 {
-	return hash_compare("1111111111111111111111111111111111111111111111111111111111111111", hash);
+	return hash_equal("1111111111111111111111111111111111111111111111111111111111111111", hash);
 }
 #endif
 
@@ -244,7 +244,7 @@ bool verify_file(struct file *file, char *filename)
 	}
 
 	/* Check if manifest hash matches local file hash */
-	if (hash_compare(file->hash, local->hash)) {
+	if (hash_equal(file->hash, local->hash)) {
 		free(local);
 		return true;
 	} else {

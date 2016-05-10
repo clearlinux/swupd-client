@@ -208,7 +208,7 @@ extern int component_subscribed(char *component);
 extern void subscription_versions_from_MoM(struct manifest *MoM, int is_old);
 
 extern void hash_assign(char *src, char *dest);
-extern bool hash_compare(char *hash1, char *hash2);
+extern bool hash_equal(char *hash1, char *hash2);
 extern bool hash_is_zeros(char *hash);
 extern int compute_hash_lazy(struct file *file, char *filename);
 extern int compute_hash(struct file *file, char *filename) __attribute__((warn_unused_result));

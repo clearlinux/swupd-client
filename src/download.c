@@ -86,7 +86,7 @@ static int swupd_curl_hashmap_insert(struct file *file)
 	iter = bucket->list;
 	while (iter) {
 		tmp = iter->data;
-		if (hash_compare(tmp->hash, file->hash)) {
+		if (hash_equal(tmp->hash, file->hash)) {
 			// hash already in download queue
 			pthread_mutex_unlock(&bucket->mutex);
 			return 1;

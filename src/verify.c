@@ -210,7 +210,7 @@ static bool hash_needs_work(struct file *file, char *hash)
 			return false;
 		}
 	} else {
-		if (hash_compare(file->hash, hash)) {
+		if (hash_equal(file->hash, hash)) {
 			return false;
 		} else {
 			return true;

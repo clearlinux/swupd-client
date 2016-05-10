@@ -99,7 +99,7 @@ int main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 			printf("Hash computation failed\n");
 			exit(0);
 		}
-		if (!hash_compare(file1->hash, file2->hash)) {
+		if (!hash_equal(file1->hash, file2->hash)) {
 			printf("Hash mismatch for algorithm %i \n", algo);
 			exit(0);
 		}

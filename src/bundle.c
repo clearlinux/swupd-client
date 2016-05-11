@@ -171,6 +171,33 @@ static int unload_tracked_bundle(const char *bundle_name)
 	return EBUNDLE_NOT_TRACKED;
 }
 
+/* Check if bundle is included by any subscribed bundles */
+bool is_included(const char *bundle_name, struct manifest *mom)
+{
+	bool ret = false;
+	struct list *b, *i;
+
+	b = list_head(mom->submanifests);
+	while (b) {
+		struct manifest *bundle = b->data;
+		b = b->next;
+
+		i = list_head(bundle->includes);
+		while (i) {
+			char *name = i->data;
+			i = i->next;
+
+			if (strcmp(name, bundle_name) == 0) {
+				ret = true;
+				goto out;
+			}
+		}
+	}
+
+out:
+	return ret;
+}
+
 /*  This function is a fresh new implementation for a bundle
  *  remove without being tied to verify loop, this means
  *  improved speed and space as well as more roubustness and
@@ -248,6 +275,12 @@ int remove_bundle(const char *bundle_name)
 	if (!current_mom->submanifests) {
 		printf("Error: Cannot load MoM sub-manifests\n");
 		ret = ERECURSE_MANIFEST;
+		goto out_free_mom;
+	}
+
+	if (is_included(bundle_name, current_mom)) {
+		printf("Error: bundle requested to be removed is required by other installed bundles\n");
+		ret = EBUNDLE_REMOVE;
 		goto out_free_mom;
 	}
 

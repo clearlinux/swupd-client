@@ -103,11 +103,10 @@ static bool parse_options(int argc, char **argv)
 			set_version_url(optarg);
 			break;
 		case 'p': /* default empty path_prefix verifies the running OS */
-			if (!optarg) {
+			if (!optarg || !set_path_prefix(optarg)) {
 				printf("Invalid --path argument\n\n");
 				goto err;
 			}
-			set_path_prefix(optarg);
 			break;
 		case 'P':
 			if (sscanf(optarg, "%ld", &update_server_port) != 1) {

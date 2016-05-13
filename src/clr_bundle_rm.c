@@ -79,11 +79,10 @@ static bool parse_options(int argc, char **argv)
 			print_help(argv[0]);
 			exit(EXIT_SUCCESS);
 		case 'p': /* default empty path_prefix removes on the running OS */
-			if (!optarg) {
+			if (!optarg || !set_path_prefix(optarg)) {
 				printf("Invalid --path argument\n\n");
 				goto err;
 			}
-			set_path_prefix(optarg);
 			break;
 		case 'u':
 			if (!optarg) {

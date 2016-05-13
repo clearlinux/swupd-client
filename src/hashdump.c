@@ -80,12 +80,11 @@ int hashdump_main(int argc, char **argv)
 			file->use_xattrs = false;
 			break;
 		case 'b':
-			if (!optarg) {
-				printf("Invalid --path argument\n\n");
+			if (!optarg || !set_path_prefix(optarg)) {
+				printf("Invalid --basepath argument\n\n");
 				free(file);
 				return EXIT_FAILURE;
 			}
-			set_path_prefix(optarg);
 			break;
 		case 'h':
 			usage(argv[0]);

@@ -384,11 +384,8 @@ static int perform_curl_io_and_complete(int *left)
 				failed = list_prepend_data(failed, file);
 			}
 		} else {
-			char *url = NULL;
-
 			printf("Error for %s download: Received %ld response\n", file->hash, ret);
 			failed = list_prepend_data(failed, file);
-			curl_easy_getinfo(handle, CURLINFO_EFFECTIVE_URL, &url);
 
 			unlink_all_staged_content(file);
 		}

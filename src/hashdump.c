@@ -112,7 +112,12 @@ int hashdump_main(int argc, char **argv)
 		string_or_die(&file->filename, "/%s", argv[optind]);
 	}
 
-	set_path_prefix(NULL);
+	ret = set_path_prefix(NULL);
+	if (!ret) {
+		free(file->filename);
+		free(file);
+		return EXIT_FAILURE;
+	}
 
 	printf("Calculating hash %s xattrs for: (%s) ... %s\n",
 	       (file->use_xattrs ? "with" : "without"), path_prefix, file->filename);

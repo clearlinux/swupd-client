@@ -613,6 +613,7 @@ int verify_main(int argc, char **argv)
 		if (version < 0) {
 			printf("Error: Unable to determine current OS version\n");
 			free_globals();
+			v_lockfile(lock_fd);
 			return ECURRENT_VERSION;
 		}
 	}

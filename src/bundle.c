@@ -64,6 +64,7 @@ int list_installable_bundles()
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
 		printf("Error: Unable to determine current OS version\n");
+		v_lockfile(lock_fd);
 		return ECURRENT_VERSION;
 	}
 
@@ -244,6 +245,7 @@ int remove_bundle(const char *bundle_name)
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
 		printf("Error: Unable to determine current OS version\n");
+		v_lockfile(lock_fd);
 		return ECURRENT_VERSION;
 	}
 
@@ -507,6 +509,7 @@ int install_bundles_frontend(char **bundles)
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
 		printf("Error: Unable to determine current OS version\n");
+		v_lockfile(lock_fd);
 		return ECURRENT_VERSION;
 	}
 

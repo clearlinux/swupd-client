@@ -379,14 +379,14 @@ static int perform_curl_io_and_complete(int *left)
 			if (local_download) {
 				untar_full_download(file);
 			} else {
-				printf("error: received http \"0\" response for %s download\n",
+				printf("Error for %s download: No response received\n",
 				       file->hash);
 				failed = list_prepend_data(failed, file);
 			}
 		} else {
 			char *url = NULL;
 
-			printf("error: received %ld response for download\n", ret);
+			printf("Error for %s download: Received %ld response\n", file->hash, ret);
 			failed = list_prepend_data(failed, file);
 			curl_easy_getinfo(handle, CURLINFO_EFFECTIVE_URL, &url);
 

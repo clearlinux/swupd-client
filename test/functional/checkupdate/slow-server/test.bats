@@ -8,7 +8,7 @@ port=""
 setup() {
   for i in $(seq 8080 8180); do
     "$DIR/server.py" $i &
-    sleep .2
+    sleep .5
     server_pid=$!
     if [ -d /proc/$server_pid ]; then
       port=$i

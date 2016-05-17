@@ -2,9 +2,7 @@
 
 load "../../swupdlib"
 
-f1=24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af
-f2=cde33514c151abb2b01448be290ab1d5212952571d15e3533cadc15ff82f2cd5
-f3=520f83440d3dddc25ad09ca858b9c669245f82d3181a45cdfe793aac9dd1fb15
+f1=520f83440d3dddc25ad09ca858b9c669245f82d3181a45cdfe793aac9dd1fb15
 
 setup() {
   clean_test_dir
@@ -13,12 +11,8 @@ setup() {
   tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.test-bundle.tar" Manifest.test-bundle Manifest.test-bundle.signed
   tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
   tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.test-bundle.tar" Manifest.test-bundle Manifest.test-bundle.signed
-  sudo chown root:root "$DIR/web-dir/10/files/$f1"
-  sudo chown root:root "$DIR/web-dir/10/files/$f2"
-  sudo chown root:root "$DIR/web-dir/100/files/$f3"
-  tar -C "$DIR/web-dir/10/files" -cf "$DIR/web-dir/10/files/$f1.tar" $f1 --exclude=$f1/*
-  tar -C "$DIR/web-dir/10/files" -cf "$DIR/web-dir/10/files/$f2.tar" $f2 --exclude=$f2/*
-  tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$f3.tar" $f3
+  sudo chown root:root "$DIR/web-dir/100/files/$f1"
+  tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$f1.tar" $f1
 }
 
 teardown() {
@@ -28,21 +22,13 @@ teardown() {
   pushd "$DIR/web-dir/100"
   rm *.tar
   popd
-  pushd "$DIR/web-dir/10/files"
-  rm *.tar
-  popd
   pushd "$DIR/web-dir/100/files"
   rm *.tar
   popd
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/10/files/$f1"
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/10/files/$f2"
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/100/files/$f3"
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/target-dir/usr"
-  sudo rm "$DIR/target-dir/usr/bin/foo"
-  sudo rmdir "$DIR/target-dir/usr/bin"
+  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/100/files/$f1"
 }
 
-@test "update verify_fix_path corrects hash mismatch" {
+@test "update fullfile hashes verified" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
   echo "$output"
@@ -63,13 +49,7 @@ teardown() {
   [ "${lines[16]}" = "    deleted files     : 0" ]
   [ "${lines[17]}" = "Starting download of remaining update content. This may take a while..." ]
   [ "${lines[18]}" = "Finishing download of update content..." ]
-  [ "${lines[19]}" = "Staging file content" ]
-  [ "${lines[21]}" = "Hash did not match for path : /usr" ]
-  [ "${lines[22]}" = "Path /usr/bin is missing on the file system" ]
-  [ "${lines[23]}" = "Update was applied." ]
-  [ "${lines[27]}" = "Update successful. System updated from version 10 to version 100" ]
-  [ -d "$DIR/target-dir/usr/bin" ]
-  [ -f "$DIR/target-dir/usr/bin/foo" ]
+  [ ! -f "$DIR/target-dir/foo" ]
 }
 
 # vi: ft=sh ts=8 sw=2 sts=2 et tw=80

@@ -316,6 +316,12 @@ int untar_full_download(void *data)
 	}
 
 	err = lstat(targetfile, &stat);
+	if (!err && !verify_file(file, targetfile)) {
+		/* Download was successful but the hash was bad. This is fatal*/
+		printf("Error: File content hash mismatch for %s (bad server data?)\n", targetfile);
+		exit(EXIT_FAILURE);
+	}
+
 exit:
 	free(tarfile);
 	free(targetfile);
@@ -371,13 +377,21 @@ static int perform_curl_io_and_complete(int *left)
 		} else if (ret == 200) {
 			/* When both web server and CURL report success, only then
 			 * proceed to uncompress. */
-			untar_full_download(file);
+			if (untar_full_download(file)) {
+				printf("Error for %s tarfile extraction, (check free space for %s?)\n",
+				       file->hash, state_dir);
+				failed = list_prepend_data(failed, file);
+			}
 		} else if (ret == 0) {
 			/* When using the FILE:// protocol, 0 indicates success.
 			 * Otherwise, it means the web server hasn't responded yet.
 			 */
 			if (local_download) {
-				untar_full_download(file);
+				if (untar_full_download(file)) {
+					printf("Error for %s tarfile extraction, (check free space for %s?)\n",
+					       file->hash, state_dir);
+					failed = list_prepend_data(failed, file);
+				}
 			} else {
 				printf("Error for %s download: No response received\n",
 				       file->hash);

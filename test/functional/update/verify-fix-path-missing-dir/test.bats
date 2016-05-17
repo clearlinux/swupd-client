@@ -3,7 +3,7 @@
 load "../../swupdlib"
 
 f1=24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af
-f2=c2fb5e545287e632581b82e371de5d4aac2c7eb50d7f357f3b66fb0fdca71dd9
+f2=520f83440d3dddc25ad09ca858b9c669245f82d3181a45cdfe793aac9dd1fb15
 
 setup() {
   clean_test_dir

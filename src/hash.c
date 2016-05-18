@@ -201,7 +201,7 @@ int compute_hash(struct file *file, char *filename)
 		hmac_sha256_for_string(file->hash,
 				       (const unsigned char *)key,
 				       key_len,
-				       file->filename); //file->filename not filename
+				       SWUPD_HASH_DIRNAME); //Make independent of dirname
 		return 0;
 	}
 

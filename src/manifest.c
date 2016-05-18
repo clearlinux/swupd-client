@@ -495,8 +495,8 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	char *filename;
 	char *dir;
 	int ret = 0;
-	char *tar;
 	struct stat sb;
+	char *param1, *param2;
 
 	string_or_die(&filename, "%s/%i/Manifest.%s.tar", state_dir, version, component);
 	if (stat(filename, &sb) == 0) {
@@ -531,15 +531,13 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		goto out;
 	}
 
-	string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",
-		      state_dir, version, state_dir, version, component);
-
+	string_or_die(&param1, "%s/%i",  state_dir, version);
+	string_or_die(&param2, "%s/%i/Manifest.%s.tar", state_dir, version, component);
+	char *const tarcmd[] = { TAR_COMMAND, "-C", param1, "-xf", param2, NULL };
 	/* this is is historically a point of odd errors */
-	ret = system(tar);
-	if (WIFEXITED(ret)) {
-		ret = WEXITSTATUS(ret);
-	}
-	free(tar);
+	ret = system_argv_fd(tarcmd, -1, -1, -2);
+	free(param1);
+	free(param2);
 	if (ret != 0) {
 		goto out;
 	}

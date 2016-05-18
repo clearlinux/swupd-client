@@ -29,6 +29,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <assert.h>
 
 #include "config.h"
 #include "signature.h"
@@ -38,9 +40,9 @@
 static int download_pack(int oldversion, int newversion, char *module)
 {
 	FILE *tarfile = NULL;
-	char *tar = NULL;
+	char *param = NULL;
 	char *url = NULL;
-	int err = -1;
+	int err = -1, stderrfd;
 	char *filename;
 	struct stat stat;
 
@@ -76,14 +78,16 @@ static int download_pack(int oldversion, int newversion, char *module)
 	free(url);
 
 	printf("Extracting pack.\n");
-	string_or_die(&tar, TAR_COMMAND " -C %s " TAR_PERM_ATTR_ARGS " -xf %s/pack-%s-from-%i-to-%i.tar 2> /dev/null",
-		      state_dir, state_dir, module, oldversion, newversion);
-
-	err = system(tar);
-	if (WIFEXITED(err)) {
-		err = WEXITSTATUS(err);
+	string_or_die(&param, "%s/pack-%s-from-%i-to-%i.tar", state_dir, module, oldversion, newversion);
+	char *const tarcmd[] = { TAR_COMMAND, "-C", state_dir, TAR_PERM_ATTR_ARGS_STRLIST, "-xf", param, NULL };
+	stderrfd = open("/dev/null", O_WRONLY);
+	if (stderrfd == -1) {
+		fprintf(stderr, "Failed to open /dev/null\n");
+		assert(0);
 	}
-	free(tar);
+	err = system_argv_fd(tarcmd, -1, -1, stderrfd);
+	free(param);
+	close(stderrfd);
 	unlink(filename);
 	/* make a zero sized file to prevent redownload */
 	tarfile = fopen(filename, "w");

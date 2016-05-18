@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <assert.h>
 
 #include "config.h"
 #include "swupd-build-variant.h"
@@ -249,8 +250,8 @@ int untar_full_download(void *data)
 	char *tar_dotfile;
 	char *targetfile;
 	struct stat stat;
-	int err;
-	char *tarcommand;
+	int err, stderrfd;
+	char *tardir;
 
 	string_or_die(&tar_dotfile, "%s/download/.%s.tar", state_dir, file->hash);
 	string_or_die(&tarfile, "%s/download/%s.tar", state_dir, file->hash);
@@ -289,14 +290,16 @@ int untar_full_download(void *data)
 	}
 
 	/* modern tar will automatically determine the compression type used */
-	string_or_die(&tarcommand, TAR_COMMAND " -C %s/staged/ " TAR_PERM_ATTR_ARGS " -xf %s 2> /dev/null",
-		      state_dir, tarfile);
-
-	err = system(tarcommand);
-	if (WIFEXITED(err)) {
-		err = WEXITSTATUS(err);
+	string_or_die(&tardir, "%s/staged/", state_dir);
+	char *const tarcmd[] = { TAR_COMMAND, "-C", tardir, TAR_PERM_ATTR_ARGS_STRLIST, "-xf", tarfile, NULL };
+	stderrfd = open("/dev/null", O_WRONLY);
+	if (stderrfd == -1) {
+		fprintf(stderr, "Failed to open /dev/null\n");
+		assert(0);
 	}
-	free(tarcommand);
+	err = system_argv_fd(tarcmd, -1, -1, stderrfd);
+	free(tardir);
+	close(stderrfd);
 	if (err) {
 		printf("ignoring tar extract failure for fullfile %s.tar (ret %d)\n",
 		       file->hash, err);

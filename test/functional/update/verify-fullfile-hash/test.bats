@@ -49,6 +49,10 @@ teardown() {
   [ "${lines[16]}" = "    deleted files     : 0" ]
   [ "${lines[17]}" = "Starting download of remaining update content. This may take a while..." ]
   [ "${lines[18]}" = "Finishing download of update content..." ]
+
+  regex="Error: File content hash mismatch for .*/staged/$f1 \(bad server data\?\)"
+  [[ "${lines[19]}" =~ $regex ]]
+
   [ ! -f "$DIR/target-dir/foo" ]
 }
 

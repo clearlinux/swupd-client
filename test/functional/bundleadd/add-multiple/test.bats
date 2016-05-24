@@ -32,7 +32,7 @@ teardown() {
 
   echo "$output"
   [ "${lines[2]}" = "Attempting to download version string to memory" ]
-  [ "${lines[3]}" = "Downloading required packs..." ]
+  [ "${lines[3]}" = "Downloading packs..." ]
   [ "${lines[4]}" = "Downloading test-bundle1 pack for version 10" ]
   [ "${lines[5]}" = "Extracting pack." ]
   [ "${lines[6]}" = "Downloading test-bundle2 pack for version 10" ]

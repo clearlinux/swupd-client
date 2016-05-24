@@ -433,12 +433,8 @@ int install_bundles(struct list *bundles, int current_version, struct manifest *
 
 	(void)rm_staging_dir_contents("download");
 
-	printf("Downloading required packs...\n");
-	ret = download_subscribed_packs(true);
-	if (ret != 0) {
-		printf("pack downloads failed, cannot proceed with the installation, exiting.\n");
-		goto out;
-	}
+	printf("Downloading packs...\n");
+	(void)download_subscribed_packs(true);
 
 	/* step 3: Add tracked bundles */
 	read_subscriptions_alt();
@@ -466,13 +462,30 @@ int install_bundles(struct list *bundles, int current_version, struct manifest *
 		}
 
 		ret = do_staging(file, mom);
-		if (ret == 0) {
-			rename_staged_file_to_final(file);
-		} else {
-			printf("Failed to stage file: %s (ret = %d). Aborting bundle-add\n",
-			       file->filename, ret);
+		if (ret) {
+			ret = verify_fix_path(file->filename, mom);
+		}
+		if (ret) {
+			ret = EBUNDLE_INSTALL;
 			goto out;
 		}
+	}
+
+	iter = list_head(to_install_files);
+	while (iter) {
+		file = iter->data;
+		iter = iter->next;
+
+		if (file->is_deleted || file->do_not_update || ignore(file)) {
+			continue;
+		}
+
+		/* This was staged by verify_fix_path */
+		if (!file->staging) {
+			file = search_file_in_manifest(mom, file->filename);
+		}
+
+		rename_staged_file_to_final(file);
 	}
 
 	sync();

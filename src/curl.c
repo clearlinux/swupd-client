@@ -52,11 +52,6 @@ static int curr_version = -1;
 static int req_version = -1;
 static bool resume_download_enabled = true;
 
-struct version_container {
-	size_t offset;
-	char *version;
-};
-
 int swupd_curl_init(void)
 {
 	CURLcode curl_ret;
@@ -211,7 +206,7 @@ size_t swupd_download_file(void *ptr, size_t size, size_t nmemb, void *userdata)
  * - NOTE: See full_download() for multi/asynchronous downloading of fullfiles.
  */
 int swupd_curl_get_file(const char *url, char *filename, struct file *file,
-			char *in_memory_version_string, bool pack)
+			struct version_container *in_memory_version_string, bool pack)
 {
 	CURLcode curl_ret;
 	long ret = 0;
@@ -258,9 +253,6 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 			goto exit;
 		}
 	} else {
-		struct version_container vc = { 0 };
-		vc.version = in_memory_version_string;
-
 		// only download latest version number, storing in the provided pointer
 		printf("Attempting to download version string to memory\n");
 
@@ -268,7 +260,7 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
-		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&vc);
+		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)in_memory_version_string);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}

@@ -39,10 +39,10 @@ int get_latest_version(void)
 	char *url = NULL;
 	char *path = NULL;
 	int ret = 0;
-	char *tmp_version;
+	struct version_container tmp_version = { 0 };
 
-	tmp_version = calloc(LINE_MAX, 1);
-	if (tmp_version == NULL) {
+	tmp_version.version = calloc(LINE_MAX, 1);
+	if (tmp_version.version == NULL) {
 		abort();
 	}
 
@@ -52,17 +52,17 @@ int get_latest_version(void)
 
 	unlink(path);
 
-	ret = swupd_curl_get_file(url, path, NULL, tmp_version, false);
+	ret = swupd_curl_get_file(url, path, NULL, &tmp_version, false);
 	if (ret) {
 		goto out;
 	} else {
-		ret = strtol(tmp_version, NULL, 10);
+		ret = strtol(tmp_version.version, NULL, 10);
 	}
 
 out:
 	free(path);
 	free(url);
-	free(tmp_version);
+	free(tmp_version.version);
 	return ret;
 }
 

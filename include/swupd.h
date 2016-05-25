@@ -55,6 +55,11 @@ struct manifest {
 	char *component;
 };
 
+struct version_container {
+	size_t offset;
+	char *version;
+};
+
 struct header;
 
 extern bool force;
@@ -193,7 +198,7 @@ extern void swupd_curl_set_requested_version(int v);
 extern double swupd_query_url_content_size(char *url);
 extern size_t swupd_download_file(void *ptr, size_t size, size_t nmemb, void *userdata);
 extern int swupd_curl_get_file(const char *url, char *filename, struct file *file,
-			       char *tmp_version, bool pack);
+			       struct version_container *tmp_version, bool pack);
 #define SWUPD_CURL_LOW_SPEED_LIMIT 1
 #define SWUPD_CURL_CONNECT_TIMEOUT 30
 #define SWUPD_CURL_RCV_TIMEOUT 120

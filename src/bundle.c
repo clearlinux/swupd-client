@@ -377,7 +377,7 @@ int add_subscriptions(struct list *bundles, int current_version, struct manifest
 				new_bundles = true;
 			}
 		}
-		free(manifest);
+		free_manifest(manifest);
 
 		if (is_tracked_bundle(bundle)) {
 			continue;

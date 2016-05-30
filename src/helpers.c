@@ -947,21 +947,21 @@ int system_argv_fd(char *const argv[], int newstdin, int newstdout, int newstder
 	pid = fork();
 
 	if (pid == 0) { /* child */
-		if (newstdin >= 0) {
+		if (newstdin >= 0 && newstdin != STDIN_FILENO) {
 			if (dup2(newstdin, STDIN_FILENO) == -1) {
 				fprintf(stderr, "Could not redirect stdin\n");
 				assert(0);
 			}
 			close(newstdin);
 		}
-		if (newstdout >= 0) {
+		if (newstdout >= 0 && newstdout != STDOUT_FILENO) {
 			if (dup2(newstdout, STDOUT_FILENO) == -1) {
 				fprintf(stderr, "Could not redirect stdout\n");
 				assert(0);
 			}
 			close(newstdout);
 		}
-		if (newstderr >= 0) {
+		if (newstderr >= 0 && newstderr != STDERR_FILENO) {
 			if (dup2(newstderr, STDERR_FILENO) == -1) {
 				fprintf(stderr, "Could not redirect stderr\n");
 				assert(0);

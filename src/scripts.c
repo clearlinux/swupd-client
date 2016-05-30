@@ -126,7 +126,7 @@ void run_preupdate_scripts(struct manifest *manifest)
 	char *script;
 
 	string_or_die(&script, "/usr/bin/clr_pre_update.sh");
-	char *const scriptcmd = { script, NULL };
+	char *const scriptcmd[] = { script, NULL };
 
 	if (stat(script, &sb) == -1) {
 		free(script);

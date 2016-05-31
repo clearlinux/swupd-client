@@ -619,7 +619,7 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 		    (file->is_rename && file_has_different_hash_in_older_manifest(current, file)) ||
 		    !file->is_tracked) {
 			/* check and if needed mark as do_not_update */
-			ignore(file);
+			(void)ignore(file);
 			/* check if we need to run scripts/update the bootloader/etc */
 			apply_heuristics(file);
 

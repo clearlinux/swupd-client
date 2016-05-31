@@ -370,7 +370,6 @@ void swupd_curl_test_resume(void)
 #define RESUME_BYTE_RANGE 2
 
 	CURLcode curl_ret;
-	char *version_string = NULL;
 	char *url = NULL;
 
 	if (!curl) {
@@ -378,8 +377,10 @@ void swupd_curl_test_resume(void)
 	}
 
 	curl_easy_reset(curl);
-	version_string = malloc(LINE_MAX);
-	if (version_string == NULL) {
+
+	struct version_container tmp_version = { 0 };
+	tmp_version.version = calloc(LINE_MAX, 1);
+	if (tmp_version.version == NULL) {
 		abort();
 	}
 
@@ -394,7 +395,7 @@ void swupd_curl_test_resume(void)
 	if (curl_ret != CURLE_OK) {
 		goto exit;
 	}
-	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)version_string);
+	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&tmp_version);
 	if (curl_ret != CURLE_OK) {
 		goto exit;
 	}
@@ -415,7 +416,7 @@ void swupd_curl_test_resume(void)
 		resume_download_enabled = false;
 	}
 exit:
-	free(version_string);
+	free(tmp_version.version);
 	free(url);
 
 	return;

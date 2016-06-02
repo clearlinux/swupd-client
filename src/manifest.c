@@ -606,6 +606,7 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 {
 	struct list *output = NULL;
 	struct list *list;
+	char *fullname = NULL;
 
 	update_count = 0;
 	update_skip = 0;
@@ -614,6 +615,17 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 		struct file *file;
 		file = list->data;
 		list = list->next;
+
+		/* Skip files that aren't updated */
+		fullname = mk_full_filename(path_prefix, file->filename);
+		if (fullname == NULL) {
+			abort();
+		}
+		if (verify_file(file, fullname)) {
+			free(fullname);
+			continue;
+		}
+		free(fullname);
 
 		if ((file->last_change > current->version) ||
 		    (file->is_rename && file_has_different_hash_in_older_manifest(current, file)) ||

@@ -42,7 +42,7 @@ static int download_pack(int oldversion, int newversion, char *module)
 	FILE *tarfile = NULL;
 	char *param = NULL;
 	char *url = NULL;
-	int err = -1, stderrfd;
+	int err = -1;
 	char *filename;
 	struct stat stat;
 
@@ -80,14 +80,8 @@ static int download_pack(int oldversion, int newversion, char *module)
 	printf("Extracting pack.\n");
 	string_or_die(&param, "%s/pack-%s-from-%i-to-%i.tar", state_dir, module, oldversion, newversion);
 	char *const tarcmd[] = { TAR_COMMAND, "-C", state_dir, TAR_PERM_ATTR_ARGS_STRLIST, "-xf", param, NULL };
-	stderrfd = open("/dev/null", O_WRONLY);
-	if (stderrfd == -1) {
-		fprintf(stderr, "Failed to open /dev/null\n");
-		assert(0);
-	}
-	err = system_argv_fd(tarcmd, -1, -1, stderrfd);
+	err = system_argv_fd(tarcmd, -1, -1, -2);
 	free(param);
-	close(stderrfd);
 	unlink(filename);
 	/* make a zero sized file to prevent redownload */
 	tarfile = fopen(filename, "w");

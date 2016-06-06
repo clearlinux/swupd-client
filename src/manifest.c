@@ -498,7 +498,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	char *url;
 	char *filename;
 	char *dir;
-	int ret = 0, stderrfd = -1;
+	int ret = 0;
 	char *param1, *param2;
 
 	*manifest = NULL;
@@ -541,15 +541,10 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	string_or_die(&param1, "%s/%i",  state_dir, version);
 	string_or_die(&param2, "%s/%i/Manifest.%s.tar", state_dir, version, component);
 	char *const tarcmd[] = { TAR_COMMAND, "-C", param1, "-xf", param2, NULL };
-	stderrfd = open("/dev/null", O_WRONLY);
-	if (stderrfd == -1) {
-		fprintf(stderr, "Failed to open /dev/null\n");
-		assert(0);
-	}
-	ret = system_argv_fd(tarcmd, -1, -1, stderrfd);
+	/* this is is historically a point of odd errors */
+	ret = system_argv_fd(tarcmd, -1, -1, -2);
 	free(param1);
 	free(param2);
-	close(stderrfd);
 	if (ret != 0) {
 		goto out;
 	}

@@ -37,14 +37,14 @@ static void update_kernel(void)
 	if (strcmp("/", path_prefix) == 0) {
 		char *const kernel_update_cmd[] = { "/usr/bin/kernel_updater.sh", NULL } ;
 
-		system_argv(kernel_update_cmd);
+		(void)system_argv(kernel_update_cmd);
 	} else {
 		char *pathupdater;
 
 		string_or_die(&pathupdater, "%s/usr/bin/kernel_updater.sh", path_prefix);
 		char *const kernel_update_cmd[] = { pathupdater, "--path", path_prefix,  NULL } ;
 
-		system_argv(kernel_update_cmd);
+		(void)system_argv(kernel_update_cmd);
 		free(pathupdater);
 	}
 }
@@ -54,28 +54,28 @@ static void update_bootloader(void)
 	if (strcmp("/", path_prefix) == 0) {
 		char *const bootloader_update_cmd[] = { "/usr/bin/gummiboot_updaters.sh", NULL };
 
-		system_argv(bootloader_update_cmd);
+		(void)system_argv(bootloader_update_cmd);
 	} else {
 		char *pathupdater;
 
 		string_or_die(&pathupdater, "%s/usr/bin/gummiboot_updaters.sh", path_prefix);
 		char *const bootloader_update_cmd[] = { pathupdater, "--path", path_prefix, NULL };
 
-		system_argv(bootloader_update_cmd);
+		(void)system_argv(bootloader_update_cmd);
 		free(pathupdater);
 	}
 
 	if (strcmp("/", path_prefix) == 0) {
 		char *const bootloader_update_cmd[] = { "/usr/bin/systemdboot_updater.sh", NULL };
 
-		system_argv(bootloader_update_cmd);
+		(void)system_argv(bootloader_update_cmd);
 	} else {
 		char *pathupdater;
 
 		string_or_die(&pathupdater, "%s/usr/bin/systemdboot_updater.sh", path_prefix);
 		char *const bootloader_update_cmd[] = { pathupdater, "--path", path_prefix, NULL };
 
-		system_argv(bootloader_update_cmd);
+		(void)system_argv(bootloader_update_cmd);
 		free(pathupdater);
 	}
 }
@@ -85,8 +85,8 @@ static void update_triggers(void)
 	char *const reloadcmd[] = { "/usr/bin/systemctl", "daemon-reload", NULL };
 	char *const restartcmd[] = { "/usr/bin/systemctl", "restart", "update-triggers.target", NULL };
 
-	system_argv(reloadcmd);
-	system_argv(restartcmd);
+	(void)system_argv(reloadcmd);
+	(void)system_argv(restartcmd);
 }
 
 void run_scripts(void)
@@ -143,7 +143,7 @@ void run_preupdate_scripts(struct manifest *manifest)
 
 		/* Check that system file matches file in manifest */
 		if (verify_file(file, script)) {
-			system_argv(scriptcmd);
+			(void)system_argv(scriptcmd);
 			break;
 		}
 	}

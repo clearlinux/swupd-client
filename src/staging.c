@@ -74,7 +74,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 	char *targetpath = NULL;
 	char *rename_target = NULL;
 	char *rename_tmpdir = NULL;
-	int ret, stderrfd;
+	int ret;
 	struct stat s;
 
 	tmp = strdup(file->filename);
@@ -151,15 +151,9 @@ int do_staging(struct file *file, struct manifest *MoM)
 		string_or_die(&param2, "%s%s", path_prefix, rel_dir);
 		char *const tarcfcmd[] = { TAR_COMMAND, "-C", rename_tmpdir, TAR_PERM_ATTR_ARGS_STRLIST, "-cf", "-", param1, NULL };
 		char *const tarxfcmd[] = { TAR_COMMAND, "-C", param2, TAR_PERM_ATTR_ARGS_STRLIST, "-xf", "-", NULL };
-		stderrfd = open("/dev/null", O_WRONLY);
-		if (stderrfd == -1) {
-			fprintf(stderr, "Failed to open /dev/null\n");
-			assert(0);
-		}
-		ret = system_argv_pipe(tarcfcmd, -1, stderrfd, tarxfcmd, -1, stderrfd);
+		ret = system_argv_pipe(tarcfcmd, -1, -2, tarxfcmd, -1, -2);
 		free(param1);
 		free(param2);
-		close(stderrfd);
 
 		if (rename(rename_target, original)) {
 			ret = -errno;
@@ -196,16 +190,10 @@ int do_staging(struct file *file, struct manifest *MoM)
 			string_or_die(&param3, "%s%s", path_prefix, rel_dir);
 			char *const tarcfcmd[] = { TAR_COMMAND, "-C", param1, TAR_PERM_ATTR_ARGS_STRLIST, "-cf", "-", param2, NULL };
 			char *const tarxfcmd[] = { TAR_COMMAND, "-C", param3, TAR_PERM_ATTR_ARGS_STRLIST, "-xf", "-", NULL };
-			stderrfd = open("/dev/null", O_WRONLY);
-			if (stderrfd == -1) {
-				fprintf(stderr, "Failed to open /dev/null\n");
-				assert(0);
-			}
-			ret = system_argv_pipe(tarcfcmd, -1, stderrfd, tarxfcmd, -1, stderrfd);
+			ret = system_argv_pipe(tarcfcmd, -1, -2, tarxfcmd, -1, -2);
 			free(param1);
 			free(param2);
 			free(param3);
-			close(stderrfd);
 			ret = rename(rename_target, original);
 			if (ret) {
 				ret = -errno;

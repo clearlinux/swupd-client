@@ -886,7 +886,7 @@ void concat_str_array(char **output, char *const argv[])
 
 	*output = malloc(size + 1);
 	if (!*output) {
-		fprintf(stderr, "Failed to allocate %i bytes", size);
+		fprintf(stderr, "Failed to allocate %i bytes\n", size);
 		assert(0);
 	}
 	strcpy(*output, "");
@@ -938,6 +938,11 @@ int system_argv(char *const argv[])
 	return status;
 }
 
+/* This function runs a command given in argv[] and redirects all file descriptors
+ * whose value is greater equal to 0. To avoid file descriptor redirection a negative
+ * value must be passed as argument. Note that there is an special case for stdout and
+ * stderr: if a value of "-2" is given, they will be redirected to "/dev/null" file.
+ */
 int system_argv_fd(char *const argv[], int newstdin, int newstdout, int newstderr)
 {
 	int child_exit_status;
@@ -947,6 +952,14 @@ int system_argv_fd(char *const argv[], int newstdin, int newstdout, int newstder
 	pid = fork();
 
 	if (pid == 0) { /* child */
+		if (newstdout == -2) {
+			/* If next call fails, error will be consider non-fatal and will be ignored */
+			newstdout = open("/dev/null", O_WRONLY);
+		}
+		if (newstderr == -2) {
+			/* If next call fails, error will be consider non-fatal and will be ignored */
+			newstderr = open("/dev/null", O_WRONLY);
+		}
 		if (newstdin >= 0 && newstdin != STDIN_FILENO) {
 			if (dup2(newstdin, STDIN_FILENO) == -1) {
 				fprintf(stderr, "Could not redirect stdin\n");
@@ -973,7 +986,7 @@ int system_argv_fd(char *const argv[], int newstdin, int newstdout, int newstder
 		/* Next line must not be reached */
 		assert(0);
 	} else if (pid < 0) {
-	    fprintf(stderr, "Failed to fork a child process\n");
+		fprintf(stderr, "Failed to fork a child process\n");
 		assert(0);
 	} else {
 		pid_t ws = waitpid(pid, &child_exit_status, 0);
@@ -1002,6 +1015,13 @@ int system_argv_fd(char *const argv[], int newstdin, int newstdout, int newstder
 	return status;
 }
 
+/* This function runs two commands given in argvp1[] and argvp2[]
+ * The stdout of argvp1 will be redirected to stdin of argvp2.
+ * A redirection for other file descriptors will be done if the value passed is greater equal to 0.
+ * To avoid file descriptor redirection a negative value must be passed as argument.
+ * Note that there is an special case for stderrp1, stdoutp2, and stderrp2:
+ * if a value of "-2" is given, they will be redirected to "/dev/null" file.
+ */
 int system_argv_pipe(char *const argvp1[], int stdinp1, int stderrp1,
 					 char *const argvp2[], int stdoutp2, int stderrp2)
 {

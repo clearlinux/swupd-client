@@ -16,7 +16,7 @@ setup() {
   sudo chmod 755 "$DIR/target-dir/usr"
   sudo chown root:root "$DIR/web-dir/10/files/$f1"
   sudo chown root:root "$DIR/web-dir/100/files/$f2"
-  tar -C "$DIR/web-dir/10/files" -cf "$DIR/web-dir/10/files/$f1.tar" $f1 --exclude=$f1/*
+  tar -C "$DIR/web-dir/10/files" -cf "$DIR/web-dir/10/files/$f1.tar" --exclude=$f1/* $f1
   tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$f2.tar" $f2
 }
 

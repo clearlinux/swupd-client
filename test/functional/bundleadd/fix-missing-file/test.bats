@@ -10,7 +10,7 @@ setup() {
   tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
   tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.test-bundle.tar" Manifest.test-bundle Manifest.test-bundle.signed
   sudo chown root:root "$DIR/web-dir/10/files/$t1_hash"
-  tar -C "$DIR/web-dir/10/files" -cf "$DIR/web-dir/10/files/$t1_hash.tar" $t1_hash --exclude=$t1_hash/*
+  tar -C "$DIR/web-dir/10/files" -cf "$DIR/web-dir/10/files/$t1_hash.tar" --exclude=$t1_hash/* $t1_hash
 }
 
 teardown() {

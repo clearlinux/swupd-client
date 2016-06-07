@@ -12,7 +12,7 @@ setup() {
   tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.test-bundle.tar" Manifest.test-bundle Manifest.test-bundle.signed
   sudo chown root:root "$DIR/web-dir/10/files/$t1_hash"
   sudo chown root:root "$DIR/web-dir/10/staged/$t2_hash"
-  tar -C "$DIR/web-dir/10/files" -cf "$DIR/web-dir/10/files/$t1_hash.tar" $t1_hash --exclude=$t1_hash/*
+  tar -C "$DIR/web-dir/10/files" -cf "$DIR/web-dir/10/files/$t1_hash.tar" --exclude=$t1_hash/* $t1_hash
   tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/pack-test-bundle-from-0.tar" staged/$t2_hash
   sudo chown root:root "$DIR/target-dir/usr"
   sudo chmod 755 "$DIR/target-dir/usr"

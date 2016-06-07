@@ -34,7 +34,7 @@ setup() {
   sudo chown root:root "$DIR/web-dir/100/files/$f6"
   sudo chown root:root "$DIR/web-dir/100/files/$f7"
   sudo chown root:root "$DIR/web-dir/100/files/$f8"
-  tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$f1.tar" $f1 --exclude=$f1/*
+  tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$f1.tar" --exclude=$f1/* $f1
   tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$f2.tar" $f2
   tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$f3.tar" $f3
   tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$f4.tar" $f4

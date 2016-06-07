@@ -11,7 +11,7 @@ setup() {
   tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
   tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
   sudo chown root:root "$DIR/web-dir/100/files/$targetfile"
-  tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$targetfile.tar" $targetfile --exclude=$targetfile/*
+  tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$targetfile.tar" --exclude=$targetfile/* $targetfile
 }
 
 teardown() {

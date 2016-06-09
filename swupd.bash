@@ -47,7 +47,7 @@ _swupd()
   index=COMP_CWORD-1
   while [[ " swupd $mainsubcommands " != *" $prev "* ]]; do
     ((index--))
-    prev="${COMP_WORDS[$index]}"
+    prev=`basename "${COMP_WORDS[$index]}"`
   done
   #Now need to calculate the index of the subcommand in order to
   #retreive options

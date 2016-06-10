@@ -104,12 +104,12 @@ static int file_sort_version(const void *a, const void *b)
 	return strcmp(A->filename, B->filename);
 }
 
-static int file_found_in_older_manifest(struct manifest *from_manifest, struct file *searched_file)
+static int file_found_in_manifest(struct manifest *manifest, struct file *searched_file)
 {
 	struct list *list;
 	struct file *file;
 
-	list = list_head(from_manifest->files);
+	list = list_head(manifest->files);
 	while (list) {
 		file = list->data;
 		list = list->next;
@@ -125,12 +125,12 @@ static int file_found_in_older_manifest(struct manifest *from_manifest, struct f
 	return 0;
 }
 
-static int file_has_different_hash_in_older_manifest(struct manifest *from_manifest, struct file *searched_file)
+static int file_has_different_hash_in_manifest(struct manifest *manifest, struct file *searched_file)
 {
 	struct list *list;
 	struct file *file;
 
-	list = list_head(from_manifest->files);
+	list = list_head(manifest->files);
 	while (list) {
 		file = list->data;
 		list = list->next;
@@ -628,7 +628,7 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 		free(fullname);
 
 		if ((file->last_change > current->version) ||
-		    (file->is_rename && file_has_different_hash_in_older_manifest(current, file)) ||
+		    (file->is_rename && file_has_different_hash_in_manifest(current, file)) ||
 		    !file->is_tracked) {
 			/* check and if needed mark as do_not_update */
 			(void)ignore(file);
@@ -1031,7 +1031,7 @@ void link_renames(struct list *newfiles, struct manifest *from_manifest)
 			if (!file2->is_deleted) {
 				continue;
 			}
-			if (!file_found_in_older_manifest(from_manifest, file2)) {
+			if (!file_found_in_manifest(from_manifest, file2)) {
 				continue;
 			}
 			if (hash_equal(file2->hash, file1->hash)) {

@@ -139,7 +139,7 @@ static int file_has_different_hash_in_older_manifest(struct manifest *from_manif
 			continue;
 		}
 		if (!strcmp(file->filename, searched_file->filename) &&
-		    hash_equal(file->hash, searched_file->hash)) {
+		    !hash_equal(file->hash, searched_file->hash)) {
 			return 1;
 		}
 	}

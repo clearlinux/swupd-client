@@ -29,7 +29,11 @@ AS_IF([test "x$enable_bzip2" != "xno" ],
 	 AC_CHECK_LIB([bz2], [BZ2_bzBuffToBuffCompress], [], [AC_MSG_ERROR([the libbz2 library is missing])])],
   [AC_DEFINE(SWUPD_WITHOUT_BZIP2,1,[Do not use bzip2 compression])]
 )
-
+AC_ARG_ENABLE(
+  [signature-verification],
+  [AS_HELP_STRING([--enable-signature-verification], [Enable signature check (disabled by default)])],
+  [AC_DEFINE([SIGNATURES], [], [Enable signature check as default])]
+)
 AC_ARG_ENABLE(
   [tests],
   [AS_HELP_STRING([--disable-tests], [Do not enable unit or functional test framework (enabled by default)])]
@@ -83,7 +87,7 @@ AS_IF([test "$enable_tests" != "no"], [
 AM_CONDITIONAL([ENABLE_TESTS], [test "$enable_tests" != "no"])
 
 PKG_CHECK_MODULES([curl], [libcurl])
-PKG_CHECK_MODULES([openssl], [libcrypto >= 0.9.8])
+PKG_CHECK_MODULES([openssl], [libcrypto >= 1.0.2])
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_PROGS(TAR, tar)
 

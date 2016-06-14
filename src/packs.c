@@ -66,13 +66,6 @@ static int download_pack(int oldversion, int newversion, char *module)
 		return err;
 	}
 
-	if (!signature_download_and_verify(url, filename)) {
-		free(url);
-		unlink(filename);
-		free(filename);
-		return -1;
-	}
-
 	free(url);
 
 	printf("Extracting pack.\n");

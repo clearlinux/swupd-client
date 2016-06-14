@@ -242,7 +242,7 @@ int main_update()
 	printf("Update started.\n");
 	read_subscriptions_alt();
 
-	if (!signature_initialize(UPDATE_CA_CERTS_PATH "/" SIGNATURE_CA_CERT)) {
+	if (!initialize_signature()) {
 		goto clean_curl;
 	}
 
@@ -396,7 +396,7 @@ clean_exit:
 	free_manifest(server_manifest);
 
 clean_curl:
-	signature_terminate();
+	terminate_signature();
 	swupd_curl_cleanup();
 	free_subscriptions();
 	free_globals();

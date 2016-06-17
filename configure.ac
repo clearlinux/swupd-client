@@ -98,27 +98,62 @@ AH_TEMPLATE([SWUPD_WITH_BINDMNTS],[cope with bind mounts over rootfs])
 AH_TEMPLATE([SWUPD_WITH_SELINUX],[handle selinux attributes])
 ## (3) variant extra options
 AH_TEMPLATE([MOUNT_POINT],[The mount point])
-AH_TEMPLATE([STATE_DIR],[The state directory for swupd content])
-AH_TEMPLATE([LOG_DIR],[Directory for swupd log files])
-AH_TEMPLATE([LOCK_DIR],[Directory for lock file])
-AH_TEMPLATE([BUNDLES_DIR],[Directory to use for bundles])
-AH_TEMPLATE([UPDATE_CA_CERTS_PATH],[Location of CA certificates])
-AH_TEMPLATE([SIGNATURE_CA_CERT],[CA certificate to use])
-AH_TEMPLATE([MOTD_FILE],[motd file path])
 
 if test "$enable_linux_rootfs_build" = "yes"; then
 	AC_DEFINE([SWUPD_LINUX_ROOTFS],1)
 	AC_DEFINE([MOUNT_POINT],["/"])
-	AC_DEFINE([STATE_DIR],["/var/lib/swupd"])
-	AC_DEFINE([LOG_DIR],["/var/log/swupd"])
-	AC_DEFINE([LOCK_DIR],["/run/lock"])
-	AC_DEFINE([BUNDLES_DIR],["/usr/share/clear/bundles"])
-	AC_DEFINE([UPDATE_CA_CERTS_PATH],["/usr/share/clear/update-ca"])
-	AC_DEFINE([SIGNATURE_CA_CERT],["test-do-not-ship-R0-0.pem"])
-	AC_DEFINE([MOTD_FILE],["/usr/lib/motd.d/001-new-release"])
 else
 	AC_MSG_ERROR([Unknown build variant])
 fi
+
+AC_ARG_WITH(statedir,
+AS_HELP_STRING([--with-statedir=DIR],
+    [The state directory for swupd content]),
+[STATEDIR=$withval],
+[STATEDIR="/var/lib/swupd"])
+AC_DEFINE_UNQUOTED([STATE_DIR], ["$STATEDIR"])
+
+AC_ARG_WITH(logdir,
+AS_HELP_STRING([--with-logdir=DIR],
+    [Directory for swupd log files]),
+[LOGDIR=$withval],
+[LOGDIR="/var/log/swupd"])
+AC_DEFINE_UNQUOTED([LOG_DIR], ["$LOGDIR"])
+
+AC_ARG_WITH(lockdir,
+AS_HELP_STRING([--with-lockdir=DIR],
+    [Directory for lock file]),
+[LOCKDIR=$withval],
+[LOCKDIR="/run/lock"])
+AC_DEFINE_UNQUOTED([LOCK_DIR], ["$LOCKDIR"])
+
+AC_ARG_WITH(bundlesdir,
+AS_HELP_STRING([--with-bundlesdir=DIR],
+    [Directory to use for bundles]),
+[BUNDLESDIR=$withval],
+[BUNDLESDIR="/usr/share/swupd/bundles"])
+AC_DEFINE_UNQUOTED([BUNDLES_DIR], ["$BUNDLESDIR"])
+
+AC_ARG_WITH(ca-certs-path,
+AS_HELP_STRING([--with-ca-certs-path=PATH],
+    [Location of CA certificates]),
+[CERTSPATH=$withval],
+[CERTSPATH="/usr/share/swupd/update-ca"])
+AC_DEFINE_UNQUOTED([UPDATE_CA_CERTS_PATH], ["$CERTSPATH"])
+
+AC_ARG_WITH(signature-cert,
+AS_HELP_STRING([--with-signature-cert=CERT],
+    [CA certificate to use]),
+[SIGCERT=$withval],
+[SIGCERT="test-do-not-ship-R0-0.pem"])
+AC_DEFINE_UNQUOTED([SIGNATURE_CA_CERT], ["$SIGCERT"])
+
+AC_ARG_WITH(motdfile,
+AS_HELP_STRING([--with-motdfile=FILE],
+    [motd file path]),
+[MOTDFILE=$withval],
+[MOTDFILE="/usr/lib/motd.d/001-new-release"])
+AC_DEFINE_UNQUOTED([MOTD_FILE], ["$MOTDFILE"])
 
 AC_CONFIG_FILES([Makefile data/check-update.service data/check-update.timer])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])

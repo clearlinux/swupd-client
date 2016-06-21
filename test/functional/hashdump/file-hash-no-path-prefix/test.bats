@@ -3,11 +3,11 @@
 load "../../swupdlib"
 
 setup() {
-  sudo chown root:root "$DIR/target-dir/test-hash"
+  chown_root "$DIR/target-dir/test-hash"
 }
 
 teardown() {
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/target-dir/test-hash"
+  revert_chown_root "$DIR/target-dir/test-hash"
 }
 
 @test "hashdump with prefix" {

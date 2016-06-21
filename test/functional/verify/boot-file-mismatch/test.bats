@@ -4,16 +4,14 @@ load "../../swupdlib"
 
 setup() {
   clean_test_dir
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
-  sudo chown root:root "$DIR/target-dir/usr/lib/kernel/testfile"
+  create_manifest_tar 10 MoM
+  create_manifest_tar 10 os-core
+  chown_root "$DIR/target-dir/usr/lib/kernel/testfile"
 }
 
 teardown() {
-  pushd "$DIR/web-dir/10"
-  rm *.tar
-  popd
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/target-dir/usr/lib/kernel/testfile"
+  clean_tars 10
+  revert_chown_root "$DIR/target-dir/usr/lib/kernel/testfile"
 }
 
 @test "verify check incorrect boot file" {

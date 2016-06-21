@@ -6,21 +6,16 @@ t1_hash="e6d85023c5e619eb43d5cfbfdbdec784afef5a82ffa54e8c93bda3e0883360a3"
 
 setup() {
   clean_test_dir
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.test-bundle.tar" Manifest.test-bundle Manifest.test-bundle.signed
-  sudo chown root:root "$DIR/web-dir/10/files/$t1_hash"
-  tar -C "$DIR/web-dir/10/files" -cf "$DIR/web-dir/10/files/$t1_hash.tar" --exclude=$t1_hash/* $t1_hash
+  create_manifest_tar 10 MoM
+  create_manifest_tar 10 os-core
+  create_manifest_tar 10 test-bundle
+  create_fullfile_tar 10 $t1_hash
 }
 
 teardown() {
-  pushd "$DIR/web-dir/10"
-  rm *.tar
-  popd
-  pushd "$DIR/web-dir/10/files"
-  rm *.tar
-  popd
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/10/files/$t1_hash"
+  clean_tars 10
+  clean_tars 10 files
+  revert_chown_root "$DIR/web-dir/10/files/$t1_hash"
   sudo rm "$DIR/target-dir/foo"
 }
 

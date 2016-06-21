@@ -6,25 +6,18 @@ targetfile=e6d85023c5e619eb43d5cfbfdbdec784afef5a82ffa54e8c93bda3e0883360a3
 
 setup() {
   clean_test_dir
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
-  tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
-  sudo chown root:root "$DIR/web-dir/100/files/$targetfile"
-  tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$targetfile.tar" $targetfile
+  create_manifest_tar 10 MoM
+  create_manifest_tar 10 os-core
+  create_manifest_tar 100 MoM
+  create_manifest_tar 100 os-core
+  create_fullfile_tar 100 $targetfile
 }
 
 teardown() {
-  pushd "$DIR/web-dir/10"
-  rm *.tar
-  popd
-  pushd "$DIR/web-dir/100"
-  rm *.tar
-  popd
-  pushd "$DIR/web-dir/100/files"
-  rm *.tar
-  popd
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/100/files/$targetfile"
+  clean_tars 10
+  clean_tars 100
+  clean_tars 100 files
+  revert_chown_root "$DIR/web-dir/100/files/$targetfile"
   sudo rm "$DIR/target-dir/usr/lib/kernel/testfile"
 }
 

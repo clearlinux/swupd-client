@@ -8,38 +8,27 @@ f3=a96e0b959874854750e8e08372e62c4d1821c5e0106694365396d02c363ada50
 
 setup() {
   clean_test_dir
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.test-bundle1.tar" Manifest.test-bundle1 Manifest.test-bundle1.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.test-bundle2.tar" Manifest.test-bundle2 Manifest.test-bundle2.signed
-  sudo chown root:root "$DIR/web-dir/10/files/$f1"
-  tar -C "$DIR/web-dir/10/files" -cf "$DIR/web-dir/10/files/$f1.tar" $f1
+  create_manifest_tar 10 MoM
+  create_manifest_tar 10 os-core
+  create_manifest_tar 10 test-bundle1
+  create_manifest_tar 10 test-bundle2
+  create_fullfile_tar 10 $f1
 
-  tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
-  tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.test-bundle1.tar" Manifest.test-bundle1 Manifest.test-bundle1.signed
-  sudo chown root:root "$DIR/web-dir/100/files/$f2"
-  sudo chown root:root "$DIR/web-dir/100/files/$f3"
-  tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$f2.tar" $f2
-  tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$f3.tar" $f3
+  create_manifest_tar 100 MoM
+  create_manifest_tar 100 os-core
+  create_manifest_tar 100 test-bundle1
+  create_fullfile_tar 100 $f2
+  create_fullfile_tar 100 $f3
 }
 
 teardown() {
-  pushd "$DIR/web-dir/10"
-  rm *.tar
-  popd
-  pushd "$DIR/web-dir/10/files"
-  rm *.tar
-  popd
-  pushd "$DIR/web-dir/100"
-  rm *.tar
-  popd
-  pushd "$DIR/web-dir/100/files"
-  rm *.tar
-  popd
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/10/files/$f1"
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/100/files/$f2"
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/100/files/$f3"
+  clean_tars 10
+  clean_tars 10 files
+  clean_tars 100
+  clean_tars files
+  revert_chown_root "$DIR/web-dir/10/files/$f1"
+  revert_chown_root "$DIR/web-dir/100/files/$f2"
+  revert_chown_root "$DIR/web-dir/100/files/$f3"
   sudo rm "$DIR/target-dir/os-core"
   sudo rm "$DIR/target-dir/test-bundle1"
   sudo rm "$DIR/target-dir/test-bundle2"

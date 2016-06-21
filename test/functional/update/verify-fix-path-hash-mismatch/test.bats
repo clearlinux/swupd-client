@@ -8,36 +8,25 @@ f3=520f83440d3dddc25ad09ca858b9c669245f82d3181a45cdfe793aac9dd1fb15
 
 setup() {
   clean_test_dir
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.test-bundle.tar" Manifest.test-bundle Manifest.test-bundle.signed
-  tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.test-bundle.tar" Manifest.test-bundle Manifest.test-bundle.signed
-  sudo chown root:root "$DIR/web-dir/10/files/$f1"
-  sudo chown root:root "$DIR/web-dir/10/files/$f2"
-  sudo chown root:root "$DIR/web-dir/100/files/$f3"
-  tar -C "$DIR/web-dir/10/files" -cf "$DIR/web-dir/10/files/$f1.tar" --exclude=$f1/* $f1
-  tar -C "$DIR/web-dir/10/files" -cf "$DIR/web-dir/10/files/$f2.tar" --exclude=$f2/* $f2
-  tar -C "$DIR/web-dir/100/files" -cf "$DIR/web-dir/100/files/$f3.tar" $f3
+  create_manifest_tar 10 MoM
+  create_manifest_tar 10 os-core
+  create_manifest_tar 10 test-bundle
+  create_manifest_tar 100 MoM
+  create_manifest_tar 100 test-bundle
+  create_fullfile_tar 10 $f1
+  create_fullfile_tar 10 $f2
+  create_fullfile_tar 100 $f3
 }
 
 teardown() {
-  pushd "$DIR/web-dir/10"
-  rm *.tar
-  popd
-  pushd "$DIR/web-dir/100"
-  rm *.tar
-  popd
-  pushd "$DIR/web-dir/10/files"
-  rm *.tar
-  popd
-  pushd "$DIR/web-dir/100/files"
-  rm *.tar
-  popd
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/10/files/$f1"
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/10/files/$f2"
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/100/files/$f3"
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/target-dir/usr"
+  clean_tars 10
+  clean_tars 100
+  clean_tars 10 files
+  clean_tars 100 files
+  revert_chown_root "$DIR/web-dir/10/files/$f1"
+  revert_chown_root "$DIR/web-dir/10/files/$f2"
+  revert_chown_root "$DIR/web-dir/100/files/$f3"
+  revert_chown_root "$DIR/target-dir/usr"
   sudo rm "$DIR/target-dir/usr/bin/foo"
   sudo rmdir "$DIR/target-dir/usr/bin"
 }

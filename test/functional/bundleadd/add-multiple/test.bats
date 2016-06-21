@@ -7,22 +7,23 @@ t2_hash="e6d85023c5e619eb43d5cfbfdbdec784afef5a82ffa54e8c93bda3e0883360a3"
 
 setup() {
   clean_test_dir
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.test-bundle1.tar" Manifest.test-bundle1 Manifest.test-bundle1.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.test-bundle2.tar" Manifest.test-bundle2 Manifest.test-bundle2.signed
-  sudo chown root:root "$DIR/web-dir/10/staged/$t1_hash"
-  sudo chown root:root "$DIR/web-dir/10/staged/$t2_hash"
+  create_manifest_tar 10 MoM
+  create_manifest_tar 10 os-core
+  create_manifest_tar 10 test-bundle1
+  create_manifest_tar 10 test-bundle2
+  chown_root "$DIR/web-dir/10/staged/$t1_hash"
+  chown_root "$DIR/web-dir/10/staged/$t2_hash"
   tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/pack-test-bundle1-from-0.tar" --exclude=staged/$t1_hash/* staged/$t1_hash
   tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/pack-test-bundle2-from-0.tar" staged/$t2_hash
 }
 
 teardown() {
-  pushd "$DIR/web-dir/10"
-  rm *.tar
-  popd
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/10/staged/$t1_hash"
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/10/staged/$t2_hash"
+  clean_tars 10
+  revert_chown_root "$DIR/web-dir/10/staged/$t1_hash"
+  revert_chown_root "$DIR/web-dir/10/staged/$t2_hash"
+  revert_chown_root "$DIR/web-dir/10/Manifest.os-core"
+  revert_chown_root "$DIR/web-dir/10/Manifest.test-bundle1"
+  revert_chown_root "$DIR/web-dir/10/Manifest.test-bundle2"
   sudo rmdir "$DIR/target-dir/usr/bin/"
   sudo rm "$DIR/target-dir/usr/foo"
 }

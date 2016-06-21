@@ -6,21 +6,16 @@ targetfile=e6d85023c5e619eb43d5cfbfdbdec784afef5a82ffa54e8c93bda3e0883360a3
 
 setup() {
   clean_test_dir
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
-  sudo chown root:root "$DIR/target-dir/usr/lib/kernel/testfile"
-  sudo chown root:root "$DIR/web-dir/10/files/$targetfile"
-  tar -C "$DIR/web-dir/10/files" -cf "$DIR/web-dir/10/files/$targetfile.tar" $targetfile
+  create_manifest_tar 10 MoM
+  create_manifest_tar 10 os-core
+  chown_root "$DIR/target-dir/usr/lib/kernel/testfile"
+  create_fullfile_tar 10 $targetfile
 }
 
 teardown() {
-  pushd "$DIR/web-dir/10"
-  rm *.tar
-  popd
-  pushd "$DIR/web-dir/10/files"
-  rm *.tar
-  popd
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/10/files/$targetfile"
+  clean_tars 10
+  clean_tars 10 files
+  revert_chown_root "$DIR/web-dir/10/files/$targetfile"
   sudo rm "$DIR/target-dir/usr/lib/kernel/testfile"
   cp "$DIR/web-dir/10/files/$targetfile" "$DIR/target-dir/usr/lib/kernel/testfile"
 }

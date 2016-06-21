@@ -6,17 +6,15 @@ targetfile=24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af
 
 setup() {
   clean_test_dir
-  tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
-  sudo chown root:root "$DIR/web-dir/100/staged/$targetfile"
+  create_manifest_tar 100 MoM
+  create_manifest_tar 100 os-core
+  chown_root "$DIR/web-dir/100/staged/$targetfile"
   tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/pack-os-core-from-0.tar" --exclude=staged/$targetfile/* staged/$targetfile
 }
 
 teardown() {
-  pushd "$DIR/web-dir/100"
-  rm *.tar
-  popd
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/100/staged/$targetfile"
+  clean_tars 100
+  revert_chown_root "$DIR/web-dir/100/staged/$targetfile"
   sudo rmdir "$DIR/target-dir/usr/bin/"
 }
 

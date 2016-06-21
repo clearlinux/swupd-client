@@ -7,15 +7,13 @@ setup() {
   mkdir -p "$DIR/target-dir/usr/share/clear/bundles/"
   touch "$DIR/target-dir/usr/share/clear/bundles/test-bundle"
   touch "$DIR/target-dir/test-file"
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.test-bundle.tar" Manifest.test-bundle Manifest.test-bundle.signed
+  create_manifest_tar 10 MoM
+  create_manifest_tar 10 os-core
+  create_manifest_tar 10 test-bundle
 }
 
 teardown() {
-  pushd "$DIR/web-dir/10"
-  rm *.tar
-  popd
+  clean_tars 10
 }
 
 @test "bundle-remove remove bundle containing a file" {

@@ -6,26 +6,22 @@ deltafile="10-100-9f83d713da9df6cabd2abc9d9061f9b611a207e1e0dd22ed7a071ddb1cc153
 
 setup() {
   clean_test_dir
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
-  tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.MoM.tar" Manifest.MoM Manifest.MoM.signed
-  tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/Manifest.os-core.tar" Manifest.os-core Manifest.os-core.signed
-  sudo chown root:root "$DIR/web-dir/100/delta/$deltafile"
+  create_manifest_tar 10 MoM
+  create_manifest_tar 10 os-core
+  create_manifest_tar 100 MoM
+  create_manifest_tar 100 os-core
+  chown_root "$DIR/web-dir/100/delta/$deltafile"
   cp "$DIR/web-dir/10/staged/0832c0c7fb9d05ac3088a493f430e81044a0fc03f81cba9eb89d3b7816ef3962" "$DIR/target-dir/testfile"
-  sudo chown root:root "$DIR/target-dir/testfile"
+  chown_root "$DIR/target-dir/testfile"
   mkdir -p "$DIR/web-dir/100/staged"
   tar -C "$DIR/web-dir/100" -cf "$DIR/web-dir/100/pack-os-core-from-10.tar" delta/$deltafile staged/
 }
 
 teardown() {
-  pushd "$DIR/web-dir/10"
-  rm *.tar
-  popd
-  pushd "$DIR/web-dir/100"
-  rm *.tar
-  popd
+  clean_tars 10
+  clean_tars 100
   rmdir "$DIR/web-dir/100/staged"
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$DIR/web-dir/100/delta/$deltafile"
+  revert_chown_root "$DIR/web-dir/100/delta/$deltafile"
   sudo rm "$DIR/target-dir/testfile"
 }
 

@@ -532,9 +532,11 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		goto out;
 	}
 
-	if (!signature_download_and_verify(url, filename)) {
-		unlink(filename);
-		goto out;
+	if (signing_enabled) {
+		if (!signature_download_and_verify(url, filename)) {
+			unlink(filename);
+			goto out;
+		}
 	}
 
 	string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",

@@ -651,9 +651,9 @@ int verify_main(int argc, char **argv)
 		printf("Failed to remove prior downloads, carrying on anyway\n");
 	}
 
-	ret = load_manifests(version, version, "MoM", NULL, &official_manifest);
+	official_manifest = load_mom(version);
 
-	if (ret != 0) {
+	if (!official_manifest) {
 		/* This is hit when or if an OS version is specified for --fix which
 		 * is not available, or if there is a server error and a manifest is
 		 * not provided.

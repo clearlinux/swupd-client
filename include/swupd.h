@@ -161,7 +161,8 @@ extern void apply_heuristics(struct file *file);
 
 extern int file_sort_filename(const void *a, const void *b);
 extern int file_sort_filename_reverse(const void *a, const void *b);
-extern int load_manifests(int current, int version, char *component, struct file *file, struct manifest **manifest);
+extern struct manifest *load_mom(int version);
+extern struct manifest *load_manifest(int current, int version, struct file *file, struct manifest *mom);
 extern struct list *create_update_list(struct manifest *current, struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
 extern void link_submanifests(struct manifest *m1, struct manifest *m2);
@@ -224,6 +225,7 @@ extern struct list *consolidate_files(struct list *files);
 extern void debug_write_manifest(struct manifest *manifest, char *filename);
 extern void populate_file_struct(struct file *file, char *filename);
 extern bool verify_file(struct file *file, char *filename);
+extern int verify_bundle_hash(struct manifest *manifest, struct file *bundle);
 extern void unlink_all_staged_content(struct file *file);
 extern void link_renames(struct list *newfiles, struct manifest *from_manifest);
 extern void dump_file_descriptor_leaks(void);

@@ -492,15 +492,19 @@ out:
 }
 
 /* TODO: This should deal with nested manifests better */
-static int retrieve_manifests(int current, int version, char *component, struct file *file, struct manifest **manifest)
+static int retrieve_manifests(int current, int version, char *component, struct file *file)
 {
 	char *url;
 	char *filename;
 	char *dir;
 	int ret = 0;
 	char *tar;
+	struct stat sb;
 
-	*manifest = NULL;
+	string_or_die(&filename, "%s/%i/Manifest.%s.tar", state_dir, version, component);
+	if (stat(filename, &sb) == 0) {
+		return 0;
+	}
 
 	if (!check_network()) {
 		return -ENOSWUPDSERVER;
@@ -513,16 +517,12 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	}
 	free(dir);
 
-	if (current < version) {
+	/* FILE is not set for a MoM, only for bundle manifests */
+	if (file && current < version) {
 		if (try_delta_manifest_download(current, version, component, file) == 0) {
-			*manifest = manifest_from_file(version, component);
-			if (*manifest) {
-				return 0;
-			}
+			return 0;
 		}
 	}
-
-	string_or_die(&filename, "%s/%i/Manifest.%s.tar", state_dir, version, component);
 
 	string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url, version, component);
 
@@ -550,7 +550,6 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		goto out;
 	}
 
-	*manifest = manifest_from_file(version, component);
 out:
 	free(filename);
 	free(url);
@@ -574,29 +573,78 @@ static void set_untracked_manifest_files(struct manifest *manifest)
 	}
 }
 
-//NOTE: file==NULL when component=="MoM", else file->hash is needed
-int load_manifests(int current, int version, char *component, struct file *file, struct manifest **manifest)
+/* Loads the MoM (Manifest of Manifests) for VERSION.
+ *
+ * Implementation note: MoMs are not huge so deltas do not give much benefit,
+ * versus bundle manifests which can be huge and big for deltas. If there was a
+ * MoM delta you would want to validate the input MoM prior to applying a
+ * delta, and then validate the output MoM. All complicated compared to just
+ * getting the whole MoM and verifying it.
+ *
+ * Note that if the manifest fails to download, or if the manifest fails to be
+ * loaded into memory, this function will return NULL.
+ */
+struct manifest *load_mom(int version)
 {
+	struct manifest *manifest = NULL;
 	int ret = 0;
 
-	*manifest = manifest_from_file(version, component);
-
-	if (*manifest == NULL) {
-		ret = retrieve_manifests(current, version, component, file, manifest);
-		if (ret != 0) {
-			ret = EMANIFEST_LOAD;
-		}
+	ret = retrieve_manifests(version, version, "MoM", NULL);
+	if (ret != 0) {
+		printf("Failed to retrieve %d MoM manifest\n", version);
+		return NULL;
 	}
 
-	if (component) {
-		/*
-		 * When component is "MoM" this is a noop due to the MoM not
-		 * having a files list.
-		 */
-		set_untracked_manifest_files(*manifest);
+	manifest = manifest_from_file(version, "MoM");
+
+	if (manifest == NULL) {
+		printf("Failed to load %d MoM manifest\n", version);
+		return NULL;
 	}
 
-	return ret;
+	return manifest;
+}
+
+/* Loads the MANIFEST for bundle associated with FILE at VERSION, referenced by
+ * the given MOM manifest.
+ *
+ * Value ranges and restrictions:
+ *   - CURRENT < VERSION for 'update' subcommand
+ *   - CURRENT == VERSION for other subcommands
+ *
+ * The FILENAME member of FILE contains the name of the bundle. Also, the HASH
+ * member of FILE is needed for delta manifest application. The values of
+ * CURRENT and VERSION are used to determine which delta manifest to apply.
+ *
+ * Note that if the manifest fails to download, or if the manifest fails to be
+ * loaded into memory, this function will return NULL.
+ */
+struct manifest *load_manifest(int current, int version, struct file *file, struct manifest *mom)
+{
+	struct manifest *manifest = NULL;
+	int ret = 0;
+
+	ret = retrieve_manifests(current, version, file->filename, file);
+	if (ret != 0) {
+		printf("Failed to retrieve %d %s manifest\n", version, file->filename);
+		return NULL;
+	}
+
+	ret = verify_bundle_hash(mom, file);
+	if (ret != 0) {
+		return NULL;
+	}
+
+	manifest = manifest_from_file(version, file->filename);
+
+	if (manifest == NULL) {
+		printf("Failed to load %d %s manifest\n", version, file->filename);
+		return NULL;
+	}
+
+	set_untracked_manifest_files(manifest);
+
+	return manifest;
 }
 
 /* Find files which need updated based on deltas in last_change.
@@ -758,7 +806,6 @@ struct list *recurse_manifest(struct manifest *manifest, const char *component)
 	struct file *file;
 	struct manifest *sub;
 	int version1, version2;
-	int err;
 
 	manifest->contentsize = 0;
 	list = manifest->manifests;
@@ -784,8 +831,8 @@ struct list *recurse_manifest(struct manifest *manifest, const char *component)
 			version1 = version2;
 		}
 
-		err = load_manifests(version1, version2, file->filename, file, &sub);
-		if (err) {
+		sub = load_manifest(version1, version2, file, manifest);
+		if (!sub) {
 			list_free_list_and_data(bundles, free_manifest_data);
 			return NULL;
 		}

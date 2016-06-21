@@ -272,8 +272,8 @@ load_current_manifests:
 
 	/* get the from/to MoM manifests */
 	printf("Querying current manifest.\n");
-	ret = load_manifests(current_version, current_version, "MoM", NULL, &current_manifest);
-	if (ret) {
+	current_manifest = load_mom(current_version);
+	if (!current_manifest) {
 		/* TODO: possibly remove this as not getting a "from" manifest is not fatal
 		 * - we just don't apply deltas */
 		if (retries < MAX_TRIES) {
@@ -292,8 +292,8 @@ load_current_manifests:
 load_server_manifests:
 	printf("Querying server manifest.\n");
 
-	ret = load_manifests(current_version, server_version, "MoM", NULL, &server_manifest);
-	if (ret) {
+	server_manifest = load_mom(server_version);
+	if (!server_manifest) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
 			printf("Retry #%d downloading server Manifests\n", retries);

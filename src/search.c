@@ -263,7 +263,7 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 	struct file *file;
 	struct file *subfile;
 	struct manifest *subman = NULL;
-	int i, ret;
+	int i;
 	bool done_with_bundle, done_with_search = false;
 	bool hit = false;
 	long hit_count = 0;
@@ -275,8 +275,8 @@ void do_search(struct manifest *MoM, char search_type, char *search_term)
 		done_with_bundle = false;
 
 		/* Load sub-manifest */
-		ret = load_manifests(file->last_change, file->last_change, file->filename, NULL, &subman);
-		if (ret != 0) {
+		subman = load_manifest(file->last_change, file->last_change, file, MoM);
+		if (!subman) {
 			printf("Failed to load manifest %s\n", file->filename);
 			continue;
 		}
@@ -407,8 +407,8 @@ int download_manifests(struct manifest **MoM)
 
 	swupd_curl_set_current_version(current_version);
 
-	ret = load_manifests(current_version, current_version, "MoM", NULL, MoM);
-	if (ret != 0) {
+	*MoM = load_mom(current_version);
+	if (!(*MoM)) {
 		printf("Cannot load official manifest MoM for version %i\n", current_version);
 		return ret;
 	}
@@ -440,8 +440,8 @@ int download_manifests(struct manifest **MoM)
 			/* Do download */
 			printf(" '%s' manifest...\n", file->filename);
 
-			ret = load_manifests(current_version, file->last_change, file->filename, NULL, &subMan);
-			if (ret != 0) {
+			subMan = load_manifest(current_version, file->last_change, file, *MoM);
+			if (!subMan) {
 				printf("Cannot load official manifest MoM for version %i\n", current_version);
 			} else {
 				did_download = true;

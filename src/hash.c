@@ -252,3 +252,37 @@ bool verify_file(struct file *file, char *filename)
 		return false;
 	}
 }
+
+/* Compares the hash for BUNDLE with that listed in the Manifest.MoM.  If the
+ * hash check fails, for now, we print a warning and return success, but
+ * eventually will switch to being a fatal error and exit early.
+ */
+int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
+{
+	struct list *iter = list_head(manifest->manifests);
+	struct file *current;
+	char *local = NULL;
+	int ret = 0;
+
+	while (iter) {
+		current = iter->data;
+		iter = iter->next;
+
+		if (strcmp(current->filename, bundle->filename) != 0) {
+			continue;
+		}
+
+		string_or_die(&local, "%s/%i/Manifest.%s", state_dir,
+			      current->last_change, current->filename);
+
+		if (!verify_file(bundle, local)) {
+			printf("Warning: hash check failed for Manifest.%s\n",
+			       current->filename);
+			ret = 0;
+		}
+		break;
+	}
+
+	free(local);
+	return ret;
+}

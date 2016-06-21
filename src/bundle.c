@@ -70,8 +70,8 @@ int list_installable_bundles()
 
 	swupd_curl_set_current_version(current_version);
 
-	ret = load_manifests(current_version, current_version, "MoM", NULL, &MoM);
-	if (ret != 0) {
+	MoM = load_mom(current_version);
+	if (!MoM) {
 		v_lockfile(lock_fd);
 		return ret;
 	}
@@ -104,8 +104,8 @@ static int load_bundle_manifest(const char *bundle_name, int version, struct man
 	*submanifest = NULL;
 
 	swupd_curl_set_current_version(version);
-	ret = load_manifests(version, version, "MoM", NULL, &mom);
-	if (ret != 0) {
+	mom = load_mom(version);
+	if (!mom) {
 		ret = EMOM_NOTFOUND;
 		goto out;
 	}
@@ -251,8 +251,8 @@ int remove_bundle(const char *bundle_name)
 
 	swupd_curl_set_current_version(current_version);
 
-	ret = load_manifests(current_version, current_version, "MoM", NULL, &current_mom);
-	if (ret != 0) {
+	current_mom = load_mom(current_version);
+	if (!current_mom) {
 		goto out_free_curl;
 	}
 
@@ -351,8 +351,8 @@ int add_subscriptions(struct list *bundles, int current_version, struct manifest
 		}
 
 	retry_manifest_download:
-		ret = load_manifests(current_version, file->last_change, bundle, file, &manifest);
-		if (ret) {
+		manifest = load_manifest(current_version, file->last_change, file, mom);
+		if (!manifest) {
 			if (retries < MAX_TRIES) {
 				increment_retries(&retries, &timeout);
 				goto retry_manifest_download;
@@ -528,8 +528,8 @@ int install_bundles_frontend(char **bundles)
 
 	swupd_curl_set_current_version(current_version);
 
-	ret = load_manifests(current_version, current_version, "MoM", NULL, &mom);
-	if (ret != 0) {
+	mom = load_mom(current_version);
+	if (!mom) {
 		printf("Cannot load official manifest MoM for version %i\n", current_version);
 		ret = EMOM_NOTFOUND;
 		goto clean_and_exit;

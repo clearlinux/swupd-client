@@ -459,16 +459,9 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 			unlink(deltafile);
 			goto out;
 		}
-
-		if (!signature_download_and_verify(url, deltafile)) {
-			ret = -1;
-			unlink(deltafile);
-			goto out;
-		}
 	}
 
 	/* Now apply the manifest delta */
-
 	string_or_die(&newfile, "%s/%i/Manifest.%s", state_dir, new, component);
 
 	ret = apply_bsdiff_delta(original, newfile, deltafile);
@@ -480,7 +473,7 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 	}
 
 	unlink(deltafile);
-	signature_delete(deltafile);
+//	delete_signature(deltafile);
 
 out:
 	free(original);
@@ -497,8 +490,8 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	char *url;
 	char *filename;
 	char *dir;
-	int ret = 0;
 	char *tar;
+	int ret = 0;
 
 	*manifest = NULL;
 
@@ -532,11 +525,6 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		goto out;
 	}
 
-	if (!signature_download_and_verify(url, filename)) {
-		unlink(filename);
-		goto out;
-	}
-
 	string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",
 		      state_dir, version, state_dir, version, component);
 
@@ -550,8 +538,20 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		goto out;
 	}
 
+	/* Only signing the MoM manifest*/
+	if (strncmp(component, "MoM", 3) == 0) {
+		free(filename);
+		free(url);
+		string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
+		string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);
+		if (verify_signatures && !download_and_verify_signature(url, filename)) {
+			goto out;
+		}
+	}
+
 	*manifest = manifest_from_file(version, component);
 out:
+	delete_signature(filename);
 	free(filename);
 	free(url);
 	return ret;

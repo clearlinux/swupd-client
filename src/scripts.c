@@ -34,45 +34,59 @@
 
 static void update_kernel(void)
 {
-	char *kernel_update_cmd = NULL;
-
 	if (strcmp("/", path_prefix) == 0) {
-		string_or_die(&kernel_update_cmd, "/usr/bin/kernel_updater.sh");
-	} else {
-		string_or_die(&kernel_update_cmd, "%s/usr/bin/kernel_updater.sh --path %s", path_prefix, path_prefix);
-	}
+		char *const kernel_update_cmd[] = { "/usr/bin/kernel_updater.sh", NULL } ;
 
-	system(kernel_update_cmd);
-	free(kernel_update_cmd);
+		(void)system_argv(kernel_update_cmd);
+	} else {
+		char *pathupdater;
+
+		string_or_die(&pathupdater, "%s/usr/bin/kernel_updater.sh", path_prefix);
+		char *const kernel_update_cmd[] = { pathupdater, "--path", path_prefix,  NULL } ;
+
+		(void)system_argv(kernel_update_cmd);
+		free(pathupdater);
+	}
 }
 
 static void update_bootloader(void)
 {
-	char *bootloader_update_cmd = NULL;
-
 	if (strcmp("/", path_prefix) == 0) {
-		string_or_die(&bootloader_update_cmd, "/usr/bin/gummiboot_updaters.sh");
+		char *const bootloader_update_cmd[] = { "/usr/bin/gummiboot_updaters.sh", NULL };
+
+		(void)system_argv(bootloader_update_cmd);
 	} else {
-		string_or_die(&bootloader_update_cmd, "%s/usr/bin/gummiboot_updaters.sh --path %s", path_prefix, path_prefix);
+		char *pathupdater;
+
+		string_or_die(&pathupdater, "%s/usr/bin/gummiboot_updaters.sh", path_prefix);
+		char *const bootloader_update_cmd[] = { pathupdater, "--path", path_prefix, NULL };
+
+		(void)system_argv(bootloader_update_cmd);
+		free(pathupdater);
 	}
 
-	system(bootloader_update_cmd);
-	free(bootloader_update_cmd);
-
 	if (strcmp("/", path_prefix) == 0) {
-		string_or_die(&bootloader_update_cmd, "/usr/bin/systemdboot_updater.sh");
-	} else {
-		string_or_die(&bootloader_update_cmd, "%s/usr/bin/systemdboot_updater.sh --path %s", path_prefix, path_prefix);
-	}
+		char *const bootloader_update_cmd[] = { "/usr/bin/systemdboot_updater.sh", NULL };
 
-	system(bootloader_update_cmd);
-	free(bootloader_update_cmd);
+		(void)system_argv(bootloader_update_cmd);
+	} else {
+		char *pathupdater;
+
+		string_or_die(&pathupdater, "%s/usr/bin/systemdboot_updater.sh", path_prefix);
+		char *const bootloader_update_cmd[] = { pathupdater, "--path", path_prefix, NULL };
+
+		(void)system_argv(bootloader_update_cmd);
+		free(pathupdater);
+	}
 }
 
 static void update_triggers(void)
 {
-	system("/usr/bin/systemctl daemon-reload");
-	system("/usr/bin/systemctl restart update-triggers.target");
+	char *const reloadcmd[] = { "/usr/bin/systemctl", "daemon-reload", NULL };
+	char *const restartcmd[] = { "/usr/bin/systemctl", "restart", "update-triggers.target", NULL };
+
+	(void)system_argv(reloadcmd);
+	(void)system_argv(restartcmd);
 }
 
 void run_scripts(void)
@@ -112,6 +126,7 @@ void run_preupdate_scripts(struct manifest *manifest)
 	char *script;
 
 	string_or_die(&script, "/usr/bin/clr_pre_update.sh");
+	char *const scriptcmd[] = { script, NULL };
 
 	if (stat(script, &sb) == -1) {
 		free(script);
@@ -128,7 +143,7 @@ void run_preupdate_scripts(struct manifest *manifest)
 
 		/* Check that system file matches file in manifest */
 		if (verify_file(file, script)) {
-			system(script);
+			(void)system_argv(scriptcmd);
 			break;
 		}
 	}

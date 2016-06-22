@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "config.h"
 #include "swupd-build-variant.h"
@@ -40,16 +41,14 @@
 static int create_staging_renamedir(char *rename_tmpdir)
 {
 	int ret;
-	char *rmcommand = NULL;
+	char *const rmcommand[] = { "rm", "-fr", rename_tmpdir, NULL };
 
-	string_or_die(&rmcommand, "rm -fr %s", rename_tmpdir);
-	if (!system(rmcommand)) {
+	if (!system_argv(rmcommand)) {
 		/* Not fatal but pretty scary, likely to really fail at the
 		 * next command too. Pass for now as printing may just cause
 		 * confusion */
 		;
 	}
-	free(rmcommand);
 
 	ret = mkdir(rename_tmpdir, S_IRWXU);
 	if (ret == -1 && errno != EEXIST) {
@@ -69,7 +68,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 {
 	char *statfile = NULL, *tmp = NULL, *tmp2 = NULL;
 	char *dir, *base, *rel_dir;
-	char *tarcommand = NULL;
+	char *param1 = NULL, *param2 = NULL, *param3 = NULL;
 	char *original = NULL;
 	char *target = NULL;
 	char *targetpath = NULL;
@@ -148,13 +147,14 @@ int do_staging(struct file *file, struct manifest *MoM)
 			ret = -errno;
 			goto out;
 		}
-		string_or_die(&tarcommand, TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -cf - './%s' 2> /dev/null | " TAR_COMMAND " -C '%s%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-			      rename_tmpdir, base, path_prefix, rel_dir);
-		ret = system(tarcommand);
-		if (WIFEXITED(ret)) {
-			ret = WEXITSTATUS(ret);
-		}
-		free(tarcommand);
+		string_or_die(&param1, "./%s", base);
+		string_or_die(&param2, "%s%s", path_prefix, rel_dir);
+		char *const tarcfcmd[] = { TAR_COMMAND, "-C", rename_tmpdir, TAR_PERM_ATTR_ARGS_STRLIST, "-cf", "-", param1, NULL };
+		char *const tarxfcmd[] = { TAR_COMMAND, "-C", param2, TAR_PERM_ATTR_ARGS_STRLIST, "-xf", "-", NULL };
+		ret = system_argv_pipe(tarcfcmd, -1, -2, tarxfcmd, -1, -2);
+		free(param1);
+		free(param2);
+
 		if (rename(rename_target, original)) {
 			ret = -errno;
 			goto out;
@@ -185,13 +185,15 @@ int do_staging(struct file *file, struct manifest *MoM)
 				ret = -errno;
 				goto out;
 			}
-			string_or_die(&tarcommand, TAR_COMMAND " -C '%s/staged' " TAR_PERM_ATTR_ARGS " -cf - '.update.%s' 2> /dev/null | " TAR_COMMAND " -C '%s%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-				      state_dir, base, path_prefix, rel_dir);
-			ret = system(tarcommand);
-			if (WIFEXITED(ret)) {
-				ret = WEXITSTATUS(ret);
-			}
-			free(tarcommand);
+			string_or_die(&param1, "%s/staged", state_dir);
+			string_or_die(&param2, ".update.%s", base);
+			string_or_die(&param3, "%s%s", path_prefix, rel_dir);
+			char *const tarcfcmd[] = { TAR_COMMAND, "-C", param1, TAR_PERM_ATTR_ARGS_STRLIST, "-cf", "-", param2, NULL };
+			char *const tarxfcmd[] = { TAR_COMMAND, "-C", param3, TAR_PERM_ATTR_ARGS_STRLIST, "-xf", "-", NULL };
+			ret = system_argv_pipe(tarcfcmd, -1, -2, tarxfcmd, -1, -2);
+			free(param1);
+			free(param2);
+			free(param3);
 			ret = rename(rename_target, original);
 			if (ret) {
 				ret = -errno;

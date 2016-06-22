@@ -35,6 +35,8 @@
 #include <sys/statvfs.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <assert.h>
+#include <sys/wait.h>
 
 #include "config.h"
 #include "swupd.h"
@@ -164,16 +166,17 @@ int create_required_dirs(void)
 	}
 
 	if (missing) { // (re)create dirs
-		char *cmd;
+		char *param;
 
 		for (i = 0; i < STATE_DIR_COUNT; i++) {
-			string_or_die(&cmd, "mkdir -p %s/%s", state_dir, dirs[i]);
-			ret = system(cmd);
+			string_or_die(&param, "%s/%s", state_dir, dirs[i]);
+			char *const cmd[] = { "mkdir", "-p", param, NULL };
+			ret = system_argv(cmd);
 			if (ret) {
 				printf("Error: failed to create %s/%s\n", state_dir, dirs[i]);
 				return -1;
 			}
-			free(cmd);
+			free(param);
 
 			string_or_die(&dir, "%s/%s", state_dir, dirs[i]);
 			ret = chmod(dir, S_IRWXU);
@@ -871,4 +874,168 @@ struct list *files_from_bundles(struct list *bundles)
 	}
 
 	return files;
+}
+
+void concat_str_array(char **output, char *const argv[])
+{
+	int size = 0;
+
+	for (int i = 0; argv[i]; i++) {
+		size += strlen(argv[i]) + 1;
+	}
+
+	*output = malloc(size + 1);
+	if (!*output) {
+		fprintf(stderr, "Failed to allocate %i bytes\n", size);
+		assert(0);
+	}
+	strcpy(*output, "");
+	for (int i = 0; argv[i]; i++) {
+		strcat(*output, argv[i]);
+		strcat(*output, " ");
+	}
+}
+
+int system_argv(char *const argv[])
+{
+	int child_exit_status;
+	pid_t pid;
+	int status = -1;
+
+	pid = fork();
+
+	if (pid == 0) { /* child */
+		execvp(*argv, argv);
+		/* Next line must not be reached */
+		assert(0);
+	} else if (pid < 0) {
+		fprintf(stderr, "Failed to fork a child process\n");
+		assert(0);
+	} else {
+		pid_t ws = waitpid(pid, &child_exit_status, 0);
+
+		if (ws == -1) {
+			fprintf(stderr, "Failed to wait for child process\n");
+			assert(0);
+		}
+
+		if (WIFEXITED(child_exit_status)) {
+			status = WEXITSTATUS(child_exit_status);
+		} else {
+			fprintf(stderr, "Child process didn't exit\n");
+			assert(0);
+		}
+
+		if (status != 0) {
+			char *cmdline = NULL;
+
+			concat_str_array(&cmdline, argv);
+			fprintf(stderr, "Failed to run command: %s\n", cmdline);
+			free(cmdline);
+		}
+	}
+
+	return status;
+}
+
+/* This function runs a command given in argv[] and redirects all file descriptors
+ * whose value is greater equal to 0. To avoid file descriptor redirection a negative
+ * value must be passed as argument. Note that there is an special case for stdout and
+ * stderr: if a value of "-2" is given, they will be redirected to "/dev/null" file.
+ */
+int system_argv_fd(char *const argv[], int newstdin, int newstdout, int newstderr)
+{
+	int child_exit_status;
+	pid_t pid;
+	int status = -1;
+
+	pid = fork();
+
+	if (pid == 0) { /* child */
+		if (newstdout == -2) {
+			/* If next call fails, error will be consider non-fatal and will be ignored */
+			newstdout = open("/dev/null", O_WRONLY);
+		}
+		if (newstderr == -2) {
+			/* If next call fails, error will be consider non-fatal and will be ignored */
+			newstderr = open("/dev/null", O_WRONLY);
+		}
+		if (newstdin >= 0 && newstdin != STDIN_FILENO) {
+			if (dup2(newstdin, STDIN_FILENO) == -1) {
+				fprintf(stderr, "Could not redirect stdin\n");
+				assert(0);
+			}
+			close(newstdin);
+		}
+		if (newstdout >= 0 && newstdout != STDOUT_FILENO) {
+			if (dup2(newstdout, STDOUT_FILENO) == -1) {
+				fprintf(stderr, "Could not redirect stdout\n");
+				assert(0);
+			}
+			close(newstdout);
+		}
+		if (newstderr >= 0 && newstderr != STDERR_FILENO) {
+			if (dup2(newstderr, STDERR_FILENO) == -1) {
+				fprintf(stderr, "Could not redirect stderr\n");
+				assert(0);
+			}
+			close(newstderr);
+		}
+
+		execvp(*argv, argv);
+		/* Next line must not be reached */
+		assert(0);
+	} else if (pid < 0) {
+		fprintf(stderr, "Failed to fork a child process\n");
+		assert(0);
+	} else {
+		pid_t ws = waitpid(pid, &child_exit_status, 0);
+
+		if (ws == -1) {
+			fprintf(stderr, "Failed to wait for child process\n");
+			assert(0);
+		}
+
+		if (WIFEXITED(child_exit_status)) {
+			status = WEXITSTATUS(child_exit_status);
+		} else {
+			fprintf(stderr, "Child process didn't exit\n");
+			assert(0);
+		}
+
+		if (status != 0) {
+			char *cmdline = NULL;
+
+			concat_str_array(&cmdline, argv);
+			fprintf(stderr, "Failed to run command: %s\n", cmdline);
+			free(cmdline);
+		}
+	}
+
+	return status;
+}
+
+/* This function runs two commands given in argvp1[] and argvp2[]
+ * The stdout of argvp1 will be redirected to stdin of argvp2.
+ * A redirection for other file descriptors will be done if the value passed is greater equal to 0.
+ * To avoid file descriptor redirection a negative value must be passed as argument.
+ * Note that there is an special case for stderrp1, stdoutp2, and stderrp2:
+ * if a value of "-2" is given, they will be redirected to "/dev/null" file.
+ */
+int system_argv_pipe(char *const argvp1[], int stdinp1, int stderrp1,
+					 char *const argvp2[], int stdoutp2, int stderrp2)
+{
+	int statusp2;
+	int pipefd[2];
+
+	if (pipe(pipefd)) {
+		fprintf(stderr, "Failed to create a pipe\n");
+		return -1;
+	}
+	system_argv_fd(argvp1, stdinp1, pipefd[1], stderrp1);
+	close(pipefd[1]);
+	statusp2 = system_argv_fd(argvp2, pipefd[0], stdoutp2, stderrp2);
+	close(pipefd[0]);
+
+	return statusp2;
 }

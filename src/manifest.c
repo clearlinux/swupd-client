@@ -538,19 +538,6 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		goto out;
 	}
 
-	/* Only MoM manifests are signed, so only the MoM gets verified*/
-	if (strncmp(component, "MoM", 3) == 0) {
-		free(filename);
-		free(url);
-		string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
-		string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);
-		if (verify_signatures && !download_and_verify_signature(url, filename)) {
-			delete_signature(filename);
-			goto out;
-		}
-	}
-
-
 out:
 	free(filename);
 	free(url);
@@ -589,6 +576,8 @@ struct manifest *load_mom(int version)
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
+	char *filename;
+	char *url;
 
 	ret = retrieve_manifests(version, version, "MoM", NULL);
 	if (ret != 0) {
@@ -596,14 +585,27 @@ struct manifest *load_mom(int version)
 		return NULL;
 	}
 
+	string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
+	string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);
+	if (verify_signatures && !download_and_verify_signature(url, filename)) {
+		delete_signature(filename);
+		goto out;
+	}
+
+
 	manifest = manifest_from_file(version, "MoM");
 
 	if (manifest == NULL) {
 		printf("Failed to load %d MoM manifest\n", version);
-		return NULL;
+		goto out;
 	}
 
 	return manifest;
+
+out:
+	free(filename);
+	free(url);
+	return NULL;
 }
 
 /* Loads the MANIFEST for bundle associated with FILE at VERSION, referenced by

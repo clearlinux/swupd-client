@@ -68,6 +68,7 @@ static const struct option prog_opts[] = {
 	{ "quick", no_argument, 0, 'q' },
 	{ "force", no_argument, 0, 'x' },
 	{ "statedir", required_argument, 0, 'S' },
+	{ "verify-signatures", no_argument, 0, 'V' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -90,6 +91,7 @@ static void print_help(const char *name)
 	printf("   -q, --quick             Don't compare hashes, only fix missing files\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
+	printf("   -V, --verify-signatures Enable signature verification, default value is disabled\n");
 	printf("\n");
 }
 
@@ -97,7 +99,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxm:p:u:P:c:v:fiF:qS:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "Vhxm:p:u:P:c:v:fiF:qS:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -169,6 +171,9 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'x':
 			force = true;
+			break;
+		case 'V':
+			verify_signatures = true;
 			break;
 		default:
 			printf("Unrecognized option\n\n");
@@ -641,10 +646,6 @@ int verify_main(int argc, char **argv)
 	 * FIXME: We need a command line option to override this in case the
 	 * certificate is hosed and the admin knows it and wants to recover.
 	 */
-	if (!signature_initialize(UPDATE_CA_CERTS_PATH "/" SIGNATURE_CA_CERT)) {
-		printf("Can't initialize the SSL certificates\n");
-		goto brick_the_system_and_clean_curl;
-	}
 
 	ret = rm_staging_dir_contents("download");
 	if (ret != 0) {
@@ -658,7 +659,7 @@ int verify_main(int argc, char **argv)
 		 * is not available, or if there is a server error and a manifest is
 		 * not provided.
 		 */
-		printf("Unable to download %d Manifest.MoM\n", version);
+		printf("Unable to download/verify %d Manifest.MoM\n", version);
 		ret = EXIT_FAILURE;
 
 		/* No repair is possible without a manifest, nor is accurate reporting

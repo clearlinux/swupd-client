@@ -473,7 +473,6 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 	}
 
 	unlink(deltafile);
-//	delete_signature(deltafile);
 
 out:
 	free(original);
@@ -588,8 +587,7 @@ struct manifest *load_mom(int version)
 	string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
 	string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);
 	if (verify_signatures && !download_and_verify_signature(url, filename)) {
-		delete_signature(filename);
-		goto out;
+		printf("WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM\n");
 	}
 
 

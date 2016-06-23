@@ -175,57 +175,61 @@ error:
  * returns: true if signature was correct, false otherwise */
 static bool validate_signature(FILE *fp_data, FILE *fp_sig)
 {
-	char buffer[BUFFER_SIZE];
-	unsigned char sig_buffer[BUFFER_SIZE];
+	unsigned char *data;
+	unsigned char *signature;
 	size_t sig_len;
 	size_t data_size;
-	size_t len = 0;
-	size_t bytes_left;
 	size_t count;
 	struct stat st;
 	int fd;
-	EVP_MD_CTX md_ctx;
+	EVP_MD_CTX *ctx;
 
-	sig_len = fread(sig_buffer, 1, BUFFER_SIZE, fp_sig);
-	if (sig_len == 0) {
-		fprintf(stderr, "Failed to get signature length!\n");
+	/* Read in the .sig file */
+	fd = fileno(fp_sig);
+	if (fstat(fd, &st) != 0) {
+		fprintf(stderr, "Failed to stat .sig file\n");
+	}
+	sig_len = st.st_size;
+	signature = malloc(sig_len);
+	count = fread(signature, 1, sig_len, fp_sig);
+	if (count != sig_len) {
+		fprintf(stderr, "Failed to get signature length! Read %lu/%lu bytes\n", count, sig_len);
 		goto error;
 	}
+
+	/* Read in the corresponding data file for the .sig */
 	fd = fileno(fp_data);
 	if (fstat(fd, &st) != 0) {
 		fprintf(stderr, "Failed to stat data file\n");
 		goto error;
 	}
 	data_size = st.st_size;
-
-	/* Initialize verify context and use sha256 algorithm internally */
-	if (!EVP_VerifyInit(&md_ctx, EVP_sha256())) {
+	data = malloc(data_size);
+	count = fread(data, 1, data_size, fp_data);
+	if (count != data_size) {
+		fprintf(stderr, "Failed to read full data file\n");
 		goto error;
 	}
 
-	/* read all bytes from file to calculate digest using sha256 and then sign it */
-	bytes_left = data_size;
-	while (bytes_left > 0) {
-		count = (bytes_left > BUFFER_SIZE ? BUFFER_SIZE : bytes_left);
-		len = fread(buffer, 1, count, fp_data);
-		if (len != count) {
-			fprintf(stderr, "Signature check failed, read %lu bytes, expected %lu\n", len, count);
-			goto error;
-		}
-		/* Hashes len bytes into the verification context */
-		if (!EVP_VerifyUpdate(&md_ctx, buffer, len)) {
-			goto error;
-		}
-		bytes_left -= len;
+	ctx = EVP_MD_CTX_create();
+	/* Initialize verify context and use sha512 algorithm internally */
+	if (!EVP_VerifyInit_ex(ctx, EVP_sha512(), NULL)) {
+		goto error;
 	}
 
+	/* Hashes data_size bytes into the verification context */
+	if (!EVP_VerifyUpdate(ctx, data, data_size)) {
+		goto error;
+	}
 	/* Verify data in context using pkey against signature */
-	if (EVP_VerifyFinal(&md_ctx, sig_buffer, sig_len, pkey) == 1) {
+	if (EVP_VerifyFinal(ctx, signature, sig_len, pkey) == 1) {
+		EVP_MD_CTX_destroy(ctx);
 		return true;
 	}
 
 error:
 	ERR_print_errors_fp(stderr);
+	fprintf(stderr, "Signature check failed\n");
 	return false;
 }
 

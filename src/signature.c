@@ -175,14 +175,15 @@ error:
  * returns: true if signature was correct, false otherwise */
 static bool validate_signature(FILE *fp_data, FILE *fp_sig)
 {
-	unsigned char *data;
-	unsigned char *signature;
+	unsigned char *data = NULL;
+	unsigned char *signature = NULL;
 	size_t sig_len;
 	size_t data_size;
 	size_t count;
 	struct stat st;
 	int fd;
-	EVP_MD_CTX *ctx;
+	int ret = 0;
+	EVP_MD_CTX *ctx = NULL;
 
 	/* Read in the .sig file */
 	fd = fileno(fp_sig);
@@ -210,20 +211,27 @@ static bool validate_signature(FILE *fp_data, FILE *fp_sig)
 		fprintf(stderr, "Failed to read full data file\n");
 		goto error;
 	}
-
 	ctx = EVP_MD_CTX_create();
+	if(ctx == NULL) {
+		fprintf(stderr, "EVP_MD_CTX_create failed, error 0x%lx\n", ERR_get_error());
+		goto error;
+    }
+	EVP_MD_CTX_init(ctx);
 	/* Initialize verify context and use sha256 algorithm internally */
 	if (!EVP_VerifyInit_ex(ctx, EVP_sha256(), NULL)) {
 		goto error;
 	}
 
 	/* Hashes data_size bytes into the verification context */
-	if (!EVP_VerifyUpdate(ctx, data, data_size)) {
+	ret = EVP_VerifyUpdate(ctx, data, data_size);
+	if (!ret) {
+		fprintf(stderr, "Failed to hash data into context, err: %d\n", ret);
 		goto error;
 	}
 	/* Verify data in context using pkey against signature */
-	if (EVP_VerifyFinal(ctx, signature, sig_len, pkey) == 1) {
-		EVP_MD_CTX_destroy(ctx);
+	ret = EVP_VerifyFinal(ctx, signature, sig_len, pkey);
+	EVP_MD_CTX_destroy(ctx);
+	if (ret == 1) {
 		free(data);
 		free(signature);
 		return true;

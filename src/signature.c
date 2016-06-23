@@ -24,198 +24,342 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
+#include <openssl/crypto.h>
 
 #include "config.h"
 #include "signature.h"
 #include "swupd.h"
 
-/*
- * Implementation flavors:
- *   FAKE ..... do nothing, always return success
- *   FORGIVE .. do everything, always return success
- *   REAL ..... do everything, return the real status
- */
-#define IMPL_FAKE 0
-#define IMPL_FORGIVE 1
-#define IMPL_REAL 2
-
-#warning "TODO pick signing scheme"
-#if defined(SWUPD_LINUX_ROOTFS)
-#define IMPL IMPL_FAKE
+#define BUFFER_SIZE   4096
+#define CERTNAME "/usr/share/clear/update-ca/ClearLinuxRoot.pem"
+#ifdef SIGNATURES
+       bool verify_signatures = true;
+#else
+       bool verify_signatures = false;
 #endif
 
-#if IMPL != IMPL_FAKE
-
-static X509_STORE *create_store(const char *, const char *, const char *);
-
-static char *VERIF_FAIL = "Signature verification failed";
-static char *XSTORE_FAIL = "XSTORE creation failed";
+static bool validate_signature(FILE *, FILE *);
+static bool validate_certificate(void);
+static int verify_callback(int, X509_STORE_CTX *);
+static bool get_pubkey();
 
 static bool initialized = false;
+static EVP_PKEY *pkey;
+static X509 *cert;
+static char *chain;
+static char *crl;
 
-static X509_STORE *x509_store = NULL;
-
-bool signature_initialize(const char *ca_cert_filename)
+/* This function must be called before trying to sign any file.
+ * It loads string for errors, and ciphers are auto-loaded by OpenSSL now.
+ * If this function fails it may be because the certificate cannot
+ * be validated.
+ *
+ * ca_cert_filename: is the swupd certificate that contains the public key
+ * for signature verification.
+ *
+ * returns: true if can initialize and validate certificates, otherwise false */
+bool initialize_signature(void)
 {
 	if (initialized) {
 		return true;
 	}
-	OpenSSL_add_all_algorithms();
+
 	ERR_load_crypto_strings();
-	x509_store = create_store(ca_cert_filename, NULL, NULL);
-	if (x509_store == NULL) {
-		ERR_free_strings(); // undoes ERR_load_crypto_strings
-		EVP_cleanup();      // undoes OpenSSL_add_all_algorithms
-		return false || (IMPL == IMPL_FORGIVE);
+
+	if (!get_pubkey()) {
+		goto fail;
 	}
+	if (!validate_certificate()) {
+		goto fail;
+	}
+
 	initialized = true;
 	return true;
+fail:
+	ERR_free_strings();
+	EVP_cleanup();
+	return false;
 }
 
-void signature_terminate(void)
+/* Delete the memory used for string errors as well as memory allocated for
+ * certificates and private keys. */
+void terminate_signature(void)
 {
 	if (initialized) {
-		X509_STORE_free(x509_store); // undocumented...
-		ERR_free_strings();	  // undoes ERR_load_crypto_strings
-		EVP_cleanup();		     // undoes OpenSSL_add_all_algorithms
+		X509_free(cert);
+		ERR_free_strings();
+		EVP_PKEY_free(pkey);
+		EVP_cleanup();
 		initialized = false;
 	}
 }
 
-bool signature_verify(const char *data_filename, const char *sig_filename)
+/* Verifies that the file and the signature exists, and does a signature
+ * check afterwards.
+ *
+ * returns: true if able to validate the signature, false otherwise */
+bool verify_signature(const char *data_filename, const char *sig_filename)
 {
-	BIO *bio_data = NULL;
-	BIO *bio_sig = NULL;
-	PKCS7 *pkcs7 = NULL;
-	int ret;
+	FILE *file = NULL;
+	FILE *sig = NULL;
 	bool result = false;
 
 	if (!initialized) {
-		return false || (IMPL == IMPL_FORGIVE);
+		return false;
 	}
-	bio_data = BIO_new_file(data_filename, "r"); // i.e. fopen
-	if (bio_data == NULL) {
-		goto exit;
+
+	sig = fopen(sig_filename, "r");
+	if (!sig) {
+		fprintf(stderr, "Failed fopen %s\n", sig_filename);
+		return false;
 	}
-	bio_sig = BIO_new_file(sig_filename, "r"); // i.e. fopen
-	if (bio_sig == NULL) {
-		goto exit;
+
+	file = fopen(data_filename, "r");
+	if (!file) {
+		fprintf(stderr, "Failed fopen %s\n", data_filename);
+		fclose(sig);
+		return false;
 	}
-	pkcs7 = PEM_read_bio_PKCS7(bio_sig, NULL, NULL, NULL);
-	if (pkcs7 == NULL) {
-		goto exit;
-	}
-	ret = PKCS7_verify(pkcs7, NULL, x509_store, bio_data, NULL, 0);
-	if (ret != 1) {
-		goto exit;
-	}
-	result = true;
-exit:
-	/*
-	 * The free functions below tolerate NULL arguments.
-	 * The documentation doesn't really say so, but both testing and
-	 * examination of openssl source code confirm that such is the case.
-         */
-	PKCS7_free(pkcs7);  // undocumented...
-	BIO_free(bio_sig);  // i.e. fclose
-	BIO_free(bio_data); // i.e. fclose
-	return result || (IMPL == IMPL_FORGIVE);
+
+	result = validate_signature(file, sig);
+	fclose(file);
+	fclose(sig);
+
+	return result;
 }
 
-static X509_STORE *create_store(const char *ca_filename, const char *ca_dirname,
-				const char *crl_filename)
+/* Make sure the certificate exists and extract the public key from it.
+ *
+ * CERTNAME: certificate used to verify signature.
+ *
+ * returns: true if it can get the public key, false otherwise */
+static bool get_pubkey(void)
 {
-	X509_STORE *store = X509_STORE_new();
+	FILE *fp_pubkey = NULL;
 
-	if (!store) {
-		return NULL;
+	fp_pubkey = fopen(CERTNAME, "r");
+	if (!fp_pubkey) {
+		fprintf(stderr, "Failed fopen %s\n", CERTNAME);
+		goto error;
 	}
-	if (X509_STORE_load_locations(store, ca_filename, ca_dirname) != 1) {
-		goto err;
+
+	cert = PEM_read_X509(fp_pubkey, NULL, NULL, NULL);
+	if (!cert) {
+		fclose(fp_pubkey);
+		goto error;
 	}
-	if (X509_STORE_set_default_paths(store) != 1) {
-		goto err;
+
+	pkey = X509_get_pubkey(cert);
+	if (!pkey) {
+		fclose(fp_pubkey);
+		X509_free(cert);
+		goto error;
 	}
-	if (crl_filename) {
-		X509_LOOKUP *lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
-		if (!lookup) {
-			goto err;
+	return true;
+error:
+	ERR_print_errors_fp(stderr);
+	return false;
+}
+
+/* This is the main part of the signature validation.
+ * This function reads a file in chunks of 4096 bytes to create a hash from
+ * the content, then verifies the hash using the publick key against the
+ * signature.
+ *
+ * returns: true if signature was correct, false otherwise */
+static bool validate_signature(FILE *fp_data, FILE *fp_sig)
+{
+	char buffer[BUFFER_SIZE];
+	unsigned char sig_buffer[BUFFER_SIZE];
+	size_t sig_len;
+	size_t data_size;
+	size_t len = 0;
+	size_t bytes_left;
+	size_t count;
+	struct stat st;
+	int fd;
+	EVP_MD_CTX md_ctx;
+
+	sig_len = fread(sig_buffer, 1, BUFFER_SIZE, fp_sig);
+	if (sig_len == 0) {
+		fprintf(stderr, "Failed to get signature length!\n");
+		goto error;
+	}
+	fd = fileno(fp_data);
+	if (fstat(fd, &st) != 0) {
+		fprintf(stderr, "Failed to stat data file\n");
+		goto error;
+	}
+	data_size = st.st_size;
+
+	/* Initialize verify context and use sha256 algorithm internally */
+	if (!EVP_VerifyInit(&md_ctx, EVP_sha256())) {
+		goto error;
+	}
+
+	/* read all bytes from file to calculate digest using sha256 and then sign it */
+	bytes_left = data_size;
+	while (bytes_left > 0) {
+		count = (bytes_left > BUFFER_SIZE ? BUFFER_SIZE : bytes_left);
+		len = fread(buffer, 1, count, fp_data);
+		if (len != count) {
+			fprintf(stderr, "Signature check failed, read %lu bytes, expected %lu\n", len, count);
+			goto error;
 		}
-		if (X509_load_crl_file(lookup, crl_filename, X509_FILETYPE_PEM) != 1) {
-			goto err;
+		/* Hashes len bytes into the verification context */
+		if (!EVP_VerifyUpdate(&md_ctx, buffer, len)) {
+			goto error;
 		}
+		bytes_left -= len;
+	}
+
+	/* Verify data in context using pkey against signature */
+	if (EVP_VerifyFinal(&md_ctx, sig_buffer, sig_len, pkey) == 1) {
+		return true;
+	}
+
+error:
+	ERR_print_errors_fp(stderr);
+	return false;
+}
+
+/* This function makes sure the certificate is still valid by not having any
+ * compromised certificates in the chain.
+ * If there is no Certificate Revocation List (CRL) it may be that the private
+ * keys have not been compromised or the CRL has not been generated by the
+ * Certificate Authority (CA)
+ *
+ * returns: true if certificate is valid, false otherwise */
+static bool validate_certificate(void)
+{
+	FILE *fp = NULL;
+	X509_STORE *store = NULL;
+	X509_LOOKUP *lookup = NULL;
+	X509_STORE_CTX *verify_ctx = NULL;
+
+	/* CRL and Chains are not required for the current setup, but we may
+	 * implement them in the future */
+	if (!crl) {
+		printf("No certificate revocation list provided\n");
+	}
+	if (!chain) {
+		printf("No certificate chain provided\n");
+	}
+
+	/* create the cert store and set the verify callback */
+	if (!(store = X509_STORE_new())) {
+		goto error;
+	}
+
+	X509_STORE_set_verify_cb_func(store, verify_callback);
+
+	/* Add the certificates to be verified to the store */
+	if (!(lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file()))) {
+		goto error;
+	}
+
+	/*  Load the our Root cert, which can be in either DER or PEM format */
+	if (!X509_load_cert_file(lookup, CERTNAME, X509_FILETYPE_PEM)) {
+		goto error;
+	}
+
+	if (crl) {
+		if (!(lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file())) ||
+		   (X509_load_crl_file(lookup, crl, X509_FILETYPE_PEM) != 1)) {
+			goto error;
+		}
+		/* set the flags of the store so that CLRs are consulted */
 		X509_STORE_set_flags(store, X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
 	}
-	return store;
-err:
-	X509_STORE_free(x509_store);
-	return NULL;
+
+	/* create a verification context and initialize it */
+	if (!(verify_ctx = X509_STORE_CTX_new())) {
+		goto error;
+	}
+
+	if (X509_STORE_CTX_init(verify_ctx, store, cert, NULL) != 1) {
+		goto error;
+	}
+
+	/* Specify which cert to validate in the verify context.
+	 * This is required because we may add multiple certs to the X509 store,
+	 * but we want to validate a specific one out of the group/chain. */
+	X509_STORE_CTX_set_cert(verify_ctx, cert);
+
+	/* verify the certificate */
+	if (X509_verify_cert(verify_ctx) != 1) {
+		goto error;
+	}
+	/* Certificate verified correctly */
+	return true;
+
+error:
+	ERR_print_errors_fp(stderr);
+
+	if (fp) {
+		fclose(fp);
+	}
+	if (store) {
+		X509_STORE_free(store);
+	}
+	if (lookup) {
+		X509_LOOKUP_free(lookup);
+	}
+	return false;
 }
 
-bool signature_download_and_verify(const char *data_url, const char *data_filename)
+int verify_callback(int ok, X509_STORE_CTX *stor)
+{
+	if (!ok) {
+		fprintf(stderr, "Error: %s\n",
+		X509_verify_cert_error_string(stor->error));
+	}
+	return ok;
+}
+
+/* Downloads the corresponding signature filename from the
+ * swupd server.
+ *
+ * returns: true if signature was downloaded, false otherwise
+ */
+bool download_and_verify_signature(const char *data_url, const char *data_filename)
 {
 	char *sig_url;
 	char *sig_filename;
 	int ret;
 	bool result;
 
-	string_or_die(&sig_url, "%s.signed", data_url);
+	string_or_die(&sig_url, "%s.sig", data_url);
 
-	string_or_die(&sig_filename, "%s.signed", data_filename);
+	string_or_die(&sig_filename, "%s.sig", data_filename);
 
 	ret = swupd_curl_get_file(sig_url, sig_filename, NULL, NULL, false);
 	if (ret) {
 		result = false;
 	} else {
-		result = signature_verify(data_filename, sig_filename);
-	}
-	if (!result) {
-		unlink(sig_filename);
+		result = verify_signature(data_filename, sig_filename);
 	}
 	free(sig_filename);
 	free(sig_url);
-	return result || (IMPL == IMPL_FORGIVE);
+	return result;
 }
 
-void signature_delete(const char *data_filename)
+/* Delete the signature file downloaded with download_and_verify_signature() */
+void delete_signature(const char *data_filename)
 {
 	char *sig_filename;
+	struct stat st;
 
-	string_or_die(&sig_filename, "%s.signed", data_filename);
-
-	unlink(sig_filename);
-
+	string_or_die(&sig_filename, "%s.sig", data_filename);
+	if (stat(sig_filename, &st) == 0) {
+		unlink(sig_filename);
+	}
 	free(sig_filename);
 }
 
-#else // IMPL == IMPL_FAKE
-
-bool signature_initialize(const char UNUSED_PARAM *ca_cert_filename)
-{
-	return true;
-}
-
-void signature_terminate(void)
-{
-}
-
-bool signature_verify(const char UNUSED_PARAM *data_filename, const char UNUSED_PARAM *sig_filename)
-{
-	return true;
-}
-
-bool signature_download_and_verify(const char UNUSED_PARAM *data_url, const char UNUSED_PARAM *data_filename)
-{
-	return true;
-}
-
-void signature_delete(const char UNUSED_PARAM *data_filename)
-{
-}
-
-#endif // IMPL == IMPL_FAKE

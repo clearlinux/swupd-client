@@ -646,10 +646,6 @@ int verify_main(int argc, char **argv)
 	 * FIXME: We need a command line option to override this in case the
 	 * certificate is hosed and the admin knows it and wants to recover.
 	 */
-	if (!initialize_signature()) {
-		printf("Can't initialize the SSL certificates\n");
-		goto brick_the_system_and_clean_curl;
-	}
 
 	ret = rm_staging_dir_contents("download");
 	if (ret != 0) {

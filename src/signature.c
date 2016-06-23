@@ -25,7 +25,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include <openssl/bio.h>
 #include <openssl/err.h>
@@ -44,12 +46,12 @@
        bool verify_signatures = false;
 #endif
 
-static bool validate_signature(FILE *fp_data, FILE *fp_sig);
 static bool validate_certificate(void);
 static int verify_callback(int, X509_STORE_CTX *);
 static bool get_pubkey();
 
 static bool initialized = false;
+FILE *fp_pubkey = NULL;
 static EVP_PKEY *pkey;
 static X509 *cert;
 static X509_STORE *store = NULL;
@@ -65,10 +67,10 @@ static char *crl;
  * for signature verification.
  *
  * returns: true if can initialize and validate certificates, otherwise false */
-bool initialize_signature(void)
+void initialize_signature(void)
 {
 	if (initialized) {
-		return true;
+		return;
 	}
 
 	ERR_load_crypto_strings();
@@ -81,11 +83,9 @@ bool initialize_signature(void)
 	}
 
 	initialized = true;
-	return true;
 fail:
 	ERR_free_strings();
 	EVP_cleanup();
-	return false;
 }
 
 /* Delete the memory used for string errors as well as memory allocated for
@@ -97,6 +97,7 @@ void terminate_signature(void)
 		ERR_free_strings();
 		EVP_PKEY_free(pkey);
 		EVP_cleanup();
+		fclose(fp_pubkey);
 		initialized = false;
 	}
 }
@@ -107,32 +108,154 @@ void terminate_signature(void)
  * returns: true if able to validate the signature, false otherwise */
 bool verify_signature(const char *data_filename, const char *sig_filename)
 {
-	FILE *file = NULL;
-	FILE *sig = NULL;
-	bool result = false;
+	int ret;
+	struct stat st;
+
+	int data_fd;
+	size_t data_len;
+	unsigned char *data = NULL;
+	BIO *data_BIO;
+
+	int sig_fd;
+	size_t sig_len;
+	unsigned char *sig = NULL;
+	BIO *sig_BIO;
+
+	PKCS7 *p7;
+	STACK_OF(X509) *x509_stack;
+	BIO *verify_BIO;
+
+	initialize_signature();
 
 	if (!initialized) {
+		printf("Can't initialize the SSL certificates\n");
 		return false;
 	}
 
-	sig = fopen(sig_filename, "rb");
-	if (!sig) {
-		fprintf(stderr, "Failed fopen %s\n", sig_filename);
+	EVP_add_digest(EVP_sha256());
+
+	/* get the signature */
+	sig_fd = open(sig_filename, O_RDONLY);
+	if (sig_fd == -1) {
+		fprintf(stderr, "Failed open %s\n", sig_filename);
+		return false;
+	}
+	if (fstat(sig_fd, &st) != 0) {
+		fprintf(stderr, "Failed to stat %s file\n", sig_filename);
+		close(sig_fd);
+		return false;
+	}
+	sig_len = st.st_size;
+	sig = mmap(NULL, sig_len, PROT_READ, MAP_PRIVATE, sig_fd, 0);
+	if (sig == MAP_FAILED) {
+		fprintf(stderr, "Failed to mmap %s signature\n", sig_filename);
+		close(sig_fd);
+		return false;
+	}
+	sig_BIO = BIO_new_mem_buf(sig, sig_len);
+	if (!sig_BIO) {
+		fprintf(stderr, "Failed to read %s signature into BIO\n", sig_filename);
+		munmap(sig, sig_len);
+		close(sig_fd);
 		return false;
 	}
 
-	file = fopen(data_filename, "rb");
-	if (!file) {
-		fprintf(stderr, "Failed fopen %s\n", data_filename);
-		fclose(sig);
+	/* the signature is in DER format, so d2i it into verification pkcs7 form */
+	p7 = d2i_PKCS7_bio(sig_BIO, NULL);
+	if (p7 == NULL) {
+		fprintf(stderr, "NULL PKCS7 File\n");
+		munmap(sig, sig_len);
+		close(sig_fd);
+		BIO_free(sig_BIO);
 		return false;
 	}
 
-	result = validate_signature(file, sig);
-	fclose(file);
-	fclose(sig);
+	/* get the data to be verified */
+	data_fd = open(data_filename, O_RDONLY);
+	if (data_fd == -1) {
+		fprintf(stderr, "Failed open %s\n", data_filename);
+		munmap(sig, sig_len);
+		close(sig_fd);
+		BIO_free(sig_BIO);
+		return false;
+	}
+	if (fstat(data_fd, &st) != 0) {
+		fprintf(stderr, "Failed to stat %s\n", data_filename);
+		munmap(sig, sig_len);
+		close(sig_fd);
+		close(data_fd);
+		BIO_free(sig_BIO);
+		return false;
+	}
+	data_len = st.st_size;
+	data = mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
+	if (data == MAP_FAILED) {
+		fprintf(stderr, "Failed to mmap %s\n", data_filename);
+		munmap(sig, sig_len);
+		close(sig_fd);
+		close(data_fd);
+		BIO_free(sig_BIO);
+		return false;
+	}
+	data_BIO = BIO_new_mem_buf(data, data_len);
+	if (!data_BIO) {
+		fprintf(stderr, "Failed to read %s into BIO\n", data_filename);
+		munmap(sig, sig_len);
+		close(sig_fd);
+		munmap(data, data_len);
+		close(data_fd);
+		BIO_free(sig_BIO);
+		return false;
+	}
 
-	return result;
+	/* munge the signature and data into a verifiable format */
+	verify_BIO = PKCS7_dataInit(p7, data_BIO);
+	if (!verify_BIO) {
+		fprintf(stderr, "Failed to initialize BIO for verification\n");
+		munmap(sig, sig_len);
+		close(sig_fd);
+		munmap(data, data_len);
+		close(data_fd);
+		BIO_free(sig_BIO);
+		BIO_free(data_BIO);
+		return false;
+	}
+
+	/* Push our trust cert(s) to the stack, which is a set of certificates
+	 * in which to search for the signer's cert. */
+	x509_stack = sk_X509_new_null();
+	if (!x509_stack) {
+		fprintf(stderr, "Failed to initialize X509 certificate stack\n");
+		munmap(sig, sig_len);
+		close(sig_fd);
+		munmap(data, data_len);
+		close(data_fd);
+		BIO_free(sig_BIO);
+		BIO_free(data_BIO);
+		BIO_free(verify_BIO);
+		return false;
+	}
+	sk_X509_push(x509_stack, cert);
+
+	/* Verify the signature, outdata can be NULL because we don't use it */
+	ret = PKCS7_verify(p7, x509_stack, store, verify_BIO, NULL, 0);
+
+	munmap(sig, sig_len);
+	close(sig_fd);
+	munmap(data, data_len);
+	close(data_fd);
+	BIO_free(sig_BIO);
+	BIO_free(data_BIO);
+	BIO_free(verify_BIO);
+
+	if (ret == 1) {
+		printf("VERIFY SUCCESS!\n");
+		return true;
+	}
+
+	ERR_print_errors_fp(stderr);
+	fprintf(stderr, "Signature check failed\n");
+	return false;
 }
 
 /* Make sure the certificate exists and extract the public key from it.
@@ -142,8 +265,6 @@ bool verify_signature(const char *data_filename, const char *sig_filename)
  * returns: true if it can get the public key, false otherwise */
 static bool get_pubkey(void)
 {
-	FILE *fp_pubkey = NULL;
-
 	fp_pubkey = fopen(CERTNAME, "r");
 	if (!fp_pubkey) {
 		fprintf(stderr, "Failed fopen %s\n", CERTNAME);
@@ -165,112 +286,6 @@ static bool get_pubkey(void)
 	return true;
 error:
 	ERR_print_errors_fp(stderr);
-	return false;
-}
-
-/* This is the main part of the signature validation.
- * This function reads a file in chunks of 4096 bytes to create a hash from
- * the content, then verifies the hash using the publick key against the
- * signature.
- *
- * returns: true if signature was correct, false otherwise */
-static bool validate_signature(FILE *fp_data, FILE* fp_sig)
-{
-	unsigned char *data = NULL;
-	unsigned char *signature = NULL;
-	size_t sig_len;
-	size_t data_size;
-	size_t count;
-	struct stat st;
-	int fd;
-	int ret = 0;
-	PKCS7 *p7;
-	BIO *sigbio;
-	BIO *databio;
-	BIO *indata;
-	STACK_OF(X509) *x509_stack;
-
-	EVP_add_digest(EVP_sha256());
-
-	/* Read in the .sig file */
-	fd = fileno(fp_sig);
-	if (fstat(fd, &st) != 0) {
-		fprintf(stderr, "Failed to stat .sig file\n");
-	}
-	sig_len = st.st_size;
-	signature = malloc(sig_len);
-	count = fread(signature, 1, sig_len, fp_sig);
-	if (count != sig_len) {
-		fprintf(stderr, "Failed to get signature length! Read %lu/%lu bytes\n", count, sig_len);
-		goto error;
-	}
-
-	/* Read in the corresponding data file for the .sig */
-	fd = fileno(fp_data);
-	if (fstat(fd, &st) != 0) {
-		fprintf(stderr, "Failed to stat data file\n");
-		goto error;
-	}
-	data_size = st.st_size;
-	data = malloc(data_size);
-	count = fread(data, 1, data_size, fp_data);
-	if (count != data_size) {
-		fprintf(stderr, "Failed to read full data file\n");
-		goto error;
-	}
-
-	/* Load the signature file which is in PKCS7 format */
-	sigbio = BIO_new_mem_buf(signature, sig_len);
-	if (!sigbio) {
-		fprintf(stderr, "Failed to read signature into buffer\n");
-		goto error;
-	}
-
-	/* Read the PKCS7 file which is in DER format, hence the d2i function */
-	p7 = d2i_PKCS7_bio(sigbio, NULL);
-	if (p7 == NULL) {
-		fprintf(stderr, "NULL PKCS7 File\n");
-		goto error;
-	}
-
-	/* Load the data to be verified */
-	databio = BIO_new_mem_buf(data, data_size);
-	if (!databio) {
-		fprintf(stderr, "Failed to read data file into buffer\n");
-		goto error;
-	}
-
-	/* Initialize the data that will be passed into verify with the PKCS7 */
-	indata = PKCS7_dataInit(p7, databio);
-	if (!indata) {
-		fprintf(stderr, "Failed to initialize data buffer for verification\n");
-		goto error;
-	}
-
-	/* Push our trust cert(s) to the stack, which is a set of certificates
-	 * in which to search for the signer's cert. */
-	x509_stack = sk_X509_new_null();
-	if (!x509_stack) {
-		fprintf(stderr, "Failed to initialize X509 certificate stack\n");
-		goto error;
-	}
-	sk_X509_push(x509_stack, cert);
-
-	/* Verify the signature, outdata can be NULL because we don't use it */
-	ret = PKCS7_verify(p7, x509_stack, store, indata, NULL, 0);
-	if (ret == 1) {
-		printf("VERIFY SUCCESS!\n");
-		return true;
-	}
-error:
-	if (signature) {
-		free(signature);
-	}
-	if (data) {
-		free(data);
-	}
-	ERR_print_errors_fp(stderr);
-	fprintf(stderr, "Signature check failed\n");
 	return false;
 }
 

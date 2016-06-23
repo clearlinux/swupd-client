@@ -8,7 +8,7 @@
  * @param ca_cert_filename - the file containing the CA certificate
  * @return true <=> no error
  */
-bool initialize_signature(void);
+void initialize_signature(void);
 
 /*
  * Terminate usage of this module, free resources.

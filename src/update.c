@@ -242,10 +242,6 @@ int main_update()
 	printf("Update started.\n");
 	read_subscriptions_alt();
 
-	if (!initialize_signature()) {
-		goto clean_curl;
-	}
-
 	/* Step 1: get versions */
 
 	ret = check_versions(&current_version, &server_version, path_prefix);

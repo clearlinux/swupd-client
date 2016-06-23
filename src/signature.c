@@ -212,8 +212,8 @@ static bool validate_signature(FILE *fp_data, FILE *fp_sig)
 	}
 
 	ctx = EVP_MD_CTX_create();
-	/* Initialize verify context and use sha512 algorithm internally */
-	if (!EVP_VerifyInit_ex(ctx, EVP_sha512(), NULL)) {
+	/* Initialize verify context and use sha256 algorithm internally */
+	if (!EVP_VerifyInit_ex(ctx, EVP_sha256(), NULL)) {
 		goto error;
 	}
 
@@ -224,10 +224,18 @@ static bool validate_signature(FILE *fp_data, FILE *fp_sig)
 	/* Verify data in context using pkey against signature */
 	if (EVP_VerifyFinal(ctx, signature, sig_len, pkey) == 1) {
 		EVP_MD_CTX_destroy(ctx);
+		free(data);
+		free(signature);
 		return true;
 	}
 
 error:
+	if (signature) {
+		free(signature);
+	}
+	if (data) {
+		free(data);
+	}
 	ERR_print_errors_fp(stderr);
 	fprintf(stderr, "Signature check failed\n");
 	return false;

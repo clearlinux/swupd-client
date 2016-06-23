@@ -44,7 +44,7 @@
        bool verify_signatures = false;
 #endif
 
-static bool validate_signature(FILE *, FILE *);
+static bool validate_signature(char *, FILE *, FILE *);
 static bool validate_certificate(void);
 static int verify_callback(int, X509_STORE_CTX *);
 static bool get_pubkey();
@@ -52,6 +52,7 @@ static bool get_pubkey();
 static bool initialized = false;
 static EVP_PKEY *pkey;
 static X509 *cert;
+static X509_STORE *store = NULL;
 static char *chain;
 static char *crl;
 
@@ -71,7 +72,7 @@ bool initialize_signature(void)
 	}
 
 	ERR_load_crypto_strings();
-
+	ERR_load_PKCS7_strings();
 	if (!get_pubkey()) {
 		goto fail;
 	}
@@ -114,20 +115,20 @@ bool verify_signature(const char *data_filename, const char *sig_filename)
 		return false;
 	}
 
-	sig = fopen(sig_filename, "r");
+	sig = fopen(sig_filename, "rb");
 	if (!sig) {
 		fprintf(stderr, "Failed fopen %s\n", sig_filename);
 		return false;
 	}
 
-	file = fopen(data_filename, "r");
+	file = fopen(data_filename, "rb");
 	if (!file) {
 		fprintf(stderr, "Failed fopen %s\n", data_filename);
 		fclose(sig);
 		return false;
 	}
 
-	result = validate_signature(file, sig);
+	result = validate_signature(data_filename, file, sig);
 	fclose(file);
 	fclose(sig);
 
@@ -173,7 +174,7 @@ error:
  * signature.
  *
  * returns: true if signature was correct, false otherwise */
-static bool validate_signature(FILE *fp_data, FILE *fp_sig)
+static bool validate_signature(char *data_filename, FILE *fp_data, FILE* fp_sig)
 {
 	unsigned char *data = NULL;
 	unsigned char *signature = NULL;
@@ -184,6 +185,13 @@ static bool validate_signature(FILE *fp_data, FILE *fp_sig)
 	int fd;
 	int ret = 0;
 	EVP_MD_CTX *ctx = NULL;
+	PKCS7 *p7;
+	BIO *sigbio;
+	BIO *databio;
+	BIO *indata;
+	STACK_OF(X509) *x509_stack;
+
+	EVP_add_digest(EVP_sha256());
 
 	/* Read in the .sig file */
 	fd = fileno(fp_sig);
@@ -211,32 +219,23 @@ static bool validate_signature(FILE *fp_data, FILE *fp_sig)
 		fprintf(stderr, "Failed to read full data file\n");
 		goto error;
 	}
-	ctx = EVP_MD_CTX_create();
-	if(ctx == NULL) {
-		fprintf(stderr, "EVP_MD_CTX_create failed, error 0x%lx\n", ERR_get_error());
-		goto error;
-    }
-	EVP_MD_CTX_init(ctx);
-	/* Initialize verify context and use sha256 algorithm internally */
-	if (!EVP_VerifyInit_ex(ctx, EVP_sha256(), NULL)) {
+	sigbio = BIO_new_mem_buf(signature, sig_len);
+	p7 = d2i_PKCS7_bio(sigbio, NULL);
+	if (p7 == NULL) {
+		fprintf(stderr, "NULL PKCS7 File\n");
 		goto error;
 	}
+	databio = BIO_new_mem_buf(data, data_size);
+	indata = PKCS7_dataInit(p7, databio);
 
-	/* Hashes data_size bytes into the verification context */
-	ret = EVP_VerifyUpdate(ctx, data, data_size);
-	if (!ret) {
-		fprintf(stderr, "Failed to hash data into context, err: %d\n", ret);
-		goto error;
-	}
-	/* Verify data in context using pkey against signature */
-	ret = EVP_VerifyFinal(ctx, signature, sig_len, pkey);
-	EVP_MD_CTX_destroy(ctx);
-	if (ret == 1) {
-		free(data);
-		free(signature);
+	x509_stack = sk_X509_new_null();
+	sk_X509_push(x509_stack, cert);
+
+	ret = PKCS7_verify(p7, x509_stack, store, indata, NULL, 0);
+	if (ret ==1) {
+		printf("VERIFY SUCCESS!\n");
 		return true;
 	}
-
 error:
 	if (signature) {
 		free(signature);
@@ -259,7 +258,6 @@ error:
 static bool validate_certificate(void)
 {
 	FILE *fp = NULL;
-	X509_STORE *store = NULL;
 	X509_LOOKUP *lookup = NULL;
 	X509_STORE_CTX *verify_ctx = NULL;
 

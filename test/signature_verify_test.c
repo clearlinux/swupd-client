@@ -46,18 +46,11 @@ int main(int argc, char **argv)
 		usage(argv[0]);
 	}
 
-	if (!signature_initialize(argv[3])) {
-		fprintf(stderr, "Can't initialize!\n");
-		exit(-1);
-	}
-
-	if (signature_verify(argv[1], argv[2])) {
+	if (download_and_verify_signature(argv[1], argv[2])) {
 		fprintf(stderr, "Verification successful!\n");
 	} else {
 		fprintf(stderr, "Verification failed!\n");
 	}
-
-	signature_terminate();
 
 	return 0;
 }

@@ -428,7 +428,7 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 	struct stat buf;
 
 	if (strcmp(component, "MoM") == 0) {
-#warning "need to crypto validate MoM and allow delta"
+		// We don't do MoM deltas.
 		return -1;
 	}
 
@@ -459,16 +459,9 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 			unlink(deltafile);
 			goto out;
 		}
-
-		if (!signature_download_and_verify(url, deltafile)) {
-			ret = -1;
-			unlink(deltafile);
-			goto out;
-		}
 	}
 
 	/* Now apply the manifest delta */
-
 	string_or_die(&newfile, "%s/%i/Manifest.%s", state_dir, new, component);
 
 	ret = apply_bsdiff_delta(original, newfile, deltafile);
@@ -480,7 +473,6 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 	}
 
 	unlink(deltafile);
-	signature_delete(deltafile);
 
 out:
 	free(original);
@@ -494,7 +486,7 @@ out:
 /* TODO: This should deal with nested manifests better */
 static int retrieve_manifests(int current, int version, char *component, struct file *file)
 {
-	char *url;
+	char *url = NULL;
 	char *filename;
 	char *dir;
 	int ret = 0;
@@ -503,17 +495,19 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 
 	string_or_die(&filename, "%s/%i/Manifest.%s.tar", state_dir, version, component);
 	if (stat(filename, &sb) == 0) {
-		return 0;
+		ret = 0;
+		goto out;
 	}
 
 	if (!check_network()) {
-		return -ENOSWUPDSERVER;
+		ret = -ENOSWUPDSERVER;
+		goto out;
 	}
 
 	string_or_die(&dir, "%s/%i", state_dir, version);
 	ret = mkdir(dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if ((ret != 0) && (errno != EEXIST)) {
-		return ret;
+		goto out;
 	}
 	free(dir);
 
@@ -528,11 +522,6 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 
 	ret = swupd_curl_get_file(url, filename, NULL, NULL, false);
 	if (ret) {
-		unlink(filename);
-		goto out;
-	}
-
-	if (!signature_download_and_verify(url, filename)) {
 		unlink(filename);
 		goto out;
 	}
@@ -588,6 +577,8 @@ struct manifest *load_mom(int version)
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
+	char *filename;
+	char *url;
 
 	ret = retrieve_manifests(version, version, "MoM", NULL);
 	if (ret != 0) {
@@ -595,14 +586,25 @@ struct manifest *load_mom(int version)
 		return NULL;
 	}
 
+	string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
+	string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);
+	if (!download_and_verify_signature(url, filename)) {
+		printf("WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM\n");
+	}
+	free(filename);
+	free(url);
+
 	manifest = manifest_from_file(version, "MoM");
 
 	if (manifest == NULL) {
 		printf("Failed to load %d MoM manifest\n", version);
-		return NULL;
+		goto out;
 	}
 
 	return manifest;
+
+out:
+	return NULL;
 }
 
 /* Loads the MANIFEST for bundle associated with FILE at VERSION, referenced by

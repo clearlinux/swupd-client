@@ -641,10 +641,6 @@ int verify_main(int argc, char **argv)
 	 * FIXME: We need a command line option to override this in case the
 	 * certificate is hosed and the admin knows it and wants to recover.
 	 */
-	if (!signature_initialize(UPDATE_CA_CERTS_PATH "/" SIGNATURE_CA_CERT)) {
-		printf("Can't initialize the SSL certificates\n");
-		goto brick_the_system_and_clean_curl;
-	}
 
 	ret = rm_staging_dir_contents("download");
 	if (ret != 0) {
@@ -658,7 +654,7 @@ int verify_main(int argc, char **argv)
 		 * is not available, or if there is a server error and a manifest is
 		 * not provided.
 		 */
-		printf("Unable to download %d Manifest.MoM\n", version);
+		printf("Unable to download/verify %d Manifest.MoM\n", version);
 		ret = EXIT_FAILURE;
 
 		/* No repair is possible without a manifest, nor is accurate reporting

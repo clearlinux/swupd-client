@@ -242,10 +242,6 @@ int main_update()
 	printf("Update started.\n");
 	read_subscriptions_alt();
 
-	if (!signature_initialize(UPDATE_CA_CERTS_PATH "/" SIGNATURE_CA_CERT)) {
-		goto clean_curl;
-	}
-
 	/* Step 1: get versions */
 
 	ret = check_versions(&current_version, &server_version, path_prefix);
@@ -402,7 +398,6 @@ clean_exit:
 	free_manifest(server_manifest);
 
 clean_curl:
-	signature_terminate();
 	swupd_curl_cleanup();
 	free_subscriptions();
 	free_globals();

@@ -11,11 +11,7 @@ AM_SILENT_RULES([yes])
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_LANG(C)
-AC_ARG_WITH([swupdcertsdir],
-  [AS_HELP_STRING([--with-swupdcertsdir=DIR], [swupdcertsdir files])],
-  [swupdcertsdir=$withval],
-  [swupdcertsdir="/usr/share/clear/update-ca"])
-AC_SUBST([swupdcertsdir], [$swupdcertsdir])
+
 AC_CONFIG_HEADERS([config.h])
 PKG_CHECK_MODULES([bsdiff], [bsdiff])
 PKG_CHECK_MODULES([lzma], [liblzma])
@@ -29,6 +25,19 @@ AS_IF([test "x$enable_bzip2" != "xno" ],
 	 AC_CHECK_LIB([bz2], [BZ2_bzBuffToBuffCompress], [], [AC_MSG_ERROR([the libbz2 library is missing])])],
   [AC_DEFINE(SWUPD_WITHOUT_BZIP2,1,[Do not use bzip2 compression])]
 )
+AC_ARG_ENABLE(
+  [signature-verification],
+  [AS_HELP_STRING([--enable-signature-verification], [Enable signature check (disabled by default)])],
+  [AC_DEFINE([SIGNATURES], [], [Enable signature check as default])]
+
+)
+
+if test "$enable_signature_verification" = "yes" ; then
+	AC_ARG_WITH([swupdcert],
+		[AS_HELP_STRING([--with-swupdcert=FILE], [swupd verification cert])],
+		[AC_DEFINE_UNQUOTED([SWUPDCERT], ["$withval"], [swupd verification cert])],
+		[AC_DEFINE([SWUPDCERT], ["ClearLinuxRoot.pem"], [swupd verification cert])])
+fi
 
 AC_ARG_ENABLE(
   [tests],
@@ -83,12 +92,13 @@ AS_IF([test "$enable_tests" != "no"], [
 AM_CONDITIONAL([ENABLE_TESTS], [test "$enable_tests" != "no"])
 
 PKG_CHECK_MODULES([curl], [libcurl])
-PKG_CHECK_MODULES([openssl], [libcrypto >= 0.9.8])
+PKG_CHECK_MODULES([openssl], [libcrypto >= 1.0.2])
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_PROGS(TAR, tar)
 
 # default to Linux rootfs build
 enable_linux_rootfs_build="yes"
+certs_path="/usr/share/clear/update-ca"
 
 # document all options for build variants
 ## (1) build variants
@@ -103,7 +113,6 @@ AH_TEMPLATE([LOG_DIR],[Directory for swupd log files])
 AH_TEMPLATE([LOCK_DIR],[Directory for lock file])
 AH_TEMPLATE([BUNDLES_DIR],[Directory to use for bundles])
 AH_TEMPLATE([UPDATE_CA_CERTS_PATH],[Location of CA certificates])
-AH_TEMPLATE([SIGNATURE_CA_CERT],[CA certificate to use])
 AH_TEMPLATE([MOTD_FILE],[motd file path])
 
 if test "$enable_linux_rootfs_build" = "yes"; then
@@ -113,12 +122,13 @@ if test "$enable_linux_rootfs_build" = "yes"; then
 	AC_DEFINE([LOG_DIR],["/var/log/swupd"])
 	AC_DEFINE([LOCK_DIR],["/run/lock"])
 	AC_DEFINE([BUNDLES_DIR],["/usr/share/clear/bundles"])
-	AC_DEFINE([UPDATE_CA_CERTS_PATH],["/usr/share/clear/update-ca"])
-	AC_DEFINE([SIGNATURE_CA_CERT],["test-do-not-ship-R0-0.pem"])
+	AC_DEFINE_UNQUOTED([UPDATE_CA_CERTS_PATH],["$certs_path"])
 	AC_DEFINE([MOTD_FILE],["/usr/lib/motd.d/001-new-release"])
 else
 	AC_MSG_ERROR([Unknown build variant])
 fi
+
+AC_SUBST([update_ca_certs_path], ["$certs_path"])
 
 AC_CONFIG_FILES([Makefile data/check-update.service data/check-update.timer])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])

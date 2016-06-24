@@ -90,7 +90,7 @@ swupd_sig_verifytest_LDADD = $(SWUPD_CORE_LIBS)
 
 noinst_HEADERS = $(top_srcdir)/include/*
 
-swupdcertsdir = @swupdcertsdir@
+swupdcertsdir = @update_ca_certs_path@
 SWUPD_CERTS = certs/157753a5.0 \
 	certs/425b0f6b.0 \
 	certs/425b0f6b.key \

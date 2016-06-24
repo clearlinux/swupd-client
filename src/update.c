@@ -260,6 +260,8 @@ int main_update()
 	/* Step 2: housekeeping */
 
 	if (rm_staging_dir_contents("download")) {
+		printf("Error cleaning download directory\n");
+		ret = EXIT_FAILURE;
 		goto clean_curl;
 	}
 
@@ -398,11 +400,7 @@ clean_exit:
 	free_manifest(server_manifest);
 
 clean_curl:
-	swupd_curl_cleanup();
-	free_subscriptions();
-	free_globals();
-	v_lockfile(lock_fd);
-	dump_file_descriptor_leaks();
+	swupd_deinit(lock_fd);
 
 	if ((current_version < server_version) && (ret == 0)) {
 		printf("Update successful. System updated from version %d to version %d\n",

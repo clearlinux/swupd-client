@@ -49,10 +49,10 @@ static int verify_callback(int, X509_STORE_CTX *);
 static bool get_pubkey();
 
 FILE *fp_pubkey = NULL;
-static EVP_PKEY *pkey = NULL;
-static X509 *cert = NULL;
-static X509_STORE *store = NULL;
-static STACK_OF(X509) *x509_stack = NULL;
+EVP_PKEY *pkey = NULL;
+X509 *cert = NULL;
+X509_STORE *store = NULL;
+STACK_OF(X509) *x509_stack = NULL;
 //TODO: static char *chain = NULL;
 static char *crl = NULL;
 
@@ -62,10 +62,12 @@ static char *crl = NULL;
  * be validated.
  *
  * returns: true if can initialize and validate certificates, otherwise false */
-static bool initialize_signature(void)
+bool initialize_signature(void)
 {
 	ERR_load_crypto_strings();
 	ERR_load_PKCS7_strings();
+	EVP_add_digest(EVP_sha256());
+
 	if (!get_pubkey()) {
 		goto fail;
 	}
@@ -88,7 +90,7 @@ fail:
 
 /* Delete the memory used for string errors as well as memory allocated for
  * certificates and private keys. */
-static void terminate_signature(void)
+void terminate_signature(void)
 {
 	//TODO: once implemented, must free chain
 	//TODO: once implemented, must free crl
@@ -138,25 +140,15 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 	PKCS7 *p7;
 	BIO *verify_BIO;
 
-	if (!initialize_signature()) {
-		terminate_signature();
-		return false;
-	}
-
-	//this function has issues: EVP_add_digest(EVP_sha256());
-	OpenSSL_add_all_digests();
-
 	/* get the signature */
 	sig_fd = open(sig_filename, O_RDONLY);
 	if (sig_fd == -1) {
 		fprintf(stderr, "Failed open %s\n", sig_filename);
-		terminate_signature();
 		return false;
 	}
 	if (fstat(sig_fd, &st) != 0) {
 		fprintf(stderr, "Failed to stat %s file\n", sig_filename);
 		close(sig_fd);
-		terminate_signature();
 		return false;
 	}
 	sig_len = st.st_size;
@@ -164,7 +156,6 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 	if (sig == MAP_FAILED) {
 		fprintf(stderr, "Failed to mmap %s signature\n", sig_filename);
 		close(sig_fd);
-		terminate_signature();
 		return false;
 	}
 	sig_BIO = BIO_new_mem_buf(sig, sig_len);
@@ -173,7 +164,6 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 		ERR_print_errors_fp(stderr);
 		munmap(sig, sig_len);
 		close(sig_fd);
-		terminate_signature();
 		return false;
 	}
 
@@ -185,7 +175,6 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 		munmap(sig, sig_len);
 		close(sig_fd);
 		BIO_free(sig_BIO);
-		terminate_signature();
 		return false;
 	}
 
@@ -197,7 +186,6 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 		close(sig_fd);
 		BIO_free(sig_BIO);
 		PKCS7_free(p7);
-		terminate_signature();
 		return false;
 	}
 	if (fstat(data_fd, &st) != 0) {
@@ -207,7 +195,6 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 		close(data_fd);
 		BIO_free(sig_BIO);
 		PKCS7_free(p7);
-		terminate_signature();
 		return false;
 	}
 	data_len = st.st_size;
@@ -219,7 +206,6 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 		close(data_fd);
 		BIO_free(sig_BIO);
 		PKCS7_free(p7);
-		terminate_signature();
 		return false;
 	}
 	data_BIO = BIO_new_mem_buf(data, data_len);
@@ -232,7 +218,6 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 		close(data_fd);
 		BIO_free(sig_BIO);
 		PKCS7_free(p7);
-		terminate_signature();
 		return false;
 	}
 
@@ -248,7 +233,6 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 		BIO_free(sig_BIO);
 		BIO_free(data_BIO);
 		PKCS7_free(p7);
-		terminate_signature();
 		return false;
 	}
 
@@ -265,7 +249,6 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 	PKCS7_free(p7);
 
 	ERR_print_errors_fp(stderr);
-	terminate_signature();
 
 	if (ret == 1) {
 		printf("Signature check succeeded.\n");

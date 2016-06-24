@@ -3,6 +3,17 @@
 
 #include <stdbool.h>
 
+ /*
+ * Initialize this module.
+ * @return true <=> no error
+ */
+bool initialize_signature(void);
+
+/*
+ * Terminate usage of this module, free resources.
+ */
+void terminate_signature(void);
+
 /*
  * The given data file has already been downloaded from the given URL.
  * Download the corresponding signature file, and verify the data against the signature.

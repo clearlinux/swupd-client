@@ -245,14 +245,16 @@ int remove_bundle(const char *bundle_name)
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
 		printf("Error: Unable to determine current OS version\n");
-		v_lockfile(lock_fd);
-		return ECURRENT_VERSION;
+		ret = ECURRENT_VERSION;
+		goto out_free_curl;
 	}
 
 	swupd_curl_set_current_version(current_version);
 
 	current_mom = load_mom(current_version);
 	if (!current_mom) {
+		printf("Unable to download/verify %d Manifest.MoM\n", current_version);
+		ret = EMOM_NOTFOUND;
 		goto out_free_curl;
 	}
 
@@ -318,9 +320,7 @@ out_free_curl:
 		printf("Error: Bundle remove failed\n");
 	}
 
-	swupd_curl_cleanup();
-	v_lockfile(lock_fd);
-	dump_file_descriptor_leaks();
+	swupd_deinit(lock_fd);
 
 	return ret;
 }
@@ -522,8 +522,8 @@ int install_bundles_frontend(char **bundles)
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
 		printf("Error: Unable to determine current OS version\n");
-		v_lockfile(lock_fd);
-		return ECURRENT_VERSION;
+		ret = ECURRENT_VERSION;
+		goto clean_and_exit;
 	}
 
 	swupd_curl_set_current_version(current_version);
@@ -544,10 +544,7 @@ int install_bundles_frontend(char **bundles)
 
 	free_manifest(mom);
 clean_and_exit:
-	swupd_curl_cleanup();
-	v_lockfile(lock_fd);
-	dump_file_descriptor_leaks();
-	free_globals();
+	swupd_deinit(lock_fd);
 
 	return ret;
 }

@@ -38,6 +38,7 @@
 
 #include "config.h"
 #include "swupd.h"
+#include "signature.h"
 
 void check_root(void)
 {
@@ -571,6 +572,15 @@ void free_file_data(void *data)
 	free(file);
 }
 
+void swupd_deinit(int lock_fd){
+	terminate_signature();
+	swupd_curl_cleanup();
+	free_subscriptions();
+	free_globals();
+	v_lockfile(lock_fd);
+	dump_file_descriptor_leaks();
+}
+
 /* this function is intended to encapsulate the basic swupd
 * initializations for the majority of commands, that is:
 * 	- Make sure root is the user running the code
@@ -606,6 +616,11 @@ int swupd_init(int *lock_fd)
 	if (swupd_curl_init() != 0) {
 		ret = ECURL_INIT;
 		goto out_close_lock;
+	}
+
+	if (!initialize_signature()) {
+		terminate_signature();
+		return false;
 	}
 
 	return ret;

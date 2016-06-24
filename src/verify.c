@@ -612,9 +612,8 @@ int verify_main(int argc, char **argv)
 		version = get_current_version(path_prefix);
 		if (version < 0) {
 			printf("Error: Unable to determine current OS version\n");
-			free_globals();
-			v_lockfile(lock_fd);
-			return ECURRENT_VERSION;
+			ret = ECURRENT_VERSION;
+			goto clean_and_exit;
 		}
 	}
 
@@ -622,8 +621,8 @@ int verify_main(int argc, char **argv)
 		version = get_latest_version();
 		if (version < 0) {
 			printf("Unable to get latest version for install\n");
-			v_lockfile(lock_fd);
-			return EXIT_FAILURE;
+			ret = EXIT_FAILURE;
+			goto clean_and_exit;
 		}
 	}
 
@@ -631,8 +630,8 @@ int verify_main(int argc, char **argv)
 
 	if (!check_network()) {
 		printf("Error: Network issue, unable to download manifest\n");
-		v_lockfile(lock_fd);
-		return EXIT_FAILURE;
+		ret = EXIT_FAILURE;
+		goto clean_and_exit;
 	}
 
 	read_subscriptions_alt();
@@ -734,6 +733,7 @@ int verify_main(int argc, char **argv)
 		printf("Verifying files\n");
 		deal_with_hash_mismatches(official_manifest, repair);
 	}
+	free_manifest(official_manifest);
 
 brick_the_system_and_clean_curl:
 	/* clean up */
@@ -790,12 +790,7 @@ brick_the_system_and_clean_curl:
 /* this concludes the critical section, after this point it's clean up time, the disk content is finished and final */
 
 clean_and_exit:
-	swupd_curl_cleanup();
-	free_subscriptions();
-	free_manifest(official_manifest);
-	v_lockfile(lock_fd);
-	dump_file_descriptor_leaks();
-	free_globals();
+	swupd_deinit(lock_fd);
 
 	if (ret == EXIT_SUCCESS) {
 		if (cmdline_option_fix || cmdline_option_install) {

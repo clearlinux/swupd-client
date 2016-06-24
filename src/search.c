@@ -483,7 +483,7 @@ int search_main(int argc, char **argv)
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
 		printf("Failed swupd initialization, exiting now.\n");
-		goto clean_exit;
+		return ret;
 	}
 
 	if (!check_network()) {
@@ -519,10 +519,7 @@ int search_main(int argc, char **argv)
 	do_search(MoM, search_type, search_string);
 
 clean_exit:
-	free_manifest(MoM);
-	free_globals();
-	swupd_curl_cleanup();
-	v_lockfile(lock_fd);
+	swupd_deinit(lock_fd);
 
 	return ret;
 }

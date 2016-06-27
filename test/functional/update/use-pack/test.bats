@@ -32,7 +32,9 @@ teardown() {
   [ "${lines[5]}" = "Attempting to download version string to memory" ]
   [ "${lines[6]}" = "Preparing to update from 10 to 100" ]
   [ "${lines[7]}" = "Querying current manifest." ]
+  ignore_sigverify_error 8
   [ "${lines[8]}" = "Querying server manifest." ]
+  ignore_sigverify_error 9
   [ "${lines[9]}" = "Downloading os-core pack for version 100" ]
   [ "${lines[10]}" = "Extracting pack." ]
   [ "${lines[11]}" = "Statistics for going from version 10 to version 100:" ]

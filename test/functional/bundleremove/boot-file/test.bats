@@ -22,6 +22,8 @@ teardown() {
 
   echo "$output"
   [ "${lines[2]}" = "Attempting to download version string to memory" ]
+  ignore_sigverify_error 3
+  ignore_sigverify_error 3
   [ "${lines[3]}" = "Deleting bundle files..." ]
   [ "${lines[4]}" = "Total deleted files: 1" ]
   [ "${lines[5]}" = "Untracking bundle from system..." ]

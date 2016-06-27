@@ -40,6 +40,7 @@ teardown() {
   echo "$output"
   [ "${lines[5]}" = "Verifying version 100" ]
   [ "${lines[6]}" = "Attempting to download version string to memory" ]
+  ignore_sigverify_error 7
   [ "${lines[7]}" = "Starting download of remaining update content. This may take a while..." ]
   [ "${lines[8]}" = "Finishing download of update content..." ]
   [ "${lines[9]}" = "Adding any missing files" ]

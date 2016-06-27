@@ -67,4 +67,14 @@ create_fullfile_tar() {
 #   return
 # }
 
+ignore_sigverify_error() {
+  local index="$1"
+  if [[ "${lines[$index]}" =~ ^WARNING!!!\ FAILED\ TO\ VERIFY\ SIGNATURE\ OF\ Manifest.MoM ]]; then
+    # remove element from array
+    unset lines[$index]
+    # reassign indices
+    lines=("${lines[@]}")
+  fi
+}
+
 # vi: ft=sh ts=8 sw=2 sts=2 et tw=80

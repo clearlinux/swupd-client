@@ -17,6 +17,7 @@ teardown() {
 
   echo "$output"
   [ "${lines[2]}" = "Attempting to download version string to memory" ]
+  ignore_sigverify_error 3
   [ "${lines[3]}" = "bundle(s) already installed, exiting now" ]
 }
 

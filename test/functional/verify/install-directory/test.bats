@@ -24,6 +24,7 @@ teardown() {
   echo "$output"
   [ "${lines[5]}" = "Verifying version 10" ]
   [ "${lines[6]}" = "Attempting to download version string to memory" ]
+  ignore_sigverify_error 7
   [ "${lines[7]}" = "Downloading os-core pack for version 10" ]
   [ "${lines[8]}" = "Extracting pack." ]
   [ "${lines[9]}" = "Adding any missing files" ]

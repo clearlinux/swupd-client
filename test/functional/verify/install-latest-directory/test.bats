@@ -25,6 +25,7 @@ teardown() {
   [ "${lines[5]}" = "Attempting to download version string to memory" ]
   [ "${lines[6]}" = "Verifying version 100" ]
   [ "${lines[7]}" = "Attempting to download version string to memory" ]
+  ignore_sigverify_error 8
   [ "${lines[8]}" = "Downloading os-core pack for version 100" ]
   [ "${lines[9]}" = "Extracting pack." ]
   [ "${lines[10]}" = "Adding any missing files" ]

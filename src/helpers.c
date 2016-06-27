@@ -37,8 +37,8 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "swupd.h"
 #include "signature.h"
+#include "swupd.h"
 
 void check_root(void)
 {
@@ -572,7 +572,8 @@ void free_file_data(void *data)
 	free(file);
 }
 
-void swupd_deinit(int lock_fd){
+void swupd_deinit(int lock_fd)
+{
 	terminate_signature();
 	swupd_curl_cleanup();
 	free_subscriptions();

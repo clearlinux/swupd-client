@@ -23,18 +23,18 @@
  */
 
 #define _GNU_SOURCE
+#include <fcntl.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 #include <unistd.h>
-#include <fcntl.h>
 
 #include <openssl/bio.h>
+#include <openssl/crypto.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
-#include <openssl/crypto.h>
 
 #include "config.h"
 #include "signature.h"
@@ -42,7 +42,7 @@
 
 #ifdef SIGNATURES
 
-#define CERTNAME UPDATE_CA_CERTS_PATH"/"SWUPDCERT
+#define CERTNAME UPDATE_CA_CERTS_PATH "/" SWUPDCERT
 
 static bool validate_certificate(void);
 static int verify_callback(int, X509_STORE_CTX *);
@@ -334,7 +334,7 @@ static bool validate_certificate(void)
 
 	if (crl) {
 		if (!(lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file())) ||
-		   (X509_load_crl_file(lookup, crl, X509_FILETYPE_PEM) != 1)) {
+		    (X509_load_crl_file(lookup, crl, X509_FILETYPE_PEM) != 1)) {
 			fprintf(stderr, "Failed X509 crl init for %s\n", CERTNAME);
 			goto error;
 		}
@@ -385,7 +385,7 @@ int verify_callback(int ok, X509_STORE_CTX *stor)
 {
 	if (!ok) {
 		fprintf(stderr, "Error: %s\n",
-		X509_verify_cert_error_string(stor->error));
+			X509_verify_cert_error_string(stor->error));
 	}
 	return ok;
 }

@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
- /*
+/*
  * Initialize this module.
  * @return true <=> no error
  */

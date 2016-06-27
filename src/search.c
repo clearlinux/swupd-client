@@ -410,7 +410,7 @@ int download_manifests(struct manifest **MoM)
 	*MoM = load_mom(current_version);
 	if (!(*MoM)) {
 		printf("Cannot load official manifest MoM for version %i\n", current_version);
-		return ret;
+		return EMOM_NOTFOUND;
 	}
 
 	subscription_versions_from_MoM(*MoM, 0);

@@ -418,6 +418,16 @@ bool download_and_verify_signature(const char *data_url, const char *data_filena
 }
 
 #else
+bool initialize_signature(void)
+{
+	return true;
+}
+
+void terminate_signature(void)
+{
+	return;
+}
+
 bool download_and_verify_signature(const char UNUSED_PARAM *data_url, const char UNUSED_PARAM *data_filename)
 {
 	return true;

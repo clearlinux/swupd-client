@@ -18,6 +18,12 @@ teardown() {
   run sudo sh -c "$SWUPD verify --fix $SWUPD_OPTS"
 
   echo "$output"
+  [ "${lines[5]}" = "Verifying version 10" ]
+  [ "${lines[6]}" = "Attempting to download version string to memory" ]
+  [ "${lines[7]}" = "Starting download of remaining update content. This may take a while..." ]
+  [ "${lines[8]}" = "Finishing download of update content..." ]
+  [ "${lines[9]}" = "Adding any missing files" ]
+  [ "${lines[10]}" = "Fixing modified files" ]
   [ "${lines[11]}" = "Deleted $DIR/target-dir/testdir1/testdir2/testfile" ]
   [ "${lines[12]}" = "Deleted $DIR/target-dir/testdir1/testdir2" ]
   [ "${lines[13]}" = "Deleted $DIR/target-dir/testdir1" ]

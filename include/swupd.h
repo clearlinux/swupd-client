@@ -265,6 +265,7 @@ extern void dump_file_descriptor_leaks(void);
 extern int rm_staging_dir_contents(const char *rel_path);
 extern void dump_file_info(struct file *file);
 void free_file_data(void *data);
+void free_manifest_data(void *data);
 void remove_files_in_manifest_from_fs(struct manifest *m);
 void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2);
 extern struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bundlename);

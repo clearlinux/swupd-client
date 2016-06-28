@@ -106,8 +106,7 @@ static int load_bundle_manifest(const char *bundle_name, int version, struct man
 	swupd_curl_set_current_version(version);
 	mom = load_mom(version);
 	if (!mom) {
-		ret = EMOM_NOTFOUND;
-		goto out;
+		return EMOM_NOTFOUND;
 	}
 
 	sub_list = recurse_manifest(mom, bundle_name);
@@ -121,8 +120,8 @@ static int load_bundle_manifest(const char *bundle_name, int version, struct man
 	ret = 0;
 
 free_out:
+	list_free_list(sub_list);
 	free_manifest(mom);
-out:
 	return ret;
 }
 
@@ -399,7 +398,8 @@ static int install_bundles(struct list *bundles, int current_version, struct man
 	int ret;
 	struct file *file;
 	struct list *iter;
-	struct list *to_install_bundles, *to_install_files;
+	struct list *to_install_bundles = NULL;
+	struct list *to_install_files = NULL;
 
 	/* step 1: check bundle args are valid if so populate subs struct */
 	ret = add_subscriptions(bundles, current_version, mom);
@@ -492,6 +492,12 @@ static int install_bundles(struct list *bundles, int current_version, struct man
 	printf("Bundle(s) installation done.\n");
 
 out:
+	if (to_install_files) {
+		list_free_list(to_install_files);
+	}
+	if (to_install_bundles) {
+		list_free_list_and_data(to_install_bundles, free_manifest_data);
+	}
 	free_subscriptions();
 	return ret;
 }

@@ -389,7 +389,7 @@ void print_manifest_filenames(struct manifest *m)
 }
 #endif
 
-static void free_manifest_data(void *data)
+void free_manifest_data(void *data)
 {
 	struct manifest *manifest = (struct manifest *)data;
 

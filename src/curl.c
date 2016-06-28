@@ -447,7 +447,7 @@ static CURLcode swupd_curl_set_security_opts(CURL *curl)
 		goto exit;
 	}
 
-	curl_ret = curl_easy_setopt(curl, CURLOPT_PINNEDPUBLICKEY, "/usr/share/clear/update-ca/425b0f6b.key");
+	curl_ret = curl_easy_setopt(curl, CURLOPT_PINNEDPUBLICKEY, UPDATE_CA_CERTS_PATH "/425b0f6b.key");
 	if (curl_ret != CURLE_OK) {
 		goto exit;
 	}

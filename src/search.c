@@ -371,17 +371,19 @@ static double query_total_download_size(struct list *list)
 				      file->last_change, file->filename);
 
 			ret = swupd_query_url_content_size(url);
+			free(url);
 			if (ret != -1) {
 				/* Convert file size from bytes to MB */
 				ret = ret / 1000000;
 				size_sum += ret;
 			} else {
+				free(untard_file);
 				return ret;
 			}
 		}
+		free(untard_file);
 	}
 
-	free(untard_file);
 	return size_sum;
 }
 
@@ -520,7 +522,7 @@ int search_main(int argc, char **argv)
 	do_search(MoM, search_type, search_string);
 
 clean_exit:
+	free_manifest(MoM);
 	swupd_deinit(lock_fd);
-	free(MoM);
 	return ret;
 }

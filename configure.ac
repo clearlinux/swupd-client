@@ -28,7 +28,7 @@ AS_IF([test "x$enable_bzip2" != "xno" ],
 AC_ARG_ENABLE(
   [signature-verification],
   [AS_HELP_STRING([--enable-signature-verification], [Enable signature check (disabled by default)])],
-  [AC_DEFINE([SIGNATURES], [], [Enable signature check as default])]
+  [AC_DEFINE([SIGNATURES], 1, [Enable signature check as default])]
 
 )
 

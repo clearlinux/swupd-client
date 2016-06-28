@@ -118,145 +118,132 @@ void terminate_signature(void)
 	CRYPTO_cleanup_all_ex_data();
 }
 
-/* Verifies that the file and the signature exists, and does a signature
- * check afterwards.
+/* Verifies that the file and the signature exists, and does a signature check
+ * afterwards. If any error is to be considered a verify failure, then
+ * ERRORS_FATAL should be set to true.
  *
  * returns: true if able to validate the signature, false otherwise */
-static bool verify_signature(const char *data_filename, const char *sig_filename)
+static bool verify_signature(const char *data_filename, const char *sig_filename, bool errors_fatal)
 {
 	int ret;
+	bool result = false;
 	struct stat st;
+	char *errorstr = NULL;
 
-	int data_fd;
+	int data_fd = -1;
 	size_t data_len;
 	unsigned char *data = NULL;
-	BIO *data_BIO;
+	BIO *data_BIO = NULL;
 
-	int sig_fd;
+	int sig_fd = -1;
 	size_t sig_len;
 	unsigned char *sig = NULL;
-	BIO *sig_BIO;
+	BIO *sig_BIO = NULL;
 
-	PKCS7 *p7;
-	BIO *verify_BIO;
+	PKCS7 *p7 = NULL;
+	BIO *verify_BIO = NULL;
 
 	/* get the signature */
 	sig_fd = open(sig_filename, O_RDONLY);
 	if (sig_fd == -1) {
-		fprintf(stderr, "Failed open %s\n", sig_filename);
-		return false;
+		string_or_die(&errorstr, "Failed open %s: %s\n", sig_filename, strerror(errno));
+		goto error;
 	}
 	if (fstat(sig_fd, &st) != 0) {
-		fprintf(stderr, "Failed to stat %s file\n", sig_filename);
-		close(sig_fd);
-		return false;
+		string_or_die(&errorstr, "Failed to stat %s file\n", sig_filename);
+		goto error;
 	}
 	sig_len = st.st_size;
 	sig = mmap(NULL, sig_len, PROT_READ, MAP_PRIVATE, sig_fd, 0);
 	if (sig == MAP_FAILED) {
-		fprintf(stderr, "Failed to mmap %s signature\n", sig_filename);
-		close(sig_fd);
-		return false;
+		string_or_die(&errorstr, "Failed to mmap %s signature\n", sig_filename);
+		goto error;
 	}
 	sig_BIO = BIO_new_mem_buf(sig, sig_len);
 	if (!sig_BIO) {
-		fprintf(stderr, "Failed to read %s signature into BIO\n", sig_filename);
-		ERR_print_errors_fp(stderr);
-		munmap(sig, sig_len);
-		close(sig_fd);
-		return false;
+		string_or_die(&errorstr, "Failed to read %s signature into BIO\n", sig_filename);
+		goto error;
 	}
 
 	/* the signature is in DER format, so d2i it into verification pkcs7 form */
 	p7 = d2i_PKCS7_bio(sig_BIO, NULL);
 	if (p7 == NULL) {
-		fprintf(stderr, "NULL PKCS7 File\n");
-		ERR_print_errors_fp(stderr);
-		munmap(sig, sig_len);
-		close(sig_fd);
-		BIO_free(sig_BIO);
-		return false;
+		string_or_die(&errorstr, "NULL PKCS7 File\n");
+		goto error;
 	}
 
 	/* get the data to be verified */
 	data_fd = open(data_filename, O_RDONLY);
 	if (data_fd == -1) {
-		fprintf(stderr, "Failed open %s\n", data_filename);
-		munmap(sig, sig_len);
-		close(sig_fd);
-		BIO_free(sig_BIO);
-		PKCS7_free(p7);
-		return false;
+		string_or_die(&errorstr, "Failed open %s\n", data_filename);
+		goto error;
 	}
 	if (fstat(data_fd, &st) != 0) {
-		fprintf(stderr, "Failed to stat %s\n", data_filename);
-		munmap(sig, sig_len);
-		close(sig_fd);
-		close(data_fd);
-		BIO_free(sig_BIO);
-		PKCS7_free(p7);
-		return false;
+		string_or_die(&errorstr, "Failed to stat %s\n", data_filename);
+		goto error;
 	}
 	data_len = st.st_size;
 	data = mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
 	if (data == MAP_FAILED) {
-		fprintf(stderr, "Failed to mmap %s\n", data_filename);
-		munmap(sig, sig_len);
-		close(sig_fd);
-		close(data_fd);
-		BIO_free(sig_BIO);
-		PKCS7_free(p7);
-		return false;
+		string_or_die(&errorstr, "Failed to mmap %s\n", data_filename);
+		goto error;
 	}
 	data_BIO = BIO_new_mem_buf(data, data_len);
 	if (!data_BIO) {
-		fprintf(stderr, "Failed to read %s into BIO\n", data_filename);
-		ERR_print_errors_fp(stderr);
-		munmap(sig, sig_len);
-		close(sig_fd);
-		munmap(data, data_len);
-		close(data_fd);
-		BIO_free(sig_BIO);
-		PKCS7_free(p7);
-		return false;
+		string_or_die(&errorstr, "Failed to read %s into BIO\n", data_filename);
+		goto error;
 	}
 
 	/* munge the signature and data into a verifiable format */
 	verify_BIO = PKCS7_dataInit(p7, data_BIO);
 	if (!verify_BIO) {
-		fprintf(stderr, "Failed PKCS7_dataInit()\n");
-		ERR_print_errors_fp(stderr);
-		munmap(sig, sig_len);
-		close(sig_fd);
-		munmap(data, data_len);
-		close(data_fd);
-		BIO_free(sig_BIO);
-		BIO_free(data_BIO);
-		PKCS7_free(p7);
-		return false;
+		string_or_die(&errorstr, "Failed PKCS7_dataInit()\n");
+		goto error;
 	}
 
 	/* Verify the signature, outdata can be NULL because we don't use it */
 	ret = PKCS7_verify(p7, x509_stack, store, verify_BIO, NULL, 0);
-
-	munmap(sig, sig_len);
-	close(sig_fd);
-	munmap(data, data_len);
-	close(data_fd);
-	BIO_free(sig_BIO);
-	BIO_free(data_BIO);
-	BIO_free(verify_BIO);
-	PKCS7_free(p7);
-
-	ERR_print_errors_fp(stderr);
-
 	if (ret == 1) {
 		printf("Signature check succeeded.\n");
-		return true;
+		result = true;
+	} else {
+		string_or_die(&errorstr, "Signature check failed!\n");
 	}
 
-	fprintf(stderr, "Signature check failed!\n");
-	return false;
+error:
+	if (!result && errors_fatal) {
+		fputs(errorstr, stderr);
+		ERR_print_errors_fp(stderr);
+	}
+
+	free(errorstr);
+
+	if (sig) {
+		munmap(sig, sig_len);
+	}
+	if (sig_fd >= 0) {
+		close(sig_fd);
+	}
+	if (data) {
+		munmap(data, data_len);
+	}
+	if (data_fd >= 0) {
+		close(data_fd);
+	}
+	if (sig_BIO) {
+		BIO_free(sig_BIO);
+	}
+	if (data_BIO) {
+		BIO_free(data_BIO);
+	}
+	if (verify_BIO) {
+		BIO_free(verify_BIO);
+	}
+	if (p7) {
+		PKCS7_free(p7);
+	}
+
+	return result;
 }
 
 /* Make sure the certificate exists and extract the public key from it.
@@ -390,10 +377,11 @@ int verify_callback(int ok, X509_STORE_CTX *stor)
 	return ok;
 }
 
-/* Downloads the corresponding signature filename from the
- * swupd server.
+/* Verifies signature for the local file DATA_FILENAME first, and on failure
+ * downloads the signature based on DATA_URL and tries to verify again.
  *
- * returns: true if signature was downloaded, false otherwise
+ * returns: true if signature verification succeeded, false if verification
+ * failed, or the signature download failed
  */
 bool download_and_verify_signature(const char *data_url, const char *data_filename)
 {
@@ -406,12 +394,21 @@ bool download_and_verify_signature(const char *data_url, const char *data_filena
 
 	string_or_die(&sig_filename, "%s.sig", data_filename);
 
-	ret = swupd_curl_get_file(sig_url, sig_filename, NULL, NULL, false);
-	if (ret) {
-		result = false;
-	} else {
-		result = verify_signature(data_filename, sig_filename);
+	// Try verifying a local copy of the signature first
+	result = verify_signature(data_filename, sig_filename, false);
+	if (result) {
+		goto out;
 	}
+
+	// Else, download a fresh signature, and verify
+	ret = swupd_curl_get_file(sig_url, sig_filename, NULL, NULL, false);
+	if (ret == 0) {
+		result = verify_signature(data_filename, sig_filename, true);
+	} else {
+		// download failed
+		result = false;
+	}
+out:
 	free(sig_filename);
 	free(sig_url);
 	return result;

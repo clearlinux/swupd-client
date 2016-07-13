@@ -31,6 +31,8 @@ extern "C" {
 
 #define MAX_TRIES 3
 
+#define SWUPD_HASH_DIRNAME "DIRECTORY"
+
 struct sub {
 	/* name of bundle/component/subscription */
 	char *component;

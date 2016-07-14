@@ -239,6 +239,7 @@ int remove_bundle(const char *bundle_name)
 
 	if (!is_tracked_bundle(bundle_name)) {
 		ret = EBUNDLE_NOT_TRACKED;
+		printf("Warning: Bundle \"%s\" does not seem to be installed\n", bundle_name);
 		goto out_free_curl;
 	}
 

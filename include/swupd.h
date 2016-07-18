@@ -62,6 +62,7 @@ struct version_container {
 
 struct header;
 
+extern bool force_ignore_unverified_signature;
 extern bool force;
 extern int verbose;
 extern int update_count;

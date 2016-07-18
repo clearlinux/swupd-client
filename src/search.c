@@ -71,6 +71,7 @@ static void print_help(const char *name)
 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
+	printf("   -y, --force-continue-with-unverified-signature    Attempt to proceed despite MoM signature verification failure\n");
 
 	printf("\nResults format:\n");
 	printf(" 'Bundle Name'  :  'File matching search term'\n\n");
@@ -91,6 +92,7 @@ static const struct option prog_opts[] = {
 	{ "init", no_argument, 0, 'i' },
 	{ "display-files", no_argument, 0, 'd' },
 	{ "statedir", required_argument, 0, 'S' },
+	{ "force-continue-with-unverified-signature", no_argument, 0, 'y' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -98,7 +100,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hu:c:v:P:p:F:s:lbidS:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hu:c:v:P:p:F:s:lbidS:y", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -186,6 +188,9 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'd':
 			display_files = true;
+			break;
+		case 'y':
+			force_ignore_unverified_signature = true;
 			break;
 		default:
 			printf("Error: unrecognized option: -'%c',\n\n", opt);

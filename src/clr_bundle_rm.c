@@ -51,6 +51,7 @@ static void print_help(const char *name)
 	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
+	printf("   -y, --force-continue-with-unverified-signature    Attempt to proceed despite MoM signature verification failure\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
 	printf("\n");
 }
@@ -64,6 +65,7 @@ static const struct option prog_opts[] = {
 	{ "port", required_argument, 0, 'P' },
 	{ "format", required_argument, 0, 'F' },
 	{ "force", no_argument, 0, 'x' },
+	{ "force-continue-with-unverified-signature", no_argument, 0, 'y' },
 	{ "statedir", required_argument, 0, 'S' },
 	{ 0, 0, 0, 0 }
 };
@@ -72,7 +74,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxp:u:c:v:P:F:S:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxp:u:c:v:P:F:S:y", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -126,6 +128,9 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'x':
 			force = true;
+			break;
+		case 'y':
+			force_ignore_unverified_signature = true;
 			break;
 		default:
 			printf("error: unrecognized option\n\n");

@@ -252,11 +252,8 @@ static int bus_message_read_options(sd_bus_message *m,
 				return r;
 			}
 		} else {
-			r = sd_bus_message_skip(m, "v");
-			if (r < 0) {
-				sd_bus_error_set_errnof(error, -r, "Can't skip unwanted option value");
-				return r;
-			}
+			sd_bus_error_set_errnof(error, EINVAL, "Unrecognized option: %s", argname);
+			return -EINVAL;
 		}
 
                 r = sd_bus_message_exit_container(m);

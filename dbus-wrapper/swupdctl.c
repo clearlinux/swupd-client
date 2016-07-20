@@ -47,19 +47,19 @@ static const struct option prog_opts_main[] = {
 
 static void copyright_header(const char *name)
 {
-        printf("%s 1.0\n", name);
-        printf("   Copyright (C) 2012-2016 Intel Corporation\n");
-        printf("\n");
+	printf("%s 1.0\n", name);
+	printf("   Copyright (C) 2012-2016 Intel Corporation\n");
+	printf("\n");
 }
 
 static struct subcmd commands[] = {
-	{ "bundle-add", "Install a new bundle", bundle_add_main},
-	{ "bundle-remove", "Uninstall a bundle", bundle_remove_main},
-	{ "hashdump", "Dumps the HMAC hash of a file", hashdump_main},
-	{ "update", "Update to latest OS version", update_main},
-	{ "verify", "Verify content for OS version", verify_main},
-	{ "check-update", "Checks if a new OS version is available", check_update_main},
-	{ "search", "Search Clear Linux for a binary or library", search_main},
+	{ "bundle-add", "Install a new bundle", bundle_add_main },
+	{ "bundle-remove", "Uninstall a bundle", bundle_remove_main },
+	{ "hashdump", "Dumps the HMAC hash of a file", hashdump_main },
+	{ "update", "Update to latest OS version", update_main },
+	{ "verify", "Verify content for OS version", verify_main },
+	{ "check-update", "Checks if a new OS version is available", check_update_main },
+	{ "search", "Search Clear Linux for a binary or library", search_main },
 	{ 0 }
 };
 

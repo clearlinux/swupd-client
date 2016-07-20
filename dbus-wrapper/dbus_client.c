@@ -41,7 +41,7 @@ static int on_child_output_received(sd_bus_message *message, void *userdata, sd_
 	const char *output;
 	int r;
 
-	r  = sd_bus_message_read(message, "s", &output);
+	r = sd_bus_message_read(message, "s", &output);
 	if (r < 0) {
 		ERR("Can't read client's output: %s", strerror(-r));
 		return -1;
@@ -58,7 +58,7 @@ static int on_request_completed(sd_bus_message *message, void *userdata, sd_bus_
 	int code;
 	int r;
 
-	r  = sd_bus_message_read(message, "si", &method, &code);
+	r = sd_bus_message_read(message, "si", &method, &code);
 	if (r < 0) {
 		ERR("Can't read request results: %s", strerror(-r));
 		abort();
@@ -296,9 +296,9 @@ int dbus_client_call_method(const char *const method, struct list *opts, dbus_cm
 		goto finish;
 	}
 
-        r = sd_bus_attach_event(bus, event, 0);
-        if (r < 0) {
-                ERR("Failed to attach bus to event loop: %s", strerror(-r));
+	r = sd_bus_attach_event(bus, event, 0);
+	if (r < 0) {
+		ERR("Failed to attach bus to event loop: %s", strerror(-r));
 		goto finish;
 	}
 

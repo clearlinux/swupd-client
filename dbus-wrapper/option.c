@@ -33,13 +33,13 @@ command_option_t *construct_command_option(const char *name, option_type_t type,
 
 	switch (type) {
 	case TYPE_STRING:
-		option->value.as_str = strdup((char *) value);
+		option->value.as_str = strdup((char *)value);
 		break;
 	case TYPE_BOOL:
-		option->value.as_bool = * (bool*) value;
+		option->value.as_bool = *(bool *)value;
 		break;
 	case TYPE_INT:
-		option->value.as_int = * (int*) value;
+		option->value.as_int = *(int *)value;
 		break;
 	default:
 		ERR("Wrong option type");

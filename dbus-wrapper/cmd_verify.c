@@ -33,42 +33,42 @@
 #include "log.h"
 
 static const struct option prog_opts[] = {
-        { "help", no_argument, 0, 'h' },
-        { "manifest", required_argument, 0, 'm' },
-        { "path", required_argument, 0, 'p' },
-        { "url", required_argument, 0, 'u' },
-        { "port", required_argument, 0, 'P' },
-        { "contenturl", required_argument, 0, 'c' },
-        { "versionurl", required_argument, 0, 'v' },
-        { "fix", no_argument, 0, 'f' },
-        { "install", no_argument, 0, 'i' },
-        { "format", required_argument, 0, 'F' },
-        { "quick", no_argument, 0, 'q' },
-        { "force", no_argument, 0, 'x' },
-        { "statedir", required_argument, 0, 'S' },
-        { 0, 0, 0, 0 }
+	{ "help", no_argument, 0, 'h' },
+	{ "manifest", required_argument, 0, 'm' },
+	{ "path", required_argument, 0, 'p' },
+	{ "url", required_argument, 0, 'u' },
+	{ "port", required_argument, 0, 'P' },
+	{ "contenturl", required_argument, 0, 'c' },
+	{ "versionurl", required_argument, 0, 'v' },
+	{ "fix", no_argument, 0, 'f' },
+	{ "install", no_argument, 0, 'i' },
+	{ "format", required_argument, 0, 'F' },
+	{ "quick", no_argument, 0, 'q' },
+	{ "force", no_argument, 0, 'x' },
+	{ "statedir", required_argument, 0, 'S' },
+	{ 0, 0, 0, 0 }
 };
 
 static void print_help(const char *name)
 {
-        printf("Usage:\n");
-        printf("   swupd %s [OPTION...]\n\n", basename((char *)name));
-        printf("Help Options:\n");
-        printf("   -h, --help              Show help options\n\n");
-        printf("Application Options:\n");
-        printf("   -m, --manifest=M        Verify against manifest version M\n");
-        printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
-        printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
-        printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
-        printf("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
-        printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version file downloads\n");
-        printf("   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files)\n");
-        printf("   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory\n");
-        printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-        printf("   -q, --quick             Don't compare hashes, only fix missing files\n");
-        printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
-        printf("   -S, --statedir          Specify alternate swupd state directory\n");
-        printf("\n");
+	printf("Usage:\n");
+	printf("   swupd %s [OPTION...]\n\n", basename((char *)name));
+	printf("Help Options:\n");
+	printf("   -h, --help              Show help options\n\n");
+	printf("Application Options:\n");
+	printf("   -m, --manifest=M        Verify against manifest version M\n");
+	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
+	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
+	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
+	printf("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
+	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version file downloads\n");
+	printf("   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files)\n");
+	printf("   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory\n");
+	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
+	printf("   -q, --quick             Don't compare hashes, only fix missing files\n");
+	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
+	printf("   -S, --statedir          Specify alternate swupd state directory\n");
+	printf("\n");
 }
 
 static bool parse_options(int argc, char **argv, struct list **opts)
@@ -79,124 +79,124 @@ static bool parse_options(int argc, char **argv, struct list **opts)
 	bool fix = false;
 	bool path_prefix = false;
 
-        while ((opt = getopt_long(argc, argv, "hxm:p:u:P:c:v:fiF:qS:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxm:p:u:P:c:v:fiF:qS:", prog_opts, NULL)) != -1) {
 		command_option_t *option = NULL;
 		int port = -1;
 		bool bool_true = true;
 
-                switch (opt) {
-                case '?':
-                case 'h':
-                        print_help(argv[0]);
+		switch (opt) {
+		case '?':
+		case 'h':
+			print_help(argv[0]);
 			exit(EXIT_SUCCESS);
-                case 'm':
-                        if (strcmp("latest", optarg) == 0) {
-                                version = -1;
-                        } else if (sscanf(optarg, "%i", &version) != 1) {
-                                printf("Invalid --manifest argument\n\n");
-                                return false;
-                        }
+		case 'm':
+			if (strcmp("latest", optarg) == 0) {
+				version = -1;
+			} else if (sscanf(optarg, "%i", &version) != 1) {
+				printf("Invalid --manifest argument\n\n");
+				return false;
+			}
 			option = construct_command_option("manifest", TYPE_INT, &version);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'p': /* default empty path_prefix verifies the running OS */
-                        if (!optarg) {
-                                printf("Invalid --path argument\n\n");
-                                return false;
-                        }
+			break;
+		case 'p': /* default empty path_prefix verifies the running OS */
+			if (!optarg) {
+				printf("Invalid --path argument\n\n");
+				return false;
+			}
 			path_prefix = true;
 			option = construct_command_option("path", TYPE_STRING, optarg);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'u':
-                        if (!optarg) {
-                                printf("Invalid --url argument\n\n");
-                                return false;
-                        }
+			break;
+		case 'u':
+			if (!optarg) {
+				printf("Invalid --url argument\n\n");
+				return false;
+			}
 			option = construct_command_option("url", TYPE_STRING, optarg);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'P':
-                        if (sscanf(optarg, "%i", &port) != 1) {
-                                printf("Invalid --port argument\n\n");
-                                return false;
-                        }
+			break;
+		case 'P':
+			if (sscanf(optarg, "%i", &port) != 1) {
+				printf("Invalid --port argument\n\n");
+				return false;
+			}
 			option = construct_command_option("port", TYPE_INT, &port);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'c':
-                        if (!optarg) {
-                                printf("Invalid --contenturl argument\n\n");
-                                return false;
-                        }
+			break;
+		case 'c':
+			if (!optarg) {
+				printf("Invalid --contenturl argument\n\n");
+				return false;
+			}
 			option = construct_command_option("contenturl", TYPE_STRING, optarg);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'v':
+			break;
+		case 'v':
 			if (!optarg) {
 				printf("Invalid --versionurl argument\n\n");
 				return false;
 			}
 			option = construct_command_option("versionurl", TYPE_STRING, optarg);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'f':
+			break;
+		case 'f':
 			fix = true;
 			option = construct_command_option("fix", TYPE_BOOL, &fix);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'i':
+			break;
+		case 'i':
 			install = true;
 			option = construct_command_option("install", TYPE_BOOL, &install);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'F':
-                        if (!optarg || !is_format_correct(optarg)) {
-                                printf("Invalid --format argument\n\n");
-                                return false;
-                        }
+			break;
+		case 'F':
+			if (!optarg || !is_format_correct(optarg)) {
+				printf("Invalid --format argument\n\n");
+				return false;
+			}
 			option = construct_command_option("format", TYPE_STRING, optarg);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'S':
-                        if (!optarg || !is_statedir_correct(optarg)) {
-                                printf("Invalid --statedir argument\n\n");
-                                return false;
-                        }
+			break;
+		case 'S':
+			if (!optarg || !is_statedir_correct(optarg)) {
+				printf("Invalid --statedir argument\n\n");
+				return false;
+			}
 			option = construct_command_option("statedir", TYPE_STRING, optarg);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'q':
+			break;
+		case 'q':
 			option = construct_command_option("quick", TYPE_BOOL, &bool_true);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'x':
+			break;
+		case 'x':
 			option = construct_command_option("force", TYPE_BOOL, &bool_true);
 			*opts = list_append_data(*opts, option);
-                        break;
-                default:
-                        printf("Unrecognized option\n\n");
-                        return false;
-                }
-        }
+			break;
+		default:
+			printf("Unrecognized option\n\n");
+			return false;
+		}
+	}
 
-        if (install) {
-                if (version == 0) {
-                        printf("--install option requires -m version option\n");
-                        return false;
-                }
-                if (!path_prefix) {
-                        printf("--install option requires --path option\n");
-                        return false;
-                }
-                if (fix) {
-                        printf("--install and --fix options are mutually exclusive\n");
-                        return false;
-                }
-        } else if (version == -1) {
-                printf("-m latest only supported with --install\n");
-                return false;
-        }
+	if (install) {
+		if (version == 0) {
+			printf("--install option requires -m version option\n");
+			return false;
+		}
+		if (!path_prefix) {
+			printf("--install option requires --path option\n");
+			return false;
+		}
+		if (fix) {
+			printf("--install and --fix options are mutually exclusive\n");
+			return false;
+		}
+	} else if (version == -1) {
+		printf("-m latest only supported with --install\n");
+		return false;
+	}
 
 	return true;
 }
@@ -211,7 +211,7 @@ int verify_main(int argc, char **argv)
 		goto finish;
 	}
 
-        ret = dbus_client_call_method("Verify", opts, DBUS_CMD_NO_ARGS, NULL);
+	ret = dbus_client_call_method("Verify", opts, DBUS_CMD_NO_ARGS, NULL);
 
 finish:
 	list_free_list_and_data(opts, free_command_option);

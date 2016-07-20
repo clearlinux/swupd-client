@@ -79,84 +79,84 @@ static bool parse_options(int argc, char **argv, struct list **opts)
 		int port = -1;
 		bool bool_true = true;
 
-                switch (opt) {
-                case '?':
-                case 'h':
-                        print_help(argv[0]);
+		switch (opt) {
+		case '?':
+		case 'h':
+			print_help(argv[0]);
 			exit(EXIT_SUCCESS);
 		case 'd':
 			option = construct_command_option("download", TYPE_BOOL, &bool_true);
 			*opts = list_append_data(*opts, option);
 			break;
-                case 'u':
-                        if (!optarg) {
-                                printf("Invalid --url argument\n\n");
-                                return false;
-                        }
+		case 'u':
+			if (!optarg) {
+				printf("Invalid --url argument\n\n");
+				return false;
+			}
 			option = construct_command_option("url", TYPE_STRING, optarg);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'P':
-                        if (sscanf(optarg, "%i", &port) != 1) {
-                                printf("Invalid --port argument\n\n");
-                                return false;
-                        }
+			break;
+		case 'P':
+			if (sscanf(optarg, "%i", &port) != 1) {
+				printf("Invalid --port argument\n\n");
+				return false;
+			}
 			option = construct_command_option("port", TYPE_INT, &port);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'c':
-                        if (!optarg) {
-                                printf("Invalid --contenturl argument\n\n");
-                                return false;
-                        }
+			break;
+		case 'c':
+			if (!optarg) {
+				printf("Invalid --contenturl argument\n\n");
+				return false;
+			}
 			option = construct_command_option("contenturl", TYPE_STRING, optarg);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'v':
+			break;
+		case 'v':
 			if (!optarg) {
 				printf("Invalid --versionurl argument\n\n");
 				return false;
 			}
 			option = construct_command_option("versionurl", TYPE_STRING, optarg);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 's':
+			break;
+		case 's':
 			option = construct_command_option("status", TYPE_BOOL, &bool_true);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'F':
-                        if (!optarg || !is_format_correct(optarg)) {
-                                printf("Invalid --format argument\n\n");
-                                return false;
-                        }
+			break;
+		case 'F':
+			if (!optarg || !is_format_correct(optarg)) {
+				printf("Invalid --format argument\n\n");
+				return false;
+			}
 			option = construct_command_option("format", TYPE_STRING, optarg);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'S':
-                        if (!optarg || !is_statedir_correct(optarg)) {
-                                printf("Invalid --statedir argument\n\n");
-                                return false;
-                        }
+			break;
+		case 'S':
+			if (!optarg || !is_statedir_correct(optarg)) {
+				printf("Invalid --statedir argument\n\n");
+				return false;
+			}
 			option = construct_command_option("statedir", TYPE_STRING, optarg);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'p': /* default empty path_prefix verifies the running OS */
-                        if (!optarg) {
-                                printf("Invalid --path argument\n\n");
-                                return false;
-                        }
+			break;
+		case 'p': /* default empty path_prefix verifies the running OS */
+			if (!optarg) {
+				printf("Invalid --path argument\n\n");
+				return false;
+			}
 			option = construct_command_option("path", TYPE_STRING, optarg);
 			*opts = list_append_data(*opts, option);
-                        break;
-                case 'x':
+			break;
+		case 'x':
 			option = construct_command_option("force", TYPE_BOOL, &bool_true);
 			*opts = list_append_data(*opts, option);
-                        break;
-                default:
-                        printf("Unrecognized option\n\n");
-                        return false;
-                }
-        }
+			break;
+		default:
+			printf("Unrecognized option\n\n");
+			return false;
+		}
+	}
 
 	return true;
 }
@@ -171,7 +171,7 @@ int update_main(int argc, char **argv)
 		goto finish;
 	}
 
-        ret = dbus_client_call_method("Update", opts, DBUS_CMD_NO_ARGS, NULL);
+	ret = dbus_client_call_method("Update", opts, DBUS_CMD_NO_ARGS, NULL);
 
 finish:
 	list_free_list_and_data(opts, free_command_option);

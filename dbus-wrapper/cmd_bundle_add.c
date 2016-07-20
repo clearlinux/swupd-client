@@ -170,7 +170,7 @@ int bundle_add_main(int argc, char **argv)
 
 	/* DBUS_CMD_MULTIPLE_ARGS makes dbus_client_call_method() interpret (argv + optind)
 	   as a slice of the NULL-terminated string vector 'argv' from 'optind' to its end. */
-        ret = dbus_client_call_method("BundleAdd", opts, DBUS_CMD_MULTIPLE_ARGS, (argv + optind));
+	ret = dbus_client_call_method("BundleAdd", opts, DBUS_CMD_MULTIPLE_ARGS, (argv + optind));
 
 finish:
 	list_free_list_and_data(opts, free_command_option);

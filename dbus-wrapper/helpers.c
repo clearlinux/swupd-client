@@ -31,15 +31,15 @@
 
 static bool is_valid_integer_format(const char *str)
 {
-        unsigned long long int version;
-        errno = 0;
+	unsigned long long int version;
+	errno = 0;
 
-        version = strtoull(str, NULL, 10);
-        if ((errno < 0) || (version == 0)) {
-                return false;
-        }
+	version = strtoull(str, NULL, 10);
+	if ((errno < 0) || (version == 0)) {
+		return false;
+	}
 
-        return true;
+	return true;
 }
 
 bool is_format_correct(const char *userinput)
@@ -58,7 +58,7 @@ bool is_format_correct(const char *userinput)
 		return false;
 	}
 
-        return true;
+	return true;
 }
 
 bool is_statedir_correct(const char *path)

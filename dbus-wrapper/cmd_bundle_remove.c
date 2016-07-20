@@ -158,7 +158,7 @@ int bundle_remove_main(int argc, char **argv)
 		goto finish;
 	}
 
-        ret = dbus_client_call_method("BundleRemove", opts, DBUS_CMD_SINGLE_ARG, (argv + optind));
+	ret = dbus_client_call_method("BundleRemove", opts, DBUS_CMD_SINGLE_ARG, (argv + optind));
 
 finish:
 	list_free_list_and_data(opts, free_command_option);

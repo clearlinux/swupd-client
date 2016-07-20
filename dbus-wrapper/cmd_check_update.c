@@ -142,7 +142,7 @@ int check_update_main(int argc, char **argv)
 		print_help(argv[0]);
 		goto finish;
 	}
-        ret = dbus_client_call_method("CheckUpdate", opts, DBUS_CMD_SINGLE_ARG, (argv + optind));
+	ret = dbus_client_call_method("CheckUpdate", opts, DBUS_CMD_SINGLE_ARG, (argv + optind));
 
 finish:
 	list_free_list_and_data(opts, free_command_option);

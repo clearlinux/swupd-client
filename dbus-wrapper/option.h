@@ -31,7 +31,7 @@ typedef enum {
 } option_type_t;
 
 typedef union _option_value {
-        char *as_str;
+	char *as_str;
 	bool as_bool;
 	int as_int;
 } option_value_t;
@@ -44,6 +44,5 @@ typedef struct _command_option {
 
 command_option_t *construct_command_option(const char *name, option_type_t type, void *value);
 void free_command_option(void *data);
-
 
 #endif /* OPTION_H */

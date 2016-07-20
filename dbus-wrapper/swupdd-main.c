@@ -37,7 +37,7 @@
 #include "log.h"
 #include "list.h"
 
-#define SWUPD_CLIENT    "swupd"
+#define SWUPD_CLIENT "swupd"
 #define TIMEOUT_EXIT_SEC 30
 
 typedef enum {
@@ -57,7 +57,7 @@ typedef struct _daemon_state {
 	method_t method;
 } daemon_state_t;
 
-static const char * const _method_str_map[] = {
+static const char *const _method_str_map[] = {
 	NULL,
 	"CheckUpdate",
 	"Update",
@@ -68,7 +68,7 @@ static const char * const _method_str_map[] = {
 	"Search"
 };
 
-static const char * const _method_opt_map[] = {
+static const char *const _method_opt_map[] = {
 	NULL,
 	"check-update",
 	"update",
@@ -87,8 +87,7 @@ static char **list_to_strv(struct list *strlist)
 	strv = (char **)calloc((list_len(strlist) + 1), sizeof(char *));
 
 	temp = strv;
-	while (strlist)
-	{
+	while (strlist) {
 		*temp = strlist->data;
 		temp++;
 		strlist = strlist->next;
@@ -96,13 +95,13 @@ static char **list_to_strv(struct list *strlist)
 	return strv;
 }
 
-static int is_in_array(const char *key, char const * const arr[])
+static int is_in_array(const char *key, char const *const arr[])
 {
 	if (arr == NULL) {
 		return 0;
 	}
 
-	char const * const *temp = arr;
+	char const *const *temp = arr;
 	while (*temp) {
 		if (strcmp(key, *temp) == 0) {
 			return 1;
@@ -214,9 +213,9 @@ static int bus_message_read_option_int(sd_bus_message *m,
 }
 
 static int bus_message_read_options(sd_bus_message *m,
-	                            char const * const opts_str[],
-	                            char const * const opts_bool[],
-				    char const * const opts_int[],
+				    char const *const opts_str[],
+				    char const *const opts_bool[],
+				    char const *const opts_int[],
 				    struct list **strlist,
 				    sd_bus_error *error)
 {
@@ -229,12 +228,12 @@ static int bus_message_read_options(sd_bus_message *m,
 	}
 
 	while ((r = sd_bus_message_enter_container(m, SD_BUS_TYPE_DICT_ENTRY, "sv")) > 0) {
-                const char *argname;
+		const char *argname;
 
-                r = sd_bus_message_read(m, "s", &argname);
-                if (r < 0) {
+		r = sd_bus_message_read(m, "s", &argname);
+		if (r < 0) {
 			sd_bus_error_set_errnof(error, -r, "Can't read option name");
-                        return r;
+			return r;
 		}
 		if (is_in_array(argname, opts_str)) {
 			r = bus_message_read_option_string(m, argname, strlist, error);
@@ -256,10 +255,10 @@ static int bus_message_read_options(sd_bus_message *m,
 			return -EINVAL;
 		}
 
-                r = sd_bus_message_exit_container(m);
-                if (r < 0) {
+		r = sd_bus_message_exit_container(m);
+		if (r < 0) {
 			sd_bus_error_set_errnof(error, -r, "Can't exit dict entry container");
-                        return r;
+			return r;
 		}
 	}
 	r = sd_bus_message_exit_container(m);
@@ -271,7 +270,8 @@ static int bus_message_read_options(sd_bus_message *m,
 	return 0;
 }
 
-static int on_name_owner_change(sd_bus_message *m, void *userdata, sd_bus_error *ret_error) {
+static int on_name_owner_change(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
+{
 	sd_event *e = userdata;
 
 	assert(m);
@@ -294,7 +294,8 @@ static int on_childs_output(sd_event_source *s, int fd, uint32_t revents, void *
 		goto finish;
 	}
 
-	while ((count = read(fd, buffer, PIPE_BUF)) < 0 && (errno == EINTR)) {}
+	while ((count = read(fd, buffer, PIPE_BUF)) < 0 && (errno == EINTR)) {
+	}
 	if (count > 0) {
 		buffer[count] = '\0';
 		r = sd_bus_emit_signal(context->bus,
@@ -366,7 +367,7 @@ static int run_swupd(method_t method, struct list *args, daemon_state_t *context
 	int fdm, fds;
 	int r;
 
-	fdm = posix_openpt(O_RDONLY|O_NOCTTY);
+	fdm = posix_openpt(O_RDONLY | O_NOCTTY);
 	if (fdm < 0) {
 		ERR("Can't open pseudo terminal: %s", strerror(errno));
 		return -errno;
@@ -403,8 +404,10 @@ static int run_swupd(method_t method, struct list *args, daemon_state_t *context
 		new_term_settings = old_term_settings;
 		cfmakeraw(&new_term_settings);
 		tcsetattr(fds, TCSANOW, &new_term_settings);
-		while ((dup2(fds, STDOUT_FILENO) == -1) && (errno == EINTR)) {}
-		while ((dup2(fds, STDERR_FILENO) == -1) && (errno == EINTR)) {}
+		while ((dup2(fds, STDOUT_FILENO) == -1) && (errno == EINTR)) {
+		}
+		while ((dup2(fds, STDERR_FILENO) == -1) && (errno == EINTR)) {
+		}
 		close(fds);
 		close(fdm);
 		char **argv = list_to_strv(list_head(args));
@@ -441,8 +444,8 @@ static int check_prerequisites(daemon_state_t *context, sd_bus_error *error)
 }
 
 static int method_update(sd_bus_message *m,
-	                 void *userdata,
-	                 sd_bus_error *ret_error)
+			 void *userdata,
+			 sd_bus_error *ret_error)
 {
 	daemon_state_t *context = userdata;
 	int r = 0;
@@ -456,16 +459,16 @@ static int method_update(sd_bus_message *m,
 	args = list_append_data(args, strdup(SWUPD_CLIENT));
 	args = list_append_data(args, strdup(_method_opt_map[METHOD_UPDATE]));
 
-	char const * const str_opts[] = {"url", "contenturl", "versionurl",
-					 "format", "statedir", "path", NULL};
-	char const * const bool_opts[] = {"download", "status", "force", NULL};
-	char const * const int_opts[] = {"port", NULL};
+	char const *const str_opts[] = { "url", "contenturl", "versionurl",
+					 "format", "statedir", "path", NULL };
+	char const *const bool_opts[] = { "download", "status", "force", NULL };
+	char const *const int_opts[] = { "port", NULL };
 	r = bus_message_read_options(m, str_opts, bool_opts, int_opts, &args, ret_error);
 	if (r < 0) {
 		goto finish;
 	}
 
-	r  = run_swupd(METHOD_UPDATE, args, context);
+	r = run_swupd(METHOD_UPDATE, args, context);
 	if (r < 0) {
 		sd_bus_error_set_errnof(ret_error, -r, "Failed to run swupd command");
 		goto finish;
@@ -479,8 +482,8 @@ finish:
 }
 
 static int method_verify(sd_bus_message *m,
-	                 void *userdata,
-	                 sd_bus_error *ret_error)
+			 void *userdata,
+			 sd_bus_error *ret_error)
 {
 	daemon_state_t *context = userdata;
 	int r = 0;
@@ -494,16 +497,16 @@ static int method_verify(sd_bus_message *m,
 	args = list_append_data(args, strdup(SWUPD_CLIENT));
 	args = list_append_data(args, strdup(_method_opt_map[METHOD_VERIFY]));
 
-	char const * const str_opts[] = {"path", "url", "contenturl", "versionurl",
-					 "format", "statedir", NULL};
-	char const * const bool_opts[] = {"fix", "install", "quick", "force", NULL};
-	char const * const int_opts[] = {"manifest", "port", NULL};
+	char const *const str_opts[] = { "path", "url", "contenturl", "versionurl",
+					 "format", "statedir", NULL };
+	char const *const bool_opts[] = { "fix", "install", "quick", "force", NULL };
+	char const *const int_opts[] = { "manifest", "port", NULL };
 	r = bus_message_read_options(m, str_opts, bool_opts, int_opts, &args, ret_error);
 	if (r < 0) {
 		goto finish;
 	}
 
-	r  = run_swupd(METHOD_VERIFY, args, context);
+	r = run_swupd(METHOD_VERIFY, args, context);
 	if (r < 0) {
 		sd_bus_error_set_errnof(ret_error, -r, "Failed to run swupd command");
 	}
@@ -531,9 +534,9 @@ static int method_check_update(sd_bus_message *m,
 	args = list_append_data(args, strdup(SWUPD_CLIENT));
 	args = list_append_data(args, strdup(_method_opt_map[METHOD_CHECK_UPDATE]));
 
-	char const * const str_opts[] = {"url", "versionurl", "format", "statedir", "path", NULL};
-	char const * const bool_opts[] = {"force", NULL};
-	char const * const int_opts[] = {"port", NULL};
+	char const *const str_opts[] = { "url", "versionurl", "format", "statedir", "path", NULL };
+	char const *const bool_opts[] = { "force", NULL };
+	char const *const int_opts[] = { "port", NULL };
 	r = bus_message_read_options(m, str_opts, bool_opts, int_opts, &args, ret_error);
 	if (r < 0) {
 		goto finish;
@@ -547,7 +550,7 @@ static int method_check_update(sd_bus_message *m,
 	}
 	args = list_append_data(args, strdup(bundle));
 
-	r  = run_swupd(METHOD_CHECK_UPDATE, args, context);
+	r = run_swupd(METHOD_CHECK_UPDATE, args, context);
 	if (r < 0) {
 		sd_bus_error_set_errnof(ret_error, -r, "Failed to run swupd command");
 		goto finish;
@@ -576,8 +579,8 @@ static int method_hash_dump(sd_bus_message *m,
 	args = list_append_data(args, strdup(SWUPD_CLIENT));
 	args = list_append_data(args, strdup(_method_opt_map[METHOD_HASH_DUMP]));
 
-	char const * const str_opts[] = {"basepath", NULL};
-	char const * const bool_opts[] = {"no-xattrs", NULL};
+	char const *const str_opts[] = { "basepath", NULL };
+	char const *const bool_opts[] = { "no-xattrs", NULL };
 	r = bus_message_read_options(m, str_opts, bool_opts, NULL, &args, ret_error);
 	if (r < 0) {
 		goto finish;
@@ -591,7 +594,7 @@ static int method_hash_dump(sd_bus_message *m,
 	}
 	args = list_append_data(args, strdup(filename));
 
-	r  = run_swupd(METHOD_HASH_DUMP, args, context);
+	r = run_swupd(METHOD_HASH_DUMP, args, context);
 	if (r < 0) {
 		sd_bus_error_set_errnof(ret_error, -r, "Failed to run swupd command");
 		goto finish;
@@ -620,11 +623,11 @@ static int method_search(sd_bus_message *m,
 	args = list_append_data(args, strdup(SWUPD_CLIENT));
 	args = list_append_data(args, strdup(_method_opt_map[METHOD_SEARCH]));
 
-	char const * const str_opts[] = {"url", "contenturl", "versionurl",
-					 "path", "scope", "format", "statedir", NULL};
-	char const * const bool_opts[] = {"library", "binary", "init",
-					  "display-files", NULL};
-	char const * const int_opts[] = {"port", NULL};
+	char const *const str_opts[] = { "url", "contenturl", "versionurl",
+					 "path", "scope", "format", "statedir", NULL };
+	char const *const bool_opts[] = { "library", "binary", "init",
+					  "display-files", NULL };
+	char const *const int_opts[] = { "port", NULL };
 	r = bus_message_read_options(m, str_opts, bool_opts, int_opts, &args, ret_error);
 	if (r < 0) {
 		goto finish;
@@ -638,7 +641,7 @@ static int method_search(sd_bus_message *m,
 	}
 	args = list_append_data(args, strdup(filename));
 
-	r  = run_swupd(METHOD_SEARCH, args, context);
+	r = run_swupd(METHOD_SEARCH, args, context);
 	if (r < 0) {
 		sd_bus_error_set_errnof(ret_error, -r, "Failed to run swupd command");
 		goto finish;
@@ -658,7 +661,7 @@ static int method_bundle_add(sd_bus_message *m,
 	daemon_state_t *context = userdata;
 	int r = 0;
 	struct list *args = NULL;
-	const char* bundle = NULL;
+	const char *bundle = NULL;
 
 	r = check_prerequisites(context, ret_error);
 	if (r < 0) {
@@ -668,10 +671,10 @@ static int method_bundle_add(sd_bus_message *m,
 	args = list_append_data(args, strdup(SWUPD_CLIENT));
 	args = list_append_data(args, strdup(_method_opt_map[METHOD_BUNDLE_ADD]));
 
-	char const * const str_opts[] = {"url", "contenturl", "versionurl",
-					 "path", "format", "statedir", NULL};
-	char const * const bool_opts[] = {"list", "force", NULL};
-	char const * const int_opts[] = {"port", NULL};
+	char const *const str_opts[] = { "url", "contenturl", "versionurl",
+					 "path", "format", "statedir", NULL };
+	char const *const bool_opts[] = { "list", "force", NULL };
+	char const *const int_opts[] = { "port", NULL };
 	r = bus_message_read_options(m, str_opts, bool_opts, int_opts, &args, ret_error);
 	if (r < 0) {
 		goto finish;
@@ -695,7 +698,7 @@ static int method_bundle_add(sd_bus_message *m,
 		goto finish;
 	}
 
-	r  = run_swupd(METHOD_BUNDLE_ADD, args, context);
+	r = run_swupd(METHOD_BUNDLE_ADD, args, context);
 	if (r < 0) {
 		sd_bus_error_set_errnof(ret_error, -r, "Failed to run swupd command");
 		goto finish;
@@ -724,10 +727,10 @@ static int method_bundle_remove(sd_bus_message *m,
 	args = list_append_data(args, strdup(SWUPD_CLIENT));
 	args = list_append_data(args, strdup(_method_opt_map[METHOD_BUNDLE_REMOVE]));
 
-	char const * const str_opts[] = {"path", "url", "contenturl", "versionurl",
-					 "format", "statedir", NULL};
-	char const * const bool_opts[] = {"force", NULL};
-	char const * const int_opts[] = {"port", NULL};
+	char const *const str_opts[] = { "path", "url", "contenturl", "versionurl",
+					 "format", "statedir", NULL };
+	char const *const bool_opts[] = { "force", NULL };
+	char const *const int_opts[] = { "port", NULL };
 	r = bus_message_read_options(m, str_opts, bool_opts, int_opts, &args, ret_error);
 	if (r < 0) {
 		goto finish;
@@ -741,7 +744,7 @@ static int method_bundle_remove(sd_bus_message *m,
 	}
 	args = list_append_data(args, strdup(bundle));
 
-	r  = run_swupd(METHOD_BUNDLE_REMOVE, args, context);
+	r = run_swupd(METHOD_BUNDLE_REMOVE, args, context);
 	if (r < 0) {
 		sd_bus_error_set_errnof(ret_error, -r, "Failed to run swupd command");
 		goto finish;
@@ -802,7 +805,7 @@ static int run_bus_event_loop(sd_event *event,
 			break;
 		}
 
-		r = sd_event_run(event, exiting ? (uint64_t) -1 : (uint64_t) TIMEOUT_EXIT_SEC * 1000000);
+		r = sd_event_run(event, exiting ? (uint64_t)-1 : (uint64_t)TIMEOUT_EXIT_SEC * 1000000);
 		if (r < 0) {
 			ERR("Failed to run event loop: %s", strerror(-r));
 			return r;
@@ -813,10 +816,10 @@ static int run_bus_event_loop(sd_event *event,
 			if (r == -EBUSY) {
 				continue;
 			}
-                        /* Fallback for dbus1 connections: we
+			/* Fallback for dbus1 connections: we
                          * unregister the name and wait for the
                          * response to come through for it */
-                        if (r == -EOPNOTSUPP) {
+			if (r == -EOPNOTSUPP) {
 				sd_notify(false, "STOPPING=1");
 
 				/* We unregister the name here and then wait for the
@@ -839,7 +842,8 @@ static int run_bus_event_loop(sd_event *event,
 					      "path='/org/freedesktop/DBus',"
 					      "arg0='org.O1.swupdd.Client',"
 					      "arg1='%s',"
-					      "arg2=''", unique);
+					      "arg2=''",
+					      unique);
 
 				r = sd_bus_add_match(bus, NULL, match, on_name_owner_change, event);
 				if (r < 0) {
@@ -869,12 +873,12 @@ static int run_bus_event_loop(sd_event *event,
 		}
 	}
 
-        r = sd_event_get_exit_code(event, &code);
-        if (r < 0) {
-                return r;
+	r = sd_event_get_exit_code(event, &code);
+	if (r < 0) {
+		return r;
 	}
 
-        return code;
+	return code;
 }
 
 static const sd_bus_vtable swupdd_vtable[] = {
@@ -892,7 +896,8 @@ static const sd_bus_vtable swupdd_vtable[] = {
 	SD_BUS_VTABLE_END
 };
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	daemon_state_t context;
 	sd_bus_slot *slot = NULL;
 	sd_event *event = NULL;
@@ -901,11 +906,11 @@ int main(int argc, char *argv[]) {
 
 	memset(&context, 0x00, sizeof(daemon_state_t));
 
-        r = sd_event_default(&event);
-        if (r < 0) {
-                ERR("Failed to allocate event loop: %s", strerror(-r));
-                goto finish;
-        }
+	r = sd_event_default(&event);
+	if (r < 0) {
+		ERR("Failed to allocate event loop: %s", strerror(-r));
+		goto finish;
+	}
 
 	if (sigemptyset(&ss) < 0 ||
 	    sigaddset(&ss, SIGCHLD) < 0) {
@@ -923,7 +928,7 @@ int main(int argc, char *argv[]) {
 		goto finish;
 	}
 
-        sd_event_set_watchdog(event, true);
+	sd_event_set_watchdog(event, true);
 
 	r = sd_bus_open_system(&context.bus);
 	if (r < 0) {
@@ -950,9 +955,9 @@ int main(int argc, char *argv[]) {
 		goto finish;
 	}
 
-        r = sd_bus_attach_event(context.bus, event, 0);
-        if (r < 0) {
-                ERR("Failed to attach bus to event loop: %s", strerror(-r));
+	r = sd_bus_attach_event(context.bus, event, 0);
+	if (r < 0) {
+		ERR("Failed to attach bus to event loop: %s", strerror(-r));
 		goto finish;
 	}
 

@@ -310,6 +310,10 @@ static int on_childs_output(sd_event_source *s, int fd, uint32_t revents, void *
 		ERR("Failed to read pipe: %s", strerror(errno));
 		/* Disable the handler since the pipe is broken */
 		r = -1;
+	} else { /* count == 0 */
+		ERR("Got EPOLLIN event, but pipe's buffer is empty");
+		/* Disable the handler since the pipe is broken */
+		r = -1;
 	}
 
 finish:

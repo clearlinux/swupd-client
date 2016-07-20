@@ -369,11 +369,13 @@ static int run_swupd(method_t method, struct list *args, daemon_state_t *context
 	}
 	r = grantpt(fdm);
 	if (r != 0) {
+		close(fdm);
 		ERR("Can't grant pseudo terminal: %s", strerror(errno));
 		return -errno;
 	}
 	r = unlockpt(fdm);
 	if (r != 0) {
+		close(fdm);
 		ERR("Can't unlock pseudo terminal: %s", strerror(errno));
 		return -errno;
 	}

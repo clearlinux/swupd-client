@@ -292,7 +292,7 @@ int dbus_client_call_method(const char *const method, struct list *opts, dbus_cm
 			     on_request_completed,
 			     event /* user data */);
 	if (r < 0) {
-		ERR("Failed to add handler for ChildOutputReceived signal: %s", strerror(-r));
+		ERR("Failed to add handler for RequestCompleted signal: %s", strerror(-r));
 		goto finish;
 	}
 

@@ -48,6 +48,7 @@ SWUPD_COMMON_SOURCES = \
 
 swupdd_SOURCES = \
 	src/list.c \
+	dbus-wrapper/wrapper_helpers.c \
 	dbus-wrapper/swupdd-main.c \
 	$(NULL)
 

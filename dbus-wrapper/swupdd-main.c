@@ -137,11 +137,7 @@ static int bus_message_read_option_string(sd_bus_message *m,
 		return r;
 	}
 
-	r = asprintf(&option, "--%s", optname);
-	if (r < 0) {
-		sd_bus_error_set_errnof(error, ENOMEM, "Can't allocate memory for '%s'", optname);
-		return -ENOMEM;
-	}
+	string_or_die(&option, "--%s", optname);
 
 	*strlist = list_append_data(*strlist, option);
 	*strlist = list_append_data(*strlist, strdup(value));
@@ -176,11 +172,7 @@ static int bus_message_read_option_bool(sd_bus_message *m,
 	if (value) {
 		char *option = NULL;
 
-		r = asprintf(&option, "--%s", optname);
-		if (r < 0) {
-			sd_bus_error_set_errnof(error, ENOMEM, "Can't allocate memory for '%s'", optname);
-			return -ENOMEM;
-		}
+		string_or_die(&option, "--%s", optname);
 		*strlist = list_append_data(*strlist, option);
 	}
 	return 0;
@@ -212,16 +204,10 @@ static int bus_message_read_option_int(sd_bus_message *m,
 		return r;
 	}
 
-	if (asprintf(&option, "--%s", optname) < 0) {
-		sd_bus_error_set_errnof(error, ENOMEM, "Can't allocate memory for '%s'", optname);
-		return -ENOMEM;
-	}
+	string_or_die(&option, "--%s", optname);
 	*strlist = list_append_data(*strlist, option);
 
-	if (asprintf(&value_str, "%i", value) < 0) {
-		sd_bus_error_set_errnof(error, ENOMEM, "Can't allocate memory for '%i'", value);
-		return -ENOMEM;
-	}
+	string_or_die(&value_str, "%i", value);
 	*strlist = list_append_data(*strlist, value_str);
 
 	return 0;
@@ -842,19 +828,15 @@ static int run_bus_event_loop(sd_event *event,
 					ERR("Failed to get unique D-Bus name: %s", strerror(-r));
 					return r;
 				}
-				r = asprintf(&match,
-					     "sender='org.freedesktop.DBus',"
-					     "type='signal',"
-					     "interface='org.freedesktop.DBus',"
-					     "member='NameOwnerChanged',"
-					     "path='/org/freedesktop/DBus',"
-					     "arg0='org.O1.swupdd.Client',"
-					     "arg1='%s',"
-					     "arg2=''", unique);
-				if (r < 0) {
-					ERR("Not enough memory to allocate string");
-					return r;
-				}
+				string_or_die(&match,
+					      "sender='org.freedesktop.DBus',"
+					      "type='signal',"
+					      "interface='org.freedesktop.DBus',"
+					      "member='NameOwnerChanged',"
+					      "path='/org/freedesktop/DBus',"
+					      "arg0='org.O1.swupdd.Client',"
+					      "arg1='%s',"
+					      "arg2=''", unique);
 
 				r = sd_bus_add_match(bus, NULL, match, on_name_owner_change, event);
 				if (r < 0) {

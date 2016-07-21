@@ -337,7 +337,6 @@ static int on_child_exit(sd_event_source *s, const struct signalfd_siginfo *si, 
 	if (si->ssi_code == CLD_EXITED) {
 		status = si->ssi_status;
 	} else {
-		DEBUG("Child process was killed");
 		/* si->ssi_status is signal code in this case */
 		status = 128 + si->ssi_status;
 	}

@@ -33,6 +33,6 @@
 	printf(__FILE__ ":" STR(__LINE__) " " fmt "\n", ##__VA_ARGS__)
 
 #define ERR(fmt, ...) \
-	fprintf(stderr, "Error: " __FILE__ ":" STR(__LINE__) " " fmt "\n", ##__VA_ARGS__)
+	fprintf(stderr, "error: " fmt "\n", ##__VA_ARGS__)
 
 #endif

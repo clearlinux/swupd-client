@@ -276,8 +276,8 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			      current->last_change, current->filename);
 
 		if (!verify_file(bundle, local)) {
-			printf("Warning: hash check failed for Manifest.%s\n",
-			       current->filename);
+			printf("Warning: hash check failed for Manifest.%s for version %i\n",
+			       current->filename, manifest->version);
 			ret = 0;
 		}
 		break;

@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "swupd-build-opts.h"
 #include "swupd-internal.h"
 #include "swupd.h"
 
@@ -101,6 +102,7 @@ static int parse_options(int argc, char **argv, int *index)
 			exit(EXIT_SUCCESS);
 		case 'v':
 			copyright_header("swupd");
+			printf("Compile-time options: %s\n", BUILD_OPTS);
 			exit(EXIT_SUCCESS);
 		case '\01':
 			/* found a subcommand, or a random non-option argument */

@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/statvfs.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -122,6 +123,49 @@ struct list *get_min_bundle_list(struct list *full_list)
 	return min_list;
 }
 
+/* sum size of required downloads */
+bool space_check(struct list *bundles)
+{
+	struct sub *bundle = NULL;
+	struct list *iter;
+	struct statvfs stat;
+	char *url = NULL;
+	double req = 0, avail = 0, ret;
+
+	/* sum required space for list of bundles */
+	iter = list_head(bundles);
+	while (iter) {
+		bundle = iter->data;
+		iter = iter->next;
+
+		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, bundle->version,
+						bundle->component, bundle->oldversion);
+		ret = swupd_query_url_content_size(url);
+		if (!ret) {
+			req += ret;
+		} else {
+			printf("Unable to query size of: %s\n", url);
+			return true; /* cannot estimate req'd space; must continue with download */
+		}
+
+		free(url);
+	}
+
+	/* check available disk space */
+	if(statvfs(state_dir, &stat) != 0) {
+		return true;
+	}
+
+	avail = stat.f_bsize * stat.f_bavail;
+	if (req >= avail) {
+		printf("Space check failed. %.2lf MB needed, only %.2lf available\n",
+					req/1000000, avail/1000000);
+		return false;
+	}
+
+	return true;
+}
+
 /* pull in packs for base and any subscription */
 int download_subscribed_packs(bool required)
 {
@@ -135,6 +179,9 @@ int download_subscribed_packs(bool required)
 	}
 
 	req_bundles = get_min_bundle_list(subs);
+	if (!space_check(req_bundles)) {
+		return -EINSUFFICIENT_SPACE;
+	}
 
 	iter = list_head(req_bundles);
 	while (iter) {

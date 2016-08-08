@@ -95,6 +95,7 @@ int get_current_version(char *path_prefix)
 	string_or_die(&buildstamp, "%s/usr/lib/os-release", path_prefix);
 	file = fopen(buildstamp, "rm");
 	if (!file) {
+		free(buildstamp);
 		string_or_die(&buildstamp, "%s/etc/os-release", path_prefix);
 		file = fopen(buildstamp, "rm");
 		if (!file) {

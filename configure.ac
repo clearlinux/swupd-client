@@ -18,18 +18,30 @@ PKG_CHECK_MODULES([lzma], [liblzma])
 PKG_CHECK_MODULES([zlib], [zlib])
 AC_ARG_ENABLE(
 	[bzip2],
-	AS_HELP_STRING([--disable-bzip2],[Do not use bzip2 compression (uses bzip2 by default)])
+	AS_HELP_STRING([--disable-bzip2],[Do not use bzip2 compression (uses bzip2 by default)]),
 )
+
+BZIP="yes"
+AS_IF([test -n "$enable_bzip2" -a "$enable_bzip2" = "yes"],
+		[BZIP="$enable_bzip2"]
+)
+
 AS_IF([test "x$enable_bzip2" != "xno" ],
   [AC_DEFINE(SWUPD_WITH_BZIP2,1,[Use bzip2 compression])
-	 AC_CHECK_LIB([bz2], [BZ2_bzBuffToBuffCompress], [], [AC_MSG_ERROR([the libbz2 library is missing])])],
-  [AC_DEFINE(SWUPD_WITHOUT_BZIP2,1,[Do not use bzip2 compression])]
+	 AC_CHECK_LIB([bz2], [BZ2_bzBuffToBuffCompress], [], [AC_MSG_ERROR([the libbz2 library is missing])])
+	 BZIP="yes"],
+  [AC_DEFINE(SWUPD_WITHOUT_BZIP2,1,[Do not use bzip2 compression])
+	 BZIP="no"]
 )
 AC_ARG_ENABLE(
   [signature-verification],
   [AS_HELP_STRING([--enable-signature-verification], [Enable signature check (disabled by default)])],
   [AC_DEFINE([SIGNATURES], 1, [Enable signature check as default])]
+)
 
+SIGVERIFICATION="no"
+AS_IF([test -n "$enable_signature_verification" -a "$enable_signature_verification" = "yes" ],
+		[SIGVERIFICATION="$enable_signature_verification"]
 )
 
 if test "$enable_signature_verification" = "yes" ; then
@@ -39,9 +51,55 @@ if test "$enable_signature_verification" = "yes" ; then
 		[AC_DEFINE([SWUPDCERT], ["ClearLinuxRoot.pem"], [swupd verification cert])])
 fi
 
+AS_IF([test -n "$with_swupdcert" -a "$with_swupdcert" != "no" -a "$with_swupdcert" != "yes"],
+		[SWUPDCERT="$with_swupdcert"],
+	[SWUPDCERT="ClearLinuxRoot.pem"]
+)
+
+AC_ARG_WITH([contenturl],
+	[AS_HELP_STRING([--with-contenturl=URL], [Default content url])],
+	  [AC_DEFINE_UNQUOTED([CONTENTURL], ["$withval"], [Default content url])]
+)
+
+AS_IF([test -n "$with_contenturl" -a "$with_contenturl" != "no" -a "$with_contenturl" != "yes"],
+		[CONTENTURL="$with_contenturl"],
+	[test "$with_contenturl" = "no"],	[CONTENTURL='!! Warning !! --with-contenturl not specified!'],
+	[test "$with_contenturl" = "yes"],	[CONTENTURL='!! Warning !! --with-contenturl not specified!'],
+	[CONTENTURL='!! Warning !! --with-contenturl not specified!']
+)
+
+AC_ARG_WITH([versionurl],
+	[AS_HELP_STRING([--with-versionurl=URL], [Default version url])],
+	[AC_DEFINE_UNQUOTED([VERSIONURL], ["$withval"], [Default version url])]
+)
+
+AS_IF([test -n "$with_versionurl" -a "$with_versionurl" != "no" -a "$with_versionurl" != "yes"],
+		[VERSIONURL="$with_versionurl"],
+	[test "$with_versionurl" = "no"],	[VERSIONURL='!! Warning !! --with-versionurl not specified!'],
+	[test "$with_versionurl" = "yes"],	[VERSIONURL='!! Warning !! --with-versionurl not specified!'],
+	[VERSIONURL='!! Warning !! --with-versionurl not specified!']
+)
+
+AC_ARG_WITH([formatid],
+	[AS_HELP_STRING([--with-formatid=NUM], [Default format identifier])],
+	[AC_DEFINE_UNQUOTED([FORMATID], ["$withval"], [Default format identifier])]
+)
+
+AS_IF([test -n "$with_formatid" -a "$with_formatid" != "no" -a "$with_formatid" != "yes"],
+		[FORMATID="$with_formatid"],
+	[test "$with_formatid" = "no"],	[FORMATID='!! Warning !! --with-formatid not specified!'],
+	[test "$with_formatid" = "yes"],	[FORMATID='!! Warning !! --with-formatid not specified!'],
+	[FORMATID='!! Warning !! --with-formatid not specified!']
+)
+
 AC_ARG_ENABLE(
   [tests],
-  [AS_HELP_STRING([--disable-tests], [Do not enable unit or functional test framework (enabled by default)])]
+  [AS_HELP_STRING([--disable-tests], [Do not enable unit or functional test framework (enabled by default)])],
+)
+
+TESTS="yes"
+AS_IF([test -n "$enable_tests" -a "$enable_tests" = "yes" ],
+		[TESTS="$enable_tests"]
 )
 
 have_coverage=no
@@ -88,7 +146,9 @@ AS_IF([test "$enable_tests" != "no"], [
   AS_IF([test -z "${have_bats}"], [
     AC_MSG_ERROR([Must have the Bash Automated Testing System (bats) installed to run functional tests])
   ])
-])
+  TESTS="yes"],
+  TESTS="no"
+)
 AM_CONDITIONAL([ENABLE_TESTS], [test "$enable_tests" != "no"])
 
 PKG_CHECK_MODULES([curl], [libcurl])
@@ -133,3 +193,20 @@ AC_SUBST([update_ca_certs_path], ["$certs_path"])
 AC_CONFIG_FILES([Makefile data/check-update.service data/check-update.timer])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])
 AC_OUTPUT
+
+AC_MSG_NOTICE([
+
+------------
+swupd-client
+------------
+
+Configuration to build swupd-client:
+
+  Content URL:				${CONTENTURL}
+  Version URL:				${VERSIONURL}
+  Format Identifier:			${FORMATID}
+  Signature verification:		${SIGVERIFICATION}
+  SSL Certificate file:			${SWUPDCERT}
+  Use bzip compression:			${BZIP}
+  Run Tests:				${TESTS}
+])

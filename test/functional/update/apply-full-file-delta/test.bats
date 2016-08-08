@@ -2,7 +2,7 @@
 
 load "../../swupdlib"
 
-deltafile="10-100-9f83d713da9df6cabd2abc9d9061f9b611a207e1e0dd22ed7a071ddb1cc1537a"
+deltafile="10-100-0832c0c7fb9d05ac3088a493f430e81044a0fc03f81cba9eb89d3b7816ef3962-9f83d713da9df6cabd2abc9d9061f9b611a207e1e0dd22ed7a071ddb1cc1537a"
 
 setup() {
   clean_test_dir

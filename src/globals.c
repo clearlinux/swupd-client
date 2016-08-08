@@ -318,10 +318,25 @@ bool init_globals(void)
 		return false;
 	}
 
-	/* must set these globals after path_prefix */
+/* Set configuration defaults based on options provided
+	at configure time.  */
+#ifdef FORMATID
+	set_format_string(FORMATID);
+#else
 	(void)set_format_string(NULL);
+#endif /* FORMATID */
+
+#ifdef VERSIONURL
+	set_version_url(VERSIONURL);
+#else
 	set_version_url(NULL);
+#endif /* VERSIONURL */
+
+#ifdef CONTENTURL
+	set_content_url(CONTENTURL);
+#else
 	set_content_url(NULL);
+#endif /* CONTENTURL */
 
 	/* must set this global after version_url and content_url */
 	set_local_download();

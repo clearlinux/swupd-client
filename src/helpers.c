@@ -620,8 +620,9 @@ int swupd_init(int *lock_fd)
 	}
 
 	if (!initialize_signature()) {
+		ret = ESIGNATURE;
 		terminate_signature();
-		return false;
+		goto out_close_lock;
 	}
 
 	return ret;

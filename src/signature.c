@@ -112,6 +112,7 @@ void terminate_signature(void)
 		fclose(fp_pubkey);
 	}
 	if (cert) {
+		X509_free(cert);
 		cert = NULL;
 	}
 	ERR_remove_thread_state(NULL);
@@ -358,6 +359,10 @@ static bool validate_certificate(void)
 
 error:
 	ERR_print_errors_fp(stderr);
+
+	if (verify_ctx) {
+		X509_STORE_CTX_free(verify_ctx);
+	}
 
 	return false;
 }

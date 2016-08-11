@@ -346,7 +346,7 @@ exit:
 			err = -1;
 			break;
 		default:
-			printf("Curl error: %d - see curl.h for details\n", curl_ret);
+			printf("Curl error: %s\n", curl_easy_strerror(curl_ret));
 			err = -1;
 			break;
 		}

@@ -359,6 +359,10 @@ static bool validate_certificate(void)
 error:
 	ERR_print_errors_fp(stderr);
 
+	if (verify_ctx) {
+		X509_STORE_CTX_free(verify_ctx);
+	}
+
 	return false;
 }
 

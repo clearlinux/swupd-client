@@ -371,7 +371,7 @@ error:
 int verify_callback(int ok, X509_STORE_CTX *stor)
 {
 	if (!ok) {
-		fprintf(stderr, "Error: %s\n",
+		fprintf(stderr, "Certificate verification error: %s\n",
 			X509_verify_cert_error_string(stor->error));
 	}
 	return ok;

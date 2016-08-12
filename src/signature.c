@@ -359,12 +359,6 @@ static bool validate_certificate(void)
 error:
 	ERR_print_errors_fp(stderr);
 
-	if (store) {
-		X509_STORE_free(store);
-	}
-	if (lookup) {
-		X509_LOOKUP_free(lookup);
-	}
 	return false;
 }
 

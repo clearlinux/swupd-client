@@ -51,6 +51,7 @@ char *mounted_dirs = NULL;
 char *bundle_to_add = NULL;
 struct timeval start_time;
 char *state_dir = NULL;
+char *pinned_pubkey_path = NULL;
 
 /* NOTE: Today the content and version server urls are the same in
  * all cases.  It is highly likely these will eventually differ, eg:
@@ -68,6 +69,7 @@ long update_server_port = -1;
 static const char *default_version_url_path = "/usr/share/defaults/swupd/versionurl";
 static const char *default_content_url_path = "/usr/share/defaults/swupd/contenturl";
 static const char *default_format_path = "/usr/share/defaults/swupd/format";
+static const char *default_pinnedpubkey_path = "/usr/share/defaults/swupd/pinnedpubkey";
 
 static int set_default_value(char **global, const char *path)
 {
@@ -192,6 +194,16 @@ bool set_state_dir(char *path)
 	}
 
 	return true;
+}
+
+void set_pinned_pubkey_path()
+{
+	int ret;
+
+	ret = set_default_value(&pinned_pubkey_path, default_pinnedpubkey_path);
+	if (ret < 0) {
+		string_or_die(&pinned_pubkey_path, "%s", PINNED_PUBKEY_PATH);
+	}
 }
 
 bool set_format_string(char *userinput)
@@ -322,6 +334,7 @@ bool init_globals(void)
 	(void)set_format_string(NULL);
 	set_version_url(NULL);
 	set_content_url(NULL);
+	set_pinned_pubkey_path();
 
 	/* must set this global after version_url and content_url */
 	set_local_download();
@@ -337,6 +350,7 @@ void free_globals(void)
 	free(format_string);
 	free(mounted_dirs);
 	free(state_dir);
+	free(pinned_pubkey_path);
 	if (bundle_to_add != NULL) {
 		free(bundle_to_add);
 	}

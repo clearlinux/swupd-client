@@ -114,6 +114,7 @@ AH_TEMPLATE([LOCK_DIR],[Directory for lock file])
 AH_TEMPLATE([BUNDLES_DIR],[Directory to use for bundles])
 AH_TEMPLATE([UPDATE_CA_CERTS_PATH],[Location of CA certificates])
 AH_TEMPLATE([MOTD_FILE],[motd file path])
+AH_TEMPLATE([PINNED_PUBKEY_PATH],[Path to pinned public key])
 
 if test "$enable_linux_rootfs_build" = "yes"; then
 	AC_DEFINE([SWUPD_LINUX_ROOTFS],1)
@@ -124,6 +125,7 @@ if test "$enable_linux_rootfs_build" = "yes"; then
 	AC_DEFINE([BUNDLES_DIR],["/usr/share/clear/bundles"])
 	AC_DEFINE_UNQUOTED([UPDATE_CA_CERTS_PATH],["$certs_path"])
 	AC_DEFINE([MOTD_FILE],["/usr/lib/motd.d/001-new-release"])
+	AC_DEFINE_UNQUOTED([PINNED_PUBKEY_PATH],["${certs_path}/425b0f6b.key"])
 else
 	AC_MSG_ERROR([Unknown build variant])
 fi

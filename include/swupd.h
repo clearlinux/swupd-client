@@ -132,6 +132,7 @@ extern void *tm_dlhandle;
 extern char *bundle_to_add;
 extern struct timeval start_time;
 extern char *state_dir;
+extern char *pinned_pubkey_path;
 
 extern char *version_url;
 extern char *content_url;

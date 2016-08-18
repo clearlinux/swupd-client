@@ -260,14 +260,12 @@ static bool get_pubkey(void)
 	cert = PEM_read_X509(fp_pubkey, NULL, NULL, NULL);
 	if (!cert) {
 		fprintf(stderr, "Failed PEM_read_X509() for %s\n", CERTNAME);
-		fclose(fp_pubkey);
 		goto error;
 	}
 
 	pkey = X509_get_pubkey(cert);
 	if (!pkey) {
 		fprintf(stderr, "Failed X509_get_pubkey() for %s\n", CERTNAME);
-		fclose(fp_pubkey);
 		X509_free(cert);
 		goto error;
 	}

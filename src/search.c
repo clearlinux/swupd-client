@@ -520,6 +520,6 @@ int search_main(int argc, char **argv)
 
 clean_exit:
 	swupd_deinit(lock_fd);
-
+	free(MoM);
 	return ret;
 }

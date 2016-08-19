@@ -298,10 +298,6 @@ load_server_manifests:
 			goto load_server_manifests;
 		}
 		printf("Failure retrieving manifest from server\n");
-		goto clean_exit;
-	}
-
-	if (current_manifest == NULL || server_manifest == NULL) {
 		printf("Unable to load manifest after retrying (config or network problem?)\n");
 		goto clean_exit;
 	}

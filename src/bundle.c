@@ -362,12 +362,6 @@ int add_subscriptions(struct list *bundles, int current_version, struct manifest
 			goto out;
 		}
 
-		if (!manifest) {
-			printf("Unable to load manifest %s version %d, exiting now\n", bundle, file->last_change);
-			ret = -1;
-			goto out;
-		}
-
 		if (manifest->includes) {
 			ret = add_subscriptions(manifest->includes, current_version, mom);
 			if (ret == -1) {

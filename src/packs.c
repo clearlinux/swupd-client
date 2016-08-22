@@ -59,9 +59,7 @@ static int download_pack(int oldversion, int newversion, char *module)
 	err = swupd_curl_get_file(url, filename, NULL, NULL, true);
 	if (err) {
 		free(url);
-		if ((lstat(filename, &stat) == 0) && (stat.st_size == 0)) {
-			unlink(filename);
-		}
+		unlink(filename);
 		free(filename);
 		return err;
 	}

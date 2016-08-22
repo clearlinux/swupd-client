@@ -428,7 +428,10 @@ int install_bundles(struct list *bundles, int current_version, struct manifest *
 	(void)rm_staging_dir_contents("download");
 
 	printf("Downloading packs...\n");
-	(void)download_subscribed_packs(true);
+	ret = download_subscribed_packs(true);
+	if (ret) {
+		goto out;
+	}
 
 	/* step 3: Add tracked bundles */
 	read_subscriptions_alt();

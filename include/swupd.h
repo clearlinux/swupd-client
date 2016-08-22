@@ -209,6 +209,7 @@ extern CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url);
 void swupd_curl_test_resume(void);
 
 extern struct list *subs;
+extern void free_subscription_data(void *data);
 extern void free_subscriptions(void);
 extern void read_subscriptions(void);
 extern void read_subscriptions_alt(void);

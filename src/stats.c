@@ -28,64 +28,17 @@
 
 #include "swupd.h"
 
-static int new_files;
-static int deleted_files;
-static int changed_files;
-static int new_manifests;
-static int deleted_manifests;
-static int changed_manifests;
-static int delta_miss;
-static int delta_hit;
-
-void account_new_file(void)
-{
-	new_files++;
-}
-
-void account_deleted_file(void)
-{
-	deleted_files++;
-}
-
-void account_changed_file(void)
-{
-	changed_files++;
-}
-
-void account_new_manifest(void)
-{
-	new_manifests++;
-}
-
-void account_deleted_manifest(void)
-{
-	deleted_manifests++;
-}
-
-void account_changed_manifest(void)
-{
-	changed_manifests++;
-}
-
-void account_delta_hit(void)
-{
-	delta_hit++;
-}
-
-void account_delta_miss(void)
-{
-	delta_miss++;
-}
+int swupd_stats[8];
 
 void print_statistics(int version1, int version2)
 {
 	printf("\n");
 	printf("Statistics for going from version %i to version %i:\n\n", version1, version2);
-	printf("    changed manifests : %i\n", changed_manifests);
-	printf("    new manifests     : %i\n", new_manifests);
-	printf("    deleted manifests : %i\n\n", deleted_manifests);
-	printf("    changed files     : %i\n", changed_files);
-	printf("    new files         : %i\n", new_files);
-	printf("    deleted files     : %i\n", deleted_files);
+	printf("    changed manifests : %i\n", swupd_stats[5]);
+	printf("    new manifests     : %i\n", swupd_stats[3]);
+	printf("    deleted manifests : %i\n\n", swupd_stats[4]);
+	printf("    changed files     : %i\n", swupd_stats[2]);
+	printf("    new files         : %i\n", swupd_stats[0]);
+	printf("    deleted files     : %i\n", swupd_stats[1]);
 	printf("\n");
 }

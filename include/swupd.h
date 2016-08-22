@@ -170,14 +170,47 @@ extern void link_manifests(struct manifest *m1, struct manifest *m2);
 extern void link_submanifests(struct manifest *m1, struct manifest *m2);
 extern void free_manifest(struct manifest *manifest);
 
-extern void account_new_file(void);
-extern void account_deleted_file(void);
-extern void account_changed_file(void);
-extern void account_new_manifest(void);
-extern void account_deleted_manifest(void);
-extern void account_changed_manifest(void);
-extern void account_delta_hit(void);
-extern void account_delta_miss(void);
+extern int swupd_stats[];
+static inline void account_new_file(void)
+{
+	swupd_stats[0]++;
+}
+
+static inline void account_deleted_file(void)
+{
+	swupd_stats[1]++;
+}
+
+static inline void account_changed_file(void)
+{
+	swupd_stats[2]++;
+};
+
+static inline void account_new_manifest(void)
+{
+	swupd_stats[3]++;
+};
+
+static inline void account_deleted_manifest(void)
+{
+	swupd_stats[4]++;
+};
+
+static inline void account_changed_manifest(void)
+{
+	swupd_stats[5]++;
+};
+
+static inline void account_delta_hit(void)
+{
+	swupd_stats[6]++;
+};
+
+static inline void account_delta_miss(void)
+{
+	swupd_stats[7]++;
+};
+
 extern void print_statistics(int version1, int version2);
 
 extern int download_subscribed_packs(bool required);

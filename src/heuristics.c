@@ -31,7 +31,7 @@
 
 /* trailing slash is to indicate dir itself is expected to exist, but
  * contents are ignored */
-bool is_config(char *filename)
+static bool is_config(char *filename)
 {
 	if (strncmp(filename, "/etc/", 5) == 0) {
 		return true;
@@ -48,7 +48,7 @@ static void config_file_heuristics(struct file *file)
 
 /* trailing slash is to indicate dir itself is expected to exist, but
  * contents are ignored */
-bool is_state(char *filename)
+static bool is_state(char *filename)
 {
 	if (is_directory_mounted(filename)) {
 		return true;

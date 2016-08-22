@@ -203,17 +203,9 @@ err:
 static bool hash_needs_work(struct file *file, char *hash)
 {
 	if (cmdline_option_quick) {
-		if (hash_is_zeros(hash)) {
-			return true;
-		} else {
-			return false;
-		}
+		return (hash_is_zeros(hash));
 	} else {
-		if (hash_equal(file->hash, hash)) {
-			return false;
-		} else {
-			return true;
-		}
+		return (!hash_equal(file->hash, hash));
 	}
 }
 

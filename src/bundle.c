@@ -173,7 +173,7 @@ static int unload_tracked_bundle(const char *bundle_name)
 }
 
 /* Check if bundle is included by any subscribed bundles */
-bool is_included(const char *bundle_name, struct manifest *mom)
+static bool is_included(const char *bundle_name, struct manifest *mom)
 {
 	bool ret = false;
 	struct list *b, *i;
@@ -394,7 +394,7 @@ out:
 	return ret;
 }
 
-int install_bundles(struct list *bundles, int current_version, struct manifest *mom)
+static int install_bundles(struct list *bundles, int current_version, struct manifest *mom)
 {
 	int ret;
 	struct file *file;

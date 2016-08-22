@@ -157,8 +157,6 @@ extern int get_current_version(char *path_prefix);
 extern bool check_network(void);
 
 extern bool ignore(struct file *file);
-extern bool is_config(char *filename);
-extern bool is_state(char *filename);
 extern void apply_heuristics(struct file *file);
 
 extern int file_sort_filename(const void *a, const void *b);
@@ -264,9 +262,7 @@ extern int verify_bundle_hash(struct manifest *manifest, struct file *bundle);
 extern void unlink_all_staged_content(struct file *file);
 extern void link_renames(struct list *newfiles, struct manifest *from_manifest);
 extern void dump_file_descriptor_leaks(void);
-extern FILE *fopen_exclusive(const char *filename); /* no mode, opens for write only */
 extern int rm_staging_dir_contents(const char *rel_path);
-extern int create_required_dirs(void);
 extern void dump_file_info(struct file *file);
 void free_file_data(void *data);
 void remove_files_in_manifest_from_fs(struct manifest *m);
@@ -275,7 +271,6 @@ extern struct file *search_bundle_in_manifest(struct manifest *manifest, const c
 extern struct file *search_file_in_manifest(struct manifest *manifest, const char *filename);
 
 extern char *mounted_dirs;
-extern void get_mounted_directories(void);
 extern char *mk_full_filename(const char *prefix, const char *path);
 extern bool is_directory_mounted(const char *filename);
 extern bool is_under_mounted_directory(const char *filename);

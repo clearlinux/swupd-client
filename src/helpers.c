@@ -125,7 +125,7 @@ void unlink_all_staged_content(struct file *file)
 	}
 }
 
-FILE *fopen_exclusive(const char *filename) /* no mode, opens for write only */
+static FILE *fopen_exclusive(const char *filename) /* no mode, opens for write only */
 {
 	int fd;
 
@@ -136,7 +136,7 @@ FILE *fopen_exclusive(const char *filename) /* no mode, opens for write only */
 	return fdopen(fd, "w");
 }
 
-int create_required_dirs(void)
+static int create_required_dirs(void)
 {
 	int ret = 0;
 	int i;
@@ -198,7 +198,7 @@ int create_required_dirs(void)
  *
  * e.g: :/proc:/mnt/acct:
  */
-void get_mounted_directories(void)
+static void get_mounted_directories(void)
 {
 	FILE *file;
 	char *line = NULL;
@@ -714,7 +714,7 @@ out:
 	return ret;
 }
 
-void free_path_data(void *data)
+static void free_path_data(void *data)
 {
 	char *path = (char *)data;
 	free(path);

@@ -34,18 +34,19 @@
 #include "swupd.h"
 
 char *search_string;
-char search_type = '0';
 bool display_files = false; /* Just display all files found in Manifest set */
 bool init = false;
-char scope = '0';
+
+static char search_type = '0';
+static char scope = '0';
 
 /* Supported default search paths */
-char *lib_paths[] = {
+static char *lib_paths[] = {
 	"/usr/lib",
 	NULL
 };
 
-char *bin_paths[] = {
+static char *bin_paths[] = {
 	"/usr/bin/",
 	NULL
 };
@@ -222,7 +223,7 @@ err:
  * Attempt to match path and substring of filename. Base op for 'swupd search'
  * Path must match exact case, filename is case insensitive
  */
-bool file_search(char *filename, char *path, char *search_term)
+static bool file_search(char *filename, char *path, char *search_term)
 {
 	char *pos;
 
@@ -247,7 +248,7 @@ bool file_search(char *filename, char *path, char *search_term)
 /* report_find()
  * Report out, respecting verbosity
  */
-void report_find(char *bundle, char *file)
+static void report_find(char *bundle, char *file)
 {
 	printf("'%s'  :  '%s'\n", bundle, file);
 }
@@ -256,7 +257,7 @@ void report_find(char *bundle, char *file)
  * Description: Perform a lookup of the specified search string in all Clear manifests
  * for the current os release.
  */
-void do_search(struct manifest *MoM, char search_type, char *search_term)
+static void do_search(struct manifest *MoM, char search_type, char *search_term)
 {
 	struct list *list;
 	struct list *sublist;
@@ -388,7 +389,7 @@ static double query_total_download_size(struct list *list)
  * Description: To search Clear bundles for a particular entry, a complete set of
  *		manifests must be downloaded. This function does so, asynchronously, using
  *		the curl_multi interface */
-int download_manifests(struct manifest **MoM)
+static int download_manifests(struct manifest **MoM)
 {
 	struct list *list = NULL;
 	struct file *file = NULL;

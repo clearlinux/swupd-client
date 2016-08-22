@@ -113,11 +113,7 @@ void unlink_all_staged_content(struct file *file)
 
 	/* downloaded and un-tar'd file */
 	string_or_die(&filename, "%s/staged/%s", state_dir, file->hash);
-	if (file->is_dir) {
-		rmdir(filename);
-	} else {
-		unlink(filename);
-	}
+	remove(filename);
 	free(filename);
 
 	/* delta file */

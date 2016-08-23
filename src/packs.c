@@ -78,11 +78,14 @@ static int download_pack(int oldversion, int newversion, char *module)
 	}
 	free(tar);
 	unlink(filename);
-	/* make a zero sized file to prevent redownload */
-	tarfile = fopen(filename, "w");
-	free(filename);
-	if (tarfile) {
-		fclose(tarfile);
+
+	if (err == 0) {
+		/* make a zero sized file to prevent redownload */
+		tarfile = fopen(filename, "w");
+		free(filename);
+		if (tarfile) {
+			fclose(tarfile);
+		}
 	}
 
 	return err;

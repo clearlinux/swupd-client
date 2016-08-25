@@ -223,14 +223,27 @@ int main_update()
 	int lock_fd;
 	int retries = 0;
 	int timeout = 10;
+	char *log_cmd = NULL;
 
 	srand(time(NULL));
 
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
-		/* being here means we already close log by a previously caught error */
-		printf("Updater failed to initialize, exiting now.\n");
-		return ret;
+		if (ret == ESIGNATURE) {
+			if (!force) {
+				printf("Failed to load a valid certificate. Aborting update\n");
+				return ret;
+			} else {
+				string_or_die(&log_cmd, "echo \"swupd security notice:"
+					" --force used to bypass signature initialization failure\" | systemd-cat");
+				(void) system(log_cmd);
+				free(log_cmd);
+			}
+		} else {
+			/* being here means we already close log by a previously caught error */
+			printf("Updater failed to initialize, exiting now.\n");
+			return ret;
+		}
 	}
 
 	if (!check_network()) {

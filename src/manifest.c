@@ -579,6 +579,7 @@ struct manifest *load_mom(int version)
 	int ret = 0;
 	char *filename;
 	char *url;
+	char *log_cmd = NULL;
 
 	ret = retrieve_manifests(version, version, "MoM", NULL);
 	if (ret != 0) {
@@ -589,8 +590,19 @@ struct manifest *load_mom(int version)
 	string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
 	string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);
 	if (!download_and_verify_signature(url, filename)) {
-		printf("WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM\n");
+		if (!force) {
+			printf("FAILED TO VERIFY SIGNATURE OF Manifest.MoM\n");
+			return NULL;
+		} else {
+			printf("FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
+				"  --force, but system security may be compromised\n");
+			string_or_die(&log_cmd, "echo \"swupd security notice:"
+				" --force used to bypass MoM signature verification failure\" | systemd-cat");
+			(void) system(log_cmd);
+			free(log_cmd);
+		}
 	}
+
 	free(filename);
 	free(url);
 
@@ -677,7 +689,8 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 			if (verify_file(file, fullname)) {
 				free(fullname);
 				continue;
-			}
+			} /* A verify_file failure need not cause an operation abort, as this will
+				result in the file being updated,which should resolve the hash mismatch. */
 			free(fullname);
 		}
 

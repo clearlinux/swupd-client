@@ -102,6 +102,10 @@ static int swupd_curl_hashmap_insert(struct file *file)
 			free(targetfile);
 			pthread_mutex_unlock(&bucket->mutex);
 			return 1;
+		} else {
+			/* verify_file() failed. Clean up corrupt file and proceed with downloading
+				new tar */
+			unlink(targetfile);
 		}
 	}
 	free(targetfile);
@@ -251,6 +255,7 @@ int untar_full_download(void *data)
 	struct stat stat;
 	int err;
 	char *tarcommand;
+	char *log_cmd = NULL;
 
 	string_or_die(&tar_dotfile, "%s/download/.%s.tar", state_dir, file->hash);
 	string_or_die(&tarfile, "%s/download/%s.tar", state_dir, file->hash);
@@ -268,8 +273,27 @@ int untar_full_download(void *data)
 			free(targetfile);
 			return 0;
 		} else {
-			unlink(tarfile);
-			unlink(targetfile);
+			/* tar hash mismatch. Only proceed if forced */
+			if (!force) {
+				printf("Error: Hash of downloaded file %s does not match expected.\n",
+						targetfile);
+				unlink(tarfile);
+				unlink(targetfile);
+			} else {
+				unlink(tar_dotfile);
+				unlink(tarfile);
+				free(tar_dotfile);
+				free(tarfile);
+				free(targetfile);
+				/* This --force override may allow a hacked or corrupted file
+					onto the client. Log this event to the systemd journal to retain
+					a record of the event */
+				string_or_die(&log_cmd, "echo \"swupd security notice:"
+					" --force used to bypass hash verification\" | systemd-cat");
+				(void) system(log_cmd);
+				free(log_cmd);
+				return 0;
+			}
 		}
 	} else if (lstat(tarfile, &stat) == 0) {
 		/* remove tar file from possible past failure */
@@ -317,7 +341,8 @@ int untar_full_download(void *data)
 
 	err = lstat(targetfile, &stat);
 	if (!err && !verify_file(file, targetfile)) {
-		/* Download was successful but the hash was bad. This is fatal*/
+		/* Download was successful but the hash was bad. This is fatal. force override not
+			allowed */
 		printf("Error: File content hash mismatch for %s (bad server data?)\n", targetfile);
 		exit(EXIT_FAILURE);
 	}

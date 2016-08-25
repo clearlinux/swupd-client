@@ -436,8 +436,7 @@ static CURLcode swupd_curl_set_security_opts(CURL *curl)
 		goto exit;
 	}
 
-	// TODO: change this to to use tlsv1.2 when it is supported and enabled on hosting web server
-	curl_ret = curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_0);
+	curl_ret = curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
 	if (curl_ret != CURLE_OK) {
 		goto exit;
 	}

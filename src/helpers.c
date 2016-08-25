@@ -589,6 +589,7 @@ void swupd_deinit(int lock_fd)
 int swupd_init(int *lock_fd)
 {
 	int ret = 0;
+	char *log_cmd = NULL;
 
 	check_root();
 
@@ -736,6 +737,7 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 	struct file *file;
 	char *tar_dotfile = NULL;
 	struct list *list1 = NULL;
+	char *log_cmd = NULL;
 
 	/* This shouldn't happen */
 	if (strcmp(targetpath, "/") == 0) {
@@ -786,8 +788,17 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		if (ret == 0) {
 			if (verify_file(file, target)) {
 				continue;
+			} else if (force) {
+				string_or_die(&log_cmd, "echo \"swupd security notice: "
+					"--force used to bypass hash verification\" | systemd-cat");
+				(void) system(log_cmd);
+				free(log_cmd);
+				continue;
+			} else {
+				printf("Expected hash did not match for path : %s\n", path);
+				ret = -EHASH;
+				goto end;
 			}
-			printf("Hash did not match for path : %s\n", path);
 		} else if (ret == -1 && errno == ENOENT) {
 			printf("Path %s is missing on the file system\n", path);
 		} else {

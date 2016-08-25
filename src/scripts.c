@@ -130,6 +130,9 @@ void run_preupdate_scripts(struct manifest *manifest)
 		if (verify_file(file, script)) {
 			system(script);
 			break;
+		} else {
+			printf("Failed to run pre-update scripts. Hash check failure for : %s\n",
+					script);
 		}
 	}
 

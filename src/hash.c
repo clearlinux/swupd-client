@@ -263,6 +263,7 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 	struct file *current;
 	char *local = NULL;
 	int ret = 0;
+	char *log_cmd = NULL;
 
 	while (iter) {
 		current = iter->data;
@@ -276,9 +277,17 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			      current->last_change, current->filename);
 
 		if (!verify_file(bundle, local)) {
-			printf("Warning: hash check failed for Manifest.%s for version %i\n",
-			       current->filename, manifest->version);
-			ret = 0;
+			if (!force) {
+				printf("Warning: hash check failed for Manifest.%s for version %i\n",
+					   current->filename, manifest->version);
+				ret = EHASH;
+			} else {
+				string_or_die(&log_cmd, "echo \"swupd security notice:"
+					" --force used to bypass hash verification\" | systemd-cat");
+				(void) system(log_cmd);
+				free(log_cmd);
+				ret = 0;
+			}
 		}
 		break;
 	}

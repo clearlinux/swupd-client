@@ -172,6 +172,7 @@ dist_check_SCRIPTS = \
 	test/functional/update/download/test.bats \
 	test/functional/update/include/test.bats \
 	test/functional/update/include-old-bundle/test.bats \
+	test/functional/update/include-old-bundle-with-tracked-file/test.bats \
 	test/functional/update/missing-os-core/test.bats \
 	test/functional/update/newest-deleted/test.bats \
 	test/functional/update/skip-verified-fullfiles/test.bats \

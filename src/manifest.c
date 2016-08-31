@@ -589,8 +589,16 @@ struct manifest *load_mom(int version)
 	string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
 	string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);
 	if (!download_and_verify_signature(url, filename)) {
-		printf("WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM\n");
+		if (!force_ignore_unverified_signature) {
+			printf("FAILED TO VERIFY SIGNATURE OF Manifest.MoM\n");
+			return NULL;
+		} else {
+			printf("FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to"
+				"  --force-continue-with-unverified-signature, but system security MAY BE"
+				" COMPROMISED\n");
+		}
 	}
+
 	free(filename);
 	free(url);
 

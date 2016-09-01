@@ -595,8 +595,12 @@ int verify_main(int argc, char **argv)
 
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
-		printf("Failed verify initialization, exiting now.\n");
-		return ret;
+		if (ret == ESIGNATURE) {
+			printf("Failed to load valid certificate. Attempting to proceed\n");
+		} else {
+			printf("Failed verify initialization, exiting now.\n");
+			return ret;
+		}
 	}
 
 	/* Gather current manifests */

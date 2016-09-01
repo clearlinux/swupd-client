@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "swupd-build-variant.h"
 #include "swupd.h"
 #include "xattrs.h"
 
@@ -254,8 +255,8 @@ bool verify_file(struct file *file, char *filename)
 }
 
 /* Compares the hash for BUNDLE with that listed in the Manifest.MoM.  If the
- * hash check fails, for now, we print a warning and return success, but
- * eventually will switch to being a fatal error and exit early.
+ * hash check fails, we should assume the bundle manifest is incorrect and
+ * discard it. A retry should then force redownloading of the bundle manifest.
  */
 int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 {
@@ -265,6 +266,8 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 	int ret = 0;
 
 	while (iter) {
+		struct stat sb;
+
 		current = iter->data;
 		iter = iter->next;
 
@@ -275,10 +278,50 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 		string_or_die(&local, "%s/%i/Manifest.%s", state_dir,
 			      current->last_change, current->filename);
 
+		if (stat(local, &sb) != 0) {
+			/* missing bundle manifest - attempt to download it */
+			char *filename;
+			char *url;
+			char *tar;
+
+			printf("Warning: Downloading missing manifest for bundle %s version %d.\n",
+					current->filename, current->last_change);
+
+			string_or_die(&filename, "%s/%i/Manifest.%s", state_dir,
+					current->last_change, current->filename);
+			string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url,
+					current->last_change, current->filename);
+			ret = swupd_curl_get_file(url, filename, NULL, NULL, false);
+			free(url);
+
+			if (ret != 0) {
+				printf("Error: download of %s failed\n", filename);
+				unlink(filename);
+				free(filename);
+				break;
+			}
+			free(filename);
+
+			string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",
+					state_dir, current->last_change, state_dir,
+					current->last_change, current->filename);
+
+			ret = system(tar);
+			free(tar);
+			if (WIFEXITED(ret)) {
+				ret = WEXITSTATUS(ret);
+			}
+			if (ret != 0) {
+				break;
+			}
+
+		}
+
 		if (!verify_file(bundle, local)) {
-			printf("Warning: hash check failed for Manifest.%s for version %i\n",
+			printf("Warning: hash check failed for Manifest.%s for version %i. Deleting it.\n",
 			       current->filename, manifest->version);
-			ret = 0;
+			unlink(local);
+			ret = 1;
 		}
 		break;
 	}

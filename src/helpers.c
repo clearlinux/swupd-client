@@ -125,17 +125,6 @@ void unlink_all_staged_content(struct file *file)
 	}
 }
 
-static FILE *fopen_exclusive(const char *filename) /* no mode, opens for write only */
-{
-	int fd;
-
-	fd = open(filename, O_CREAT | O_EXCL | O_RDWR, 00600);
-	if (fd < 0) {
-		return NULL;
-	}
-	return fdopen(fd, "w");
-}
-
 static int create_required_dirs(void)
 {
 	int ret = 0;

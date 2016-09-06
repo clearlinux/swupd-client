@@ -479,7 +479,10 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url)
 		goto exit;
 	}
 
-	curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+	curl_ret = curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+	if (curl_ret != CURLE_OK) {
+		goto exit;
+	}
 
 	if (update_server_port > 0) {
 		curl_ret = curl_easy_setopt(curl, CURLOPT_PORT, update_server_port);

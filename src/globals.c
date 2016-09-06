@@ -31,6 +31,7 @@
 #include "config.h"
 #include "swupd.h"
 
+bool badcert = false;
 bool force = false;
 bool verify_esp_only;
 bool verify_bundles_only = false;

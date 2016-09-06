@@ -46,6 +46,7 @@
  */
 
 static CURLM *mcurl = NULL;
+static size_t mcurl_size = 0;
 static struct list *failed = NULL;
 
 /*
@@ -126,8 +127,8 @@ static int swupd_curl_hashmap_insert(struct file *file)
 }
 
 /* hysteresis thresholds */
-static int MAX_XFER = 25;
-static int MAX_XFER_BOTTOM = 15;
+static size_t MAX_XFER = 25;
+static size_t MAX_XFER_BOTTOM = 15;
 
 int start_full_download(bool pipelining)
 {
@@ -331,24 +332,32 @@ exit:
 	return err;
 }
 
-static int perform_curl_io_and_complete(int *left)
+/* Try to process at most COUNT messages from the curl multi-stack, and enforce
+ * the hysteresis when BOUNDED is true. The COUNT value is a best guess about
+ * the number of messages ready to process, because it may include file
+ * descriptors internal to libcurl as well (see curl_multi_wait(3)). */
+static int perform_curl_io_and_complete(int count, bool bounded)
 {
 	CURLMsg *msg;
 	long ret;
-	CURLMcode curlm_ret;
 	CURLcode curl_ret;
 
-	curlm_ret = curl_multi_perform(mcurl, left);
-	if (curlm_ret != CURLM_OK) {
-		return -1;
-	}
-
-	while (true) {
+	while (count > 0) {
 		CURL *handle;
 		struct file *file;
 
-		msg = curl_multi_info_read(mcurl, left);
+		/* This function may return NULL before processing the
+		 * requested number of messages (stored in variable "count").
+		 * The second argument here (*msgs_in_queue) could be used to
+		 * update "count", but if its value is greater than "count",
+		 * more messages would be processed than desired. Note:
+		 * curl_multi_info_read() does not accept NULL for the second
+		 * argument to indicate an unused value. */
+		int unused;
+		msg = curl_multi_info_read(mcurl, &unused);
 		if (!msg) {
+			/* Either there were fewer than COUNT messages to
+			 * process, or the multi-stack is now empty. */
 			break;
 		}
 		if (msg->msg != CURLMSG_DONE) {
@@ -420,11 +429,16 @@ static int perform_curl_io_and_complete(int *left)
 		curl_multi_remove_handle(mcurl, handle);
 		curl_easy_cleanup(handle);
 		file->curl = NULL;
-	}
 
-	curlm_ret = curl_multi_perform(mcurl, left);
-	if (curlm_ret != CURLM_OK) {
-		return -1;
+		/* "bounded" is false when the remainder of the multi-stack is
+		 * to be processed, ignoring the hysteresis bound. */
+		if (bounded) {
+			count--;
+		}
+
+		/* A response has been completely processed by this point, so
+		 * make the stack shorter. */
+		mcurl_size--;
 	}
 
 	return 0;
@@ -434,23 +448,57 @@ static int perform_curl_io_and_complete(int *left)
  * add new transfer up until the queue reaches the high threshold. At this point
  * we don't return to the caller and instead process the queue until its len
  * gets below the low threshold */
-static int poll_fewer_than(int xfer_queue_high, int xfer_queue_low)
+static int poll_fewer_than(size_t xfer_queue_high, size_t xfer_queue_low)
 {
-	int left;
 	CURLMcode curlm_ret;
+	int running;
 
-	curlm_ret = curl_multi_perform(mcurl, &left);
+	curlm_ret = curl_multi_perform(mcurl, &running);
 	if (curlm_ret != CURLM_OK) {
 		return -1;
 	}
 
-	if (left <= xfer_queue_high) {
+	// There are not enough transfers in queue yet
+	if (mcurl_size <= xfer_queue_high) {
 		return 0;
 	}
 
-	while (left > xfer_queue_low) {
-		usleep(500); /* TODO this really ought to be a select() statement */
-		if (perform_curl_io_and_complete(&left) != 0) {
+	/* When the high bound for the hysteresis is reached, process events
+	 * until the low bound is reached */
+	while (mcurl_size > xfer_queue_low) {
+		int numfds = 0;
+
+		// Wait for activity on the multi-stack
+		curlm_ret = curl_multi_wait(mcurl, NULL, 0, 500, &numfds);
+		if (curlm_ret != CURLM_OK) {
+			return -1;
+		}
+
+		/* Either a timeout was hit, or no events to process.
+		 * Note: curl_multi_wait() never sets numfds < 0 */
+		if (numfds == 0) {
+			curlm_ret = curl_multi_perform(mcurl, &running);
+			if (curlm_ret != CURLM_OK) {
+				return -1;
+			}
+
+			/* If there are no longer any transfers in progress,
+			 * there is no work left to do. */
+			if (running == 0) {
+				break;
+			}
+
+			continue;
+		}
+
+		// At this point, there are some potential events to process
+		if (perform_curl_io_and_complete(numfds, true) != 0) {
+			return -1;
+		}
+
+		// Do more work, in preparation for the next curl_multi_wait()
+		curlm_ret = curl_multi_perform(mcurl, &running);
+		if (curlm_ret != CURLM_OK) {
 			return -1;
 		}
 	}
@@ -523,6 +571,10 @@ void full_download(struct file *file)
 		goto out_bad;
 	}
 
+	/* The current multi-stack size is not exposed by libcurl, so we track
+	 * it with a counter variable. */
+	mcurl_size++;
+
 	if (poll_fewer_than(MAX_XFER + 10, MAX_XFER) != 0) {
 		clean_curl_multi_queue();
 	}
@@ -543,13 +595,13 @@ out_good:
 
 struct list *end_full_download(void)
 {
-	int left;
 	int err;
 
 	printf("Finishing download of update content...\n");
 
 	if (poll_fewer_than(0, 0) == 0) {
-		err = perform_curl_io_and_complete(&left);
+		// The multi-stack is now emptied.
+		err = perform_curl_io_and_complete(1, false);
 		if (err) {
 			clean_curl_multi_queue();
 		}

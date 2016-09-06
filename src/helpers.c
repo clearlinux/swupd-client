@@ -113,7 +113,9 @@ void unlink_all_staged_content(struct file *file)
 
 	/* downloaded and un-tar'd file */
 	string_or_die(&filename, "%s/staged/%s", state_dir, file->hash);
-	remove(filename);
+	if (remove(filename) != 0) {
+		fprintf(stderr, "ERROR:%d, failed to remove %s...\nconsider running swupd verify --fix\n",errno, file->filename);
+	}
 	free(filename);
 
 	/* delta file */

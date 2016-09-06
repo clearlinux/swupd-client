@@ -20,6 +20,7 @@ fi
 openssl_verify()
 {
 	openssl smime -verify -in "$1" -inform der -content "$2" -CAfile "$3" > /dev/null 2>&1
+
 }
 
 create_fake_signature()
@@ -76,7 +77,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# All tests below should NOT return 0
+# All tests below should NOT return 0, and are testing OpenSSL correctness rather than the content passed in
 TEMPCERT=$(mktemp)
 TEMPDATA=$(mktemp)
 TEMPSIG=$(mktemp)

@@ -36,7 +36,7 @@ static bool use_prefix = false;
 
 static struct option opts[] = {
 	{ "no-xattrs", 0, NULL, 'n' },
-	{ "basepath", 1, NULL, 'b' },
+	{ "path", 1, NULL, 'p' },
 	{ "help", 0, NULL, 'h' },
 	{ 0, 0, NULL, 0 }
 };
@@ -49,7 +49,7 @@ static void usage(const char *name)
 	printf("   -h, --help              Show help options\n\n");
 	printf("Application Options:\n");
 	printf("   -n, --no-xattrs         Ignore extended attributes\n");
-	printf("   -b, --basepath          Optional argument for leading path to filename\n");
+	printf("   -p, --path=[PATH...]    Use [PATH...] for leading path to filename\n");
 	printf("\n");
 	printf("The filename is the name of a file on the filesystem.\n");
 	printf("\n");
@@ -72,7 +72,7 @@ int hashdump_main(int argc, char **argv)
 		int c;
 		int i;
 
-		c = getopt_long(argc, argv, "nb:h", opts, &i);
+		c = getopt_long(argc, argv, "np:h", opts, &i);
 		if (c == -1) {
 			break;
 		}
@@ -81,7 +81,7 @@ int hashdump_main(int argc, char **argv)
 		case 'n':
 			file->use_xattrs = false;
 			break;
-		case 'b':
+		case 'p':
 			if (!optarg || !set_path_prefix(optarg)) {
 				printf("Invalid --basepath argument\n\n");
 				free(file);

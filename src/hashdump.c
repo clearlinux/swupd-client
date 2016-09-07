@@ -32,6 +32,8 @@
 
 /* outputs the hash of a file */
 
+static bool use_prefix = false;
+
 static struct option opts[] = {
 	{ "no-xattrs", 0, NULL, 'n' },
 	{ "path", 1, NULL, 'p' },
@@ -49,14 +51,14 @@ static void usage(const char *name)
 	printf("   -n, --no-xattrs         Ignore extended attributes\n");
 	printf("   -p, --path=[PATH...]    Use [PATH...] for leading path to filename\n");
 	printf("\n");
-	printf("The filename is the name as it would appear in a Manifest file.\n");
+	printf("The filename is the name of a file on the filesystem.\n");
 	printf("\n");
 }
 
 int hashdump_main(int argc, char **argv)
 {
 	struct file *file;
-	char *fullname;
+	char *fullname = NULL;
 	int ret;
 
 	file = calloc(1, sizeof(struct file));
@@ -85,6 +87,7 @@ int hashdump_main(int argc, char **argv)
 				free(file);
 				return EXIT_FAILURE;
 			}
+			use_prefix = true;
 			break;
 		case 'h':
 			usage(argv[0]);
@@ -102,14 +105,9 @@ int hashdump_main(int argc, char **argv)
 		exit(-1);
 	}
 
-	// mk_full_filename expects absolute filenames (eg: from Manifest)
-	if (argv[optind][0] == '/') {
-		file->filename = strdup(argv[optind]);
-		if (!file->filename) {
-			abort();
-		}
-	} else {
-		string_or_die(&file->filename, "/%s", argv[optind]);
+	file->filename = strdup(argv[optind]);
+	if (!file->filename) {
+		abort();
 	}
 
 	ret = set_path_prefix(NULL);
@@ -119,10 +117,19 @@ int hashdump_main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	printf("Calculating hash %s xattrs for: (%s) ... %s\n",
-	       (file->use_xattrs ? "with" : "without"), path_prefix, file->filename);
-	fullname = mk_full_filename(path_prefix, file->filename);
-	printf("fullname=%s\n", fullname);
+	// Accept relative paths if no path_prefix set on command line
+	if (use_prefix) {
+		fullname = mk_full_filename(path_prefix, file->filename);
+	} else {
+		fullname = strdup(file->filename);
+		if (!fullname) {
+			abort();
+		}
+	}
+
+	printf("Calculating hash %s xattrs for: %s\n",
+	       (file->use_xattrs ? "with" : "without"), fullname);
+
 	populate_file_struct(file, fullname);
 	ret = compute_hash(file, fullname);
 	if (ret != 0) {

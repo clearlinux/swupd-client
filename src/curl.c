@@ -480,7 +480,7 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url)
 	}
 
 	curl_ret = curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
-	if (curl_ret != CURLE_OK) {
+	if (curl_ret != CURLE_OK && curl_ret != CURLE_UNSUPPORTED_PROTOCOL) {
 		goto exit;
 	}
 

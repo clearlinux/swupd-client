@@ -56,7 +56,7 @@ teardown() {
   run sudo sh -c "$SWUPD hashdump $DIR/target-dir/testfile"
 
   echo "$output"
-  [ "${lines[2]}" = "9f83d713da9df6cabd2abc9d9061f9b611a207e1e0dd22ed7a071ddb1cc1537a" ]
+  [ "${lines[1]}" = "9f83d713da9df6cabd2abc9d9061f9b611a207e1e0dd22ed7a071ddb1cc1537a" ]
 }
 
 # vi: ft=sh ts=8 sw=2 sts=2 et tw=80

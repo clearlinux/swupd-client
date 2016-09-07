@@ -127,35 +127,31 @@ static int set_url(char **global, char *url, const char *path)
 		} else {
 			/* no option passed; use the default value */
 			ret = set_default_value(global, path);
-			if (ret < 0) {
-				return ret;
-			}
+			return ret;
 		}
 	}
 
 	return ret;
 }
 
-void set_content_url(char *url)
+int set_content_url(char *url)
 {
-	int ret;
-
-	ret = set_url(&content_url, url, default_content_url_path);
-	if (ret < 0) {
-		printf("\nDefault content URL cannot be read. Use the -c option instead.\n");
-		exit(EXIT_FAILURE);
+	if (content_url) {
+		/* Only set once; we assume the first successful set is the best choice */
+		return 0;
 	}
+
+	return set_url(&content_url, url, default_content_url_path);
 }
 
-void set_version_url(char *url)
+int set_version_url(char *url)
 {
-	int ret;
-
-	ret = set_url(&version_url, url, default_version_url_path);
-	if (ret < 0) {
-		printf("\nDefault version URL cannot be read. Use the -v option instead.\n");
-		exit(EXIT_FAILURE);
+	if (version_url) {
+		/* Only set once; we assume the first successful set is the best choice */
+		return 0;
 	}
+
+	return set_url(&version_url, url, default_version_url_path);
 }
 
 static bool is_valid_integer_format(char *str)
@@ -197,6 +193,10 @@ bool set_state_dir(char *path)
 bool set_format_string(char *userinput)
 {
 	int ret;
+
+	if (format_string) {
+		return true;
+	}
 
 	if (userinput) {
 		// allow "staging" as a format string
@@ -318,25 +318,47 @@ bool init_globals(void)
 		return false;
 	}
 
-/* Set configuration defaults based on options provided
-	at configure time.  */
+/* Set defaults with following order of preference:
+	1. Runtime flags
+	2. State dir configuration files
+	3. Configure time settings
+*/
+	if (!set_format_string(NULL)) {
 #ifdef FORMATID
-	set_format_string(FORMATID);
-#else
-	(void)set_format_string(NULL);
-#endif /* FORMATID */
+		/* Fallback to configure time format_string if other sources fail */
+		set_format_string(FORMATID);
+#endif
+}
 
+	if (set_version_url(NULL)) {
 #ifdef VERSIONURL
-	set_version_url(VERSIONURL);
+		/* Fallback to configure time version_url if other sources fail */
+		ret = set_version_url(VERSIONURL);
+		if (ret) {
+			printf("\nDefault version URL not found. Use the -v option instead.\n");
+			exit(EXIT_FAILURE);
+		}
 #else
-	set_version_url(NULL);
-#endif /* VERSIONURL */
+		/* We have no choice but to fail */
+		printf("\nDefault version URL not found. Use the -v option instead.\n");
+		exit(EXIT_FAILURE);
+#endif
+	}
 
+	if (set_content_url(NULL)) {
 #ifdef CONTENTURL
-	set_content_url(CONTENTURL);
+		/* Fallback to configure time content_url if other sources fail */
+		ret = set_content_url(CONTENTURL);
+		if (ret) {
+			printf("\nDefault content URL not found. Use the -c option instead.\n");
+			exit(EXIT_FAILURE);
+		}
 #else
-	set_content_url(NULL);
-#endif /* CONTENTURL */
+		/* We have no choice but to fail */
+		printf("\nDefault content URL not found. Use the -c option instead.\n");
+		exit(EXIT_FAILURE);
+#endif
+	}
 
 	/* must set this global after version_url and content_url */
 	set_local_download();

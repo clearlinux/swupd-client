@@ -102,6 +102,7 @@ int rm_staging_dir_contents(const char *rel_path)
 void unlink_all_staged_content(struct file *file)
 {
 	char *filename;
+	int ret;
 
 	/* downloaded tar file */
 	string_or_die(&filename, "%s/download/%s.tar", state_dir, file->hash);
@@ -113,8 +114,10 @@ void unlink_all_staged_content(struct file *file)
 
 	/* downloaded and un-tar'd file */
 	string_or_die(&filename, "%s/staged/%s", state_dir, file->hash);
-	if (remove(filename) != 0) {
-		fprintf(stderr, "ERROR:%d, failed to remove %s...\nconsider running swupd verify --fix\n",errno, file->filename);
+	ret = remove(filename);
+	if (ret && (errno != ENOENT)) {
+		fprintf(stderr, "ERROR: %s, failed to remove %s...\nconsider running swupd verify --fix\n",
+			strerror(errno), filename);
 	}
 	free(filename);
 

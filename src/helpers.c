@@ -58,11 +58,10 @@ void check_root(void)
 int rm_staging_dir_contents(const char *rel_path)
 {
 	DIR *dir;
-	struct dirent entry;
-	struct dirent *result;
+	struct dirent *entry;
 	char *filename;
 	char *abs_path;
-	int ret;
+	int ret = -1;
 
 	string_or_die(&abs_path, "%s/%s", state_dir, rel_path);
 
@@ -72,17 +71,22 @@ int rm_staging_dir_contents(const char *rel_path)
 		return -1;
 	}
 
-	while ((ret = readdir_r(dir, &entry, &result)) == 0) {
-		if (result == NULL) {
+	errno = 0;
+	while(true) {
+		entry = readdir(dir);
+		if (!entry) {
+			if (errno) {
+				ret = errno;
+			}
 			break;
 		}
 
-		if (!strcmp(entry.d_name, ".") ||
-		    !strcmp(entry.d_name, "..")) {
+		if (!strcmp(entry->d_name, ".") ||
+		    !strcmp(entry->d_name, "..")) {
 			continue;
 		}
 
-		string_or_die(&filename, "%s/%s", abs_path, entry.d_name);
+		string_or_die(&filename, "%s/%s", abs_path, entry->d_name);
 
 		ret = remove(filename);
 		if (ret != 0) {
@@ -90,6 +94,7 @@ int rm_staging_dir_contents(const char *rel_path)
 			break;
 		}
 		free(filename);
+		ret = 0;
 	}
 
 	free(abs_path);
@@ -373,8 +378,7 @@ static int swupd_rm_file(const char *path)
 static int swupd_rm_dir(const char *path)
 {
 	DIR *dir;
-	struct dirent entry;
-	struct dirent *result;
+	struct dirent *entry;
 	char *filename = NULL;
 	int ret, err;
 
@@ -389,18 +393,23 @@ static int swupd_rm_dir(const char *path)
 		}
 	}
 
-	while ((ret = readdir_r(dir, &entry, &result)) == 0) {
-		if (result == NULL) {
+	errno = 0;
+	while (true) {
+		entry = readdir(dir);
+		if (!entry) {
+			if (!errno) {
+				ret = errno;
+			}
 			break;
 		}
 
-		if (!strcmp(entry.d_name, ".") ||
-		    !strcmp(entry.d_name, "..")) {
+		if (!strcmp(entry->d_name, ".") ||
+		    !strcmp(entry->d_name, "..")) {
 			continue;
 		}
 
 		free(filename);
-		string_or_die(&filename, "%s/%s", path, entry.d_name);
+		string_or_die(&filename, "%s/%s", path, entry->d_name);
 
 		err = swupd_rm(filename);
 		if (err) {

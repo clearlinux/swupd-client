@@ -204,7 +204,6 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 	/* Verify the signature, outdata can be NULL because we don't use it */
 	ret = PKCS7_verify(p7, x509_stack, store, verify_BIO, NULL, 0);
 	if (ret == 1) {
-		printf("Signature check succeeded.\n");
 		result = true;
 	} else {
 		string_or_die(&errorstr, "Signature check failed!\n");

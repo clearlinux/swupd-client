@@ -579,6 +579,7 @@ struct manifest *load_mom(int version)
 	int ret = 0;
 	char *filename;
 	char *url;
+	char *log_cmd = NULL;
 
 	ret = retrieve_manifests(version, version, "MoM", NULL);
 	if (ret != 0) {
@@ -589,7 +590,19 @@ struct manifest *load_mom(int version)
 	string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
 	string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);
 	if (!download_and_verify_signature(url, filename)) {
-		printf("WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM\n");
+		if (sigcheck) {
+			printf("WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM\n");
+			free(filename);
+			free(url);
+			return NULL;
+		} else {
+			printf("FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
+				"  --nosigcheck, but system security may be compromised\n");
+			string_or_die(&log_cmd, "echo \"swupd security notice:"
+				" --nosigcheck used to bypass MoM signature verification failure\" | systemd-cat");
+			(void)system(log_cmd);
+			free(log_cmd);
+		}
 	}
 	free(filename);
 	free(url);

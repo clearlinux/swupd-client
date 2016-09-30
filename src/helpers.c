@@ -614,7 +614,8 @@ int swupd_init(int *lock_fd)
 		goto out_close_lock;
 	}
 
-	if (!initialize_signature()) {
+	/* If --nosigcheck, we do not attempt any signature checking */
+	if (sigcheck && !initialize_signature()) {
 		ret = ESIGNATURE;
 		terminate_signature();
 		goto out_close_lock;

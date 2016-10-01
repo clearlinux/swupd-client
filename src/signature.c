@@ -259,12 +259,14 @@ static bool get_pubkey(void)
 	cert = PEM_read_X509(fp_pubkey, NULL, NULL, NULL);
 	if (!cert) {
 		fprintf(stderr, "Failed PEM_read_X509() for %s\n", CERTNAME);
+		fp_pubkey = NULL;
 		goto error;
 	}
 
 	pkey = X509_get_pubkey(cert);
 	if (!pkey) {
 		fprintf(stderr, "Failed X509_get_pubkey() for %s\n", CERTNAME);
+		fp_pubkey = NULL;
 		X509_free(cert);
 		goto error;
 	}
@@ -384,6 +386,10 @@ bool download_and_verify_signature(const char *data_url, const char *data_filena
 	char *sig_filename;
 	int ret;
 	bool result;
+
+	if (badcert) {
+		return false;
+	}
 
 	string_or_die(&sig_url, "%s.sig", data_url);
 

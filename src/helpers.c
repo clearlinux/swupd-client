@@ -604,7 +604,8 @@ int swupd_init(int *lock_fd)
 		goto out_close_lock;
 	}
 
-	if (!initialize_signature()) {
+	if (!initialize_signature() && !force) {
+		badcert = true;
 		ret = ESIGNATURE;
 		terminate_signature();
 		goto out_close_lock;

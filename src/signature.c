@@ -250,7 +250,7 @@ error:
  * returns: true if it can get the public key, false otherwise */
 static bool get_pubkey(void)
 {
-	fp_pubkey = fopen(CERTNAME, "r");
+	fp_pubkey = fopen(CERTNAME, "re");
 	if (!fp_pubkey) {
 		fprintf(stderr, "Failed fopen %s\n", CERTNAME);
 		goto error;

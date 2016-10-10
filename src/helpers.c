@@ -130,8 +130,8 @@ static int create_required_dirs(void)
 	int ret = 0;
 	int i;
 	char *dir;
-#define STATE_DIR_COUNT 3
-	const char *dirs[] = { "delta", "staged", "download" };
+#define STATE_DIR_COUNT 4
+	const char *dirs[] = { "delta", "staged", "download", "tmprenamedir" };
 	struct stat buf;
 	bool missing = false;
 

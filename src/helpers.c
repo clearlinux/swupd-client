@@ -782,11 +782,15 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		} else {
 			goto end;
 		}
+		/* In some circumstances (Docker using layers between updates/bundle adds,
+                 * corrupt staging content) we could have content which fails to stage.
+		 * In order to avoid this causing failure in verify_fix_path, remove the
+		 * staging content before proceeding. This also cleans up in case any prior
+		 * download failed in a partial state.
+		 */
+		unlink_all_staged_content(file);
 
 		string_or_die(&tar_dotfile, "%s/download/.%s.tar", state_dir, file->hash);
-
-		// clean up in case any prior download failed in a partial state
-		unlink(tar_dotfile);
 
 		string_or_die(&url, "%s/%i/files/%s.tar", content_url, file->last_change, file->hash);
 		ret = swupd_curl_get_file(url, tar_dotfile, NULL, NULL, false);

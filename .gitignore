@@ -9,6 +9,9 @@
 .libs/
 .project
 DEADJOE
+GPATH
+GRTAGS
+GTAGS
 Makefile
 Makefile.in
 aclocal.m4

@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "swupd.h"
 
@@ -184,7 +185,13 @@ int update_main(int argc, char **argv)
 	if (cmd_line_status) {
 		print_versions();
 	} else {
+		struct timespec ts_start, ts_stop;
+
+		clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
 		ret = main_update();
+		clock_gettime(CLOCK_MONOTONIC_RAW, &ts_stop);
+
+		printf("Update took %lu seconds\n", ts_stop.tv_sec - ts_start.tv_sec);
 	}
 	return ret;
 }

@@ -61,7 +61,7 @@ int rm_staging_dir_contents(const char *rel_path)
 	struct dirent *entry;
 	char *filename;
 	char *abs_path;
-	int ret = -1;
+	int ret = 0;
 
 	string_or_die(&abs_path, "%s/%s", state_dir, rel_path);
 
@@ -75,6 +75,8 @@ int rm_staging_dir_contents(const char *rel_path)
 	while(true) {
 		entry = readdir(dir);
 		if (!entry) {
+			/* readdir returns NULL on the end of a directory stream, we only
+			 * want to set ret if errno is also set, indicating a failure */
 			if (errno) {
 				ret = errno;
 			}
@@ -94,7 +96,6 @@ int rm_staging_dir_contents(const char *rel_path)
 			break;
 		}
 		free(filename);
-		ret = 0;
 	}
 
 	free(abs_path);
@@ -380,7 +381,8 @@ static int swupd_rm_dir(const char *path)
 	DIR *dir;
 	struct dirent *entry;
 	char *filename = NULL;
-	int ret, err;
+	int ret = 0;
+	int err;
 
 	dir = opendir(path);
 	if (dir == NULL) {

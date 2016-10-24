@@ -736,7 +736,7 @@ void link_manifests(struct manifest *m1, struct manifest *m2)
 			list1 = list1->next;
 			list2 = list2->next;
 
-			if (((file2->last_change == m2->version) || (file2->last_change > m1->version)) && !file2->is_deleted) {
+			if (file2->last_change > m1->version && !file2->is_deleted) {
 				account_changed_file();
 			}
 			if (file2->last_change > m1->version && file2->is_deleted) {
@@ -792,7 +792,7 @@ void link_submanifests(struct manifest *m1, struct manifest *m2)
 			list1 = list1->next;
 			list2 = list2->next;
 
-			if (((file2->last_change == m2->version) || (file2->last_change > m1->version)) && !file2->is_deleted) {
+			if (file2->last_change > m1->version && !file2->is_deleted) {
 				account_changed_manifest();
 			}
 			if (file2->last_change == m2->version && file2->is_deleted) {

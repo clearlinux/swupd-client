@@ -129,32 +129,31 @@ int component_subscribed(struct list *subs, char *component)
 	return 0;
 }
 
-void subscription_versions_from_MoM(struct manifest *MoM, struct list **subs, int is_old)
+/* For the given subscription list (subs), set each subscription version as
+ * listed in the MoM (latest). For 'update', the subscription versions from the
+ * old MoM (current) are also set. For other subcommands, pass NULL for
+ * current, since only a single MoM is referenced.
+ */
+void set_subscription_versions(struct manifest *latest, struct manifest *current, struct list **subs)
 {
 	struct list *list;
-	struct list *list2;
 	struct file *file;
 	struct sub *sub;
-	bool bundle_found;
 
 	list = list_head(*subs);
 	while (list) {
-		bundle_found = false;
 		sub = list->data;
 		list = list->next;
 
-		list2 = MoM->manifests;
-		while (list2 && !bundle_found) {
-			file = list2->data;
-			list2 = list2->next;
+		file = search_bundle_in_manifest(latest, sub->component);
+		if (file) {
+			sub->version = file->last_change;
+		}
 
-			if (strcmp(sub->component, file->filename) == 0) {
-				if (is_old) {
-					sub->oldversion = file->last_change;
-				} else {
-					sub->version = file->last_change;
-				}
-				bundle_found = true;
+		if (current) {
+			file = search_bundle_in_manifest(current, sub->component);
+			if (file) {
+				sub->oldversion = file->last_change;
 			}
 		}
 	}

@@ -273,7 +273,7 @@ int remove_bundle(const char *bundle_name)
 		goto out_free_mom;
 	}
 
-	subscription_versions_from_MoM(current_mom, &subs, 0);
+	set_subscription_versions(current_mom, NULL, &subs);
 
 	/* load all submanifest minus the one to be removed */
 	current_mom->submanifests = recurse_manifest(current_mom, subs, NULL);
@@ -413,7 +413,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 		goto out;
 	}
 
-	subscription_versions_from_MoM(mom, subs, 0);
+	set_subscription_versions(mom, NULL, subs);
 
 	to_install_bundles = recurse_manifest(mom, *subs, NULL);
 	if (!to_install_bundles) {
@@ -434,7 +434,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 
 	/* step 3: Add tracked bundles */
 	read_subscriptions_alt(subs);
-	subscription_versions_from_MoM(mom, subs, 0);
+	set_subscription_versions(mom, NULL, subs);
 	mom->submanifests = recurse_manifest(mom, *subs, NULL);
 	if (!mom->submanifests) {
 		printf("Error: Cannot load installed bundles\n");

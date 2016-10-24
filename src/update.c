@@ -311,8 +311,7 @@ load_server_manifests:
 		goto clean_exit;
 	}
 
-	subscription_versions_from_MoM(current_manifest, &subs, 1);
-	subscription_versions_from_MoM(server_manifest, &subs, 0);
+	set_subscription_versions(server_manifest, current_manifest, &subs);
 
 	link_submanifests(current_manifest, server_manifest);
 

@@ -660,7 +660,7 @@ int verify_main(int argc, char **argv)
 		goto clean_and_exit;
 	}
 
-	subscription_versions_from_MoM(official_manifest, &subs, 0);
+	set_subscription_versions(official_manifest, NULL, &subs);
 
 	official_manifest->submanifests = recurse_manifest(official_manifest, subs, NULL);
 	if (!official_manifest->submanifests) {

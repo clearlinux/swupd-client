@@ -243,7 +243,7 @@ extern void free_subscriptions(struct list **subs);
 extern void read_subscriptions(void);
 extern void read_subscriptions_alt(struct list **subs);
 extern int component_subscribed(struct list *subs, char *component);
-extern void subscription_versions_from_MoM(struct manifest *MoM, struct list **subs, int is_old);
+extern void set_subscription_versions(struct manifest *latest, struct manifest *current, struct list **subs);
 
 extern void hash_assign(char *src, char *dest);
 extern bool hash_equal(char *hash1, char *hash2);

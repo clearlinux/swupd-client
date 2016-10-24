@@ -22,6 +22,7 @@ teardown() {
   clean_tars 100
   clean_tars 100 files
   revert_chown_root "$DIR/web-dir/100/files/$f1"
+  sudo rmdir "$DIR/target-dir/os-core"
   sudo rmdir "$DIR/target-dir/usr/bin"
 }
 
@@ -41,10 +42,10 @@ teardown() {
   [ "${lines[9]}" = "Downloading os-core pack for version 100" ]
   [ "${lines[10]}" = "Downloading test-bundle1 pack for version 100" ]
   [ "${lines[11]}" = "Statistics for going from version 10 to version 100:" ]
-  [ "${lines[12]}" = "    changed manifests : 2" ]
-  [ "${lines[13]}" = "    new manifests     : 0" ]
-  [ "${lines[14]}" = "    deleted manifests : 0" ]
-  [ "${lines[15]}" = "    changed files     : 0" ]
+  [ "${lines[12]}" = "    changed bundles   : 2" ]
+  [ "${lines[13]}" = "    new bundles       : 0" ]
+  [ "${lines[14]}" = "    deleted bundles   : 0" ]
+  [ "${lines[15]}" = "    changed files     : 2" ]
   [ "${lines[16]}" = "    new files         : 0" ]
   [ "${lines[17]}" = "    deleted files     : 0" ]
   [ "${lines[18]}" = "Starting download of remaining update content. This may take a while..." ]
@@ -52,6 +53,9 @@ teardown() {
   [ "${lines[20]}" = "Staging file content" ]
   [ "${lines[21]}" = "Update was applied." ]
   [ "${lines[25]}" = "Update successful. System updated from version 10 to version 100" ]
+
+  # changed files (hashes didn't change, only the versions)
+  [ -d "$DIR/target-dir/os-core" ]
   [ -d "$DIR/target-dir/usr/bin" ]
 }
 

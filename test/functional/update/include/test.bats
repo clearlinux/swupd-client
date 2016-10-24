@@ -80,20 +80,23 @@ teardown() {
   [ "${lines[15]}" = "Downloading os-core pack for version 100" ]
   [ "${lines[16]}" = "Downloading test-bundle1 pack for version 100" ]
   [ "${lines[17]}" = "Statistics for going from version 10 to version 100:" ]
-  [ "${lines[18]}" = "    changed manifests : 3" ]
-  [ "${lines[19]}" = "    new manifests     : 0" ]
-  [ "${lines[20]}" = "    deleted manifests : 0" ]
-  [ "${lines[21]}" = "    changed files     : 3" ]
-# FIXME not detecting new files from includes
-  [ "${lines[22]}" = "    new files         : 0" ]
+  [ "${lines[18]}" = "    changed bundles   : 2" ]
+  [ "${lines[19]}" = "    new bundles       : 6" ]
+  [ "${lines[20]}" = "    deleted bundles   : 0" ]
+  [ "${lines[21]}" = "    changed files     : 2" ]
+  [ "${lines[22]}" = "    new files         : 6" ]
   [ "${lines[23]}" = "    deleted files     : 0" ]
   [ "${lines[24]}" = "Starting download of remaining update content. This may take a while..." ]
   [ "${lines[25]}" = "Finishing download of update content..." ]
   [ "${lines[26]}" = "Staging file content" ]
   [ "${lines[27]}" = "Update was applied." ]
   [ "${lines[31]}" = "Update successful. System updated from version 10 to version 100" ]
+
+  # changed files
   [ -d "$DIR/target-dir/usr/bin" ]
   [ -f "$DIR/target-dir/usr/core" ]
+
+  # new files
   [ -f "$DIR/target-dir/usr/foo2" ]
   [ -f "$DIR/target-dir/usr/foo3" ]
   [ -f "$DIR/target-dir/usr/foo4" ]

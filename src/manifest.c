@@ -757,6 +757,12 @@ void link_manifests(struct manifest *m1, struct manifest *m2)
 		list2 = list2->next;
 		account_new_file();
 	}
+
+	// Capture new files if they are at the tail end of the file list
+	while (list2) {
+		list2 = list2->next;
+		account_new_file();
+	}
 }
 
 /* m1: old manifest

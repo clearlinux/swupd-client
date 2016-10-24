@@ -498,7 +498,6 @@ out:
 	if (to_install_bundles) {
 		list_free_list_and_data(to_install_bundles, free_manifest_data);
 	}
-	free_subscriptions();
 	return ret;
 }
 

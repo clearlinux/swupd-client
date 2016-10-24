@@ -806,7 +806,7 @@ void link_submanifests(struct manifest *m1, struct manifest *m2)
 
 /* if component is specified explicitly, pull in submanifest only for that
  * if component is not specified, pull in any tracked component submanifest */
-struct list *recurse_manifest(struct manifest *manifest, const char *component)
+struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component)
 {
 	struct list *bundles = NULL;
 	struct list *list;
@@ -820,7 +820,7 @@ struct list *recurse_manifest(struct manifest *manifest, const char *component)
 		file = list->data;
 		list = list->next;
 
-		if (!component && !component_subscribed(file->filename)) {
+		if (!component && !component_subscribed(subs, file->filename)) {
 			continue;
 		}
 

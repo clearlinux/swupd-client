@@ -89,7 +89,7 @@ static int download_pack(int oldversion, int newversion, char *module)
 }
 
 /* pull in packs for base and any subscription */
-int download_subscribed_packs(bool required)
+int download_subscribed_packs(struct list *subs, bool required)
 {
 	struct list *iter;
 	struct sub *sub = NULL;

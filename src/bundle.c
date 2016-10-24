@@ -95,7 +95,7 @@ int list_installable_bundles()
 * Basically we read MoM version then get the submanifest only for our bundle (component)
 * put it into submanifest pointer, then dispose MoM data.
 */
-static int load_bundle_manifest(const char *bundle_name, int version, struct manifest **submanifest)
+static int load_bundle_manifest(const char *bundle_name, struct list *subs, int version, struct manifest **submanifest)
 {
 	struct list *sub_list = NULL;
 	struct manifest *mom = NULL;
@@ -109,7 +109,7 @@ static int load_bundle_manifest(const char *bundle_name, int version, struct man
 		return EMOM_NOTFOUND;
 	}
 
-	sub_list = recurse_manifest(mom, bundle_name);
+	sub_list = recurse_manifest(mom, subs, bundle_name);
 	if (!sub_list) {
 		ret = ERECURSE_MANIFEST;
 		goto free_out;
@@ -150,20 +150,20 @@ bool is_tracked_bundle(const char *bundle_name)
  * bundles, this function search for bundle_name into subs
  * struct and if it found then free it from the list.
  */
-static int unload_tracked_bundle(const char *bundle_name)
+static int unload_tracked_bundle(const char *bundle_name, struct list **subs)
 {
 	struct list *bundles;
 	struct list *cur_item;
 	struct sub *bundle;
 
-	bundles = list_head(subs);
+	bundles = list_head(*subs);
 	while (bundles) {
 		bundle = bundles->data;
 		cur_item = bundles;
 		bundles = bundles->next;
 		if (strcmp(bundle->component, bundle_name) == 0) {
 			/* unlink (aka untrack) matching bundle name from tracked ones */
-			subs = free_bundle(cur_item);
+			*subs = free_bundle(cur_item);
 			return EXIT_SUCCESS;
 		}
 	}
@@ -219,6 +219,7 @@ int remove_bundle(const char *bundle_name)
 	int ret = 0;
 	int current_version = CURRENT_OS_VERSION;
 	struct manifest *current_mom, *bundle_manifest = NULL;
+	struct list *subs = NULL;
 
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
@@ -265,17 +266,17 @@ int remove_bundle(const char *bundle_name)
 	}
 
 	/* load all tracked bundles into memory */
-	read_subscriptions_alt();
+	read_subscriptions_alt(&subs);
 	/* now popout the one to be removed */
-	ret = unload_tracked_bundle(bundle_name);
+	ret = unload_tracked_bundle(bundle_name, &subs);
 	if (ret != 0) {
 		goto out_free_mom;
 	}
 
-	subscription_versions_from_MoM(current_mom, 0);
+	subscription_versions_from_MoM(current_mom, &subs, 0);
 
 	/* load all submanifest minus the one to be removed */
-	current_mom->submanifests = recurse_manifest(current_mom, NULL);
+	current_mom->submanifests = recurse_manifest(current_mom, subs, NULL);
 	if (!current_mom->submanifests) {
 		printf("Error: Cannot load MoM sub-manifests\n");
 		ret = ERECURSE_MANIFEST;
@@ -293,7 +294,7 @@ int remove_bundle(const char *bundle_name)
 	current_mom->files = consolidate_files(current_mom->files);
 
 	/* Now that we have the consolidated list of all files, load bundle to be removed submanifest*/
-	ret = load_bundle_manifest(bundle_name, current_version, &bundle_manifest);
+	ret = load_bundle_manifest(bundle_name, subs, current_version, &bundle_manifest);
 	if (ret != 0 || !bundle_manifest) {
 		printf("Error: Cannot load %s sub-manifest (ret = %d)\n", bundle_name, ret);
 		goto out_free_mom;
@@ -320,13 +321,13 @@ out_free_curl:
 		printf("Error: Bundle remove failed\n");
 	}
 
-	swupd_deinit(lock_fd);
+	swupd_deinit(lock_fd, &subs);
 
 	return ret;
 }
 
 /* tristate return, -1 for errors, 1 for no errors but no new subscriptions, 0 for no errors and new subscriptions */
-int add_subscriptions(struct list *bundles, int current_version, struct manifest *mom)
+int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom)
 {
 	bool new_bundles = false;
 	char *bundle;
@@ -363,7 +364,7 @@ int add_subscriptions(struct list *bundles, int current_version, struct manifest
 		}
 
 		if (manifest->includes) {
-			ret = add_subscriptions(manifest->includes, current_version, mom);
+			ret = add_subscriptions(manifest->includes, subs, current_version, mom);
 			if (ret == -1) {
 				free_manifest(manifest);
 				goto out;
@@ -377,10 +378,10 @@ int add_subscriptions(struct list *bundles, int current_version, struct manifest
 			continue;
 		}
 
-		if (component_subscribed(bundle)) {
+		if (component_subscribed(*subs, bundle)) {
 			continue;
 		}
-		create_and_append_subscription(bundle);
+		create_and_append_subscription(subs, bundle);
 		new_bundles = true;
 	}
 	if (new_bundles) {
@@ -393,7 +394,7 @@ out:
 	return ret;
 }
 
-static int install_bundles(struct list *bundles, int current_version, struct manifest *mom)
+static int install_bundles(struct list *bundles, struct list **subs, int current_version, struct manifest *mom)
 {
 	int ret;
 	struct file *file;
@@ -402,7 +403,7 @@ static int install_bundles(struct list *bundles, int current_version, struct man
 	struct list *to_install_files = NULL;
 
 	/* step 1: check bundle args are valid if so populate subs struct */
-	ret = add_subscriptions(bundles, current_version, mom);
+	ret = add_subscriptions(bundles, subs, current_version, mom);
 
 	if (ret) {
 		if (ret == 1) {
@@ -412,9 +413,9 @@ static int install_bundles(struct list *bundles, int current_version, struct man
 		goto out;
 	}
 
-	subscription_versions_from_MoM(mom, 0);
+	subscription_versions_from_MoM(mom, subs, 0);
 
-	to_install_bundles = recurse_manifest(mom, NULL);
+	to_install_bundles = recurse_manifest(mom, *subs, NULL);
 	if (!to_install_bundles) {
 		printf("Error: Cannot load to install bundles\n");
 		ret = ERECURSE_MANIFEST;
@@ -429,12 +430,12 @@ static int install_bundles(struct list *bundles, int current_version, struct man
 	(void)rm_staging_dir_contents("download");
 
 	printf("Downloading packs...\n");
-	(void)download_subscribed_packs(true);
+	(void)download_subscribed_packs(*subs, true);
 
 	/* step 3: Add tracked bundles */
-	read_subscriptions_alt();
-	subscription_versions_from_MoM(mom, 0);
-	mom->submanifests = recurse_manifest(mom, NULL);
+	read_subscriptions_alt(subs);
+	subscription_versions_from_MoM(mom, subs, 0);
+	mom->submanifests = recurse_manifest(mom, *subs, NULL);
 	if (!mom->submanifests) {
 		printf("Error: Cannot load installed bundles\n");
 		ret = ERECURSE_MANIFEST;
@@ -511,6 +512,7 @@ int install_bundles_frontend(char **bundles)
 	int current_version;
 	struct list *bundles_list = NULL;
 	struct manifest *mom;
+	struct list *subs = NULL;
 
 	/* initialize swupd and get current version from OS */
 	ret = swupd_init(&lock_fd);
@@ -539,12 +541,12 @@ int install_bundles_frontend(char **bundles)
 		bundles_list = list_prepend_data(bundles_list, *bundles);
 	}
 
-	ret = install_bundles(bundles_list, current_version, mom);
+	ret = install_bundles(bundles_list, &subs, current_version, mom);
 	list_free_list(bundles_list);
 
 	free_manifest(mom);
 clean_and_exit:
-	swupd_deinit(lock_fd);
+	swupd_deinit(lock_fd, &subs);
 
 	return ret;
 }

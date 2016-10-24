@@ -391,7 +391,7 @@ static double query_total_download_size(struct list *list)
  * Description: To search Clear bundles for a particular entry, a complete set of
  *		manifests must be downloaded. This function does so, asynchronously, using
  *		the curl_multi interface */
-static int download_manifests(struct manifest **MoM)
+static int download_manifests(struct manifest **MoM, struct list **subs)
 {
 	struct list *list = NULL;
 	struct file *file = NULL;
@@ -429,7 +429,7 @@ static int download_manifests(struct manifest **MoM)
 		file = list->data;
 		list = list->next;
 
-		create_and_append_subscription(file->filename);
+		create_and_append_subscription(subs, file->filename);
 
 		string_or_die(&untard_file, "%s/%i/Manifest.%s", state_dir, file->last_change,
 			      file->filename);
@@ -476,6 +476,7 @@ int search_main(int argc, char **argv)
 	int ret = 0;
 	int lock_fd = 0;
 	struct manifest *MoM = NULL;
+	struct list *subs = NULL;
 
 	if (!parse_options(argc, argv)) {
 		return EXIT_FAILURE;
@@ -497,7 +498,7 @@ int search_main(int argc, char **argv)
 		printf("Searching for '%s'\n\n", search_string);
 	}
 
-	ret = download_manifests(&MoM);
+	ret = download_manifests(&MoM, &subs);
 	if (ret != 0) {
 		printf("Error: Failed to download manifests\n");
 		goto clean_exit;
@@ -521,6 +522,6 @@ int search_main(int argc, char **argv)
 
 clean_exit:
 	free_manifest(MoM);
-	swupd_deinit(lock_fd);
+	swupd_deinit(lock_fd, &subs);
 	return ret;
 }

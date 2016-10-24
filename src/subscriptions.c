@@ -42,10 +42,10 @@ static void free_subscription_data(void *data)
 	free(sub);
 }
 
-void free_subscriptions(void)
+void free_subscriptions(struct list **subs)
 {
-	list_free_list_and_data(subs, free_subscription_data);
-	subs = NULL;
+	list_free_list_and_data(*subs, free_subscription_data);
+	*subs = NULL;
 }
 
 struct list *free_bundle(struct list *item)
@@ -70,7 +70,7 @@ static int subscription_sort_component(const void *a, const void *b)
 	return ret;
 }
 
-void read_subscriptions_alt(void)
+void read_subscriptions_alt(struct list **subs)
 {
 	bool have_os_core = false;
 	char *path = NULL;
@@ -86,7 +86,7 @@ void read_subscriptions_alt(void)
 				continue;
 			}
 			if (ent->d_type == DT_REG) {
-				if (component_subscribed(ent->d_name)) {
+				if (component_subscribed(*subs, ent->d_name)) {
 					/*  This is considered odd since means two files same name on same folder */
 					continue;
 				}
@@ -94,7 +94,7 @@ void read_subscriptions_alt(void)
 					have_os_core = true;
 				}
 
-				create_and_append_subscription(ent->d_name);
+				create_and_append_subscription(subs, ent->d_name);
 			}
 		}
 
@@ -105,13 +105,13 @@ void read_subscriptions_alt(void)
 
 	/* Always add os-core */
 	if (!have_os_core) {
-		create_and_append_subscription("os-core");
+		create_and_append_subscription(subs, "os-core");
 	}
 
-	subs = list_sort(subs, subscription_sort_component);
+	*subs = list_sort(*subs, subscription_sort_component);
 }
 
-int component_subscribed(char *component)
+int component_subscribed(struct list *subs, char *component)
 {
 	struct list *list;
 	struct sub *sub;
@@ -129,7 +129,7 @@ int component_subscribed(char *component)
 	return 0;
 }
 
-void subscription_versions_from_MoM(struct manifest *MoM, int is_old)
+void subscription_versions_from_MoM(struct manifest *MoM, struct list **subs, int is_old)
 {
 	struct list *list;
 	struct list *list2;
@@ -137,7 +137,7 @@ void subscription_versions_from_MoM(struct manifest *MoM, int is_old)
 	struct sub *sub;
 	bool bundle_found;
 
-	list = list_head(subs);
+	list = list_head(*subs);
 	while (list) {
 		bundle_found = false;
 		sub = list->data;
@@ -160,7 +160,7 @@ void subscription_versions_from_MoM(struct manifest *MoM, int is_old)
 	}
 }
 
-void create_and_append_subscription(const char *component)
+void create_and_append_subscription(struct list **subs, const char *component)
 {
 	struct sub *sub;
 
@@ -176,5 +176,5 @@ void create_and_append_subscription(const char *component)
 
 	sub->version = 0;
 	sub->oldversion = 0;
-	subs = list_prepend_data(subs, sub);
+	*subs = list_prepend_data(*subs, sub);
 }

@@ -209,13 +209,13 @@ static bool hash_needs_work(struct file *file, char *hash)
 	}
 }
 
-static int get_all_files(struct manifest *official_manifest)
+static int get_all_files(struct manifest *official_manifest, struct list *subs)
 {
 	int ret;
 	struct list *iter;
 
 	/* for install we need everything so synchronously download zero packs */
-	ret = download_subscribed_packs(true);
+	ret = download_subscribed_packs(subs, true);
 	if (ret < 0) { // require zero pack
 		/* If we hit this point, we know we have a network connection, therefore
 		 * 	the error is server-side. This is also a critical error, so detailed
@@ -337,10 +337,10 @@ RETRY_DOWNLOADS:
 }
 
 /* allow optimization of install case */
-static int get_required_files(struct manifest *official_manifest)
+static int get_required_files(struct manifest *official_manifest, struct list *subs)
 {
 	if (cmdline_option_install) {
-		return get_all_files(official_manifest);
+		return get_all_files(official_manifest, subs);
 	}
 
 	if (cmdline_option_fix) {
@@ -582,6 +582,7 @@ int verify_main(int argc, char **argv)
 	struct manifest *official_manifest = NULL;
 	int ret;
 	int lock_fd;
+	struct list *subs = NULL;
 
 	copyright_header("software verify");
 
@@ -626,7 +627,7 @@ int verify_main(int argc, char **argv)
 		goto clean_and_exit;
 	}
 
-	read_subscriptions_alt();
+	read_subscriptions_alt(&subs);
 
 	/*
 	 * FIXME: We need a command line option to override this in case the
@@ -654,14 +655,14 @@ int verify_main(int argc, char **argv)
 		goto clean_and_exit;
 	}
 
-	ret = add_included_manifests(official_manifest);
+	ret = add_included_manifests(official_manifest, &subs);
 	if (ret) {
 		goto clean_and_exit;
 	}
 
-	subscription_versions_from_MoM(official_manifest, 0);
+	subscription_versions_from_MoM(official_manifest, &subs, 0);
 
-	official_manifest->submanifests = recurse_manifest(official_manifest, NULL);
+	official_manifest->submanifests = recurse_manifest(official_manifest, subs, NULL);
 	if (!official_manifest->submanifests) {
 		printf("Error: Cannot load MoM sub-manifests\n");
 		ret = ERECURSE_MANIFEST;
@@ -688,7 +689,7 @@ int verify_main(int argc, char **argv)
 
 	if (cmdline_option_fix || cmdline_option_install) {
 		/* when fixing or installing we need input files. */
-		ret = get_required_files(official_manifest);
+		ret = get_required_files(official_manifest, subs);
 		if (ret != 0) {
 			goto brick_the_system_and_clean_curl;
 		}
@@ -782,7 +783,7 @@ brick_the_system_and_clean_curl:
 /* this concludes the critical section, after this point it's clean up time, the disk content is finished and final */
 
 clean_and_exit:
-	swupd_deinit(lock_fd);
+	swupd_deinit(lock_fd, &subs);
 
 	if (ret == EXIT_SUCCESS) {
 		if (cmdline_option_fix || cmdline_option_install) {

@@ -146,7 +146,7 @@ extern void clean_curl_multi_queue(void);
 extern void increment_retries(int *retries, int *timeout);
 
 extern int main_update(void);
-extern int add_included_manifests(struct manifest *mom);
+extern int add_included_manifests(struct manifest *mom, struct list **subs);
 extern int main_verify(int current_version);
 
 extern int get_latest_version(void);
@@ -211,7 +211,7 @@ static inline void account_delta_miss(void)
 
 extern void print_statistics(int version1, int version2);
 
-extern int download_subscribed_packs(bool required);
+extern int download_subscribed_packs(struct list *subs, bool required);
 
 extern void try_delta(struct file *file);
 extern void full_download(struct file *file);
@@ -239,12 +239,11 @@ extern int swupd_curl_get_file(const char *url, char *filename, struct file *fil
 extern CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url);
 void swupd_curl_test_resume(void);
 
-extern struct list *subs;
-extern void free_subscriptions(void);
+extern void free_subscriptions(struct list **subs);
 extern void read_subscriptions(void);
-extern void read_subscriptions_alt(void);
-extern int component_subscribed(char *component);
-extern void subscription_versions_from_MoM(struct manifest *MoM, int is_old);
+extern void read_subscriptions_alt(struct list **subs);
+extern int component_subscribed(struct list *subs, char *component);
+extern void subscription_versions_from_MoM(struct manifest *MoM, struct list **subs, int is_old);
 
 extern void hash_assign(char *src, char *dest);
 extern bool hash_equal(char *hash1, char *hash2);
@@ -253,7 +252,7 @@ extern int compute_hash_lazy(struct file *file, char *filename);
 extern int compute_hash(struct file *file, char *filename) __attribute__((warn_unused_result));
 
 /* manifest.c */
-extern struct list *recurse_manifest(struct manifest *manifest, const char *component);
+extern struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component);
 extern struct list *consolidate_files(struct list *files);
 extern void debug_write_manifest(struct manifest *manifest, char *filename);
 extern void populate_file_struct(struct file *file, char *filename);
@@ -287,7 +286,7 @@ void v_lockfile(int fd);
 extern int swupd_rm(const char *path);
 extern int rm_bundle_file(const char *bundle);
 extern void print_manifest_files(struct manifest *m);
-extern void swupd_deinit(int lock_fd);
+extern void swupd_deinit(int lock_fd, struct list **subs);
 extern int swupd_init(int *lock_fd);
 extern void copyright_header(const char *name);
 extern void string_or_die(char **strp, const char *fmt, ...);
@@ -301,14 +300,14 @@ extern struct list *files_from_bundles(struct list *bundles);
 /* subscription.c */
 struct list *free_list_file(struct list *item);
 struct list *free_bundle(struct list *item);
-extern void create_and_append_subscription(const char *component);
+extern void create_and_append_subscription(struct list **subs, const char *component);
 
 /* bundle.c */
 extern bool is_tracked_bundle(const char *bundle_name);
 extern int remove_bundle(const char *bundle_name);
 extern int list_installable_bundles();
 extern int install_bundles_frontend(char **bundles);
-extern int add_subscriptions(struct list *bundles, int current_version, struct manifest *mom);
+extern int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom);
 
 /* some disk sizes constants for the various features:
  *   ...consider adding build automation to catch at build time

@@ -568,11 +568,11 @@ void free_file_data(void *data)
 	free(file);
 }
 
-void swupd_deinit(int lock_fd)
+void swupd_deinit(int lock_fd, struct list **subs)
 {
 	terminate_signature();
 	swupd_curl_cleanup();
-	free_subscriptions();
+	free_subscriptions(subs);
 	free_globals();
 	v_lockfile(lock_fd);
 	dump_file_descriptor_leaks();

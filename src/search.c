@@ -416,8 +416,6 @@ static int download_manifests(struct manifest **MoM)
 		return EMOM_NOTFOUND;
 	}
 
-	subscription_versions_from_MoM(*MoM, 0);
-
 	list = (*MoM)->manifests;
 	size = query_total_download_size(list);
 	if (size == -1) {

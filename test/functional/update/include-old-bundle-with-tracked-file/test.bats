@@ -58,19 +58,22 @@ teardown() {
   [ "${lines[10]}" = "Downloading test-bundle2 pack for version 30" ]
   [ "${lines[11]}" = "Downloading test-bundle3 pack for version 30" ]
   [ "${lines[12]}" = "Statistics for going from version 20 to version 30:" ]
-  [ "${lines[13]}" = "    changed manifests : 3" ]
-  [ "${lines[14]}" = "    new manifests     : 0" ]
-  [ "${lines[15]}" = "    deleted manifests : 0" ]
-  [ "${lines[16]}" = "    changed files     : 2" ]
-# FIXME not detecting new files from includes
-  [ "${lines[17]}" = "    new files         : 0" ]
+  [ "${lines[13]}" = "    changed bundles   : 3" ]
+  [ "${lines[14]}" = "    new bundles       : 0" ]
+  [ "${lines[15]}" = "    deleted bundles   : 0" ]
+  [ "${lines[16]}" = "    changed files     : 1" ]
+  [ "${lines[17]}" = "    new files         : 1" ]
   [ "${lines[18]}" = "    deleted files     : 0" ]
   [ "${lines[19]}" = "Starting download of remaining update content. This may take a while..." ]
   [ "${lines[20]}" = "Finishing download of update content..." ]
   [ "${lines[21]}" = "Staging file content" ]
   [ "${lines[22]}" = "Update was applied." ]
   [ "${lines[26]}" = "Update successful. System updated from version 20 to version 30" ]
+
+  # changed file
   [ -f "$DIR/target-dir/os-core" ]
+
+  # new file
   [ -f "$DIR/target-dir/tracked-file" ]
 }
 

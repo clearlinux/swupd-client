@@ -36,9 +36,9 @@ teardown() {
   ignore_sigverify_error 9
   [ "${lines[9]}" = "Downloading os-core pack for version 100" ]
   [ "${lines[10]}" = "Statistics for going from version 10 to version 100:" ]
-  [ "${lines[11]}" = "    changed manifests : 1" ]
-  [ "${lines[12]}" = "    new manifests     : 0" ]
-  [ "${lines[13]}" = "    deleted manifests : 0" ]
+  [ "${lines[11]}" = "    changed bundles   : 1" ]
+  [ "${lines[12]}" = "    new bundles       : 0" ]
+  [ "${lines[13]}" = "    deleted bundles   : 0" ]
   [ "${lines[14]}" = "    changed files     : 1" ]
   [ "${lines[15]}" = "    new files         : 0" ]
   [ "${lines[16]}" = "    deleted files     : 0" ]

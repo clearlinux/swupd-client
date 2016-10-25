@@ -219,7 +219,8 @@ int main_update()
 	int current_version = -1, server_version = -1;
 	struct manifest *current_manifest = NULL, *server_manifest = NULL;
 	struct list *updates = NULL;
-	struct list *subs = NULL;
+	struct list *current_subs = NULL;
+	struct list *latest_subs = NULL;
 	int ret;
 	int lock_fd;
 	int retries = 0;
@@ -241,7 +242,7 @@ int main_update()
 	}
 
 	printf("Update started.\n");
-	read_subscriptions_alt(&subs);
+	read_subscriptions_alt(&current_subs);
 
 	/* Step 1: get versions */
 
@@ -306,32 +307,33 @@ load_server_manifests:
 	retries = 0;
 	timeout = 10;
 
-	ret = add_included_manifests(server_manifest, &subs);
+	// The new subscription is seeded from the list of currently installed bundles
+	latest_subs = list_clone(current_subs);
+	ret = add_included_manifests(server_manifest, &latest_subs);
 	if (ret) {
 		goto clean_exit;
 	}
 
-	set_subscription_versions(server_manifest, current_manifest, &subs);
+	set_subscription_versions(server_manifest, current_manifest, &latest_subs);
 
 	link_submanifests(current_manifest, server_manifest);
 
 	/* updating subscribed manifests is done as part of recurse_manifest */
 
 	/* read the current collective of manifests that we are subscribed to */
-	current_manifest->submanifests = recurse_manifest(current_manifest, subs, NULL);
+	current_manifest->submanifests = recurse_manifest(current_manifest, current_subs, NULL);
 	if (!current_manifest->submanifests) {
 		ret = -1;
 		printf("Cannot load current MoM sub-manifests, (%s), exiting\n", strerror(errno));
 		goto clean_exit;
 	}
-
 	/* consolidate the current collective manifests down into one in memory */
 	current_manifest->files = files_from_bundles(current_manifest->submanifests);
 
 	current_manifest->files = consolidate_files(current_manifest->files);
 
 	/* read the new collective of manifests that we are subscribed to */
-	server_manifest->submanifests = recurse_manifest(server_manifest, subs, NULL);
+	server_manifest->submanifests = recurse_manifest(server_manifest, latest_subs, NULL);
 	if (!server_manifest->submanifests) {
 		ret = -1;
 		printf("Error: Cannot load server MoM sub-manifests, (%s), exiting\n", strerror(errno));
@@ -355,7 +357,7 @@ load_server_manifests:
 
 download_packs:
 	/* Step 5: get the packs and untar */
-	ret = download_subscribed_packs(subs, false);
+	ret = download_subscribed_packs(latest_subs, false);
 	if (ret) {
 		// packs don't always exist, tolerate that but not ENONET
 		if (retries < MAX_TRIES) {
@@ -396,7 +398,7 @@ clean_exit:
 	free_manifest(server_manifest);
 
 clean_curl:
-	swupd_deinit(lock_fd, &subs);
+	swupd_deinit(lock_fd, &latest_subs);
 
 	if ((current_version < server_version) && (ret == 0)) {
 		printf("Update successful. System updated from version %d to version %d\n",

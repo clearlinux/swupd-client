@@ -165,7 +165,7 @@ extern struct manifest *load_mom(int version);
 extern struct manifest *load_manifest(int current, int version, struct file *file, struct manifest *mom);
 extern struct list *create_update_list(struct manifest *current, struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
-extern void link_submanifests(struct manifest *m1, struct manifest *m2);
+extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2);
 extern void free_manifest(struct manifest *manifest);
 
 extern int swupd_stats[];
@@ -184,17 +184,17 @@ static inline void account_changed_file(void)
 	swupd_stats[2]++;
 };
 
-static inline void account_new_manifest(void)
+static inline void account_new_bundle(void)
 {
 	swupd_stats[3]++;
 };
 
-static inline void account_deleted_manifest(void)
+static inline void account_deleted_bundle(void)
 {
 	swupd_stats[4]++;
 };
 
-static inline void account_changed_manifest(void)
+static inline void account_changed_bundle(void)
 {
 	swupd_stats[5]++;
 };

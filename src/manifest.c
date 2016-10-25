@@ -780,7 +780,7 @@ void link_manifests(struct manifest *m1, struct manifest *m2)
 
 /* m1: old manifest
  * m2: new manifest */
-void link_submanifests(struct manifest *m1, struct manifest *m2)
+void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2)
 {
 	struct list *list1, *list2;
 	struct file *file1, *file2;
@@ -793,8 +793,11 @@ void link_submanifests(struct manifest *m1, struct manifest *m2)
 
 	while (list1 && list2) { /* m1/file1 matches m2/file2 */
 		int ret;
+		bool subbed1, subbed2;
 		file1 = list1->data;
 		file2 = list2->data;
+		subbed1 = component_subscribed(subs1, file1->filename);
+		subbed2 = component_subscribed(subs2, file2->filename);
 
 		ret = strcmp(file1->filename, file2->filename);
 		if (ret == 0) {
@@ -806,10 +809,16 @@ void link_submanifests(struct manifest *m1, struct manifest *m2)
 			list2 = list2->next;
 
 			if (file2->last_change > m1->version && !file2->is_deleted) {
-				account_changed_manifest();
+				if (subbed1 && subbed2) {
+					account_changed_bundle();
+				} else if (!subbed1 && subbed2) {
+					account_new_bundle();
+				}
 			}
 			if (file2->last_change > m1->version && file2->is_deleted) {
-				account_deleted_manifest();
+				if (subbed1) {
+					account_deleted_bundle();
+				}
 			}
 			continue;
 		}
@@ -822,7 +831,20 @@ void link_submanifests(struct manifest *m1, struct manifest *m2)
 			continue;
 		} /* else ret > 0  m1/file1 is after m2/file2 */
 		list2 = list2->next;
-		account_new_manifest();
+		if (subbed2) {
+			account_new_bundle();
+		}
+	}
+
+	// Capture new bundles if they are at the tail end of the list
+	while (list2) {
+		file2 = list2->data;
+		list2 = list2->next;
+		bool subbed2 = component_subscribed(subs2, file2->filename);
+
+		if (subbed2) {
+			account_new_bundle();
+		}
 	}
 }
 

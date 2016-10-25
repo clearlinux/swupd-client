@@ -316,7 +316,7 @@ load_server_manifests:
 
 	set_subscription_versions(server_manifest, current_manifest, &latest_subs);
 
-	link_submanifests(current_manifest, server_manifest);
+	link_submanifests(current_manifest, server_manifest, current_subs, latest_subs);
 
 	/* updating subscribed manifests is done as part of recurse_manifest */
 

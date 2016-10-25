@@ -649,6 +649,25 @@ struct manifest *load_manifest(int current, int version, struct file *file, stru
 	return manifest;
 }
 
+/* Checks to see if the given file is installed under the path_prefix. */
+static bool is_installed_and_verified(struct file *file)
+{
+	/* Not safe to perform the hash check if there was a type change
+	 * involving symlinks. */
+	if (file->is_link != file->peer->is_link) {
+		return false;
+	}
+
+	char *fullname = mk_full_filename(path_prefix, file->filename);
+
+	if (verify_file(file, fullname)) {
+		free(fullname);
+		return true;
+	}
+	free(fullname);
+	return false;
+}
+
 /* Find files which need updated based on deltas in last_change.
    Should let further do_not_update policy be handled in the caller, but for
    now some hacky exclusions are done here. */
@@ -656,7 +675,6 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 {
 	struct list *output = NULL;
 	struct list *list;
-	char *fullname = NULL;
 
 	update_count = 0;
 	update_skip = 0;
@@ -667,29 +685,33 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 		list = list->next;
 
 		if (file->peer && hash_equal(file->hash, file->peer->hash)) {
-			/* Skip new/changed files if they are already installed
-			 * and the hash check passes. This makes minversion
-			 * bumps cheaper. */
-			fullname = mk_full_filename(path_prefix, file->filename);
-			if (fullname == NULL) {
-				abort();
-			}
-			if (verify_file(file, fullname)) {
-				free(fullname);
+			if (file->last_change == file->peer->last_change) {
+				/* Nothing to do; the file did not change */
 				continue;
+			} else {
+				/* When file and its peer have matching hashes
+				 * but different versions, this indicates a
+				 * minversion bump was performed server-side.
+				 * Skip updating them if installed with the
+				 * correct hash. */
+				if (is_installed_and_verified(file)) {
+					continue;
+				}
 			}
-			free(fullname);
 		}
 
-		if ((file->last_change > current->version) ||
-		    (file->is_rename && file_has_different_hash_in_manifest(current, file)) ||
-		    !file->is_tracked) {
+		/* Note: at this stage, "untracked" files are always "new"
+		 * files, so they will not have a peer. */
+		if (!file->peer ||
+		    (file->peer && file->last_change > file->peer->last_change) ||
+		    (file->is_rename && file_has_different_hash_in_manifest(current, file))) {
 			/* check and if needed mark as do_not_update */
 			(void)ignore(file);
 			/* check if we need to run scripts/update the bootloader/etc */
 			apply_heuristics(file);
 
 			output = list_prepend_data(output, file);
+			continue;
 		}
 	}
 	update_count = list_len(output) - update_skip;

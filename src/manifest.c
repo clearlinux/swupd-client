@@ -808,14 +808,17 @@ void link_submanifests(struct manifest *m1, struct manifest *m2)
 			if (file2->last_change > m1->version && !file2->is_deleted) {
 				account_changed_manifest();
 			}
-			if (file2->last_change == m2->version && file2->is_deleted) {
+			if (file2->last_change > m1->version && file2->is_deleted) {
 				account_deleted_manifest();
 			}
 			continue;
 		}
 		if (ret < 0) { /*  m1/file1 is before m2/file2 */
+			/* A bundle manifest going missing from the MoM in the
+			 * latest version is a breaking change, only possible
+			 * during a format bump, so don't account for this
+			 * possibility in the stats. */
 			list1 = list1->next;
-			account_deleted_manifest();
 			continue;
 		} /* else ret > 0  m1/file1 is after m2/file2 */
 		list2 = list2->next;

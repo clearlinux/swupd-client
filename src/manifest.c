@@ -724,15 +724,6 @@ void link_manifests(struct manifest *m1, struct manifest *m2)
 				file2->deltapeer = file1;
 			}
 
-			/* When new bundle is added to the include list of an installed bundle,
-				we must use the more recent, tracked last_change to ensure new files
-				are not assumed already present */
-			if (!file1->is_deleted && !file2->is_deleted
-					&& hash_equal(file1->hash, file2->hash)
-					&& file1->is_tracked) {
-				file2->last_change = file1->last_change;
-			}
-
 			list1 = list1->next;
 			list2 = list2->next;
 

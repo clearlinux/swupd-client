@@ -181,7 +181,7 @@ AS_IF([test "$enable_tests" != "no"], [
 AM_CONDITIONAL([ENABLE_TESTS], [test "$enable_tests" != "no"])
 
 PKG_CHECK_MODULES([curl], [libcurl])
-PKG_CHECK_MODULES([openssl], [libcrypto >= 1.0.2])
+PKG_CHECK_MODULES([openssl], [libcrypto >= 1.0.1])
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_PROGS(TAR, tar)
 

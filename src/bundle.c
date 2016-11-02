@@ -327,7 +327,7 @@ out_free_curl:
 }
 
 /* tristate return, -1 for errors, 1 for no errors but no new subscriptions, 0 for no errors and new subscriptions */
-int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom)
+int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, int recursion)
 {
 	bool new_bundles = false;
 	char *bundle;
@@ -351,6 +351,19 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 			continue;
 		}
 
+		/*
+		 * If we're recursing a tree of includes, we need to cut out early
+		 * if the bundle we're looking at is already subscribed...
+		 * Because if it is, we'll visit it soon anyway at the top level.
+		 *
+		 * We can't do this for the toplevel of the recursion because
+		 * that is how we initiallly fill in the include tree.
+		 */
+		if (component_subscribed(*subs, bundle) && recursion > 0) {
+			continue;
+		}
+
+
 	retry_manifest_download:
 		manifest = load_manifest(current_version, file->last_change, file, mom);
 		if (!manifest) {
@@ -364,7 +377,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 		}
 
 		if (manifest->includes) {
-			ret = add_subscriptions(manifest->includes, subs, current_version, mom);
+			ret = add_subscriptions(manifest->includes, subs, current_version, mom, recursion + 1);
 			if (ret == -1) {
 				free_manifest(manifest);
 				goto out;
@@ -403,7 +416,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	struct list *to_install_files = NULL;
 
 	/* step 1: check bundle args are valid if so populate subs struct */
-	ret = add_subscriptions(bundles, subs, current_version, mom);
+	ret = add_subscriptions(bundles, subs, current_version, mom, 0);
 
 	if (ret) {
 		if (ret == 1) {

@@ -307,7 +307,7 @@ extern bool is_tracked_bundle(const char *bundle_name);
 extern int remove_bundle(const char *bundle_name);
 extern int list_installable_bundles();
 extern int install_bundles_frontend(char **bundles);
-extern int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom);
+extern int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, int recursion);
 
 /* some disk sizes constants for the various features:
  *   ...consider adding build automation to catch at build time

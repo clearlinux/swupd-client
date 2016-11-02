@@ -147,7 +147,7 @@ AC_ARG_ENABLE([tar-selinux],
 )
 AS_IF([test "x$enable_tar_selinux" = "xyes"],
 	    [AC_DEFINE(SWUPD_TAR_SELINUX,1,[give --selinux option to tar])
-	    AS_IF(test "x$enable_xattr" = "xyes",,
+	    AS_IF(test "x$XATTR" = "xno",
 	    echo "Must have --enable-xattr to have --enable-tar-selinux" >&2
 	    AS_EXIT(1))],
 	    [TARSELINUX=no]

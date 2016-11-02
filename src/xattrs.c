@@ -41,8 +41,15 @@ typedef enum xattrs_action_type_t_ xattrs_action_type_t;
  * glibc's interface to the system calls
  */
 #ifndef SWUPD_WITH_XATTRS
-#define lgetxattr(p,n,b,l) (-1)
+/* Return a length of zero attribute names, i.e. there are none.
+ * Not a perfect emulation, but good enough
+ */
 #define llistxattr(p,b,l) (0)
+/* If by some chance we have an attribute name and try and get its
+ * value then set errno and return an error.
+ */
+#define lgetxattr(p,n,b,l) ((errno = ENOTSUP, -1))
+
 #endif
 
 static int xattr_get_value(const char *path, const char *name, char **blob,

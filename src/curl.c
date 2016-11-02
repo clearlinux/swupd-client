@@ -447,16 +447,6 @@ static CURLcode swupd_curl_set_security_opts(CURL *curl)
 		goto exit;
 	}
 
-	curl_ret = curl_easy_setopt(curl, CURLOPT_PINNEDPUBLICKEY, UPDATE_CA_CERTS_PATH "/425b0f6b.key");
-	if (curl_ret != CURLE_OK) {
-		goto exit;
-	}
-
-	curl_ret = curl_easy_setopt(curl, CURLOPT_CAPATH, UPDATE_CA_CERTS_PATH);
-	if (curl_ret != CURLE_OK) {
-		goto exit;
-	}
-
 #if 0
 	// TODO: add the below when you know the paths:
 	curl_easy_setopt(curl, CURLOPT_CRLFILE, path-to-cert-revoc-list);

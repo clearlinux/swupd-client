@@ -262,11 +262,11 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 {
 	struct list *iter = list_head(manifest->manifests);
 	struct file *current;
-	char *local = NULL;
+	char *local = NULL, *cached;
 	int ret = 0;
 
 	while (iter) {
-		struct stat sb;
+		struct stat sb, sb2;
 
 		current = iter->data;
 		iter = iter->next;
@@ -275,8 +275,18 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			continue;
 		}
 
+		string_or_die(&cached, "%s/%i/Manifest.%s.%s", state_dir,
+			      current->last_change, current->filename, bundle->hash);
+
 		string_or_die(&local, "%s/%i/Manifest.%s", state_dir,
 			      current->last_change, current->filename);
+
+		if (stat(local, &sb) == 0 && stat(cached, &sb2) == 0 && sb.st_ino == sb2.st_ino) {
+			free(cached);
+			break;
+		} else {
+			unlink(cached);
+		}
 
 		if (stat(local, &sb) != 0) {
 			/* missing bundle manifest - attempt to download it */
@@ -323,6 +333,10 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			unlink(local);
 			ret = 1;
 		}
+		if (link(local, cached) != 0) {
+			unlink(cached);
+		}
+		free(cached);
 		break;
 	}
 

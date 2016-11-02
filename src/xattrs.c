@@ -37,6 +37,14 @@ enum xattrs_action_type_t_ {
 
 typedef enum xattrs_action_type_t_ xattrs_action_type_t;
 
+/* If SWUPD_WITH_XATTRS is not defined, create functions to override
+ * glibc's interface to the system calls
+ */
+#ifndef SWUPD_WITH_XATTRS
+#define lgetxattr(p,n,b,l) (-1)
+#define llistxattr(p,b,l) (0)
+#endif
+
 static int xattr_get_value(const char *path, const char *name, char **blob,
 			   size_t *blob_len, xattrs_action_type_t action)
 {

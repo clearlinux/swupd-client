@@ -126,8 +126,31 @@ AC_ARG_ENABLE(
 	AS_HELP_STRING([--enable-bsdtar], [Use alternative bsdtar command (uses tar by default)])
 )
 AS_IF([test "x$enable_bsdtar" = "xyes" ],
-	[AC_DEFINE(SWUPD_WITH_BSDTAR, 1, [Use bsdtar])],
-	[AC_DEFINE(SWUPD_WITHOUT_BSDTAR, 1, [Use default tar])]
+	[AC_DEFINE(SWUPD_WITH_BSDTAR, 1, [Use bsdtar])]
+)
+dnl Enable extended attribute support
+XATTR="yes"
+AC_ARG_ENABLE(
+	[xattr],
+	AS_HELP_STRING([--enable-xattr],[Use extended file attributes (unused by default)])
+)
+AS_IF([test "x$enable_xattr" = "xyes"],
+	    [AC_DEFINE(SWUPD_WITH_XATTRS,1,[Use extended file attributes])
+	    AS_IF(test "x$enable_bsdtar" = "xyes",
+	    echo "Options --enable-bsdtar and --enable-xattr are incompatible" >&2
+	    AS_EXIT(1))],
+	    [XATTR=no]
+)
+TARSELINUX="yes"
+AC_ARG_ENABLE([tar-selinux],
+	AS_HELP_STRING([--enable-tar-selinux],[give --selinux option to tar])
+)
+AS_IF([test "x$enable_tar_selinux" = "xyes"],
+	    [AC_DEFINE(SWUPD_TAR_SELINUX,1,[give --selinux option to tar])
+	    AS_IF(test "x$enable_xattr" = "xyes",,
+	    echo "Must have --enable-xattr to have --enable-tar-selinux" >&2
+	    AS_EXIT(1))],
+	    [TARSELINUX=no]
 )
 
 AC_ARG_WITH([systemdsystemunitdir], AS_HELP_STRING([--with-systemdsystemunitdir=DIR],
@@ -165,7 +188,6 @@ certs_path="/usr/share/clear/update-ca"
 AH_TEMPLATE([SWUPD_LINUX_ROOTFS],[Enable Linux rootfs build variant])
 ## (2) variant features
 AH_TEMPLATE([SWUPD_WITH_BINDMNTS],[cope with bind mounts over rootfs])
-AH_TEMPLATE([SWUPD_WITH_SELINUX],[handle selinux attributes])
 ## (3) variant extra options
 AH_TEMPLATE([MOUNT_POINT],[The mount point])
 AH_TEMPLATE([STATE_DIR],[The state directory for swupd content])
@@ -209,4 +231,6 @@ Configuration to build swupd-client:
   SSL Certificate file:			${SWUPDCERT}
   Use bzip compression:			${BZIP}
   Run Tests:				${TESTS}
+  Use extended file attributes		${XATTR}
+  Use --selinux option for tar		${TARSELINUX}
 ])

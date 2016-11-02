@@ -13,13 +13,18 @@
 #define TAR_XATTR_ARGS ""
 #else
 #define TAR_COMMAND "tar"
+/* configure.ac ensures a sensible configuration of bsdtar/selinux/xattr */
+#ifdef SWUPD_TAR_SELINUX
+#define TAR_XATTR_ARGS "--xattrs --xattrs-include='*' --selinux"
+#else
 #define TAR_XATTR_ARGS "--xattrs --xattrs-include='*'"
 #endif
+#endif
 
-#ifdef SWUPD_WITH_SELINUX
-#define TAR_PERM_ATTR_ARGS "--preserve-permissions --selinux " TAR_XATTR_ARGS
-#else /* SWUPD_WITHOUT_SELINUX */
+#ifdef SWUPD_WITH_XATTRS
 #define TAR_PERM_ATTR_ARGS "--preserve-permissions " TAR_XATTR_ARGS
+#else /* SWUPD_WITHOUT_XATTRS */
+#define TAR_PERM_ATTR_ARGS "--preserve-permissions "
 #endif
 
 #endif

@@ -204,7 +204,7 @@ int add_included_manifests(struct manifest *mom, struct list **subs)
 		iter = iter->next;
 	}
 
-	if (add_subscriptions(subbed, subs, mom->version, mom) >= 0) {
+	if (add_subscriptions(subbed, subs, mom->version, mom, 0) >= 0) {
 		ret = 0;
 	} else {
 		ret = -1;

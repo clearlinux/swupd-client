@@ -4,6 +4,8 @@ Starting download of remaining update content. This may take a while...
 Finishing download of update content...
 Adding any missing files
 Fixing modified files
+REGEXP:^Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile$
+	fixed
 Inspected 1 files
   0 files were missing
   1 files did not match

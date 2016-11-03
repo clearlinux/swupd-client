@@ -4,6 +4,7 @@ Starting download of remaining update content. This may take a while...
 Finishing download of update content...
 Adding any missing files
 Fixing modified files
+REGEXP:^Deleted .*/target-dir/testdir$
 Inspected 0 files
   0 files were missing
   1 files found which should be deleted

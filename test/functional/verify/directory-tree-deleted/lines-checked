@@ -7,6 +7,9 @@ Fixing modified files
 REGEXP:Deleted .*/target-dir/testdir1/testdir2/testfile
 REGEXP:Deleted .*/target-dir/testdir1/testdir2
 REGEXP:Deleted .*/target-dir/testdir1
+Inspected 0 files
   0 files were missing
   3 files found which should be deleted
     3 of 3 files were deleted
+    0 of 3 files were not deleted
+Fix successful

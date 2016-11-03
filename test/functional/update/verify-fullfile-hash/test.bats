@@ -24,29 +24,7 @@ teardown() {
 @test "update fullfile hashes verified" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
-  echo "$output"
-  [ "${lines[2]}" = "Attempting to download version string to memory" ]
-  [ "${lines[3]}" = "Update started." ]
-  [ "${lines[4]}" = "Querying server version." ]
-  [ "${lines[5]}" = "Attempting to download version string to memory" ]
-  [ "${lines[6]}" = "Preparing to update from 10 to 100" ]
-  [ "${lines[7]}" = "Querying current manifest." ]
-  ignore_sigverify_error 8
-  [ "${lines[8]}" = "Querying server manifest." ]
-  ignore_sigverify_error 9
-  [ "${lines[9]}" = "Downloading test-bundle pack for version 100" ]
-  [ "${lines[10]}" = "Statistics for going from version 10 to version 100:" ]
-  [ "${lines[11]}" = "    changed bundles   : 1" ]
-  [ "${lines[12]}" = "    new bundles       : 0" ]
-  [ "${lines[13]}" = "    deleted bundles   : 0" ]
-  [ "${lines[14]}" = "    changed files     : 1" ]
-  [ "${lines[15]}" = "    new files         : 0" ]
-  [ "${lines[16]}" = "    deleted files     : 0" ]
-  [ "${lines[17]}" = "Starting download of remaining update content. This may take a while..." ]
-  [ "${lines[18]}" = "Finishing download of update content..." ]
-
-  regex="Error: File content hash mismatch for .*/staged/$f1 \(bad server data\?\)"
-  [[ "${lines[19]}" =~ $regex ]]
+  check_lines "$output"
 
   [ ! -f "$DIR/target-dir/foo" ]
 }

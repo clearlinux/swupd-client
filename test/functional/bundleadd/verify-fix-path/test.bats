@@ -30,15 +30,7 @@ teardown() {
 @test "bundle-add verify_fix_path support" {
   run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
-  echo "$output"
-  [ "${lines[2]}" = "Attempting to download version string to memory" ]
-  ignore_sigverify_error 3
-  [ "${lines[3]}" = "Downloading packs..." ]
-  [ "${lines[4]}" = "Downloading test-bundle pack for version 10" ]
-  [ "${lines[5]}" = "Extracting pack." ]
-  [ "${lines[6]}" = "Installing bundle(s) files..." ]
-  [ "${lines[8]}" = "Path /usr/bin is missing on the file system" ]
-  [ "${lines[12]}" = "Bundle(s) installation done." ]
+  check_lines "$output"
   [ -d "$DIR/target-dir/usr/bin" ]
   [ -f "$DIR/target-dir/usr/bin/foo" ]
 }

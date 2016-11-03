@@ -18,20 +18,7 @@ teardown() {
 @test "verify delete already removed directory" {
   run sudo sh -c "$SWUPD verify --fix $SWUPD_OPTS"
 
-  echo "$output"
-  [ "${lines[5]}" = "Verifying version 10" ]
-  [ "${lines[6]}" = "Attempting to download version string to memory" ]
-  ignore_sigverify_error 7
-  [ "${lines[7]}" = "Starting download of remaining update content. This may take a while..." ]
-  [ "${lines[8]}" = "Finishing download of update content..." ]
-  [ "${lines[9]}" = "Adding any missing files" ]
-  [ "${lines[10]}" = "Fixing modified files" ]
-  [ "${lines[12]}" = "Inspected 0 files" ]
-  [ "${lines[13]}" = "  0 files were missing" ]
-  [ "${lines[14]}" = "  1 files found which should be deleted" ]
-  [ "${lines[15]}" = "    1 of 1 files were deleted" ]
-  [ "${lines[16]}" = "    0 of 1 files were not deleted" ]
-  [ "${lines[18]}" = "Fix successful" ]
+  check_lines "$output"
   [ ! -d "$DIR/target-dir/testdir" ]
 }
 

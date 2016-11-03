@@ -21,19 +21,7 @@ teardown() {
 @test "verify install a directory using latest" {
   run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install -m latest"
 
-  echo "$output"
-  [ "${lines[5]}" = "Attempting to download version string to memory" ]
-  [ "${lines[6]}" = "Verifying version 100" ]
-  [ "${lines[7]}" = "Attempting to download version string to memory" ]
-  ignore_sigverify_error 8
-  [ "${lines[8]}" = "Downloading os-core pack for version 100" ]
-  [ "${lines[9]}" = "Extracting pack." ]
-  [ "${lines[10]}" = "Adding any missing files" ]
-  [ "${lines[11]}" = "Inspected 1 files" ]
-  [ "${lines[12]}" = "  1 files were missing" ]
-  [ "${lines[13]}" = "    1 of 1 missing files were replaced" ]
-  [ "${lines[14]}" = "    0 of 1 missing files were not replaced" ]
-  [ "${lines[16]}" = "Fix successful" ]
+  check_lines "$output"
   [ -d "$DIR/target-dir/usr/bin" ]
 }
 

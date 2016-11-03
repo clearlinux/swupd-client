@@ -15,14 +15,7 @@ teardown() {
 @test "verify check missing directory" {
   run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
 
-  echo "$output"
-  [ "${lines[2]}" = "Verifying version 10" ]
-  [ "${lines[3]}" = "Attempting to download version string to memory" ]
-  ignore_sigverify_error 4
-  [ "${lines[4]}" = "Verifying files" ]
-  [ "${lines[6]}" = "Inspected 1 files" ]
-  [ "${lines[7]}" = "  1 files did not match" ]
-  [ "${lines[8]}" = "Verify successful" ]
+  check_lines "$output"
   [ ! -d "$DIR/target-dir/usr/bin" ]
 }
 

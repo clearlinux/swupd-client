@@ -23,22 +23,7 @@ teardown() {
 @test "verify fix incorrect boot file" {
   run sudo sh -c "$SWUPD verify $SWUPD_OPTS --fix"
 
-  echo wtf "${lines[19]}"
-  echo "$output"
-  [ "${lines[5]}" = "Verifying version 10" ]
-  [ "${lines[6]}" = "Attempting to download version string to memory" ]
-  ignore_sigverify_error 7
-  [ "${lines[7]}" = "Starting download of remaining update content. This may take a while..." ]
-  [ "${lines[8]}" = "Finishing download of update content..." ]
-  [ "${lines[9]}" = "Adding any missing files" ]
-  [ "${lines[10]}" = "Fixing modified files" ]
-  [ "${lines[13]}" = "Inspected 1 files" ]
-  [ "${lines[14]}" = "  0 files were missing" ]
-  [ "${lines[15]}" = "  1 files did not match" ]
-  [ "${lines[16]}" = "    1 of 1 files were fixed" ]
-  [ "${lines[17]}" = "    0 of 1 files were not fixed" ]
-  [ "${lines[18]}" = "  0 files found which should be deleted" ]
-  [ "${lines[20]}" = "Fix successful" ]
+  check_lines "$output"
   [ -f "$DIR/target-dir/usr/lib/kernel/testfile" ]
 }
 

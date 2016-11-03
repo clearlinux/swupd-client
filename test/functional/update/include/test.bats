@@ -61,36 +61,7 @@ teardown() {
 @test "update with includes" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
-  echo "$output"
-  [ "${lines[2]}" = "Attempting to download version string to memory" ]
-  [ "${lines[3]}" = "Update started." ]
-  [ "${lines[4]}" = "Querying server version." ]
-  [ "${lines[5]}" = "Attempting to download version string to memory" ]
-  [ "${lines[6]}" = "Preparing to update from 10 to 100" ]
-  [ "${lines[7]}" = "Querying current manifest." ]
-  ignore_sigverify_error 8
-  [ "${lines[8]}" = "Querying server manifest." ]
-  ignore_sigverify_error 9
-  [ "${lines[9]}" = "Downloading test-bundle3 pack for version 100" ]
-  [ "${lines[10]}" = "Downloading test-bundle4 pack for version 100" ]
-  [ "${lines[11]}" = "Downloading test-bundle5 pack for version 100" ]
-  [ "${lines[12]}" = "Downloading test-bundle2 pack for version 100" ]
-  [ "${lines[13]}" = "Downloading test-bundle7 pack for version 100" ]
-  [ "${lines[14]}" = "Downloading test-bundle6 pack for version 100" ]
-  [ "${lines[15]}" = "Downloading os-core pack for version 100" ]
-  [ "${lines[16]}" = "Downloading test-bundle1 pack for version 100" ]
-  [ "${lines[17]}" = "Statistics for going from version 10 to version 100:" ]
-  [ "${lines[18]}" = "    changed bundles   : 2" ]
-  [ "${lines[19]}" = "    new bundles       : 6" ]
-  [ "${lines[20]}" = "    deleted bundles   : 0" ]
-  [ "${lines[21]}" = "    changed files     : 2" ]
-  [ "${lines[22]}" = "    new files         : 6" ]
-  [ "${lines[23]}" = "    deleted files     : 0" ]
-  [ "${lines[24]}" = "Starting download of remaining update content. This may take a while..." ]
-  [ "${lines[25]}" = "Finishing download of update content..." ]
-  [ "${lines[26]}" = "Staging file content" ]
-  [ "${lines[27]}" = "Update was applied." ]
-  [ "${lines[31]}" = "Update successful. System updated from version 10 to version 100" ]
+  check_lines "$output"
 
   # changed files
   [ -d "$DIR/target-dir/usr/bin" ]

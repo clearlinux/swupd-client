@@ -15,10 +15,7 @@ teardown() {
 @test "bundle-add an already existing bundle" {
   run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
-  echo "$output"
-  [ "${lines[2]}" = "Attempting to download version string to memory" ]
-  ignore_sigverify_error 3
-  [ "${lines[3]}" = "bundle(s) already installed, exiting now" ]
+  check_lines "$output"
 }
 
 # vi: ft=sh ts=8 sw=2 sts=2 et tw=80

@@ -24,29 +24,7 @@ teardown() {
 @test "update add boot file" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
-  echo "$output"
-  [ "${lines[3]}" = "Attempting to download version string to memory" ]
-  [ "${lines[4]}" = "Update started." ]
-  [ "${lines[5]}" = "Querying server version." ]
-  [ "${lines[6]}" = "Attempting to download version string to memory" ]
-  [ "${lines[7]}" = "Preparing to update from 10 to 100" ]
-  [ "${lines[8]}" = "Querying current manifest." ]
-  ignore_sigverify_error 9
-  [ "${lines[9]}" = "Querying server manifest." ]
-  ignore_sigverify_error 10
-  [ "${lines[10]}" = "Downloading os-core pack for version 100" ]
-  [ "${lines[11]}" = "Statistics for going from version 10 to version 100:" ]
-  [ "${lines[12]}" = "    changed bundles   : 1" ]
-  [ "${lines[13]}" = "    new bundles       : 0" ]
-  [ "${lines[14]}" = "    deleted bundles   : 0" ]
-  [ "${lines[15]}" = "    changed files     : 0" ]
-  [ "${lines[16]}" = "    new files         : 1" ]
-  [ "${lines[17]}" = "    deleted files     : 0" ]
-  [ "${lines[18]}" = "Starting download of remaining update content. This may take a while..." ]
-  [ "${lines[19]}" = "Finishing download of update content..." ]
-  [ "${lines[20]}" = "Staging file content" ]
-  [ "${lines[21]}" = "Update was applied." ]
-  [ "${lines[24]}" = "Update successful. System updated from version 10 to version 100" ]
+  check_lines "$output"
   [ -f "$DIR/target-dir/usr/lib/kernel/testfile" ]
 }
 

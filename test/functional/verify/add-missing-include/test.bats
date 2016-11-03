@@ -31,20 +31,7 @@ teardown() {
 @test "verify add missing include" {
   run sudo sh -c "$SWUPD verify --fix $SWUPD_OPTS"
 
-  echo "$output"
-  [ "${lines[5]}" = "Verifying version 10" ]
-  [ "${lines[6]}" = "Attempting to download version string to memory" ]
-  ignore_sigverify_error 7
-  [ "${lines[7]}" = "Starting download of remaining update content. This may take a while..." ]
-  [ "${lines[8]}" = "Finishing download of update content..." ]
-  [ "${lines[9]}" = "Adding any missing files" ]
-  [ "${lines[16]}" = "Fixing modified files" ]
-  [ "${lines[17]}" = "Inspected 3 files" ]
-  [ "${lines[18]}" = "  3 files were missing" ]
-  [ "${lines[19]}" = "    3 of 3 missing files were replaced" ]
-  [ "${lines[20]}" = "    0 of 3 missing files were not replaced" ]
-  [ "${lines[21]}" = "  0 files found which should be deleted" ]
-  [ "${lines[23]}" = "Fix successful" ]
+  check_lines "$output"
   [ -f "$DIR/target-dir/os-core" ]
   [ -f "$DIR/target-dir/test-bundle1" ]
   [ -f "$DIR/target-dir/test-bundle2" ]

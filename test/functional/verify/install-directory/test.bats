@@ -21,18 +21,7 @@ teardown() {
 @test "verify install directory" {
   run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install -m 10"
 
-  echo "$output"
-  [ "${lines[5]}" = "Verifying version 10" ]
-  [ "${lines[6]}" = "Attempting to download version string to memory" ]
-  ignore_sigverify_error 7
-  [ "${lines[7]}" = "Downloading os-core pack for version 10" ]
-  [ "${lines[8]}" = "Extracting pack." ]
-  [ "${lines[9]}" = "Adding any missing files" ]
-  [ "${lines[10]}" = "Inspected 1 files" ]
-  [ "${lines[11]}" = "  1 files were missing" ]
-  [ "${lines[12]}" = "    1 of 1 missing files were replaced" ]
-  [ "${lines[13]}" = "    0 of 1 missing files were not replaced" ]
-  [ "${lines[15]}" = "Fix successful" ]
+  check_lines "$output"
   [ -d "$DIR/target-dir/usr/bin" ]
 }
 

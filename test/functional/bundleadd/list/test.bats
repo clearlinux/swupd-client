@@ -15,10 +15,7 @@ teardown() {
 @test "bundle-add list bundles" {
   run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS --list"
 
-  echo "$output"
-  [ "${lines[2]}" = "Attempting to download version string to memory" ]
-  ignore_sigverify_error 3
-  [ "${lines[3]}" = "os-core" ]
+  check_lines "$output"
 }
 
 # vi: ft=sh ts=8 sw=2 sts=2 et tw=80

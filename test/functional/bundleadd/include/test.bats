@@ -27,16 +27,7 @@ teardown() {
 @test "bundle-add verify include support" {
   run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
-  echo "$output"
-  [ "${lines[2]}" = "Attempting to download version string to memory" ]
-  ignore_sigverify_error 3
-  [ "${lines[3]}" = "Downloading packs..." ]
-  [ "${lines[4]}" = "Downloading test-bundle pack for version 10" ]
-  [ "${lines[5]}" = "Extracting pack." ]
-  [ "${lines[6]}" = "Downloading os-core pack for version 10" ]
-  [ "${lines[7]}" = "Extracting pack." ]
-  [ "${lines[8]}" = "Installing bundle(s) files..." ]
-  [ "${lines[12]}" = "Bundle(s) installation done." ]
+  check_lines "$output"
   ls "$DIR/target-dir/usr/bin"
   ls "$DIR/target-dir/usr/foo"
 }

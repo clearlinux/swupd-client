@@ -50,9 +50,6 @@ static void try_delta_loop(struct list *updates)
 	struct list *iter;
 	struct file *file;
 
-	/* need update list in filename order to insure directories are
-	 * created before their contents */
-	updates = list_sort(updates, file_sort_filename);
 
 	iter = list_head(updates);
 	while (iter) {
@@ -382,6 +379,12 @@ download_packs:
 	print_statistics(current_version, server_version);
 
 	/* Step 7: apply the update */
+
+	/*
+	 * need update list in filename order to insure directories are
+	 * created before their contents
+	 */
+	updates = list_sort(updates, file_sort_filename);
 
 	ret = update_loop(updates, server_manifest);
 	if (ret == 0) {

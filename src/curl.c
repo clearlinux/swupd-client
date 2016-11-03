@@ -484,6 +484,11 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url)
 		goto exit;
 	}
 
+	curl_ret = curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1);
+	if (curl_ret != CURLE_OK) {
+		goto exit;
+	}
+
 	if (update_server_port > 0) {
 		curl_ret = curl_easy_setopt(curl, CURLOPT_PORT, update_server_port);
 		if (curl_ret != CURLE_OK) {

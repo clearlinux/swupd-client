@@ -40,6 +40,11 @@ int get_latest_version(void)
 	char *path = NULL;
 	int ret = 0;
 	struct version_container tmp_version = { 0 };
+	static int cached_version = -1;
+
+	if (cached_version > 0) {
+		return cached_version;
+	}
 
 	tmp_version.version = calloc(LINE_MAX, 1);
 	if (tmp_version.version == NULL) {
@@ -63,6 +68,7 @@ out:
 	free(path);
 	free(url);
 	free(tmp_version.version);
+	cached_version = ret;
 	return ret;
 }
 

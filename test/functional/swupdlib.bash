@@ -67,16 +67,6 @@ create_fullfile_tar() {
 #   return
 # }
 
-ignore_sigverify_error() {
-  local index="$1"
-  if [[ "${lines[$index]}" =~ ^WARNING!!!\ FAILED\ TO\ VERIFY\ SIGNATURE\ OF\ Manifest.MoM ]]; then
-    # remove element from array
-    unset lines[$index]
-    # reassign indices
-    lines=("${lines[@]}")
-  fi
-}
-
 check_lines() {
   local outputstr="$1"
   local outputfile="$DIR/lines-output"

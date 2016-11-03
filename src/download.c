@@ -149,7 +149,7 @@ int start_full_download(bool pipelining)
 	 * is even more broken than average. This at least will allow the user to update, albeit slowly.
 	 */
 	if (pipelining) {
-		curl_multi_setopt(mcurl, CURLMOPT_PIPELINING, 1);
+		curl_multi_setopt(mcurl, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX | CURLPIPE_HTTP1);
 	} else {
 		/* survival: don't go too parallel in verify/fix loop */
 		MAX_XFER = 1;

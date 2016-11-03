@@ -1,7 +1,6 @@
 Attempting to download version string to memory
 Update started.
 Querying server version.
-Attempting to download version string to memory
 Preparing to update from 10 to 100
 Querying current manifest.
 Querying server manifest.
@@ -14,5 +13,6 @@ Statistics for going from version 10 to version 100:
     new files         : 0
     deleted files     : 0
 Starting download of remaining update content. This may take a while...
+File /foo was not in a pack
 Finishing download of update content...
 REGEXP:Error: File content hash mismatch for .*/staged/520f83440d3dddc25ad09ca858b9c669245f82d3181a45cdfe793aac9dd1fb15 \(bad server data\?\)

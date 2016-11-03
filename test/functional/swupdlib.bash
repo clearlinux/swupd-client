@@ -71,15 +71,16 @@ check_lines() {
   local outputstr="$1"
   local outputfile="$DIR/lines-output"
   local checked="$DIR/lines-checked"
+  local ignored="$DIR/../../ignore-list"
   local prog="$DIR/../../matcher.awk"
 
   echo "$outputstr" > "$outputfile"
 
-  run awk -f "$prog" "$checked" "$outputfile"
+  run awk -f "$prog" "$checked" "$ignored" "$outputfile"
 
   if [ $status -eq 1 ]; then
     echo "$output"
-    echo -e "\nChecked lines versus actual output (note that actual output may contain unchecked lines):\n"
+    echo -e "\nChecked lines versus actual output (note that actual output may contain ignored lines):\n"
     diff -u "$checked" "$outputfile"
   fi
 }

@@ -1,0 +1,16 @@
+^swupd-client bundle adder [0-9.]+$
+^swupd-client bundle remover [0-9.]+$
+^swupd-client software update [0-9.]+$
+^swupd-client software update checker [0-9.]+$
+^swupd-client software verify [0-9.]+$
+^.*Copyright \(C\) .*$
+^$
+^Calling post-update helper scripts.$
+^No kernel update needed, skipping helper call out.$
+^No bootloader update needed, skipping helper call out.$
+^Update took .* seconds$
+^sh: .*/usr/bin/kernel_updater.sh: No such file or directory$
+^sh: .*/usr/bin/gummiboot_updaters.sh: No such file or directory$
+^sh: .*/usr/bin/systemdboot_updater.sh: No such file or directory$
+^Possible filedescriptor leak: .*$
+^WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM$

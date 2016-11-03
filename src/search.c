@@ -276,7 +276,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 		done_with_bundle = false;
 
 		/* Load sub-manifest */
-		subman = load_manifest(file->last_change, file->last_change, file, MoM);
+		subman = load_manifest(file->last_change, file->last_change, file, MoM, 0);
 		if (!subman) {
 			printf("Failed to load manifest %s\n", file->filename);
 			continue;
@@ -441,7 +441,7 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 			/* Do download */
 			printf(" '%s' manifest...\n", file->filename);
 
-			subMan = load_manifest(current_version, file->last_change, file, *MoM);
+			subMan = load_manifest(current_version, file->last_change, file, *MoM, 0);
 			if (!subMan) {
 				printf("Cannot load official manifest MoM for version %i\n", current_version);
 			} else {

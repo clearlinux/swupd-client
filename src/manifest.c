@@ -162,7 +162,7 @@ static struct manifest *alloc_manifest(int version, char *component)
 	return manifest;
 }
 
-static struct manifest *manifest_from_file(int version, char *component)
+static struct manifest *manifest_from_file(int version, char *component, int header_only)
 {
 	FILE *infile;
 	char line[MANIFEST_LINE_MAXLEN], *c, *c2;
@@ -177,7 +177,7 @@ static struct manifest *manifest_from_file(int version, char *component)
 
 	string_or_die(&filename, "%s/%i/Manifest.%s", state_dir, version, component);
 
-	infile = fopen(filename, "rb");
+	infile = fopen(filename, "rbm");
 	if (infile == NULL) {
 		free(filename);
 		return NULL;
@@ -249,6 +249,11 @@ static struct manifest *manifest_from_file(int version, char *component)
 	manifest->contentsize = contentsize;
 	manifest->manifest_version = manifest_enc_version;
 	manifest->includes = includes;
+
+	if (header_only) {
+		fclose(infile);
+		return manifest;
+	}
 
 	/* empty line */
 	while (!feof(infile)) {
@@ -594,7 +599,7 @@ struct manifest *load_mom(int version)
 	free(filename);
 	free(url);
 
-	manifest = manifest_from_file(version, "MoM");
+	manifest = manifest_from_file(version, "MoM", 0);
 
 	if (manifest == NULL) {
 		printf("Failed to load %d MoM manifest\n", version);
@@ -621,7 +626,7 @@ out:
  * Note that if the manifest fails to download, or if the manifest fails to be
  * loaded into memory, this function will return NULL.
  */
-struct manifest *load_manifest(int current, int version, struct file *file, struct manifest *mom)
+struct manifest *load_manifest(int current, int version, struct file *file, struct manifest *mom, bool header_only)
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
@@ -632,12 +637,15 @@ struct manifest *load_manifest(int current, int version, struct file *file, stru
 		return NULL;
 	}
 
-	ret = verify_bundle_hash(mom, file);
+	if (!header_only) {
+		ret = verify_bundle_hash(mom, file);
+	}
+
 	if (ret != 0) {
 		return NULL;
 	}
 
-	manifest = manifest_from_file(version, file->filename);
+	manifest = manifest_from_file(version, file->filename, header_only);
 
 	if (manifest == NULL) {
 		printf("Failed to load %d %s manifest\n", version, file->filename);
@@ -882,7 +890,7 @@ struct list *recurse_manifest(struct manifest *manifest, struct list *subs, cons
 			version1 = version2;
 		}
 
-		sub = load_manifest(version1, version2, file, manifest);
+		sub = load_manifest(version1, version2, file, manifest, 0);
 		if (!sub) {
 			list_free_list_and_data(bundles, free_manifest_data);
 			return NULL;

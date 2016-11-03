@@ -365,7 +365,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 
 
 	retry_manifest_download:
-		manifest = load_manifest(current_version, file->last_change, file, mom);
+		manifest = load_manifest(current_version, file->last_change, file, mom, 1);
 		if (!manifest) {
 			if (retries < MAX_TRIES) {
 				increment_retries(&retries, &timeout);

@@ -186,12 +186,15 @@ int update_main(int argc, char **argv)
 		print_versions();
 	} else {
 		struct timespec ts_start, ts_stop;
+		double delta;
 
 		clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
 		ret = main_update();
 		clock_gettime(CLOCK_MONOTONIC_RAW, &ts_stop);
 
-		printf("Update took %lu seconds\n", ts_stop.tv_sec - ts_start.tv_sec);
+		delta = ts_stop.tv_sec - ts_start.tv_sec + ts_stop.tv_nsec / 1000000000.0 - ts_start.tv_nsec / 1000000000.0;
+
+		printf("Update took %5.1f seconds\n", delta);
 	}
 	return ret;
 }

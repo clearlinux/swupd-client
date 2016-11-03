@@ -82,14 +82,10 @@ void run_scripts(void)
 	/* path_prefix aware helper */
 	if (need_update_boot) {
 		update_kernel();
-	} else {
-		printf("No kernel update needed, skipping helper call out.\n");
 	}
 
 	if (need_update_bootloader) {
 		update_bootloader();
-	} else {
-		printf("No bootloader update needed, skipping helper call out.\n");
 	}
 
 	/* helpers which don't run when path_prefix is set */

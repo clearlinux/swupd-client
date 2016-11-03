@@ -49,3 +49,4 @@ test/functional/*/*/web-dir/*/staged/*.tar
 test/functional/*/*/web-dir/*/files/*.tar
 test/functional/*/*/test.log
 test/functional/*/*/state
+test/functional/*/*/lines-output

@@ -36,6 +36,8 @@
 #include "signature.h"
 #include "swupd.h"
 
+int nonpack;
+
 void increment_retries(int *retries, int *timeout)
 {
 	(*retries)++;
@@ -405,6 +407,10 @@ clean_curl:
 		       current_version, server_version);
 	} else if (ret == 0) {
 		printf("Update complete. System already up-to-date at version %d\n", current_version);
+	}
+
+	if (nonpack > 0) {
+		printf("%i files were not in a pack\n", nonpack);
 	}
 
 	return ret;

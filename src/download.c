@@ -506,6 +506,8 @@ static int poll_fewer_than(size_t xfer_queue_high, size_t xfer_queue_low)
 	return 0;
 }
 
+extern int nonpack;
+
 /* full_download() attempts to enqueue a file for later asynchronous download
    - NOTE: See swupd_curl_get_file() for single file synchronous downloads. */
 void full_download(struct file *file)
@@ -525,6 +527,13 @@ void full_download(struct file *file)
 	} else if (ret < 0) { /* error */
 		goto out_bad;
 	} /* else (ret == 0)	   download needed */
+
+	/* Only print the first file so we don't spam on large misses */
+	if (nonpack == 0) {
+		printf("File %s was not in a pack\n", file->filename);
+	}
+	/* If we get here the pack is missing a file so we have to download it */
+	nonpack++;
 
 	curl = curl_easy_init();
 	if (curl == NULL) {

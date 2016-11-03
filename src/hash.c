@@ -236,7 +236,14 @@ bool verify_file(struct file *file, char *filename)
 	}
 
 	local->filename = file->filename;
-	local->use_xattrs = true;
+	/*
+	 * xattrs are currently not supported for manifest files.
+	 * They are data files produced by the swupd-server and
+	 * therefore do not have any of the xattrs normally
+	 * set for the actual system files (like security.ima
+	 * when using IMA or security.SMACK64 when using Smack).
+	 */
+	local->use_xattrs = !file->is_manifest;
 
 	populate_file_struct(local, filename);
 	if (compute_hash(local, filename) != 0) {

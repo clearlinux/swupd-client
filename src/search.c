@@ -439,8 +439,6 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 
 		if (access(untard_file, F_OK) == -1) {
 			/* Do download */
-			printf(" '%s' manifest...\n", file->filename);
-
 			subMan = load_manifest(current_version, file->last_change, file, *MoM, 0);
 			if (!subMan) {
 				printf("Cannot load official manifest MoM for version %i\n", current_version);

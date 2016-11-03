@@ -1,7 +1,6 @@
 Attempting to download version string to memory
 Update started.
 Querying server version.
-Attempting to download version string to memory
 Preparing to update from 10 to 100
 Querying current manifest.
 Querying server manifest.
@@ -14,9 +13,11 @@ Statistics for going from version 10 to version 100:
     new files         : 0
     deleted files     : 0
 Starting download of remaining update content. This may take a while...
+File /usr/bin/foo was not in a pack
 Finishing download of update content...
 Staging file content
 REGEXP:^Update target directory does not exist: .*/target-dir/usr/bin. Trying to fix it$
 Path /usr/bin is missing on the file system
 Update was applied.
 Update successful. System updated from version 10 to version 100
+1 files were not in a pack

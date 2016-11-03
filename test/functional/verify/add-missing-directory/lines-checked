@@ -1,6 +1,7 @@
 Verifying version 10
 Attempting to download version string to memory
 Starting download of remaining update content. This may take a while...
+File /usr/bin was not in a pack
 Finishing download of update content...
 Adding any missing files
 REGEXP:^Missing file: .*/target-dir/usr/bin$

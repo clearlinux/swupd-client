@@ -101,7 +101,6 @@ int rm_staging_dir_contents(const char *rel_path)
 	free(abs_path);
 	closedir(dir);
 
-	sync();
 	return ret;
 }
 

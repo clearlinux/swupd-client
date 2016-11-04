@@ -270,7 +270,6 @@ load_current_manifests:
 	/* Step 3: setup manifests */
 
 	/* get the from/to MoM manifests */
-	printf("Querying current manifest.\n");
 	current_manifest = load_mom(current_version);
 	if (!current_manifest) {
 		/* TODO: possibly remove this as not getting a "from" manifest is not fatal
@@ -289,8 +288,6 @@ load_current_manifests:
 	timeout = 10;
 
 load_server_manifests:
-	printf("Querying server manifest.\n");
-
 	server_manifest = load_mom(server_version);
 	if (!server_manifest) {
 		if (retries < MAX_TRIES) {

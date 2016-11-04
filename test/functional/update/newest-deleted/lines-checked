@@ -1,9 +1,6 @@
 Attempting to download version string to memory
 Update started.
-Querying server version.
 Preparing to update from 20 to 30
-Querying current manifest.
-Querying server manifest.
 Downloading os-core pack for version 30
 Extracting pack.
 Downloading test-bundle2 pack for version 30

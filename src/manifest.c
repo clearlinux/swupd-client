@@ -162,7 +162,7 @@ static struct manifest *alloc_manifest(int version, char *component)
 	return manifest;
 }
 
-static struct manifest *manifest_from_file(int version, char *component, int header_only)
+static struct manifest *manifest_from_file(int version, char *component, bool header_only)
 {
 	FILE *infile;
 	char line[MANIFEST_LINE_MAXLEN], *c, *c2;
@@ -599,7 +599,7 @@ struct manifest *load_mom(int version)
 	free(filename);
 	free(url);
 
-	manifest = manifest_from_file(version, "MoM", 0);
+	manifest = manifest_from_file(version, "MoM", false);
 
 	if (manifest == NULL) {
 		printf("Failed to load %d MoM manifest\n", version);
@@ -890,7 +890,7 @@ struct list *recurse_manifest(struct manifest *manifest, struct list *subs, cons
 			version1 = version2;
 		}
 
-		sub = load_manifest(version1, version2, file, manifest, 0);
+		sub = load_manifest(version1, version2, file, manifest, false);
 		if (!sub) {
 			list_free_list_and_data(bundles, free_manifest_data);
 			return NULL;

@@ -148,7 +148,6 @@ void read_versions(int *current_version,
 {
 	*current_version = get_current_version(path_prefix);
 
-	printf("Querying server version.\n");
 	*server_version = get_latest_version();
 }
 

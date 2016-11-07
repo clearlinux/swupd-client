@@ -319,6 +319,7 @@ exit:
 			err = -1;
 			break;
 		case CURLE_COULDNT_CONNECT:
+			printf("Curl: Could not connect to host or proxy\n");
 			err = -ENONET;
 			break;
 		case CURLE_FILE_COULDNT_READ_FILE:

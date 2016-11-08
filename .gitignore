@@ -32,7 +32,7 @@ kw*
 libswupd*
 libtool
 ltmain.sh
-m4/
+m4/*.m4
 missing
 regression/*.out
 src/*.gcda

@@ -468,7 +468,7 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url)
 	}
 
 	curl_ret = curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1);
-	if (curl_ret != CURLE_OK) {
+	if (curl_ret != CURLE_OK && curl_ret != CURLE_UNKNOWN_OPTION) {
 		goto exit;
 	}
 

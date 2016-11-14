@@ -12,5 +12,8 @@
 ^sh: .*/usr/bin/kernel_updater.sh: No such file or directory$
 ^sh: .*/usr/bin/gummiboot_updaters.sh: No such file or directory$
 ^sh: .*/usr/bin/systemdboot_updater.sh: No such file or directory$
+^sh: .*/usr/bin/kernel_updater.sh: not found$
+^sh: .*/usr/bin/gummiboot_updaters.sh: not found$
+^sh: .*/usr/bin/systemdboot_updater.sh: not found$
 ^Possible filedescriptor leak: .*$
 ^WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM$

@@ -464,6 +464,7 @@ void full_download(struct file *file)
 	CURLMcode curlm_ret = CURLM_OK;
 	CURLcode curl_ret = CURLE_OK;
 
+	file->fh = NULL;
 	ret = swupd_curl_hashmap_insert(file);
 	if (ret > 0) { /* no download needed */
 		/* File already exists - report success */
@@ -499,11 +500,11 @@ void full_download(struct file *file)
 	if (curl_ret != CURLE_OK) {
 		goto out_bad;
 	}
-	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, swupd_download_file);
+	curl_ret = swupd_download_file_start(file);
 	if (curl_ret != CURLE_OK) {
 		goto out_bad;
 	}
-	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)file);
+	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)file->fh);
 	if (curl_ret != CURLE_OK) {
 		goto out_bad;
 	}
@@ -525,6 +526,7 @@ void full_download(struct file *file)
 	goto out_good;
 
 out_bad:
+	(void) swupd_download_file_complete(CURLE_OK, file);
 	failed = list_prepend_data(failed, file);
 	if (curl != NULL) {
 		/* Must remove handle out of multi queue first!*/

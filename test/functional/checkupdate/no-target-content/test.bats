@@ -5,6 +5,7 @@ load "../../swupdlib"
 @test "check-update with no target version file available" {
   run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
 
+  [ "$status" -ne 0 ]
   check_lines "$output"
 }
 

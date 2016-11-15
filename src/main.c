@@ -150,9 +150,13 @@ err:
 	return false;
 }
 
-static void print_versions()
+/* return 0 if server_version is ahead of current_version,
+ * 1 if the current_version is current or ahead
+ * 2 if one or more versions can't be found
+ */
+static int print_versions()
 {
-	int current_version, server_version;
+	int current_version, server_version, ret=0;
 
 	check_root();
 	(void)init_globals();
@@ -162,15 +166,21 @@ static void print_versions()
 
 	if (current_version < 0) {
 		printf("Cannot determine current OS version\n");
+		ret = 2;
 	} else {
 		printf("Current OS version: %d\n", current_version);
 	}
 
 	if (server_version < 0) {
 		printf("Cannot get latest the server version.Could not reach server\n");
+		ret = 2;
 	} else {
 		printf("Latest server version: %d\n", server_version);
 	}
+	if ((ret == 0) && (server_version <= current_version)) {
+		ret = 1;
+	}
+	return ret;
 }
 
 int update_main(int argc, char **argv)
@@ -183,7 +193,7 @@ int update_main(int argc, char **argv)
 	}
 
 	if (cmd_line_status) {
-		print_versions();
+		ret = print_versions();
 	} else {
 		struct timespec ts_start, ts_stop;
 		double delta;

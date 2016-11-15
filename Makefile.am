@@ -102,25 +102,20 @@ swupdcerts_DATA = $(SWUPD_CERTS)
 EXTRA_DIST += \
 	data/check-update.service \
 	data/check-update.timer \
+	data/swupd-update.service \
+	data/swupd-update.timer
 	$(SWUPD_CERTS)
 
 DISTCHECK_CONFIGURE_FLAGS = \
-        --with-systemdsystemunitdir=$$dc_install_base/$(systemdunitdir)
+	--with-systemdsystemunitdir=$$dc_install_base/$(systemdunitdir)
 
 systemdunitdir = @SYSTEMD_UNITDIR@
 
 systemdunit_DATA = \
-        data/check-update.service \
-        data/check-update.timer
-
-systemdunit-install-local:
-	mkdir -p $(DESTDIR)$(systemdunitdir)/multi-user.target.wants/
-	ln -sf ../check-update.timer $(DESTDIR)$(systemdunitdir)/multi-user.target.wants/check-update.timer
-install-data-local: systemdunit-install-local
-
-systemdunit-uninstall-local:
-	rm -f $(DESTDIR)$(systemdunitdir)/multi-user.target.wants/check-update.timer
-uninstall-local: systemdunit-uninstall-local
+	data/check-update.service \
+	data/check-update.timer \
+	data/swupd-update.service \
+	data/swupd-update.timer
 
 distclean-local:
 	rm -rf aclocal.m4 ar-lib autom4te.cache config.guess config.h.in config.h.in~ config.sub configure depcomp install-sh ltmain.sh m4 Makefile.in missing compile

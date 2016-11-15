@@ -123,6 +123,7 @@ err:
 	return false;
 }
 
+/* Return 0 if there is an update available, nonzero if not */
 static int check_update()
 {
 	int current_version, server_version;
@@ -142,16 +143,19 @@ static int check_update()
 		printf("Unable to determine current OS version\n");
 		return ECURRENT_VERSION;
 	} else {
-		if (current_version != -1 && current_version < server_version) {
+		printf("Current OS version: %d\n", current_version);
+		if (current_version < server_version) {
 			printf("There is a new OS version available: %d\n", server_version);
 			update_motd(server_version);
+			return 0; /* update available */
 		} else if (current_version >= server_version) {
 			printf("There are no updates available\n");
 		}
-		return 0;
+		return 1;	/* No update available */
 	}
 }
 
+/* return 0 if update available, non-zero if not */
 int check_update_main(int argc, char **argv)
 {
 	int ret;

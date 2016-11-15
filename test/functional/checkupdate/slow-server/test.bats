@@ -25,6 +25,7 @@ teardown() {
   slow_opts="-p $DIR/target-dir -F staging -u http://localhost:$port/"
   run sudo sh -c "$SWUPD check-update $slow_opts"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
 }
 

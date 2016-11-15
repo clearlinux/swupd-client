@@ -23,7 +23,7 @@ configure
 coverage/
 cscope.*
 data/check-update.service
-data/check-update.timer
+data/swupd-update.service
 depcomp
 functional-tests.log
 fuzzout/

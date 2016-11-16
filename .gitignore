@@ -24,6 +24,7 @@ coverage/
 cscope.*
 data/check-update.service
 data/swupd-update.service
+docs/*.html
 depcomp
 functional-tests.log
 fuzzout/

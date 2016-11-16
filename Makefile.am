@@ -216,3 +216,21 @@ release:
 	fi
 	@git tag -a -m "$(PACKAGE_NAME) release $(PACKAGE_VERSION)" v$(PACKAGE_VERSION)
 	@printf "\nNew release $(PACKAGE_VERSION) tagged!\n\n"
+
+
+MANPAGES = \
+	docs/swupd.1 \
+	docs/check-update.service.4 \
+	docs/check-update.timer.4 \
+	docs/swupd-update.service.4 \
+	docs/swupd-update.timer.4 \
+	docs/update-triggers.target.4
+
+manpages:
+	for MANPAGE in $(MANPAGES); do \
+		ronn --roff < $${MANPAGE}.md > $${MANPAGE}; \
+		ronn --html < $${MANPAGE}.md > $${MANPAGE}.html; \
+	done
+
+dist_man_MANS = \
+	$(MANPAGES)

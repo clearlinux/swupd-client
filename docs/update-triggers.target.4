@@ -1,0 +1,47 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "UPDATE\-TRIGGERS\.TARGET" "4" "November 2016" "" ""
+.
+.SH "NAME"
+\fBupdate\-triggers\.target\fR \- System Unit
+.
+.SH "SYNOPSIS"
+\fBupdate\-triggers\.target\fR \fB/usr/lib/systemd/system/update\-triggers\.target\fR
+.
+.SH "DESCRIPTION"
+Instructs the \fBsystemd(1)\fR system daemon what units needed to be started as part of the software update process\. After the main software update content is applied to the OS, the \fBswupd(1)\fR program starts this \fIsystemd\fR target\.
+.
+.P
+The main function of this target is to allow optional corrections and adjustments to be made after installation that can not easily be made through static file installation methods\. This usually applies to things like cached lists, dynamic configuration files and similar volatile databases that are regularly altered and may contain user data\.
+.
+.P
+One example is the dynamic loader cache which needs to be updated when ever there are modifications to the system installed dynamic libraries\.
+.
+.P
+The user is not intended to execute these scripts and plugin units directly\. If however so this is desired, one can execute the following command to re\-execute all the actions:
+.
+.P
+\fBsystemctl start update\-triggers\.target\fR
+.
+.SH "ENVIRONMENT"
+This unit is a \fBsystemd(1)\fR target file\.
+.
+.SH "COPYRIGHT"
+.
+.IP "\(bu" 4
+Copyright (C) 2016 Intel Corporation, License: CC\-BY\-SA\-3\.0
+.
+.IP "" 0
+.
+.SH "SEE ALSO"
+\fBswupd(1)\fR
+.
+.SH "NOTES"
+Creative Commons Attribution\-ShareAlike 3\.0 Unported
+.
+.IP "\(bu" 4
+http://creativecommons\.org/licenses/by\-sa/3\.0/
+.
+.IP "" 0
+

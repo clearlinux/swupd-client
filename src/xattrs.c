@@ -27,6 +27,7 @@
 #include <string.h>
 #include <sys/xattr.h>
 
+#include "config.h"
 #include "swupd.h"
 #include "xattrs.h"
 

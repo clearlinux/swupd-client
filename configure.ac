@@ -135,10 +135,7 @@ AC_ARG_ENABLE(
 	AS_HELP_STRING([--enable-xattr],[Use extended file attributes (unused by default)])
 )
 AS_IF([test "x$enable_xattr" = "xyes"],
-	    [AC_DEFINE(SWUPD_WITH_XATTRS,1,[Use extended file attributes])
-	    AS_IF(test "x$enable_bsdtar" = "xyes",
-	    echo "Options --enable-bsdtar and --enable-xattr are incompatible" >&2
-	    AS_EXIT(1))],
+	    [AC_DEFINE(SWUPD_WITH_XATTRS,1,[Use extended file attributes])],
 	    [XATTR=no]
 )
 TARSELINUX="yes"

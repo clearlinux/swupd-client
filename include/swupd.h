@@ -128,8 +128,6 @@ extern char *path_prefix;
 extern bool set_format_string(char *userinput);
 extern bool init_globals(void);
 extern void free_globals(void);
-extern bool has_telemetry;
-extern void *tm_dlhandle;
 extern char *bundle_to_add;
 extern struct timeval start_time;
 extern char *state_dir;

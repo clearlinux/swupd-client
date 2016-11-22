@@ -71,8 +71,8 @@ static void update_bootloader(void)
 
 static void update_triggers(void)
 {
-	system("/usr/bin/systemctl daemon-reload");
-	system("/usr/bin/systemctl restart update-triggers.target");
+	system("/usr/bin/systemctl --no-block daemon-reload");
+	system("/usr/bin/systemctl --no-block restart update-triggers.target");
 }
 
 void run_scripts(void)

@@ -309,6 +309,15 @@ extern int list_installable_bundles();
 extern int install_bundles_frontend(char **bundles);
 extern int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, int recursion);
 
+/* telemetry.c */
+typedef enum telem_prio_t {
+	TELEMETRY_DEBG = 1,
+	TELEMETRY_INFO,
+	TELEMETRY_WARN,
+	TELEMETRY_CRIT
+} telem_prio_t;
+extern void telemetry(telem_prio_t level, const char *fmt, ...);
+
 /* some disk sizes constants for the various features:
  *   ...consider adding build automation to catch at build time
  *      if the build's artifacts are larger than these thresholds */

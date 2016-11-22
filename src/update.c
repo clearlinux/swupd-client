@@ -224,6 +224,8 @@ int main_update()
 	int lock_fd;
 	int retries = 0;
 	int timeout = 10;
+	struct timespec ts_start, ts_stop;
+	double delta;
 
 	srand(time(NULL));
 
@@ -233,6 +235,8 @@ int main_update()
 		printf("Updater failed to initialize, exiting now.\n");
 		return ret;
 	}
+
+	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
 
 	if (!check_network()) {
 		printf("Error: Network issue, unable to proceed with update\n");
@@ -400,6 +404,23 @@ clean_exit:
 	free_manifest(server_manifest);
 
 clean_curl:
+	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_stop);
+	delta = ts_stop.tv_sec - ts_start.tv_sec + ts_stop.tv_nsec / 1000000000.0 - ts_start.tv_nsec / 1000000000.0;
+	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
+		"action=update-completed\n"
+		"current_version=%d\n"
+		"server_version=%d\n"
+		"result=%d\n"
+		"time=%5.1f\n",
+		current_version,
+		server_version,
+		ret,
+		delta);
+
+	if (server_version > current_version) {
+		printf("Update took %0.1f seconds\n", delta);
+	}
+
 	swupd_deinit(lock_fd, &latest_subs);
 
 	if ((current_version < server_version) && (ret == 0)) {

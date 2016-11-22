@@ -44,7 +44,8 @@ SWUPD_COMMON_SOURCES = \
 	src/xattrs.c \
 	src/globals.c \
 	src/scripts.c \
-	src/bundle.c
+	src/bundle.c \
+	src/telemetry.c
 
 lib_LTLIBRARIES = libswupd.la
 libswupd_la_SOURCES = $(SWUPD_COMMON_SOURCES)

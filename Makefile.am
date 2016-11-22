@@ -103,7 +103,7 @@ EXTRA_DIST += \
 	data/check-update.service \
 	data/check-update.timer \
 	data/swupd-update.service \
-	data/swupd-update.timer
+	data/swupd-update.timer \
 	$(SWUPD_CERTS)
 
 DISTCHECK_CONFIGURE_FLAGS = \

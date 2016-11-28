@@ -136,7 +136,7 @@ static int create_required_dirs(void)
 	int i;
 	char *dir;
 #define STATE_DIR_COUNT 3
-	const char *dirs[] = { "delta", "staged", "download" };
+	const char *state_dirs[] = { "delta", "staged", "download" };
 	struct stat buf;
 	bool missing = false;
 
@@ -146,7 +146,7 @@ static int create_required_dirs(void)
 		missing = true;
 	}
 	for (i = 0; i < STATE_DIR_COUNT; i++) {
-		string_or_die(&dir, "%s/%s", state_dir, dirs[i]);
+		string_or_die(&dir, "%s/%s", state_dir, state_dirs[i]);
 		ret = stat(dir, &buf);
 		if (ret) {
 			missing = true;
@@ -154,22 +154,22 @@ static int create_required_dirs(void)
 		free(dir);
 	}
 
-	if (missing) { // (re)create dirs
+	if (missing) { // (re)create state dirs
 		char *cmd;
 
 		for (i = 0; i < STATE_DIR_COUNT; i++) {
-			string_or_die(&cmd, "mkdir -p %s/%s", state_dir, dirs[i]);
+			string_or_die(&cmd, "mkdir -p %s/%s", state_dir, state_dirs[i]);
 			ret = system(cmd);
 			if (ret) {
-				printf("Error: failed to create %s/%s\n", state_dir, dirs[i]);
+				printf("Error: failed to create %s/%s\n", state_dir, state_dirs[i]);
 				return -1;
 			}
 			free(cmd);
 
-			string_or_die(&dir, "%s/%s", state_dir, dirs[i]);
+			string_or_die(&dir, "%s/%s", state_dir, state_dirs[i]);
 			ret = chmod(dir, S_IRWXU);
 			if (ret) {
-				printf("Error: failed to set mode for %s/%s\n", state_dir, dirs[i]);
+				printf("Error: failed to set mode for %s/%s\n", state_dir, state_dirs[i]);
 				return -1;
 			}
 			free(dir);

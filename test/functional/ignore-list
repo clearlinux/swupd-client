@@ -9,11 +9,8 @@
 ^No kernel update needed, skipping helper call out.$
 ^No bootloader update needed, skipping helper call out.$
 ^Update took .* seconds$
-^sh: .*/usr/bin/kernel_updater.sh: No such file or directory$
-^sh: .*/usr/bin/gummiboot_updaters.sh: No such file or directory$
-^sh: .*/usr/bin/systemdboot_updater.sh: No such file or directory$
-^sh: .*/usr/bin/kernel_updater.sh: not found$
-^sh: .*/usr/bin/gummiboot_updaters.sh: not found$
-^sh: .*/usr/bin/systemdboot_updater.sh: not found$
+^Error: Failed to exec.*/usr/bin/kernel_updater.sh.*No such file or directory$
+^Error: Failed to exec.*/usr/bin/gummiboot_updaters.sh.*No such file or directory$
+^Error: Failed to exec.*/usr/bin/systemdboot_updater.sh.*No such file or directory$
 ^Possible filedescriptor leak: .*$
 ^WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM$

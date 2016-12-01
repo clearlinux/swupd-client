@@ -42,7 +42,7 @@
 
 #ifdef SIGNATURES
 
-#define CERTNAME UPDATE_CA_CERTS_PATH "/" SWUPDCERT
+#define CERTNAME CERT_PATH "/" SWUPDCERT
 
 static bool validate_certificate(void);
 static int verify_callback(int, X509_STORE_CTX *);

@@ -158,6 +158,27 @@ AS_IF(
 
 # With/without options
 AC_ARG_WITH(
+  [certpath],
+  [AS_HELP_STRING([--with-certpath=PATH], [Location of CA certificates])]
+)
+default_cert_path="/usr/share/clear/update-ca"
+cert_path=
+# Makes sure --with-certpath receives an argument that is not "yes" or "no",
+# and uses the default path if only --enable-signature-verification is passed.
+AS_IF(
+  [test "$enable_signature_verification" = "yes" && test "$with_certpath" = "no"],
+  [AC_MSG_ERROR(['--with-certpath=no' or '--without-certpath' not supported. Specify a PATH.])],
+  [test "$enable_signature_verification" = "yes" && test "$with_certpath" = "yes"],
+  [AC_MSG_ERROR(['--with-certpath=yes' or '--with-certpath' not supported. Specify a PATH.])],
+  [test "$enable_signature_verification" != "yes" && test -n "$with_certpath"],
+  [AC_MSG_WARN([--with-certpath=PATH requires --enable-signature-verification])],
+  [test "$enable_signature_verification" = "yes" && test -n "$with_certpath"],
+  [cert_path="$with_certpath"],
+  [test "$enable_signature_verification" = "yes"],
+  [cert_path="$default_cert_path"]
+)
+
+AC_ARG_WITH(
   [swupdcert],
   [AS_HELP_STRING([--with-swupdcert=FILE], [swupd verification cert])],
   [AC_DEFINE_UNQUOTED([SWUPDCERT], ["$withval"], [swupd verification cert])],
@@ -230,7 +251,6 @@ AC_SUBST(SYSTEMD_UNITDIR, [${unitpath}])
 # Build variants
 # default to Linux rootfs build
 enable_linux_rootfs_build="yes"
-certs_path="/usr/share/clear/update-ca"
 
 # document all options for build variants
 ## (1) build variants
@@ -243,7 +263,7 @@ AH_TEMPLATE([STATE_DIR], [The state directory for swupd content])
 AH_TEMPLATE([LOG_DIR], [Directory for swupd log files])
 AH_TEMPLATE([LOCK_DIR], [Directory for lock file])
 AH_TEMPLATE([BUNDLES_DIR], [Directory to use for bundles])
-AH_TEMPLATE([UPDATE_CA_CERTS_PATH], [Location of CA certificates])
+AH_TEMPLATE([CERT_PATH], [Location of CA certificates])
 AH_TEMPLATE([MOTD_FILE], [motd file path])
 
 AS_IF(
@@ -254,12 +274,12 @@ AS_IF(
      AC_DEFINE([LOG_DIR], ["/var/log/swupd"])
      AC_DEFINE([LOCK_DIR], ["/run/lock"])
      AC_DEFINE([BUNDLES_DIR], ["/usr/share/clear/bundles"])
-     AC_DEFINE_UNQUOTED([UPDATE_CA_CERTS_PATH], ["$certs_path"])
+     AC_DEFINE_UNQUOTED([CERT_PATH], ["$cert_path"])
      AC_DEFINE([MOTD_FILE], ["/usr/lib/motd.d/001-new-release"])],
   [AC_MSG_ERROR([Unknown build variant])]
 )
 
-AC_SUBST([update_ca_certs_path], ["$certs_path"])
+AC_SUBST([cert_path], ["$cert_path"])
 
 AC_CONFIG_FILES([Makefile data/check-update.service data/swupd-update.service])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])
@@ -277,6 +297,7 @@ Configuration to build swupd-client:
   Version URL:				${VERSIONURL}
   Format Identifier:			${FORMATID}
   Signature verification:		${SIGVERIFICATION}
+  CA certificate path:			${cert_path}
   SSL Certificate file:			${SWUPDCERT}
   Use bzip compression:			${BZIP}
   Run Tests:				${TESTS}

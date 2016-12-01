@@ -140,12 +140,12 @@ AS_IF([test "x$enable_stateless" = "xno"],
 
 
 # With/without options
-if test "$enable_signature_verification" = "yes" ; then
-	AC_ARG_WITH([swupdcert],
-		[AS_HELP_STRING([--with-swupdcert=FILE], [swupd verification cert])],
-		[AC_DEFINE_UNQUOTED([SWUPDCERT], ["$withval"], [swupd verification cert])],
-		[AC_DEFINE([SWUPDCERT], ["ClearLinuxRoot.pem"], [swupd verification cert])])
-fi
+AC_ARG_WITH(
+  [swupdcert],
+  [AS_HELP_STRING([--with-swupdcert=FILE], [swupd verification cert])],
+  [AC_DEFINE_UNQUOTED([SWUPDCERT], ["$withval"], [swupd verification cert])],
+  [AC_DEFINE([SWUPDCERT], ["ClearLinuxRoot.pem"], [swupd verification cert])]
+)
 AS_IF([test -n "$with_swupdcert" -a "$with_swupdcert" != "no" -a "$with_swupdcert" != "yes"],
 		[SWUPDCERT="$with_swupdcert"],
 	[SWUPDCERT="ClearLinuxRoot.pem"]

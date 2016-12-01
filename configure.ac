@@ -13,9 +13,21 @@ AM_PROG_CC_C_O
 AC_LANG(C)
 
 AC_CONFIG_HEADERS([config.h])
+
+
+# Library checks
 PKG_CHECK_MODULES([bsdiff], [bsdiff])
 PKG_CHECK_MODULES([lzma], [liblzma])
 PKG_CHECK_MODULES([zlib], [zlib])
+PKG_CHECK_MODULES([curl], [libcurl])
+PKG_CHECK_MODULES([openssl], [libcrypto >= 1.0.1])
+AC_CHECK_LIB([pthread], [pthread_create])
+
+
+# Program checks
+AC_CHECK_PROGS(TAR, tar)
+
+
 AC_ARG_ENABLE(
 	[bzip2],
 	AS_HELP_STRING([--disable-bzip2],[Do not use bzip2 compression (uses bzip2 by default)]),
@@ -179,11 +191,6 @@ AS_IF([test "$enable_tests" != "no"], [
   TESTS="no"
 )
 AM_CONDITIONAL([ENABLE_TESTS], [test "$enable_tests" != "no"])
-
-PKG_CHECK_MODULES([curl], [libcurl])
-PKG_CHECK_MODULES([openssl], [libcrypto >= 1.0.1])
-AC_CHECK_LIB([pthread], [pthread_create])
-AC_CHECK_PROGS(TAR, tar)
 
 # default to Linux rootfs build
 enable_linux_rootfs_build="yes"

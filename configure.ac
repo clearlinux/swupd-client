@@ -28,16 +28,15 @@ AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_PROGS(TAR, tar)
 
 
+# Enable/disable options
 AC_ARG_ENABLE(
 	[bzip2],
 	AS_HELP_STRING([--disable-bzip2],[Do not use bzip2 compression (uses bzip2 by default)]),
 )
-
 BZIP="yes"
 AS_IF([test -n "$enable_bzip2" -a "$enable_bzip2" = "yes"],
 		[BZIP="$enable_bzip2"]
 )
-
 AS_IF([test "x$enable_bzip2" != "xno" ],
   [AC_DEFINE(SWUPD_WITH_BZIP2,1,[Use bzip2 compression])
 	 AC_CHECK_LIB([bz2], [BZ2_bzBuffToBuffCompress], [], [AC_MSG_ERROR([the libbz2 library is missing])])
@@ -45,74 +44,39 @@ AS_IF([test "x$enable_bzip2" != "xno" ],
   [AC_DEFINE(SWUPD_WITHOUT_BZIP2,1,[Do not use bzip2 compression])
 	 BZIP="no"]
 )
+
 AC_ARG_ENABLE(
   [signature-verification],
   [AS_HELP_STRING([--enable-signature-verification], [Enable signature check (disabled by default)])],
   [AC_DEFINE([SIGNATURES], 1, [Enable signature check as default])]
 )
-
 SIGVERIFICATION="no"
 AS_IF([test -n "$enable_signature_verification" -a "$enable_signature_verification" = "yes" ],
 		[SIGVERIFICATION="$enable_signature_verification"]
-)
-
-if test "$enable_signature_verification" = "yes" ; then
-	AC_ARG_WITH([swupdcert],
-		[AS_HELP_STRING([--with-swupdcert=FILE], [swupd verification cert])],
-		[AC_DEFINE_UNQUOTED([SWUPDCERT], ["$withval"], [swupd verification cert])],
-		[AC_DEFINE([SWUPDCERT], ["ClearLinuxRoot.pem"], [swupd verification cert])])
-fi
-
-AS_IF([test -n "$with_swupdcert" -a "$with_swupdcert" != "no" -a "$with_swupdcert" != "yes"],
-		[SWUPDCERT="$with_swupdcert"],
-	[SWUPDCERT="ClearLinuxRoot.pem"]
-)
-
-AC_ARG_WITH([contenturl],
-	[AS_HELP_STRING([--with-contenturl=URL], [Default content url])],
-	  [AC_DEFINE_UNQUOTED([CONTENTURL], ["$withval"], [Default content url])]
-)
-
-AS_IF([test -n "$with_contenturl" -a "$with_contenturl" != "no" -a "$with_contenturl" != "yes"],
-		[CONTENTURL="$with_contenturl"],
-	[test "$with_contenturl" = "no"],	[CONTENTURL='!! Warning !! --with-contenturl not specified!'],
-	[test "$with_contenturl" = "yes"],	[CONTENTURL='!! Warning !! --with-contenturl not specified!'],
-	[CONTENTURL='!! Warning !! --with-contenturl not specified!']
-)
-
-AC_ARG_WITH([versionurl],
-	[AS_HELP_STRING([--with-versionurl=URL], [Default version url])],
-	[AC_DEFINE_UNQUOTED([VERSIONURL], ["$withval"], [Default version url])]
-)
-
-AS_IF([test -n "$with_versionurl" -a "$with_versionurl" != "no" -a "$with_versionurl" != "yes"],
-		[VERSIONURL="$with_versionurl"],
-	[test "$with_versionurl" = "no"],	[VERSIONURL='!! Warning !! --with-versionurl not specified!'],
-	[test "$with_versionurl" = "yes"],	[VERSIONURL='!! Warning !! --with-versionurl not specified!'],
-	[VERSIONURL='!! Warning !! --with-versionurl not specified!']
-)
-
-AC_ARG_WITH([formatid],
-	[AS_HELP_STRING([--with-formatid=NUM], [Default format identifier])],
-	[AC_DEFINE_UNQUOTED([FORMATID], ["$withval"], [Default format identifier])]
-)
-
-AS_IF([test -n "$with_formatid" -a "$with_formatid" != "no" -a "$with_formatid" != "yes"],
-		[FORMATID="$with_formatid"],
-	[test "$with_formatid" = "no"],	[FORMATID='!! Warning !! --with-formatid not specified!'],
-	[test "$with_formatid" = "yes"],	[FORMATID='!! Warning !! --with-formatid not specified!'],
-	[FORMATID='!! Warning !! --with-formatid not specified!']
 )
 
 AC_ARG_ENABLE(
   [tests],
   [AS_HELP_STRING([--disable-tests], [Do not enable unit or functional test framework (enabled by default)])],
 )
-
 TESTS="yes"
 AS_IF([test -n "$enable_tests" -a "$enable_tests" = "yes" ],
 		[TESTS="$enable_tests"]
 )
+AS_IF([test "$enable_tests" != "no"], [
+  PKG_CHECK_MODULES([check], [check >= 0.9.12])
+  AC_PATH_PROG([have_python3], [python3])
+  AS_IF([test -z "${have_python3}"], [
+    AC_MSG_ERROR([Must have Python 3 installed to run functional tests])
+  ])
+  AC_PATH_PROG([have_bats], [bats])
+  AS_IF([test -z "${have_bats}"], [
+    AC_MSG_ERROR([Must have the Bash Automated Testing System (bats) installed to run functional tests])
+  ])
+  TESTS="yes"],
+  TESTS="no"
+)
+AM_CONDITIONAL([ENABLE_TESTS], [test "$enable_tests" != "no"])
 
 have_coverage=no
 AC_ARG_ENABLE(coverage, AS_HELP_STRING([--enable-coverage], [enable test coverage]))
@@ -140,6 +104,7 @@ AC_ARG_ENABLE(
 AS_IF([test "x$enable_bsdtar" = "xyes" ],
 	[AC_DEFINE(SWUPD_WITH_BSDTAR, 1, [Use bsdtar])]
 )
+
 dnl Enable extended attribute support
 XATTR="yes"
 AC_ARG_ENABLE(
@@ -150,6 +115,7 @@ AS_IF([test "x$enable_xattr" = "xyes"],
 	    [AC_DEFINE(SWUPD_WITH_XATTRS,1,[Use extended file attributes])],
 	    [XATTR=no]
 )
+
 TARSELINUX="yes"
 AC_ARG_ENABLE([tar-selinux],
 	AS_HELP_STRING([--enable-tar-selinux],[give --selinux option to tar])
@@ -171,27 +137,60 @@ AS_IF([test "x$enable_stateless" = "xno"],
             [AC_DEFINE(OS_IS_STATELESS,1,[OS is stateless])]
 )
 
+
+# With/without options
+if test "$enable_signature_verification" = "yes" ; then
+	AC_ARG_WITH([swupdcert],
+		[AS_HELP_STRING([--with-swupdcert=FILE], [swupd verification cert])],
+		[AC_DEFINE_UNQUOTED([SWUPDCERT], ["$withval"], [swupd verification cert])],
+		[AC_DEFINE([SWUPDCERT], ["ClearLinuxRoot.pem"], [swupd verification cert])])
+fi
+AS_IF([test -n "$with_swupdcert" -a "$with_swupdcert" != "no" -a "$with_swupdcert" != "yes"],
+		[SWUPDCERT="$with_swupdcert"],
+	[SWUPDCERT="ClearLinuxRoot.pem"]
+)
+
+AC_ARG_WITH([contenturl],
+	[AS_HELP_STRING([--with-contenturl=URL], [Default content url])],
+	  [AC_DEFINE_UNQUOTED([CONTENTURL], ["$withval"], [Default content url])]
+)
+AS_IF([test -n "$with_contenturl" -a "$with_contenturl" != "no" -a "$with_contenturl" != "yes"],
+		[CONTENTURL="$with_contenturl"],
+	[test "$with_contenturl" = "no"],	[CONTENTURL='!! Warning !! --with-contenturl not specified!'],
+	[test "$with_contenturl" = "yes"],	[CONTENTURL='!! Warning !! --with-contenturl not specified!'],
+	[CONTENTURL='!! Warning !! --with-contenturl not specified!']
+)
+
+AC_ARG_WITH([versionurl],
+	[AS_HELP_STRING([--with-versionurl=URL], [Default version url])],
+	[AC_DEFINE_UNQUOTED([VERSIONURL], ["$withval"], [Default version url])]
+)
+AS_IF([test -n "$with_versionurl" -a "$with_versionurl" != "no" -a "$with_versionurl" != "yes"],
+		[VERSIONURL="$with_versionurl"],
+	[test "$with_versionurl" = "no"],	[VERSIONURL='!! Warning !! --with-versionurl not specified!'],
+	[test "$with_versionurl" = "yes"],	[VERSIONURL='!! Warning !! --with-versionurl not specified!'],
+	[VERSIONURL='!! Warning !! --with-versionurl not specified!']
+)
+
+AC_ARG_WITH([formatid],
+	[AS_HELP_STRING([--with-formatid=NUM], [Default format identifier])],
+	[AC_DEFINE_UNQUOTED([FORMATID], ["$withval"], [Default format identifier])]
+)
+AS_IF([test -n "$with_formatid" -a "$with_formatid" != "no" -a "$with_formatid" != "yes"],
+		[FORMATID="$with_formatid"],
+	[test "$with_formatid" = "no"],	[FORMATID='!! Warning !! --with-formatid not specified!'],
+	[test "$with_formatid" = "yes"],	[FORMATID='!! Warning !! --with-formatid not specified!'],
+	[FORMATID='!! Warning !! --with-formatid not specified!']
+)
+
 AC_ARG_WITH([systemdsystemunitdir], AS_HELP_STRING([--with-systemdsystemunitdir=DIR],
             [path to systemd system service dir @<:@default=/usr/lib/systemd/system@:>@]), [unitpath=${withval}],
             [unitpath="$($PKG_CONFIG --variable=systemdsystemunitdir systemd)"])
 test -z "${unitpath}" && unitpath=/usr/lib/systemd/system
 AC_SUBST(SYSTEMD_UNITDIR, [${unitpath}])
 
-AS_IF([test "$enable_tests" != "no"], [
-  PKG_CHECK_MODULES([check], [check >= 0.9.12])
-  AC_PATH_PROG([have_python3], [python3])
-  AS_IF([test -z "${have_python3}"], [
-    AC_MSG_ERROR([Must have Python 3 installed to run functional tests])
-  ])
-  AC_PATH_PROG([have_bats], [bats])
-  AS_IF([test -z "${have_bats}"], [
-    AC_MSG_ERROR([Must have the Bash Automated Testing System (bats) installed to run functional tests])
-  ])
-  TESTS="yes"],
-  TESTS="no"
-)
-AM_CONDITIONAL([ENABLE_TESTS], [test "$enable_tests" != "no"])
 
+# Build variants
 # default to Linux rootfs build
 enable_linux_rootfs_build="yes"
 certs_path="/usr/share/clear/update-ca"

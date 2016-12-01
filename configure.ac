@@ -80,21 +80,22 @@ AM_CONDITIONAL([ENABLE_TESTS], [test "$enable_tests" != "no"])
 
 have_coverage=no
 AC_ARG_ENABLE(coverage, AS_HELP_STRING([--enable-coverage], [enable test coverage]))
-if test "$enable_coverage" = "yes" ; then
-        AC_CHECK_PROG(lcov_found, [lcov], [yes], [no])
-        if test "$lcov_found" = "no" ; then
-                AC_MSG_ERROR([*** lcov support requested but the program was not found])
-        else
-                lcov_version_major="`lcov --version | cut -d ' ' -f 4 | cut -d '.' -f 1`"
-                lcov_version_minor="`lcov --version | cut -d ' ' -f 4 | cut -d '.' -f 2`"
-                if test "$lcov_version_major" -eq 1 -a "$lcov_version_minor" -lt 10; then
-                        AC_MSG_ERROR([*** lcov version is too old. 1.10 required])
-                else
-			have_coverage=yes
-			AC_DEFINE([COVERAGE], [1], [Coverage enabled])
-                fi
-        fi
-fi
+AS_IF(
+  [test "$enable_coverage" = "yes"],
+  [AC_CHECK_PROG(lcov_found, [lcov], [yes], [no])
+     AS_IF(
+       [test "$lcov_found" = "no"],
+       [AC_MSG_ERROR([*** lcov support requested but the program was not found])],
+       [lcov_version_major="`lcov --version | cut -d ' ' -f 4 | cut -d '.' -f 1`"
+          lcov_version_minor="`lcov --version | cut -d ' ' -f 4 | cut -d '.' -f 2`"
+          AS_IF(
+            [test "$lcov_version_major" -eq 1 -a "$lcov_version_minor" -lt 10],
+            [AC_MSG_ERROR([*** lcov version is too old. 1.10 required])],
+            [have_coverage=yes
+               AC_DEFINE([COVERAGE], [1], [Coverage enabled])]
+          )]
+     )]
+)
 AM_CONDITIONAL([COVERAGE], [test "$have_coverage" = "yes"])
 
 AC_ARG_ENABLE(
@@ -186,7 +187,10 @@ AS_IF([test -n "$with_formatid" -a "$with_formatid" != "no" -a "$with_formatid" 
 AC_ARG_WITH([systemdsystemunitdir], AS_HELP_STRING([--with-systemdsystemunitdir=DIR],
             [path to systemd system service dir @<:@default=/usr/lib/systemd/system@:>@]), [unitpath=${withval}],
             [unitpath="$($PKG_CONFIG --variable=systemdsystemunitdir systemd)"])
-test -z "${unitpath}" && unitpath=/usr/lib/systemd/system
+AS_IF(
+  [test -z "${unitpath}"],
+  [unitpath=/usr/lib/systemd/system]
+)
 AC_SUBST(SYSTEMD_UNITDIR, [${unitpath}])
 
 
@@ -209,18 +213,18 @@ AH_TEMPLATE([BUNDLES_DIR],[Directory to use for bundles])
 AH_TEMPLATE([UPDATE_CA_CERTS_PATH],[Location of CA certificates])
 AH_TEMPLATE([MOTD_FILE],[motd file path])
 
-if test "$enable_linux_rootfs_build" = "yes"; then
-	AC_DEFINE([SWUPD_LINUX_ROOTFS],1)
-	AC_DEFINE([MOUNT_POINT],["/"])
-	AC_DEFINE([STATE_DIR],["/var/lib/swupd"])
-	AC_DEFINE([LOG_DIR],["/var/log/swupd"])
-	AC_DEFINE([LOCK_DIR],["/run/lock"])
-	AC_DEFINE([BUNDLES_DIR],["/usr/share/clear/bundles"])
-	AC_DEFINE_UNQUOTED([UPDATE_CA_CERTS_PATH],["$certs_path"])
-	AC_DEFINE([MOTD_FILE],["/usr/lib/motd.d/001-new-release"])
-else
-	AC_MSG_ERROR([Unknown build variant])
-fi
+AS_IF(
+  [test "$enable_linux_rootfs_build" = "yes"],
+  [AC_DEFINE([SWUPD_LINUX_ROOTFS],1)
+     AC_DEFINE([MOUNT_POINT],["/"])
+     AC_DEFINE([STATE_DIR],["/var/lib/swupd"])
+     AC_DEFINE([LOG_DIR],["/var/log/swupd"])
+     AC_DEFINE([LOCK_DIR],["/run/lock"])
+     AC_DEFINE([BUNDLES_DIR],["/usr/share/clear/bundles"])
+     AC_DEFINE_UNQUOTED([UPDATE_CA_CERTS_PATH],["$certs_path"])
+     AC_DEFINE([MOTD_FILE],["/usr/lib/motd.d/001-new-release"])],
+  [AC_MSG_ERROR([Unknown build variant])]
+)
 
 AC_SUBST([update_ca_certs_path], ["$certs_path"])
 

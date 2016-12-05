@@ -133,6 +133,10 @@ static int set_url(char **global, char *url, const char *path)
 	return ret;
 }
 
+/* Initializes the content_url global variable. If the url parameter is not
+ * NULL, content_url will be set to its value. Otherwise, the value is read
+ * from the 'contenturl' configuration file.
+ */
 int set_content_url(char *url)
 {
 	if (content_url) {
@@ -143,6 +147,10 @@ int set_content_url(char *url)
 	return set_url(&content_url, url, default_content_url_path);
 }
 
+/* Initializes the version_url global variable. If the url parameter is not
+ * NULL, version_url will be set to its value. Otherwise, the value is read
+ * from the 'versionurl' configuration file.
+ */
 int set_version_url(char *url)
 {
 	if (version_url) {
@@ -166,6 +174,10 @@ static bool is_valid_integer_format(char *str)
 	return true;
 }
 
+/* Initializes the state_dir global variable. If the path parameter is not
+ * NULL, state_dir will be set to its value. Otherwise, the value is the
+ * build-time default (STATE_DIR).
+ */
 bool set_state_dir(char *path)
 {
 	if (path) {
@@ -189,6 +201,11 @@ bool set_state_dir(char *path)
 	return true;
 }
 
+/* Initializes the format_string global variable. If the userinput parameter is
+ * not NULL, format_string will be set to its value, but only if it is a
+ * positive integer or the special value "staging". Otherwise, the value is
+ * read from the 'format' configuration file.
+ */
 bool set_format_string(char *userinput)
 {
 	int ret;
@@ -229,8 +246,10 @@ bool set_format_string(char *userinput)
 	return true;
 }
 
-/* Passing NULL for PATH will either use the last --path argument given on the command
- * line, or sets the default value ("/").
+/* Initializes the path_prefix global variable. If the path parameter is not
+ * NULL, path_prefix will be set to its value, but only if it is a positive
+ * integer or the special value "staging". Otherwise, the default value of '/'
+ * is used. Note that the given path must exist.
  */
 bool set_path_prefix(char *path)
 {

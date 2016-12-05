@@ -47,6 +47,7 @@ static const struct option prog_opts[] = {
 	{ "path", required_argument, 0, 'p' },
 	{ "force", no_argument, 0, 'x' },
 	{ "statedir", required_argument, 0, 'S' },
+	{ "certpath", required_argument, 0, 'C' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -70,6 +71,7 @@ static void print_help(const char *name)
 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
+	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
 	printf("\n");
 }
 
@@ -77,7 +79,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxdu:P:c:v:sF:p:S:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxdu:P:c:v:sF:p:S:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -137,6 +139,13 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'x':
 			force = true;
+			break;
+		case 'C':
+			if (!optarg) {
+				printf("Invalid --certpath argument\n\n");
+				goto err;
+			}
+			set_cert_path(optarg);
 			break;
 		default:
 			printf("Unrecognized option\n\n");

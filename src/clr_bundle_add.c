@@ -53,6 +53,7 @@ static void print_help(const char *name)
 	printf("   -l, --list              List all available bundles for the current version of Clear Linux\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
+	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
 	printf("\n");
 }
 
@@ -67,6 +68,7 @@ static const struct option prog_opts[] = {
 	{ "format", required_argument, 0, 'F' },
 	{ "force", no_argument, 0, 'x' },
 	{ "statedir", required_argument, 0, 'S' },
+	{ "certpath", required_argument, 0, 'C' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -74,7 +76,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxu:c:v:P:p:F:lS:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxu:c:v:P:p:F:lS:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -131,6 +133,13 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'x':
 			force = true;
+			break;
+		case 'C':
+			if (!optarg) {
+				printf("Invalid --certpath argument\n\n");
+				goto err;
+			}
+			set_cert_path(optarg);
 			break;
 		default:
 			printf("error: unrecognized option\n\n");

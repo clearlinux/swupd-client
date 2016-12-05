@@ -63,6 +63,7 @@ bool have_manifest_diskspace = false; /* assume no until checked */
 bool have_network = false;	    /* assume no access until proved */
 char *version_url = NULL;
 char *content_url = NULL;
+char *cert_path = NULL;
 long update_server_port = -1;
 
 static const char *default_version_url_path = "/usr/share/defaults/swupd/versionurl";
@@ -312,6 +313,31 @@ bool set_path_prefix(char *path)
 	return true;
 }
 
+/* Initializes the cert_path global variable. If the path parameter is not
+ * NULL, cert_path will be set to its value. Otherwise, the default build-time
+ * value is used (CERT_PATH). Note that only the first call to this function
+ * sets the variable.
+ */
+#ifdef SIGNATURES
+void set_cert_path(char *path) {
+	// Early exit if the function was called previously.
+	if (cert_path) {
+		return;
+	}
+
+	if (path) {
+		string_or_die(&cert_path, "%s", path);
+	} else {
+		// CERT_PATH is guaranteed to be valid at this point.
+		string_or_die(&cert_path, "%s", CERT_PATH);
+	}
+}
+#else
+void set_cert_path(char UNUSED_PARAM *path) {
+	return;
+}
+#endif
+
 bool init_globals(void)
 {
 	int ret;
@@ -378,6 +404,10 @@ bool init_globals(void)
 
 	/* must set this global after version_url and content_url */
 	set_local_download();
+
+#ifdef SIGNATURES
+	set_cert_path(NULL);
+#endif
 
 	return true;
 }

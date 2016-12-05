@@ -134,10 +134,12 @@ extern char *state_dir;
 
 extern char *version_url;
 extern char *content_url;
+extern char *cert_path;
 extern long update_server_port;
 extern bool set_path_prefix(char *path);
 extern int set_content_url(char *url);
 extern int set_version_url(char *url);
+extern void set_cert_path(char *path);
 extern bool set_state_dir(char *path);
 
 extern void check_root(void);

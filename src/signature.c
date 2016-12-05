@@ -42,7 +42,7 @@
 
 #ifdef SIGNATURES
 
-#define CERTNAME CERT_PATH "/" SWUPDCERT
+static char *CERTNAME;
 
 static bool validate_certificate(void);
 static int verify_callback(int, X509_STORE_CTX *);
@@ -64,6 +64,8 @@ static char *crl = NULL;
  * returns: true if can initialize and validate certificates, otherwise false */
 bool initialize_signature(void)
 {
+	string_or_die(&CERTNAME, "%s/%s", cert_path, SWUPDCERT);
+
 	ERR_load_crypto_strings();
 	ERR_load_PKCS7_strings();
 	EVP_add_digest(EVP_sha256());

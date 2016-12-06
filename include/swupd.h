@@ -316,7 +316,7 @@ typedef enum telem_prio_t {
 	TELEMETRY_WARN,
 	TELEMETRY_CRIT
 } telem_prio_t;
-extern void telemetry(telem_prio_t level, const char *fmt, ...);
+extern void telemetry(telem_prio_t level, const char *class, const char *fmt, ...);
 
 /* some disk sizes constants for the various features:
  *   ...consider adding build automation to catch at build time

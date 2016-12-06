@@ -784,7 +784,8 @@ brick_the_system_and_clean_curl:
 
 clean_and_exit:
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
-		"action=verify\nfix=%d\nret=%d\n"
+		"verify",
+		"fix=%d\nret=%d\n"
 		"current_version=%d\n"
 		"file_replaced_count=%d\n"
 		"file_not_replaced_count=%d\n"

@@ -29,15 +29,16 @@
 #include "config.h"
 #include "swupd.h"
 
-#define RECORD_VERSION 1
+#define RECORD_VERSION 2
 
-void telemetry(telem_prio_t level, const char *fmt, ...)
+void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 {
 	va_list args;
 	char *filename;
 	int fd;
 
-	string_or_die(&filename, "%s/telemetry/%d.%d.XXXXXX", state_dir, RECORD_VERSION, level);
+	string_or_die(&filename, "%s/telemetry/%d.%s.%d.XXXXXX", state_dir,
+		RECORD_VERSION, class, level);
 
 	fd = mkstemp(filename);
 	free(filename);

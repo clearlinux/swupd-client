@@ -182,7 +182,7 @@ static int print_versions()
 	}
 
 	telemetry(ret ? TELEMETRY_WARN : TELEMETRY_INFO,
-		"action=check\n"
+		"check",
 		"result=%d\n"
 		"version_current=%d\n"
 		"version_server=%d\n",

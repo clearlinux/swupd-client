@@ -316,7 +316,14 @@ int remove_bundle(const char *bundle_name)
 out_free_mom:
 	free_manifest(current_mom);
 out_free_curl:
-
+	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
+		"bundleremove",
+		"bundle=%s\n"
+		"current_version=%d\n"
+		"result=%d\n",
+		bundle_name,
+		current_version,
+		ret);
 	if (ret) {
 		printf("Error: Bundle remove failed\n");
 	}
@@ -526,6 +533,7 @@ int install_bundles_frontend(char **bundles)
 	struct list *bundles_list = NULL;
 	struct manifest *mom;
 	struct list *subs = NULL;
+	char *bundles_list_str = NULL;
 
 	/* initialize swupd and get current version from OS */
 	ret = swupd_init(&lock_fd);
@@ -552,6 +560,15 @@ int install_bundles_frontend(char **bundles)
 
 	for (; *bundles; ++bundles) {
 		bundles_list = list_prepend_data(bundles_list, *bundles);
+		if (*bundles) {
+			char *tmp = bundles_list_str;
+			if (bundles_list_str) {
+				string_or_die(&bundles_list_str, "%s, %s", bundles_list_str, *bundles);
+			} else {
+				string_or_die(&bundles_list_str, "%s", *bundles);
+			}
+			free(tmp);
+		}
 	}
 
 	ret = install_bundles(bundles_list, &subs, current_version, mom);
@@ -559,6 +576,15 @@ int install_bundles_frontend(char **bundles)
 
 	free_manifest(mom);
 clean_and_exit:
+	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
+		"bundleadd",
+		"bundles=%s\n"
+		"current_version=%d\n"
+		"result=%d\n",
+		bundles_list_str,
+		current_version,
+		ret);
+
 	swupd_deinit(lock_fd, &subs);
 
 	return ret;

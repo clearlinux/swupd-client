@@ -16,6 +16,13 @@ AC_CONFIG_HEADERS([config.h])
 PKG_CHECK_MODULES([bsdiff], [bsdiff])
 PKG_CHECK_MODULES([lzma], [liblzma])
 PKG_CHECK_MODULES([zlib], [zlib])
+
+PKG_CHECK_MODULES(
+		  [SWUPDD],
+		  [libsystemd >= 221])
+AC_SUBST(SWUPDD_CFLAGS)
+AC_SUBST(SWUPDD_LIBS)
+
 AC_ARG_ENABLE(
 	[bzip2],
 	AS_HELP_STRING([--disable-bzip2],[Do not use bzip2 compression (uses bzip2 by default)]),

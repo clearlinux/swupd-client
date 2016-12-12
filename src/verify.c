@@ -67,6 +67,7 @@ static const struct option prog_opts[] = {
 	{ "format", required_argument, 0, 'F' },
 	{ "quick", no_argument, 0, 'q' },
 	{ "force", no_argument, 0, 'x' },
+	{ "nosigcheck", no_argument, 0, 'n' },
 	{ "statedir", required_argument, 0, 'S' },
 	{ 0, 0, 0, 0 }
 };
@@ -89,6 +90,7 @@ static void print_help(const char *name)
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	printf("   -q, --quick             Don't compare hashes, only fix missing files\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
+	printf("   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
 	printf("\n");
 }
@@ -97,7 +99,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxm:p:u:P:c:v:fiF:qS:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxnm:p:u:P:c:v:fiF:qS:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -169,6 +171,9 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'x':
 			force = true;
+			break;
+		case 'n':
+			sigcheck = false;
 			break;
 		default:
 			printf("Unrecognized option\n\n");

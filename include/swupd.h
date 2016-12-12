@@ -65,6 +65,7 @@ struct version_container {
 struct header;
 
 extern bool force;
+extern bool sigcheck;
 extern int verbose;
 extern int update_count;
 extern int update_skip;

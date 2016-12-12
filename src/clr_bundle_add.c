@@ -52,6 +52,7 @@ static void print_help(const char *name)
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	printf("   -l, --list              List all available bundles for the current version of Clear Linux\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
+	printf("   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
 	printf("\n");
 }
@@ -66,6 +67,7 @@ static const struct option prog_opts[] = {
 	{ "path", required_argument, 0, 'p' },
 	{ "format", required_argument, 0, 'F' },
 	{ "force", no_argument, 0, 'x' },
+	{ "nosigcheck", no_argument, 0, 'n' },
 	{ "statedir", required_argument, 0, 'S' },
 	{ 0, 0, 0, 0 }
 };
@@ -74,7 +76,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxu:c:v:P:p:F:lS:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxnu:c:v:P:p:F:lS:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -131,6 +133,9 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'x':
 			force = true;
+			break;
+		case 'n':
+			sigcheck = false;
 			break;
 		default:
 			printf("error: unrecognized option\n\n");

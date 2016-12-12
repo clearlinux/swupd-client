@@ -32,6 +32,7 @@
 #include "swupd.h"
 
 bool force = false;
+bool sigcheck = true;
 bool verify_esp_only;
 bool verify_bundles_only = false;
 int update_count = 0;

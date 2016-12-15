@@ -7,12 +7,15 @@ os_release_file=1c1efd10467cbc1dddd8e63c3ef4d9099f36418ed5372d080a1bf0f03a49ab05
 setup() {
   clean_test_dir
   create_manifest_tar 10 MoM
+  sign_manifest_mom 10
   create_manifest_tar 10 os-core
   create_manifest_tar 10 test-bundle1
   create_manifest_tar 20 MoM
+  sign_manifest_mom 20
   create_manifest_tar 20 os-core
   create_manifest_tar 20 test-bundle2
   create_manifest_tar 30 MoM
+  sign_manifest_mom 30
   create_manifest_tar 30 os-core
   create_manifest_tar 30 test-bundle2
   chown_root "$DIR/web-dir/30/staged/$os_release_file"

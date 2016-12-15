@@ -9,6 +9,7 @@ setup() {
   mkdir -p "$DIR/target-dir/usr/lib/kernel/"
   touch "$DIR/target-dir/usr/lib/kernel/testfile"
   create_manifest_tar 10 MoM
+  sign_manifest_mom 10
   create_manifest_tar 10 os-core
   create_manifest_tar 10 test-bundle
 }

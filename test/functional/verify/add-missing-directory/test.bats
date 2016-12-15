@@ -7,6 +7,7 @@ targetfile=6c27df6efcd6fc401ff1bc67c970b83eef115f6473db4fb9d57e5de317eba96e
 setup() {
   clean_test_dir
   create_manifest_tar 10 MoM
+  sign_manifest_mom 10
   create_manifest_tar 10 os-core
   create_fullfile_tar 10 $targetfile
 }

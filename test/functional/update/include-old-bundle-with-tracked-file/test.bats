@@ -9,6 +9,7 @@ setup() {
   clean_test_dir
 
   create_manifest_tar 10 MoM
+  sign_manifest_mom 10
   create_manifest_tar 10 os-core
   create_manifest_tar 10 test-bundle1
   create_manifest_tar 10 test-bundle2
@@ -17,9 +18,11 @@ setup() {
   create_fullfile_tar 10 $f1
 
   create_manifest_tar 20 MoM
+  sign_manifest_mom 20
   create_manifest_tar 20 os-core
 
   create_manifest_tar 30 MoM
+  sign_manifest_mom 30
   create_manifest_tar 30 os-core
   create_manifest_tar 30 test-bundle2
   create_manifest_tar 30 test-bundle3

@@ -125,7 +125,7 @@ install-exec-hook:
 	perl $(top_srcdir)/scripts/findstatic.pl */*.o | grep -v Checking ||:
 
 
-TEST_EXTENSIONS = .bats
+TEST_EXTENSIONS = .bats .prereq
 
 if ENABLE_TESTS
 tap_driver = env AM_TAP_AWK='$(AWK)' $(SHELL) \
@@ -194,7 +194,15 @@ dist_check_SCRIPTS = \
 	test/functional/verify/install-directory/test.bats \
 	test/functional/verify/install-latest-directory/test.bats \
 	test/functional/verify/latest-missing/test.bats
+
+# Must be run before all other tests
+dist_check_SCRIPTS += test/functional/generate-cert.prereq
+
+parallel_tests := $(patsubst %.bats,%.log,$(filter %.bats,$(dist_check_SCRIPTS)))
+$(parallel_tests) : test/functional/generate-cert.log
 endif
+
+
 
 if COVERAGE
 AM_CFLAGS += --coverage

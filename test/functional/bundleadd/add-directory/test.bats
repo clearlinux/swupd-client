@@ -7,6 +7,7 @@ dir_hash="24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af"
 setup() {
   clean_test_dir
   create_manifest_tar 10 MoM
+  sign_manifest_mom 10
   create_manifest_tar 10 os-core
   create_manifest_tar 10 test-bundle
   chown_root "$DIR/web-dir/10/staged/$dir_hash"

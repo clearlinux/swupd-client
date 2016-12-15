@@ -8,9 +8,11 @@ f2=520f83440d3dddc25ad09ca858b9c669245f82d3181a45cdfe793aac9dd1fb15
 setup() {
   clean_test_dir
   create_manifest_tar 10 MoM
+  sign_manifest_mom 10
   create_manifest_tar 10 os-core
   create_manifest_tar 10 test-bundle
   create_manifest_tar 100 MoM
+  sign_manifest_mom 100
   create_manifest_tar 100 test-bundle
   create_fullfile_tar 10 $f1
   create_fullfile_tar 100 $f2

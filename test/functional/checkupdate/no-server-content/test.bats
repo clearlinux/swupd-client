@@ -3,7 +3,7 @@
 load "../../swupdlib"
 
 @test "check-update with no server version file available" {
-  run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
+  run sudo sh -c "$SWUPD check-update $SWUPD_OPTS_NO_CERT"
 
 [ "$status" -ne 0 ]
   check_lines "$output"

@@ -5,9 +5,11 @@ load "../../swupdlib"
 setup() {
   clean_test_dir
   create_manifest_tar 10 MoM
+  sign_manifest_mom 10
   create_manifest_tar 10 os-core
   create_manifest_tar 10 test-bundle
   create_manifest_tar 100 MoM
+  sign_manifest_mom 100
   create_manifest_tar 100 test-bundle
   chown_root "$DIR/target-dir/foo"
 }

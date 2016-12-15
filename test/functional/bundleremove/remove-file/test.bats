@@ -8,6 +8,7 @@ setup() {
   touch "$DIR/target-dir/usr/share/clear/bundles/test-bundle"
   touch "$DIR/target-dir/test-file"
   create_manifest_tar 10 MoM
+  sign_manifest_mom 10
   create_manifest_tar 10 os-core
   create_manifest_tar 10 test-bundle
 }

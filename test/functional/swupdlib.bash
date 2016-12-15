@@ -9,7 +9,13 @@ export DIR="$BATS_TEST_DIRNAME"
 
 export STATE_DIR="$BATS_TEST_DIRNAME/state"
 
-export SWUPD_OPTS="-S $STATE_DIR -p $DIR/target-dir -F staging -u file://$DIR/web-dir"
+export SWUPD_OPTS="-S $STATE_DIR -p $DIR/target-dir -F staging -u file://$DIR/web-dir -C $BATS_TEST_DIRNAME/../../"
+
+export SWUPD_OPTS_NO_CERT="-S $STATE_DIR -p $DIR/target-dir -F staging -u file://$DIR/web-dir"
+
+export CERT="$BATS_TEST_DIRNAME/ClearLinuxRoot.pem"
+
+export CERTCONF="$BATS_TEST_DIRNAME/certattributes.cnf"
 
 clean_test_dir() {
   sudo rm -rf "$STATE_DIR"
@@ -83,6 +89,20 @@ check_lines() {
     echo -e "\nChecked lines versus actual output (note that actual output may contain ignored lines):\n"
     diff -u "$checked" "$outputfile"
   fi
+}
+
+# This generates the private key and self signed certificate
+generate_cert() {
+  openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 \
+  -keyout $BATS_TEST_DIRNAME/private.pem -out $CERT \
+  -subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=www.example.com/DN=MixerCert" \
+  -config $CERTCONF
+}
+
+sign_manifest_mom() {
+  sudo openssl smime -sign -binary -in $BATS_TEST_DIRNAME/web-dir/$1/Manifest.MoM \
+    -signer $SRCDIR/test/functional/ClearLinuxRoot.pem -inkey $SRCDIR/test/functional/private.pem \
+    -outform DER -out $BATS_TEST_DIRNAME/web-dir/$1/Manifest.MoM.sig
 }
 
 # vi: ft=sh ts=8 sw=2 sts=2 et tw=80

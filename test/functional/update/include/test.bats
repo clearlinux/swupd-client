@@ -14,10 +14,12 @@ f8=9a94d945b3841b70df7117fd02cffa36e4f1e5b430703b8fd26c086bf1059e72
 setup() {
   clean_test_dir
   create_manifest_tar 10 MoM
+  sign_manifest_mom 10
   create_manifest_tar 10 os-core
   create_manifest_tar 10 test-bundle1
   create_manifest_tar 10 test-bundle2
   create_manifest_tar 100 MoM
+  sign_manifest_mom 100
   create_manifest_tar 100 os-core
   create_manifest_tar 100 test-bundle1
   create_manifest_tar 100 test-bundle2

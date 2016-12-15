@@ -5,6 +5,7 @@ load "../../swupdlib"
 setup() {
   clean_test_dir
   create_manifest_tar 10 MoM
+  sign_manifest_mom 10
   create_manifest_tar 10 os-core
   chown_root "$DIR/target-dir/usr/lib/kernel/testfile"
 }

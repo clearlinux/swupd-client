@@ -208,6 +208,27 @@ coverage-clean:
 	rm -rf coverage
 endif
 
+compliant:
+	@git diff --quiet --exit-code include src; ret=$$?; \
+	if [ $$ret -eq 1 ]; then \
+		echo "Error: can only check code style when include/ and src/ are clean."; \
+		echo "Stash or commit your changes and try again."; \
+		exit $$ret; \
+	elif [ $$ret -gt 1 ]; then \
+		exit $$ret; \
+	fi; \
+	clang-format -i -style=file include/*.h src/*.c; ret=$$?; \
+	if [ $$ret -ne 0 ]; then \
+		exit $$ret; \
+	fi; \
+	git diff --quiet --exit-code include src; ret=$$?; \
+	if [ $$ret -eq 1 ]; then \
+		echo "Code style issues found. Run 'git diff' to view issues."; \
+	elif [ $$ret -eq 0 ]; then \
+		echo "No code style issues found."; \
+	fi; \
+	exit $$ret
+
 release:
 	@git rev-parse v$(PACKAGE_VERSION) &> /dev/null; \
 	if [ "$$?" -eq 0 ]; then \

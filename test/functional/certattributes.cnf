@@ -1,0 +1,25 @@
+[ ca ]
+default_ca = myca
+
+[ crl_ext ]
+authorityKeyIdentifier=keyid:always
+
+[ req ]
+private_key = private.pem
+distinguished_name = myca_policy
+x509_extensions = ca_extensions
+
+[ myca_policy ]
+commonName = supplied
+stateOrProvinceName = supplied
+countryName = supplied
+emailAddress = optional
+organizationName = supplied
+organizationalUnitName = optional
+
+[ca_extensions]
+keyUsage = digitalSignature,keyCertSign,cRLSign
+extendedKeyUsage = codeSigning
+basicConstraints = critical,CA:FALSE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer

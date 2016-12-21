@@ -1,0 +1,11 @@
+#!/usr/bin/env bats
+
+load "swupdlib"
+
+
+@test "Generate certificate for signing Manifest.MoM" {
+  run sudo sh -c "rm -rf $CERT $BATS_TEST_DIRNAME/private.pem"
+  generate_cert
+}
+
+# vi: ft=sh ts=8 sw=2 sts=2 et tw=80

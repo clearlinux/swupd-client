@@ -681,6 +681,15 @@ int verify_main(int argc, char **argv)
 
 	official_manifest->files = consolidate_files(official_manifest->files);
 
+	/* when fixing or installing we need input files. */
+	if (cmdline_option_fix || cmdline_option_install) {
+		ret = get_required_files(official_manifest, subs);
+		if (ret != 0) {
+			ret = -ret;
+			goto clean_and_exit;
+		}
+	}
+
 	/* preparation work complete. */
 
 	/*
@@ -697,12 +706,6 @@ int verify_main(int argc, char **argv)
 	 */
 
 	if (cmdline_option_fix || cmdline_option_install) {
-		/* when fixing or installing we need input files. */
-		ret = get_required_files(official_manifest, subs);
-		if (ret != 0) {
-			goto brick_the_system_and_clean_curl;
-		}
-
 		/*
 		 * Next put the files in place that are missing completely.
 		 * This is to avoid updating a symlink to a library before the new full file

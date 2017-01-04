@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 	int ret;
 
 	if (parse_options(argc, argv, &index) < 0) {
-		return EXIT_FAILURE;
+		return EINVALID_OPTION;
 	}
 
 	/* Reset optind to 0 (instead of the default value, 1) at this point,

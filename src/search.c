@@ -486,7 +486,7 @@ int search_main(int argc, char **argv)
 	struct list *subs = NULL;
 
 	if (!parse_options(argc, argv)) {
-		return EXIT_FAILURE;
+		return EINVALID_OPTION;
 	}
 
 	ret = swupd_init(&lock_fd);

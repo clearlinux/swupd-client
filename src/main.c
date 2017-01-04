@@ -208,7 +208,7 @@ int update_main(int argc, char **argv)
 	copyright_header("software update");
 
 	if (!parse_options(argc, argv)) {
-		return EXIT_FAILURE;
+		return EINVALID_OPTION;
 	}
 
 	if (cmd_line_status) {

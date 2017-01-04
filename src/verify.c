@@ -596,7 +596,7 @@ int verify_main(int argc, char **argv)
 	copyright_header("software verify");
 
 	if (!parse_options(argc, argv)) {
-		return EXIT_FAILURE;
+		return EINVALID_OPTION;
 	}
 
 	/* parse command line options */

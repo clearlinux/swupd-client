@@ -73,7 +73,7 @@ int list_installable_bundles()
 	MoM = load_mom(current_version);
 	if (!MoM) {
 		v_lockfile(lock_fd);
-		return ret;
+		return EMOM_NOTFOUND;
 	}
 
 	list = MoM->manifests;

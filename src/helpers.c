@@ -71,8 +71,8 @@ int rm_staging_dir_contents(const char *rel_path)
 		return -1;
 	}
 
-	errno = 0;
 	while(true) {
+		errno = 0;
 		entry = readdir(dir);
 		if (!entry) {
 			/* readdir returns NULL on the end of a directory stream, we only
@@ -394,8 +394,8 @@ static int swupd_rm_dir(const char *path)
 		}
 	}
 
-	errno = 0;
 	while (true) {
+		errno = 0;
 		entry = readdir(dir);
 		if (!entry) {
 			if (!errno) {

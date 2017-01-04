@@ -656,7 +656,7 @@ int verify_main(int argc, char **argv)
 		 * not provided.
 		 */
 		printf("Unable to download/verify %d Manifest.MoM\n", version);
-		ret = EXIT_FAILURE;
+		ret = EMOM_NOTFOUND;
 
 		/* No repair is possible without a manifest, nor is accurate reporting
 		 * of the state of the system. Therefore cleanup, report failure and exit

@@ -284,6 +284,7 @@ load_current_manifests:
 			goto load_current_manifests;
 		}
 		printf("Failure retrieving manifest from server\n");
+		ret = EMOM_NOTFOUND;
 		goto clean_exit;
 	}
 
@@ -301,6 +302,7 @@ load_server_manifests:
 		}
 		printf("Failure retrieving manifest from server\n");
 		printf("Unable to load manifest after retrying (config or network problem?)\n");
+		ret = EMOM_NOTFOUND;
 		goto clean_exit;
 	}
 

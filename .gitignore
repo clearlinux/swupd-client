@@ -45,9 +45,13 @@ swupd_*
 tap-driver.sh
 test-suite.log
 test/*.gcno
+test/functional/ClearLinuxRoot.pem
+test/functional/private.pem
+test/functional/*.log
 test/functional/*/*/web-dir/*/*.tar
 test/functional/*/*/web-dir/*/staged/*.tar
 test/functional/*/*/web-dir/*/files/*.tar
+test/functional/*/*/web-dir/*/Manifest.MoM.sig
 test/functional/*/*/test.log
 test/functional/*/*/state
 test/functional/*/*/lines-output

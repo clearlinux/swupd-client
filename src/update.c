@@ -398,6 +398,9 @@ download_packs:
 		 * should not affect exit status. */
 		(void)update_device_latest_version(server_version);
 		printf("Update was applied.\n");
+	} else if (ret < 0) {
+		// Ensure a positive exit status for the main program.
+		ret = -ret;
 	}
 
 	delete_motd();

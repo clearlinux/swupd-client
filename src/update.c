@@ -252,6 +252,7 @@ int main_update()
 	ret = check_versions(&current_version, &server_version, path_prefix);
 
 	if (ret < 0) {
+		ret = EXIT_FAILURE;
 		goto clean_curl;
 	}
 	if (server_version <= current_version) {

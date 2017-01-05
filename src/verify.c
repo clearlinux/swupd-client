@@ -231,7 +231,7 @@ static int get_all_files(struct manifest *official_manifest, struct list *subs)
 		 * 	logging needed */
 		printf("zero pack downloads failed. \n");
 		printf("Failed - Server-side error, cannot download necessary files\n");
-		return ret;
+		return -ENOSWUPDSERVER;
 	}
 	iter = list_head(official_manifest->files);
 	while (iter) {

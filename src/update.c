@@ -240,7 +240,7 @@ int main_update()
 
 	if (!check_network()) {
 		printf("Error: Network issue, unable to proceed with update\n");
-		ret = EXIT_FAILURE;
+		ret = ENOSWUPDSERVER;
 		goto clean_curl;
 	}
 

@@ -58,7 +58,7 @@ int list_installable_bundles()
 	if (!check_network()) {
 		printf("Error: Network issue, unable to download manifest\n");
 		v_lockfile(lock_fd);
-		return EXIT_FAILURE;
+		return ENOSWUPDSERVER;
 	}
 
 	current_version = get_current_version(path_prefix);

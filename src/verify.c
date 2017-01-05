@@ -632,7 +632,7 @@ int verify_main(int argc, char **argv)
 
 	if (!check_network()) {
 		printf("Error: Network issue, unable to download manifest\n");
-		ret = EXIT_FAILURE;
+		ret = ENOSWUPDSERVER;
 		goto clean_and_exit;
 	}
 

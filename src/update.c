@@ -313,6 +313,7 @@ load_server_manifests:
 	latest_subs = list_clone(current_subs);
 	ret = add_included_manifests(server_manifest, &latest_subs);
 	if (ret) {
+		ret = EMANIFEST_LOAD;
 		goto clean_exit;
 	}
 

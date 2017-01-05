@@ -318,7 +318,7 @@ RETRY_DOWNLOADS:
 		 * 	unable to download the needed files. This is a terminal error
 		 * 	and we need good logging */
 		printf("Error: Unable to download neccessary files for this OS release\n");
-		return ret;
+		return -EFULLDOWNLOAD;
 	}
 
 	if (failed != NULL) {
@@ -339,7 +339,7 @@ RETRY_DOWNLOADS:
 	if (retries >= MAX_TRIES) {
 		printf("ERROR: Could not download all files, aborting update\n");
 		list_free_list(failed);
-		return -1;
+		return -EFULLDOWNLOAD;
 	}
 
 	return 0;

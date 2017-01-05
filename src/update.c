@@ -325,8 +325,8 @@ load_server_manifests:
 	/* read the current collective of manifests that we are subscribed to */
 	current_manifest->submanifests = recurse_manifest(current_manifest, current_subs, NULL);
 	if (!current_manifest->submanifests) {
-		ret = -1;
-		printf("Cannot load current MoM sub-manifests, (%s), exiting\n", strerror(errno));
+		ret = ERECURSE_MANIFEST;
+		printf("Cannot load current MoM sub-manifests, exiting\n");
 		goto clean_exit;
 	}
 	/* consolidate the current collective manifests down into one in memory */
@@ -337,8 +337,8 @@ load_server_manifests:
 	/* read the new collective of manifests that we are subscribed to */
 	server_manifest->submanifests = recurse_manifest(server_manifest, latest_subs, NULL);
 	if (!server_manifest->submanifests) {
-		ret = -1;
-		printf("Error: Cannot load server MoM sub-manifests, (%s), exiting\n", strerror(errno));
+		ret = ERECURSE_MANIFEST;
+		printf("Error: Cannot load server MoM sub-manifests, exiting\n");
 		goto clean_exit;
 	}
 

@@ -393,7 +393,9 @@ download_packs:
 
 	ret = update_loop(updates, server_manifest);
 	if (ret == 0) {
-		ret = update_device_latest_version(server_version);
+		/* Failure to write the version file in the state directory
+		 * should not affect exit status. */
+		(void)update_device_latest_version(server_version);
 		printf("Update was applied.\n");
 	}
 

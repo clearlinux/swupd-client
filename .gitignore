@@ -43,6 +43,7 @@ swupd
 swupd-client*tar.gz
 swupd_*
 tap-driver.sh
+test-driver
 test-suite.log
 test/*.gcno
 test/functional/ClearLinuxRoot.pem

@@ -85,7 +85,12 @@ static int download_pack(int oldversion, int newversion, char *module)
 		fclose(tarfile);
 	}
 
-	return err;
+	// Only negative return values should indicate errors
+	if (err > 0) {
+		return -err;
+	} else {
+		return err;
+	}
 }
 
 /* pull in packs for base and any subscription */

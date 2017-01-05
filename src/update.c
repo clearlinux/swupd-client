@@ -368,6 +368,7 @@ download_packs:
 			goto download_packs;
 		}
 		printf("No network, or server unavailable for pack downloads\n");
+		ret = ENOSWUPDSERVER;
 		goto clean_exit;
 	}
 

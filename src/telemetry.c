@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <libgen.h>
 
 #include "config.h"
 #include "swupd.h"
@@ -35,15 +36,16 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 {
 	va_list args;
 	char *filename;
+	char *filename_n;
+	char *newname;
 	int fd;
 
-	string_or_die(&filename, "%s/telemetry/%d.%s.%d.XXXXXX", state_dir,
+	string_or_die(&filename, "%s/%d.%s.%d.XXXXXX", state_dir,
 		RECORD_VERSION, class, level);
 
 	fd = mkstemp(filename);
-	free(filename);
-
 	if (fd < 0) {
+		free(filename);
 		return;
 	}
 
@@ -55,4 +57,16 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 	va_end(args);
 
 	close(fd);
+
+	filename_n = basename(filename);
+	if (!filename_n) {
+		free(filename);
+		return;
+	}
+
+	string_or_die(&newname, "%s/telemetry/%s", state_dir, filename_n);
+
+	rename(filename, newname);
+	free(filename);
+	free(newname);
 }

@@ -13,6 +13,7 @@ swupd_SOURCES = \
 	$(swupd_verify_SOURCES) \
 	$(clr_bundle_add_SOURCES) \
 	$(clr_bundle_rm_SOURCES) \
+	$(clr_bundle_ls_SOURCES) \
 	$(swupd_search_SOURCES)
 
 check_PROGRAMS = \
@@ -65,6 +66,7 @@ swupd_search_SOURCES = src/search.c
 
 clr_bundle_add_SOURCES = src/clr_bundle_add.c
 clr_bundle_rm_SOURCES = src/clr_bundle_rm.c
+clr_bundle_ls_SOURCES = src/clr_bundle_ls.c
 
 swupd_hashdump_SOURCES = src/hashdump.c
 

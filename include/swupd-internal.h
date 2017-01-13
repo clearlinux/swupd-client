@@ -3,6 +3,7 @@
 
 extern int bundle_add_main(int argc, char **argv);
 extern int bundle_remove_main(int argc, char **argv);
+extern int bundle_list_main(int argc, char **argv);
 extern int hashdump_main(int argc, char **argv);
 extern int update_main(int argc, char **argv);
 extern int verify_main(int argc, char **argv);

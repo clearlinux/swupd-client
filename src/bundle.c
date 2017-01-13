@@ -589,3 +589,33 @@ clean_and_exit:
 
 	return ret;
 }
+
+/*
+ * This function will read /usr/share/clear/bundles/
+ * in order to get the bundle names, these will be
+ * saved in a list.
+ */
+void read_local_bundles(struct list **list_bundles)
+{
+	char *path = NULL;
+	DIR *dir;
+	struct dirent *ent;
+
+	string_or_die(&path, "%s/%s", path_prefix, BUNDLES_DIR);
+
+	dir = opendir(path);
+	if (dir) {
+		while ((ent = readdir(dir))) {
+			if ((strcmp(ent->d_name, ".") == 0) ||
+			(strcmp(ent->d_name, "..") == 0)) {
+				continue;
+			}
+
+			*list_bundles = list_append_data(*list_bundles, ent->d_name);
+		}
+
+		closedir(dir);
+	}
+
+	free(path);
+}

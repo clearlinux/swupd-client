@@ -110,6 +110,10 @@ to modify the core behavior and resources that swupd uses.
     will be removed from the system, as well as all bundles that required
     the listed bundles, either directly or indirectly.
 
+`bundle-list`
+
+    List all installed sofware bundles in the local system.
+
 `check-update`
 
     Checks whether an update is available and prints out the information

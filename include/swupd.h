@@ -310,6 +310,7 @@ extern int remove_bundle(const char *bundle_name);
 extern int list_installable_bundles();
 extern int install_bundles_frontend(char **bundles);
 extern int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, int recursion);
+void read_local_bundles(struct list **list_bundles);
 
 /* telemetry.c */
 typedef enum telem_prio_t {

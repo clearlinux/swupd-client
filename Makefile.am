@@ -145,8 +145,8 @@ dist_check_SCRIPTS = \
 	test/functional/bundleadd/boot-file/test.bats \
 	test/functional/bundleadd/include/test.bats \
 	test/functional/bundleadd/fix-missing-file/test.bats \
-	test/functional/bundleadd/list/test.bats \
 	test/functional/bundleadd/verify-fix-path/test.bats \
+	test/functional/bundlelist/all/test.bats \
 	test/functional/bundleremove/boot-file/test.bats \
 	test/functional/bundleremove/include/test.bats \
 	test/functional/bundleremove/parse-args/test.bats \

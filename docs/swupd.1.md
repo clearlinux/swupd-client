@@ -95,14 +95,8 @@ to modify the core behavior and resources that swupd uses.
 
 `bundle-add {bundles}`
 
-    Installs new software bundles. Bundles available can be listed with
-    the `--list` option. Any bundle name listed after `bundle-add` will
-    be downloaded and installed.
-
-    *  `-l, --list`
-
-        Lists all available software bundles, either installed or not, that
-        are available.
+    Installs new software bundles. Any bundle name listed after
+    `bundle-list --all` will be downloaded and installed.
 
 `bundle-remove {bundles}`
 
@@ -112,7 +106,14 @@ to modify the core behavior and resources that swupd uses.
 
 `bundle-list`
 
-    List all installed sofware bundles in the local system.
+    List all installed sofware bundles in the local system. Bundles available
+    can be listed with the `--all` option.
+
+    *  `-a, --all`
+
+        Lists all available software bundles, either installed or not, that
+        are available. It will return 0 with succeeded and a different value
+        of 0 with failed.
 
 `check-update`
 

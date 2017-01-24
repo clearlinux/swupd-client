@@ -13,8 +13,8 @@ teardown() {
   clean_tars 10
 }
 
-@test "bundle-add list bundles" {
-  run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS --list"
+@test "bundle-list all bundles" {
+  run sudo sh -c "$SWUPD bundle-list --all"
 
   check_lines "$output"
 }

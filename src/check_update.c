@@ -151,7 +151,7 @@ static int check_update()
 		} else if (current_version >= server_version) {
 			printf("There are no updates available\n");
 		}
-		return 1;	/* No update available */
+		return 1; /* No update available */
 	}
 }
 

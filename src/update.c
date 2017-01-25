@@ -50,7 +50,6 @@ static void try_delta_loop(struct list *updates)
 	struct list *iter;
 	struct file *file;
 
-
 	iter = list_head(updates);
 	while (iter) {
 		file = iter->data;
@@ -417,15 +416,15 @@ clean_curl:
 	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_stop);
 	delta = ts_stop.tv_sec - ts_start.tv_sec + ts_stop.tv_nsec / 1000000000.0 - ts_start.tv_nsec / 1000000000.0;
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
-		"update",
-		"current_version=%d\n"
-		"server_version=%d\n"
-		"result=%d\n"
-		"time=%5.1f\n",
-		current_version,
-		server_version,
-		ret,
-		delta);
+		  "update",
+		  "current_version=%d\n"
+		  "server_version=%d\n"
+		  "result=%d\n"
+		  "time=%5.1f\n",
+		  current_version,
+		  server_version,
+		  ret,
+		  delta);
 
 	if (server_version > current_version) {
 		printf("Update took %0.1f seconds\n", delta);

@@ -28,8 +28,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "swupd.h"
 
@@ -165,7 +165,7 @@ err:
  */
 static int print_versions()
 {
-	int current_version, server_version, ret=0;
+	int current_version, server_version, ret = 0;
 
 	check_root();
 	(void)init_globals();
@@ -191,13 +191,13 @@ static int print_versions()
 	}
 
 	telemetry(ret ? TELEMETRY_WARN : TELEMETRY_INFO,
-		"check",
-		"result=%d\n"
-		"version_current=%d\n"
-		"version_server=%d\n",
-		ret,
-		current_version,
-		server_version);
+		  "check",
+		  "result=%d\n"
+		  "version_current=%d\n"
+		  "version_server=%d\n",
+		  ret,
+		  current_version,
+		  server_version);
 
 	return ret;
 }

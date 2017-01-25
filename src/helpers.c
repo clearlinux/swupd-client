@@ -71,7 +71,7 @@ int rm_staging_dir_contents(const char *rel_path)
 		return -1;
 	}
 
-	while(true) {
+	while (true) {
 		errno = 0;
 		entry = readdir(dir);
 		if (!entry) {
@@ -118,7 +118,7 @@ void unlink_all_staged_content(struct file *file)
 
 	/* downloaded and un-tar'd file */
 	string_or_die(&filename, "%s/staged/%s", state_dir, file->hash);
-	(void) remove(filename);
+	(void)remove(filename);
 	free(filename);
 
 	/* delta file */

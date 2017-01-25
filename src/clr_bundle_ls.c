@@ -21,8 +21,8 @@
  */
 
 #define _GNU_SOURCE
-#include "swupd.h"
 #include "config.h"
+#include "swupd.h"
 
 int bundle_list_main(int argc, char **argv)
 {

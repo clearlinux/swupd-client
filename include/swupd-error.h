@@ -21,6 +21,6 @@
 #define EBUNDLE_INSTALL 18      /* Cannot install bundles */
 #define EREQUIRED_DIRS 19       /* Cannot create required dirs */
 #define ECURRENT_VERSION 20     /* Cannot determine current OS version */
-#define ESIGNATURE 21           /* Cannot initialize signature verification */
+#define ESIGNATURE 21		/* Cannot initialize signature verification */
 
 #endif

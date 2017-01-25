@@ -797,30 +797,30 @@ brick_the_system_and_clean_curl:
 
 clean_and_exit:
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
-		"verify",
-		"fix=%d\nret=%d\n"
-		"current_version=%d\n"
-		"file_replaced_count=%d\n"
-		"file_not_replaced_count=%d\n"
-		"file_missing_count=%d\n"
-		"file_fixed_count=%d\n"
-		"file_not_fixed_count=%d\n"
-		"file_deleted_count=%d\n"
-		"file_not_deleted_count=%d\n"
-		"file_mismatch_count=%d\n"
-		"file_extraneous_count=%d\n",
-		cmdline_option_fix || cmdline_option_install,
-		ret,
-		version,
-		file_replaced_count,
-		file_not_replaced_count,
-		file_missing_count,
-		file_fixed_count,
-		file_not_fixed_count,
-		file_deleted_count,
-		file_not_deleted_count,
-		file_mismatch_count,
-		file_extraneous_count);
+		  "verify",
+		  "fix=%d\nret=%d\n"
+		  "current_version=%d\n"
+		  "file_replaced_count=%d\n"
+		  "file_not_replaced_count=%d\n"
+		  "file_missing_count=%d\n"
+		  "file_fixed_count=%d\n"
+		  "file_not_fixed_count=%d\n"
+		  "file_deleted_count=%d\n"
+		  "file_not_deleted_count=%d\n"
+		  "file_mismatch_count=%d\n"
+		  "file_extraneous_count=%d\n",
+		  cmdline_option_fix || cmdline_option_install,
+		  ret,
+		  version,
+		  file_replaced_count,
+		  file_not_replaced_count,
+		  file_missing_count,
+		  file_fixed_count,
+		  file_not_fixed_count,
+		  file_deleted_count,
+		  file_not_deleted_count,
+		  file_mismatch_count,
+		  file_extraneous_count);
 	if (ret == EXIT_SUCCESS) {
 		if (cmdline_option_fix || cmdline_option_install) {
 			printf("Fix successful\n");

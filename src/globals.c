@@ -319,7 +319,8 @@ bool set_path_prefix(char *path)
  * sets the variable.
  */
 #ifdef SIGNATURES
-void set_cert_path(char *path) {
+void set_cert_path(char *path)
+{
 	// Early exit if the function was called previously.
 	if (cert_path) {
 		return;
@@ -333,7 +334,8 @@ void set_cert_path(char *path) {
 	}
 }
 #else
-void set_cert_path(char UNUSED_PARAM *path) {
+void set_cert_path(char UNUSED_PARAM *path)
+{
 	return;
 }
 #endif
@@ -355,7 +357,7 @@ bool init_globals(void)
 		return false;
 	}
 
-/* Set defaults with following order of preference:
+	/* Set defaults with following order of preference:
 	1. Runtime flags
 	2. State dir configuration files
 	3. Configure time settings

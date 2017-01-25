@@ -22,10 +22,10 @@
  */
 
 #define _GNU_SOURCE
+#include <libgen.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <stdarg.h>
-#include <libgen.h>
 
 #include "config.h"
 #include "swupd.h"
@@ -41,7 +41,7 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 	int fd;
 
 	string_or_die(&filename, "%s/%d.%s.%d.XXXXXX", state_dir,
-		RECORD_VERSION, class, level);
+		      RECORD_VERSION, class, level);
 
 	fd = mkstemp(filename);
 	if (fd < 0) {

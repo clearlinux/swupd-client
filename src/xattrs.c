@@ -45,11 +45,11 @@ typedef enum xattrs_action_type_t_ xattrs_action_type_t;
 /* Return a length of zero attribute names, i.e. there are none.
  * Not a perfect emulation, but good enough
  */
-#define llistxattr(p,b,l) (0)
+#define llistxattr(p, b, l) (0)
 /* If by some chance we have an attribute name and try and get its
  * value then set errno and return an error.
  */
-#define lgetxattr(p,n,b,l) ((errno = ENOTSUP, -1))
+#define lgetxattr(p, n, b, l) ((errno = ENOTSUP, -1))
 
 #endif
 

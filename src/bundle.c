@@ -317,13 +317,13 @@ out_free_mom:
 	free_manifest(current_mom);
 out_free_curl:
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
-		"bundleremove",
-		"bundle=%s\n"
-		"current_version=%d\n"
-		"result=%d\n",
-		bundle_name,
-		current_version,
-		ret);
+		  "bundleremove",
+		  "bundle=%s\n"
+		  "current_version=%d\n"
+		  "result=%d\n",
+		  bundle_name,
+		  current_version,
+		  ret);
 	if (ret) {
 		printf("Error: Bundle remove failed\n");
 	}
@@ -369,7 +369,6 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 		if (component_subscribed(*subs, bundle) && recursion > 0) {
 			continue;
 		}
-
 
 	retry_manifest_download:
 		manifest = load_manifest(current_version, file->last_change, file, mom, true);
@@ -577,13 +576,13 @@ int install_bundles_frontend(char **bundles)
 	free_manifest(mom);
 clean_and_exit:
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
-		"bundleadd",
-		"bundles=%s\n"
-		"current_version=%d\n"
-		"result=%d\n",
-		bundles_list_str,
-		current_version,
-		ret);
+		  "bundleadd",
+		  "bundles=%s\n"
+		  "current_version=%d\n"
+		  "result=%d\n",
+		  bundles_list_str,
+		  current_version,
+		  ret);
 
 	swupd_deinit(lock_fd, &subs);
 
@@ -607,7 +606,7 @@ void read_local_bundles(struct list **list_bundles)
 	if (dir) {
 		while ((ent = readdir(dir))) {
 			if ((strcmp(ent->d_name, ".") == 0) ||
-			(strcmp(ent->d_name, "..") == 0)) {
+			    (strcmp(ent->d_name, "..") == 0)) {
 				continue;
 			}
 

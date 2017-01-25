@@ -302,12 +302,12 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			char *tar;
 
 			printf("Warning: Downloading missing manifest for bundle %s version %d.\n",
-					current->filename, current->last_change);
+			       current->filename, current->last_change);
 
 			string_or_die(&filename, "%s/%i/Manifest.%s", state_dir,
-					current->last_change, current->filename);
+				      current->last_change, current->filename);
 			string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url,
-					current->last_change, current->filename);
+				      current->last_change, current->filename);
 			ret = swupd_curl_get_file(url, filename, NULL, NULL, false);
 			free(url);
 
@@ -320,8 +320,8 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			free(filename);
 
 			string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",
-					state_dir, current->last_change, state_dir,
-					current->last_change, current->filename);
+				      state_dir, current->last_change, state_dir,
+				      current->last_change, current->filename);
 
 			ret = system(tar);
 			free(tar);
@@ -331,7 +331,6 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			if (ret != 0) {
 				break;
 			}
-
 		}
 
 		if (!verify_file(bundle, local)) {

@@ -47,10 +47,6 @@
 #endif
 
 #define BUILD_OPTS \
-	OPT_BZIP2 " " \
-	OPT_SIGNATURES " " \
-	OPT_COVERAGE " " \
-	OPT_BSDTAR
-
+	OPT_BZIP2 " " OPT_SIGNATURES " " OPT_COVERAGE " " OPT_BSDTAR
 
 #endif

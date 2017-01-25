@@ -15,7 +15,7 @@
  * and Smack, but not with SELinux.
  */
 #define TAR_COMMAND "bsdtar"
-#define TAR_XATTR_ARGS ""
+#define TAR_XATTR_ARGS
 
 #else /* SWUPD_WITH_BSDTAR */
 
@@ -24,17 +24,17 @@
  */
 #define TAR_COMMAND "tar"
 #ifdef SWUPD_TAR_SELINUX
-#define TAR_XATTR_ARGS "--xattrs --xattrs-include='*' --selinux"
+#define TAR_XATTR_ARGS "--xattrs", "--xattrs-include='*'", "--selinux",
 #else
-#define TAR_XATTR_ARGS "--xattrs --xattrs-include='*'"
+#define TAR_XATTR_ARGS "--xattrs", "--xattrs-include='*'",
 #endif
 
 #endif /* SWUPD_WITH_BSDTAR */
 
 #ifdef SWUPD_WITH_XATTRS
-#define TAR_PERM_ATTR_ARGS "--preserve-permissions " TAR_XATTR_ARGS
+#define TAR_PERM_ATTR_ARGS TAR_XATTR_ARGS "--preserve-permissions"
 #else /* SWUPD_WITHOUT_XATTRS */
-#define TAR_PERM_ATTR_ARGS "--preserve-permissions "
+#define TAR_PERM_ATTR_ARGS "--preserve-permissions"
 #endif
 
 #endif

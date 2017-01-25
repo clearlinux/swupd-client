@@ -299,7 +299,6 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			/* missing bundle manifest - attempt to download it */
 			char *filename;
 			char *url;
-			char *tar;
 
 			printf("Warning: Downloading missing manifest for bundle %s version %d.\n",
 					current->filename, current->last_change);
@@ -319,15 +318,15 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			}
 			free(filename);
 
-			string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",
-					state_dir, current->last_change, state_dir,
-					current->last_change, current->filename);
+			char *param1, *param2;
+			string_or_die(&param1, "%s/%i", state_dir, current->last_change);
+			string_or_die(&param2, "%s/%i/Manifest.%s.tar",
+				      state_dir, current->last_change, current->filename);
+			char *const tarcmd[] = { TAR_COMMAND, "-C", param1, "-xf", param2, NULL };
+			ret = system_argv_fd(tarcmd, -1, -1, -2);
+			free(param1);
+			free(param2);
 
-			ret = system(tar);
-			free(tar);
-			if (WIFEXITED(ret)) {
-				ret = WEXITSTATUS(ret);
-			}
 			if (ret != 0) {
 				break;
 			}

@@ -298,6 +298,10 @@ extern int get_dirfd_path(const char *fullname);
 extern int verify_fix_path(char *targetpath, struct manifest *manifest);
 extern void set_local_download(void);
 extern struct list *files_from_bundles(struct list *bundles);
+extern int system_argv(char *const argv[]);
+extern int system_argv_fd(char *const argv[], int newstdin, int newstdout, int newstderr);
+extern int system_argv_pipe(char *const argvp1[], int stdinp1, int stderrp1,
+							char *const argvp2[], int stdoutp2, int stderrp2);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);

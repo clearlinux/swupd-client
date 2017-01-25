@@ -35,6 +35,7 @@
 #include <sys/statvfs.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #include "config.h"
 #include "signature.h"
@@ -155,16 +156,17 @@ static int create_required_dirs(void)
 	}
 
 	if (missing) { // (re)create state dirs
-		char *cmd;
+		char *param;
 
 		for (i = 0; i < STATE_DIR_COUNT; i++) {
-			string_or_die(&cmd, "mkdir -p %s/%s", state_dir, state_dirs[i]);
-			ret = system(cmd);
+			string_or_die(&param, "%s/%s", state_dir, state_dirs[i]);
+			char *const cmd[] = { "mkdir", "-p", param, NULL };
+			ret = system_argv(cmd);
 			if (ret) {
 				printf("Error: failed to create %s/%s\n", state_dir, state_dirs[i]);
 				return -1;
 			}
-			free(cmd);
+			free(param);
 
 			string_or_die(&dir, "%s/%s", state_dir, state_dirs[i]);
 			ret = chmod(dir, S_IRWXU);
@@ -887,4 +889,186 @@ struct list *files_from_bundles(struct list *bundles)
 	}
 
 	return files;
+}
+
+static int concat_str_array(char **output, char *const argv[])
+{
+	int size = 0;
+
+	for (int i = 0; argv[i]; i++) {
+		size += strlen(argv[i]) + 1;
+	}
+
+	*output = malloc(size + 1);
+	if (!*output) {
+		return -1;
+	}
+	strcpy(*output, "");
+	for (int i = 0; argv[i]; i++) {
+		strcat(*output, argv[i]);
+		strcat(*output, " ");
+	}
+	return 0;
+}
+
+static int handle_exit_status(int child_status)
+{
+	int status = -1;
+
+	if (WIFEXITED(child_status)) {
+		status = WEXITSTATUS(child_status);
+	} else if (WIFSIGNALED(child_status)) {
+		fprintf(stderr, "Child terminated with signal %d",
+				WTERMSIG(child_status));
+		if (WCOREDUMP(child_status)) {
+			fprintf(stderr, " (core dumped)");
+		}
+		fprintf(stderr, "\n");
+	} else {
+		fprintf(stderr, "Unknown exit status for child: %d\n",
+				child_status);
+	}
+
+	return status;
+}
+
+/* Fork/execs the command line constructed from the NULL-terminated argv array.
+ * Returns the exit status of the command for normal process termination.
+ * Otherwise, -1 is returned to indicate an error condition.
+ */
+int system_argv(char *const argv[])
+{
+	int child_exit_status;
+	pid_t pid;
+	int status = -1;
+	char *cmdline = NULL;
+	int saved_errno = 0;
+
+	pid = fork();
+
+	if (pid == 0) { /* child */
+		if (execvp(*argv, argv) < 0) {
+			saved_errno = errno;
+			if (concat_str_array(&cmdline, argv) < 0) {
+				return -1;
+			}
+			fprintf(stderr, "Error: Failed to exec '%s': %s\n",
+					cmdline, strerror(saved_errno));
+			/* To avoid flushing stdio, use _exit(2) instead of
+			 * exit(3) */
+			_exit(EXIT_FAILURE);
+		}
+	} else if (pid < 0) {
+		fprintf(stderr, "Failed to fork a child process: %s\n",
+				strerror(errno));
+	} else {
+		pid_t ws = waitpid(pid, &child_exit_status, 0);
+		if (ws == -1) {
+			fprintf(stderr, "Failed to wait for child process\n");
+			return status;
+		}
+
+		status = handle_exit_status(child_exit_status);
+	}
+
+	return status;
+}
+
+/* This function runs a command given in argv[] and redirects all file descriptors
+ * whose value is greater equal to 0. To avoid file descriptor redirection a negative
+ * value must be passed as argument. Note that there is an special case for stdout and
+ * stderr: if a value of "-2" is given, they will be redirected to "/dev/null" file.
+ */
+int system_argv_fd(char *const argv[], int newstdin, int newstdout, int newstderr)
+{
+	int child_exit_status;
+	pid_t pid;
+	int status = -1;
+	int saved_errno = 0;
+	char *cmdline = NULL;
+
+	pid = fork();
+
+	if (pid == 0) { /* child */
+		if (newstdout == -2) {
+			/* If next call fails, error will be consider non-fatal and will be ignored */
+			newstdout = open("/dev/null", O_WRONLY);
+		}
+		if (newstderr == -2) {
+			/* If next call fails, error will be consider non-fatal and will be ignored */
+			newstderr = open("/dev/null", O_WRONLY);
+		}
+		if (newstdin >= 0 && newstdin != STDIN_FILENO) {
+			if (dup2(newstdin, STDIN_FILENO) == -1) {
+				fprintf(stderr, "Could not redirect stdin\n");
+				return status;
+			}
+			close(newstdin);
+		}
+		if (newstdout >= 0 && newstdout != STDOUT_FILENO) {
+			if (dup2(newstdout, STDOUT_FILENO) == -1) {
+				fprintf(stderr, "Could not redirect stdout\n");
+				return status;
+			}
+			close(newstdout);
+		}
+		if (newstderr >= 0 && newstderr != STDERR_FILENO) {
+			if (dup2(newstderr, STDERR_FILENO) == -1) {
+				fprintf(stderr, "Could not redirect stderr\n");
+				return status;
+			}
+			close(newstderr);
+		}
+
+		if (execvp(*argv, argv) < 0) {
+			saved_errno = errno;
+			if (concat_str_array(&cmdline, argv) < 0) {
+				return -1;
+			}
+			fprintf(stderr, "Error: Failed to exec '%s': %s\n",
+					cmdline, strerror(saved_errno));
+			/* To avoid flushing stdio, use _exit(2) instead of
+			 * exit(3) */
+			_exit(EXIT_FAILURE);
+		}
+	} else if (pid < 0) {
+		fprintf(stderr, "Failed to fork a child process\n");
+		return status;
+	} else {
+		pid_t ws = waitpid(pid, &child_exit_status, 0);
+		if (ws == -1) {
+			fprintf(stderr, "Failed to wait for child process\n");
+			return status;
+		}
+
+		status = handle_exit_status(child_exit_status);
+	}
+
+	return status;
+}
+
+/* This function runs two commands given in argvp1[] and argvp2[]. The stdout
+ * of argvp1 will be redirected to stdin of argvp2. A redirection for other
+ * file descriptors will be done if the value passed is greater equal to 0.  To
+ * avoid file descriptor redirection a negative value must be passed as
+ * argument.  Note that there is an special case for stderrp1, stdoutp2, and
+ * stderrp2: if a value of "-2" is given, they will be redirected to
+ * "/dev/null" file.
+ */
+int system_argv_pipe(char *const argvp1[], int stdinp1, int stderrp1,
+		     char *const argvp2[], int stdoutp2, int stderrp2)
+{
+	int statusp2;
+	int pipefd[2];
+
+	if (pipe(pipefd)) {
+		fprintf(stderr, "Failed to create a pipe\n");
+		return -1;
+	}
+	system_argv_fd(argvp1, stdinp1, pipefd[1], stderrp1);
+	close(pipefd[1]);
+	statusp2 = system_argv_fd(argvp2, pipefd[0], stdoutp2, stderrp2);
+	close(pipefd[0]);
+
+	return statusp2;
 }

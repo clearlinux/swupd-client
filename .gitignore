@@ -46,7 +46,7 @@ tap-driver.sh
 test-driver
 test-suite.log
 test/*.gcno
-test/functional/ClearLinuxRoot.pem
+test/functional/Swupd_Root.pem
 test/functional/private.pem
 test/functional/*.log
 test/functional/*/*/web-dir/*/*.tar

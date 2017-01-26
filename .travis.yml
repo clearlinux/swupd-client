@@ -6,7 +6,7 @@ language: c
 # - libcheck 0.9.10 is slightly too old, since 0.9.12 adds TAP support
 # - bsdiff 1.* is the Clear Linux OS fork
 # - libcurl 7.35.0 is too old. Installing a newer version.
-# - the ClearLinuxRoot.pem cert must be installed out-of-tree to run the test suite with signature verification enabled
+# - the Swupd_Root.pem cert must be installed out-of-tree to run the test suite with signature verification enabled
 install:
         - wget http://downloads.sourceforge.net/project/check/check/0.10.0/check-0.10.0.tar.gz
         - tar -xvf check-0.10.0.tar.gz
@@ -17,8 +17,8 @@ install:
         - wget https://curl.haxx.se/download/curl-7.51.0.tar.gz
         - tar -xvf curl-7.51.0.tar.gz
         - pushd curl-7.51.0 && ./configure --prefix=/usr && make -j48 && sudo make install && popd
-        - wget https://download.clearlinux.org/releases/11280/clear/ClearLinuxRoot.pem
-        - sudo install -D -m0644 ClearLinuxRoot.pem /usr/share/clear/update-ca/ClearLinuxRoot.pem
+        - wget https://download.clearlinux.org/releases/12970/clear/Swupd_Root.pem
+        - sudo install -D -m0644 Swupd_Root.pem /usr/share/clear/update-ca/Swupd_Root.pem
 
 # Ubuntu's default umask is 0002, but this break's swupd hash calculations.
 script:

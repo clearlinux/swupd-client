@@ -13,7 +13,7 @@ export SWUPD_OPTS="-S $STATE_DIR -p $DIR/target-dir -F staging -u file://$DIR/we
 
 export SWUPD_OPTS_NO_CERT="-S $STATE_DIR -p $DIR/target-dir -F staging -u file://$DIR/web-dir"
 
-export CERT="$BATS_TEST_DIRNAME/ClearLinuxRoot.pem"
+export CERT="$BATS_TEST_DIRNAME/Swupd_Root.pem"
 
 export CERTCONF="$BATS_TEST_DIRNAME/certattributes.cnf"
 
@@ -101,7 +101,7 @@ generate_cert() {
 
 sign_manifest_mom() {
   sudo openssl smime -sign -binary -in $BATS_TEST_DIRNAME/web-dir/$1/Manifest.MoM \
-    -signer $SRCDIR/test/functional/ClearLinuxRoot.pem -inkey $SRCDIR/test/functional/private.pem \
+    -signer $SRCDIR/test/functional/Swupd_Root.pem -inkey $SRCDIR/test/functional/private.pem \
     -outform DER -out $BATS_TEST_DIRNAME/web-dir/$1/Manifest.MoM.sig
 }
 

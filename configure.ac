@@ -182,12 +182,12 @@ AC_ARG_WITH(
   [swupdcert],
   [AS_HELP_STRING([--with-swupdcert=FILE], [swupd verification cert])],
   [AC_DEFINE_UNQUOTED([SWUPDCERT], ["$withval"], [swupd verification cert])],
-  [AC_DEFINE([SWUPDCERT], ["ClearLinuxRoot.pem"], [swupd verification cert])]
+  [AC_DEFINE([SWUPDCERT], ["Swupd_Root.pem"], [swupd verification cert])]
 )
 AS_IF(
   [test -n "$with_swupdcert" -a "$with_swupdcert" != "no" -a "$with_swupdcert" != "yes"],
   [SWUPDCERT="$with_swupdcert"],
-  [SWUPDCERT="ClearLinuxRoot.pem"]
+  [SWUPDCERT="Swupd_Root.pem"]
 )
 
 AC_ARG_WITH(

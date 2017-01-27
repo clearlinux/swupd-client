@@ -130,7 +130,7 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'l':
 			printf("error: [-l, --list] option is deprecated, use\n"
-			       "bundle-list [-l|--list] sub-command instead.\n\n");
+			       "bundle-list [-a|--all] sub-command instead.\n\n");
 			exit(EXIT_FAILURE);
 		case 'x':
 			force = true;

@@ -33,13 +33,13 @@ static void print_help(const char *name)
 	printf("   swupd %s [options]\n\n", basename((char *)name));
 	printf("Help Options:\n");
 	printf("   -h, --help              Show help options\n");
-	printf("   -l, --list              List all available bundles for the current version of Clear Linux\n");
+	printf("   -a, --all               List all available bundles for the current version of Clear Linux\n");
 	printf("\n");
 }
 
 static const struct option prog_opts[] = {
 	{ "help", no_argument, 0, 'h'},
-	{ "list", no_argument, 0, 'l' },
+	{ "all",  no_argument, 0, 'a' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -47,13 +47,13 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hl", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "ha", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
 			print_help(argv[0]);
 			exit(EXIT_SUCCESS);
-		case 'l':
+		case 'a':
 			return list_installable_bundles();
 			break;
 		default:

@@ -35,7 +35,6 @@
 #define MODE_RW_O (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 #define VERIFY_NOPICKY 0
 
-bool list = false;
 static char **bundles;
 
 static void print_help(const char *name)
@@ -50,7 +49,6 @@ static void print_help(const char *name)
 	printf("   -P, --port=[port #]        Port number to connect to at the url for version string and content file downloads\n");
 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	printf("   -l, --list              List all available bundles for the current version of Clear Linux\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	printf("   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
@@ -131,8 +129,9 @@ static bool parse_options(int argc, char **argv)
 			}
 			break;
 		case 'l':
-			list = true;
-			break;
+			printf("error: [-l, --list] option is deprecated, use\n"
+			       "bundle-list [-l|--list] sub-command instead.\n\n");
+			exit(EXIT_FAILURE);
 		case 'x':
 			force = true;
 			break;
@@ -152,14 +151,13 @@ static bool parse_options(int argc, char **argv)
 		}
 	}
 
-	if (!list) {
-		if (argc <= optind) {
-			printf("error: missing bundle(s) to be installed\n\n");
-			goto err;
-		}
 
-		bundles = argv + optind;
+	if (argc <= optind) {
+		printf("error: missing bundle(s) to be installed\n\n");
+		goto err;
 	}
+
+	bundles = argv + optind;
 
 	return true;
 err:
@@ -175,9 +173,5 @@ int bundle_add_main(int argc, char **argv)
 		return EINVALID_OPTION;
 	}
 
-	if (list) {
-		return list_installable_bundles();
-	} else {
-		return install_bundles_frontend(bundles);
-	}
+	return install_bundles_frontend(bundles);
 }

@@ -21,8 +21,52 @@
  */
 
 #define _GNU_SOURCE
+#include <getopt.h>
+#include <libgen.h>
+
 #include "config.h"
 #include "swupd.h"
+
+static void print_help(const char *name)
+{
+	printf("Usage:\n");
+	printf("   swupd %s [options]\n\n", basename((char *)name));
+	printf("Help Options:\n");
+	printf("   -h, --help              Show help options\n");
+	printf("   -l, --list              List all available bundles for the current version of Clear Linux\n");
+	printf("\n");
+}
+
+static const struct option prog_opts[] = {
+	{ "help", no_argument, 0, 'h'},
+	{ "list", no_argument, 0, 'l' },
+	{ 0, 0, 0, 0 }
+};
+
+static bool parse_options(int argc, char **argv)
+{
+	int opt;
+
+	while ((opt = getopt_long(argc, argv, "hl", prog_opts, NULL)) != -1) {
+		switch (opt) {
+		case '?':
+		case 'h':
+			print_help(argv[0]);
+			exit(EXIT_SUCCESS);
+		case 'l':
+			return list_installable_bundles();
+			break;
+		default:
+			printf("error: unrecognized option\n\n");
+			goto err;
+		}
+	}
+
+	return true;
+err:
+	print_help(argv[0]);
+	return false;
+}
 
 int bundle_list_main(int argc, char **argv)
 {
@@ -33,6 +77,10 @@ int bundle_list_main(int argc, char **argv)
 	struct list *item = NULL;
 
 	copyright_header("bundle list");
+
+	if (!parse_options(argc, argv)) {
+		return EXIT_FAILURE;
+	}
 
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {

@@ -17,7 +17,7 @@ install:
         - wget https://curl.haxx.se/download/curl-7.51.0.tar.gz
         - tar -xvf curl-7.51.0.tar.gz
         - pushd curl-7.51.0 && ./configure --prefix=/usr && make -j48 && sudo make install && popd
-        - wget https://download.clearlinux.org/releases/12970/clear/Swupd_Root.pem
+        - wget https://download.clearlinux.org/releases/13010/clear/Swupd_Root.pem
         - sudo install -D -m0644 Swupd_Root.pem /usr/share/clear/update-ca/Swupd_Root.pem
 
 # Ubuntu's default umask is 0002, but this break's swupd hash calculations.

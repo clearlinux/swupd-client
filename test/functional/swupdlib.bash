@@ -46,7 +46,7 @@ create_manifest_tar() {
   local ver=$1
   local name=$2
   chown_root "$DIR/web-dir/$ver/Manifest.$name"
-  sudo tar -C "$DIR/web-dir/$ver" -cf "$DIR/web-dir/$ver/Manifest.$name.tar" Manifest.$name Manifest.$name.signed
+  sudo tar -C "$DIR/web-dir/$ver" -cf "$DIR/web-dir/$ver/Manifest.$name.tar" Manifest.$name
 }
 
 create_fullfile_tar() {

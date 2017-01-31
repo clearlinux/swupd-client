@@ -34,12 +34,30 @@ static void print_help(const char *name)
 	printf("Help Options:\n");
 	printf("   -h, --help              Show help options\n");
 	printf("   -a, --all               List all available bundles for the current version of Clear Linux\n");
+	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
+	printf("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
+	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
+	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
+	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
+	printf("   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
+	printf("   -S, --statedir          Specify alternate swupd state directory\n");
+	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
+
 	printf("\n");
 }
 
 static const struct option prog_opts[] = {
 	{ "help", no_argument, 0, 'h'},
 	{ "all",  no_argument, 0, 'a' },
+	{ "url", required_argument, 0, 'u' },
+	{ "contenturl", required_argument, 0, 'c' },
+	{ "versionurl", required_argument, 0, 'v' },
+	{ "path", required_argument, 0, 'p' },
+	{ "format", required_argument, 0, 'F' },
+	{ "nosigcheck", no_argument, 0, 'n' },
+	{ "statedir", required_argument, 0, 'S' },
+	{ "certpath", required_argument, 0, 'C' },
+
 	{ 0, 0, 0, 0 }
 };
 
@@ -47,7 +65,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "ha", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hanu:c:v:p:F:S:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -56,6 +74,57 @@ static bool parse_options(int argc, char **argv)
 		case 'a':
 			return list_installable_bundles();
 			break;
+		case 'u':
+			if (!optarg) {
+				printf("error: invalid --url argument\n\n");
+				goto err;
+			}
+			set_version_url(optarg);
+			set_content_url(optarg);
+			break;
+		case 'c':
+			if (!optarg) {
+				printf("Invalid --contenturl argument\n\n");
+				goto err;
+			}
+			set_content_url(optarg);
+			break;
+		case 'v':
+			if (!optarg) {
+				printf("Invalid --versionurl argument\n\n");
+				goto err;
+			}
+			set_version_url(optarg);
+			break;
+		case 'p': /* default empty path_prefix verifies the running OS */
+			if (!optarg || !set_path_prefix(optarg)) {
+				printf("Invalid --path argument\n\n");
+				goto err;
+			}
+			break;
+		case 'F':
+			if (!optarg || !set_format_string(optarg)) {
+				printf("Invalid --format argument\n\n");
+				goto err;
+			}
+			break;
+		case 'n':
+			sigcheck = false;
+			break;
+		case 'S':
+			if (!optarg || !set_state_dir(optarg)) {
+				printf("Invalid --statedir argument\n\n");
+				goto err;
+			}
+			break;
+		case 'C':
+			if (!optarg) {
+				printf("Invalid --certpath argument\n\n");
+				goto err;
+			}
+			set_cert_path(optarg);
+			break;
+
 		default:
 			printf("error: unrecognized option\n\n");
 			goto err;

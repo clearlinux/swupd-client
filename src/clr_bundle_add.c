@@ -151,7 +151,6 @@ static bool parse_options(int argc, char **argv)
 		}
 	}
 
-
 	if (argc <= optind) {
 		printf("error: missing bundle(s) to be installed\n\n");
 		goto err;

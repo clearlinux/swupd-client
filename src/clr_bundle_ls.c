@@ -47,8 +47,8 @@ static void print_help(const char *name)
 }
 
 static const struct option prog_opts[] = {
-	{ "help", no_argument, 0, 'h'},
-	{ "all",  no_argument, 0, 'a' },
+	{ "help", no_argument, 0, 'h' },
+	{ "all", no_argument, 0, 'a' },
 	{ "url", required_argument, 0, 'u' },
 	{ "contenturl", required_argument, 0, 'c' },
 	{ "versionurl", required_argument, 0, 'v' },

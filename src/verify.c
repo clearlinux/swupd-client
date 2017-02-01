@@ -525,7 +525,7 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 
 		/* Note: boot files marked as deleted should not be deleted by
 		 * verify/fix; this task is delegated to an external program
-		 * (currently /usr/bin/kernel_updater.sh).
+		 * (currently /usr/bin/clr-boot-manager).
 		 */
 		if (ignore(file)) {
 			continue;

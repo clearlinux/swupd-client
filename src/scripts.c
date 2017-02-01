@@ -49,8 +49,10 @@ static void update_boot(void)
 
 static void update_triggers(void)
 {
-	system("/usr/bin/systemctl --no-block daemon-reload");
-	system("/usr/bin/systemctl --no-block restart update-triggers.target");
+	__attribute__((unused)) int ret = 0;
+
+	ret = system("/usr/bin/systemctl --no-block daemon-reload");
+	ret = system("/usr/bin/systemctl --no-block restart update-triggers.target");
 }
 
 void run_scripts(void)
@@ -80,6 +82,7 @@ void run_preupdate_scripts(struct manifest *manifest)
 	struct file *file;
 	struct stat sb;
 	char *script;
+	__attribute__((unused)) int ret = 0;
 
 	string_or_die(&script, "/usr/bin/clr_pre_update.sh");
 
@@ -98,7 +101,7 @@ void run_preupdate_scripts(struct manifest *manifest)
 
 		/* Check that system file matches file in manifest */
 		if (verify_file(file, script)) {
-			system(script);
+			ret = system(script);
 			break;
 		}
 	}

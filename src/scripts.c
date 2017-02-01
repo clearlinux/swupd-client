@@ -32,41 +32,19 @@
 
 #include "swupd.h"
 
-static void update_kernel(void)
+static void update_boot(void)
 {
-	char *kernel_update_cmd = NULL;
+	char *boot_update_cmd = NULL;
+	__attribute__((unused)) int ret = 0;
 
 	if (strcmp("/", path_prefix) == 0) {
-		string_or_die(&kernel_update_cmd, "/usr/bin/kernel_updater.sh");
+		string_or_die(&boot_update_cmd, "/usr/bin/clr-boot-manager update");
 	} else {
-		string_or_die(&kernel_update_cmd, "%s/usr/bin/kernel_updater.sh --path %s", path_prefix, path_prefix);
+		string_or_die(&boot_update_cmd, "%s/usr/bin/clr-boot-manager update --path %s", path_prefix, path_prefix);
 	}
 
-	system(kernel_update_cmd);
-	free(kernel_update_cmd);
-}
-
-static void update_bootloader(void)
-{
-	char *bootloader_update_cmd = NULL;
-
-	if (strcmp("/", path_prefix) == 0) {
-		string_or_die(&bootloader_update_cmd, "/usr/bin/gummiboot_updaters.sh");
-	} else {
-		string_or_die(&bootloader_update_cmd, "%s/usr/bin/gummiboot_updaters.sh --path %s", path_prefix, path_prefix);
-	}
-
-	system(bootloader_update_cmd);
-	free(bootloader_update_cmd);
-
-	if (strcmp("/", path_prefix) == 0) {
-		string_or_die(&bootloader_update_cmd, "/usr/bin/systemdboot_updater.sh");
-	} else {
-		string_or_die(&bootloader_update_cmd, "%s/usr/bin/systemdboot_updater.sh --path %s", path_prefix, path_prefix);
-	}
-
-	system(bootloader_update_cmd);
-	free(bootloader_update_cmd);
+	ret = system(boot_update_cmd);
+	free(boot_update_cmd);
 }
 
 static void update_triggers(void)
@@ -80,12 +58,8 @@ void run_scripts(void)
 	printf("Calling post-update helper scripts.\n");
 
 	/* path_prefix aware helper */
-	if (need_update_boot) {
-		update_kernel();
-	}
-
-	if (need_update_bootloader) {
-		update_bootloader();
+	if (need_update_boot || need_update_bootloader) {
+		update_boot();
 	}
 
 	/* helpers which don't run when path_prefix is set */

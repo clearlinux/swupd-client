@@ -176,6 +176,7 @@ int bundle_list_main(int argc, char **argv)
 	printf("Current OS version: %d\n", current_version);
 
 	list_free_list(list_bundles);
+	v_lockfile(lock_fd);
 
 	return ret;
 }

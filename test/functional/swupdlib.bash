@@ -9,7 +9,7 @@ export DIR="$BATS_TEST_DIRNAME"
 
 export STATE_DIR="$BATS_TEST_DIRNAME/state"
 
-export SWUPD_OPTS="-S $STATE_DIR -p $DIR/target-dir -F staging -u file://$DIR/web-dir -C $BATS_TEST_DIRNAME/../../"
+export SWUPD_OPTS="-S $STATE_DIR -p $DIR/target-dir -F staging -u file://$DIR/web-dir -C $BATS_TEST_DIRNAME/../../Swupd_Root.pem"
 
 export SWUPD_OPTS_NO_CERT="-S $STATE_DIR -p $DIR/target-dir -F staging -u file://$DIR/web-dir"
 

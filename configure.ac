@@ -161,7 +161,7 @@ AC_ARG_WITH(
   [certpath],
   [AS_HELP_STRING([--with-certpath=PATH], [Location of CA certificates])]
 )
-default_cert_path="/usr/share/clear/update-ca"
+default_cert_path="/usr/share/clear/update-ca/Swupd_Root.pem"
 cert_path=
 # Makes sure --with-certpath receives an argument that is not "yes" or "no",
 # and uses the default path if only --enable-signature-verification is passed.
@@ -176,18 +176,6 @@ AS_IF(
   [cert_path="$with_certpath"],
   [test "$enable_signature_verification" = "yes"],
   [cert_path="$default_cert_path"]
-)
-
-AC_ARG_WITH(
-  [swupdcert],
-  [AS_HELP_STRING([--with-swupdcert=FILE], [swupd verification cert])],
-  [AC_DEFINE_UNQUOTED([SWUPDCERT], ["$withval"], [swupd verification cert])],
-  [AC_DEFINE([SWUPDCERT], ["Swupd_Root.pem"], [swupd verification cert])]
-)
-AS_IF(
-  [test -n "$with_swupdcert" -a "$with_swupdcert" != "no" -a "$with_swupdcert" != "yes"],
-  [SWUPDCERT="$with_swupdcert"],
-  [SWUPDCERT="Swupd_Root.pem"]
 )
 
 AC_ARG_WITH(
@@ -298,7 +286,6 @@ Configuration to build swupd-client:
   Format Identifier:			${FORMATID}
   Signature verification:		${SIGVERIFICATION}
   CA certificate path:			${cert_path}
-  SSL Certificate file:			${SWUPDCERT}
   Use bzip compression:			${BZIP}
   Run Tests:				${TESTS}
   Use extended file attributes		${XATTR}

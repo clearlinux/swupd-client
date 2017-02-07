@@ -291,7 +291,7 @@ int untar_full_download(void *data)
 	}
 
 	/* modern tar will automatically determine the compression type used */
-	string_or_die(&tarcommand, TAR_COMMAND " -C %s/staged/ " TAR_PERM_ATTR_ARGS " -xf %s 2> /dev/null",
+	string_or_die(&tarcommand, TAR_COMMAND " -C %s/staged/ " TAR_PERM_ATTR_ARGS " -xf %s",
 		      state_dir, tarfile);
 
 	err = system(tarcommand);
@@ -302,6 +302,7 @@ int untar_full_download(void *data)
 	if (err) {
 		printf("ignoring tar extract failure for fullfile %s.tar (ret %d)\n",
 		       file->hash, err);
+		err = 0;
 		goto exit;
 		/* FIXME: can we respond meaningfully to tar error codes?
 		 * symlink untars may have perm/xattr complaints and non-zero

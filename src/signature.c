@@ -70,7 +70,7 @@ bool initialize_signature(void)
 	struct tm *alttime;
 	struct stat statt;
 
-	string_or_die(&CERTNAME, "%s/%s", cert_path, SWUPDCERT);
+	string_or_die(&CERTNAME, "%s", cert_path);
 
 	ERR_load_crypto_strings();
 	ERR_load_PKCS7_strings();

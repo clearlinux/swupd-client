@@ -417,13 +417,29 @@ bool init_globals(void)
 
 void free_globals(void)
 {
+	/* freeing all globals and set ALL them to NULL
+	 * to avoid memory corruption on multiple calls
+	 * to swupd_init() */
 	free(content_url);
+	content_url = NULL;
+
 	free(version_url);
+	version_url = NULL;
+
 	free(path_prefix);
+	path_prefix = NULL;
+
 	free(format_string);
+	format_string = NULL;
+
 	free(mounted_dirs);
+	mounted_dirs = NULL;
+
 	free(state_dir);
+	state_dir = NULL;
+
 	if (bundle_to_add != NULL) {
 		free(bundle_to_add);
+		bundle_to_add = NULL;
 	}
 }

@@ -20,52 +20,51 @@
 #declares the completion function
 _swupd()
 {
-  local cur prev opts index suboptions mainsubcommands
-  local mainopts=" -h --help -v --version"
-  COMPREPLY=()
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  prev="${COMP_WORDS[COMP_CWORD-1]}"
-  #Adding all options for subcommands in an array
-  mainsubcommands+=("bundle-add bundle-remove hashdump update verify check-update search")
-  suboptions+=("$mainopts")
-  suboptions+=(" -h --help -u --url -c --contenturl -v --versionurl -P --port -p --path -F --format -l --list -x --force -S --statedir")
-  mainsubcommands+=(" ")
-  suboptions+=(" -h --help -p --path -u --url -c --contenturl -v --versionurl -P --port -F --format -x --force -S --statedir")
-  mainsubcommands+=(" ")
-  suboptions+=(" -h --help -n --no-xattrs -b --basepath")
-  mainsubcommands+=(" ")
-  suboptions+=(" -h --help -d --download -u --url -P --port -c --contenturl -v --versionurl -s --status -F --format -p --path -x --force -S --statedir")
-  mainsubcommands+=(" ")
-  suboptions+=(" -h --help -m --manifest -p --path -u --url -P --port -c --contenturl -v --versionurl -f --fix -i --install -F --format -q --quick -x --force -S --statedir")
-  mainsubcommands+=(" ")
-  suboptions+=(" -h --help -u --url -v --versionurl -P --port -F --format -x --force -p --path -S --statedir")
-  mainsubcommands+=(" ")
-  suboptions+=(" -h --help -l --library -b --binary -s --scope -d --display-files -i --init -u --url -c --contenturl -v --versionurl -P --port -p --path -F --format -S --statedir")
-  mainsubcommands+=(" ")
-
-  #Need to get last subcommand entered by the user
-  index=COMP_CWORD-1
-  while [[ " swupd $mainsubcommands " != *" $prev "* ]]; do
-    ((index--))
-    prev=`basename "${COMP_WORDS[$index]}"`
-  done
-  #Now need to calculate the index of the subcommand in order to
-  #retreive options
-  index=0
-  for subc in swupd ${mainsubcommands[0]}
-  do
-    if [[ $subc == $prev ]]; then
-      break
-    fi
-    ((index++))
-  done
-
-  #Get all options for last subcommand entered
-  opts="${suboptions[$index]} ${mainsubcommands[$index]}"
-
-  COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-
-  return 0
+    # $1 is the command being completed, $2 is the current word being expanded
+    local opts myname=${COMP_WORDS[0]} IFS=$' \t\n'
+    local -i i installed
+    COMPREPLY=()
+    for ((i=COMP_CWORD-1;i>=0;i--))
+    do case "${COMP_WORDS[$i]}" in
+	   ("$1")
+	       opts=" -h --help -v --version bundle-add bundle-list bundle-remove hashdump update verify check-update search"
+	       break;;
+	    ("bundle-add")
+		opts="-h --help -u --url -c --contenturl -v --versionurl -P --port -p --path -F --format -x --force -S --statedir "
+		if [ -r /var/lib/swupd/version ] &&
+		       installed=$(</var/lib/swupd/version) &&
+		       [ -r /var/lib/swupd/$installed/Manifest.MoM ]
+		then
+		    opts+="$( sed '1,/^$/d; s/^.*\t/ /' /var/lib/swupd/$installed/Manifest.MoM | LC_ALL=C sort )"
+		fi
+		break;;
+	    ("bundle-list")
+		opts="-h --help -a --all -u --url -v --versionurl -p --path -F --format"
+		break;;
+	    ("bundle-remove")
+		opts=" -h --help -p --path -u --url -c --contenturl -v --versionurl -P --port -F --format -x --force -S --statedir"
+		opts+=" $(unset CDPATH; test -d /usr/share/clear/bundles &&  cd /usr/share/clear/bundles && echo *)"
+		break;;
+	    ("hashdump")
+		opts=" -h --help -n --no-xattrs -b --basepath"
+		break;;
+	    ("update")
+		opts=" -h --help -d --download -u --url -P --port -c --contenturl -v --versionurl -s --status -F --format -p --path -x --force -S --statedir"
+		break;;
+	    ("verify")
+		opts=" -h --help -m --manifest -p --path -u --url -P --port -c --contenturl -v --versionurl -f --fix -i --install -F --format -q --quick -x --force -S --statedir"
+		break;;
+	    ("check-update")
+		opts=" -h --help -u --url -v --versionurl -P --port -F --format -x --force -p --path -S --statedir"
+		break;;
+	    ("search")
+		opts=" -h --help -l --library -b --binary -s --scope -d --display-files -i --init -u --url -c --contenturl -v --versionurl -P --port -p --path -F --format -S --statedir"
+		break;;
+	    (*) # If nothing matches then continue the loop over the arguments
+		;;
+	esac
+    done
+    COMPREPLY=($(compgen -W "${opts}" -- ${2}));
+    return 0
 }
-
-complete -F _swupd swupd
+complete -F _swupd -o nosort swupd

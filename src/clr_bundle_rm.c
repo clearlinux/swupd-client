@@ -36,12 +36,28 @@
 
 #define VERIFY_PICKY 1
 
-static char *bundle_name = NULL;
+/* this is a temp container to save parsed
+ * options so if more than one bundle to remove
+ * then we can restore the parsed options into
+ * globals
+ */
+static struct opts {
+	char *path_prefix;
+	char *version_url;
+	char *content_url;
+	char *format_string;
+	char *state_dir;
+	char *cert_path;
+	bool force;
+	bool sigcheck;
+}curopts = {NULL, NULL, NULL, NULL, NULL, NULL, false, true};
+
+static char **bundles;
 
 static void print_help(const char *name)
 {
 	printf("Usage:\n");
-	printf("   swupd %s [options] bundlename\n\n", basename((char *)name));
+	printf("   swupd %s [options] [bundle1, bundle2, ...]\n\n", basename((char *)name));
 	printf("Help Options:\n");
 	printf("   -h, --help              Show help options\n");
 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
@@ -89,6 +105,7 @@ static bool parse_options(int argc, char **argv)
 				printf("Invalid --path argument\n\n");
 				goto err;
 			}
+			string_or_die(&curopts.path_prefix, "%s", optarg);
 			break;
 		case 'u':
 			if (!optarg) {
@@ -97,6 +114,8 @@ static bool parse_options(int argc, char **argv)
 			}
 			set_version_url(optarg);
 			set_content_url(optarg);
+			string_or_die(&curopts.version_url, "%s", optarg);
+			string_or_die(&curopts.content_url, "%s", optarg);
 			break;
 		case 'c':
 			if (!optarg) {
@@ -104,6 +123,7 @@ static bool parse_options(int argc, char **argv)
 				goto err;
 			}
 			set_content_url(optarg);
+			string_or_die(&curopts.content_url, "%s", optarg);
 			break;
 		case 'v':
 			if (!optarg) {
@@ -111,6 +131,7 @@ static bool parse_options(int argc, char **argv)
 				goto err;
 			}
 			set_version_url(optarg);
+			string_or_die(&curopts.version_url, "%s", optarg);
 			break;
 		case 'P':
 			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
@@ -123,18 +144,22 @@ static bool parse_options(int argc, char **argv)
 				printf("Invalid --format argument\n\n");
 				goto err;
 			}
+			string_or_die(&curopts.format_string, "%s", optarg);
 			break;
 		case 'S':
 			if (!optarg || !set_state_dir(optarg)) {
 				printf("Invalid --statedir argument\n\n");
 				goto err;
 			}
+			string_or_die(&curopts.state_dir, "%s", optarg);
 			break;
 		case 'x':
 			force = true;
+			curopts.force = true;
 			break;
 		case 'n':
 			sigcheck = false;
+			curopts.sigcheck = false;
 			break;
 		case 'I':
 			timecheck = false;
@@ -145,6 +170,7 @@ static bool parse_options(int argc, char **argv)
 				goto err;
 			}
 			set_cert_path(optarg);
+			string_or_die(&curopts.cert_path, "%s", optarg);
 			break;
 		default:
 			printf("error: unrecognized option\n\n");
@@ -152,11 +178,12 @@ static bool parse_options(int argc, char **argv)
 		}
 	}
 
-	if (argc != optind + 1) {
-		printf("error: invalid arguments\n\n");
+	if (argc <= optind) {
+		printf("error: missing bundle(s) to be removed\n\n");
 		goto err;
 	}
-	string_or_die(&bundle_name, "%s", argv[optind]);
+
+	bundles = argv + optind;
 
 	return true;
 err:
@@ -164,9 +191,71 @@ err:
 	return false;
 }
 
+static void reload_parsed_opts(void)
+{
+	if (curopts.path_prefix) {
+		set_path_prefix(curopts.path_prefix);
+	}
+
+	if (curopts.version_url) {
+		set_version_url(curopts.version_url);
+	}
+
+	if (curopts.content_url) {
+		set_content_url(curopts.content_url);
+	}
+
+	if (curopts.format_string) {
+		set_format_string(curopts.format_string);
+	}
+
+	if (curopts.state_dir) {
+		set_state_dir(curopts.state_dir);
+	}
+
+	if (curopts.cert_path) {
+		set_cert_path(curopts.cert_path);
+	}
+
+	force = curopts.force;
+	sigcheck = curopts.sigcheck;
+
+}
+
+void static free_saved_opts(void)
+{
+	if (curopts.path_prefix != NULL) {
+		free(curopts.path_prefix);
+	}
+
+	if (curopts.version_url != NULL) {
+		free(curopts.version_url);
+	}
+
+	if (curopts.content_url != NULL) {
+		free(curopts.content_url);
+	}
+
+	if (curopts.format_string != NULL) {
+		free(curopts.format_string);
+	}
+
+	if (curopts.state_dir != NULL) {
+		free(curopts.state_dir);
+	}
+
+	if (curopts.cert_path != NULL) {
+		free(curopts.cert_path);
+	}
+
+
+}
+
 int bundle_remove_main(int argc, char **argv)
 {
-	int ret;
+	int ret = 0;
+	int total = 0;
+	int bad = 0;
 
 	copyright_header("bundle remover");
 
@@ -174,8 +263,34 @@ int bundle_remove_main(int argc, char **argv)
 		return EINVALID_OPTION;
 	}
 
-	ret = remove_bundle(bundle_name);
-	free(bundle_name);
+	for (; *bundles; ++bundles, total++) {
+		printf("Removing bundle: %s\n", *bundles);
+
+		if (remove_bundle(*bundles) != 0) {
+			/* At least one bundle failed to be removed
+			 * then for consistency return an error
+			 * indicating that
+			 */
+			ret = EBUNDLE_REMOVE;
+			bad++;
+		}
+		/* if we have more than one bundle to process then
+		 * make sure to reload the parsed options since all
+		 * globals are cleaned up at swupd_deinit()
+		 */
+		if (*bundles) {
+			reload_parsed_opts();
+		}
+	}
+	/* print some statistics */
+	if (ret) {
+		printf("%i bundle(s) of %i failed to remove\n", bad, total);
+	} else {
+		printf("%i bundle(s) were removed succesfully\n", total);
+	}
+
+	/* free any parsed opt saved for reloading */
+	free_saved_opts();
 
 	return ret;
 }

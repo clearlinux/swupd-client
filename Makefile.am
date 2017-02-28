@@ -141,6 +141,7 @@ dist_check_SCRIPTS = \
 	test/functional/bundleremove/include/test.bats \
 	test/functional/bundleremove/parse-args/test.bats \
 	test/functional/bundleremove/remove-file/test.bats \
+	test/functional/bundleremove/remove-multiple/test.bats \
 	test/functional/checkupdate/new-version/test.bats \
 	test/functional/checkupdate/no-server-content/test.bats \
 	test/functional/checkupdate/no-target-content/test.bats \

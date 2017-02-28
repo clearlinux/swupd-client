@@ -1,5 +1,7 @@
+Removing bundle: test-bundle
 Attempting to download version string to memory
 Deleting bundle files...
 Total deleted files: 1
 Untracking bundle from system...
 Success: Bundle removed
+1 bundle(s) were removed succesfully

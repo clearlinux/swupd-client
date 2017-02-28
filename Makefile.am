@@ -93,21 +93,11 @@ swupd_sig_verifytest_LDADD = $(SWUPD_CORE_LIBS)
 
 noinst_HEADERS = $(top_srcdir)/include/*
 
-swupdcertsdir = @cert_path@
-SWUPD_CERTS = certs/157753a5.0 \
-	certs/425b0f6b.0 \
-	certs/425b0f6b.key \
-	certs/8d28ae65.0 \
-	certs/d6325660.0 \
-	certs/d6325660.1
-swupdcerts_DATA = $(SWUPD_CERTS)
-
 EXTRA_DIST += \
 	data/check-update.service \
 	data/check-update.timer \
 	data/swupd-update.service \
-	data/swupd-update.timer \
-	$(SWUPD_CERTS)
+	data/swupd-update.timer
 
 DISTCHECK_CONFIGURE_FLAGS = \
 	--with-systemdsystemunitdir=$$dc_install_base/$(systemdunitdir)

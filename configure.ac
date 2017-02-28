@@ -159,7 +159,7 @@ AS_IF(
 # With/without options
 AC_ARG_WITH(
   [certpath],
-  [AS_HELP_STRING([--with-certpath=PATH], [Location of CA certificates])]
+  [AS_HELP_STRING([--with-certpath=PATH], [Location of update certificate])]
 )
 default_cert_path="/usr/share/clear/update-ca/Swupd_Root.pem"
 cert_path=
@@ -251,7 +251,7 @@ AH_TEMPLATE([STATE_DIR], [The state directory for swupd content])
 AH_TEMPLATE([LOG_DIR], [Directory for swupd log files])
 AH_TEMPLATE([LOCK_DIR], [Directory for lock file])
 AH_TEMPLATE([BUNDLES_DIR], [Directory to use for bundles])
-AH_TEMPLATE([CERT_PATH], [Location of CA certificates])
+AH_TEMPLATE([CERT_PATH], [Location of update certificate])
 AH_TEMPLATE([MOTD_FILE], [motd file path])
 
 AS_IF(
@@ -285,7 +285,7 @@ Configuration to build swupd-client:
   Version URL:				${VERSIONURL}
   Format Identifier:			${FORMATID}
   Signature verification:		${SIGVERIFICATION}
-  CA certificate path:			${cert_path}
+  Update certificate path:		${cert_path}
   Use bzip compression:			${BZIP}
   Run Tests:				${TESTS}
   Use extended file attributes		${XATTR}

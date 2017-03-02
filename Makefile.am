@@ -256,3 +256,6 @@ manpages:
 
 dist_man_MANS = \
 	$(MANPAGES)
+
+swupd.bash: $(top_srcdir)/scripts/swupd-completion.sh $(top_srcdir)/swupd
+	bash $<

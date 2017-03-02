@@ -258,3 +258,6 @@ man: $(dist_man_MANS)
 
 %: %.rst
 	rst2man.py $< > $@
+
+swupd.bash: $(top_srcdir)/scripts/swupd-completion.sh $(top_srcdir)/swupd
+	bash $<

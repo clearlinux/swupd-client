@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <sys/queue.h>
 
 #include "list.h"
 #include "swupd-error.h"
@@ -64,6 +65,7 @@ struct version_container {
 
 struct header;
 
+extern bool verbose_time;
 extern bool force;
 extern bool sigcheck;
 extern bool timecheck;
@@ -115,6 +117,19 @@ struct file {
 	CURL *curl;    /* curl handle if downloading */
 	FILE *fh;      /* file written into during downloading */
 };
+
+struct time {
+	struct timespec procstart;
+	struct timespec procstop;
+	struct timespec rawstart;
+	struct timespec rawstop;
+	const char *name;
+	bool complete;
+	TAILQ_ENTRY(time) times;
+};
+
+typedef TAILQ_HEAD(timelist, time) timelist;
+
 
 extern bool download_only;
 extern bool local_download;
@@ -170,6 +185,12 @@ extern struct list *create_update_list(struct manifest *current, struct manifest
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
 extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2);
 extern void free_manifest(struct manifest *manifest);
+
+extern void grabtime_start(timelist *list, const char *name);
+extern void grabtime_stop(timelist *list);
+extern void print_time_stats(timelist *list);
+extern timelist init_timelist(void);
+
 
 extern int swupd_stats[];
 static inline void account_new_file(void)

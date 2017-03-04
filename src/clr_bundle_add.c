@@ -54,6 +54,7 @@ static void print_help(const char *name)
 	printf("   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
 	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
+	printf("   -t, --time         	   Show verbose time output for swupd operations\n");
 	printf("\n");
 }
 
@@ -71,6 +72,7 @@ static const struct option prog_opts[] = {
 	{ "ignore-time", no_argument, 0, 'I' },
 	{ "statedir", required_argument, 0, 'S' },
 	{ "certpath", required_argument, 0, 'C' },
+	{ "time", no_argument, 0, 't'},
 	{ 0, 0, 0, 0 }
 };
 
@@ -78,7 +80,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxnIu:c:v:P:p:F:lS:C:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxnIu:c:v:P:p:F:lS:tC:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -142,6 +144,9 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'I':
 			timecheck = false;
+			break;
+		case 't':
+			verbose_time = true;
 			break;
 		case 'C':
 			if (!optarg) {

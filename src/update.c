@@ -36,6 +36,7 @@
 #include "signature.h"
 #include "swupd.h"
 
+
 int nonpack;
 
 void increment_retries(int *retries, int *timeout)
@@ -118,7 +119,7 @@ TRY_DOWNLOAD:
 #endif
 
 	/* Set retries only if failed downloads exist, and only retry a fixed
-	   amount of times */
+	   amount of &times */
 	if (list_head(failed) != NULL && retries < MAX_TRIES) {
 		increment_retries(&retries, &timeout);
 		printf("Starting download retry #%d\n", retries);
@@ -223,7 +224,8 @@ int main_update()
 	int lock_fd;
 	int retries = 0;
 	int timeout = 10;
-	struct timespec ts_start, ts_stop;
+	struct timespec ts_start, ts_stop; // For main swupd update time
+	timelist times;
 	double delta;
 
 	srand(time(NULL));
@@ -235,7 +237,10 @@ int main_update()
 		return ret;
 	}
 
-	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
+	times = init_timelist();
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
+	grabtime_start(&times, "Main Update");
 
 	if (!check_network()) {
 		printf("Error: Network issue, unable to proceed with update\n");
@@ -244,6 +249,9 @@ int main_update()
 	}
 
 	printf("Update started.\n");
+
+	grabtime_start(&times, "Update Step 1: get versions");
+
 	read_subscriptions_alt(&current_subs);
 
 	/* Step 1: get versions */
@@ -269,7 +277,9 @@ int main_update()
 		ret = EXIT_FAILURE;
 		goto clean_curl;
 	}
-
+	grabtime_stop(&times);
+	grabtime_stop(&times); // Close step 1
+	grabtime_start(&times, "Load Manifests:");
 load_current_manifests:
 	/* Step 3: setup manifests */
 
@@ -291,7 +301,8 @@ load_current_manifests:
 	/*  Reset the retries and timeout for subsequent download calls */
 	retries = 0;
 	timeout = 10;
-
+	grabtime_stop(&times); // Close step 2
+	grabtime_start(&times, "Recurse and Consolidate Manifests");
 load_server_manifests:
 	server_manifest = load_mom(server_version);
 	if (!server_manifest) {
@@ -354,9 +365,13 @@ load_server_manifests:
 	debug_write_manifest(current_manifest, "debug_manifest_current.txt");
 	debug_write_manifest(server_manifest, "debug_manifest_server.txt");
 #endif
+	grabtime_stop(&times);
 	/* Step 4: check disk state before attempting update */
-
+	grabtime_start(&times, "Pre-Update Scripts");
 	run_preupdate_scripts(server_manifest);
+	grabtime_stop(&times);
+
+	grabtime_start(&times, "Download Packs");
 
 download_packs:
 	/* Step 5: get the packs and untar */
@@ -372,9 +387,9 @@ download_packs:
 		ret = ENOSWUPDSERVER;
 		goto clean_exit;
 	}
-
+	grabtime_stop(&times);
+	grabtime_start(&times, "Create Update List");
 	/* Step 6: some more housekeeping */
-
 	/* TODO: consider trying to do less sorting of manifests */
 
 	updates = create_update_list(current_manifest, server_manifest);
@@ -382,13 +397,14 @@ download_packs:
 	link_renames(updates, current_manifest); /* TODO: Have special lists for candidate and renames */
 
 	print_statistics(current_version, server_version);
-
+	grabtime_stop(&times);
 	/* Step 7: apply the update */
 
 	/*
 	 * need update list in filename order to insure directories are
 	 * created before their contents
 	 */
+	grabtime_start(&times, "Update Loop");
 	updates = list_sort(updates, file_sort_filename);
 
 	ret = update_loop(updates, server_manifest);
@@ -403,9 +419,11 @@ download_packs:
 	}
 
 	delete_motd();
-
+	grabtime_stop(&times);
 	/* Run any scripts that are needed to complete update */
+	grabtime_start(&times, "Run Scripts");
 	run_scripts();
+	grabtime_stop(&times);
 
 clean_exit:
 	list_free_list(updates);
@@ -413,8 +431,9 @@ clean_exit:
 	free_manifest(server_manifest);
 
 clean_curl:
+	grabtime_stop(&times);
 	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_stop);
-	delta = ts_stop.tv_sec - ts_start.tv_sec + ts_stop.tv_nsec / 1000000000.0 - ts_start.tv_nsec / 1000000000.0;
+	delta =  ts_stop.tv_sec - ts_start.tv_sec + ts_stop.tv_nsec / 1000000000.0 - ts_start.tv_nsec / 1000000000.0;
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
 		  "update",
 		  "current_version=%d\n"
@@ -429,6 +448,7 @@ clean_curl:
 	if (server_version > current_version) {
 		printf("Update took %0.1f seconds\n", delta);
 	}
+	print_time_stats(&times);
 
 	swupd_deinit(lock_fd, &latest_subs);
 

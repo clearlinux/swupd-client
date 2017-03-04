@@ -71,6 +71,7 @@ static const struct option prog_opts[] = {
 	{ "nosigcheck", no_argument, 0, 'n' },
 	{ "statedir", required_argument, 0, 'S' },
 	{ "certpath", required_argument, 0, 'C' },
+	{ "time", no_argument, 0, 't'},
 	{ 0, 0, 0, 0 }
 };
 
@@ -96,6 +97,7 @@ static void print_help(const char *name)
 	printf("   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
 	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
+	printf("   -t, --time         	   Show verbose time output for swupd operations\n");
 	printf("\n");
 }
 
@@ -103,7 +105,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxnIm:p:u:P:c:v:fiF:qS:C:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxnItm:p:u:P:c:v:fiF:qS:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -181,6 +183,9 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'I':
 			timecheck = false;
+			break;
+		case 't':
+			verbose_time = true;
 			break;
 		case 'C':
 			if (!optarg) {
@@ -338,7 +343,7 @@ RETRY_DOWNLOADS:
 	}
 
 	/* Set retries only if failed downloads exist, and only retry a fixed
-	   amount of times */
+	   amount of &times */
 	if (list_head(failed) != NULL && retries < MAX_TRIES) {
 		increment_retries(&retries, &timeout);
 		printf("Starting download retry #%d\n", retries);
@@ -602,6 +607,7 @@ int verify_main(int argc, char **argv)
 	int ret;
 	int lock_fd;
 	struct list *subs = NULL;
+	timelist times;
 
 	copyright_header("software verify");
 
@@ -658,6 +664,9 @@ int verify_main(int argc, char **argv)
 		printf("Failed to remove prior downloads, carrying on anyway\n");
 	}
 
+	times = init_timelist();
+
+	grabtime_start(&times, "Load and recurse Manifests");
 	official_manifest = load_mom(version);
 
 	if (!official_manifest) {
@@ -688,10 +697,13 @@ int verify_main(int argc, char **argv)
 		ret = ERECURSE_MANIFEST;
 		goto clean_and_exit;
 	}
+	grabtime_stop(&times);
+	grabtime_start(&times, "Consolidate files from bundles");
 	official_manifest->files = files_from_bundles(official_manifest->submanifests);
 
 	official_manifest->files = consolidate_files(official_manifest->files);
-
+	grabtime_stop(&times);
+	grabtime_start(&times, "Get required files");
 	/* when fixing or installing we need input files. */
 	if (cmdline_option_fix || cmdline_option_install) {
 		ret = get_required_files(official_manifest, subs);
@@ -700,6 +712,7 @@ int verify_main(int argc, char **argv)
 			goto clean_and_exit;
 		}
 	}
+	grabtime_stop(&times);
 
 	/* preparation work complete. */
 
@@ -723,8 +736,10 @@ int verify_main(int argc, char **argv)
 		 * is already there. It's also the most safe operation, adding files rarely
 		 * has unintended side effect. So lets do the safest thing first.
 		 */
+		grabtime_start(&times, "Add missing files");
 		printf("Adding any missing files\n");
 		add_missing_files(official_manifest);
+		grabtime_stop(&times);
 	}
 
 	if (cmdline_option_quick) {
@@ -735,6 +750,7 @@ int verify_main(int argc, char **argv)
 	if (cmdline_option_fix) {
 		bool repair = true;
 
+		grabtime_start(&times, "Fixing modified files");
 		printf("Fixing modified files\n");
 		deal_with_hash_mismatches(official_manifest, repair);
 
@@ -743,6 +759,7 @@ int verify_main(int argc, char **argv)
 		if ((file_not_fixed_count == 0) && (file_not_replaced_count == 0)) {
 			remove_orphaned_files(official_manifest);
 		}
+		grabtime_stop(&times);
 	} else {
 		bool repair = false;
 
@@ -847,6 +864,7 @@ clean_and_exit:
 		}
 	}
 
+	print_time_stats(&times);
 	swupd_deinit(lock_fd, &subs);
 
 	return ret;

@@ -60,6 +60,7 @@ char *state_dir = NULL;
  * different quality of server and control of the servers
  */
 bool download_only;
+bool verbose_time = false;
 bool local_download = false;
 bool have_manifest_diskspace = false; /* assume no until checked */
 bool have_network = false;	    /* assume no access until proved */
@@ -71,6 +72,89 @@ long update_server_port = -1;
 static const char *default_version_url_path = "/usr/share/defaults/swupd/versionurl";
 static const char *default_content_url_path = "/usr/share/defaults/swupd/contenturl";
 static const char *default_format_path = "/usr/share/defaults/swupd/format";
+
+timelist init_timelist(void)
+{
+	timelist head = TAILQ_HEAD_INITIALIZER(head);
+	TAILQ_INIT(&head);
+	return head;
+}
+
+static struct time *alloc_time(timelist *head)
+{
+	struct time *t = calloc(1, sizeof(struct time));
+	if (t == NULL) {
+		printf("ERROR: grab_time: Failed to to allocate memory...freeing and removing timing\n");
+		while (!TAILQ_EMPTY(head)) {
+			struct time *iter = TAILQ_FIRST(head);
+			TAILQ_REMOVE(head, iter, times);
+			free(iter);
+		}
+		/* Malloc failed...something bad happened, stop trying and let swupd attempt to finish */
+		verbose_time = true;
+		return NULL;
+	}
+	return t;
+}
+
+/* Fill the time struct for later processing */
+void grabtime_start(timelist *head, const char *name)
+{
+	if (verbose_time == false) {
+		return;
+	}
+
+	/* Only create one element for each start/stop block */
+	struct time *t = alloc_time(head);
+	if (t == NULL) {
+		return;
+	}
+	clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstart);
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstart);
+	t->name = name;
+	t->complete = false;
+	TAILQ_INSERT_HEAD(head, t, times);
+}
+
+void grabtime_stop(timelist *head)
+{
+	if (verbose_time == false) {
+		return;
+	}
+
+	struct time *t = TAILQ_FIRST(head);
+	clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstop);
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstop);
+	t->complete = true;
+}
+
+void print_time_stats(timelist *head)
+{
+	if (verbose_time == false) {
+		return;
+	}
+
+	double delta = 0;
+	struct time *t;
+
+	printf("\nRaw elapsed time stats:\n");
+	TAILQ_FOREACH_REVERSE(t, head, timelist, times) {
+		if (t->complete == true) {
+			delta = t->rawstop.tv_sec - t->rawstart.tv_sec + (t->rawstop.tv_nsec / 1000000.0) - (t->rawstart.tv_nsec / 1000000.0);
+			printf("%.4f\tms: %s\n", delta, t->name);
+		}
+	}
+	printf("\nCPU process time stats:\n");
+	while (!TAILQ_EMPTY(head)) {
+		t = TAILQ_LAST(head, timelist);
+		if (t->complete == true) {
+			delta = t->procstop.tv_sec - t->procstart.tv_sec + (t->procstop.tv_nsec / 1000000.0) - (t->procstart.tv_nsec / 1000000.0);
+			printf("%.4f\tms: %s\n", delta, t->name);
+		}
+		TAILQ_REMOVE(head, t, times);
+		free(t);
+	}
+}
 
 static int set_default_value_from_path(char **global, const char *path)
 {

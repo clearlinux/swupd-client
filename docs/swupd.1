@@ -1,327 +1,353 @@
-.\" generated with Ronn/v0.7.3
-.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.\" Man page generated from reStructuredText.
 .
-.TH "SWUPD" "1" "November 2016" "" ""
+.TH SWUPD 1 "" "" ""
+.SH NAME
+swupd \- OS software update program
 .
-.SH "NAME"
-\fBswupd\fR \- OS software update program
+.nr rst2man-indent-level 0
 .
-.SH "SYNOPSIS"
-\fBswupd [subcommand] <flags>\fR
-.
-.SH "DESCRIPTION"
-\fBswupd(1)\fR is an OS\-level software update program that applies updates to system software\.
-.
-.P
-The updates are fetched from a central software update server\. If a valid update is found on the server, it can be downloaded and applied\.
-.
-.P
-The \fBswupd\fR tool can also install and remove bundles, check for updates without applying them, and perform system\-level verification of the system software\.
-.
-.P
-A \fIversion url\fR server provides version information\. This server notifies the program of available updates\.
-.
-.P
-A \fIcontent url\fR server (can be the same as \fIversion url\fR server) provides the file and metadata content for all versions\. The content url server provides metadata in the form of manifests\. These Manifest files list and describe file contents, symlinks, directories\. Additionally, the actual content is provided to clients in the form of archive files\.
-.
-.SH "OPTIONS"
-The following options are applicable to most subcommands, and can be used to modify the core behavior and resources that swupd uses\.
-.
-.IP "\(bu" 4
-\fB\-h, \-\-help\fR
-.
-.IP
-Display general help information\. If put after a subcommand, it will display help specific to that subcommand\.
-.
-.IP "\(bu" 4
-\fB\-v, \-\-version\fR
-.
-.IP
-Displays the version information of the swupd program, and exit\. It also displays compile options and copyright information\.
-.
-.IP "\(bu" 4
-\fB\-u, \-\-url={url}\fR
-.
-.IP
-Specify an RFC\-3986 encoded url\. The url will be used to download version information and file content downloads\.
-.
-.IP "\(bu" 4
-\fB\-c, \-\-contenturl={url}\fR
-.
-.IP
-Specify an RFC\-3986 encoded url\. The url will be used for file content downloads only\.
-.
-.IP "\(bu" 4
-\fB\-v, \-\-versionurl={url}\fR
-.
-.IP
-Specify an RFC\-3986 encoded url\. The url will be used to download version information\.
-.
-.IP "\(bu" 4
-\fB\-P, \-\-port={port}\fR
-.
-.IP
-Specify the port number of the server to connect to\. Applies to both version and file content url server connections\.
-.
-.IP "\(bu" 4
-\fB\-p, \-\-path={path}\fR
-.
-.IP
-Specify the path to use for operations\. This can be used to point to a chroot installation of the OS or a custom mount\.
-.
-.IP "\(bu" 4
-\fB\-F, \-\-format={formatstring}\fR
-.
-.IP
-Specify the format suffix for version file downloads\. Is usually one of \fB1\fR, \fB2\fR, \fB3\fR, etc\. or \fBstaging\fR\. Software update formats may change regularly and normally you should consult the swupd server data for the appropriate latest version available\. If that version is not supported by your version of \fBswupd\fR, you should subtract \fB1\fR from the number and try again until it succeeds\.
-.
-.IP "\(bu" 4
-\fB\-f, \-\-force\fR
-.
-.IP
-Forces completion of swupd beyond critical failures\. This may ignore filesystem errors, configuration errors and other errors which are considered fatal, and could damage an installation if not addressed properly\.
-.
-.IP "\(bu" 4
-\fB\-S, \-\-statedir={path}\fR
-.
-.IP
-Specify an alternate swupd state directory\. Normally \fBswupd\fR uses \fB/var/lib/swupd\fR\.
-.
-.IP "" 0
-.
-.SH "SUBCOMMANDS"
-\fBbundle\-add {bundles}\fR
-.
-.IP "" 4
-.
-.nf
-
-Installs new software bundles\. Any bundle name listed after
-`bundle\-list --all` will be downloaded and installed\.
-.
-.fi
-.
-.IP "" 0
-.
-.P
-\fBbundle\-remove {bundles}\fR
-.
-.IP "" 4
-.
-.nf
-
-Removes software bundles\. Any bundle name listed after `bundle\-remove`
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.SH SYNOPSIS
+.sp
+\fBswupd [subcommand] <flags>\fP
+.SH DESCRIPTION
+.sp
+\fBswupd\fP(1) is an OS\-level software update program that applies updates
+to system software.
+.sp
+The updates are fetched from a central software update server. If a
+valid update is found on the server, it can be downloaded and applied.
+.sp
+The \fBswupd\fP tool can also install and remove bundles, check for
+updates without applying them, and perform system\-level verification of
+the system software.
+.sp
+A \fIversion url\fP server provides version information. This server
+notifies the program of available updates.
+.sp
+A \fIcontent url\fP server (can be the same as \fIversion url\fP server)
+provides the file and metadata content for all versions. The content url
+server provides metadata in the form of manifests. These Manifest files
+list and describe file contents, symlinks, directories. Additionally,
+the actual content is provided to clients in the form of archive files.
+.SH OPTIONS
+.sp
+The following options are applicable to most subcommands, and can be
+used to modify the core behavior and resources that swupd uses.
+.INDENT 0.0
+.IP \(bu 2
+\fB\-h, \-\-help\fP
+.sp
+Display general help information. If put after a subcommand, it will
+display help specific to that subcommand.
+.IP \(bu 2
+\fB\-v, \-\-version\fP
+.sp
+Displays the version information of the swupd program, and exit. It also
+displays compile options and copyright information.
+.IP \(bu 2
+\fB\-u, \-\-url={url}\fP
+.sp
+Specify an RFC\-3986 encoded url. The url will be used to download
+version information and file content downloads.
+.IP \(bu 2
+\fB\-c, \-\-contenturl={url}\fP
+.sp
+Specify an RFC\-3986 encoded url. The url will be used for file
+content downloads only.
+.IP \(bu 2
+\fB\-v, \-\-versionurl={url}\fP
+.sp
+Specify an RFC\-3986 encoded url. The url will be used to download
+version information.
+.IP \(bu 2
+\fB\-P, \-\-port={port}\fP
+.sp
+Specify the port number of the server to connect to. Applies to both
+version and file content url server connections.
+.IP \(bu 2
+\fB\-p, \-\-path={path}\fP
+.sp
+Specify the path to use for operations. This can be used to point to
+a chroot installation of the OS or a custom mount.
+.IP \(bu 2
+\fB\-F, \-\-format={formatstring}\fP
+.sp
+Specify the format suffix for version file downloads. Is usually one
+of \fB1\fP, \fB2\fP, \fB3\fP, etc. or \fBstaging\fP\&. Software update formats
+may change regularly and normally you should consult the swupd server
+data for the appropriate latest version available. If that version is
+not supported by your version of \fBswupd\fP, you should subtract \fB1\fP
+from the number and try again until it succeeds.
+.IP \(bu 2
+\fB\-f, \-\-force\fP
+.sp
+Forces completion of swupd beyond critical failures. This may ignore
+filesystem errors, configuration errors and other errors which are
+considered fatal, and could damage an installation if not addressed
+properly.
+.IP \(bu 2
+\fB\-S, \-\-statedir={path}\fP
+.sp
+Specify an alternate swupd state directory. Normally \fBswupd\fP uses
+\fB/var/lib/swupd\fP\&.
+.UNINDENT
+.SH SUBCOMMANDS
+.sp
+\fBbundle\-add {bundles}\fP
+.INDENT 0.0
+.INDENT 3.5
+Installs new software bundles. Any bundle name listed after
+\fIbundle\-list \-\-all\fP will be downloaded and installed.
+.UNINDENT
+.UNINDENT
+.sp
+\fBbundle\-remove {bundles}\fP
+.INDENT 0.0
+.INDENT 3.5
+Removes software bundles. Any bundle name listed after \fIbundle\-remove\fP
 will be removed from the system, as well as all bundles that required
-the listed bundles, either directly or indirectly\.
-.
-.fi
-.
-.IP "" 0
-.
-.P
-\fBbundle\-list\fR
-.
-.IP "" 4
-.
-.nf
-
-List all installed sofware bundles in the local system\. Bundles available
-can be listed with the `\-\-all` option\.
-
-*  `\-a, \-\-all`
-
-    Lists all available software bundles, either installed or not, that
-    are available\. It will return 0 with succeeded and a different value
-    of 0 with failed.
-.
-.fi
-.
-.IP "" 0
-.
-.P
-\fBcheck\-update\fR
-.
-.IP "" 4
-.
-.nf
-
+the listed bundles, either directly or indirectly.
+.UNINDENT
+.UNINDENT
+.sp
+\fBbundle\-list\fP
+.INDENT 0.0
+.INDENT 3.5
+List all installed sofware bundles in the local system. Bundles available
+can be listed with the \fI\-\-all\fP option.
+.INDENT 0.0
+.IP \(bu 2
+\fI\-a, \-\-all\fP
+.INDENT 2.0
+.INDENT 3.5
+Lists all available software bundles, either installed or not, that
+are available. It will return 0 with succeeded and a different value
+of 0 with failed.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+\fBcheck\-update\fP
+.INDENT 0.0
+.INDENT 3.5
 Checks whether an update is available and prints out the information
-if so\. Does not download update content\.
-.
-.fi
-.
-.IP "" 0
-.
-.P
-\fBhashdump {path}\fR
-.
-.IP "" 4
-.
-.nf
-
-Calculates and print the Manifest hash for a specific file on disk\.
-
-* `\-n \-\-no\-xattrs`
-
-    Ignore extended attributes when calculating hash\.
-
-* `\-p, \-\-path={path}`
-
-    Specify the path to use for operations\. This can be used to
-    point to a chroot installation of the OS or a custom mount\.
-.
-.fi
-.
-.IP "" 0
-.
-.P
-\fBsearch {string}\fR
-.
-.IP "" 4
-.
-.nf
-
-Search for matching paths in manifest data\. The specified {string}
+if so. Does not download update content.
+.UNINDENT
+.UNINDENT
+.sp
+\fBhashdump {path}\fP
+.INDENT 0.0
+.INDENT 3.5
+Calculates and print the Manifest hash for a specific file on disk.
+.INDENT 0.0
+.IP \(bu 2
+\fI\-n \-\-no\-xattrs\fP
+.INDENT 2.0
+.INDENT 3.5
+Ignore extended attributes when calculating hash.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-p, \-\-path={path}\fP
+.INDENT 2.0
+.INDENT 3.5
+Specify the path to use for operations. This can be used to
+point to a chroot installation of the OS or a custom mount.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+\fBsearch {string}\fP
+.INDENT 0.0
+.INDENT 3.5
+Search for matching paths in manifest data. The specified {string}
 is matched in any part of the path listed in manifests, and all
 matches are printed, including the name of the bundle in which the
-match was found\.
-
+match was found.
+.sp
 If manifest data is not present in the state folder, it is
-downloaded from the content url\.
-
+downloaded from the content url.
+.sp
 Because this search consults all manifests, it normally requires to
 download all manifests for bundles that are not installed, and may
-result in the download of several mega bytes of manifest data\.
-
-* `\-l, \-\-library`
-
-    Restrict search to designated dynamic shared library paths\.
-
-* `\-b, \-\-binary`
-
-    Restrict search to designated program binary paths\.
-
-* `\-i, \-\-init`
-
-    Perform collection and download of all required manifest
-    resources needed to perform the search, then exit\.
-
-* `\-d, \-\-display\-files`
-
-    Do not search for any particular string, instead, print out all
-    files, paths, etc\. listed in any manifest, and exit\.
-
-* `\-s, \-\-scope={b|o}`
-
-    Restrict search to only list the first match found in *b*undle
-    or *o*s\.
-.
-.fi
-.
-.IP "" 0
-.
-.P
-\fBupdate\fR
-.
-.IP "" 4
-.
-.nf
-
-Performs a system software update\.
-
+result in the download of several mega bytes of manifest data.
+.INDENT 0.0
+.IP \(bu 2
+\fI\-l, \-\-library\fP
+.INDENT 2.0
+.INDENT 3.5
+Restrict search to designated dynamic shared library paths.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-b, \-\-binary\fP
+.INDENT 2.0
+.INDENT 3.5
+Restrict search to designated program binary paths.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-i, \-\-init\fP
+.INDENT 2.0
+.INDENT 3.5
+Perform collection and download of all required manifest
+resources needed to perform the search, then exit.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-d, \-\-display\-files\fP
+.INDENT 2.0
+.INDENT 3.5
+Do not search for any particular string, instead, print out all
+files, paths, etc. listed in any manifest, and exit.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-s, \-\-scope={b|o}\fP
+.INDENT 2.0
+.INDENT 3.5
+Restrict search to only list the first match found in \fBbundle\fP
+or \fBos\fP\&.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+\fBupdate\fP
+.INDENT 0.0
+.INDENT 3.5
+Performs a system software update.
+.sp
 The program will contact the version server at the version url, and
-check to see if a system software update is available\. If an update
+check to see if a system software update is available. If an update
 is available, the update content will be downloaded from the content
-url and stored in the `/var/lib/swupd` state path\. Once all content
-is downloaded and verified, the update is applied to the system\.
-
+url and stored in the \fI/var/lib/swupd\fP state path. Once all content
+is downloaded and verified, the update is applied to the system.
+.sp
 In case any problem arises during a software update, the program
-attempts to correct the issue, possibly by performing a `swupd verify \-\-fix`
-operation, which corrects broken or missing files and other issues\.
-
+attempts to correct the issue, possibly by performing a \fIswupd verify \-\-fix\fP
+operation, which corrects broken or missing files and other issues.
+.sp
 After the update is applied, the system performs an array of
-post\-update actions\. These actions are triggered through `systemd(1)`
-and reside in the `update\-triggers\.target(4)` system target\.
-
-* `\-s, \-\-status`
-
-    Do not perform an update, instead display whether an update is
-    available on the version url server, and what version number is
-    available\.
-
-* `\-d, \-\-download`
-
-    Do not perform an update, instead download all resources needed
-    to perform the update, and exit\.
-.
-.fi
-.
-.IP "" 0
-.
-.P
-\fBverify\fR
-.
-.IP "" 4
-.
-.nf
-
-Perform system software installation verification\. The program will
+post\-update actions. These actions are triggered through \fIsystemd(1)\fP
+and reside in the \fIupdate\-triggers.target(4)\fP system target.
+.INDENT 0.0
+.IP \(bu 2
+\fI\-s, \-\-status\fP
+.INDENT 2.0
+.INDENT 3.5
+Do not perform an update, instead display whether an update is
+available on the version url server, and what version number is
+available.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-d, \-\-download\fP
+.INDENT 2.0
+.INDENT 3.5
+Do not perform an update, instead download all resources needed
+to perform the update, and exit.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+\fBverify\fP
+.INDENT 0.0
+.INDENT 3.5
+Perform system software installation verification. The program will
 obtain all the manifests needed from version url and content url to
 establish whether the system software is correctly installed and not
-overwritten, modified, missing or otherwise incorrect (permissions, etc\.)\.
-
+overwritten, modified, missing or otherwise incorrect (permissions, etc.).
+.sp
 After obtaining the proper resources, all files that are under
 control of the software update program are verified according to the
 manifest data
-
-* `\-f, \-\-fix`
-
-    Correct any issues found\. This will overwrite incorrect file
-    content, add missing files and do additional corrections, permissions
-    etc\.
-
-* `\-i, \-\-install`
-
-    Install all files into {path} as specified by the `\-\-path={path}`
-    option\. Useful to generate a new system root, or verify side
-    by side\.
-
-* `\-q, \-\-quick`
-
-    Omit checking hash values\. Instead only corrects missing files
-    and directories and/or symlinks\.
+.INDENT 0.0
+.IP \(bu 2
+\fI\-f, \-\-fix\fP
+.INDENT 2.0
+.INDENT 3.5
+Correct any issues found. This will overwrite incorrect file
+content, add missing files and do additional corrections, permissions
+etc.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-i, \-\-install\fP
+.INDENT 2.0
+.INDENT 3.5
+Install all files into {path} as specified by the \fI\-\-path={path}\fP
+option. Useful to generate a new system root, or verify side
+by side.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-q, \-\-quick\fP
+.INDENT 2.0
+.INDENT 3.5
+Omit checking hash values. Instead only corrects missing files
+and directories and/or symlinks.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SH EXIT STATUS
+.sp
+On success, 0 is returned. A non\-zero return code signals a failure.
+.sp
+If the subcommand \fBcheck\-update\fP was specified, the program returns
+\fB0\fP if an update is available, \fB1\fP if no update available, and a
+return value higher than \fB1\fP signals a failure.
+.SS SEE ALSO
+.INDENT 0.0
+.IP \(bu 2
+\fBcheck\-update.service\fP(4)
+.IP \(bu 2
+\fBcheck\-update.timer\fP(4)
+.IP \(bu 2
+\fBswupd\-update.service\fP(4)
+.IP \(bu 2
+\fBswupd\-update.timer\fP(4)
+.IP \(bu 2
+\fBupdate\-triggers.target\fP(4)
+.IP \(bu 2
+\fI\%https://github.com/clearlinux/swupd\-client/\fP
+.IP \(bu 2
+\fI\%https://clearlinux.org/documentation/\fP
+.UNINDENT
+.SH COPYRIGHT
+(C) 2017 Intel Corporation, CC-BY-SA-3.0
+.\" Generated by docutils manpage writer.
 .
-.fi
-.
-.IP "" 0
-.
-.SH "EXIT STATUS"
-On success, 0 is returned\. A non\-zero return code signals a failure\.
-.
-.P
-If the subcommand \fBcheck\-update\fR was specified, the program returns \fB0\fR if an update is available, \fB1\fR if no update available, and a return value higher than \fB1\fR signals a failure\.
-.
-.SH "COPYRIGHT"
-.
-.IP "\(bu" 4
-Copyright (C) 2016 Intel Corporation, License: CC\-BY\-SA\-3\.0
-.
-.IP "" 0
-.
-.SH "SEE ALSO"
-\fBcheck\-update\.service(4)\fR, \fBcheck\-update\.timer(4)\fR, \fBswupd\-update\.service(4)\fR, \fBswupd\-update\.timer(4)\fR, \fBupdate\-triggers\.target(4)\fR
-.
-.P
-https://github\.com/clearlinux/swupd\-client/
-.
-.P
-https://clearlinux\.org/documentation/
-.
-.SH "NOTES"
-Creative Commons Attribution\-ShareAlike 3\.0 Unported
-.
-.IP "\(bu" 4
-http://creativecommons\.org/licenses/by\-sa/3\.0/
-.
-.IP "" 0
-

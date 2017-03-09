@@ -248,11 +248,13 @@ MANPAGES = \
 	docs/swupd-update.timer.4 \
 	docs/update-triggers.target.4
 
-manpages:
-	for MANPAGE in $(MANPAGES); do \
-		ronn --roff < $${MANPAGE}.md > $${MANPAGE}; \
-		ronn --html < $${MANPAGE}.md > $${MANPAGE}.html; \
-	done
-
 dist_man_MANS = \
 	$(MANPAGES)
+
+clean-local:
+	rm -f $(dist_man_MANS)
+
+man: $(dist_man_MANS)
+
+%: %.rst
+	rst2man.py $< > $@

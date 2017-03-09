@@ -1,139 +1,150 @@
-swupd(1) -- OS software update program
-==================================
+=====
+swupd
+=====
+
+--------------------------
+OS software update program
+--------------------------
+
+:Copyright: \(C) 2017 Intel Corporation, CC-BY-SA-3.0
+:Manual section: 1
 
 
-## SYNOPSIS
+SYNOPSIS
+========
 
-`swupd [subcommand] <flags>`
+``swupd [subcommand] <flags>``
 
 
-## DESCRIPTION
+DESCRIPTION
+===========
 
-`swupd(1)` is an OS-level software update program that applies updates
+``swupd``\(1) is an OS-level software update program that applies updates
 to system software.
 
 The updates are fetched from a central software update server. If a
 valid update is found on the server, it can be downloaded and applied.
 
-The `swupd` tool can also install and remove bundles, check for updates
-without applying them, and perform system-level verification of the
-system software.
+The ``swupd`` tool can also install and remove bundles, check for
+updates without applying them, and perform system-level verification of
+the system software.
 
-A *version url* server provides version information. This server notifies
-the program of available updates.
+A *version url* server provides version information. This server
+notifies the program of available updates.
 
-A *content url* server (can be the same as *version url* server) provides
-the file and metadata content for all versions. The content url server
-provides metadata in the form of manifests. These Manifest files list and
-describe file contents, symlinks, directories. Additionally, the actual
-content is provided to clients in the form of archive files.
+A *content url* server (can be the same as *version url* server)
+provides the file and metadata content for all versions. The content url
+server provides metadata in the form of manifests. These Manifest files
+list and describe file contents, symlinks, directories. Additionally,
+the actual content is provided to clients in the form of archive files.
 
+OPTIONS
+=======
 
-## OPTIONS
+The following options are applicable to most subcommands, and can be
+used to modify the core behavior and resources that swupd uses.
 
-The following options are applicable to most subcommands, and can be used
-to modify the core behavior and resources that swupd uses.
-
- * `-h, --help`
+-  ``-h, --help``
 
    Display general help information. If put after a subcommand, it will
    display help specific to that subcommand.
 
- * `-v, --version`
+-  ``-v, --version``
 
-   Displays the version information of the swupd program, and exit. It
-   also displays compile options and copyright information.
+   Displays the version information of the swupd program, and exit. It also
+   displays compile options and copyright information.
 
- * `-u, --url={url}`
+-  ``-u, --url={url}``
 
-    Specify an RFC-3986 encoded url. The url will be used to download
-    version information and file content downloads.
+   Specify an RFC-3986 encoded url. The url will be used to download
+   version information and file content downloads.
 
- * `-c, --contenturl={url}`
+-  ``-c, --contenturl={url}``
 
-    Specify an RFC-3986 encoded url. The url will be used for file content
-    downloads only.
+   Specify an RFC-3986 encoded url. The url will be used for file
+   content downloads only.
 
- * `-v, --versionurl={url}`
+-  ``-v, --versionurl={url}``
 
-    Specify an RFC-3986 encoded url. The url will be used to download
-    version information.
+   Specify an RFC-3986 encoded url. The url will be used to download
+   version information.
 
- * `-P, --port={port}`
+-  ``-P, --port={port}``
 
-    Specify the port number of the server to connect to. Applies to both
-    version and file content url server connections.
+   Specify the port number of the server to connect to. Applies to both
+   version and file content url server connections.
 
- * `-p, --path={path}`
+-  ``-p, --path={path}``
 
-    Specify the path to use for operations. This can be used to point to
-    a chroot installation of the OS or a custom mount.
+   Specify the path to use for operations. This can be used to point to
+   a chroot installation of the OS or a custom mount.
 
- * `-F, --format={formatstring}`
+-  ``-F, --format={formatstring}``
 
-    Specify the format suffix for version file downloads. Is usually one
-    of `1`, `2`, `3`, etc. or `staging`. Software update formats may change
-    regularly and normally you should consult the swupd server data for
-    the appropriate latest version available. If that version is not
-    supported by your version of `swupd`, you should subtract `1` from the
-    number and try again until it succeeds.
+   Specify the format suffix for version file downloads. Is usually one
+   of ``1``, ``2``, ``3``, etc. or ``staging``. Software update formats
+   may change regularly and normally you should consult the swupd server
+   data for the appropriate latest version available. If that version is
+   not supported by your version of ``swupd``, you should subtract ``1``
+   from the number and try again until it succeeds.
 
- *  `-f, --force`
+-  ``-f, --force``
 
-    Forces completion of swupd beyond critical failures. This may ignore
-    filesystem errors, configuration errors and other errors which are
-    considered fatal, and could damage an installation if not addressed
-    properly.
+   Forces completion of swupd beyond critical failures. This may ignore
+   filesystem errors, configuration errors and other errors which are
+   considered fatal, and could damage an installation if not addressed
+   properly.
 
- *  `-S, --statedir={path}`
+-  ``-S, --statedir={path}``
 
-    Specify an alternate swupd state directory. Normally `swupd` uses
-    `/var/lib/swupd`.
+   Specify an alternate swupd state directory. Normally ``swupd`` uses
+   ``/var/lib/swupd``.
 
 
-## SUBCOMMANDS
+SUBCOMMANDS
+===========
 
-`bundle-add {bundles}`
+``bundle-add {bundles}``
 
     Installs new software bundles. Any bundle name listed after
     `bundle-list --all` will be downloaded and installed.
 
-`bundle-remove {bundles}`
+``bundle-remove {bundles}``
 
     Removes software bundles. Any bundle name listed after `bundle-remove`
     will be removed from the system, as well as all bundles that required
     the listed bundles, either directly or indirectly.
 
-`bundle-list`
+``bundle-list``
 
     List all installed sofware bundles in the local system. Bundles available
     can be listed with the `--all` option.
 
-    *  `-a, --all`
+    -  `-a, --all`
 
         Lists all available software bundles, either installed or not, that
         are available. It will return 0 with succeeded and a different value
         of 0 with failed.
 
-`check-update`
+``check-update``
 
     Checks whether an update is available and prints out the information
     if so. Does not download update content.
 
-`hashdump {path}`
+``hashdump {path}``
 
     Calculates and print the Manifest hash for a specific file on disk.
 
-    * `-n --no-xattrs`
+    - `-n --no-xattrs`
 
         Ignore extended attributes when calculating hash.
 
-    * `-p, --path={path}`
+    - `-p, --path={path}`
 
         Specify the path to use for operations. This can be used to
         point to a chroot installation of the OS or a custom mount.
 
-`search {string}`
+``search {string}``
 
     Search for matching paths in manifest data. The specified {string}
     is matched in any part of the path listed in manifests, and all
@@ -147,30 +158,30 @@ to modify the core behavior and resources that swupd uses.
     download all manifests for bundles that are not installed, and may
     result in the download of several mega bytes of manifest data.
 
-    * `-l, --library`
+    - `-l, --library`
 
         Restrict search to designated dynamic shared library paths.
 
-    * `-b, --binary`
+    - `-b, --binary`
 
         Restrict search to designated program binary paths.
 
-    * `-i, --init`
+    - `-i, --init`
 
         Perform collection and download of all required manifest
         resources needed to perform the search, then exit.
 
-    * `-d, --display-files`
+    - `-d, --display-files`
 
         Do not search for any particular string, instead, print out all
         files, paths, etc. listed in any manifest, and exit.
 
-    * `-s, --scope={b|o}`
+    - `-s, --scope={b|o}`
 
-        Restrict search to only list the first match found in *b*undle
-        or *o*s.
+        Restrict search to only list the first match found in **bundle**
+        or **os**.
 
-`update`
+``update``
 
     Performs a system software update.
 
@@ -188,18 +199,18 @@ to modify the core behavior and resources that swupd uses.
     post-update actions. These actions are triggered through `systemd(1)`
     and reside in the `update-triggers.target(4)` system target.
 
-    * `-s, --status`
+    - `-s, --status`
 
         Do not perform an update, instead display whether an update is
         available on the version url server, and what version number is
         available.
 
-    * `-d, --download`
+    - `-d, --download`
 
         Do not perform an update, instead download all resources needed
         to perform the update, and exit.
 
-`verify`
+``verify``
 
     Perform system software installation verification. The program will
     obtain all the manifests needed from version url and content url to
@@ -210,51 +221,42 @@ to modify the core behavior and resources that swupd uses.
     control of the software update program are verified according to the
     manifest data
 
-    * `-f, --fix`
+    - `-f, --fix`
 
         Correct any issues found. This will overwrite incorrect file
         content, add missing files and do additional corrections, permissions
         etc.
 
-    * `-i, --install`
+    - `-i, --install`
 
         Install all files into {path} as specified by the `--path={path}`
         option. Useful to generate a new system root, or verify side
         by side.
 
-    * `-q, --quick`
+    - `-q, --quick`
 
         Omit checking hash values. Instead only corrects missing files
         and directories and/or symlinks.
 
 
-## EXIT STATUS
+EXIT STATUS
+===========
 
 On success, 0 is returned. A non-zero return code signals a failure.
 
-If the subcommand `check-update` was specified, the program returns `0`
-if an update is available, `1` if no update available, and a return value
-higher than `1` signals a failure.
+If the subcommand ``check-update`` was specified, the program returns
+``0`` if an update is available, ``1`` if no update available, and a
+return value higher than ``1`` signals a failure.
 
 
-## COPYRIGHT
+SEE ALSO
+--------
 
- * Copyright (C) 2016 Intel Corporation, License: CC-BY-SA-3.0
+* ``check-update.service``\(4)
+* ``check-update.timer``\(4)
+* ``swupd-update.service``\(4)
+* ``swupd-update.timer``\(4)
+* ``update-triggers.target``\(4)
+* https://github.com/clearlinux/swupd-client/
+* https://clearlinux.org/documentation/
 
-
-## SEE ALSO
-
-`check-update.service(4)`, `check-update.timer(4)`,
-`swupd-update.service(4)`, `swupd-update.timer(4)`,
-`update-triggers.target(4)`
-
-https://github.com/clearlinux/swupd-client/
-
-https://clearlinux.org/documentation/
-
-
-## NOTES
-
-Creative Commons Attribution-ShareAlike 3.0 Unported
-
- * http://creativecommons.org/licenses/by-sa/3.0/

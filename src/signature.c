@@ -42,6 +42,7 @@
 #include "swupd.h"
 
 #ifdef SIGNATURES
+#define WEEKLEN 604800 // length of week in seconds to validate sys time
 
 static char *CERTNAME;
 
@@ -57,6 +58,30 @@ STACK_OF(X509) *x509_stack = NULL;
 //TODO: static char *chain = NULL;
 static char *crl = NULL;
 
+bool get_filetime(const char *filename, time_t *mod_sec, struct tm *alttime)
+{
+	struct stat statt;
+
+	if (stat(filename, &statt) != -1) {
+		*mod_sec = statt.st_mtime;
+		char timebuf[30];
+		alttime = localtime(mod_sec);
+		strftime(timebuf, sizeof(timebuf), "%F", alttime);
+		return true;
+	}
+	return false;
+}
+
+bool set_time(time_t mtime, char *time)
+{
+	if (stime(&mtime) != 0) {
+		printf("Failed to set system time");
+		return false;
+	}
+	printf("Set system time to %s\n", time);
+	return true;
+}
+
 /* This function must be called before trying to sign any file.
  * It loads string for errors, and ciphers are auto-loaded by OpenSSL now.
  * If this function fails it may be because the certificate cannot
@@ -67,8 +92,7 @@ bool initialize_signature(void)
 {
 	int ret = -1;
 	time_t mod_sec = 0;
-	struct tm *alttime;
-	struct stat statt;
+	struct tm *alttime = NULL;
 
 	string_or_die(&CERTNAME, "%s", cert_path);
 
@@ -82,20 +106,41 @@ bool initialize_signature(void)
 
 	ret = validate_certificate();
 	if (ret) {
-		printf("Failed to verify certificate: %s\n", X509_verify_cert_error_string(ret));
 		if (ret == X509_V_ERR_CERT_NOT_YET_VALID) {
-			/* If we can retrieve an approx. good system time, report out to user */
-			if (stat("/usr/lib/os-release", &statt) != -1) {
-				mod_sec = statt.st_mtim.tv_sec;
-				char timebuf[30];
-				alttime = localtime(&mod_sec);
-				strftime(timebuf, sizeof(timebuf), "%F", alttime);
-				printf("System clock should be at least %s\n", timebuf);
+			time_t currtime;
+			struct tm *timeinfo;
+			double timediff;
+
+			time(&currtime);
+			timeinfo = localtime(&currtime);
+
+			/* If we can retrieve an approx. good system time, use it and try again */
+			if (get_filetime("/usr/bin/swupd", &mod_sec, alttime) == false) {
+				goto fail;
 			}
+			timediff = llabs((long long int) difftime(currtime, mod_sec));
+
+			/* The system time is sane, so the cert time must be bad, thus we can't trust the cert */
+			if (timediff < WEEKLEN) {
+				goto fail;
+			}
+
+			/* The system time wasn't sane, so set it here and try again */
+			printf("Warning: Current time is %s\nAttempting to fix...", asctime(timeinfo));
+			if (set_time(mod_sec, asctime(timeinfo)) == false) {
+				goto fail;
+			}
+			ret = validate_certificate();
+			if (ret) {
+				goto fail;
+			}
+			/* validate succeeded if we get here */
+			goto success;
 		}
 		goto fail;
 	}
 
+success:
 	/* Push our trust cert(s) to the stack, which is a set of certificates
 	 * in which to search for the signer's cert. */
 	x509_stack = sk_X509_new_null();
@@ -106,6 +151,7 @@ bool initialize_signature(void)
 
 	return true;
 fail:
+	printf("Failed to verify certificate: %s\n", X509_verify_cert_error_string(ret));
 	return false;
 }
 

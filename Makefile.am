@@ -91,6 +91,9 @@ swupd_fuzz_LDADD = $(SWUPD_CORE_LIBS) $(pthread_LIBS)
 swupd_locktest_LDADD = $(SWUPD_CORE_LIBS) $(pthread_LIBS)
 swupd_sig_verifytest_LDADD = $(SWUPD_CORE_LIBS)
 
+verifytime_SOURCES = src/verifytime.c
+bin_PROGRAMS += verifytime
+
 noinst_HEADERS = $(top_srcdir)/include/*
 
 EXTRA_DIST += \

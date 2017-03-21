@@ -591,6 +591,15 @@ int swupd_init(int *lock_fd)
 
 	check_root();
 
+	/* Check that our system time is reasonably valid before continuing,
+	 * or the certificate verification will fail with invalid time */
+	if (timecheck) {
+		if (system("verifytime") != 0) {
+			ret = EBADTIME;
+			goto out_fds;
+		}
+	}
+
 	if (!init_globals()) {
 		ret = EINIT_GLOBALS;
 		goto out_fds;

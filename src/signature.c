@@ -66,9 +66,6 @@ static char *crl = NULL;
 bool initialize_signature(void)
 {
 	int ret = -1;
-	time_t mod_sec = 0;
-	struct tm *alttime;
-	struct stat statt;
 
 	string_or_die(&CERTNAME, "%s", cert_path);
 
@@ -82,16 +79,33 @@ bool initialize_signature(void)
 
 	ret = validate_certificate();
 	if (ret) {
-		printf("Failed to verify certificate: %s\n", X509_verify_cert_error_string(ret));
 		if (ret == X509_V_ERR_CERT_NOT_YET_VALID) {
-			/* If we can retrieve an approx. good system time, report out to user */
-			if (stat("/usr/lib/os-release", &statt) != -1) {
-				mod_sec = statt.st_mtim.tv_sec;
-				char timebuf[30];
-				alttime = localtime(&mod_sec);
-				strftime(timebuf, sizeof(timebuf), "%F", alttime);
-				printf("System clock should be at least %s\n", timebuf);
+			BIO *b;
+			time_t currtime = 0;
+			struct tm *timeinfo;
+
+			/* The system time wasn't sane, print out what it is and the cert validity range */
+			time(&currtime);
+			timeinfo = localtime(&currtime);
+			printf("Warning: Current time is %s\n", asctime(timeinfo));
+			printf("Certificate validity is:\n");
+			b = BIO_new_fp(stdout, BIO_NOCLOSE);
+			if (b == NULL) {
+				printf("Failed to create BIO wrapping stream\n");
+				goto fail;
 			}
+			/* The ASN1_TIME_print function does not include a newline... */
+			if (!ASN1_TIME_print(b, X509_get_notBefore(cert))) {
+				printf("\nFailed to get certificate begin date\n");
+				goto fail;
+			}
+			printf("\n");
+			if (!ASN1_TIME_print(b, X509_get_notAfter(cert))) {
+				printf("\nFailed to get certificate expiration date\n");
+				goto fail;
+			}
+			printf("\n");
+			BIO_free(b);
 		}
 		goto fail;
 	}
@@ -106,6 +120,7 @@ bool initialize_signature(void)
 
 	return true;
 fail:
+	printf("Failed to verify certificate: %s\n", X509_verify_cert_error_string(ret));
 	return false;
 }
 

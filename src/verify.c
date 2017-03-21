@@ -64,6 +64,7 @@ static const struct option prog_opts[] = {
 	{ "versionurl", required_argument, 0, 'v' },
 	{ "fix", no_argument, 0, 'f' },
 	{ "install", no_argument, 0, 'i' },
+	{ "ignore", no_argument, 0, 'I'},
 	{ "format", required_argument, 0, 'F' },
 	{ "quick", no_argument, 0, 'q' },
 	{ "force", no_argument, 0, 'x' },
@@ -92,6 +93,7 @@ static void print_help(const char *name)
 	printf("   -q, --quick             Don't compare hashes, only fix missing files\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	printf("   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
+	printf("   -I, --ignore-certtime   Ignore system/certificate time when validating signature\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
 	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
 	printf("\n");
@@ -101,7 +103,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxnm:p:u:P:c:v:fiF:qS:C:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxnIm:p:u:P:c:v:fiF:qS:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -176,6 +178,9 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'n':
 			sigcheck = false;
+			break;
+		case 'I':
+			timecheck = false;
 			break;
 		case 'C':
 			if (!optarg) {

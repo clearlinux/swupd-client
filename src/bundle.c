@@ -333,12 +333,16 @@ out_free_curl:
 	return ret;
 }
 
-/* tristate return, -1 for errors, 1 for no errors but no new subscriptions, 0 for no errors and new subscriptions */
+/* bitmapped return
+   1 error happened
+   2 new subscriptions
+*/
+#define add_sub_ERR 1
+#define add_sub_NEW 2
 int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, int recursion)
 {
-	bool new_bundles = false;
 	char *bundle;
-	int ret;
+	int ret = 0;
 	int retries = 0;
 	int timeout = 10;
 	struct file *file;
@@ -355,6 +359,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 		file = search_bundle_in_manifest(mom, bundle);
 		if (!file) {
 			printf("%s bundle name is invalid, skipping it...\n", bundle);
+			/* Don't need to alter return code for a skip */
 			continue;
 		}
 
@@ -378,18 +383,17 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 				goto retry_manifest_download;
 			}
 			printf("Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
-			ret = -1;
+			ret |= add_sub_ERR;
 			goto out;
 		}
 
 		if (manifest->includes) {
-			ret = add_subscriptions(manifest->includes, subs, current_version, mom, recursion + 1);
-			if (ret == -1) {
+			int r = add_subscriptions(manifest->includes, subs, current_version, mom, recursion + 1);
+			if (r & add_sub_ERR) {
 				free_manifest(manifest);
 				goto out;
-			} else if (ret == 0) {
-				new_bundles = true;
 			}
+			ret |= r; /* merge in recursive call results */
 		}
 		free_manifest(manifest);
 
@@ -401,14 +405,8 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 			continue;
 		}
 		create_and_append_subscription(subs, bundle);
-		new_bundles = true;
+		ret |= add_sub_NEW; /* We have added at least one */
 	}
-	if (new_bundles) {
-		ret = 0;
-	} else {
-		ret = 1;
-	}
-
 out:
 	return ret;
 }
@@ -424,12 +422,16 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	/* step 1: check bundle args are valid if so populate subs struct */
 	ret = add_subscriptions(bundles, subs, current_version, mom, 0);
 
-	if (ret) {
-		if (ret == 1) {
-			printf("bundle(s) already installed, exiting now\n");
-		}
+	switch (ret)
+	{
+	case 0: /* no errors, but nothing added */
+		printf("nothing to add, exiting now\n");
+		/* fall through */
+	case add_sub_ERR: /* error of some kind */
+	case add_sub_ERR|add_sub_NEW: /* error of some kind but we did add something */
 		ret = EBUNDLE_INSTALL;
 		goto out;
+	default: break;
 	}
 
 	set_subscription_versions(mom, NULL, subs);

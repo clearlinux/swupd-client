@@ -276,7 +276,7 @@ bool set_path_prefix(char *path)
 
 			cwd = get_current_dir_name();
 			if (cwd == NULL) {
-				printf("Unable to getwd() (%s)\n", strerror(errno));
+				printf("Unable to get current directory name (%s)\n", strerror(errno));
 				free(tmp);
 				return false;
 			}

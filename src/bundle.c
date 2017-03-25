@@ -422,16 +422,16 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	/* step 1: check bundle args are valid if so populate subs struct */
 	ret = add_subscriptions(bundles, subs, current_version, mom, 0);
 
-	switch (ret)
-	{
+	switch (ret) {
 	case 0: /* no errors, but nothing added */
 		printf("nothing to add, exiting now\n");
-		/* fall through */
-	case add_sub_ERR: /* error of some kind */
-	case add_sub_ERR|add_sub_NEW: /* error of some kind but we did add something */
+	/* fall through */
+	case add_sub_ERR:		/* error of some kind */
+	case add_sub_ERR | add_sub_NEW: /* error of some kind but we did add something */
 		ret = EBUNDLE_INSTALL;
 		goto out;
-	default: break;
+	default:
+		break;
 	}
 
 	set_subscription_versions(mom, NULL, subs);

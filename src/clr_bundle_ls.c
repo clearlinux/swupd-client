@@ -57,7 +57,7 @@ static const struct option prog_opts[] = {
 	{ "format", required_argument, 0, 'F' },
 	{ "nosigcheck", no_argument, 0, 'n' },
 	{ "statedir", required_argument, 0, 'S' },
-	{ "ignore", no_argument, 0, 'I'},
+	{ "ignore", no_argument, 0, 'I' },
 	{ "certpath", required_argument, 0, 'C' },
 
 	{ 0, 0, 0, 0 }

@@ -22,6 +22,6 @@
 #define EREQUIRED_DIRS 19       /* Cannot create required dirs */
 #define ECURRENT_VERSION 20     /* Cannot determine current OS version */
 #define ESIGNATURE 21		/* Cannot initialize signature verification */
-#define EBADTIME 22				/* System time is bad */
+#define EBADTIME 22		/* System time is bad */
 
 #endif

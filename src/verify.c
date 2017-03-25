@@ -64,7 +64,7 @@ static const struct option prog_opts[] = {
 	{ "versionurl", required_argument, 0, 'v' },
 	{ "fix", no_argument, 0, 'f' },
 	{ "install", no_argument, 0, 'i' },
-	{ "ignore", no_argument, 0, 'I'},
+	{ "ignore", no_argument, 0, 'I' },
 	{ "format", required_argument, 0, 'F' },
 	{ "quick", no_argument, 0, 'q' },
 	{ "force", no_argument, 0, 'x' },

@@ -54,7 +54,7 @@ unsigned long int get_versionstamp(void)
 
 	/* If we read a 0 the versionstamp is wrong/corrupt */
 	if (strtoul(data, NULL, 10) == 0) {
-		fclose (fp);
+		fclose(fp);
 		return 0;
 	}
 

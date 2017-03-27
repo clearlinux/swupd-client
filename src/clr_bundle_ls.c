@@ -40,7 +40,7 @@ static void print_help(const char *name)
 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
 	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	printf("   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
-	printf("   -I, --ignore-certtime   Ignore system/certificate time when validating signature\n");
+	printf("   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
 	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
 
@@ -57,7 +57,7 @@ static const struct option prog_opts[] = {
 	{ "format", required_argument, 0, 'F' },
 	{ "nosigcheck", no_argument, 0, 'n' },
 	{ "statedir", required_argument, 0, 'S' },
-	{ "ignore", no_argument, 0, 'I' },
+	{ "ignore-time", no_argument, 0, 'I' },
 	{ "certpath", required_argument, 0, 'C' },
 
 	{ 0, 0, 0, 0 }

@@ -47,7 +47,7 @@ static const struct option prog_opts[] = {
 	{ "path", required_argument, 0, 'p' },
 	{ "force", no_argument, 0, 'x' },
 	{ "nosigcheck", no_argument, 0, 'n' },
-	{ "ignore", no_argument, 0, 'I' },
+	{ "ignore-time", no_argument, 0, 'I' },
 	{ "statedir", required_argument, 0, 'S' },
 	{ "certpath", required_argument, 0, 'C' },
 	{ 0, 0, 0, 0 }
@@ -73,7 +73,7 @@ static void print_help(const char *name)
 	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
 	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	printf("   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
-	printf("   -I, --ignore-certtime   Ignore system/certificate time when validating signature\n");
+	printf("   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	printf("   -S, --statedir          Specify alternate swupd state directory\n");
 	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
 	printf("\n");

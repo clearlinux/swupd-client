@@ -65,7 +65,7 @@ static void print_help(const char *name)
 	printf("   -s, --scope=[query type] 'b' or 'o' for first hit per (b)undle, or one hit total across the (o)s\n");
 	printf("   -d, --display-files	   Output full file list, no search done\n");
 	printf("   -i, --init              Download all manifests then return, no search done\n");
-	printf("   -I, --ignore-certtime   Ignore system/certificate time when validating signature\n");
+	printf("   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
 	printf("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
 	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
@@ -92,7 +92,7 @@ static const struct option prog_opts[] = {
 	{ "path", required_argument, 0, 'p' },
 	{ "format", required_argument, 0, 'F' },
 	{ "init", no_argument, 0, 'i' },
-	{ "ignore", no_argument, 0, 'I' },
+	{ "ignore-time", no_argument, 0, 'I' },
 	{ "display-files", no_argument, 0, 'd' },
 	{ "statedir", required_argument, 0, 'S' },
 	{ "certpath", required_argument, 0, 'C' },

@@ -150,7 +150,7 @@ cat >> $SCRIPTNAME << 'EOM'
     COMPREPLY=($(compgen -W "${opts}" -- ${2}));
     return 0
 }
-if [ ${BASH_VERSION[0]} -gt 4 ] || ( [ ${BASH_VERSION[0]} -eq 4 ] && [ $BASH_VERSION[1] -ge 4] )
+if [ ${BASH_VERSINFO[0]} -gt 4 ] || ( [ ${BASH_VERSINFO[0]} -eq 4 ] && [ ${BASH_VERSINFO[1]} -ge 4 ] )
 then
 	complete -F _swupd -o nosort swupd
 else

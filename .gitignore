@@ -42,6 +42,7 @@ stamp-h1
 swupd
 swupd-client*tar.gz
 swupd_*
+swupd.bash
 tap-driver.sh
 test-driver
 test-suite.log
@@ -56,3 +57,4 @@ test/functional/*/*/web-dir/*/Manifest.MoM.sig
 test/functional/*/*/test.log
 test/functional/*/*/state
 test/functional/*/*/lines-output
+verifytime

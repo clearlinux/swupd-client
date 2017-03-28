@@ -551,7 +551,7 @@ void full_download(struct file *file)
 	file->curl = curl;
 
 	ret = poll_fewer_than(MAX_XFER, MAX_XFER_BOTTOM);
-	if (ret) {
+	if (ret != 0) {
 		clean_curl_multi_queue();
 		goto out_bad;
 	}
@@ -593,9 +593,12 @@ void full_download(struct file *file)
 	 * it with a counter variable. */
 	mcurl_size++;
 
-	if (poll_fewer_than(MAX_XFER + 10, MAX_XFER) != 0) {
+	ret = poll_fewer_than(MAX_XFER + 10, MAX_XFER);
+	if (ret != 0) {
 		clean_curl_multi_queue();
+		goto out_bad;
 	}
+
 	ret = 0;
 	goto out_good;
 

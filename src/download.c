@@ -169,6 +169,7 @@ static void free_curl_list_data(void *data)
 	if (curl != NULL) {
 		curl_multi_remove_handle(mcurl, curl);
 		curl_easy_cleanup(curl);
+		file->curl = NULL;
 	}
 }
 
@@ -604,6 +605,7 @@ out_bad:
 		/* Must remove handle out of multi queue first!*/
 		curl_multi_remove_handle(mcurl, curl);
 		curl_easy_cleanup(curl);
+		file->curl = NULL;
 	}
 	free(filename);
 out_good:

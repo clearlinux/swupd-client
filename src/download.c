@@ -167,6 +167,7 @@ static void free_curl_list_data(void *data)
 	CURL *curl = file->curl;
 	(void)swupd_download_file_complete(CURLE_OK, file);
 	if (curl != NULL) {
+		/* Must remove handle out of multi queue first!*/
 		curl_multi_remove_handle(mcurl, curl);
 		curl_easy_cleanup(curl);
 		file->curl = NULL;
@@ -599,14 +600,8 @@ void full_download(struct file *file)
 	goto out_good;
 
 out_bad:
-	(void)swupd_download_file_complete(CURLE_OK, file);
 	failed = list_prepend_data(failed, file);
-	if (curl != NULL) {
-		/* Must remove handle out of multi queue first!*/
-		curl_multi_remove_handle(mcurl, curl);
-		curl_easy_cleanup(curl);
-		file->curl = NULL;
-	}
+	free_curl_list_data(file);
 	free(filename);
 out_good:
 	free(url);

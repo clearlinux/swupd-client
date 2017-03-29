@@ -123,9 +123,20 @@ void grabtime_stop(timelist *head)
 	}
 
 	struct time *t = TAILQ_FIRST(head);
-	clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstop);
-	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstop);
-	t->complete = true;
+
+	if (t->complete == true) {
+		TAILQ_FOREACH(t, head, times) {
+			if (t->complete != true) {
+				clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstop);
+				clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstop);
+				t->complete = true;
+			}
+		}
+	} else {
+		clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstop);
+		clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstop);
+		t->complete = true;
+	}
 }
 
 void print_time_stats(timelist *head)

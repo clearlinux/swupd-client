@@ -125,11 +125,11 @@ struct time {
 	struct timespec rawstop;
 	const char *name;
 	bool complete;
-	TAILQ_ENTRY(time) times;
+	TAILQ_ENTRY(time)
+	times;
 };
 
 typedef TAILQ_HEAD(timelist, time) timelist;
-
 
 extern bool download_only;
 extern bool local_download;
@@ -190,7 +190,6 @@ extern void grabtime_start(timelist *list, const char *name);
 extern void grabtime_stop(timelist *list);
 extern void print_time_stats(timelist *list);
 extern timelist init_timelist(void);
-
 
 extern int swupd_stats[];
 static inline void account_new_file(void)

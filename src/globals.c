@@ -125,7 +125,8 @@ void grabtime_stop(timelist *head)
 	struct time *t = TAILQ_FIRST(head);
 
 	if (t->complete == true) {
-		TAILQ_FOREACH(t, head, times) {
+		TAILQ_FOREACH(t, head, times)
+		{
 			if (t->complete != true) {
 				clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstop);
 				clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstop);
@@ -149,7 +150,8 @@ void print_time_stats(timelist *head)
 	struct time *t;
 
 	printf("\nRaw elapsed time stats:\n");
-	TAILQ_FOREACH_REVERSE(t, head, timelist, times) {
+	TAILQ_FOREACH_REVERSE(t, head, timelist, times)
+	{
 		if (t->complete == true) {
 			delta = t->rawstop.tv_sec - t->rawstart.tv_sec + (t->rawstop.tv_nsec / 1000000.0) - (t->rawstart.tv_nsec / 1000000.0);
 			printf("%.4f\tms: %s\n", delta, t->name);

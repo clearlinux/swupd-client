@@ -72,7 +72,7 @@ static const struct option prog_opts[] = {
 	{ "ignore-time", no_argument, 0, 'I' },
 	{ "statedir", required_argument, 0, 'S' },
 	{ "certpath", required_argument, 0, 'C' },
-	{ "time", no_argument, 0, 't'},
+	{ "time", no_argument, 0, 't' },
 	{ 0, 0, 0, 0 }
 };
 

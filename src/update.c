@@ -36,7 +36,6 @@
 #include "signature.h"
 #include "swupd.h"
 
-
 int nonpack;
 
 void increment_retries(int *retries, int *timeout)
@@ -239,7 +238,7 @@ int main_update()
 
 	times = init_timelist();
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
+	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
 	grabtime_start(&times, "Main Update");
 
 	if (!check_network()) {
@@ -433,7 +432,7 @@ clean_exit:
 clean_curl:
 	grabtime_stop(&times);
 	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_stop);
-	delta =  ts_stop.tv_sec - ts_start.tv_sec + ts_stop.tv_nsec / 1000000000.0 - ts_start.tv_nsec / 1000000000.0;
+	delta = ts_stop.tv_sec - ts_start.tv_sec + ts_stop.tv_nsec / 1000000000.0 - ts_start.tv_nsec / 1000000000.0;
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
 		  "update",
 		  "current_version=%d\n"

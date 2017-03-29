@@ -1,0 +1,9 @@
+[Unit]
+Description=Check that system time is sane; update to more correct time if needed
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/verifytime
+
+[Install]
+WantedBy=multi-user.target

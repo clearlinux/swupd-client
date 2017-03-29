@@ -452,6 +452,9 @@ static int perform_curl_io_and_complete(int count, bool bounded)
 	return 0;
 }
 
+/* Fixed window added to hysteresis upper bound before it is enforced. */
+#define BUFFER 5
+
 /* 2 limits, so that we can have hysteresis in behavior. We let the caller
  * add new transfer up until the queue reaches the high threshold. At this point
  * we don't return to the caller and instead process the queue until its len
@@ -509,6 +512,22 @@ static int poll_fewer_than(size_t xfer_queue_high, size_t xfer_queue_low)
 		if (curlm_ret != CURLM_OK) {
 			return -1;
 		}
+	}
+
+	// Avoid escaping the hysteresis upper bound; the expected case is for
+	// the stack size to be xfer_queue_high + 1 before entering the below
+	// while loop. If the stack attempts to grow larger than this, it means
+	// that curl_multi_perform() indicated no transfers in progress more
+	// than once after curl_multi_wait() reported no file descriptors with
+	// activity. Meanwhile, there may be any number of future transfers
+	// attempted, with curl returning no progress each time, resulting in
+	// mcurl_size still being too large. If this condition occurs
+	// (exceeding xfer_queue_high + 1), do not return an error unless no
+	// activity is reported the next BUFFER times. When an error is
+	// returned, the most recent attempted transfer is added to the failed
+	// list, later to be retried.
+	if (xfer_queue_low != xfer_queue_high && mcurl_size > xfer_queue_high + 1 + BUFFER) {
+		return -1;
 	}
 
 	return 0;

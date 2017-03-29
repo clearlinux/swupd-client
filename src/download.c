@@ -552,7 +552,6 @@ void full_download(struct file *file)
 
 	ret = poll_fewer_than(MAX_XFER, MAX_XFER_BOTTOM);
 	if (ret != 0) {
-		clean_curl_multi_queue();
 		goto out_bad;
 	}
 
@@ -595,7 +594,6 @@ void full_download(struct file *file)
 
 	ret = poll_fewer_than(MAX_XFER + 10, MAX_XFER);
 	if (ret != 0) {
-		clean_curl_multi_queue();
 		goto out_bad;
 	}
 

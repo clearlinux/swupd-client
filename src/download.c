@@ -500,6 +500,12 @@ static int poll_fewer_than(size_t xfer_queue_high, size_t xfer_queue_low)
 			}
 		}
 
+		// Do more work before processing the queue
+		curlm_ret = curl_multi_perform(mcurl, &running);
+		if (curlm_ret != CURLM_OK) {
+			return -1;
+		}
+
 		// Instead of using "numfds" as a hint for how many transfers
 		// to process, try to drain the queue to the lower bound.
 		int remaining = mcurl_size - xfer_queue_low;

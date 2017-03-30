@@ -498,12 +498,13 @@ static int poll_fewer_than(size_t xfer_queue_high, size_t xfer_queue_low)
 			if (running == 0) {
 				break;
 			}
-
-			continue;
 		}
 
-		// At this point, there are some potential events to process
-		if (perform_curl_io_and_complete(numfds, true) != 0) {
+		// Instead of using "numfds" as a hint for how many transfers
+		// to process, try to drain the queue to the lower bound.
+		int remaining = mcurl_size - xfer_queue_low;
+
+		if (perform_curl_io_and_complete(remaining, true) != 0) {
 			return -1;
 		}
 

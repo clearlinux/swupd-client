@@ -91,7 +91,7 @@ static struct time *alloc_time(timelist *head)
 			free(iter);
 		}
 		/* Malloc failed...something bad happened, stop trying and let swupd attempt to finish */
-		verbose_time = true;
+		verbose_time = false;
 		return NULL;
 	}
 	return t;

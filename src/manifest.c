@@ -567,6 +567,29 @@ static void set_untracked_manifest_files(struct manifest *manifest)
 	}
 }
 
+/* Removes the extracted Manifest.<bundle> and accompanying tar file, cache file, and
+ * the signature file */
+void remove_manifest_files(char *filename, int version, char *hash)
+{
+	char *file;
+
+	printf("Warning: Removing corrupt Manifest.%s artifacts and re-downloading...\n", filename);
+	string_or_die(&file, "%s/%i/Manifest.%s", state_dir, version, filename);
+	unlink(file);
+	free(file);
+	string_or_die(&file, "%s/%i/Manifest.%s.tar", state_dir, version, filename);
+	unlink(file);
+	free(file);
+	string_or_die(&file, "%s/%i/Manifest.%s.sig", state_dir, version, filename);
+	unlink(file);
+	free(file);
+	if (hash != NULL) {
+		string_or_die(&file, "%s/%i/Manifest.%s.%s", state_dir, version, filename, hash);
+		unlink(file);
+		free(file);
+	}
+}
+
 /* Loads the MoM (Manifest of Manifests) for VERSION.
  *
  * Implementation note: MoMs are not huge so deltas do not give much benefit,
@@ -585,17 +608,38 @@ struct manifest *load_mom(int version)
 	char *filename;
 	char *url;
 	char *log_cmd = NULL;
+	bool retried = false;
 
+verify_mom:
 	ret = retrieve_manifests(version, version, "MoM", NULL);
 	if (ret != 0) {
 		printf("Failed to retrieve %d MoM manifest\n", version);
 		return NULL;
 	}
 
+	manifest = manifest_from_file(version, "MoM", false);
+
+	if (manifest == NULL) {
+		if (retried == false) {
+			remove_manifest_files("MoM", version, NULL);
+			retried = true;
+			goto verify_mom;
+		}
+		printf("Failed to load %d MoM manifest\n", version);
+		goto out;
+	}
+	retried = false;
+
 	string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
 	string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);
 	if (!download_and_verify_signature(url, filename)) {
 		if (sigcheck) {
+			/* cleanup and try one more time, statedir could have got corrupt/stale */
+			if (retried == false) {
+				remove_manifest_files("MoM", version, NULL);
+				retried = true;
+				goto verify_mom;
+			}
 			printf("WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM\n");
 			free(filename);
 			free(url);
@@ -611,13 +655,6 @@ struct manifest *load_mom(int version)
 	}
 	free(filename);
 	free(url);
-
-	manifest = manifest_from_file(version, "MoM", false);
-
-	if (manifest == NULL) {
-		printf("Failed to load %d MoM manifest\n", version);
-		goto out;
-	}
 
 	return manifest;
 
@@ -643,7 +680,8 @@ struct manifest *load_manifest(int current, int version, struct file *file, stru
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
-
+	bool retried = false;
+retry_load:
 	ret = retrieve_manifests(current, version, file->filename, file);
 	if (ret != 0) {
 		printf("Failed to retrieve %d %s manifest\n", version, file->filename);
@@ -655,12 +693,23 @@ struct manifest *load_manifest(int current, int version, struct file *file, stru
 	}
 
 	if (ret != 0) {
+		if (retried == false) {
+			remove_manifest_files(file->filename, version, file->hash);
+			retried = true;
+			goto retry_load;
+		}
 		return NULL;
 	}
+	retried = false;
 
 	manifest = manifest_from_file(version, file->filename, header_only);
 
 	if (manifest == NULL) {
+		if (retried == false) {
+			remove_manifest_files(file->filename, version, file->hash);
+			retried = true;
+			goto retry_load;
+		}
 		printf("Failed to load %d %s manifest\n", version, file->filename);
 		return NULL;
 	}

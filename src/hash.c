@@ -288,6 +288,8 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 		string_or_die(&local, "%s/%i/Manifest.%s", state_dir,
 			      current->last_change, current->filename);
 
+		/* *NOTE* If the file is changed after being hardlinked, the hash will be different,
+		 * but the inode will not change making swupd skip hash check thinking they still match */
 		if (stat(local, &sb) == 0 && stat(cached, &sb2) == 0 && sb.st_ino == sb2.st_ino) {
 			free(cached);
 			break;

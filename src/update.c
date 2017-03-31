@@ -336,10 +336,17 @@ load_server_manifests:
 	/* read the current collective of manifests that we are subscribed to */
 	current_manifest->submanifests = recurse_manifest(current_manifest, current_subs, NULL);
 	if (!current_manifest->submanifests) {
+		if (retries < MAX_TRIES) {
+			increment_retries(&retries, &timeout);
+			printf("Retry #%d downloading current sub-manifests\n", retries);
+			goto load_server_manifests;
+		}
 		ret = ERECURSE_MANIFEST;
 		printf("Cannot load current MoM sub-manifests, exiting\n");
 		goto clean_exit;
 	}
+	retries = 0;
+	timeout = 10;
 	/* consolidate the current collective manifests down into one in memory */
 	current_manifest->files = files_from_bundles(current_manifest->submanifests);
 
@@ -348,11 +355,17 @@ load_server_manifests:
 	/* read the new collective of manifests that we are subscribed to */
 	server_manifest->submanifests = recurse_manifest(server_manifest, latest_subs, NULL);
 	if (!server_manifest->submanifests) {
+		if (retries < MAX_TRIES) {
+			increment_retries(&retries, &timeout);
+			printf("Retry #%d downloading server sub-manifests\n", retries);
+			goto load_server_manifests;
+		}
 		ret = ERECURSE_MANIFEST;
 		printf("Error: Cannot load server MoM sub-manifests, exiting\n");
 		goto clean_exit;
 	}
-
+	retries = 0;
+	timeout = 10;
 	/* consolidate the new collective manifests down into one in memory */
 	server_manifest->files = files_from_bundles(server_manifest->submanifests);
 

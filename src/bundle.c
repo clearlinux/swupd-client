@@ -336,9 +336,11 @@ out_free_curl:
 /* bitmapped return
    1 error happened
    2 new subscriptions
+   4 bad name given
 */
 #define add_sub_ERR 1
 #define add_sub_NEW 2
+#define add_sub_BADNAME 4
 int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, int recursion)
 {
 	char *bundle;
@@ -359,7 +361,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 		file = search_bundle_in_manifest(mom, bundle);
 		if (!file) {
 			printf("%s bundle name is invalid, skipping it...\n", bundle);
-			/* Don't need to alter return code for a skip */
+			ret |= add_sub_BADNAME; /* Use this to get non-zero exit code */
 			continue;
 		}
 
@@ -426,16 +428,23 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	grabtime_start(&times, "Add bundles and recurse");
 	ret = add_subscriptions(bundles, subs, current_version, mom, 0);
 
-	switch (ret) {
-	case 0: /* no errors, but nothing added */
-		printf("nothing to add, exiting now\n");
-	/* fall through */
-	case add_sub_ERR:		/* error of some kind */
-	case add_sub_ERR | add_sub_NEW: /* error of some kind but we did add something */
+	if (ret != add_sub_NEW) {
+		/* something went wrong, print a message and exit */
+		const char * m;
+		if (ret == 0) {	/* no bad names, no new packages */
+			printf("nothing to add, exiting now\n");
+			goto out;
+		}
+		if (ret & add_sub_ERR) {
+			m = "Processing error";
+		} else if (ret & add_sub_BADNAME) {
+			m = "Bad bundle name(s) detected";
+		} else {
+			m = "Unknown error";
+		}
 		ret = EBUNDLE_INSTALL;
+		printf("Error: %s - Aborting\n", m); /* Should be to stderr */
 		goto out;
-	default:
-		break;
 	}
 
 	set_subscription_versions(mom, NULL, subs);

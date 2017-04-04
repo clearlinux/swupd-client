@@ -430,8 +430,8 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 
 	if (ret != add_sub_NEW) {
 		/* something went wrong, print a message and exit */
-		const char * m;
-		if (ret == 0) {	/* no bad names, no new packages */
+		const char *m;
+		if (ret == 0) { /* no bad names, no new packages */
 			printf("nothing to add, exiting now\n");
 			goto out;
 		}

@@ -50,7 +50,7 @@ static struct opts {
 	char *cert_path;
 	bool force;
 	bool sigcheck;
-}curopts = {NULL, NULL, NULL, NULL, NULL, NULL, false, true};
+} curopts = { NULL, NULL, NULL, NULL, NULL, NULL, false, true };
 
 static char **bundles;
 
@@ -219,7 +219,6 @@ static void reload_parsed_opts(void)
 
 	force = curopts.force;
 	sigcheck = curopts.sigcheck;
-
 }
 
 void static free_saved_opts(void)
@@ -247,8 +246,6 @@ void static free_saved_opts(void)
 	if (curopts.cert_path != NULL) {
 		free(curopts.cert_path);
 	}
-
-
 }
 
 int bundle_remove_main(int argc, char **argv)

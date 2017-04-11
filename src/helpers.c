@@ -965,3 +965,28 @@ void print_progress(unsigned int count, unsigned int max)
 		}
 	}
 }
+
+/* Compare formats of the global variable (format_string) and the format number
+ * from a manifest (usually a MoM). Because "staging" is treated specially and
+ * never appears in a manifest, it is skipped. */
+bool is_compatible_format(int format_num)
+{
+	if (strcmp(format_string, "staging") == 0) {
+		return true;
+	}
+
+	char *format_manifest = NULL;
+	string_or_die(&format_manifest, "%d", format_num);
+
+	size_t len = strlen(format_string);
+
+	bool ret;
+	if (strncmp(format_string, format_manifest, len) == 0) {
+		ret = true;
+	} else {
+		ret = false;
+	}
+
+	free(format_manifest);
+	return ret;
+}

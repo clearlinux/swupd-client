@@ -702,6 +702,23 @@ int verify_main(int argc, char **argv)
 		goto clean_and_exit;
 	}
 
+	if (!is_compatible_format(official_manifest->manifest_version)) {
+		if (force) {
+			fprintf(stderr, "WARNING: the force option is specified; ignoring"
+					" format mismatch for verify\n");
+		} else {
+			fprintf(stderr, "ERROR: Mismatching formats detected when verifying %d"
+					" (expected: %s; actual: %d)\n",
+				version, format_string, official_manifest->manifest_version);
+			int latest = get_latest_version();
+			if (latest > 0) {
+				fprintf(stderr, "Latest supported version to verify: %d\n", latest);
+			}
+			ret = EMANIFEST_LOAD;
+			goto clean_and_exit;
+		}
+	}
+
 	ret = add_included_manifests(official_manifest, version, &subs);
 	if (ret) {
 		ret = EMANIFEST_LOAD;

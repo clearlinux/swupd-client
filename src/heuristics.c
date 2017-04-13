@@ -98,6 +98,10 @@ static void boot_file_heuristics(struct file *file)
 		need_update_boot = true;
 	}
 
+	if (strcmp(file->filename, "/usr/lib/systemd/systemd") == 0) {
+		need_systemd_reexec = true;
+	}
+
 	if ((strncmp(file->filename, "/usr/lib/gummiboot", 18) == 0) ||
 	    (strncmp(file->filename, "/usr/bin/gummiboot", 18) == 0) ||
 	    (strncmp(file->filename, "/usr/bin/bootctl", 16) == 0) ||

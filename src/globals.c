@@ -40,6 +40,7 @@ int update_count = 0;
 int update_skip = 0;
 bool need_update_boot = false;
 bool need_update_bootloader = false;
+bool need_systemd_reexec = false;
 bool update_complete = false;
 #if 0
 /* disabled unused global variables */

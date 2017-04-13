@@ -51,7 +51,13 @@ static void update_triggers(void)
 {
 	__attribute__((unused)) int ret = 0;
 
-	ret = system("/usr/bin/systemctl --no-block daemon-reload");
+	/* These must block so that new update triggers are executed after */
+	if (need_systemd_reexec) {
+		ret = system("/usr/bin/systemctl daemon-reexec");
+	} else {
+		ret = system("/usr/bin/systemctl daemon-reload");
+	}
+
 	ret = system("/usr/bin/systemctl --no-block restart update-triggers.target");
 }
 

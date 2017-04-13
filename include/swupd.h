@@ -75,6 +75,7 @@ extern int update_skip;
 extern bool update_complete;
 extern bool need_update_boot;
 extern bool need_update_bootloader;
+extern bool need_systemd_reexec;
 
 struct update_stat {
 	uint64_t st_mode;

@@ -164,7 +164,7 @@ extern void clean_curl_multi_queue(void);
 extern void increment_retries(int *retries, int *timeout);
 
 extern int main_update(void);
-extern int add_included_manifests(struct manifest *mom, struct list **subs);
+extern int add_included_manifests(struct manifest *mom, int current, struct list **subs);
 extern int main_verify(int current_version);
 
 extern int get_latest_version(void);

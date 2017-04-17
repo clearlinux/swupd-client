@@ -190,7 +190,7 @@ TRY_DOWNLOAD:
 	return ret;
 }
 
-int add_included_manifests(struct manifest *mom, struct list **subs)
+int add_included_manifests(struct manifest *mom, int current, struct list **subs)
 {
 	struct list *subbed = NULL;
 	struct list *iter;
@@ -202,7 +202,9 @@ int add_included_manifests(struct manifest *mom, struct list **subs)
 		iter = iter->next;
 	}
 
-	if (add_subscriptions(subbed, subs, mom->version, mom, 0) >= 0) {
+	/* Pass the current version here, not the new, otherwise we will never
+	 * hit the Manifest delta path. */
+	if (add_subscriptions(subbed, subs, current, mom, 0) >= 0) {
 		ret = 0;
 	} else {
 		ret = -1;

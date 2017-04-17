@@ -503,11 +503,15 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	char *tar;
 	struct stat sb;
 
-	string_or_die(&filename, "%s/%i/Manifest.%s.tar", state_dir, version, component);
+	/* Check for fullfile only, we will not be keeping the .tar around */
+	string_or_die(&filename, "%s/%i/Manifest.%s", state_dir, version, component);
 	if (stat(filename, &sb) == 0) {
+
 		ret = 0;
 		goto out;
 	}
+	free(filename);
+	string_or_die(&filename, "%s/%i/Manifest.%s.tar", state_dir, version, component);
 
 	if (!check_network()) {
 		ret = -ENOSWUPDSERVER;
@@ -547,6 +551,8 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	free(tar);
 	if (ret != 0) {
 		goto out;
+	} else {
+		unlink(filename);
 	}
 
 out:

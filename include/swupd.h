@@ -184,7 +184,7 @@ extern struct manifest *load_mom(int version);
 extern struct manifest *load_manifest(int current, int version, struct file *file, struct manifest *mom, bool header_only);
 extern struct list *create_update_list(struct manifest *current, struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
-extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2);
+extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2, bool server);
 extern void free_manifest(struct manifest *manifest);
 extern void remove_manifest_files(char *filename, int version, char *hash);
 

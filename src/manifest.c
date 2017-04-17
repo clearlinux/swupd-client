@@ -431,29 +431,21 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 	char *url = NULL;
 	int ret = 0;
 	struct stat buf;
-
 	if (strcmp(component, "MoM") == 0) {
 		// We don't do MoM deltas.
 		return -1;
 	}
 
 	if (!file->peer) {
+		return -1;
 		goto out;
 	}
 
 	string_or_die(&original, "%s/%i/Manifest.%s", state_dir, current, component);
 
-	populate_file_struct(file, original);
-	ret = compute_hash(file, original);
-	if (ret != 0) {
-		goto out;
-	}
-	if (!hash_equal(file->peer->hash, file->hash)) {
-		goto out;
-	}
-
 	string_or_die(&deltafile, "%s/Manifest-%s-delta-from-%i-to-%i", state_dir, component, current, new);
-
+	/* If we cannot get a delta, quit and don't mess with the file struct.
+	 * Populating it early and then exiting early corrupts the manifest list */
 	memset(&buf, 0, sizeof(struct stat));
 	ret = stat(deltafile, &buf);
 	if (ret || buf.st_size == 0) {
@@ -464,6 +456,17 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 			unlink(deltafile);
 			goto out;
 		}
+	}
+
+	populate_file_struct(file, original);
+	ret = compute_hash(file, original);
+	if (ret != 0) {
+		ret = -1;
+		goto out;
+	}
+	if (!hash_equal(file->peer->hash, file->hash)) {
+		ret = -1;
+		goto out;
 	}
 
 	/* Now apply the manifest delta */
@@ -478,13 +481,15 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 	}
 
 	unlink(deltafile);
-
+	ret = compute_hash(file, newfile); // MUST save new hash!
+	if (ret != 0) {
+		ret = -1;
+	}
 out:
 	free(original);
 	free(url);
 	free(newfile);
 	free(deltafile);
-
 	return ret;
 }
 

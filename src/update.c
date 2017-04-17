@@ -321,21 +321,11 @@ load_server_manifests:
 	retries = 0;
 	timeout = 10;
 
-	// The new subscription is seeded from the list of currently installed bundles
-	latest_subs = list_clone(current_subs);
-	ret = add_included_manifests(server_manifest, &latest_subs);
-	if (ret) {
-		ret = EMANIFEST_LOAD;
-		goto clean_exit;
-	}
-
-	set_subscription_versions(server_manifest, current_manifest, &latest_subs);
-
-	link_submanifests(current_manifest, server_manifest, current_subs, latest_subs);
-
 	/* updating subscribed manifests is done as part of recurse_manifest */
 
-	/* read the current collective of manifests that we are subscribed to */
+	/* Read the current collective of manifests that we are subscribed to.
+	 * First load up the old (current) manifests. Statedir could have been cleared
+	 * or corrupt, so don't assume things are already there. */
 	current_manifest->submanifests = recurse_manifest(current_manifest, current_subs, NULL);
 	if (!current_manifest->submanifests) {
 		if (retries < MAX_TRIES) {
@@ -349,12 +339,26 @@ load_server_manifests:
 	}
 	retries = 0;
 	timeout = 10;
+
 	/* consolidate the current collective manifests down into one in memory */
 	current_manifest->files = files_from_bundles(current_manifest->submanifests);
 
 	current_manifest->files = consolidate_files(current_manifest->files);
 
-	/* read the new collective of manifests that we are subscribed to */
+	latest_subs = list_clone(current_subs);
+	set_subscription_versions(server_manifest, current_manifest, &latest_subs);
+	link_submanifests(current_manifest, server_manifest, current_subs, latest_subs, false);
+	/* The new subscription is seeded from the list of currently installed bundles
+	 * This calls add_subscriptions which recurses for new includes */
+	grabtime_start(&times, "Add Included Manifests");
+	ret = add_included_manifests(server_manifest, current_version, &latest_subs);
+	grabtime_stop(&times);
+	if (ret) {
+		ret = EMANIFEST_LOAD;
+		goto clean_exit;
+	}
+
+	/* read the new collective of manifests that we are subscribed to in the new MoM */
 	server_manifest->submanifests = recurse_manifest(server_manifest, latest_subs, NULL);
 	if (!server_manifest->submanifests) {
 		if (retries < MAX_TRIES) {
@@ -372,6 +376,9 @@ load_server_manifests:
 	server_manifest->files = files_from_bundles(server_manifest->submanifests);
 
 	server_manifest->files = consolidate_files(server_manifest->files);
+
+	set_subscription_versions(server_manifest, current_manifest, &latest_subs);
+	link_submanifests(current_manifest, server_manifest, current_subs, latest_subs, true);
 
 	/* prepare for an update process based on comparing two in memory manifests */
 	link_manifests(current_manifest, server_manifest);

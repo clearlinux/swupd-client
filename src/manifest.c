@@ -850,7 +850,7 @@ void link_manifests(struct manifest *m1, struct manifest *m2)
 
 /* m1: old manifest
  * m2: new manifest */
-void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2)
+void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2, bool server)
 {
 	struct list *list1, *list2;
 	struct file *file1, *file2;
@@ -878,14 +878,15 @@ void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *su
 			list1 = list1->next;
 			list2 = list2->next;
 
+			/* server (new) manifests will only bring in new bundles */
 			if (file2->last_change > m1->version && !file2->is_deleted) {
-				if (subbed1 && subbed2) {
+				if (!server && subbed1 && subbed2) {
 					account_changed_bundle();
 				} else if (!subbed1 && subbed2) {
 					account_new_bundle();
 				}
 			}
-			if (file2->last_change > m1->version && file2->is_deleted) {
+			if (!server && (file2->last_change > m1->version && file2->is_deleted)) {
 				if (subbed1) {
 					account_deleted_bundle();
 				}

@@ -466,7 +466,6 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	grabtime_start(&times, "Download packs");
 	(void)rm_staging_dir_contents("download");
 
-	printf("Downloading packs...\n");
 	(void)download_subscribed_packs(*subs, true);
 	grabtime_stop(&times);
 

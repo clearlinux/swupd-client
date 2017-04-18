@@ -52,8 +52,6 @@ static int download_pack(int oldversion, int newversion, char *module)
 		return 0;
 	}
 
-	printf("Downloading %s pack for version %i\n", module, newversion);
-
 	string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, newversion, module, oldversion);
 
 	err = swupd_curl_get_file(url, filename, NULL, NULL, true);
@@ -68,7 +66,7 @@ static int download_pack(int oldversion, int newversion, char *module)
 
 	free(url);
 
-	printf("Extracting pack.\n");
+	printf("Extracting %s pack for version %i\n", module, newversion);
 	string_or_die(&tar, TAR_COMMAND " -C %s " TAR_PERM_ATTR_ARGS " -xf %s/pack-%s-from-%i-to-%i.tar 2> /dev/null",
 		      state_dir, state_dir, module, oldversion, newversion);
 
@@ -104,6 +102,7 @@ int download_subscribed_packs(struct list *subs, bool required)
 		return -ENOSWUPDSERVER;
 	}
 
+	printf("Downloading packs...\n");
 	iter = list_head(subs);
 	while (iter) {
 		sub = iter->data;

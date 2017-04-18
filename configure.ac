@@ -222,6 +222,11 @@ AS_IF(
   [FORMATID='!! Warning !! --with-formatid not specified!'],
   [FORMATID='!! Warning !! --with-formatid not specified!']
 )
+AS_IF(
+  [test -n "$with_formatid"],
+  [echo "$with_formatid" | grep -q -E '^([[1-9]][[0-9]]*|staging)$' || \
+    AC_MSG_ERROR(['--with-formatid' has an invalid value ($with_formatid). Supported values are positive integers or "staging".])]
+)
 
 AC_ARG_WITH(
   [systemdsystemunitdir],

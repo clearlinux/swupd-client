@@ -1,7 +1,5 @@
 Attempting to download version string to memory
-Downloading packs...
-Downloading test-bundle pack for version 10
-Extracting pack.
+Extracting test-bundle pack for version 10
 Installing bundle(s) files...
 REGEXP:Update target directory does not exist: .*/usr/bin. Trying to fix it
 Path /usr/bin is missing on the file system

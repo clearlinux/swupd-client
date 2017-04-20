@@ -281,7 +281,7 @@ int main_update()
 	grabtime_stop(&times);
 	grabtime_stop(&times); // Close step 1
 	grabtime_start(&times, "Load Manifests:");
-load_current_manifests:
+load_current_mom:
 	/* Step 3: setup manifests */
 
 	/* get the from/to MoM manifests */
@@ -292,7 +292,7 @@ load_current_manifests:
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
 			printf("Retry #%d downloading from/to MoM Manifests\n", retries);
-			goto load_current_manifests;
+			goto load_current_mom;
 		}
 		printf("Failure retrieving manifest from server\n");
 		ret = EMOM_NOTFOUND;
@@ -302,15 +302,16 @@ load_current_manifests:
 	/*  Reset the retries and timeout for subsequent download calls */
 	retries = 0;
 	timeout = 10;
+
+load_server_mom:
 	grabtime_stop(&times); // Close step 2
 	grabtime_start(&times, "Recurse and Consolidate Manifests");
-load_server_manifests:
 	server_manifest = load_mom(server_version);
 	if (!server_manifest) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
 			printf("Retry #%d downloading server Manifests\n", retries);
-			goto load_server_manifests;
+			goto load_server_mom;
 		}
 		printf("Failure retrieving manifest from server\n");
 		printf("Unable to load manifest after retrying (config or network problem?)\n");
@@ -326,12 +327,13 @@ load_server_manifests:
 	/* Read the current collective of manifests that we are subscribed to.
 	 * First load up the old (current) manifests. Statedir could have been cleared
 	 * or corrupt, so don't assume things are already there. */
+load_current_submanifests:
 	current_manifest->submanifests = recurse_manifest(current_manifest, current_subs, NULL);
 	if (!current_manifest->submanifests) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
 			printf("Retry #%d downloading current sub-manifests\n", retries);
-			goto load_server_manifests;
+			goto load_current_submanifests;
 		}
 		ret = ERECURSE_MANIFEST;
 		printf("Cannot load current MoM sub-manifests, exiting\n");
@@ -358,13 +360,14 @@ load_server_manifests:
 		goto clean_exit;
 	}
 
+load_server_submanifests:
 	/* read the new collective of manifests that we are subscribed to in the new MoM */
 	server_manifest->submanifests = recurse_manifest(server_manifest, latest_subs, NULL);
 	if (!server_manifest->submanifests) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
 			printf("Retry #%d downloading server sub-manifests\n", retries);
-			goto load_server_manifests;
+			goto load_server_submanifests;
 		}
 		ret = ERECURSE_MANIFEST;
 		printf("Error: Cannot load server MoM sub-manifests, exiting\n");

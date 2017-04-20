@@ -438,7 +438,6 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 
 	if (!file->peer) {
 		return -1;
-		goto out;
 	}
 
 	string_or_die(&original, "%s/%i/Manifest.%s", state_dir, current, component);
@@ -458,17 +457,6 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 		}
 	}
 
-	populate_file_struct(file, original);
-	ret = compute_hash(file, original);
-	if (ret != 0) {
-		ret = -1;
-		goto out;
-	}
-	if (!hash_equal(file->peer->hash, file->hash)) {
-		ret = -1;
-		goto out;
-	}
-
 	/* Now apply the manifest delta */
 	string_or_die(&newfile, "%s/%i/Manifest.%s", state_dir, new, component);
 
@@ -476,16 +464,23 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 	xattrs_copy(original, newfile);
 	if (ret != 0) {
 		unlink(newfile);
+		goto out;
 	} else if ((ret = xattrs_compare(original, newfile)) != 0) {
 		unlink(newfile);
+		goto out;
 	}
 
-	unlink(deltafile);
+	/* This is OK to do because populate_file will completely rewrite the file
+	 * struct contents and not leave stale data behind. Should the
+	 * implementation change, this must be updated to account for uncleared or
+	 * un-updated struct members. */
+	populate_file_struct(file, newfile);
 	ret = compute_hash(file, newfile); // MUST save new hash!
 	if (ret != 0) {
 		ret = -1;
 	}
 out:
+	unlink(deltafile);
 	free(original);
 	free(url);
 	free(newfile);
@@ -506,7 +501,6 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	/* Check for fullfile only, we will not be keeping the .tar around */
 	string_or_die(&filename, "%s/%i/Manifest.%s", state_dir, version, component);
 	if (stat(filename, &sb) == 0) {
-
 		ret = 0;
 		goto out;
 	}

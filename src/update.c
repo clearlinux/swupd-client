@@ -322,12 +322,11 @@ load_server_mom:
 	retries = 0;
 	timeout = 10;
 
-	/* updating subscribed manifests is done as part of recurse_manifest */
-
+load_current_submanifests:
 	/* Read the current collective of manifests that we are subscribed to.
 	 * First load up the old (current) manifests. Statedir could have been cleared
-	 * or corrupt, so don't assume things are already there. */
-load_current_submanifests:
+	 * or corrupt, so don't assume things are already there. Updating subscribed
+	 * manifests is done as part of recurse_manifest */
 	current_manifest->submanifests = recurse_manifest(current_manifest, current_subs, NULL);
 	if (!current_manifest->submanifests) {
 		if (retries < MAX_TRIES) {

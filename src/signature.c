@@ -87,24 +87,24 @@ bool initialize_signature(void)
 			/* The system time wasn't sane, print out what it is and the cert validity range */
 			time(&currtime);
 			timeinfo = localtime(&currtime);
-			printf("Warning: Current time is %s\n", asctime(timeinfo));
-			printf("Certificate validity is:\n");
+			fprintf(stderr, "Warning: Current time is %s\n", asctime(timeinfo));
+			fprintf(stderr, "Certificate validity is:\n");
 			b = BIO_new_fp(stdout, BIO_NOCLOSE);
 			if (b == NULL) {
-				printf("Failed to create BIO wrapping stream\n");
+				fprintf(stderr, "Failed to create BIO wrapping stream\n");
 				goto fail;
 			}
 			/* The ASN1_TIME_print function does not include a newline... */
 			if (!ASN1_TIME_print(b, X509_get_notBefore(cert))) {
-				printf("\nFailed to get certificate begin date\n");
+				fprintf(stderr, "\nFailed to get certificate begin date\n");
 				goto fail;
 			}
-			printf("\n");
+			fprintf(stderr, "\n");
 			if (!ASN1_TIME_print(b, X509_get_notAfter(cert))) {
-				printf("\nFailed to get certificate expiration date\n");
+				fprintf(stderr, "\nFailed to get certificate expiration date\n");
 				goto fail;
 			}
-			printf("\n");
+			fprintf(stderr, "\n");
 			BIO_free(b);
 		}
 		goto fail;
@@ -120,7 +120,7 @@ bool initialize_signature(void)
 
 	return true;
 fail:
-	printf("Failed to verify certificate: %s\n", X509_verify_cert_error_string(ret));
+	fprintf(stderr, "Failed to verify certificate: %s\n", X509_verify_cert_error_string(ret));
 	return false;
 }
 
@@ -325,10 +325,10 @@ static int validate_certificate(void)
 	/* TODO: CRL and Chains are not required for the current setup, but we may
 	 * implement them in the future 
 	if (!crl) {
-		printf("No certificate revocation list provided\n");
+		fprintf(stderr, "No certificate revocation list provided\n");
 	}
 	if (!chain) {
-		printf("No certificate chain provided\n");
+		fprintf(stderr, "No certificate chain provided\n");
 	}
 	*/
 
@@ -402,8 +402,8 @@ error:
 int verify_callback(int ok, X509_STORE_CTX *stor)
 {
 	if (!ok) {
-		printf("Certificate verification error: %s\n",
-		       X509_verify_cert_error_string(stor->error));
+		fprintf(stderr, "Certificate verification error: %s\n",
+			X509_verify_cert_error_string(stor->error));
 	}
 	return ok;
 }

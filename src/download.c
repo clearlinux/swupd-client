@@ -156,7 +156,7 @@ int start_full_download(bool pipelining)
 		MAX_XFER_BOTTOM = 1;
 	}
 
-	printf("Starting download of remaining update content. This may take a while...\n");
+	fprintf(stderr, "Starting download of remaining update content. This may take a while...\n");
 
 	return 0;
 }
@@ -302,8 +302,8 @@ int untar_full_download(void *data)
 	}
 	free(tarcommand);
 	if (err) {
-		printf("ignoring tar extract failure for fullfile %s.tar (ret %d)\n",
-		       file->hash, err);
+		fprintf(stderr, "ignoring tar extract failure for fullfile %s.tar (ret %d)\n",
+			file->hash, err);
 		goto exit;
 		/* FIXME: can we respond meaningfully to tar error codes?
 		 * symlink untars may have perm/xattr complaints and non-zero
@@ -322,7 +322,7 @@ int untar_full_download(void *data)
 	err = lstat(targetfile, &stat);
 	if (!err && !verify_file(file, targetfile)) {
 		/* Download was successful but the hash was bad. This is fatal*/
-		printf("Error: File content hash mismatch for %s (bad server data?)\n", targetfile);
+		fprintf(stderr, "Error: File content hash mismatch for %s (bad server data?)\n", targetfile);
 		exit(EXIT_FAILURE);
 	}
 
@@ -388,15 +388,15 @@ static int perform_curl_io_and_complete(int count, bool bounded)
 		/* The easy handle may have an error set, even if the server returns
 		 * HTTP 200, so retry the download for this case. */
 		if (ret == 200 && curl_ret != CURLE_OK) {
-			printf("Error for %s download: %s\n", file->hash,
-			       curl_easy_strerror(msg->data.result));
+			fprintf(stderr, "Error for %s download: %s\n", file->hash,
+				curl_easy_strerror(msg->data.result));
 			failed = list_prepend_data(failed, file);
 		} else if (ret == 200) {
 			/* When both web server and CURL report success, only then
 			 * proceed to uncompress. */
 			if (untar_full_download(file)) {
-				printf("Error for %s tarfile extraction, (check free space for %s?)\n",
-				       file->hash, state_dir);
+				fprintf(stderr, "Error for %s tarfile extraction, (check free space for %s?)\n",
+					file->hash, state_dir);
 				failed = list_prepend_data(failed, file);
 			}
 		} else if (ret == 0) {
@@ -405,17 +405,17 @@ static int perform_curl_io_and_complete(int count, bool bounded)
 			 */
 			if (local_download) {
 				if (untar_full_download(file)) {
-					printf("Error for %s tarfile extraction, (check free space for %s?)\n",
-					       file->hash, state_dir);
+					fprintf(stderr, "Error for %s tarfile extraction, (check free space for %s?)\n",
+						file->hash, state_dir);
 					failed = list_prepend_data(failed, file);
 				}
 			} else {
-				printf("Error for %s download: No response received\n",
-				       file->hash);
+				fprintf(stderr, "Error for %s download: No response received\n",
+					file->hash);
 				failed = list_prepend_data(failed, file);
 			}
 		} else {
-			printf("Error for %s download: Received %ld response\n", file->hash, ret);
+			fprintf(stderr, "Error for %s download: Received %ld response\n", file->hash, ret);
 			failed = list_prepend_data(failed, file);
 
 			unlink_all_staged_content(file);
@@ -565,7 +565,7 @@ void full_download(struct file *file)
 
 	/* Only print the first file so we don't spam on large misses */
 	if (nonpack == 0) {
-		printf("File %s was not in a pack\n", file->filename);
+		fprintf(stderr, "File %s was not in a pack\n", file->filename);
 	}
 	/* If we get here the pack is missing a file so we have to download it */
 	nonpack++;
@@ -638,7 +638,7 @@ struct list *end_full_download(void)
 {
 	int err;
 
-	printf("Finishing download of update content...\n");
+	fprintf(stderr, "Finishing download of update content...\n");
 
 	if (poll_fewer_than(0, 0) == 0) {
 		// The multi-stack is now emptied.

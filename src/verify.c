@@ -37,6 +37,7 @@
 #include "swupd.h"
 
 static bool cmdline_option_fix = false;
+static bool cmdline_option_picky = false;
 static bool cmdline_option_install = false;
 static bool cmdline_option_quick = false;
 
@@ -69,6 +70,7 @@ static const struct option prog_opts[] = {
 	{ "quick", no_argument, 0, 'q' },
 	{ "force", no_argument, 0, 'x' },
 	{ "nosigcheck", no_argument, 0, 'n' },
+	{ "picky", no_argument, 0, 'Y' },
 	{ "statedir", required_argument, 0, 'S' },
 	{ "certpath", required_argument, 0, 'C' },
 	{ "time", no_argument, 0, 't' },
@@ -89,6 +91,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
 	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version file downloads\n");
 	fprintf(stderr, "   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files)\n");
+	fprintf(stderr, "   -Y, --picky             List files which should not exist\n");
 	fprintf(stderr, "   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory\n");
 	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	fprintf(stderr, "   -q, --quick             Don't compare hashes, only fix missing files\n");
@@ -193,6 +196,9 @@ static bool parse_options(int argc, char **argv)
 				goto err;
 			}
 			set_cert_path(optarg);
+			break;
+		case 'Y':
+			cmdline_option_picky = true;
 			break;
 		default:
 			fprintf(stderr, "Unrecognized option\n\n");
@@ -769,6 +775,15 @@ load_submanifests:
 			remove_orphaned_files(official_manifest);
 		}
 		grabtime_stop(&times);
+	} else if (cmdline_option_picky) {
+		char *start = mk_full_filename(path_prefix, "/usr");
+		fprintf(stderr, "Generating list of extra files under %s\n", start);
+		ret = walk_tree(official_manifest, start);
+		if (ret >= 0) {
+			file_checked_count = ret;
+			ret = 0;
+		}
+		free(start);
 	} else {
 		bool repair = false;
 

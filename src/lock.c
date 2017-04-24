@@ -61,7 +61,7 @@ int p_lockfile(void)
 	lock_fd = open(lockfile, O_RDWR | O_CREAT | O_CLOEXEC, 0600);
 
 	if (lock_fd < 0) {
-		printf("Error: failed to open %s: %s\n", lockfile, strerror(errno));
+		fprintf(stderr, "Error: failed to open %s: %s\n", lockfile, strerror(errno));
 		free(lockfile);
 		return -1;
 	}
@@ -74,7 +74,7 @@ int p_lockfile(void)
 		if ((errno == EAGAIN) || (errno == EACCES)) {
 			ret = -EAGAIN;
 		}
-		printf("Error: cannot acquire lock file. Another swupd process is already running.\n");
+		fprintf(stderr, "Error: cannot acquire lock file. Another swupd process is already running.\n");
 		close(lock_fd);
 		return ret;
 	} else {

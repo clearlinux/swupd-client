@@ -95,17 +95,17 @@ int do_staging(struct file *file, struct manifest *MoM)
 	ret = stat(targetpath, &s);
 
 	if ((ret == -1) && (errno == ENOENT)) {
-		printf("Update target directory does not exist: %s. Trying to fix it\n", targetpath);
+		fprintf(stderr, "Update target directory does not exist: %s. Trying to fix it\n", targetpath);
 		verify_fix_path(dir, MoM);
 	} else if (!S_ISDIR(s.st_mode)) {
-		printf("Error: Update target exists but is NOT a directory: %s\n", targetpath);
+		fprintf(stderr, "Error: Update target exists but is NOT a directory: %s\n", targetpath);
 	}
 
 	free(targetpath);
 	string_or_die(&target, "%s%s/.update.%s", path_prefix, rel_dir, base);
 	ret = swupd_rm(target);
 	if (ret < 0 && ret != -ENOENT) {
-		printf("Error: Failed to remove %s\n", target);
+		fprintf(stderr, "Error: Failed to remove %s\n", target);
 	}
 
 	string_or_die(&statfile, "%s%s", path_prefix, file->filename);
@@ -281,15 +281,15 @@ int rename_staged_file_to_final(struct file *file)
 			/* this will fail if the directory was not already emptied */
 			ret = rename(target, lostnfound);
 			if (ret < 0 && errno != ENOTEMPTY && errno != EEXIST) {
-				printf("Error: failed to move %s to lost+found: %s\n",
-				       base, strerror(errno));
+				fprintf(stderr, "Error: failed to move %s to lost+found: %s\n",
+					base, strerror(errno));
 			}
 			free(lostnfound);
 		} else {
 			ret = rename(file->staging, target);
 			if (ret < 0) {
-				printf("Error: failed to rename staged %s to final: %s\n",
-				       file->hash, strerror(errno));
+				fprintf(stderr, "Error: failed to rename staged %s to final: %s\n",
+					file->hash, strerror(errno));
 			}
 			unlink(file->staging);
 		}

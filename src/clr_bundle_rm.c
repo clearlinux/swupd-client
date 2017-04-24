@@ -56,22 +56,22 @@ static char **bundles;
 
 static void print_help(const char *name)
 {
-	printf("Usage:\n");
-	printf("   swupd %s [options] [bundle1, bundle2, ...]\n\n", basename((char *)name));
-	printf("Help Options:\n");
-	printf("   -h, --help              Show help options\n");
-	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
-	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
-	printf("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
-	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
-	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
-	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
-	printf("   -n, --nosigcheck       Do not attempt to enforce certificate or signature checks\n");
-	printf("   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
-	printf("   -S, --statedir          Specify alternate swupd state directory\n");
-	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
-	printf("\n");
+	fprintf(stderr, "Usage:\n");
+	fprintf(stderr, "   swupd %s [options] [bundle1, bundle2, ...]\n\n", basename((char *)name));
+	fprintf(stderr, "Help Options:\n");
+	fprintf(stderr, "   -h, --help              Show help options\n");
+	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
+	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
+	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
+	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
+	fprintf(stderr, "   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
+	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
+	fprintf(stderr, "   -x, --force             Attempt to proceed even if non-critical errors found\n");
+	fprintf(stderr, "   -n, --nosigcheck       Do not attempt to enforce certificate or signature checks\n");
+	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
+	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
+	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
+	fprintf(stderr, "\n");
 }
 
 static const struct option prog_opts[] = {
@@ -102,14 +102,14 @@ static bool parse_options(int argc, char **argv)
 			exit(EXIT_SUCCESS);
 		case 'p': /* default empty path_prefix removes on the running OS */
 			if (!optarg || !set_path_prefix(optarg)) {
-				printf("Invalid --path argument\n\n");
+				fprintf(stderr, "Invalid --path argument\n\n");
 				goto err;
 			}
 			string_or_die(&curopts.path_prefix, "%s", optarg);
 			break;
 		case 'u':
 			if (!optarg) {
-				printf("error: invalid --url argument\n\n");
+				fprintf(stderr, "error: invalid --url argument\n\n");
 				goto err;
 			}
 			set_version_url(optarg);
@@ -119,7 +119,7 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'c':
 			if (!optarg) {
-				printf("Invalid --contenturl argument\n\n");
+				fprintf(stderr, "Invalid --contenturl argument\n\n");
 				goto err;
 			}
 			set_content_url(optarg);
@@ -127,7 +127,7 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'v':
 			if (!optarg) {
-				printf("Invalid --versionurl argument\n\n");
+				fprintf(stderr, "Invalid --versionurl argument\n\n");
 				goto err;
 			}
 			set_version_url(optarg);
@@ -135,20 +135,20 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'P':
 			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
-				printf("Invalid --port argument\n\n");
+				fprintf(stderr, "Invalid --port argument\n\n");
 				goto err;
 			}
 			break;
 		case 'F':
 			if (!optarg || !set_format_string(optarg)) {
-				printf("Invalid --format argument\n\n");
+				fprintf(stderr, "Invalid --format argument\n\n");
 				goto err;
 			}
 			string_or_die(&curopts.format_string, "%s", optarg);
 			break;
 		case 'S':
 			if (!optarg || !set_state_dir(optarg)) {
-				printf("Invalid --statedir argument\n\n");
+				fprintf(stderr, "Invalid --statedir argument\n\n");
 				goto err;
 			}
 			string_or_die(&curopts.state_dir, "%s", optarg);
@@ -166,20 +166,20 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'C':
 			if (!optarg) {
-				printf("Invalid --certpath argument\n\n");
+				fprintf(stderr, "Invalid --certpath argument\n\n");
 				goto err;
 			}
 			set_cert_path(optarg);
 			string_or_die(&curopts.cert_path, "%s", optarg);
 			break;
 		default:
-			printf("error: unrecognized option\n\n");
+			fprintf(stderr, "error: unrecognized option\n\n");
 			goto err;
 		}
 	}
 
 	if (argc <= optind) {
-		printf("error: missing bundle(s) to be removed\n\n");
+		fprintf(stderr, "error: missing bundle(s) to be removed\n\n");
 		goto err;
 	}
 
@@ -261,7 +261,7 @@ int bundle_remove_main(int argc, char **argv)
 	}
 
 	for (; *bundles; ++bundles, total++) {
-		printf("Removing bundle: %s\n", *bundles);
+		fprintf(stderr, "Removing bundle: %s\n", *bundles);
 
 		if (remove_bundle(*bundles) != 0) {
 			/* At least one bundle failed to be removed
@@ -281,9 +281,9 @@ int bundle_remove_main(int argc, char **argv)
 	}
 	/* print some statistics */
 	if (ret) {
-		printf("%i bundle(s) of %i failed to remove\n", bad, total);
+		fprintf(stderr, "%i bundle(s) of %i failed to remove\n", bad, total);
 	} else {
-		printf("%i bundle(s) were removed succesfully\n", total);
+		fprintf(stderr, "%i bundle(s) were removed succesfully\n", total);
 	}
 
 	/* free any parsed opt saved for reloading */

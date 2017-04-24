@@ -63,7 +63,7 @@ static void update_triggers(void)
 
 void run_scripts(void)
 {
-	printf("Calling post-update helper scripts.\n");
+	fprintf(stderr, "Calling post-update helper scripts.\n");
 
 	/* path_prefix aware helper */
 	if (need_update_boot || need_update_bootloader) {

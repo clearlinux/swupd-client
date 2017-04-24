@@ -583,7 +583,7 @@ void remove_manifest_files(char *filename, int version, char *hash)
 {
 	char *file;
 
-	printf("Warning: Removing corrupt Manifest.%s artifacts and re-downloading...\n", filename);
+	fprintf(stderr, "Warning: Removing corrupt Manifest.%s artifacts and re-downloading...\n", filename);
 	string_or_die(&file, "%s/%i/Manifest.%s", state_dir, version, filename);
 	unlink(file);
 	free(file);
@@ -623,7 +623,7 @@ struct manifest *load_mom(int version, bool latest)
 verify_mom:
 	ret = retrieve_manifests(version, version, "MoM", NULL);
 	if (ret != 0) {
-		printf("Failed to retrieve %d MoM manifest\n", version);
+		fprintf(stderr, "Failed to retrieve %d MoM manifest\n", version);
 		return NULL;
 	}
 
@@ -635,7 +635,7 @@ verify_mom:
 			retried = true;
 			goto verify_mom;
 		}
-		printf("Failed to load %d MoM manifest\n", version);
+		fprintf(stderr, "Failed to load %d MoM manifest\n", version);
 		goto out;
 	}
 
@@ -649,13 +649,13 @@ verify_mom:
 				retried = true;
 				goto verify_mom;
 			}
-			printf("WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM\n");
+			fprintf(stderr, "WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM\n");
 			free(filename);
 			free(url);
 			return NULL;
 		} else {
-			printf("FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
-			       "  --nosigcheck, but system security may be compromised\n");
+			fprintf(stderr, "FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
+					"  --nosigcheck, but system security may be compromised\n");
 			string_or_die(&log_cmd, "echo \"swupd security notice:"
 						" --nosigcheck used to bypass MoM signature verification failure\" | systemd-cat --priority=\"err\" --identifier=\"swupd\"");
 			(void)system(log_cmd);
@@ -693,7 +693,7 @@ struct manifest *load_manifest(int current, int version, struct file *file, stru
 retry_load:
 	ret = retrieve_manifests(current, version, file->filename, file);
 	if (ret != 0) {
-		printf("Failed to retrieve %d %s manifest\n", version, file->filename);
+		fprintf(stderr, "Failed to retrieve %d %s manifest\n", version, file->filename);
 		return NULL;
 	}
 
@@ -719,7 +719,7 @@ retry_load:
 			retried = true;
 			goto retry_load;
 		}
-		printf("Failed to load %d %s manifest\n", version, file->filename);
+		fprintf(stderr, "Failed to load %d %s manifest\n", version, file->filename);
 		return NULL;
 	}
 
@@ -1150,7 +1150,7 @@ void debug_write_manifest(struct manifest *manifest, char *filename)
 
 	out = fopen(fullfile, "w");
 	if (out == NULL) {
-		printf("Failed to open %s for write\n", fullfile);
+		fprintf(stderr, "Failed to open %s for write\n", fullfile);
 	}
 	if (out == NULL) {
 		abort();
@@ -1294,7 +1294,7 @@ void remove_files_in_manifest_from_fs(struct manifest *m)
 		free(fullfile);
 		count++;
 	}
-	printf("Total deleted files: %i\n", count);
+	fprintf(stderr, "Total deleted files: %i\n", count);
 }
 
 /* free all files found in m1 that happens to be

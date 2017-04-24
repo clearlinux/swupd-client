@@ -53,22 +53,22 @@ static const struct option prog_opts[] = {
 
 static void print_help(const char *name)
 {
-	printf("Usage:\n");
-	printf("    %s [OPTION...]\n", basename((char *)name));
-	printf(" or %s [OPTION...] SUBCOMMAND [OPTION...]\n\n", basename((char *)name));
-	printf("Help Options:\n");
-	printf("   -h, --help              Show help options\n");
-	printf("   -v, --version           Output version information and exit\n\n");
-	printf("Subcommands:\n");
+	fprintf(stderr, "Usage:\n");
+	fprintf(stderr, "    %s [OPTION...]\n", basename((char *)name));
+	fprintf(stderr, " or %s [OPTION...] SUBCOMMAND [OPTION...]\n\n", basename((char *)name));
+	fprintf(stderr, "Help Options:\n");
+	fprintf(stderr, "   -h, --help              Show help options\n");
+	fprintf(stderr, "   -v, --version           Output version information and exit\n\n");
+	fprintf(stderr, "Subcommands:\n");
 
 	struct subcmd *entry = commands;
 
 	while (entry->name != NULL) {
-		printf("   %-20s    %-30s\n", entry->name, entry->doc);
+		fprintf(stderr, "   %-20s    %-30s\n", entry->name, entry->doc);
 		entry++;
 	}
-	printf("\n");
-	printf("To view subcommand options, run `%s SUBCOMMAND --help'\n", basename((char *)name));
+	fprintf(stderr, "\n");
+	fprintf(stderr, "To view subcommand options, run `%s SUBCOMMAND --help'\n", basename((char *)name));
 }
 
 static int subcmd_index(char *arg)
@@ -103,7 +103,7 @@ static int parse_options(int argc, char **argv, int *index)
 			exit(EXIT_SUCCESS);
 		case 'v':
 			copyright_header("swupd");
-			printf("Compile-time options: %s\n", BUILD_OPTS);
+			fprintf(stderr, "Compile-time options: %s\n", BUILD_OPTS);
 			exit(EXIT_SUCCESS);
 		case '\01':
 			/* found a subcommand, or a random non-option argument */
@@ -118,7 +118,7 @@ static int parse_options(int argc, char **argv, int *index)
 			}
 		case '?':
 			/* for unknown options, an error message is printed automatically */
-			printf("\n");
+			fprintf(stderr, "\n");
 			goto error;
 		default:
 			/* should be unreachable */
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
 	if (parse_options(argc, argv, &index) < 0) {
 		return EINVALID_OPTION;
 	}
-
+	setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
 	/* Reset optind to 0 (instead of the default value, 1) at this point,
 	 * because option parsing is restarted for the given subcommand, and
 	 * subcommand optstrings are not prefixed with "-", which is a GNU

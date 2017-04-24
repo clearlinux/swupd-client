@@ -303,8 +303,8 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			char *url;
 			char *tar;
 
-			printf("Warning: Downloading missing manifest for bundle %s version %d.\n",
-			       current->filename, current->last_change);
+			fprintf(stderr, "Warning: Downloading missing manifest for bundle %s version %d.\n",
+				current->filename, current->last_change);
 
 			string_or_die(&filename, "%s/%i/Manifest.%s", state_dir,
 				      current->last_change, current->filename);
@@ -314,7 +314,7 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			free(url);
 
 			if (ret != 0) {
-				printf("Error: download of %s failed\n", filename);
+				fprintf(stderr, "Error: download of %s failed\n", filename);
 				unlink(filename);
 				free(filename);
 				break;
@@ -336,8 +336,8 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 		}
 
 		if (!verify_file(bundle, local)) {
-			printf("Warning: hash check failed for Manifest.%s for version %i. Deleting it.\n",
-			       current->filename, manifest->version);
+			fprintf(stderr, "Warning: hash check failed for Manifest.%s for version %i. Deleting it.\n",
+				current->filename, manifest->version);
 			unlink(local);
 			ret = 1;
 		}

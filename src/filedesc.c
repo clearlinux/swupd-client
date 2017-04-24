@@ -75,7 +75,7 @@ void dump_file_descriptor_leaks(void)
 		memset(&buffer, 0, sizeof(buffer));
 		size = readlink(filename, buffer, PATH_MAXLEN);
 		if (size && !strstr(buffer, "socket")) {
-			printf("Possible filedescriptor leak: fd_number=\"%s\",fd_details=\"%s\"\n", entry->d_name, buffer);
+			fprintf(stderr, "Possible filedescriptor leak: fd_number=\"%s\",fd_details=\"%s\"\n", entry->d_name, buffer);
 		}
 		free(filename);
 	}

@@ -121,13 +121,13 @@ TRY_DOWNLOAD:
 	   amount of &times */
 	if (list_head(failed) != NULL && retries < MAX_TRIES) {
 		increment_retries(&retries, &timeout);
-		printf("Starting download retry #%d\n", retries);
+		fprintf(stderr, "Starting download retry #%d\n", retries);
 		clean_curl_multi_queue();
 		goto TRY_DOWNLOAD;
 	}
 
 	if (retries >= MAX_TRIES) {
-		printf("ERROR: Could not download all files, aborting update\n");
+		fprintf(stderr, "ERROR: Could not download all files, aborting update\n");
 		list_free_list(failed);
 		return -1;
 	}
@@ -145,7 +145,7 @@ TRY_DOWNLOAD:
 
 	/* starting at list_head in the filename alpha-sorted updates list
 	 * means node directories are added before leaf files */
-	printf("Staging file content\n");
+	fprintf(stderr, "Staging file content\n");
 	iter = list_head(updates);
 	while (iter) {
 		file = iter->data;
@@ -161,7 +161,7 @@ TRY_DOWNLOAD:
 
 		ret = do_staging(file, server_manifest);
 		if (ret < 0) {
-			printf("File staging failed: %s\n", file->filename);
+			fprintf(stderr, "File staging failed: %s\n", file->filename);
 			return ret;
 		}
 	}
@@ -234,7 +234,7 @@ int main_update()
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
 		/* being here means we already close log by a previously caught error */
-		printf("Updater failed to initialize, exiting now.\n");
+		fprintf(stderr, "Updater failed to initialize, exiting now.\n");
 		return ret;
 	}
 
@@ -244,12 +244,12 @@ int main_update()
 	grabtime_start(&times, "Main Update");
 
 	if (!check_network()) {
-		printf("Error: Network issue, unable to proceed with update\n");
+		fprintf(stderr, "Error: Network issue, unable to proceed with update\n");
 		ret = ENOSWUPDSERVER;
 		goto clean_curl;
 	}
 
-	printf("Update started.\n");
+	fprintf(stderr, "Update started.\n");
 
 	grabtime_start(&times, "Update Step 1: get versions");
 
@@ -264,17 +264,17 @@ int main_update()
 		goto clean_curl;
 	}
 	if (server_version <= current_version) {
-		printf("Version on server (%i) is not newer than system version (%i)\n", server_version, current_version);
+		fprintf(stderr, "Version on server (%i) is not newer than system version (%i)\n", server_version, current_version);
 		ret = EXIT_SUCCESS;
 		goto clean_curl;
 	}
 
-	printf("Preparing to update from %i to %i\n", current_version, server_version);
+	fprintf(stderr, "Preparing to update from %i to %i\n", current_version, server_version);
 
 	/* Step 2: housekeeping */
 
 	if (rm_staging_dir_contents("download")) {
-		printf("Error cleaning download directory\n");
+		fprintf(stderr, "Error cleaning download directory\n");
 		ret = EXIT_FAILURE;
 		goto clean_curl;
 	}
@@ -291,10 +291,10 @@ load_current_mom:
 		 * - we just don't apply deltas */
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
-			printf("Retry #%d downloading from/to MoM Manifests\n", retries);
+			fprintf(stderr, "Retry #%d downloading from/to MoM Manifests\n", retries);
 			goto load_current_mom;
 		}
-		printf("Failure retrieving manifest from server\n");
+		fprintf(stderr, "Failure retrieving manifest from server\n");
 		ret = EMOM_NOTFOUND;
 		goto clean_exit;
 	}
@@ -310,11 +310,11 @@ load_server_mom:
 	if (!server_manifest) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
-			printf("Retry #%d downloading server Manifests\n", retries);
+			fprintf(stderr, "Retry #%d downloading server Manifests\n", retries);
 			goto load_server_mom;
 		}
-		printf("Failure retrieving manifest from server\n");
-		printf("Unable to load manifest after retrying (config or network problem?)\n");
+		fprintf(stderr, "Failure retrieving manifest from server\n");
+		fprintf(stderr, "Unable to load manifest after retrying (config or network problem?)\n");
 		ret = EMOM_NOTFOUND;
 		goto clean_exit;
 	}
@@ -331,7 +331,7 @@ load_current_submanifests:
 	if (!current_manifest->submanifests) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
-			printf("Retry #%d downloading current sub-manifests\n", retries);
+			fprintf(stderr, "Retry #%d downloading current sub-manifests\n", retries);
 			goto load_current_submanifests;
 		}
 		ret = ERECURSE_MANIFEST;

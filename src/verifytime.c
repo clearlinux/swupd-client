@@ -36,18 +36,18 @@ unsigned long int get_versionstamp(void)
 	const char *filename = "/usr/share/clear/versionstamp";
 
 	if (stat(filename, &statt) == -1) {
-		printf("%s does not exist!\n", filename);
+		fprintf(stderr, "%s does not exist!\n", filename);
 		return 0;
 	}
 
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
-		printf("Failed to open %s\n", filename);
+		fprintf(stderr, "Failed to open %s\n", filename);
 		return 0;
 	}
 
 	if (fgets(data, 11, fp) == NULL) {
-		printf("Failed to read %s\n", filename);
+		fprintf(stderr, "Failed to read %s\n", filename);
 		fclose(fp);
 		return 0;
 	}
@@ -65,10 +65,10 @@ unsigned long int get_versionstamp(void)
 bool set_time(time_t mtime, char *time)
 {
 	if (stime(&mtime) != 0) {
-		printf("Failed to set system time");
+		fprintf(stderr, "Failed to set system time");
 		return false;
 	}
-	printf("Set system time to %s\n", time);
+	fprintf(stderr, "Set system time to %s\n", time);
 	return true;
 }
 
@@ -92,7 +92,7 @@ int main()
 		/* TODO: Get even better time than the versionstamp using a collection of servers,
 		 * and fallback to using versionstamp time if it does not work or seem reasonable.
 		 * The system time wasn't sane, so set it here and try again */
-		printf("Warning: Current time is %s\nAttempting to fix...", asctime(timeinfo));
+		fprintf(stderr, "Warning: Current time is %s\nAttempting to fix...", asctime(timeinfo));
 		if (set_time(versiontime, asctime(timeinfo)) == false) {
 			return 1;
 		}

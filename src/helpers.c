@@ -43,7 +43,7 @@
 void check_root(void)
 {
 	if (getuid() != 0) {
-		printf("This program must be run as root..aborting.\n\n");
+		fprintf(stderr, "This program must be run as root..aborting.\n\n");
 		exit(EXIT_FAILURE);
 	}
 }
@@ -161,7 +161,7 @@ static int create_required_dirs(void)
 			string_or_die(&cmd, "mkdir -p %s/%s", state_dir, state_dirs[i]);
 			ret = system(cmd);
 			if (ret) {
-				printf("Error: failed to create %s/%s\n", state_dir, state_dirs[i]);
+				fprintf(stderr, "Error: failed to create %s/%s\n", state_dir, state_dirs[i]);
 				return -1;
 			}
 			free(cmd);
@@ -169,7 +169,7 @@ static int create_required_dirs(void)
 			string_or_die(&dir, "%s/%s", state_dir, state_dirs[i]);
 			ret = chmod(dir, S_IRWXU);
 			if (ret) {
-				printf("Error: failed to set mode for %s/%s\n", state_dir, state_dirs[i]);
+				fprintf(stderr, "Error: failed to set mode for %s/%s\n", state_dir, state_dirs[i]);
 				return -1;
 			}
 			free(dir);
@@ -178,7 +178,7 @@ static int create_required_dirs(void)
 		// chmod 700
 		ret = chmod(state_dir, S_IRWXU);
 		if (ret) {
-			printf("Error: failed to set mode for state dir (%s)\n", state_dir);
+			fprintf(stderr, "Error: failed to set mode for state dir (%s)\n", state_dir);
 			return -1;
 		}
 	}
@@ -644,9 +644,9 @@ out_fds:
 */
 void copyright_header(const char *name)
 {
-	printf(PACKAGE " %s " VERSION "\n", name);
-	printf("   Copyright (C) 2012-2016 Intel Corporation\n");
-	printf("\n");
+	fprintf(stderr, PACKAGE " %s " VERSION "\n", name);
+	fprintf(stderr, "   Copyright (C) 2012-2016 Intel Corporation\n");
+	fprintf(stderr, "\n");
 }
 
 void string_or_die(char **strp, const char *fmt, ...)
@@ -693,13 +693,13 @@ int get_dirfd_path(const char *fullname)
 
 	fd = open(dir, O_RDONLY);
 	if (fd < 0) {
-		printf("Failed to open dir %s (%s)\n", dir, strerror(errno));
+		fprintf(stderr, "Failed to open dir %s (%s)\n", dir, strerror(errno));
 		goto out;
 	}
 
 	real_path = realpath(dir, NULL);
 	if (!real_path) {
-		printf("Failed to get real path of %s (%s)\n", dir, strerror(errno));
+		fprintf(stderr, "Failed to get real path of %s (%s)\n", dir, strerror(errno));
 		close(fd);
 		goto out;
 	}
@@ -778,15 +778,15 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		/* Search for the file in the manifest, to get the hash for the file */
 		file = search_file_in_manifest(target_MoM, path);
 		if (file == NULL) {
-			printf("Error: Path %s not found in any of the subscribed manifests"
-			       "in verify_fix_path for path_prefix %s\n",
-			       path, path_prefix);
+			fprintf(stderr, "Error: Path %s not found in any of the subscribed manifests"
+					"in verify_fix_path for path_prefix %s\n",
+				path, path_prefix);
 			ret = -1;
 			goto end;
 		}
 
 		if (file->is_deleted) {
-			printf("Error: Path %s found deleted in verify_fix_path\n", path);
+			fprintf(stderr, "Error: Path %s found deleted in verify_fix_path\n", path);
 			ret = -1;
 			goto end;
 		}
@@ -796,9 +796,9 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 			if (verify_file(file, target)) {
 				continue;
 			}
-			printf("Hash did not match for path : %s\n", path);
+			fprintf(stderr, "Hash did not match for path : %s\n", path);
 		} else if (ret == -1 && errno == ENOENT) {
-			printf("Path %s is missing on the file system\n", path);
+			fprintf(stderr, "Path %s is missing on the file system\n", path);
 		} else {
 			goto end;
 		}
@@ -816,19 +816,19 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		ret = swupd_curl_get_file(url, tar_dotfile, NULL, NULL, false);
 
 		if (ret != 0) {
-			printf("Error: Failed to download file %s in verify_fix_path\n", file->filename);
+			fprintf(stderr, "Error: Failed to download file %s in verify_fix_path\n", file->filename);
 			unlink(tar_dotfile);
 			goto end;
 		}
 		if (untar_full_download(file) != 0) {
-			printf("Error: Failed to untar file %s\n", file->filename);
+			fprintf(stderr, "Error: Failed to untar file %s\n", file->filename);
 			ret = -1;
 			goto end;
 		}
 
 		ret = do_staging(file, target_MoM);
 		if (ret != 0) {
-			printf("Error: Path %s failed to stage in verify_fix_path\n", path);
+			fprintf(stderr, "Error: Path %s failed to stage in verify_fix_path\n", path);
 			goto end;
 		}
 	}
@@ -866,8 +866,8 @@ void set_local_download(void)
 
 	/* protocols must match for download logic */
 	if (version_local != content_local) {
-		printf("\nVersion and content URLs must both use the HTTP/HTTPS protocols"
-		       " or the libcurl FILE protocol.\n");
+		fprintf(stderr, "\nVersion and content URLs must both use the HTTP/HTTPS protocols"
+				" or the libcurl FILE protocol.\n");
 		exit(EXIT_FAILURE);
 	}
 

@@ -58,13 +58,13 @@ int swupd_curl_init(void)
 
 	curl_ret = curl_global_init(CURL_GLOBAL_ALL);
 	if (curl_ret != CURLE_OK) {
-		printf("Error: failed to initialize CURL environment\n");
+		fprintf(stderr, "Error: failed to initialize CURL environment\n");
 		return -1;
 	}
 
 	curl = curl_easy_init();
 	if (curl == NULL) {
-		printf("Error: failed to initialize CURL session\n");
+		fprintf(stderr, "Error: failed to initialize CURL session\n");
 		curl_global_cleanup();
 		return -1;
 	}
@@ -243,7 +243,7 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 		}
 	} else {
 		// only download latest version number, storing in the provided pointer
-		printf("Attempting to download version string to memory\n");
+		fprintf(stderr, "Attempting to download version string to memory\n");
 
 		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, swupd_download_version_to_memory);
 		if (curl_ret != CURLE_OK) {
@@ -303,43 +303,43 @@ exit:
 	} else { /* download failed but let our caller do it */
 		switch (curl_ret) {
 		case CURLE_COULDNT_RESOLVE_PROXY:
-			printf("Curl: Could not resolve proxy\n");
+			fprintf(stderr, "Curl: Could not resolve proxy\n");
 			err = -1;
 			break;
 		case CURLE_COULDNT_RESOLVE_HOST:
-			printf("Curl: Could not resolve host - '%s'\n", url);
+			fprintf(stderr, "Curl: Could not resolve host - '%s'\n", url);
 			err = -1;
 			break;
 		case CURLE_COULDNT_CONNECT:
-			printf("Curl: Could not connect to host or proxy\n");
+			fprintf(stderr, "Curl: Could not connect to host or proxy\n");
 			err = -ENONET;
 			break;
 		case CURLE_FILE_COULDNT_READ_FILE:
 			err = -1;
 			break;
 		case CURLE_PARTIAL_FILE:
-			printf("Curl: File incompletely downloaded from '%s' to '%s'\n",
-			       url, filename);
+			fprintf(stderr, "Curl: File incompletely downloaded from '%s' to '%s'\n",
+				url, filename);
 			err = -1;
 			break;
 		case CURLE_RECV_ERROR:
-			printf("Curl: Failure receiving data from server\n");
+			fprintf(stderr, "Curl: Failure receiving data from server\n");
 			err = -ENOLINK;
 			break;
 		case CURLE_WRITE_ERROR:
-			printf("Curl: Error downloading to local file - %s\n", filename);
+			fprintf(stderr, "Curl: Error downloading to local file - %s\n", filename);
 			err = -EIO;
 			break;
 		case CURLE_OPERATION_TIMEDOUT:
-			printf("Curl: Communicating with server timed out.\n");
+			fprintf(stderr, "Curl: Communicating with server timed out.\n");
 			err = -ETIMEDOUT;
 			break;
 		case CURLE_SSL_CACERT_BADFILE:
-			printf("Curl: Bad SSL Cert file, cannot ensure secure connection\n");
+			fprintf(stderr, "Curl: Bad SSL Cert file, cannot ensure secure connection\n");
 			err = -1;
 			break;
 		default:
-			printf("Curl error: %s\n", curl_easy_strerror(curl_ret));
+			fprintf(stderr, "Curl error: %s\n", curl_easy_strerror(curl_ret));
 			err = -1;
 			break;
 		}
@@ -405,7 +405,7 @@ void swupd_curl_test_resume(void)
 	curl_ret = curl_easy_perform(curl);
 
 	if (curl_ret == CURLE_RANGE_ERROR) {
-		printf("Range command not supported by server, download resume disabled.\n");
+		fprintf(stderr, "Range command not supported by server, download resume disabled.\n");
 		resume_download_enabled = false;
 	}
 exit:

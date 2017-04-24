@@ -86,7 +86,7 @@ static struct time *alloc_time(timelist *head)
 {
 	struct time *t = calloc(1, sizeof(struct time));
 	if (t == NULL) {
-		printf("ERROR: grab_time: Failed to to allocate memory...freeing and removing timing\n");
+		fprintf(stderr, "ERROR: grab_time: Failed to to allocate memory...freeing and removing timing\n");
 		while (!TAILQ_EMPTY(head)) {
 			struct time *iter = TAILQ_FIRST(head);
 			TAILQ_REMOVE(head, iter, times);
@@ -151,20 +151,20 @@ void print_time_stats(timelist *head)
 	double delta = 0;
 	struct time *t;
 
-	printf("\nRaw elapsed time stats:\n");
+	fprintf(stderr, "\nRaw elapsed time stats:\n");
 	TAILQ_FOREACH_REVERSE(t, head, timelist, times)
 	{
 		if (t->complete == true) {
 			delta = t->rawstop.tv_sec - t->rawstart.tv_sec + (t->rawstop.tv_nsec / 1000000.0) - (t->rawstart.tv_nsec / 1000000.0);
-			printf("%.4f\tms: %s\n", delta, t->name);
+			fprintf(stderr, "%.4f\tms: %s\n", delta, t->name);
 		}
 	}
-	printf("\nCPU process time stats:\n");
+	fprintf(stderr, "\nCPU process time stats:\n");
 	while (!TAILQ_EMPTY(head)) {
 		t = TAILQ_LAST(head, timelist);
 		if (t->complete == true) {
 			delta = t->procstop.tv_sec - t->procstart.tv_sec + (t->procstop.tv_nsec / 1000000.0) - (t->procstart.tv_nsec / 1000000.0);
-			printf("%.4f\tms: %s\n", delta, t->name);
+			fprintf(stderr, "%.4f\tms: %s\n", delta, t->name);
 		}
 		TAILQ_REMOVE(head, t, times);
 		free(t);
@@ -191,9 +191,9 @@ static int set_default_value_from_path(char **global, const char *path)
 	line[0] = 0;
 	if (fgets(line, LINE_MAX, file) == NULL) {
 		if (ferror(file)) {
-			printf("Error: Unable to read data from %s\n", rel_path);
+			fprintf(stderr, "Error: Unable to read data from %s\n", rel_path);
 		} else if (feof(file)) {
-			printf("Error: Contents of %s are empty\n", rel_path);
+			fprintf(stderr, "Error: Contents of %s are empty\n", rel_path);
 		}
 		goto fail;
 	}
@@ -284,7 +284,7 @@ bool set_state_dir(char *path)
 {
 	if (path) {
 		if (path[0] != '/') {
-			printf("statepath must be a full path starting with '/', not '%c'\n", path[0]);
+			fprintf(stderr, "statepath must be a full path starting with '/', not '%c'\n", path[0]);
 			return false;
 		}
 
@@ -349,8 +349,8 @@ bool set_format_string(char *userinput)
 }
 
 /* Initializes the path_prefix global variable. If the path parameter is not
- * NULL, path_prefix will be set to its value, but only if it is a positive
- * integer or the special value "staging". Otherwise, the default value of '/'
+ * NULL, path_prefix will be set to its value.
+ * Otherwise, the default value of '/'
  * is used. Note that the given path must exist.
  */
 bool set_path_prefix(char *path)
@@ -376,7 +376,7 @@ bool set_path_prefix(char *path)
 
 			cwd = get_current_dir_name();
 			if (cwd == NULL) {
-				printf("Unable to get current directory name (%s)\n", strerror(errno));
+				fprintf(stderr, "Unable to get current directory name (%s)\n", strerror(errno));
 				free(tmp);
 				return false;
 			}
@@ -406,8 +406,8 @@ bool set_path_prefix(char *path)
 	}
 	ret = stat(path_prefix, &statbuf);
 	if (ret != 0 || !S_ISDIR(statbuf.st_mode)) {
-		printf("Bad path_prefix %s (%s), cannot continue.\n",
-		       path_prefix, strerror(errno));
+		fprintf(stderr, "Bad path_prefix %s (%s), cannot continue.\n",
+			path_prefix, strerror(errno));
 		return false;
 	}
 
@@ -470,7 +470,7 @@ bool init_globals(void)
 		/* Fallback to configure time format_string if other sources fail */
 		set_format_string(FORMATID);
 #else
-		printf("Unable to determine format id. Use the -F option instead.\n");
+		fprintf(stderr, "Unable to determine format id. Use the -F option instead.\n");
 		exit(EXIT_FAILURE);
 #endif
 	}
@@ -485,7 +485,7 @@ bool init_globals(void)
 		ret = -1;
 #endif
 		if (ret) {
-			printf("\nDefault version URL not found. Use the -v option instead.\n");
+			fprintf(stderr, "\nDefault version URL not found. Use the -v option instead.\n");
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -500,7 +500,7 @@ bool init_globals(void)
 		ret = -1;
 #endif
 		if (ret) {
-			printf("\nDefault content URL not found. Use the -c option instead.\n");
+			fprintf(stderr, "\nDefault content URL not found. Use the -c option instead.\n");
 			exit(EXIT_FAILURE);
 		}
 	}

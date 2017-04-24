@@ -39,23 +39,23 @@ static char **bundles;
 
 static void print_help(const char *name)
 {
-	printf("Usage:\n");
-	printf("   swupd %s [options] [bundle1 bundle2 (...)]\n\n", basename((char *)name));
-	printf("Help Options:\n");
-	printf("   -h, --help              Show help options\n");
-	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
-	printf("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
-	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
-	printf("   -P, --port=[port #]        Port number to connect to at the url for version string and content file downloads\n");
-	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
-	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
-	printf("   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
-	printf("   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
-	printf("   -S, --statedir          Specify alternate swupd state directory\n");
-	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
-	printf("   -t, --time         	   Show verbose time output for swupd operations\n");
-	printf("\n");
+	fprintf(stderr, "Usage:\n");
+	fprintf(stderr, "   swupd %s [options] [bundle1 bundle2 (...)]\n\n", basename((char *)name));
+	fprintf(stderr, "Help Options:\n");
+	fprintf(stderr, "   -h, --help              Show help options\n");
+	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
+	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
+	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
+	fprintf(stderr, "   -P, --port=[port #]        Port number to connect to at the url for version string and content file downloads\n");
+	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
+	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
+	fprintf(stderr, "   -x, --force             Attempt to proceed even if non-critical errors found\n");
+	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
+	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
+	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
+	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
+	fprintf(stderr, "   -t, --time         	   Show verbose time output for swupd operations\n");
+	fprintf(stderr, "\n");
 }
 
 static const struct option prog_opts[] = {
@@ -88,7 +88,7 @@ static bool parse_options(int argc, char **argv)
 			exit(EXIT_SUCCESS);
 		case 'u':
 			if (!optarg) {
-				printf("error: invalid --url argument\n\n");
+				fprintf(stderr, "error: invalid --url argument\n\n");
 				goto err;
 			}
 			set_version_url(optarg);
@@ -96,45 +96,45 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'c':
 			if (!optarg) {
-				printf("Invalid --contenturl argument\n\n");
+				fprintf(stderr, "Invalid --contenturl argument\n\n");
 				goto err;
 			}
 			set_content_url(optarg);
 			break;
 		case 'v':
 			if (!optarg) {
-				printf("Invalid --versionurl argument\n\n");
+				fprintf(stderr, "Invalid --versionurl argument\n\n");
 				goto err;
 			}
 			set_version_url(optarg);
 			break;
 		case 'p': /* default empty path_prefix verifies the running OS */
 			if (!optarg || !set_path_prefix(optarg)) {
-				printf("Invalid --path argument\n\n");
+				fprintf(stderr, "Invalid --path argument\n\n");
 				goto err;
 			}
 			break;
 		case 'P':
 			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
-				printf("Invalid --port argument\n\n");
+				fprintf(stderr, "Invalid --port argument\n\n");
 				goto err;
 			}
 			break;
 		case 'F':
 			if (!optarg || !set_format_string(optarg)) {
-				printf("Invalid --format argument\n\n");
+				fprintf(stderr, "Invalid --format argument\n\n");
 				goto err;
 			}
 			break;
 		case 'S':
 			if (!optarg || !set_state_dir(optarg)) {
-				printf("Invalid --statedir argument\n\n");
+				fprintf(stderr, "Invalid --statedir argument\n\n");
 				goto err;
 			}
 			break;
 		case 'l':
-			printf("error: [-l, --list] option is deprecated, use\n"
-			       "bundle-list [-a|--all] sub-command instead.\n\n");
+			fprintf(stderr, "error: [-l, --list] option is deprecated, use\n"
+					"bundle-list [-a|--all] sub-command instead.\n\n");
 			exit(EXIT_FAILURE);
 		case 'x':
 			force = true;
@@ -150,19 +150,19 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'C':
 			if (!optarg) {
-				printf("Invalid --certpath argument\n\n");
+				fprintf(stderr, "Invalid --certpath argument\n\n");
 				goto err;
 			}
 			set_cert_path(optarg);
 			break;
 		default:
-			printf("error: unrecognized option\n\n");
+			fprintf(stderr, "error: unrecognized option\n\n");
 			goto err;
 		}
 	}
 
 	if (argc <= optind) {
-		printf("error: missing bundle(s) to be installed\n\n");
+		fprintf(stderr, "error: missing bundle(s) to be installed\n\n");
 		goto err;
 	}
 

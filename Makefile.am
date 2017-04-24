@@ -60,7 +60,7 @@ libswupd_la_LDFLAGS = \
 	-version-info $(LIBSWUPD_CURRENT):$(LIBSWUPD_REVISION):$(LIBSWUPD_AGE)
 
 swupd_update_SOURCES = src/main.c
-swupd_verify_SOURCES = src/verify.c
+swupd_verify_SOURCES = src/verify.c src/extra_files.c
 swupd_check_update_SOURCES = src/check_update.c
 swupd_search_SOURCES = src/search.c
 

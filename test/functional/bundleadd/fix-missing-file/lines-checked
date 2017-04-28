@@ -1,4 +1,7 @@
 Attempting to download version string to memory
+Retry #1 downloading subscribed packs
+Retry #2 downloading subscribed packs
+Retry #3 downloading subscribed packs
 Installing bundle(s) files...
 Path /foo is missing on the file system
 Bundle(s) installation done.

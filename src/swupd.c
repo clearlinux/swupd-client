@@ -34,6 +34,7 @@ struct subcmd {
 };
 
 static struct subcmd commands[] = {
+	{ "autoupdate", "Enable/disable automatic system updates", autoupdate_main },
 	{ "bundle-add", "Install a new bundle", bundle_add_main },
 	{ "bundle-remove", "Uninstall a bundle", bundle_remove_main },
 	{ "bundle-list", "List installed bundles", bundle_list_main },

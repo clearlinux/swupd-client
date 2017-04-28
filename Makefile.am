@@ -14,6 +14,7 @@ swupd_SOURCES = \
 	$(clr_bundle_add_SOURCES) \
 	$(clr_bundle_rm_SOURCES) \
 	$(clr_bundle_ls_SOURCES) \
+	$(swupd_autoupdate_SOURCES) \
 	$(swupd_search_SOURCES)
 
 check_PROGRAMS = \
@@ -63,6 +64,7 @@ swupd_update_SOURCES = src/main.c
 swupd_verify_SOURCES = src/verify.c src/extra_files.c
 swupd_check_update_SOURCES = src/check_update.c
 swupd_search_SOURCES = src/search.c
+swupd_autoupdate_SOURCES = src/autoupdate.c
 
 clr_bundle_add_SOURCES = src/clr_bundle_add.c
 clr_bundle_rm_SOURCES = src/clr_bundle_rm.c

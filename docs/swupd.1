@@ -117,6 +117,15 @@ Specify an alternate swupd state directory. Normally \fBswupd\fP uses
 .UNINDENT
 .SH SUBCOMMANDS
 .sp
+\fBautoupdate [\-\-enable|\-\-disable]\fP
+.INDENT 0.0
+.INDENT 3.5
+Enables or disables automatic updates, or reports current
+status. Enabling updates does not cause an immediate update \-
+use \fIswupd update\fP to force one if desired.
+.UNINDENT
+.UNINDENT
+.sp
 \fBbundle\-add {bundles}\fP
 .INDENT 0.0
 .INDENT 3.5
@@ -330,6 +339,9 @@ On success, 0 is returned. A non\-zero return code signals a failure.
 If the subcommand \fBcheck\-update\fP was specified, the program returns
 \fB0\fP if an update is available, \fB1\fP if no update available, and a
 return value higher than \fB1\fP signals a failure.
+.sp
+If the subcommand was \fBautoupdate\fP without options, then the program
+returns \fB0\fP if automatic updating is enabled.
 .SS SEE ALSO
 .INDENT 0.0
 .IP \(bu 2

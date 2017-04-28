@@ -104,6 +104,12 @@ used to modify the core behavior and resources that swupd uses.
 SUBCOMMANDS
 ===========
 
+``autoupdate [--enable|--disable]``
+
+    Enables or disables automatic updates, or reports current
+    status. Enabling updates does not cause an immediate update -
+    use `swupd update` to force one if desired.
+
 ``bundle-add {bundles}``
 
     Installs new software bundles. Any bundle name listed after
@@ -248,6 +254,8 @@ If the subcommand ``check-update`` was specified, the program returns
 ``0`` if an update is available, ``1`` if no update available, and a
 return value higher than ``1`` signals a failure.
 
+If the subcommand was ``autoupdate`` without options, then the program
+returns ``0`` if automatic updating is enabled.
 
 SEE ALSO
 --------

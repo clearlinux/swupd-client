@@ -416,6 +416,8 @@ out:
 static int install_bundles(struct list *bundles, struct list **subs, int current_version, struct manifest *mom)
 {
 	int ret;
+	int retries = 0;
+	int timeout = 10;
 	struct file *file;
 	struct list *iter;
 	struct list *to_install_bundles = NULL;
@@ -466,7 +468,14 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	grabtime_start(&times, "Download packs");
 	(void)rm_staging_dir_contents("download");
 
-	(void)download_subscribed_packs(*subs, true);
+download_subscribed_packs:
+	if (download_subscribed_packs(*subs, true)) {
+		if (retries < MAX_TRIES) {
+			increment_retries(&retries, &timeout);
+			printf("Retry #%d downloading subscribed packs\n", retries);
+			goto download_subscribed_packs;
+		}
+	}
 	grabtime_stop(&times);
 
 	/* step 3: Add tracked bundles */

@@ -55,7 +55,7 @@ static struct fileskip {
 	const char *shortname; /* Without prefix */
 	char *name;	    /* full name, including any path_prefix */
 	int len;
-} skippers[] =
+} skip_dirs[] =
     { { shortname : "/lib/modules" },
       { shortname : "/local" } };
 static int path_prefix_len;
@@ -64,8 +64,8 @@ static int path_prefix_len;
 
 static int record_filename(const char *name, const struct stat *stat __attribute__((unused)), int type, struct FTW *ftw __attribute__((unused)))
 {
-	for (size_t i = 0; i < sizeof(skippers) / sizeof(skippers[0]); i++) {
-		if (strncmp(name, skippers[i].name, skippers[i].len) == 0) {
+	for (size_t i = 0; i < sizeof(skip_dirs) / sizeof(skip_dirs[0]); i++) {
+		if (strncmp(name, skip_dirs[i].name, skip_dirs[i].len) == 0) {
 			return FTW_SKIP_SUBTREE;
 		}
 	}
@@ -89,7 +89,7 @@ static int qsort_helper(const void *A, const void *B)
 	return strcmp(((struct filerecord *)A)->filename, ((struct filerecord *)B)->filename);
 }
 /* bsearch helper function */
-static int looker(const void *A, const void *B)
+static int bsearch_helper(const void *A, const void *B)
 {
 	return strcmp(*(const char **)A, ((struct filerecord *)B)->filename);
 }
@@ -101,9 +101,9 @@ int walk_tree(struct manifest *manifest, const char *start)
 	int rc;
 	path_prefix_len = strlen(path_prefix);
 	/* Set up the directories to skip */
-	for (size_t i = 0; i < sizeof(skippers) / sizeof(skippers[0]); i++) {
-		skippers[i].name = mk_full_filename(start, skippers[i].shortname);
-		skippers[i].len = strlen(skippers[i].name);
+	for (size_t i = 0; i < sizeof(skip_dirs) / sizeof(skip_dirs[0]); i++) {
+		skip_dirs[i].name = mk_full_filename(start, skip_dirs[i].shortname);
+		skip_dirs[i].len = strlen(skip_dirs[i].name);
 	}
 	rc = nftw(start, &record_filename, 0, FTW_ACTIONRETVAL | FTW_PHYS | FTW_MOUNT);
 	const char *skip_dir = NULL; /* Skip files below this in printout */
@@ -126,15 +126,18 @@ int walk_tree(struct manifest *manifest, const char *start)
 		if (file->is_deleted) {
 			continue;
 		}
-		found = bsearch(&file->filename, F, nF, sizeof(*F), &looker);
+		found = bsearch(&file->filename, F, nF, sizeof(*F), &bsearch_helper);
 		if (found) {
 			found->in_manifest = true;
 		}
 	}
 	/* list files/directories which are extra */
 	for (int i = 0; i < nF; i++) {
-		int skip_len; /* Length of directory name we are skipping */
+		int skip_len; /* Length of directory name we are skipping
+			       * could have used strlen(skip_dir), but speed! */
 		if (!F[i].in_manifest) {
+			/* Logic to avoid printing out all the files in a
+			 * directory when the directory itself is not present */
 			if (skip_dir) {
 				/* This is under the current directory to be skipped */
 				if ((strncmp(F[i].filename, skip_dir, skip_len) == 0) &&
@@ -145,16 +148,18 @@ int walk_tree(struct manifest *manifest, const char *start)
 			if (F[i].dir) { /* Start of new dir to skip */
 				skip_dir = F[i].filename;
 				skip_len = strlen(skip_dir);
+				printf("%s/\n", F[i].filename);
+			} else {
+				printf("%s\n", F[i].filename);
 			}
-			printf("%s\n", F[i].filename);
 		} else {
 			skip_dir = NULL;
 		}
 	}
 	rc = nF;
 tidy:
-	for (size_t i = 0; i < sizeof(skippers) / sizeof(skippers[0]); i++) {
-		free(skippers[i].name);
+	for (size_t i = 0; i < sizeof(skip_dirs) / sizeof(skip_dirs[0]); i++) {
+		free(skip_dirs[i].name);
 	}
 	for (int i = 0; i < nF; i++) {
 		free(F[i].filename);

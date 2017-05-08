@@ -76,6 +76,7 @@ extern bool update_complete;
 extern bool need_update_boot;
 extern bool need_update_bootloader;
 extern bool need_systemd_reexec;
+extern char *post_update_action;
 
 struct update_stat {
 	uint64_t st_mode;

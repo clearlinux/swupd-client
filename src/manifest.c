@@ -633,7 +633,6 @@ verify_mom:
 		printf("Failed to load %d MoM manifest\n", version);
 		goto out;
 	}
-	retried = false;
 
 	string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
 	string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);

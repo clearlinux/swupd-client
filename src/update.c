@@ -214,6 +214,15 @@ int add_included_manifests(struct manifest *mom, int current, struct list **subs
 	return ret;
 }
 
+static void run_postupdate_action(void)
+{
+	if (post_update_action == NULL) {
+		return;
+	}
+	fprintf(stderr, "**** [Warning] Post update action was detected in this update, please run: ****\n\t$ %s\n", post_update_action);
+	free(post_update_action);
+}
+
 int main_update()
 {
 	int current_version = -1, server_version = -1;
@@ -485,6 +494,7 @@ clean_curl:
 	if (nonpack > 0) {
 		printf("%i files were not in a pack\n", nonpack);
 	}
+	run_postupdate_action();
 
 	return ret;
 }

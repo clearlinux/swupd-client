@@ -233,6 +233,9 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		if (strncmp(line, "contentsize:", 12) == 0) {
 			contentsize = strtoull(c, NULL, 10);
 		}
+		if (strncmp(line, "actions:", 8) == 0) {
+			post_update_action = strdup(c);
+		}
 		if (strncmp(line, "includes:", 9) == 0) {
 			includes = list_prepend_data(includes, strdup(c));
 			if (!includes->data) {

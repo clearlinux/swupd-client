@@ -42,6 +42,7 @@ bool need_update_boot = false;
 bool need_update_bootloader = false;
 bool need_systemd_reexec = false;
 bool update_complete = false;
+char *post_update_action = NULL;
 #if 0
 /* disabled unused global variables */
 bool ignore_config = true;

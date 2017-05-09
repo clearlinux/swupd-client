@@ -669,7 +669,7 @@ int verify_main(int argc, char **argv)
 	times = init_timelist();
 
 	grabtime_start(&times, "Load and recurse Manifests");
-	official_manifest = load_mom(version);
+	official_manifest = load_mom(version, false);
 
 	if (!official_manifest) {
 		/* This is hit when or if an OS version is specified for --fix which

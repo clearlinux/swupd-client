@@ -70,7 +70,7 @@ int list_installable_bundles()
 
 	swupd_curl_set_current_version(current_version);
 
-	MoM = load_mom(current_version);
+	MoM = load_mom(current_version, false);
 	if (!MoM) {
 		v_lockfile(lock_fd);
 		return EMOM_NOTFOUND;
@@ -104,7 +104,7 @@ static int load_bundle_manifest(const char *bundle_name, struct list *subs, int 
 	*submanifest = NULL;
 
 	swupd_curl_set_current_version(version);
-	mom = load_mom(version);
+	mom = load_mom(version, false);
 	if (!mom) {
 		return EMOM_NOTFOUND;
 	}
@@ -252,7 +252,7 @@ int remove_bundle(const char *bundle_name)
 
 	swupd_curl_set_current_version(current_version);
 
-	current_mom = load_mom(current_version);
+	current_mom = load_mom(current_version, false);
 	if (!current_mom) {
 		printf("Unable to download/verify %d Manifest.MoM\n", current_version);
 		ret = EMOM_NOTFOUND;
@@ -581,7 +581,7 @@ int install_bundles_frontend(char **bundles)
 
 	swupd_curl_set_current_version(current_version);
 
-	mom = load_mom(current_version);
+	mom = load_mom(current_version, false);
 	if (!mom) {
 		printf("Cannot load official manifest MoM for version %i\n", current_version);
 		ret = EMOM_NOTFOUND;

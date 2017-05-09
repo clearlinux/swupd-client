@@ -294,7 +294,7 @@ load_current_mom:
 	/* Step 3: setup manifests */
 
 	/* get the from/to MoM manifests */
-	current_manifest = load_mom(current_version);
+	current_manifest = load_mom(current_version, false);
 	if (!current_manifest) {
 		/* TODO: possibly remove this as not getting a "from" manifest is not fatal
 		 * - we just don't apply deltas */
@@ -315,7 +315,7 @@ load_current_mom:
 load_server_mom:
 	grabtime_stop(&times); // Close step 2
 	grabtime_start(&times, "Recurse and Consolidate Manifests");
-	server_manifest = load_mom(server_version);
+	server_manifest = load_mom(server_version, true);
 	if (!server_manifest) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);

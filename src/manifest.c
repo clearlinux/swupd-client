@@ -162,7 +162,7 @@ static struct manifest *alloc_manifest(int version, char *component)
 	return manifest;
 }
 
-static struct manifest *manifest_from_file(int version, char *component, bool header_only)
+static struct manifest *manifest_from_file(int version, char *component, bool header_only, bool latest)
 {
 	FILE *infile;
 	char line[MANIFEST_LINE_MAXLEN], *c, *c2;
@@ -233,8 +233,10 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		if (strncmp(line, "contentsize:", 12) == 0) {
 			contentsize = strtoull(c, NULL, 10);
 		}
-		if (strncmp(line, "actions:", 8) == 0) {
-			post_update_action = strdup(c);
+		if (latest && strncmp(component, "MoM", 3) == 0) {
+			if (strncmp(line, "actions:", 8) == 0) {
+				post_update_action = strdup(c);
+			}
 		}
 		if (strncmp(line, "includes:", 9) == 0) {
 			includes = list_prepend_data(includes, strdup(c));
@@ -609,7 +611,7 @@ void remove_manifest_files(char *filename, int version, char *hash)
  * Note that if the manifest fails to download, or if the manifest fails to be
  * loaded into memory, this function will return NULL.
  */
-struct manifest *load_mom(int version)
+struct manifest *load_mom(int version, bool latest)
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
@@ -625,7 +627,7 @@ verify_mom:
 		return NULL;
 	}
 
-	manifest = manifest_from_file(version, "MoM", false);
+	manifest = manifest_from_file(version, "MoM", false, latest);
 
 	if (manifest == NULL) {
 		if (retried == false) {
@@ -710,7 +712,7 @@ retry_load:
 	}
 	retried = false;
 
-	manifest = manifest_from_file(version, file->filename, header_only);
+	manifest = manifest_from_file(version, file->filename, header_only, false);
 
 	if (manifest == NULL) {
 		if (retried == false) {

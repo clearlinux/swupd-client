@@ -56,29 +56,29 @@ static const struct option prog_opts[] = {
 
 static void print_help(const char *name)
 {
-	printf("Usage:\n");
-	printf("   swupd %s [OPTION...]\n\n", basename((char *)name));
-	printf("Help Options:\n");
-	printf("   -h, --help              Show help options\n\n");
-	printf("Application Options:\n");
-	printf("   -d, --download          Download all content, but do not actually install the update\n");
+	fprintf(stderr, "Usage:\n");
+	fprintf(stderr, "   swupd %s [OPTION...]\n\n", basename((char *)name));
+	fprintf(stderr, "Help Options:\n");
+	fprintf(stderr, "   -h, --help              Show help options\n\n");
+	fprintf(stderr, "Application Options:\n");
+	fprintf(stderr, "   -d, --download          Download all content, but do not actually install the update\n");
 #warning "remove user configurable url when alternative exists"
-	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
-	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
+	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
+	fprintf(stderr, "   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
 #warning "remove user configurable content url when alternative exists"
-	printf("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
+	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
 #warning "remove user configurable version url when alternative exists"
-	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
-	printf("   -s, --status            Show current OS version and latest version available on server\n");
-	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
-	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
-	printf("   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
-	printf("   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
-	printf("   -S, --statedir          Specify alternate swupd state directory\n");
-	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
-	printf("   -t, --time         	   Show verbose time output for swupd operations\n");
-	printf("\n");
+	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
+	fprintf(stderr, "   -s, --status            Show current OS version and latest version available on server\n");
+	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
+	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
+	fprintf(stderr, "   -x, --force             Attempt to proceed even if non-critical errors found\n");
+	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
+	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
+	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
+	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
+	fprintf(stderr, "   -t, --time         	   Show verbose time output for swupd operations\n");
+	fprintf(stderr, "\n");
 }
 
 static bool parse_options(int argc, char **argv)
@@ -96,7 +96,7 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'u':
 			if (!optarg) {
-				printf("Invalid --url argument\n\n");
+				fprintf(stderr, "Invalid --url argument\n\n");
 				goto err;
 			}
 			set_version_url(optarg);
@@ -107,20 +107,20 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'P':
 			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
-				printf("Invalid --port argument\n\n");
+				fprintf(stderr, "Invalid --port argument\n\n");
 				goto err;
 			}
 			break;
 		case 'c':
 			if (!optarg) {
-				printf("Invalid --contenturl argument\n\n");
+				fprintf(stderr, "Invalid --contenturl argument\n\n");
 				goto err;
 			}
 			set_content_url(optarg);
 			break;
 		case 'v':
 			if (!optarg) {
-				printf("Invalid --versionurl argument\n\n");
+				fprintf(stderr, "Invalid --versionurl argument\n\n");
 				goto err;
 			}
 			set_version_url(optarg);
@@ -130,19 +130,19 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'F':
 			if (!optarg || !set_format_string(optarg)) {
-				printf("Invalid --format argument\n\n");
+				fprintf(stderr, "Invalid --format argument\n\n");
 				goto err;
 			}
 			break;
 		case 'S':
 			if (!optarg || !set_state_dir(optarg)) {
-				printf("Invalid --statedir argument\n\n");
+				fprintf(stderr, "Invalid --statedir argument\n\n");
 				goto err;
 			}
 			break;
 		case 'p': /* default empty path_prefix updates the running OS */
 			if (!optarg || !set_path_prefix(optarg)) {
-				printf("Invalid --path argument\n\n");
+				fprintf(stderr, "Invalid --path argument\n\n");
 				goto err;
 			}
 			break;
@@ -157,13 +157,13 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'C':
 			if (!optarg) {
-				printf("Invalid --certpath argument\n\n");
+				fprintf(stderr, "Invalid --certpath argument\n\n");
 				goto err;
 			}
 			set_cert_path(optarg);
 			break;
 		default:
-			printf("Unrecognized option\n\n");
+			fprintf(stderr, "Unrecognized option\n\n");
 			goto err;
 		}
 	}
@@ -189,17 +189,17 @@ static int print_versions()
 	read_versions(&current_version, &server_version, path_prefix);
 
 	if (current_version < 0) {
-		printf("Cannot determine current OS version\n");
+		fprintf(stderr, "Cannot determine current OS version\n");
 		ret = 2;
 	} else {
-		printf("Current OS version: %d\n", current_version);
+		fprintf(stderr, "Current OS version: %d\n", current_version);
 	}
 
 	if (server_version < 0) {
-		printf("Cannot get latest the server version.Could not reach server\n");
+		fprintf(stderr, "Cannot get latest the server version.Could not reach server\n");
 		ret = 2;
 	} else {
-		printf("Latest server version: %d\n", server_version);
+		fprintf(stderr, "Latest server version: %d\n", server_version);
 	}
 	if ((ret == 0) && (server_version <= current_version)) {
 		ret = 1;

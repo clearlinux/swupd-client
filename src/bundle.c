@@ -51,19 +51,19 @@ int list_installable_bundles()
 
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
-		printf("Error: Failed updater initialization. Exiting now\n");
+		fprintf(stderr, "Error: Failed updater initialization. Exiting now\n");
 		return ret;
 	}
 
 	if (!check_network()) {
-		printf("Error: Network issue, unable to download manifest\n");
+		fprintf(stderr, "Error: Network issue, unable to download manifest\n");
 		v_lockfile(lock_fd);
 		return ENOSWUPDSERVER;
 	}
 
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
-		printf("Error: Unable to determine current OS version\n");
+		fprintf(stderr, "Error: Unable to determine current OS version\n");
 		v_lockfile(lock_fd);
 		return ECURRENT_VERSION;
 	}
@@ -223,7 +223,7 @@ int remove_bundle(const char *bundle_name)
 
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
-		printf("Failed updater initialization, exiting now.\n");
+		fprintf(stderr, "Failed updater initialization, exiting now.\n");
 		return ret;
 	}
 
@@ -239,13 +239,13 @@ int remove_bundle(const char *bundle_name)
 
 	if (!is_tracked_bundle(bundle_name)) {
 		ret = EBUNDLE_NOT_TRACKED;
-		printf("Warning: Bundle \"%s\" does not seem to be installed\n", bundle_name);
+		fprintf(stderr, "Warning: Bundle \"%s\" does not seem to be installed\n", bundle_name);
 		goto out_free_curl;
 	}
 
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
-		printf("Error: Unable to determine current OS version\n");
+		fprintf(stderr, "Error: Unable to determine current OS version\n");
 		ret = ECURRENT_VERSION;
 		goto out_free_curl;
 	}
@@ -254,13 +254,13 @@ int remove_bundle(const char *bundle_name)
 
 	current_mom = load_mom(current_version);
 	if (!current_mom) {
-		printf("Unable to download/verify %d Manifest.MoM\n", current_version);
+		fprintf(stderr, "Unable to download/verify %d Manifest.MoM\n", current_version);
 		ret = EMOM_NOTFOUND;
 		goto out_free_curl;
 	}
 
 	if (!search_bundle_in_manifest(current_mom, bundle_name)) {
-		printf("Bundle name is invalid, aborting removal\n");
+		fprintf(stderr, "Bundle name is invalid, aborting removal\n");
 		ret = EBUNDLE_REMOVE;
 		goto out_free_mom;
 	}
@@ -278,13 +278,13 @@ int remove_bundle(const char *bundle_name)
 	/* load all submanifest minus the one to be removed */
 	current_mom->submanifests = recurse_manifest(current_mom, subs, NULL);
 	if (!current_mom->submanifests) {
-		printf("Error: Cannot load MoM sub-manifests\n");
+		fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
 		ret = ERECURSE_MANIFEST;
 		goto out_free_mom;
 	}
 
 	if (is_included(bundle_name, current_mom)) {
-		printf("Error: bundle requested to be removed is required by other installed bundles\n");
+		fprintf(stderr, "Error: bundle requested to be removed is required by other installed bundles\n");
 		ret = EBUNDLE_REMOVE;
 		goto out_free_mom;
 	}
@@ -296,7 +296,7 @@ int remove_bundle(const char *bundle_name)
 	/* Now that we have the consolidated list of all files, load bundle to be removed submanifest*/
 	ret = load_bundle_manifest(bundle_name, subs, current_version, &bundle_manifest);
 	if (ret != 0 || !bundle_manifest) {
-		printf("Error: Cannot load %s sub-manifest (ret = %d)\n", bundle_name, ret);
+		fprintf(stderr, "Error: Cannot load %s sub-manifest (ret = %d)\n", bundle_name, ret);
 		goto out_free_mom;
 	}
 
@@ -304,13 +304,13 @@ int remove_bundle(const char *bundle_name)
 	bundle_manifest->files = list_sort(bundle_manifest->files, file_sort_filename);
 	deduplicate_files_from_manifest(&bundle_manifest, current_mom);
 
-	printf("Deleting bundle files...\n");
+	fprintf(stderr, "Deleting bundle files...\n");
 	remove_files_in_manifest_from_fs(bundle_manifest);
 
-	printf("Untracking bundle from system...\n");
+	fprintf(stderr, "Untracking bundle from system...\n");
 	rm_bundle_file(bundle_name);
 
-	printf("Success: Bundle removed\n");
+	fprintf(stderr, "Success: Bundle removed\n");
 
 	free_manifest(bundle_manifest);
 out_free_mom:
@@ -325,7 +325,7 @@ out_free_curl:
 		  current_version,
 		  ret);
 	if (ret) {
-		printf("Error: Bundle remove failed\n");
+		fprintf(stderr, "Error: Bundle remove failed\n");
 	}
 
 	swupd_deinit(lock_fd, &subs);
@@ -360,7 +360,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 
 		file = search_bundle_in_manifest(mom, bundle);
 		if (!file) {
-			printf("%s bundle name is invalid, skipping it...\n", bundle);
+			fprintf(stderr, "%s bundle name is invalid, skipping it...\n", bundle);
 			ret |= add_sub_BADNAME; /* Use this to get non-zero exit code */
 			continue;
 		}
@@ -384,7 +384,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 				increment_retries(&retries, &timeout);
 				goto retry_manifest_download;
 			}
-			printf("Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
+			fprintf(stderr, "Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
 			ret |= add_sub_ERR;
 			goto out;
 		}
@@ -434,7 +434,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 		/* something went wrong, print a message and exit */
 		const char *m;
 		if (ret == 0) { /* no bad names, no new packages */
-			printf("nothing to add, exiting now\n");
+			fprintf(stderr, "nothing to add, exiting now\n");
 			goto out;
 		}
 		if (ret & add_sub_ERR) {
@@ -445,7 +445,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 			m = "Unknown error";
 		}
 		ret = EBUNDLE_INSTALL;
-		printf("Error: %s - Aborting\n", m); /* Should be to stderr */
+		fprintf(stderr, "Error: %s - Aborting\n", m); /* Should be to stderr */
 		goto out;
 	}
 
@@ -453,7 +453,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 
 	to_install_bundles = recurse_manifest(mom, *subs, NULL);
 	if (!to_install_bundles) {
-		printf("Error: Cannot load to install bundles\n");
+		fprintf(stderr, "Error: Cannot load to install bundles\n");
 		ret = ERECURSE_MANIFEST;
 		goto out;
 	}
@@ -484,7 +484,7 @@ download_subscribed_packs:
 	set_subscription_versions(mom, NULL, subs);
 	mom->submanifests = recurse_manifest(mom, *subs, NULL);
 	if (!mom->submanifests) {
-		printf("Error: Cannot load installed bundles\n");
+		fprintf(stderr, "Error: Cannot load installed bundles\n");
 		ret = ERECURSE_MANIFEST;
 		goto out;
 	}
@@ -495,7 +495,7 @@ download_subscribed_packs:
 
 	/* step 4: Install all bundle(s) files into the fs */
 	grabtime_start(&times, "Installing bundle(s) files onto filesystem");
-	printf("Installing bundle(s) files...\n");
+	fprintf(stderr, "Installing bundle(s) files...\n");
 	iter = list_head(to_install_files);
 	while (iter) {
 		file = iter->data;
@@ -538,7 +538,7 @@ download_subscribed_packs:
 	run_scripts();
 
 	ret = 0;
-	printf("Bundle(s) installation done.\n");
+	fprintf(stderr, "Bundle(s) installation done.\n");
 	print_time_stats(&times);
 
 out:
@@ -568,13 +568,13 @@ int install_bundles_frontend(char **bundles)
 	/* initialize swupd and get current version from OS */
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
-		printf("Failed updater initialization, exiting now.\n");
+		fprintf(stderr, "Failed updater initialization, exiting now.\n");
 		return ret;
 	}
 
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
-		printf("Error: Unable to determine current OS version\n");
+		fprintf(stderr, "Error: Unable to determine current OS version\n");
 		ret = ECURRENT_VERSION;
 		goto clean_and_exit;
 	}
@@ -583,7 +583,7 @@ int install_bundles_frontend(char **bundles)
 
 	mom = load_mom(current_version);
 	if (!mom) {
-		printf("Cannot load official manifest MoM for version %i\n", current_version);
+		fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
 		ret = EMOM_NOTFOUND;
 		goto clean_and_exit;
 	}

@@ -43,16 +43,16 @@ static struct option opts[] = {
 
 static void usage(const char *name)
 {
-	printf("Usage:\n");
-	printf("   swupd %s [OPTION...] filename\n\n", basename((char *)name));
-	printf("Help Options:\n");
-	printf("   -h, --help              Show help options\n\n");
-	printf("Application Options:\n");
-	printf("   -n, --no-xattrs         Ignore extended attributes\n");
-	printf("   -p, --path=[PATH...]    Use [PATH...] for leading path to filename\n");
-	printf("\n");
-	printf("The filename is the name of a file on the filesystem.\n");
-	printf("\n");
+	fprintf(stderr, "Usage:\n");
+	fprintf(stderr, "   swupd %s [OPTION...] filename\n\n", basename((char *)name));
+	fprintf(stderr, "Help Options:\n");
+	fprintf(stderr, "   -h, --help              Show help options\n\n");
+	fprintf(stderr, "Application Options:\n");
+	fprintf(stderr, "   -n, --no-xattrs         Ignore extended attributes\n");
+	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] for leading path to filename\n");
+	fprintf(stderr, "\n");
+	fprintf(stderr, "The filename is the name of a file on the filesystem.\n");
+	fprintf(stderr, "\n");
 }
 
 int hashdump_main(int argc, char **argv)
@@ -83,7 +83,7 @@ int hashdump_main(int argc, char **argv)
 			break;
 		case 'p':
 			if (!optarg || !set_path_prefix(optarg)) {
-				printf("Invalid --basepath argument\n\n");
+				fprintf(stderr, "Invalid --basepath argument\n\n");
 				free(file);
 				return EXIT_FAILURE;
 			}
@@ -127,18 +127,18 @@ int hashdump_main(int argc, char **argv)
 		}
 	}
 
-	printf("Calculating hash %s xattrs for: %s\n",
-	       (file->use_xattrs ? "with" : "without"), fullname);
+	fprintf(stderr, "Calculating hash %s xattrs for: %s\n",
+		(file->use_xattrs ? "with" : "without"), fullname);
 
 	populate_file_struct(file, fullname);
 	ret = compute_hash(file, fullname);
 	if (ret != 0) {
-		printf("compute_hash() failed\n");
+		fprintf(stderr, "compute_hash() failed\n");
 	} else {
 		printf("%s\n", file->hash);
 		if (file->is_dir) {
 			if (is_directory_mounted(fullname)) {
-				printf("!! dumped hash might not match a manifest hash because a mount is active\n");
+				fprintf(stderr, "!! dumped hash might not match a manifest hash because a mount is active\n");
 			}
 		}
 	}

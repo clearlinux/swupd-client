@@ -53,31 +53,31 @@ static char *bin_paths[] = {
 
 static void print_help(const char *name)
 {
-	printf("Usage:\n");
-	printf("	swupd %s [Options] 'search_term'\n", basename((char *)name));
-	printf("		'search_term': A substring of a binary, library or filename (default)\n");
-	printf("		Return: Bundle name : filename matching search term\n\n");
+	fprintf(stderr, "Usage:\n");
+	fprintf(stderr, "	swupd %s [Options] 'search_term'\n", basename((char *)name));
+	fprintf(stderr, "		'search_term': A substring of a binary, library or filename (default)\n");
+	fprintf(stderr, "		Return: Bundle name : filename matching search term\n\n");
 
-	printf("Help Options:\n");
-	printf("   -h, --help              Display this help\n");
-	printf("   -l, --library           Search paths where libraries are located for a match\n");
-	printf("   -b, --binary            Search paths where binaries are located for a match\n");
-	printf("   -s, --scope=[query type] 'b' or 'o' for first hit per (b)undle, or one hit total across the (o)s\n");
-	printf("   -d, --display-files	   Output full file list, no search done\n");
-	printf("   -i, --init              Download all manifests then return, no search done\n");
-	printf("   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
-	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
-	printf("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
-	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
-	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
-	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
-	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	printf("   -S, --statedir          Specify alternate swupd state directory\n");
-	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
+	fprintf(stderr, "Help Options:\n");
+	fprintf(stderr, "   -h, --help              Display this help\n");
+	fprintf(stderr, "   -l, --library           Search paths where libraries are located for a match\n");
+	fprintf(stderr, "   -b, --binary            Search paths where binaries are located for a match\n");
+	fprintf(stderr, "   -s, --scope=[query type] 'b' or 'o' for first hit per (b)undle, or one hit total across the (o)s\n");
+	fprintf(stderr, "   -d, --display-files	   Output full file list, no search done\n");
+	fprintf(stderr, "   -i, --init              Download all manifests then return, no search done\n");
+	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
+	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
+	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
+	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
+	fprintf(stderr, "   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
+	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
+	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
+	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
+	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
 
-	printf("\nResults format:\n");
-	printf(" 'Bundle Name'  :  'File matching search term'\n\n");
-	printf("\n");
+	fprintf(stderr, "\nResults format:\n");
+	fprintf(stderr, " 'Bundle Name'  :  'File matching search term'\n\n");
+	fprintf(stderr, "\n");
 }
 
 static const struct option prog_opts[] = {
@@ -111,7 +111,7 @@ static bool parse_options(int argc, char **argv)
 			exit(0);
 		case 'u':
 			if (!optarg) {
-				printf("error: invalid --url argument\n\n");
+				fprintf(stderr, "error: invalid --url argument\n\n");
 				goto err;
 			}
 			set_version_url(optarg);
@@ -119,33 +119,33 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'c':
 			if (!optarg) {
-				printf("Invalid --contenturl argument\n\n");
+				fprintf(stderr, "Invalid --contenturl argument\n\n");
 				goto err;
 			}
 			set_content_url(optarg);
 			break;
 		case 'v':
 			if (!optarg) {
-				printf("Invalid --versionurl argument\n\n");
+				fprintf(stderr, "Invalid --versionurl argument\n\n");
 				goto err;
 			}
 			set_version_url(optarg);
 			break;
 		case 'P':
 			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
-				printf("Invalid --port argument\n\n");
+				fprintf(stderr, "Invalid --port argument\n\n");
 				goto err;
 			}
 			break;
 		case 'p': /* default empty path_prefix verifies the running OS */
 			if (!optarg || !set_path_prefix(optarg)) {
-				printf("Invalid --path argument\n\n");
+				fprintf(stderr, "Invalid --path argument\n\n");
 				goto err;
 			}
 			break;
 		case 's':
 			if (!optarg || (strcmp(optarg, "b") && (strcmp(optarg, "o")))) {
-				printf("Invalid --scope argument. Must be 'b' or 'o'\n\n");
+				fprintf(stderr, "Invalid --scope argument. Must be 'b' or 'o'\n\n");
 				goto err;
 			}
 
@@ -158,20 +158,20 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'F':
 			if (!optarg || !set_format_string(optarg)) {
-				printf("Invalid --format argument\n\n");
+				fprintf(stderr, "Invalid --format argument\n\n");
 				goto err;
 			}
 			break;
 		case 'S':
 			if (!optarg || !set_state_dir(optarg)) {
-				printf("Invalid --statedir argument\n\n");
+				fprintf(stderr, "Invalid --statedir argument\n\n");
 				goto err;
 			}
 			break;
 		case 'l':
 			if (search_type != '0') {
-				printf("Error, cannot specify multiple search types "
-				       "(-l and -b are mutually exclusive)\n");
+				fprintf(stderr, "Error, cannot specify multiple search types "
+						"(-l and -b are mutually exclusive)\n");
 				goto err;
 			}
 
@@ -185,8 +185,8 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'b':
 			if (search_type != '0') {
-				printf("Error, cannot specify multiple search types "
-				       "(-l and -b are mutually exclusive)\n");
+				fprintf(stderr, "Error, cannot specify multiple search types "
+						"(-l and -b are mutually exclusive)\n");
 				goto err;
 			}
 
@@ -197,32 +197,32 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'C':
 			if (!optarg) {
-				printf("Invalid --certpath argument\n\n");
+				fprintf(stderr, "Invalid --certpath argument\n\n");
 				goto err;
 			}
 			set_cert_path(optarg);
 			break;
 		default:
-			printf("Error: unrecognized option: -'%c',\n\n", opt);
+			fprintf(stderr, "Error: unrecognized option: -'%c',\n\n", opt);
 			goto err;
 		}
 	}
 
 	if ((optind == argc) && (!init) && (!display_files)) {
-		printf("Error: Search term missing\n\n");
+		fprintf(stderr, "Error: Search term missing\n\n");
 		print_help(argv[0]);
 		return false;
 	}
 
 	if ((optind == argc - 1) && (display_files)) {
-		printf("Error: Cannot supply a search term and -d, --display-files together\n");
+		fprintf(stderr, "Error: Cannot supply a search term and -d, --display-files together\n");
 		return false;
 	}
 
 	search_string = argv[optind];
 
 	if (optind + 1 < argc) {
-		printf("Error, only 1 search term supported at a time\n");
+		fprintf(stderr, "Error, only 1 search term supported at a time\n");
 		return false;
 	}
 
@@ -292,13 +292,13 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 		/* Load sub-manifest */
 		subman = load_manifest(file->last_change, file->last_change, file, MoM, false);
 		if (!subman) {
-			printf("Failed to load manifest %s\n", file->filename);
+			fprintf(stderr, "Failed to load manifest %s\n", file->filename);
 			continue;
 		}
 
 		if (display_files) {
 			/* Display bundle name. Marked up for pattern matchability */
-			printf("--Bundle: %s--\n", file->filename);
+			fprintf(stderr, "--Bundle: %s--\n", file->filename);
 		}
 
 		/* Loop through sub-manifest, searching for files matching the desired pattern */
@@ -337,7 +337,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 					}
 				}
 			} else {
-				printf("Unrecognized search type. -b or -l supported\n");
+				fprintf(stderr, "Unrecognized search type. -b or -l supported\n");
 				done_with_search = true;
 				break;
 			}
@@ -360,7 +360,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 	}
 
 	if (!hit_count) {
-		printf("Search term not found.\n");
+		fprintf(stderr, "Search term not found.\n");
 	}
 }
 
@@ -418,7 +418,7 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
-		printf("Error: Unable to determine current OS version\n");
+		fprintf(stderr, "Error: Unable to determine current OS version\n");
 		return ECURRENT_VERSION;
 	}
 
@@ -426,17 +426,17 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 
 	*MoM = load_mom(current_version);
 	if (!(*MoM)) {
-		printf("Cannot load official manifest MoM for version %i\n", current_version);
+		fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
 		return EMOM_NOTFOUND;
 	}
 
 	list = (*MoM)->manifests;
 	size = query_total_download_size(list);
 	if (size == -1) {
-		printf("Downloading manifests. Expect a delay, up to 100MB may be downloaded\n");
+		fprintf(stderr, "Downloading manifests. Expect a delay, up to 100MB may be downloaded\n");
 	} else if (size > 0) {
-		printf("Downloading Clear Linux manifests\n");
-		printf("   %.2f MB total...\n\n", size);
+		fprintf(stderr, "Downloading Clear Linux manifests\n");
+		fprintf(stderr, "   %.2f MB total...\n\n", size);
 	}
 
 	while (list) {
@@ -455,7 +455,7 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 			/* Do download */
 			subMan = load_manifest(current_version, file->last_change, file, *MoM, false);
 			if (!subMan) {
-				printf("Cannot load official manifest MoM for version %i\n", current_version);
+				fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
 			} else {
 				did_download = true;
 			}
@@ -467,7 +467,7 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 			string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url, current_version,
 				      file->filename);
 
-			printf("Error: Failure reading from %s\n", url);
+			fprintf(stderr, "Error: Failure reading from %s\n", url);
 			free(url);
 		}
 
@@ -477,7 +477,7 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 	}
 
 	if (did_download) {
-		printf("Completed manifests download.\n\n");
+		fprintf(stderr, "Completed manifests download.\n\n");
 	}
 
 	return ret;
@@ -496,28 +496,28 @@ int search_main(int argc, char **argv)
 
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
-		printf("Failed swupd initialization, exiting now.\n");
+		fprintf(stderr, "Failed swupd initialization, exiting now.\n");
 		return ret;
 	}
 
 	if (!check_network()) {
-		printf("Error: Network issue, unable to proceed with update\n");
+		fprintf(stderr, "Error: Network issue, unable to proceed with update\n");
 		ret = ENOSWUPDSERVER;
 		goto clean_exit;
 	}
 
 	if (!init) {
-		printf("Searching for '%s'\n\n", search_string);
+		fprintf(stderr, "Searching for '%s'\n\n", search_string);
 	}
 
 	ret = download_manifests(&MoM, &subs);
 	if (ret != 0) {
-		printf("Error: Failed to download manifests\n");
+		fprintf(stderr, "Error: Failed to download manifests\n");
 		goto clean_exit;
 	}
 
 	if (init) {
-		printf("Successfully retreived manifests. Exiting\n");
+		fprintf(stderr, "Successfully retreived manifests. Exiting\n");
 		ret = 0;
 		goto clean_exit;
 	}
@@ -525,7 +525,7 @@ int search_main(int argc, char **argv)
 	/* Arbitrary upper limit to ensure we aren't getting handed garbage */
 	if (!display_files &&
 	    ((strlen(search_string) <= 0) || (strlen(search_string) > NAME_MAX))) {
-		printf("Error - search string invalid\n");
+		fprintf(stderr, "Error - search string invalid\n");
 		ret = EXIT_FAILURE;
 		goto clean_exit;
 	}

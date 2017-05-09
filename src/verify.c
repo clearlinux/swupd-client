@@ -37,6 +37,7 @@
 #include "swupd.h"
 
 static bool cmdline_option_fix = false;
+static bool cmdline_option_picky = false;
 static bool cmdline_option_install = false;
 static bool cmdline_option_quick = false;
 
@@ -69,6 +70,7 @@ static const struct option prog_opts[] = {
 	{ "quick", no_argument, 0, 'q' },
 	{ "force", no_argument, 0, 'x' },
 	{ "nosigcheck", no_argument, 0, 'n' },
+	{ "picky", no_argument, 0, 'Y' },
 	{ "statedir", required_argument, 0, 'S' },
 	{ "certpath", required_argument, 0, 'C' },
 	{ "time", no_argument, 0, 't' },
@@ -77,28 +79,29 @@ static const struct option prog_opts[] = {
 
 static void print_help(const char *name)
 {
-	printf("Usage:\n");
-	printf("   swupd %s [OPTION...]\n\n", basename((char *)name));
-	printf("Help Options:\n");
-	printf("   -h, --help              Show help options\n\n");
-	printf("Application Options:\n");
-	printf("   -m, --manifest=M        Verify against manifest version M\n");
-	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
-	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
-	printf("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
-	printf("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
-	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version file downloads\n");
-	printf("   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files)\n");
-	printf("   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory\n");
-	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	printf("   -q, --quick             Don't compare hashes, only fix missing files\n");
-	printf("   -x, --force             Attempt to proceed even if non-critical errors found\n");
-	printf("   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
-	printf("   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
-	printf("   -S, --statedir          Specify alternate swupd state directory\n");
-	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
-	printf("   -t, --time         	   Show verbose time output for swupd operations\n");
-	printf("\n");
+	fprintf(stderr, "Usage:\n");
+	fprintf(stderr, "   swupd %s [OPTION...]\n\n", basename((char *)name));
+	fprintf(stderr, "Help Options:\n");
+	fprintf(stderr, "   -h, --help              Show help options\n\n");
+	fprintf(stderr, "Application Options:\n");
+	fprintf(stderr, "   -m, --manifest=M        Verify against manifest version M\n");
+	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
+	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
+	fprintf(stderr, "   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
+	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
+	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version file downloads\n");
+	fprintf(stderr, "   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files)\n");
+	fprintf(stderr, "   -Y, --picky             List files which should not exist\n");
+	fprintf(stderr, "   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory\n");
+	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
+	fprintf(stderr, "   -q, --quick             Don't compare hashes, only fix missing files\n");
+	fprintf(stderr, "   -x, --force             Attempt to proceed even if non-critical errors found\n");
+	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
+	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
+	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
+	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
+	fprintf(stderr, "   -t, --time         	   Show verbose time output for swupd operations\n");
+	fprintf(stderr, "\n");
 }
 
 static bool parse_options(int argc, char **argv)
@@ -115,19 +118,19 @@ static bool parse_options(int argc, char **argv)
 			if (strcmp("latest", optarg) == 0) {
 				version = -1;
 			} else if (sscanf(optarg, "%i", &version) != 1) {
-				printf("Invalid --manifest argument\n\n");
+				fprintf(stderr, "Invalid --manifest argument\n\n");
 				goto err;
 			}
 			break;
 		case 'p': /* default empty path_prefix verifies the running OS */
 			if (!optarg || !set_path_prefix(optarg)) {
-				printf("Invalid --path argument\n\n");
+				fprintf(stderr, "Invalid --path argument\n\n");
 				goto err;
 			}
 			break;
 		case 'u':
 			if (!optarg) {
-				printf("Invalid --url argument\n\n");
+				fprintf(stderr, "Invalid --url argument\n\n");
 				goto err;
 			}
 			set_version_url(optarg);
@@ -135,20 +138,20 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'P':
 			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
-				printf("Invalid --port argument\n\n");
+				fprintf(stderr, "Invalid --port argument\n\n");
 				goto err;
 			}
 			break;
 		case 'c':
 			if (!optarg) {
-				printf("Invalid --contenturl argument\n\n");
+				fprintf(stderr, "Invalid --contenturl argument\n\n");
 				goto err;
 			}
 			set_content_url(optarg);
 			break;
 		case 'v':
 			if (!optarg) {
-				printf("Invalid --versionurl argument\n\n");
+				fprintf(stderr, "Invalid --versionurl argument\n\n");
 				goto err;
 			}
 			set_version_url(optarg);
@@ -162,13 +165,13 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'F':
 			if (!optarg || !set_format_string(optarg)) {
-				printf("Invalid --format argument\n\n");
+				fprintf(stderr, "Invalid --format argument\n\n");
 				goto err;
 			}
 			break;
 		case 'S':
 			if (!optarg || !set_state_dir(optarg)) {
-				printf("Invalid --statedir argument\n\n");
+				fprintf(stderr, "Invalid --statedir argument\n\n");
 				goto err;
 			}
 			break;
@@ -189,32 +192,35 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'C':
 			if (!optarg) {
-				printf("Invalid --certpath argument\n\n");
+				fprintf(stderr, "Invalid --certpath argument\n\n");
 				goto err;
 			}
 			set_cert_path(optarg);
 			break;
+		case 'Y':
+			cmdline_option_picky = true;
+			break;
 		default:
-			printf("Unrecognized option\n\n");
+			fprintf(stderr, "Unrecognized option\n\n");
 			goto err;
 		}
 	}
 
 	if (cmdline_option_install) {
 		if (version == 0) {
-			printf("--install option requires -m version option\n");
+			fprintf(stderr, "--install option requires -m version option\n");
 			return false;
 		}
 		if (path_prefix == NULL) {
-			printf("--install option requires --path option\n");
+			fprintf(stderr, "--install option requires --path option\n");
 			return false;
 		}
 		if (cmdline_option_fix) {
-			printf("--install and --fix options are mutually exclusive\n");
+			fprintf(stderr, "--install and --fix options are mutually exclusive\n");
 			return false;
 		}
 	} else if (version == -1) {
-		printf("-m latest only supported with --install\n");
+		fprintf(stderr, "-m latest only supported with --install\n");
 		return false;
 	}
 
@@ -244,8 +250,8 @@ static int get_all_files(struct manifest *official_manifest, struct list *subs)
 		/* If we hit this point, we know we have a network connection, therefore
 		 * 	the error is server-side. This is also a critical error, so detailed
 		 * 	logging needed */
-		printf("zero pack downloads failed. \n");
-		printf("Failed - Server-side error, cannot download necessary files\n");
+		fprintf(stderr, "zero pack downloads failed. \n");
+		fprintf(stderr, "Failed - Server-side error, cannot download necessary files\n");
 		return -ENOSWUPDSERVER;
 	}
 	iter = list_head(official_manifest->files);
@@ -332,7 +338,7 @@ RETRY_DOWNLOADS:
 		/* If we hit this point, the network is accessible but we were
 		 * 	unable to download the needed files. This is a terminal error
 		 * 	and we need good logging */
-		printf("Error: Unable to download neccessary files for this OS release\n");
+		fprintf(stderr, "Error: Unable to download neccessary files for this OS release\n");
 		return -EFULLDOWNLOAD;
 	}
 
@@ -346,13 +352,13 @@ RETRY_DOWNLOADS:
 	   amount of &times */
 	if (list_head(failed) != NULL && retries < MAX_TRIES) {
 		increment_retries(&retries, &timeout);
-		printf("Starting download retry #%d\n", retries);
+		fprintf(stderr, "Starting download retry #%d\n", retries);
 		clean_curl_multi_queue();
 		goto RETRY_DOWNLOADS;
 	}
 
 	if (retries >= MAX_TRIES) {
-		printf("ERROR: Could not download all files, aborting update\n");
+		fprintf(stderr, "ERROR: Could not download all files, aborting update\n");
 		list_free_list(failed);
 		return -EFULLDOWNLOAD;
 	}
@@ -412,6 +418,7 @@ static void add_missing_files(struct manifest *official_manifest)
 		if (hash_is_zeros(local.hash)) {
 			file_missing_count++;
 			if (cmdline_option_install == false) {
+				/* Log to stdout, so we can post-process */
 				printf("Missing file: %s\n", fullname);
 			}
 		} else {
@@ -483,6 +490,7 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 			continue;
 		} else {
 			file_mismatch_count++;
+			/* Log to stdout, so we can post-process it */
 			printf("Hash mismatch for file: %s\n", fullname);
 		}
 
@@ -556,7 +564,7 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 
 		fd = get_dirfd_path(fullname);
 		if (fd < 0) {
-			printf("Not safe to delete: %s\n", fullname);
+			fprintf(stderr, "Not safe to delete: %s\n", fullname);
 			free(fullname);
 			file_not_deleted_count++;
 			continue;
@@ -567,10 +575,10 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 		if (!S_ISDIR(sb.st_mode)) {
 			ret = unlinkat(fd, base, 0);
 			if (ret && errno != ENOENT) {
-				printf("Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));
+				fprintf(stderr, "Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));
 				file_not_deleted_count++;
 			} else {
-				printf("Deleted %s\n", fullname);
+				fprintf(stderr, "Deleted %s\n", fullname);
 				file_deleted_count++;
 			}
 		} else {
@@ -578,14 +586,14 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 			if (ret) {
 				file_not_deleted_count++;
 				if (errno != ENOTEMPTY) {
-					printf("Failed to remove empty folder %s (%i: %s)\n",
-					       fullname, errno, strerror(errno));
+					fprintf(stderr, "Failed to remove empty folder %s (%i: %s)\n",
+						fullname, errno, strerror(errno));
 				} else {
 					//FIXME: Add force removal option?
-					printf("Couldn't remove directory containing untracked files: %s\n", fullname);
+					fprintf(stderr, "Couldn't remove directory containing untracked files: %s\n", fullname);
 				}
 			} else {
-				printf("Deleted %s\n", fullname);
+				fprintf(stderr, "Deleted %s\n", fullname);
 				file_deleted_count++;
 			}
 		}
@@ -623,7 +631,7 @@ int verify_main(int argc, char **argv)
 
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
-		printf("Failed verify initialization, exiting now.\n");
+		fprintf(stderr, "Failed verify initialization, exiting now.\n");
 		return ret;
 	}
 
@@ -631,7 +639,7 @@ int verify_main(int argc, char **argv)
 	if (!version) {
 		version = get_current_version(path_prefix);
 		if (version < 0) {
-			printf("Error: Unable to determine current OS version\n");
+			fprintf(stderr, "Error: Unable to determine current OS version\n");
 			ret = ECURRENT_VERSION;
 			goto clean_and_exit;
 		}
@@ -640,16 +648,16 @@ int verify_main(int argc, char **argv)
 	if (version == -1) {
 		version = get_latest_version();
 		if (version < 0) {
-			printf("Unable to get latest version for install\n");
+			fprintf(stderr, "Unable to get latest version for install\n");
 			ret = EXIT_FAILURE;
 			goto clean_and_exit;
 		}
 	}
 
-	printf("Verifying version %i\n", version);
+	fprintf(stderr, "Verifying version %i\n", version);
 
 	if (!check_network()) {
-		printf("Error: Network issue, unable to download manifest\n");
+		fprintf(stderr, "Error: Network issue, unable to download manifest\n");
 		ret = ENOSWUPDSERVER;
 		goto clean_and_exit;
 	}
@@ -663,7 +671,7 @@ int verify_main(int argc, char **argv)
 
 	ret = rm_staging_dir_contents("download");
 	if (ret != 0) {
-		printf("Failed to remove prior downloads, carrying on anyway\n");
+		fprintf(stderr, "Failed to remove prior downloads, carrying on anyway\n");
 	}
 
 	times = init_timelist();
@@ -676,7 +684,7 @@ int verify_main(int argc, char **argv)
 		 * is not available, or if there is a server error and a manifest is
 		 * not provided.
 		 */
-		printf("Unable to download/verify %d Manifest.MoM\n", version);
+		fprintf(stderr, "Unable to download/verify %d Manifest.MoM\n", version);
 		ret = EMOM_NOTFOUND;
 
 		/* No repair is possible without a manifest, nor is accurate reporting
@@ -697,10 +705,10 @@ load_submanifests:
 	if (!official_manifest->submanifests) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
-			printf("Retry #%d downloading MoM sub-manifests\n", retries);
+			fprintf(stderr, "Retry #%d downloading MoM sub-manifests\n", retries);
 			goto load_submanifests;
 		}
-		printf("Error: Cannot load MoM sub-manifests\n");
+		fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
 		ret = ERECURSE_MANIFEST;
 		goto clean_and_exit;
 	}
@@ -744,7 +752,7 @@ load_submanifests:
 		 * has unintended side effect. So lets do the safest thing first.
 		 */
 		grabtime_start(&times, "Add missing files");
-		printf("Adding any missing files\n");
+		fprintf(stderr, "Adding any missing files\n");
 		add_missing_files(official_manifest);
 		grabtime_stop(&times);
 	}
@@ -758,7 +766,7 @@ load_submanifests:
 		bool repair = true;
 
 		grabtime_start(&times, "Fixing modified files");
-		printf("Fixing modified files\n");
+		fprintf(stderr, "Fixing modified files\n");
 		deal_with_hash_mismatches(official_manifest, repair);
 
 		/* removing files could be risky, so only do it if the
@@ -767,10 +775,19 @@ load_submanifests:
 			remove_orphaned_files(official_manifest);
 		}
 		grabtime_stop(&times);
+	} else if (cmdline_option_picky) {
+		char *start = mk_full_filename(path_prefix, "/usr");
+		fprintf(stderr, "Generating list of extra files under %s\n", start);
+		ret = walk_tree(official_manifest, start);
+		if (ret >= 0) {
+			file_checked_count = ret;
+			ret = 0;
+		}
+		free(start);
 	} else {
 		bool repair = false;
 
-		printf("Verifying files\n");
+		fprintf(stderr, "Verifying files\n");
 		deal_with_hash_mismatches(official_manifest, repair);
 	}
 	free_manifest(official_manifest);
@@ -783,30 +800,30 @@ brick_the_system_and_clean_curl:
 	 */
 
 	/* report a summary of what we managed to do and not do */
-	printf("Inspected %i files\n", file_checked_count);
+	fprintf(stderr, "Inspected %i files\n", file_checked_count);
 
 	if (cmdline_option_fix || cmdline_option_install) {
-		printf("  %i files were missing\n", file_missing_count);
+		fprintf(stderr, "  %i files were missing\n", file_missing_count);
 		if (file_missing_count) {
-			printf("    %i of %i missing files were replaced\n", file_replaced_count, file_missing_count);
-			printf("    %i of %i missing files were not replaced\n", file_not_replaced_count, file_missing_count);
+			fprintf(stderr, "    %i of %i missing files were replaced\n", file_replaced_count, file_missing_count);
+			fprintf(stderr, "    %i of %i missing files were not replaced\n", file_not_replaced_count, file_missing_count);
 		}
 	}
 
 	if (!cmdline_option_quick && file_mismatch_count > 0) {
-		printf("  %i files did not match\n", file_mismatch_count);
+		fprintf(stderr, "  %i files did not match\n", file_mismatch_count);
 		if (cmdline_option_fix) {
-			printf("    %i of %i files were fixed\n", file_fixed_count, file_mismatch_count);
-			printf("    %i of %i files were not fixed\n", file_not_fixed_count, file_mismatch_count);
+			fprintf(stderr, "    %i of %i files were fixed\n", file_fixed_count, file_mismatch_count);
+			fprintf(stderr, "    %i of %i files were not fixed\n", file_not_fixed_count, file_mismatch_count);
 		}
 	}
 
 	if ((file_not_fixed_count == 0) && (file_not_replaced_count == 0) &&
 	    cmdline_option_fix && !cmdline_option_quick) {
-		printf("  %i files found which should be deleted\n", file_extraneous_count);
+		fprintf(stderr, "  %i files found which should be deleted\n", file_extraneous_count);
 		if (file_extraneous_count) {
-			printf("    %i of %i files were deleted\n", file_deleted_count, file_extraneous_count);
-			printf("    %i of %i files were not deleted\n", file_not_deleted_count, file_extraneous_count);
+			fprintf(stderr, "    %i of %i files were deleted\n", file_deleted_count, file_extraneous_count);
+			fprintf(stderr, "    %i of %i files were not deleted\n", file_not_deleted_count, file_extraneous_count);
 		}
 	}
 
@@ -857,17 +874,17 @@ clean_and_exit:
 		  file_extraneous_count);
 	if (ret == EXIT_SUCCESS) {
 		if (cmdline_option_fix || cmdline_option_install) {
-			printf("Fix successful\n");
+			fprintf(stderr, "Fix successful\n");
 		} else {
 			/* This is just a verification */
-			printf("Verify successful\n");
+			fprintf(stderr, "Verify successful\n");
 		}
 	} else {
 		if (cmdline_option_fix || cmdline_option_install) {
-			printf("Error: Fix did not fully succeed\n");
+			fprintf(stderr, "Error: Fix did not fully succeed\n");
 		} else {
 			/* This is just a verification */
-			printf("Error: Verify did not fully succeed\n");
+			fprintf(stderr, "Error: Verify did not fully succeed\n");
 		}
 	}
 

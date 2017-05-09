@@ -29,22 +29,22 @@
 
 static void print_help(const char *name)
 {
-	printf("Usage:\n");
-	printf("   swupd %s [options]\n\n", basename((char *)name));
-	printf("Help Options:\n");
-	printf("   -h, --help              Show help options\n");
-	printf("   -a, --all               List all available bundles for the current version of Clear Linux\n");
-	printf("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
-	printf("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
-	printf("   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
-	printf("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
-	printf("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	printf("   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
-	printf("   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
-	printf("   -S, --statedir          Specify alternate swupd state directory\n");
-	printf("   -C, --certpath          Specify alternate path to swupd certificates\n");
+	fprintf(stderr, "Usage:\n");
+	fprintf(stderr, "   swupd %s [options]\n\n", basename((char *)name));
+	fprintf(stderr, "Help Options:\n");
+	fprintf(stderr, "   -h, --help              Show help options\n");
+	fprintf(stderr, "   -a, --all               List all available bundles for the current version of Clear Linux\n");
+	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
+	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
+	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
+	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
+	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
+	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
+	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
+	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
+	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
 
-	printf("\n");
+	fprintf(stderr, "\n");
 }
 
 static const struct option prog_opts[] = {
@@ -78,7 +78,7 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'u':
 			if (!optarg) {
-				printf("error: invalid --url argument\n\n");
+				fprintf(stderr, "error: invalid --url argument\n\n");
 				goto err;
 			}
 			set_version_url(optarg);
@@ -86,27 +86,27 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'c':
 			if (!optarg) {
-				printf("Invalid --contenturl argument\n\n");
+				fprintf(stderr, "Invalid --contenturl argument\n\n");
 				goto err;
 			}
 			set_content_url(optarg);
 			break;
 		case 'v':
 			if (!optarg) {
-				printf("Invalid --versionurl argument\n\n");
+				fprintf(stderr, "Invalid --versionurl argument\n\n");
 				goto err;
 			}
 			set_version_url(optarg);
 			break;
 		case 'p': /* default empty path_prefix verifies the running OS */
 			if (!optarg || !set_path_prefix(optarg)) {
-				printf("Invalid --path argument\n\n");
+				fprintf(stderr, "Invalid --path argument\n\n");
 				goto err;
 			}
 			break;
 		case 'F':
 			if (!optarg || !set_format_string(optarg)) {
-				printf("Invalid --format argument\n\n");
+				fprintf(stderr, "Invalid --format argument\n\n");
 				goto err;
 			}
 			break;
@@ -118,20 +118,20 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'S':
 			if (!optarg || !set_state_dir(optarg)) {
-				printf("Invalid --statedir argument\n\n");
+				fprintf(stderr, "Invalid --statedir argument\n\n");
 				goto err;
 			}
 			break;
 		case 'C':
 			if (!optarg) {
-				printf("Invalid --certpath argument\n\n");
+				fprintf(stderr, "Invalid --certpath argument\n\n");
 				goto err;
 			}
 			set_cert_path(optarg);
 			break;
 
 		default:
-			printf("error: unrecognized option\n\n");
+			fprintf(stderr, "error: unrecognized option\n\n");
 			goto err;
 		}
 	}
@@ -158,13 +158,13 @@ int bundle_list_main(int argc, char **argv)
 
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
-		printf("Error: Failed updater initialization. Exiting now\n");
+		fprintf(stderr, "Error: Failed updater initialization. Exiting now\n");
 		return ret;
 	}
 
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
-		printf("Error: Unable to determine current OS version\n");
+		fprintf(stderr, "Error: Unable to determine current OS version\n");
 		v_lockfile(lock_fd);
 		return ECURRENT_VERSION;
 	}
@@ -177,8 +177,8 @@ int bundle_list_main(int argc, char **argv)
 		printf("%s\n", (char *)item->data);
 		item = item->next;
 	}
-
-	printf("Current OS version: %d\n", current_version);
+	/* Should this be a different command */
+	fprintf(stderr, "Current OS version: %d\n", current_version);
 
 	list_free_list(list_bundles);
 	v_lockfile(lock_fd);

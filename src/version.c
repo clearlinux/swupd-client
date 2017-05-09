@@ -159,15 +159,15 @@ int check_versions(int *current_version,
 	read_versions(current_version, server_version, path_prefix);
 
 	if (*current_version < 0) {
-		printf("Error: Unable to determine current OS version\n");
+		fprintf(stderr, "Error: Unable to determine current OS version\n");
 		return -1;
 	}
 	if (*current_version == 0) {
-		printf("Update from version 0 not supported yet.\n");
+		fprintf(stderr, "Update from version 0 not supported yet.\n");
 		return -1;
 	}
 	if (SWUPD_VERSION_IS_DEVEL(*current_version) || SWUPD_VERSION_IS_RESVD(*current_version)) {
-		printf("Update of dev build not supported %d\n", *current_version);
+		fprintf(stderr, "Update of dev build not supported %d\n", *current_version);
 		return -1;
 	}
 	swupd_curl_set_current_version(*current_version);

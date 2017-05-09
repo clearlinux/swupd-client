@@ -70,8 +70,7 @@ static int xattr_get_value(const char *path, const char *name, char **blob,
 
 	/* realloc needed len + 1 in case we need to add final zero
 	 * to ensure consistent blob */
-	value = realloc(*blob, *blob_len + len +
-				   (action == XATTRS_ACTION_GET_BLOB ? 1 : 0));
+	value = realloc(*blob, *blob_len + len + (action == XATTRS_ACTION_GET_BLOB ? 1 : 0));
 	if (!value) {
 		abort();
 	}

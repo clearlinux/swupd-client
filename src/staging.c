@@ -122,6 +122,13 @@ int do_staging(struct file *file, struct manifest *MoM)
 				ret = -ETYPE_CHANGED_FILE_RM;
 				goto out;
 			}
+			/* Since we have removed the old file, it doesn't
+			 * matter what type it used to be. This is in
+			 * particular important if file has changed from
+			 * directory to non-directory, as otherwise we'd end
+			 * up in the directory clause below, which we really
+			 * only want for new directories. */
+			s.st_mode &= ~S_IFMT;
 		}
 	}
 	free(statfile);

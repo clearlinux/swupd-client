@@ -212,6 +212,13 @@ static inline int bsearch_helper(const void *A, const void *B)
 	return strcmp(*(const char **)A, ((struct filerecord *)B)->filename);
 }
 
+static inline int bsearch_file_helper(const void *A, const void *B)
+{
+	struct file *key = (struct file *) A;
+	struct file *elem = (*(struct file **)B);
+	return strcmp(key->filename, elem->filename);
+}
+
 extern int swupd_stats[];
 static inline void account_new_file(void)
 {
@@ -371,6 +378,10 @@ typedef enum telem_prio_t {
 	TELEMETRY_CRIT
 } telem_prio_t;
 extern void telemetry(telem_prio_t level, const char *class, const char *fmt, ...);
+
+extern struct file **manifest_files_to_array(struct manifest *manifest);
+extern void print_manifest_array(struct file **array, int filecount);
+int enforce_compliant_manifest(struct file **a, struct file **b, int size);
 
 /* some disk sizes constants for the various features:
  *   ...consider adding build automation to catch at build time

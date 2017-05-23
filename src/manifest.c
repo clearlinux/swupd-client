@@ -1413,3 +1413,67 @@ struct file *search_file_in_manifest(struct manifest *manifest, const char *file
 	}
 	return NULL;
 }
+
+/* Ideally have the manifest sorted already by this point */
+struct file **manifest_files_to_array(struct manifest *manifest)
+{
+	struct file **array;
+	struct list *iter;
+	struct file *file;
+	int i = 0;
+	int numfiles = manifest->filecount;
+
+	if (!manifest) {
+		fprintf(stderr, "Manifest is NULL!\n");
+		return NULL;
+	}
+
+	array = malloc(sizeof(struct file *) * numfiles);
+
+	iter = list_head(manifest->files);
+	while (iter) {
+		file = iter->data;
+		iter = iter->next;
+		array[i] = file;
+		i++;
+	}
+	return array;
+}
+
+void print_manifest_array(struct file **array, int filecount)
+{
+	for (int i = 0; i < filecount; i++) {
+		printf("%s\n", array[i]->filename);
+	}
+}
+
+void free_manifest_array(struct file **array)
+{
+	free(array);
+}
+
+static int cmpnames(const void *a, const void *b)
+{
+	return strcmp((*(struct file **)a)->filename, (*(struct file **)b)->filename);
+}
+
+int enforce_compliant_manifest(struct file **a, struct file **b, int size)
+{
+	struct file **found;
+
+	//qsort(a, size, sizeof(char *), cmpnames);
+	print_manifest_array(a, size);
+	printf("Checking manifest uniqueness...\n");
+	for (int i = 0; i < size; i++) {
+		found = bsearch(a[i], b, size, sizeof(struct file *), bsearch_file_helper);
+		if (found) {
+			if (hash_equal(a[i]->hash, (*found)->hash)) {
+				continue;
+			}
+			fprintf(stderr, "ERROR: Conflict found for file: %s & %s\n", a[i]->filename, (*found)->filename);
+			return 1;
+		}
+	}
+	return 0; // No collisions were found, so manifest is purely additive
+}
+

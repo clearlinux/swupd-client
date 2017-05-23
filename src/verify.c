@@ -774,11 +774,21 @@ load_submanifests:
 		if ((file_not_fixed_count == 0) && (file_not_replaced_count == 0)) {
 			remove_orphaned_files(official_manifest);
 		}
+		if (cmdline_option_picky) {
+			char *start = mk_full_filename(path_prefix, "/usr");
+			fprintf(stderr, "--picky removing extra files under %s\n", start);
+			ret = walk_tree(official_manifest, start, true);
+			if (ret >= 0) {
+				file_checked_count = ret;
+				ret = 0;
+			}
+			free(start);
+		}
 		grabtime_stop(&times);
 	} else if (cmdline_option_picky) {
 		char *start = mk_full_filename(path_prefix, "/usr");
 		fprintf(stderr, "Generating list of extra files under %s\n", start);
-		ret = walk_tree(official_manifest, start);
+		ret = walk_tree(official_manifest, start, false);
 		if (ret >= 0) {
 			file_checked_count = ret;
 			ret = 0;

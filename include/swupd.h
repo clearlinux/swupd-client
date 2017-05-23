@@ -122,6 +122,12 @@ struct file {
 	FILE *fh;      /* file written into during downloading */
 };
 
+struct filerecord {
+	char *filename;
+	bool dir;
+	bool in_manifest;
+};
+
 struct time {
 	struct timespec procstart;
 	struct timespec procstop;
@@ -200,6 +206,11 @@ extern void print_time_stats(timelist *list);
 extern int get_value_from_path(char **contents, const char *path, bool is_abs_path);
 extern int get_version_from_path(const char *abs_path);
 extern timelist init_timelist(void);
+
+static inline int bsearch_helper(const void *A, const void *B)
+{
+	return strcmp(*(const char **)A, ((struct filerecord *)B)->filename);
+}
 
 extern int swupd_stats[];
 static inline void account_new_file(void)

@@ -42,12 +42,6 @@
 #include "signature.h"
 #include "swupd.h"
 
-struct filerecord {
-	char *filename;
-	bool dir;
-	bool in_manifest;
-};
-
 static struct filerecord *F; /* Array of filerecords */
 static int nF = 0;	   /* Number of filerecords */
 
@@ -88,11 +82,6 @@ static int record_filename(const char *name, const struct stat *stat __attribute
 static int qsort_helper(const void *A, const void *B)
 {
 	return strcmp(((struct filerecord *)A)->filename, ((struct filerecord *)B)->filename);
-}
-/* bsearch helper function */
-static int bsearch_helper(const void *A, const void *B)
-{
-	return strcmp(*(const char **)A, ((struct filerecord *)B)->filename);
 }
 
 /* expect the start to end in /usr and be the absolute path to the root */

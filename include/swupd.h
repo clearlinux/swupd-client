@@ -50,6 +50,7 @@ struct sub {
 struct manifest {
 	int version;
 	int manifest_version;
+	uint64_t filecount;
 	uint64_t contentsize;
 	struct list *files;
 	struct list *manifests;    /* struct file for possible manifests */

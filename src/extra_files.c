@@ -95,10 +95,11 @@ static int bsearch_helper(const void *A, const void *B)
 }
 
 /* expect the start to end in /usr and be the absolute path to the root */
-int walk_tree(struct manifest *manifest, const char *start)
+int walk_tree(struct manifest *manifest, const char *start, bool fix)
 {
 	/* Walk the tree, */
 	int rc;
+	char *temp;
 	path_prefix_len = strlen(path_prefix);
 	/* Set up the directories to skip */
 	for (size_t i = 0; i < sizeof(skip_dirs) / sizeof(skip_dirs[0]); i++) {
@@ -131,8 +132,9 @@ int walk_tree(struct manifest *manifest, const char *start)
 			found->in_manifest = true;
 		}
 	}
-	/* list files/directories which are extra */
-	for (int i = 0; i < nF; i++) {
+	/* list files/directories which are extra.
+	 * This is reverse so that files are removed before their parent dirs */
+	for (int i = nF - 1; i >= 0; i--) {
 		int skip_len; /* Length of directory name we are skipping
 			       * could have used strlen(skip_dir), but speed! */
 		if (!F[i].in_manifest) {
@@ -148,9 +150,23 @@ int walk_tree(struct manifest *manifest, const char *start)
 			if (F[i].dir) { /* Start of new dir to skip */
 				skip_dir = F[i].filename;
 				skip_len = strlen(skip_dir);
-				printf("%s/\n", F[i].filename);
+				if (fix) {
+					string_or_die(&temp, "%s%s", path_prefix, F[i].filename);
+					fprintf(stderr, "REMOVING DIR %s/\n", F[i].filename);
+					remove(temp);
+					free(temp);
+				} else {
+					printf("%s/\n", F[i].filename);
+				}
 			} else {
-				printf("%s\n", F[i].filename);
+				if (fix) {
+					string_or_die(&temp, "%s%s", path_prefix, F[i].filename);
+					fprintf(stderr, "REMOVING %s\n", F[i].filename);
+					remove(temp);
+					free(temp);
+				} else {
+					printf("%s\n", F[i].filename);
+				}
 			}
 		} else {
 			skip_dir = NULL;

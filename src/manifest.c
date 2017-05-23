@@ -171,6 +171,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 	struct manifest *manifest;
 	struct list *includes = NULL;
 	char *filename;
+	uint64_t filecount = 0;
 	uint64_t contentsize = 0;
 	int manifest_hdr_version;
 	int manifest_enc_version;
@@ -230,6 +231,9 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 				goto err_close;
 			}
 		}
+		if (strncmp(line, "filecount:", 10) == 0) {
+			filecount = strtoull(c, NULL, 10);
+		}
 		if (strncmp(line, "contentsize:", 12) == 0) {
 			contentsize = strtoull(c, NULL, 10);
 		}
@@ -255,6 +259,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		goto err_close;
 	}
 
+	manifest->filecount = filecount;
 	manifest->contentsize = contentsize;
 	manifest->manifest_version = manifest_enc_version;
 	manifest->includes = includes;

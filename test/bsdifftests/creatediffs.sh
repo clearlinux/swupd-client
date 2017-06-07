@@ -103,10 +103,10 @@ echo -e "Finished!\n"
 # Check that the patched file hashes match the original file hashes
 for f in $(ls patched);
 do
-	newhash=$(sudo swupd hashdump --basepath ./ patched/$f | tail -1)
+	newhash=$(sudo swupd hashdump --path ./ patched/$f | tail -1)
 	# strip the encoding type off the filename so we can match the original file
 	oldfile=$(echo $f | sed 's/\.[a-z0-9]*$//')
-	oldhash=$(sudo swupd hashdump --basepath $folder $oldfile | tail -1)
+	oldhash=$(sudo swupd hashdump --path $folder $oldfile | tail -1)
 
 	if [[ "$newhash" != "$oldhash" ]]; then
 		echo -e "\n*** ERROR: hash mismatch **\n$input/$oldfile\n"

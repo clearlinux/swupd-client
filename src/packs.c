@@ -54,8 +54,13 @@ static int download_pack(int oldversion, int newversion, char *module, int is_mi
 
 	if (is_mix) {
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", MIX_STATE_DIR, newversion, module, oldversion);
-		link(url, filename);
+		err = link(url, filename);
 		printf("Linked %s to %s\n", url, filename);
+		if (err) {
+			free(filename);
+			free(url);
+			return err;
+		}
 		free(url);
 	} else {
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, newversion, module, oldversion);
@@ -69,16 +74,7 @@ static int download_pack(int oldversion, int newversion, char *module, int is_mi
 			free(filename);
 			return err;
 		}
-
-		free(url);
-		if ((lstat(filename, &stat) == 0) && (stat.st_size == 0)) {
-			unlink(filename);
-		}
-		free(filename);
-		return err;
 	}
-
-	free(url);
 
 	fprintf(stderr, "\nExtracting %s pack for version %i\n", module, newversion);
 	string_or_die(&tar, TAR_COMMAND " -C %s " TAR_PERM_ATTR_ARGS " -xf %s/pack-%s-from-%i-to-%i.tar 2> /dev/null",
@@ -111,6 +107,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	struct list *iter;
 	struct sub *sub = NULL;
 	int err;
+	int is_mix = 0;
 	unsigned int list_length = list_len(subs);
 	unsigned int complete = 0;
 
@@ -129,7 +126,11 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 			continue;
 		}
 
-		err = download_pack(sub->oldversion, sub->version, sub->component);
+		struct file *bundle = search_bundle_in_manifest(mom, sub->component);
+		if (bundle) {
+			is_mix = bundle->is_mix;
+		}
+		err = download_pack(sub->oldversion, sub->version, sub->component, is_mix);
 		print_progress(complete, list_length);
 		if (err < 0) {
 			if (required) { /* Probably need printf("\n") here */

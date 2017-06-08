@@ -99,21 +99,21 @@ int get_current_version(char *path_prefix)
 		}
 		if (strncmp(line, "VERSION_ID=", 11) == 0) {
 			src = &line[11];
-				/* Drop quotes and newline in value */
-				dest = src;
-				while (*src) {
-					if (*src == '\'' || *src == '"' || *src == '\n') {
-						++src;
-					} else {
-						*dest = *src;
-						++dest;
-						++src;
-					}
+			/* Drop quotes and newline in value */
+			dest = src;
+			while (*src) {
+				if (*src == '\'' || *src == '"' || *src == '\n') {
+					++src;
+				} else {
+					*dest = *src;
+					++dest;
+					++src;
 				}
-				*dest = 0;
+			}
+			*dest = 0;
 
-				v = strtoull(&line[11], NULL, 10);
-				break;
+			v = strtoull(&line[11], NULL, 10);
+			break;
 		}
 	}
 

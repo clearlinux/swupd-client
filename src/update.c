@@ -141,10 +141,6 @@ int check_manifests_uniqueness(int clrver, int mixver)
 	return ret;
 }
 
-void setup_mix_update()
-{
-}
-
 static int update_loop(struct list *updates, struct manifest *server_manifest)
 {
 	int ret;
@@ -273,30 +269,24 @@ int add_included_manifests(struct manifest *mom, int current, struct list **subs
 	return ret;
 }
 
-static int re_exec_update(bool versions_match)                                  
-{                                                                               
-    if (!versions_match) {                                                      
-        fprintf(stderr, "ERROR: Inconsistency between version files, exiting now.\n");
-        return 1;                                                               
-    }                                                                           
-                                                                                
-    if (!swupd_cmd) {                                                           
-        fprintf(stderr, "ERROR: Unable to determine re-update command, exiting now.\n");
-        return 1;                                                               
-    }                                                                           
-                                                                                
-    /* Run the swupd_cmd saved from main */                                     
-    if (system(swupd_cmd) != 0) {                                               
-        return 1;                                                               
-    }                                                                           
-                                                                                
-    return 0;                                                                   
-}  
-
-static bool system_on_mix(void)
+static int re_exec_update(bool versions_match)
 {
-	bool ret = (access("/usr/share/defaults/swupd/mixed", R_OK) != 0);
-	return ret;
+	if (!versions_match) {
+		fprintf(stderr, "ERROR: Inconsistency between version files, exiting now.\n");
+		return 1;
+	}
+
+	if (!swupd_cmd) {
+		fprintf(stderr, "ERROR: Unable to determine re-update command, exiting now.\n");
+		return 1;
+	}
+
+	/* Run the swupd_cmd saved from main */
+	if (system(swupd_cmd) != 0) {
+		return 1;
+	}
+
+	return 0;
 }
 
 static bool need_new_upstream(int server)
@@ -355,7 +345,7 @@ int main_update()
 
 	grabtime_start(&times, "Update Step 1: get versions");
 
-	read_subscriptions_alt(&current_subs, mix_exists);
+	read_subscriptions(&current_subs);
 
 /* Step 1: get versions */
 version_check:
@@ -383,13 +373,13 @@ version_check:
 			/* Update the clearversion that will be used to generate the new mix content */
 			FILE *verfile = fopen(MIX_DIR ".clearversion", "w+");
 			if (!verfile) {
-				fprintf(stderr, "ERROR: fopen() returned %s\n", strerror(errno));
+				fprintf(stderr, "ERROR: fopen() %s/.clearversion returned %s\n", MIX_DIR, strerror(errno));
 			} else {
 				fprintf(verfile, "%d", server_version);
 				fclose(verfile);
 			}
 
-			if (system("/usr/bin/add-pkg.sh") != 0) {
+			if (system("/usr/bin/add-pkg.sh regenerate") != 0) {
 				fprintf(stderr, "ERROR: Could not execute add-pkg.sh\n");
 				ret = EXIT_FAILURE;
 				goto clean_curl;

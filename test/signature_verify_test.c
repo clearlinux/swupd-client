@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 		usage(argv[0]);
 	}
 
-	if (download_and_verify_signature(argv[1], argv[2])) {
+	if (download_and_verify_signature(argv[1], argv[2], 10, false)) {
 		fprintf(stderr, "Verification successful!\n");
 	} else {
 		fprintf(stderr, "Verification failed!\n");

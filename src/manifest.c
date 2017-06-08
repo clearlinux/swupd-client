@@ -591,18 +591,6 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		goto out;
 	}
 
-	if (ret) {
-		free(filename);
-		string_or_die(&filename, "%s/%i/Manifest.%s.tar", state_dir, version, component);
-		string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url, version, component);
-
-		ret = swupd_curl_get_file(url, filename, NULL, NULL, false);
-		if (ret) {
-			unlink(filename);
-			goto out;
-		}
-	}
-
 untar:
 	string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",
 		      state_dir, version, state_dir, version, component);
@@ -682,17 +670,12 @@ struct manifest *load_mom(int version, bool latest, bool mix_exists)
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
-	char *basedir;
 	char *filename;
 	char *url;
 	char *log_cmd = NULL;
 	bool retried = false;
-
-	if (mix_exists) {
-		basedir = MIX_STATE_DIR;
-	} else {
-		basedir = state_dir;
-	}
+	bool perform_sig_verify = !(migrate && mix_exists);
+	bool invalid_sig = false;
 
 verify_mom:
 	ret = retrieve_manifests(version, version, "MoM", NULL, mix_exists);
@@ -715,7 +698,14 @@ verify_mom:
 
 	string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
 	string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);
-	if (!download_and_verify_signature(url, filename, version, mix_exists)) {
+
+	if (perform_sig_verify) {
+		invalid_sig = !download_and_verify_signature(url, filename, version, mix_exists);
+	}
+
+	/* Only when migrating , ignore the locally made signature check which is guaranteed to have been signed
+	 * by the user and does not come from any network source */
+	if (invalid_sig) {
 		if (sigcheck) {
 			/* cleanup and try one more time, statedir could have got corrupt/stale */
 			if (retried == false && !mix_exists) {
@@ -726,27 +716,24 @@ verify_mom:
 			fprintf(stderr, "WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM version %d\n", version);
 			free(filename);
 			free(url);
+			free_manifest(manifest);
 			return NULL;
-		} else {
-			fprintf(stderr, "FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
-					"  --nosigcheck, but system security may be compromised\n");
-			string_or_die(&log_cmd, "echo \"swupd security notice:"
-						" --nosigcheck used to bypass MoM signature verification failure\" | systemd-cat --priority=\"err\" --identifier=\"swupd\"");
-			if (system(log_cmd)) {
-				/* useless noise to suppress gcc & glibc conspiring
-				 * to make us check the result of system */
-			}
-			free(log_cmd);
 		}
+		fprintf(stderr, "FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
+				"  --nosigcheck, but system security may be compromised\n");
+		string_or_die(&log_cmd, "echo \"swupd security notice:"
+					" --nosigcheck used to bypass MoM signature verification failure\" | systemd-cat --priority=\"err\" --identifier=\"swupd\"");
+		if (system(log_cmd)) {
+			/* useless noise to suppress gcc & glibc conspiring
+			 * to make us check the result of system */
+		}
+		free(log_cmd);
 	}
-	printf("MOM IS GOODDDD\n");
 	free(filename);
 	free(url);
-	printf("manifest is %s\n", manifest->component);
 	return manifest;
 
 out:
-	printf("why\n");
 	return NULL;
 }
 
@@ -788,9 +775,6 @@ retry_load:
 			goto retry_load;
 		}
 		return NULL;
-	}
-	if (!retried) {
-		retried = false;
 	}
 
 	manifest = manifest_from_file(version, file->filename, header_only, false, file->is_mix);
@@ -1509,12 +1493,14 @@ struct file **manifest_files_to_array(struct manifest *manifest)
 	struct list *iter;
 	struct file *file;
 	int i = 0;
-	int numfiles = manifest->filecount;
+	int numfiles;
 
 	if (!manifest) {
 		fprintf(stderr, "Manifest is NULL!\n");
 		return NULL;
 	}
+
+	numfiles = manifest->filecount;
 
 	array = malloc(sizeof(struct file *) * numfiles);
 
@@ -1551,7 +1537,6 @@ int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize,
 	struct file **found;
 	int ret = 0;
 
-	qsort(a, searchsize, sizeof(struct file *), cmpnames);
 	qsort(b, size, sizeof(struct file *), cmpnames);
 	printf("Checking manifest uniqueness...\n");
 	for (int i = 0; i < searchsize; i++) {

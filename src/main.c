@@ -53,6 +53,7 @@ static const struct option prog_opts[] = {
 	{ "time", no_argument, 0, 't' },
 	{ "no-scripts", no_argument, 0, 'N' },
 	{ "no-boot-update", no_argument, 0, 'b' },
+	{ "migrate", no_argument, 0, 'b' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -82,6 +83,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -t, --time              Show verbose time output for swupd operations\n");
 	fprintf(stderr, "   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
 	fprintf(stderr, "   -b, --no-boot-update    Do not update the boot files using clr-boot-manager\n");
+	fprintf(stderr, "   -m, --migrate           Migrate to augmented upstream/mix content\n");
 	fprintf(stderr, "\n");
 }
 
@@ -89,7 +91,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxnIdtNbu:P:c:v:sF:p:S:C:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxnIdtNbmu:P:c:v:sF:p:S:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -158,6 +160,10 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'x':
 			force = true;
+			break;
+		case 'm':
+			migrate = true;
+			fprintf(stderr, "Attempting to migrate to your mix content...\n\n");
 			break;
 		case 'n':
 			sigcheck = false;

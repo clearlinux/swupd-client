@@ -410,6 +410,8 @@ int verify_callback(int ok, X509_STORE_CTX *stor)
 
 /* Verifies signature for the local file DATA_FILENAME first, and on failure
  * downloads the signature based on DATA_URL and tries to verify again.
+ * Automatically manages the signature for mix content, performing local
+ * verification only if the manifest is user created.
  *
  * returns: true if signature verification succeeded, false if verification
  * failed, or the signature download failed

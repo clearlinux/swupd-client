@@ -32,6 +32,7 @@
 #include "swupd.h"
 
 bool force = false;
+bool migrate = false;
 bool sigcheck = true;
 bool timecheck = true;
 bool no_scripts = false;
@@ -185,26 +186,31 @@ bool check_mix_exists(void)
 	string_or_die(&fullpath, "%s%s", path_prefix, MIX_DIR);
 
 	dir = opendir(fullpath);
+	free(fullpath);
+
 	if (dir == NULL) {
-		free(fullpath);
 		return false;
 	}
-	for(i = 0; i < 3; i++) {
-		entry = readdir(dir);
+	for (; entry = readdir(dir);) {
 		if (!entry) {
 			break;
 		}
 		if (!strcmp(entry->d_name, ".") ||
-			!strcmp(entry->d_name, "..")) {
+		    !strcmp(entry->d_name, "..")) {
 			continue;
 		}
+		break;
 	}
+	closedir(dir);
 	/* If more than /. & /.. exists, then at least one bundle exists */
-	if (i > 2) {
-		return true;
-	} else {
-		return false;
-	}
+	return entry != NULL;
+}
+
+/* Once system is on mix this file should exist */
+bool system_on_mix(void)
+{
+	bool ret = (access("/usr/share/defaults/swupd/mixed", R_OK) == 0);
+	return ret;
 }
 
 int get_value_from_path(char **contents, const char *path, bool is_abs_path)
@@ -497,11 +503,17 @@ void set_cert_path(char *path)
 		return;
 	}
 
+	/* Cmd line has priority, otherwise check if we're on a mix so the correct
+	 * cert is used and user does not have to call swupd with -C all the time */
 	if (path) {
 		string_or_die(&cert_path, "%s", path);
 	} else {
-		// CERT_PATH is guaranteed to be valid at this point.
-		string_or_die(&cert_path, "%s", CERT_PATH);
+		if (system_on_mix()) {
+			string_or_die(&cert_path, "%s", MIX_CERT);
+		} else {
+			// CERT_PATH is guaranteed to be valid at this point.
+			string_or_die(&cert_path, "%s", CERT_PATH);
+		}
 	}
 }
 #else

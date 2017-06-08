@@ -72,21 +72,14 @@ static int subscription_sort_component(const void *a, const void *b)
 
 /* Custom content comes from a different location and is not required to
  * have os-core added */
-void read_subscriptions_alt(struct list **subs, bool is_mix)
+void read_subscriptions(struct list **subs)
 {
 	bool have_os_core = false;
 	char *path = NULL;
-	char *bundlesdir = NULL;
 	DIR *dir;
 	struct dirent *ent;
 
-	if (!is_mix) {
-		bundlesdir = BUNDLES_DIR;
-	} else {
-		bundlesdir = MIX_BUNDLES_DIR;
-	}
-
-	string_or_die(&path, "%s/%s", path_prefix, bundlesdir);
+	string_or_die(&path, "%s/%s", path_prefix, BUNDLES_DIR);
 
 	dir = opendir(path);
 	if (dir) {
@@ -99,10 +92,9 @@ void read_subscriptions_alt(struct list **subs, bool is_mix)
 					/*  This is considered odd since means two files same name on same folder */
 					continue;
 				}
-				if (!is_mix) {
-					if (strcmp(ent->d_name, "os-core") == 0) {
-						have_os_core = true;
-					}
+
+				if (strcmp(ent->d_name, "os-core") == 0) {
+					have_os_core = true;
 				}
 
 				create_and_append_subscription(subs, ent->d_name);
@@ -115,7 +107,7 @@ void read_subscriptions_alt(struct list **subs, bool is_mix)
 	free(path);
 
 	/* Always add os-core */
-	if (!is_mix && !have_os_core) {
+	if (!have_os_core) {
 		create_and_append_subscription(subs, "os-core");
 	}
 

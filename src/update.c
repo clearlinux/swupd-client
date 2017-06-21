@@ -415,8 +415,8 @@ download_packs:
 			printf("Retry #%d downloading packs\n", retries);
 			goto download_packs;
 		}
-		printf("No network, or server unavailable for pack downloads\n");
-		ret = ENOSWUPDSERVER;
+		printf("Pack download failed\n");
+		ret = EDOWNLOADPACKS;
 		goto clean_exit;
 	}
 	grabtime_stop(&times);

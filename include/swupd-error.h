@@ -23,5 +23,6 @@
 #define ECURRENT_VERSION 20     /* Cannot determine current OS version */
 #define ESIGNATURE 21		/* Cannot initialize signature verification */
 #define EBADTIME 22		/* System time is bad */
+#define EDOWNLOADPACKS 23       /* Pack download failed */
 
 #endif

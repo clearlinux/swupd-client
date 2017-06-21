@@ -252,7 +252,7 @@ static int get_all_files(struct manifest *official_manifest, struct list *subs)
 		 * 	logging needed */
 		fprintf(stderr, "zero pack downloads failed. \n");
 		fprintf(stderr, "Failed - Server-side error, cannot download necessary files\n");
-		return -ENOSWUPDSERVER;
+		return -EDOWNLOADPACKS;
 	}
 	iter = list_head(official_manifest->files);
 	while (iter) {

@@ -21,6 +21,6 @@ void terminate_signature(void);
  * @param data_url - the URL from which the data came
  * @param data_filename - the file containing the data
  */
-bool download_and_verify_signature(const char *data_url, const char *data_filename);
+bool download_and_verify_signature(const char *data_url, const char *data_filename, int version, bool mix_exists);
 
 #endif /* SIGNATURE_H_ */

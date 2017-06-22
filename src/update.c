@@ -67,6 +67,9 @@ static struct list *full_download_loop(struct list *updates, int isfailed)
 {
 	struct list *iter;
 	struct file *file;
+	char *filename;
+	char *url;
+	int ret = -1;
 	unsigned int list_length = list_len(updates);
 	unsigned int complete = 0;
 
@@ -79,7 +82,23 @@ static struct list *full_download_loop(struct list *updates, int isfailed)
 		if (file->is_deleted) {
 			continue;
 		}
+		/* Mix content is local, so don't queue files up for curl downloads */
+		if (file->is_mix) {
+			string_or_die(&url, "%s/%i/files/%s.tar", MIX_STATE_DIR, file->last_change, file->hash);
+			string_or_die(&filename, "%s/download/.%s.tar", state_dir, file->hash);
+			file->staging = filename;
+			ret = link(url, filename);
+			/* Try doing a regular rename if hardlink fails */
+			if (ret) {
+				if (rename(url, filename) != 0) {
+					fprintf(stderr, "Failed to copy local mix file: %s\n", filename);
+					continue;
+				}
+			}
 
+			untar_full_download(file);
+			continue;
+		}
 		full_download(file);
 		print_progress(complete, list_length);
 	}
@@ -91,6 +110,39 @@ static struct list *full_download_loop(struct list *updates, int isfailed)
 	}
 
 	return end_full_download();
+}
+
+/* This loads the upstream Clear Manifest.Full and local Manifest.full, and then checks
+ * that there are no conflicts between the files they both include */
+int check_manifests_uniqueness(int clrver, int mixver)
+{
+	struct manifest *clear = load_manifest_full(clrver, false);
+	struct manifest *mixer = load_manifest_full(mixver, true);
+	if (!clear || !mixer) {
+		fprintf(stderr, "ERROR: Could not load full manifests\n");
+		return -1;
+	}
+
+	struct file **clearfull = manifest_files_to_array(clear);
+	struct file **mixerfull = manifest_files_to_array(mixer);
+
+	if (clearfull == NULL || mixerfull == NULL) {
+		fprintf(stderr, "Could not convert full manifest to array\n");
+		abort();
+	}
+
+	int ret = enforce_compliant_manifest(mixerfull, clearfull, mixer->filecount, clear->filecount);
+
+	free_manifest_array(clearfull);
+	free_manifest_array(mixerfull);
+	free_manifest(clear);
+	free_manifest(mixer);
+
+	return ret;
+}
+
+void setup_mix_update()
+{
 }
 
 static int update_loop(struct list *updates, struct manifest *server_manifest)
@@ -221,29 +273,47 @@ int add_included_manifests(struct manifest *mom, int current, struct list **subs
 	return ret;
 }
 
-static int re_exec_update(bool versions_match)
+static int re_exec_update(bool versions_match)                                  
+{                                                                               
+    if (!versions_match) {                                                      
+        fprintf(stderr, "ERROR: Inconsistency between version files, exiting now.\n");
+        return 1;                                                               
+    }                                                                           
+                                                                                
+    if (!swupd_cmd) {                                                           
+        fprintf(stderr, "ERROR: Unable to determine re-update command, exiting now.\n");
+        return 1;                                                               
+    }                                                                           
+                                                                                
+    /* Run the swupd_cmd saved from main */                                     
+    if (system(swupd_cmd) != 0) {                                               
+        return 1;                                                               
+    }                                                                           
+                                                                                
+    return 0;                                                                   
+}  
+
+static bool system_on_mix(void)
 {
-	if (!versions_match) {
-		fprintf(stderr, "ERROR: Inconsistency between version files, exiting now.\n");
-		return 1;
-	}
+	bool ret = (access("/usr/share/defaults/swupd/mixed", R_OK) != 0);
+	return ret;
+}
 
-	if (!swupd_cmd) {
-		fprintf(stderr, "ERROR: Unable to determine re-update command, exiting now.\n");
-		return 1;
+static bool need_new_upstream(int server)
+{
+	if (!access(MIX_DIR ".clearversion", R_OK)) {
+		int version = read_mix_version_file(MIX_DIR ".clearversion", path_prefix);
+		if (version < server) {
+			return true;
+		}
 	}
-
-	/* Run the swupd_cmd saved from main */
-	if (system(swupd_cmd) != 0) {
-		return 1;
-	}
-
-	return 0;
+	return false;
 }
 
 int main_update()
 {
 	int current_version = -1, server_version = -1;
+	int mix_current_version = -1, mix_server_version = -1;
 	struct manifest *current_manifest = NULL, *server_manifest = NULL;
 	struct list *updates = NULL;
 	struct list *current_subs = NULL;
@@ -255,6 +325,7 @@ int main_update()
 	struct timespec ts_start, ts_stop; // For main swupd update time
 	timelist times;
 	double delta;
+	bool mix_exists;
 	bool re_update = false;
 	bool versions_match = false;
 
@@ -278,20 +349,57 @@ int main_update()
 		goto clean_curl;
 	}
 
+	mix_exists = check_mix_exists();
+
 	fprintf(stderr, "Update started.\n");
 
 	grabtime_start(&times, "Update Step 1: get versions");
 
-	read_subscriptions_alt(&current_subs);
+	read_subscriptions_alt(&current_subs, mix_exists);
 
-	/* Step 1: get versions */
-
+/* Step 1: get versions */
+version_check:
 	ret = check_versions(&current_version, &server_version, path_prefix);
 
 	if (ret < 0) {
 		ret = EXIT_FAILURE;
 		goto clean_curl;
 	}
+
+	if (mix_exists) {
+		ret = check_mix_versions(&mix_current_version, &mix_server_version, path_prefix);
+		if (ret < 0) {
+			ret = EXIT_FAILURE;
+			goto clean_curl;
+		}
+		/* Check if a new upstream version is available so we can update to it still */
+		if (need_new_upstream(server_version)) {
+			printf("NEW CLEAR AVAILABLE %d\n", server_version);
+			ret = check_manifests_uniqueness(server_version, mix_server_version);
+			if (ret) {
+				printf("\n\t!! %i collisions were found between mix and upstream, please re-create mix !!\n", ret);
+			}
+
+			/* Update the clearversion that will be used to generate the new mix content */
+			FILE *verfile = fopen(MIX_DIR ".clearversion", "w+");
+			if (!verfile) {
+				fprintf(stderr, "ERROR: fopen() returned %s\n", strerror(errno));
+			} else {
+				fprintf(verfile, "%d", server_version);
+				fclose(verfile);
+			}
+
+			if (system("/usr/bin/add-pkg.sh") != 0) {
+				fprintf(stderr, "ERROR: Could not execute add-pkg.sh\n");
+				ret = EXIT_FAILURE;
+				goto clean_curl;
+			}
+			goto version_check;
+		}
+		current_version = mix_current_version;
+		server_version = mix_server_version;
+	}
+
 	if (server_version <= current_version) {
 		fprintf(stderr, "Version on server (%i) is not newer than system version (%i)\n", server_version, current_version);
 		ret = EXIT_SUCCESS;
@@ -314,7 +422,11 @@ load_current_mom:
 	/* Step 3: setup manifests */
 
 	/* get the from/to MoM manifests */
-	current_manifest = load_mom(current_version, false);
+	if (system_on_mix()) {
+		current_manifest = load_mom(current_version, false, mix_exists);
+	} else {
+		current_manifest = load_mom(current_version, false, false);
+	}
 	if (!current_manifest) {
 		/* TODO: possibly remove this as not getting a "from" manifest is not fatal
 		 * - we just don't apply deltas */
@@ -335,7 +447,7 @@ load_current_mom:
 load_server_mom:
 	grabtime_stop(&times); // Close step 2
 	grabtime_start(&times, "Recurse and Consolidate Manifests");
-	server_manifest = load_mom(server_version, true);
+	server_manifest = load_mom(server_version, true, mix_exists);
 	if (!server_manifest) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
@@ -378,6 +490,7 @@ load_current_submanifests:
 	latest_subs = list_clone(current_subs);
 	set_subscription_versions(server_manifest, current_manifest, &latest_subs);
 	link_submanifests(current_manifest, server_manifest, current_subs, latest_subs, false);
+
 	/* The new subscription is seeded from the list of currently installed bundles
 	 * This calls add_subscriptions which recurses for new includes */
 	grabtime_start(&times, "Add Included Manifests");
@@ -427,7 +540,7 @@ load_server_submanifests:
 
 download_packs:
 	/* Step 5: get the packs and untar */
-	ret = download_subscribed_packs(latest_subs, false);
+	ret = download_subscribed_packs(latest_subs, server_manifest, false);
 	if (ret) {
 		// packs don't always exist, tolerate that but not ENONET
 		if (retries < MAX_TRIES) {
@@ -482,6 +595,16 @@ download_packs:
 
 	run_scripts(re_update);
 	grabtime_stop(&times);
+
+	/* Create the state file that will tell swupd it's on a mix on future runs */
+	if (mix_exists && !system_on_mix()) {
+		int fd = open("/usr/share/defaults/swupd/mixed", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+		if (fd == -1) {
+			fprintf(stderr, "ERROR: Failed to create 'mixed' statefile\n");
+			ret = -1;
+		}
+		close(fd);
+	}
 
 clean_exit:
 	list_free_list(updates);

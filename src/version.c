@@ -97,25 +97,23 @@ int get_current_version(char *path_prefix)
 		if (fgets(line, LINE_MAX, file) == NULL) {
 			break;
 		}
-
 		if (strncmp(line, "VERSION_ID=", 11) == 0) {
 			src = &line[11];
-
-			/* Drop quotes and newline in value */
-			dest = src;
-			while (*src) {
-				if (*src == '\'' || *src == '"' || *src == '\n') {
-					++src;
-				} else {
-					*dest = *src;
-					++dest;
-					++src;
+				/* Drop quotes and newline in value */
+				dest = src;
+				while (*src) {
+					if (*src == '\'' || *src == '"' || *src == '\n') {
+						++src;
+					} else {
+						*dest = *src;
+						++dest;
+						++src;
+					}
 				}
-			}
-			*dest = 0;
+				*dest = 0;
 
-			v = strtoull(&line[11], NULL, 10);
-			break;
+				v = strtoull(&line[11], NULL, 10);
+				break;
 		}
 	}
 
@@ -170,6 +168,44 @@ int check_versions(int *current_version,
 	return 0;
 }
 
+int read_mix_version_file(char *filename, char *path_prefix)
+{
+	char line[LINE_MAX];
+	FILE *file;
+	int v = -1;
+	char *buildstamp;
+
+	string_or_die(&buildstamp, "%s%s", path_prefix, filename);
+	file = fopen(buildstamp, "rm");
+	if (!file) {
+		free(buildstamp);
+		return v;
+	}
+
+	while (!feof(file)) {
+		line[0] = 0;
+		if (fgets(line, LINE_MAX, file) == NULL) {
+			break;
+		}
+
+		/* Drop newline in value */
+		char *c = strchr(line, '\n');
+		if (c) {
+			*c = '\0';
+		}
+
+		v = strtoull(line, NULL, 10);
+	}
+	free(buildstamp);
+	fclose(file);
+	return v;
+}
+
+int check_mix_versions(int *current_version, int *server_version, char *path_prefix)
+{
+	*current_version = read_mix_version_file("/usr/share/clear/version", path_prefix);
+	*server_version = read_mix_version_file(MIX_STATE_DIR "version/format1/latest", path_prefix);
+}
 int update_device_latest_version(int version)
 {
 	FILE *file = NULL;

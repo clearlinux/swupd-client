@@ -428,7 +428,7 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 
 	swupd_curl_set_current_version(current_version);
 
-	*MoM = load_mom(current_version, false);
+	*MoM = load_mom(current_version, false, false);
 	if (!(*MoM)) {
 		fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
 		return EMOM_NOTFOUND;

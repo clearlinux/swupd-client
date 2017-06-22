@@ -255,7 +255,7 @@ static int get_all_files(struct manifest *official_manifest, struct list *subs)
 	struct list *iter;
 
 	/* for install we need everything so synchronously download zero packs */
-	ret = download_subscribed_packs(subs, true);
+	ret = download_subscribed_packs(subs, official_manifest, true);
 	if (ret < 0) { // require zero pack
 		/* If we hit this point, we know we have a network connection, therefore
 		 * 	the error is server-side. This is also a critical error, so detailed
@@ -321,6 +321,26 @@ static struct list *download_loop(struct list *files, int isfailed)
 		}
 
 		if (hash_needs_work(file, local.hash)) {
+			/* Mix content is local, so don't queue files up for curl downloads */
+			if (file->is_mix) {
+				char *filename;
+				char *url;
+				string_or_die(&url, "%s/%i/files/%s.tar", MIX_STATE_DIR, file->last_change, file->hash);
+				string_or_die(&filename, "%s/download/.%s.tar", state_dir, file->hash);
+				file->staging = filename;
+				ret = link(url, filename);
+				/* Try doing a regular rename if hardlink fails */
+				if (ret) {
+					if (rename(url, filename) != 0) {
+						fprintf(stderr, "Failed to copy local mix file: %s\n", filename);
+						continue;
+					}
+				}
+				untar_full_download(file);
+				free(filename);
+				free(url);
+				continue;
+			}
 			full_download(file);
 		} else {
 			/* mark the file as good to save time later */
@@ -651,6 +671,7 @@ int verify_main(int argc, char **argv)
 	int timeout = 10;
 	struct list *subs = NULL;
 	timelist times;
+	bool mix_exists;
 
 	copyright_header("software verify");
 
@@ -695,7 +716,9 @@ int verify_main(int argc, char **argv)
 		goto clean_and_exit;
 	}
 
-	read_subscriptions_alt(&subs);
+	mix_exists = check_mix_exists();
+
+	read_subscriptions_alt(&subs, mix_exists);
 
 	/*
 	 * FIXME: We need a command line option to override this in case the
@@ -710,7 +733,7 @@ int verify_main(int argc, char **argv)
 	times = init_timelist();
 
 	grabtime_start(&times, "Load and recurse Manifests");
-	official_manifest = load_mom(version, false);
+	official_manifest = load_mom(version, false, mix_exists);
 
 	if (!official_manifest) {
 		/* This is hit when or if an OS version is specified for --fix which

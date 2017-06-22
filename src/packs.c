@@ -35,7 +35,7 @@
 #include "swupd-build-variant.h"
 #include "swupd.h"
 
-static int download_pack(int oldversion, int newversion, char *module)
+static int download_pack(int oldversion, int newversion, char *module, int is_mix)
 {
 	FILE *tarfile = NULL;
 	char *tar = NULL;
@@ -52,10 +52,24 @@ static int download_pack(int oldversion, int newversion, char *module)
 		return 0;
 	}
 
-	string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, newversion, module, oldversion);
+	if (is_mix) {
+		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", MIX_STATE_DIR, newversion, module, oldversion);
+		link(url, filename);
+		printf("Linked %s to %s\n", url, filename);
+		free(url);
+	} else {
+		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, newversion, module, oldversion);
 
-	err = swupd_curl_get_file(url, filename, NULL, NULL, true);
-	if (err) {
+		err = swupd_curl_get_file(url, filename, NULL, NULL, true);
+		if (err) {
+			free(url);
+			if ((lstat(filename, &stat) == 0) && (stat.st_size == 0)) {
+				unlink(filename);
+			}
+			free(filename);
+			return err;
+		}
+
 		free(url);
 		if ((lstat(filename, &stat) == 0) && (stat.st_size == 0)) {
 			unlink(filename);
@@ -92,7 +106,7 @@ static int download_pack(int oldversion, int newversion, char *module)
 }
 
 /* pull in packs for base and any subscription */
-int download_subscribed_packs(struct list *subs, bool required)
+int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required)
 {
 	struct list *iter;
 	struct sub *sub = NULL;

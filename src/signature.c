@@ -414,8 +414,9 @@ int verify_callback(int ok, X509_STORE_CTX *stor)
  * returns: true if signature verification succeeded, false if verification
  * failed, or the signature download failed
  */
-bool download_and_verify_signature(const char *data_url, const char *data_filename)
+bool download_and_verify_signature(const char *data_url, const char *data_filename, int version, bool mix_exists)
 {
+	char *local;
 	char *sig_url;
 	char *sig_filename;
 	int ret;
@@ -426,8 +427,8 @@ bool download_and_verify_signature(const char *data_url, const char *data_filena
 	}
 
 	string_or_die(&sig_url, "%s.sig", data_url);
-
 	string_or_die(&sig_filename, "%s.sig", data_filename);
+	string_or_die(&local, "%s/%i/Manifest.MoM.sig", MIX_STATE_DIR, version);
 
 	// Try verifying a local copy of the signature first
 	result = verify_signature(data_filename, sig_filename, false);
@@ -436,7 +437,12 @@ bool download_and_verify_signature(const char *data_url, const char *data_filena
 	}
 
 	// Else, download a fresh signature, and verify
-	ret = swupd_curl_get_file(sig_url, sig_filename, NULL, NULL, false);
+	if (mix_exists) {
+		ret = link(local, sig_filename);
+	} else {
+		ret = swupd_curl_get_file(sig_url, sig_filename, NULL, NULL, false);
+	}
+
 	if (ret == 0) {
 		result = verify_signature(data_filename, sig_filename, true);
 	} else {

@@ -23,6 +23,7 @@
 #define _GNU_SOURCE
 #include <getopt.h>
 #include <libgen.h>
+#include <string.h>
 
 #include "config.h"
 #include "swupd.h"
@@ -142,6 +143,13 @@ err:
 	return false;
 }
 
+static int lex_sort(const void *a, const void *b)
+{
+	const char *name1 = (char *)a;
+	const char *name2 = (char *)b;
+	return strcmp(name1, name2);
+}
+
 int bundle_list_main(int argc, char **argv)
 {
 	int current_version;
@@ -170,6 +178,8 @@ int bundle_list_main(int argc, char **argv)
 	}
 
 	read_local_bundles(&list_bundles);
+
+	list_bundles = list_sort(list_bundles, lex_sort);
 
 	item = list_head(list_bundles);
 

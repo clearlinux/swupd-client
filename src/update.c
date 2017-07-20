@@ -237,6 +237,7 @@ int main_update()
 	struct timespec ts_start, ts_stop; // For main swupd update time
 	timelist times;
 	double delta;
+	bool updated = false;
 
 	srand(time(NULL));
 
@@ -485,6 +486,7 @@ clean_curl:
 	swupd_deinit(lock_fd, &latest_subs);
 
 	if ((current_version < server_version) && (ret == 0)) {
+		updated = true;
 		printf("Update successful. System updated from version %d to version %d\n",
 		       current_version, server_version);
 	} else if (ret == 0) {
@@ -495,6 +497,10 @@ clean_curl:
 		printf("%i files were not in a pack\n", nonpack);
 	}
 	run_postupdate_action();
+
+	if (updated) {
+		ret = main_update();
+	}
 
 	return ret;
 }

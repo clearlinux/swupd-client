@@ -71,6 +71,8 @@ char *content_url = NULL;
 char *cert_path = NULL;
 long update_server_port = -1;
 
+char *swupd_cmd = "";
+
 static const char *default_version_url_path = "/usr/share/defaults/swupd/versionurl";
 static const char *default_content_url_path = "/usr/share/defaults/swupd/contenturl";
 static const char *default_format_path = "/usr/share/defaults/swupd/format";
@@ -541,5 +543,12 @@ void free_globals(void)
 	if (bundle_to_add != NULL) {
 		free(bundle_to_add);
 		bundle_to_add = NULL;
+	}
+}
+
+void save_cmd(int argc, char **argv)
+{
+	for (int i = 0; i < argc; i++) {
+		string_or_die(&swupd_cmd, "%s %s", swupd_cmd, argv[i]);
 	}
 }

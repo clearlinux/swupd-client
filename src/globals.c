@@ -173,7 +173,7 @@ void print_time_stats(timelist *head)
 	}
 }
 
-static int set_default_value_from_path(char **global, const char *path)
+int get_value_from_path(char **contents, const char *path, bool is_abs_path)
 {
 	char line[LINE_MAX];
 	FILE *file;
@@ -181,7 +181,11 @@ static int set_default_value_from_path(char **global, const char *path)
 	char *rel_path;
 	int ret = -1;
 
-	string_or_die(&rel_path, "%s%s", path_prefix, path);
+	if (is_abs_path) {
+		string_or_die(&rel_path, path);
+	} else {
+		string_or_die(&rel_path, "%s%s", path_prefix, path);
+	}
 
 	file = fopen(rel_path, "r");
 	if (!file) {
@@ -206,11 +210,36 @@ static int set_default_value_from_path(char **global, const char *path)
 		*c = '\0';
 	}
 
-	string_or_die(global, "%s", line);
+	string_or_die(contents, line);
 	ret = 0;
 fail:
 	fclose(file);
 	free(rel_path);
+	return ret;
+}
+
+int get_int_from_path(const char *abs_path) {
+	int ret = -1;
+	char *ret_str;
+
+	ret = get_value_from_path(&ret_str, abs_path, true);
+	if (ret == 0) {
+		return strtoull(ret_str, NULL, 10);
+	}
+
+	return -1;
+}
+
+static int set_default_value_from_path(char **global, const char *path)
+{
+	int ret = -1;
+	char *ret_str;
+
+	ret = get_value_from_path(&ret_str, path, false);
+	if (ret == 0) {
+		string_or_die(global, "%s", ret_str);
+	}
+
 	return ret;
 }
 

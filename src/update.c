@@ -223,11 +223,15 @@ static void run_postupdate_action(void)
 	free(post_update_action);
 }
 
-static void re_exec_update(void)
+static int re_exec_update(bool versions_match)
 {
-	__attribute__((unused)) int ret = 0;
+	if (!versions_match) {
+		fprintf(stderr, "ERROR: Inconsistency between version files, exiting now.\n");
+		return -1;
+	}
+
 	/* Run the swupd_cmd saved from main */
-	ret = system(swupd_cmd);
+	return system(swupd_cmd);
 }
 
 int main_update()
@@ -245,6 +249,7 @@ int main_update()
 	timelist times;
 	double delta;
 	bool re_update = false;
+	bool versions_match = false;
 
 	srand(time(NULL));
 
@@ -496,6 +501,10 @@ clean_curl:
 	}
 	print_time_stats(&times);
 
+	/* version_files_match must be done before swupd_deinit to use globals */
+	if (re_update) {
+		versions_match = version_files_consistent();
+	}
 	swupd_deinit(lock_fd, &latest_subs);
 
 	if ((current_version < server_version) && (ret == 0)) {
@@ -511,7 +520,7 @@ clean_curl:
 	run_postupdate_action();
 
 	if (re_update && ret == 0) {
-		re_exec_update();
+		ret = re_exec_update(versions_match);
 	}
 
 	return ret;

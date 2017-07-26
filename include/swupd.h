@@ -195,6 +195,8 @@ extern void remove_manifest_files(char *filename, int version, char *hash);
 extern void grabtime_start(timelist *list, const char *name);
 extern void grabtime_stop(timelist *list);
 extern void print_time_stats(timelist *list);
+extern int get_value_from_path(char **contents, const char *path, bool is_abs_path);
+extern int get_int_from_path(const char *abs_path);
 extern timelist init_timelist(void);
 
 extern int swupd_stats[];
@@ -326,6 +328,7 @@ extern int get_dirfd_path(const char *fullname);
 extern int verify_fix_path(char *targetpath, struct manifest *manifest);
 extern void set_local_download(void);
 extern struct list *files_from_bundles(struct list *bundles);
+extern bool version_files_consistent(void);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);

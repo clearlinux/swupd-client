@@ -143,6 +143,8 @@ int main(int argc, char **argv)
 	if (parse_options(argc, argv, &index) < 0) {
 		return EINVALID_OPTION;
 	}
+
+	save_cmd(argc, argv);
 	setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
 	/* Reset optind to 0 (instead of the default value, 1) at this point,
 	 * because option parsing is restarted for the given subcommand, and

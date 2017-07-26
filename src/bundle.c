@@ -535,7 +535,7 @@ download_subscribed_packs:
 	sync();
 	grabtime_stop(&times);
 	/* step 5: Run any scripts that are needed to complete update */
-	run_scripts();
+	run_scripts(false);
 
 	ret = 0;
 	fprintf(stderr, "Bundle(s) installation done.\n");

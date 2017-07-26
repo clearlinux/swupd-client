@@ -47,8 +47,10 @@ static void update_boot(void)
 	free(boot_update_cmd);
 }
 
-static void update_triggers(void)
+static void update_triggers(bool block)
 {
+	char *restart_cmd;
+	char *block_flag = "";
 	__attribute__((unused)) int ret = 0;
 
 	/* These must block so that new update triggers are executed after */
@@ -58,10 +60,15 @@ static void update_triggers(void)
 		ret = system("/usr/bin/systemctl daemon-reload");
 	}
 
-	ret = system("/usr/bin/systemctl --no-block restart update-triggers.target");
+	if (!block) {
+		string_or_die(&block_flag, "--no-block");
+	}
+
+	string_or_die(&restart_cmd, "/usr/bin/systemctl restart %s update-triggers.target", block_flag);
+	ret = system(restart_cmd);
 }
 
-void run_scripts(void)
+void run_scripts(bool block)
 {
 	fprintf(stderr, "Calling post-update helper scripts.\n");
 
@@ -76,7 +83,7 @@ void run_scripts(void)
 	}
 
 	/* Crudely call post-update hooks after every update...FIXME */
-	update_triggers();
+	update_triggers(block);
 }
 
 /* Run any "mandatory" pre-update scripts needed. In this case, mandatory

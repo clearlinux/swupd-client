@@ -841,7 +841,7 @@ brick_the_system_and_clean_curl:
 		// always run in a fix or install case
 		need_update_boot = true;
 		need_update_bootloader = true;
-		run_scripts();
+		run_scripts(false);
 	}
 
 	sync();

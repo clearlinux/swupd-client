@@ -223,6 +223,13 @@ static void run_postupdate_action(void)
 	free(post_update_action);
 }
 
+static void re_exec_update(void)
+{
+	__attribute__((unused)) int ret = 0;
+	/* Run the swupd_cmd saved from main */
+	ret = system(swupd_cmd);
+}
+
 int main_update()
 {
 	int current_version = -1, server_version = -1;
@@ -237,6 +244,7 @@ int main_update()
 	struct timespec ts_start, ts_stop; // For main swupd update time
 	timelist times;
 	double delta;
+	bool re_update = false;
 
 	srand(time(NULL));
 
@@ -454,7 +462,13 @@ download_packs:
 	grabtime_stop(&times);
 	/* Run any scripts that are needed to complete update */
 	grabtime_start(&times, "Run Scripts");
-	run_scripts();
+
+	/* Determine if another update is needed so the scripts block */
+	if (post_update_action && (strncmp(post_update_action, "update", 6) == 0) && (ret == 0)) {
+		re_update = true;
+	}
+
+	run_scripts(re_update);
 	grabtime_stop(&times);
 
 clean_exit:
@@ -495,6 +509,10 @@ clean_curl:
 		printf("%i files were not in a pack\n", nonpack);
 	}
 	run_postupdate_action();
+
+	if (re_update && ret == 0) {
+		re_exec_update();
+	}
 
 	return ret;
 }

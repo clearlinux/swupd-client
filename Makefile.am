@@ -184,6 +184,7 @@ dist_check_SCRIPTS = \
 	test/functional/update/verify-fix-path-missing-dir/test.bats \
 	test/functional/update/verify-fullfile-hash/test.bats \
 	test/functional/update/re-update-required/test.bats \
+	test/functional/update/re-update-bad-os-release/test.bats \
 	test/functional/verify/add-missing-directory/test.bats \
 	test/functional/verify/add-missing-include/test.bats \
 	test/functional/verify/add-missing-include-old/test.bats \

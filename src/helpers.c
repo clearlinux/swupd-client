@@ -898,3 +898,26 @@ struct list *files_from_bundles(struct list *bundles)
 
 	return files;
 }
+
+bool version_files_consistent(void) {
+	/*
+	 * Compare version numbers in state_dir/version and /usr/lib/os-release.
+	 * The version in /usr/lib/os-release must match or be greater than
+	 * state_dir/version for successful updates (greater than occurs during
+	 * format bumps).
+	 */
+	int os_release_v = -1;
+	int state_v = -1;
+	char *state_v_path;
+
+	string_or_die(&state_v_path, "%s/version", state_dir);
+	os_release_v = get_current_version(path_prefix);
+	state_v = get_int_from_path(state_v_path);
+
+	// -1 returns indicate failures
+	if (os_release_v < 0 || state_v < 0) {
+		return false;
+	}
+
+	return (os_release_v >= state_v);
+}

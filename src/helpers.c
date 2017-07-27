@@ -912,7 +912,8 @@ bool version_files_consistent(void) {
 
 	string_or_die(&state_v_path, "%s/version", state_dir);
 	os_release_v = get_current_version(path_prefix);
-	state_v = get_int_from_path(state_v_path);
+	state_v = get_version_from_path(state_v_path);
+	free(state_v_path);
 
 	// -1 returns indicate failures
 	if (os_release_v < 0 || state_v < 0) {
@@ -920,4 +921,20 @@ bool version_files_consistent(void) {
 	}
 
 	return (os_release_v >= state_v);
+}
+
+bool string_in_list(char *string_to_check, struct list *list_to_check)
+{
+	struct list *iter;
+
+	iter = list_head(list_to_check);
+	while (iter) {
+		if (strncmp(iter->data, string_to_check, strlen(string_to_check)) == 0) {
+			return true;
+		}
+
+		iter = iter->next;
+	}
+
+	return false;
 }

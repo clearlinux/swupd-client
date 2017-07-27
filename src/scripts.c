@@ -49,8 +49,8 @@ static void update_boot(void)
 
 static void update_triggers(bool block)
 {
-	char *restart_cmd;
-	char *block_flag = "";
+	char *restart_cmd = NULL;
+	char *block_flag = NULL;
 	__attribute__((unused)) int ret = 0;
 
 	/* These must block so that new update triggers are executed after */
@@ -62,10 +62,15 @@ static void update_triggers(bool block)
 
 	if (!block) {
 		string_or_die(&block_flag, "--no-block");
+	} else {
+		string_or_die(&block_flag, "");
 	}
 
-	string_or_die(&restart_cmd, "/usr/bin/systemctl restart %s update-triggers.target", block_flag);
+	string_or_die(&restart_cmd, "/usr/bin/systemctl %s restart update-triggers.target", block_flag);
 	ret = system(restart_cmd);
+
+	free(restart_cmd);
+	free(block_flag);
 }
 
 void run_scripts(bool block)

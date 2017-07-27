@@ -76,7 +76,7 @@ extern bool update_complete;
 extern bool need_update_boot;
 extern bool need_update_bootloader;
 extern bool need_systemd_reexec;
-extern char *post_update_action;
+extern struct list *post_update_actions;
 
 struct update_stat {
 	uint64_t st_mode;
@@ -147,7 +147,7 @@ extern char *path_prefix;
 extern bool set_format_string(char *userinput);
 extern bool init_globals(void);
 extern void free_globals(void);
-extern void save_cmd(int argc, char **argv);
+extern void save_cmd(char **argv);
 extern char *swupd_cmd;
 extern char *bundle_to_add;
 extern struct timeval start_time;
@@ -196,7 +196,7 @@ extern void grabtime_start(timelist *list, const char *name);
 extern void grabtime_stop(timelist *list);
 extern void print_time_stats(timelist *list);
 extern int get_value_from_path(char **contents, const char *path, bool is_abs_path);
-extern int get_int_from_path(const char *abs_path);
+extern int get_version_from_path(const char *abs_path);
 extern timelist init_timelist(void);
 
 extern int swupd_stats[];
@@ -329,6 +329,7 @@ extern int verify_fix_path(char *targetpath, struct manifest *manifest);
 extern void set_local_download(void);
 extern struct list *files_from_bundles(struct list *bundles);
 extern bool version_files_consistent(void);
+extern bool string_in_list(char *string_to_check, struct list *list_to_check);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);

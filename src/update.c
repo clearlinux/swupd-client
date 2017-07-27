@@ -214,19 +214,15 @@ int add_included_manifests(struct manifest *mom, int current, struct list **subs
 	return ret;
 }
 
-static void run_postupdate_action(void)
-{
-	if (post_update_action == NULL) {
-		return;
-	}
-	fprintf(stderr, "**** [Warning] Post update action was detected in this update, please run: ****\n\t$ %s\n", post_update_action);
-	free(post_update_action);
-}
-
 static int re_exec_update(bool versions_match)
 {
 	if (!versions_match) {
 		fprintf(stderr, "ERROR: Inconsistency between version files, exiting now.\n");
+		return -1;
+	}
+
+	if (!swupd_cmd) {
+		fprintf(stderr, "ERROR: Unable to determine re-update command, exiting now.\n");
 		return -1;
 	}
 
@@ -469,7 +465,7 @@ download_packs:
 	grabtime_start(&times, "Run Scripts");
 
 	/* Determine if another update is needed so the scripts block */
-	if (post_update_action && (strncmp(post_update_action, "update", 6) == 0) && (ret == 0)) {
+	if (string_in_list("update", post_update_actions) && (ret == 0)) {
 		re_update = true;
 	}
 
@@ -517,11 +513,14 @@ clean_curl:
 	if (nonpack > 0) {
 		printf("%i files were not in a pack\n", nonpack);
 	}
-	run_postupdate_action();
 
 	if (re_update && ret == 0) {
 		ret = re_exec_update(versions_match);
 	}
+
+	/* free swupd_cmd now that is no longer needed */
+	free(swupd_cmd);
+	swupd_cmd = NULL;
 
 	return ret;
 }

@@ -235,7 +235,11 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		}
 		if (latest && strncmp(component, "MoM", 3) == 0) {
 			if (strncmp(line, "actions:", 8) == 0) {
-				post_update_action = strdup(c);
+				post_update_actions = list_prepend_data(post_update_actions, strdup(c));
+				if (!post_update_actions->data) {
+					fprintf(stderr, "WARNING: Unable to read post update action from Manifest.MoM. \
+							Another update or verify may be required.\n");
+				}
 			}
 		}
 		if (strncmp(line, "includes:", 9) == 0) {

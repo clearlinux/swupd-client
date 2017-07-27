@@ -15,6 +15,4 @@ Staging file content
 Update was applied.
 Update successful. System updated from version 10 to version 20
 2 files were not in a pack
-**** [Warning] Post update action was detected in this update, please run: ****
-	$ update
 ERROR: Inconsistency between version files, exiting now.

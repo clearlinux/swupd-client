@@ -42,7 +42,7 @@ bool need_update_boot = false;
 bool need_update_bootloader = false;
 bool need_systemd_reexec = false;
 bool update_complete = false;
-char *post_update_action = NULL;
+struct list *post_update_actions = NULL;
 #if 0
 /* disabled unused global variables */
 bool ignore_config = true;
@@ -71,7 +71,7 @@ char *content_url = NULL;
 char *cert_path = NULL;
 long update_server_port = -1;
 
-char *swupd_cmd = "";
+char *swupd_cmd = NULL;
 
 static const char *default_version_url_path = "/usr/share/defaults/swupd/versionurl";
 static const char *default_content_url_path = "/usr/share/defaults/swupd/contenturl";
@@ -181,6 +181,9 @@ int get_value_from_path(char **contents, const char *path, bool is_abs_path)
 	char *rel_path;
 	int ret = -1;
 
+	/* When path is an absolute path, do not prepend the path_prefix. This
+	 * happens when this function is called with state_dir as the path, which
+	 * already has the path_prefix included */
 	if (is_abs_path) {
 		string_or_die(&rel_path, path);
 	} else {
@@ -218,7 +221,7 @@ fail:
 	return ret;
 }
 
-int get_int_from_path(const char *abs_path) {
+int get_version_from_path(const char *abs_path) {
 	int ret = -1;
 	char *ret_str;
 
@@ -569,15 +572,34 @@ void free_globals(void)
 	free(state_dir);
 	state_dir = NULL;
 
+	list_free_list(post_update_actions);
+
 	if (bundle_to_add != NULL) {
 		free(bundle_to_add);
 		bundle_to_add = NULL;
 	}
 }
 
-void save_cmd(int argc, char **argv)
+void save_cmd(char **argv)
 {
-	for (int i = 0; i < argc; i++) {
-		string_or_die(&swupd_cmd, "%s %s", swupd_cmd, argv[i]);
+	int size = 0;
+
+	/* Find size of total argv strings */
+	for (int i = 0; argv[i]; i++) {
+		/* +1 for space (" ") after flag that will be added later */
+		size += strlen(argv[i]) + 1;
+	}
+
+	/* +1 for null terminator */
+	swupd_cmd = malloc(size + 1);
+	if (!swupd_cmd) {
+		/* failed to allocate string */
+		return;
+	}
+
+	strcpy(swupd_cmd, "");
+	for (int i = 0; argv[i]; i++) {
+		strcat(swupd_cmd, argv[i]);
+		strcat(swupd_cmd, " ");
 	}
 }

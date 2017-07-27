@@ -15,8 +15,6 @@ Staging file content
 Update was applied.
 Update successful. System updated from version 10 to version 20
 3 files were not in a pack
-**** [Warning] Post update action was detected in this update, please run: ****
-	$ update
 Attempting to download version string to memory
 Update started.
 Preparing to update from 100 to 110

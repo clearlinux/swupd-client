@@ -221,7 +221,8 @@ fail:
 	return ret;
 }
 
-int get_version_from_path(const char *abs_path) {
+int get_version_from_path(const char *abs_path)
+{
 	int ret = -1;
 	char *ret_str;
 

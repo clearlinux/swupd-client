@@ -899,7 +899,8 @@ struct list *files_from_bundles(struct list *bundles)
 	return files;
 }
 
-bool version_files_consistent(void) {
+bool version_files_consistent(void)
+{
 	/*
 	 * Compare version numbers in state_dir/version and /usr/lib/os-release.
 	 * The version in /usr/lib/os-release must match or be greater than

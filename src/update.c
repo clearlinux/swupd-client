@@ -67,6 +67,8 @@ static struct list *full_download_loop(struct list *updates, int isfailed)
 {
 	struct list *iter;
 	struct file *file;
+	unsigned int list_length = list_len(updates);
+	unsigned int complete = 0;
 
 	iter = list_head(updates);
 	while (iter) {
@@ -78,7 +80,9 @@ static struct list *full_download_loop(struct list *updates, int isfailed)
 		}
 
 		full_download(file);
+		print_progress(++complete, list_length);
 	}
+	printf("\n");
 
 	if (isfailed) {
 		list_free_list(updates);

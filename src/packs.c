@@ -97,6 +97,8 @@ int download_subscribed_packs(struct list *subs, bool required)
 	struct list *iter;
 	struct sub *sub = NULL;
 	int err;
+	unsigned int list_length = list_len(subs);
+	unsigned int complete = 0;
 
 	if (!check_network()) {
 		return -ENOSWUPDSERVER;
@@ -113,6 +115,7 @@ int download_subscribed_packs(struct list *subs, bool required)
 		}
 
 		err = download_pack(sub->oldversion, sub->version, sub->component);
+		print_progress(++complete, list_length);
 		if (err < 0) {
 			if (required) {
 				return err;
@@ -122,5 +125,6 @@ int download_subscribed_packs(struct list *subs, bool required)
 		}
 	}
 
+	printf("\n");
 	return 0;
 }

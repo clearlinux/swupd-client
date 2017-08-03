@@ -945,3 +945,11 @@ bool string_in_list(char *string_to_check, struct list *list_to_check)
 
 	return false;
 }
+
+void print_progress(unsigned int count, unsigned int max)
+{
+	if (isatty(fileno(stdout))) {
+		printf("\r\t...%d%%", (int)(100 * ((float)count / (float)max)));
+		fflush(stdout);
+	}
+}

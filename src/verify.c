@@ -386,6 +386,8 @@ static void add_missing_files(struct manifest *official_manifest)
 	int ret;
 	struct file local;
 	struct list *iter;
+	unsigned int list_length = list_len(official_manifest->files);
+	unsigned int complete = 0;
 
 	iter = list_head(official_manifest->files);
 	while (iter) {
@@ -450,7 +452,9 @@ static void add_missing_files(struct manifest *official_manifest)
 			}
 		}
 		free(fullname);
+		print_progress(++complete, list_length);
 	}
+	printf("\n");
 }
 
 static void deal_with_hash_mismatches(struct manifest *official_manifest, bool repair)

@@ -330,6 +330,7 @@ extern void set_local_download(void);
 extern struct list *files_from_bundles(struct list *bundles);
 extern bool version_files_consistent(void);
 extern bool string_in_list(char *string_to_check, struct list *list_to_check);
+extern void print_progress(unsigned int count, unsigned int max);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);

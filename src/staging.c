@@ -303,6 +303,8 @@ int rename_all_files_to_final(struct list *updates)
 {
 	int ret, update_errs = 0, update_good = 0, skip = 0;
 	struct list *list;
+	unsigned int complete = 0;
+	unsigned int list_length = list_len(updates);
 
 	list = list_head(updates);
 	while (list) {
@@ -320,7 +322,10 @@ int rename_all_files_to_final(struct list *updates)
 		} else {
 			update_good += 1;
 		}
+
+		print_progress(++complete, list_length);
 	}
 
+	printf("\n");
 	return update_count - update_good - update_errs - (update_skip - skip);
 }

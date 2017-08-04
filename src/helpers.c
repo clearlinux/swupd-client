@@ -951,5 +951,10 @@ void print_progress(unsigned int count, unsigned int max)
 	if (isatty(fileno(stdout))) {
 		printf("\r\t...%d%%", (int)(100 * ((float)count / (float)max)));
 		fflush(stdout);
+	} else {
+		// Print the first one, then every 10 after that
+		if (count % 10 == 1) {
+			printf(".");
+		}
 	}
 }

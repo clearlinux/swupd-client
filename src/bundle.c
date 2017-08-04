@@ -472,7 +472,7 @@ download_subscribed_packs:
 	if (download_subscribed_packs(*subs, true)) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
-			printf("Retry #%d downloading subscribed packs\n", retries);
+			printf("\nRetry #%d downloading subscribed packs\n", retries);
 			goto download_subscribed_packs;
 		}
 	}
@@ -496,6 +496,8 @@ download_subscribed_packs:
 	/* step 4: Install all bundle(s) files into the fs */
 	grabtime_start(&times, "Installing bundle(s) files onto filesystem");
 	fprintf(stderr, "Installing bundle(s) files...\n");
+	unsigned int list_length = list_len(to_install_files);
+	unsigned int complete = 0;
 	iter = list_head(to_install_files);
 	while (iter) {
 		file = iter->data;
@@ -513,6 +515,10 @@ download_subscribed_packs:
 			ret = EBUNDLE_INSTALL;
 			goto out;
 		}
+
+		/* two loops are necessary, first to stage, then to rename. Total is
+		 * list_length * 2 */
+		print_progress(++complete, list_length * 2);
 	}
 
 	iter = list_head(to_install_files);
@@ -530,8 +536,11 @@ download_subscribed_packs:
 		}
 
 		rename_staged_file_to_final(file);
+		// This is the second half of this process
+		print_progress(++complete, list_length * 2);
 	}
 
+	printf("\n");
 	sync();
 	grabtime_stop(&times);
 	/* step 5: Run any scripts that are needed to complete update */

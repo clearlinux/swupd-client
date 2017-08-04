@@ -275,6 +275,8 @@ static struct list *download_loop(struct list *files, int isfailed)
 	int ret;
 	struct file local;
 	struct list *iter;
+	unsigned int complete = 0;
+	unsigned int list_length = list_len(files);
 
 	iter = list_head(files);
 	while (iter) {
@@ -314,8 +316,10 @@ static struct list *download_loop(struct list *files, int isfailed)
 			file->do_not_update = 1;
 		}
 		free(fullname);
+		print_progress(++complete, list_length);
 	}
 
+	printf("\n");
 	if (isfailed) {
 		list_free_list(files);
 	}
@@ -421,7 +425,7 @@ static void add_missing_files(struct manifest *official_manifest)
 			file_missing_count++;
 			if (cmdline_option_install == false) {
 				/* Log to stdout, so we can post-process */
-				printf("Missing file: %s\n", fullname);
+				printf("\nMissing file: %s\n", fullname);
 			}
 		} else {
 			free(fullname);
@@ -443,17 +447,18 @@ static void add_missing_files(struct manifest *official_manifest)
 		}
 		if ((ret != 0) || hash_needs_work(file, local.hash)) {
 			file_not_replaced_count++;
-			printf("\tnot fixed\n");
+			printf("\n\tnot fixed\n");
 		} else {
 			file_replaced_count++;
 			file->do_not_update = 1;
 			if (cmdline_option_install == false) {
-				printf("\tfixed\n");
+				printf("\n\tfixed\n");
 			}
 		}
 		free(fullname);
 		print_progress(++complete, list_length);
 	}
+
 	printf("\n");
 }
 

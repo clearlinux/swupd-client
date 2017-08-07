@@ -7,5 +7,6 @@ format:
  # * is-also-included-by
  # ...
   * test-bundle2
+    └─ test-bundle3
 Error: Bundle remove failed
 1 bundle(s) of 1 failed to remove

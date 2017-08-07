@@ -171,31 +171,38 @@ static int unload_tracked_bundle(const char *bundle_name, struct list **subs)
 	return EBUNDLE_NOT_TRACKED;
 }
 
-/* Check if bundle is included by any subscribed bundles */
-static bool is_included(const char *bundle_name, struct manifest *mom)
+/* Return list of bundles that include bundle_name */
+void required_by(struct list **reqd_by, const char *bundle_name, struct manifest *mom, int rl)
 {
-	bool ret = false;
 	struct list *b, *i;
+	// track recursion level for indentation
+	rl++;
 
 	b = list_head(mom->submanifests);
 	while (b) {
 		struct manifest *bundle = b->data;
 		b = b->next;
 
+		int indent = 0;
 		i = list_head(bundle->includes);
 		while (i) {
 			char *name = i->data;
 			i = i->next;
 
 			if (strcmp(name, bundle_name) == 0) {
-				ret = true;
-				goto out;
+				char *bundle_str = NULL;
+				indent = (rl - 1) * 4;
+				if (rl == 1) {
+					string_or_die(&bundle_str, "%*s* %s\n", indent + 2, "", bundle->component);
+				} else {
+					string_or_die(&bundle_str, "%*s|-- %s\n", indent, "", bundle->component);
+				}
+
+				*reqd_by = list_append_data(*reqd_by, bundle_str);
+				required_by(reqd_by, bundle->component, mom, rl);
 			}
 		}
 	}
-
-out:
-	return ret;
 }
 
 /*  This function is a fresh new implementation for a bundle
@@ -283,8 +290,22 @@ int remove_bundle(const char *bundle_name)
 		goto out_free_mom;
 	}
 
-	if (is_included(bundle_name, current_mom)) {
-		fprintf(stderr, "Error: bundle requested to be removed is required by other installed bundles\n");
+	struct list *reqd_by = NULL;
+	required_by(&reqd_by, bundle_name, current_mom, 0);
+	if (reqd_by != NULL) {
+		struct list *iter;
+		char *bundle;
+		iter = list_head(reqd_by);
+		fprintf(stderr, "Error: bundle requested to be removed is required by the following bundles:\n");
+		fprintf(stderr, "format:\n");
+		fprintf(stderr, " # * is-included-by\n #   |-- is-included-by\n # * is-also-included-by\n # ...\n\n");
+		while (iter) {
+			bundle = iter->data;
+			iter = iter->next;
+			fprintf(stderr, "%s", bundle);
+		}
+
+		list_free_list(reqd_by);
 		ret = EBUNDLE_REMOVE;
 		goto out_free_mom;
 	}

@@ -283,7 +283,7 @@ int bundle_remove_main(int argc, char **argv)
 	if (ret) {
 		fprintf(stderr, "%i bundle(s) of %i failed to remove\n", bad, total);
 	} else {
-		fprintf(stderr, "%i bundle(s) were removed succesfully\n", total);
+		fprintf(stderr, "%i bundle(s) were removed successfully\n", total);
 	}
 
 	/* free any parsed opt saved for reloading */

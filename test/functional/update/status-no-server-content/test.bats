@@ -5,6 +5,7 @@ load "../../swupdlib"
 @test "update --status with no server content" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS --status"
 
+  [ "$status" -eq 2 ]
   check_lines "$output"
 }
 

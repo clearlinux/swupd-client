@@ -23,6 +23,7 @@ teardown() {
 @test "update fullfile download skipped when hash verifies correctly" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
 
   # changed file (hash is the same, but version changed)

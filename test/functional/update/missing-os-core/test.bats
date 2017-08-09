@@ -31,6 +31,7 @@ teardown() {
 @test "update always add os-core to tracked bundles" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
 
   # changed files (hashes didn't change, only the versions)

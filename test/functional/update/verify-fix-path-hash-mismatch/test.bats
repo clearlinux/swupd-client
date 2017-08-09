@@ -33,6 +33,7 @@ teardown() {
 @test "update verify_fix_path corrects hash mismatch" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
   [ -d "$DIR/target-dir/usr/bin" ]
   [ -f "$DIR/target-dir/usr/bin/foo" ]

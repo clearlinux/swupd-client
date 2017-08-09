@@ -63,6 +63,7 @@ teardown() {
 @test "update with includes" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
 
   # changed files

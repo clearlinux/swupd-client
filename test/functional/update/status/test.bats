@@ -5,6 +5,7 @@ load "../../swupdlib"
 @test "update --status" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS --status"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
 }
 

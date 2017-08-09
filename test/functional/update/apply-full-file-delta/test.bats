@@ -34,6 +34,7 @@ teardown() {
 
   run sudo sh -c "$SWUPD hashdump $DIR/target-dir/testfile"
 
+  [ "$status" -eq 0 ]
   echo "$output"
   [ "${lines[1]}" = "9f83d713da9df6cabd2abc9d9061f9b611a207e1e0dd22ed7a071ddb1cc1537a" ]
 }

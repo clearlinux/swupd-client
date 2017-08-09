@@ -17,6 +17,7 @@ teardown() {
 @test "search for a file everywhere" {
   run sudo sh -c "$SWUPD search $SWUPD_OPTS test-bin"
 
+  [ "$status" -eq 0 ]
   echo "$output" | grep -q "'test-bundle'  :  '/usr/bin/test-bin'"
 }
 

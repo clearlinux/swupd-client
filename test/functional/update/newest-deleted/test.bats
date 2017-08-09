@@ -35,6 +35,7 @@ teardown() {
 @test "update where the newest version of a file was deleted" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
   [ ! -f "$DIR/target-dir/testfile" ]
 }

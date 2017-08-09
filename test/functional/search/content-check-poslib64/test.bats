@@ -17,6 +17,7 @@ teardown() {
 @test "search for a library in lib64" {
   run sudo sh -c "$SWUPD search $SWUPD_OPTS -l test-lib64"
 
+  [ "$status" -eq 0 ]
   echo "$output" | grep -q "'test-bundle'  :  '/usr/lib64/test-lib64'"
 }
 

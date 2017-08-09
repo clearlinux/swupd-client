@@ -17,6 +17,7 @@ teardown() {
 @test "search with non existant library" {
   run sudo sh -c "$SWUPD search $SWUPD_OPTS -l libtest-nohit"
 
+  [ "$status" -eq 0 ]
   echo "$output" | grep -q 'Search term not found.'
 }
 

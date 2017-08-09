@@ -53,12 +53,12 @@ teardown() {
   revert_chown_root "$DIR/web-dir/110/files/$targetfile"
   revert_chown_root "$DIR/web-dir/110/files/$targetfilefmt"
   sudo rm -rf "$DIR/target-dir/usr/bin/"
-  echo 'hi'
 }
 
 @test "update re-update bad os-release" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS_NO_FMT"
 
+  [ "$status" -eq 1 ]
   check_lines "$output"
   [ -d "$DIR/target-dir/usr/bin" ]
 }

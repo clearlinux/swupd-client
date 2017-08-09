@@ -15,6 +15,8 @@ teardown() {
 
 @test "bundle-list all bundles" {
   run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --all"
+
+  [ "$status" -eq 0 ]
   output=$(echo "$output" | sed -e 1,3d)
   check_lines "$output"
 }

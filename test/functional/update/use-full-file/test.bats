@@ -26,6 +26,7 @@ teardown() {
 @test "update use full file" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
   [ -d "$DIR/target-dir/usr/bin" ]
 }

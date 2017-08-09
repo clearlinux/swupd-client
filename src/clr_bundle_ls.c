@@ -75,7 +75,10 @@ static bool parse_options(int argc, char **argv)
 			print_help(argv[0]);
 			exit(EXIT_SUCCESS);
 		case 'a':
-			return list_installable_bundles();
+			/* Exit early, we do not need to init swupd locally just to get a
+			 * list from the server
+			 * list_installable_bundles will supply the exit status */
+			exit(list_installable_bundles());
 			break;
 		case 'u':
 			if (!optarg) {

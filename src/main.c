@@ -196,7 +196,7 @@ static int print_versions()
 	}
 
 	if (server_version < 0) {
-		fprintf(stderr, "Cannot get latest the server version.Could not reach server\n");
+		fprintf(stderr, "Cannot get the latest server version. Could not reach server\n");
 		ret = 2;
 	} else {
 		fprintf(stderr, "Latest server version: %d\n", server_version);

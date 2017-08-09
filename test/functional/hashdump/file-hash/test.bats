@@ -13,6 +13,7 @@ teardown() {
 @test "hashdump with prefix" {
   run sudo sh -c "$SWUPD hashdump --path=$DIR/target-dir /test-hash"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
 }
 

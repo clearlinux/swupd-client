@@ -26,6 +26,7 @@ teardown() {
 @test "update add boot file" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
   [ -f "$DIR/target-dir/usr/lib/kernel/testfile" ]
 }

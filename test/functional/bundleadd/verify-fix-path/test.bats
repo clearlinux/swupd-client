@@ -31,6 +31,7 @@ teardown() {
 @test "bundle-add verify_fix_path support" {
   run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
   [ -d "$DIR/target-dir/usr/bin" ]
   [ -f "$DIR/target-dir/usr/bin/foo" ]

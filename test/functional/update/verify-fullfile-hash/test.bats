@@ -26,6 +26,7 @@ teardown() {
 @test "update fullfile hashes verified" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
+  [ "$status" -eq 1 ]
   check_lines "$output"
 
   [ ! -f "$DIR/target-dir/foo" ]

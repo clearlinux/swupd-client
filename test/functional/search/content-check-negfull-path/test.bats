@@ -17,6 +17,7 @@ teardown() {
 @test "search with non existant file, specifying full path" {
   run sudo sh -c "$SWUPD search $SWUPD_OPTS /usr/lib64/test-lib100"
 
+  [ "$status" -eq 0 ]
   echo "$output" | grep -q 'Search term not found.'
 }
 

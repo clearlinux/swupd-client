@@ -27,6 +27,7 @@ teardown() {
 @test "update using a pack" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
   [ -d "$DIR/target-dir/usr/bin" ]
 }

@@ -17,6 +17,7 @@ teardown() {
 @test "search for a file specifying the full path" {
   run sudo sh -c "$SWUPD search $SWUPD_OPTS /usr/lib64/test-lib64"
 
+  [ "$status" -eq 0 ]
   echo "$output" | grep -q "'test-bundle'  :  '/usr/lib64/test-lib64'"
 }
 

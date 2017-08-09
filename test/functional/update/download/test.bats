@@ -26,6 +26,7 @@ teardown() {
 @test "update only download packs" {
   run sudo sh -c "$SWUPD update $SWUPD_OPTS --download"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
   [ ! -d "$DIR/target-dir/usr/bin" ]
 }

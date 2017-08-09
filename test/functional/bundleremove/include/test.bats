@@ -18,6 +18,8 @@ teardown() {
 @test "bundle-remove remove bundle containing a file" {
   run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle"
 
+  # EBUNDLE_REMOVE == 3
+  [ "$status" -eq 3 ]
   check_lines "$output"
   [ -f "$DIR/target-dir/test-file" ]
   [ -f "$DIR/target-dir/test-file2" ]

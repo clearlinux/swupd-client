@@ -32,6 +32,7 @@ teardown() {
 @test "bundle-add add multiple bundles" {
   run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle2"
 
+  [ "$status" -eq 0 ]
   check_lines "$output"
   [ -d "$DIR/target-dir/usr/bin" ]
   [ -f "$DIR/target-dir/usr/foo" ]

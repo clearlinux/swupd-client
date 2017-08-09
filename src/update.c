@@ -133,7 +133,7 @@ TRY_DOWNLOAD:
 	}
 
 	if (download_only) {
-		return -1;
+		return 0;
 	}
 
 	/*********** rootfs critical section starts ***************************
@@ -449,7 +449,7 @@ download_packs:
 	updates = list_sort(updates, file_sort_filename);
 
 	ret = update_loop(updates, server_manifest);
-	if (ret == 0) {
+	if (ret == 0 && !download_only) {
 		/* Failure to write the version file in the state directory
 		 * should not affect exit status. */
 		(void)update_device_latest_version(server_version);
@@ -503,11 +503,13 @@ clean_curl:
 	}
 	swupd_deinit(lock_fd, &latest_subs);
 
-	if ((current_version < server_version) && (ret == 0)) {
-		printf("Update successful. System updated from version %d to version %d\n",
-		       current_version, server_version);
-	} else if (ret == 0) {
-		printf("Update complete. System already up-to-date at version %d\n", current_version);
+	if (!download_only) {
+		if ((current_version < server_version) && (ret == 0)) {
+			printf("Update successful. System updated from version %d to version %d\n",
+			       current_version, server_version);
+		} else if (ret == 0) {
+			printf("Update complete. System already up-to-date at version %d\n", current_version);
+		}
 	}
 
 	if (nonpack > 0) {

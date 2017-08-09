@@ -218,16 +218,20 @@ static int re_exec_update(bool versions_match)
 {
 	if (!versions_match) {
 		fprintf(stderr, "ERROR: Inconsistency between version files, exiting now.\n");
-		return -1;
+		return 1;
 	}
 
 	if (!swupd_cmd) {
 		fprintf(stderr, "ERROR: Unable to determine re-update command, exiting now.\n");
-		return -1;
+		return 1;
 	}
 
 	/* Run the swupd_cmd saved from main */
-	return system(swupd_cmd);
+	if (system(swupd_cmd) != 0) {
+		return 1;
+	}
+
+	return 0;
 }
 
 int main_update()

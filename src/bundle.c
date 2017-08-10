@@ -109,7 +109,7 @@ static int load_bundle_manifest(const char *bundle_name, struct list *subs, int 
 		return EMOM_NOTFOUND;
 	}
 
-	sub_list = recurse_manifest(mom, subs, bundle_name);
+	sub_list = recurse_manifest(mom, subs, bundle_name, false);
 	if (!sub_list) {
 		ret = ERECURSE_MANIFEST;
 		goto free_out;
@@ -172,11 +172,11 @@ static int unload_tracked_bundle(const char *bundle_name, struct list **subs)
 }
 
 /* Return list of bundles that include bundle_name */
-void required_by(struct list **reqd_by, const char *bundle_name, struct manifest *mom, int rl)
+void required_by(struct list **reqd_by, const char *bundle_name, struct manifest *mom, int recursion)
 {
 	struct list *b, *i;
 	// track recursion level for indentation
-	rl++;
+	recursion++;
 
 	b = list_head(mom->submanifests);
 	while (b) {
@@ -191,18 +191,126 @@ void required_by(struct list **reqd_by, const char *bundle_name, struct manifest
 
 			if (strcmp(name, bundle_name) == 0) {
 				char *bundle_str = NULL;
-				indent = (rl - 1) * 4;
-				if (rl == 1) {
+				indent = (recursion - 1) * 4;
+				if (recursion == 1) {
 					string_or_die(&bundle_str, "%*s* %s\n", indent + 2, "", bundle->component);
 				} else {
 					string_or_die(&bundle_str, "%*s|-- %s\n", indent, "", bundle->component);
 				}
 
 				*reqd_by = list_append_data(*reqd_by, bundle_str);
-				required_by(reqd_by, bundle->component, mom, rl);
+				required_by(reqd_by, bundle->component, mom, recursion);
 			}
 		}
 	}
+}
+
+int show_bundle_reqd_by(const char *bundle_name, bool server)
+{
+	int ret = 0;
+	int version = CURRENT_OS_VERSION;
+	struct manifest *current_manifest = NULL;
+	struct list *subs = NULL;
+	struct list *reqd_by = NULL;
+
+	if (!server && !is_tracked_bundle(bundle_name)) {
+		fprintf(stderr, "Error: Bundle \"%s\" does not seem to be installed\n", bundle_name);
+		fprintf(stderr, "       try passing --all to check uninstalled bundles\n");
+		ret = EBUNDLE_NOT_TRACKED;
+		goto out;
+	}
+
+	version = get_current_version(path_prefix);
+	if (version < 0) {
+		fprintf(stderr, "Error: Unable to determine current OS version\n");
+		ret = ECURRENT_VERSION;
+		goto out;
+	}
+
+	current_manifest = load_mom(version, server);
+	if (!current_manifest) {
+		fprintf(stderr, "Unable to download/verify %d Manifest.MoM\n", version);
+		ret = EMOM_NOTFOUND;
+		goto out;
+	}
+
+	if (!search_bundle_in_manifest(current_manifest, bundle_name)) {
+		fprintf(stderr, "Bundle name %s is invalid, aborting dependency list\n", bundle_name);
+		ret = EBUNDLE_REMOVE;
+		goto out;
+	}
+
+	if (server) {
+		ret = add_included_manifests(current_manifest, version, &subs);
+		if (ret) {
+			fprintf(stderr, "Unable to load server manifest");
+			ret = EMANIFEST_LOAD;
+			goto out;
+		}
+
+	} else {
+		/* load all tracked bundles into memory */
+		read_subscriptions_alt(&subs);
+		/* now popout the one to be processed */
+		ret = unload_tracked_bundle(bundle_name, &subs);
+		if (ret != 0) {
+			fprintf(stderr, "Unable to untrack %s\n", bundle_name);
+			goto out;
+		}
+	}
+
+	/* load all submanifests */
+	current_manifest->submanifests = recurse_manifest(current_manifest, subs, NULL, server);
+	if (!current_manifest->submanifests) {
+		fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
+		ret = ERECURSE_MANIFEST;
+		goto out;
+	}
+
+	required_by(&reqd_by, bundle_name, current_manifest, 0);
+	if (reqd_by == NULL) {
+		printf("No bundles have %s as a dependency\n", bundle_name);
+		ret = 0;
+		goto out;
+	}
+
+	printf(server ? "All installable and installed " : "Installed ");
+	printf("bundles that have %s as a dependency:\n", bundle_name);
+	printf("format:\n");
+	printf(" # * is-required-by\n");
+	printf(" #   |-- is-required-by\n");
+	printf(" # * is-also-required-by\n # ...\n\n");
+
+	struct list *iter;
+	char *bundle;
+	iter = list_head(reqd_by);
+	while (iter) {
+		bundle = iter->data;
+		iter = iter->next;
+		printf("%s", bundle);
+		free(bundle);
+	}
+
+	ret = 0;
+
+out:
+	if (current_manifest) {
+		free_manifest(current_manifest);
+	}
+
+	if (ret) {
+		fprintf(stderr, "Error: Bundle list failed\n");
+	}
+
+	if (reqd_by) {
+		list_free_list(reqd_by);
+	}
+
+	if (subs) {
+		free_subscriptions(&subs);
+	}
+
+	return ret;
 }
 
 /*  This function is a fresh new implementation for a bundle
@@ -283,7 +391,7 @@ int remove_bundle(const char *bundle_name)
 	set_subscription_versions(current_mom, NULL, &subs);
 
 	/* load all submanifest minus the one to be removed */
-	current_mom->submanifests = recurse_manifest(current_mom, subs, NULL);
+	current_mom->submanifests = recurse_manifest(current_mom, subs, NULL, false);
 	if (!current_mom->submanifests) {
 		fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
 		ret = ERECURSE_MANIFEST;
@@ -297,8 +405,10 @@ int remove_bundle(const char *bundle_name)
 		char *bundle;
 		iter = list_head(reqd_by);
 		fprintf(stderr, "Error: bundle requested to be removed is required by the following bundles:\n");
-		fprintf(stderr, "format:\n");
-		fprintf(stderr, " # * is-included-by\n #   |-- is-included-by\n # * is-also-included-by\n # ...\n\n");
+		printf("format:\n");
+		printf(" # * is-required-by\n");
+		printf(" #   |-- is-required-by\n");
+		printf(" # * is-also-required-by\n # ...\n\n");
 		while (iter) {
 			bundle = iter->data;
 			iter = iter->next;
@@ -472,7 +582,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 
 	set_subscription_versions(mom, NULL, subs);
 
-	to_install_bundles = recurse_manifest(mom, *subs, NULL);
+	to_install_bundles = recurse_manifest(mom, *subs, NULL, false);
 	if (!to_install_bundles) {
 		fprintf(stderr, "Error: Cannot load to install bundles\n");
 		ret = ERECURSE_MANIFEST;
@@ -503,7 +613,7 @@ download_subscribed_packs:
 	grabtime_start(&times, "Add tracked bundles");
 	read_subscriptions_alt(subs);
 	set_subscription_versions(mom, NULL, subs);
-	mom->submanifests = recurse_manifest(mom, *subs, NULL);
+	mom->submanifests = recurse_manifest(mom, *subs, NULL, false);
 	if (!mom->submanifests) {
 		fprintf(stderr, "Error: Cannot load installed bundles\n");
 		ret = ERECURSE_MANIFEST;

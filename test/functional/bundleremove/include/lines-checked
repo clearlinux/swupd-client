@@ -2,9 +2,9 @@ Removing bundle: test-bundle
 Attempting to download version string to memory
 Error: bundle requested to be removed is required by the following bundles:
 format:
- # * is-included-by
- #   |-- is-included-by
- # * is-also-included-by
+ # * is-required-by
+ #   |-- is-required-by
+ # * is-also-required-by
  # ...
   * test-bundle2
 Error: Bundle remove failed

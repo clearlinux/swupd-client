@@ -1,6 +1,5 @@
-Removing bundle: test-bundle
 Attempting to download version string to memory
-Error: bundle requested to be removed is required by the following bundles:
+Installed bundles that have test-bundle as a dependency:
 format:
  # * is-required-by
  #   |-- is-required-by
@@ -8,5 +7,3 @@ format:
  # ...
   * test-bundle2
     |-- test-bundle3
-Error: Bundle remove failed
-1 bundle(s) of 1 failed to remove

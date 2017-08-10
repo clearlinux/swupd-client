@@ -1,5 +1,6 @@
 ^swupd-client bundle adder [0-9.]+$
 ^swupd-client bundle remover [0-9.]+$
+^swupd-client bundle list [0-9.]+$
 ^swupd-client software update [0-9.]+$
 ^swupd-client software update checker [0-9.]+$
 ^swupd-client software verify [0-9.]+$

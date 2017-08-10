@@ -1,0 +1,3 @@
+Error: Bundle "test-bundle" does not seem to be installed
+       try passing --all to check uninstalled bundles
+Error: Bundle list failed

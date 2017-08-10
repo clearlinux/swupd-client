@@ -579,7 +579,9 @@ void swupd_deinit(int lock_fd, struct list **subs)
 {
 	terminate_signature();
 	swupd_curl_cleanup();
-	free_subscriptions(subs);
+	if (subs) {
+		free_subscriptions(subs);
+	}
 	free_globals();
 	v_lockfile(lock_fd);
 	dump_file_descriptor_leaks();

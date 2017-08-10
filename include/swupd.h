@@ -284,7 +284,7 @@ extern int compute_hash_lazy(struct file *file, char *filename);
 extern int compute_hash(struct file *file, char *filename) __attribute__((warn_unused_result));
 
 /* manifest.c */
-extern struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component);
+extern struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server);
 extern struct list *consolidate_files(struct list *files);
 extern void debug_write_manifest(struct manifest *manifest, char *filename);
 extern void populate_file_struct(struct file *file, char *filename);
@@ -341,6 +341,8 @@ extern void create_and_append_subscription(struct list **subs, const char *compo
 /* bundle.c */
 extern bool is_tracked_bundle(const char *bundle_name);
 extern int remove_bundle(const char *bundle_name);
+extern int show_bundle_reqd_by(const char *bundle_name, bool server);
+extern void required_by(struct list **list, const char *bundle_name, struct manifest *mom, int rl);
 extern int list_installable_bundles();
 extern int install_bundles_frontend(char **bundles);
 extern int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, int recursion);

@@ -28,6 +28,9 @@
 #include "config.h"
 #include "swupd.h"
 
+static bool cmdline_option_all = false;
+static char *cmdline_option_has_dep = NULL;
+
 static void print_help(const char *name)
 {
 	fprintf(stderr, "Usage:\n");
@@ -44,6 +47,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
 	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
+	fprintf(stderr, "   -d, --has-dep=[BUNDLE]   List dependency tree of all bundles which have BUNDLE as a dependency\n");
 
 	fprintf(stderr, "\n");
 }
@@ -60,6 +64,7 @@ static const struct option prog_opts[] = {
 	{ "statedir", required_argument, 0, 'S' },
 	{ "ignore-time", no_argument, 0, 'I' },
 	{ "certpath", required_argument, 0, 'C' },
+	{ "has-dep", required_argument, 0, 'd' },
 
 	{ 0, 0, 0, 0 }
 };
@@ -68,17 +73,14 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hanIu:c:v:p:F:S:C:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hanIu:c:v:p:F:S:C:d:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
 			print_help(argv[0]);
 			exit(EXIT_SUCCESS);
 		case 'a':
-			/* Exit early, we do not need to init swupd locally just to get a
-			 * list from the server
-			 * list_installable_bundles will supply the exit status */
-			exit(list_installable_bundles());
+			cmdline_option_all = true;
 			break;
 		case 'u':
 			if (!optarg) {
@@ -133,6 +135,13 @@ static bool parse_options(int argc, char **argv)
 			}
 			set_cert_path(optarg);
 			break;
+		case 'd':
+			if (!optarg) {
+				fprintf(stderr, "Invalid --has-dep argument\n\n");
+				goto err;
+			}
+			string_or_die(&cmdline_option_has_dep, "%s", optarg);
+			break;
 
 		default:
 			fprintf(stderr, "error: unrecognized option\n\n");
@@ -173,6 +182,14 @@ int bundle_list_main(int argc, char **argv)
 		return ret;
 	}
 
+	if (cmdline_option_all && cmdline_option_has_dep != NULL) {
+		exit(show_bundle_reqd_by(cmdline_option_has_dep, true));
+	} else if (cmdline_option_has_dep != NULL) {
+		exit(show_bundle_reqd_by(cmdline_option_has_dep, false));
+	} else if (cmdline_option_all) {
+		exit(list_installable_bundles());
+	}
+
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
 		fprintf(stderr, "Error: Unable to determine current OS version\n");
@@ -193,8 +210,8 @@ int bundle_list_main(int argc, char **argv)
 	/* Should this be a different command */
 	fprintf(stderr, "Current OS version: %d\n", current_version);
 
+	swupd_deinit(lock_fd, NULL);
 	list_free_list(list_bundles);
-	v_lockfile(lock_fd);
 
 	return ret;
 }

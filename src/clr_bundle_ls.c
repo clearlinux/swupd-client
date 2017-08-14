@@ -30,6 +30,17 @@
 
 static bool cmdline_option_all = false;
 static char *cmdline_option_has_dep = NULL;
+static char *cmdline_option_deps = NULL;
+
+static void free_has_dep(void)
+{
+	free(cmdline_option_has_dep);
+}
+
+static void free_deps(void)
+{
+	free(cmdline_option_deps);
+}
 
 static void print_help(const char *name)
 {
@@ -47,7 +58,8 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
 	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
-	fprintf(stderr, "   -d, --has-dep=[BUNDLE]   List dependency tree of all bundles which have BUNDLE as a dependency\n");
+	fprintf(stderr, "   -d, --deps=[BUNDLE]     List bundles included by BUNDLE\n");
+	fprintf(stderr, "   -D, --has-dep=[BUNDLE]  List dependency tree of all bundles which have BUNDLE as a dependency\n");
 
 	fprintf(stderr, "\n");
 }
@@ -64,7 +76,8 @@ static const struct option prog_opts[] = {
 	{ "statedir", required_argument, 0, 'S' },
 	{ "ignore-time", no_argument, 0, 'I' },
 	{ "certpath", required_argument, 0, 'C' },
-	{ "has-dep", required_argument, 0, 'd' },
+	{ "has-dep", required_argument, 0, 'D' },
+	{ "deps", required_argument, 0, 'd' },
 
 	{ 0, 0, 0, 0 }
 };
@@ -73,7 +86,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hanIu:c:v:p:F:S:C:d:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hanIu:c:v:p:F:S:C:d:D:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -135,14 +148,22 @@ static bool parse_options(int argc, char **argv)
 			}
 			set_cert_path(optarg);
 			break;
-		case 'd':
+		case 'D':
 			if (!optarg) {
 				fprintf(stderr, "Invalid --has-dep argument\n\n");
 				goto err;
 			}
 			string_or_die(&cmdline_option_has_dep, "%s", optarg);
+			atexit(free_has_dep);
 			break;
-
+		case 'd':
+			if (!optarg) {
+				fprintf(stderr, "Invalid --deps argument\n\n");
+				goto err;
+			}
+			string_or_die(&cmdline_option_deps, "%s", optarg);
+			atexit(free_deps);
+			break;
 		default:
 			fprintf(stderr, "error: unrecognized option\n\n");
 			goto err;
@@ -180,6 +201,10 @@ int bundle_list_main(int argc, char **argv)
 	if (ret != 0) {
 		fprintf(stderr, "Error: Failed updater initialization. Exiting now\n");
 		return ret;
+	}
+
+	if (cmdline_option_deps != NULL) {
+		exit(show_included_bundles(cmdline_option_deps));
 	}
 
 	if (cmdline_option_all && cmdline_option_has_dep != NULL) {

@@ -138,8 +138,9 @@ Installs new software bundles. Any bundle name listed after
 .INDENT 0.0
 .INDENT 3.5
 Removes software bundles. Any bundle name listed after \fIbundle\-remove\fP
-will be removed from the system, as well as all bundles that required
-the listed bundles, either directly or indirectly.
+will be removed from the system. If the bundle is required by another
+bundle(s) on the system, a tree will be displayed to indicate which bundles
+are blocking removal.
 .UNINDENT
 .UNINDENT
 .sp
@@ -156,6 +157,23 @@ can be listed with the \fI\-\-all\fP option.
 Lists all available software bundles, either installed or not, that
 are available. It will return 0 with succeeded and a different value
 of 0 with failed.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-d, \-\-deps={bundle}\fP
+.INDENT 2.0
+.INDENT 3.5
+Lists all bundle dependencies of the passed bundle, including
+recursively included bundles.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-D, \-\-has\-dep={bundle}\fP
+.INDENT 2.0
+.INDENT 3.5
+Displays a tree of all bundles which include the passed bundle as a
+dependency. Combine with \fI\-\-all\fP to report all bundles including those
+not installed on the system.
 .UNINDENT
 .UNINDENT
 .UNINDENT

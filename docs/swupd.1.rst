@@ -118,8 +118,9 @@ SUBCOMMANDS
 ``bundle-remove {bundles}``
 
     Removes software bundles. Any bundle name listed after `bundle-remove`
-    will be removed from the system, as well as all bundles that required
-    the listed bundles, either directly or indirectly.
+    will be removed from the system. If the bundle is required by another
+    bundle(s) on the system, a tree will be displayed to indicate which bundles
+    are blocking removal.
 
 ``bundle-list``
 
@@ -131,6 +132,17 @@ SUBCOMMANDS
         Lists all available software bundles, either installed or not, that
         are available. It will return 0 with succeeded and a different value
         of 0 with failed.
+
+    - `-d, --deps={bundle}`
+
+        Lists all bundle dependencies of the passed bundle, including
+        recursively included bundles.
+
+    - `-D, --has-dep={bundle}`
+
+        Displays a tree of all bundles which include the passed bundle as a
+        dependency. Combine with `--all` to report all bundles including those
+        not installed on the system.
 
 ``check-update``
 

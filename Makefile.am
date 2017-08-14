@@ -145,9 +145,13 @@ dist_check_SCRIPTS = \
 	test/functional/bundleadd/fix-missing-file/test.bats \
 	test/functional/bundleadd/verify-fix-path/test.bats \
 	test/functional/bundlelist/all/test.bats \
+	test/functional/bundlelist/deps-flat/test.bats \
+	test/functional/bundlelist/deps-invalid-bundle/test.bats \
+	test/functional/bundlelist/deps-nested/test.bats \
 	test/functional/bundlelist/has-dep-nested/test.bats \
 	test/functional/bundlelist/has-dep-nested-not-installed/test.bats \
 	test/functional/bundlelist/has-dep-nested-server/test.bats \
+	test/functional/bundlelist/no-deps/test.bats \
 	test/functional/bundlelist/none-has-deps/test.bats \
 	test/functional/bundleremove/boot-file/test.bats \
 	test/functional/bundleremove/include/test.bats \

@@ -342,10 +342,11 @@ extern void create_and_append_subscription(struct list **subs, const char *compo
 extern bool is_tracked_bundle(const char *bundle_name);
 extern int remove_bundle(const char *bundle_name);
 extern int show_bundle_reqd_by(const char *bundle_name, bool server);
+extern int show_included_bundles(char *bundle_name);
 extern void required_by(struct list **list, const char *bundle_name, struct manifest *mom, int rl);
 extern int list_installable_bundles();
 extern int install_bundles_frontend(char **bundles);
-extern int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, int recursion);
+extern int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, bool find_all, int recursion);
 void read_local_bundles(struct list **list_bundles);
 
 /* telemetry.c */

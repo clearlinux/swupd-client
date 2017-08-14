@@ -35,6 +35,10 @@
 
 #define MODE_RW_O (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 
+#define add_sub_ERR 1
+#define add_sub_NEW 2
+#define add_sub_BADNAME 4
+
 /*
 * list_installable_bundles()
 * Parse the full manifest for the current version of the OS and print
@@ -204,6 +208,97 @@ void required_by(struct list **reqd_by, const char *bundle_name, struct manifest
 		}
 	}
 }
+/* Return recursive list of included bundles */
+int show_included_bundles(char *bundle_name)
+{
+	int ret = 0;
+	int current_version = CURRENT_OS_VERSION;
+	struct list *subs = NULL;
+	struct list *deps = NULL;
+	struct manifest *mom = NULL;
+
+	current_version = get_current_version(path_prefix);
+	if (current_version < 0) {
+		fprintf(stderr, "Error: Unable to determine current OS version\n");
+		ret = ECURRENT_VERSION;
+		goto out;
+	}
+
+	mom = load_mom(current_version, false);
+	if (!mom) {
+		fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
+		ret = EMOM_NOTFOUND;
+		goto out;
+	}
+
+	// add_subscriptions takes a list, so construct one with only bundle_name
+	struct list *bundles = NULL;
+	bundles = list_prepend_data(bundles, bundle_name);
+	ret = add_subscriptions(bundles, &subs, current_version, mom, true, 0);
+	list_free_list(bundles);
+	if (ret != add_sub_NEW) {
+		// something went wrong or there were no includes, print a message and exit
+		char *m = NULL;
+		if (ret & add_sub_ERR) {
+			string_or_die(&m, "Processing error");
+		} else if (ret & add_sub_BADNAME) {
+			string_or_die(&m, "Bad bundle name detected");
+		} else {
+			string_or_die(&m, "Unknown error");
+		}
+
+		fprintf(stderr, "Error: %s - Aborting\n", m);
+		free(m);
+		ret = 1;
+		goto out;
+	}
+	deps = recurse_manifest(mom, subs, NULL, false);
+	if (!deps) {
+		fprintf(stderr, "Error: Cannot load included bundles\n");
+		ret = ERECURSE_MANIFEST;
+		goto out;
+	}
+
+	/* deps now includes the bundle indicated by bundle_name
+	 * if deps only has one bundle in it, no included packages were found */
+	if (list_len(deps) == 1) {
+		fprintf(stderr, "No included bundles\n");
+		ret = 0;
+		goto out;
+	}
+
+	fprintf(stderr, "Bundles included by %s:\n\n", bundle_name);
+
+	struct list *iter;
+	iter = list_head(deps);
+	while (iter) {
+		struct manifest *included_bundle = iter->data;
+		iter = iter->next;
+		// deps includes the bundle_name bundle, skip it
+		if (strcmp(bundle_name, included_bundle->component) == 0) {
+			continue;
+		}
+
+		printf("%s\n", included_bundle->component);
+	}
+
+	ret = 0;
+
+out:
+	if (mom) {
+		free_manifest(mom);
+	}
+
+	if (deps) {
+		list_free_list_and_data(deps, free_manifest_data);
+	}
+
+	if (subs) {
+		free_subscriptions(&subs);
+	}
+
+	return ret;
+}
 
 int show_bundle_reqd_by(const char *bundle_name, bool server)
 {
@@ -269,17 +364,17 @@ int show_bundle_reqd_by(const char *bundle_name, bool server)
 
 	required_by(&reqd_by, bundle_name, current_manifest, 0);
 	if (reqd_by == NULL) {
-		printf("No bundles have %s as a dependency\n", bundle_name);
+		fprintf(stderr, "No bundles have %s as a dependency\n", bundle_name);
 		ret = 0;
 		goto out;
 	}
 
-	printf(server ? "All installable and installed " : "Installed ");
-	printf("bundles that have %s as a dependency:\n", bundle_name);
-	printf("format:\n");
-	printf(" # * is-required-by\n");
-	printf(" #   |-- is-required-by\n");
-	printf(" # * is-also-required-by\n # ...\n\n");
+	fprintf(stderr, server ? "All installable and installed " : "Installed ");
+	fprintf(stderr, "bundles that have %s as a dependency:\n", bundle_name);
+	fprintf(stderr, "format:\n");
+	fprintf(stderr, " # * is-required-by\n");
+	fprintf(stderr, " #   |-- is-required-by\n");
+	fprintf(stderr, " # * is-also-required-by\n # ...\n\n");
 
 	struct list *iter;
 	char *bundle;
@@ -469,10 +564,7 @@ out_free_curl:
    2 new subscriptions
    4 bad name given
 */
-#define add_sub_ERR 1
-#define add_sub_NEW 2
-#define add_sub_BADNAME 4
-int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, int recursion)
+int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, bool find_all, int recursion)
 {
 	char *bundle;
 	int ret = 0;
@@ -521,7 +613,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 		}
 
 		if (manifest->includes) {
-			int r = add_subscriptions(manifest->includes, subs, current_version, mom, recursion + 1);
+			int r = add_subscriptions(manifest->includes, subs, current_version, mom, find_all, recursion + 1);
 			if (r & add_sub_ERR) {
 				free_manifest(manifest);
 				goto out;
@@ -530,7 +622,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 		}
 		free_manifest(manifest);
 
-		if (is_tracked_bundle(bundle)) {
+		if (!find_all && is_tracked_bundle(bundle)) {
 			continue;
 		}
 
@@ -559,7 +651,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 
 	/* step 1: check bundle args are valid if so populate subs struct */
 	grabtime_start(&times, "Add bundles and recurse");
-	ret = add_subscriptions(bundles, subs, current_version, mom, 0);
+	ret = add_subscriptions(bundles, subs, current_version, mom, false, 0);
 
 	if (ret != add_sub_NEW) {
 		/* something went wrong, print a message and exit */

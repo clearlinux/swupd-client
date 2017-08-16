@@ -40,6 +40,8 @@
 #include "signature.h"
 #include "swupd.h"
 
+static int last_percentage = -1;
+
 void check_root(void)
 {
 	if (getuid() != 0) {
@@ -949,8 +951,13 @@ bool string_in_list(char *string_to_check, struct list *list_to_check)
 void print_progress(unsigned int count, unsigned int max)
 {
 	if (isatty(fileno(stdout))) {
-		printf("\r\t...%d%%", (int)(100 * ((float)count / (float)max)));
-		fflush(stdout);
+		/* Only print when the percentage changes, so a maximum of 100 times per run */
+		int percentage = (int)(100 * ((float)count / (float)max));
+		if (percentage != last_percentage) {
+			printf("\r\t...%d%%", percentage);
+			fflush(stdout);
+			last_percentage = percentage;
+		}
 	} else {
 		// Print the first one, then every 10 after that
 		if (count % 10 == 1) {

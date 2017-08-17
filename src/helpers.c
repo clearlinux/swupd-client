@@ -130,60 +130,66 @@ void unlink_all_staged_content(struct file *file)
 	}
 }
 
+/* Ensure that a directory either doesn't exist
+ * or does exist and belongs to root.
+ * If it exists, but is not a directory or belonging to root, remove it
+ * returns true if it doesn't exist
+ */
+static int ensure_root_owned_dir(const char *dirname)
+{
+	struct stat sb;
+	int ret = stat(dirname, &sb);
+	if (ret && (errno == ENOENT)) {
+		return true;
+	}
+	if ((sb.st_uid == 0) &&
+	    (S_ISDIR(sb.st_mode)) &&
+	    ((sb.st_mode & 0777) == 0700)) {
+		return false;
+	}
+	/* Oops, not owned by root or
+	 * not a directory or wrong perms
+	 */
+	ret=swupd_rm(state_dir);
+	if (ret) {
+		fprintf(stderr,
+			"Error \"%s\" not owned by root"
+			"but couldn't be deleted\n",
+			state_dir);
+		exit(100);
+	}
+	return true;		/* doesn't exist now */
+}
+
 static int create_required_dirs(void)
 {
 	int ret = 0;
-	int i;
+	unsigned int i;
 	char *dir;
-#define STATE_DIR_COUNT 4
+#define STATE_DIR_COUNT (sizeof(state_dirs)/sizeof(state_dirs[0]))
 	const char *state_dirs[] = { "delta", "staged", "download", "telemetry" };
-	struct stat buf;
-	bool missing = false;
 
 	// check for existance
-	ret = stat(state_dir, &buf);
-	if (ret && (errno == ENOENT)) {
-		missing = true;
-	}
+	ensure_root_owned_dir(state_dir);
+			
 	for (i = 0; i < STATE_DIR_COUNT; i++) {
 		string_or_die(&dir, "%s/%s", state_dir, state_dirs[i]);
-		ret = stat(dir, &buf);
+		ret = ensure_root_owned_dir(dir);
 		if (ret) {
-			missing = true;
-		}
-		free(dir);
-	}
-
-	if (missing) { // (re)create state dirs
-		char *cmd;
-
-		for (i = 0; i < STATE_DIR_COUNT; i++) {
-			string_or_die(&cmd, "mkdir -p %s/%s", state_dir, state_dirs[i]);
+			char *cmd;
+			string_or_die(&cmd, "umask 077 ; mkdir -p %s", dir);
 			ret = system(cmd);
 			if (ret) {
-				fprintf(stderr, "Error: failed to create %s/%s\n", state_dir, state_dirs[i]);
+				fprintf(stderr, "Error: failed to create %s\n", dir);
 				return -1;
 			}
 			free(cmd);
-
-			string_or_die(&dir, "%s/%s", state_dir, state_dirs[i]);
-			ret = chmod(dir, S_IRWXU);
-			if (ret) {
-				fprintf(stderr, "Error: failed to set mode for %s/%s\n", state_dir, state_dirs[i]);
-				return -1;
-			}
-			free(dir);
 		}
-
-		// chmod 700
-		ret = chmod(state_dir, S_IRWXU);
-		if (ret) {
-			fprintf(stderr, "Error: failed to set mode for state dir (%s)\n", state_dir);
-			return -1;
-		}
+		free(dir);
 	}
-
-	return 0;
+	/* Do a final check to make sure that the top level dir wasn't
+	 * tampered with whilst we were creating the dirs */
+	return ensure_root_owned_dir(state_dir);
 }
 
 /**

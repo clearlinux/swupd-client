@@ -15,6 +15,7 @@ Staging file content
 REGEXP:^Update target directory does not exist: .*/target-dir/usr/bin. Trying to fix it$
 Hash did not match for path : /usr
 Path /usr/bin is missing on the file system
+Applying update
 Update was applied.
 Update successful. System updated from version 10 to version 100
 1 files were not in a pack

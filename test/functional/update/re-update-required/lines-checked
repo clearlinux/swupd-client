@@ -12,6 +12,7 @@ Starting download of remaining update content. This may take a while...
 File /usr/bin was not in a pack
 Finishing download of update content...
 Staging file content
+Applying update
 Update was applied.
 Update successful. System updated from version 10 to version 20
 3 files were not in a pack
@@ -29,6 +30,7 @@ Starting download of remaining update content. This may take a while...
 File /usr/lib/os-release was not in a pack
 Finishing download of update content...
 Staging file content
+Applying update
 Update was applied.
 Update successful. System updated from version 100 to version 110
 1 files were not in a pack

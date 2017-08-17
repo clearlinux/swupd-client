@@ -177,6 +177,7 @@ TRY_DOWNLOAD:
 	sync();
 
 	/* rename to apply update */
+	printf("Applying update\n");
 	ret = rename_all_files_to_final(updates);
 	if (ret != 0) {
 		return ret;

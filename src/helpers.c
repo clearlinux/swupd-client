@@ -152,7 +152,7 @@ static int ensure_root_owned_dir(const char *dirname)
 	/* Oops, not owned by root or
 	 * not a directory or wrong perms
 	 */
-	ret=swupd_rm(state_dir);
+	ret = swupd_rm(state_dir);
 	if (ret) {
 		fprintf(stderr,
 			"Error \"%s\" not owned by root"
@@ -160,7 +160,7 @@ static int ensure_root_owned_dir(const char *dirname)
 			state_dir);
 		exit(100);
 	}
-	return true;		/* doesn't exist now */
+	return true; /* doesn't exist now */
 }
 
 static int create_required_dirs(void)
@@ -168,12 +168,12 @@ static int create_required_dirs(void)
 	int ret = 0;
 	unsigned int i;
 	char *dir;
-#define STATE_DIR_COUNT (sizeof(state_dirs)/sizeof(state_dirs[0]))
+#define STATE_DIR_COUNT (sizeof(state_dirs) / sizeof(state_dirs[0]))
 	const char *state_dirs[] = { "delta", "staged", "download", "telemetry" };
 
 	// check for existance
 	ensure_root_owned_dir(state_dir);
-			
+
 	for (i = 0; i < STATE_DIR_COUNT; i++) {
 		string_or_die(&dir, "%s/%s", state_dir, state_dirs[i]);
 		ret = ensure_root_owned_dir(dir);

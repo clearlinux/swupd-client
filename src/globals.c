@@ -301,10 +301,11 @@ int set_version_url(char *url)
 static bool is_valid_integer_format(char *str)
 {
 	unsigned long long int version;
+	char *endptr = NULL;
 	errno = 0;
 
-	version = strtoull(str, NULL, 10);
-	if ((errno < 0) || (version == 0)) {
+	version = strtoull(str, &endptr, 10);
+	if ((errno < 0) || (version == 0) || (endptr && *endptr != '\0')) {
 		return false;
 	}
 

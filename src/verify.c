@@ -100,7 +100,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
 	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
-	fprintf(stderr, "   -t, --time         	   Show verbose time output for swupd operations\n");
+	fprintf(stderr, "   -t, --time              Show verbose time output for swupd operations\n");
 	fprintf(stderr, "\n");
 }
 

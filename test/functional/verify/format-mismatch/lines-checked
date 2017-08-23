@@ -1,0 +1,5 @@
+Verifying version 20
+Attempting to download version string to memory
+ERROR: Mismatching formats detected when verifying 20 (expected: 1; actual: 2)
+Latest supported version to verify: 10
+Error: Fix did not fully succeed

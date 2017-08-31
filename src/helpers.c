@@ -152,12 +152,15 @@ static int ensure_root_owned_dir(const char *dirname)
 	/* Oops, not owned by root or
 	 * not a directory or wrong perms
 	 */
-	ret = swupd_rm(state_dir);
-	if (ret) {
+	swupd_rm(dirname);
+	errno = 0;
+	ret = stat(dirname, &sb);
+	if ((ret != -1) || (errno != ENOENT)) {
 		fprintf(stderr,
-			"Error \"%s\" not owned by root"
-			"but couldn't be deleted\n",
-			state_dir);
+			"Error \"%s\" not owned by root, is not a directory, "
+			"or has the wrong permissions.\n"
+			"However it couldn't be deleted. stat gives error '%s'\n",
+			dirname, strerror(errno));
 		exit(100);
 	}
 	return true; /* doesn't exist now */

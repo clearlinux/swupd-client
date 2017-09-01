@@ -995,3 +995,13 @@ bool is_compatible_format(int format_num)
 	free(format_manifest);
 	return ret;
 }
+
+/* Check if the version argument is the same version as the current OS */
+bool is_current_version(int version)
+{
+	if (version < 0) {
+		return false;
+	}
+
+	return (version == get_current_version(path_prefix));
+}

@@ -1,0 +1,4 @@
+Verifying version 10
+Attempting to download version string to memory
+ERROR: Fixing to a different version requires --force or --picky
+Error: Fix did not fully succeed

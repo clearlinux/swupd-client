@@ -203,6 +203,8 @@ dist_check_SCRIPTS = \
 	test/functional/verify/check-missing-directory/test.bats \
 	test/functional/verify/directory-tree-deleted/test.bats \
 	test/functional/verify/empty-dir-deleted/test.bats \
+	test/functional/verify/fix-version-mismatch/test.bats \
+	test/functional/verify/fix-version-mismatch-override/test.bats \
 	test/functional/verify/format-mismatch/test.bats \
 	test/functional/verify/format-mismatch-override/test.bats \
 	test/functional/verify/install-directory/test.bats \

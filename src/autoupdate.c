@@ -112,7 +112,22 @@ int autoupdate_main(int argc, char **argv)
 		}
 		return (rc);
 	} else {
-		int rc = system("/usr/bin/systemctl is-enabled swupd-update.service > /dev/null");
+		/* In a container, "/usr/bin/systemctl" will return 1 with
+		 * "Failed to connect to bus: No such file or directory"
+		 * However /usr/bin/systemctl is-enabled ... will not fail, even when it
+		 * should. Check that systemctl is working before reporting the output
+		 * of is-enabled. */
+		int rc = system("/usr/bin/systemctl > /dev/null 2>&1");
+		if (rc != -1) {
+			rc = WEXITSTATUS(rc);
+		}
+
+		if (rc) {
+			fprintf(stderr, "Unable to determine autoupdate status\n");
+			return rc;
+		}
+
+		rc = system("/usr/bin/systemctl is-enabled swupd-update.service > /dev/null");
 		if (rc != -1) {
 			rc = WEXITSTATUS(rc);
 		}

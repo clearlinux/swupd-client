@@ -719,6 +719,22 @@ int verify_main(int argc, char **argv)
 		}
 	}
 
+	/* If --fix was specified but --force and --picky are not present, check
+	 * that the user is only fixing to their current version. If they are
+	 * fixing to a different version, print an error message that they need to
+	 * specify --force or --picky. */
+	if (cmdline_option_fix && !is_current_version(version)) {
+		if (cmdline_option_picky || force) {
+			fprintf(stderr, "WARNING: the force or picky option is specified; "
+					"ignoring version mismatch for verify --fix\n");
+		} else {
+			fprintf(stderr, "ERROR: Fixing to a different version requires "
+					"--force or --picky\n");
+			ret = EMANIFEST_LOAD;
+			goto clean_and_exit;
+		}
+	}
+
 	ret = add_included_manifests(official_manifest, version, &subs);
 	if (ret) {
 		ret = EMANIFEST_LOAD;

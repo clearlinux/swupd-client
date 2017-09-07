@@ -53,6 +53,15 @@ static void update_triggers(bool block)
 	char *block_flag = NULL;
 	__attribute__((unused)) int ret = 0;
 
+	/* Check that systemd is working (container case)
+	 * and return if it is not after printing an error */
+	ret = system("/usr/bin/systemctl > /dev/null 2>&1");
+	if (ret != 0) {
+		fprintf(stderr, "WARNING: systemctl not operable, "
+		                "unable to run systemd update triggers\n");
+		return;
+	}
+
 	/* These must block so that new update triggers are executed after */
 	if (need_systemd_reexec) {
 		ret = system("/usr/bin/systemctl daemon-reexec");

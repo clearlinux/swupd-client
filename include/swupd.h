@@ -142,6 +142,7 @@ extern bool verify_bundles_only;
 extern bool ignore_config;
 extern bool ignore_state;
 extern bool ignore_orphans;
+extern bool no_boot_update;
 extern char *format_string;
 extern char *path_prefix;
 extern bool set_format_string(char *userinput);

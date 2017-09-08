@@ -88,7 +88,12 @@ void run_scripts(bool block)
 
 	/* path_prefix aware helper */
 	if (need_update_boot || need_update_bootloader) {
-		update_boot();
+		if (no_boot_update) {
+			fprintf(stderr, "WARNING: boot files update skipped due to "
+			        "--no-boot-update argument\n");
+		} else {
+			update_boot();
+		}
 	}
 
 	/* helpers which don't run when path_prefix is set */

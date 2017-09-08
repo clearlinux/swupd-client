@@ -766,6 +766,9 @@ download_subscribed_packs:
 			continue;
 		}
 
+		/* apply the heuristics for the file so the correct post-actions can
+		 * be completed */
+		apply_heuristics(file);
 		ret = do_staging(file, mom);
 		if (ret) {
 			ret = verify_fix_path(file->filename, mom);

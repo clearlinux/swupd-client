@@ -34,6 +34,7 @@
 bool force = false;
 bool sigcheck = true;
 bool timecheck = true;
+bool no_boot_update = false;
 bool verify_esp_only;
 bool verify_bundles_only = false;
 int update_count = 0;

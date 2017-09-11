@@ -141,6 +141,7 @@ dist_check_SCRIPTS = \
 	test/functional/bundleadd/add-multiple/test.bats \
 	test/functional/bundleadd/add-rc/test.bats \
 	test/functional/bundleadd/boot-file/test.bats \
+	test/functional/bundleadd/boot-skip/test.bats \
 	test/functional/bundleadd/include/test.bats \
 	test/functional/bundleadd/fix-missing-file/test.bats \
 	test/functional/bundleadd/verify-fix-path/test.bats \
@@ -175,6 +176,7 @@ dist_check_SCRIPTS = \
 	test/functional/search/content-check-poslib64/test.bats \
 	test/functional/update/apply-full-file-delta/test.bats \
 	test/functional/update/boot-file/test.bats \
+	test/functional/update/boot-skip/test.bats \
 	test/functional/update/download/test.bats \
 	test/functional/update/include/test.bats \
 	test/functional/update/include-old-bundle/test.bats \
@@ -200,6 +202,7 @@ dist_check_SCRIPTS = \
 	test/functional/verify/boot-file-deleted/test.bats \
 	test/functional/verify/boot-file-mismatch/test.bats \
 	test/functional/verify/boot-file-mismatch-fix/test.bats \
+	test/functional/verify/boot-skip/test.bats \
 	test/functional/verify/check-missing-directory/test.bats \
 	test/functional/verify/directory-tree-deleted/test.bats \
 	test/functional/verify/empty-dir-deleted/test.bats \

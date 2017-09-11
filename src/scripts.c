@@ -58,7 +58,7 @@ static void update_triggers(bool block)
 	ret = system("/usr/bin/systemctl > /dev/null 2>&1");
 	if (ret != 0) {
 		fprintf(stderr, "WARNING: systemctl not operable, "
-		                "unable to run systemd update triggers\n");
+				"unable to run systemd update triggers\n");
 		return;
 	}
 

@@ -35,7 +35,7 @@
 #include "swupd-build-variant.h"
 #include "swupd.h"
 
-static int download_pack(int oldversion, int newversion, char *module)
+static int download_pack(int oldversion, int newversion, char *module, int complete, int total)
 {
 	FILE *tarfile = NULL;
 	char *tar = NULL;
@@ -66,10 +66,10 @@ static int download_pack(int oldversion, int newversion, char *module)
 
 	free(url);
 
-	fprintf(stderr, "\nExtracting %s pack for version %i\n", module, newversion);
 	string_or_die(&tar, TAR_COMMAND " -C %s " TAR_PERM_ATTR_ARGS " -xf %s/pack-%s-from-%i-to-%i.tar 2> /dev/null",
 		      state_dir, state_dir, module, oldversion, newversion);
 
+	fprintf(stderr, "[%d/%d] Extracting pack...\n", complete, total);
 	err = system(tar);
 	if (WIFEXITED(err)) {
 		err = WEXITSTATUS(err);
@@ -97,14 +97,13 @@ int download_subscribed_packs(struct list *subs, bool required)
 	struct list *iter;
 	struct sub *sub = NULL;
 	int err;
-	unsigned int list_length = list_len(subs);
+	unsigned int list_length = 0;
 	unsigned int complete = 0;
 
 	if (!check_network()) {
 		return -ENOSWUPDSERVER;
 	}
 
-	fprintf(stderr, "Downloading packs...\n");
 	iter = list_head(subs);
 	while (iter) {
 		sub = iter->data;
@@ -114,8 +113,26 @@ int download_subscribed_packs(struct list *subs, bool required)
 			continue;
 		}
 
-		err = download_pack(sub->oldversion, sub->version, sub->component);
-		print_progress(++complete, list_length);
+		list_length++;
+	}
+
+	iter = list_head(subs);
+	if (list_length > 0) {
+		fprintf(stderr, "Downloading %d packs...\n", list_length);
+	}
+
+	while (iter) {
+		sub = iter->data;
+		iter = iter->next;
+
+		if (sub->oldversion == sub->version) { // pack didn't change in this release
+			continue;
+		}
+
+		fprintf(stderr, "[%d/%d] Downloading %s pack for version %i...\n",
+			++complete, list_length, sub->component, sub->version);
+
+		err = download_pack(sub->oldversion, sub->version, sub->component, complete, list_length);
 		if (err < 0) {
 			if (required) {
 				return err;
@@ -125,6 +142,5 @@ int download_subscribed_packs(struct list *subs, bool required)
 		}
 	}
 
-	printf("\n");
 	return 0;
 }

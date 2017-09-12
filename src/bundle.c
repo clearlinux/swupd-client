@@ -727,7 +727,7 @@ download_subscribed_packs:
 	 * Do not install any files to the system until the hash has been
 	 * verified. The verify_fix_path also verifies the hashes. */
 	char *hashpath;
-	char *fullpath;  // for the error messages
+	char *fullpath; // for the error messages
 	iter = list_head(to_install_files);
 	while (iter) {
 		file = iter->data;

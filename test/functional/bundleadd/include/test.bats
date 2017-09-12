@@ -2,7 +2,7 @@
 
 load "../../swupdlib"
 
-t1_hash="24d8955d9952c3fcb2241b0f8d225205a5861cec9757b3a075d34810da9b08af"
+t1_hash="6c27df6efcd6fc401ff1bc67c970b83eef115f6473db4fb9d57e5de317eba96e"
 t2_hash="e6d85023c5e619eb43d5cfbfdbdec784afef5a82ffa54e8c93bda3e0883360a3"
 
 setup() {
@@ -28,8 +28,8 @@ teardown() {
 @test "bundle-add verify include support" {
   run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
-  [ "$status" -eq 0 ]
   check_lines "$output"
+  [ "$status" -eq 0 ]
   ls "$DIR/target-dir/usr/bin"
   ls "$DIR/target-dir/usr/foo"
 }

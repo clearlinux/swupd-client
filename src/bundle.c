@@ -719,25 +719,45 @@ download_subscribed_packs:
 	/* step 4: Install all bundle(s) files into the fs */
 	grabtime_start(&times, "Installing bundle(s) files onto filesystem");
 	fprintf(stderr, "Installing bundle(s) files...\n");
-	unsigned int list_length = list_len(to_install_files);
-	unsigned int complete = 0;
-	char *fullname;
+
+	/* Do an initial check to
+	 * 1. make sure the file actually downloaded, if not continue on to the
+	 *    verify_fix_path below.
+	 * 2. verify the file hash
+	 * Do not install any files to the system until the hash has been
+	 * verified. The verify_fix_path also verifies the hashes. */
+	char *hashpath;
+	char *fullpath;  // for the error messages
 	iter = list_head(to_install_files);
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
 
-		string_or_die(&fullname, "%s/staged/%s", state_dir, file->hash);
+		string_or_die(&hashpath, "%s/staged/%s", state_dir, file->hash);
+		string_or_die(&fullpath, "%s%s", path_prefix, file->filename);
 
-		ret = verify_file(file, fullname);
+		if (access(hashpath, F_OK) < 0) {
+			/* fallback to verify_fix_path below, which will check the hash
+			 * itself */
+			free(hashpath);
+			free(fullpath);
+			continue;
+		}
+
+		ret = verify_file(file, hashpath);
 		if (!ret) {
-			free(fullname);
-			fprintf(stderr, "FAILED HASH CHECK %s\n", fullname);
+			fprintf(stderr, "Error: hash check failed for %s\n", fullpath);
+			free(hashpath);
+			free(fullpath);
 			goto out;
 		}
-		free(fullname);
+		free(hashpath);
+		free(fullpath);
 	}
+
 	iter = list_head(to_install_files);
+	unsigned int list_length = list_len(to_install_files);
+	unsigned int complete = 0;
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;

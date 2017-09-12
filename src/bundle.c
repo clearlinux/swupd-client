@@ -721,6 +721,22 @@ download_subscribed_packs:
 	fprintf(stderr, "Installing bundle(s) files...\n");
 	unsigned int list_length = list_len(to_install_files);
 	unsigned int complete = 0;
+	char *fullname;
+	iter = list_head(to_install_files);
+	while (iter) {
+		file = iter->data;
+		iter = iter->next;
+
+		string_or_die(&fullname, "%s/staged/%s", state_dir, file->hash);
+
+		ret = verify_file(file, fullname);
+		if (!ret) {
+			free(fullname);
+			fprintf(stderr, "FAILED HASH CHECK %s\n", fullname);
+			goto out;
+		}
+		free(fullname);
+	}
 	iter = list_head(to_install_files);
 	while (iter) {
 		file = iter->data;

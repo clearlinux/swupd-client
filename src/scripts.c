@@ -90,7 +90,7 @@ void run_scripts(bool block)
 	if (need_update_boot || need_update_bootloader) {
 		if (no_boot_update) {
 			fprintf(stderr, "WARNING: boot files update skipped due to "
-			        "--no-boot-update argument\n");
+					"--no-boot-update argument\n");
 		} else {
 			update_boot();
 		}

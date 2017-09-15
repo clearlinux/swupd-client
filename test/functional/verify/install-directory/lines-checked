@@ -1,6 +1,7 @@
 Verifying version 10
 Attempting to download version string to memory
-Extracting os-core pack for version 10
+[1/1] Downloading os-core pack for version 10...
+[1/1] Extracting pack...
 Adding any missing files
 Inspected 1 files
   1 files were missing

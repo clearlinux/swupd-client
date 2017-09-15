@@ -1,7 +1,9 @@
 Attempting to download version string to memory
 Update started.
 Preparing to update from 20 to 30
-Extracting os-core pack for version 30
+[1/2] Downloading os-core pack for version 30...
+[1/2] Extracting pack...
+[2/2] Downloading test-bundle2 pack for version 30...
 Statistics for going from version 20 to version 30:
     changed bundles   : 2
     new bundles       : 0

@@ -6,7 +6,7 @@
 ^swupd-client software verify [0-9.]+$
 ^.*Copyright \(C\) .*$
 ^$
-^Downloading packs...
+^Downloading [0-9]+ packs...
 ^Calling post-update helper scripts.$
 ^No kernel update needed, skipping helper call out.$
 ^No bootloader update needed, skipping helper call out.$

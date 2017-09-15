@@ -1,6 +1,7 @@
 Attempting to download version string to memory
 Verifying version 100
-Extracting os-core pack for version 100
+[1/1] Downloading os-core pack for version 100...
+[1/1] Extracting pack...
 Adding any missing files
 Inspected 1 files
   1 files were missing

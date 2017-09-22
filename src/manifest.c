@@ -662,7 +662,10 @@ verify_mom:
 					"  --nosigcheck, but system security may be compromised\n");
 			string_or_die(&log_cmd, "echo \"swupd security notice:"
 						" --nosigcheck used to bypass MoM signature verification failure\" | systemd-cat --priority=\"err\" --identifier=\"swupd\"");
-			(void)system(log_cmd);
+			if (system(log_cmd)) {
+				/* useless noise to suppress gcc & glibc conspiring
+				 * to make us check the result of system */
+			}
 			free(log_cmd);
 		}
 	}

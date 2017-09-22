@@ -1,3 +1,5 @@
+SUFFIXES= .rst
+
 EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash
 
 AM_CFLAGS = -fPIC -Iinclude/ -O2 -g -Wall -W -Wformat-security -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99
@@ -135,7 +137,7 @@ BATS_LOG_DRIVER = $(tap_driver)
 
 TESTS = $(dist_check_SCRIPTS)
 
-dist_check_SCRIPTS = \
+BATS = \
 	test/functional/bundleadd/add-directory/test.bats \
 	test/functional/bundleadd/add-existing/test.bats \
 	test/functional/bundleadd/add-multiple/test.bats \
@@ -211,10 +213,11 @@ dist_check_SCRIPTS = \
 	test/functional/verify/install-latest-directory/test.bats \
 	test/functional/verify/latest-missing/test.bats
 
+dist_check_SCRIPTS = $(BATS)
 # Must be run before all other tests
 dist_check_SCRIPTS += test/functional/generate-cert.prereq
 
-parallel_tests := $(patsubst %.bats,%.log,$(filter %.bats,$(dist_check_SCRIPTS)))
+parallel_tests = $(BATS:.bats=.log)
 $(parallel_tests) : test/functional/generate-cert.log
 endif
 
@@ -280,7 +283,7 @@ clean-local:
 
 man: $(dist_man_MANS)
 
-%: %.rst
+.rst:
 	rst2man.py $< > $@
 
 swupd.bash: $(top_srcdir)/scripts/swupd-completion.sh $(top_srcdir)/swupd

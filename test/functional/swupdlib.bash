@@ -19,9 +19,23 @@ export CERT="$BATS_TEST_DIRNAME/Swupd_Root.pem"
 
 export CERTCONF="$BATS_TEST_DIRNAME/certattributes.cnf"
 
+# Maintain compatibility
 clean_test_dir() {
+  clean_state_dir
+}
+
+clean_state_dir() {
   sudo rm -rf "$STATE_DIR"
 }
+
+clean_target_dir() {
+  sudo rm -rf "$DIR/target-dir"
+}
+
+clean_web_dir() {
+  sudo rm -rf "$DIR/web_dir"
+}
+
 
 clean_tars() {
   local ver=$1
@@ -37,11 +51,11 @@ clean_tars() {
 }
 
 chown_root() {
-  sudo chown root:root "$1"
+  sudo chown root:root "$@"
 }
 
 revert_chown_root() {
-  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$1"
+  sudo chown $(ls -l "$DIR/test.bats" | awk '{ print $3 ":" $4 }') "$@"
 }
 
 create_manifest_tar() {
@@ -105,6 +119,32 @@ sign_manifest_mom() {
   sudo openssl smime -sign -binary -in $BATS_TEST_DIRNAME/web-dir/$1/Manifest.MoM \
     -signer $SRCDIR/test/functional/Swupd_Root.pem -inkey $SRCDIR/test/functional/private.pem \
     -outform DER -out $BATS_TEST_DIRNAME/web-dir/$1/Manifest.MoM.sig
+}
+
+set_os_release() {
+  sudo mkdir -p $DIR/target-dir/usr/lib
+  echo "VERSION_ID=$1" | sudo tee $DIR/target-dir/usr/lib/os-release
+}
+
+# Create a target tree from a manifest
+unpack_target_from_manifest(){
+  local REL=$1
+  local MANIFEST=$2
+  exec 9< $DIR/web-dir/$REL/Manifest.$MANIFEST
+  # Skip header
+  while read -u 9 line
+  do  [ -z "$line" ] && break
+  done
+  # Process lines
+  mkdir -p "$DIR/target-dir"
+  while read -u 9 code hash ver path
+  do
+      case "$code" in
+	  ("F"*) sudo cp "$DIR/web-dir/$REL/staged/$hash" "$DIR/target-dir/$path" ;;
+	  ("D"*) sudo mkdir -p "$DIR/target-dir/$path" ;;
+      esac
+  done
+  exec 9<&-
 }
 
 # vi: ft=sh ts=8 sw=2 sts=2 et tw=80

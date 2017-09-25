@@ -139,7 +139,7 @@ static int check_update()
 	}
 	swupd_curl_init();
 
-	if (!check_network) {
+	if (!check_network()) {
 		fprintf(stderr, "Error: Network issue, unable to proceed with update\n");
 		return ENOSWUPDSERVER;
 	}

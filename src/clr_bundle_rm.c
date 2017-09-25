@@ -221,7 +221,7 @@ static void reload_parsed_opts(void)
 	sigcheck = curopts.sigcheck;
 }
 
-void static free_saved_opts(void)
+static void free_saved_opts(void)
 {
 	if (curopts.path_prefix != NULL) {
 		free(curopts.path_prefix);

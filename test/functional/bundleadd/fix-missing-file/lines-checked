@@ -1,7 +1,12 @@
 Attempting to download version string to memory
+Downloading packs
 Retry #1 downloading subscribed packs
+Downloading packs
 Retry #2 downloading subscribed packs
+Downloading packs
 Retry #3 downloading subscribed packs
-Installing bundle(s) files...
+Downloading packs
+Installing bundle(s) files
 Path /foo is missing on the file system
-Bundle(s) installation done.
+Calling post-update helper scripts
+Bundle(s) installation done

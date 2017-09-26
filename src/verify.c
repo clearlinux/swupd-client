@@ -290,6 +290,7 @@ static struct list *download_loop(struct list *files, int isfailed)
 
 		file = iter->data;
 		iter = iter->next;
+		complete++;
 
 		if (file->is_deleted) {
 			continue;
@@ -321,9 +322,9 @@ static struct list *download_loop(struct list *files, int isfailed)
 			file->do_not_update = 1;
 		}
 		free(fullname);
-		print_progress(++complete, list_length);
+		print_progress(complete, list_length);
 	}
-
+	print_progress(list_length, list_length); /* Force out 100% */
 	printf("\n");
 	if (isfailed) {
 		list_free_list(files);
@@ -405,6 +406,7 @@ static void add_missing_files(struct manifest *official_manifest)
 
 		file = iter->data;
 		iter = iter->next;
+		complete++;
 
 		if ((file->is_deleted) ||
 		    (file->do_not_update)) {
@@ -461,9 +463,9 @@ static void add_missing_files(struct manifest *official_manifest)
 			}
 		}
 		free(fullname);
-		print_progress(++complete, list_length);
+		print_progress(complete, list_length);
 	}
-
+	print_progress(list_length, list_length);
 	printf("\n");
 }
 

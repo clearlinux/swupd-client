@@ -311,6 +311,7 @@ int rename_all_files_to_final(struct list *updates)
 		struct file *file;
 		file = list->data;
 		list = list->next;
+		complete++;
 		if (file->do_not_update) {
 			skip += 1;
 			continue;
@@ -323,9 +324,10 @@ int rename_all_files_to_final(struct list *updates)
 			update_good += 1;
 		}
 
-		print_progress(++complete, list_length);
+		print_progress(complete, list_length);
 	}
 
+	print_progress(list_length, list_length); /* Force out 100% */
 	printf("\n");
 	return update_count - update_good - update_errs - (update_skip - skip);
 }

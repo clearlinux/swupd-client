@@ -109,15 +109,16 @@ int download_subscribed_packs(struct list *subs, bool required)
 	while (iter) {
 		sub = iter->data;
 		iter = iter->next;
+		complete++;
 
 		if (sub->oldversion == sub->version) { // pack didn't change in this release
 			continue;
 		}
 
 		err = download_pack(sub->oldversion, sub->version, sub->component);
-		print_progress(++complete, list_length);
+		print_progress(complete, list_length);
 		if (err < 0) {
-			if (required) {
+			if (required) { /* Probably need printf("\n") here */
 				return err;
 			} else {
 				continue;
@@ -125,6 +126,7 @@ int download_subscribed_packs(struct list *subs, bool required)
 		}
 	}
 
+	print_progress(list_length, list_length); /* Force out 100% */
 	printf("\n");
 	return 0;
 }

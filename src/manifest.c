@@ -770,19 +770,25 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 		file = list->data;
 		list = list->next;
 
-		if (file->peer && hash_equal(file->hash, file->peer->hash)) {
+		/* Look for potential short circuit, if something has the same
+		 * flags and the same hash, then conclude they are the same. */
+		if (file->peer &&
+		    file->is_deleted == file->peer->is_deleted &&
+		    file->is_file == file->peer->is_file &&
+		    file->is_dir == file->peer->is_dir &&
+		    file->is_link == file->peer->is_link &&
+		    hash_equal(file->hash, file->peer->hash)) {
 			if (file->last_change == file->peer->last_change) {
 				/* Nothing to do; the file did not change */
 				continue;
-			} else {
-				/* When file and its peer have matching hashes
-				 * but different versions, this indicates a
-				 * minversion bump was performed server-side.
-				 * Skip updating them if installed with the
-				 * correct hash. */
-				if (is_installed_and_verified(file)) {
-					continue;
-				}
+			}
+			/* When file and its peer have matching hashes
+			 * but different versions, this indicates a
+			 * minversion bump was performed server-side.
+			 * Skip updating them if installed with the
+			 * correct hash. */
+			if (is_installed_and_verified(file)) {
+				continue;
 			}
 		}
 

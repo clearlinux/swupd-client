@@ -287,7 +287,8 @@ clean-local:
 man: $(dist_man_MANS)
 
 .rst:
-	rst2man.py $< > $@
+	mkdir -p "$(dir $@)"
+	rst2man.py "$<" > "$@.tmp" && mv -f "$@.tmp" "$@"
 
 swupd.bash: $(top_srcdir)/scripts/swupd-completion.sh $(top_srcdir)/swupd
 	bash $<

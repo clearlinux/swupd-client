@@ -469,69 +469,80 @@ static void add_missing_files(struct manifest *official_manifest)
 	printf("\n");
 }
 
+static void check_and_fix_one(struct file *file, struct manifest *official_manifest, bool repair)
+{
+	char *fullname;
+	int ret;
+
+	// Note: boot files not marked as deleted are candidates for verify/fix
+	if (file->is_deleted ||
+	    ignore(file)) {
+		return;
+	}
+
+	file_checked_count++;
+
+	// do_not_update set by earlier check, so account as checked
+	if (file->do_not_update) {
+		return;
+	}
+
+	/* compare the hash and report mismatch */
+	fullname = mk_full_filename(path_prefix, file->filename);
+	if (fullname == NULL) {
+		abort();
+	}
+	if (verify_file(file, fullname)) {
+		goto end;
+	}
+	file_mismatch_count++;
+	/* Log to stdout, so we can post-process it */
+	printf("Hash mismatch for file: %s\n", fullname);
+
+	/* if not repairing, we're done */
+	if (!repair) {
+		goto end;
+	}
+
+	/* install the new file (on miscompare + fix) */
+	ret = do_staging(file, official_manifest);
+	if (ret == 0) {
+		rename_staged_file_to_final(file);
+	}
+
+	/* at the end of all this, verify the hash again to judge success */
+	if (verify_file(file, fullname)) {
+		file_fixed_count++;
+		printf("\tfixed\n");
+	} else {
+		file_not_fixed_count++;
+		printf("\tnot fixed\n");
+	}
+end:
+	free(fullname);
+}
+
 static void deal_with_hash_mismatches(struct manifest *official_manifest, bool repair)
 {
-	int ret;
 	struct list *iter;
+	int complete = 0;
+	int list_length;
 
-	/* for each expected and present file which hash-mismatches vs the manifest, replace the file */
+	/* for each expected and present file which hash-mismatches vs
+	 * the manifest, replace the file */
 	iter = list_head(official_manifest->files);
+	list_length = list_len(iter);
+
 	while (iter) {
 		struct file *file;
-		char *fullname;
-
 		file = iter->data;
 		iter = iter->next;
+		complete++;
 
-		// Note: boot files not marked as deleted are candidates for verify/fix
-		if (file->is_deleted ||
-		    ignore(file)) {
-			continue;
-		}
-
-		file_checked_count++;
-
-		// do_not_update set by earlier check, so account as checked
-		if (file->do_not_update) {
-			continue;
-		}
-
-		/* compare the hash and report mismatch */
-		fullname = mk_full_filename(path_prefix, file->filename);
-		if (fullname == NULL) {
-			abort();
-		}
-		if (verify_file(file, fullname)) {
-			free(fullname);
-			continue;
-		} else {
-			file_mismatch_count++;
-			/* Log to stdout, so we can post-process it */
-			printf("Hash mismatch for file: %s\n", fullname);
-		}
-
-		/* if not repairing, we're done */
-		if (!repair) {
-			free(fullname);
-			continue;
-		}
-
-		/* install the new file (on miscompare + fix) */
-		ret = do_staging(file, official_manifest);
-		if (ret == 0) {
-			rename_staged_file_to_final(file);
-		}
-
-		/* at the end of all this, verify the hash again to judge success */
-		if (verify_file(file, fullname)) {
-			file_fixed_count++;
-			printf("\tfixed\n");
-		} else {
-			file_not_fixed_count++;
-			printf("\tnot fixed\n");
-		}
-		free(fullname);
+		check_and_fix_one(file, official_manifest, repair);
+		print_progress(complete, list_length);
 	}
+	printf("\n"); /* Finish update progress message */
 }
 
 static void remove_orphaned_files(struct manifest *official_manifest)

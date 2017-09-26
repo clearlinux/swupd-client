@@ -761,6 +761,7 @@ download_subscribed_packs:
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
+		complete++;
 
 		if (file->is_deleted || file->do_not_update || ignore(file)) {
 			continue;
@@ -780,13 +781,14 @@ download_subscribed_packs:
 
 		/* two loops are necessary, first to stage, then to rename. Total is
 		 * list_length * 2 */
-		print_progress(++complete, list_length * 2);
+		print_progress(complete, list_length * 2);
 	}
 
 	iter = list_head(to_install_files);
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
+		complete++;
 
 		if (file->is_deleted || file->do_not_update || ignore(file)) {
 			continue;
@@ -799,9 +801,9 @@ download_subscribed_packs:
 
 		rename_staged_file_to_final(file);
 		// This is the second half of this process
-		print_progress(++complete, list_length * 2);
+		print_progress(complete, list_length * 2);
 	}
-
+	print_progress(list_length * 2, list_length * 2); /* Force out 100% complete */
 	printf("\n");
 	sync();
 	grabtime_stop(&times);

@@ -74,14 +74,16 @@ static struct list *full_download_loop(struct list *updates, int isfailed)
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
+		complete++;
 
 		if (file->is_deleted) {
 			continue;
 		}
 
 		full_download(file);
-		print_progress(++complete, list_length);
+		print_progress(complete, list_length);
 	}
+	print_progress(list_length, list_length); /* Force out 100% */
 	printf("\n");
 
 	if (isfailed) {

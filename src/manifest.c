@@ -543,7 +543,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		goto out;
 	}
 
-	string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",
+	string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar",
 		      state_dir, version, state_dir, version, component);
 
 	/* this is is historically a point of odd errors */

@@ -200,6 +200,7 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 	long ret = 0;
 	int err = -1;
 	struct file *local = NULL;
+	bool local_download = strncmp(url, "file://", 7) == 0;
 
 	if (!curl) {
 		abort();

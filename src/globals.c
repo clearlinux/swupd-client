@@ -64,7 +64,6 @@ char *state_dir = NULL;
  */
 bool download_only;
 bool verbose_time = false;
-bool local_download = false;
 bool have_manifest_diskspace = false; /* assume no until checked */
 bool have_network = false;	    /* assume no access until proved */
 char *version_url = NULL;
@@ -541,9 +540,6 @@ bool init_globals(void)
 			exit(EXIT_FAILURE);
 		}
 	}
-
-	/* must set this global after version_url and content_url */
-	set_local_download();
 
 #ifdef SIGNATURES
 	set_cert_path(NULL);

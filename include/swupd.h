@@ -134,7 +134,6 @@ struct time {
 typedef TAILQ_HEAD(timelist, time) timelist;
 
 extern bool download_only;
-extern bool local_download;
 extern bool verify_esp_only;
 extern bool have_manifest_diskspace;
 extern bool have_network;
@@ -327,7 +326,6 @@ void update_motd(int new_release);
 void delete_motd(void);
 extern int get_dirfd_path(const char *fullname);
 extern int verify_fix_path(char *targetpath, struct manifest *manifest);
-extern void set_local_download(void);
 extern struct list *files_from_bundles(struct list *bundles);
 extern bool version_files_consistent(void);
 extern bool string_in_list(char *string_to_check, struct list *list_to_check);

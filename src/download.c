@@ -348,6 +348,8 @@ static int perform_curl_io_and_complete(int count, bool bounded)
 	while (count > 0) {
 		CURL *handle;
 		struct file *file;
+		char *url = NULL;
+		bool local_download;
 
 		/* This function may return NULL before processing the
 		 * requested number of messages (stored in variable "count").
@@ -379,6 +381,13 @@ static int perform_curl_io_and_complete(int count, bool bounded)
 			curl_easy_cleanup(handle);
 			continue;
 		}
+
+		curl_ret = curl_easy_getinfo(handle, CURLINFO_EFFECTIVE_URL, &url);
+		if (curl_ret != CURLE_OK) {
+			curl_easy_cleanup(handle);
+			continue;
+		}
+		local_download = strncmp(url, "file://", 7) == 0;
 
 		/* Get error code from easy handle and augment it if
 		 * completing the download encounters further problems. */

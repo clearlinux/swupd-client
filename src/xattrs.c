@@ -42,14 +42,23 @@ typedef enum xattrs_action_type_t_ xattrs_action_type_t;
  * glibc's interface to the system calls
  */
 #ifndef SWUPD_WITH_XATTRS
+/* Silly little function to ignore 4 parameters to keep gcc quiet */
+#ifdef UNUSED
+#undef UNUSED
+#endif
+#define UNUSED(x) x __attribute__((__unused__))
+static int dummy4(const char * UNUSED(p), const char * UNUSED(n), void * UNUSED(b), size_t UNUSED(l))
+{
+	return 0;
+}
 /* Return a length of zero attribute names, i.e. there are none.
  * Not a perfect emulation, but good enough
  */
-#define llistxattr(p, b, l) (0)
+#define llistxattr(p, b, l) dummy4(p,p,b,l)
 /* If by some chance we have an attribute name and try and get its
  * value then set errno and return an error.
  */
-#define lgetxattr(p, n, b, l) ((errno = ENOTSUP, -1))
+#define lgetxattr(p, n, b, l) ((errno = ENOTSUP, dummy4(p, n, b, l), -1))
 
 #endif
 

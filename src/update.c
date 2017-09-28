@@ -272,7 +272,7 @@ int main_update()
 	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
 	grabtime_start(&times, "Main Update");
 
-	if (!check_network()) {
+	if (swupd_curl_check_network()) {
 		fprintf(stderr, "Error: Network issue, unable to proceed with update\n");
 		ret = ENOSWUPDSERVER;
 		goto clean_curl;

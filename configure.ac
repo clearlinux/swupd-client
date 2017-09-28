@@ -179,6 +179,12 @@ AS_IF(
 )
 
 AC_ARG_WITH(
+  [alt-ca-paths],
+  [AS_HELP_STRING([--with-alt-ca-paths=PATHS], [List of alternative CApaths to use for https connectivity])], 
+  [AC_DEFINE_UNQUOTED([ALT_CA_PATHS], ["$withval"], [List of alternative CApaths to use for https connectivity])]
+)
+
+AC_ARG_WITH(
   [contenturl],
   [AS_HELP_STRING([--with-contenturl=URL], [Default content url])],
   [AC_DEFINE_UNQUOTED([CONTENTURL], ["$withval"], [Default content url])]

@@ -52,6 +52,12 @@ static int curr_version = -1;
 static int req_version = -1;
 static bool resume_download_enabled = true;
 
+/* these are used to handle alternative trust locations */
+#define CA_PATH_NO_MAX 16
+static char *ca_path;
+static char *alt_ca_paths[CA_PATH_NO_MAX];
+static char alt_ca_paths_no = 0;
+
 int swupd_curl_init(void)
 {
 	CURLcode curl_ret;
@@ -69,7 +75,92 @@ int swupd_curl_init(void)
 		return -1;
 	}
 
+#ifdef ALT_CA_PATHS
+	/* parse and initialize CA paths. */
+	{
+		char *str = strdup(ALT_CA_PATHS);
+		char *tok;
+		char *ctx;
+		int i = 0;
+
+		tok = strtok_r(str, ":", &ctx);
+		while (tok) {
+			alt_ca_paths[i] = strdup(tok);
+			fprintf(stderr, "Alternative CApath: %s\n", alt_ca_paths[i]);
+			tok = strtok_r(NULL, ":", &ctx);
+			if (++i > CA_PATH_NO_MAX) {
+				fprintf(stderr, "Warning: up to %d CApaths can be specified."
+						" Ignoring the rest.\n", CA_PATH_NO_MAX);
+				break;
+			}
+		}
+		alt_ca_paths_no = i;
+	}
+#endif
+
 	return 0;
+}
+
+int swupd_curl_check_network(void) {
+	CURLcode curl_ret;
+	int ret = -1;
+	int i = -1;
+	CURL *c;
+
+	if (!curl) {
+		return -1;
+	}
+
+	c = curl_easy_duphandle(curl);
+	if (!c) {
+		return -1;
+	}
+
+	/* cycle starts with -1 which tests the default */
+	while (i < alt_ca_paths_no) {
+		curl_easy_reset(c);
+
+		curl_ret = curl_easy_setopt(c, CURLOPT_URL, VERSIONURL);
+		if (curl_ret != CURLE_OK) {
+			goto cleanup;
+		}
+
+		curl_ret = curl_easy_setopt(c, CURLOPT_NOBODY, 1L);
+		if (curl_ret != CURLE_OK) {
+			goto cleanup;
+		}
+
+		if (i >= 0) { /* -1 stands for default */
+			fprintf(stderr, "Trying %s...\n", alt_ca_paths[i]);
+			curl_ret = curl_easy_setopt(curl, CURLOPT_CAPATH, alt_ca_paths[i]);
+			if (curl_ret != CURLE_OK) {
+				continue;
+			}
+		}
+
+		curl_ret = curl_easy_perform(c);
+
+		switch (curl_ret) {
+			case CURLE_OK:
+				ret = 0;
+				goto cleanup;
+			case CURLE_SSL_CACERT:
+				/* default trust info cannot verify the peer, continue */
+				i++;
+				break;
+			default:
+				/* something bad, stop */
+				goto cleanup;
+		}
+	}
+
+cleanup:
+	if (!ret && i >= 0) {
+		fprintf(stderr, "Using CAPATH: %s\n", alt_ca_paths[i]);
+	}
+	curl_easy_cleanup(c);
+	return ret;
+
 }
 
 void swupd_curl_cleanup(void)

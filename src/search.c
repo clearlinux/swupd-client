@@ -246,14 +246,18 @@ static bool file_search(char *filename, char *path, char *search_term)
 		return false;
 	}
 
-	pos = strstr(filename, path);
-	if (pos == NULL) {
-		return false;
+	if (path) {
+		pos = strstr(filename, path);
+		if (pos == NULL) {
+			return false;
+		}
 	}
 
-	/* match filename or substring of filename */
-	if (strcasestr(pos + strlen(path), search_term)) {
-		return true;
+	if (path && search_term) {
+		/* match filename or substring of filename */
+		if (strcasestr(pos + strlen(path), search_term)) {
+			return true;
+		}
 	}
 
 	return false;

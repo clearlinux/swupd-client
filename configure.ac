@@ -179,6 +179,18 @@ AS_IF(
 )
 
 AC_ARG_WITH(
+  [fallback-capaths],
+  [AS_HELP_STRING([--with-fallback-capaths=PATHS], [List of fallback CApaths to use for trust])]
+)
+AS_IF(
+  [test "x$with_fallback_capaths" = "xno"],
+  [],
+  [test "x$with_fallback_capaths" = "xyes"],
+  [AC_MSG_ERROR("--with-fallback-capaths requires a value")],
+  [AC_DEFINE_UNQUOTED([FALLBACK_CAPATHS], ["$with_fallback_capaths"], [List of fallback CApaths to use for trust])]
+)
+
+AC_ARG_WITH(
   [contenturl],
   [AS_HELP_STRING([--with-contenturl=URL], [Default content url])],
   [AC_DEFINE_UNQUOTED([CONTENTURL], ["$withval"], [Default content url])]

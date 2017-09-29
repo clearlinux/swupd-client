@@ -516,7 +516,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	free(filename);
 	string_or_die(&filename, "%s/%i/Manifest.%s.tar", state_dir, version, component);
 
-	if (!check_network()) {
+	if (swupd_curl_check_network()) {
 		ret = -ENOSWUPDSERVER;
 		goto out;
 	}

@@ -504,7 +504,7 @@ int search_main(int argc, char **argv)
 		return ret;
 	}
 
-	if (!check_network()) {
+	if (swupd_curl_check_network()) {
 		fprintf(stderr, "Error: Network issue, unable to proceed with update\n");
 		ret = ENOSWUPDSERVER;
 		goto clean_exit;

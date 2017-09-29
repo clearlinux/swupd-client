@@ -65,7 +65,6 @@ char *state_dir = NULL;
 bool download_only;
 bool verbose_time = false;
 bool have_manifest_diskspace = false; /* assume no until checked */
-bool have_network = false;	    /* assume no access until proved */
 char *version_url = NULL;
 char *content_url = NULL;
 char *cert_path = NULL;

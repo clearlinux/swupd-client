@@ -683,7 +683,7 @@ int verify_main(int argc, char **argv)
 
 	fprintf(stderr, "Verifying version %i\n", version);
 
-	if (!check_network()) {
+	if (swupd_curl_check_network()) {
 		fprintf(stderr, "Error: Network issue, unable to download manifest\n");
 		ret = ENOSWUPDSERVER;
 		goto clean_and_exit;

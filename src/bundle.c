@@ -59,7 +59,7 @@ int list_installable_bundles()
 		return ret;
 	}
 
-	if (!check_network()) {
+	if (swupd_curl_check_network()) {
 		fprintf(stderr, "Error: Network issue, unable to download manifest\n");
 		v_lockfile(lock_fd);
 		return ENOSWUPDSERVER;

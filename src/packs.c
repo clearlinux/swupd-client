@@ -100,7 +100,7 @@ int download_subscribed_packs(struct list *subs, bool required)
 	unsigned int list_length = list_len(subs);
 	unsigned int complete = 0;
 
-	if (!check_network()) {
+	if (swupd_curl_check_network()) {
 		return -ENOSWUPDSERVER;
 	}
 

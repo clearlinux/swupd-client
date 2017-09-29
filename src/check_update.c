@@ -139,12 +139,17 @@ static int check_update()
 	}
 	swupd_curl_init();
 
-	if (!check_network()) {
+	if (swupd_curl_check_network()) {
 		fprintf(stderr, "Error: Network issue, unable to check for update\n");
 		return ENOSWUPDSERVER;
 	}
 
 	read_versions(&current_version, &server_version, path_prefix);
+
+	if (server_version < 0) {
+		fprintf(stderr, "Error: server does not report any version\n");
+		return ENOSWUPDSERVER;
+	}
 
 	if (current_version < 0) {
 		fprintf(stderr, "Unable to determine current OS version\n");

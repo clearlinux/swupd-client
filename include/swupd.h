@@ -258,6 +258,7 @@ extern int update_device_latest_version(int version);
 
 extern int swupd_curl_init(void);
 extern void swupd_curl_cleanup(void);
+extern int swupd_curl_check_network(void);
 extern void swupd_curl_set_current_version(int v);
 extern void swupd_curl_set_requested_version(int v);
 extern double swupd_query_url_content_size(char *url);
@@ -269,7 +270,6 @@ extern int swupd_curl_get_file(const char *url, char *filename, struct file *fil
 #define SWUPD_CURL_CONNECT_TIMEOUT 30
 #define SWUPD_CURL_RCV_TIMEOUT 120
 extern CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url);
-void swupd_curl_test_resume(void);
 
 extern void free_subscriptions(struct list **subs);
 extern void read_subscriptions(void);

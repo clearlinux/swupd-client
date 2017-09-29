@@ -52,6 +52,11 @@ static int curr_version = -1;
 static int req_version = -1;
 static bool resume_download_enabled = true;
 
+/* these are used to handle alternative trust locations */
+static char *capath;
+static char **fallback_capaths;
+static char fallback_capaths_no;
+
 int swupd_curl_init(void)
 {
 	CURLcode curl_ret;
@@ -69,7 +74,112 @@ int swupd_curl_init(void)
 		return -1;
 	}
 
+#ifdef FALLBACK_CAPATHS
+	/* parse and initialize CA paths. */
+	{
+		char *str = strdup(FALLBACK_CAPATHS);
+		char *tok;
+		char *ctx;
+		struct stat st;
+		int i;
+		int sz = 1;
+
+		fallback_capaths = (char **)malloc(sz * sizeof(char *));
+		fallback_capaths[0] = NULL;
+		i = 1;
+
+		tok = strtok_r(str, ":", &ctx);
+		do {
+			if (stat(tok, &st)) {
+				continue;
+			}
+			if ((st.st_mode & S_IFMT) != S_IFDIR) {
+				continue;
+			}
+			if (i == sz) {
+				sz <<= 1;
+				fallback_capaths = (char **)realloc(fallback_capaths, sz * sizeof(char *));
+			}
+			fallback_capaths[i] = strdup(tok);
+			i++;
+
+		} while ((tok = strtok_r(NULL, ":", &ctx)));
+		fallback_capaths_no = i;
+		free(str);
+	}
+#else
+	fallback_capaths = (char **)malloc(sizeof(char *));
+	fallback_capaths[0] = NULL;
+	fallback_capaths_no = 1;
+#endif
+
 	return 0;
+}
+
+static void swupd_curl_test_resume(void);
+
+int swupd_curl_check_network(void)
+{
+	CURLcode curl_ret;
+	int ret = -1;
+	int i;
+	CURL *c;
+	static int has_network = 0;
+
+	if (has_network)
+		return 0;
+
+	if (!curl) {
+		return -1;
+	}
+
+	c = curl_easy_duphandle(curl);
+	if (!c) {
+		return -1;
+	}
+
+	for (i = 0; i < fallback_capaths_no; i++) {
+		curl_easy_reset(c);
+
+		curl_ret = curl_easy_setopt(c, CURLOPT_URL, version_url);
+		if (curl_ret != CURLE_OK) {
+			goto cleanup;
+		}
+
+		curl_ret = curl_easy_setopt(c, CURLOPT_NOBODY, 1L);
+		if (curl_ret != CURLE_OK) {
+			goto cleanup;
+		}
+
+		if (i) { /* first element represents default CApath, means no explicit setting */
+			curl_ret = curl_easy_setopt(c, CURLOPT_CAPATH, fallback_capaths[i]);
+			if (curl_ret != CURLE_OK) {
+				break;
+			}
+		}
+
+		curl_ret = curl_easy_perform(c);
+
+		switch (curl_ret) {
+		case CURLE_OK:
+			capath = fallback_capaths[i];
+			ret = 0;
+			has_network = 1;
+			swupd_curl_test_resume();
+			goto cleanup;
+		case CURLE_SSL_CACERT:
+			i++;
+			break;
+		default:
+			fprintf(stderr, "ERROR: %d\n", curl_ret);
+			/* something bad, stop */
+			goto cleanup;
+		}
+	}
+
+cleanup:
+	curl_easy_cleanup(c);
+	return ret;
 }
 
 void swupd_curl_cleanup(void)
@@ -127,6 +237,13 @@ double swupd_query_url_content_size(char *url)
 	curl_ret = curl_easy_setopt(curl, CURLOPT_URL, url);
 	if (curl_ret != CURLE_OK) {
 		return -1;
+	}
+
+	if (capath) {
+		curl_ret = curl_easy_setopt(curl, CURLOPT_CAPATH, capath);
+		if (curl_ret != CURLE_OK) {
+			return -1;
+		}
 	}
 
 	curl_ret = curl_easy_perform(curl);
@@ -359,7 +476,7 @@ exit:
 	return err;
 }
 
-void swupd_curl_test_resume(void)
+static void swupd_curl_test_resume(void)
 {
 #define RESUME_BYTE_RANGE 2
 
@@ -440,6 +557,13 @@ static CURLcode swupd_curl_set_security_opts(CURL *curl)
 		goto exit;
 	}
 
+	if (capath) {
+		curl_ret = curl_easy_setopt(curl, CURLOPT_CAPATH, capath);
+		if (curl_ret != CURLE_OK) {
+			goto exit;
+		}
+	}
+
 #if 0
 	// TODO: add the below when you know the paths:
 	curl_easy_setopt(curl, CURLOPT_CRLFILE, path-to-cert-revoc-list);
@@ -480,7 +604,7 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url)
 		}
 	}
 
-	if (strncmp(url, content_url, strlen(content_url)) == 0) {
+	if (strncmp(url, "https://", 8) == 0) {
 #warning "SECURITY HOLE since we can't SSL pin arbitrary servers"
 		curl_ret = swupd_curl_set_security_opts(curl);
 		if (curl_ret != CURLE_OK) {

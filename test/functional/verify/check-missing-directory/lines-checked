@@ -1,5 +1,4 @@
 Verifying version 10
-Attempting to download version string to memory
 Verifying files
 REGEXP:^Hash mismatch for file: .*/target-dir/usr/bin$
 Inspected 1 files

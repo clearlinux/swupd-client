@@ -72,24 +72,6 @@ out:
 	return ret;
 }
 
-bool check_network(void)
-{
-	int ret;
-
-	if (!have_network) {
-		ret = get_latest_version();
-		if (ret < 0) {
-			have_network = false;
-		} else {
-			have_network = true;
-			/* check if server supports Range command (resume) */
-			swupd_curl_test_resume();
-		}
-	}
-
-	return have_network;
-}
-
 int get_current_version(char *path_prefix)
 {
 	char line[LINE_MAX];
@@ -156,6 +138,10 @@ int check_versions(int *current_version,
 		   char *path_prefix)
 {
 
+	if (swupd_curl_check_network()) {
+		return -1;
+	}
+
 	read_versions(current_version, server_version, path_prefix);
 
 	if (*current_version < 0) {
@@ -174,11 +160,8 @@ int check_versions(int *current_version,
 
 	/* set preferred version and content server urls */
 	if (*current_version < 0) {
-		have_network = false;
 		return -1;
 	}
-
-	have_network = true;
 
 	//TODO allow policy layer to send us to intermediate version?
 

@@ -270,7 +270,7 @@ release:
 	@git tag -a -m "$(PACKAGE_NAME) release $(PACKAGE_VERSION)" v$(PACKAGE_VERSION)
 	@printf "\nNew release $(PACKAGE_VERSION) tagged!\n\n"
 
-
+if ENABLE_MAN
 MANPAGES = \
 	docs/swupd.1 \
 	docs/check-update.service.4 \
@@ -290,6 +290,7 @@ man: $(dist_man_MANS)
 .rst:
 	mkdir -p "$$(dirname $@)"
 	rst2man.py "$<" > "$@.tmp" && mv -f "$@.tmp" "$@"
+endif
 
 swupd.bash: $(top_srcdir)/scripts/swupd-completion.sh $(top_srcdir)/swupd
 	bash $<

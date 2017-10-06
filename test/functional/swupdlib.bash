@@ -95,16 +95,20 @@ check_lines() {
   local checked="$DIR/lines-checked"
   local ignored="$DIR/../../ignore-list"
   local prog="$DIR/../../matcher.awk"
+  local ret
 
   echo "$outputstr" > "$outputfile"
 
   run awk -f "$prog" "$ignored" "$checked" "$outputfile"
+  ret=$status
+  echo "$output"
 
-  if [ $status -eq 1 ]; then
-    echo "$output"
+  if [ $ret -eq 1 ]; then
     echo -e "\nChecked lines versus actual output (note that actual output may contain ignored lines):\n"
     diff -u "$checked" "$outputfile"
   fi
+
+  return $ret
 }
 
 # This generates the private key and self signed certificate

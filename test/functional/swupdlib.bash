@@ -98,7 +98,7 @@ check_lines() {
 
   echo "$outputstr" > "$outputfile"
 
-  run awk -f "$prog" "$checked" "$ignored" "$outputfile"
+  run awk -f "$prog" "$ignored" "$checked" "$outputfile"
 
   if [ $status -eq 1 ]; then
     echo "$output"

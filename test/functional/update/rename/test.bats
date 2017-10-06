@@ -26,7 +26,7 @@ teardown() {
 }
 
 @test "update simple rename" {
-  run sudo sh -xvc "$SWUPD update $SWUPD_OPTS"
+  run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
   check_lines "$output"
 

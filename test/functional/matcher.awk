@@ -61,3 +61,6 @@ END {
     exit 1
   }
 }
+
+
+# vi: ft=awk sw=2 sts=2 et tw=80

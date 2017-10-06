@@ -106,6 +106,8 @@ check_lines() {
   if [ $ret -eq 1 ]; then
     echo -e "\nChecked lines versus actual output (note that actual output may contain ignored lines):\n"
     diff -u "$checked" "$outputfile"
+  elif [ $ret -eq 2 ]; then
+    echo -e "\n^ Error: lines-checked contains ignored lines\n"
   fi
 
   return $ret

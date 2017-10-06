@@ -4,12 +4,6 @@ BEGIN {
   early_exit = 0
 }
 
-# First, read all checked lines into an indexed array, later
-# referenced when reading the file containing swupd output.
-FILENAME ~ /lines-checked/ {
-  tocheck[checked_count++] = $0
-}
-
 # There are several lines that can be ignored for all tests.
 FILENAME ~ /ignore-list/ {
   toignore[$0]++
@@ -26,7 +20,25 @@ function is_ignored(line) {
   return 0
 }
 
+# Read all checked lines into an indexed array, later referenced when reading
+# the file containing swupd output.
+FILENAME ~ /lines-checked/ {
+  # Validate that none of these lines match the patterns from the ignore list,
+  # since the comparison of lines-checked to lines-output requires it.
+  result = is_ignored($0)
+  if (result) {
+    bad_lines[bad_count++] = sprintf("'%s' matches '%s'", $0, result)
+    next
+  }
+
+  tocheck[checked_count++] = $0
+}
+
 FILENAME ~ /lines-output/ {
+  if (0 in bad_lines) {
+    exit 2
+  }
+
   # Skip to the next line if the current line matches any patterns from the
   # global ignore list.
   if (is_ignored($0)) {
@@ -64,6 +76,15 @@ FILENAME ~ /lines-output/ {
 }
 
 END {
+  if (0 in bad_lines) {
+    printf("\nDetected ignored lines in lines-checked:\n\n")
+    for (i in bad_lines) {
+      printf("    %s\n", bad_lines[i])
+    }
+    printf("\n")
+    exit 2
+  }
+
   if (early_exit == 0 && checked_idx < checked_count) {
     printf("\nDetected missing line(s) in the output, beginning with:\n")
     printf("\n   %s\n", tocheck[checked_idx])

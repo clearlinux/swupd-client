@@ -15,13 +15,22 @@ FILENAME ~ /ignore-list/ {
   toignore[$0]++
 }
 
+# Checks if LINE matches any pattern in the "toignore" array. Returns the first
+# matching pattern if true, 0 if false.
+function is_ignored(line) {
+  for (pattern in toignore) {
+    if (line ~ pattern) {
+      return pattern
+    }
+  }
+  return 0
+}
+
 FILENAME ~ /lines-output/ {
   # Skip to the next line if the current line matches any patterns from the
   # global ignore list.
-  for (pattern in toignore) {
-    if ($0 ~ pattern) {
-      next
-    }
+  if (is_ignored($0)) {
+    next
   }
 
   # An output line may match a regular expression from lines-checked, which

@@ -305,6 +305,14 @@ Do not perform an update, instead download all resources needed
 to perform the update, and exit.
 .UNINDENT
 .UNINDENT
+.IP \(bu 2
+\fI\-m, \-\-migrate\fP
+.INDENT 2.0
+.INDENT 3.5
+Perform an update to the local user mix content, enabling swupd to
+use content from both upstream, and the local system.
+.UNINDENT
+.UNINDENT
 .UNINDENT
 .UNINDENT
 .UNINDENT
@@ -372,6 +380,8 @@ returns \fB0\fP if automatic updating is enabled.
 \fBswupd\-update.timer\fP(4)
 .IP \(bu 2
 \fBupdate\-triggers.target\fP(4)
+.IP \(bu 2
+\fBswupd\-add\-pkg.sh\fP(4)
 .IP \(bu 2
 \fI\%https://github.com/clearlinux/swupd\-client/\fP
 .IP \(bu 2

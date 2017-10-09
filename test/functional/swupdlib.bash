@@ -105,7 +105,9 @@ check_lines() {
 
   if [ $ret -eq 1 ]; then
     echo -e "\nChecked lines versus actual output (note that actual output may contain ignored lines):\n"
-    diff -u "$checked" "$outputfile"
+    # Omit ignored lines in the actual output to unobfuscate test error
+    # reporting.
+    diff -u "$checked" <(grep -Evf "$ignored" "$outputfile")
   elif [ $ret -eq 2 ]; then
     echo -e "\n^ Error: lines-checked contains ignored lines\n"
   fi

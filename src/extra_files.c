@@ -57,6 +57,7 @@ static struct fileskip {
 	int len;
 } skip_dirs[] =
     { { shortname : "/lib/modules" },
+      { shortname : "/lib/kernel" },
       { shortname : "/local" } };
 static int path_prefix_len;
 

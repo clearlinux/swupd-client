@@ -101,6 +101,7 @@ struct file {
 	unsigned int is_file : 1;
 	unsigned int is_link : 1;
 	unsigned int is_deleted : 1;
+	unsigned int is_ghosted : 1;
 	unsigned int is_tracked : 1;
 	unsigned int is_manifest : 1;
 

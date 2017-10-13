@@ -308,6 +308,10 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		if (c[1] == 'd') {
 			file->is_deleted = 1;
 			deleted++;
+		} else if (c[1] == 'g') {
+			file->is_deleted = 1;
+			file->is_ghosted = 1;
+			deleted++;
 		} else if (c[1] != '.') { /* unknown modifier #1 */
 			free(file);
 			goto err;

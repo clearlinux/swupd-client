@@ -125,7 +125,7 @@ int walk_tree(struct manifest *manifest, const char *start, bool fix)
 		file = iter->data;
 		iter = iter->next;
 
-		if (file->is_deleted) {
+		if (file->is_deleted && !file->is_ghosted) {
 			continue;
 		}
 		found = bsearch(&file->filename, F, nF, sizeof(*F), &bsearch_helper);

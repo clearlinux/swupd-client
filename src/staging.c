@@ -243,7 +243,9 @@ int rename_staged_file_to_final(struct file *file)
 		return -1;
 	}
 
-	if (file->is_deleted) {
+	/* Delete files if they are not ghosted and will be garbage collected by
+	 * another process */
+	if (file->is_deleted && !file->is_ghosted) {
 		ret = swupd_rm(target);
 
 		/* don't count missing ones as errors...
@@ -251,7 +253,7 @@ int rename_staged_file_to_final(struct file *file)
 		if ((ret == -ENOENT) || (ret == -ENOTDIR)) {
 			ret = 0;
 		}
-	} else if (file->is_dir) {
+	} else if (file->is_dir || file->is_ghosted) {
 		ret = 0;
 	} else {
 		struct stat stat;

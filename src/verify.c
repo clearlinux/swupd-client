@@ -563,8 +563,9 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 		file = iter->data;
 		iter = iter->next;
 
-		if ((!file->is_deleted) ||
-		    (file->is_config)) {
+		/* Do not remove files that have not been deleted, are config files, or
+		 * are marked as ghosted */
+		if (!file->is_deleted || file->is_config || file->is_ghosted) {
 			continue;
 		}
 

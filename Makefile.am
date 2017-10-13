@@ -185,7 +185,9 @@ BATS = \
 	test/functional/update/include-old-bundle-with-tracked-file/test.bats \
 	test/functional/update/missing-os-core/test.bats \
 	test/functional/update/newest-deleted/test.bats \
+	test/functional/update/newest-ghosted/test.bats \
 	test/functional/update/rename/test.bats \
+	test/functional/update/rename-ghosted/test.bats \
 	test/functional/update/skip-verified-fullfiles/test.bats \
 	test/functional/update/status/test.bats \
 	test/functional/update/status-no-server-content/test.bats \
@@ -215,7 +217,10 @@ BATS = \
 	test/functional/verify/format-mismatch-override/test.bats \
 	test/functional/verify/install-directory/test.bats \
 	test/functional/verify/install-latest-directory/test.bats \
-	test/functional/verify/latest-missing/test.bats
+	test/functional/verify/latest-missing/test.bats \
+	test/functional/verify/ghosted/test.bats \
+	test/functional/verify/picky-ghosted/test.bats \
+	test/functional/verify/picky-ghosted-missing/test.bats
 
 dist_check_SCRIPTS = $(BATS)
 # Must be run before all other tests

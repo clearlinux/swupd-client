@@ -178,8 +178,6 @@ extern void read_versions(int *current_version, int *server_version, char *path_
 extern int check_versions(int *current_version, int *server_version, char *path_prefix);
 extern int get_current_version(char *path_prefix);
 
-extern bool check_network(void);
-
 extern bool ignore(struct file *file);
 extern void apply_heuristics(struct file *file);
 

@@ -158,6 +158,7 @@ extern char *version_url;
 extern char *content_url;
 extern char *cert_path;
 extern long update_server_port;
+extern char *default_format_path;
 extern bool set_path_prefix(char *path);
 extern int set_content_url(char *url);
 extern int set_version_url(char *url);
@@ -333,6 +334,7 @@ extern bool string_in_list(char *string_to_check, struct list *list_to_check);
 extern void print_progress(unsigned int count, unsigned int max);
 extern bool is_compatible_format(int format_num);
 extern bool is_current_version(int version);
+extern bool on_new_format(void);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);

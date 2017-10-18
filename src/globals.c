@@ -69,12 +69,12 @@ char *version_url = NULL;
 char *content_url = NULL;
 char *cert_path = NULL;
 long update_server_port = -1;
+char *default_format_path = "/usr/share/defaults/swupd/format";
 
 char *swupd_cmd = NULL;
 
 static const char *default_version_url_path = "/usr/share/defaults/swupd/versionurl";
 static const char *default_content_url_path = "/usr/share/defaults/swupd/contenturl";
-static const char *default_format_path = "/usr/share/defaults/swupd/format";
 
 timelist init_timelist(void)
 {

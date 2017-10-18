@@ -476,7 +476,7 @@ download_packs:
 	grabtime_start(&times, "Run Scripts");
 
 	/* Determine if another update is needed so the scripts block */
-	if (string_in_list("update", post_update_actions) && (ret == 0)) {
+	if (on_new_format()) {
 		re_update = true;
 	}
 

@@ -974,3 +974,25 @@ bool is_current_version(int version)
 
 	return (version == get_current_version(path_prefix));
 }
+
+/* Check if the format at default_format_path has changed from the beginning
+ * of the update */
+bool on_new_format(void)
+{
+	int res = -1;
+	char *ret_str;
+
+	res = get_value_from_path(&ret_str, default_format_path, false);
+	if (res != 0) {
+		// could not detect current format
+		return false;
+	}
+
+	res = strtoull(ret_str, NULL, 10);
+	free(ret_str);
+	/* is_compatible_format returns true if the argument matches the
+	 * format_string, which was read at the beginning of the update. Return the
+	 * opposite of is_compatible_format to indicate when the new format is
+	 * different from the one we started on. */
+	return !is_compatible_format(res);
+}

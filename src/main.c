@@ -54,6 +54,7 @@ static const struct option prog_opts[] = {
 	{ "no-scripts", no_argument, 0, 'N' },
 	{ "no-boot-update", no_argument, 0, 'b' },
 	{ "migrate", no_argument, 0, 'b' },
+	{ "allow-mix-collisions", no_argument, 0, 'a' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -91,12 +92,15 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxnIdtNbmu:P:c:v:sF:p:S:C:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxnIdtNbmau:P:c:v:sF:p:S:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
 			print_help(argv[0]);
 			exit(EXIT_SUCCESS);
+		case 'a':
+			allow_mix_collisions = true;
+			break;
 		case 'd':
 			download_only = true;
 			break;

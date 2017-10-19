@@ -1546,5 +1546,5 @@ int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize,
 			ret++;
 		}
 	}
-	return ret; // No collisions were found, so manifest is purely additive
+	return ret; // If collisions were found, so manifest is purely additive
 }

@@ -7,8 +7,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <sys/queue.h>
 #include <string.h>
+#include <sys/queue.h>
 
 #include "list.h"
 #include "swupd-error.h"
@@ -80,6 +80,7 @@ struct version_container {
 
 struct header;
 
+extern bool allow_mix_collisions;
 extern bool verbose_time;
 extern bool force;
 extern bool migrate;

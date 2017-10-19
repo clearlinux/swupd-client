@@ -368,6 +368,10 @@ version_check:
 			ret = check_manifests_uniqueness(server_version, mix_server_version);
 			if (ret) {
 				printf("\n\t!! %i collisions were found between mix and upstream, please re-create mix !!\n", ret);
+				if (!allow_mix_collisions) {
+					ret = EXIT_FAILURE;
+					goto clean_curl;
+				}
 			}
 
 			/* Update the clearversion that will be used to generate the new mix content */

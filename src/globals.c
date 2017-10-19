@@ -30,7 +30,7 @@
 
 #include "config.h"
 #include "swupd.h"
-
+bool allow_mix_collisions = false;
 bool force = false;
 bool migrate = false;
 bool sigcheck = true;

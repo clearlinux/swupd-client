@@ -71,12 +71,7 @@ char *version_url = NULL;
 char *content_url = NULL;
 char *cert_path = NULL;
 long update_server_port = -1;
-char *default_format_path = "/usr/share/defaults/swupd/format";
-
 char *swupd_cmd = NULL;
-
-static const char *default_version_url_path = "/usr/share/defaults/swupd/versionurl";
-static const char *default_content_url_path = "/usr/share/defaults/swupd/contenturl";
 
 timelist init_timelist(void)
 {
@@ -181,7 +176,6 @@ bool check_mix_exists(void)
 	DIR *dir;
 	struct dirent *entry;
 	char *fullpath;
-	int i;
 
 	string_or_die(&fullpath, "%s%s", path_prefix, MIX_DIR);
 
@@ -191,7 +185,7 @@ bool check_mix_exists(void)
 	if (dir == NULL) {
 		return false;
 	}
-	for (; entry = readdir(dir);) {
+	for (; (entry = readdir(dir));) {
 		if (!entry) {
 			break;
 		}
@@ -209,7 +203,7 @@ bool check_mix_exists(void)
 /* Once system is on mix this file should exist */
 bool system_on_mix(void)
 {
-	bool ret = (access("/usr/share/defaults/swupd/mixed", R_OK) == 0);
+	bool ret = (access(MIXED_FILE, R_OK) == 0);
 	return ret;
 }
 
@@ -321,7 +315,7 @@ int set_content_url(char *url)
 		return 0;
 	}
 
-	return set_url(&content_url, url, default_content_url_path);
+	return set_url(&content_url, url, DEFAULT_CONTENT_URL_PATH);
 }
 
 /* Initializes the version_url global variable. If the url parameter is not
@@ -335,7 +329,7 @@ int set_version_url(char *url)
 		return 0;
 	}
 
-	return set_url(&version_url, url, default_version_url_path);
+	return set_url(&version_url, url, DEFAULT_VERSION_URL_PATH);
 }
 
 static bool is_valid_integer_format(char *str)
@@ -412,7 +406,7 @@ bool set_format_string(char *userinput)
 		string_or_die(&format_string, "%s", userinput);
 	} else {
 		/* no option passed; use the default value */
-		ret = set_default_value_from_path(&format_string, default_format_path);
+		ret = set_default_value_from_path(&format_string, DEFAULT_FORMAT_PATH);
 		if (ret < 0) {
 			return false;
 		}

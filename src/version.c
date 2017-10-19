@@ -201,7 +201,7 @@ int read_mix_version_file(char *filename, char *path_prefix)
 	return v;
 }
 
-int check_mix_versions(int *current_version, int *server_version, char *path_prefix)
+void check_mix_versions(int *current_version, int *server_version, char *path_prefix)
 {
 	*current_version = read_mix_version_file("/usr/share/clear/version", path_prefix);
 	*server_version = read_mix_version_file(MIX_STATE_DIR "version/format1/latest", path_prefix);

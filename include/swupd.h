@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/queue.h>
+#include <string.h>
 
 #include "list.h"
 #include "swupd-error.h"
@@ -33,10 +34,18 @@ extern "C" {
 #define MAX_TRIES 3
 
 #define SWUPD_HASH_DIRNAME "DIRECTORY"
+#define SWUPD_DEFAULTS "/usr/share/defaults/swupd/"
 #define MIX_DIR "/usr/share/mix/"
 #define MIX_STATE_DIR MIX_DIR "update/www/"
 #define MIX_CERT MIX_DIR "Swupd_Root.pem"
 #define MIX_BUNDLES_DIR MIX_STATE_DIR "mix-bundles/"
+#define MIXED_FILE SWUPD_DEFAULTS "mixed"
+
+#define DEFAULT_VERSION_URL_PATH "/usr/share/defaults/swupd/versionurl"
+#define DEFAULT_CONTENT_URL_PATH "/usr/share/defaults/swupd/contenturl"
+#define DEFAULT_FORMAT_PATH "/usr/share/defaults/swupd/format"
+
+#define DEFAULT_CONTENTURL "https://cdn.download.clearlinux.org/update/"
 
 struct sub {
 	/* name of bundle/component/subscription */
@@ -387,13 +396,12 @@ typedef enum telem_prio_t {
 extern void telemetry(telem_prio_t level, const char *class, const char *fmt, ...);
 
 extern struct file **manifest_files_to_array(struct manifest *manifest);
-extern void print_manifest_array(struct file **array, int filecount);
 extern int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize, int size);
 extern void free_manifest_array(struct file **array);
 
 extern bool system_on_mix(void);
 extern bool check_mix_exists(void);
-extern int check_mix_versions(int *current_version, int *server_version, char *path_prefix);
+extern void check_mix_versions(int *current_version, int *server_version, char *path_prefix);
 extern int read_mix_version_file(char *filename, char *path_prefix);
 
 /* some disk sizes constants for the various features:

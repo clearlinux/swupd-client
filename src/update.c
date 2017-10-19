@@ -357,8 +357,8 @@ version_check:
 	}
 
 	if (mix_exists) {
-		ret = check_mix_versions(&mix_current_version, &mix_server_version, path_prefix);
-		if (ret < 0) {
+		check_mix_versions(&mix_current_version, &mix_server_version, path_prefix);
+		if (mix_current_version == -1 || mix_server_version == -1) {
 			ret = EXIT_FAILURE;
 			goto clean_curl;
 		}
@@ -588,7 +588,7 @@ download_packs:
 
 	/* Create the state file that will tell swupd it's on a mix on future runs */
 	if (mix_exists && !system_on_mix()) {
-		int fd = open("/usr/share/defaults/swupd/mixed", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+		int fd = open(MIXED_FILE, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 		if (fd == -1) {
 			fprintf(stderr, "ERROR: Failed to create 'mixed' statefile\n");
 			ret = -1;

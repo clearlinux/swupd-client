@@ -1514,14 +1514,6 @@ struct file **manifest_files_to_array(struct manifest *manifest)
 	return array;
 }
 
-void print_manifest_array(struct file **array, int filecount)
-{
-	for (int i = 0; i < filecount; i++) {
-		printf("[%d]/%d %s\n", i, filecount, array[i]->filename);
-	}
-	printf("SIZE: %d\n", filecount);
-}
-
 void free_manifest_array(struct file **array)
 {
 	free(array);

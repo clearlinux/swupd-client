@@ -982,7 +982,7 @@ bool on_new_format(void)
 	int res = -1;
 	char *ret_str;
 
-	res = get_value_from_path(&ret_str, default_format_path, false);
+	res = get_value_from_path(&ret_str, DEFAULT_FORMAT_PATH, false);
 	if (res != 0) {
 		// could not detect current format
 		return false;

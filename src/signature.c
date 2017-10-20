@@ -468,7 +468,7 @@ void terminate_signature(void)
 	return;
 }
 
-bool download_and_verify_signature(const char UNUSED_PARAM *data_url, const char UNUSED_PARAM *data_filename)
+bool download_and_verify_signature(const char UNUSED_PARAM *data_url, const char UNUSED_PARAM *data_filename, int UNUSED_PARAM version, bool UNUSED_PARAM mix_exists)
 {
 	return true;
 }

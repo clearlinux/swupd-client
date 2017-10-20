@@ -170,7 +170,7 @@ int swupd_curl_check_network(void)
 		case CURLE_SSL_CACERT:
 			break;
 		default:
-			fprintf(stderr, "ERROR: %d\n", curl_ret);
+			fprintf(stderr, "ERROR: (%d) %s\n", curl_ret, curl_easy_strerror(curl_ret));
 			/* something bad, stop */
 			goto cleanup;
 		}

@@ -57,6 +57,12 @@ static char *capath;
 static char **fallback_capaths;
 static char fallback_capaths_no;
 
+/* Pretty print curl return status */
+static void swupd_curl_strerror(CURLcode curl_ret)
+{
+	fprintf(stderr, "Curl error: (%d) %s\n", curl_ret, curl_easy_strerror(curl_ret));
+}
+
 int swupd_curl_init(void)
 {
 	CURLcode curl_ret;
@@ -170,7 +176,7 @@ int swupd_curl_check_network(void)
 		case CURLE_SSL_CACERT:
 			break;
 		default:
-			fprintf(stderr, "ERROR: (%d) %s\n", curl_ret, curl_easy_strerror(curl_ret));
+			swupd_curl_strerror(curl_ret);
 			/* something bad, stop */
 			goto cleanup;
 		}
@@ -456,7 +462,7 @@ exit:
 			err = -1;
 			break;
 		default:
-			fprintf(stderr, "Curl error: %s\n", curl_easy_strerror(curl_ret));
+			swupd_curl_strerror(curl_ret);
 			err = -1;
 			break;
 		}

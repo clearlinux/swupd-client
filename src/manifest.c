@@ -1230,10 +1230,10 @@ void link_renames(struct list *newfiles, struct manifest *from_manifest)
 			if (!file2->is_deleted) {
 				continue;
 			}
-			if (!file_found_in_manifest(from_manifest, file2)) {
+			if (!hash_equal(file2->hash, file1->hash)) {
 				continue;
 			}
-			if (hash_equal(file2->hash, file1->hash)) {
+			if (file_found_in_manifest(from_manifest, file2)) {
 				file1->deltapeer = file2->peer;
 				file1->peer = file2->peer;
 				file2->peer->deltapeer = file1;

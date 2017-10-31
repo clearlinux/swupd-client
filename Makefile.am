@@ -28,6 +28,7 @@ check_PROGRAMS = \
 	swupd_sig_verifytest
 
 SWUPD_COMMON_SOURCES = \
+	src/archives.c \
 	src/curl.c \
 	src/delta.c \
 	src/download.c \
@@ -82,9 +83,9 @@ swupd_locktest_SOURCES = test/locktest.c
 swupd_sig_verifytest_SOURCES = test/signature_verify_test.c
 
 
-AM_CPPFLAGS = $(AM_CFLAGS) -I$(top_srcdir)/include
+AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS) -I$(top_srcdir)/include
 SWUPD_COMPRESSION_LIBS = $(lzma_LIBS) $(zlib_LIBS) $(bzip2_LIBS)
-SWUPD_CORE_LIBS = libswupd.la ${curl_LIBS} $(openssl_LIBS) $(SWUPD_COMPRESSION_LIBS) $(bsdiff_LIBS)
+SWUPD_CORE_LIBS = libswupd.la ${curl_LIBS} $(openssl_LIBS) $(libarchive_LIBS) $(SWUPD_COMPRESSION_LIBS) $(bsdiff_LIBS)
 
 swupd_LDADD = $(SWUPD_CORE_LIBS) $(pthread_LIBS)
 

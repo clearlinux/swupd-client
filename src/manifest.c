@@ -529,7 +529,6 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	char *dir;
 	char *basedir;
 	int ret = 0;
-	char *tar;
 	struct stat sb;
 
 	if (!is_mix) {
@@ -556,7 +555,6 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	if ((ret != 0) && (errno != EEXIST)) {
 		goto out;
 	}
-	free(dir);
 
 	/* FILE is not set for a MoM, only for bundle manifests */
 	if (file && current < version && strcmp(component, "full") != 0) {
@@ -593,15 +591,8 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	}
 
 untar:
-	string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",
-		      state_dir, version, state_dir, version, component);
-
-	/* this is is historically a point of odd errors */
-	ret = system(tar);
-	if (WIFEXITED(ret)) {
-		ret = WEXITSTATUS(ret);
-	}
-	free(tar);
+	ret = extract_to(filename, dir);
+	free(dir);
 	if (ret != 0) {
 		goto out;
 	} else {

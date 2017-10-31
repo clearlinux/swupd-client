@@ -56,6 +56,10 @@ static struct fileskip {
 static int path_prefix_len;
 
 /* Helper function to call from nftw */
+static inline int bsearch_helper(const void *A, const void *B)
+{
+	return strcmp(*(const char **)A, ((struct filerecord *)B)->filename);
+}
 
 static int record_filename(const char *name, const struct stat *stat __attribute__((unused)), int type, struct FTW *ftw __attribute__((unused)))
 {

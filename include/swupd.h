@@ -225,11 +225,6 @@ extern int get_value_from_path(char **contents, const char *path, bool is_abs_pa
 extern int get_version_from_path(const char *abs_path);
 extern timelist init_timelist(void);
 
-static inline int bsearch_helper(const void *A, const void *B)
-{
-	return strcmp(*(const char **)A, ((struct filerecord *)B)->filename);
-}
-
 static inline int bsearch_file_helper(const void *A, const void *B)
 {
 	struct file *key = (struct file *)A;

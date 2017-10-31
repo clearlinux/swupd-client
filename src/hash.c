@@ -321,7 +321,7 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			}
 			free(filename);
 
-			string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar 2> /dev/null",
+			string_or_die(&tar, TAR_COMMAND " -C %s/%i -xf %s/%i/Manifest.%s.tar",
 				      state_dir, current->last_change, state_dir,
 				      current->last_change, current->filename);
 

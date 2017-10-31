@@ -198,7 +198,7 @@ static int check_tarfile_content(struct file *file, const char *tarfilename)
 	FILE *tar;
 	int count = 0;
 
-	string_or_die(&tarcommand, TAR_COMMAND " -tf %s/download/%s.tar 2> /dev/null", state_dir, file->hash);
+	string_or_die(&tarcommand, TAR_COMMAND " -tf %s/download/%s.tar", state_dir, file->hash);
 
 	err = access(tarfilename, R_OK);
 	if (err) {
@@ -293,7 +293,7 @@ int untar_full_download(void *data)
 	}
 
 	/* modern tar will automatically determine the compression type used */
-	string_or_die(&tarcommand, TAR_COMMAND " -C %s/staged/ " TAR_PERM_ATTR_ARGS " -xf %s 2> /dev/null",
+	string_or_die(&tarcommand, TAR_COMMAND " -C %s/staged/ " TAR_PERM_ATTR_ARGS " -xf %s",
 		      state_dir, tarfile);
 
 	err = system(tarcommand);

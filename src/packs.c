@@ -38,7 +38,6 @@
 static int download_pack(int oldversion, int newversion, char *module, int is_mix)
 {
 	FILE *tarfile = NULL;
-	char *tar = NULL;
 	char *url = NULL;
 	int err = -1;
 	char *filename;
@@ -77,14 +76,8 @@ static int download_pack(int oldversion, int newversion, char *module, int is_mi
 	}
 
 	fprintf(stderr, "\nExtracting %s pack for version %i\n", module, newversion);
-	string_or_die(&tar, TAR_COMMAND " -C %s " TAR_PERM_ATTR_ARGS " -xf %s/pack-%s-from-%i-to-%i.tar 2> /dev/null",
-		      state_dir, state_dir, module, oldversion, newversion);
+	err = extract_to(filename, state_dir);
 
-	err = system(tar);
-	if (WIFEXITED(err)) {
-		err = WEXITSTATUS(err);
-	}
-	free(tar);
 	unlink(filename);
 	/* make a zero sized file to prevent redownload */
 	tarfile = fopen(filename, "w");

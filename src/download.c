@@ -259,7 +259,6 @@ int untar_full_download(void *data)
 	char *targetfile;
 	struct stat stat;
 	int err;
-	char *tarcommand;
 
 	string_or_die(&tar_dotfile, "%s/download/.%s.tar", state_dir, file->hash);
 	string_or_die(&tarfile, "%s/download/%s.tar", state_dir, file->hash);
@@ -298,26 +297,18 @@ int untar_full_download(void *data)
 	}
 
 	/* modern tar will automatically determine the compression type used */
-	string_or_die(&tarcommand, TAR_COMMAND " -C %s/staged/ " TAR_PERM_ATTR_ARGS " -xf %s 2> /dev/null",
-		      state_dir, tarfile);
-
-	err = system(tarcommand);
-	if (WIFEXITED(err)) {
-		err = WEXITSTATUS(err);
-	}
-	free(tarcommand);
+	char *outputdir;
+	string_or_die(&outputdir, "%s/staged", state_dir);
+	err = extract_to(tarfile, outputdir);
+	free(outputdir);
 	if (err) {
 		fprintf(stderr, "ignoring tar extract failure for fullfile %s.tar (ret %d)\n",
 			file->hash, err);
 		goto exit;
-		/* FIXME: can we respond meaningfully to tar error codes?
-		 * symlink untars may have perm/xattr complaints and non-zero
-		 * tar return, but symlink (probably?) untarred ok.
-		 *
-		 * Also getting complaints on some new regular files?
-		 *
-		 * Either way we verify the hash later, so on error there,
-		 * something could try to recover? */
+		/* TODO: respond to ARCHIVE_RETRY error codes
+		 * libarchive returns ARCHIVE_RETRY when tar extraction fails but the
+		 * operation is retry-able. We need to determine if it is worth our time
+		 * to retry in these situations. */
 	} else {
 		/* Only unlink when tar succeeded, so we can examine the tar file
 		 * in the failure case. */

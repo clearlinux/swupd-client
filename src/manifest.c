@@ -574,6 +574,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		if (ret) {
 			ret = rename(url, filename);
 		}
+		/* If rename fails, we try again below with curl to the contenurl */
 		if (ret == 0) {
 			goto untar;
 		}
@@ -1496,7 +1497,6 @@ struct file **manifest_files_to_array(struct manifest *manifest)
 	int numfiles;
 
 	if (!manifest) {
-		fprintf(stderr, "Manifest is NULL!\n");
 		return NULL;
 	}
 

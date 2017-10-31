@@ -20,6 +20,9 @@ install:
         - pushd curl-7.51.0 && ./configure --prefix=/usr && make -j48 && sudo make install && popd
         - wget https://download.clearlinux.org/releases/13010/clear/Swupd_Root.pem
         - sudo install -D -m0644 Swupd_Root.pem /usr/share/clear/update-ca/Swupd_Root.pem
+        - wget https://github.com/libarchive/libarchive/archive/v3.3.1.tar.gz
+        - tar -xvf v3.3.1.tar.gz
+        - pushd libarchive-3.3.1 && autoreconf -fi && ./configure --prefix=/usr && make && sudo make install && popd
         - sudo apt-get install python3-docutils
         - sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
 

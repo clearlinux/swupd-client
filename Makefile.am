@@ -1,11 +1,11 @@
 SUFFIXES= .rst
 
-EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash
+EXTRA_DIST = COPYING scripts/findstatic.pl
 
 AM_CFLAGS = -fPIC -Iinclude/ -O2 -g -Wall -W -Wformat-security -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99
 ACLOCAL_AMFLAGS = -I m4
 
-bin_PROGRAMS = swupd
+bin_PROGRAMS = swupd swupd.bash
 
 swupd_SOURCES = \
 	src/swupd.c \
@@ -167,6 +167,7 @@ BATS = \
 	test/functional/checkupdate/no-target-content/test.bats \
 	test/functional/checkupdate/slow-server/test.bats \
 	test/functional/checkupdate/version-match/test.bats \
+	test/functional/completion/basic/test.bats \
 	test/functional/hashdump/file-hash/test.bats \
 	test/functional/hashdump/file-hash-no-path-prefix/test.bats \
 	test/functional/search/content-check-negfull-path/test.bats \

@@ -63,7 +63,7 @@ do
 	#For the rest do nothing
 	("") : ;;
     esac
-done < <($SWUPDCOMMAND --help)
+done < <($SWUPDCOMMAND --help 2>&1)
 
 # Construct sed script
 #Convert all tabs to spaces
@@ -120,7 +120,7 @@ EOM
   printf '\t    break;;\n'
   for i in "${subcommandsfromhelp[@]}"; do
       printf '\t    ("%s")\n' "$i"
-      C="$($SWUPDCOMMAND $i --help | sed -e "$SEDSCRIPT" | tr '\n' ' ')"
+      C="$($SWUPDCOMMAND $i --help 2>&1 | sed -e "$SEDSCRIPT" | tr '\n' ' ')"
       printf '\t\topts="%s"\n' "$C"
       printf '\t\tbreak;;\n'
   done

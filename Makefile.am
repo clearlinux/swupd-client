@@ -146,6 +146,7 @@ BATS = \
 	test/functional/bundleadd/boot-skip/test.bats \
 	test/functional/bundleadd/include/test.bats \
 	test/functional/bundleadd/fix-missing-file/test.bats \
+	test/functional/bundleadd/skip-scripts/test.bats \
 	test/functional/bundleadd/verify-fix-path/test.bats \
 	test/functional/bundlelist/all/test.bats \
 	test/functional/bundlelist/deps-flat/test.bats \
@@ -189,6 +190,7 @@ BATS = \
 	test/functional/update/newest-ghosted/test.bats \
 	test/functional/update/rename/test.bats \
 	test/functional/update/rename-ghosted/test.bats \
+	test/functional/update/skip-scripts/test.bats \
 	test/functional/update/skip-verified-fullfiles/test.bats \
 	test/functional/update/status/test.bats \
 	test/functional/update/status-no-server-content/test.bats \
@@ -216,12 +218,13 @@ BATS = \
 	test/functional/verify/fix-version-mismatch-override/test.bats \
 	test/functional/verify/format-mismatch/test.bats \
 	test/functional/verify/format-mismatch-override/test.bats \
+	test/functional/verify/ghosted/test.bats \
 	test/functional/verify/install-directory/test.bats \
 	test/functional/verify/install-latest-directory/test.bats \
 	test/functional/verify/latest-missing/test.bats \
-	test/functional/verify/ghosted/test.bats \
 	test/functional/verify/picky-ghosted/test.bats \
-	test/functional/verify/picky-ghosted-missing/test.bats
+	test/functional/verify/picky-ghosted-missing/test.bats \
+	test/functional/verify/skip-scripts/test.bats
 
 dist_check_SCRIPTS = $(BATS)
 # Must be run before all other tests

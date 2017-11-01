@@ -84,6 +84,12 @@ static void update_triggers(bool block)
 
 void run_scripts(bool block)
 {
+	if (no_scripts) {
+		fprintf(stderr, "WARNING: post-update helper scripts skipped due to "
+				"--no-scripts argument\n");
+		return;
+	}
+
 	fprintf(stderr, "Calling post-update helper scripts.\n");
 
 	/* path_prefix aware helper */

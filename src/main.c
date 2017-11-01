@@ -51,6 +51,7 @@ static const struct option prog_opts[] = {
 	{ "statedir", required_argument, 0, 'S' },
 	{ "certpath", required_argument, 0, 'C' },
 	{ "time", no_argument, 0, 't' },
+	{ "no-scripts", no_argument, 0, 'N' },
 	{ "no-boot-update", no_argument, 0, 'b' },
 	{ 0, 0, 0, 0 }
 };
@@ -79,6 +80,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
 	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
 	fprintf(stderr, "   -t, --time              Show verbose time output for swupd operations\n");
+	fprintf(stderr, "   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
 	fprintf(stderr, "   -b, --no-boot-update    Do not update the boot files using clr-boot-manager\n");
 	fprintf(stderr, "\n");
 }
@@ -87,7 +89,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxnIdtbu:P:c:v:sF:p:S:C:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxnIdtNbu:P:c:v:sF:p:S:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -106,6 +108,9 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 't':
 			verbose_time = true;
+			break;
+		case 'N':
+			no_scripts = true;
 			break;
 		case 'b':
 			no_boot_update = true;

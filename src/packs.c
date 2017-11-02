@@ -55,12 +55,12 @@ static int download_pack(int oldversion, int newversion, char *module, int is_mi
 	if (is_mix) {
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", MIX_STATE_DIR, newversion, module, oldversion);
 		err = link(url, filename);
-		printf("Linked %s to %s\n", url, filename);
 		if (err) {
 			free(filename);
 			free(url);
 			return err;
 		}
+		printf("Linked %s to %s\n", url, filename);
 		free(url);
 	} else {
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, newversion, module, oldversion);

@@ -33,6 +33,12 @@ FORMAT="$(awk -F '=' '/FORMAT/ {print $2}' $BUILDCONF  | tr -d ' ')"
 pkg=$1
 bundle=$2
 
+type "mixer"
+if [ $? -ne 0 ]; then
+	echo -e "Please install the mixer bundle before proceeding:\n  swupd bundle-add mixer"
+	exit 1
+fi
+
 # Make sure all the directories exist
 sudo mkdir -p $MIX_DIR $BUNDLE_DIR $REPO_DIR $BUILD_STATE_DIR
 if [ ! -f "$MIX_DIR/.clearversion" ]; then
@@ -55,7 +61,12 @@ if [[ -n "$pkg" && -n "$bundle" ]]; then
 fi
 
 # Copy os-core from upstream
-sudo -E curl -O "https://raw.githubusercontent.com/clearlinux/clr-bundles/$clearver/bundles/os-core"
+sudo -E curl -f -O "https://raw.githubusercontent.com/clearlinux/clr-bundles/$clearver/bundles/os-core"
+if [ $? -eq 22 ]; then
+	echo "ERROR: Could not download os-core bundle ver $clearver"
+	sudo rm -rf "os-core"
+	exit 1
+fi
 sudo mv os-core "$BUNDLE_DIR"
 
 # Copy the rpms into the local database location
@@ -66,8 +77,18 @@ sudo mixer build-all -config "$BUILDCONF"
 
 # Download and verify the upstream Clear MoM
 echo "* Downloading $clearver Manifest.MoM..."
-sudo -E curl -O "https://download.clearlinux.org/update/$clearver/Manifest.MoM"
-sudo -E curl -O "https://download.clearlinux.org/update/$clearver/Manifest.MoM.sig"
+sudo -E curl -f -O "https://download.clearlinux.org/update/$clearver/Manifest.MoM"
+if [ $? -eq 22 ]; then
+	echo "ERROR: Could not download Manifest.MoM ver $clearver"
+	sudo rm -rf "Manifest.MoM"
+	exit 1
+fi
+sudo -E curl -f -O "https://download.clearlinux.org/update/$clearver/Manifest.MoM.sig"
+if [ $? -eq 22 ]; then
+	echo "ERROR: Could not download Manifest.MoM.sig ver $clearver"
+	sudo rm -rf "Manifest.MoM.sig"
+	exit 1
+fi
 CERT="/usr/share/ca-certs/Swupd_Root.pem"
 
 sudo openssl smime -verify -in Manifest.MoM.sig -inform der -content Manifest.MoM -CAfile "$CERT"  > /dev/null 2>&1

@@ -99,10 +99,15 @@ static int swupd_curl_hashmap_insert(struct file *file)
 	string_or_die(&targetfile, "%s/staged/%s", state_dir, file->hash);
 
 	if (lstat(targetfile, &stat) == 0) {
+		/* file exists */
 		if (verify_file(file, targetfile)) {
+			/* hash matches, no download necessary */
 			free(targetfile);
 			pthread_mutex_unlock(&bucket->mutex);
 			return 1;
+		} else {
+			/* hash mismatch, remove the staged file to enable re-download */
+			unlink(targetfile);
 		}
 	}
 	free(targetfile);

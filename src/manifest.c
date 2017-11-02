@@ -1524,6 +1524,16 @@ static int cmpnames(const void *a, const void *b)
 	return strcmp((*(struct file **)a)->filename, (*(struct file **)b)->filename);
 }
 
+static int is_version_data(const char *filename)
+{
+	if (strcmp(filename, "/usr/lib/os-release") == 0 ||
+	    strcmp(filename, "/usr/share/clear/version") == 0 ||
+	    strcmp(filename, "/usr/share/clear/versionstamp") == 0) {
+		return 1;
+	}
+	return 0;
+}
+
 int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize, int size)
 {
 	struct file **found;
@@ -1534,9 +1544,7 @@ int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize,
 	for (int i = 0; i < searchsize; i++) {
 		found = bsearch(a[i], b, size, sizeof(struct file *), bsearch_file_helper);
 		if (found) {
-			if (strcmp(a[i]->filename, "/usr/lib/os-release") == 0 ||
-			    strcmp(a[i]->filename, "/usr/share/clear/version") == 0 ||
-			    strcmp(a[i]->filename, "/usr/share/clear/versionstamp") == 0) {
+			if (is_version_data(a[i]->filename)) {
 				continue;
 			}
 			if (hash_equal(a[i]->hash, (*found)->hash)) {

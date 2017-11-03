@@ -731,7 +731,6 @@ int verify_main(int argc, char **argv)
 
 	grabtime_start(&times, "Load and recurse Manifests");
 
-
 	/* If upstream URL is passed, user is likely trying to get back to the official stream,
 	 * so ignore any custom mixer related state */
 	if (strncmp(content_url, DEFAULT_CONTENTURL, strlen(DEFAULT_CONTENTURL)) == 0) {

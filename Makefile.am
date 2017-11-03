@@ -1,11 +1,11 @@
 SUFFIXES= .rst
 
-EXTRA_DIST = COPYING scripts/findstatic.pl
+EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash
 
 AM_CFLAGS = -fPIC -Iinclude/ -O2 -g -Wall -W -Wformat-security -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99
 ACLOCAL_AMFLAGS = -I m4
 
-bin_PROGRAMS = swupd swupd.bash
+bin_PROGRAMS = swupd
 
 swupd_SOURCES = \
 	src/swupd.c \
@@ -299,6 +299,8 @@ man: $(dist_man_MANS)
 .rst:
 	mkdir -p "$$(dirname $@)"
 	rst2man.py "$<" > "$@.tmp" && mv -f "$@.tmp" "$@"
+
+test/functional/completion/basic/test.bats: swupd.bash
 
 swupd.bash: $(top_srcdir)/scripts/swupd-completion.sh $(top_srcdir)/swupd
 	bash $<

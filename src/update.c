@@ -383,8 +383,8 @@ version_check:
 				fclose(verfile);
 			}
 
-			if (system("/usr/bin/add-pkg.sh regenerate") != 0) {
-				fprintf(stderr, "ERROR: Could not execute add-pkg.sh\n");
+			if (system("/usr/bin/swupd-add-pkg regenerate") != 0) {
+				fprintf(stderr, "ERROR: Could not execute swupd-add-pkg\n");
 				ret = EXIT_FAILURE;
 				goto clean_curl;
 			}

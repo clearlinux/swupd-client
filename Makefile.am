@@ -98,6 +98,8 @@ swupd_sig_verifytest_LDADD = $(SWUPD_CORE_LIBS)
 verifytime_SOURCES = src/verifytime.c
 bin_PROGRAMS += verifytime
 
+dist_bin_SCRIPTS = swupd-add-pkg
+
 noinst_HEADERS = $(top_srcdir)/include/*
 
 EXTRA_DIST += \

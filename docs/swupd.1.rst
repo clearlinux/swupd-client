@@ -228,10 +228,15 @@ SUBCOMMANDS
         Do not perform an update, instead download all resources needed
         to perform the update, and exit.
 
-    - `-m, --migrate`
+    - `-T, --migrate`
 
         Perform an update to the local user mix content, enabling swupd to
         use content from both upstream, and the local system.
+
+    - `-a, --allow-mix-collisions`
+
+        Ignore and continue if custom user content conflicts with upstream
+        provided content.
 
 ``verify``
 
@@ -282,7 +287,7 @@ SEE ALSO
 * ``swupd-update.service``\(4)
 * ``swupd-update.timer``\(4)
 * ``update-triggers.target``\(4)
-* ``swupd-add-pkg.sh``\(4)
+* ``swupd-add-pkg``\(4)
 * https://github.com/clearlinux/swupd-client/
 * https://clearlinux.org/documentation/
 

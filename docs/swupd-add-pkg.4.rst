@@ -1,5 +1,5 @@
 =================
-swupd-add-pkg.sh
+swupd-add-pkg
 =================
 
 ------------------------------------
@@ -13,9 +13,9 @@ Adds custom package for swupd to use
 SYNOPSIS
 ========
 
-``swupd-add-pkg.sh``
+``swupd-add-pkg``
 
-``/usr/bin/swupd-add-pkg.sh``
+``/usr/bin/swupd-add-pkg``
 
 
 DESCRIPTION

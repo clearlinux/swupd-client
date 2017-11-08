@@ -252,6 +252,19 @@ AS_IF(
 )
 AC_SUBST(SYSTEMD_UNITDIR, [${unitpath}])
 
+AC_ARG_WITH(
+  [pre-update],
+  [AS_HELP_STRING([--with-pre-update=EXE], [Path to the pre-update executable])],
+  [AC_DEFINE_UNQUOTED([PRE_UPDATE], ["$withval"], [pre-update])],
+  [AC_DEFINE([PRE_UPDATE], [""], [pre-update])],
+)
+
+AC_ARG_WITH(
+  [post-update],
+  [AS_HELP_STRING([--with-post-update=EXE], [Path to the post-update executable])],
+  [AC_DEFINE_UNQUOTED([POST_UPDATE], ["$withval"], [post-update])],
+  [AC_DEFINE([POST_UPDATE], [""], [post-update])],
+)
 
 # Build variants
 # default to Linux rootfs build

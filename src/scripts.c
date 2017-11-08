@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "config.h"
 #include "swupd.h"
 
 static void update_boot(void)
@@ -49,37 +50,55 @@ static void update_boot(void)
 
 static void update_triggers(bool block)
 {
-	char *restart_cmd = NULL;
-	char *block_flag = NULL;
+	char *cmd = NULL;
+	char const *block_flag = NULL;
+	char const *reexec_flag = NULL;
 	__attribute__((unused)) int ret = 0;
 
-	/* Check that systemd is working (container case)
-	 * and return if it is not after printing an error */
-	ret = system("/usr/bin/systemctl > /dev/null 2>&1");
-	if (ret != 0) {
-		fprintf(stderr, "WARNING: systemctl not operable, "
+        if (!block) {
+                block_flag = "--no-block";
+        } else {
+                block_flag = "";
+        }
+
+	if (strlen(POST_UPDATE) == 0) {
+		/* fall back to systemd if path prefix is not the rootfs
+		 * and the POST_UPDATE trigger wasn't specified */
+		if (strcmp("/", path_prefix) != 0) {
+			return;
+		}
+
+		ret = system("/usr/bin/systemctl > /dev/null 2>&1");
+		if (ret != 0) {
+			fprintf(stderr, "WARNING: systemctl not operable, "
 				"unable to run systemd update triggers\n");
-		return;
-	}
+			return;
+		}
+		/* These must block so that new update triggers are executed after */
+		if (need_systemd_reexec) {
+			ret = system("/usr/bin/systemctl daemon-reexec");
+		} else {
+			ret = system("/usr/bin/systemctl daemon-reload");
+		}
 
-	/* These must block so that new update triggers are executed after */
-	if (need_systemd_reexec) {
-		ret = system("/usr/bin/systemctl daemon-reexec");
+		string_or_die(&cmd, "/usr/bin/systemctl %s restart update-triggers.target", block_flag);
 	} else {
-		ret = system("/usr/bin/systemctl daemon-reload");
+		/* These must block so that new update triggers are executed after */
+		if (need_systemd_reexec) {
+			reexec_flag = "--reexec";
+		} else {
+			reexec_flag = "";
+		}
+
+		if (strcmp("/", path_prefix) == 0) {
+			string_or_die(&cmd, "%s %s %s", POST_UPDATE, reexec_flag, block_flag);
+		} else {
+			string_or_die(&cmd, "%s/%s %s %s %s", path_prefix, POST_UPDATE, path_prefix, reexec_flag, block_flag);
+		}
 	}
+	ret = system(cmd);
 
-	if (!block) {
-		string_or_die(&block_flag, "--no-block");
-	} else {
-		string_or_die(&block_flag, "");
-	}
-
-	string_or_die(&restart_cmd, "/usr/bin/systemctl %s restart update-triggers.target", block_flag);
-	ret = system(restart_cmd);
-
-	free(restart_cmd);
-	free(block_flag);
+	free(cmd);
 }
 
 void run_scripts(bool block)
@@ -92,7 +111,6 @@ void run_scripts(bool block)
 
 	fprintf(stderr, "Calling post-update helper scripts.\n");
 
-	/* path_prefix aware helper */
 	if (need_update_boot || need_update_bootloader) {
 		if (no_boot_update) {
 			fprintf(stderr, "WARNING: boot files update skipped due to "
@@ -102,12 +120,6 @@ void run_scripts(bool block)
 		}
 	}
 
-	/* helpers which don't run when path_prefix is set */
-	if (strcmp("/", path_prefix) != 0) {
-		return;
-	}
-
-	/* Crudely call post-update hooks after every update...FIXME */
 	update_triggers(block);
 }
 
@@ -122,7 +134,15 @@ void run_preupdate_scripts(struct manifest *manifest)
 	char *script;
 	__attribute__((unused)) int ret = 0;
 
-	string_or_die(&script, "/usr/bin/clr_pre_update.sh");
+	if (strlen(PRE_UPDATE) == 0) {
+		string_or_die(&script, "/usr/bin/clr_pre_update.sh");
+	} else {
+		if (strcmp("/", path_prefix) == 0) {
+			string_or_die(&script, PRE_UPDATE);
+		} else {
+			string_or_die(&script, "%s/%s %s", path_prefix, PRE_UPDATE, path_prefix);
+		}
+	}
 
 	if (stat(script, &sb) == -1) {
 		free(script);

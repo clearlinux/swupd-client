@@ -55,11 +55,11 @@ static void update_triggers(bool block)
 	char const *reexec_flag = NULL;
 	__attribute__((unused)) int ret = 0;
 
-        if (!block) {
-                block_flag = "--no-block";
-        } else {
-                block_flag = "";
-        }
+	if (!block) {
+		block_flag = "--no-block";
+	} else {
+		block_flag = "";
+	}
 
 	if (strlen(POST_UPDATE) == 0) {
 		/* fall back to systemd if path prefix is not the rootfs
@@ -71,7 +71,7 @@ static void update_triggers(bool block)
 		ret = system("/usr/bin/systemctl > /dev/null 2>&1");
 		if (ret != 0) {
 			fprintf(stderr, "WARNING: systemctl not operable, "
-				"unable to run systemd update triggers\n");
+					"unable to run systemd update triggers\n");
 			return;
 		}
 		/* These must block so that new update triggers are executed after */

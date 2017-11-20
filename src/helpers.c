@@ -602,12 +602,11 @@ int swupd_init(int *lock_fd)
 
 	check_root();
 
-	/* Check that our system time is reasonably valid before continuing,
-	 * or the certificate verification will fail with invalid time */
+	/* Check that our system time is reasonably valid, print a warning if not.
+	 * Certificate verification can fail with invalid time. */
 	if (timecheck) {
 		if (system("verifytime") != 0) {
-			ret = EBADTIME;
-			goto out_fds;
+			fprintf(stderr, "Warning: failed to verify system time\n");
 		}
 	}
 

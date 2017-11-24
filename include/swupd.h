@@ -4,6 +4,7 @@
 #include <curl/curl.h>
 #include <dirent.h>
 #include <limits.h>
+#include <regex.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -197,7 +198,7 @@ extern void increment_retries(int *retries, int *timeout);
 extern int main_update(void);
 extern int add_included_manifests(struct manifest *mom, int current, struct list **subs);
 extern int main_verify(int current_version);
-extern int walk_tree(struct manifest *, const char *, bool);
+extern int walk_tree(struct manifest *, const char *, bool, const regex_t *);
 
 extern int get_latest_version(void);
 extern void read_versions(int *current_version, int *server_version, char *path_prefix);

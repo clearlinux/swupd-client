@@ -363,6 +363,57 @@ Omit checking hash values. Instead only corrects missing files
 and directories and/or symlinks.
 .UNINDENT
 .UNINDENT
+.IP \(bu 2
+\fI\-Y, \-\-picky\fP
+.INDENT 2.0
+.INDENT 3.5
+List (without \-\-fix) or remove (with \-\-fix) files which should
+not exist. Only files listed in the manifests should exist.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-X, \-\-picky\-tree=[PATH]\fP
+.INDENT 2.0
+.INDENT 3.5
+Selects the sub\-tree where \-\-picky looks for extra files. To be
+specified as absolute path. The default is \fI/usr\fP\&.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-w, \-\-picky\-whitelist=[RE]\fP
+.INDENT 2.0
+.INDENT 3.5
+Any path matching the POSIX extended regular expression is
+ignored by \-\-picky. The given expression is always wrapped
+in \fB^(\fP and \fB)$\fP and thus has to match the entire path.
+Matched directories get skipped completely.
+.sp
+The default is to ignore \fB/usr/lib/kernel\fP,
+\fB/usr/lib/modules\fP, and \fB/usr/local\fP\&.
+.sp
+Examples:
+.INDENT 0.0
+.IP \(bu 2
+\fB/var|/etc/machine\-id\fP
+.INDENT 2.0
+.INDENT 3.5
+Ignores \fB/var\fP or \fB/etc/machine\-id\fP, regardless of
+whether they are directories or something else. In the
+usual case that \fB/var\fP is a directory, also everything
+inside it is ignored because directories get skipped
+during scanning the directory tree.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+empty string or \fB^$\fP
+.INDENT 2.0
+.INDENT 3.5
+Matches nothing, because paths are never empty.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
 .UNINDENT
 .UNINDENT
 .UNINDENT

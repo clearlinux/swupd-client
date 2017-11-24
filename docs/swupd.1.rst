@@ -266,6 +266,40 @@ SUBCOMMANDS
         Omit checking hash values. Instead only corrects missing files
         and directories and/or symlinks.
 
+    - `-Y, --picky`
+
+        List (without --fix) or remove (with --fix) files which should
+        not exist. Only files listed in the manifests should exist.
+
+    - `-X, --picky-tree=[PATH]`
+
+        Selects the sub-tree where --picky looks for extra files. To be
+        specified as absolute path. The default is `/usr`.
+
+    - `-w, --picky-whitelist=[RE]`
+
+        Any path matching the POSIX extended regular expression is
+        ignored by --picky. The given expression is always wrapped
+        in ``^(`` and ``)$`` and thus has to match the entire path.
+        Matched directories get skipped completely.
+
+        The default is to ignore ``/usr/lib/kernel``,
+        ``/usr/lib/modules``, and ``/usr/local``.
+
+        Examples:
+
+        - ``/var|/etc/machine-id``
+
+            Ignores ``/var`` or ``/etc/machine-id``, regardless of
+            whether they are directories or something else. In the
+            usual case that ``/var`` is a directory, also everything
+            inside it is ignored because the directory gets skipped
+            while scanning the directory tree.
+
+        - empty string or ``^$``
+
+            Matches nothing, because paths are never empty.
+
 
 EXIT STATUS
 ===========

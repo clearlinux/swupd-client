@@ -45,14 +45,7 @@
 static struct filerecord *F; /* Array of filerecords */
 static int nF = 0;	   /* Number of filerecords */
 
-static struct fileskip {
-	const char *shortname; /* Without prefix */
-	char *name;	    /* full name, including any path_prefix */
-	int len;
-} skip_dirs[] =
-    { { shortname : "/lib/modules" },
-      { shortname : "/lib/kernel" },
-      { shortname : "/local" } };
+static const regex_t *path_whitelist;
 static int path_prefix_len;
 
 /* Helper function to call from nftw */
@@ -63,15 +56,26 @@ static inline int bsearch_helper(const void *A, const void *B)
 
 static int record_filename(const char *name, const struct stat *stat __attribute__((unused)), int type, struct FTW *ftw __attribute__((unused)))
 {
-	for (size_t i = 0; i < sizeof(skip_dirs) / sizeof(skip_dirs[0]); i++) {
-		if (strncmp(name, skip_dirs[i].name, skip_dirs[i].len) == 0) {
+	/* Name as it would appear in manifest, f.i. /usr */
+	const char *relname = name + path_prefix_len - 1;
+
+	if (!relname[0] || !strcmp(relname, "/")) {
+		/* Do not record root while descending into it. */
+		return 0;
+	}
+
+	if (path_whitelist) {
+		int match_res;
+		match_res = regexec(path_whitelist, relname, 0, NULL, 0);
+		if (match_res == 0) {
+			/* ignore matching entry and everything underneath it */
 			return FTW_SKIP_SUBTREE;
 		}
 	}
 
-	char *savedname = strdup(name + path_prefix_len - 1); /* Only store name relative to top of area */
-	F = realloc(F, (nF + 1) * sizeof(*F));		      /* TODO, check realloc is smart, so don't need to double myself */
-	if (!F || !name) {
+	char *savedname = strdup(relname);     /* Only store name relative to top of area */
+	F = realloc(F, (nF + 1) * sizeof(*F)); /* TODO, check realloc is smart, so don't need to double myself */
+	if (!F || !savedname) {
 		fprintf(stderr, "Out of memory allocating %d filenames\n", nF);
 		return -ENOMEM;
 	}
@@ -107,16 +111,12 @@ static void handle(const char *filename, bool is_dir, bool fix)
 }
 
 /* expect the start to end in /usr and be the absolute path to the root */
-int walk_tree(struct manifest *manifest, const char *start, bool fix)
+int walk_tree(struct manifest *manifest, const char *start, bool fix, const regex_t *whitelist)
 {
 	/* Walk the tree, */
 	int rc;
 	path_prefix_len = strlen(path_prefix);
-	/* Set up the directories to skip */
-	for (size_t i = 0; i < sizeof(skip_dirs) / sizeof(skip_dirs[0]); i++) {
-		skip_dirs[i].name = mk_full_filename(start, skip_dirs[i].shortname);
-		skip_dirs[i].len = strlen(skip_dirs[i].name);
-	}
+	path_whitelist = whitelist;
 	rc = nftw(start, &record_filename, 0, FTW_ACTIONRETVAL | FTW_PHYS | FTW_MOUNT);
 	const char *skip_dir = NULL; /* Skip files below this in printout */
 	if (rc) {
@@ -171,9 +171,6 @@ int walk_tree(struct manifest *manifest, const char *start, bool fix)
 	}
 	rc = nF;
 tidy:
-	for (size_t i = 0; i < sizeof(skip_dirs) / sizeof(skip_dirs[0]); i++) {
-		free(skip_dirs[i].name);
-	}
 	for (int i = 0; i < nF; i++) {
 		free(F[i].filename);
 	}

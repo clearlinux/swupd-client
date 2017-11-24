@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
+#include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,10 +37,18 @@
 #include "signature.h"
 #include "swupd.h"
 
+static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|/usr/local";
+
 static bool cmdline_option_fix = false;
 static bool cmdline_option_picky = false;
+static const char *cmdline_option_picky_tree = "/usr";
+static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
 static bool cmdline_option_install = false;
 static bool cmdline_option_quick = false;
+
+/* picky_whitelist points to picky_whitelist_buffer if and only if regcomp() was called for it */
+static regex_t *picky_whitelist;
+static regex_t picky_whitelist_buffer;
 
 static int version = 0;
 
@@ -71,6 +80,8 @@ static const struct option prog_opts[] = {
 	{ "force", no_argument, 0, 'x' },
 	{ "nosigcheck", no_argument, 0, 'n' },
 	{ "picky", no_argument, 0, 'Y' },
+	{ "picky-tree", required_argument, 0, 'X' },
+	{ "picky-whitelist", required_argument, 0, 'w' },
 	{ "statedir", required_argument, 0, 'S' },
 	{ "certpath", required_argument, 0, 'C' },
 	{ "time", no_argument, 0, 't' },
@@ -93,7 +104,9 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
 	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version file downloads\n");
 	fprintf(stderr, "   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files)\n");
-	fprintf(stderr, "   -Y, --picky             List files which should not exist\n");
+	fprintf(stderr, "   -Y, --picky             List (without --fix) or remove (with --fix) files which should not exist\n");
+	fprintf(stderr, "   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
+	fprintf(stderr, "   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
 	fprintf(stderr, "   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory\n");
 	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	fprintf(stderr, "   -q, --quick             Don't compare hashes, only fix missing files\n");
@@ -108,11 +121,45 @@ static void print_help(const char *name)
 	fprintf(stderr, "\n");
 }
 
+static bool compile_whitelist()
+{
+	int errcode;
+	char *error_buffer = NULL;
+	char *full_regex = NULL;
+	bool success = false;
+
+	/* Enforce matching the entire path. */
+	string_or_die(&full_regex, "^(%s)$", cmdline_option_picky_whitelist);
+
+	assert(!picky_whitelist);
+	errcode = regcomp(&picky_whitelist_buffer, full_regex, REG_NOSUB | REG_EXTENDED);
+	picky_whitelist = &picky_whitelist_buffer;
+	if (errcode) {
+		size_t len;
+		len = regerror(errcode, picky_whitelist, NULL, 0);
+		error_buffer = malloc(len);
+		if (!error_buffer) {
+			fprintf(stderr, "out of memory\n");
+			goto done;
+		}
+		regerror(errcode, picky_whitelist, error_buffer, len);
+		fprintf(stderr, "Invalid --picky-whitelist=%s: %s\n", cmdline_option_picky_whitelist, error_buffer);
+		goto done;
+	}
+	success = true;
+
+done:
+	free(full_regex);
+	if (error_buffer) {
+		free(error_buffer);
+	}
+	return success;
+}
+
 static bool parse_options(int argc, char **argv)
 {
 	int opt;
-
-	while ((opt = getopt_long(argc, argv, "hxnItNbm:p:u:P:c:v:fYiF:qS:C:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hxnItNbm:p:u:P:c:v:fYX:w:iF:qS:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -210,6 +257,24 @@ static bool parse_options(int argc, char **argv)
 		case 'Y':
 			cmdline_option_picky = true;
 			break;
+		case 'X':
+			if (!optarg) {
+				fprintf(stderr, "Missing --picky-tree argument\n\n");
+				goto err;
+			}
+			if (optarg[0] != '/') {
+				fprintf(stderr, "--picky-tree must be an absolute path, for example /usr");
+				goto err;
+			}
+			cmdline_option_picky_tree = optarg;
+			break;
+		case 'w':
+			if (!optarg) {
+				fprintf(stderr, "Missing --picky-whitelist argument\n\n");
+				goto err;
+			}
+			cmdline_option_picky_whitelist = optarg;
+			break;
 		default:
 			fprintf(stderr, "Unrecognized option\n\n");
 			goto err;
@@ -231,6 +296,9 @@ static bool parse_options(int argc, char **argv)
 		}
 	} else if (version == -1) {
 		fprintf(stderr, "-m latest only supported with --install\n");
+		return false;
+	}
+	if (!compile_whitelist()) {
 		return false;
 	}
 
@@ -675,7 +743,8 @@ int verify_main(int argc, char **argv)
 	copyright_header("software verify");
 
 	if (!parse_options(argc, argv)) {
-		return EINVALID_OPTION;
+		ret = EINVALID_OPTION;
+		goto clean_args_and_exit;
 	}
 
 	/* parse command line options */
@@ -685,7 +754,7 @@ int verify_main(int argc, char **argv)
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
 		fprintf(stderr, "Failed verify initialization, exiting now.\n");
-		return ret;
+		goto clean_args_and_exit;
 	}
 
 	/* Gather current manifests */
@@ -868,9 +937,9 @@ load_submanifests:
 			remove_orphaned_files(official_manifest);
 		}
 		if (cmdline_option_picky) {
-			char *start = mk_full_filename(path_prefix, "/usr");
+			char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
 			fprintf(stderr, "--picky removing extra files under %s\n", start);
-			ret = walk_tree(official_manifest, start, true);
+			ret = walk_tree(official_manifest, start, true, picky_whitelist);
 			if (ret >= 0) {
 				file_checked_count = ret;
 				ret = 0;
@@ -879,9 +948,9 @@ load_submanifests:
 		}
 		grabtime_stop(&times);
 	} else if (cmdline_option_picky) {
-		char *start = mk_full_filename(path_prefix, "/usr");
+		char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
 		fprintf(stderr, "Generating list of extra files under %s\n", start);
-		ret = walk_tree(official_manifest, start, false);
+		ret = walk_tree(official_manifest, start, false, picky_whitelist);
 		if (ret >= 0) {
 			file_checked_count = ret;
 			ret = 0;
@@ -993,6 +1062,12 @@ clean_and_exit:
 
 	print_time_stats(&times);
 	swupd_deinit(lock_fd, &subs);
+
+clean_args_and_exit:
+	if (picky_whitelist) {
+		regfree(picky_whitelist);
+		picky_whitelist = NULL;
+	}
 
 	return ret;
 }

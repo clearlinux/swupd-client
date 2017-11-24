@@ -88,12 +88,29 @@ static int qsort_helper(const void *A, const void *B)
 	return strcmp(((struct filerecord *)A)->filename, ((struct filerecord *)B)->filename);
 }
 
+static void handle(const char *filename, bool is_dir, bool fix)
+{
+	char *temp;
+
+	if (fix) {
+		string_or_die(&temp, "%s%s", path_prefix, filename);
+		fprintf(stderr,
+			is_dir ? "REMOVING DIR %s/\n" : "REMOVING %s\n",
+			filename);
+		if (remove(temp)) {
+			fprintf(stderr, "Removing %s failed: %s", temp, strerror(errno));
+		}
+		free(temp);
+	} else {
+		printf("%s%s\n", filename, is_dir ? "/" : "");
+	}
+}
+
 /* expect the start to end in /usr and be the absolute path to the root */
 int walk_tree(struct manifest *manifest, const char *start, bool fix)
 {
 	/* Walk the tree, */
 	int rc;
-	char *temp;
 	path_prefix_len = strlen(path_prefix);
 	/* Set up the directories to skip */
 	for (size_t i = 0; i < sizeof(skip_dirs) / sizeof(skip_dirs[0]); i++) {
@@ -144,23 +161,9 @@ int walk_tree(struct manifest *manifest, const char *start, bool fix)
 			if (F[i].dir) { /* Start of new dir to skip */
 				skip_dir = F[i].filename;
 				skip_len = strlen(skip_dir);
-				if (fix) {
-					string_or_die(&temp, "%s%s", path_prefix, F[i].filename);
-					fprintf(stderr, "REMOVING DIR %s/\n", F[i].filename);
-					remove(temp);
-					free(temp);
-				} else {
-					printf("%s/\n", F[i].filename);
-				}
+				handle(F[i].filename, true, fix);
 			} else {
-				if (fix) {
-					string_or_die(&temp, "%s%s", path_prefix, F[i].filename);
-					fprintf(stderr, "REMOVING %s\n", F[i].filename);
-					remove(temp);
-					free(temp);
-				} else {
-					printf("%s\n", F[i].filename);
-				}
+				handle(F[i].filename, false, fix);
 			}
 		} else {
 			skip_dir = NULL;

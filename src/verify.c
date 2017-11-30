@@ -263,7 +263,7 @@ static bool parse_options(int argc, char **argv)
 				goto err;
 			}
 			if (optarg[0] != '/') {
-				fprintf(stderr, "--picky-tree must be an absolute path, for example /usr");
+				fprintf(stderr, "--picky-tree must be an absolute path, for example /usr\n\n");
 				goto err;
 			}
 			cmdline_option_picky_tree = optarg;
@@ -1016,7 +1016,7 @@ brick_the_system_and_clean_curl:
 		ret = EXIT_FAILURE;
 	}
 
-	/* this concludes the critical section, after this point it's clean up time, the disk content is finished and final */
+/* this concludes the critical section, after this point it's clean up time, the disk content is finished and final */
 
 clean_and_exit:
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,

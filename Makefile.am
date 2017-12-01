@@ -85,7 +85,7 @@ swupd_sig_verifytest_SOURCES = test/signature_verify_test.c
 
 AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS) -I$(top_srcdir)/include
 SWUPD_COMPRESSION_LIBS = $(lzma_LIBS) $(zlib_LIBS) $(bzip2_LIBS)
-SWUPD_CORE_LIBS = libswupd.la ${curl_LIBS} $(openssl_LIBS) $(libarchive_LIBS) $(SWUPD_COMPRESSION_LIBS) $(bsdiff_LIBS)
+SWUPD_CORE_LIBS = libswupd.la
 
 swupd_LDADD = $(SWUPD_CORE_LIBS) $(pthread_LIBS)
 

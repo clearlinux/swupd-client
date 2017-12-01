@@ -19,14 +19,6 @@ swupd_SOURCES = \
 	$(swupd_autoupdate_SOURCES) \
 	$(swupd_search_SOURCES)
 
-check_PROGRAMS = \
-	swupd_bsdiff_bench \
-	swupd_hashtest \
-	swupd_listtest \
-	swupd_fuzz \
-	swupd_locktest \
-	swupd_sig_verifytest
-
 SWUPD_COMMON_SOURCES = \
 	src/archives.c \
 	src/curl.c \
@@ -75,26 +67,11 @@ clr_bundle_ls_SOURCES = src/clr_bundle_ls.c
 
 swupd_hashdump_SOURCES = src/hashdump.c
 
-swupd_bsdiff_bench_SOURCES = test/bsdiff_bench.c
-swupd_hashtest_SOURCES = test/hash_test.c
-swupd_listtest_SOURCES = test/listtest.c
-swupd_fuzz_SOURCES = test/fuzz.c
-swupd_locktest_SOURCES = test/locktest.c
-swupd_sig_verifytest_SOURCES = test/signature_verify_test.c
-
-
 AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS) -I$(top_srcdir)/include
 SWUPD_COMPRESSION_LIBS = $(lzma_LIBS) $(zlib_LIBS) $(bzip2_LIBS)
 SWUPD_CORE_LIBS = libswupd.la
 
 swupd_LDADD = $(SWUPD_CORE_LIBS) $(pthread_LIBS)
-
-swupd_bsdiff_bench_LDADD = $(SWUPD_CORE_LIBS)
-swupd_hashtest_LDADD = $(SWUPD_CORE_LIBS) $(pthread_LIBS)
-swupd_listtest_LDADD = $(SWUPD_CORE_LIBS)
-swupd_fuzz_LDADD = $(SWUPD_CORE_LIBS) $(pthread_LIBS)
-swupd_locktest_LDADD = $(SWUPD_CORE_LIBS) $(pthread_LIBS)
-swupd_sig_verifytest_LDADD = $(SWUPD_CORE_LIBS)
 
 verifytime_SOURCES = src/verifytime.c
 bin_PROGRAMS += verifytime

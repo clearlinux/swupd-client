@@ -63,6 +63,13 @@ static bool is_state(char *filename)
 		return false;
 	}
 
+	/* Compare the first part of the path, first all the entries inside
+	 * kernel directory, then only the kernel directoy */
+	if ((strncmp(filename, "/usr/src/kernel/", 16) == 0) ||
+	    ((strlen(filename) == 15) && (strncmp(filename, "/usr/src/kernel", 15) == 0))) {
+		return false;
+	}
+
 	if ((strncmp(filename, "/data", 5) == 0) ||
 	    (strncmp(filename, "/dev/", 5) == 0) ||
 	    (strncmp(filename, "/home/", 6) == 0) ||

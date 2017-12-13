@@ -309,14 +309,14 @@ CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file)
 /* Download a single file SYNCHRONOUSLY
  * - If (in_memory_version_string != NULL) the file downloaded is expected
  *   to be a version file and it is downloaded to memory instead of disk.
- * - Packs are big.  If (pack == true) then the function allows resuming
+ * - Packs are big.  If (resume_ok == true) then the function allows resuming
  *   a previous/interrupted download.
  * - This function returns zero or a standard < 0 status code.
  * - If failure to download, partial download is not deleted.
  * - NOTE: See full_download() for multi/asynchronous downloading of fullfiles.
  */
 int swupd_curl_get_file(const char *url, char *filename, struct file *file,
-			struct version_container *in_memory_version_string, bool pack)
+			struct version_container *in_memory_version_string, bool resume_ok)
 {
 	CURLcode curl_ret;
 	long ret = 0;
@@ -346,7 +346,7 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 		local->staging = filename;
 
 		if (lstat(filename, &stat) == 0) {
-			if (pack && resume_download_enabled) {
+			if (resume_ok && resume_download_enabled) {
 				curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
 			} else {
 				unlink(filename);
@@ -470,7 +470,7 @@ exit:
 	}
 
 	if (err) {
-		if (!pack) {
+		if (!resume_ok) {
 			unlink(filename);
 		}
 	}

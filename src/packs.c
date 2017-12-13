@@ -35,7 +35,7 @@
 #include "swupd-build-variant.h"
 #include "swupd.h"
 
-static int download_pack(int oldversion, int newversion, char *module, int is_mix)
+static int download_pack(int oldversion, int newversion, char *module, int is_mix, bool resume_ok)
 {
 	FILE *tarfile = NULL;
 	char *url = NULL;
@@ -64,7 +64,7 @@ static int download_pack(int oldversion, int newversion, char *module, int is_mi
 	} else {
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, newversion, module, oldversion);
 
-		err = swupd_curl_get_file(url, filename, NULL, NULL, true);
+		err = swupd_curl_get_file(url, filename, NULL, NULL, resume_ok);
 		if (err) {
 			free(url);
 			if ((lstat(filename, &stat) == 0) && (stat.st_size == 0)) {
@@ -95,7 +95,7 @@ static int download_pack(int oldversion, int newversion, char *module, int is_mi
 }
 
 /* pull in packs for base and any subscription */
-int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required)
+int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required, bool resume_ok)
 {
 	struct list *iter;
 	struct sub *sub = NULL;
@@ -123,7 +123,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 		if (bundle) {
 			is_mix = bundle->is_mix;
 		}
-		err = download_pack(sub->oldversion, sub->version, sub->component, is_mix);
+		err = download_pack(sub->oldversion, sub->version, sub->component, is_mix, resume_ok);
 		print_progress(complete, list_length);
 		if (err < 0) {
 			if (required) { /* Probably need printf("\n") here */

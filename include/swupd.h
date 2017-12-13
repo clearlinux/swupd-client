@@ -278,7 +278,7 @@ static inline void account_delta_miss(void)
 
 extern void print_statistics(int version1, int version2);
 
-extern int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required);
+extern int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required, bool resume_ok);
 
 extern void try_delta(struct file *file);
 extern void full_download(struct file *file);
@@ -301,7 +301,7 @@ extern double swupd_query_url_content_size(char *url);
 extern CURLcode swupd_download_file_start(struct file *file);
 extern CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file);
 extern int swupd_curl_get_file(const char *url, char *filename, struct file *file,
-			       struct version_container *tmp_version, bool pack);
+			       struct version_container *tmp_version, bool resume_ok);
 #define SWUPD_CURL_LOW_SPEED_LIMIT 1
 #define SWUPD_CURL_CONNECT_TIMEOUT 30
 #define SWUPD_CURL_RCV_TIMEOUT 120

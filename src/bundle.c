@@ -695,7 +695,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	(void)rm_staging_dir_contents("download");
 
 download_subscribed_packs:
-	if (download_subscribed_packs(*subs, mom, true)) {
+	if (download_subscribed_packs(*subs, mom, true, false)) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
 			printf("\nRetry #%d downloading subscribed packs\n", retries);

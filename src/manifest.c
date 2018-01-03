@@ -544,6 +544,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		goto out;
 	}
 	free(filename);
+	filename = NULL;
 
 	if (swupd_curl_check_network()) {
 		ret = -ENOSWUPDSERVER;
@@ -577,7 +578,9 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 			goto untar;
 		}
 		free(filename);
+		filename = NULL;
 		free(url);
+		url = NULL;
 	}
 
 	/* Either we're not on mix or it failed, try curl-ing the file if link didn't work */

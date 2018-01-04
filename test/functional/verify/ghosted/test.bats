@@ -14,6 +14,7 @@ teardown() {
   clean_tars 10
   clean_tars 10 files
   sudo cp -r "$DIR/target-dir.bak/foo" "$DIR/target-dir"
+  revert_chown_root -R "$DIR/target-dir"
 }
 
 @test "verify ghosted file skipped" {

@@ -13,6 +13,7 @@ setup() {
 teardown() {
   clean_tars 10
   sudo cp -r "$DIR/target-dir.bak/usr" "$DIR/target-dir/"
+  revert_chown_root -R "$DIR/target-dir"
 }
 
 @test "verify ghosted file not added during --picky" {

@@ -19,7 +19,7 @@ setup() {
 }
 
 teardown() {
-  revert_chown_root -R "$DIR/web-dir"
+  revert_chown_root -R "$DIR/target-dir" "$DIR/web-dir"
 }
 
 @test "update rename ghosted file" {

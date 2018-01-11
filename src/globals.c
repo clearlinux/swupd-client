@@ -271,11 +271,12 @@ int get_version_from_path(const char *abs_path)
 static int set_default_value_from_path(char **global, const char *path)
 {
 	int ret = -1;
-	char *ret_str;
+	char *ret_str = NULL;
 
 	ret = get_value_from_path(&ret_str, path, false);
-	if (ret == 0) {
+	if (ret == 0 && ret_str) {
 		string_or_die(global, "%s", ret_str);
+		free(ret_str);
 	}
 
 	return ret;

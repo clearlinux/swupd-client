@@ -418,9 +418,9 @@ int verify_callback(int ok, X509_STORE_CTX *stor)
  */
 bool download_and_verify_signature(const char *data_url, const char *data_filename, int version, bool mix_exists)
 {
-	char *local;
-	char *sig_url;
-	char *sig_filename;
+	char *local = NULL;
+	char *sig_url = NULL;
+	char *sig_filename = NULL;
 	int ret;
 	bool result;
 
@@ -452,6 +452,7 @@ bool download_and_verify_signature(const char *data_url, const char *data_filena
 		result = false;
 	}
 out:
+	free(local);
 	free(sig_filename);
 	free(sig_url);
 	return result;

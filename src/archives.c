@@ -133,7 +133,7 @@ int extract_to(const char *tarfile, const char *outputdir)
 			break;
 		}
 
-		if (_archive_check_err(ext, r)) {
+		if (_archive_check_err(a, r)) {
 			goto out;
 		}
 

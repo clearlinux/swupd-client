@@ -81,6 +81,11 @@ static void update_triggers(bool block)
 			ret = system("/usr/bin/systemctl daemon-reload");
 		}
 
+		/* Check for daemons that need to be restarted */
+		if (access("/usr/bin/clr-service-restart", F_OK | X_OK) == 0) {
+			ret = system("/usr/bin/clr-service-restart");
+		}
+
 		string_or_die(&cmd, "/usr/bin/systemctl %s restart update-triggers.target", block_flag);
 	} else {
 		/* These must block so that new update triggers are executed after */

@@ -251,7 +251,7 @@ error:
 		ERR_print_errors_fp(stderr);
 	}
 
-	free(errorstr);
+	free_string(&errorstr);
 
 	if (sig) {
 		munmap(sig, sig_len);
@@ -452,9 +452,9 @@ bool download_and_verify_signature(const char *data_url, const char *data_filena
 		result = false;
 	}
 out:
-	free(local);
-	free(sig_filename);
-	free(sig_url);
+	free_string(&local);
+	free_string(&sig_filename);
+	free_string(&sig_url);
 	return result;
 }
 

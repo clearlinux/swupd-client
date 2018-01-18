@@ -104,7 +104,7 @@ static void handle(const char *filename, bool is_dir, bool fix)
 		if (remove(temp)) {
 			fprintf(stderr, "Removing %s failed: %s", temp, strerror(errno));
 		}
-		free(temp);
+		free_string(&temp);
 	} else {
 		printf("%s%s\n", filename, is_dir ? "/" : "");
 	}
@@ -172,7 +172,7 @@ int walk_tree(struct manifest *manifest, const char *start, bool fix, const rege
 	rc = nF;
 tidy:
 	for (int i = 0; i < nF; i++) {
-		free(F[i].filename);
+		free_string(&F[i].filename);
 	}
 	free(F);
 

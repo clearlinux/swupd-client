@@ -67,7 +67,7 @@ int rm_staging_dir_contents(const char *rel_path)
 
 	dir = opendir(abs_path);
 	if (dir == NULL) {
-		free(abs_path);
+		free_string(&abs_path);
 		return -1;
 	}
 
@@ -92,13 +92,13 @@ int rm_staging_dir_contents(const char *rel_path)
 
 		ret = remove(filename);
 		if (ret != 0) {
-			free(filename);
+			free_string(&filename);
 			break;
 		}
-		free(filename);
+		free_string(&filename);
 	}
 
-	free(abs_path);
+	free_string(&abs_path);
 	closedir(dir);
 
 	return ret;
@@ -111,22 +111,22 @@ void unlink_all_staged_content(struct file *file)
 	/* downloaded tar file */
 	string_or_die(&filename, "%s/download/%s.tar", state_dir, file->hash);
 	unlink(filename);
-	free(filename);
+	free_string(&filename);
 	string_or_die(&filename, "%s/download/.%s.tar", state_dir, file->hash);
 	unlink(filename);
-	free(filename);
+	free_string(&filename);
 
 	/* downloaded and un-tar'd file */
 	string_or_die(&filename, "%s/staged/%s", state_dir, file->hash);
 	(void)remove(filename);
-	free(filename);
+	free_string(&filename);
 
 	/* delta file */
 	if (file->peer) {
 		string_or_die(&filename, "%s/delta/%i-%i-%s", state_dir,
 			      file->peer->last_change, file->last_change, file->hash);
 		unlink(filename);
-		free(filename);
+		free_string(&filename);
 	}
 }
 
@@ -186,9 +186,9 @@ static int create_required_dirs(void)
 				fprintf(stderr, "Error: failed to create %s\n", dir);
 				return -1;
 			}
-			free(cmd);
+			free_string(&cmd);
 		}
-		free(dir);
+		free_string(&dir);
 	}
 	/* Do a final check to make sure that the top level dir wasn't
 	 * tampered with whilst we were creating the dirs */
@@ -243,16 +243,15 @@ static void get_mounted_directories(void)
 				}
 				tmp = mounted_dirs;
 				string_or_die(&mounted_dirs, "%s%s:", tmp, mnt);
-				free(tmp);
+				free_string(&tmp);
 				break;
 			}
 			n++;
 			mnt = strtok(NULL, " ");
 		}
-		free(line);
-		line = NULL;
+		free_string(&line);
 	}
-	free(line);
+	free_string(&line);
 	fclose(file);
 }
 
@@ -292,12 +291,12 @@ char *mk_full_filename(const char *prefix, const char *path)
 		tmp[strlen(tmp) - 1] = '\0';
 
 		string_or_die(&fname, "%s%s", tmp, abspath);
-		free(tmp);
+		free_string(&tmp);
 	} else {
 		// chroot and no need to strip trailing "/" from prefix
 		string_or_die(&fname, "%s%s", prefix, abspath);
 	}
-	free(abspath);
+	free_string(&abspath);
 	return fname;
 }
 
@@ -314,13 +313,13 @@ bool is_directory_mounted(const char *filename)
 
 	tmp = mk_full_filename(path_prefix, filename);
 	string_or_die(&fname, ":%s:", tmp);
-	free(tmp);
+	free_string(&tmp);
 
 	if (strstr(mounted_dirs, fname)) {
 		ret = true;
 	}
 
-	free(fname);
+	free_string(&fname);
 
 	return ret;
 }
@@ -351,22 +350,22 @@ bool is_under_mounted_directory(const char *filename)
 
 		tmp = mk_full_filename(path_prefix, filename);
 		string_or_die(&fname, ":%s:", tmp);
-		free(tmp);
+		free_string(&tmp);
 
 		err = strncmp(fname, mountpoint, strlen(mountpoint));
-		free(fname);
+		free_string(&fname);
 		if (err == 0) {
-			free(mountpoint);
+			free_string(&mountpoint);
 			ret = true;
 			break;
 		}
 
 		token = strtok(NULL, ":");
 
-		free(mountpoint);
+		free_string(&mountpoint);
 	}
 
-	free(dir);
+	free_string(&dir);
 
 	return ret;
 }
@@ -418,7 +417,7 @@ static int swupd_rm_dir(const char *path)
 			continue;
 		}
 
-		free(filename);
+		free_string(&filename);
 		string_or_die(&filename, "%s/%s", path, entry->d_name);
 
 		err = swupd_rm(filename);
@@ -440,7 +439,7 @@ static int swupd_rm_dir(const char *path)
 
 exit:
 	closedir(dir);
-	free(filename);
+	free_string(&filename);
 	return ret;
 }
 
@@ -490,7 +489,7 @@ int rm_bundle_file(const char *bundle)
 	}
 
 out:
-	free(filename);
+	free_string(&filename);
 	return ret;
 }
 
@@ -560,17 +559,11 @@ void free_file_data(void *data)
 
 	/* peer and deltapeer are pointers to files contained
 	 * in another list and must not be disposed */
-
-	if (file->filename) {
-		free(file->filename);
-	}
+	free_string(&file->filename);
+	free_string(&file->staging);
 
 	if (file->header) {
 		free(file->header);
-	}
-
-	if (file->staging) {
-		free(file->staging);
 	}
 
 	free(file);
@@ -671,6 +664,14 @@ void string_or_die(char **strp, const char *fmt, ...)
 	va_end(ap);
 }
 
+void free_string(char **s)
+{
+	if (s) {
+		free(*s);
+		*s = NULL;
+	}
+}
+
 void update_motd(int new_release)
 {
 	FILE *motd_fp = NULL;
@@ -728,16 +729,16 @@ int get_dirfd_path(const char *fullname)
 		ret = fd;
 	}
 
-	free(real_path);
+	free_string(&real_path);
 out:
-	free(tmp);
+	free_string(&tmp);
 	return ret;
 }
 
 static void free_path_data(void *data)
 {
 	char *path = (char *)data;
-	free(path);
+	free_string(&path);
 }
 
 /* This function is meant to be called while staging file to fix any missing/incorrect paths.
@@ -774,10 +775,10 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 	while (strcmp(path, "/") != 0) {
 		path_list = list_prepend_data(path_list, strdup(path));
 		tmp = strdup(dirname(path));
-		free(path);
+		free_string(&path);
 		path = tmp;
 	}
-	free(path);
+	free_string(&path);
 
 	list1 = list_head(path_list);
 	while (list1) {
@@ -844,15 +845,9 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		}
 	}
 end:
-	if (target) {
-		free(target);
-	}
-	if (tar_dotfile) {
-		free(tar_dotfile);
-	}
-	if (url) {
-		free(url);
-	}
+	free_string(&target);
+	free_string(&tar_dotfile);
+	free_string(&url);
 	list_free_list_and_data(path_list, free_path_data);
 	return ret;
 }
@@ -893,7 +888,7 @@ bool version_files_consistent(void)
 	string_or_die(&state_v_path, "%s/version", state_dir);
 	os_release_v = get_current_version(path_prefix);
 	state_v = get_version_from_path(state_v_path);
-	free(state_v_path);
+	free_string(&state_v_path);
 
 	// -1 returns indicate failures
 	if (os_release_v < 0 || state_v < 0) {
@@ -961,7 +956,7 @@ bool is_compatible_format(int format_num)
 		ret = false;
 	}
 
-	free(format_manifest);
+	free_string(&format_manifest);
 	return ret;
 }
 
@@ -989,7 +984,7 @@ bool on_new_format(void)
 	}
 
 	res = strtoull(ret_str, NULL, 10);
-	free(ret_str);
+	free_string(&ret_str);
 	/* is_compatible_format returns true if the argument matches the
 	 * format_string, which was read at the beginning of the update. Return the
 	 * opposite of is_compatible_format to indicate when the new format is

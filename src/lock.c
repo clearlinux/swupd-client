@@ -62,11 +62,11 @@ int p_lockfile(void)
 
 	if (lock_fd < 0) {
 		fprintf(stderr, "Error: failed to open %s: %s\n", lockfile, strerror(errno));
-		free(lockfile);
+		free_string(&lockfile);
 		return -1;
 	}
 
-	free(lockfile);
+	free_string(&lockfile);
 
 	/* try to get an advisory region lock for the file */
 	ret = fcntl(lock_fd, F_SETLK, &fl);

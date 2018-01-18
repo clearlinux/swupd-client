@@ -144,7 +144,7 @@ bool is_tracked_bundle(const char *bundle_name)
 		ret = false;
 	}
 
-	free(filename);
+	free_string(&filename);
 	return ret;
 }
 
@@ -248,7 +248,7 @@ int show_included_bundles(char *bundle_name)
 		}
 
 		fprintf(stderr, "Error: %s - Aborting\n", m);
-		free(m);
+		free_string(&m);
 		ret = 1;
 		goto out;
 	}
@@ -383,7 +383,7 @@ int show_bundle_reqd_by(const char *bundle_name, bool server)
 		bundle = iter->data;
 		iter = iter->next;
 		printf("%s", bundle);
-		free(bundle);
+		free_string(&bundle);
 	}
 
 	ret = 0;
@@ -742,20 +742,20 @@ download_subscribed_packs:
 		if (access(hashpath, F_OK) < 0) {
 			/* fallback to verify_fix_path below, which will check the hash
 			 * itself */
-			free(hashpath);
-			free(fullpath);
+			free_string(&hashpath);
+			free_string(&fullpath);
 			continue;
 		}
 
 		ret = verify_file(file, hashpath);
 		if (!ret) {
 			fprintf(stderr, "Error: hash check failed for %s\n", fullpath);
-			free(hashpath);
-			free(fullpath);
+			free_string(&hashpath);
+			free_string(&fullpath);
 			goto out;
 		}
-		free(hashpath);
-		free(fullpath);
+		free_string(&hashpath);
+		free_string(&fullpath);
 	}
 
 	iter = list_head(to_install_files);
@@ -879,7 +879,7 @@ int install_bundles_frontend(char **bundles)
 			} else {
 				string_or_die(&bundles_list_str, "%s", *bundles);
 			}
-			free(tmp);
+			free_string(&tmp);
 		}
 	}
 	grabtime_stop(&times);
@@ -933,5 +933,5 @@ void read_local_bundles(struct list **list_bundles)
 		closedir(dir);
 	}
 
-	free(path);
+	free_string(&path);
 }

@@ -149,9 +149,9 @@ static bool compile_whitelist()
 	success = true;
 
 done:
-	free(full_regex);
+	free_string(&full_regex);
 	if (error_buffer) {
-		free(error_buffer);
+		free_string(&error_buffer);
 	}
 	return success;
 }
@@ -384,7 +384,7 @@ static struct list *download_loop(struct list *files, int isfailed)
 			ret = compute_hash(&local, fullname);
 		}
 		if (ret != 0) {
-			free(fullname);
+			free_string(&fullname);
 			continue;
 		}
 
@@ -405,8 +405,8 @@ static struct list *download_loop(struct list *files, int isfailed)
 					}
 				}
 				untar_full_download(file);
-				free(filename);
-				free(url);
+				free_string(&filename);
+				free_string(&url);
 				continue;
 			}
 			full_download(file);
@@ -414,7 +414,7 @@ static struct list *download_loop(struct list *files, int isfailed)
 			/* mark the file as good to save time later */
 			file->do_not_update = 1;
 		}
-		free(fullname);
+		free_string(&fullname);
 		print_progress(complete, list_length);
 	}
 	print_progress(list_length, list_length); /* Force out 100% */
@@ -516,7 +516,7 @@ static void add_missing_files(struct manifest *official_manifest)
 		ret = compute_hash_lazy(&local, fullname);
 		if (ret != 0) {
 			file_not_replaced_count++;
-			free(fullname);
+			free_string(&fullname);
 			continue;
 		}
 
@@ -528,7 +528,7 @@ static void add_missing_files(struct manifest *official_manifest)
 				printf("\nMissing file: %s\n", fullname);
 			}
 		} else {
-			free(fullname);
+			free_string(&fullname);
 			continue;
 		}
 
@@ -555,7 +555,7 @@ static void add_missing_files(struct manifest *official_manifest)
 				printf("\n\tfixed\n");
 			}
 		}
-		free(fullname);
+		free_string(&fullname);
 		print_progress(complete, list_length);
 	}
 	print_progress(list_length, list_length);
@@ -612,7 +612,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 		printf("\tnot fixed\n");
 	}
 end:
-	free(fullname);
+	free_string(&fullname);
 }
 
 static void deal_with_hash_mismatches(struct manifest *official_manifest, bool repair)
@@ -677,7 +677,7 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 
 		if (lstat(fullname, &sb) != 0) {
 			/* correctly, the file is not present */
-			free(fullname);
+			free_string(&fullname);
 			continue;
 		}
 
@@ -686,7 +686,7 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 		fd = get_dirfd_path(fullname);
 		if (fd < 0) {
 			fprintf(stderr, "Not safe to delete: %s\n", fullname);
-			free(fullname);
+			free_string(&fullname);
 			file_not_deleted_count++;
 			continue;
 		}
@@ -718,7 +718,7 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 				file_deleted_count++;
 			}
 		}
-		free(fullname);
+		free_string(&fullname);
 		close(fd);
 	}
 }
@@ -944,7 +944,7 @@ load_submanifests:
 				file_checked_count = ret;
 				ret = 0;
 			}
-			free(start);
+			free_string(&start);
 		}
 		grabtime_stop(&times);
 	} else if (cmdline_option_picky) {
@@ -955,7 +955,7 @@ load_submanifests:
 			file_checked_count = ret;
 			ret = 0;
 		}
-		free(start);
+		free_string(&start);
 	} else {
 		bool repair = false;
 

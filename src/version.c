@@ -65,9 +65,9 @@ int get_latest_version(void)
 	}
 
 out:
-	free(path);
-	free(url);
-	free(tmp_version.version);
+	free_string(&path);
+	free_string(&url);
+	free_string(&tmp_version.version);
 	cached_version = ret;
 	return ret;
 }
@@ -83,11 +83,11 @@ int get_current_version(char *path_prefix)
 	string_or_die(&buildstamp, "%s/usr/lib/os-release", path_prefix);
 	file = fopen(buildstamp, "rm");
 	if (!file) {
-		free(buildstamp);
+		free_string(&buildstamp);
 		string_or_die(&buildstamp, "%s/etc/os-release", path_prefix);
 		file = fopen(buildstamp, "rm");
 		if (!file) {
-			free(buildstamp);
+			free_string(&buildstamp);
 			return v;
 		}
 	}
@@ -117,7 +117,7 @@ int get_current_version(char *path_prefix)
 		}
 	}
 
-	free(buildstamp);
+	free_string(&buildstamp);
 	fclose(file);
 	return v;
 }
@@ -178,7 +178,7 @@ int read_mix_version_file(char *filename, char *path_prefix)
 	string_or_die(&buildstamp, "%s%s", path_prefix, filename);
 	file = fopen(buildstamp, "rm");
 	if (!file) {
-		free(buildstamp);
+		free_string(&buildstamp);
 		return v;
 	}
 
@@ -196,7 +196,7 @@ int read_mix_version_file(char *filename, char *path_prefix)
 
 		v = strtoull(line, NULL, 10);
 	}
-	free(buildstamp);
+	free_string(&buildstamp);
 	fclose(file);
 	return v;
 }
@@ -214,7 +214,7 @@ int update_device_latest_version(int version)
 	string_or_die(&path, "%s/version", state_dir);
 	file = fopen(path, "w");
 	if (!file) {
-		free(path);
+		free_string(&path);
 		return -1;
 	}
 
@@ -222,6 +222,6 @@ int update_device_latest_version(int version)
 	fflush(file);
 	fdatasync(fileno(file));
 	fclose(file);
-	free(path);
+	free_string(&path);
 	return 0;
 }

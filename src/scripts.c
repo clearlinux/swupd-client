@@ -45,7 +45,7 @@ static void update_boot(void)
 	}
 
 	ret = system(boot_update_cmd);
-	free(boot_update_cmd);
+	free_string(&boot_update_cmd);
 }
 
 static void update_triggers(bool block)
@@ -103,7 +103,7 @@ static void update_triggers(bool block)
 	}
 	ret = system(cmd);
 
-	free(cmd);
+	free_string(&cmd);
 }
 
 void run_scripts(bool block)
@@ -150,7 +150,7 @@ void run_preupdate_scripts(struct manifest *manifest)
 	}
 
 	if (stat(script, &sb) == -1) {
-		free(script);
+		free_string(&script);
 		return;
 	}
 
@@ -169,5 +169,5 @@ void run_preupdate_scripts(struct manifest *manifest)
 		}
 	}
 
-	free(script);
+	free_string(&script);
 }

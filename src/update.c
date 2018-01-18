@@ -649,8 +649,7 @@ clean_curl:
 	}
 
 	/* free swupd_cmd now that is no longer needed */
-	free(swupd_cmd);
-	swupd_cmd = NULL;
+	free_string(&swupd_cmd);
 
 	return ret;
 }

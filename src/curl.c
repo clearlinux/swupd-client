@@ -111,7 +111,7 @@ int swupd_curl_init(void)
 
 		} while ((tok = strtok_r(NULL, ":", &ctx)));
 		fallback_capaths_no = i;
-		free(str);
+		free_string(&str);
 	}
 #else
 	fallback_capaths = (char **)malloc(sizeof(char *));
@@ -533,8 +533,8 @@ static void swupd_curl_test_resume(void)
 		resume_download_enabled = false;
 	}
 exit:
-	free(tmp_version.version);
-	free(url);
+	free_string(&tmp_version.version);
+	free_string(&url);
 
 	return;
 }

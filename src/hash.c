@@ -102,7 +102,7 @@ static void hmac_sha256_for_data(char *hash,
 	}
 
 	hash_assign(digest_str, hash);
-	free(digest_str);
+	free_string(&digest_str);
 }
 
 static void hmac_sha256_for_string(char *hash,
@@ -140,7 +140,7 @@ static void hmac_compute_key(const char *filename,
 	}
 
 	if (xattrs_blob_len != 0) {
-		free(xattrs_blob);
+		free_string(&xattrs_blob);
 	}
 }
 
@@ -291,7 +291,7 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 		/* *NOTE* If the file is changed after being hardlinked, the hash will be different,
 		 * but the inode will not change making swupd skip hash check thinking they still match */
 		if (stat(local, &sb) == 0 && stat(cached, &sb2) == 0 && sb.st_ino == sb2.st_ino) {
-			free(cached);
+			free_string(&cached);
 			break;
 		} else {
 			unlink(cached);
@@ -310,20 +310,20 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url,
 				      current->last_change, current->filename);
 			ret = swupd_curl_get_file(url, filename, NULL, NULL, false);
-			free(url);
+			free_string(&url);
 
 			if (ret != 0) {
 				fprintf(stderr, "Error: download of %s failed\n", filename);
 				unlink(filename);
-				free(filename);
+				free_string(&filename);
 				break;
 			}
 
 			char *outputdir;
 			string_or_die(&outputdir, "%s/%i", state_dir, current->last_change);
 			ret = extract_to(filename, outputdir);
-			free(outputdir);
-			free(filename);
+			free_string(&outputdir);
+			free_string(&filename);
 
 			if (ret != 0) {
 				break;
@@ -339,10 +339,10 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 		if (link(local, cached) != 0) {
 			unlink(cached);
 		}
-		free(cached);
+		free_string(&cached);
 		break;
 	}
 
-	free(local);
+	free_string(&local);
 	return ret;
 }

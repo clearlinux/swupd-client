@@ -64,10 +64,10 @@ void try_delta(struct file *file)
 	/* check if the full file is there already, because if it is, don't do the delta */
 	string_or_die(&filename, "%s/staged/%s", state_dir, file->hash);
 	if (lstat(filename, &stat) == 0) {
-		free(filename);
+		free_string(&filename);
 		return;
 	}
-	free(filename);
+	free_string(&filename);
 
 	do_delta(file);
 }
@@ -85,7 +85,7 @@ static void do_delta(struct file *file)
 	string_or_die(&filename, "%s/staged/%s", state_dir, file->hash);
 	ret = lstat(filename, &sb);
 	if (ret == 0) {
-		free(filename);
+		free_string(&filename);
 		return;
 	}
 
@@ -94,8 +94,8 @@ static void do_delta(struct file *file)
 
 	ret = stat(deltafile, &sb);
 	if (ret != 0) {
-		free(deltafile);
-		free(filename);
+		free_string(&deltafile);
+		free_string(&filename);
 		return;
 	}
 
@@ -127,9 +127,9 @@ static void do_delta(struct file *file)
 	unlink(deltafile);
 
 out:
-	free(origin);
-	free(deltafile);
-	free(filename);
-	free(tmp);
-	free(tmp2);
+	free_string(&origin);
+	free_string(&deltafile);
+	free_string(&filename);
+	free_string(&tmp);
+	free_string(&tmp2);
 }

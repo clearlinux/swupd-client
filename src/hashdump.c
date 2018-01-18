@@ -112,7 +112,7 @@ int hashdump_main(int argc, char **argv)
 
 	ret = set_path_prefix(NULL);
 	if (!ret) {
-		free(file->filename);
+		free_string(&file->filename);
 		free(file);
 		return EXIT_FAILURE;
 	}
@@ -143,8 +143,8 @@ int hashdump_main(int argc, char **argv)
 		}
 	}
 
-	free(fullname);
-	free(file->filename);
+	free_string(&fullname);
+	free_string(&file->filename);
 	free(file);
 	return 0;
 }

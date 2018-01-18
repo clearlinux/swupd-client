@@ -186,10 +186,10 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 
 	infile = fopen(filename, "rbm");
 	if (infile == NULL) {
-		free(filename);
+		free_string(&filename);
 		return NULL;
 	}
-	free(filename);
+	free_string(&filename);
 
 	/* line 1: MANIFEST\t<version> */
 	line[0] = 0;
@@ -452,7 +452,7 @@ void free_manifest(struct manifest *manifest)
 	if (manifest->includes) {
 		list_free_list_and_data(manifest->includes, free);
 	}
-	free(manifest->component);
+	free_string(&manifest->component);
 	free(manifest);
 }
 
@@ -514,10 +514,10 @@ static int try_delta_manifest_download(int current, int new, char *component, st
 	}
 out:
 	unlink(deltafile);
-	free(original);
-	free(url);
-	free(newfile);
-	free(deltafile);
+	free_string(&original);
+	free_string(&url);
+	free_string(&newfile);
+	free_string(&deltafile);
 	return ret;
 }
 
@@ -543,8 +543,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		ret = 0;
 		goto out;
 	}
-	free(filename);
-	filename = NULL;
+	free_string(&filename);
 
 	if (swupd_curl_check_network()) {
 		ret = -ENOSWUPDSERVER;
@@ -577,10 +576,8 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 		if (ret == 0) {
 			goto untar;
 		}
-		free(filename);
-		filename = NULL;
-		free(url);
-		url = NULL;
+		free_string(&filename);
+		free_string(&url);
 	}
 
 	/* Either we're not on mix or it failed, try curl-ing the file if link didn't work */
@@ -595,7 +592,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 
 untar:
 	ret = extract_to(filename, dir);
-	free(dir);
+	free_string(&dir);
 	if (ret != 0) {
 		goto out;
 	} else {
@@ -605,8 +602,8 @@ untar:
 	}
 
 out:
-	free(filename);
-	free(url);
+	free_string(&filename);
+	free_string(&url);
 	return ret;
 }
 
@@ -636,17 +633,17 @@ void remove_manifest_files(char *filename, int version, char *hash)
 	fprintf(stderr, "Warning: Removing corrupt Manifest.%s artifacts and re-downloading...\n", filename);
 	string_or_die(&file, "%s/%i/Manifest.%s", state_dir, version, filename);
 	unlink(file);
-	free(file);
+	free_string(&file);
 	string_or_die(&file, "%s/%i/Manifest.%s.tar", state_dir, version, filename);
 	unlink(file);
-	free(file);
+	free_string(&file);
 	string_or_die(&file, "%s/%i/Manifest.%s.sig", state_dir, version, filename);
 	unlink(file);
-	free(file);
+	free_string(&file);
 	if (hash != NULL) {
 		string_or_die(&file, "%s/%i/Manifest.%s.%s", state_dir, version, filename, hash);
 		unlink(file);
-		free(file);
+		free_string(&file);
 	}
 }
 
@@ -709,8 +706,8 @@ verify_mom:
 				goto verify_mom;
 			}
 			fprintf(stderr, "WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM version %d\n", version);
-			free(filename);
-			free(url);
+			free_string(&filename);
+			free_string(&url);
 			free_manifest(manifest);
 			return NULL;
 		}
@@ -722,10 +719,10 @@ verify_mom:
 			/* useless noise to suppress gcc & glibc conspiring
 			 * to make us check the result of system */
 		}
-		free(log_cmd);
+		free_string(&log_cmd);
 	}
-	free(filename);
-	free(url);
+	free_string(&filename);
+	free_string(&url);
 	return manifest;
 
 out:
@@ -823,10 +820,10 @@ static bool is_installed_and_verified(struct file *file)
 	char *fullname = mk_full_filename(path_prefix, file->filename);
 
 	if (verify_file(file, fullname)) {
-		free(fullname);
+		free_string(&fullname);
 		return true;
 	}
-	free(fullname);
+	free_string(&fullname);
 	return false;
 }
 
@@ -1377,10 +1374,10 @@ void remove_files_in_manifest_from_fs(struct manifest *m)
 		iter = iter->next;
 		string_or_die(&fullfile, "%s/%s", path_prefix, file->filename);
 		if (swupd_rm(fullfile) != 0) {
-			free(fullfile);
+			free_string(&fullfile);
 			continue;
 		}
-		free(fullfile);
+		free_string(&fullfile);
 		count++;
 	}
 	fprintf(stderr, "Total deleted files: %i\n", count);

@@ -180,7 +180,7 @@ bool check_mix_exists(void)
 	string_or_die(&fullpath, "%s%s", path_prefix, MIX_DIR);
 
 	dir = opendir(fullpath);
-	free(fullpath);
+	free_string(&fullpath);
 
 	if (dir == NULL) {
 		return false;
@@ -226,7 +226,7 @@ int get_value_from_path(char **contents, const char *path, bool is_abs_path)
 
 	file = fopen(rel_path, "r");
 	if (!file) {
-		free(rel_path);
+		free_string(&rel_path);
 		return ret;
 	}
 
@@ -251,7 +251,7 @@ int get_value_from_path(char **contents, const char *path, bool is_abs_path)
 	ret = 0;
 fail:
 	fclose(file);
-	free(rel_path);
+	free_string(&rel_path);
 	return ret;
 }
 
@@ -276,7 +276,7 @@ static int set_default_value_from_path(char **global, const char *path)
 	ret = get_value_from_path(&ret_str, path, false);
 	if (ret == 0 && ret_str) {
 		string_or_die(global, "%s", ret_str);
-		free(ret_str);
+		free_string(&ret_str);
 	}
 
 	return ret;
@@ -287,9 +287,7 @@ static int set_url(char **global, char *url, const char *path)
 	int ret = 0;
 
 	if (url) {
-		if (*global) {
-			free(*global);
-		}
+		free_string(global);
 		string_or_die(global, "%s", url);
 	} else {
 		if (*global) {
@@ -359,10 +357,7 @@ bool set_state_dir(char *path)
 			return false;
 		}
 
-		if (state_dir) {
-			free(state_dir);
-		}
-
+		free_string(&state_dir);
 		string_or_die(&state_dir, "%s", path);
 	} else {
 		if (state_dir) {
@@ -390,9 +385,7 @@ bool set_format_string(char *userinput)
 	if (userinput) {
 		// allow "staging" as a format string
 		if ((strcmp(userinput, "staging") == 0)) {
-			if (format_string) {
-				free(format_string);
-			}
+			free_string(&format_string);
 			string_or_die(&format_string, "%s", userinput);
 			return true;
 		}
@@ -401,9 +394,7 @@ bool set_format_string(char *userinput)
 		if (!is_valid_integer_format(userinput)) {
 			return false;
 		}
-		if (format_string) {
-			free(format_string);
-		}
+		free_string(&format_string);
 		string_or_die(&format_string, "%s", userinput);
 	} else {
 		/* no option passed; use the default value */
@@ -434,10 +425,7 @@ bool set_path_prefix(char *path)
 		char *tmp;
 
 		/* in case multiple -p options are passed */
-		if (path_prefix) {
-			free(path_prefix);
-		}
-
+		free_string(&path_prefix);
 		string_or_die(&tmp, "%s", path);
 
 		/* ensure path_prefix is absolute, at least '/', ends in '/',
@@ -448,21 +436,20 @@ bool set_path_prefix(char *path)
 			cwd = get_current_dir_name();
 			if (cwd == NULL) {
 				fprintf(stderr, "Unable to get current directory name (%s)\n", strerror(errno));
-				free(tmp);
+				free_string(&tmp);
 				return false;
 			}
 
-			free(tmp);
+			free_string(&tmp);
 			string_or_die(&tmp, "%s/%s", cwd, path);
-
-			free(cwd);
+			free_string(&cwd);
 		}
 
 		len = strlen(tmp);
 		if (!len || (tmp[len - 1] != '/')) {
 			char *tmp_old = tmp;
 			string_or_die(&tmp, "%s/", tmp_old);
-			free(tmp_old);
+			free_string(&tmp_old);
 		}
 
 		path_prefix = tmp;
@@ -591,33 +578,17 @@ bool init_globals(void)
 
 void free_globals(void)
 {
-	/* freeing all globals and set ALL them to NULL
+	/* freeing all globals and set ALL them to NULL (via free_string)
 	 * to avoid memory corruption on multiple calls
 	 * to swupd_init() */
-	free(content_url);
-	content_url = NULL;
-
-	free(version_url);
-	version_url = NULL;
-
-	free(path_prefix);
-	path_prefix = NULL;
-
-	free(format_string);
-	format_string = NULL;
-
-	free(mounted_dirs);
-	mounted_dirs = NULL;
-
-	free(state_dir);
-	state_dir = NULL;
-
+	free_string(&content_url);
+	free_string(&version_url);
+	free_string(&path_prefix);
+	free_string(&format_string);
+	free_string(&mounted_dirs);
+	free_string(&state_dir);
 	list_free_list(post_update_actions);
-
-	if (bundle_to_add != NULL) {
-		free(bundle_to_add);
-		bundle_to_add = NULL;
-	}
+	free_string(&bundle_to_add);
 }
 
 void save_cmd(char **argv)

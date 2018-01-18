@@ -102,7 +102,7 @@ static int swupd_curl_hashmap_insert(struct file *file)
 		/* file exists */
 		if (verify_file(file, targetfile)) {
 			/* hash matches, no download necessary */
-			free(targetfile);
+			free_string(&targetfile);
 			pthread_mutex_unlock(&bucket->mutex);
 			return 1;
 		} else {
@@ -110,14 +110,14 @@ static int swupd_curl_hashmap_insert(struct file *file)
 			unlink(targetfile);
 		}
 	}
-	free(targetfile);
+	free_string(&targetfile);
 
 	// hash not in queue and not present in staged
 
 	// clean up in case any prior download failed in a partial state
 	string_or_die(&tar_dotfile, "%s/download/.%s.tar", state_dir, file->hash);
 	unlink(tar_dotfile);
-	free(tar_dotfile);
+	free_string(&tar_dotfile);
 
 	// queue the hash for download
 	iter = bucket->list;
@@ -244,7 +244,7 @@ static int check_tarfile_content(struct file *file, const char *tarfilename)
 
 	pclose(tar);
 free_tarcommand:
-	free(tarcommand);
+	free_string(&tarcommand);
 
 	return err;
 }
@@ -271,9 +271,9 @@ int untar_full_download(void *data)
 		if (verify_file(file, targetfile)) {
 			unlink(tar_dotfile);
 			unlink(tarfile);
-			free(tar_dotfile);
-			free(tarfile);
-			free(targetfile);
+			free_string(&tar_dotfile);
+			free_string(&tarfile);
+			free_string(&targetfile);
 			return 0;
 		} else {
 			unlink(tarfile);
@@ -286,10 +286,10 @@ int untar_full_download(void *data)
 
 	err = rename(tar_dotfile, tarfile);
 	if (err) {
-		free(tar_dotfile);
+		free_string(&tar_dotfile);
 		goto exit;
 	}
-	free(tar_dotfile);
+	free_string(&tar_dotfile);
 
 	err = check_tarfile_content(file, tarfile);
 	if (err) {
@@ -300,7 +300,7 @@ int untar_full_download(void *data)
 	char *outputdir;
 	string_or_die(&outputdir, "%s/staged", state_dir);
 	err = extract_to(tarfile, outputdir);
-	free(outputdir);
+	free_string(&outputdir);
 	if (err) {
 		fprintf(stderr, "ignoring tar extract failure for fullfile %s.tar (ret %d)\n",
 			file->hash, err);
@@ -323,8 +323,8 @@ int untar_full_download(void *data)
 	}
 
 exit:
-	free(tarfile);
-	free(targetfile);
+	free_string(&tarfile);
+	free_string(&targetfile);
 	if (err) {
 		unlink_all_staged_content(file);
 	}
@@ -425,10 +425,7 @@ static int perform_curl_io_and_complete(int count, bool bounded)
 
 			unlink_all_staged_content(file);
 		}
-		if (file->staging) {
-			free(file->staging);
-			file->staging = NULL;
-		}
+		free_string(&file->staging);
 
 		/* NOTE: Intentionally no removal of file from hashmap.  All
 		 * needed files need determined and queued in one complete
@@ -634,9 +631,9 @@ void full_download(struct file *file)
 out_bad:
 	failed = list_prepend_data(failed, file);
 	free_curl_list_data(file);
-	free(filename);
+	free_string(&filename);
 out_good:
-	free(url);
+	free_string(&url);
 }
 
 struct list *end_full_download(void)

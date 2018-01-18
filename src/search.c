@@ -389,17 +389,17 @@ static double query_total_download_size(struct list *list)
 				      file->last_change, file->filename);
 
 			ret = swupd_query_url_content_size(url);
-			free(url);
+			free_string(&url);
 			if (ret != -1) {
 				/* Convert file size from bytes to MB */
 				ret = ret / 1000000;
 				size_sum += ret;
 			} else {
-				free(untard_file);
+				free_string(&untard_file);
 				return ret;
 			}
 		}
-		free(untard_file);
+		free_string(&untard_file);
 	}
 
 	return size_sum;
@@ -472,12 +472,12 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 				      file->filename);
 
 			fprintf(stderr, "Error: Failure reading from %s\n", url);
-			free(url);
+			free_string(&url);
 		}
 
 		unlink(tarfile);
-		free(untard_file);
-		free(tarfile);
+		free_string(&untard_file);
+		free_string(&tarfile);
 	}
 
 	if (did_download) {

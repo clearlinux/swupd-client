@@ -357,6 +357,7 @@ extern void swupd_deinit(int lock_fd, struct list **subs);
 extern int swupd_init(int *lock_fd);
 extern void copyright_header(const char *name);
 extern void string_or_die(char **strp, const char *fmt, ...);
+extern void free_string(char **s);
 void update_motd(int new_release);
 void delete_motd(void);
 extern int get_dirfd_path(const char *fullname);

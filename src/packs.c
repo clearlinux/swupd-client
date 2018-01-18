@@ -47,7 +47,7 @@ static int download_pack(int oldversion, int newversion, char *module, int is_mi
 
 	err = lstat(filename, &stat);
 	if (err == 0 && stat.st_size == 0) {
-		free(filename);
+		free_string(&filename);
 		return 0;
 	}
 
@@ -55,22 +55,22 @@ static int download_pack(int oldversion, int newversion, char *module, int is_mi
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", MIX_STATE_DIR, newversion, module, oldversion);
 		err = link(url, filename);
 		if (err) {
-			free(filename);
-			free(url);
+			free_string(&filename);
+			free_string(&url);
 			return err;
 		}
 		printf("Linked %s to %s\n", url, filename);
-		free(url);
+		free_string(&url);
 	} else {
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, newversion, module, oldversion);
 
 		err = swupd_curl_get_file(url, filename, NULL, NULL, resume_ok);
 		if (err) {
-			free(url);
+			free_string(&url);
 			if ((lstat(filename, &stat) == 0) && (stat.st_size == 0)) {
 				unlink(filename);
 			}
-			free(filename);
+			free_string(&filename);
 			return err;
 		}
 	}
@@ -81,7 +81,7 @@ static int download_pack(int oldversion, int newversion, char *module, int is_mi
 	unlink(filename);
 	/* make a zero sized file to prevent redownload */
 	tarfile = fopen(filename, "w");
-	free(filename);
+	free_string(&filename);
 	if (tarfile) {
 		fclose(tarfile);
 	}

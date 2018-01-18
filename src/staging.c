@@ -49,7 +49,7 @@ static int create_staging_renamedir(char *rename_tmpdir)
 		 * confusion */
 		;
 	}
-	free(rmcommand);
+	free_string(&rmcommand);
 
 	ret = mkdir(rename_tmpdir, S_IRWXU);
 	if (ret == -1 && errno != EEXIST) {
@@ -101,7 +101,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 		fprintf(stderr, "Error: Update target exists but is NOT a directory: %s\n", targetpath);
 	}
 
-	free(targetpath);
+	free_string(&targetpath);
 	string_or_die(&target, "%s%s/.update.%s", path_prefix, rel_dir, base);
 	ret = swupd_rm(target);
 	if (ret < 0 && ret != -ENOENT) {
@@ -124,7 +124,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 			}
 		}
 	}
-	free(statfile);
+	free_string(&statfile);
 
 	if (file->is_dir || S_ISDIR(s.st_mode)) {
 		/* In the btrfs only scenario there was an implicit
@@ -154,7 +154,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 		if (WIFEXITED(ret)) {
 			ret = WEXITSTATUS(ret);
 		}
-		free(tarcommand);
+		free_string(&tarcommand);
 		if (rename(rename_target, original)) {
 			ret = -errno;
 			goto out;
@@ -191,7 +191,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 			if (WIFEXITED(ret)) {
 				ret = WEXITSTATUS(ret);
 			}
-			free(tarcommand);
+			free_string(&tarcommand);
 			ret = rename(rename_target, original);
 			if (ret) {
 				ret = -errno;
@@ -202,30 +202,24 @@ int do_staging(struct file *file, struct manifest *MoM)
 		struct stat buf;
 		int err;
 
-		if (file->staging) {
-			/* this must never happen...full file never finished download */
-			free(file->staging);
-			file->staging = NULL;
-		}
-
+		free_string(&file->staging);
 		string_or_die(&file->staging, "%s%s/.update.%s", path_prefix, rel_dir, base);
 
 		err = lstat(file->staging, &buf);
 		if (err != 0) {
-			free(file->staging);
-			file->staging = NULL;
+			free_string(&file->staging);
 			ret = -EDOTFILE_WRITE;
 			goto out;
 		}
 	}
 
 out:
-	free(target);
-	free(original);
-	free(rename_target);
-	free(rename_tmpdir);
-	free(tmp);
-	free(tmp2);
+	free_string(&target);
+	free_string(&original);
+	free_string(&rename_target);
+	free_string(&rename_tmpdir);
+	free_string(&tmp);
+	free_string(&tmp2);
 
 	return ret;
 }
@@ -239,7 +233,7 @@ int rename_staged_file_to_final(struct file *file)
 	string_or_die(&target, "%s%s", path_prefix, file->filename);
 
 	if (!file->staging && !file->is_deleted && !file->is_dir) {
-		free(target);
+		free_string(&target);
 		return -1;
 	}
 
@@ -272,11 +266,11 @@ int rename_staged_file_to_final(struct file *file)
 			string_or_die(&lostnfound, "%slost+found", path_prefix);
 			ret = mkdir(lostnfound, S_IRWXU);
 			if ((ret != 0) && (errno != EEXIST)) {
-				free(lostnfound);
-				free(target);
+				free_string(&lostnfound);
+				free_string(&target);
 				return ret;
 			}
-			free(lostnfound);
+			free_string(&lostnfound);
 
 			base = basename(file->filename);
 			string_or_die(&lostnfound, "%slost+found/%s", path_prefix, base);
@@ -286,7 +280,7 @@ int rename_staged_file_to_final(struct file *file)
 				fprintf(stderr, "Error: failed to move %s to lost+found: %s\n",
 					base, strerror(errno));
 			}
-			free(lostnfound);
+			free_string(&lostnfound);
 		} else {
 			ret = rename(file->staging, target);
 			if (ret < 0) {
@@ -297,7 +291,7 @@ int rename_staged_file_to_final(struct file *file)
 		}
 	}
 
-	free(target);
+	free_string(&target);
 	return ret;
 }
 

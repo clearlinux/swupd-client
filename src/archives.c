@@ -141,7 +141,7 @@ int extract_to(const char *tarfile, const char *outputdir)
 		char *fullpath;
 		string_or_die(&fullpath, "%s/%s", outputdir, archive_entry_pathname(entry));
 		archive_entry_set_pathname(entry, fullpath);
-		free(fullpath);
+		free_string(&fullpath);
 
 		/* write archive header, if successful continue to copy data */
 		r = archive_write_header(ext, entry);

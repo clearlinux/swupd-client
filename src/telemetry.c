@@ -45,7 +45,7 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 
 	fd = mkstemp(filename);
 	if (fd < 0) {
-		free(filename);
+		free_string(&filename);
 		return;
 	}
 
@@ -60,13 +60,13 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 
 	filename_n = basename(filename);
 	if (!filename_n) {
-		free(filename);
+		free_string(&filename);
 		return;
 	}
 
 	string_or_die(&newname, "%s/telemetry/%s", state_dir, filename_n);
 
 	rename(filename, newname);
-	free(filename);
-	free(newname);
+	free_string(&filename);
+	free_string(&newname);
 }

@@ -223,29 +223,12 @@ static void reload_parsed_opts(void)
 
 static void free_saved_opts(void)
 {
-	if (curopts.path_prefix != NULL) {
-		free(curopts.path_prefix);
-	}
-
-	if (curopts.version_url != NULL) {
-		free(curopts.version_url);
-	}
-
-	if (curopts.content_url != NULL) {
-		free(curopts.content_url);
-	}
-
-	if (curopts.format_string != NULL) {
-		free(curopts.format_string);
-	}
-
-	if (curopts.state_dir != NULL) {
-		free(curopts.state_dir);
-	}
-
-	if (curopts.cert_path != NULL) {
-		free(curopts.cert_path);
-	}
+	free_string(&curopts.path_prefix);
+	free_string(&curopts.version_url);
+	free_string(&curopts.content_url);
+	free_string(&curopts.format_string);
+	free_string(&curopts.state_dir);
+	free_string(&curopts.cert_path);
 }
 
 int bundle_remove_main(int argc, char **argv)

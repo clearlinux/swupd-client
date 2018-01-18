@@ -77,7 +77,7 @@ void dump_file_descriptor_leaks(void)
 		if (size && !strstr(buffer, "socket")) {
 			fprintf(stderr, "Possible filedescriptor leak: fd_number=\"%s\",fd_details=\"%s\"\n", entry->d_name, buffer);
 		}
-		free(filename);
+		free_string(&filename);
 	}
 
 	closedir(dir);

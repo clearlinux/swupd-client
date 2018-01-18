@@ -34,12 +34,12 @@ static char *cmdline_option_deps = NULL;
 
 static void free_has_dep(void)
 {
-	free(cmdline_option_has_dep);
+	free_string(&cmdline_option_has_dep);
 }
 
 static void free_deps(void)
 {
-	free(cmdline_option_deps);
+	free_string(&cmdline_option_deps);
 }
 
 static void print_help(const char *name)

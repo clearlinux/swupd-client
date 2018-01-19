@@ -114,6 +114,48 @@ properly.
 .sp
 Specify an alternate swupd state directory. Normally \fBswupd\fP uses
 \fB/var/lib/swupd\fP\&.
+.IP \(bu 2
+\fB\-N, \-\-no\-scripts\fP
+.INDENT 2.0
+.INDENT 3.5
+Do not run the post\-update scripts and boot update tool.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fB\-b, \-\-no\-boot\-update\fP
+.INDENT 2.0
+.INDENT 3.5
+Do not update the boot files using clr\-boot\-manager
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fB\-n, \-\-nosigcheck\fP
+.INDENT 2.0
+.INDENT 3.5
+Do not attempt to enforce certificate or signature checking
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fB\-I, \-\-ignore\-time\fP
+.INDENT 2.0
+.INDENT 3.5
+Ignore system/certificate time when validating signature
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fB\-C, \-\-certpath\fP
+.INDENT 2.0
+.INDENT 3.5
+Specify alternate path to swupd certificates
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fB\-t, \-\-time\fP
+.INDENT 2.0
+.INDENT 3.5
+Show verbose time output for swupd operations
+.UNINDENT
+.UNINDENT
 .UNINDENT
 .SH SUBCOMMANDS
 .sp

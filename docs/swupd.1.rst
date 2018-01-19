@@ -100,6 +100,29 @@ used to modify the core behavior and resources that swupd uses.
    Specify an alternate swupd state directory. Normally ``swupd`` uses
    ``/var/lib/swupd``.
 
+- ``-N, --no-scripts``
+
+   Do not run the post-update scripts and boot update tool.
+
+- ``-b, --no-boot-update``
+
+   Do not update the boot files using clr-boot-manager
+
+- ``-n, --nosigcheck``
+
+   Do not attempt to enforce certificate or signature checking
+
+- ``-I, --ignore-time``
+
+   Ignore system/certificate time when validating signature
+
+- ``-C, --certpath``
+
+   Specify alternate path to swupd certificates
+
+- ``-t, --time``
+
+   Show verbose time output for swupd operations
 
 SUBCOMMANDS
 ===========

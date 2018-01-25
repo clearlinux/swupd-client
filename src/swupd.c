@@ -38,10 +38,10 @@ static struct subcmd commands[] = {
 	{ "bundle-add", "Install a new bundle", bundle_add_main },
 	{ "bundle-remove", "Uninstall a bundle", bundle_remove_main },
 	{ "bundle-list", "List installed bundles", bundle_list_main },
-	{ "hashdump", "Dumps the HMAC hash of a file", hashdump_main },
+	{ "hashdump", "Dump the HMAC hash of a file", hashdump_main },
 	{ "update", "Update to latest OS version", update_main },
 	{ "verify", "Verify content for OS version", verify_main },
-	{ "check-update", "Checks if a new OS version is available", check_update_main },
+	{ "check-update", "Check if a new OS version is available", check_update_main },
 	{ "search", "Search Clear Linux for a binary or library", search_main },
 	{ 0 }
 };

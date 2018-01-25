@@ -17,7 +17,8 @@ swupd_SOURCES = \
 	$(clr_bundle_rm_SOURCES) \
 	$(clr_bundle_ls_SOURCES) \
 	$(swupd_autoupdate_SOURCES) \
-	$(swupd_search_SOURCES)
+	$(swupd_search_SOURCES) \
+	$(swupd_info_SOURCES)
 
 SWUPD_COMMON_SOURCES = \
 	src/archives.c \
@@ -66,6 +67,7 @@ clr_bundle_rm_SOURCES = src/clr_bundle_rm.c
 clr_bundle_ls_SOURCES = src/clr_bundle_ls.c
 
 swupd_hashdump_SOURCES = src/hashdump.c
+swupd_info_SOURCES = src/info.c
 
 AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS) -I$(top_srcdir)/include
 SWUPD_COMPRESSION_LIBS = $(lzma_LIBS) $(zlib_LIBS) $(bzip2_LIBS)

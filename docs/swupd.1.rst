@@ -323,6 +323,10 @@ SUBCOMMANDS
 
             Matches nothing, because paths are never empty.
 
+``info``
+
+    Shows the current OS version and the URLs used for updates.
+
 
 EXIT STATUS
 ===========

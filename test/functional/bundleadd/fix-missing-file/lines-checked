@@ -6,6 +6,6 @@ Downloading packs
 Retry #3 downloading subscribed packs
 Downloading packs
 Installing bundle(s) files
-Path /foo is missing on the file system
+Path /foo is missing on the file system  fixing
 Calling post-update helper scripts
 Bundle(s) installation done

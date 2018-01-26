@@ -13,7 +13,7 @@ File /usr/bin/foo was not in a pack
 Finishing download of update content...
 Staging file content
 REGEXP:^Update target directory does not exist: .*/target-dir/usr/bin. Trying to fix it$
-Path /usr/bin is missing on the file system
+Path /usr/bin is missing on the file system ... fixing
 Applying update
 Update was applied.
 Update successful. System updated from version 10 to version 100

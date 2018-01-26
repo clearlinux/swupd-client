@@ -1,0 +1,6 @@
+Extracting test-bundle pack for version 10
+Installing bundle(s) files...
+Warning: hash check failed for /testfile
+         will attempt to download fullfile for /testfile
+Path /testfile is missing on the file system ... fixing
+REGEXP:File content hash mismatch for .*

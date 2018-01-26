@@ -808,9 +808,9 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 			if (verify_file(file, target)) {
 				continue;
 			}
-			fprintf(stderr, "Hash did not match for path : %s\n", path);
+			fprintf(stderr, "Hash did not match for path : %s ... fixing\n", path);
 		} else if (ret == -1 && errno == ENOENT) {
-			fprintf(stderr, "Path %s is missing on the file system\n", path);
+			fprintf(stderr, "Path %s is missing on the file system ... fixing\n", path);
 		} else {
 			goto end;
 		}

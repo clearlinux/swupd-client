@@ -730,32 +730,36 @@ download_subscribed_packs:
 	 * Do not install any files to the system until the hash has been
 	 * verified. The verify_fix_path also verifies the hashes. */
 	char *hashpath;
-	char *fullpath; // for the error messages
 	iter = list_head(to_install_files);
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
 
 		string_or_die(&hashpath, "%s/staged/%s", state_dir, file->hash);
-		string_or_die(&fullpath, "%s%s", path_prefix, file->filename);
 
 		if (access(hashpath, F_OK) < 0) {
 			/* fallback to verify_fix_path below, which will check the hash
 			 * itself */
 			free_string(&hashpath);
-			free_string(&fullpath);
 			continue;
 		}
 
 		ret = verify_file(file, hashpath);
 		if (!ret) {
-			fprintf(stderr, "Error: hash check failed for %s\n", fullpath);
+			fprintf(stderr, "Warning: hash check failed for %s\n", file->filename);
+			fprintf(stderr, "         will attempt to download fullfile for %s\n", file->filename);
+			ret = swupd_rm(hashpath);
+			if (ret) {
+				fprintf(stderr, "Error: could not remove bad file %s\n", hashpath);
+				ret = EBUNDLE_INSTALL;
+				free_string(&hashpath);
+				goto out;
+			}
+			// successfully removed, continue and check the next file
 			free_string(&hashpath);
-			free_string(&fullpath);
-			goto out;
+			continue;
 		}
 		free_string(&hashpath);
-		free_string(&fullpath);
 	}
 
 	iter = list_head(to_install_files);

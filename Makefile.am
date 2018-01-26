@@ -124,6 +124,8 @@ BATS = \
 	test/functional/bundleadd/add-existing/test.bats \
 	test/functional/bundleadd/add-multiple/test.bats \
 	test/functional/bundleadd/add-rc/test.bats \
+	test/functional/bundleadd/bad-hash/test.bats \
+	test/functional/bundleadd/bad-hash-state/test.bats \
 	test/functional/bundleadd/boot-file/test.bats \
 	test/functional/bundleadd/boot-skip/test.bats \
 	test/functional/bundleadd/include/test.bats \

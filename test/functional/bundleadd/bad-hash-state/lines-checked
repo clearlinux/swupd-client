@@ -1,0 +1,5 @@
+Installing bundle(s) files...
+Warning: hash check failed for /testfile
+         will attempt to download fullfile for /testfile
+Path /testfile is missing on the file system ... fixing
+Bundle(s) installation done.

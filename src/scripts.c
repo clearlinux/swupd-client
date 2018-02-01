@@ -33,10 +33,28 @@
 #include "config.h"
 #include "swupd.h"
 
+static bool in_container(void)
+{
+        char *detect_container_cmd = NULL;
+        bool ret = false;
+        /* systemd-detect-virt -c does container detection only *
+         * The return code is zero if the system is in a container */
+        string_or_die(&detect_container_cmd, "/usr/bin/systemd-detect-virt -c");
+        ret = !system(detect_container_cmd);
+        free_string(&detect_container_cmd);
+
+        return ret;
+}
+
 static void update_boot(void)
 {
 	char *boot_update_cmd = NULL;
 	__attribute__((unused)) int ret = 0;
+
+        /* Don't run clr-boot-manager update in a container on the rootfs */
+        if (strcmp("/", path_prefix) == 0 && in_container()) {
+                return;
+        }
 
 	if (strcmp("/", path_prefix) == 0) {
 		string_or_die(&boot_update_cmd, "/usr/bin/clr-boot-manager update");

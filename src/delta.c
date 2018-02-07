@@ -38,7 +38,7 @@
 #include "swupd.h"
 #include "xattrs.h"
 
-static void do_delta(struct file *file);
+static void do_delta(char *filename, struct file *file);
 
 void try_delta(struct file *file)
 {
@@ -67,27 +67,17 @@ void try_delta(struct file *file)
 		free_string(&filename);
 		return;
 	}
+	do_delta(filename, file);
 	free_string(&filename);
-
-	do_delta(file);
 }
 
-static void do_delta(struct file *file)
+static void do_delta(char *filename, struct file *file)
 {
 	char *origin;
 	char *dir, *base, *tmp = NULL, *tmp2 = NULL;
 	char *deltafile = NULL;
-	char *filename;
 	int ret;
 	struct stat sb;
-
-	/* check if the full file is there already, because if it is, don't do the delta */
-	string_or_die(&filename, "%s/staged/%s", state_dir, file->hash);
-	ret = lstat(filename, &sb);
-	if (ret == 0) {
-		free_string(&filename);
-		return;
-	}
 
 	string_or_die(&deltafile, "%s/delta/%i-%i-%s-%s", state_dir,
 		      file->deltapeer->last_change, file->last_change, file->deltapeer->hash, file->hash);
@@ -95,7 +85,6 @@ static void do_delta(struct file *file)
 	ret = stat(deltafile, &sb);
 	if (ret != 0) {
 		free_string(&deltafile);
-		free_string(&filename);
 		return;
 	}
 
@@ -129,7 +118,6 @@ static void do_delta(struct file *file)
 out:
 	free_string(&origin);
 	free_string(&deltafile);
-	free_string(&filename);
 	free_string(&tmp);
 	free_string(&tmp2);
 }

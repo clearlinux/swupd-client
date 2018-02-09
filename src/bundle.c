@@ -910,32 +910,55 @@ clean_and_exit:
 	return ret;
 }
 
+static int lex_sort(const void *a, const void *b)
+{
+	const char *name1 = (char *)a;
+	const char *name2 = (char *)b;
+	return strcmp(name1, name2);
+}
+
 /*
- * This function will read /usr/share/clear/bundles/
- * in order to get the bundle names, these will be
- * saved in a list.
+ * This function will read the BUNDLES_DIR (by default
+ * /usr/share/clear/bundles/), get the list of local bundles and print
+ * them sorted.
  */
-void read_local_bundles(struct list **list_bundles)
+int list_local_bundles()
 {
 	char *path = NULL;
 	DIR *dir;
 	struct dirent *ent;
+	struct list *bundles = NULL;
+	struct list *item = NULL;
 
 	string_or_die(&path, "%s/%s", path_prefix, BUNDLES_DIR);
 
 	dir = opendir(path);
-	if (dir) {
-		while ((ent = readdir(dir))) {
-			if ((strcmp(ent->d_name, ".") == 0) ||
-			    (strcmp(ent->d_name, "..") == 0)) {
-				continue;
-			}
-
-			*list_bundles = list_append_data(*list_bundles, ent->d_name);
+	if (!dir) {
+		perror("couldn't open bundles directory");
+		free_string(&path);
+		return EXIT_FAILURE;
+	}
+	while ((ent = readdir(dir))) {
+		if ((strcmp(ent->d_name, ".") == 0) ||
+		    (strcmp(ent->d_name, "..") == 0)) {
+			continue;
 		}
 
-		closedir(dir);
+		bundles = list_append_data(bundles, ent->d_name);
 	}
 
+	item = bundles = list_sort(bundles, lex_sort);
+
+	while (item) {
+		printf("%s\n", (char *)item->data);
+		item = item->next;
+	}
+
+	list_free_list(bundles);
+
+	/* closedir only after we use the strings from readdir. */
+	closedir(dir);
 	free_string(&path);
+
+	return 0;
 }

@@ -38,86 +38,158 @@
 #include "swupd.h"
 #include "xattrs.h"
 
-static void do_delta(char *filename, struct file *file);
-
-void try_delta(struct file *file)
+static bool compute_hash_from_file(char *filename, char *hash)
 {
-	char *filename;
-	struct stat stat;
+	/* TODO: implement this without the indirection of creating a file... */
+	struct file f = {};
 
-	if (file->is_file == 0) {
-		return;
+	f.filename = filename;
+	f.use_xattrs = true;
+
+	populate_file_struct(&f, filename);
+	if (compute_hash(&f, filename) != 0) {
+		return false;
 	}
 
-	if (file->deltapeer == NULL) {
-		return;
-	}
-
-	if (file->deltapeer->is_file == 0) {
-		return;
-	}
-
-	if (file->deltapeer->is_deleted) {
-		return;
-	}
-
-	/* check if the full file is there already, because if it is, don't do the delta */
-	string_or_die(&filename, "%s/staged/%s", state_dir, file->hash);
-	if (lstat(filename, &stat) == 0) {
-		free_string(&filename);
-		return;
-	}
-	do_delta(filename, file);
-	free_string(&filename);
+	hash_assign(&f.hash[0], hash);
+	return true;
 }
 
-static void do_delta(char *filename, struct file *file)
+static void apply_one_delta(char *from_file, char *to_staged, char *delta_file, char *to_hash)
 {
-	char *origin;
-	char *dir, *base, *tmp = NULL, *tmp2 = NULL;
-	char *deltafile = NULL;
-	int ret;
-	struct stat sb;
-
-	string_or_die(&deltafile, "%s/delta/%i-%i-%s-%s", state_dir,
-		      file->deltapeer->last_change, file->last_change, file->deltapeer->hash, file->hash);
-
-	ret = stat(deltafile, &sb);
-	if (ret != 0) {
-		free_string(&deltafile);
+	int ret = apply_bsdiff_delta(from_file, to_staged, delta_file);
+	if (ret) {
 		return;
 	}
 
-	tmp = strdup(file->deltapeer->filename);
-	tmp2 = strdup(file->deltapeer->filename);
+	xattrs_copy(from_file, to_staged);
 
-	dir = dirname(tmp);
-	base = basename(tmp2);
-
-	string_or_die(&origin, "%s/%s/%s", path_prefix, dir, base);
-
-	ret = apply_bsdiff_delta(origin, filename, deltafile);
-	if (ret) {
-		unlink_all_staged_content(file);
-		goto out;
+	char hash[SWUPD_HASH_LEN];
+	if (!compute_hash_from_file(to_staged, &hash[0])) {
+		fprintf(stderr, "Couldn't use delta file %s: hash calculation failed\n", delta_file);
+		(void)remove(to_staged);
+		return;
 	}
-	xattrs_copy(origin, filename);
+	if (!hash_equal(hash, to_hash)) {
+		fprintf(stderr, "Couldn't use delta file %s: application resulted in wrong hash\n", delta_file);
+		(void)remove(to_staged);
+	}
+}
 
-	if (!verify_file(file, filename)) {
-		unlink_all_staged_content(file);
-		goto out;
+/* Check if the delta filename is well-formed, if so return true and fill the from/to
+ * buffers with the corresponding hashes. Return false otherwise. */
+static bool check_delta_filename(const char *delta_name, char *from, char *to)
+{
+	/* Delta files have the form [FROM_VERSION]-[TO_VERSION]-[FROM_HASH]-[TO_HASH]. */
+	const char *s = delta_name;
+
+	/* Ignore versions, deltas will be used based on their hashes only. */
+	for (int i = 0; i < 2; i++) {
+		s = strchr(s, '-');
+		if (!s) {
+			return false;
+		}
+		s++;
 	}
 
-	if (xattrs_compare(origin, filename) != 0) {
-		unlink_all_staged_content(file);
-		goto out;
+	/* Note: SWUPD_HASH_LEN accounts for the NUL-terminator after the hash. */
+	const size_t hash_len = SWUPD_HASH_LEN - 1;
+	if (strlen(s) != (hash_len * 2 + 1)) {
+		return false;
 	}
 
-	unlink(deltafile);
+	if (s[hash_len] != '-') {
+		return false;
+	}
 
-out:
-	free_string(&origin);
-	free_string(&deltafile);
-	free_string(&tmp);
-	free_string(&tmp2);
+	hash_assign(s, from);
+
+	/* Consume the first hash and the separator. */
+	s += hash_len + 1;
+
+	hash_assign(s, to);
+
+	return true;
+}
+
+void apply_deltas(struct manifest *current_manifest)
+{
+	char *delta_dir;
+	string_or_die(&delta_dir, "%s/delta", state_dir);
+
+	DIR *dir = opendir(delta_dir);
+	if (!dir) {
+		/* No deltas available to apply. */
+		return;
+	}
+
+	struct dirent *ent;
+	while ((ent = readdir(dir))) {
+		if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, "..")) {
+			continue;
+		}
+
+		char *to_staged = NULL;
+
+		char *delta_name = ent->d_name;
+		char *delta_file;
+		string_or_die(&delta_file, "%s/%s", delta_dir, delta_name);
+
+		char from[SWUPD_HASH_LEN] = {};
+		char to[SWUPD_HASH_LEN] = {};
+		if (!check_delta_filename(delta_name, &from[0], &to[0])) {
+			fprintf(stderr, "Invalid name for delta file: %s\n", delta_file);
+			goto next;
+		}
+
+		string_or_die(&to_staged, "%s/staged/%s", state_dir, to);
+
+		/* If 'to' file already exists, no need to apply delta. */
+		struct stat stat;
+		if (lstat(to_staged, &stat) == 0) {
+			goto next;
+		}
+
+		/* TODO: Sort the list of files by hash then walk it
+		 * in parallel with the (sorted) results of readdir. */
+
+		struct list *ll = list_head(current_manifest->files);
+		char *found = NULL;
+
+		for (; ll && !found; ll = ll->next) {
+			struct file *file = ll->data;
+			if (file->is_deleted || file->is_ghosted || !file->is_file || !hash_equal(file->hash, from))
+				continue;
+
+			/* Verify the actual file in the disk matches our expectations. */
+			char hash[SWUPD_HASH_LEN];
+			char *filename;
+			string_or_die(&filename, "%s/%s", path_prefix, file->filename);
+
+			if (!compute_hash_from_file(filename, hash) || !hash_equal(file->hash, hash)) {
+				free_string(&filename);
+				continue;
+			}
+
+			found = filename;
+		}
+
+		if (!found) {
+			fprintf(stderr, "Couldn't use delta file %s: no 'from' file to apply was found\n", delta_file);
+			goto next;
+		}
+
+		apply_one_delta(found, to_staged, delta_file, to);
+		free_string(&found);
+
+	next:
+		/* Always remove delta files. Once applied the full staged file will be
+		 * available, so no need to keep the delta around. */
+		swupd_rm(delta_file);
+		free_string(&delta_file);
+		free_string(&to_staged);
+	}
+
+	closedir(dir);
+	free_string(&delta_dir);
 }

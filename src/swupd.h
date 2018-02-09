@@ -132,8 +132,7 @@ struct file {
 	unsigned int is_mix : 1;
 	unsigned int do_not_update : 1;
 
-	struct file *peer;      /* same file in another manifest */
-	struct file *deltapeer; /* the file to do the binary delta against; often same as "peer" except in rename cases */
+	struct file *peer; /* same file in another manifest */
 	struct header *header;
 
 	char *staging; /* output name used during download & staging */
@@ -281,7 +280,7 @@ extern void print_statistics(int version1, int version2);
 
 extern int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required, bool resume_ok);
 
-extern void try_delta(struct file *file);
+extern void apply_deltas(struct manifest *current_manifest);
 extern void full_download(struct file *file);
 extern int start_full_download(bool pipelining);
 extern struct list *end_full_download(void);
@@ -327,7 +326,6 @@ extern void populate_file_struct(struct file *file, char *filename);
 extern bool verify_file(struct file *file, char *filename);
 extern int verify_bundle_hash(struct manifest *manifest, struct file *bundle);
 extern void unlink_all_staged_content(struct file *file);
-extern void link_renames(struct list *newfiles, struct manifest *from_manifest);
 extern void dump_file_descriptor_leaks(void);
 extern int rm_staging_dir_contents(const char *rel_path);
 extern void dump_file_info(struct file *file);

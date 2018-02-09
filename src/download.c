@@ -110,6 +110,7 @@ static int swupd_curl_hashmap_insert(struct file *file)
 			unlink(targetfile);
 		}
 	}
+
 	free_string(&targetfile);
 
 	// hash not in queue and not present in staged

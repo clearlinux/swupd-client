@@ -202,16 +202,6 @@ int bundle_list_main(int argc, char **argv)
 		ret = list_installable_bundles();
 	} else {
 		ret = list_local_bundles();
-
-		current_version = get_current_version(path_prefix);
-		if (current_version < 0) {
-			fprintf(stderr, "Error: Unable to determine current OS version\n");
-			v_lockfile(lock_fd);
-			return ECURRENT_VERSION;
-		}
-
-		/* Should this be a different command */
-		fprintf(stderr, "Current OS version: %d\n", current_version);
 	}
 
 	swupd_deinit(lock_fd, NULL);

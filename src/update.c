@@ -45,24 +45,6 @@ void increment_retries(int *retries, int *timeout)
 	*timeout *= 2;
 }
 
-static void try_delta_loop(struct list *updates)
-{
-	struct list *iter;
-	struct file *file;
-
-	iter = list_head(updates);
-	while (iter) {
-		file = iter->data;
-		iter = iter->next;
-
-		if (!file->is_file) {
-			continue;
-		}
-
-		try_delta(file);
-	}
-}
-
 static struct list *full_download_loop(struct list *updates, int isfailed)
 {
 	struct list *iter;
@@ -158,10 +140,8 @@ TRY_DOWNLOAD:
 	}
 
 	if (failed != NULL) {
-		try_delta_loop(failed);
 		failed = full_download_loop(failed, 1);
 	} else {
-		try_delta_loop(updates);
 		failed = full_download_loop(updates, 0);
 	}
 
@@ -547,13 +527,17 @@ download_packs:
 		goto clean_exit;
 	}
 	grabtime_stop(&times);
-	grabtime_start(&times, "Create Update List");
+
+	grabtime_start(&times, "Apply deltas");
+	apply_deltas(current_manifest);
+	grabtime_stop(&times);
+
 	/* Step 6: some more housekeeping */
 	/* TODO: consider trying to do less sorting of manifests */
 
-	updates = create_update_list(current_manifest, server_manifest);
+	grabtime_start(&times, "Create Update List");
 
-	link_renames(updates, current_manifest); /* TODO: Have special lists for candidate and renames */
+	updates = create_update_list(current_manifest, server_manifest);
 
 	print_statistics(current_version, server_version);
 	grabtime_stop(&times);

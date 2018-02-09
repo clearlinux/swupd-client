@@ -89,43 +89,6 @@ int file_sort_filename_reverse(const void *a, const void *b)
 	return -ret;
 }
 
-static int file_sort_version(const void *a, const void *b)
-{
-	struct file *A, *B;
-	A = (struct file *)a;
-	B = (struct file *)b;
-
-	if (A->last_change < B->last_change) {
-		return -1;
-	}
-	if (A->last_change > B->last_change) {
-		return 1;
-	}
-
-	return strcmp(A->filename, B->filename);
-}
-
-static int file_found_in_manifest(struct manifest *manifest, struct file *searched_file)
-{
-	struct list *list;
-	struct file *file;
-
-	list = list_head(manifest->files);
-	while (list) {
-		file = list->data;
-		list = list->next;
-
-		if (file->is_deleted) {
-			continue;
-		}
-		if (!strcmp(file->filename, searched_file->filename)) {
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
 static int file_has_different_hash_in_manifest(struct manifest *manifest, struct file *searched_file)
 {
 	struct list *list;
@@ -940,8 +903,6 @@ void link_manifests(struct manifest *m1, struct manifest *m2)
 			if (!file1->is_deleted || file2->is_deleted) {
 				file1->peer = file2;
 				file2->peer = file1;
-				file1->deltapeer = file2;
-				file2->deltapeer = file1;
 			}
 
 			list1 = list1->next;
@@ -1001,8 +962,6 @@ void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *su
 		if (ret == 0) {
 			file1->peer = file2;
 			file2->peer = file1;
-			file1->deltapeer = file2;
-			file2->deltapeer = file1;
 			list1 = list1->next;
 			list2 = list2->next;
 
@@ -1297,53 +1256,6 @@ void debug_write_manifest(struct manifest *manifest, char *filename)
 	free(fullfile);
 }
 #endif
-
-void link_renames(struct list *newfiles, struct manifest *from_manifest)
-{
-	struct list *list1, *list2;
-	struct list *targets;
-	struct file *file1, *file2;
-
-	targets = newfiles = list_sort(newfiles, file_sort_version);
-
-	list1 = list_head(newfiles);
-
-	/* todo: sort newfiles and targets by hash */
-
-	while (list1) {
-		file1 = list1->data;
-		list1 = list1->next;
-
-		if (file1->peer || !file1->is_rename) {
-			continue;
-		}
-		if (file1->is_deleted) {
-			continue;
-		}
-		/* now, file1 is the new file that got renamed. time to search the rename targets */
-		list2 = list_head(targets);
-		while (list2) {
-			file2 = list2->data;
-			list2 = list2->next;
-
-			if (!file2->peer || !file2->is_rename) {
-				continue;
-			}
-			if (!file2->is_deleted) {
-				continue;
-			}
-			if (!hash_equal(file2->hash, file1->hash)) {
-				continue;
-			}
-			if (file_found_in_manifest(from_manifest, file2)) {
-				file1->deltapeer = file2->peer;
-				file1->peer = file2->peer;
-				file2->peer->deltapeer = file1;
-				list2 = NULL;
-			}
-		}
-	}
-}
 
 void populate_file_struct(struct file *file, char *filename)
 {

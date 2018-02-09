@@ -120,14 +120,6 @@ void unlink_all_staged_content(struct file *file)
 	string_or_die(&filename, "%s/staged/%s", state_dir, file->hash);
 	(void)remove(filename);
 	free_string(&filename);
-
-	/* delta file */
-	if (file->peer) {
-		string_or_die(&filename, "%s/delta/%i-%i-%s", state_dir,
-			      file->peer->last_change, file->last_change, file->hash);
-		unlink(filename);
-		free_string(&filename);
-	}
 }
 
 /* Ensure that a directory either doesn't exist
@@ -540,9 +532,6 @@ void dump_file_info(struct file *file)
 	if (file->peer) {
 		printf("\tpeer %s(%s)\n", file->peer->filename, file->peer->hash);
 	}
-	if (file->deltapeer) {
-		printf("\tdeltapeer %s(%s)\n", file->deltapeer->filename, file->deltapeer->hash);
-	}
 	if (file->staging) {
 		printf("\tstaging %s\n", file->staging);
 	}
@@ -557,7 +546,7 @@ void free_file_data(void *data)
 		return;
 	}
 
-	/* peer and deltapeer are pointers to files contained
+	/* peer is a pointer to file contained
 	 * in another list and must not be disposed */
 	free_string(&file->filename);
 	free_string(&file->staging);

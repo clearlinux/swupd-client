@@ -154,6 +154,7 @@ BATS = \
 	test/functional/update/apply-full-file-delta/test.bats \
 	test/functional/update/boot-file/test.bats \
 	test/functional/update/boot-skip/test.bats \
+	test/functional/update/delta-without-rename-flag/test.bats \
 	test/functional/update/download/test.bats \
 	test/functional/update/include/test.bats \
 	test/functional/update/include-old-bundle/test.bats \

@@ -80,7 +80,7 @@ int list_installable_bundles()
 		return EMOM_NOTFOUND;
 	}
 
-	list = MoM->manifests;
+	list = MoM->manifests = list_sort(MoM->manifests, file_sort_filename);
 	while (list) {
 		file = list->data;
 		list = list->next;

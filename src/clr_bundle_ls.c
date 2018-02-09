@@ -195,28 +195,24 @@ int bundle_list_main(int argc, char **argv)
 	}
 
 	if (cmdline_option_deps != NULL) {
-		exit(show_included_bundles(cmdline_option_deps));
-	}
-
-	if (cmdline_option_all && cmdline_option_has_dep != NULL) {
-		exit(show_bundle_reqd_by(cmdline_option_has_dep, true));
+		ret = show_included_bundles(cmdline_option_deps);
 	} else if (cmdline_option_has_dep != NULL) {
-		exit(show_bundle_reqd_by(cmdline_option_has_dep, false));
+		ret = show_bundle_reqd_by(cmdline_option_has_dep, cmdline_option_all);
 	} else if (cmdline_option_all) {
-		exit(list_installable_bundles());
+		ret = list_installable_bundles();
+	} else {
+		ret = list_local_bundles();
+
+		current_version = get_current_version(path_prefix);
+		if (current_version < 0) {
+			fprintf(stderr, "Error: Unable to determine current OS version\n");
+			v_lockfile(lock_fd);
+			return ECURRENT_VERSION;
+		}
+
+		/* Should this be a different command */
+		fprintf(stderr, "Current OS version: %d\n", current_version);
 	}
-
-	ret = list_local_bundles();
-
-	current_version = get_current_version(path_prefix);
-	if (current_version < 0) {
-		fprintf(stderr, "Error: Unable to determine current OS version\n");
-		v_lockfile(lock_fd);
-		return ECURRENT_VERSION;
-	}
-
-	/* Should this be a different command */
-	fprintf(stderr, "Current OS version: %d\n", current_version);
 
 	swupd_deinit(lock_fd, NULL);
 

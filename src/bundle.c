@@ -50,25 +50,15 @@ int list_installable_bundles()
 	struct file *file;
 	struct manifest *MoM = NULL;
 	int current_version;
-	int lock_fd;
-	int ret;
-
-	ret = swupd_init(&lock_fd);
-	if (ret != 0) {
-		fprintf(stderr, "Error: Failed updater initialization. Exiting now\n");
-		return ret;
-	}
 
 	if (swupd_curl_check_network()) {
 		fprintf(stderr, "Error: Network issue, unable to download manifest\n");
-		v_lockfile(lock_fd);
 		return ENOSWUPDSERVER;
 	}
 
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
 		fprintf(stderr, "Error: Unable to determine current OS version\n");
-		v_lockfile(lock_fd);
 		return ECURRENT_VERSION;
 	}
 
@@ -76,7 +66,6 @@ int list_installable_bundles()
 
 	MoM = load_mom(current_version, false, false);
 	if (!MoM) {
-		v_lockfile(lock_fd);
 		return EMOM_NOTFOUND;
 	}
 
@@ -88,7 +77,6 @@ int list_installable_bundles()
 	}
 
 	free_manifest(MoM);
-	v_lockfile(lock_fd);
 	return 0;
 }
 

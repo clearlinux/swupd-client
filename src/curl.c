@@ -94,8 +94,7 @@ int swupd_curl_init(void)
 		fallback_capaths[0] = NULL;
 		i = 1;
 
-		tok = strtok_r(str, ":", &ctx);
-		do {
+		for (tok = strtok_r(str, ":", &ctx); tok; tok = strtok_r(NULL, ":", &ctx)) {
 			if (stat(tok, &st)) {
 				continue;
 			}
@@ -108,8 +107,7 @@ int swupd_curl_init(void)
 			}
 			fallback_capaths[i] = strdup(tok);
 			i++;
-
-		} while ((tok = strtok_r(NULL, ":", &ctx)));
+		}
 		fallback_capaths_no = i;
 		free_string(&str);
 	}

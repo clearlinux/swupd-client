@@ -176,20 +176,11 @@ err:
 	return false;
 }
 
-static int lex_sort(const void *a, const void *b)
-{
-	const char *name1 = (char *)a;
-	const char *name2 = (char *)b;
-	return strcmp(name1, name2);
-}
-
 int bundle_list_main(int argc, char **argv)
 {
 	int current_version;
 	int lock_fd;
 	int ret;
-	struct list *list_bundles = NULL;
-	struct list *item = NULL;
 
 	copyright_header("bundle list");
 
@@ -215,6 +206,8 @@ int bundle_list_main(int argc, char **argv)
 		exit(list_installable_bundles());
 	}
 
+	ret = list_local_bundles();
+
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
 		fprintf(stderr, "Error: Unable to determine current OS version\n");
@@ -222,21 +215,10 @@ int bundle_list_main(int argc, char **argv)
 		return ECURRENT_VERSION;
 	}
 
-	read_local_bundles(&list_bundles);
-
-	list_bundles = list_sort(list_bundles, lex_sort);
-
-	item = list_head(list_bundles);
-
-	while (item) {
-		printf("%s\n", (char *)item->data);
-		item = item->next;
-	}
 	/* Should this be a different command */
 	fprintf(stderr, "Current OS version: %d\n", current_version);
 
 	swupd_deinit(lock_fd, NULL);
-	list_free_list(list_bundles);
 
 	return ret;
 }

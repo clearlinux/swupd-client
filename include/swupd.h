@@ -384,7 +384,7 @@ extern void required_by(struct list **list, const char *bundle_name, struct mani
 extern int list_installable_bundles();
 extern int install_bundles_frontend(char **bundles);
 extern int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, bool find_all, int recursion);
-void read_local_bundles(struct list **list_bundles);
+int list_local_bundles();
 
 /* telemetry.c */
 typedef enum telem_prio_t {

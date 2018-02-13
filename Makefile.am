@@ -10,6 +10,7 @@ bin_PROGRAMS = swupd
 swupd_SOURCES = \
 	src/autoupdate.c \
 	src/check_update.c \
+	src/clean.c \
 	src/clr_bundle_add.c \
 	src/clr_bundle_ls.c \
 	src/clr_bundle_rm.c \

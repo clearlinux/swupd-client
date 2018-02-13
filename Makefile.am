@@ -8,17 +8,18 @@ ACLOCAL_AMFLAGS = -I m4
 bin_PROGRAMS = swupd
 
 swupd_SOURCES = \
+	src/autoupdate.c \
+	src/check_update.c \
+	src/clr_bundle_add.c \
+	src/clr_bundle_ls.c \
+	src/clr_bundle_rm.c \
+	src/extra_files.c \
+	src/hashdump.c \
+	src/info.c \
+	src/main.c \
+	src/search.c \
 	src/swupd.c \
-	$(swupd_hashdump_SOURCES) \
-	$(swupd_update_SOURCES) \
-	$(swupd_check_update_SOURCES) \
-	$(swupd_verify_SOURCES) \
-	$(clr_bundle_add_SOURCES) \
-	$(clr_bundle_rm_SOURCES) \
-	$(clr_bundle_ls_SOURCES) \
-	$(swupd_autoupdate_SOURCES) \
-	$(swupd_search_SOURCES) \
-	$(swupd_info_SOURCES)
+	src/verify.c
 
 SWUPD_COMMON_SOURCES = \
 	src/archives.c \
@@ -55,19 +56,6 @@ LIBSWUPD_REVISION=0
 LIBSWUPD_AGE=0
 libswupd_la_LDFLAGS = \
 	-version-info $(LIBSWUPD_CURRENT):$(LIBSWUPD_REVISION):$(LIBSWUPD_AGE)
-
-swupd_update_SOURCES = src/main.c
-swupd_verify_SOURCES = src/verify.c src/extra_files.c
-swupd_check_update_SOURCES = src/check_update.c
-swupd_search_SOURCES = src/search.c
-swupd_autoupdate_SOURCES = src/autoupdate.c
-
-clr_bundle_add_SOURCES = src/clr_bundle_add.c
-clr_bundle_rm_SOURCES = src/clr_bundle_rm.c
-clr_bundle_ls_SOURCES = src/clr_bundle_ls.c
-
-swupd_hashdump_SOURCES = src/hashdump.c
-swupd_info_SOURCES = src/info.c
 
 AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS) -I$(top_srcdir)/include
 SWUPD_COMPRESSION_LIBS = $(lzma_LIBS) $(zlib_LIBS) $(bzip2_LIBS)

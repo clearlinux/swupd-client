@@ -178,7 +178,6 @@ err:
 
 int bundle_list_main(int argc, char **argv)
 {
-	int current_version;
 	int lock_fd;
 	int ret;
 

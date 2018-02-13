@@ -353,7 +353,15 @@ bool set_state_dir(char *path)
 {
 	if (path) {
 		if (path[0] != '/') {
-			fprintf(stderr, "statepath must be a full path starting with '/', not '%c'\n", path[0]);
+			fprintf(stderr, "state dir must be a full path starting with '/', not '%c'\n", path[0]);
+			return false;
+		}
+
+		/* Prevent some disasters: since the state dir can be destroyed and
+		 * reconstructed, make sure we never set those by accident and nuke the
+		 * system. */
+		if (!strcmp(path, "/") || !strcmp(path, "/var") || !strcmp(path, "/usr")) {
+			fprintf(stderr, "Refusing to use '%s' as a state dir because it might be erased first.\n", path);
 			return false;
 		}
 

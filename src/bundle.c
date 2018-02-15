@@ -449,7 +449,7 @@ int remove_bundle(const char *bundle_name)
 		goto out_free_curl;
 	}
 
-	mix_exists = check_mix_exists();
+	mix_exists = (check_mix_exists() & system_on_mix());
 
 	swupd_curl_set_current_version(current_version);
 
@@ -848,7 +848,7 @@ int install_bundles_frontend(char **bundles)
 		goto clean_and_exit;
 	}
 
-	mix_exists = check_mix_exists();
+	mix_exists = (check_mix_exists() & system_on_mix());
 
 	swupd_curl_set_current_version(current_version);
 

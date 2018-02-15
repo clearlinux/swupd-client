@@ -53,6 +53,8 @@ fi
 clearver=$(cat $MIX_DIR/.clearversion | tr -d ' ')
 echo -n "$clearver" | sudo tee "$MIX_DIR/version" > /dev/null
 
+sudo mixer init-mix -clearver $(cat "$MIX_DIR/.clearversion") -mixver $(cat "$MIX_DIR/.mixversion") -config "$BUILDCONF"
+
 if [[ -n "$pkg" && -n "$bundle" ]]; then
 	echo "Adding $pkg to $bundle..."
 

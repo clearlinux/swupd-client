@@ -519,9 +519,6 @@ void dump_file_info(struct file *file)
 	if (file->is_boot) {
 		printf("\tis_boot\n");
 	}
-	if (file->is_rename) {
-		printf("\tis_rename\n");
-	}
 	if (file->is_orphan) {
 		printf("\tis_orphan\n");
 	}

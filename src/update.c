@@ -537,7 +537,7 @@ download_packs:
 
 	grabtime_start(&times, "Create Update List");
 
-	updates = create_update_list(current_manifest, server_manifest);
+	updates = create_update_list(server_manifest);
 
 	print_statistics(current_version, server_version);
 	grabtime_stop(&times);

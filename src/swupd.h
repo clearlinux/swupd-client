@@ -127,7 +127,6 @@ struct file {
 	unsigned int is_config : 1;
 	unsigned int is_state : 1;
 	unsigned int is_boot : 1;
-	unsigned int is_rename : 1;
 	unsigned int is_orphan : 1;
 	unsigned int is_mix : 1;
 	unsigned int do_not_update : 1;
@@ -213,7 +212,7 @@ extern int file_sort_filename_reverse(const void *a, const void *b);
 extern struct manifest *load_mom(int version, bool latest, bool mix_exists);
 extern struct manifest *load_manifest(int current, int version, struct file *file, struct manifest *mom, bool header_only);
 extern struct manifest *load_manifest_full(int version, bool mix);
-extern struct list *create_update_list(struct manifest *current, struct manifest *server);
+extern struct list *create_update_list(struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
 extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2, bool server);
 extern void free_manifest(struct manifest *manifest);

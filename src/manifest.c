@@ -89,28 +89,6 @@ int file_sort_filename_reverse(const void *a, const void *b)
 	return -ret;
 }
 
-static int file_has_different_hash_in_manifest(struct manifest *manifest, struct file *searched_file)
-{
-	struct list *list;
-	struct file *file;
-
-	list = list_head(manifest->files);
-	while (list) {
-		file = list->data;
-		list = list->next;
-
-		if (file->is_deleted) {
-			continue;
-		}
-		if (!strcmp(file->filename, searched_file->filename) &&
-		    !hash_equal(file->hash, searched_file->hash)) {
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
 static struct manifest *alloc_manifest(int version, char *component)
 {
 	struct manifest *manifest;
@@ -324,7 +302,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		}
 
 		if (c[3] == 'r') {
-			file->is_rename = 1;
+			/* rename flag is ignored */
 		} else if (c[3] == 'm') {
 			file->is_mix = 1;
 			manifest->is_mix = 1;
@@ -823,10 +801,10 @@ static bool is_installed_and_verified(struct file *file)
 	return false;
 }
 
-/* Find files which need updated based on deltas in last_change.
+/* Find files which need updated based on differences in last_change.
    Should let further do_not_update policy be handled in the caller, but for
    now some hacky exclusions are done here. */
-struct list *create_update_list(struct manifest *current, struct manifest *server)
+struct list *create_update_list(struct manifest *server)
 {
 	struct list *output = NULL;
 	struct list *list;
@@ -864,8 +842,7 @@ struct list *create_update_list(struct manifest *current, struct manifest *serve
 		/* Note: at this stage, "untracked" files are always "new"
 		 * files, so they will not have a peer. */
 		if (!file->peer ||
-		    (file->peer && file->last_change > file->peer->last_change) ||
-		    (file->is_rename && file_has_different_hash_in_manifest(current, file))) {
+		    (file->peer && file->last_change > file->peer->last_change)) {
 			/* check and if needed mark as do_not_update */
 			(void)ignore(file);
 			/* check if we need to run scripts/update the bootloader/etc */
@@ -1053,6 +1030,9 @@ struct list *recurse_manifest(struct manifest *manifest, struct list *subs, cons
 	return bundles;
 }
 
+/* Takes the combination of files from several manifests and remove duplicated
+ * entries. Such cases happen when two bundles have the same file in their manifest with
+ * different status or version (last_changed). */
 struct list *consolidate_files(struct list *files)
 {
 	struct list *list, *next, *tmp;
@@ -1067,34 +1047,8 @@ struct list *consolidate_files(struct list *files)
 	 * "list" and "next" point to the first and second in a series of perhaps
 	 * many objects referring to the same filename.  As we determine which file out
 	 * of multiples to keep in our consolidated, deduplicated, filename sorted list
-	 * there are Manifest invariants to maintain.  The following table shows the
-	 * associated decision matrix.  Note that "file" may be a file, directory or
-	 * symlink.
-	 *
-	 *         | File 2:
-	 *         |  A'    B'    C'    D'
-	 * File 1: |------------------------
-	 *    A    |  -  |  2  |  2  |  2  |
-	 *    B    |  1  |  -  |  2  |  2  |
-	 *    C    |  1  |  1  |  -  |  X  |
-	 *    D    |  1  |  1  |  X  |  X  |
-	 *
-	 *   State for file1 {A,B,C,D}
-	 *         for file2 {A',B',C',D'}
-	 *       A:  is_deleted && !is_rename
-	 *       B:  is_deleted &&  is_rename
-	 *       C: !is_deleted && (file1->hash == file2->hash)
-	 *       D: !is_deleted && (file1->hash != file2->hash)
-	 *
-	 *   Action
-	 *       -: Don't Care   - choose/remove either file
-	 *       X: Error State  - remove both files, LOG error
-	 *       1: choose file1 - remove file2
-	 *       2: choose file2 - remove file1
-	 *
-	 * NOTE: the code below could be rewritten to be more "efficient", but clarity
-	 *       and concreteness here are of utmost importance if we are to correctly
-	 *       maintain the installed system's state in the filesystem across updates
+	 * there are Manifest invariants to maintain.
+	 * Note that "file" may be a file, directory or symlink.
 	 */
 	list = list_head(files);
 	while (list) {
@@ -1105,21 +1059,49 @@ struct list *consolidate_files(struct list *files)
 		file1 = list->data;
 		file2 = next->data;
 
+		/* If the filenames are different, nothing to consolidate, just move on. */
 		if (strcmp(file1->filename, file2->filename)) {
 			list = next;
 			continue;
-		} /* from here on, file1 and file2 have a filename match */
+		}
 
-		/* (case 1) C and C'               : choose file1
-		 * this is the most common case, so test it first */
-		if (!file1->is_deleted && !file2->is_deleted && hash_equal(file1->hash, file2->hash)) {
-			/* always drop the untracked file if there is a tracked file */
+		/* From here on, file1 and file2 have a filename match. */
+
+		/* If both files are present, this is the most common case. */
+		if (!file1->is_deleted && !file2->is_deleted) {
+
+			/* If the hashes don't match, we have an inconsistency in the
+			 * manifest. Exclude both from the list. */
+			if (!hash_equal(file1->hash, file2->hash)) {
+				tmp = next->next;
+				list_free_item(list, NULL);
+				list_free_item(next, NULL);
+				list = tmp;
+				telemetry(TELEMETRY_CRIT,
+					  "inconsistent-file-hash",
+					  "filename=%s\n"
+					  "hash1=%s\n"
+					  "version1=%d\n"
+					  "hash2=%s\n"
+					  "version2=%d\n",
+					  file1->filename,
+					  file1->hash,
+					  file1->last_change,
+					  file2->hash,
+					  file2->last_change);
+				continue;
+			}
+
+			/* Prefer the tracked one, since that will prevent download a file
+			 * that is already in the system. Then prefer the older version
+			 * since it is more likely it will contain a fullfile for it in case
+			 * we need to download. */
 			if (file1->is_tracked && !file2->is_tracked) {
 				list_free_item(next, NULL);
 			} else if (!file1->is_tracked && file2->is_tracked) {
 				list_free_item(list, NULL);
 				list = next;
-			} else if (file1->last_change <= file2->last_change) { /* drop the newer of the two */
+			} else if (file1->last_change <= file2->last_change) {
 				list_free_item(next, NULL);
 			} else {
 				list_free_item(list, NULL);
@@ -1128,8 +1110,9 @@ struct list *consolidate_files(struct list *files)
 			continue;
 		}
 
+		/* If both files are deleted, pick the newer deletion. This will make an
+		 * update not ignore a new deletion. */
 		if (file1->is_deleted && file2->is_deleted) {
-			/* keep the newer of the two */
 			if (file1->last_change > file2->last_change) {
 				list_free_item(next, NULL);
 			} else {
@@ -1139,35 +1122,13 @@ struct list *consolidate_files(struct list *files)
 			continue;
 		}
 
-		/* (case 2) A'                     : choose file1 */
-		if (file2->is_deleted && !file2->is_rename) {
+		/* Otherwise, pick the present file. */
+		if (file2->is_deleted) {
 			list_free_item(next, NULL);
-			continue;
-		}
-		/* (case 3) A                      : choose file2 */
-		if (file1->is_deleted && !file1->is_rename) {
+		} else {
 			list_free_item(list, NULL);
 			list = next;
-			continue;
 		}
-		/* (case 4) B' AND NOT A           : choose file 1*/
-		if (file2->is_deleted && file2->is_rename) { // && !(file1->is_deleted && !file1->is_rename)
-			list_free_item(next, NULL);
-			continue;
-		}
-
-		/* (case 5) B AND NOT (A' OR B')   : choose file2 */
-		if (file1->is_deleted && file1->is_rename) { // && !(file2->is_deleted)
-			list_free_item(list, NULL);
-			list = next;
-			continue;
-		}
-
-		/* (case 6) all others constitute errors */
-		tmp = next->next;
-		list_free_item(list, NULL);
-		list_free_item(next, NULL);
-		list = tmp;
 	}
 
 	return list;
@@ -1208,10 +1169,6 @@ static char *type_to_string(struct file *file)
 	}
 	if (file->is_boot) {
 		type[2] = 'b';
-	}
-
-	if (file->is_rename) {
-		type[3] = 'r';
 	}
 
 	return type;

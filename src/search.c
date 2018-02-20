@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <libgen.h>
 
 #include "config.h"
 #include "swupd.h"
@@ -39,6 +40,121 @@ bool init = false;
 
 static char search_type = '0';
 static char scope = '0';
+
+struct bundle_result {
+	char bundle_name[256];
+	long size;
+	double score;
+	struct list *files;
+};
+
+struct file_result {
+	char filename[PATH_MAX+1];
+	double score;
+};
+
+static struct list *results;
+
+
+static void add_bundle_file_result(char *bundlename, char *filename, double score, struct manifest *man) 
+{
+	struct bundle_result *bundle = NULL;
+	struct file_result *file;
+	struct list *ptr;
+
+	ptr = results;
+	while (ptr) {
+		struct bundle_result *item;
+
+		item = ptr->data;
+		if (strcmp(item->bundle_name, bundlename) == 0) {
+			bundle = item;
+			break;
+		}
+		ptr = ptr->next;
+	}
+	if (!bundle) {
+		bundle = calloc(sizeof(struct bundle_result), 1);
+		results = list_append_data(results, bundle);
+		strncpy(bundle->bundle_name, bundlename, 255);
+		bundle->size = man->contentsize / 1024 / 1204;
+		bundle->score = -0.1 * bundle->size;
+	}
+
+	file = calloc(sizeof(struct file_result), 1);
+	strncpy(file->filename, filename, PATH_MAX);
+	bundle->files = list_append_data(bundle->files, file);
+	file->score = score;
+	bundle->score += score;
+}
+
+static int bundle_cmp(const void *a, const void *b)
+{
+	const struct bundle_result *A, *B;
+	A = (struct bundle_result *)a;
+	B = (struct bundle_result *)b;
+	if (A->score > B->score)
+		return -1;
+	if (A->score < B->score)
+		return 1;
+	return 0;
+	
+}
+
+static int file_cmp(const void *a, const void *b)
+{
+	const struct file_result *A, *B;
+	A = (struct file_result *)a;
+	B = (struct file_result *)b;
+	if (A->score > B->score)
+		return -1;
+	if (A->score < B->score)
+		return 1;
+	return 0;
+	
+}
+static void sort_results(void)
+{
+	struct list *ptr;
+	struct bundle_result *b;
+
+	results = list_sort(results, bundle_cmp);
+
+	ptr = results;
+	while (ptr) {
+		b = ptr->data;
+		ptr = ptr->next;
+
+		b->files = list_sort(b->files, file_cmp);
+	}
+}
+
+static void print_final_results(void)
+{
+	struct bundle_result *b;
+	struct list *ptr;
+	int counter = 0;
+
+	ptr = results;
+	while (ptr && counter < 5) {
+		struct list *ptr2;
+		struct file_result *f;
+		int counter2 = 0;
+
+		b = ptr->data;
+		ptr = ptr->next;
+		counter++;
+		printf("Bundle %s   (%li Mb)\n", b->bundle_name, b->size);
+		ptr2 = b->files;
+		while (ptr2 && counter2 < 5) {
+			f = ptr2->data;
+			ptr2 = ptr2->next;
+			printf("\t%s\n", f->filename);
+			counter2++;
+		}
+		printf("\n");
+	}
+}
 
 /* Supported default search paths */
 static char *lib_paths[] = {
@@ -263,12 +379,58 @@ static bool file_search(char *filename, char *path, char *search_term)
 	return false;
 }
 
-/* report_find()
+double guess_score(char *bundle, char *file, char *search_term)
+{
+	double multiplier = 1.0;
+	double score = 1.0;
+
+	char bnb[PATH_MAX];
+	char dnb[PATH_MAX];
+
+	char *bn;
+	char *dn;
+
+	strcpy(bnb, file);
+	strcpy(dnb, file);
+
+	bn = basename(bnb);
+	dn = dirname(dnb);
+
+
+	if (strstr(bundle, "-dev"))
+		multiplier /= 10;
+
+	if (strcmp(dn, "/usr/bin") == 0)
+		score += 5;
+
+	if (strcmp(dn, "/usr/include") == 0)
+		multiplier /= 2;
+
+	if (strstr(bundle, search_term))
+		score += 0.5;
+
+	/* slightly favor shorter filenames */
+	score += (2.0 / strlen(file));
+
+	if (strcmp(bn, search_term) == 0)
+		multiplier *= 5;
+
+
+
+	return multiplier * score;
+}
+
+
+/* report_finds()
  * Report out, respecting verbosity
  */
-static void report_find(char *bundle, char *file)
+static void report_find(char *bundle, char *file, char *search_term, struct manifest *man)
 {
-	printf("'%s'  :  '%s'\n", bundle, file);
+	double score;
+
+	score = guess_score(bundle, file, search_term);
+//	printf("'%s'  :  '%s'   (%5.1f)\n", bundle, file, score);
+	add_bundle_file_result(bundle, file, score, man);
 }
 
 /* do_search()
@@ -321,14 +483,14 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 			} else if (search_type == '0') {
 				/* Search for exact match, not path addition */
 				if (file_search(subfile->filename, "", search_term)) {
-					report_find(file->filename, subfile->filename);
+					report_find(file->filename, subfile->filename, search_term, subman);
 					hit = true;
 				}
 			} else if (search_type == 'l') {
 				/* Check each supported library path for a match */
 				for (i = 0; lib_paths[i] != NULL; i++) {
 					if (file_search(subfile->filename, lib_paths[i], search_term)) {
-						report_find(file->filename, subfile->filename);
+						report_find(file->filename, subfile->filename, search_term, subman);
 						hit = true;
 					}
 				}
@@ -336,7 +498,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 				/* Check each supported path for binaries */
 				for (i = 0; bin_paths[i] != NULL; i++) {
 					if (file_search(subfile->filename, bin_paths[i], search_term)) {
-						report_find(file->filename, subfile->filename);
+						report_find(file->filename, subfile->filename, search_term, subman);
 						hit = true;
 					}
 				}
@@ -366,6 +528,8 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 	if (!hit_count) {
 		fprintf(stderr, "Search term not found.\n");
 	}
+	sort_results();
+	print_final_results();
 }
 
 static double query_total_download_size(struct list *list)

@@ -18,7 +18,8 @@ teardown() {
   run sudo sh -c "$SWUPD search $SWUPD_OPTS test-bin"
 
   [ "$status" -eq 0 ]
-  echo "$output" | grep -q "'test-bundle'  :  '/usr/bin/test-bin'"
+  echo "$output" | grep -q "Bundle test-bundle"
+  echo "$output" | grep -q "/usr/bin/test-bin"
 }
 
 # vi: ft=sh ts=8 sw=2 sts=2 et tw=80

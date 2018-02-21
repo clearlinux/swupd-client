@@ -25,7 +25,6 @@
 #define _GNU_SOURCE
 #include <fcntl.h>
 #include <getopt.h>
-#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,7 +43,7 @@ static char scope = '0';
 /* bundle_result contains the information to print along with
  * the internal relevancy score used to sort the output */
 struct bundle_result {
-	char bundle_name[256];
+	char bundle_name[BUNDLE_NAME_MAXLEN];
 	long size;
 	double score;
 	struct list *files;
@@ -79,8 +78,12 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 	if (!bundle) {
 		bundle = calloc(sizeof(struct bundle_result), 1);
 		results = list_append_data(results, bundle);
-		strncpy(bundle->bundle_name, bundlename, 255);
-		bundle->size = man->contentsize / 1024 / 1204;
+		strncpy(bundle->bundle_name, bundlename, BUNDLE_NAME_MAXLEN - 1);
+		/* calculate bundle size by converting bytes->KB->MB */
+		bundle->size = man->contentsize / 1024 / 1024;
+		/* Arbitrarily assign an initial negative score based on how large the bundle is.
+		 * This is set to negative 1/10th of the bundle size.
+		 * NOTE this bundle->size does not include the bundle includes sizes */
 		bundle->score = -0.1 * bundle->size;
 	}
 
@@ -96,11 +99,13 @@ static int bundle_cmp(const void *a, const void *b)
 	const struct bundle_result *A, *B;
 	A = (struct bundle_result *)a;
 	B = (struct bundle_result *)b;
-	if (A->score > B->score)
+	if (A->score > B->score) {
 		return -1;
-	if (A->score < B->score)
+	} else if (A->score < B->score) {
 		return 1;
-	return 0;
+	} else {
+		return 0;
+	}
 }
 
 static int file_cmp(const void *a, const void *b)
@@ -108,12 +113,15 @@ static int file_cmp(const void *a, const void *b)
 	const struct file_result *A, *B;
 	A = (struct file_result *)a;
 	B = (struct file_result *)b;
-	if (A->score > B->score)
+	if (A->score > B->score) {
 		return -1;
-	if (A->score < B->score)
+	} else if (A->score < B->score) {
 		return 1;
-	return 0;
+	} else {
+		return 0;
+	}
 }
+
 static void sort_results(void)
 {
 	struct list *ptr;
@@ -128,6 +136,18 @@ static void sort_results(void)
 
 		b->files = list_sort(b->files, file_cmp);
 	}
+}
+
+static void free_bundle_result_data(void *data)
+{
+	struct bundle_result *br = (struct bundle_result *)data;
+
+	if (!br) {
+		return;
+	}
+
+	list_free_list(br->files);
+	free(br);
 }
 
 static void print_final_results(void)
@@ -386,36 +406,48 @@ double guess_score(char *bundle, char *file, char *search_term)
 {
 	double multiplier = 1.0;
 	double score = 1.0;
+	char dirname[PATH_MAX];
+	char *bname;
 
-	char bnb[PATH_MAX];
-	char dnb[PATH_MAX];
+	strcpy(dirname, file);
+	// calculate basename
+	bname = strrchr(dirname, '/');
+	// set dirname to be just the dirname
+	*bname = '\0';
+	bname++;
 
-	char *bn;
-	char *dn;
+	/* The following score and multiplier transformations are experimental
+	 * heuristics and should be updated over time based on results and
+	 * feedback from swupd search usage */
 
-	strcpy(bnb, file);
-	strcpy(dnb, file);
-
-	bn = basename(bnb);
-	dn = dirname(dnb);
-
-	if (strstr(bundle, "-dev"))
+	/* dev bundles are less important */
+	if (strstr(bundle, "-dev")) {
 		multiplier /= 10;
+	}
 
-	if (strcmp(dn, "/usr/bin") == 0)
+	/* files in /usr/bin are more important */
+	if (strcmp(dirname, "/usr/bin") == 0) {
 		score += 5;
+	}
 
-	if (strcmp(dn, "/usr/include") == 0)
+	/* files in /usr/include are not as important as other files */
+	if (strcmp(dirname, "/usr/include") == 0) {
 		multiplier /= 2;
+	}
 
-	if (strstr(bundle, search_term))
+	/* if the search term is in the bundle name this is probably the bundle the
+	 * user is looking for. Give it a slight bump. */
+	if (strstr(bundle, search_term)) {
 		score += 0.5;
+	}
 
 	/* slightly favor shorter filenames */
 	score += (2.0 / strlen(file));
 
-	if (strcmp(bn, search_term) == 0)
+	/* if the search term matches the basename give it a substantial score bump */
+	if (strcmp(bname, search_term) == 0) {
 		multiplier *= 5;
+	}
 
 	return multiplier * score;
 }
@@ -529,6 +561,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 	}
 	sort_results();
 	print_final_results();
+	list_free_list_and_data(results, free_bundle_result_data);
 }
 
 static double query_total_download_size(struct list *list)

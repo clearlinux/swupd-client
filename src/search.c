@@ -25,11 +25,11 @@
 #define _GNU_SOURCE
 #include <fcntl.h>
 #include <getopt.h>
+#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <libgen.h>
 
 #include "config.h"
 #include "swupd.h"
@@ -49,14 +49,13 @@ struct bundle_result {
 };
 
 struct file_result {
-	char filename[PATH_MAX+1];
+	char filename[PATH_MAX + 1];
 	double score;
 };
 
 static struct list *results;
 
-
-static void add_bundle_file_result(char *bundlename, char *filename, double score, struct manifest *man) 
+static void add_bundle_file_result(char *bundlename, char *filename, double score, struct manifest *man)
 {
 	struct bundle_result *bundle = NULL;
 	struct file_result *file;
@@ -98,7 +97,6 @@ static int bundle_cmp(const void *a, const void *b)
 	if (A->score < B->score)
 		return 1;
 	return 0;
-	
 }
 
 static int file_cmp(const void *a, const void *b)
@@ -111,7 +109,6 @@ static int file_cmp(const void *a, const void *b)
 	if (A->score < B->score)
 		return 1;
 	return 0;
-	
 }
 static void sort_results(void)
 {
@@ -396,7 +393,6 @@ double guess_score(char *bundle, char *file, char *search_term)
 	bn = basename(bnb);
 	dn = dirname(dnb);
 
-
 	if (strstr(bundle, "-dev"))
 		multiplier /= 10;
 
@@ -415,11 +411,8 @@ double guess_score(char *bundle, char *file, char *search_term)
 	if (strcmp(bn, search_term) == 0)
 		multiplier *= 5;
 
-
-
 	return multiplier * score;
 }
-
 
 /* report_finds()
  * Report out, respecting verbosity
@@ -429,7 +422,7 @@ static void report_find(char *bundle, char *file, char *search_term, struct mani
 	double score;
 
 	score = guess_score(bundle, file, search_term);
-//	printf("'%s'  :  '%s'   (%5.1f)\n", bundle, file, score);
+	//	printf("'%s'  :  '%s'   (%5.1f)\n", bundle, file, score);
 	add_bundle_file_result(bundle, file, score, man);
 }
 

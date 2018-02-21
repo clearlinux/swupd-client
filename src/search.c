@@ -41,6 +41,8 @@ bool init = false;
 static char search_type = '0';
 static char scope = '0';
 
+/* bundle_result contains the information to print along with
+ * the internal relevancy score used to sort the output */
 struct bundle_result {
 	char bundle_name[256];
 	long size;
@@ -48,6 +50,7 @@ struct bundle_result {
 	struct list *files;
 };
 
+/* per-file scoring struct */
 struct file_result {
 	char filename[PATH_MAX + 1];
 	double score;
@@ -55,6 +58,7 @@ struct file_result {
 
 static struct list *results;
 
+/* add a bundle_result to the results list */
 static void add_bundle_file_result(char *bundlename, char *filename, double score, struct manifest *man)
 {
 	struct bundle_result *bundle = NULL;
@@ -133,6 +137,8 @@ static void print_final_results(void)
 	int counter = 0;
 
 	ptr = results;
+	/* TODO: make 5 a constant, potentially configurable during build or runtime
+	 * we are basically printing the top 5 file matches for the top 5 bundles. */
 	while (ptr && counter < 5) {
 		struct list *ptr2;
 		struct file_result *f;

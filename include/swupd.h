@@ -29,6 +29,7 @@ extern "C" {
 
 #define PATH_MAXLEN 4096
 #define CURRENT_OS_VERSION -1
+#define BUNDLE_NAME_MAXLEN 256
 
 #define UNUSED_PARAM __attribute__((__unused__))
 

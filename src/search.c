@@ -47,6 +47,7 @@ struct bundle_result {
 	long size;
 	double score;
 	struct list *files;
+	bool is_tracked;
 };
 
 /* per-file scoring struct */
@@ -85,6 +86,8 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 		 * This is set to negative 1/10th of the bundle size.
 		 * NOTE this bundle->size does not include the bundle includes sizes */
 		bundle->score = -0.1 * bundle->size;
+		/* record if the bundle is tracked on the system */
+		bundle->is_tracked = is_tracked_bundle(bundlename);
 	}
 
 	file = calloc(sizeof(struct file_result), 1);
@@ -167,7 +170,10 @@ static void print_final_results(void)
 		b = ptr->data;
 		ptr = ptr->next;
 		counter++;
-		printf("Bundle %s   (%li Mb)\n", b->bundle_name, b->size);
+		printf("Bundle %s\t(%li Mb)%s\n",
+		       b->bundle_name,
+		       b->size,
+		       b->is_tracked ? "\tinstalled" : "");
 		ptr2 = b->files;
 		while (ptr2 && counter2 < 5) {
 			f = ptr2->data;

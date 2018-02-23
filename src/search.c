@@ -59,7 +59,7 @@ struct file_result {
 static struct list *results;
 
 /* add a bundle_result to the results list */
-static void add_bundle_file_result(char *bundlename, char *filename, double score, struct manifest *man)
+static void add_bundle_file_result(char *bundlename, char *filename, double score, struct manifest *man, struct manifest *MoM)
 {
 	struct bundle_result *bundle = NULL;
 	struct file_result *file;
@@ -77,11 +77,25 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 		ptr = ptr->next;
 	}
 	if (!bundle) {
+		struct list *subs = NULL;
+		struct list *bundles = NULL;
+		bundles = list_prepend_data(bundles, man->component);
+		add_subscriptions(bundles, &subs, MoM->version, MoM, true, 0);
+		list_free_list(bundles);
+		man->submanifests = recurse_manifest(MoM, subs, NULL, false);
+
 		bundle = calloc(sizeof(struct bundle_result), 1);
 		results = list_append_data(results, bundle);
 		strncpy(bundle->bundle_name, bundlename, BUNDLE_NAME_MAXLEN - 1);
-		/* calculate bundle size by converting bytes->KB->MB */
-		bundle->size = man->contentsize / 1024 / 1024;
+		bundle->size = 0;
+		struct list *submanifests = man->submanifests;
+		struct manifest *subman;
+		while (submanifests) {
+			subman = submanifests->data;
+			submanifests = submanifests->next;
+			/* calculate bundle size by converting bytes->KB->MB */
+			bundle->size += subman->contentsize / 1024 / 1024;
+		}
 		/* Arbitrarily assign an initial negative score based on how large the bundle is.
 		 * This is set to negative 1/10th of the bundle size.
 		 * NOTE this bundle->size does not include the bundle includes sizes */
@@ -461,13 +475,13 @@ double guess_score(char *bundle, char *file, char *search_term)
 /* report_finds()
  * Report out, respecting verbosity
  */
-static void report_find(char *bundle, char *file, char *search_term, struct manifest *man)
+static void report_find(char *bundle, char *file, char *search_term, struct manifest *man, struct manifest *MoM)
 {
 	double score;
 
 	score = guess_score(bundle, file, search_term);
 	//	printf("'%s'  :  '%s'   (%5.1f)\n", bundle, file, score);
-	add_bundle_file_result(bundle, file, score, man);
+	add_bundle_file_result(bundle, file, score, man, MoM);
 }
 
 /* do_search()
@@ -520,14 +534,14 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 			} else if (search_type == '0') {
 				/* Search for exact match, not path addition */
 				if (file_search(subfile->filename, "", search_term)) {
-					report_find(file->filename, subfile->filename, search_term, subman);
+					report_find(file->filename, subfile->filename, search_term, subman, MoM);
 					hit = true;
 				}
 			} else if (search_type == 'l') {
 				/* Check each supported library path for a match */
 				for (i = 0; lib_paths[i] != NULL; i++) {
 					if (file_search(subfile->filename, lib_paths[i], search_term)) {
-						report_find(file->filename, subfile->filename, search_term, subman);
+						report_find(file->filename, subfile->filename, search_term, subman, MoM);
 						hit = true;
 					}
 				}
@@ -535,7 +549,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 				/* Check each supported path for binaries */
 				for (i = 0; bin_paths[i] != NULL; i++) {
 					if (file_search(subfile->filename, bin_paths[i], search_term)) {
-						report_find(file->filename, subfile->filename, search_term, subman);
+						report_find(file->filename, subfile->filename, search_term, subman, MoM);
 						hit = true;
 					}
 				}

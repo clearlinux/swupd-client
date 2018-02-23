@@ -299,3 +299,18 @@ struct list *list_clone(struct list *list)
 
 	return clone;
 }
+
+/* deep clone a list of char * */
+struct list *list_deep_clone_strs(struct list *source)
+{
+	struct list *clone = list_clone(source);
+	struct list *src_ptr = list_tail(source);
+
+	while (src_ptr) {
+		char *cloned_item = strdup(src_ptr->data);
+		clone = list_prepend_data(clone, cloned_item);
+		src_ptr = src_ptr->prev;
+	}
+
+	return clone;
+}

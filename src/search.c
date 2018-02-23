@@ -44,10 +44,13 @@ static char scope = '0';
  * the internal relevancy score used to sort the output */
 struct bundle_result {
 	char bundle_name[BUNDLE_NAME_MAXLEN];
+	long topsize;
 	long size;
 	double score;
 	struct list *files;
+	struct list *includes;
 	bool is_tracked;
+	bool seen;
 };
 
 /* per-file scoring struct */
@@ -59,7 +62,7 @@ struct file_result {
 static struct list *results;
 
 /* add a bundle_result to the results list */
-static void add_bundle_file_result(char *bundlename, char *filename, double score, struct manifest *man)
+static void add_bundle_file_result(char *bundlename, char *filename, double score)
 {
 	struct bundle_result *bundle = NULL;
 	struct file_result *file;
@@ -80,12 +83,6 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 		bundle = calloc(sizeof(struct bundle_result), 1);
 		results = list_append_data(results, bundle);
 		strncpy(bundle->bundle_name, bundlename, BUNDLE_NAME_MAXLEN - 1);
-		/* calculate bundle size by converting bytes->KB->MB */
-		bundle->size = man->contentsize / 1024 / 1024;
-		/* Arbitrarily assign an initial negative score based on how large the bundle is.
-		 * This is set to negative 1/10th of the bundle size.
-		 * NOTE this bundle->size does not include the bundle includes sizes */
-		bundle->score = -0.1 * bundle->size;
 		/* record if the bundle is tracked on the system */
 		bundle->is_tracked = is_tracked_bundle(bundlename);
 	}
@@ -153,7 +150,83 @@ static void free_bundle_result_data(void *data)
 	free(br);
 }
 
-static void print_final_results(void)
+/* unmark all bundle_results in bl as seen */
+static void unsee_bundle_results(struct list *bl)
+{
+	struct bundle_result *br;
+	struct list *ptr = list_head(bl);
+
+	while (ptr) {
+		br = ptr->data;
+		br->seen = false;
+		ptr = ptr->next;
+	}
+}
+
+/* recursively calculate size from a complete list of bundle_result structs */
+static long calculate_size(char *bname, struct list *bundle_info, bool installed)
+{
+	struct list *ptr;
+	struct bundle_result *bi;
+	long size = 0;
+	ptr = list_head(bundle_info);
+	while (ptr) {
+		bi = ptr->data;
+		ptr = ptr->next;
+		if (bi->seen || strcmp(bname, bi->bundle_name) != 0) {
+			continue;
+		}
+
+		/* If installed is true the initial call to this recursive
+		 * function was for an installed bundle. In this case we want
+		 * to calculate the contentsize of all included bundles (we
+		 * know they are all installed already) so we can report the
+		 * total installed size on the system.
+		 *
+		 * Otherwise only add the contentsize of bundles not already
+		 * installed on the system. */
+		if (installed || !is_tracked_bundle(bname)) {
+			size += bi->topsize;
+			bi->seen = true;
+		}
+
+		/* add bundle sizes for includes as well */
+		struct list *ptr2;
+		ptr2 = list_head(bi->includes);
+		while (ptr2) {
+			char *inc = NULL;
+			inc = ptr2->data;
+			ptr2 = ptr2->next;
+			/* recursively add included sizes */
+			size += calculate_size(inc, bundle_info, installed);
+		}
+	}
+
+	return size;
+}
+
+static void apply_size_penalty(struct list *bundle_info)
+{
+	struct bundle_result *b;
+	struct list *ptr;
+
+	ptr = list_head(results);
+
+	while (ptr) {
+		b = ptr->data;
+		ptr = ptr->next;
+
+		/* unsee all bundles before calculating size */
+		unsee_bundle_results(bundle_info);
+		/* calculate bundle size for recursive includes */
+		b->size = calculate_size(b->bundle_name, bundle_info, b->is_tracked);
+		/* Arbitrarily assign a score penalty based on how large the bundle is.
+		 * This is set to negative 1/10th of the bundle size. */
+		b->score -= (0.01 * b->size);
+	}
+}
+
+static void print_final_results(char scope)
 {
 	struct bundle_result *b;
 	struct list *ptr;
@@ -170,10 +243,16 @@ static void print_final_results(void)
 		b = ptr->data;
 		ptr = ptr->next;
 		counter++;
-		printf("Bundle %s\t(%li Mb)%s\n",
-		       b->bundle_name,
-		       b->size,
-		       b->is_tracked ? "\tinstalled" : "");
+		/* do not print the size information when the scope is only one bundle ('o')
+		 * because we did not load all bundles and therefore do not have include sizes
+		 * for the result */
+		printf("Bundle %s\t%s", b->bundle_name, b->is_tracked ? "[installed]\t" : "");
+		if (scope != 'o') {
+			printf("(%li MB%s)",
+			       b->size / 1000 / 1000, /* convert from bytes->KB->MB */
+			       b->is_tracked ? " on system" : " to install");
+		}
+		putchar('\n');
 		ptr2 = b->files;
 		while (ptr2 && counter2 < 5) {
 			f = ptr2->data;
@@ -461,13 +540,13 @@ double guess_score(char *bundle, char *file, char *search_term)
 /* report_finds()
  * Report out, respecting verbosity
  */
-static void report_find(char *bundle, char *file, char *search_term, struct manifest *man)
+static void report_find(char *bundle, char *file, char *search_term)
 {
 	double score;
 
 	score = guess_score(bundle, file, search_term);
 	//	printf("'%s'  :  '%s'   (%5.1f)\n", bundle, file, score);
-	add_bundle_file_result(bundle, file, score, man);
+	add_bundle_file_result(bundle, file, score);
 }
 
 /* do_search()
@@ -480,6 +559,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 	struct list *sublist;
 	struct file *file;
 	struct file *subfile;
+	struct list *bundle_info = NULL;
 	struct manifest *subman = NULL;
 	int i;
 	bool done_with_bundle, done_with_search = false;
@@ -498,6 +578,16 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 			fprintf(stderr, "Failed to load manifest %s\n", file->filename);
 			continue;
 		}
+
+		/* record contentsize and includes for install size calculation */
+		struct bundle_result *bundle = NULL;
+		bundle = calloc(sizeof(struct bundle_result), 1);
+		/* copy relevant information over for future use */
+		strncpy(bundle->bundle_name, subman->component, BUNDLE_NAME_MAXLEN - 1);
+		bundle->topsize = subman->contentsize;
+		/* do a deep copy of the includes list */
+		bundle->includes = list_deep_clone_strs(subman->includes);
+		bundle_info = list_prepend_data(bundle_info, bundle);
 
 		if (display_files) {
 			/* Display bundle name. Marked up for pattern matchability */
@@ -520,14 +610,14 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 			} else if (search_type == '0') {
 				/* Search for exact match, not path addition */
 				if (file_search(subfile->filename, "", search_term)) {
-					report_find(file->filename, subfile->filename, search_term, subman);
+					report_find(file->filename, subfile->filename, search_term);
 					hit = true;
 				}
 			} else if (search_type == 'l') {
 				/* Check each supported library path for a match */
 				for (i = 0; lib_paths[i] != NULL; i++) {
 					if (file_search(subfile->filename, lib_paths[i], search_term)) {
-						report_find(file->filename, subfile->filename, search_term, subman);
+						report_find(file->filename, subfile->filename, search_term);
 						hit = true;
 					}
 				}
@@ -535,7 +625,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 				/* Check each supported path for binaries */
 				for (i = 0; bin_paths[i] != NULL; i++) {
 					if (file_search(subfile->filename, bin_paths[i], search_term)) {
-						report_find(file->filename, subfile->filename, search_term, subman);
+						report_find(file->filename, subfile->filename, search_term);
 						hit = true;
 					}
 				}
@@ -565,8 +655,9 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 	if (!hit_count) {
 		fprintf(stderr, "Search term not found.\n");
 	}
+	apply_size_penalty(bundle_info);
 	sort_results();
-	print_final_results();
+	print_final_results(scope);
 	list_free_list_and_data(results, free_bundle_result_data);
 }
 

@@ -54,4 +54,6 @@ void list_free_list(struct list *list);
 /* shallow copy of the the list */
 struct list *list_clone(struct list *list);
 
+/* deep copy of a string list */
+struct list *list_deep_clone_strs(struct list *source);
 #endif

@@ -649,7 +649,7 @@ out_fds:
 void copyright_header(const char *name)
 {
 	fprintf(stderr, PACKAGE " %s " VERSION "\n", name);
-	fprintf(stderr, "   Copyright (C) 2012-2017 Intel Corporation\n");
+	fprintf(stderr, "   Copyright (C) 2012-2018 Intel Corporation\n");
 	fprintf(stderr, "\n");
 }
 

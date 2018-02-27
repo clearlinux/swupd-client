@@ -130,6 +130,22 @@ AS_IF(
   [XATTR=no]
 )
 
+AC_ARG_ENABLE(
+  [manpages],
+  [AS_HELP_STRING([--disable-manpages], [Do not enable manpage generation (disabled by default)])]
+)
+MANPAGES="yes"
+AS_IF(
+  [test -n "$enable_manpages" -a "$enable_manpages" = "yes"],
+  [MANPAGES="$enable_manpages"]
+)
+AS_IF(
+  [test "$enable_manpages" != "no"],
+  [MANPAGES="yes"],
+  [MANPAGES="no"]
+)
+AM_CONDITIONAL([ENABLE_MAN], [test "$enable_manpages" = "yes"])
+
 TARSELINUX="yes"
 AC_ARG_ENABLE(
   [tar-selinux],
@@ -312,13 +328,14 @@ swupd-client
 
 Configuration to build swupd-client:
 
-  Content URL:				${CONTENTURL}
-  Version URL:				${VERSIONURL}
-  Format Identifier:			${FORMATID}
-  Signature verification:		${SIGVERIFICATION}
-  Update certificate path:		${cert_path}
-  Use bzip compression:			${BZIP}
-  Run Tests:				${TESTS}
-  Use extended file attributes		${XATTR}
-  Use --selinux option for tar		${TARSELINUX}
+  Content URL:        ${CONTENTURL}
+  Version URL:        ${VERSIONURL}
+  Format Identifier:      ${FORMATID}
+  Signature verification:   ${SIGVERIFICATION}
+  Update certificate path:    ${cert_path}
+  Use bzip compression:     ${BZIP}
+  Run Tests:        ${TESTS}
+  Manpages:        ${MANPAGES}
+  Use extended file attributes    ${XATTR}
+  Use --selinux option for tar    ${TARSELINUX}
 ])

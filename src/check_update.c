@@ -133,7 +133,6 @@ static int check_update()
 {
 	int current_version, server_version;
 
-	check_root();
 	if (!init_globals()) {
 		return EINIT_GLOBALS;
 	}
@@ -158,7 +157,6 @@ static int check_update()
 		fprintf(stderr, "Current OS version: %d\n", current_version);
 		if (current_version < server_version) {
 			fprintf(stderr, "There is a new OS version available: %d\n", server_version);
-			update_motd(server_version);
 			return 0; /* update available */
 		} else if (current_version >= server_version) {
 			fprintf(stderr, "There are no updates available\n");

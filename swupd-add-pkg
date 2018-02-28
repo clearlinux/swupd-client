@@ -4,7 +4,10 @@ BUILDCONF="/usr/share/mix/builder.conf"
 
 # Auto generate builder.conf if it's not there
 if [ ! -f "$BUILDCONF" ]; then
-echo "[Builder]
+echo "[Mixer]
+LOCAL_BUNDLE_DIR = /usr/share/mix/local-bundles
+
+[Builder]
 SERVER_STATE_DIR = /usr/share/mix/update
 BUNDLE_DIR = /usr/share/mix/mix-bundles
 YUM_CONF = /usr/share/mix/.yum-mix.conf
@@ -75,7 +78,7 @@ sudo mv os-core "$BUNDLE_DIR"
 sudo mixer add-rpms -config "$BUILDCONF"
 
 # Build update content
-sudo mixer build-all -config "$BUILDCONF"
+sudo mixer build all --config "$BUILDCONF"
 
 # Download and verify the upstream Clear MoM
 echo "* Downloading $clearver Manifest.MoM..."

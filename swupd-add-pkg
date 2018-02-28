@@ -1,30 +1,34 @@
-#!/bin/bash -x
+#!/bin/bash
 
 BUILDCONF="/usr/share/mix/builder.conf"
 
 # Auto generate builder.conf if it's not there
 if [ ! -f "$BUILDCONF" ]; then
-echo "[Builder]
+echo "[Mixer]
+LOCAL_BUNDLE_DIR = /usr/share/mix/local-bundles
+
+[Builder]
 SERVER_STATE_DIR = /usr/share/mix/update
-BUNDLE_DIR = /usr/share/mix/mix-bundles
+BUNDLE_DIR = /usr/share/mix/local-bundles
 YUM_CONF = /usr/share/mix/.yum-mix.conf
 CERT = /usr/share/mix/Swupd_Root.pem
 VERSIONS_PATH =/usr/share/mix
-RPMDIR = /usr/share/mix/rpms
-REPODIR = /usr/share/mix/local
+LOCAL_RPM_DIR = /usr/share/mix/rpms
+LOCAL_REPO_DIR = /usr/share/mix/local
 
 [swupd]
-BUNDLE=os-core-update
+BUNDLE=os-core
 CONTENTURL=file:///usr/share/mix/update/www
 VERSIONURL=file:///usr/share/mix/update/www
 FORMAT=1" | sudo tee "$BUILDCONF" > /dev/null
 fi
 
+
 MIX_DIR="/usr/share/mix/"
 OUTPUTDIR="$MIX_DIR/update/www"
-BUNDLE_DIR="$(awk -F '=' '/BUNDLE_DIR/ {print $2}' $BUILDCONF  | tr -d ' ')"
-RPM_DIR="$(awk -F '=' '/RPMDIR/ {print $2}' $BUILDCONF  | tr -d ' ')"
-REPO_DIR="$(awk -F '=' '/REPODIR/ {print $2}' $BUILDCONF  | tr -d ' ')"
+BUNDLE_DIR="$(awk -F '=' '/LOCAL_BUNDLE_DIR/ {print $2}' $BUILDCONF  | tr -d ' ')"
+RPM_DIR="$(awk -F '=' '/LOCAL_RPM_DIR/ {print $2}' $BUILDCONF  | tr -d ' ')"
+REPO_DIR="$(awk -F '=' '/LOCAL_REPO_DIR/ {print $2}' $BUILDCONF  | tr -d ' ')"
 BUILD_STATE_DIR="/var/lib/mix"
 MIX_CERT="$MIX_DIR/Swupd_Root.pem"
 PRIVKEY="$MIX_DIR/private.pem"
@@ -40,42 +44,43 @@ if [ $? -ne 0 ]; then
 fi
 
 # Make sure all the directories exist
-sudo mkdir -p $MIX_DIR $BUNDLE_DIR $REPO_DIR $BUILD_STATE_DIR
-if [ ! -f "$MIX_DIR/.clearversion" ]; then
-	awk -F  "=" '/^VERSION_ID=/ { print $2 }' /usr/lib/os-release | tr -d '\n' | sudo tee "$MIX_DIR/.clearversion" > /dev/null
+sudo mkdir -p $MIX_DIR $REPO_DIR $BUILD_STATE_DIR
+if [ ! -f "$MIX_DIR/upstreamversion" ]; then
+	awk -F  "=" '/^VERSION_ID=/ { print $2 }' /usr/lib/os-release | tr -d '\n' | sudo tee "$MIX_DIR/upstreamversion" > /dev/null
 elif [ "$pkg" -eq "regenerate" ]; then
-	echo -n "$(($(cat $MIX_DIR/.clearversion)*1000))" | sudo tee "$MIX_DIR/.mixversion" > /dev/null
+	echo -n "$(($(cat $MIX_DIR/upstreamversion)*1000))" | sudo tee "$MIX_DIR/mixversion" > /dev/null
 fi
-if [ ! -f "$MIX_DIR/.mixversion" ]; then
-	echo -n "$(($(cat $MIX_DIR/.clearversion)*1000))" | sudo tee "$MIX_DIR/.mixversion" > /dev/null
+if [ ! -f "$MIX_DIR/mixversion" ]; then
+	echo -n "$(($(cat $MIX_DIR/upstreamversion)*1000))" | sudo tee "$MIX_DIR/mixversion" > /dev/null
 fi
 
-clearver=$(cat $MIX_DIR/.clearversion | tr -d ' ')
+clearver=$(cat $MIX_DIR/upstreamversion| tr -d ' ')
 echo -n "$clearver" | sudo tee "$MIX_DIR/version" > /dev/null
 
-sudo mixer init-mix -clearver $(cat "$MIX_DIR/.clearversion") -mixver $(cat "$MIX_DIR/.mixversion") -config "$BUILDCONF"
+cd "$MIX_DIR"
+sudo touch mixbundles
+sudo mixer init --upstream-version $(cat "$MIX_DIR/upstreamversion") --mix-version $(cat "$MIX_DIR/mixversion")
 
 if [[ -n "$pkg" && -n "$bundle" ]]; then
 	echo "Adding $pkg to $bundle..."
+	if [ ! -f "$BUNDLE_DIR/$bundle" ]; then
+		echo "# [TITLE]: $bundle
+# [DESCRIPTION]: Custom bundle
+# [STATUS]: Active
+# [CAPABILITIES]:
+# [MAINTAINER]: Mixer User" | sudo tee "$BUNDLE_DIR/$bundle" > /dev/null
+	fi
 
 	# Write package to bundle definition
 	echo "$pkg" | sudo tee -a "$BUNDLE_DIR/$bundle" > /dev/null
 fi
 
-# Copy os-core from upstream
-sudo -E curl -f -O "https://raw.githubusercontent.com/clearlinux/clr-bundles/$clearver/bundles/os-core"
-if [ $? -eq 22 ]; then
-	echo "ERROR: Could not download os-core bundle ver $clearver"
-	sudo rm -rf "os-core"
-	exit 1
-fi
-sudo mv os-core "$BUNDLE_DIR"
-
 # Copy the rpms into the local database location
-sudo mixer add-rpms -config "$BUILDCONF"
-
-# Build update content
-sudo mixer build-all -config "$BUILDCONF"
+sudo mixer add-rpms --config "$BUILDCONF"
+sudo mixer bundle add "$bundle" os-core --config "$BUILDCONF"
+sudo mixer build chroots --config "$BUILDCONF" --new-chroots
+sudo mixer build update --config "$BUILDCONF" --new-swupd --increment
+cd -
 
 # Download and verify the upstream Clear MoM
 echo "* Downloading $clearver Manifest.MoM..."
@@ -103,7 +108,7 @@ echo "* Verified upstream Manifest.MoM"
 
 ### Combine upstream MoM with Mixer MoM ###
 ###########################################
-mixver=$(cat $MIX_DIR/.mixversion)
+mixver=$(cat $MIX_DIR/mixversion)
 ((mixver-=10))
 filecount=$(grep filecount Manifest.MoM  | cut -d ':' -f 2 | tr -d '\t')
 mixcount=$(grep filecount $OUTPUTDIR/$mixver/Manifest.MoM | cut -d ':' -f 2 | tr -d '\t')

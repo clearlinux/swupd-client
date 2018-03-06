@@ -23,6 +23,7 @@
  */
 
 #define _GNU_SOURCE
+#include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -39,6 +40,7 @@ bool init = false;
 
 static char search_type = '0';
 static char scope = '0';
+int num_results = INT_MAX;
 
 /* bundle_result contains the information to print along with
  * the internal relevancy score used to sort the output */
@@ -102,6 +104,21 @@ static int bundle_cmp(const void *a, const void *b)
 	if (A->score > B->score) {
 		return -1;
 	} else if (A->score < B->score) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+static int bundle_size_cmp(const void *a, const void *b)
+{
+	const struct bundle_result *A, *B;
+	A = (struct bundle_result *)a;
+	B = (struct bundle_result *)b;
+	// smaller before larger
+	if (A->size < B->size) {
+		return -1;
+	} else if (A->size > B->size) {
 		return 1;
 	} else {
 		return 0;
@@ -232,10 +249,11 @@ static void print_final_results(bool display_size)
 	struct list *ptr;
 	int counter = 0;
 
-	ptr = results;
-	/* TODO: make 5 a constant, potentially configurable during build or runtime
-	 * we are basically printing the top 5 file matches for the top 5 bundles. */
-	while (ptr && counter < 5) {
+	ptr = list_head(results);
+	if (num_results != INT_MAX) {
+		printf("Displaying top %d file results per bundle\n\n", num_results);
+	}
+	while (ptr) {
 		struct list *ptr2;
 		struct file_result *f;
 		int counter2 = 0;
@@ -253,12 +271,16 @@ static void print_final_results(bool display_size)
 			       b->is_tracked ? " on system" : " to install");
 		}
 		putchar('\n');
-		ptr2 = b->files;
-		while (ptr2 && counter2 < 5) {
+		ptr2 = list_head(b->files);
+		while (ptr2 && counter2 < num_results) {
 			f = ptr2->data;
 			ptr2 = ptr2->next;
 			printf("\t%s\n", f->filename);
 			counter2++;
+		}
+
+		if (ptr2) {
+			printf("\tfile results truncated...\n");
 		}
 		printf("\n");
 	}
@@ -287,6 +309,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -l, --library           Search paths where libraries are located for a match\n");
 	fprintf(stderr, "   -b, --binary            Search paths where binaries are located for a match\n");
 	fprintf(stderr, "   -s, --scope=[query type] 'b' or 'o' for first hit per (b)undle, or one hit total across the (o)s\n");
+	fprintf(stderr, "   -t, --top=[NUM]         Only display the top NUM results for each bundle\n");
 	fprintf(stderr, "   -d, --display-files	   Output full file list, no search done\n");
 	fprintf(stderr, "   -i, --init              Download all manifests then return, no search done\n");
 	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
@@ -298,10 +321,6 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
 	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
-
-	fprintf(stderr, "\nResults format:\n");
-	fprintf(stderr, " 'Bundle Name'  :  'File matching search term'\n\n");
-	fprintf(stderr, "\n");
 }
 
 static const struct option prog_opts[] = {
@@ -312,6 +331,7 @@ static const struct option prog_opts[] = {
 	{ "library", no_argument, 0, 'l' },
 	{ "binary", no_argument, 0, 'b' },
 	{ "scope", required_argument, 0, 's' },
+	{ "top", required_argument, 0, 't' },
 	{ "port", required_argument, 0, 'P' },
 	{ "path", required_argument, 0, 'p' },
 	{ "format", required_argument, 0, 'F' },
@@ -327,7 +347,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hu:c:v:P:p:F:s:lbiIdS:C:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hu:c:v:P:p:F:s:t:lbiIdS:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -379,6 +399,14 @@ static bool parse_options(int argc, char **argv)
 				scope = 'o';
 			}
 
+			break;
+		case 't':
+			errno = 0;
+			num_results = strtol(optarg, NULL, 10);
+			if (errno != 0) {
+				fprintf(stderr, "Invalid --top argument\n\n");
+				goto err;
+			}
 			break;
 		case 'F':
 			if (!optarg || !set_format_string(optarg)) {
@@ -657,11 +685,18 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 	if (!hit_count) {
 		fprintf(stderr, "Search term not found.\n");
 	}
+
 	bool display_size = (scope != 'o' && !man_load_failures);
 	if (display_size) {
 		apply_size_penalty(bundle_info);
 	}
-	sort_results();
+
+	if (num_results != INT_MAX) {
+		sort_results();
+	} else {
+		results = list_sort(results, bundle_size_cmp);
+	}
+
 	print_final_results(display_size);
 	list_free_list_and_data(results, free_bundle_result_data);
 }

@@ -50,6 +50,7 @@ int list_installable_bundles()
 	struct file *file;
 	struct manifest *MoM = NULL;
 	int current_version;
+	bool mix_exists;
 
 	if (swupd_curl_check_network()) {
 		fprintf(stderr, "Error: Network issue, unable to download manifest\n");
@@ -61,10 +62,10 @@ int list_installable_bundles()
 		fprintf(stderr, "Error: Unable to determine current OS version\n");
 		return ECURRENT_VERSION;
 	}
-
 	swupd_curl_set_current_version(current_version);
 
-	MoM = load_mom(current_version, false, false);
+	mix_exists = (check_mix_exists() & system_on_mix());
+	MoM = load_mom(current_version, false, mix_exists);
 	if (!MoM) {
 		return EMOM_NOTFOUND;
 	}

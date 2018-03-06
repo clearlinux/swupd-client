@@ -36,6 +36,7 @@
 
 char *search_string;
 bool display_files = false; /* Just display all files found in Manifest set */
+bool csv_format = false;
 bool init = false;
 
 static char search_type = '0';
@@ -243,6 +244,25 @@ static void apply_size_penalty(struct list *bundle_info)
 	}
 }
 
+static void print_csv_results()
+{
+	struct bundle_result *b;
+	struct list *ptr;
+	ptr = list_head(results);
+	while (ptr) {
+		struct list *fptr;
+		struct file_result *f;
+		b = ptr->data;
+		ptr = ptr->next;
+		fptr = list_head(b->files);
+		while (fptr) {
+			f = fptr->data;
+			fptr = fptr->next;
+			printf("%s,%s\n", f->filename, b->bundle_name);
+		}
+	}
+}
+
 static void print_final_results(bool display_size)
 {
 	struct bundle_result *b;
@@ -310,6 +330,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -b, --binary            Search paths where binaries are located for a match\n");
 	fprintf(stderr, "   -s, --scope=[query type] 'b' or 'o' for first hit per (b)undle, or one hit total across the (o)s\n");
 	fprintf(stderr, "   -t, --top=[NUM]         Only display the top NUM results for each bundle\n");
+	fprintf(stderr, "   -m, --csv               Output all results in CSV format (machine-readable)\n");
 	fprintf(stderr, "   -d, --display-files	   Output full file list, no search done\n");
 	fprintf(stderr, "   -i, --init              Download all manifests then return, no search done\n");
 	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
@@ -332,6 +353,7 @@ static const struct option prog_opts[] = {
 	{ "binary", no_argument, 0, 'b' },
 	{ "scope", required_argument, 0, 's' },
 	{ "top", required_argument, 0, 't' },
+	{ "csv", no_argument, 0, 'm' },
 	{ "port", required_argument, 0, 'P' },
 	{ "path", required_argument, 0, 'p' },
 	{ "format", required_argument, 0, 'F' },
@@ -347,7 +369,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hu:c:v:P:p:F:s:t:lbiIdS:C:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hu:c:v:P:p:F:s:t:mlbiIdS:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -407,6 +429,9 @@ static bool parse_options(int argc, char **argv)
 				fprintf(stderr, "Invalid --top argument\n\n");
 				goto err;
 			}
+			break;
+		case 'm':
+			csv_format = true;
 			break;
 		case 'F':
 			if (!optarg || !set_format_string(optarg)) {
@@ -573,7 +598,6 @@ static void report_find(char *bundle, char *file, char *search_term)
 	double score;
 
 	score = guess_score(bundle, file, search_term);
-	//	printf("'%s'  :  '%s'   (%5.1f)\n", bundle, file, score);
 	add_bundle_file_result(bundle, file, score);
 }
 
@@ -697,7 +721,11 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 		results = list_sort(results, bundle_size_cmp);
 	}
 
-	print_final_results(display_size);
+	if (csv_format) {
+		print_csv_results();
+	} else {
+		print_final_results(display_size);
+	}
 	list_free_list_and_data(results, free_bundle_result_data);
 }
 

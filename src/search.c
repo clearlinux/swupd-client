@@ -226,7 +226,7 @@ static void apply_size_penalty(struct list *bundle_info)
 	}
 }
 
-static void print_final_results(char scope)
+static void print_final_results(bool display_size)
 {
 	struct bundle_result *b;
 	struct list *ptr;
@@ -247,7 +247,7 @@ static void print_final_results(char scope)
 		 * because we did not load all bundles and therefore do not have include sizes
 		 * for the result */
 		printf("Bundle %s\t%s", b->bundle_name, b->is_tracked ? "[installed]\t" : "");
-		if (scope != 'o') {
+		if (display_size) {
 			printf("(%li MB%s)",
 			       b->size / 1000 / 1000, /* convert from bytes->KB->MB */
 			       b->is_tracked ? " on system" : " to install");
@@ -564,6 +564,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 	int i;
 	bool done_with_bundle, done_with_search = false;
 	bool hit = false;
+	bool man_load_failures = false;
 	long hit_count = 0;
 
 	list = MoM->manifests;
@@ -576,6 +577,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 		subman = load_manifest(file->last_change, file->last_change, file, MoM, false);
 		if (!subman) {
 			fprintf(stderr, "Failed to load manifest %s\n", file->filename);
+			man_load_failures = true;
 			continue;
 		}
 
@@ -655,9 +657,12 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 	if (!hit_count) {
 		fprintf(stderr, "Search term not found.\n");
 	}
-	apply_size_penalty(bundle_info);
+	bool display_size = (scope != 'o' && !man_load_failures);
+	if (display_size) {
+		apply_size_penalty(bundle_info);
+	}
 	sort_results();
-	print_final_results(scope);
+	print_final_results(display_size);
 	list_free_list_and_data(results, free_bundle_result_data);
 }
 

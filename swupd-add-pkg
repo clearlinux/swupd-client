@@ -47,7 +47,7 @@ fi
 sudo mkdir -p $MIX_DIR $REPO_DIR $BUILD_STATE_DIR
 if [ ! -f "$MIX_DIR/upstreamversion" ]; then
 	awk -F  "=" '/^VERSION_ID=/ { print $2 }' /usr/lib/os-release | tr -d '\n' | sudo tee "$MIX_DIR/upstreamversion" > /dev/null
-elif [ "$pkg" -eq "regenerate" ]; then
+elif [[ "$pkg" == "regenerate" ]]; then
 	echo -n "$(($(cat $MIX_DIR/upstreamversion)*1000))" | sudo tee "$MIX_DIR/mixversion" > /dev/null
 fi
 if [ ! -f "$MIX_DIR/mixversion" ]; then
@@ -71,15 +71,40 @@ if [[ -n "$pkg" && -n "$bundle" ]]; then
 # [MAINTAINER]: Mixer User" | sudo tee "$BUNDLE_DIR/$bundle" > /dev/null
 	fi
 
-	# Write package to bundle definition
-	echo "$pkg" | sudo tee -a "$BUNDLE_DIR/$bundle" > /dev/null
+	grep "$pkg" "$BUNDLE_DIR/$bundle"
+	if [ $? -ne 0 ]; then
+		# Write package to bundle definition
+		echo "$pkg" | sudo tee -a "$BUNDLE_DIR/$bundle" > /dev/null
+	fi
 fi
+
+# Save LAST_VER so we can add unchanged bundles to new Manifest.MoM
+PREVIOUS_VER=$(cat "$MIX_DIR/update/image/LAST_VER")
+if [ $? -ne 0 ]; then
+	echo "LAST_VER not found, setting to 0"
+	PREVIOUS_VER=0
+fi
+
+mixver=$(cat $MIX_DIR/mixversion)
 
 # Copy the rpms into the local database location
 sudo mixer add-rpms --config "$BUILDCONF"
 sudo mixer bundle add "$bundle" os-core --config "$BUILDCONF"
-sudo mixer build chroots --config "$BUILDCONF" --new-chroots
-sudo mixer build update --config "$BUILDCONF" --new-swupd --increment
+# Use the original (non-merged) MoM for creating updates between custom content
+if [ $PREVIOUS_VER -eq 0 ]; then
+	sudo mixer build bundles --config "$BUILDCONF" --new-chroots
+	sudo mixer build update --config "$BUILDCONF" --new-swupd --increment
+else
+	((mixver-=10))
+	sudo mv $OUTPUTDIR/$mixver/Manifest.MoM $OUTPUTDIR/$mixver/FullManifest.MoM
+	sudo mv $OUTPUTDIR/$mixver/Manifest.MoM.$mixver $OUTPUTDIR/$mixver/Manifest.MoM
+	sudo mixer build bundles --config "$BUILDCONF" --new-chroots
+	sudo mixer build update --config "$BUILDCONF" --new-swupd --increment
+	sudo mv $OUTPUTDIR/$mixver/Manifest.MoM $OUTPUTDIR/$mixver/Manifest.MoM.$mixver
+	sudo mv $OUTPUTDIR/$mixver/FullManifest.MoM $OUTPUTDIR/$mixver/Manifest.MoM
+	((mixver+=10))
+
+fi
 cd -
 
 # Download and verify the upstream Clear MoM
@@ -108,8 +133,6 @@ echo "* Verified upstream Manifest.MoM"
 
 ### Combine upstream MoM with Mixer MoM ###
 ###########################################
-mixver=$(cat $MIX_DIR/mixversion)
-((mixver-=10))
 filecount=$(grep filecount Manifest.MoM  | cut -d ':' -f 2 | tr -d '\t')
 mixcount=$(grep filecount $OUTPUTDIR/$mixver/Manifest.MoM | cut -d ':' -f 2 | tr -d '\t')
 
@@ -117,15 +140,18 @@ mixcount=$(grep filecount $OUTPUTDIR/$mixver/Manifest.MoM | cut -d ':' -f 2 | tr
 ((mixcount--))
 ((filecount+=mixcount))
 
-# Contentsize needs new manifests added into it
-contentsize=$(grep contentsize $OUTPUTDIR/$mixver/Manifest.MoM | cut -d ':' -f 2 | tr -d '\t')
-for i in $(grep 'M...' /usr/share/mix/update/www/$mixver/Manifest.MoM | grep -v "os-core" | cut -f 4); do size=$(grep contentsize /usr/share/mix/update/www/$mixver/Manifest.$i | cut -d ':' -f 2 | tr -d '\t'); ((contentsize+=size));done
-
 echo "* Adjusting stats for Manifest.MoM...."
 
 # Adjust the stats for Manifest.MoM when it's combined
 sudo sed -i "s/version:\\t[0-9].*/version:\\t$mixver/" Manifest.MoM
-sudo sed -i "s/previous:\\t[0-9].*/previous:\\t$clearver/" Manifest.MoM
+# Need to set mixver to previous ver, without this mixver = the currently built ver
+((mixver-=10))
+if [ $PREVIOUS_VER -eq 0 ]; then
+	sudo sed -i "s/previous:\\t[0-9].*/previous:\\t$clearver/" Manifest.MoM
+else
+	sudo sed -i "s/previous:\\t[0-9].*/previous:\\t$mixver/" Manifest.MoM
+fi
+((mixver+=10))
 sudo sed -i "s/filecount:\\t[0-9].*/filecount:\\t$filecount/" Manifest.MoM
 sudo sed -i "s/contentsize:\\t[0-9].*/contentsize:\\t$contentsize/" Manifest.MoM
 sudo sed -i "s/MANIFEST\\t[0-9].*/MANIFEST\\t$FORMAT/" Manifest.MoM
@@ -136,11 +162,11 @@ sudo sed -i '/os-core$/d' Manifest.MoM
 # Change the Mixer manifest to have the new mixer flag
 sudo sed -i "s/M\.\.\./M\.\.m/" "$OUTPUTDIR/$mixver/Manifest.MoM"
 
-# Add mixer bundles to official
-grep 'M..m' "$OUTPUTDIR/$mixver/Manifest.MoM" | sudo tee -a Manifest.MoM
+# Add mixer bundles to official MoM
+grep -w 'M..m' "$OUTPUTDIR/$mixver/Manifest.MoM" | sudo tee -a Manifest.MoM
 
 # Copy the combined MoM to our output now (backup original mix one)
-sudo mv "$OUTPUTDIR/$mixver/Manifest.MoM" "$OUTPUTDIR/$mixver/Manifest.MoM.orig"
+sudo mv "$OUTPUTDIR/$mixver/Manifest.MoM" "$OUTPUTDIR/$mixver/Manifest.MoM.$mixver"
 sudo cp Manifest.MoM "$OUTPUTDIR/$mixver/Manifest.MoM"
 
 # Resign the Manifest.MoM

@@ -71,7 +71,7 @@ if [[ -n "$pkg" && -n "$bundle" ]]; then
 # [MAINTAINER]: Mixer User" | sudo tee "$BUNDLE_DIR/$bundle" > /dev/null
 	fi
 
-	grep "$pkg" "$BUNDLE_DIR/$bundle"
+	grep -x "$pkg" "$BUNDLE_DIR/$bundle"
 	if [ $? -ne 0 ]; then
 		# Write package to bundle definition
 		echo "$pkg" | sudo tee -a "$BUNDLE_DIR/$bundle" > /dev/null

@@ -26,6 +26,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -239,9 +240,29 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		}
 		if (strncmp(line, "filecount:", 10) == 0) {
 			filecount = strtoull(c, NULL, 10);
+			if (filecount > 4000000) {
+				/* Note on the number 4,000,000. We want this
+				 * to be big enough to allow Manifest.Full to
+				 * pass (currently about 450,000 March 18) but
+				 * small enough that when multiplied by
+				 * sizeof(struct file) it fits into
+				 * size_t. For a system with size_t being a 32
+				 * bit value, this constrains it to be less
+				 * than about 6,000,000, but close to infinity
+				 * for systems with 64 bit size_t.
+				 */
+				fprintf(stderr, "Error: preposterous (%" PRIu64 ") number of files in %s Manifest, more than 4 million skipping\n",
+					filecount, component);
+				goto err_close;
+			}
 		}
 		if (strncmp(line, "contentsize:", 12) == 0) {
 			contentsize = strtoull(c, NULL, 10);
+			if (contentsize > 2000000000) {
+				fprintf(stderr, "Error: preposterous (%" PRIu64 ") size of files in %s Manifest, more than 2TB skipping\n",
+					contentsize, component);
+				goto err_close;
+			}
 		}
 		if (latest && strncmp(component, "MoM", 3) == 0) {
 			if (strncmp(line, "actions:", 8) == 0) {

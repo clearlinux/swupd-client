@@ -77,6 +77,7 @@ static int record_filename(const char *name, const struct stat *stat __attribute
 	F = realloc(F, (nF + 1) * sizeof(*F)); /* TODO, check realloc is smart, so don't need to double myself */
 	if (!F || !savedname) {
 		fprintf(stderr, "Out of memory allocating %d filenames\n", nF);
+		abort();	/* For consistency with string_or_die on out of memory*/
 		return -ENOMEM;
 	}
 	F[nF].filename = savedname;

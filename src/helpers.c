@@ -672,19 +672,6 @@ void free_string(char **s)
 	}
 }
 
-void update_motd(int new_release)
-{
-	FILE *motd_fp = NULL;
-
-	motd_fp = fopen(MOTD_FILE, "w");
-
-	if (motd_fp != NULL) {
-		fprintf(motd_fp, "There is a new OS version available: %d\n", new_release);
-		fprintf(motd_fp, "Upgrade to the latest version using 'swupd update'\n");
-		fclose(motd_fp);
-	}
-}
-
 void delete_motd(void)
 {
 	if (unlink(MOTD_FILE) == ENOMEM) {

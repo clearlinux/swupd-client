@@ -928,13 +928,12 @@ int list_local_bundles()
 		return EXIT_FAILURE;
 	}
 	while ((ent = readdir(dir))) {
-		if ((strcmp(ent->d_name, ".") == 0) ||
-		    (strcmp(ent->d_name, "..") == 0)) {
+		if (ent->d_name[0] == '.') {
 			continue;
 		}
 		/* Need to dup the strings as the directory
 		 * may be bigger than the size of the I/O buffer */
-		char * name = strdup(ent->d_name);
+		char *name = strdup(ent->d_name);
 		if (!name) {
 			abort();
 		}

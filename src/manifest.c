@@ -742,6 +742,18 @@ verify_mom:
 		}
 		free_string(&log_cmd);
 	}
+	/* Make a copy of the Manifest for the completion code */
+	if (latest) {
+		char *momcopy;
+		rm_bundle_file(".MoM");
+		string_or_die(&momcopy, "/bin/cp \"%s\" \"%s/%s/.MoM\" 2>/dev/null",
+			      filename, path_prefix, BUNDLES_DIR);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+		(void)system(momcopy); /* If it fails it fails */
+#pragma GCC diagnostic pop
+		free(momcopy);
+	}
 	free_string(&filename);
 	free_string(&url);
 	return manifest;

@@ -84,7 +84,8 @@ void read_subscriptions(struct list **subs)
 	dir = opendir(path);
 	if (dir) {
 		while ((ent = readdir(dir))) {
-			if ((strcmp(ent->d_name, ".") == 0) || (strcmp(ent->d_name, "..") == 0)) {
+			if (ent->d_name[0] == '.') {
+				/* ignore dot files, in particular .MoM */
 				continue;
 			}
 			if (ent->d_type == DT_REG) {

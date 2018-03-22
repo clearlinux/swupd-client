@@ -15,6 +15,6 @@ load "../../swupdlib"
 }
 
 @test "autocomplete has expected hashdump opts" {
-  grep -q  'opts="-h --help -n --no-xattrs -p --path "' $SRCDIR/swupd.bash
+  grep -q  'opts="--help --no-xattrs --path "' $SRCDIR/swupd.bash
 }
 # vi: ft=sh ts=8 sw=2 sts=2 et tw=80

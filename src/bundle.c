@@ -932,21 +932,27 @@ int list_local_bundles()
 		    (strcmp(ent->d_name, "..") == 0)) {
 			continue;
 		}
-
-		bundles = list_append_data(bundles, ent->d_name);
+		/* Need to dup the strings as the directory
+		 * may be bigger than the size of the I/O buffer */
+		char * name = strdup(ent->d_name);
+		if (!name) {
+			abort();
+		}
+		bundles = list_append_data(bundles, name);
 	}
+
+	closedir(dir);
 
 	item = bundles = list_sort(bundles, lex_sort);
 
 	while (item) {
 		printf("%s\n", (char *)item->data);
+		free(item->data);
 		item = item->next;
 	}
 
 	list_free_list(bundles);
 
-	/* closedir only after we use the strings from readdir. */
-	closedir(dir);
 	free_string(&path);
 
 	return 0;

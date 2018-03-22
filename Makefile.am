@@ -277,6 +277,3 @@ man: $(dist_man_MANS)
 	rst2man.py "$<" > "$@.tmp" && mv -f "$@.tmp" "$@"
 
 test/functional/completion/basic/test.bats: swupd.bash
-
-swupd.bash: $(top_srcdir)/scripts/swupd-completion.sh $(top_srcdir)/swupd
-	bash $<

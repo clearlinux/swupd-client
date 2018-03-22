@@ -42,7 +42,6 @@ stamp-h1
 swupd
 swupd-client*tar.gz
 swupd_*
-swupd.bash
 tap-driver.sh
 test-driver
 test-suite.log

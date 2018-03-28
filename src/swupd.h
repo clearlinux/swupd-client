@@ -313,8 +313,8 @@ extern void read_subscriptions(struct list **subs);
 extern int component_subscribed(struct list *subs, char *component);
 extern void set_subscription_versions(struct manifest *latest, struct manifest *current, struct list **subs);
 
-extern void hash_assign(char *src, char *dest);
-extern bool hash_equal(char *hash1, char *hash2);
+extern void hash_assign(const char *src, char *dest);
+extern bool hash_equal(const char *hash1, const char *hash2);
 extern bool hash_is_zeros(char *hash);
 extern int compute_hash_lazy(struct file *file, char *filename);
 extern int compute_hash(struct file *file, char *filename) __attribute__((warn_unused_result));

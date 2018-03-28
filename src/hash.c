@@ -36,13 +36,13 @@
 #include "swupd.h"
 #include "xattrs.h"
 
-void hash_assign(char *src, char *dst)
+void hash_assign(const char *src, char *dst)
 {
 	memcpy(dst, src, SWUPD_HASH_LEN - 1);
 	dst[SWUPD_HASH_LEN - 1] = '\0';
 }
 
-bool hash_equal(char *hash1, char *hash2)
+bool hash_equal(const char *hash1, const char *hash2)
 {
 	if (bcmp(hash1, hash2, SWUPD_HASH_LEN - 1) == 0) {
 		return true;

@@ -258,7 +258,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		}
 		if (strncmp(line, "contentsize:", 12) == 0) {
 			contentsize = strtoull(c, NULL, 10);
-			if (contentsize > 2000000000) {
+			if (contentsize > 2000000000000UL) {
 				fprintf(stderr, "Error: preposterous (%" PRIu64 ") size of files in %s Manifest, more than 2TB skipping\n",
 					contentsize, component);
 				goto err_close;

@@ -7,62 +7,55 @@ ACLOCAL_AMFLAGS = -I m4
 
 bin_PROGRAMS = swupd
 
+AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS) -I$(top_srcdir)/include
+
 swupd_SOURCES = \
+	src/archives.c \
 	src/autoupdate.c \
+	src/bundle.c \
 	src/check_update.c \
 	src/clean.c \
 	src/clr_bundle_add.c \
 	src/clr_bundle_ls.c \
 	src/clr_bundle_rm.c \
-	src/extra_files.c \
-	src/hashdump.c \
-	src/info.c \
-	src/main.c \
-	src/search.c \
-	src/swupd.c \
-	src/verify.c
-
-SWUPD_COMMON_SOURCES = \
-	src/archives.c \
 	src/curl.c \
 	src/delta.c \
 	src/download.c \
+	src/extra_files.c \
 	src/filedesc.c \
+	src/globals.c \
 	src/hash.c \
+	src/hashdump.c \
 	src/helpers.c \
 	src/heuristics.c \
+	src/info.c \
 	src/list.c \
 	src/lock.c \
+	src/main.c \
 	src/manifest.c \
 	src/packs.c \
+	src/scripts.c \
+	src/search.c \
 	src/signature.c \
 	src/staging.c \
 	src/stats.c \
 	src/subscriptions.c \
+	src/swupd.c \
+	src/telemetry.c \
 	src/update.c \
+	src/verify.c \
 	src/version.c \
-	src/xattrs.c \
-	src/globals.c \
-	src/scripts.c \
-	src/bundle.c \
-	src/telemetry.c
+	src/xattrs.c
 
-lib_LTLIBRARIES = libswupd.la
-libswupd_la_SOURCES = $(SWUPD_COMMON_SOURCES)
-libswupd_la_LIBADD = $(SWUPD_COMPRESSION_LIBS) $(openssl_LIBS) $(curl_LIBS) $(bsdiff_LIBS) $(libarchive_LIBS)
-# Library version changes according to the libtool convention:
-# http://www.gnu.org/software/libtool/manual/libtool.html#Updating-version-info
-LIBSWUPD_CURRENT=2
-LIBSWUPD_REVISION=0
-LIBSWUPD_AGE=0
-libswupd_la_LDFLAGS = \
-	-version-info $(LIBSWUPD_CURRENT):$(LIBSWUPD_REVISION):$(LIBSWUPD_AGE)
-
-AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS) -I$(top_srcdir)/include
-SWUPD_COMPRESSION_LIBS = $(lzma_LIBS) $(zlib_LIBS) $(bzip2_LIBS)
-SWUPD_CORE_LIBS = libswupd.la
-
-swupd_LDADD = $(SWUPD_CORE_LIBS) $(pthread_LIBS)
+swupd_LDADD = \
+	$(lzma_LIBS) \
+	$(zlib_LIBS) \
+	$(bzip2_LIBS) \
+	$(openssl_LIBS) \
+	$(curl_LIBS) \
+	$(bsdiff_LIBS) \
+	$(libarchive_LIBS) \
+	$(pthread_LIBS)
 
 verifytime_SOURCES = src/verifytime.c
 bin_PROGRAMS += verifytime

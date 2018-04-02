@@ -2,12 +2,12 @@ SUFFIXES= .rst
 
 EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash
 
-AM_CFLAGS = -fPIC -Iinclude/ -O2 -g -Wall -W -Wformat-security -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99
+AM_CFLAGS = -fPIC -O2 -g -Wall -W -Wformat-security -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99
 ACLOCAL_AMFLAGS = -I m4
 
 bin_PROGRAMS = swupd
 
-AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS) -I$(top_srcdir)/include
+AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS)
 
 swupd_SOURCES = \
 	src/archives.c \
@@ -30,6 +30,7 @@ swupd_SOURCES = \
 	src/heuristics.c \
 	src/info.c \
 	src/list.c \
+	src/list.h \
 	src/lock.c \
 	src/main.c \
 	src/manifest.c \
@@ -37,15 +38,22 @@ swupd_SOURCES = \
 	src/scripts.c \
 	src/search.c \
 	src/signature.c \
+	src/signature.h \
 	src/staging.c \
 	src/stats.c \
 	src/subscriptions.c \
+	src/swupd-build-opts.h \
+	src/swupd-build-variant.h \
+	src/swupd-error.h \
+	src/swupd-internal.h \
 	src/swupd.c \
+	src/swupd.h \
 	src/telemetry.c \
 	src/update.c \
 	src/verify.c \
 	src/version.c \
-	src/xattrs.c
+	src/xattrs.c \
+	src/xattrs.h
 
 swupd_LDADD = \
 	$(lzma_LIBS) \
@@ -61,8 +69,6 @@ verifytime_SOURCES = src/verifytime.c
 bin_PROGRAMS += verifytime
 
 dist_bin_SCRIPTS = swupd-add-pkg
-
-noinst_HEADERS = $(top_srcdir)/include/*
 
 EXTRA_DIST += \
 	data/check-update.service \
@@ -217,19 +223,19 @@ coverage-clean:
 endif
 
 compliant:
-	@git diff --quiet --exit-code include src; ret=$$?; \
+	@git diff --quiet --exit-code src; ret=$$?; \
 	if [ $$ret -eq 1 ]; then \
-		echo "Error: can only check code style when include/ and src/ are clean."; \
+		echo "Error: can only check code style when src/ are clean."; \
 		echo "Stash or commit your changes and try again."; \
 		exit $$ret; \
 	elif [ $$ret -gt 1 ]; then \
 		exit $$ret; \
 	fi; \
-	clang-format -i -style=file include/*.h src/*.c; ret=$$?; \
+	clang-format -i -style=file src/*.h src/*.c; ret=$$?; \
 	if [ $$ret -ne 0 ]; then \
 		exit $$ret; \
 	fi; \
-	git diff --quiet --exit-code include src; ret=$$?; \
+	git diff --quiet --exit-code src; ret=$$?; \
 	if [ $$ret -eq 1 ]; then \
 		echo "Code style issues found. Run 'git diff' to view issues."; \
 	elif [ $$ret -eq 0 ]; then \

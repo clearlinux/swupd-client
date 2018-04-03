@@ -301,15 +301,15 @@ struct list *list_clone(struct list *list)
 }
 
 /* deep clone a list of char * */
-struct list *list_deep_clone_strs(struct list *source)
+struct list *list_deep_clone_strs(struct list *list)
 {
-	struct list *clone = list_clone(source);
-	struct list *src_ptr = list_tail(source);
+	struct list *clone = NULL;
+	struct list *item;
 
-	while (src_ptr) {
-		char *cloned_item = strdup(src_ptr->data);
-		clone = list_prepend_data(clone, cloned_item);
-		src_ptr = src_ptr->prev;
+	item = list_tail(list);
+	while (item) {
+		clone = list_prepend_data(clone, strdup(item->data));
+		item = item->prev;
 	}
 
 	return clone;

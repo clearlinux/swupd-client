@@ -226,6 +226,7 @@ static char *read_mom_contents(int version)
 		return NULL;
 	}
 
+	char *contents = NULL;
 	int fd = fileno(f);
 	if (fd == -1) {
 		goto end;
@@ -238,7 +239,7 @@ static char *read_mom_contents(int version)
 		goto end;
 	}
 
-	char *contents = malloc(stat.st_size + 1);
+	contents = malloc(stat.st_size + 1);
 	if (!contents) {
 		goto end;
 	}

@@ -257,11 +257,11 @@ end:
 	return contents;
 }
 
-static int clean_staged_manifests()
+static int clean_staged_manifests(const char *path)
 {
 	DIR *dir;
 
-	dir = opendir(state_dir);
+	dir = opendir(path);
 	if (!dir) {
 		return errno;
 	}

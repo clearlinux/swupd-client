@@ -272,22 +272,15 @@ SUBCOMMANDS
     control of the software update program are verified according to the
     manifest data
 
+    - `-m, --manifest`
+
+        Verify against manifest version M.
+
     - `-f, --fix`
 
         Correct any issues found. This will overwrite incorrect file
         content, add missing files and do additional corrections, permissions
         etc.
-
-    - `-i, --install`
-
-        Install all files into {path} as specified by the `--path={path}`
-        option. Useful to generate a new system root, or verify side
-        by side.
-
-    - `-q, --quick`
-
-        Omit checking hash values. Instead only corrects missing files
-        and directories and/or symlinks.
 
     - `-Y, --picky`
 
@@ -322,6 +315,22 @@ SUBCOMMANDS
         - empty string or ``^$``
 
             Matches nothing, because paths are never empty.
+
+    - `-i, --install`
+
+        Install all files into {path} as specified by the `--path={path}`
+        option. Useful to generate a new system root, or verify side
+        by side.
+
+    - `-q, --quick`
+
+        Omit checking hash values. Instead only corrects missing files
+        and directories and/or symlinks.
+
+    - `-x, --force`
+
+        Attempt to proceed even if non-critical errors found.
+
 
 ``info``
 

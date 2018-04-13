@@ -380,29 +380,19 @@ control of the software update program are verified according to the
 manifest data
 .INDENT 0.0
 .IP \(bu 2
+\fI\-m, \-\-manifest\fP
+.INDENT 2.0
+.INDENT 3.5
+Verify against manifest version M.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
 \fI\-f, \-\-fix\fP
 .INDENT 2.0
 .INDENT 3.5
 Correct any issues found. This will overwrite incorrect file
 content, add missing files and do additional corrections, permissions
 etc.
-.UNINDENT
-.UNINDENT
-.IP \(bu 2
-\fI\-i, \-\-install\fP
-.INDENT 2.0
-.INDENT 3.5
-Install all files into {path} as specified by the \fI\-\-path={path}\fP
-option. Useful to generate a new system root, or verify side
-by side.
-.UNINDENT
-.UNINDENT
-.IP \(bu 2
-\fI\-q, \-\-quick\fP
-.INDENT 2.0
-.INDENT 3.5
-Omit checking hash values. Instead only corrects missing files
-and directories and/or symlinks.
 .UNINDENT
 .UNINDENT
 .IP \(bu 2
@@ -454,6 +444,30 @@ Matches nothing, because paths are never empty.
 .UNINDENT
 .UNINDENT
 .UNINDENT
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-i, \-\-install\fP
+.INDENT 2.0
+.INDENT 3.5
+Install all files into {path} as specified by the \fI\-\-path={path}\fP
+option. Useful to generate a new system root, or verify side
+by side.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-q, \-\-quick\fP
+.INDENT 2.0
+.INDENT 3.5
+Omit checking hash values. Instead only corrects missing files
+and directories and/or symlinks.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-x, \-\-force\fP
+.INDENT 2.0
+.INDENT 3.5
+Attempt to proceed even if non\-critical errors found.
 .UNINDENT
 .UNINDENT
 .UNINDENT

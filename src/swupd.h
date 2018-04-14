@@ -194,7 +194,6 @@ extern void check_root(void);
 extern void clean_curl_multi_queue(void);
 extern void increment_retries(int *retries, int *timeout);
 
-extern int main_update(void);
 extern int add_included_manifests(struct manifest *mom, int current, struct list **subs);
 extern int main_verify(int current_version);
 extern int walk_tree(struct manifest *, const char *, bool, const regex_t *);

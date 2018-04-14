@@ -133,6 +133,7 @@ void read_versions(int *current_version,
 
 int check_versions(int *current_version,
 		   int *server_version,
+		   int requested_version,
 		   char *path_prefix)
 {
 
@@ -161,7 +162,16 @@ int check_versions(int *current_version,
 		return -1;
 	}
 
-	//TODO allow policy layer to send us to intermediate version?
+	if (requested_version != -1) {
+		if (requested_version <= *current_version) {
+			fprintf(stderr, "Requested version for update (%d) must be greater than current version (%d)\n",
+				requested_version, *current_version);
+			return -1;
+		}
+		if (requested_version < *server_version) {
+			*server_version = requested_version;
+		}
+	}
 
 	swupd_curl_set_requested_version(*server_version);
 

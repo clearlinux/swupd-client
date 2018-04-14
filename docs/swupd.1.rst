@@ -240,6 +240,10 @@ SUBCOMMANDS
     post-update actions. These actions are triggered through `systemd(1)`
     and reside in the `update-triggers.target(4)` system target.
 
+    - `-m, --manifest`
+
+        Update to a specific version, also accepts 'latest' (default).
+
     - `-s, --status`
 
         Do not perform an update, instead display whether an update is

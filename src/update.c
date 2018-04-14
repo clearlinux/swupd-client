@@ -37,6 +37,8 @@
 #include "signature.h"
 #include "swupd.h"
 
+static int requested_version = -1;
+
 int nonpack;
 
 void increment_retries(int *retries, int *timeout)
@@ -330,7 +332,7 @@ static int main_update()
 
 /* Step 1: get versions */
 version_check:
-	ret = check_versions(&current_version, &server_version, path_prefix);
+	ret = check_versions(&current_version, &server_version, requested_version, path_prefix);
 
 	if (ret < 0) {
 		ret = EXIT_FAILURE;
@@ -382,7 +384,6 @@ version_check:
 	}
 
 	fprintf(stderr, "Preparing to update from %i to %i\n", current_version, server_version);
-
 	/* Step 2: housekeeping */
 
 	if (rm_staging_dir_contents("download")) {
@@ -568,7 +569,8 @@ download_packs:
 	grabtime_start(&times, "Run Scripts");
 
 	/* Determine if another update is needed so the scripts block */
-	if (on_new_format()) {
+	int new_current_version = get_current_version(path_prefix);
+	if (on_new_format() && (requested_version == -1 || (requested_version > new_current_version))) {
 		re_update = true;
 	}
 
@@ -644,6 +646,7 @@ static bool cmd_line_status = false;
 static const struct option prog_opts[] = {
 	{ "download", no_argument, 0, 'd' },
 	{ "help", no_argument, 0, 'h' },
+	{ "manifest", required_argument, 0, 'm' },
 	{ "url", required_argument, 0, 'u' },
 	{ "port", required_argument, 0, 'P' },
 	{ "contenturl", required_argument, 0, 'c' },
@@ -671,6 +674,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "Help Options:\n");
 	fprintf(stderr, "   -h, --help              Show help options\n\n");
 	fprintf(stderr, "Application Options:\n");
+	fprintf(stderr, "   -m, --manifest=M        Update to version M, also accepts 'latest' (default)\n");
 	fprintf(stderr, "   -d, --download          Download all content, but do not actually install the update\n");
 #warning "remove user configurable url when alternative exists"
 	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
@@ -699,12 +703,20 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxnIdtNbTau:P:c:v:sF:p:S:C:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hm:xnIdtNbTau:P:c:v:sF:p:S:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
 			print_help(argv[0]);
 			exit(EXIT_SUCCESS);
+		case 'm':
+			if (strcmp("latest", optarg) == 0) {
+				requested_version = -1;
+			} else if (sscanf(optarg, "%i", &requested_version) != 1) {
+				fprintf(stderr, "Invalid --manifest argument\n\n");
+				goto err;
+			}
+			break;
 		case 'a':
 			allow_mix_collisions = true;
 			break;

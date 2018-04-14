@@ -32,6 +32,7 @@ swupd_SOURCES = \
 	src/list.c \
 	src/list.h \
 	src/lock.c \
+	src/main.c \
 	src/manifest.c \
 	src/packs.c \
 	src/scripts.c \
@@ -45,7 +46,6 @@ swupd_SOURCES = \
 	src/swupd-build-variant.h \
 	src/swupd-error.h \
 	src/swupd-internal.h \
-	src/swupd.c \
 	src/swupd.h \
 	src/telemetry.c \
 	src/update.c \

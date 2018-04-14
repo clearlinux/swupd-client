@@ -153,16 +153,16 @@ void print_time_stats(timelist *head)
 	TAILQ_FOREACH_REVERSE(t, head, timelist, times)
 	{
 		if (t->complete == true) {
-			delta = t->rawstop.tv_sec - t->rawstart.tv_sec + (t->rawstop.tv_nsec / 1000000.0) - (t->rawstart.tv_nsec / 1000000.0);
-			fprintf(stderr, "%.4f\tms: %s\n", delta, t->name);
+			delta = (t->rawstop.tv_sec - t->rawstart.tv_sec) * 1000 + (t->rawstop.tv_nsec / 1000000.0) - (t->rawstart.tv_nsec / 1000000.0);
+			fprintf(stderr, "%10.2f ms: %s\n", delta, t->name);
 		}
 	}
 	fprintf(stderr, "\nCPU process time stats:\n");
 	while (!TAILQ_EMPTY(head)) {
 		t = TAILQ_LAST(head, timelist);
 		if (t->complete == true) {
-			delta = t->procstop.tv_sec - t->procstart.tv_sec + (t->procstop.tv_nsec / 1000000.0) - (t->procstart.tv_nsec / 1000000.0);
-			fprintf(stderr, "%.4f\tms: %s\n", delta, t->name);
+			delta = (t->procstop.tv_sec - t->procstart.tv_sec) * 1000 + (t->procstop.tv_nsec / 1000000.0) - (t->procstart.tv_nsec / 1000000.0);
+			fprintf(stderr, "%10.2f ms: %s\n", delta, t->name);
 		}
 		TAILQ_REMOVE(head, t, times);
 		free(t);

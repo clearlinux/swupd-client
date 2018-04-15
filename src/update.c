@@ -423,15 +423,20 @@ load_current_mom:
 load_server_mom:
 	grabtime_stop(&times); // Close step 2
 	grabtime_start(&times, "Recurse and Consolidate Manifests");
-	server_manifest = load_mom(server_version, true, mix_exists);
+	int server_manifest_err;
+	server_manifest = load_mom_err(server_version, true, mix_exists, &server_manifest_err);
 	if (!server_manifest) {
-		if (retries < MAX_TRIES) {
+		if (retries < MAX_TRIES && server_manifest_err != -ENET404) {
 			increment_retries(&retries, &timeout);
 			fprintf(stderr, "Retry #%d downloading server Manifests\n", retries);
 			goto load_server_mom;
 		}
 		fprintf(stderr, "Failure retrieving manifest from server\n");
-		fprintf(stderr, "Unable to load manifest after retrying (config or network problem?)\n");
+		if (server_manifest_err == -ENET404) {
+			fprintf(stderr, "Version %d not available\n", server_version);
+		} else {
+			fprintf(stderr, "Unable to load manifest after retrying (config or network problem?)\n");
+		}
 		ret = EMOM_NOTFOUND;
 		goto clean_exit;
 	}

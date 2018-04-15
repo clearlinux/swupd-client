@@ -609,6 +609,11 @@ void remove_manifest_files(char *filename, int version, char *hash)
 	}
 }
 
+struct manifest *load_mom(int version, bool latest, bool mix_exists)
+{
+	return load_mom_err(version, latest, mix_exists, NULL);
+}
+
 /* Loads the MoM (Manifest of Manifests) for VERSION.
  *
  * Implementation note: MoMs are not huge so deltas do not give much benefit,
@@ -618,9 +623,10 @@ void remove_manifest_files(char *filename, int version, char *hash)
  * getting the whole MoM and verifying it.
  *
  * Note that if the manifest fails to download, or if the manifest fails to be
- * loaded into memory, this function will return NULL.
+ * loaded into memory, this function will return NULL. If err is passed, it is set
+ * with the error code.
  */
-struct manifest *load_mom(int version, bool latest, bool mix_exists)
+struct manifest *load_mom_err(int version, bool latest, bool mix_exists, int *err)
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
@@ -635,6 +641,9 @@ verify_mom:
 	ret = retrieve_manifests(version, version, "MoM", NULL, mix_exists);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to retrieve %d MoM manifest\n", version);
+		if (err) {
+			*err = ret;
+		}
 		return NULL;
 	}
 
@@ -647,7 +656,10 @@ verify_mom:
 			goto verify_mom;
 		}
 		fprintf(stderr, "Failed to load %d MoM manifest\n", version);
-		goto out;
+		if (err) {
+			*err = EMANIFEST_LOAD;
+		}
+		return NULL;
 	}
 
 	string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
@@ -671,6 +683,9 @@ verify_mom:
 			free_string(&filename);
 			free_string(&url);
 			free_manifest(manifest);
+			if (err) {
+				*err = ESIGNATURE;
+			}
 			return NULL;
 		}
 		fprintf(stderr, "FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
@@ -698,9 +713,6 @@ verify_mom:
 	free_string(&filename);
 	free_string(&url);
 	return manifest;
-
-out:
-	return NULL;
 }
 
 /* Loads the MANIFEST for bundle associated with FILE at VERSION, referenced by

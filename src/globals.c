@@ -69,6 +69,7 @@ bool verbose_time = false;
 bool have_manifest_diskspace = false; /* assume no until checked */
 char *version_url = NULL;
 char *content_url = NULL;
+bool content_url_is_local = false;
 char *cert_path = NULL;
 long update_server_port = -1;
 char *swupd_cmd = NULL;
@@ -314,7 +315,12 @@ int set_content_url(char *url)
 		return 0;
 	}
 
-	return set_url(&content_url, url, DEFAULT_CONTENT_URL_PATH);
+	int ret = set_url(&content_url, url, DEFAULT_CONTENT_URL_PATH);
+	if (ret == 0) {
+		content_url_is_local = strncmp(content_url, "file://", 7) == 0;
+	}
+
+	return ret;
 }
 
 /* Initializes the version_url global variable. If the url parameter is not

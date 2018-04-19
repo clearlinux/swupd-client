@@ -595,7 +595,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 	retry_manifest_download:
 		manifest = load_manifest(current_version, file->last_change, file, mom, true);
 		if (!manifest) {
-			if (retries < MAX_TRIES) {
+			if (retries < MAX_TRIES && !content_url_is_local) {
 				increment_retries(&retries, &timeout);
 				goto retry_manifest_download;
 			}
@@ -685,7 +685,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 
 download_subscribed_packs:
 	if (download_subscribed_packs(*subs, mom, true, false)) {
-		if (retries < MAX_TRIES) {
+		if (retries < MAX_TRIES && !content_url_is_local) {
 			increment_retries(&retries, &timeout);
 			printf("\nRetry #%d downloading subscribed packs\n", retries);
 			goto download_subscribed_packs;

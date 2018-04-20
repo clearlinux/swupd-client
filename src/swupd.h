@@ -44,7 +44,9 @@ extern "C" {
 #define MIXED_FILE SWUPD_DEFAULTS "mixed"
 
 #define DEFAULT_VERSION_URL_PATH "/usr/share/defaults/swupd/versionurl"
+#define MIRROR_VERSION_URL_PATH "/etc/swupd/mirror_versionurl"
 #define DEFAULT_CONTENT_URL_PATH "/usr/share/defaults/swupd/contenturl"
+#define MIRROR_CONTENT_URL_PATH "/etc/swupd/mirror_contenturl"
 #define DEFAULT_FORMAT_PATH "/usr/share/defaults/swupd/format"
 
 #define DEFAULT_CONTENTURL "https://cdn.download.clearlinux.org/update/"

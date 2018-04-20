@@ -315,6 +315,12 @@ int set_content_url(char *url)
 		return 0;
 	}
 
+	/* check for mirror configuration first */
+	if (set_url(&content_url, url, MIRROR_CONTENT_URL_PATH) == 0) {
+		content_url_is_local = strncmp(content_url, "file://", 7) == 0;
+		return 0;
+	}
+
 	int ret = set_url(&content_url, url, DEFAULT_CONTENT_URL_PATH);
 	if (ret == 0) {
 		content_url_is_local = strncmp(content_url, "file://", 7) == 0;
@@ -331,6 +337,11 @@ int set_version_url(char *url)
 {
 	if (version_url) {
 		/* Only set once; we assume the first successful set is the best choice */
+		return 0;
+	}
+
+	/* check for mirror configuration first */
+	if (set_url(&version_url, url, MIRROR_VERSION_URL_PATH) == 0) {
 		return 0;
 	}
 

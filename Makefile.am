@@ -33,6 +33,7 @@ swupd_SOURCES = \
 	src/list.h \
 	src/lock.c \
 	src/main.c \
+	src/mirror.c \
 	src/manifest.c \
 	src/packs.c \
 	src/scripts.c \

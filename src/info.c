@@ -22,20 +22,23 @@
 
 #include "swupd.h"
 
+void print_update_conf_info()
+{
+	int current_version = get_current_version(path_prefix);
+	printf("Installed version: %d\n", current_version);
+	printf("Version URL:       %s\n", version_url);
+	printf("Content URL:       %s\n", content_url);
+}
+
 int info_main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 {
-	int current_version;
-
 	copyright_header("info");
 
 	if (!init_globals()) {
 		return EINIT_GLOBALS;
 	}
 
-	current_version = get_current_version(path_prefix);
-	printf("Installed version: %d\n", current_version);
-	printf("Version URL:       %s\n", version_url);
-	printf("Content URL:       %s\n", content_url);
+	print_update_conf_info();
 
 	free_globals();
 	return 0;

@@ -45,6 +45,7 @@ static struct subcmd commands[] = {
 	{ "search", "Search Clear Linux for a binary or library", search_main },
 	{ "info", "Show the version and the update URLs", info_main },
 	{ "clean", "Clean cached files", clean_main },
+	{ "mirror", "Configure mirror url for swupd content", mirror_main },
 	{ 0 }
 };
 

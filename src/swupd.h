@@ -405,6 +405,8 @@ extern bool check_mix_exists(void);
 extern void check_mix_versions(int *current_version, int *server_version, char *path_prefix);
 extern int read_mix_version_file(char *filename, char *path_prefix);
 
+extern void print_update_conf_info(void);
+
 /* some disk sizes constants for the various features:
  *   ...consider adding build automation to catch at build time
  *      if the build's artifacts are larger than these thresholds */

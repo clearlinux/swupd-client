@@ -185,6 +185,10 @@ SUBCOMMANDS
         Specify the path to use for operations. This can be used to
         point to a chroot installation of the OS or a custom mount.
 
+``info``
+
+    Shows the current OS version and the URLs used for updates.
+
 ``search {string}``
 
     Search for matching paths in manifest data. The specified {string}
@@ -334,11 +338,6 @@ SUBCOMMANDS
     - `-x, --force`
 
         Attempt to proceed even if non-critical errors found.
-
-
-``info``
-
-    Shows the current OS version and the URLs used for updates.
 
 
 EXIT STATUS

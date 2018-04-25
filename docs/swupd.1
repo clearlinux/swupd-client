@@ -261,6 +261,41 @@ Shows the current OS version and the URLs used for updates.
 .UNINDENT
 .UNINDENT
 .sp
+\fBmirror\fP
+.INDENT 0.0
+.INDENT 3.5
+Configure a mirror URL for swupd to use instead of the defaults on the
+system or compiled into the swupd binary.
+.INDENT 0.0
+.IP \(bu 2
+\fI\-s, \-\-set URL\fP
+.INDENT 2.0
+.INDENT 3.5
+Set the content and version URLs to URL by adding configuration files to
+<path>/etc/swupd/mirror_contenturl and
+<path>/etc/swupd/mirror_versionurl
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-u, \-\-unset\fP
+.INDENT 2.0
+.INDENT 3.5
+Remove the content and version URL configuration by removing
+<path>/etc/swupd
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fI\-p, \-\-path\fP
+.INDENT 2.0
+.INDENT 3.5
+Optionally set the top\-level directory for the swupd\-managed system.
+If not specified this will default to \(aq/\(aq
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
 \fBsearch {string}\fP
 .INDENT 0.0
 .INDENT 3.5

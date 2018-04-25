@@ -189,6 +189,27 @@ SUBCOMMANDS
 
     Shows the current OS version and the URLs used for updates.
 
+``mirror``
+
+    Configure a mirror URL for swupd to use instead of the defaults on the
+    system or compiled into the swupd binary.
+
+    - `-s, --set URL`
+
+        Set the content and version URLs to URL by adding configuration files to
+        <path>/etc/swupd/mirror_contenturl and
+        <path>/etc/swupd/mirror_versionurl
+
+    - `-u, --unset`
+
+        Remove the content and version URL configuration by removing
+        <path>/etc/swupd
+
+    - `-p, --path`
+
+        Optionally set the top-level directory for the swupd-managed system.
+        If not specified this will default to '/'
+
 ``search {string}``
 
     Search for matching paths in manifest data. The specified {string}

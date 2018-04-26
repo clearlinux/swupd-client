@@ -70,6 +70,11 @@ static bool is_state(char *filename)
 		return false;
 	}
 
+	/* Kernel build support files under /usr/src/linux-$(uname -r) */
+	if ((strncmp(filename, "/usr/src/linux-", 15) == 0)) {
+		return false;
+	}
+
 	if ((strncmp(filename, "/data", 5) == 0) ||
 	    (strncmp(filename, "/dev/", 5) == 0) ||
 	    (strncmp(filename, "/home/", 6) == 0) ||

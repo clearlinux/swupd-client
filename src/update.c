@@ -330,6 +330,8 @@ static int main_update()
 
 	read_subscriptions(&current_subs);
 
+	handle_mirror_if_stale();
+
 /* Step 1: get versions */
 version_check:
 	ret = check_versions(&current_version, &server_version, requested_version, path_prefix);

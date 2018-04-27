@@ -33,8 +33,13 @@
 
 /* this function attempts to download the latest server version string file from
  * the preferred server to a memory buffer, returning either a negative integer
- * error code or >= 0 representing the server version */
-int get_latest_version(void)
+ * error code or >= 0 representing the server version
+ *
+ * if v_url is non-NULL the version at v_url is fetched. If v_url is NULL the
+ * global version_url is used and the cached version may be used instead of
+ * attempting to download the version string again. If v_url is the empty string
+ * the global version_url is used and the cached version is ignored. */
+int get_latest_version(char *v_url)
 {
 	char *url = NULL;
 	char *path = NULL;
@@ -42,8 +47,12 @@ int get_latest_version(void)
 	struct version_container tmp_version = { 0 };
 	static int cached_version = -1;
 
-	if (cached_version > 0) {
+	if (cached_version > 0 && v_url == NULL) {
 		return cached_version;
+	}
+
+	if (v_url == NULL || strcmp(v_url, "") == 0) {
+		v_url = version_url;
 	}
 
 	tmp_version.version = calloc(LINE_MAX, 1);
@@ -51,7 +60,7 @@ int get_latest_version(void)
 		abort();
 	}
 
-	string_or_die(&url, "%s/version/format%s/latest", version_url, format_string);
+	string_or_die(&url, "%s/version/format%s/latest", v_url, format_string);
 
 	string_or_die(&path, "%s/server_version", state_dir);
 
@@ -128,7 +137,7 @@ void read_versions(int *current_version,
 {
 	*current_version = get_current_version(path_prefix);
 
-	*server_version = get_latest_version();
+	*server_version = get_latest_version(NULL);
 }
 
 int check_versions(int *current_version,

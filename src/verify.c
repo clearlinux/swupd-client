@@ -768,7 +768,7 @@ int verify_main(int argc, char **argv)
 	}
 
 	if (version == -1) {
-		version = get_latest_version();
+		version = get_latest_version(NULL);
 		if (version < 0) {
 			fprintf(stderr, "Unable to get latest version for install\n");
 			ret = EXIT_FAILURE;
@@ -830,7 +830,7 @@ int verify_main(int argc, char **argv)
 			fprintf(stderr, "ERROR: Mismatching formats detected when verifying %d"
 					" (expected: %s; actual: %d)\n",
 				version, format_string, official_manifest->manifest_version);
-			int latest = get_latest_version();
+			int latest = get_latest_version(NULL);
 			if (latest > 0) {
 				fprintf(stderr, "Latest supported version to verify: %d\n", latest);
 			}

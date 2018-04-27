@@ -367,8 +367,6 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 		}
 	} else {
 		// only download latest version number, storing in the provided pointer
-		fprintf(stderr, "Attempting to download version string to memory\n");
-
 		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, swupd_download_version_to_memory);
 		if (curl_ret != CURLE_OK) {
 			goto exit;

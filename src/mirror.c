@@ -143,6 +143,48 @@ out:
 	return ret;
 }
 
+void handle_mirror_if_stale(void)
+{
+	char *ret_str = NULL;
+	char *fullpath = NULL;
+
+	if (path_prefix != NULL) {
+		fullpath = mk_full_filename(path_prefix, DEFAULT_VERSION_URL_PATH);
+	} else {
+		string_or_die(&fullpath, DEFAULT_VERSION_URL_PATH);
+	}
+	int ret = get_value_from_path(&ret_str, fullpath, false);
+	if (ret != 0 || ret_str == NULL) {
+		/* no versionurl file here, might not exist under --path argument */
+		goto out;
+	}
+	int central_version = get_latest_version(ret_str);
+	int mirror_version = get_latest_version("");
+
+	/* note that negative mirror_version and negative central_version are handled
+	 * correctly, as the difference will be great for a mirror_version of -1
+	 * (it will resolve to central_version + 1 and the diff will be very large).
+	 * When the upstream central_version is an error -1 version the mirror version
+	 * will be used due to the diff being negative. */
+	int diff = central_version - mirror_version;
+	if (diff > MIRROR_STALE_UNSET || mirror_version == -1) {
+		fprintf(stderr, "WARNING: removing stale mirror configuration. "
+				"Mirror version (%d) is too far behind upstream version (%d)\n",
+			mirror_version,
+			central_version);
+		unset_mirror_url();
+		goto out;
+	}
+	if (diff > MIRROR_STALE_WARN) {
+		fprintf(stderr, "WARNING: mirror version (%d) is behind upstream version (%d)\n",
+			mirror_version,
+			central_version);
+	}
+out:
+	free_string(&fullpath);
+	free_string(&ret_str);
+}
+
 char *set = NULL;
 bool unset = false;
 

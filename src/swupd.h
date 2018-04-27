@@ -49,6 +49,9 @@ extern "C" {
 #define MIRROR_CONTENT_URL_PATH "/etc/swupd/mirror_contenturl"
 #define DEFAULT_FORMAT_PATH "/usr/share/defaults/swupd/format"
 
+#define MIRROR_STALE_WARN 20
+#define MIRROR_STALE_UNSET 500
+
 #define DEFAULT_CONTENTURL "https://cdn.download.clearlinux.org/update/"
 
 struct sub {
@@ -201,7 +204,7 @@ extern int add_included_manifests(struct manifest *mom, int current, struct list
 extern int main_verify(int current_version);
 extern int walk_tree(struct manifest *, const char *, bool, const regex_t *);
 
-extern int get_latest_version(void);
+extern int get_latest_version(char *v_url);
 extern void read_versions(int *current_version, int *server_version, char *path_prefix);
 extern int check_versions(int *current_version, int *server_version, int requested_version, char *path_prefix);
 extern int get_current_version(char *path_prefix);
@@ -406,6 +409,8 @@ extern void check_mix_versions(int *current_version, int *server_version, char *
 extern int read_mix_version_file(char *filename, char *path_prefix);
 
 extern void print_update_conf_info(void);
+
+extern void handle_mirror_if_stale(void);
 
 /* some disk sizes constants for the various features:
  *   ...consider adding build automation to catch at build time

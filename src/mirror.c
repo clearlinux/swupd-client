@@ -53,11 +53,7 @@ static const struct option prog_opts[] = {
 static int unset_mirror_url()
 {
 	char *fullpath;
-	if (path_prefix != NULL) {
-		fullpath = mk_full_filename(path_prefix, "/etc/swupd");
-	} else {
-		string_or_die(&fullpath, "/etc/swupd");
-	}
+	fullpath = mk_full_filename(path_prefix, "/etc/swupd");
 
 	if (fullpath == NULL ||
 	    strcmp(fullpath, "/") == 0 ||
@@ -111,14 +107,10 @@ static int set_mirror_url(char *url)
 	char *version_path;
 	int ret = 0;
 	bool need_unset = false;
-	/* concatenate path_prefix and configuration paths if necessary */
-	if (path_prefix != NULL) {
-		content_path = mk_full_filename(path_prefix, MIRROR_CONTENT_URL_PATH);
-		version_path = mk_full_filename(path_prefix, MIRROR_VERSION_URL_PATH);
-	} else {
-		string_or_die(&content_path, "%s", MIRROR_CONTENT_URL_PATH);
-		string_or_die(&version_path, "%s", MIRROR_VERSION_URL_PATH);
-	}
+	/* concatenate path_prefix and configuration paths if necessary
+	 * if path_prefix is NULL the second argument will be returned */
+	content_path = mk_full_filename(path_prefix, MIRROR_CONTENT_URL_PATH);
+	version_path = mk_full_filename(path_prefix, MIRROR_VERSION_URL_PATH);
 
 	/* write url to path_prefix/MIRROR_CONTENT_URL_PATH */
 	ret = write_to_path(url, content_path);
@@ -148,11 +140,7 @@ void handle_mirror_if_stale(void)
 	char *ret_str = NULL;
 	char *fullpath = NULL;
 
-	if (path_prefix != NULL) {
-		fullpath = mk_full_filename(path_prefix, DEFAULT_VERSION_URL_PATH);
-	} else {
-		string_or_die(&fullpath, DEFAULT_VERSION_URL_PATH);
-	}
+	fullpath = mk_full_filename(path_prefix, DEFAULT_VERSION_URL_PATH);
 	int ret = get_value_from_path(&ret_str, fullpath, false);
 	if (ret != 0 || ret_str == NULL) {
 		/* no versionurl file here, might not exist under --path argument */

@@ -264,6 +264,10 @@ char *mk_full_filename(const char *prefix, const char *path)
 		abort();
 	}
 
+	if (prefix == NULL) {
+		return abspath;
+	}
+
 	// The prefix is a minimum of "/" or "".  If the prefix is only that,
 	// just use abspath.  If the prefix is longer than the minimal, insure
 	// it ends in not "/" and append abspath.

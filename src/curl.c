@@ -172,6 +172,8 @@ int swupd_curl_check_network(void)
 			swupd_curl_test_resume();
 			goto cleanup;
 		case CURLE_SSL_CACERT:
+			fprintf(stderr, "Error: unable to verify server SSL certificate\n");
+			ret = EBADCERT;
 			break;
 		default:
 			swupd_curl_strerror(curl_ret);

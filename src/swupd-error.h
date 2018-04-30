@@ -24,5 +24,6 @@
 #define ESIGNATURE 21		/* Cannot initialize signature verification */
 #define EBADTIME 22		/* System time is bad */
 #define EDOWNLOADPACKS 23       /* Pack download failed */
+#define EBADCERT 24		/* unable to verify server SSL certificate */
 
 #endif

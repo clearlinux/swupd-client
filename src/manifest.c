@@ -507,8 +507,9 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	}
 	free_string(&filename);
 
-	if (swupd_curl_check_network()) {
-		ret = -ENOSWUPDSERVER;
+	ret = swupd_curl_check_network();
+	if (ret) {
+		ret = -ret;
 		goto out;
 	}
 

@@ -139,9 +139,10 @@ static int check_update()
 	}
 	swupd_curl_init();
 
-	if (swupd_curl_check_network()) {
+	int ret = swupd_curl_check_network();
+	if (ret) {
 		fprintf(stderr, "Error: Network issue, unable to check for update\n");
-		return ENOSWUPDSERVER;
+		return ret;
 	}
 
 	read_versions(&current_version, &server_version, path_prefix);

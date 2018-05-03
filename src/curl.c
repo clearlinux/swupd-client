@@ -118,6 +118,31 @@ int swupd_curl_init(void)
 	return 0;
 }
 
+/* 
+ * Cannot avoid a TOCTOU here with the current curl API.  Only using the curl
+ * API, a curl_easy_setopt does not detect if the client SSL certificate is
+ * present on the filesystem.  The only happens during curl_easy_perform.
+ * The emphasis is rather on how using a SSL client certificate is an opt-in
+ * function rather than an opt-out function.
+ */
+CURLcode swupd_curl_set_optional_client_cert(CURL* curl) {
+	CURLcode curl_ret = CURLE_OK;
+
+	if (access(SSL_CLIENT_CERT, F_OK) != -1) {
+		curl_ret = curl_easy_setopt(curl, CURLOPT_SSLCERT, SSL_CLIENT_CERT);
+		if (curl_ret != CURLE_OK) {
+			goto exit;
+		}
+		curl_ret = curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+		if (curl_ret != CURLE_OK) {
+			goto exit;
+		}
+	}
+
+exit:
+	return curl_ret;
+}
+
 static void swupd_curl_test_resume(void);
 
 int swupd_curl_check_network(void)
@@ -160,6 +185,11 @@ int swupd_curl_check_network(void)
 			}
 		}
 
+		curl_ret = swupd_curl_set_optional_client_cert(c);
+		if (curl_ret != CURLE_OK) {
+			goto cleanup;
+		}
+
 		curl_ret = curl_easy_perform(c);
 
 		switch (curl_ret) {
@@ -171,6 +201,10 @@ int swupd_curl_check_network(void)
 			goto cleanup;
 		case CURLE_SSL_CACERT:
 			fprintf(stderr, "Error: unable to verify server SSL certificate\n");
+			ret = EBADCERT;
+			break;
+		case CURLE_SSL_CERTPROBLEM:
+			fprintf(stderr, "Curl: Problem with the local client SSL certificate\n");
 			ret = EBADCERT;
 			break;
 		default:
@@ -237,6 +271,11 @@ double swupd_query_url_content_size(char *url)
 		if (curl_ret != CURLE_OK) {
 			return -1;
 		}
+	}
+
+	curl_ret = swupd_curl_set_optional_client_cert(curl);
+	if (curl_ret != CURLE_OK) {
+		return -1;
 	}
 
 	curl_ret = curl_easy_perform(curl);
@@ -447,6 +486,10 @@ exit:
 			fprintf(stderr, "Curl: Bad SSL Cert file, cannot ensure secure connection\n");
 			err = -1;
 			break;
+		case CURLE_SSL_CERTPROBLEM:
+			fprintf(stderr, "Curl: Problem with the local client SSL certificate\n");
+			ret = -EBADCERT;
+			break;
 		default:
 			swupd_curl_strerror(curl_ret);
 			err = -1;
@@ -550,6 +593,11 @@ static CURLcode swupd_curl_set_security_opts(CURL *curl)
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
+	}
+
+	curl_ret = swupd_curl_set_optional_client_cert(curl);
+	if (curl_ret != CURLE_OK) {
+		goto exit;
 	}
 
 exit:

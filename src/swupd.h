@@ -42,6 +42,7 @@ extern "C" {
 #define MIX_CERT MIX_DIR "Swupd_Root.pem"
 #define MIX_BUNDLES_DIR MIX_STATE_DIR "mix-bundles/"
 #define MIXED_FILE SWUPD_DEFAULTS "mixed"
+#define SSL_CLIENT_CERT "/usr/share/clear/update-ca/Swupd_Ssl_Client.pem"
 
 #define DEFAULT_VERSION_URL_PATH "/usr/share/defaults/swupd/versionurl"
 #define MIRROR_VERSION_URL_PATH "/etc/swupd/mirror_versionurl"

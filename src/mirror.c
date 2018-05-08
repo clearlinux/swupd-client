@@ -52,53 +52,73 @@ static const struct option prog_opts[] = {
 
 static int unset_mirror_url()
 {
-	char *fullpath;
-	fullpath = mk_full_filename(path_prefix, "/etc/swupd");
+	char *content_path;
+	char *version_path;
+	int ret = 0;
+	content_path = mk_full_filename(path_prefix, MIRROR_CONTENT_URL_PATH);
+	version_path = mk_full_filename(path_prefix, MIRROR_VERSION_URL_PATH);
 
-	if (fullpath == NULL ||
-	    strcmp(fullpath, "/") == 0 ||
-	    strcmp(fullpath, "/etc") == 0) {
-		fprintf(stderr, "Invalid mirror configuration path\n");
-		free_string(&fullpath);
-		return 1;
+	if ((ret = swupd_rm(content_path))) {
+		goto out;
 	}
-	int ret = swupd_rm(fullpath);
-	free_string(&fullpath);
+	if ((ret = swupd_rm(version_path))) {
+		goto out;
+	}
+
+out:
+	free_string(&content_path);
+	free_string(&version_path);
 	return ret;
 }
 
 static int write_to_path(char *content, char *path)
 {
 	char *dir, *tmp = NULL;
+	struct stat dirstat;
 	string_or_die(&tmp, "%s", path);
 	dir = dirname(tmp);
-	/* attempt to  make the directory
-	 * ignore EEXIST errors */
-	int ret = mkdir(dir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-	char *cmd;
-	string_or_die(&cmd, "mkdir -p %s", dir);
-	ret = system(cmd);
-	free_string(&cmd);
-	free_string(&tmp);
-	if (ret) {
-		return ret;
+
+	/* attempt to make the directory, ok if already exists */
+	int ret = mkdir(dir, S_IRWXU | S_IRWXG | S_IRWXO);
+	if (ret && EEXIST != errno) {
+		fprintf(stderr, "mkdir\n");
+		perror(dir);
+		goto out;
+	}
+
+	/* Make sure we have a directory, for better user feedback */
+	if ((ret = stat(dir, &dirstat))) {
+		perror(dir);
+		goto out;
+	} else if (!S_ISDIR(dirstat.st_mode)) {
+		fprintf(stderr, "%s: not a directory\n", dir);
+		ret = 1;
+		goto out;
 	}
 
 	/* now try to open the file to write */
 	FILE *fp = NULL;
 	fp = fopen(path, "w");
 	if (fp == NULL) {
-		return 1;
+		perror(path);
+		ret = 1;
+		goto out;
 	}
 
 	/* and write to the file */
 	ret = fputs(content, fp);
-	fclose(fp);
 	if (ret < 0 || ret == EOF) {
-		return 1;
+		fprintf(stderr, "%s: write failed\n", path);
 	}
 
-	return 0;
+	if ((ret = fclose(fp))) {
+		fprintf(stderr, "fclose\n");
+		perror(path);
+	}
+
+out:
+	free_string(&tmp);
+	return ret;
 }
 
 static int set_mirror_url(char *url)

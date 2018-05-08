@@ -15,6 +15,8 @@ export SWUPD_OPTS_NO_FMT="-S $STATE_DIR -p $DIR/target-dir -u file://$DIR/web-di
 
 export SWUPD_OPTS_NO_CERT="-S $STATE_DIR -p $DIR/target-dir -F staging -u file://$DIR/web-dir"
 
+export SWUPD_OPTS_MIRROR="-p $DIR/target-dir"
+
 export CERT="$BATS_TEST_DIRNAME/Swupd_Root.pem"
 
 export CERTCONF="$BATS_TEST_DIRNAME/certattributes.cnf"

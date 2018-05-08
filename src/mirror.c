@@ -74,7 +74,7 @@ static int write_to_path(char *content, char *path)
 	dir = dirname(tmp);
 	/* attempt to  make the directory
 	 * ignore EEXIST errors */
-	int ret = mkdir(dir, S_IRWXU);
+	int ret = mkdir(dir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 	char *cmd;
 	string_or_die(&cmd, "mkdir -p %s", dir);
 	ret = system(cmd);

@@ -145,6 +145,8 @@ BATS = \
 	test/functional/completion/basic/test.bats \
 	test/functional/hashdump/file-hash/test.bats \
 	test/functional/hashdump/file-hash-no-path-prefix/test.bats \
+	test/functional/mirror/createdir/test.bats \
+	test/functional/mirror/createdir-negative/test.bats \
 	test/functional/search/content-check-negfull-path/test.bats \
 	test/functional/search/content-check-neglibtest/test.bats \
 	test/functional/search/content-check-posbin/test.bats \

@@ -5,7 +5,7 @@ load "../../swupdlib"
 setup() {
   clean_test_dir
   sudo mkdir -p "$DIR/target-dir/usr/share/defaults/swupd/"
-  echo 4 | sudo tee "$DIR/target-dir/usr/share/defaults/swupd/format"
+  echo 1 | sudo tee "$DIR/target-dir/usr/share/defaults/swupd/format"
   sudo mkdir -p "$DIR/target-dir/etc"
 }
 
@@ -19,6 +19,7 @@ teardown() {
   sudo touch "$DIR/target-dir/etc/swupd"
   [[ -f "$DIR/target-dir/etc/swupd" ]] && ! [[ -L "$DIR/target-dir/etc/swupd" ]]
   run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file $SWUPD_OPTS_MIRROR"
+  [[ $status != 0 ]]
   check_lines "$output"
 }
 
@@ -28,6 +29,7 @@ teardown() {
   sudo touch "$DIR/target-dir/foo"
   sudo ln -s "$DIR/target-dir/foo" "$DIR/target-dir/etc/swupd"
   run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file $SWUPD_OPTS_MIRROR"
+  [[ $status != 0 ]]
   check_lines "$output"
   sudo rm "$DIR/target-dir/foo"
 }

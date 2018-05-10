@@ -20,7 +20,7 @@ LOCAL_REPO_DIR = /usr/share/mix/local
 BUNDLE=os-core
 CONTENTURL=file:///usr/share/mix/update/www
 VERSIONURL=file:///usr/share/mix/update/www
-FORMAT=1" | sudo tee "$BUILDCONF" > /dev/null
+FORMAT=1" | tee "$BUILDCONF" > /dev/null
 fi
 
 
@@ -44,22 +44,22 @@ if [ $? -ne 0 ]; then
 fi
 
 # Make sure all the directories exist
-sudo mkdir -p $MIX_DIR $REPO_DIR $BUILD_STATE_DIR
+mkdir -p $MIX_DIR $REPO_DIR $BUILD_STATE_DIR
 if [ ! -f "$MIX_DIR/upstreamversion" ]; then
-	awk -F  "=" '/^VERSION_ID=/ { print $2 }' /usr/lib/os-release | tr -d '\n' | sudo tee "$MIX_DIR/upstreamversion" > /dev/null
+	awk -F  "=" '/^VERSION_ID=/ { print $2 }' /usr/lib/os-release | tr -d '\n' | tee "$MIX_DIR/upstreamversion" > /dev/null
 elif [[ "$pkg" == "regenerate" ]]; then
-	echo -n "$(($(cat $MIX_DIR/upstreamversion)*1000))" | sudo tee "$MIX_DIR/mixversion" > /dev/null
+	echo -n "$(($(cat $MIX_DIR/upstreamversion)*1000))" | tee "$MIX_DIR/mixversion" > /dev/null
 fi
 if [ ! -f "$MIX_DIR/mixversion" ]; then
-	echo -n "$(($(cat $MIX_DIR/upstreamversion)*1000))" | sudo tee "$MIX_DIR/mixversion" > /dev/null
+	echo -n "$(($(cat $MIX_DIR/upstreamversion)*1000))" | tee "$MIX_DIR/mixversion" > /dev/null
 fi
 
 clearver=$(cat $MIX_DIR/upstreamversion| tr -d ' ')
-echo -n "$clearver" | sudo tee "$MIX_DIR/version" > /dev/null
+echo -n "$clearver" | tee "$MIX_DIR/version" > /dev/null
 
 cd "$MIX_DIR"
-sudo touch mixbundles
-sudo mixer init --upstream-version $(cat "$MIX_DIR/upstreamversion") --mix-version $(cat "$MIX_DIR/mixversion")
+touch mixbundles
+mixer init --upstream-version $(cat "$MIX_DIR/upstreamversion") --mix-version $(cat "$MIX_DIR/mixversion")
 
 if [[ -n "$pkg" && -n "$bundle" ]]; then
 	echo "Adding $pkg to $bundle..."
@@ -68,13 +68,13 @@ if [[ -n "$pkg" && -n "$bundle" ]]; then
 # [DESCRIPTION]: Custom bundle
 # [STATUS]: Active
 # [CAPABILITIES]:
-# [MAINTAINER]: Mixer User" | sudo tee "$BUNDLE_DIR/$bundle" > /dev/null
+# [MAINTAINER]: Mixer User" | tee "$BUNDLE_DIR/$bundle" > /dev/null
 	fi
 
 	grep -x "$pkg" "$BUNDLE_DIR/$bundle"
 	if [ $? -ne 0 ]; then
 		# Write package to bundle definition
-		echo "$pkg" | sudo tee -a "$BUNDLE_DIR/$bundle" > /dev/null
+		echo "$pkg" | tee -a "$BUNDLE_DIR/$bundle" > /dev/null
 	fi
 fi
 
@@ -88,20 +88,20 @@ fi
 mixver=$(cat $MIX_DIR/mixversion)
 
 # Copy the rpms into the local database location
-sudo mixer add-rpms --config "$BUILDCONF"
-sudo mixer bundle add "$bundle" os-core --config "$BUILDCONF"
+mixer add-rpms --config "$BUILDCONF"
+mixer bundle add "$bundle" os-core --config "$BUILDCONF"
 # Use the original (non-merged) MoM for creating updates between custom content
 if [ $PREVIOUS_VER -eq 0 ]; then
-	sudo mixer build bundles --config "$BUILDCONF" --new-chroots
-	sudo mixer build update --config "$BUILDCONF" --new-swupd --increment
+	mixer build bundles --config "$BUILDCONF" --new-chroots
+	mixer build update --config "$BUILDCONF" --new-swupd --increment
 else
 	((mixver-=10))
-	sudo mv $OUTPUTDIR/$mixver/Manifest.MoM $OUTPUTDIR/$mixver/FullManifest.MoM
-	sudo mv $OUTPUTDIR/$mixver/Manifest.MoM.$mixver $OUTPUTDIR/$mixver/Manifest.MoM
-	sudo mixer build bundles --config "$BUILDCONF" --new-chroots
-	sudo mixer build update --config "$BUILDCONF" --new-swupd --increment
-	sudo mv $OUTPUTDIR/$mixver/Manifest.MoM $OUTPUTDIR/$mixver/Manifest.MoM.$mixver
-	sudo mv $OUTPUTDIR/$mixver/FullManifest.MoM $OUTPUTDIR/$mixver/Manifest.MoM
+	mv $OUTPUTDIR/$mixver/Manifest.MoM $OUTPUTDIR/$mixver/FullManifest.MoM
+	mv $OUTPUTDIR/$mixver/Manifest.MoM.$mixver $OUTPUTDIR/$mixver/Manifest.MoM
+	mixer build bundles --config "$BUILDCONF" --new-chroots
+	mixer build update --config "$BUILDCONF" --new-swupd --increment
+	mv $OUTPUTDIR/$mixver/Manifest.MoM $OUTPUTDIR/$mixver/Manifest.MoM.$mixver
+	mv $OUTPUTDIR/$mixver/FullManifest.MoM $OUTPUTDIR/$mixver/Manifest.MoM
 	((mixver+=10))
 
 fi
@@ -109,21 +109,21 @@ cd -
 
 # Download and verify the upstream Clear MoM
 echo "* Downloading $clearver Manifest.MoM..."
-sudo -E curl -f -O "https://download.clearlinux.org/update/$clearver/Manifest.MoM"
+curl -f -O "https://download.clearlinux.org/update/$clearver/Manifest.MoM"
 if [ $? -eq 22 ]; then
 	echo "ERROR: Could not download Manifest.MoM ver $clearver"
-	sudo rm -rf "Manifest.MoM"
+	rm -rf "Manifest.MoM"
 	exit 1
 fi
-sudo -E curl -f -O "https://download.clearlinux.org/update/$clearver/Manifest.MoM.sig"
+curl -f -O "https://download.clearlinux.org/update/$clearver/Manifest.MoM.sig"
 if [ $? -eq 22 ]; then
 	echo "ERROR: Could not download Manifest.MoM.sig ver $clearver"
-	sudo rm -rf "Manifest.MoM.sig"
+	rm -rf "Manifest.MoM.sig"
 	exit 1
 fi
 CERT="/usr/share/ca-certs/Swupd_Root.pem"
 
-sudo openssl smime -verify -in Manifest.MoM.sig -inform der -content Manifest.MoM -CAfile "$CERT"  > /dev/null 2>&1
+openssl smime -verify -in Manifest.MoM.sig -inform der -content Manifest.MoM -CAfile "$CERT"  > /dev/null 2>&1
 if [ $? -ne 0 ]; then
 	echo "ERROR: Official Manifest.MoM version $clearver could not be verified!"
 	exit
@@ -143,37 +143,37 @@ mixcount=$(grep filecount $OUTPUTDIR/$mixver/Manifest.MoM | cut -d ':' -f 2 | tr
 echo "* Adjusting stats for Manifest.MoM...."
 
 # Adjust the stats for Manifest.MoM when it's combined
-sudo sed -i "s/version:\\t[0-9].*/version:\\t$mixver/" Manifest.MoM
+sed -i "s/version:\\t[0-9].*/version:\\t$mixver/" Manifest.MoM
 # Need to set mixver to previous ver, without this mixver = the currently built ver
 ((mixver-=10))
 if [ $PREVIOUS_VER -eq 0 ]; then
-	sudo sed -i "s/previous:\\t[0-9].*/previous:\\t$clearver/" Manifest.MoM
+	sed -i "s/previous:\\t[0-9].*/previous:\\t$clearver/" Manifest.MoM
 else
-	sudo sed -i "s/previous:\\t[0-9].*/previous:\\t$mixver/" Manifest.MoM
+	sed -i "s/previous:\\t[0-9].*/previous:\\t$mixver/" Manifest.MoM
 fi
 ((mixver+=10))
-sudo sed -i "s/filecount:\\t[0-9].*/filecount:\\t$filecount/" Manifest.MoM
-sudo sed -i "s/contentsize:\\t[0-9].*/contentsize:\\t$contentsize/" Manifest.MoM
-sudo sed -i "s/MANIFEST\\t[0-9].*/MANIFEST\\t$FORMAT/" Manifest.MoM
+sed -i "s/filecount:\\t[0-9].*/filecount:\\t$filecount/" Manifest.MoM
+sed -i "s/contentsize:\\t[0-9].*/contentsize:\\t$contentsize/" Manifest.MoM
+sed -i "s/MANIFEST\\t[0-9].*/MANIFEST\\t$FORMAT/" Manifest.MoM
 
 # Remove os-core because ours will take place
-sudo sed -i '/os-core$/d' Manifest.MoM
+sed -i '/os-core$/d' Manifest.MoM
 
 # Change the Mixer manifest to have the new mixer flag
-sudo sed -i "s/M\.\.\./M\.\.m/" "$OUTPUTDIR/$mixver/Manifest.MoM"
+sed -i "s/M\.\.\./M\.\.m/" "$OUTPUTDIR/$mixver/Manifest.MoM"
 
 # Add mixer bundles to official MoM
-grep -w 'M..m' "$OUTPUTDIR/$mixver/Manifest.MoM" | sudo tee -a Manifest.MoM
+grep -w 'M..m' "$OUTPUTDIR/$mixver/Manifest.MoM" | tee -a Manifest.MoM
 
 # Copy the combined MoM to our output now (backup original mix one)
-sudo mv "$OUTPUTDIR/$mixver/Manifest.MoM" "$OUTPUTDIR/$mixver/Manifest.MoM.$mixver"
-sudo cp Manifest.MoM "$OUTPUTDIR/$mixver/Manifest.MoM"
+mv "$OUTPUTDIR/$mixver/Manifest.MoM" "$OUTPUTDIR/$mixver/Manifest.MoM.$mixver"
+cp Manifest.MoM "$OUTPUTDIR/$mixver/Manifest.MoM"
 
 # Resign the Manifest.MoM
-sudo openssl smime -sign -binary -in "$OUTPUTDIR/$mixver/Manifest.MoM" -signer "$MIX_CERT" -inkey "$PRIVKEY" -outform DER -out "$OUTPUTDIR/$mixver/Manifest.MoM.sig"
+openssl smime -sign -binary -in "$OUTPUTDIR/$mixver/Manifest.MoM" -signer "$MIX_CERT" -inkey "$PRIVKEY" -outform DER -out "$OUTPUTDIR/$mixver/Manifest.MoM.sig"
 cd "$OUTPUTDIR/$mixver"
-sudo tar -cvf Manifest.MoM.tar Manifest.MoM
+tar -cvf Manifest.MoM.tar Manifest.MoM
 cd -
 
 # Clean up files
-sudo rm -rf Manifest.MoM Manifest.MoM.sig
+rm -rf Manifest.MoM Manifest.MoM.sig

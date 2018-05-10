@@ -21,6 +21,8 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
+This tool requires ``sudo`` access to run.
+
 Adds a given local package to the specified <bundle_name> file, and
 automatically generates all content with mixer for swupd to use. It creates
 a very minimalist mix, unlike regular mixer usage where one composes the

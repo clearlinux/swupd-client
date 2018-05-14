@@ -636,9 +636,9 @@ out_fds:
 
 /* this function prints the initial message for all utils
 */
-void copyright_header(const char *name)
+void copyright_header(void)
 {
-	fprintf(stderr, PACKAGE " %s " VERSION "\n", name);
+	fprintf(stderr, PACKAGE " " VERSION "\n");
 	fprintf(stderr, "   Copyright (C) 2012-2018 Intel Corporation\n");
 	fprintf(stderr, "\n");
 }

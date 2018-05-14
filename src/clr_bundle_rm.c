@@ -237,8 +237,6 @@ int bundle_remove_main(int argc, char **argv)
 	int total = 0;
 	int bad = 0;
 
-	copyright_header("bundle remover");
-
 	if (!parse_options(argc, argv)) {
 		return EINVALID_OPTION;
 	}

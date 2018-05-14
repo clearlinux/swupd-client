@@ -172,7 +172,6 @@ static int check_update()
 int check_update_main(int argc, char **argv)
 {
 	int ret;
-	copyright_header("software update checker");
 
 	if (!parse_options(argc, argv)) {
 		return EINVALID_OPTION;

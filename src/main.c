@@ -106,7 +106,7 @@ static int parse_options(int argc, char **argv, int *index)
 			print_help(argv[0]);
 			exit(EXIT_SUCCESS);
 		case 'v':
-			copyright_header("swupd");
+			copyright_header();
 			fprintf(stderr, "Compile-time options: %s\n", BUILD_OPTS);
 			exit(EXIT_SUCCESS);
 		case '\01':

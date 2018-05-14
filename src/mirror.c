@@ -249,7 +249,6 @@ out:
 int mirror_main(int argc, char **argv)
 {
 	int ret = 0;
-	copyright_header("mirror");
 	ret = parse_options(argc, argv);
 	if (ret != 0) {
 		return ret;

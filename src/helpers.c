@@ -634,15 +634,6 @@ out_fds:
 	return ret;
 }
 
-/* this function prints the initial message for all utils
-*/
-void copyright_header(void)
-{
-	fprintf(stderr, PACKAGE " " VERSION "\n");
-	fprintf(stderr, "   Copyright (C) 2012-2018 Intel Corporation\n");
-	fprintf(stderr, "\n");
-}
-
 void string_or_die(char **strp, const char *fmt, ...)
 {
 	va_list ap;

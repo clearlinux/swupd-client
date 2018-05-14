@@ -75,6 +75,14 @@ static void print_help(const char *name)
 	fprintf(stderr, "To view subcommand options, run `%s SUBCOMMAND --help'\n", basename((char *)name));
 }
 
+/* this function prints the copyright message for the --version command */
+static void copyright_header(void)
+{
+	fprintf(stderr, PACKAGE " " VERSION "\n");
+	fprintf(stderr, "   Copyright (C) 2012-2018 Intel Corporation\n");
+	fprintf(stderr, "\n");
+}
+
 static int subcmd_index(char *arg)
 {
 	struct subcmd *entry = commands;

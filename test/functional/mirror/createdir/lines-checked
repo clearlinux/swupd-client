@@ -1,4 +1,3 @@
-REGEXP:^swupd-client mirror .*$
 Set upstream mirror to http://example.com/swupd-file
 Installed version: -1
 Version URL:       http://example.com/swupd-file

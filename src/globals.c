@@ -170,35 +170,16 @@ void print_time_stats(timelist *head)
 	}
 }
 
-/* If the MIX_BUNDLES_DIR has any content then we can run through
+/* If the MIX_BUNDLES_DIR has the valid-mix flag file we can run through
  * adding the mix data to the OS */
 bool check_mix_exists(void)
 {
-	DIR *dir;
-	struct dirent *entry;
 	char *fullpath;
-
-	string_or_die(&fullpath, "%s%s", path_prefix, MIX_DIR);
-
-	dir = opendir(fullpath);
+	bool ret;
+	string_or_die(&fullpath, "%s%s/.valid-mix", path_prefix, MIX_DIR);
+	ret = access(fullpath, F_OK) == 0;
 	free_string(&fullpath);
-
-	if (dir == NULL) {
-		return false;
-	}
-	for (; (entry = readdir(dir));) {
-		if (!entry) {
-			break;
-		}
-		if (!strcmp(entry->d_name, ".") ||
-		    !strcmp(entry->d_name, "..")) {
-			continue;
-		}
-		break;
-	}
-	closedir(dir);
-	/* If more than /. & /.. exists, then at least one bundle exists */
-	return entry != NULL;
+	return ret;
 }
 
 /* Once system is on mix this file should exist */

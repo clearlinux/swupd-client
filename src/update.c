@@ -274,8 +274,8 @@ static int re_exec_update(bool versions_match)
 
 static bool need_new_upstream(int server)
 {
-	if (!access(MIX_DIR ".clearversion", R_OK)) {
-		int version = read_mix_version_file(MIX_DIR ".clearversion", path_prefix);
+	if (!access(MIX_DIR "upstreamversion", R_OK)) {
+		int version = read_mix_version_file(MIX_DIR "upstreamversion", path_prefix);
 		if (version < server) {
 			return true;
 		}
@@ -359,17 +359,17 @@ version_check:
 				}
 			}
 
-			/* Update the clearversion that will be used to generate the new mix content */
-			FILE *verfile = fopen(MIX_DIR ".clearversion", "w+");
+			/* Update the upstreamversion that will be used to generate the new mix content */
+			FILE *verfile = fopen(MIX_DIR "upstreamversion", "w+");
 			if (!verfile) {
-				fprintf(stderr, "ERROR: fopen() %s/.clearversion returned %s\n", MIX_DIR, strerror(errno));
+				fprintf(stderr, "ERROR: fopen() %s/upstreamversion returned %s\n", MIX_DIR, strerror(errno));
 			} else {
 				fprintf(verfile, "%d", server_version);
 				fclose(verfile);
 			}
 
-			if (system("/usr/bin/swupd-add-pkg regenerate") != 0) {
-				fprintf(stderr, "ERROR: Could not execute swupd-add-pkg\n");
+			if (system("/usr/bin/mixin build") != 0) {
+				fprintf(stderr, "ERROR: Could not execute mixin\n");
 				ret = EXIT_FAILURE;
 				goto clean_curl;
 			}

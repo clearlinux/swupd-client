@@ -186,8 +186,6 @@ err:
 
 int bundle_add_main(int argc, char **argv)
 {
-	copyright_header("bundle adder");
-
 	if (!parse_options(argc, argv)) {
 		return EINVALID_OPTION;
 	}

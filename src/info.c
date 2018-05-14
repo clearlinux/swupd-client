@@ -32,8 +32,6 @@ void print_update_conf_info()
 
 int info_main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 {
-	copyright_header("info");
-
 	if (!init_globals()) {
 		return EINIT_GLOBALS;
 	}

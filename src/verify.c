@@ -740,8 +740,6 @@ int verify_main(int argc, char **argv)
 	struct list *subs = NULL;
 	timelist times;
 
-	copyright_header("software verify");
-
 	if (!parse_options(argc, argv)) {
 		ret = EINVALID_OPTION;
 		goto clean_args_and_exit;

@@ -83,8 +83,6 @@ err:
 
 int autoupdate_main(int argc, char **argv)
 {
-	copyright_header("autoupdate settings");
-
 	if (!parse_options(argc, argv)) {
 		return EINVALID_OPTION;
 	}

@@ -329,8 +329,6 @@ static int clean_staged_manifests(const char *path)
 
 int clean_main(int argc, char **argv)
 {
-	copyright_header("clean");
-
 	if (!parse_options(argc, argv)) {
 		return EXIT_FAILURE;
 	}

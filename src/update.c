@@ -866,7 +866,6 @@ static int print_versions()
 int update_main(int argc, char **argv)
 {
 	int ret = 0;
-	copyright_header("software update");
 
 	if (!parse_options(argc, argv)) {
 		return EINVALID_OPTION;

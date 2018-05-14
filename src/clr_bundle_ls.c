@@ -181,8 +181,6 @@ int bundle_list_main(int argc, char **argv)
 	int lock_fd;
 	int ret;
 
-	copyright_header("bundle list");
-
 	if (!parse_options(argc, argv)) {
 		return EXIT_FAILURE;
 	}

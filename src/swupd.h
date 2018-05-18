@@ -222,7 +222,6 @@ extern struct list *create_update_list(struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
 extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2, bool server);
 extern void free_manifest(struct manifest *manifest);
-extern void remove_manifest_files(char *filename, int version, char *hash);
 
 extern void grabtime_start(timelist *list, const char *name);
 extern void grabtime_stop(timelist *list);
@@ -383,7 +382,6 @@ extern bool is_tracked_bundle(const char *bundle_name);
 extern int remove_bundle(const char *bundle_name);
 extern int show_bundle_reqd_by(const char *bundle_name, bool server);
 extern int show_included_bundles(char *bundle_name);
-extern void required_by(struct list **list, const char *bundle_name, struct manifest *mom, int rl);
 extern int list_installable_bundles();
 extern int install_bundles_frontend(char **bundles);
 extern int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, bool find_all, int recursion);

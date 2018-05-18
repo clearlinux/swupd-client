@@ -41,7 +41,7 @@ bool init = false;
 
 static char search_type = '0';
 static char scope = '0';
-int num_results = INT_MAX;
+static int num_results = INT_MAX;
 
 /* bundle_result contains the information to print along with
  * the internal relevancy score used to sort the output */
@@ -540,7 +540,7 @@ static bool file_search(char *filename, char *path, char *search_term)
 	return false;
 }
 
-double guess_score(char *bundle, char *file, char *search_term)
+static double guess_score(char *bundle, char *file, char *search_term)
 {
 	double multiplier = 1.0;
 	double score = 1.0;

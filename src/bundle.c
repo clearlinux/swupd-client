@@ -166,7 +166,7 @@ static int unload_tracked_bundle(const char *bundle_name, struct list **subs)
 }
 
 /* Return list of bundles that include bundle_name */
-void required_by(struct list **reqd_by, const char *bundle_name, struct manifest *mom, int recursion)
+static void required_by(struct list **reqd_by, const char *bundle_name, struct manifest *mom, int recursion)
 {
 	struct list *b, *i;
 	// track recursion level for indentation

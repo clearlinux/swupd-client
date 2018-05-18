@@ -14,6 +14,15 @@ $/ = $saved_delim;
 
 my(@lines) = split(/\n/s, $syms);
 
+# The design of this code expects there to be one definition
+# for each variable and multiple references. This just doesn't
+# work for "common" variables, which are declared multiple times
+# and lets the linker merge them.
+# In particular gcc creates a common variable __gnu_lto_v1 when invoked
+# with -flto for each file. So we pretend that we have a use for this variable.
+push(@lines, "MAGICRUNTIME: U __gnu_lto_v1");
+push(@lines, "MAGICRUNTIME: U __gnu_lto_slim");
+
 my(%def);
 my(%undef);
 my(%stype);

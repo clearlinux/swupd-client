@@ -28,7 +28,7 @@
 
 #define DAY_SECONDS 86400
 
-unsigned long int get_versionstamp(void)
+static unsigned long int get_versionstamp(void)
 {
 	struct stat statt;
 	FILE *fp = NULL;
@@ -62,7 +62,7 @@ unsigned long int get_versionstamp(void)
 	return strtoul(data, NULL, 10);
 }
 
-bool set_time(time_t mtime, char *time)
+static bool set_time(time_t mtime, char *time)
 {
 	if (stime(&mtime) != 0) {
 		fprintf(stderr, "Failed to set system time");

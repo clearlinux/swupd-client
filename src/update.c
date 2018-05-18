@@ -97,9 +97,10 @@ static struct list *full_download_loop(struct list *updates, int isfailed)
 	return end_full_download();
 }
 
-/* This loads the upstream Clear Manifest.Full and local Manifest.full, and then checks
- * that there are no conflicts between the files they both include */
-int check_manifests_uniqueness(int clrver, int mixver)
+/* This loads the upstream Clear Manifest.Full and local
+ * Manifest.full, and then checks that there are no conflicts between
+ * the files they both include */
+static int check_manifests_uniqueness(int clrver, int mixver)
 {
 	struct manifest *clear = load_manifest_full(clrver, false);
 	struct manifest *mixer = load_manifest_full(mixver, true);

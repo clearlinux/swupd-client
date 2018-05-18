@@ -589,7 +589,7 @@ static void set_untracked_manifest_files(struct manifest *manifest)
 
 /* Removes the extracted Manifest.<bundle> and accompanying tar file, cache file, and
  * the signature file */
-void remove_manifest_files(char *filename, int version, char *hash)
+static void remove_manifest_files(char *filename, int version, char *hash)
 {
 	char *file;
 

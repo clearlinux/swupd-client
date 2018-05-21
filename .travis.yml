@@ -29,5 +29,9 @@ install:
 # Ubuntu's default umask is 0002, but this break's swupd hash calculations.
 script:
         - sudo find test/functional -exec chmod g-w {} \;
-        - autoreconf --verbose --warnings=none --install --force && ./configure --enable-signature-verification && make -j48 && sudo sh -c 'umask 0022 && make -j48 check'
+        - autoreconf --verbose --warnings=none --install --force &&
+          ./configure --enable-signature-verification &&
+          make -j48 &&
+          sudo sh -c 'umask 0022 && make -j48 check' &&
+          sudo sh -c 'umask 0022 && make install'
 after_failure: cat test-suite.log

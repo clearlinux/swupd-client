@@ -177,3 +177,6 @@ cd -
 
 # Clean up files
 rm -rf Manifest.MoM Manifest.MoM.sig
+
+# write valid-mix flag file so swupd-client is aware of the mix
+touch "$MIX_DIR/.valid-mix"

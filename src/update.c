@@ -351,15 +351,6 @@ version_check:
 		/* Check if a new upstream version is available so we can update to it still */
 		if (need_new_upstream(server_version)) {
 			printf("NEW CLEAR AVAILABLE %d\n", server_version);
-			ret = check_manifests_uniqueness(server_version, mix_server_version);
-			if (ret) {
-				printf("\n\t!! %i collisions were found between mix and upstream, please re-create mix !!\n", ret);
-				if (!allow_mix_collisions) {
-					ret = EXIT_FAILURE;
-					goto clean_curl;
-				}
-			}
-
 			/* Update the upstreamversion that will be used to generate the new mix content */
 			FILE *verfile = fopen(MIX_DIR "upstreamversion", "w+");
 			if (!verfile) {
@@ -374,6 +365,18 @@ version_check:
 				ret = EXIT_FAILURE;
 				goto clean_curl;
 			}
+
+			// new mix version
+			check_mix_versions(&mix_current_version, &mix_server_version, path_prefix);
+			ret = check_manifests_uniqueness(server_version, mix_server_version);
+			if (ret) {
+				printf("\n\t!! %i collisions were found between mix and upstream, please re-create mix !!\n", ret);
+				if (!allow_mix_collisions) {
+					ret = EXIT_FAILURE;
+					goto clean_curl;
+				}
+			}
+
 			goto version_check;
 		}
 		current_version = mix_current_version;

@@ -333,6 +333,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -m, --csv               Output all results in CSV format (machine-readable)\n");
 	fprintf(stderr, "   -d, --display-files	   Output full file list, no search done\n");
 	fprintf(stderr, "   -i, --init              Download all manifests then return, no search done\n");
+	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
 	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
 	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
@@ -358,6 +359,7 @@ static const struct option prog_opts[] = {
 	{ "path", required_argument, 0, 'p' },
 	{ "format", required_argument, 0, 'F' },
 	{ "init", no_argument, 0, 'i' },
+	{ "nosigcheck", no_argument, 0, 'n'},
 	{ "ignore-time", no_argument, 0, 'I' },
 	{ "display-files", no_argument, 0, 'd' },
 	{ "statedir", required_argument, 0, 'S' },
@@ -369,7 +371,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hu:c:v:P:p:F:s:t:mlbiIdS:C:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hu:c:v:P:p:F:s:t:mlbinIdS:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -456,6 +458,9 @@ static bool parse_options(int argc, char **argv)
 			break;
 		case 'i':
 			init = true;
+			break;
+		case 'n':
+			sigcheck = false;
 			break;
 		case 'I':
 			timecheck = false;

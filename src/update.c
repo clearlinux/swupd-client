@@ -627,6 +627,11 @@ clean_curl:
 	if (re_update) {
 		versions_match = version_files_consistent();
 	}
+	if (latest_subs) {
+		list_free_list(current_subs);
+	} else {
+		free_subscriptions(&current_subs);
+	}
 	swupd_deinit(lock_fd, &latest_subs);
 
 	if (!download_only) {

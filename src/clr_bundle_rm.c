@@ -67,7 +67,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
 	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	fprintf(stderr, "   -x, --force             Attempt to proceed even if non-critical errors found\n");
-	fprintf(stderr, "   -n, --nosigcheck       Do not attempt to enforce certificate or signature checks\n");
+	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checks\n");
 	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
 	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
@@ -191,84 +191,11 @@ err:
 	return false;
 }
 
-static void reload_parsed_opts(void)
-{
-	if (curopts.path_prefix) {
-		set_path_prefix(curopts.path_prefix);
-	}
-
-	if (curopts.version_url) {
-		set_version_url(curopts.version_url);
-	}
-
-	if (curopts.content_url) {
-		set_content_url(curopts.content_url);
-	}
-
-	if (curopts.format_string) {
-		set_format_string(curopts.format_string);
-	}
-
-	if (curopts.state_dir) {
-		set_state_dir(curopts.state_dir);
-	}
-
-	if (curopts.cert_path) {
-		set_cert_path(curopts.cert_path);
-	}
-
-	force = curopts.force;
-	sigcheck = curopts.sigcheck;
-}
-
-static void free_saved_opts(void)
-{
-	free_string(&curopts.path_prefix);
-	free_string(&curopts.version_url);
-	free_string(&curopts.content_url);
-	free_string(&curopts.format_string);
-	free_string(&curopts.state_dir);
-	free_string(&curopts.cert_path);
-}
-
 int bundle_remove_main(int argc, char **argv)
 {
-	int ret = 0;
-	int total = 0;
-	int bad = 0;
-
 	if (!parse_options(argc, argv)) {
 		return EINVALID_OPTION;
 	}
 
-	for (; *bundles; ++bundles, total++) {
-		fprintf(stderr, "Removing bundle: %s\n", *bundles);
-
-		if (remove_bundle(*bundles) != 0) {
-			/* At least one bundle failed to be removed
-			 * then for consistency return an error
-			 * indicating that
-			 */
-			ret = EBUNDLE_REMOVE;
-			bad++;
-		}
-		/* if we have more than one bundle to process then
-		 * make sure to reload the parsed options since all
-		 * globals are cleaned up at swupd_deinit()
-		 */
-		if (*bundles) {
-			reload_parsed_opts();
-		}
-	}
-	/* print some statistics */
-	if (ret) {
-		fprintf(stderr, "%i bundle(s) of %i failed to remove\n", bad, total);
-	} else {
-		fprintf(stderr, "%i bundle(s) were removed successfully\n", total);
-	}
-
-	/* free any parsed opt saved for reloading */
-	free_saved_opts();
-
-	return ret;
+	return remove_bundles(bundles);
 }

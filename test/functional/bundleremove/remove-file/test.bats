@@ -25,4 +25,20 @@ teardown() {
   [ ! -f "$DIR/target-dir/test-file" ]
 }
 
+@test "bundle-remove remove bundle os-core" {
+  run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS os-core"
+
+  # EBUNDLE_NOT_TRACKED == 13
+  echo "$status"
+  [ "$status" -eq 13 ]
+}
+
+@test "bundle-remove remove untracked bundle" {
+  run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS os-core"
+
+  # EBUNDLE_NOT_TRACKED == 13
+  echo "$status"
+  [ "$status" -eq 13 ]
+}
+
 # vi: ft=sh ts=8 sw=2 sts=2 et tw=80

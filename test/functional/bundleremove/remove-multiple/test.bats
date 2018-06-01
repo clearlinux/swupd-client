@@ -32,9 +32,19 @@ teardown() {
 }
 
 @test "bundle-remove remove multiple bundles one exist and one that dont" {
-  run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle3 fake-bundle"
+  run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS fake-bundle test-bundle3"
 
-  [ ! -f "$DIR/target-dir/test-file3" ] && [ $status -eq 3 ]
+  # EBUNDLE_NOT_TRACKED == 13
+  echo "Status: $status"
+  [ ! -f "$DIR/target-dir/test-file3" ] && [ $status -eq 13 ]
+}
+
+@test "bundle-remove remove multiple bundles two exist and one is os-core" {
+  run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle1 os-core test-bundle2"
+
+  # EBUNDLE_NOT_TRACKED == 13
+  echo "Status: $status"
+  [ ! -f "$DIR/target-dir/test-file1" ] && [ ! -f "$DIR/target-dir/test-file2" ] && [ $status -eq 13 ]
 }
 
 # vi: ft=sh ts=8 sw=2 sts=2 et tw=80

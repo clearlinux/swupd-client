@@ -348,104 +348,19 @@ static int get_all_files(struct manifest *official_manifest, struct list *subs)
 	return 0;
 }
 
-static struct list *download_loop(struct list *files, bool free_list)
-{
-	int ret;
-	struct list *iter;
-	unsigned int complete = 0;
-	unsigned int list_length = list_len(files);
-
-	iter = list_head(files);
-	while (iter) {
-		struct file *file;
-
-		file = iter->data;
-		iter = iter->next;
-		complete++;
-
-		if (file->is_deleted || file->do_not_update) {
-			continue;
-		}
-
-		/* Mix content is local, so don't queue files up for curl downloads */
-		if (file->is_mix) {
-			char *filename;
-			char *url;
-			string_or_die(&url, "%s/%i/files/%s.tar", MIX_STATE_DIR, file->last_change, file->hash);
-			string_or_die(&filename, "%s/download/.%s.tar", state_dir, file->hash);
-			file->staging = filename;
-			ret = link(url, filename);
-			/* Try doing a regular rename if hardlink fails */
-			if (ret) {
-				if (rename(url, filename) != 0) {
-					fprintf(stderr, "Failed to copy local mix file: %s\n", filename);
-					continue;
-				}
-			}
-			untar_full_download(file);
-			free_string(&filename);
-			free_string(&url);
-			continue;
-		}
-		full_download(file);
-		print_progress(complete, list_length);
-	}
-	print_progress(list_length, list_length); /* Force out 100% */
-	printf("\n");
-	if (free_list) {
-		list_free_list(files);
-	}
-
-	return end_full_download();
-}
-
-static int get_missing_files(struct list *files)
-{
-	int ret;
-	int retries = 0;  /* We only want to go through the download loop once */
-	int timeout = 10; /* Amount of seconds for first download retry */
-
-	while (files) {
-		ret = start_full_download(true);
-		if (ret != 0) {
-			/* If we hit this point, the network is accessible but we were
-			 * unable to download the needed files. This is a terminal error
-			 * and we need good logging */
-			goto error;
-		}
-
-		files = download_loop(files, retries > 0);
-
-		/* Set retries only if failed downloads exist, and only retry a fixed
-		   amount of &times */
-		if (list_head(files)) {
-			if (retries >= MAX_TRIES) {
-				list_free_list(files);
-				goto error;
-			}
-			increment_retries(&retries, &timeout);
-			fprintf(stderr, "Starting download retry #%d\n", retries);
-			clean_curl_multi_queue();
-		}
-	}
-
-	return 0;
-
-error:
-	fprintf(stderr, "Error: Unable to download neccessary files for this OS release\n");
-	return -EFULLDOWNLOAD;
-}
-
 /*
  * Check if the hash of all files in the list matches the system and in this case mark
  * them as do_not_update.
  * If cmdline_option_quick is set, use lazy hash mode and just check if file exists.
+ * Return 1 if the hashes of all files in the list matches the hash of the file in
+ * the system. Returns 0 otherwise.
  */
-static void check_files_hash(struct list *files)
+static int check_files_hash(struct list *files)
 {
 	struct list *iter;
 	unsigned int complete = 0;
 	unsigned int total = list_len(files);
+	int ret = 1;
 
 	fprintf(stderr, "Verifying files\n");
 	iter = list_head(files);
@@ -465,10 +380,14 @@ static void check_files_hash(struct list *files)
 		valid = cmdline_option_quick ? verify_file_lazy(fullname) : verify_file(f, fullname);
 		if (valid) {
 			f->do_not_update = 1;
+		} else {
+			ret = 0;
 		}
 	}
 	print_progress(total, total);
 	printf("\n");
+
+	return ret;
 }
 
 /* allow optimization of install case */
@@ -481,8 +400,14 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 	if (cmdline_option_fix) {
 		int ret;
 
-		check_files_hash(official_manifest->files);
-		ret = get_missing_files(official_manifest->files);
+		if (check_files_hash(official_manifest->files)) {
+			return 0;
+		}
+
+		ret = download_fullfiles(official_manifest->files, MAX_TRIES, 10);
+		if (ret) {
+			fprintf(stderr, "Error: Unable to download neccessary files for this OS release\n");
+		}
 
 		return ret;
 	}

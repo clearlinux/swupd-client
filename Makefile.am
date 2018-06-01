@@ -23,6 +23,7 @@ swupd_SOURCES = \
 	src/download.c \
 	src/extra_files.c \
 	src/filedesc.c \
+	src/fullfile.c \
 	src/globals.c \
 	src/hash.c \
 	src/hashdump.c \
@@ -33,8 +34,8 @@ swupd_SOURCES = \
 	src/list.h \
 	src/lock.c \
 	src/main.c \
-	src/mirror.c \
 	src/manifest.c \
+	src/mirror.c \
 	src/packs.c \
 	src/scripts.c \
 	src/search.c \

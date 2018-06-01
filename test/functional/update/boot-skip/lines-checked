@@ -14,5 +14,5 @@ Staging file content
 Applying update
 Update was applied.
 WARNING: boot files update skipped due to --no-boot-update argument
-Update successful. System updated from version 10 to version 100
 1 files were not in a pack
+Update successful. System updated from version 10 to version 100

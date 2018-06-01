@@ -222,13 +222,9 @@ int compute_hash(struct file *file, char *filename)
 
 bool verify_file(struct file *file, char *filename)
 {
-	struct file *local = calloc(1, sizeof(struct file));
+	struct file local = {};
 
-	if (local == NULL) {
-		abort();
-	}
-
-	local->filename = file->filename;
+	local.filename = file->filename;
 	/*
 	 * xattrs are currently not supported for manifest files.
 	 * They are data files produced by the swupd-server and
@@ -236,22 +232,15 @@ bool verify_file(struct file *file, char *filename)
 	 * set for the actual system files (like security.ima
 	 * when using IMA or security.SMACK64 when using Smack).
 	 */
-	local->use_xattrs = !file->is_manifest;
+	local.use_xattrs = !file->is_manifest;
 
-	populate_file_struct(local, filename);
-	if (compute_hash(local, filename) != 0) {
-		free(local);
+	populate_file_struct(&local, filename);
+	if (compute_hash(&local, filename) != 0) {
 		return false;
 	}
 
 	/* Check if manifest hash matches local file hash */
-	if (hash_equal(file->hash, local->hash)) {
-		free(local);
-		return true;
-	} else {
-		free(local);
-		return false;
-	}
+	return hash_equal(file->hash, local.hash);
 }
 
 /* Compares the hash for BUNDLE with that listed in the Manifest.MoM.  If the

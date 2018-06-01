@@ -204,21 +204,6 @@ unsigned int list_len(struct list *list)
 	return len;
 }
 
-#if 0
-struct list *list_find_data(struct list *list, void *data)
-{
-	list = list_head(list);
-	while (list) {
-		if (list->data == data) {
-			return list;
-		}
-		list = list->next;
-	}
-
-	return NULL;
-}
-#endif
-
 struct list *list_sort(struct list *list, comparison_fn_t comparison_fn)
 {
 	list = list_head(list);

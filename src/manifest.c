@@ -43,18 +43,6 @@
 
 #define MANIFEST_LINE_MAXLEN 8192
 
-#if 0
-static int file_sort_hash(const void* a, const void* b)
-{
-	struct file *A, *B;
-	A = (struct file *) a;
-	B = (struct file *) b;
-
-	/* this MUST be a memcmp(), not bcmp() */
-	return memcmp(A->hash, B->hash, SWUPD_HASH_LEN-1);
-}
-#endif
-
 /* sort by full path filename */
 int file_sort_filename(const void *a, const void *b)
 {
@@ -369,25 +357,6 @@ err_close:
 	fclose(infile);
 	return NULL;
 }
-
-#if 0
-/* Print filenames contained in manifest m */
-void print_manifest_filenames(struct manifest *m)
-{
-	struct list *iter = NULL;
-	struct file *file = NULL;
-	int count = 0;
-
-	iter = list_head(m->files);
-	while (iter) {
-		count++;
-		file = iter->data;
-		iter = iter->next;
-		printf("%s\n", file->filename);
-	}
-	printf("Total: %i files\n", count);
-}
-#endif
 
 void free_manifest_data(void *data)
 {
@@ -1147,86 +1116,6 @@ struct list *consolidate_files(struct list *files)
 	return list;
 }
 
-#if 0
-/* non-production code: a useful function to have and maintain and some useful
- * call sites exist though they are commented out */
-static char *type_to_string(struct file *file)
-{
-	static char type[5];
-
-	strcpy(type, "....");
-
-	if (file->is_dir) {
-		type[0] = 'D';
-	}
-
-	if (file->is_link) {
-		type[0] = 'L';
-	}
-	if (file->is_file) {
-		type[0] = 'F';
-	}
-	if (file->is_manifest) {
-		type[0] = 'M';
-	}
-
-	if (file->is_deleted) {
-		type[1] = 'd';
-	}
-
-	if (file->is_config) {
-		type[2] = 'C';
-	}
-	if (file->is_state) {
-		type[2] = 's';
-	}
-	if (file->is_boot) {
-		type[2] = 'b';
-	}
-
-	return type;
-}
-
-void debug_write_manifest(struct manifest *manifest, char *filename)
-{
-	struct list *list;
-	struct file *file;
-	FILE *out;
-	char *fullfile = NULL;
-
-	string_or_die(&fullfile, "%s/%s", state_dir, filename);
-
-	out = fopen(fullfile, "w");
-	if (out == NULL) {
-		fprintf(stderr, "Failed to open %s for write\n", fullfile);
-	}
-	if (out == NULL) {
-		abort();
-	}
-
-	fprintf(out, "MANIFEST\t1\n");
-	fprintf(out, "version:\t%i\n", manifest->version);
-
-	list = list_head(manifest->files);
-	fprintf(out, "\n");
-	while (list) {
-		file = list->data;
-		list = list->next;
-		fprintf(out, "%s\t%s\t%i\t%s\n", type_to_string(file), file->hash, file->last_change, file->filename);
-	}
-
-
-	list = list_head(manifest->manifests);
-	while (list) {
-		file = list->data;
-		list = list->next;
-		fprintf(out, "%s\t%s\t%i\t%s\n", type_to_string(file), file->hash, file->last_change, file->filename);
-	}
-	fclose(out);
-	free(fullfile);
-}
-#endif
-
 void populate_file_struct(struct file *file, char *filename)
 {
 	struct stat stat;
@@ -1269,9 +1158,6 @@ void populate_file_struct(struct file *file, char *filename)
 	file->is_dir = 0;
 	file->is_link = 0;
 
-#if 0
-	dump_file_info(file);
-#endif
 	return;
 }
 

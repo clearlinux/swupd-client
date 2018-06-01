@@ -489,56 +489,6 @@ out:
 	return ret;
 }
 
-#if 0
-void dump_file_info(struct file *file)
-{
-	printf("%s:\n", file->filename);
-	printf("\t%s\n", file->hash);
-	printf("\t%d\n", file->last_change);
-
-	if (file->use_xattrs) {
-		printf("\tuse_xattrs\n");
-	}
-	if (file->is_dir) {
-		printf("\tis_dir\n");
-	}
-	if (file->is_file) {
-		printf("\tis_file\n");
-	}
-	if (file->is_link) {
-		printf("\tis_link\n");
-	}
-	if (file->is_deleted) {
-		printf("\tis_deleted\n");
-	}
-	if (file->is_manifest) {
-		printf("\tis_manifest\n");
-	}
-	if (file->is_config) {
-		printf("\tis_config\n");
-	}
-	if (file->is_state) {
-		printf("\tis_state\n");
-	}
-	if (file->is_boot) {
-		printf("\tis_boot\n");
-	}
-	if (file->is_orphan) {
-		printf("\tis_orphan\n");
-	}
-	if (file->do_not_update) {
-		printf("\tdo_not_update\n");
-	}
-
-	if (file->peer) {
-		printf("\tpeer %s(%s)\n", file->peer->filename, file->peer->hash);
-	}
-	if (file->staging) {
-		printf("\tstaging %s\n", file->staging);
-	}
-}
-#endif
-
 void free_file_data(void *data)
 {
 	struct file *file = (struct file *)data;

@@ -26,11 +26,6 @@ struct list *list_tail(struct list *item);
 /* Returns the length of a list given anyone of its items */
 unsigned int list_len(struct list *list);
 
-#if 0
-/* Finds and returns the list item containing the parameter data */
-struct list *list_find_data(struct list *list, void *data);
-#endif
-
 /* Sorts the list using the comparison function. list can be any item in the
  * list, the complete list will still be sorted. Returns the first item in
  * the sorted list. */

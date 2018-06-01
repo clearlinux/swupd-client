@@ -149,12 +149,6 @@ TRY_DOWNLOAD:
 		failed = full_download_loop(updates, 0);
 	}
 
-#if 0
-	if (rm_staging_dir_contents("download")) {
-		return -1;
-	}
-#endif
-
 	/* Set retries only if failed downloads exist, and only retry a fixed
 	   amount of &times */
 	if (list_head(failed) != NULL && retries < MAX_TRIES) {
@@ -513,10 +507,6 @@ load_server_submanifests:
 
 	/* prepare for an update process based on comparing two in memory manifests */
 	link_manifests(current_manifest, server_manifest);
-#if 0
-	debug_write_manifest(current_manifest, "debug_manifest_current.txt");
-	debug_write_manifest(server_manifest, "debug_manifest_server.txt");
-#endif
 	grabtime_stop(&times);
 	/* Step 4: check disk state before attempting update */
 	grabtime_start(&times, "Pre-Update Scripts");

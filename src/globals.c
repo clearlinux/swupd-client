@@ -46,11 +46,6 @@ bool need_update_bootloader = false;
 bool need_systemd_reexec = false;
 bool update_complete = false;
 struct list *post_update_actions = NULL;
-#if 0
-/* disabled unused global variables */
-bool ignore_config = true;
-bool ignore_state = true;
-#endif
 bool ignore_orphans = true;
 char *format_string = NULL;
 char *path_prefix = NULL; /* must always end in '/' */

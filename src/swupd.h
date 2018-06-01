@@ -325,14 +325,12 @@ extern int compute_hash(struct file *file, char *filename) __attribute__((warn_u
 /* manifest.c */
 extern struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server);
 extern struct list *consolidate_files(struct list *files);
-extern void debug_write_manifest(struct manifest *manifest, char *filename);
 extern void populate_file_struct(struct file *file, char *filename);
 extern bool verify_file(struct file *file, char *filename);
 extern int verify_bundle_hash(struct manifest *manifest, struct file *bundle);
 extern void unlink_all_staged_content(struct file *file);
 extern void dump_file_descriptor_leaks(void);
 extern int rm_staging_dir_contents(const char *rel_path);
-extern void dump_file_info(struct file *file);
 void free_file_data(void *data);
 void free_manifest_data(void *data);
 void remove_files_in_manifest_from_fs(struct manifest *m);

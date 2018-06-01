@@ -379,7 +379,7 @@ extern void create_and_append_subscription(struct list **subs, const char *compo
 
 /* bundle.c */
 extern bool is_tracked_bundle(const char *bundle_name);
-extern int remove_bundle(const char *bundle_name);
+extern int remove_bundles(char **bundles);
 extern int show_bundle_reqd_by(const char *bundle_name, bool server);
 extern int show_included_bundles(char *bundle_name);
 extern int list_installable_bundles();

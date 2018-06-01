@@ -243,6 +243,17 @@ bool verify_file(struct file *file, char *filename)
 	return hash_equal(file->hash, local.hash);
 }
 
+bool verify_file_lazy(char *filename)
+{
+	struct file local = {};
+
+	if (compute_hash_lazy(&local, filename) != 0) {
+		return false;
+	}
+
+	return !hash_is_zeros(local.hash);
+}
+
 /* Compares the hash for BUNDLE with that listed in the Manifest.MoM.  If the
  * hash check fails, we should assume the bundle manifest is incorrect and
  * discard it. A retry should then force redownloading of the bundle manifest.

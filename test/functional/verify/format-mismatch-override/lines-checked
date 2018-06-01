@@ -1,6 +1,7 @@
 Verifying version 20
 WARNING: the force option is specified; ignoring format mismatch for verify
 WARNING: the force or picky option is specified; ignoring version mismatch for verify --fix
+Verifying files
 Starting download of remaining update content. This may take a while...
 File /usr/bin was not in a pack
 Finishing download of update content...

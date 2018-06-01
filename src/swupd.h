@@ -327,6 +327,7 @@ extern struct list *recurse_manifest(struct manifest *manifest, struct list *sub
 extern struct list *consolidate_files(struct list *files);
 extern void populate_file_struct(struct file *file, char *filename);
 extern bool verify_file(struct file *file, char *filename);
+extern bool verify_file_lazy(char *filename);
 extern int verify_bundle_hash(struct manifest *manifest, struct file *bundle);
 extern void unlink_all_staged_content(struct file *file);
 extern void dump_file_descriptor_leaks(void);

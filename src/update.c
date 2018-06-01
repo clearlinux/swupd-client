@@ -48,55 +48,6 @@ void increment_retries(int *retries, int *timeout)
 	*timeout *= 2;
 }
 
-static struct list *full_download_loop(struct list *updates, int isfailed)
-{
-	struct list *iter;
-	struct file *file;
-	char *filename;
-	char *url;
-	int ret = -1;
-	unsigned int list_length = list_len(updates);
-	unsigned int complete = 0;
-
-	iter = list_head(updates);
-	while (iter) {
-		file = iter->data;
-		iter = iter->next;
-		complete++;
-
-		if (file->is_deleted) {
-			continue;
-		}
-		/* Mix content is local, so don't queue files up for curl downloads */
-		if (file->is_mix) {
-			string_or_die(&url, "%s/%i/files/%s.tar", MIX_STATE_DIR, file->last_change, file->hash);
-			string_or_die(&filename, "%s/download/.%s.tar", state_dir, file->hash);
-			file->staging = filename;
-			ret = link(url, filename);
-			/* Try doing a regular rename if hardlink fails */
-			if (ret) {
-				if (rename(url, filename) != 0) {
-					fprintf(stderr, "Failed to copy local mix file: %s\n", filename);
-					continue;
-				}
-			}
-
-			untar_full_download(file);
-			continue;
-		}
-		full_download(file);
-		print_progress(complete, list_length);
-	}
-	print_progress(list_length, list_length); /* Force out 100% */
-	printf("\n");
-
-	if (isfailed) {
-		list_free_list(updates);
-	}
-
-	return end_full_download();
-}
-
 /* This loads the upstream Clear Manifest.Full and local
  * Manifest.full, and then checks that there are no conflicts between
  * the files they both include */
@@ -132,36 +83,10 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 	int ret;
 	struct file *file;
 	struct list *iter;
-	struct list *failed = NULL;
-	int err;
-	int retries = 0;  /* We only want to go through the download loop once */
-	int timeout = 10; /* Amount of seconds for first download retry */
 
-TRY_DOWNLOAD:
-	err = start_full_download(true);
-	if (err != 0) {
-		return err;
-	}
-
-	if (failed != NULL) {
-		failed = full_download_loop(failed, 1);
-	} else {
-		failed = full_download_loop(updates, 0);
-	}
-
-	/* Set retries only if failed downloads exist, and only retry a fixed
-	   amount of &times */
-	if (list_head(failed) != NULL && retries < MAX_TRIES) {
-		increment_retries(&retries, &timeout);
-		fprintf(stderr, "Starting download retry #%d\n", retries);
-		clean_curl_multi_queue();
-		goto TRY_DOWNLOAD;
-	}
-
-	if (retries >= MAX_TRIES) {
+	ret = download_fullfiles(updates, MAX_TRIES, 10);
+	if (ret) {
 		fprintf(stderr, "ERROR: Could not download all files, aborting update\n");
-		list_free_list(failed);
-		return -1;
 	}
 
 	if (download_only) {

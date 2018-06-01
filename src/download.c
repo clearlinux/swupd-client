@@ -41,7 +41,7 @@
 /* This file provides a managed download facility for code that needs a set of
  * update tar files.  Such code starts with one call to "start_full_download()",
  * then makes a series of calls to "full_download()" once per desired file, and
- * then finishes with one call to "end_full_downlad()" which will block until
+ * then finishes with one call to "end_full_download()" which will block until
  * the previously queued downloads are completed and and untarred.
  */
 

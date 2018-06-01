@@ -624,6 +624,10 @@ clean_curl:
 	}
 	swupd_deinit(lock_fd, &latest_subs);
 
+	if (nonpack > 0) {
+		printf("%i files were not in a pack\n", nonpack);
+	}
+
 	if (!download_only) {
 		if ((current_version < server_version) && (ret == 0)) {
 			printf("Update successful. System updated from version %d to version %d\n",
@@ -631,10 +635,6 @@ clean_curl:
 		} else if (ret == 0) {
 			printf("Update complete. System already up-to-date at version %d\n", current_version);
 		}
-	}
-
-	if (nonpack > 0) {
-		printf("%i files were not in a pack\n", nonpack);
 	}
 
 	if (re_update && ret == 0) {

@@ -1,5 +1,7 @@
 Downloading packs
+Starting download of remaining update content This may take a while
+File /foo was not in a pack
+Finishing download of update content
 Installing bundle(s) files
-Path /foo is missing on the file system  fixing
 Calling post-update helper scripts
 Bundle(s) installation done

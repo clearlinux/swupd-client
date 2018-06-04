@@ -690,6 +690,15 @@ download_subscribed_packs:
 	}
 	grabtime_stop(&times);
 
+	/* step 2.5: Download missing files */
+	grabtime_start(&times, "Download missing files");
+	ret = download_fullfiles(to_install_files, MAX_TRIES, 10);
+	if (ret) {
+		fprintf(stderr, "ERROR: Could not download some files from bundles, aborting bundle installation.\n");
+		goto out;
+	}
+	grabtime_stop(&times);
+
 	/* step 3: Add tracked bundles */
 	grabtime_start(&times, "Add tracked bundles");
 	read_subscriptions(subs);

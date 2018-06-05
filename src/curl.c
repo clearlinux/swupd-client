@@ -48,8 +48,6 @@
 
 static CURL *curl = NULL;
 
-static int curr_version = -1;
-static int req_version = -1;
 static bool resume_download_enabled = true;
 
 /* these are used to handle alternative trust locations */
@@ -194,16 +192,6 @@ void swupd_curl_deinit(void)
 	}
 	curl = NULL;
 	curl_global_cleanup();
-}
-
-void swupd_curl_set_current_version(int v)
-{
-	curr_version = v;
-}
-
-void swupd_curl_set_requested_version(int v)
-{
-	req_version = v;
 }
 
 static size_t filesize_from_header_cb(void UNUSED_PARAM *func, size_t size, size_t nmemb, void UNUSED_PARAM *data)

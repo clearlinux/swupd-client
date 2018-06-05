@@ -299,8 +299,6 @@ extern int update_device_latest_version(int version);
 extern int swupd_curl_init(void);
 extern void swupd_curl_deinit(void);
 extern int swupd_curl_check_network(void);
-extern void swupd_curl_set_current_version(int v);
-extern void swupd_curl_set_requested_version(int v);
 extern double swupd_query_url_content_size(char *url);
 extern CURLcode swupd_download_file_start(struct file *file);
 extern CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file);

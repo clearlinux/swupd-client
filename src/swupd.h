@@ -303,7 +303,7 @@ extern int swupd_curl_check_network(void);
 extern double swupd_query_url_content_size(char *url);
 extern CURLcode swupd_download_file_start(struct file *file);
 extern CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file);
-extern int swupd_curl_get_file(const char *url, char *filename, struct file *file,
+extern int swupd_curl_get_file(const char *url, char *filename,
 			       struct curl_file_data *file_data, bool resume_ok);
 #define SWUPD_CURL_LOW_SPEED_LIMIT 1
 #define SWUPD_CURL_CONNECT_TIMEOUT 30

@@ -313,7 +313,7 @@ CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file)
  *
  * NOTE: See full_download() for multi/asynchronous downloading of fullfiles.
  */
-int swupd_curl_get_file(const char *url, char *filename, struct file *file,
+int swupd_curl_get_file(const char *url, char *filename,
 			struct curl_file_data *in_memory_file, bool resume_ok)
 {
 	CURLcode curl_ret;
@@ -331,14 +331,9 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 		// normal file download
 		struct stat stat;
 
-		if (file) {
-			local = file;
-			local->fh = NULL;
-		} else {
-			local = calloc(1, sizeof(struct file));
-			if (!local) {
-				abort();
-			}
+		local = calloc(1, sizeof(struct file));
+		if (!local) {
+			abort();
 		}
 
 		local->staging = filename;
@@ -470,9 +465,7 @@ exit:
 		}
 	}
 
-	if (local != file) {
-		free(local);
-	}
+	free(local);
 
 	return err;
 }

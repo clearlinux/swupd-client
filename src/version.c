@@ -68,7 +68,7 @@ int get_latest_version(char *v_url)
 
 	unlink(path);
 
-	ret = swupd_curl_get_file(url, path, NULL, &tmp_version, false);
+	ret = swupd_curl_get_file(url, path, &tmp_version, false);
 	if (ret) {
 		goto out;
 	} else {

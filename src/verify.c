@@ -393,26 +393,22 @@ static int check_files_hash(struct list *files)
 /* allow optimization of install case */
 static int get_required_files(struct manifest *official_manifest, struct list *subs)
 {
+	int ret;
+
 	if (cmdline_option_install) {
-		return get_all_files(official_manifest, subs);
+		get_all_files(official_manifest, subs);
 	}
 
-	if (cmdline_option_fix) {
-		int ret;
-
-		if (check_files_hash(official_manifest->files)) {
-			return 0;
-		}
-
-		ret = download_fullfiles(official_manifest->files, MAX_TRIES, 10);
-		if (ret) {
-			fprintf(stderr, "Error: Unable to download neccessary files for this OS release\n");
-		}
-
-		return ret;
+	if (check_files_hash(official_manifest->files)) {
+		return 0;
 	}
 
-	return 0;
+	ret = download_fullfiles(official_manifest->files, MAX_TRIES, 10);
+	if (ret) {
+		fprintf(stderr, "Error: Unable to download neccessary files for this OS release\n");
+	}
+
+	return ret;
 }
 
 /* for each missing but expected file, (re)add the file */

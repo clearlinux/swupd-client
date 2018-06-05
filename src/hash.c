@@ -291,7 +291,7 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 				      current->last_change, current->filename);
 			string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url,
 				      current->last_change, current->filename);
-			ret = swupd_curl_get_file(url, filename, NULL, NULL, false);
+			ret = swupd_curl_get_file(url, filename, NULL, false);
 			free_string(&url);
 
 			if (ret != 0) {

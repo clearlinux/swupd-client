@@ -442,7 +442,7 @@ bool download_and_verify_signature(const char *data_url, const char *data_filena
 	if (mix_exists) {
 		ret = link(local, sig_filename);
 	} else {
-		ret = swupd_curl_get_file(sig_url, sig_filename, NULL, NULL, false);
+		ret = swupd_curl_get_file(sig_url, sig_filename, NULL, false);
 	}
 
 	if (ret == 0) {

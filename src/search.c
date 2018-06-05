@@ -359,7 +359,7 @@ static const struct option prog_opts[] = {
 	{ "path", required_argument, 0, 'p' },
 	{ "format", required_argument, 0, 'F' },
 	{ "init", no_argument, 0, 'i' },
-	{ "nosigcheck", no_argument, 0, 'n'},
+	{ "nosigcheck", no_argument, 0, 'n' },
 	{ "ignore-time", no_argument, 0, 'I' },
 	{ "display-files", no_argument, 0, 'd' },
 	{ "statedir", required_argument, 0, 'S' },

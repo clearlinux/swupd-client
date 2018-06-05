@@ -756,7 +756,7 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		string_or_die(&tar_dotfile, "%s/download/.%s.tar", state_dir, file->hash);
 
 		string_or_die(&url, "%s/%i/files/%s.tar", content_url, file->last_change, file->hash);
-		ret = swupd_curl_get_file(url, tar_dotfile, NULL, false);
+		ret = swupd_curl_get_file(url, tar_dotfile);
 
 		if (ret != 0) {
 			fprintf(stderr, "Error: Failed to download file %s in verify_fix_path\n", file->filename);

@@ -313,8 +313,8 @@ CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file)
  *
  * NOTE: See full_download() for multi/asynchronous downloading of fullfiles.
  */
-int swupd_curl_get_file(const char *url, char *filename,
-			struct curl_file_data *in_memory_file, bool resume_ok)
+int swupd_curl_get_file_full(const char *url, char *filename,
+			     struct curl_file_data *in_memory_file, bool resume_ok)
 {
 	CURLcode curl_ret;
 	long ret = 0;
@@ -459,6 +459,16 @@ exit:
 	}
 
 	return err;
+}
+
+/*
+ * Download a single file SYNCHRONOUSLY
+
+ * Returns: Zero on success or a standard < 0 status code on errors.
+ */
+int swupd_curl_get_file(const char *url, char *filename)
+{
+	return swupd_curl_get_file_full(url, filename, NULL, false);
 }
 
 static void swupd_curl_test_resume(void)

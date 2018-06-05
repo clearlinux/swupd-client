@@ -63,7 +63,6 @@ int list_installable_bundles()
 		fprintf(stderr, "Error: Unable to determine current OS version\n");
 		return ECURRENT_VERSION;
 	}
-	swupd_curl_set_current_version(current_version);
 
 	mix_exists = (check_mix_exists() & system_on_mix());
 	MoM = load_mom(current_version, false, mix_exists);
@@ -97,7 +96,6 @@ static int load_bundle_manifest(const char *bundle_name, struct list *subs, int 
 
 	*submanifest = NULL;
 
-	swupd_curl_set_current_version(version);
 	mom = load_mom(version, false, false);
 	if (!mom) {
 		return EMOM_NOTFOUND;
@@ -452,8 +450,6 @@ int remove_bundle(const char *bundle_name)
 	}
 
 	mix_exists = (check_mix_exists() & system_on_mix());
-
-	swupd_curl_set_current_version(current_version);
 
 	current_mom = load_mom(current_version, false, mix_exists);
 	if (!current_mom) {
@@ -851,8 +847,6 @@ int install_bundles_frontend(char **bundles)
 	}
 
 	mix_exists = (check_mix_exists() & system_on_mix());
-
-	swupd_curl_set_current_version(current_version);
 
 	mom = load_mom(current_version, false, mix_exists);
 	if (!mom) {

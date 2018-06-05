@@ -164,7 +164,6 @@ int check_versions(int *current_version,
 		fprintf(stderr, "Update of dev build not supported %d\n", *current_version);
 		return -1;
 	}
-	swupd_curl_set_current_version(*current_version);
 
 	/* set preferred version and content server urls */
 	if (*current_version < 0) {
@@ -181,8 +180,6 @@ int check_versions(int *current_version,
 			*server_version = requested_version;
 		}
 	}
-
-	swupd_curl_set_requested_version(*server_version);
 
 	return 0;
 }

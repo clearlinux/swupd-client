@@ -64,7 +64,7 @@ static int download_pack(int oldversion, int newversion, char *module, int is_mi
 	} else {
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, newversion, module, oldversion);
 
-		err = swupd_curl_get_file(url, filename, NULL, resume_ok);
+		err = swupd_curl_get_file_full(url, filename, NULL, resume_ok);
 		if (err) {
 			if (err == -ENET404) {
 				telemetry(TELEMETRY_WARN, "packmissing",

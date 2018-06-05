@@ -66,6 +66,10 @@ static int download_pack(int oldversion, int newversion, char *module, int is_mi
 
 		err = swupd_curl_get_file(url, filename, NULL, NULL, resume_ok);
 		if (err) {
+			if (err == -ENET404) {
+				telemetry(TELEMETRY_WARN, "packmissing",
+					  "url=%s\n", url);
+			}
 			free_string(&url);
 			if ((lstat(filename, &stat) == 0) && (stat.st_size == 0)) {
 				unlink(filename);

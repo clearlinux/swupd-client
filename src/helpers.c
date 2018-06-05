@@ -512,7 +512,7 @@ void free_file_data(void *data)
 void swupd_deinit(int lock_fd, struct list **subs)
 {
 	terminate_signature();
-	swupd_curl_cleanup();
+	swupd_curl_deinit();
 	if (subs) {
 		free_subscriptions(subs);
 	}

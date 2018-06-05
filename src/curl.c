@@ -187,7 +187,7 @@ cleanup:
 	return ret;
 }
 
-void swupd_curl_cleanup(void)
+void swupd_curl_deinit(void)
 {
 	if (curl) {
 		curl_easy_cleanup(curl);

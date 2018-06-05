@@ -319,7 +319,7 @@ int swupd_curl_get_file(const char *url, char *filename,
 	CURLcode curl_ret;
 	long ret = 0;
 	int err = -1;
-	struct file *local = NULL;
+	struct file local = { 0 };
 	bool local_download = strncmp(url, "file://", 7) == 0;
 
 	if (!curl) {
@@ -327,16 +327,11 @@ int swupd_curl_get_file(const char *url, char *filename,
 	}
 	curl_easy_reset(curl);
 
-	if (in_memory_file == NULL) {
+	if (!in_memory_file) {
 		// normal file download
 		struct stat stat;
 
-		local = calloc(1, sizeof(struct file));
-		if (!local) {
-			abort();
-		}
-
-		local->staging = filename;
+		local.staging = filename;
 
 		if (lstat(filename, &stat) == 0) {
 			if (resume_ok && resume_download_enabled) {
@@ -346,15 +341,15 @@ int swupd_curl_get_file(const char *url, char *filename,
 			}
 		}
 
-		curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void *)local);
+		curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void *)&local);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
-		curl_ret = swupd_download_file_start(local);
+		curl_ret = swupd_download_file_start(&local);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
-		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)local->fh);
+		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)local.fh);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
@@ -384,8 +379,8 @@ int swupd_curl_get_file(const char *url, char *filename,
 	}
 
 exit:
-	if (local) {
-		curl_ret = swupd_download_file_complete(curl_ret, local);
+	if (!in_memory_file) {
+		curl_ret = swupd_download_file_complete(curl_ret, &local);
 	}
 	if (curl_ret == CURLE_OK) {
 		/* curl command succeeded, download might've failed, let our caller handle */
@@ -459,13 +454,9 @@ exit:
 		}
 	}
 
-	if (err) {
-		if (!resume_ok) {
-			unlink(filename);
-		}
+	if (err && !resume_ok) {
+		unlink(filename);
 	}
-
-	free(local);
 
 	return err;
 }

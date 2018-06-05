@@ -297,7 +297,7 @@ extern int rename_staged_file_to_final(struct file *file);
 extern int update_device_latest_version(int version);
 
 extern int swupd_curl_init(void);
-extern void swupd_curl_cleanup(void);
+extern void swupd_curl_deinit(void);
 extern int swupd_curl_check_network(void);
 extern void swupd_curl_set_current_version(int v);
 extern void swupd_curl_set_requested_version(int v);

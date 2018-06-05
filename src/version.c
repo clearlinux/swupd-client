@@ -41,10 +41,17 @@
  * the global version_url is used and the cached version is ignored. */
 int get_latest_version(char *v_url)
 {
+#define MAX_VERSION_CHARS 10
+#define MAX_VERSION_STR_SIZE 11
+
 	char *url = NULL;
 	char *path = NULL;
 	int ret = 0;
-	struct version_container tmp_version = { 0 };
+	char version_str[MAX_VERSION_STR_SIZE];
+	struct curl_file_data tmp_version = {
+		MAX_VERSION_STR_SIZE, 0,
+		version_str
+	};
 	static int cached_version = -1;
 
 	if (cached_version > 0 && v_url == NULL) {
@@ -53,11 +60,6 @@ int get_latest_version(char *v_url)
 
 	if (v_url == NULL || strcmp(v_url, "") == 0) {
 		v_url = version_url;
-	}
-
-	tmp_version.version = calloc(LINE_MAX, 1);
-	if (tmp_version.version == NULL) {
-		abort();
 	}
 
 	string_or_die(&url, "%s/version/format%s/latest", v_url, format_string);
@@ -70,13 +72,13 @@ int get_latest_version(char *v_url)
 	if (ret) {
 		goto out;
 	} else {
-		ret = strtol(tmp_version.version, NULL, 10);
+		tmp_version.data[tmp_version.len] = '\0';
+		ret = strtol(tmp_version.data, NULL, MAX_VERSION_CHARS);
 	}
 
 out:
 	free_string(&path);
 	free_string(&url);
-	free_string(&tmp_version.version);
 	cached_version = ret;
 	return ret;
 }

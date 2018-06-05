@@ -252,18 +252,25 @@ double swupd_query_url_content_size(char *url)
 	return content_size;
 }
 
-static size_t swupd_download_version_to_memory(void *ptr, size_t size, size_t nmemb, void *userdata)
+/*
+ * Discard file contents. To be used in functions that test the conection
+ */
+static size_t swupd_download_discard_file(void UNUSED_PARAM *ptr, size_t UNUSED_PARAM size, size_t UNUSED_PARAM nmemb, void UNUSED_PARAM *userdata)
 {
-	struct version_container *tmp_version = (struct version_container *)userdata;
+	return size * nmemb;
+}
+
+static size_t swupd_download_file_to_memory(void *ptr, size_t size, size_t nmemb, void *userdata)
+{
+	struct curl_file_data *file_data = (struct curl_file_data *)userdata;
 	size_t data_len = size * nmemb;
 
-	if (data_len + tmp_version->offset >= LINE_MAX) {
+	if (data_len + file_data->len > file_data->capacity) {
 		return 0;
 	}
 
-	memcpy(tmp_version->version + tmp_version->offset, ptr, data_len);
-	tmp_version->version[data_len + tmp_version->offset] = '\0';
-	tmp_version->offset += data_len;
+	memcpy(file_data->data + file_data->len, ptr, data_len);
+	file_data->len += data_len;
 
 	return data_len;
 }
@@ -294,17 +301,20 @@ CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file)
 	return curl_ret;
 }
 
-/* Download a single file SYNCHRONOUSLY
- * - If (in_memory_version_string != NULL) the file downloaded is expected
- *   to be a version file and it is downloaded to memory instead of disk.
- * - Packs are big.  If (resume_ok == true) then the function allows resuming
- *   a previous/interrupted download.
- * - This function returns zero or a standard < 0 status code.
+/*
+ * Download a single file SYNCHRONOUSLY
+ *
+ * - If in_memory_file != NULL the file will be stored in memory and not on disk.
+ * - If resume_ok == true and resume is supported, the function will resume an
+ *   interrupted download if necessary.
  * - If failure to download, partial download is not deleted.
- * - NOTE: See full_download() for multi/asynchronous downloading of fullfiles.
+ *
+ * Returns: Zero on success or a standard < 0 status code on errors.
+ *
+ * NOTE: See full_download() for multi/asynchronous downloading of fullfiles.
  */
 int swupd_curl_get_file(const char *url, char *filename, struct file *file,
-			struct version_container *in_memory_version_string, bool resume_ok)
+			struct curl_file_data *in_memory_file, bool resume_ok)
 {
 	CURLcode curl_ret;
 	long ret = 0;
@@ -317,7 +327,7 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 	}
 	curl_easy_reset(curl);
 
-	if (in_memory_version_string == NULL) {
+	if (in_memory_file == NULL) {
 		// normal file download
 		struct stat stat;
 
@@ -354,12 +364,11 @@ int swupd_curl_get_file(const char *url, char *filename, struct file *file,
 			goto exit;
 		}
 	} else {
-		// only download latest version number, storing in the provided pointer
-		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, swupd_download_version_to_memory);
+		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, swupd_download_file_to_memory);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
-		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)in_memory_version_string);
+		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)in_memory_file);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
@@ -481,12 +490,6 @@ static void swupd_curl_test_resume(void)
 
 	curl_easy_reset(curl);
 
-	struct version_container tmp_version = { 0 };
-	tmp_version.version = calloc(LINE_MAX, 1);
-	if (tmp_version.version == NULL) {
-		abort();
-	}
-
 	string_or_die(&url, "%s/version/format%s/latest", version_url, format_string);
 
 	curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)RESUME_BYTE_RANGE);
@@ -494,11 +497,11 @@ static void swupd_curl_test_resume(void)
 		goto exit;
 	}
 
-	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, swupd_download_version_to_memory);
+	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, swupd_download_discard_file);
 	if (curl_ret != CURLE_OK) {
 		goto exit;
 	}
-	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&tmp_version);
+	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
 	if (curl_ret != CURLE_OK) {
 		goto exit;
 	}
@@ -519,7 +522,6 @@ static void swupd_curl_test_resume(void)
 		resume_download_enabled = false;
 	}
 exit:
-	free_string(&tmp_version.version);
 	free_string(&url);
 
 	return;

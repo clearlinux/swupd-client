@@ -601,7 +601,7 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url)
 	}
 
 	if (strncmp(url, "https://", 8) == 0) {
-#warning "SECURITY HOLE since we can't SSL pin arbitrary servers"
+		//TODO: Fix "SECURITY HOLE since we can't SSL pin arbitrary servers"
 		curl_ret = swupd_curl_set_security_opts(curl);
 		if (curl_ret != CURLE_OK) {
 			goto exit;

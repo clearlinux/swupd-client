@@ -682,12 +682,12 @@ static void print_help(const char *name)
 	fprintf(stderr, "Application Options:\n");
 	fprintf(stderr, "   -m, --manifest=M        Update to version M, also accepts 'latest' (default)\n");
 	fprintf(stderr, "   -d, --download          Download all content, but do not actually install the update\n");
-#warning "remove user configurable url when alternative exists"
+	//TODO: "remove user configurable url when alternative exists"
 	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
 	fprintf(stderr, "   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
-#warning "remove user configurable content url when alternative exists"
+	//TODO: "remove user configurable content url when alternative exists"
 	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
-#warning "remove user configurable version url when alternative exists"
+	//TODO: "remove user configurable version url when alternative exists"
 	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
 	fprintf(stderr, "   -s, --status            Show current OS version and latest version available on server\n");
 	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");

@@ -399,7 +399,11 @@ out:
 /*  This function is a fresh new implementation for a bundle
  *  remove without being tied to verify loop, this means
  *  improved speed and space as well as more roubustness and
- *  flexibility. What it does is basically:
+ *  flexibility. The function removes one ore more bundles
+ *  passed in the bundles param.
+ *
+ *  For each one of the bundles to be removed what it does
+ *  is basically:
  *
  *  1) Read MoM and load all submanifests except the one to be
  *  	removed and then consolidate them.
@@ -572,7 +576,7 @@ int remove_bundles(char **bundles)
 	}
 
 	if (bad > 0) {
-		fprintf(stderr, "%i bundle(s) of %i failed to remove\n", bad, total);
+		fprintf(stderr, "%i bundle(s) of %i failed to be removed\n", bad, total);
 	} else {
 		fprintf(stderr, "%i bundle(s) were removed successfully\n", total);
 	}

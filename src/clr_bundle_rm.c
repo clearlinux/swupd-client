@@ -36,22 +36,6 @@
 
 #define VERIFY_PICKY 1
 
-/* this is a temp container to save parsed
- * options so if more than one bundle to remove
- * then we can restore the parsed options into
- * globals
- */
-static struct opts {
-	char *path_prefix;
-	char *version_url;
-	char *content_url;
-	char *format_string;
-	char *state_dir;
-	char *cert_path;
-	bool force;
-	bool sigcheck;
-} curopts = { NULL, NULL, NULL, NULL, NULL, NULL, false, true };
-
 static char **bundles;
 
 static void print_help(const char *name)
@@ -105,7 +89,6 @@ static bool parse_options(int argc, char **argv)
 				fprintf(stderr, "Invalid --path argument\n\n");
 				goto err;
 			}
-			string_or_die(&curopts.path_prefix, "%s", optarg);
 			break;
 		case 'u':
 			if (!optarg) {
@@ -114,8 +97,6 @@ static bool parse_options(int argc, char **argv)
 			}
 			set_version_url(optarg);
 			set_content_url(optarg);
-			string_or_die(&curopts.version_url, "%s", optarg);
-			string_or_die(&curopts.content_url, "%s", optarg);
 			break;
 		case 'c':
 			if (!optarg) {
@@ -123,7 +104,6 @@ static bool parse_options(int argc, char **argv)
 				goto err;
 			}
 			set_content_url(optarg);
-			string_or_die(&curopts.content_url, "%s", optarg);
 			break;
 		case 'v':
 			if (!optarg) {
@@ -131,7 +111,6 @@ static bool parse_options(int argc, char **argv)
 				goto err;
 			}
 			set_version_url(optarg);
-			string_or_die(&curopts.version_url, "%s", optarg);
 			break;
 		case 'P':
 			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
@@ -144,22 +123,18 @@ static bool parse_options(int argc, char **argv)
 				fprintf(stderr, "Invalid --format argument\n\n");
 				goto err;
 			}
-			string_or_die(&curopts.format_string, "%s", optarg);
 			break;
 		case 'S':
 			if (!optarg || !set_state_dir(optarg)) {
 				fprintf(stderr, "Invalid --statedir argument\n\n");
 				goto err;
 			}
-			string_or_die(&curopts.state_dir, "%s", optarg);
 			break;
 		case 'x':
 			force = true;
-			curopts.force = true;
 			break;
 		case 'n':
 			sigcheck = false;
-			curopts.sigcheck = false;
 			break;
 		case 'I':
 			timecheck = false;
@@ -170,7 +145,6 @@ static bool parse_options(int argc, char **argv)
 				goto err;
 			}
 			set_cert_path(optarg);
-			string_or_die(&curopts.cert_path, "%s", optarg);
 			break;
 		default:
 			fprintf(stderr, "error: unrecognized option\n\n");

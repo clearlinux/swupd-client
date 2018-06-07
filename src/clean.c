@@ -26,19 +26,16 @@
 
 #include "swupd.h"
 
-/* Default value if --all is not passed. */
-const int DAYS_TO_KEEP_FILES = 3;
-
 static void print_help()
 {
 	fprintf(stderr,
 		"Usage:\n"
 		"	swupd clean [options]\n"
 		"\n"
-		"Remove cached data used for old updates from state directory.\n"
+		"Remove cached content used for updates from state directory.\n"
 		"\n"
 		"Options:\n"
-		"   --all                   Remove all the cached content not only old\n"
+		"   --all                   Remove all the content including recent metadata\n"
 		"   --dry-run               Just print files that would be removed\n"
 		"   -S, --statedir DIR      Specify alternate swupd state directory\n"
 		"   -h, --help              Display this help message\n"
@@ -95,14 +92,11 @@ typedef bool(remove_predicate_func)(const char *dir, const struct dirent *entry)
 
 /* Remove files from path for which pred returns true.
  * Currently it doesn't recursively remove directories.
- *
- * Unless --all is set, the files are also filtered by their age.
  */
 static int remove_if(const char *path, remove_predicate_func pred)
 {
 	int ret = 0;
 	DIR *dir;
-	const int seconds = DAYS_TO_KEEP_FILES * 60 * 60 * 24;
 
 	dir = opendir(path);
 	if (!dir) {
@@ -138,12 +132,6 @@ static int remove_if(const char *path, remove_predicate_func pred)
 		if (ret != 0) {
 			fprintf(stderr, "couldn't access %s: %s\n", file, strerror(errno));
 			continue;
-		}
-
-		if (!options.all) {
-			if (now.tv_sec - stat.st_mtime <= seconds) {
-				continue;
-			}
 		}
 
 		if (!pred(path, entry)) {
@@ -353,8 +341,11 @@ int clean_main(int argc, char **argv)
 	 * set incorrectly. */
 
 	/* Staged files. */
-	/* TODO: Consider parsing the current manifest (if available) and keeping all the
-	 * staged files of the current version. This helps recovering the current version. */
+
+	/* TODO: Consider having a mode for clean that parses the current manifest (if available)
+	 * and keeping all the staged files of the current version. This helps recovering the
+	 * current version. Or do it for the previous version to allow a rollback. */
+
 	char *staged_dir = NULL;
 	string_or_die(&staged_dir, "%s/staged", state_dir);
 	ret = remove_if(staged_dir, is_fullfile);

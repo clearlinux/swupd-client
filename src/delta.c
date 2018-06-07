@@ -158,8 +158,9 @@ void apply_deltas(struct manifest *current_manifest)
 
 		for (; ll && !found; ll = ll->next) {
 			struct file *file = ll->data;
-			if (file->is_deleted || file->is_ghosted || !file->is_file || !hash_equal(file->hash, from))
+			if (file->is_deleted || file->is_ghosted || !file->is_file || !hash_equal(file->hash, from)) {
 				continue;
+			}
 
 			/* Verify the actual file in the disk matches our expectations. */
 			char hash[SWUPD_HASH_LEN];

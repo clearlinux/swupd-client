@@ -141,7 +141,7 @@ static int remove_if(const char *path, remove_predicate_func pred)
 		}
 
 		if (!options.all) {
-			if (now.tv_sec - stat.st_mtime <= seconds) {
+			if (now.tv_sec - stat.st_ctime <= seconds) {
 				continue;
 			}
 		}

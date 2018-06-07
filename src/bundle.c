@@ -399,7 +399,7 @@ out:
 /*  This function is a fresh new implementation for a bundle
  *  remove without being tied to verify loop, this means
  *  improved speed and space as well as more roubustness and
- *  flexibility. The function removes one ore more bundles
+ *  flexibility. The function removes one or more bundles
  *  passed in the bundles param.
  *
  *  For each one of the bundles to be removed what it does
@@ -453,22 +453,24 @@ int remove_bundles(char **bundles)
 
 	for (; *bundles; ++bundles, total++) {
 
-		fprintf(stderr, "Removing bundle: %s\n", *bundles);
+		char *bundle = *bundles;
 
 		/* os-core bundle not allowed to be removed...
 		* although this is going to be caught later because of all files
 		* being marked as 'duplicated' and note removing anything
 		* anyways, better catch here and return success, no extra work to be done.
 		*/
-		if (strcmp(*bundles, "os-core") == 0) {
+		if (strcmp(bundle, "os-core") == 0) {
 			fprintf(stderr, "Warning: Bundle \"os-core\" not allowed to be removed\n");
 			ret = EBUNDLE_NOT_TRACKED;
 			bad++;
 			goto out_free_curl;
 		}
 
-		if (!is_tracked_bundle(*bundles)) {
-			fprintf(stderr, "Warning: Bundle \"%s\" does not seem to be installed\n", *bundles);
+		fprintf(stderr, "Removing bundle: %s\n", bundle);
+
+		if (!is_tracked_bundle(bundle)) {
+			fprintf(stderr, "Warning: Bundle \"%s\" does not seem to be installed\n", bundle);
 			ret = EBUNDLE_NOT_TRACKED;
 			bad++;
 			goto out_free_curl;
@@ -482,7 +484,7 @@ int remove_bundles(char **bundles)
 			goto out_free_curl;
 		}
 
-		if (!search_bundle_in_manifest(current_mom, *bundles)) {
+		if (!search_bundle_in_manifest(current_mom, bundle)) {
 			fprintf(stderr, "Bundle name is invalid, aborting removal\n");
 			ret = EBUNDLE_REMOVE;
 			bad++;
@@ -493,7 +495,7 @@ int remove_bundles(char **bundles)
 		read_subscriptions(&subs);
 
 		/* popout the bundle to be removed from memory */
-		ret = unload_tracked_bundle(*bundles, &subs);
+		ret = unload_tracked_bundle(bundle, &subs);
 		if (ret != 0) {
 			bad++;
 			goto out_free_mom;
@@ -512,7 +514,7 @@ int remove_bundles(char **bundles)
 
 		/* check if bundle is required by another installed bundle */
 		struct list *reqd_by = NULL;
-		required_by(&reqd_by, *bundles, current_mom, 0);
+		required_by(&reqd_by, bundle, current_mom, 0);
 		if (reqd_by != NULL) {
 			struct list *iter;
 			char *bundle;
@@ -538,9 +540,9 @@ int remove_bundles(char **bundles)
 		current_mom->files = consolidate_files(current_mom->files);
 
 		/* Now that we have the consolidated list of all files, load bundle to be removed submanifest */
-		ret = load_bundle_manifest(*bundles, subs, current_version, &bundle_manifest);
+		ret = load_bundle_manifest(bundle, subs, current_version, &bundle_manifest);
 		if (ret != 0 || !bundle_manifest) {
-			fprintf(stderr, "Error: Cannot load %s sub-manifest (ret = %d)\n", *bundles, ret);
+			fprintf(stderr, "Error: Cannot load %s sub-manifest (ret = %d)\n", bundle, ret);
 			bad++;
 			goto out_free_mom;
 		}
@@ -553,7 +555,7 @@ int remove_bundles(char **bundles)
 		remove_files_in_manifest_from_fs(bundle_manifest);
 
 		fprintf(stderr, "Untracking bundle from system...\n");
-		rm_bundle_file(*bundles);
+		rm_bundle_file(bundle);
 
 		fprintf(stderr, "Success: Bundle removed\n");
 
@@ -566,7 +568,7 @@ int remove_bundles(char **bundles)
 			  "bundle=%s\n"
 			  "current_version=%d\n"
 			  "result=%d\n",
-			  *bundles,
+			  bundle,
 			  current_version,
 			  ret);
 		if (ret) {

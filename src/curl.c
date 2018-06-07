@@ -128,8 +128,9 @@ int swupd_curl_check_network(void)
 	CURL *c;
 	static int has_network = 0;
 
-	if (has_network)
+	if (has_network) {
 		return 0;
+	}
 
 	if (!curl) {
 		return -1;

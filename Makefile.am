@@ -242,10 +242,16 @@ compliant:
 	git diff --quiet --exit-code src; ret=$$?; \
 	if [ $$ret -eq 1 ]; then \
 		echo "Code style issues found. Run 'git diff' to view issues."; \
+	fi; \
+	OUT=$$(git grep if\ \(.*\)$$ -- '*.c'); ret2=$$?; \
+	if [ $$ret2 -eq 0 ]; then \
+		echo "Missing brackets in single line if:"; \
+		echo "$$OUT"; \
 	elif [ $$ret -eq 0 ]; then \
 		echo "No code style issues found."; \
+		exit 0; \
 	fi; \
-	exit $$ret
+	exit 1
 
 release:
 	@git rev-parse v$(PACKAGE_VERSION) &> /dev/null; \

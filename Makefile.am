@@ -182,6 +182,7 @@ BATS = \
 	test/functional/update/verify-fullfile-hash/test.bats \
 	test/functional/update/re-update-required/test.bats \
 	test/functional/update/re-update-bad-os-release/test.bats \
+	test/functional/update/slow-server/test.bats \
 	test/functional/update/statedir-bad-hash/test.bats \
 	test/functional/verify/add-missing-directory/test.bats \
 	test/functional/verify/add-missing-include/test.bats \

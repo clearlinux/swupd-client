@@ -419,7 +419,7 @@ int remove_bundles(char **bundles)
 {
 	int lock_fd;
 	int ret = 0;
-	int retCode = 0;
+	int ret_code = 0;
 	int bad = 0;
 	int total = 0;
 	int current_version = CURRENT_OS_VERSION;
@@ -573,7 +573,7 @@ int remove_bundles(char **bundles)
 			  ret);
 		if (ret) {
 			fprintf(stderr, "Error: Bundle remove failed\n");
-			retCode = ret;
+			ret_code = ret;
 		}
 	}
 
@@ -585,7 +585,7 @@ int remove_bundles(char **bundles)
 
 	swupd_deinit(lock_fd, &subs);
 
-	return retCode;
+	return ret_code;
 }
 
 /* bitmapped return

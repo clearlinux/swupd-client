@@ -674,6 +674,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	struct list *iter;
 	struct list *to_install_bundles = NULL;
 	struct list *to_install_files = NULL;
+	struct manifest *full_mom = NULL;
 	timelist times;
 
 	times = init_timelist();
@@ -740,17 +741,6 @@ download_subscribed_packs:
 	}
 	grabtime_stop(&times);
 
-	/* step 3: Add tracked bundles */
-	grabtime_start(&times, "Add tracked bundles");
-	read_subscriptions(subs);
-	set_subscription_versions(mom, NULL, subs);
-	mom->submanifests = recurse_manifest(mom, *subs, NULL, false);
-	if (!mom->submanifests) {
-		fprintf(stderr, "Error: Cannot load installed bundles\n");
-		ret = ERECURSE_MANIFEST;
-		goto out;
-	}
-
 	mom->files = files_from_bundles(mom->submanifests);
 	mom->files = consolidate_files(mom->files);
 	grabtime_stop(&times);
@@ -813,9 +803,26 @@ download_subscribed_packs:
 		/* apply the heuristics for the file so the correct post-actions can
 		 * be completed */
 		apply_heuristics(file);
-		ret = do_staging(file, mom);
+		ret = do_staging(file, full_mom);
 		if (ret) {
-			ret = verify_fix_path(file->filename, mom);
+			if (!full_mom) {
+				/* step 3: Add tracked bundles */
+				grabtime_start(&times, "Add tracked bundles");
+				read_subscriptions(subs);
+				set_subscription_versions(mom, NULL, subs);
+				mom->submanifests = recurse_manifest(mom, *subs, NULL, false);
+				if (!mom->submanifests) {
+					fprintf(stderr, "Error: Cannot load installed bundles\n");
+					ret = ERECURSE_MANIFEST;
+					goto out;
+				}
+
+				mom->files = files_from_bundles(mom->submanifests);
+				mom->files = consolidate_files(mom->files);
+				grabtime_stop(&times);
+				full_mom = mom;
+			}
+			ret = verify_fix_path(file->filename, full_mom);
 		}
 		if (ret) {
 			ret = EBUNDLE_INSTALL;
@@ -839,7 +846,24 @@ download_subscribed_packs:
 
 		/* This was staged by verify_fix_path */
 		if (!file->staging) {
-			file = search_file_in_manifest(mom, file->filename);
+			if (!full_mom) {
+				/* step 3: Add tracked bundles */
+				grabtime_start(&times, "Add tracked bundles");
+				read_subscriptions(subs);
+				set_subscription_versions(mom, NULL, subs);
+				mom->submanifests = recurse_manifest(mom, *subs, NULL, false);
+				if (!mom->submanifests) {
+					fprintf(stderr, "Error: Cannot load installed bundles\n");
+					ret = ERECURSE_MANIFEST;
+					goto out;
+				}
+
+				mom->files = files_from_bundles(mom->submanifests);
+				mom->files = consolidate_files(mom->files);
+				grabtime_stop(&times);
+				full_mom = mom;
+			}
+			file = search_file_in_manifest(full_mom, file->filename);
 		}
 
 		rename_staged_file_to_final(file);

@@ -714,6 +714,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	grabtime_start(&times, "Consolidate files from bundles");
 	to_install_files = files_from_bundles(to_install_bundles);
 	to_install_files = consolidate_files(to_install_files);
+	to_install_files = filter_out_existing_files(to_install_files);
 	grabtime_stop(&times);
 
 	/* step 2: download neccessary packs */
@@ -721,7 +722,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	(void)rm_staging_dir_contents("download");
 
 download_subscribed_packs:
-	if (download_subscribed_packs(*subs, mom, true, false)) {
+	if (list_longer_than(to_install_files, 5) && download_subscribed_packs(*subs, mom, true, false)) {
 		if (retries < MAX_TRIES && !content_url_is_local) {
 			increment_retries(&retries, &timeout);
 			printf("\nRetry #%d downloading subscribed packs\n", retries);

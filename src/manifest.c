@@ -1116,6 +1116,34 @@ struct list *consolidate_files(struct list *files)
 	return list;
 }
 
+/*
+ * Takes a list of files, and removes files from the list that exist on the filesystem.
+ * This is used for cases like bundle-add where we don't want to re-add files that
+ * already are on the system.
+ */
+struct list *filter_out_existing_files(struct list *files)
+{
+	struct list *list, *next, *ret;
+	struct file *file;
+
+	ret = files;
+
+	list = list_head(files);
+	while (list) {
+		next = list->next;
+
+		file = list->data;
+
+		if (verify_file_lazy(file->filename)) {
+			ret = list_free_item(list, NULL);
+		}
+
+		list = next;
+	}
+
+	return ret;
+}
+
 void populate_file_struct(struct file *file, char *filename)
 {
 	struct stat stat;

@@ -326,6 +326,8 @@ extern int compute_hash(struct file *file, char *filename) __attribute__((warn_u
 /* manifest.c */
 extern struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server);
 extern struct list *consolidate_files(struct list *files);
+extern struct list *filter_out_existing_files(struct list *files);
+
 extern void populate_file_struct(struct file *file, char *filename);
 extern bool verify_file(struct file *file, char *filename);
 extern bool verify_file_lazy(char *filename);

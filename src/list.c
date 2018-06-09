@@ -299,3 +299,17 @@ struct list *list_deep_clone_strs(struct list *list)
 
 	return clone;
 }
+
+int list_longer_than(struct list *list, int count)
+{
+	struct list *item;
+
+	item = list_head(list);
+	while (item) {
+		item = item->next;
+		if (count-- < 0)
+			return 1;
+	}
+	return 0;
+
+}

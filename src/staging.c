@@ -95,8 +95,13 @@ int do_staging(struct file *file, struct manifest *MoM)
 	ret = stat(targetpath, &s);
 
 	if ((ret == -1) && (errno == ENOENT)) {
-		fprintf(stderr, "Update target directory does not exist: %s. Trying to fix it\n", targetpath);
-		verify_fix_path(dir, MoM);
+		if (MoM) {
+			fprintf(stderr, "Update target directory does not exist: %s. Trying to fix it\n", targetpath);
+			verify_fix_path(dir, MoM);
+		} else {
+			fprintf(stderr, "Update target directory does not exist: %s. Auto-fix disabled\n", targetpath);
+		}
+
 	} else if (!S_ISDIR(s.st_mode)) {
 		fprintf(stderr, "Error: Update target exists but is NOT a directory: %s\n", targetpath);
 	}

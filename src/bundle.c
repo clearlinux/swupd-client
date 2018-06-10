@@ -683,7 +683,9 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	grabtime_start(&times, "Add bundles and recurse");
 	ret = add_subscriptions(bundles, subs, current_version, mom, false, 0);
 
-	if (ret != add_sub_NEW) {
+	/* Use a bitwise AND with the add_sub_NEW mask to determine if at least
+	 * one new bundle was subscribed */
+	if (!(ret & add_sub_NEW)) {
 		/* something went wrong, print a message and exit */
 		const char *m;
 		if (ret == 0) { /* no bad names, no new packages */

@@ -46,21 +46,24 @@ static struct list *download_loop(struct list *files, bool free_list)
 
 		/* Mix content is local, so don't queue files up for curl downloads */
 		if (file->is_mix) {
-			char *filename;
 			char *url;
+
+			if (file->staging) {
+				free_string(&file->staging);
+			}
+
 			string_or_die(&url, "%s/%i/files/%s.tar", MIX_STATE_DIR, file->last_change, file->hash);
-			string_or_die(&filename, "%s/download/.%s.tar", state_dir, file->hash);
-			file->staging = filename;
-			ret = link(url, filename);
+			string_or_die(&file->staging, "%s/download/.%s.tar", state_dir, file->hash);
+
+			ret = link(url, file->staging);
 			/* Try doing a regular rename if hardlink fails */
 			if (ret) {
-				if (rename(url, filename) != 0) {
-					fprintf(stderr, "Failed to copy local mix file: %s\n", filename);
+				if (rename(url, file->staging) != 0) {
+					fprintf(stderr, "Failed to copy local mix file: %s\n", file->staging);
 					continue;
 				}
 			}
 			untar_full_download(file);
-			free_string(&filename);
 			free_string(&url);
 			continue;
 		}

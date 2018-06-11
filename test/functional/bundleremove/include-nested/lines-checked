@@ -1,4 +1,3 @@
-Removing bundle: test-bundle
 Error: bundle requested to be removed is required by the following bundles:
 format:
  # * is-required-by
@@ -7,5 +6,4 @@ format:
  # ...
   * test-bundle2
     |-- test-bundle3
-Error: Bundle remove failed
-1 bundle(s) of 1 failed to be removed
+Failed to remove 1 of 1 bundles

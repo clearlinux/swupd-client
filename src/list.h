@@ -54,5 +54,4 @@ struct list *list_deep_clone_strs(struct list *source);
 
 /* check list length */
 extern int list_longer_than(struct list *list, int count);
-
 #endif

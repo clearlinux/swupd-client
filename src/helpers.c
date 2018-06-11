@@ -829,7 +829,6 @@ bool version_files_consistent(void)
 	return (os_release_v >= state_v);
 }
 
-#if 0
 bool string_in_list(char *string_to_check, struct list *list_to_check)
 {
 	struct list *iter;
@@ -845,7 +844,6 @@ bool string_in_list(char *string_to_check, struct list *list_to_check)
 
 	return false;
 }
-#endif
 
 void print_progress(unsigned int count, unsigned int max)
 {

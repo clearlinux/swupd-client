@@ -1325,7 +1325,8 @@ static int is_version_data(const char *filename)
 	    strcmp(filename, "/usr/share/defaults/swupd/contenturl") == 0 ||
 	    strcmp(filename, "/usr/share/defaults/swupd/format") == 0 ||
 	    strcmp(filename, "/usr/share/clear/update-ca/Swupd_Root.pem") == 0 ||
-	    strcmp(filename, "/usr/share/clear/os-core-update-index") == 0) {
+	    strcmp(filename, "/usr/share/clear/os-core-update-index") == 0 ||
+	    strcmp(filename, "/usr/share/clear/allbundles/os-core") == 0) {
 		return 1;
 	}
 	return 0;

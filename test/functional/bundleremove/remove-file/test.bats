@@ -15,6 +15,8 @@ setup() {
 
 teardown() {
   clean_tars 10
+  rm -f "$DIR/target-dir/usr/share/clear/bundles/test-bundle"
+  rm -f "$DIR/target-dir/test-file"
 }
 
 @test "bundle-remove remove bundle containing a file" {
@@ -34,7 +36,7 @@ teardown() {
 }
 
 @test "bundle-remove remove untracked bundle" {
-  run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS os-core"
+  run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS fake-bundle"
 
   # EBUNDLE_NOT_TRACKED == 13
   echo "$status"

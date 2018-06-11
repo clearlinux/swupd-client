@@ -5,4 +5,4 @@ Installing bundle(s) files...
 REGEXP:Update target directory does not exist: .*/usr/bin. .*
 Path /usr/bin is missing on the file system ... fixing
 Path /usr/bin/foo is missing on the file system ... fixing
-Bundle(s) installation done.
+Successfully installed 1 bundle

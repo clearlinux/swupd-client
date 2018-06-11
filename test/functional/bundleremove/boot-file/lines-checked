@@ -1,6 +1,4 @@
-Removing bundle: test-bundle
 Deleting bundle files...
 Total deleted files: 1
 Untracking bundle from system...
-Success: Bundle removed
-1 bundle(s) were removed successfully
+Successfully removed 1 bundle

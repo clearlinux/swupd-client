@@ -15,7 +15,8 @@ teardown() {
 
 @test "bundle-add an already existing bundle" {
   run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
-  [ "$status" -eq 0 ]
+  echo "$status"
+  [ "$status" -eq 18 ]
   check_lines "$output"
 }
 

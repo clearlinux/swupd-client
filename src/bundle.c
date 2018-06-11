@@ -467,13 +467,16 @@ int remove_bundles(char **bundles)
 			goto out_free_curl;
 		}
 
-		fprintf(stderr, "Removing bundle: %s\n", bundle);
-
 		if (!is_tracked_bundle(bundle)) {
-			fprintf(stderr, "Warning: Bundle \"%s\" does not seem to be installed\n", bundle);
+			fprintf(stderr, "Warning: Bundle \"%s\" is not installed, skipping it...\n", bundle);
 			ret = EBUNDLE_NOT_TRACKED;
 			bad++;
 			goto out_free_curl;
+		}
+
+		/* only show this message if there are multiple bundles to be removed */
+		if (*(bundles + 1) || total > 0) {
+			fprintf(stderr, "Removing bundle: %s\n", bundle);
 		}
 
 		current_mom = load_mom(current_version, false, mix_exists);
@@ -557,8 +560,6 @@ int remove_bundles(char **bundles)
 		fprintf(stderr, "Untracking bundle from system...\n");
 		rm_bundle_file(bundle);
 
-		fprintf(stderr, "Success: Bundle removed\n");
-
 		free_manifest(bundle_manifest);
 	out_free_mom:
 		free_manifest(current_mom);
@@ -572,15 +573,14 @@ int remove_bundles(char **bundles)
 			  current_version,
 			  ret);
 		if (ret) {
-			fprintf(stderr, "Error: Bundle remove failed\n");
 			ret_code = ret;
 		}
 	}
 
 	if (bad > 0) {
-		fprintf(stderr, "%i bundle(s) of %i failed to be removed\n", bad, total);
+		fprintf(stderr, "Failed to remove %i of %i bundles\n", bad, total);
 	} else {
-		fprintf(stderr, "%i bundle(s) were removed successfully\n", total);
+		fprintf(stderr, "Successfully removed %i bundle%s\n", total, (total > 1 ? "s" : ""));
 	}
 
 	swupd_deinit(lock_fd, &subs);
@@ -612,7 +612,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 
 		file = search_bundle_in_manifest(mom, bundle);
 		if (!file) {
-			fprintf(stderr, "%s bundle name is invalid, skipping it...\n", bundle);
+			fprintf(stderr, "Warning: Bundle \"%s\" is invalid, skipping it...\n", bundle);
 			ret |= add_sub_BADNAME; /* Use this to get non-zero exit code */
 			continue;
 		}
@@ -670,6 +670,10 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	int ret;
 	int retries = 0;
 	int timeout = 10;
+	int bundles_failed = 0;
+	int already_installed = 0;
+	int bundles_installed = 0;
+	int bundles_requested = list_len(bundles);
 	struct file *file;
 	struct list *iter;
 	struct list *to_install_bundles = NULL;
@@ -683,24 +687,23 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	grabtime_start(&times, "Add bundles and recurse");
 	ret = add_subscriptions(bundles, subs, current_version, mom, false, 0);
 
+	/* print a message if any of the requested bundles is already installed */
+	iter = list_head(bundles);
+	while (iter) {
+		char *bundle;
+		bundle = iter->data;
+		iter = iter->next;
+		if (is_tracked_bundle(bundle)) {
+			fprintf(stderr, "Warning: Bundle \"%s\" is already installed, skipping it...\n", bundle);
+			already_installed++;
+		}
+	}
+
 	/* Use a bitwise AND with the add_sub_NEW mask to determine if at least
 	 * one new bundle was subscribed */
 	if (!(ret & add_sub_NEW)) {
 		/* something went wrong, print a message and exit */
-		const char *m;
-		if (ret == 0) { /* no bad names, no new packages */
-			fprintf(stderr, "nothing to add, exiting now\n");
-			goto out;
-		}
-		if (ret & add_sub_ERR) {
-			m = "Processing error";
-		} else if (ret & add_sub_BADNAME) {
-			m = "Bad bundle name(s) detected";
-		} else {
-			m = "Unknown error";
-		}
 		ret = EBUNDLE_INSTALL;
-		fprintf(stderr, "Error: %s - Aborting\n", m); /* Should be to stderr */
 		goto out;
 	}
 
@@ -880,10 +883,34 @@ download_subscribed_packs:
 	run_scripts(false);
 
 	ret = 0;
-	fprintf(stderr, "Bundle(s) installation done.\n");
 	print_time_stats(&times);
 
 out:
+	/* count how many of the requested bundles were actually installed, note that the
+	 * to_install_bundles list could also have extra dependencies */
+	iter = list_head(to_install_bundles);
+	while (iter) {
+		struct manifest *to_install_manifest;
+		to_install_manifest = iter->data;
+		iter = iter->next;
+		if (string_in_list(to_install_manifest->component, bundles)) {
+			bundles_installed++;
+		}
+	}
+
+	/* print totals */
+	bundles_failed = bundles_requested - bundles_installed - already_installed;
+	if (bundles_failed > 0) {
+		ret = EBUNDLE_INSTALL;
+		fprintf(stderr, "Failed to install %i of %i bundles\n", bundles_failed, bundles_requested - already_installed);
+	} else if (bundles_installed) {
+		fprintf(stderr, "Successfully installed %i bundle%s\n", bundles_installed, (bundles_installed > 1 ? "s" : ""));
+	}
+	if (already_installed) {
+		ret = EBUNDLE_INSTALL;
+		fprintf(stderr, "%i bundle%s already installed\n", already_installed, (already_installed > 1 ? "s were" : " was"));
+	}
+
 	if (to_install_files) {
 		list_free_list(to_install_files);
 	}

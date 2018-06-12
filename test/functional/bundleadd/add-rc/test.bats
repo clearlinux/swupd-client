@@ -12,6 +12,8 @@ setup() {
   create_manifest_tar 10 os-core
   create_manifest_tar 10 test-bundle1
   create_manifest_tar 10 test-bundle2
+  create_fullfile_tar 10 $t1_hash
+  create_fullfile_tar 10 $t2_hash
   chown_root "$DIR/web-dir/10/staged/$t1_hash"
   chown_root "$DIR/web-dir/10/staged/$t2_hash"
   tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/pack-test-bundle1-from-0.tar" --exclude=staged/$t1_hash/* staged/$t1_hash

@@ -287,6 +287,17 @@ CURLcode swupd_download_file_start(struct file *file)
 	return CURLE_OK;
 }
 
+CURLcode swupd_download_file_append(struct file *file)
+{
+	file->fh = fopen(file->staging, "a");
+	if (!file->fh) {
+		fprintf(stderr, "Cannot open file for append \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
+			file->staging, strerror(errno));
+		return CURLE_WRITE_ERROR;
+	}
+	return CURLE_OK;
+}
+
 CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file)
 {
 	if (file->fh) {
@@ -334,19 +345,18 @@ int swupd_curl_get_file_full(const char *url, char *filename,
 
 		local.staging = filename;
 
-		if (lstat(filename, &stat) == 0) {
-			if (resume_ok && resume_download_enabled) {
-				curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
-			} else {
-				unlink(filename);
+		if (resume_ok && resume_download_enabled && lstat(filename, &stat) == 0) {
+			curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
+			if (curl_ret != CURLE_OK) {
+				goto exit;
 			}
+
+			curl_ret = swupd_download_file_append(&local);
+		} else {
+			curl_ret = swupd_download_file_start(&local);
 		}
 
 		curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void *)&local);
-		if (curl_ret != CURLE_OK) {
-			goto exit;
-		}
-		curl_ret = swupd_download_file_start(&local);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}

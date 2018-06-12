@@ -48,8 +48,6 @@
 
 static CURL *curl = NULL;
 
-static bool resume_download_enabled = true;
-
 /* these are used to handle alternative trust locations */
 static char *capath;
 static char **fallback_capaths;
@@ -118,8 +116,6 @@ int swupd_curl_init(void)
 	return 0;
 }
 
-static void swupd_curl_test_resume(void);
-
 int swupd_curl_check_network(void)
 {
 	CURLcode curl_ret;
@@ -168,7 +164,6 @@ int swupd_curl_check_network(void)
 			capath = fallback_capaths[i];
 			ret = 0;
 			has_network = 1;
-			swupd_curl_test_resume();
 			goto cleanup;
 		case CURLE_SSL_CACERT:
 			fprintf(stderr, "Error: unable to verify server SSL certificate\n");
@@ -253,14 +248,6 @@ double swupd_query_url_content_size(char *url)
 	return content_size;
 }
 
-/*
- * Discard file contents. To be used in functions that test the conection
- */
-static size_t swupd_download_discard_file(void UNUSED_PARAM *ptr, size_t UNUSED_PARAM size, size_t UNUSED_PARAM nmemb, void UNUSED_PARAM *userdata)
-{
-	return size * nmemb;
-}
-
 static size_t swupd_download_file_to_memory(void *ptr, size_t size, size_t nmemb, void *userdata)
 {
 	struct curl_file_data *file_data = (struct curl_file_data *)userdata;
@@ -328,6 +315,8 @@ CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file)
 int swupd_curl_get_file_full(const char *url, char *filename,
 			     struct curl_file_data *in_memory_file, bool resume_ok)
 {
+	static bool resume_download_supported = true;
+
 	CURLcode curl_ret;
 	long ret = 0;
 	int err = -1;
@@ -337,6 +326,7 @@ int swupd_curl_get_file_full(const char *url, char *filename,
 	if (!curl) {
 		abort();
 	}
+restart_download:
 	curl_easy_reset(curl);
 
 	if (!in_memory_file) {
@@ -345,7 +335,7 @@ int swupd_curl_get_file_full(const char *url, char *filename,
 
 		local.staging = filename;
 
-		if (resume_ok && resume_download_enabled && lstat(filename, &stat) == 0) {
+		if (resume_ok && resume_download_supported && lstat(filename, &stat) == 0) {
 			curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
 			if (curl_ret != CURLE_OK) {
 				goto exit;
@@ -458,6 +448,17 @@ exit:
 			fprintf(stderr, "Curl: Bad SSL Cert file, cannot ensure secure connection\n");
 			err = -1;
 			break;
+		case CURLE_RANGE_ERROR:
+			fprintf(stderr, "Range command not supported by server, download resume disabled.\n");
+
+			//Reset variables
+			ret = 0;
+			err = -1;
+			memset(&local, 0, sizeof(local));
+
+			//Disable download resume
+			resume_download_supported = false;
+			goto restart_download;
 		default:
 			swupd_curl_strerror(curl_ret);
 			err = -1;
@@ -480,56 +481,6 @@ exit:
 int swupd_curl_get_file(const char *url, char *filename)
 {
 	return swupd_curl_get_file_full(url, filename, NULL, false);
-}
-
-static void swupd_curl_test_resume(void)
-{
-#define RESUME_BYTE_RANGE 2
-
-	CURLcode curl_ret;
-	char *url = NULL;
-
-	if (!curl) {
-		abort();
-	}
-
-	curl_easy_reset(curl);
-
-	string_or_die(&url, "%s/version/format%s/latest", version_url, format_string);
-
-	curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)RESUME_BYTE_RANGE);
-	if (curl_ret != CURLE_OK) {
-		goto exit;
-	}
-
-	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, swupd_download_discard_file);
-	if (curl_ret != CURLE_OK) {
-		goto exit;
-	}
-	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
-	if (curl_ret != CURLE_OK) {
-		goto exit;
-	}
-	curl_ret = curl_easy_setopt(curl, CURLOPT_COOKIE, "request=uncached");
-	if (curl_ret != CURLE_OK) {
-		goto exit;
-	}
-
-	curl_ret = swupd_curl_set_basic_options(curl, url);
-	if (curl_ret != CURLE_OK) {
-		goto exit;
-	}
-
-	curl_ret = curl_easy_perform(curl);
-
-	if (curl_ret == CURLE_RANGE_ERROR) {
-		fprintf(stderr, "Range command not supported by server, download resume disabled.\n");
-		resume_download_enabled = false;
-	}
-exit:
-	free_string(&url);
-
-	return;
 }
 
 static CURLcode swupd_curl_set_security_opts(CURL *curl)

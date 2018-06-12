@@ -311,5 +311,4 @@ int list_longer_than(struct list *list, int count)
 			return 1;
 	}
 	return 0;
-
 }

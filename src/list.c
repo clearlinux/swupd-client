@@ -307,8 +307,9 @@ int list_longer_than(struct list *list, int count)
 	item = list_head(list);
 	while (item) {
 		item = item->next;
-		if (count-- < 0)
+		if (count-- < 0) {
 			return 1;
+		}
 	}
 	return 0;
 }

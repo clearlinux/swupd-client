@@ -1134,7 +1134,7 @@ struct list *filter_out_existing_files(struct list *files)
 
 		file = list->data;
 
-		if (verify_file_lazy(file->filename)) {
+		if (verify_file_lazy(mk_full_filename(path_prefix, file->filename))) {
 			ret = list_free_item(list, NULL);
 		}
 

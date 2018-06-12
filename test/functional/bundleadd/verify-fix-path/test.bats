@@ -12,6 +12,7 @@ setup() {
   create_manifest_tar 10 os-core
   create_manifest_tar 10 test-bundle
   create_fullfile_tar 10 $t1_hash
+  create_fullfile_tar 10 $t2_hash
   chown_root "$DIR/web-dir/10/staged/$t2_hash"
   sudo tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/pack-test-bundle-from-0.tar" staged/$t2_hash
   chown_root "$DIR/target-dir/usr"

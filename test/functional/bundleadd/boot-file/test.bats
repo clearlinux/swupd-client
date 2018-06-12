@@ -11,7 +11,7 @@ setup() {
   create_manifest_tar 10 os-core
   create_manifest_tar 10 test-bundle
   chown_root "$DIR/web-dir/10/staged/$f_hash"
-  tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/pack-test-bundle-from-0.tar" staged/$f_hash
+  create_fullfile_tar 10 $f_hash
 }
 
 teardown() {

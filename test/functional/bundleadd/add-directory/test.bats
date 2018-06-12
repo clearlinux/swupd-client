@@ -10,6 +10,7 @@ setup() {
   sign_manifest_mom 10
   create_manifest_tar 10 os-core
   create_manifest_tar 10 test-bundle
+  create_fullfile_tar 10 $dir_hash
   chown_root "$DIR/web-dir/10/staged/$dir_hash"
   tar -C "$DIR/web-dir/10" -cf "$DIR/web-dir/10/pack-test-bundle-from-0.tar" --exclude=staged/$dir_hash/* staged/$dir_hash
 }

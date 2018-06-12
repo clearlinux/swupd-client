@@ -31,6 +31,7 @@
 static bool cmdline_option_all = false;
 static char *cmdline_option_has_dep = NULL;
 static char *cmdline_option_deps = NULL;
+static bool cmdline_local = true;
 
 static void free_has_dep(void)
 {
@@ -94,6 +95,7 @@ static bool parse_options(int argc, char **argv)
 			exit(EXIT_SUCCESS);
 		case 'a':
 			cmdline_option_all = true;
+			cmdline_local = false;
 			break;
 		case 'u':
 			if (!optarg) {
@@ -155,6 +157,7 @@ static bool parse_options(int argc, char **argv)
 			}
 			string_or_die(&cmdline_option_has_dep, "%s", optarg);
 			atexit(free_has_dep);
+			cmdline_local = false;
 			break;
 		case 'd':
 			if (!optarg) {
@@ -163,6 +166,7 @@ static bool parse_options(int argc, char **argv)
 			}
 			string_or_die(&cmdline_option_deps, "%s", optarg);
 			atexit(free_deps);
+			cmdline_local = false;
 			break;
 		default:
 			fprintf(stderr, "error: unrecognized option\n\n");
@@ -185,6 +189,15 @@ int bundle_list_main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	if (cmdline_local) {
+		set_path_prefix(NULL);
+		ret = list_local_bundles();
+		if (ret) {
+			check_root();
+		}
+		return ret;
+	}
+
 	ret = swupd_init(&lock_fd);
 	if (ret != 0) {
 		fprintf(stderr, "Error: Failed updater initialization. Exiting now\n");
@@ -195,10 +208,8 @@ int bundle_list_main(int argc, char **argv)
 		ret = show_included_bundles(cmdline_option_deps);
 	} else if (cmdline_option_has_dep != NULL) {
 		ret = show_bundle_reqd_by(cmdline_option_has_dep, cmdline_option_all);
-	} else if (cmdline_option_all) {
-		ret = list_installable_bundles();
 	} else {
-		ret = list_local_bundles();
+		ret = list_installable_bundles();
 	}
 
 	swupd_deinit(lock_fd, NULL);

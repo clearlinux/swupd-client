@@ -27,6 +27,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #include "config.h"
 #include "swupd.h"
@@ -239,7 +240,9 @@ int get_version_from_path(const char *abs_path)
 
 	ret = get_value_from_path(&ret_str, abs_path, true);
 	if (ret == 0) {
-		return strtoull(ret_str, NULL, 10);
+		int val = strtoimax(ret_str, NULL, 10);
+		free_string(&ret_str);
+		return val;
 	}
 
 	return -1;

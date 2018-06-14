@@ -211,10 +211,6 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 	}
 
 	manifest = alloc_manifest(version, component);
-	if (manifest == NULL) {
-		goto err_close;
-	}
-
 	manifest->filecount = filecount;
 	manifest->contentsize = contentsize;
 	manifest->manifest_version = manifest_enc_version;

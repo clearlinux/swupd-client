@@ -889,7 +889,6 @@ load_submanifests:
 		fprintf(stderr, "Verifying files\n");
 		deal_with_hash_mismatches(official_manifest, repair);
 	}
-	free_manifest(official_manifest);
 
 brick_the_system_and_clean_curl:
 	/* clean up */
@@ -946,6 +945,7 @@ brick_the_system_and_clean_curl:
 	/* this concludes the critical section, after this point it's clean up time, the disk content is finished and final */
 
 clean_and_exit:
+	free_manifest(official_manifest);
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
 		  "verify",
 		  "fix=%d\nret=%d\n"

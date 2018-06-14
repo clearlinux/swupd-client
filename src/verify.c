@@ -378,6 +378,7 @@ static int check_files_hash(struct list *files)
 
 		fullname = mk_full_filename(path_prefix, f->filename);
 		valid = cmdline_option_quick ? verify_file_lazy(fullname) : verify_file(f, fullname);
+		free_string(&fullname);
 		if (valid) {
 			f->do_not_update = 1;
 		} else {

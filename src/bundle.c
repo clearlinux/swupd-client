@@ -992,6 +992,7 @@ clean_and_exit:
 		  current_version,
 		  ret);
 
+	free_string(&bundles_list_str);
 	swupd_deinit(lock_fd, &subs);
 
 	return ret;

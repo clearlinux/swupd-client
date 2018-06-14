@@ -716,6 +716,10 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		path = list1->data;
 		list1 = list1->next;
 
+		free_string(&target);
+		free_string(&tar_dotfile);
+		free_string(&url);
+
 		target = mk_full_filename(path_prefix, path);
 
 		/* Search for the file in the manifest, to get the hash for the file */

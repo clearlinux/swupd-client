@@ -6,11 +6,6 @@ server_pid=""
 port=""
 
 setup() {
-  # extra debug for touchy test
-  exec 21> $BATS_TEST_DIRNAME/debug.log
-  BASH_XTRACEFD=21
-  set -x
-
   for i in $(seq 8080 8180); do
     "$DIR/server.py" $i &
     sleep .5

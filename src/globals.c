@@ -24,10 +24,10 @@
 #define _GNU_SOURCE
 #include <dlfcn.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <inttypes.h>
 
 #include "config.h"
 #include "swupd.h"

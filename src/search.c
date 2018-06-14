@@ -164,7 +164,8 @@ static void free_bundle_result_data(void *data)
 		return;
 	}
 
-	list_free_list(br->files);
+	list_free_list_and_data(br->files, free);
+	list_free_list_and_data(br->includes, free);
 	free(br);
 }
 
@@ -719,6 +720,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 	if (display_size) {
 		apply_size_penalty(bundle_info);
 	}
+	list_free_list_and_data(bundle_info, free_bundle_result_data);
 
 	if (num_results != INT_MAX) {
 		sort_results();

@@ -533,7 +533,7 @@ int remove_bundles(char **bundles)
 				fprintf(stderr, "%s", bundle);
 			}
 
-			list_free_list(reqd_by);
+			list_free_list_and_data(reqd_by, free);
 			ret = EBUNDLE_REMOVE;
 			bad++;
 			goto out_free_mom;

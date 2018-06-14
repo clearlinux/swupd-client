@@ -1121,6 +1121,7 @@ struct list *filter_out_existing_files(struct list *files)
 {
 	struct list *list, *next, *ret;
 	struct file *file;
+	char *filename;
 
 	ret = files;
 
@@ -1130,9 +1131,11 @@ struct list *filter_out_existing_files(struct list *files)
 
 		file = list->data;
 
-		if (verify_file_lazy(mk_full_filename(path_prefix, file->filename))) {
+		filename = mk_full_filename(path_prefix, file->filename);
+		if (verify_file_lazy(filename)) {
 			ret = list_free_item(list, NULL);
 		}
+		free_string(&filename);
 
 		list = next;
 	}

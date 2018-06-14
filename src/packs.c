@@ -77,6 +77,7 @@ static int download_pack(int oldversion, int newversion, char *module, int is_mi
 			free_string(&filename);
 			return err;
 		}
+		free_string(&url);
 	}
 
 	fprintf(stderr, "\nExtracting %s pack for version %i\n", module, newversion);

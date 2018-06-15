@@ -685,13 +685,14 @@ int verify_main(int argc, char **argv)
 	}
 
 	/* Gather current manifests */
+	int sys_version = get_current_version(path_prefix);
 	if (!version) {
-		version = get_current_version(path_prefix);
-		if (version < 0) {
+		if (sys_version < 0) {
 			fprintf(stderr, "Error: Unable to determine current OS version\n");
 			ret = ECURRENT_VERSION;
 			goto clean_and_exit;
 		}
+		version = sys_version;
 	}
 
 	if (version == -1) {
@@ -727,9 +728,10 @@ int verify_main(int argc, char **argv)
 
 	grabtime_start(&times, "Load and recurse Manifests");
 
-	/* If upstream URL is passed, user is likely trying to get back to the official stream,
-	 * so ignore any custom mixer related state */
-	if (strncmp(content_url, DEFAULT_CONTENTURL, strlen(DEFAULT_CONTENTURL)) == 0) {
+	/* When the version we are verifying against does not match our system version
+	 * disable checks for mixer state so the user can easily switch back to their
+	 * normal update stream */
+	if (version != sys_version) {
 		official_manifest = load_mom(version, false, false);
 	} else {
 		official_manifest = load_mom(version, false, system_on_mix());

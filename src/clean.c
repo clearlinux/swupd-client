@@ -93,7 +93,7 @@ typedef bool(remove_predicate_func)(const char *dir, const struct dirent *entry)
 /* Remove files from path for which pred returns true.
  * Currently it doesn't recursively remove directories.
  */
-static int remove_if(const char *path, remove_predicate_func pred)
+static int remove_if(const char *path, bool dry_run, remove_predicate_func pred)
 {
 	int ret = 0;
 	DIR *dir;
@@ -138,7 +138,7 @@ static int remove_if(const char *path, remove_predicate_func pred)
 			continue;
 		}
 
-		if (options.dry_run) {
+		if (dry_run) {
 			printf("%s\n", file);
 		} else {
 			if (S_ISDIR(stat.st_mode)) {
@@ -245,7 +245,7 @@ end:
 	return contents;
 }
 
-static int clean_staged_manifests(const char *path)
+static int clean_staged_manifests(const char *path, bool dry_run, bool all)
 {
 	DIR *dir;
 
@@ -260,7 +260,7 @@ static int clean_staged_manifests(const char *path)
 	/* When --all is not used, keep the Manifests used by the current OS version. This
 	 * ensures that a regular 'clean' won't make 'search' redownload files. */
 	char *mom_contents = NULL;
-	if (!options.all) {
+	if (!all) {
 		int current_version = get_current_version(path_prefix);
 		if (current_version < 0) {
 			fprintf(stderr, "Unable to determine current OS version\n");
@@ -299,7 +299,7 @@ static int clean_staged_manifests(const char *path)
 
 		char *version_dir;
 		string_or_die(&version_dir, "%s/%s", state_dir, name);
-		ret = remove_if(version_dir, is_manifest);
+		ret = remove_if(version_dir, dry_run, is_manifest);
 
 		/* Remove empty dirs if possible. */
 		(void)rmdir(version_dir);
@@ -345,32 +345,7 @@ int clean_main(int argc, char **argv)
 	/* TODO: Consider having a mode for clean that parses the current manifest (if available)
 	 * and keeping all the staged files of the current version. This helps recovering the
 	 * current version. Or do it for the previous version to allow a rollback. */
-
-	char *staged_dir = NULL;
-	string_or_die(&staged_dir, "%s/staged", state_dir);
-	ret = remove_if(staged_dir, is_fullfile);
-	free_string(&staged_dir);
-	if (ret != 0) {
-		goto end;
-	}
-
-	/* Pack presence indicator files. */
-	ret = remove_if(state_dir, is_pack_indicator);
-	if (ret != 0) {
-		goto end;
-	}
-
-	/* Manifest delta files. */
-	ret = remove_if(state_dir, is_manifest_delta);
-	if (ret != 0) {
-		goto end;
-	}
-
-	ret = clean_staged_manifests(state_dir);
-	if (ret != 0) {
-		goto end;
-	}
-
+	ret = clean_statedir(options.dry_run, options.all);
 	/* TODO: Also print the bytes removed, need to take into account the hardlinks. */
 	if (options.dry_run) {
 		printf("Would remove %d files.\n", stats.files_removed);
@@ -381,4 +356,34 @@ int clean_main(int argc, char **argv)
 end:
 	swupd_deinit(lock_fd, NULL);
 	return ret;
+}
+
+/* clean_statedir will clean the state directory used by swupd (default to
+ * /var/lib/swupd). It will remove all files except relevant manifests unless
+ * all is set to true. Setting dry_run to true will print the files that would
+ * be removed but will not actually remove them. */
+int clean_statedir(bool dry_run, bool all)
+{
+
+	char *staged_dir = NULL;
+	string_or_die(&staged_dir, "%s/staged", state_dir);
+	int ret = remove_if(staged_dir, dry_run, is_fullfile);
+	free_string(&staged_dir);
+	if (ret != 0) {
+		return ret;
+	}
+
+	/* Pack presence indicator files. */
+	ret = remove_if(state_dir, dry_run, is_pack_indicator);
+	if (ret != 0) {
+		return ret;
+	}
+
+	/* Manifest delta files. */
+	ret = remove_if(state_dir, dry_run, is_manifest_delta);
+	if (ret != 0) {
+		return ret;
+	}
+
+	return clean_staged_manifests(state_dir, dry_run, all);
 }

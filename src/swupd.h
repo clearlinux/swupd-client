@@ -411,6 +411,8 @@ extern void print_update_conf_info(void);
 
 extern void handle_mirror_if_stale(void);
 
+extern int clean_statedir(bool all, bool dry_run);
+
 /* some disk sizes constants for the various features:
  *   ...consider adding build automation to catch at build time
  *      if the build's artifacts are larger than these thresholds */

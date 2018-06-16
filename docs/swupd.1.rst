@@ -373,6 +373,30 @@ return value higher than ``1`` signals a failure.
 If the subcommand was ``autoupdate`` without options, then the program
 returns ``0`` if automatic updating is enabled.
 
+The non-zero return codes for other operations are listed here:
+
+  - **2**: At least one local bundle could not be found in the MoM manifest
+  - **3**: Unable to delete bundle
+  - **4**: Unable to download or read MoM manifest
+  - **5**, **6**, **7**: File staging error
+  - **8**: Unable to recursively load included manifests
+  - **9**: Unable to obtain lock on state directory
+  - **11**: Unable to initialize curl agent
+  - **12**: Initialization error
+  - **13**: Bundle not tracked on system
+  - **14**: Unable to load manifest into memory
+  - **15**: Invalid command-line option
+  - **16**: Unable to connect to update server
+  - **16**, **17**, **404**: File download issue
+  - **18**: Unable to install bundles
+  - **19**: Unable to create required directories
+  - **20**: Unable to determine current version of the OS
+  - **21**: Unable to initialize signature verification
+  - **22**: System time is off by a large margin
+  - **23**: Pack download issue
+  - **24**: Unable to verify server SSL certificate
+
+
 SEE ALSO
 --------
 

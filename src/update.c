@@ -547,6 +547,9 @@ clean_curl:
 	} else {
 		free_subscriptions(&current_subs);
 	}
+	/* clean up our cached content from the update. It is likely much more than
+	 * we need and the clean helps us prevent cache bloat. */
+	clean_statedir(false, false);
 	swupd_deinit(lock_fd, &latest_subs);
 
 	if (nonpack > 0) {

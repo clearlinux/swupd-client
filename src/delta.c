@@ -155,6 +155,7 @@ void apply_deltas(struct manifest *current_manifest)
 
 		struct list *ll = list_head(current_manifest->files);
 		char *found = NULL;
+		bool bad_on_sys = false;
 
 		for (; ll && !found; ll = ll->next) {
 			struct file *file = ll->data;
@@ -169,6 +170,7 @@ void apply_deltas(struct manifest *current_manifest)
 
 			if (!compute_hash_from_file(filename, hash) || !hash_equal(file->hash, hash)) {
 				free_string(&filename);
+				bad_on_sys = true;
 				continue;
 			}
 
@@ -176,7 +178,12 @@ void apply_deltas(struct manifest *current_manifest)
 		}
 
 		if (!found) {
-			fprintf(stderr, "Couldn't use delta file %s: no 'from' file to apply was found\n", delta_file);
+			fprintf(stderr, "Couldn't use delta file %s: ", delta_file);
+			if (bad_on_sys) {
+				fprintf(stderr, "'from' file corrupted on system, consider running 'swupd verify --fix'\n");
+			} else {
+				fprintf(stderr, "no 'from' file to apply was found\n");
+			}
 			goto next;
 		}
 

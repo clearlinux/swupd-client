@@ -532,6 +532,54 @@ return value higher than \fB1\fP signals a failure.
 .sp
 If the subcommand was \fBautoupdate\fP without options, then the program
 returns \fB0\fP if automatic updating is enabled.
+.sp
+The non\-zero return codes for other operations are listed here:
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.IP \(bu 2
+\fB2\fP: At least one local bundle could not be found in the MoM manifest
+.IP \(bu 2
+\fB3\fP: Unable to delete bundle
+.IP \(bu 2
+\fB4\fP: Unable to download or read MoM manifest
+.IP \(bu 2
+\fB5\fP, \fB6\fP, \fB7\fP: File staging error
+.IP \(bu 2
+\fB8\fP: Unable to recursively load included manifests
+.IP \(bu 2
+\fB9\fP: Unable to obtain lock on state directory
+.IP \(bu 2
+\fB11\fP: Unable to initialize curl agent
+.IP \(bu 2
+\fB12\fP: Initialization error
+.IP \(bu 2
+\fB13\fP: Bundle not tracked on system
+.IP \(bu 2
+\fB14\fP: Unable to load manifest into memory
+.IP \(bu 2
+\fB15\fP: Invalid command\-line option
+.IP \(bu 2
+\fB16\fP: Unable to connect to update server
+.IP \(bu 2
+\fB16\fP, \fB17\fP, \fB404\fP: File download issue
+.IP \(bu 2
+\fB18\fP: Unable to install bundles
+.IP \(bu 2
+\fB19\fP: Unable to create required directories
+.IP \(bu 2
+\fB20\fP: Unable to determine current version of the OS
+.IP \(bu 2
+\fB21\fP: Unable to initialize signature verification
+.IP \(bu 2
+\fB22\fP: System time is off by a large margin
+.IP \(bu 2
+\fB23\fP: Pack download issue
+.IP \(bu 2
+\fB24\fP: Unable to verify server SSL certificate
+.UNINDENT
+.UNINDENT
+.UNINDENT
 .SS SEE ALSO
 .INDENT 0.0
 .IP \(bu 2

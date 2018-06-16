@@ -9,7 +9,6 @@
 #define EDOTFILE_WRITE 7	/* do_staging() couldn't create a dotfile */
 #define ERECURSE_MANIFEST 8     /* error while recursing a manifest */
 #define ELOCK_FILE 9		/* cannot get the lock */
-#define EPREP_MOUNT 10		/* failed to prepare mount points */
 #define ECURL_INIT 11		/* cannot initialize curl agent */
 #define EINIT_GLOBALS 12	/* cannot initialize globals */
 #define EBUNDLE_NOT_TRACKED 13  /* bundle is not tracked on the system */

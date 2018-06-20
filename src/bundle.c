@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/statvfs.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -674,10 +675,13 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	int already_installed = 0;
 	int bundles_installed = 0;
 	int bundles_requested = list_len(bundles);
+	long bundle_size = 0;
+	long fs_free = 0;
 	struct file *file;
 	struct list *iter;
 	struct list *to_install_bundles = NULL;
 	struct list *to_install_files = NULL;
+	struct list *ptr;
 	struct manifest *full_mom = NULL;
 	timelist times;
 
@@ -722,6 +726,49 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	to_install_files = consolidate_files(to_install_files);
 	to_install_files = filter_out_existing_files(to_install_files);
 	grabtime_stop(&times);
+
+	/* Step 1.5: Now that we know the bundle is valid, check if we have enough space */
+	if (!skip_diskspace_check) {
+		struct statvfs stat;
+		char *filepath = NULL;
+
+		ptr = list_head(to_install_bundles);
+		while (ptr) {
+			struct manifest *subman;
+			subman = ptr->data;
+			ptr = ptr->next;
+
+			bundle_size += subman->contentsize;
+		}
+
+		filepath = mk_full_filename(path_prefix, "/usr/");
+
+		/* Calculate free space on filepath */
+		if (statvfs(filepath, &stat) != 0) {
+			fs_free = -1;
+		} else {
+			fs_free = stat.f_bsize * stat.f_bavail;
+		}
+		free_string(&filepath);
+
+		/* Add 10% to bundle_size as a 'fudge factor' */
+		if (((bundle_size * 1.1) > fs_free && !skip_diskspace_check) || fs_free < 0) {
+			ret = EBUNDLE_INSTALL;
+
+			if (fs_free > 0) {
+				fprintf(stderr, "Error: Bundle too large by %ldM.\n", (bundle_size - fs_free) / 1000 / 1000);
+			} else {
+				fprintf(stderr, "Error: Unable to determine free space on filesystem.\n");
+			}
+
+			fprintf(stderr, "NOTE: currently, swupd only checks /usr/ "
+					"(or the passed-in path with /usr/ appended) for available space.\n");
+			fprintf(stderr, "To skip this error and install anyways, "
+					"add the --skip-diskspace-check flag to your command.\n");
+
+			goto out;
+		}
+	}
 
 	/* step 2: download neccessary packs */
 	grabtime_start(&times, "Download packs");

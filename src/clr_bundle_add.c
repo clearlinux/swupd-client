@@ -57,6 +57,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -t, --time              Show verbose time output for swupd operations\n");
 	fprintf(stderr, "   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
 	fprintf(stderr, "   -b, --no-boot-update    Do not update the boot files using clr-boot-manager\n");
+	fprintf(stderr, "   --skip-diskspace-check  Do not check free disk space before adding bundle\n");
 	fprintf(stderr, "\n");
 }
 
@@ -77,6 +78,7 @@ static const struct option prog_opts[] = {
 	{ "time", no_argument, 0, 't' },
 	{ "no-scripts", no_argument, 0, 'N' },
 	{ "no-boot-update", no_argument, 0, 'b' },
+	{ "skip-diskspace-check", no_argument, &skip_diskspace_check, 1 },
 	{ 0, 0, 0, 0 }
 };
 
@@ -164,6 +166,8 @@ static bool parse_options(int argc, char **argv)
 				goto err;
 			}
 			set_cert_path(optarg);
+			break;
+		case 0:
 			break;
 		default:
 			fprintf(stderr, "error: unrecognized option\n\n");

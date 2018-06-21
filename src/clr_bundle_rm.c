@@ -44,7 +44,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "   swupd %s [options] [bundle1, bundle2, ...]\n\n", basename((char *)name));
 	fprintf(stderr, "Help Options:\n");
 	fprintf(stderr, "   -h, --help              Show help options\n");
-	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
+	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol)\n");
 	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
 	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
 	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");

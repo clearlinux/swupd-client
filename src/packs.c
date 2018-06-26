@@ -109,11 +109,6 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	unsigned int list_length = list_len(subs);
 	unsigned int complete = 0;
 
-	int ret = swupd_curl_check_network();
-	if (ret) {
-		return -ret;
-	}
-
 	fprintf(stderr, "Downloading packs...\n");
 	iter = list_head(subs);
 	while (iter) {

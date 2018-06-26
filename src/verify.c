@@ -706,12 +706,6 @@ int verify_main(int argc, char **argv)
 
 	fprintf(stderr, "Verifying version %i\n", version);
 
-	ret = swupd_curl_check_network();
-	if (ret) {
-		fprintf(stderr, "Error: Network issue, unable to download manifest\n");
-		goto clean_and_exit;
-	}
-
 	read_subscriptions(&subs);
 
 	/*

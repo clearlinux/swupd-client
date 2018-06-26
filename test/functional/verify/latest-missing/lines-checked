@@ -1,2 +1,2 @@
-Unable to get latest version for install
-Error: Fix did not fully succeed
+Curl error: (37) Couldn't read a file:// file
+Failed verify initialization, exiting now.

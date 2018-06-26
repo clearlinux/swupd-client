@@ -53,12 +53,6 @@ int list_installable_bundles()
 	int current_version;
 	bool mix_exists;
 
-	int ret = swupd_curl_check_network();
-	if (ret) {
-		fprintf(stderr, "Error: Network issue, unable to download manifest\n");
-		return ret;
-	}
-
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
 		fprintf(stderr, "Error: Unable to determine current OS version\n");

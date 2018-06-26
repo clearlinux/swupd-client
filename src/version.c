@@ -147,11 +147,6 @@ int check_versions(int *current_version,
 		   int requested_version,
 		   char *path_prefix)
 {
-
-	if (swupd_curl_check_network()) {
-		return -1;
-	}
-
 	read_versions(current_version, server_version, path_prefix);
 
 	if (*current_version < 0) {

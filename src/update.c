@@ -236,12 +236,6 @@ static int main_update()
 	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
 	grabtime_start(&times, "Main Update");
 
-	ret = swupd_curl_check_network();
-	if (ret) {
-		fprintf(stderr, "Error: Network issue, unable to proceed with update\n");
-		goto clean_curl;
-	}
-
 	mix_exists = check_mix_exists();
 
 	fprintf(stderr, "Update started.\n");

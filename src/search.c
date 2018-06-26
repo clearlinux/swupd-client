@@ -870,12 +870,6 @@ int search_main(int argc, char **argv)
 		return ret;
 	}
 
-	ret = swupd_curl_check_network();
-	if (ret) {
-		fprintf(stderr, "Error: Network issue, unable to proceed with update\n");
-		goto clean_exit;
-	}
-
 	if (!init) {
 		fprintf(stderr, "Searching for '%s'\n\n", search_string);
 	}

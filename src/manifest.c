@@ -472,12 +472,6 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	}
 	free_string(&filename);
 
-	ret = swupd_curl_check_network();
-	if (ret) {
-		ret = -ret;
-		goto out;
-	}
-
 	string_or_die(&dir, "%s/%i", state_dir, version);
 	ret = mkdir(dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if ((ret != 0) && (errno != EEXIST)) {

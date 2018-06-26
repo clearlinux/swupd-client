@@ -362,6 +362,7 @@ extern void print_manifest_files(struct manifest *m);
 extern void swupd_deinit(int lock_fd, struct list **subs);
 extern int swupd_init(int *lock_fd);
 extern void string_or_die(char **strp, const char *fmt, ...);
+char *strdup_or_die(const char *const str);
 extern void free_string(char **s);
 void update_motd(int new_release);
 void delete_motd(void);

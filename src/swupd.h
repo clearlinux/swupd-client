@@ -288,7 +288,7 @@ extern int download_subscribed_packs(struct list *subs, struct manifest *mom, bo
 
 extern void apply_deltas(struct manifest *current_manifest);
 extern void full_download(struct file *file);
-extern int start_full_download(bool pipelining);
+extern int start_full_download();
 extern struct list *end_full_download(void);
 extern int untar_full_download(void *data);
 

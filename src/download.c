@@ -135,7 +135,7 @@ static size_t file_hash_value(const void *data)
 	return HASH_VALUE(((struct file *)data)->hash[0]);
 }
 
-int start_full_download(bool pipelining)
+int start_full_download()
 {
 	if (swupd_curl_hashmap) {
 		return -1;
@@ -149,17 +149,7 @@ int start_full_download(bool pipelining)
 		return -1;
 	}
 
-	/*
-	 * we want to not do HTTP pipelining once things have failed once.. in case some transpoxy in the middle
-	 * is even more broken than average. This at least will allow the user to update, albeit slowly.
-	 */
-	if (pipelining) {
-		curl_multi_setopt(mcurl, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX | CURLPIPE_HTTP1);
-	} else {
-		/* survival: don't go too parallel in verify/fix loop */
-		MAX_XFER = 1;
-		MAX_XFER_BOTTOM = 1;
-	}
+	curl_multi_setopt(mcurl, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX | CURLPIPE_HTTP1);
 
 	fprintf(stderr, "Starting download of remaining update content. This may take a while...\n");
 

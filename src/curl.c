@@ -160,7 +160,7 @@ static size_t filesize_from_header_cb(void UNUSED_PARAM *func, size_t size, size
 	return (size_t)(size * nmemb);
 }
 
-double swupd_query_url_content_size(char *url)
+double swupd_curl_query_content_size(char *url)
 {
 	CURLcode curl_ret;
 	double content_size;

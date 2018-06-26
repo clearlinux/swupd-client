@@ -756,7 +756,7 @@ static double query_total_download_size(struct list *list)
 			string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url,
 				      file->last_change, file->filename);
 
-			ret = swupd_query_url_content_size(url);
+			ret = swupd_curl_query_content_size(url);
 			free_string(&url);
 			if (ret != -1) {
 				/* Convert file size from bytes to MB */

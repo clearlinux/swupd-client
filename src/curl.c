@@ -288,7 +288,7 @@ int swupd_curl_get_file_full(const char *url, char *filename,
 	bool local_download = strncmp(url, "file://", 7) == 0;
 
 	if (!curl) {
-		abort();
+		return -1;
 	}
 restart_download:
 	curl_easy_reset(curl);

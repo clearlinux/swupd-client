@@ -26,7 +26,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/fs.h>
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,12 +60,8 @@ static struct list *failed = NULL;
  *
  * file->hash[0] acts as index into the arrays
  */
-struct swupd_curl_hashbucket {
-	pthread_mutex_t mutex;
-	struct list *list;
-};
 #define SWUPD_CURL_HASH_BUCKETS 256
-static struct swupd_curl_hashbucket swupd_curl_hashmap[SWUPD_CURL_HASH_BUCKETS];
+static struct list *swupd_curl_hashmap[SWUPD_CURL_HASH_BUCKETS];
 
 /* try to insert the file into the hashmap download queue
  * returns 1 if no download is needed
@@ -80,16 +75,15 @@ static int swupd_curl_hashmap_insert(struct file *file)
 	char *targetfile;
 	struct stat stat;
 	int hashmap_index = file->hash[0];
-	struct swupd_curl_hashbucket *bucket = &swupd_curl_hashmap[hashmap_index];
+	struct list **bucket;
 
-	pthread_mutex_lock(&bucket->mutex);
+	bucket = &swupd_curl_hashmap[hashmap_index];
 
-	iter = bucket->list;
+	iter = *bucket;
 	while (iter) {
 		tmp = iter->data;
 		if (hash_equal(tmp->hash, file->hash)) {
 			// hash already in download queue
-			pthread_mutex_unlock(&bucket->mutex);
 			return 1;
 		}
 		iter = iter->next;
@@ -103,7 +97,6 @@ static int swupd_curl_hashmap_insert(struct file *file)
 		if (verify_file(file, targetfile)) {
 			/* hash matches, no download necessary */
 			free_string(&targetfile);
-			pthread_mutex_unlock(&bucket->mutex);
 			return 1;
 		} else {
 			/* hash mismatch, remove the staged file to enable re-download */
@@ -121,14 +114,12 @@ static int swupd_curl_hashmap_insert(struct file *file)
 	free_string(&tar_dotfile);
 
 	// queue the hash for download
-	iter = bucket->list;
+	iter = *bucket;
 	if ((iter = list_prepend_data(iter, file)) == NULL) {
-		pthread_mutex_unlock(&bucket->mutex);
 		return -1;
 	}
-	bucket->list = iter;
+	*bucket = iter;
 
-	pthread_mutex_unlock(&bucket->mutex);
 	return 0;
 }
 
@@ -138,12 +129,7 @@ static size_t MAX_XFER_BOTTOM = 15;
 
 int start_full_download(bool pipelining)
 {
-	int i;
-
 	failed = NULL;
-	for (i = 0; i < SWUPD_CURL_HASH_BUCKETS; i++) {
-		pthread_mutex_init(&swupd_curl_hashmap[i].mutex, NULL);
-	}
 
 	mcurl = curl_multi_init();
 	if (mcurl == NULL) {
@@ -183,14 +169,13 @@ static void free_curl_list_data(void *data)
 void clean_curl_multi_queue(void)
 {
 	int i;
-	struct swupd_curl_hashbucket *bucket;
+	struct list **bucket;
 
 	for (i = 0; i < SWUPD_CURL_HASH_BUCKETS; i++) {
 		bucket = &swupd_curl_hashmap[i];
-		pthread_mutex_lock(&bucket->mutex);
-		list_free_list_and_data(bucket->list, free_curl_list_data);
-		bucket->list = NULL;
-		pthread_mutex_unlock(&bucket->mutex);
+
+		list_free_list_and_data(*bucket, free_curl_list_data);
+		*bucket = NULL;
 	}
 }
 

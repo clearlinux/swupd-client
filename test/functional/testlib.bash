@@ -500,3 +500,30 @@ create_bundle() {
 
 }
 
+# Creates a new test case based on a template
+# Parameters:
+# - NAME: the name (and path) of the test to be generated
+generate_test() {
+
+	local name=$1
+	local path
+	validate_param "$name"
+
+	path=$(dirname "$name")/
+	name=$(basename "$name")
+
+	echo -e "#!/usr/bin/env bats\\n" > "$path$name".bats
+	echo -e "load \"../testlib\"\\n" >> "$path$name".bats
+	echo -e "setup() {\\n" >> "$path$name".bats
+	echo -e "\\tcreate_test_environment \"\$TEST_NAME\"" >> "$path$name".bats
+	echo -e "\\t# create_bundle -n <bundle_name> -f <file_1>,<file_2>,<file_N> \"\$TEST_NAME\"" >> "$path$name".bats
+	echo -e "\\n}\\n" >> "$path$name".bats
+	echo -e "teardown() {\\n" >> "$path$name".bats
+	echo -e "\\tdestroy_test_environment \"\$TEST_NAME\"" >> "$path$name".bats
+	echo -e "\\n}\\n" >> "$path$name".bats
+	echo -e "@test \"<test description>\" {\\n" >> "$path$name".bats
+	echo -e "\\trun sudo sh -c \"\$SWUPD <swupd_command> \$SWUPD_OPTS <command_options>\"" >> "$path$name".bats
+	echo -e "\\t# <validations>" >> "$path$name".bats
+	echo -e "\\n}" >> "$path$name".bats
+
+}

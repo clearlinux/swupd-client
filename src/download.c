@@ -58,9 +58,21 @@ static struct list *failed = NULL;
  * traversing a manifest, doing hash comparisons, and (re)staging any files
  * whose hash miscompares.
  *
- * file->hash[0] acts as index into the arrays
+ * file->hash[0:1] acts as index into the arrays
  */
 #define SWUPD_CURL_HASH_BUCKETS 256
+
+/*
+ * Converts a character to its hexadecimal value (0 to 15 assuming that the
+ * input was from the set 0123456789abcdef).
+ */
+#define HASH_VALUE(h) (h >= 'a' ? h - 'a' + 10 : h - '0')
+
+/*
+ * converts two characters to a value in the range 0 to 255.
+ */
+#define HASH_TO_KEY(hash) (HASH_VALUE(hash[0]) << 4 | HASH_VALUE(hash[1]))
+
 static struct list *swupd_curl_hashmap[SWUPD_CURL_HASH_BUCKETS];
 
 /* try to insert the file into the hashmap download queue
@@ -74,7 +86,7 @@ static int swupd_curl_hashmap_insert(struct file *file)
 	char *tar_dotfile;
 	char *targetfile;
 	struct stat stat;
-	int hashmap_index = file->hash[0];
+	int hashmap_index = HASH_TO_KEY(file->hash);
 	struct list **bucket;
 
 	bucket = &swupd_curl_hashmap[hashmap_index];

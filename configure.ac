@@ -22,7 +22,6 @@ PKG_CHECK_MODULES([zlib], [zlib])
 PKG_CHECK_MODULES([curl], [libcurl])
 PKG_CHECK_MODULES([openssl], [libcrypto >= 1.0.1])
 PKG_CHECK_MODULES([libarchive], [libarchive])
-AC_CHECK_LIB([pthread], [pthread_create])
 
 
 # Program checks

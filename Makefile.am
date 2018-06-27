@@ -63,8 +63,7 @@ swupd_LDADD = \
 	$(openssl_LIBS) \
 	$(curl_LIBS) \
 	$(bsdiff_LIBS) \
-	$(libarchive_LIBS) \
-	$(pthread_LIBS)
+	$(libarchive_LIBS)
 
 verifytime_SOURCES = src/verifytime.c
 bin_PROGRAMS += verifytime

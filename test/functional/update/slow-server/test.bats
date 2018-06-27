@@ -8,7 +8,7 @@ port=""
 targetfile="6c27df6efcd6fc401ff1bc67c970b83eef115f6473db4fb9d57e5de317eba96e"
 
 setup() {
-  for i in $(seq 8080 8180); do
+  for i in $(seq 8081 8181); do
     pushd "$DIR"
     "./server.py" $i &
     sleep .5

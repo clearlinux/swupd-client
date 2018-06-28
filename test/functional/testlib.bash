@@ -66,9 +66,11 @@ validate_param() {
 set_env_variables() {
 
 	local env_name=$1
+	local path
 	validate_path "$env_name"
+	path=$(dirname "$(realpath "env_name")")
 
-	export SWUPD_OPTS="-S$BATS_TEST_DIRNAME/$env_name/state -p $BATS_TEST_DIRNAME/$env_name/target-dir -F staging -u file://$BATS_TEST_DIRNAME/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
+	export SWUPD_OPTS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
 
 }
 
@@ -204,6 +206,7 @@ add_to_manifest() {
 	local filecount
 	local contentsize
 	local linked_file
+	local boot_type="."
 	validate_item "$manifest"
 	validate_item "$item"
 	validate_param "$item_path"
@@ -240,10 +243,63 @@ add_to_manifest() {
 	elif [ -d "$item" ]; then
 		item_type=D
 	fi
+	# if the file is in the /usr/lib/kernel dir then it is a boot file
+	if [ "$(dirname "$item_path")" = "/usr/lib/kernel" ]; then
+		boot_type="b"
+	fi
 	sudo sed -i "s/contentsize:.*/contentsize:\\t$contentsize/" "$manifest"
 	# add to manifest content
-	echo -e "$item_type...\\t$name\\t$version\\t$item_path" | sudo tee -a "$manifest" > /dev/null
-	
+	echo -e "$item_type.$boot_type.\\t$name\\t$version\\t$item_path" | sudo tee -a "$manifest" > /dev/null
+	# If a manifest tar already exists for that manifest, renew the manifest tar
+	sudo rm -f "$manifest".tar
+	create_tar "$manifest"
+
+}
+
+# Adds the specified bundle dependency to an existing bundle manifest
+# Parameters:
+# - MANIFEST: the relative path to the manifest file
+# - DEPENDENCY: the name of the bundle to be included as a dependency
+add_dependency_to_manifest() {
+
+	local manifest=$1
+	local dependency=$2
+	local path
+	local manifest_name
+	local bundle_name
+	validate_item "$manifest"
+	path=$(dirname "$manifest")
+	manifest_name=$(basename "$manifest")
+	bundle_name=${manifest_name#Manifest.}
+
+	sudo sed -i "/contentsize:.*/a includes:\\t$dependency" "$manifest"
+	# If a manifest tar already exists for that manifest, renew the manifest tar
+	sudo rm -f "$manifest".tar
+	create_tar "$manifest"
+
+}
+
+# Removes the specified item from an existing bundle manifest
+# Parameters:
+# - MANIFEST: the relative path to the manifest file
+# - ITEM: either the hash or filename of the item to be removed
+remove_from_manifest() { 
+
+	local manifest=$1
+	local item=$2
+	#local item_path=$3
+	validate_item "$manifest"
+	validate_param "$item"
+
+	# replace every / with \/ in item (if any)
+	item="${item////\\/}"
+	# remove the lines that match from the manifest
+	sudo sed -i "/\\t$item$/d" "$manifest"
+	sudo sed -i "/\\t$item\\t/d" "$manifest"
+	# If a manifest tar already exists for that manifest, renew the manifest tar
+	sudo rm -f "$manifest".tar
+	create_tar "$manifest"
+
 }
 
 # Signs a manifest with a PEM key and generates the signed manifest in the same location
@@ -258,6 +314,22 @@ sign_manifest() {
     -signer "$FUNC_DIR"/Swupd_Root.pem \
     -inkey "$FUNC_DIR"/private.pem \
     -outform DER -out "$(dirname "$manifest")"/Manifest.MoM.sig
+}
+
+# Retrieves the hash value of a file or directory in a manifest
+# Parameters:
+# - MANIFEST: the manifest in which it will be looked at
+# - ITEM: the dir or file to look for in the manifest
+get_hash_from_manifest() {
+
+	local manifest=$1
+	local item=$2
+	validate_item "$manifest"
+	validate_param "$item"
+
+	hash=$(sudo cat "$manifest" | grep "$item" | awk '{ print $2 }')
+	echo "$hash"
+
 }
 
 # Creates a test environment with the basic directory structure needed to
@@ -440,7 +512,7 @@ create_bundle() {
 			bundle_dir=$(create_dir "$files_path")
 			add_to_manifest "$manifest" "$bundle_dir" "$fdir"
 			# add each one of the directories of the path if they are not in the manifest already
-			while [ $(dirname "$fdir") != "/" ]; do
+			while [ "$(dirname "$fdir")" != "/" ]; do
 				fdir=$(dirname "$fdir")
 				if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
 					add_to_manifest "$manifest" "$bundle_dir" "$fdir"
@@ -489,7 +561,6 @@ create_bundle() {
 	add_to_manifest "$version_path"/Manifest.MoM "$manifest" "$bundle_name"
 
 	# 6) Create/renew manifest tars
-	create_tar "$manifest"
 	sudo rm -f "$version_path"/Manifest.MoM.tar
 	create_tar "$version_path"/Manifest.MoM
 

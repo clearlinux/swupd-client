@@ -199,7 +199,6 @@ extern void set_cert_path(char *path);
 extern bool set_state_dir(char *path);
 
 extern void check_root(void);
-extern void clean_curl_multi_queue(void);
 extern void increment_retries(int *retries, int *timeout);
 
 extern int add_included_manifests(struct manifest *mom, int current, struct list **subs);

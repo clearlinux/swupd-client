@@ -18,9 +18,9 @@ teardown() {
 @test "bundle-add an already existing bundle" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
-	[ "$status" -eq 18 ]
 	echo "Actual status: $status"
 	echo "$output" >&3
+	[ "$status" -eq 18 ]
 	# TODO(castulo): refactor and enable the check_lines function
 	# check_lines "$output"
 

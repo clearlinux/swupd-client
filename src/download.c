@@ -34,6 +34,7 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "hashmap.h"
 #include "swupd-build-variant.h"
 #include "swupd.h"
 
@@ -73,7 +74,7 @@ static struct list *failed = NULL;
  */
 #define HASH_TO_KEY(hash) (HASH_VALUE(hash[0]) << 4 | HASH_VALUE(hash[1]))
 
-static struct list *swupd_curl_hashmap[SWUPD_CURL_HASH_BUCKETS];
+static struct hashmap *swupd_curl_hashmap = NULL;
 
 /* try to insert the file into the hashmap download queue
  * returns 1 if no download is needed
@@ -81,24 +82,13 @@ static struct list *swupd_curl_hashmap[SWUPD_CURL_HASH_BUCKETS];
  * returns -1 if error */
 static int swupd_curl_hashmap_insert(struct file *file)
 {
-	struct list *iter;
-	struct file *tmp;
 	char *tar_dotfile;
 	char *targetfile;
 	struct stat stat;
-	int hashmap_index = HASH_TO_KEY(file->hash);
-	struct list **bucket;
 
-	bucket = &swupd_curl_hashmap[hashmap_index];
-
-	iter = *bucket;
-	while (iter) {
-		tmp = iter->data;
-		if (hash_equal(tmp->hash, file->hash)) {
-			// hash already in download queue
-			return 1;
-		}
-		iter = iter->next;
+	if (!hashmap_put(swupd_curl_hashmap, file)) {
+		// hash already in download queue
+		return 1;
 	}
 
 	// if valid target file is already here, no need to download
@@ -125,13 +115,6 @@ static int swupd_curl_hashmap_insert(struct file *file)
 	unlink(tar_dotfile);
 	free_string(&tar_dotfile);
 
-	// queue the hash for download
-	iter = *bucket;
-	if ((iter = list_prepend_data(iter, file)) == NULL) {
-		return -1;
-	}
-	*bucket = iter;
-
 	return 0;
 }
 
@@ -139,9 +122,27 @@ static int swupd_curl_hashmap_insert(struct file *file)
 static size_t MAX_XFER = 25;
 static size_t MAX_XFER_BOTTOM = 15;
 
+static bool file_hash_cmp(const void *a, const void *b)
+{
+	const struct file *fa = a;
+	const struct file *fb = b;
+
+	return hash_equal(fa->hash, fb->hash);
+}
+
+static size_t file_hash_value(const void *data)
+{
+	return HASH_VALUE(((struct file *)data)->hash[0]);
+}
+
 int start_full_download(bool pipelining)
 {
+	if (swupd_curl_hashmap) {
+		return -1;
+	}
+
 	failed = NULL;
+	swupd_curl_hashmap = hashmap_new(SWUPD_CURL_HASH_BUCKETS, file_hash_cmp, file_hash_value);
 
 	mcurl = curl_multi_init();
 	if (mcurl == NULL) {
@@ -175,19 +176,6 @@ static void free_curl_list_data(void *data)
 		curl_multi_remove_handle(mcurl, curl);
 		curl_easy_cleanup(curl);
 		file->curl = NULL;
-	}
-}
-
-void clean_curl_multi_queue(void)
-{
-	int i;
-	struct list **bucket;
-
-	for (i = 0; i < SWUPD_CURL_HASH_BUCKETS; i++) {
-		bucket = &swupd_curl_hashmap[i];
-
-		list_free_list_and_data(*bucket, free_curl_list_data);
-		*bucket = NULL;
 	}
 }
 
@@ -636,17 +624,15 @@ out_good:
 
 struct list *end_full_download(void)
 {
-	int err;
-
 	fprintf(stderr, "Finishing download of update content...\n");
 
 	if (poll_fewer_than(0, 0) == 0) {
 		// The multi-stack is now emptied.
-		err = perform_curl_io_and_complete(1, false);
-		if (err) {
-			clean_curl_multi_queue();
-		}
+		perform_curl_io_and_complete(1, false);
 	}
+
+	hashmap_free_hash_and_data(swupd_curl_hashmap, free_curl_list_data);
+	swupd_curl_hashmap = NULL;
 
 	curl_multi_cleanup(mcurl);
 	return failed;

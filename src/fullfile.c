@@ -110,7 +110,6 @@ int download_fullfiles(struct list *files, int num_retries, int timeout)
 
 			increment_retries(&retries, &timeout);
 			fprintf(stderr, "Starting download retry #%d\n", retries);
-			clean_curl_multi_queue();
 		}
 	}
 

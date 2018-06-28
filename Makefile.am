@@ -27,6 +27,8 @@ swupd_SOURCES = \
 	src/globals.c \
 	src/hash.c \
 	src/hashdump.c \
+	src/hashmap.c \
+	src/hashmap.h \
 	src/helpers.c \
 	src/heuristics.c \
 	src/info.c \

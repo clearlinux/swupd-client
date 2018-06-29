@@ -138,6 +138,14 @@ SUBCOMMANDS
     Installs new software bundles. Any bundle name listed after
     `bundle-list --all` will be downloaded and installed.
 
+    -  `--skip-diskspace-check`
+
+        Skip checking for available disk space before installing a bundle.
+        By default, swupd attempts to determine if there is enough free
+        disk space to add the passed in bundle before attempting to install.
+        The current implementation will check free space in '/usr/' by default,
+        or it will check the passed in --path option with '/usr/' appended.
+
 ``bundle-remove {bundles}``
 
     Removes software bundles. Any bundle name listed after `bundle-remove`

@@ -173,6 +173,19 @@ use \fIswupd update\fP to force one if desired.
 .INDENT 3.5
 Installs new software bundles. Any bundle name listed after
 \fIbundle\-list \-\-all\fP will be downloaded and installed.
+.INDENT 0.0
+.IP \(bu 2
+\fI\-\-skip\-diskspace\-check\fP
+.INDENT 2.0
+.INDENT 3.5
+Skip checking for available disk space before installing a bundle.
+By default, swupd attempts to determine if there is enough free
+disk space to add the passed in bundle before attempting to install.
+The current implementation will check free space in \(aq/usr/\(aq by default,
+or it will check the passed in \-\-path option with \(aq/usr/\(aq appended.
+.UNINDENT
+.UNINDENT
+.UNINDENT
 .UNINDENT
 .UNINDENT
 .sp

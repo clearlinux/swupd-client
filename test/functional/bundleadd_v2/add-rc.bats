@@ -27,60 +27,54 @@ teardown() {
 @test "bundle-add returncodes part 1" {
 
 	# Start with nothing installed
-	[ -d "$TEST_NAME"/target-dir/usr/bin ]  # /usr/bin already exist because of os-core (installed by default)
-	[ ! -f "$TEST_NAME"/target-dir/usr/bin/file1 ]
-	[ ! -d "$TEST_NAME"/target-dir/media/lib ]
-	[ ! -f "$TEST_NAME"/target-dir/media/lib/file2 ]
-	[ ! -f "$TEST_NAME"/target-dir/media/lib/file3 ]
-	[ ! -f "$TEST_NAME"/target-dir/usr/file4 ]
+	assert_dir_exists "$TEST_NAME"/target-dir/usr/bin  # /usr/bin already exist because of os-core (installed by default)
+	assert_dir_not_exists "$TEST_NAME"/target-dir/media/lib
+	assert_file_not_exists "$TEST_NAME"/target-dir/usr/bin/file1
+	assert_file_not_exists "$TEST_NAME"/target-dir/media/lib/file2
+	assert_file_not_exists "$TEST_NAME"/target-dir/media/lib/file3
+	assert_file_not_exists "$TEST_NAME"/target-dir/usr/file4
 
 	# bad on existing off new off (1)
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS no-such-bundle"
 	# Fail: nothing is installed due to bad bundle name
-	echo "Actual status: $status"
-	[ "$status" -ne 0 ]
+	assert_status_is_not 0
 
 	# bad off existing off new on (4)
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 	# Ok: Add it first time
-	echo "Actual status: $status"
-	[ "$status" -eq 0 ]
-	[ -f "$TEST_NAME"/target-dir/usr/bin/file1 ]
-	[ -d "$TEST_NAME"/target-dir/usr/bin ]
+	assert_status_is 0
+	assert_dir_exists "$TEST_NAME"/target-dir/usr/bin
+	assert_file_exists "$TEST_NAME"/target-dir/usr/bin/file1
 
 	# Now have bundle 1 installed
 	# bad on existing on new off (3)
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS no-such-bundle test-bundle1"
 	# Fail: nothing is installed due to bad name and already installed
-	echo "Actual status: $status"
-	[ "$status" -ne 0 ]
+	assert_status_is_not 0
 
 	# bad off existing on new off (2)
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 	# Fail: nothing is installed due to already being installed
-	echo "Actual status: $status"
-	[ "$status" -ne 0 ]
+	assert_status_is_not 0
 
 	# bad on existing off new on (5)
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS no-such-bundle test-bundle2"
 	# Fail: one bundle is installed, the other fails due to bad name
-	echo "Actual status: $status"
-	[ "$status" -ne 0 ]
-	[ -f "$TEST_NAME"/target-dir/media/lib/file2 ]
-	[ -d "$TEST_NAME"/target-dir/media/lib ]
+	assert_status_is_not 0
+	assert_file_exists "$TEST_NAME"/target-dir/media/lib/file2 ]
+	assert_dir_exists "$TEST_NAME"/target-dir/media/lib
 
 	# bad on existing on new on (7)
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS no-such-bundle test-bundle1 test-bundle3"
 	# Fail: one bundle installed, other two fail due to bad name and already installed
-	echo "Actual status: $status"
-	[ "$status" -ne 0 ]
-	[ -f "$TEST_NAME"/target-dir/media/lib/file3 ]
-	[ -d "$TEST_NAME"/target-dir/media/lib ]
+	assert_status_is_not 0
+	assert_file_exists "$TEST_NAME"/target-dir/media/lib/file3
+	assert_dir_exists "$TEST_NAME"/target-dir/media/lib
 
 	# bad off existing on new on (6)
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle4"
 	# Fail: one bundle installed, the other fail due to already installed
-	[ -f "$TEST_NAME"/target-dir/usr/file4 ]
-	[ -d "$TEST_NAME"/target-dir/usr ]
+	assert_file_exists "$TEST_NAME"/target-dir/usr/file4
+	assert_dir_exists "$TEST_NAME"/target-dir/usr
 
 }

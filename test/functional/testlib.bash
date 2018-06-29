@@ -287,7 +287,6 @@ remove_from_manifest() {
 
 	local manifest=$1
 	local item=$2
-	#local item_path=$3
 	validate_item "$manifest"
 	validate_param "$item"
 
@@ -299,6 +298,34 @@ remove_from_manifest() {
 	# If a manifest tar already exists for that manifest, renew the manifest tar
 	sudo rm -f "$manifest".tar
 	create_tar "$manifest"
+
+}
+
+# Recalculate the hashes of the elements in the specified MoM and updates it
+# if there are changes in hashes.
+# Parameters:
+# - MANIFEST: the path to the MoM to be updated
+update_hashes_in_mom() {
+
+	local manifest=$1
+	local path
+	local bundle
+	local manifest_name
+	validate_item "$manifest"
+	path=$(dirname "$manifest")
+
+	IFS=$'\n'
+	if [ $(basename "$manifest") = Manifest.MoM ]; then
+		bundles=($(sudo cat "$manifest" | grep -x "M\.\.\..*" | awk '{ print $4 }'))
+		for bundle in ${bundles[*]}; do
+			remove_from_manifest "$manifest" $bundle
+			add_to_manifest "$manifest" "$path"/Manifest.$bundle $bundle
+		done
+	else
+		echo "The provided manifest is not the MoM"
+		return 1
+	fi
+	unset IFS
 
 }
 
@@ -485,7 +512,7 @@ create_bundle() {
 
 	# 1) create the initial manifest
 	manifest=$(create_manifest "$version_path" "$bundle_name")
-	echo "Manifest -> $manifest"  # TODO(castulo): remove this msg when finish development
+	# echo "Manifest -> $manifest"  # TODO(castulo): remove this msg when finish development
 	
 	# 2) Create one directory for the bundle and add it the requested
 	# times to the manifest.
@@ -493,7 +520,7 @@ create_bundle() {
 	# hashes in directories vary depending on owner and permissions,
 	# so one directory hash can be reused many times
 	bundle_dir=$(create_dir "$files_path")
-	echo "Directory -> $bundle_dir"  # TODO(castulo): remove this msg when finish development
+	# echo "Directory -> $bundle_dir"  # TODO(castulo): remove this msg when finish development
 	# Create a zero pack for the bundle and add the directory to it
 	sudo tar -cf "$version_path"/pack-"$bundle_name"-from-0.tar --exclude="$bundle_dir"/*  "$bundle_dir"
 	for val in "${dir_list[@]}"; do
@@ -520,7 +547,7 @@ create_bundle() {
 			done
 		fi
 		bundle_file=$(create_file "$files_path")
-		echo "File -> $bundle_file"  # TODO(castulo): remove this msg when finish development
+		# echo "File -> $bundle_file"  # TODO(castulo): remove this msg when finish development
 		add_to_manifest "$manifest" "$bundle_file" "$val"
 		# Add the file to the zero pack of the bundle
 		sudo tar -rf "$version_path"/pack-"$bundle_name"-from-0.tar "$bundle_file"
@@ -542,7 +569,7 @@ create_bundle() {
 			add_to_manifest "$manifest" "$bundle_dir" "$fdir"
 		fi
 		bundle_link=$(create_link "$files_path")
-		echo "Symlink -> $bundle_link"  # TODO(castulo): remove this msg when finish development
+		# echo "Symlink -> $bundle_link"  # TODO(castulo): remove this msg when finish development
 		add_to_manifest "$manifest" "$bundle_link" "$val"
 		# Add the file pointed by the link to the zero pack of the bundle
 		pfile=$(readlink -f "$bundle_link")
@@ -596,5 +623,145 @@ generate_test() {
 	echo -e "\\trun sudo sh -c \"\$SWUPD <swupd_command> \$SWUPD_OPTS <command_options>\"" >> "$path$name".bats
 	echo -e "\\t# <validations>" >> "$path$name".bats
 	echo -e "\\n}" >> "$path$name".bats
+
+}
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# The section below contains functions useful for consistent test validation and output
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+print_assert_failure() {
+
+	local message=$1
+	validate_param "$message"
+
+	echo -e "\\nAssertion Failed"
+	echo -e "$message"
+	echo "Command output:"
+	echo "------------------------------------------------------------------"
+	echo "$output"
+	echo "------------------------------------------------------------------"
+
+}
+
+assert_status_is() {
+
+	local expected_status=$1
+	validate_param expected_status
+
+	if [ -z "$status" ]; then
+		echo "The \$status environment variable is empty."
+		echo "Please make sure this assertion is used inside a BATS test after a 'run' command."
+		return 1
+	fi
+
+	if [ ! "$status" -eq "$expected_status" ]; then
+		print_assert_failure "Expected status: $expected_status\\nActual status: $status"
+		return 1
+	else
+		# if the assertion was successful show the output only if the user
+		# runs the test with the -t flag
+		echo "$output" >&3
+	fi
+
+}
+
+assert_status_is_not() {
+
+	local not_expected_status=$1
+	validate_param not_expected_status
+
+	if [ -z "$status" ]; then
+		echo "The \$status environment variable is empty."
+		echo "Please make sure this assertion is used inside a BATS test after a 'run' command."
+		return 1
+	fi
+
+	if [ "$status" -eq "$not_expected_status" ]; then
+		print_assert_failure "Status expected to be different than: $not_expected_status\\nActual status: $status"
+		return 1
+	else
+		# if the assertion was successful show the output only if the user
+		# runs the test with the -t flag
+		echo "$output" >&3
+	fi
+
+}
+
+assert_dir_exists() {
+
+	local vdir=$1
+	validate_param vdir
+
+	if [ ! -d "$vdir" ]; then
+		print_assert_failure "Directory $vdir should exist, but it does not"
+		return 1
+	fi
+
+}
+
+assert_dir_not_exists() {
+
+	local vdir=$1
+	validate_param vdir
+
+	if [ -d "$vdir" ]; then
+		print_assert_failure "Directory $vdir should not exist, but it does"
+		return 1
+	fi
+
+}
+
+assert_file_exists() {
+
+	local vfile=$1
+	validate_param vfile
+
+	if [ ! -f "$vfile" ]; then
+		print_assert_failure "File $vfile should exist, but it does not"
+		return 1
+	fi
+
+}
+
+assert_file_not_exists() {
+
+	local vfile=$1
+	validate_param vfile
+
+	if [ -f "$vfile" ]; then
+		print_assert_failure "File $vfile should not exist, but it does"
+		return 1
+	fi
+
+}
+
+assert_in_output() {
+
+	local expected_output=$1
+	local sep="------------------------------------------------------------------"
+	validate_param expected_output
+
+	if [[ ! "$output" == *"$expected_output"* ]]; then
+		print_assert_failure "The following text was not found in the command output:\\n$sep\\n$expected_output\\n$sep"
+		echo -e "Difference:\\n$sep"
+		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		return 1
+	fi
+
+}
+
+assert_not_in_output() {
+
+	local expected_output=$1
+	local sep="------------------------------------------------------------------"
+	validate_param expected_output
+
+	if [[ "$output" == *"$expected_output"* ]]; then
+		print_assert_failure "The following text was found in the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
+		echo -e "Difference:\\n$sep"
+		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		return 1
+	fi
 
 }

@@ -18,10 +18,13 @@ teardown() {
 @test "bundle-add an already existing bundle" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
-	echo "Actual status: $status"
-	echo "$output" >&3
-	[ "$status" -eq 18 ]
-	# TODO(castulo): refactor and enable the check_lines function
-	# check_lines "$output"
+
+	assert_status_is 18
+	expected_output=$(cat <<-EOM
+		Warning: Bundle "test-bundle" is already installed, skipping it...
+		1 bundle was already installed
+	EOM
+	)
+	assert_in_output "$expected_output"
 
 }

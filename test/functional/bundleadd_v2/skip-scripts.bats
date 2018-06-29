@@ -16,10 +16,9 @@ teardown() {
 
 }
 
-@test "bundle-add add bundle containing boot file" {
+@test "bundle-add add bundle with --no-scripts" {
 
-	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
-
+	run sudo sh -c "$SWUPD bundle-add --no-scripts $SWUPD_OPTS test-bundle"
 	assert_status_is 0
 	assert_file_exists "$TEST_NAME/target-dir/usr/lib/kernel/test-file"
 	expected_output=$(cat <<-EOM
@@ -30,10 +29,10 @@ teardown() {
 		Finishing download of update content...
 		Installing bundle(s) files...
 		.
-		Calling post-update helper scripts.
+		WARNING: post-update helper scripts skipped due to --no-scripts argument
+		Successfully installed 1 bundle
 	EOM
 	)
 	assert_in_output "$expected_output"
-	assert_in_output "Successfully installed 1 bundle"
 
 }

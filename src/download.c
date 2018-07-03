@@ -541,10 +541,6 @@ void full_download(struct file *file)
 		goto out_bad;
 	} /* else (ret == 0)	   download needed */
 
-	/* Only print the first file so we don't spam on large misses */
-	if (nonpack == 0) {
-		fprintf(stderr, "\nFile %s was not in a pack\n", file->filename);
-	}
 	/* If we get here the pack is missing a file so we have to download it */
 	nonpack++;
 

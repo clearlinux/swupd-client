@@ -946,7 +946,14 @@ out:
 	}
 
 	/* print totals */
-	bundles_failed = bundles_requested - bundles_installed - already_installed;
+	if (ret && bundles_installed != 0) {
+		/* if this point is reached with a nonzero return code and bundles_installed=0 it means that
+		* while trying to install the bundles some error occurred which caused the whole installation
+		* process to be aborted, so none of the bundles got installed. */
+		bundles_failed = bundles_requested - already_installed;
+	} else {
+		bundles_failed = bundles_requested - bundles_installed - already_installed;
+	}
 	if (bundles_failed > 0) {
 		ret = EBUNDLE_INSTALL;
 		fprintf(stderr, "Failed to install %i of %i bundles\n", bundles_failed, bundles_requested - already_installed);

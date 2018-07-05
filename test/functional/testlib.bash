@@ -395,7 +395,7 @@ create_test_environment() {
 
 	# state files & dirs
 	sudo mkdir -p "$env_name"/state
-	# TODO(castulo): add more dirs & files as neeeded by the tests
+	sudo chmod -R 0700 "$env_name"/state
 
 	# export environment variables that are dependent of the test env
 	set_env_variables "$env_name"

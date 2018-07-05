@@ -18,11 +18,6 @@
 extern "C" {
 #endif
 
-/* WARNING: keep SWUPD_VERSION_INCR in sync with server definition  */
-#define SWUPD_VERSION_INCR 10
-#define SWUPD_VERSION_IS_DEVEL(v) (((v) % SWUPD_VERSION_INCR) == 8)
-#define SWUPD_VERSION_IS_RESVD(v) (((v) % SWUPD_VERSION_INCR) == 9)
-
 #ifndef LINE_MAX
 #define LINE_MAX _POSIX2_LINE_MAX
 #endif

@@ -48,10 +48,8 @@
 
 static CURL *curl = NULL;
 
-/* these are used to handle alternative trust locations */
-static char *capath;
-static char **fallback_capaths;
-static char fallback_capaths_no;
+/* alternative CA Path */
+static char *capath = NULL;
 
 /* Pretty print curl return status */
 static void swupd_curl_strerror(CURLcode curl_ret)
@@ -59,9 +57,50 @@ static void swupd_curl_strerror(CURLcode curl_ret)
 	fprintf(stderr, "Curl error: (%d) %s\n", curl_ret, curl_easy_strerror(curl_ret));
 }
 
+static int check_connection(const char *test_capath)
+{
+	CURLcode curl_ret;
+
+	curl_ret = curl_easy_setopt(curl, CURLOPT_URL, version_url);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
+	curl_ret = curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
+	if (test_capath) {
+		curl_ret = curl_easy_setopt(curl, CURLOPT_CAPATH, test_capath);
+		if (curl_ret != CURLE_OK) {
+			return -1;
+		}
+	}
+
+	curl_ret = curl_easy_perform(curl);
+
+	switch (curl_ret) {
+	case CURLE_OK:
+		return 0;
+	case CURLE_SSL_CACERT:
+		fprintf(stderr, "Error: unable to verify server SSL certificate\n");
+		return -EBADCERT;
+	default:
+		swupd_curl_strerror(curl_ret);
+		/* something bad, stop */
+		return -1;
+	}
+}
+
 int swupd_curl_init(void)
 {
 	CURLcode curl_ret;
+	char *str;
+	char *tok;
+	char *ctx;
+	int ret;
+	struct stat st;
 
 	curl_ret = curl_global_init(CURL_GLOBAL_ALL);
 	if (curl_ret != CURLE_OK) {
@@ -76,20 +115,13 @@ int swupd_curl_init(void)
 		return -1;
 	}
 
-#ifdef FALLBACK_CAPATHS
-	/* parse and initialize CA paths. */
-	{
-		char *str = strdup(FALLBACK_CAPATHS);
-		char *tok;
-		char *ctx;
-		struct stat st;
-		int i;
-		int sz = 1;
+	ret = check_connection(NULL);
+	if (ret == 0) {
+		return 0;
+	}
 
-		fallback_capaths = (char **)malloc(sz * sizeof(char *));
-		fallback_capaths[0] = NULL;
-		i = 1;
-
+	if (FALLBACK_CAPATHS[0]) {
+		str = strdup_or_die(FALLBACK_CAPATHS);
 		for (tok = strtok_r(str, ":", &ctx); tok; tok = strtok_r(NULL, ":", &ctx)) {
 			if (stat(tok, &st)) {
 				continue;
@@ -97,87 +129,16 @@ int swupd_curl_init(void)
 			if ((st.st_mode & S_IFMT) != S_IFDIR) {
 				continue;
 			}
-			if (i == sz) {
-				sz <<= 1;
-				fallback_capaths = (char **)realloc(fallback_capaths, sz * sizeof(char *));
-			}
-			fallback_capaths[i] = strdup(tok);
-			i++;
-		}
-		fallback_capaths_no = i;
-		free_string(&str);
-	}
-#else
-	fallback_capaths = (char **)malloc(sizeof(char *));
-	fallback_capaths[0] = NULL;
-	fallback_capaths_no = 1;
-#endif
 
-	return 0;
-}
-
-int swupd_curl_check_network(void)
-{
-	CURLcode curl_ret;
-	int ret = -1;
-	int i;
-	CURL *c;
-	static int has_network = 0;
-
-	if (has_network) {
-		return 0;
-	}
-
-	if (!curl) {
-		return -1;
-	}
-
-	c = curl_easy_duphandle(curl);
-	if (!c) {
-		return -1;
-	}
-
-	for (i = 0; i < fallback_capaths_no; i++) {
-		curl_easy_reset(c);
-
-		curl_ret = curl_easy_setopt(c, CURLOPT_URL, version_url);
-		if (curl_ret != CURLE_OK) {
-			goto cleanup;
-		}
-
-		curl_ret = curl_easy_setopt(c, CURLOPT_NOBODY, 1L);
-		if (curl_ret != CURLE_OK) {
-			goto cleanup;
-		}
-
-		if (i) { /* first element represents default CApath, means no explicit setting */
-			curl_ret = curl_easy_setopt(c, CURLOPT_CAPATH, fallback_capaths[i]);
-			if (curl_ret != CURLE_OK) {
+			ret = check_connection(tok);
+			if (ret == 0) {
+				capath = strdup_or_die(tok);
 				break;
 			}
 		}
-
-		curl_ret = curl_easy_perform(c);
-
-		switch (curl_ret) {
-		case CURLE_OK:
-			capath = fallback_capaths[i];
-			ret = 0;
-			has_network = 1;
-			goto cleanup;
-		case CURLE_SSL_CACERT:
-			fprintf(stderr, "Error: unable to verify server SSL certificate\n");
-			ret = EBADCERT;
-			break;
-		default:
-			swupd_curl_strerror(curl_ret);
-			/* something bad, stop */
-			goto cleanup;
-		}
+		free_string(&str);
 	}
 
-cleanup:
-	curl_easy_cleanup(c);
 	return ret;
 }
 
@@ -187,6 +148,9 @@ void swupd_curl_deinit(void)
 		curl_easy_cleanup(curl);
 	}
 	curl = NULL;
+
+	free_string(&capath);
+
 	curl_global_cleanup();
 }
 
@@ -196,7 +160,7 @@ static size_t filesize_from_header_cb(void UNUSED_PARAM *func, size_t size, size
 	return (size_t)(size * nmemb);
 }
 
-double swupd_query_url_content_size(char *url)
+double swupd_curl_query_content_size(char *url)
 {
 	CURLcode curl_ret;
 	double content_size;
@@ -324,7 +288,7 @@ int swupd_curl_get_file_full(const char *url, char *filename,
 	bool local_download = strncmp(url, "file://", 7) == 0;
 
 	if (!curl) {
-		abort();
+		return -1;
 	}
 restart_download:
 	curl_easy_reset(curl);

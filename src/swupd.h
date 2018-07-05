@@ -199,7 +199,6 @@ extern void set_cert_path(char *path);
 extern bool set_state_dir(char *path);
 
 extern void check_root(void);
-extern void clean_curl_multi_queue(void);
 extern void increment_retries(int *retries, int *timeout);
 
 extern int add_included_manifests(struct manifest *mom, int current, struct list **subs);
@@ -289,7 +288,7 @@ extern int download_subscribed_packs(struct list *subs, struct manifest *mom, bo
 
 extern void apply_deltas(struct manifest *current_manifest);
 extern void full_download(struct file *file);
-extern int start_full_download(bool pipelining);
+extern int start_full_download();
 extern struct list *end_full_download(void);
 extern int untar_full_download(void *data);
 
@@ -301,8 +300,7 @@ extern int update_device_latest_version(int version);
 
 extern int swupd_curl_init(void);
 extern void swupd_curl_deinit(void);
-extern int swupd_curl_check_network(void);
-extern double swupd_query_url_content_size(char *url);
+extern double swupd_curl_query_content_size(char *url);
 extern CURLcode swupd_download_file_start(struct file *file);
 extern CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file);
 extern int swupd_curl_get_file(const char *url, char *filename);
@@ -362,6 +360,7 @@ extern void print_manifest_files(struct manifest *m);
 extern void swupd_deinit(int lock_fd, struct list **subs);
 extern int swupd_init(int *lock_fd);
 extern void string_or_die(char **strp, const char *fmt, ...);
+char *strdup_or_die(const char *const str);
 extern void free_string(char **s);
 void update_motd(int new_release);
 void delete_motd(void);

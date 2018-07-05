@@ -90,7 +90,7 @@ int download_fullfiles(struct list *files, int num_retries, int timeout)
 	int retries = 0;
 
 	while (files) {
-		ret = start_full_download(true);
+		ret = start_full_download();
 		if (ret != 0) {
 			/* If we hit this point, the network is accessible but we were
 			 * unable to download the needed files. This is a terminal error
@@ -110,7 +110,6 @@ int download_fullfiles(struct list *files, int num_retries, int timeout)
 
 			increment_retries(&retries, &timeout);
 			fprintf(stderr, "Starting download retry #%d\n", retries);
-			clean_curl_multi_queue();
 		}
 	}
 

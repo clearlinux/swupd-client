@@ -584,6 +584,21 @@ out_fds:
 	return ret;
 }
 
+/* Return a duplicated copy of the string using strdup().
+ * Abort if there's no memory to allocate the new string.
+*/
+char *strdup_or_die(const char *const str)
+{
+	char *result;
+
+	result = strdup(str);
+	if (!result) {
+		abort();
+	}
+
+	return result;
+}
+
 void string_or_die(char **strp, const char *fmt, ...)
 {
 	va_list ap;

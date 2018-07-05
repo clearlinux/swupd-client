@@ -162,10 +162,6 @@ int check_versions(int *current_version,
 		fprintf(stderr, "Update from version 0 not supported yet.\n");
 		return -1;
 	}
-	if (SWUPD_VERSION_IS_DEVEL(*current_version) || SWUPD_VERSION_IS_RESVD(*current_version)) {
-		fprintf(stderr, "Update of dev build not supported %d\n", *current_version);
-		return -1;
-	}
 
 	/* set preferred version and content server urls */
 	if (*current_version < 0) {

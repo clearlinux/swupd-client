@@ -36,14 +36,13 @@ teardown() {
 	assert_status_is 1
 	# the bad hash file should not exist on the system
 	assert_file_not_exists "$TEST_NAME"/target-dir/usr/bin/file1
-	test_dirname=$(realpath "$BATS_TEST_DIRNAME")
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
 
 		File /usr/bin/file1 was not in a pack
 		.
 		Finishing download of update content...
-		Error: File content hash mismatch for $test_dirname/$TEST_NAME/state/staged/e6d85023c5e619eb43d5cfbfdbdec784afef5a82ffa54e8c93bda3e0883360a3 (bad server data?)
+		Error: File content hash mismatch for $TEST_DIRNAME/state/staged/e6d85023c5e619eb43d5cfbfdbdec784afef5a82ffa54e8c93bda3e0883360a3 (bad server data?)
 	EOM
 	)
 	assert_in_output "$expected_output"

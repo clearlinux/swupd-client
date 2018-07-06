@@ -71,6 +71,7 @@ set_env_variables() {
 	path=$(dirname "$(realpath "env_name")")
 
 	export SWUPD_OPTS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
+	export TEST_DIRNAME="$path"/"$env_name"
 
 }
 
@@ -394,7 +395,10 @@ create_test_environment() {
 	sudo mkdir -p "$env_name"/target-dir/usr/share/clear/bundles
 
 	# state files & dirs
-	sudo mkdir -p "$env_name"/state
+	sudo mkdir -p "$env_name"/state/staged
+	sudo mkdir -p "$env_name"/state/download
+	sudo mkdir -p "$env_name"/state/delta
+	sudo mkdir -p "$env_name"/state/telemetry
 	sudo chmod -R 0700 "$env_name"/state
 
 	# export environment variables that are dependent of the test env
@@ -761,6 +765,32 @@ assert_not_in_output() {
 		print_assert_failure "The following text was found in the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
 		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		return 1
+	fi
+
+}
+
+assert_equal() {
+
+	local val1=$1
+	local val2=$2
+	validate_param val1
+	validate_param val2
+
+	if [ "$val1" != "$val2" ]; then
+		return 1
+	fi
+
+}
+
+assert_not_equal() {
+
+	local val1=$1
+	local val2=$2
+	validate_param val1
+	validate_param val2
+
+	if [ "$val1" = "$val2" ]; then
 		return 1
 	fi
 

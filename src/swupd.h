@@ -134,10 +134,7 @@ struct file {
 
 	struct file *peer; /* same file in another manifest */
 	struct header *header;
-
-	char *staging; /* output name used during download & staging */
-	CURL *curl;    /* curl handle if downloading */
-	FILE *fh;      /* file written into during downloading */
+	char *staging;
 };
 
 struct filerecord {
@@ -278,13 +275,10 @@ static inline void account_delta_miss(void)
 
 extern void print_statistics(int version1, int version2);
 
-extern int download_fullfiles(struct list *files, int num_retries, int timeout);
+extern int download_fullfiles(struct list *files, int *num_downloads);
 extern int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required, bool resume_ok);
 
 extern void apply_deltas(struct manifest *current_manifest);
-extern void full_download(struct file *file);
-extern int start_full_download(void);
-extern struct list *end_full_download(void);
 extern int untar_full_download(void *data);
 
 extern int do_staging(struct file *file, struct manifest *manifest);
@@ -293,18 +287,19 @@ extern int rename_staged_file_to_final(struct file *file);
 
 extern int update_device_latest_version(int version);
 
+/* curl.c */
+
 extern int swupd_curl_init(void);
 extern void swupd_curl_deinit(void);
 extern double swupd_curl_query_content_size(char *url);
-extern CURLcode swupd_download_file_start(struct file *file);
-extern CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file);
 extern int swupd_curl_get_file(const char *url, char *filename);
 extern int swupd_curl_get_file_full(const char *url, char *filename, struct curl_file_data *file_data, bool resume_ok);
 
-#define SWUPD_CURL_LOW_SPEED_LIMIT 1
-#define SWUPD_CURL_CONNECT_TIMEOUT 30
-#define SWUPD_CURL_RCV_TIMEOUT 120
-extern CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url);
+/* download.c */
+typedef bool (*swupd_curl_download_cb)(void *data);
+extern void *swupd_curl_parallel_download_start(size_t max_xfer, size_t max_xfer_bottom, swupd_curl_download_cb success_cb);
+extern int swupd_curl_parallel_download_enqueue(void *handle, const char *url, const char *filename, const char *hash, void *data);
+extern int swupd_curl_parallel_download_end(void *handle, int *num_downloads);
 
 extern void free_subscriptions(struct list **subs);
 extern void read_subscriptions(struct list **subs);

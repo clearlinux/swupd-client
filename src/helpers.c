@@ -38,6 +38,7 @@
 
 #include "config.h"
 #include "signature.h"
+#include "swupd-build-variant.h"
 #include "swupd.h"
 
 void check_root(void)
@@ -952,4 +953,142 @@ int link_or_rename(const char *orig, const char *dest)
 	}
 
 	return 0;
+}
+
+/* list the tarfile content, and verify it contains only one line equal to the expected hash.
+ * loop through all the content to detect the case where archive contains more than one file.
+ */
+static int check_tarfile_content(struct file *file, const char *tarfilename)
+{
+	int err;
+	char *tarcommand;
+	FILE *tar;
+	int count = 0;
+
+	string_or_die(&tarcommand, TAR_COMMAND " -tf %s/download/%s.tar 2> /dev/null", state_dir, file->hash);
+
+	err = access(tarfilename, R_OK);
+	if (err) {
+		goto free_tarcommand;
+	}
+
+	tar = popen(tarcommand, "r");
+	if (tar == NULL) {
+		err = -1;
+		goto free_tarcommand;
+	}
+
+	while (!feof(tar)) {
+		char *c;
+		char buffer[PATH_MAXLEN];
+
+		if (fgets(buffer, PATH_MAXLEN, tar) == NULL) {
+			if (count != 1) {
+				err = -1;
+			}
+			break;
+		}
+
+		c = strchr(buffer, '\n');
+		if (c) {
+			*c = 0;
+		}
+		if (c && (c != buffer) && (*(c - 1) == '/')) {
+			/* strip trailing '/' from directory tar */
+			*(c - 1) = 0;
+		}
+		if (strcmp(buffer, file->hash) != 0) {
+			err = -1;
+			break;
+		}
+		count++;
+	}
+
+	pclose(tar);
+free_tarcommand:
+	free_string(&tarcommand);
+
+	return err;
+}
+
+/* This function will break if the same HASH.tar full file is downloaded
+ * multiple times in parallel. */
+int untar_full_download(void *data)
+{
+	struct file *file = data;
+	char *tarfile;
+	char *tar_dotfile;
+	char *targetfile;
+	struct stat stat;
+	int err;
+
+	string_or_die(&tar_dotfile, "%s/download/.%s.tar", state_dir, file->hash);
+	string_or_die(&tarfile, "%s/download/%s.tar", state_dir, file->hash);
+	string_or_die(&targetfile, "%s/staged/%s", state_dir, file->hash);
+
+	/* If valid target file already exists, we're done.
+	 * NOTE: this should NEVER happen given the checking that happens
+	 *       ahead of queueing a download.  But... */
+	if (lstat(targetfile, &stat) == 0) {
+		if (verify_file(file, targetfile)) {
+			unlink(tar_dotfile);
+			unlink(tarfile);
+			free_string(&tar_dotfile);
+			free_string(&tarfile);
+			free_string(&targetfile);
+			return 0;
+		} else {
+			unlink(tarfile);
+			unlink(targetfile);
+		}
+	} else if (lstat(tarfile, &stat) == 0) {
+		/* remove tar file from possible past failure */
+		unlink(tarfile);
+	}
+
+	err = rename(tar_dotfile, tarfile);
+	if (err) {
+		free_string(&tar_dotfile);
+		goto exit;
+	}
+	free_string(&tar_dotfile);
+
+	err = check_tarfile_content(file, tarfile);
+	if (err) {
+		goto exit;
+	}
+
+	/* modern tar will automatically determine the compression type used */
+	char *outputdir;
+	string_or_die(&outputdir, "%s/staged", state_dir);
+	err = extract_to(tarfile, outputdir);
+	free_string(&outputdir);
+	if (err) {
+		fprintf(stderr, "ignoring tar extract failure for fullfile %s.tar (ret %d)\n",
+			file->hash, err);
+		goto exit;
+		/* TODO: respond to ARCHIVE_RETRY error codes
+		 * libarchive returns ARCHIVE_RETRY when tar extraction fails but the
+		 * operation is retry-able. We need to determine if it is worth our time
+		 * to retry in these situations. */
+	} else {
+		/* Only unlink when tar succeeded, so we can examine the tar file
+		 * in the failure case. */
+		unlink(tarfile);
+	}
+
+	err = lstat(targetfile, &stat);
+	if (!err && !verify_file(file, targetfile)) {
+		/* Download was successful but the hash was bad. This is fatal*/
+		fprintf(stderr, "Error: File content hash mismatch for %s (bad server data?)\n", targetfile);
+		exit(EXIT_FAILURE);
+	}
+
+exit:
+	free_string(&tarfile);
+	free_string(&targetfile);
+	if (err) {
+		unlink_all_staged_content(file);
+	}
+	return err;
 }

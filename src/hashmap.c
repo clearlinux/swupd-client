@@ -31,6 +31,18 @@
 
 #define HASH_MASK(bits) (HASH_SIZE(bits) - 1)
 
+size_t hashmap_hash_from_string(const char *key)
+{
+	size_t hash = 0;
+
+	while (key) {
+		hash = hash * 29 /* a prime number */ + *key;
+		key++;
+	}
+
+	return hash;
+}
+
 static inline struct list **get_hashmap_list(struct hashmap *hashmap, const void *data)
 {
 	return &hashmap->map[hashmap->hash(data) || HASH_MASK(hashmap->mask_bits)];

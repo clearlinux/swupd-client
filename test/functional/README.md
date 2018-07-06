@@ -267,3 +267,19 @@ Examples:
 run <some_command>
 assert_not_in_output "Error"
 ```
+
+*assert_equal*  
+passes if the two values provided are equal, fails otherwise  
+Example:  
+```bash
+run <some_command>
+assert_equal "some_value" "$my_variable"
+```
+
+*assert_not_equal*  
+passes if the two values provided are not equal, fails otherwise  
+Example:  
+```bash
+run <some_command>
+assert_not_equal "$variable1" "$variable2"
+```

@@ -489,11 +489,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	if (is_mix) {
 		string_or_die(&filename, "%s/%i/Manifest.%s.tar", state_dir, version, component);
 		string_or_die(&url, "%s/%i/Manifest.%s.tar", basedir, version, component);
-		ret = link(url, filename);
-		/* Try doing a regular rename if hardlink fails */
-		if (ret) {
-			ret = rename(url, filename);
-		}
+		ret = link_or_rename(url, filename);
 		/* If rename fails, we try again below with curl to the contenurl */
 		if (ret == 0) {
 			goto untar;

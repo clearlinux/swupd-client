@@ -941,3 +941,15 @@ bool on_new_format(void)
 	 * different from the one we started on. */
 	return !is_compatible_format(res);
 }
+
+/* Try to create a link to a file. If it fails, rename it.
+ * Return 0 on success or an error code on errors.*/
+int link_or_rename(const char *orig, const char *dest)
+{
+	/* Try doing a regular rename if hardlink fails */
+	if (link(orig, dest) != 0) {
+		return rename(orig, dest);
+	}
+
+	return 0;
+}

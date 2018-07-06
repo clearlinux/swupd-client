@@ -777,7 +777,7 @@ download_subscribed_packs:
 
 	/* step 2.5: Download missing files */
 	grabtime_start(&times, "Download missing files");
-	ret = download_fullfiles(to_install_files, MAX_TRIES, 10);
+	ret = download_fullfiles(to_install_files, NULL);
 	if (ret) {
 		fprintf(stderr, "ERROR: Could not download some files from bundles, aborting bundle installation.\n");
 		goto out;

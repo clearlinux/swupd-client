@@ -84,7 +84,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 	struct file *file;
 	struct list *iter;
 
-	ret = download_fullfiles(updates, MAX_TRIES, 10);
+	ret = download_fullfiles(updates, &nonpack);
 	if (ret) {
 		fprintf(stderr, "ERROR: Could not download all files, aborting update\n");
 	}

@@ -44,7 +44,12 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "curl-internal.h"
 #include "swupd.h"
+
+#define SWUPD_CURL_LOW_SPEED_LIMIT 1
+#define SWUPD_CURL_CONNECT_TIMEOUT 30
+#define SWUPD_CURL_RCV_TIMEOUT 120
 
 static CURL *curl = NULL;
 
@@ -227,34 +232,34 @@ static size_t swupd_download_file_to_memory(void *ptr, size_t size, size_t nmemb
 	return data_len;
 }
 
-CURLcode swupd_download_file_start(struct file *file)
+CURLcode swupd_download_file_create(struct curl_file *file)
 {
-	file->fh = fopen(file->staging, "w");
+	file->fh = fopen(file->path, "w");
 	if (!file->fh) {
 		fprintf(stderr, "Cannot open file for write \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
-			file->staging, strerror(errno));
+			file->path, strerror(errno));
 		return CURLE_WRITE_ERROR;
 	}
 	return CURLE_OK;
 }
 
-CURLcode swupd_download_file_append(struct file *file)
+CURLcode swupd_download_file_append(struct curl_file *file)
 {
-	file->fh = fopen(file->staging, "a");
+	file->fh = fopen(file->path, "a");
 	if (!file->fh) {
 		fprintf(stderr, "Cannot open file for append \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
-			file->staging, strerror(errno));
+			file->path, strerror(errno));
 		return CURLE_WRITE_ERROR;
 	}
 	return CURLE_OK;
 }
 
-CURLcode swupd_download_file_complete(CURLcode curl_ret, struct file *file)
+CURLcode swupd_download_file_complete(CURLcode curl_ret, struct curl_file *file)
 {
 	if (file->fh) {
 		if (fclose(file->fh)) {
 			fprintf(stderr, "Cannot close file after write \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
-				file->staging, strerror(errno));
+				file->path, strerror(errno));
 			if (curl_ret == CURLE_OK) {
 				curl_ret = CURLE_WRITE_ERROR;
 			}
@@ -284,7 +289,7 @@ int swupd_curl_get_file_full(const char *url, char *filename,
 	CURLcode curl_ret;
 	long ret = 0;
 	int err = -1;
-	struct file local = { 0 };
+	struct curl_file local = { 0 };
 	bool local_download = strncmp(url, "file://", 7) == 0;
 
 	if (!curl) {
@@ -297,7 +302,7 @@ restart_download:
 		// normal file download
 		struct stat stat;
 
-		local.staging = filename;
+		local.path = filename;
 
 		if (resume_ok && resume_download_supported && lstat(filename, &stat) == 0) {
 			curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
@@ -307,7 +312,7 @@ restart_download:
 
 			curl_ret = swupd_download_file_append(&local);
 		} else {
-			curl_ret = swupd_download_file_start(&local);
+			curl_ret = swupd_download_file_create(&local);
 		}
 
 		curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void *)&local);
@@ -439,7 +444,7 @@ exit:
 
 /*
  * Download a single file SYNCHRONOUSLY
-
+ *
  * Returns: Zero on success or a standard < 0 status code on errors.
  */
 int swupd_curl_get_file(const char *url, char *filename)

@@ -21,11 +21,53 @@
  */
 
 #define _GNU_SOURCE
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "swupd.h"
 
-static struct list *download_loop(struct list *files, bool free_list)
+/* hysteresis thresholds */
+#define MAX_XFER 25
+#define MAX_XFER_BOTTOM 15
+
+static void download_mix_file(struct file *file)
+{
+	char *url, *filename;
+
+	string_or_die(&url, "%s/%i/files/%s.tar", MIX_STATE_DIR, file->last_change, file->hash);
+	string_or_die(&filename, "%s/download/.%s.tar", state_dir, file->hash);
+
+	/* Mix content is local, so don't queue files up for curl downloads */
+	if (link_or_rename(url, filename) == 0) {
+		untar_full_download(file);
+	} else {
+		fprintf(stderr, "Failed to copy local mix file: %s\n", file->staging);
+	}
+
+	free_string(&url);
+	free_string(&filename);
+}
+
+static void download_file(void *download_handle, struct file *file)
+{
+	char *url, *filename;
+	char *targetfile;
+	struct stat stat;
+
+	string_or_die(&targetfile, "%s/staged/%s", state_dir, file->hash);
+
+	// Just download if the target file doesn't exist
+	if (lstat(targetfile, &stat) != 0 || !verify_file(file, targetfile)) {
+		string_or_die(&filename, "%s/download/.%s.tar", state_dir, file->hash);
+		string_or_die(&url, "%s/%i/files/%s.tar", content_url, file->last_change, file->hash);
+		swupd_curl_parallel_download_enqueue(download_handle, url, filename, file->hash, file);
+		free_string(&url);
+		free_string(&filename);
+	}
+	free_string(&targetfile);
+}
+
+static int download_loop(void *download_handle, struct list *files, int *num_downloads)
 {
 	struct list *iter;
 	unsigned int complete = 0;
@@ -43,70 +85,52 @@ static struct list *download_loop(struct list *files, bool free_list)
 			continue;
 		}
 
-		/* Mix content is local, so don't queue files up for curl downloads */
 		if (file->is_mix) {
-			char *url;
-
-			if (file->staging) {
-				free_string(&file->staging);
-			}
-
-			string_or_die(&url, "%s/%i/files/%s.tar", MIX_STATE_DIR, file->last_change, file->hash);
-			string_or_die(&file->staging, "%s/download/.%s.tar", state_dir, file->hash);
-
-			if (link_or_rename(url, file->staging) != 0) {
-				fprintf(stderr, "Failed to copy local mix file: %s\n", file->staging);
-				continue;
-			}
-			untar_full_download(file);
-			free_string(&url);
-			continue;
+			download_mix_file(file);
+		} else {
+			download_file(download_handle, file);
 		}
-		full_download(file);
 		print_progress(complete, list_length);
 	}
 	print_progress(list_length, list_length); /* Force out 100% */
 	printf("\n");
 
-	if (free_list) {
-		list_free_list(files);
+	return swupd_curl_parallel_download_end(download_handle, num_downloads);
+}
+
+static bool download_successful(void *data)
+{
+	if (!data) {
+		return false;
 	}
 
-	return end_full_download();
+	if (untar_full_download(data) != 0) {
+		fprintf(stderr, "Error for %s tarfile extraction, (check free space for %s?)\n",
+			((struct file *)data)->hash, state_dir);
+	}
+	return true;
 }
 
 /*
- * Download all fullfiles from the files list.
- * Return 0 on success or a negative number if any file was not downloaded successfully
+ * Download fullfiles from the list of files.
+ *
+ * Return 0 on success or a negative number or errors.
  */
-int download_fullfiles(struct list *files, int num_retries, int timeout)
+int download_fullfiles(struct list *files, int *num_downloads)
 {
-	int ret;
-	int retries = 0;
+	void *download_handle;
 
-	while (files) {
-		ret = start_full_download();
-		if (ret != 0) {
-			/* If we hit this point, the network is accessible but we were
-			 * unable to download the needed files. This is a terminal error
-			 * and we need good logging */
-			return -EFULLDOWNLOAD;
-		}
-
-		files = download_loop(files, retries > 0);
-
-		/* Set retries only if failed downloads exist, and only retry a fixed
-		   amount of &times */
-		if (list_head(files)) {
-			if (retries >= num_retries) {
-				list_free_list(files);
-				return -EFULLDOWNLOAD;
-			}
-
-			increment_retries(&retries, &timeout);
-			fprintf(stderr, "Starting download retry #%d\n", retries);
-		}
+	if (!files) {
+		return 0;
 	}
 
-	return 0;
+	download_handle = swupd_curl_parallel_download_start(MAX_XFER, MAX_XFER_BOTTOM, download_successful);
+	if (!download_handle) {
+		/* If we hit this point, the network is accessible but we were
+		 * unable to download the needed files. This is a terminal error
+		 * and we need good logging */
+		return -EFULLDOWNLOAD;
+	}
+
+	return download_loop(download_handle, files, num_downloads);
 }

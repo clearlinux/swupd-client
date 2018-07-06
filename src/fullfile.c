@@ -27,7 +27,6 @@
 
 static struct list *download_loop(struct list *files, bool free_list)
 {
-	int ret;
 	struct list *iter;
 	unsigned int complete = 0;
 	unsigned int list_length = list_len(files);
@@ -55,13 +54,9 @@ static struct list *download_loop(struct list *files, bool free_list)
 			string_or_die(&url, "%s/%i/files/%s.tar", MIX_STATE_DIR, file->last_change, file->hash);
 			string_or_die(&file->staging, "%s/download/.%s.tar", state_dir, file->hash);
 
-			ret = link(url, file->staging);
-			/* Try doing a regular rename if hardlink fails */
-			if (ret) {
-				if (rename(url, file->staging) != 0) {
-					fprintf(stderr, "Failed to copy local mix file: %s\n", file->staging);
-					continue;
-				}
+			if (link_or_rename(url, file->staging) != 0) {
+				fprintf(stderr, "Failed to copy local mix file: %s\n", file->staging);
+				continue;
 			}
 			untar_full_download(file);
 			free_string(&url);

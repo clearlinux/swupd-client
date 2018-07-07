@@ -141,6 +141,7 @@ create_link() {
 	sudo ln -rs "$pfile" "$path"/testlink
 	hashed_name=$(sudo "$SWUPD" hashdump "$path"/testlink 2> /dev/null)
 	sudo mv "$path"/testlink "$path"/"$hashed_name"
+	create_tar "$path"/"$hashed_name"
 	echo "$path/$hashed_name"
 
 }
@@ -208,6 +209,7 @@ add_to_manifest() {
 	local contentsize
 	local linked_file
 	local boot_type="."
+	local file_path
 	validate_item "$manifest"
 	validate_item "$item"
 	validate_param "$item_path"
@@ -237,7 +239,11 @@ add_to_manifest() {
 		# its associated file too
 		linked_file=$(readlink "$item")
 		if [ ! "$(sudo cat "$manifest" | grep "$linked_file")" ]; then
-			add_to_manifest "$manifest" "$(dirname "$item")"/"$linked_file" "$(dirname "$item_path")"/"$(generate_random_name test-file-)"
+			file_path="$(dirname "$item_path")"
+			if [ "$file_path" = "/" ]; then
+				file_path=""
+			fi
+			add_to_manifest "$manifest" "$(dirname "$item")"/"$linked_file" "$file_path"/"$(generate_random_name test-file-)"
 		fi
 	elif [ -f "$item" ]; then
 		item_type=F
@@ -245,7 +251,7 @@ add_to_manifest() {
 		item_type=D
 	fi
 	# if the file is in the /usr/lib/kernel dir then it is a boot file
-	if [ "$(dirname "$item_path")" = "/usr/lib/kernel" ]; then
+	if [ "$(dirname "$item_path")" = "/usr/lib/kernel" ] || [ "$(dirname "$item_path")" = "/usr/lib/modules/" ]; then
 		boot_type="b"
 	fi
 	sudo sed -i "s/contentsize:.*/contentsize:\\t$contentsize/" "$manifest"
@@ -516,7 +522,6 @@ create_bundle() {
 
 	# 1) create the initial manifest
 	manifest=$(create_manifest "$version_path" "$bundle_name")
-	# echo "Manifest -> $manifest"  # TODO(castulo): remove this msg when finish development
 	
 	# 2) Create one directory for the bundle and add it the requested
 	# times to the manifest.
@@ -524,22 +529,24 @@ create_bundle() {
 	# hashes in directories vary depending on owner and permissions,
 	# so one directory hash can be reused many times
 	bundle_dir=$(create_dir "$files_path")
-	# echo "Directory -> $bundle_dir"  # TODO(castulo): remove this msg when finish development
 	# Create a zero pack for the bundle and add the directory to it
 	sudo tar -cf "$version_path"/pack-"$bundle_name"-from-0.tar --exclude="$bundle_dir"/*  "$bundle_dir"
 	for val in "${dir_list[@]}"; do
-		add_to_manifest "$manifest" "$bundle_dir" "$val"
-		if [ "$local_bundle" = true ]; then
-			sudo mkdir -p "$target_path$val"
+		# the "/" directory is not allowed in the manifest
+		if [ val != "/" ]; then
+			add_to_manifest "$manifest" "$bundle_dir" "$val"
+			if [ "$local_bundle" = true ]; then
+				sudo mkdir -p "$target_path$val"
+			fi
 		fi
 	done
 	
 	# 3) Create the requested file(s)
 	for val in "${file_list[@]}"; do
-		# if the directories the file is don't exist, add them to the
-		# bundle (except for the dir of the tracking file)
+		# if the directories the file is don't exist, add them to the bundle
+		# there are 2 exceptions, the dir of the tracking file and "\"
 		fdir=$(dirname "$val")
-		if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/usr/share/clear/bundles" ]; then
+		if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/usr/share/clear/bundles" ] && [ "$fdir" != "/" ]; then
 			bundle_dir=$(create_dir "$files_path")
 			add_to_manifest "$manifest" "$bundle_dir" "$fdir"
 			# add each one of the directories of the path if they are not in the manifest already
@@ -551,7 +558,6 @@ create_bundle() {
 			done
 		fi
 		bundle_file=$(create_file "$files_path")
-		# echo "File -> $bundle_file"  # TODO(castulo): remove this msg when finish development
 		add_to_manifest "$manifest" "$bundle_file" "$val"
 		# Add the file to the zero pack of the bundle
 		sudo tar -rf "$version_path"/pack-"$bundle_name"-from-0.tar "$bundle_file"
@@ -566,25 +572,27 @@ create_bundle() {
 	# 4) Create the requested link(s) in the bundle
 	for val in "${link_list[@]}"; do
 		# if the directory the link is doesn't exist,
-		# add it to the bundle
+		# add it to the bundle (except if the directory is "/")
 		fdir=$(dirname "$val")
-		if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
-			bundle_dir=$(create_dir "$files_path")
-			add_to_manifest "$manifest" "$bundle_dir" "$fdir"
+		if [ "$fdir" != "/" ]; then
+			if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
+				bundle_dir=$(create_dir "$files_path")
+				add_to_manifest "$manifest" "$bundle_dir" "$fdir"
+			fi
 		fi
 		bundle_link=$(create_link "$files_path")
-		# echo "Symlink -> $bundle_link"  # TODO(castulo): remove this msg when finish development
+		sudo tar -rf "$version_path"/pack-"$bundle_name"-from-0.tar "$bundle_link"
 		add_to_manifest "$manifest" "$bundle_link" "$val"
 		# Add the file pointed by the link to the zero pack of the bundle
-		pfile=$(readlink -f "$bundle_link")
-		sudo tar -rf "$version_path"/pack-"$bundle_name"-from-0.tar "$pfile"
+		pfile=$(basename "$(readlink -f "$bundle_link")")
+		sudo tar -rf "$version_path"/pack-"$bundle_name"-from-0.tar "$files_path"/"$pfile"
 		if [ "$local_bundle" = true ]; then
 			sudo mkdir -p "$target_path$(dirname "$val")"
 			# if local_bundle is enabled copy the link to target-dir but also
 			# copy the file it points to
 			pfile_path=$(sudo cat "$manifest" | grep "$(basename "$pfile")" | awk '{ print $4 }')
-			sudo cp "$pfile" "$target_path$pfile_path"
-			sudo cp --preserve=links "$bundle_link" "$target_path$val"
+			sudo cp "$files_path"/"$pfile" "$target_path$pfile_path"
+			sudo ln -rs "$target_path$pfile_path" "$target_path$val"
 		fi
 	done
 	

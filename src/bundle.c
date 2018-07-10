@@ -558,9 +558,6 @@ int remove_bundles(char **bundles)
 		fprintf(stderr, "Deleting bundle files...\n");
 		remove_files_in_manifest_from_fs(bundle_manifest);
 
-		fprintf(stderr, "Untracking bundle from system...\n");
-		rm_bundle_file(bundle);
-
 		free_manifest(bundle_manifest);
 	out_free_mom:
 		free_manifest(current_mom);

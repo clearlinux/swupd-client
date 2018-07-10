@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -76,6 +77,7 @@
 struct swupd_curl_parallel_handle {
 	int timeout;				      /* Retry timeout */
 	size_t mcurl_size, max_xfer, max_xfer_bottom; /* hysteresis parameters */
+	bool resume_failed;
 
 	CURLM *mcurl;			   /* Curl handle */
 	struct list *failed;		   /* List of failed downloads */
@@ -231,11 +233,16 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 		if ((response == 200 && curl_ret == CURLE_OK) || (local_download && response == 0)) {
 			if (!h->success_cb(file->data)) {
 				// Retry download if cb return is false. File probably corrupted
-
+				unlink(file->file.path);
 				h->failed = list_prepend_data(h->failed, file);
 			}
 		} else {
 			h->failed = list_prepend_data(h->failed, file);
+			//Download resume isn't supported. Disabling it for next try
+			if (curl_ret == CURLE_RANGE_ERROR) {
+				fprintf(stderr, "Range command not supported by server, download resume disabled.\n");
+				h->resume_failed = true;
+			}
 			fprintf(stderr, "Error for %s download: Response %ld - %s\n",
 				file->file.path, response, curl_easy_strerror(msg->data.result));
 		}
@@ -355,16 +362,20 @@ static int process_download(struct swupd_curl_parallel_handle *h, struct multi_c
 	CURL *curl = NULL;
 	CURLMcode curlm_ret = CURLM_OK;
 	CURLcode curl_ret = CURLE_OK;
-
-	//TODO: Add support to download resume
-	// clean up in case any prior download failed in a partial state
-	unlink(file->file.path);
+	struct stat stat;
 
 	curl = curl_easy_init();
 	if (curl == NULL) {
 		goto out_bad;
 	}
 	file->curl = curl;
+
+	if (file->retries > 0 && !h->resume_failed && lstat(file->file.path, &stat) == 0) {
+		curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
+		if (curl_ret != CURLE_OK) {
+			goto out_bad;
+		}
+	}
 
 	curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void *)file);
 	if (curl_ret != CURLE_OK) {
@@ -446,6 +457,7 @@ int swupd_curl_parallel_download_enqueue(void *handle, const char *url, const ch
 		return 0;
 	}
 
+	unlink(file->file.path);
 	return process_download(h, file);
 }
 

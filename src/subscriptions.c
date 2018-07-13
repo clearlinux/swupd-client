@@ -172,10 +172,7 @@ void create_and_append_subscription(struct list **subs, const char *component)
 		abort();
 	}
 
-	sub->component = strdup(component);
-	if (sub->component == NULL) {
-		abort();
-	}
+	sub->component = strdup_or_die(component);
 
 	sub->version = 0;
 	sub->oldversion = 0;

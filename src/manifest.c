@@ -87,7 +87,7 @@ static struct manifest *alloc_manifest(int version, char *component)
 	}
 
 	manifest->version = version;
-	manifest->component = strdup(component);
+	manifest->component = strdup_or_die(component);
 
 	return manifest;
 }
@@ -195,7 +195,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		}
 		if (latest && strncmp(component, "MoM", 3) == 0) {
 			if (strncmp(line, "actions:", 8) == 0) {
-				post_update_actions = list_prepend_data(post_update_actions, strdup(c));
+				post_update_actions = list_prepend_data(post_update_actions, strdup_or_die(c));
 				if (!post_update_actions->data) {
 					fprintf(stderr, "WARNING: Unable to read post update action from Manifest.MoM. \
 							Another update or verify may be required.\n");
@@ -203,10 +203,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 			}
 		}
 		if (strncmp(line, "includes:", 9) == 0) {
-			includes = list_prepend_data(includes, strdup(c));
-			if (!includes->data) {
-				abort();
-			}
+			includes = list_prepend_data(includes, strdup_or_die(c));
 		}
 	}
 
@@ -325,10 +322,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 
 		c = c2;
 
-		file->filename = strdup(c);
-		if (!file->filename) {
-			abort();
-		}
+		file->filename = strdup_or_die(c);
 
 		/* Mark every file in a mix manifest as also being mix content since we do not
 		 * have another flag to check for like we do in the MoM */

@@ -1151,10 +1151,7 @@ int list_local_bundles()
 		}
 		/* Need to dup the strings as the directory
 		 * may be bigger than the size of the I/O buffer */
-		char *name = strdup(ent->d_name);
-		if (!name) {
-			abort();
-		}
+		char *name = strdup_or_die(ent->d_name);
 		bundles = list_append_data(bundles, name);
 	}
 

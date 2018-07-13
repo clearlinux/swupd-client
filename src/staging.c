@@ -78,8 +78,8 @@ int do_staging(struct file *file, struct manifest *MoM)
 	int ret;
 	struct stat s;
 
-	tmp = strdup(file->filename);
-	tmp2 = strdup(file->filename);
+	tmp = strdup_or_die(file->filename);
+	tmp2 = strdup_or_die(file->filename);
 
 	dir = dirname(tmp);
 	base = basename(tmp2);

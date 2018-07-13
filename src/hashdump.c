@@ -105,10 +105,7 @@ int hashdump_main(int argc, char **argv)
 		exit(-1);
 	}
 
-	file->filename = strdup(argv[optind]);
-	if (!file->filename) {
-		abort();
-	}
+	file->filename = strdup_or_die(argv[optind]);
 
 	ret = set_path_prefix(NULL);
 	if (!ret) {
@@ -121,10 +118,7 @@ int hashdump_main(int argc, char **argv)
 	if (use_prefix) {
 		fullname = mk_full_filename(path_prefix, file->filename);
 	} else {
-		fullname = strdup(file->filename);
-		if (!fullname) {
-			abort();
-		}
+		fullname = strdup_or_die(file->filename);
 	}
 
 	fprintf(stderr, "Calculating hash %s xattrs for: %s\n",

@@ -8,13 +8,38 @@ export FUNC_DIR
 export SWUPD_DIR="$FUNC_DIR/../.."
 export SWUPD="$SWUPD_DIR/swupd"
 
+# Error codes
+export EBUNDLE_MISMATCH=2  # at least one local bundle mismatches from MoM
+export EBUNDLE_REMOVE=3  # cannot delete local bundle filename
+export EMOM_NOTFOUND=4  # MoM cannot be loaded into memory (this could imply network issue)
+export ETYPE_CHANGED_FILE_RM=5  # do_staging() couldn't delete a file which must be deleted
+export EDIR_OVERWRITE=6  # do_staging() couldn't overwrite a directory
+export EDOTFILE_WRITE=7  # do_staging() couldn't create a dotfile
+export ERECURSE_MANIFEST=8  # error while recursing a manifest
+export ELOCK_FILE=9  # cannot get the lock
+export ECURL_INIT=11  # cannot initialize curl agent
+export EINIT_GLOBALS=12  # cannot initialize globals
+export EBUNDLE_NOT_TRACKED=13  # bundle is not tracked on the system
+export EMANIFEST_LOAD=14  # cannot load manifest into memory
+export EINVALID_OPTION=15  # invalid command option
+export ENOSWUPDSERVER=16  # no net connection to swupd server
+export EFULLDOWNLOAD=17  # full_download problem
+export ENET404=404  # download 404'd
+export EBUNDLE_INSTALL=18  # Cannot install bundles
+export EREQUIRED_DIRS=19  # Cannot create required dirs
+export ECURRENT_VERSION=20  # Cannot determine current OS version
+export ESIGNATURE=21  # Cannot initialize signature verification
+export EBADTIME=22  # System time is bad
+export EDOWNLOADPACKS=23  # Pack download failed
+export EBADCERT=24  # unable to verify server SSL certificate
+
 
 generate_random_content() { 
 
-	local bottom_range=5
-	local top_range=100
+	local bottom_range=${1:-5}
+	local top_range=${2:-100}
 	local range=$((top_range - bottom_range + 1))
-	local number_of_lines=$((RANDOM%range))  
+	local number_of_lines=$((RANDOM%range+$bottom_range))
 	< /dev/urandom tr -dc 'a-zA-Z0-9-_!@#$%^&*()_+{}|:<>?=' | fold -w 100 | head -n $number_of_lines
 
 }
@@ -30,12 +55,27 @@ generate_random_name() {
 
 }
 
+terminate() {
+
+	# since the library could be sourced and run from an interactive shell
+	# not only from a script, we cannot use exit in interactive shells since it
+	# would terminate the shell, so we are using parameter expansion with a fake
+	# parameter "param" to force an error when running interactive shells
+	local msg=$1
+	local param
+	case "$-" in
+		*i*)	: ${param:?"$msg, exiting..."} ;;
+		*)		echo "$msg, exiting..."
+				exit 1;;
+	esac
+
+}
+
 validate_path() { 
 
 	local path=$1
 	if [ -z "$path" ] || [ ! -d "$path" ]; then
-		echo "Please provide a valid path"
-		return 1
+		terminate "Please provide a valid path"
 	fi
 
 }
@@ -44,8 +84,7 @@ validate_item() {
 
 	local vfile=$1
 	if [ -z "$vfile" ] || [ ! -e "$vfile" ]; then
-		echo "Please provide a valid file"
-		return 1
+		terminate "Please provide a valid file"
 	fi
 
 }
@@ -54,9 +93,24 @@ validate_param() {
 
 	local param=$1
 	if [ -z "$param" ]; then
-		echo "Mandatory parameter missing"
-		return 1
+		terminate "Mandatory parameter missing"
 	fi
+
+}
+
+# Writes to a file that is owned by root
+# Parameters:
+# - "-a": if set, the text will be appeneded to the file,
+#         otherwise will be overwritten
+# - FILE: the path to the file to write to
+# - STREAM: the content to be written
+write_to_protected_file() {
+
+        local arg
+        [ "$1" = "-a" ] && { arg=-a ; shift ; }
+        local file=${1?Missing output file in write_to_protected_file}
+        shift
+        printf "$@" | sudo tee $arg "$file" >/dev/null
 
 }
 
@@ -68,9 +122,10 @@ set_env_variables() {
 	local env_name=$1
 	local path
 	validate_path "$env_name"
-	path=$(dirname "$(realpath "env_name")")
+	path=$(dirname "$(realpath "$env_name")")
 
 	export SWUPD_OPTS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
+	export SWUPD_OPTS_NO_CERT="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir"
 	export TEST_DIRNAME="$path"/"$env_name"
 
 }
@@ -122,9 +177,10 @@ create_file() {
 # Creates a symbolic link with a hashed name to the specified file in the specified path.
 # If no existing file is specified to point to, a new file will be created and pointed to
 # by the link.
+# If a file is provided but doesn't exist, then a dangling file will be created
 # Parameters:
 # - PATH: the path where the symbolic link will be created
-# - FILE: the path to the file to point to 
+# - FILE: the path to the file to point to
 create_link() { 
 
 	local path=$1
@@ -135,26 +191,31 @@ create_link() {
 	# if no file is specified, create one
 	if [ -z "$pfile" ]; then
 		pfile=$(create_file "$path")
-	else
-		validate_item "$pfile"
 	fi
 	sudo ln -rs "$pfile" "$path"/testlink
 	hashed_name=$(sudo "$SWUPD" hashdump "$path"/testlink 2> /dev/null)
 	sudo mv "$path"/testlink "$path"/"$hashed_name"
-	create_tar "$path"/"$hashed_name"
+	create_tar --skip-validation "$path"/"$hashed_name"
 	echo "$path/$hashed_name"
 
 }
 
 # Creates a tar for the specified item in the same location
 # Parameters:
+# - --skip-validation: if this flag is set (as first parameter) the other parameter
+#                      is not validated, so use this option carefully
 # - ITEM: the relative path to the item (file, directory, link, manifest)
 create_tar() {
 
-	local item=$1
 	local path
 	local item_name
-	validate_item "$item"
+	local skip_param_validation=false
+	[ "$1" = "--skip-validation" ] && { skip_param_validation=true ; shift ; }
+	local item=$1
+
+	if [ "$skip_param_validation" = false ]; then
+		validate_item "$item"
+	fi
 
 	path=$(dirname "$(realpath "$item")")
 	item_name=$(basename "$item")
@@ -179,28 +240,29 @@ create_manifest() {
 	validate_path "$path"
 	validate_param "$name"
 
-	version=$(basename "$path")	
-	echo -e "MANIFEST\\t3" | sudo tee "$path"/Manifest."$name" > /dev/null
-	echo -e "version:\\t$version" | sudo tee -a "$path"/Manifest."$name" > /dev/null
-	echo -e "previous:\\t0" | sudo tee -a "$path"/Manifest."$name" > /dev/null
-	echo -e "filecount:\\t0" | sudo tee -a "$path"/Manifest."$name" > /dev/null
-	echo -e "timestamp:\\t$(date +"%s")" | sudo tee -a "$path"/Manifest."$name" > /dev/null
-	echo -e "contentsize:\\t0" | sudo tee -a "$path"/Manifest."$name" > /dev/null
-	echo "" | sudo tee -a "$path"/Manifest."$name" > /dev/null
+	version=$(basename "$path")
+	{
+		printf 'MANIFEST\t1\n'
+		printf 'version:\t%s\n' "$version"
+		printf 'previous:\t0\n'
+		printf 'filecount:\t0\n'
+		printf 'timestamp:\t%s\n' "$(date +"%s")"
+		printf 'contentsize:\t0\n'
+		printf '\n'
+	} | sudo tee "$path"/Manifest."$name" > /dev/null
 	echo "$path/Manifest.$name"
 	
 }
 
 # Adds the specified item to an existing bundle manifest
 # Parameters:
+# - --skip-validation: if this flag is set (as first parameter) the other parameters
+#                      are not validated, so use this option carefully
 # - MANIFEST: the relative path to the manifest file
 # - ITEM: the relative path to the item (file, directory, symlink) to be added
 # - ITEM_PATH: the absolute path of the item in the target system when installed
 add_to_manifest() { 
 
-	local manifest=$1
-	local item=$2
-	local item_path=$3
 	local item_type
 	local item_size
 	local name
@@ -210,15 +272,23 @@ add_to_manifest() {
 	local linked_file
 	local boot_type="."
 	local file_path
-	validate_item "$manifest"
-	validate_item "$item"
-	validate_param "$item_path"
-	
-	item_size=$(du -b "$item" | cut -f1)
+	local skip_param_validation=false
+	[ "$1" = "--skip-validation" ] && { skip_param_validation=true ; shift ; }
+	local manifest=$1
+	local item=$2
+	local item_path=$3
+
+	if [ "$skip_param_validation" = false ]; then
+		validate_item "$manifest"
+		validate_item "$item"
+		validate_param "$item_path"
+	fi
+
+	item_size=$(stat -c "%s" "$item")
 	name=$(basename "$item")
 	version=$(basename "$(dirname "$manifest")")
 	# add to filecount
-	filecount=$(sudo cat "$manifest" | grep filecount | awk '{ print $2 }')
+	filecount=$(awk '/filecount/ { print $2}' "$manifest")
 	filecount=$((filecount + 1))
 	sudo sed -i "s/filecount:.*/filecount:\\t$filecount/" "$manifest"
 	# add to contentsize 
@@ -236,14 +306,16 @@ add_to_manifest() {
 	elif [ -L "$item" ]; then
 		item_type=L
 		# when adding a link to a bundle, we need to make sure we add
-		# its associated file too
+		# its associated file too, unless it is a dangling link
 		linked_file=$(readlink "$item")
-		if [ ! "$(sudo cat "$manifest" | grep "$linked_file")" ]; then
-			file_path="$(dirname "$item_path")"
-			if [ "$file_path" = "/" ]; then
-				file_path=""
+		if [ -e "$(dirname "$item")"/"$linked_file" ]; then
+			if [ ! "$(sudo cat "$manifest" | grep "$linked_file")" ]; then
+				file_path="$(dirname "$item_path")"
+				if [ "$file_path" = "/" ]; then
+					file_path=""
+				fi
+				add_to_manifest "$manifest" "$(dirname "$item")"/"$linked_file" "$file_path"/"$(generate_random_name test-file-)"
 			fi
-			add_to_manifest "$manifest" "$(dirname "$item")"/"$linked_file" "$file_path"/"$(generate_random_name test-file-)"
 		fi
 	elif [ -f "$item" ]; then
 		item_type=F
@@ -256,10 +328,15 @@ add_to_manifest() {
 	fi
 	sudo sed -i "s/contentsize:.*/contentsize:\\t$contentsize/" "$manifest"
 	# add to manifest content
-	echo -e "$item_type.$boot_type.\\t$name\\t$version\\t$item_path" | sudo tee -a "$manifest" > /dev/null
+	write_to_protected_file -a "$manifest" "$item_type.$boot_type.\\t$name\\t$version\\t$item_path\\n"
 	# If a manifest tar already exists for that manifest, renew the manifest tar
 	sudo rm -f "$manifest".tar
 	create_tar "$manifest"
+	# if the modified manifest is the MoM, sign it again since it has changed
+	if [ "$(basename "$manifest")" = Manifest.MoM ]; then
+		sudo rm -f "$manifest".sig
+		sign_manifest "$manifest"
+	fi
 
 }
 
@@ -305,6 +382,11 @@ remove_from_manifest() {
 	# If a manifest tar already exists for that manifest, renew the manifest tar
 	sudo rm -f "$manifest".tar
 	create_tar "$manifest"
+	# if the modified manifest is the MoM, sign it again
+	if [ "$(basename "$manifest")" = Manifest.MoM ]; then
+		sudo rm -f "$manifest".sig
+		sign_manifest "$manifest"
+	fi
 
 }
 
@@ -328,6 +410,9 @@ update_hashes_in_mom() {
 			remove_from_manifest "$manifest" $bundle
 			add_to_manifest "$manifest" "$path"/Manifest.$bundle $bundle
 		done
+		# since the MoM has changed, sign it again
+		sudo rm -f "$manifest".sig
+		sign_manifest "$manifest"
 	else
 		echo "The provided manifest is not the MoM"
 		return 1
@@ -366,6 +451,34 @@ get_hash_from_manifest() {
 
 }
 
+# Sets the current version of the target system to the desired version
+# Parameters:
+# - ENVIRONMENT_NAME: the name of the test environmnt to act upon
+# - NEW_VERSION: the version for the target to be set to
+set_current_version() {
+
+	local env_name=$1
+	local new_version=$2
+	validate_path "$env_name"
+
+	sudo sed -i "s/VERSION_ID=.*/VERSION_ID=$new_version/" "$env_name"/target-dir/usr/lib/os-release
+
+}
+
+# Sets the latest version on the "server" to the desired version
+# Parameters:
+# - ENVIRONMENT_NAME: the name of the test environmnt to act upon
+# - NEW_VERSION: the version for the target to be set to
+set_latest_version() {
+
+	local env_name=$1
+	local new_version=$2
+	validate_path "$env_name"
+
+	write_to_protected_file "$env_name"/web-dir/version/formatstaging/latest "$new_version"
+
+}
+
 # Creates a test environment with the basic directory structure needed to
 # validate the swupd client
 # Parameters:
@@ -381,30 +494,28 @@ create_test_environment() {
 	# create all the files and directories needed
 	# web-dir files & dirs
 	sudo mkdir -p "$env_name"/web-dir/version/formatstaging
-	echo "$version" | sudo tee "$env_name"/web-dir/version/formatstaging/latest > /dev/null
+	write_to_protected_file "$env_name"/web-dir/version/formatstaging/latest "$version"
 	sudo mkdir -p "$env_name"/web-dir/"$version"/files
 	sudo mkdir -p "$env_name"/web-dir/"$version"/staged
 	mom=$(create_manifest "$env_name"/web-dir/"$version" MoM)
-	sign_manifest "$mom"
 
 	# target-dir files & dirs
 	sudo mkdir -p "$env_name"/target-dir/usr/lib
-	echo "NAME=\"Clear Linux Software for Intel Architecture\"" | sudo tee "$env_name"/target-dir/usr/lib/os-release > /dev/null
-	echo "VERSION=1" | sudo tee -a "$env_name"/target-dir/usr/lib/os-release > /dev/null
-	echo "ID=clear-linux-os" | sudo tee -a "$env_name"/target-dir/usr/lib/os-release > /dev/null
-	echo "VERSION_ID=$version" | sudo tee -a "$env_name"/target-dir/usr/lib/os-release > /dev/null
-	echo "PRETTY_NAME=\"Clear Linux Software for Intel Architecture\"" | sudo tee -a "$env_name"/target-dir/usr/lib/os-release > /dev/null
-	echo "ANSI_COLOR=\"1;35\"" | sudo tee -a "$env_name"/target-dir/usr/lib/os-release > /dev/null
-	echo "HOME_URL=\"https://clearlinux.org\"" | sudo tee -a "$env_name"/target-dir/usr/lib/os-release > /dev/null
-	echo "SUPPORT_URL=\"https://clearlinux.org\"" | sudo tee -a "$env_name"/target-dir/usr/lib/os-release > /dev/null
-	echo "BUG_REPORT_URL=\"https://bugs.clearlinux.org/jira\"" | sudo tee -a "$env_name"/target-dir/usr/lib/os-release > /dev/null
+	{
+		printf 'NAME="Clear Linux Software for Intel Architecture"\n'
+		printf 'VERSION=1\n'
+		printf 'ID=clear-linux-os\n'
+		printf 'VERSION_ID=%s\n' "$version"
+		printf 'PRETTY_NAME="Clear Linux Software for Intel Architecture"\n'
+		printf 'ANSI_COLOR="1;35"\n'
+		printf 'HOME_URL="https://clearlinux.org"\n'
+		printf 'SUPPORT_URL="https://clearlinux.org"\n'
+		printf 'BUG_REPORT_URL="https://bugs.clearlinux.org/jira"\n'
+	} | sudo tee "$env_name"/target-dir/usr/lib/os-release > /dev/null
 	sudo mkdir -p "$env_name"/target-dir/usr/share/clear/bundles
 
 	# state files & dirs
-	sudo mkdir -p "$env_name"/state/staged
-	sudo mkdir -p "$env_name"/state/download
-	sudo mkdir -p "$env_name"/state/delta
-	sudo mkdir -p "$env_name"/state/telemetry
+	sudo mkdir -p "$env_name"/state/{staged,download,delta,telemetry}
 	sudo chmod -R 0700 "$env_name"/state
 
 	# export environment variables that are dependent of the test env
@@ -422,21 +533,17 @@ create_test_environment() {
 destroy_test_environment() { 
 
 	local env_name=$1
-	local deletable=true
 	validate_path "$env_name"
+
 	# since the action to be performed is very destructive, at least
 	# make sure the directory does look like a test environment
 	for var in "state" "target-dir" "web-dir"; do
 		if [ ! -d "$env_name/$var" ]; then
-			deletable=false
+			echo "The name provided doesn't seem to be a valid test environment"
+			return 1
 		fi
 	done
-	if [ "$deletable" = true ]; then
-		sudo rm -rf "$env_name"
-	else
-		echo "The name provided doesn't seem to be a valid test environment"
-		return 1
-	fi
+	sudo rm -rf "$env_name"
 
 }
 
@@ -444,27 +551,35 @@ destroy_test_environment() {
 create_bundle() { 
 
 	cb_usage() { 
-		echo "Usage:"
-		echo -e "\\tcreate_bundle [-L] [-n] <bundle_name> [-v] <version> [-d] <list of dirs> [-f] <list of files> [-l] <list of links> ENV_NAME"
-		echo "Options:"
-		echo -e "\\t-L\\tWhen the flag is selected the bundle will be 'installed' in the target-dir, otherwise it will only be created in web-dir"
-		echo -e "\\t-n\\tThe name of the bundle to be created, if not specified a name will be autogenerated"
-		echo -e "\\t-v\\tThe version for the bundle, if non selected version 10 will be used"
-		echo -e "\\t-d\\tComma-separated list of directories to be included in the bundle"
-		echo -e "\\t-f\\tComma-separated list of files to be created and included in the bundle"
-		echo -e "\\t-l\\tComma-separated list of symlinks to be created and included in the bundle,"
-		echo "Notes:"
-		echo -e "\\t- if no option is selected, a minimal bundle will be created with only one directory"
-		echo -e "\\t- for every symlink created a related file will be created and added to the bundle as well"
-		echo -e "\\t- if the '-f' or '-l' options are used, and the directories where the files live don't exist,"
-		echo -e "\\t  they will be automatically created and added to the bundle for each file"
-		echo -e "\\nExample of usage:\\n"
-		echo -e "\\tThe following command will create a bundle named 'test-bundle', which will include three directories,"
-		echo -e "\\tfour files, and one symlink (they will be added to the bundle's manifest), all these resources will also"
-		echo -e "\\tbe tarred. The bundle's manifest will be added to the MoM."
-		echo -e "\\n\\tcreate_bundle -n test-bundle -f /usr/bin/test-1,/usr/bin/test-2,/etc/systemd/test-3 -l /etc/test-link my_test_env"
-		echo -e "\\n"
-		
+		echo $(cat <<-EOF
+		Usage:
+		    create_bundle [-L] [-n] <bundle_name> [-v] <version> [-d] <list of dirs> [-f] <list of files> [-l] <list of links> ENV_NAME
+
+		Options:
+		    -L    When the flag is selected the bundle will be 'installed' in the target-dir, otherwise it will only be created in web-dir
+		    -n    The name of the bundle to be created, if not specified a name will be autogenerated
+		    -v    The version for the bundle, if non selected version 10 will be used
+		    -d    Comma-separated list of directories to be included in the bundle
+		    -f    Comma-separated list of files to be created and included in the bundle
+		    -l    Comma-separated list of symlinks to be created and included in the bundle
+		    -b    Comma-separated list of dangling (broken) symlinks to be created and included in the bundle
+
+		Notes:
+		    - if no option is selected, a minimal bundle will be created with only one directory
+		    - for every symlink created a related file will be created and added to the bundle as well (except for dangling links)
+		    - if the '-f' or '-l' options are used, and the directories where the files live don't exist,
+		      they will be automatically created and added to the bundle for each file
+
+		Example of usage:
+
+		    The following command will create a bundle named 'test-bundle', which will include three directories,
+		    four files, and one symlink (they will be added to the bundle's manifest), all these resources will also
+		    be tarred. The manifest will be added to the MoM.
+
+		    create_bundle -n test-bundle -f /usr/bin/test-1,/usr/bin/test-2,/etc/systemd/test-3 -l /etc/test-link my_test_env
+
+		EOF
+		)
 	}
 	
 	local OPTIND
@@ -472,6 +587,7 @@ create_bundle() {
 	local dir_list
 	local file_list
 	local link_list
+	local dangling_link_list
 	local version
 	local bundle_name
 	local env_name
@@ -481,14 +597,12 @@ create_bundle() {
 	local local_bundle=false
 
 	set -f  # turn off globbing
-	while getopts :v:d:f:l:n:L opt; do
+	while getopts :v:d:f:l:b:n:L opt; do
 		case "$opt" in
-			d)	IFS=,
-				read -r -a dir_list <<< "$OPTARG" ;;
-			f)	IFS=,
-				read -r -a file_list <<< "$OPTARG" ;;
-			l)	IFS=,
-				read -r -a link_list <<< "$OPTARG" ;;
+			d)	IFS=, read -r -a dir_list <<< "$OPTARG"  ;;
+			f)	IFS=, read -r -a file_list <<< "$OPTARG" ;;
+			l)	IFS=, read -r -a link_list <<< "$OPTARG" ;;
+			b)	IFS=, read -r -a dangling_link_list <<< "$OPTARG" ;;
 			n)	bundle_name="$OPTARG" ;;
 			v)	version="$OPTARG" ;;
 			L)	local_bundle=true ;;
@@ -498,11 +612,11 @@ create_bundle() {
 	done
 	set +f  # turn globbing back on
 	env_name=${@:$OPTIND:1}
-	
+
 	# set default values
 	bundle_name=${bundle_name:-$(generate_random_name test-bundle-)}
 	version=${version:-10}
-	if [ -z "$dir_list" ] && [ -z "$file_list" ] && [ -z "$link_list" ] ; then
+	if [ -z "$dir_list" ] && [ -z "$file_list" ] && [ -z "$link_list" ] && [ -z "$dangling_link_list" ] ; then
 		# if nothing was specified to be created, at least create
 		# one directory which is the bare minimum for a bundle
 		dir_list=(/usr/bin)
@@ -512,16 +626,16 @@ create_bundle() {
 	file_list+=(/usr/share/clear/bundles/"$bundle_name")
 	
 	# get useful paths
-	if [ "$(validate_path "$env_name")" ]; then
-		echo "Please specify a valid environment"
-		return 1
-	fi
+	validate_path "$env_name"
 	version_path="$env_name"/web-dir/"$version"
 	files_path="$version_path"/files
 	target_path="$env_name"/target-dir
 
 	# 1) create the initial manifest
 	manifest=$(create_manifest "$version_path" "$bundle_name")
+	if [ "$DEBUG" == true ]; then
+		echo "Manifest -> $manifest"
+	fi
 	
 	# 2) Create one directory for the bundle and add it the requested
 	# times to the manifest.
@@ -529,6 +643,9 @@ create_bundle() {
 	# hashes in directories vary depending on owner and permissions,
 	# so one directory hash can be reused many times
 	bundle_dir=$(create_dir "$files_path")
+	if [ "$DEBUG" == true ]; then
+		echo "Directory -> $bundle_dir"
+	fi
 	# Create a zero pack for the bundle and add the directory to it
 	sudo tar -cf "$version_path"/pack-"$bundle_name"-from-0.tar --exclude="$bundle_dir"/*  "$bundle_dir"
 	for val in "${dir_list[@]}"; do
@@ -558,6 +675,9 @@ create_bundle() {
 			done
 		fi
 		bundle_file=$(create_file "$files_path")
+		if [ "$DEBUG" == true ]; then
+			echo "file -> $bundle_file"
+		fi
 		add_to_manifest "$manifest" "$bundle_file" "$val"
 		# Add the file to the zero pack of the bundle
 		sudo tar -rf "$version_path"/pack-"$bundle_name"-from-0.tar "$bundle_file"
@@ -586,24 +706,58 @@ create_bundle() {
 		# Add the file pointed by the link to the zero pack of the bundle
 		pfile=$(basename "$(readlink -f "$bundle_link")")
 		sudo tar -rf "$version_path"/pack-"$bundle_name"-from-0.tar "$files_path"/"$pfile"
+		if [ "$DEBUG" == true ]; then
+			echo "link -> $bundle_link"
+			echo "file pointed to -> $(readlink -f "$bundle_link")"
+		fi
 		if [ "$local_bundle" = true ]; then
 			sudo mkdir -p "$target_path$(dirname "$val")"
 			# if local_bundle is enabled copy the link to target-dir but also
 			# copy the file it points to
-			pfile_path=$(sudo cat "$manifest" | grep "$(basename "$pfile")" | awk '{ print $4 }')
+			pfile_path=$(awk "/$(basename $pfile)/"'{ print $4 }' "$manifest")
 			sudo cp "$files_path"/"$pfile" "$target_path$pfile_path"
 			sudo ln -rs "$target_path$pfile_path" "$target_path$val"
 		fi
 	done
 	
-	# 5) Add the bundle to the MoM
+	# 5) Create the requested dangling link(s) in the bundle
+	for val in "${dangling_link_list[@]}"; do
+		# if the directory the link is doesn't exist,
+		# add it to the bundle (except if the directory is "/")
+		fdir=$(dirname "$val")
+		if [ "$fdir" != "/" ]; then
+			if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
+				bundle_dir=$(create_dir "$files_path")
+				add_to_manifest "$manifest" "$bundle_dir" "$fdir"
+			fi
+		fi
+		# Create a link passing a file that does not exits
+		bundle_link=$(create_link "$files_path" "$files_path"/"$(generate_random_name does_not_exist-)")
+		sudo tar -rf "$version_path"/pack-"$bundle_name"-from-0.tar "$bundle_link"
+		add_to_manifest --skip-validation "$manifest" "$bundle_link" "$val"
+		# Add the file pointed by the link to the zero pack of the bundle
+		if [ "$DEBUG" == true ]; then
+			echo "dangling link -> $bundle_link"
+		fi
+		if [ "$local_bundle" = true ]; then
+			sudo mkdir -p "$target_path$(dirname "$val")"
+			# if local_bundle is enabled since we cannot copy a bad link create a new one
+			# in the appropriate location in target-dir with the corrent name
+			sudo ln -s "$(generate_random_name /does_not_exist-)" "$target_path$val"
+		fi
+	done
+
+	# 6) Add the bundle to the MoM
 	add_to_manifest "$version_path"/Manifest.MoM "$manifest" "$bundle_name"
 
-	# 6) Create/renew manifest tars
+	# 7) Create/renew manifest tars
 	sudo rm -f "$version_path"/Manifest.MoM.tar
 	create_tar "$version_path"/Manifest.MoM
 
-	# 7) Create the subscription to the bundle if the local_bundle flag iss enabled
+	# 8) Sign the manifest MoM
+	sign_manifest "$version_path"/Manifest.MoM
+
+	# 9) Create the subscription to the bundle if the local_bundle flag is enabled
 	if [ "$local_bundle" = true ]; then
 		sudo touch "$target_path"/usr/share/clear/bundles/"$bundle_name"
 	fi
@@ -622,19 +776,88 @@ generate_test() {
 	path=$(dirname "$name")/
 	name=$(basename "$name")
 
-	echo -e "#!/usr/bin/env bats\\n" > "$path$name".bats
-	echo -e "load \"../testlib\"\\n" >> "$path$name".bats
-	echo -e "setup() {\\n" >> "$path$name".bats
-	echo -e "\\tcreate_test_environment \"\$TEST_NAME\"" >> "$path$name".bats
-	echo -e "\\t# create_bundle -n <bundle_name> -f <file_1>,<file_2>,<file_N> \"\$TEST_NAME\"" >> "$path$name".bats
-	echo -e "\\n}\\n" >> "$path$name".bats
-	echo -e "teardown() {\\n" >> "$path$name".bats
-	echo -e "\\tdestroy_test_environment \"\$TEST_NAME\"" >> "$path$name".bats
-	echo -e "\\n}\\n" >> "$path$name".bats
-	echo -e "@test \"<test description>\" {\\n" >> "$path$name".bats
-	echo -e "\\trun sudo sh -c \"\$SWUPD <swupd_command> \$SWUPD_OPTS <command_options>\"" >> "$path$name".bats
-	echo -e "\\t# <validations>" >> "$path$name".bats
-	echo -e "\\n}" >> "$path$name".bats
+	{
+		printf '#!/usr/bin/env bats\n\n'
+		printf 'load "../testlib"\n\n'
+		printf 'global_setup() {\n\n'
+		printf '\t# global setup\n\n'
+		printf '}\n\n'
+		printf 'test_setup() {\n\n'
+		printf '\t# create_test_environment "$TEST_NAME"\n'
+		printf '\t# create_bundle -n <bundle_name> -f <file_1>,<file_2>,<file_N> "$TEST_NAME"\n\n'
+		printf '}\n\n'
+		printf 'test_teardown() {\n\n'
+		printf '\t# destroy_test_environment "$TEST_NAME"\n\n'
+		printf '}\n\n'
+		printf 'global_teardown() {\n\n'
+		printf '\t# global cleanup\n\n'
+		printf '}\n\n'
+		printf '@test "<test description>" {\n\n'
+		printf '\trun sudo sh -c "$SWUPD <swupd_command> $SWUPD_OPTS <command_options>"\n'
+		printf '\t# <validations>\n\n'
+		printf '}\n\n'
+	} > "$path$name".bats
+	# make the test script executable
+	chmod +x "$path$name".bats
+
+}
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# The section below contains test fixtures that can be used from tests to create and
+# cleanup test dependencies, these functions can be overwritten in the test script.
+# The intention of these is to try reducing the amount of boilerplate included in
+# tests since all tests require at least the creation of a  test environment
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+setup() {
+
+	# the first time setup runs, run the global_setup
+	if [ "$BATS_TEST_NUMBER" -eq 1 ]; then
+		global_setup
+	fi
+	# in case the env was created in global_setup set environment variables
+	if [ -d "$TEST_NAME" ]; then
+		set_env_variables "$TEST_NAME"
+	fi
+	test_setup
+
+}
+
+teardown() {
+
+	test_teardown
+	# if the last test just ran, run the global teardown
+	if [ "$BATS_TEST_NUMBER" -eq "${#BATS_TEST_NAMES[@]}" ]; then
+		global_teardown
+	fi
+
+}
+
+global_setup() {
+
+	# dummy value in case function is not defined
+	return
+
+}
+
+global_teardown() {
+
+	# dummy value in case function is not defined
+	return
+
+}
+
+# Default test_setup
+test_setup() {
+
+	create_test_environment "$TEST_NAME"
+
+}
+
+# Default test_teardown
+test_teardown() {
+
+	destroy_test_environment "$TEST_NAME"
 
 }
 
@@ -673,7 +896,10 @@ assert_status_is() {
 	else
 		# if the assertion was successful show the output only if the user
 		# runs the test with the -t flag
+		echo -e "\\nCommand output:" >&3
+		echo "------------------------------------------------------------------" >&3
 		echo "$output" >&3
+		echo -e "------------------------------------------------------------------\\n" >&3
 	fi
 
 }
@@ -695,7 +921,10 @@ assert_status_is_not() {
 	else
 		# if the assertion was successful show the output only if the user
 		# runs the test with the -t flag
+		echo -e "\\nCommand output:" >&3
+		echo "------------------------------------------------------------------" >&3
 		echo "$output" >&3
+		echo -e "------------------------------------------------------------------\\n" >&3
 	fi
 
 }

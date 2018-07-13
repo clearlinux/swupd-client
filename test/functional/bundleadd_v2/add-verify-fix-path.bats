@@ -2,7 +2,7 @@
 
 load "../testlib"
 
-setup() {
+test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle1 -f /foo/bar/test-file1 "$TEST_NAME"
@@ -22,20 +22,12 @@ setup() {
 
 }
 
-teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "bundle-add verify_fix_path support" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
-
-		File /foo/bar/test-file1 was not in a pack
 		.
 		Finishing download of update content...
 		Installing bundle(s) files...

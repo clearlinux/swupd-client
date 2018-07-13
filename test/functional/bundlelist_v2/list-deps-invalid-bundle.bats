@@ -2,18 +2,6 @@
 
 load "../testlib"
 
-setup() {
-
-	create_test_environment "$TEST_NAME"
-
-}
-
-teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "bundle-list list bundle deps with invalid bundle name" {
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --deps not-a-bundle"

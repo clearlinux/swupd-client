@@ -2,7 +2,7 @@
 
 load "../testlib"
 
-setup() {
+test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle -f /usr/bin/test-file "$TEST_NAME"
@@ -11,12 +11,6 @@ setup() {
 	sudo sed -i "s/filecount:.*/filecount:\\t9000000/" "$manifest"
 	sudo rm "$TEST_NAME"/web-dir/10/Manifest.test-bundle.tar
 	create_tar "$TEST_NAME"/web-dir/10/Manifest.test-bundle
-
-}
-
-teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

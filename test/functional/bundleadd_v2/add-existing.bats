@@ -2,16 +2,10 @@
 
 load "../testlib"
 
-setup() {
+test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle -f /usr/bin/file1 "$TEST_NAME"
-
-}
-
-teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 
@@ -19,7 +13,7 @@ teardown() {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
-	assert_status_is 18
+	assert_status_is "$EBUNDLE_INSTALL"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "test-bundle" is already installed, skipping it...
 		1 bundle was already installed

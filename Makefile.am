@@ -114,38 +114,72 @@ TESTS = $(dist_check_SCRIPTS)
 BATS = \
 	test/documentation/manpages/test.bats \
 	test/functional/bundleadd/add-directory/test.bats \
+	test/functional/bundleadd_v2/add-directory.bats \
 	test/functional/bundleadd/add-existing/test.bats \
+	test/functional/bundleadd_v2/add-existing.bats \
 	test/functional/bundleadd/add-multiple/test.bats \
+	test/functional/bundleadd_v2/add-multiple.bats \
 	test/functional/bundleadd/add-rc/test.bats \
+	test/functional/bundleadd_v2/add-rc.bats \
 	test/functional/bundleadd/bad-hash/test.bats \
+	test/functional/bundleadd_v2/add-bad-hash.bats \
 	test/functional/bundleadd/bad-hash-state/test.bats \
+	test/functional/bundleadd_v2/add-bad-hash-state.bats \
 	test/functional/bundleadd/bad-manifest/test.bats \
+	test/functional/bundleadd_v2/add-bad-manifest.bats \
 	test/functional/bundleadd/boot-file/test.bats \
+	test/functional/bundleadd_v2/add-boot-file.bats \
 	test/functional/bundleadd/boot-skip/test.bats \
+	test/functional/bundleadd_v2/add-boot-skip.bats \
 	test/functional/bundleadd/include/test.bats \
+	test/functional/bundleadd_v2/add-include.bats \
 	test/functional/bundleadd/fix-missing-file/test.bats \
 	test/functional/bundleadd/skip-scripts/test.bats \
+	test/functional/bundleadd_v2/add-skip-scripts.bats \
 	test/functional/bundleadd/verify-fix-path/test.bats \
+	test/functional/bundleadd_v2/add-verify-fix-path.bats \
 	test/functional/bundlelist/all/test.bats \
+	test/functional/bundlelist_v2/list-all.bats \
 	test/functional/bundlelist/deps-flat/test.bats \
+	test/functional/bundlelist_v2/list-deps-flat.bats \
 	test/functional/bundlelist/deps-invalid-bundle/test.bats \
+	test/functional/bundlelist_v2/list-deps-invalid-bundle.bats \
 	test/functional/bundlelist/deps-nested/test.bats \
+	test/functional/bundlelist_v2/list-deps-nested.bats \
 	test/functional/bundlelist/has-dep-nested/test.bats \
+	test/functional/bundlelist_v2/list-has-dep-nested.bats \
 	test/functional/bundlelist/has-dep-nested-not-installed/test.bats \
+	test/functional/bundlelist_v2/list-has-dep-nested-not-installed.bats \
 	test/functional/bundlelist/has-dep-nested-server/test.bats \
+	test/functional/bundlelist_v2/list-has-dep-nested-server.bats \
 	test/functional/bundlelist/no-deps/test.bats \
+	test/functional/bundlelist_v2/list-no-deps.bats \
 	test/functional/bundlelist/none-has-deps/test.bats \
+	test/functional/bundlelist_v2/list-none-has-deps.bats \
 	test/functional/bundleremove/boot-file/test.bats \
+	test/functional/bundleremove_v2/remove-boot-file.bats \
 	test/functional/bundleremove/include/test.bats \
+	test/functional/bundleremove_v2/remove-include.bats \
 	test/functional/bundleremove/include-nested/test.bats \
+	test/functional/bundleremove_v2/remove-include-nested.bats \
+	test/functional/bundleremove_v2/remove-os-core.bats \
 	test/functional/bundleremove/parse-args/test.bats \
+	test/functional/bundleremove_v2/remove-parse-args.bats \
 	test/functional/bundleremove/remove-file/test.bats \
+	test/functional/bundleremove_v2/remove-file.bats \
 	test/functional/bundleremove/remove-multiple/test.bats \
+	test/functional/bundleremove_v2/remove-multiple.bats \
+	test/functional/bundleremove_v2/remove-rc.bats \
 	test/functional/checkupdate/new-version/test.bats \
+	test/functional/checkupdate_v2/chk-update-new-version.bats \
 	test/functional/checkupdate/no-server-content/test.bats \
+	test/functional/checkupdate_v2/chk-update-no-server-content.bats \
 	test/functional/checkupdate/no-target-content/test.bats \
+	test/functional/checkupdate_v2/chk-update-no-target-content.bats \
 	test/functional/checkupdate/slow-server/test.bats \
+	test/functional/checkupdate_v2/chk-update-slow-server.bats \
 	test/functional/checkupdate/version-match/test.bats \
+	test/functional/checkupdate_v2/chk-update-version-match.bats \
 	test/functional/completion/basic/test.bats \
 	test/functional/hashdump/file-hash/test.bats \
 	test/functional/hashdump/file-hash-no-path-prefix/test.bats \

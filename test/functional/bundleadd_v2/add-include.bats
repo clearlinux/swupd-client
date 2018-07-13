@@ -2,7 +2,7 @@
 
 load "../testlib"
 
-setup() {
+test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle1 -f /foo/test-file1 "$TEST_NAME"
@@ -11,12 +11,6 @@ setup() {
 	add_dependency_to_manifest "$TEST_NAME"/web-dir/10/Manifest.test-bundle1 test-bundle2
 	# since we modified one manifest we need to update that in MoM too, so re add the bundle manifest
 	update_hashes_in_mom "$TEST_NAME"/web-dir/10/Manifest.MoM
-
-}
-
-teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 
@@ -29,8 +23,6 @@ teardown() {
 	assert_file_exists "$TEST_NAME"/target-dir/bar/test-file2
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
-
-		File /bar was not in a pack
 		.
 		Finishing download of update content...
 		Installing bundle(s) files...

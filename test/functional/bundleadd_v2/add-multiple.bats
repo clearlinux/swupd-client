@@ -2,18 +2,12 @@
 
 load "../testlib"
 
-setup() {
+test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	test_files=/usr/bin/1,/usr/bin/2,/usr/bin/3,/usr/bin/4,/usr/bin/5,/usr/bin/6,/usr/bin/7,/usr/bin/8,/usr/bin/9,/usr/bin/10
 	create_bundle -n test-bundle1 -f "$test_files" "$TEST_NAME"
 	create_bundle -n test-bundle2 -f /media/lib/file2 "$TEST_NAME"
-
-}
-
-teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 
@@ -34,8 +28,6 @@ teardown() {
 		Extracting test-bundle2 pack for version 10
 
 		Starting download of remaining update content. This may take a while...
-
-		File /media was not in a pack
 		..
 		Finishing download of update content...
 		Installing bundle(s) files...

@@ -23,6 +23,7 @@
 
 #define _GNU_SOURCE
 #include <fcntl.h>
+#include <libgen.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -397,6 +398,75 @@ out:
 	return ret;
 }
 
+static char *tracking_dir(void)
+{
+	return mk_full_filename(state_dir, "bundles");
+}
+
+/*
+ * remove_tracked removes the tracking file in
+ * path_prefix/state_dir_parent/bundles if it exists to untrack as manually
+ * installed if the file exists
+ */
+static void remove_tracked(const char *bundle)
+{
+	char *destdir = tracking_dir();
+	char *tracking_file = mk_full_filename(destdir, bundle);
+	free_string(&destdir);
+	/* we don't care about failures here since any weird state in the tracking
+	 * dir MUST be handled gracefully */
+	swupd_rm(tracking_file);
+	free_string(&tracking_file);
+}
+
+/*
+ * track_installed creates a tracking file in path_prefix/var/lib/bundles If
+ * there are no tracked files in that directory (directory is empty or does not
+ * exist) copy the tracking directory at path_prefix/usr/share/clear/bundles to
+ * path_prefix/var/lib/bundles to initiate the tracking files.
+ *
+ * This function does not return an error code because weird state in this
+ * directory must be handled gracefully whenever encountered.
+ */
+static void track_installed(const char *bundle_name)
+{
+	int ret = 0;
+	char *dst = tracking_dir();
+	char *src;
+
+	/* if state_dir_parent/bundles doesn't exist or is empty, assume this is
+	 * the first time tracking installed bundles. Since we don't know what the
+	 * user installed themselves just copy the entire system tracking directory
+	 * into the state tracking directory. */
+	if (!is_populated_dir(dst)) {
+		ret = mkdir_p(dst);
+		if (ret) {
+			goto out;
+		}
+		src = mk_full_filename(path_prefix, "/usr/share/clear/bundles/*");
+		/* at the point this function is called <bundle_name> is already
+		 * installed on the system and therefore has a tracking file under
+		 * /usr/share/clear/bundles. A simple cp -a of that directory will
+		 * accurately track that bundle as manually installed. */
+		ret = copy_all(src, dst);
+		free_string(&src);
+		if (ret) {
+			goto out;
+		}
+	}
+
+	char *tracking_file = mk_full_filename(dst, bundle_name);
+	int fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH);
+	free_string(&tracking_file);
+	if (fd < 0) {
+		goto out;
+	}
+	close(fd);
+
+out:
+	free_string(&dst);
+}
+
 /*  This function is a fresh new implementation for a bundle
  *  remove without being tied to verify loop, this means
  *  improved speed and space as well as more roubustness and
@@ -557,6 +627,7 @@ int remove_bundles(char **bundles)
 
 		fprintf(stderr, "Deleting bundle files...\n");
 		remove_files_in_manifest_from_fs(bundle_manifest);
+		remove_tracked(bundle_manifest->component);
 
 		free_manifest(bundle_manifest);
 	out_free_mom:
@@ -697,6 +768,8 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 		if (is_tracked_bundle(bundle)) {
 			fprintf(stderr, "Warning: Bundle \"%s\" is already installed, skipping it...\n", bundle);
 			already_installed++;
+			/* track as installed since they tried to install it */
+			track_installed(bundle);
 		}
 	}
 
@@ -939,6 +1012,7 @@ out:
 		iter = iter->next;
 		if (string_in_list(to_install_manifest->component, bundles)) {
 			bundles_installed++;
+			track_installed(to_install_manifest->component);
 		}
 	}
 

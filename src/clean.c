@@ -385,5 +385,7 @@ int clean_statedir(bool dry_run, bool all)
 		return ret;
 	}
 
+	/* NOTE: do not clean the state_dir/bundles directory */
+
 	return clean_staged_manifests(state_dir, dry_run, all);
 }

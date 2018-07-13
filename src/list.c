@@ -56,11 +56,13 @@ static struct list *list_alloc_item(void *data)
 	struct list *item;
 
 	item = (struct list *)malloc(sizeof(struct list));
-	if (item) {
-		item->data = data;
-		item->next = NULL;
-		item->prev = NULL;
+	if (!item) {
+		abort();
 	}
+
+	item->data = data;
+	item->next = NULL;
+	item->prev = NULL;
 
 	return item;
 }
@@ -294,6 +296,9 @@ struct list *list_deep_clone_strs(struct list *list)
 	item = list_tail(list);
 	while (item) {
 		clone = list_prepend_data(clone, strdup(item->data));
+		if (!clone->data) {
+			abort();
+		}
 		item = item->prev;
 	}
 

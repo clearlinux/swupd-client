@@ -81,6 +81,12 @@ err:
 	return false;
 }
 
+static void policy_warn(void)
+{
+	fprintf(stderr, "Warning: disabling automatic updates may take you "
+			"out of compliance with your IT policy\n\n");
+}
+
 int autoupdate_main(int argc, char **argv)
 {
 	if (!parse_options(argc, argv)) {
@@ -103,6 +109,7 @@ int autoupdate_main(int argc, char **argv)
 	} else if (disable) {
 		int rc;
 		check_root();
+		policy_warn();
 		fprintf(stderr, "Running systemctl to disable updates\n");
 		rc = system("/usr/bin/systemctl mask --now swupd-update.service swupd-update.timer > /dev/null");
 		if (rc != -1) {

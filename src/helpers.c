@@ -291,12 +291,9 @@ char *mk_full_filename(const char *prefix, const char *path)
 	char *abspath;
 
 	if (path[0] == '/') {
-		abspath = strdup(path);
+		abspath = strdup_or_die(path);
 	} else {
 		string_or_die(&abspath, "/%s", path);
-	}
-	if (abspath == NULL) {
-		abort();
 	}
 
 	if (prefix == NULL) {
@@ -309,16 +306,10 @@ char *mk_full_filename(const char *prefix, const char *path)
 	if ((strcmp(prefix, "/") == 0) ||
 	    (strcmp(prefix, "") == 0)) {
 		// rootfs, use absolute path
-		fname = strdup(abspath);
-		if (fname == NULL) {
-			abort();
-		}
+		fname = strdup_or_die(abspath);
 	} else if (strcmp(&prefix[strlen(prefix) - 1], "/") == 0) {
 		// chroot and need to strip trailing "/" from prefix
-		char *tmp = strdup(prefix);
-		if (tmp == NULL) {
-			abort();
-		}
+		char *tmp = strdup_or_die(prefix);
 		tmp[strlen(tmp) - 1] = '\0';
 
 		string_or_die(&fname, "%s%s", tmp, abspath);
@@ -370,10 +361,7 @@ bool is_under_mounted_directory(const char *filename)
 		return false;
 	}
 
-	dir = strdup(mounted_dirs);
-	if (dir == NULL) {
-		abort();
-	}
+	dir = strdup_or_die(mounted_dirs);
 
 	token = strtok(dir + 1, ":");
 	while (token != NULL) {
@@ -745,7 +733,7 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 	}
 
 	/* Removing trailing '/' from the path */
-	path = strdup(targetpath);
+	path = strdup_or_die(targetpath);
 	if (path[strlen(path) - 1] == '/') {
 		path[strlen(path) - 1] = '\0';
 	}
@@ -754,8 +742,8 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 	 * eg. Path /usr/bin/foo will be broken into /usr,/usr/bin and /usr/bin/foo
 	 */
 	while (strcmp(path, "/") != 0) {
-		path_list = list_prepend_data(path_list, strdup(path));
-		tmp = strdup(dirname(path));
+		path_list = list_prepend_data(path_list, strdup_or_die(path));
+		tmp = strdup_or_die(dirname(path));
 		free_string(&path);
 		path = tmp;
 	}

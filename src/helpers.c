@@ -288,37 +288,26 @@ static void get_mounted_directories(void)
 char *mk_full_filename(const char *prefix, const char *path)
 {
 	char *fname = NULL;
-	char *abspath;
+	size_t len = 0;
 
+	if (!path) {
+		return NULL;
+	}
+
+	if (prefix) {
+		len = strlen(prefix);
+	}
+	//Remove trailing '/' at the end of prefix
+	while (len && prefix[len - 1] == '/') {
+		len--;
+	}
+
+	//make sure a '/' will always be added between prefix and path
 	if (path[0] == '/') {
-		abspath = strdup_or_die(path);
+		string_or_die(&fname, "%.*s%s", len, prefix, path);
 	} else {
-		string_or_die(&abspath, "/%s", path);
+		string_or_die(&fname, "%.*s/%s", len, prefix, path);
 	}
-
-	if (prefix == NULL) {
-		return abspath;
-	}
-
-	// The prefix is a minimum of "/" or "".  If the prefix is only that,
-	// just use abspath.  If the prefix is longer than the minimal, insure
-	// it ends in not "/" and append abspath.
-	if ((strcmp(prefix, "/") == 0) ||
-	    (strcmp(prefix, "") == 0)) {
-		// rootfs, use absolute path
-		fname = strdup_or_die(abspath);
-	} else if (strcmp(&prefix[strlen(prefix) - 1], "/") == 0) {
-		// chroot and need to strip trailing "/" from prefix
-		char *tmp = strdup_or_die(prefix);
-		tmp[strlen(tmp) - 1] = '\0';
-
-		string_or_die(&fname, "%s%s", tmp, abspath);
-		free_string(&tmp);
-	} else {
-		// chroot and no need to strip trailing "/" from prefix
-		string_or_die(&fname, "%s%s", prefix, abspath);
-	}
-	free_string(&abspath);
 	return fname;
 }
 

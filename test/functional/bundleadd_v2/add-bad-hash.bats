@@ -2,7 +2,7 @@
 
 load "../testlib"
 
-setup() {
+test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle -f /usr/bin/file1 "$TEST_NAME"
@@ -22,12 +22,6 @@ setup() {
 
 }
 
-teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "bundle-add add bundle containing file with different hash from what is listed in manifest" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
@@ -38,8 +32,6 @@ teardown() {
 	assert_file_not_exists "$TEST_NAME"/target-dir/usr/bin/file1
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
-
-		File /usr/bin/file1 was not in a pack
 		.
 		Finishing download of update content...
 		Error: File content hash mismatch for $TEST_DIRNAME/state/staged/e6d85023c5e619eb43d5cfbfdbdec784afef5a82ffa54e8c93bda3e0883360a3 (bad server data?)

@@ -24,6 +24,7 @@ install:
         - tar -xvf v3.3.1.tar.gz
         - pushd libarchive-3.3.1 && autoreconf -fi && ./configure --prefix=/usr && make && sudo make install && popd
         - sudo apt-get install python3-docutils
+        - sudo apt-get install realpath
         - sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
 
 # Ubuntu's default umask is 0002, but this break's swupd hash calculations.

@@ -2,7 +2,7 @@
 
 load "../testlib"
 
-setup() {
+test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle -f /usr/bin/test-file "$TEST_NAME"
@@ -13,17 +13,11 @@ setup() {
 
 }
 
-teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "bundle-add add bundle with bad hash in state dir" {
  
- 	# since one of the files needed to install the bundle is already in the state/staged
- 	# directory, in theory this one shuld be used instead of downloading it again...
- 	# however since the hash of this file is wrong it should be deleted and re-downloaded
+	# since one of the files needed to install the bundle is already in the state/staged
+	# directory, in theory this one should be used instead of downloading it again...
+	# however since the hash of this file is wrong it should be deleted and re-downloaded
  	hash_before=$(sudo "$SWUPD" hashdump "$TEST_NAME"/state/staged/"$file_hash")
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
@@ -34,8 +28,6 @@ teardown() {
 	assert_not_equal "$hash_before" "$hash_after"
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
-
-		File /usr/bin/test-file was not in a pack
 		.
 		Finishing download of update content...
 		Installing bundle(s) files...

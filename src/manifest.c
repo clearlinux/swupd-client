@@ -1306,6 +1306,9 @@ struct file **manifest_files_to_array(struct manifest *manifest)
 	numfiles = manifest->filecount;
 
 	array = malloc(sizeof(struct file *) * numfiles);
+	if (!array) {
+		abort();
+	}
 
 	iter = list_head(manifest->files);
 	while (iter) {

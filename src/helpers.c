@@ -157,6 +157,43 @@ static int ensure_root_owned_dir(const char *dirname)
 	return true; /* doesn't exist now */
 }
 
+int is_populated_dir(char *dirname)
+{
+	int n = 0;
+	struct dirent *d;
+	DIR *dir = opendir(dirname);
+	if (dir == NULL) {
+		return 0;
+	}
+	while ((d = readdir(dir)) != NULL) {
+		/* account for '.' and '..' */
+		if (++n > 2) {
+			closedir(dir);
+			return 1;
+		}
+	}
+	closedir(dir);
+	return 0;
+}
+
+int copy_all(const char *src, const char *dst)
+{
+	char *cmd;
+	string_or_die(&cmd, "cp -a %s %s 2> /dev/null", src, dst);
+	int ret = system(cmd);
+	free_string(&cmd);
+	return ret;
+}
+
+int mkdir_p(const char *dir)
+{
+	char *cmd;
+	string_or_die(&cmd, "umask 077 ; mkdir -p %s", dir);
+	int ret = system(cmd);
+	free_string(&cmd);
+	return ret;
+}
+
 static int create_required_dirs(void)
 {
 	int ret = 0;
@@ -172,14 +209,11 @@ static int create_required_dirs(void)
 		string_or_die(&dir, "%s/%s", state_dir, state_dirs[i]);
 		ret = ensure_root_owned_dir(dir);
 		if (ret) {
-			char *cmd;
-			string_or_die(&cmd, "umask 077 ; mkdir -p %s", dir);
-			ret = system(cmd);
+			ret = mkdir_p(dir);
 			if (ret) {
 				fprintf(stderr, "Error: failed to create %s\n", dir);
 				return -1;
 			}
-			free_string(&cmd);
 		}
 		free_string(&dir);
 	}

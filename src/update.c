@@ -65,7 +65,7 @@ static int check_manifests_uniqueness(int clrver, int mixver)
 
 	if (clearfull == NULL || mixerfull == NULL) {
 		fprintf(stderr, "Could not convert full manifest to array\n");
-		abort();
+		return -1;
 	}
 
 	int ret = enforce_compliant_manifest(mixerfull, clearfull, mixer->filecount, clear->filecount);
@@ -282,12 +282,15 @@ version_check:
 			// new mix version
 			check_mix_versions(&mix_current_version, &mix_server_version, path_prefix);
 			ret = check_manifests_uniqueness(server_version, mix_server_version);
-			if (ret) {
+			if (ret > 0) {
 				printf("\n\t!! %i collisions were found between mix and upstream, please re-create mix !!\n", ret);
 				if (!allow_mix_collisions) {
 					ret = EXIT_FAILURE;
 					goto clean_curl;
 				}
+			} else if (ret < 0) {
+				ret = EXIT_FAILURE;
+				goto clean_curl;
 			}
 
 			goto version_check;

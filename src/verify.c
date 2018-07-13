@@ -436,9 +436,6 @@ static void add_missing_files(struct manifest *official_manifest)
 		}
 
 		fullname = mk_full_filename(path_prefix, file->filename);
-		if (fullname == NULL) {
-			abort();
-		}
 		memset(&local, 0, sizeof(struct file));
 		local.filename = file->filename;
 		populate_file_struct(&local, fullname);
@@ -511,9 +508,6 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 
 	/* compare the hash and report mismatch */
 	fullname = mk_full_filename(path_prefix, file->filename);
-	if (fullname == NULL) {
-		abort();
-	}
 	if (verify_file(file, fullname)) {
 		goto end;
 	}
@@ -600,9 +594,6 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 		}
 
 		fullname = mk_full_filename(path_prefix, file->filename);
-		if (fullname == NULL) {
-			abort();
-		}
 
 		if (lstat(fullname, &sb) != 0) {
 			/* correctly, the file is not present */

@@ -228,10 +228,10 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 		 * completing the download encounters further problems. */
 		curl_ret = swupd_download_file_complete(msg->data.result, &file->file);
 
-		/* if the server returns HTTP 200 the download is sucessful.
+		/* if the server returns HTTP 200 the download is successful.
 		 * When using the FILE:// protocol, 0 also indicates success. */
 		if ((response == 200 && curl_ret == CURLE_OK) || (local_download && response == 0)) {
-			if (!h->success_cb(file->data)) {
+			if (h->success_cb && !h->success_cb(file->data)) {
 				// Retry download if cb return is false. File probably corrupted
 				unlink(file->file.path);
 				h->failed = list_prepend_data(h->failed, file);

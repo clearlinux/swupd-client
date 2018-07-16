@@ -95,6 +95,7 @@ static int download_loop(void *download_handle, struct list *files, int *num_dow
 	print_progress(list_length, list_length); /* Force out 100% */
 	printf("\n");
 
+	fprintf(stderr, "Finishing download of update content...\n");
 	return swupd_curl_parallel_download_end(download_handle, num_downloads);
 }
 
@@ -125,6 +126,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	}
 
 	download_handle = swupd_curl_parallel_download_start(MAX_XFER, MAX_XFER_BOTTOM, download_successful);
+	fprintf(stderr, "Starting download of remaining update content. This may take a while...\n");
 	if (!download_handle) {
 		/* If we hit this point, the network is accessible but we were
 		 * unable to download the needed files. This is a terminal error

@@ -165,8 +165,6 @@ void *swupd_curl_parallel_download_start(size_t max_xfer, size_t max_xfer_bottom
 	h->curl_hashmap = hashmap_new(SWUPD_CURL_HASH_BUCKETS, file_hash_cmp, file_hash_value);
 	h->timeout = RETRY_TIMEOUT;
 
-	fprintf(stderr, "Starting download of remaining update content. This may take a while...\n");
-
 	return h;
 error:
 	free(h);
@@ -486,7 +484,6 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 	}
 
 	h = handle;
-	fprintf(stderr, "Finishing download of update content...\n");
 
 	while (poll_fewer_than(h, 0, 0) == 0 && retry) {
 		retry = false;

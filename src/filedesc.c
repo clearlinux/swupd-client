@@ -25,11 +25,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/select.h>
 #include <sys/types.h>
 #include <unistd.h>
 
 #include "swupd.h"
 
+/* global structure to hold open file descriptors at startup time */
+static fd_set open_fds;
+
+/* This function takes 2 parameters, one is a function pointer and the
+ * second is void* and so can be almost anything.
+ *
+ * This loops over all the file descriptors that are open according to
+ * /proc/self/fd, ignoring stdin, stdout, stderr and the file
+ * descriptor that is being used to read the directory. For any
+ * additional ones it calls the user supplied function with 2
+ * parameters, the file descriptor number and the void* that is passed
+ * in.
+ *
+ * Currently there is no immediate uses for this void*, but by passing
+ * a pointer to a struct additional parameters could be passed in, and
+ * results returned via elements of the struct rather than using
+ * global values.
+ */
 static void foreach_open_fd(void(pf)(int, void *), void *arg)
 {
 	DIR *dir;
@@ -77,6 +96,9 @@ static void dump_file_descriptor_leaks_int(int n, void *a)
 	char buffer[PATH_MAXLEN + 1];
 	ssize_t size;
 	a = a; /* Silence warning */
+	if (FD_ISSET(n, &open_fds)) {
+		return; /* Was already open */
+	}
 	string_or_die(&filename, "/proc/self/fd/%d", n);
 	if ((size = readlink(filename, buffer, PATH_MAXLEN)) != -1) {
 		buffer[size] = '\0'; /* Supply the terminator */
@@ -93,13 +115,14 @@ void dump_file_descriptor_leaks(void)
 }
 
 /* Internal function */
-static void close_fds_int(int n, void *arg)
+static void record_fds_int(int n, void *arg)
 {
 	arg = arg; /* silence warning */
-	close(n);
+	FD_SET(n, &open_fds);
 }
 
-void close_fds(void)
+void record_fds(void)
 {
-	foreach_open_fd(&close_fds_int, NULL);
+	FD_ZERO(&open_fds); /* Clean slate */
+	foreach_open_fd(&record_fds_int, NULL);
 }

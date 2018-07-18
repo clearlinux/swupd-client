@@ -18,7 +18,9 @@ swupd_SOURCES = \
 	src/clr_bundle_add.c \
 	src/clr_bundle_ls.c \
 	src/clr_bundle_rm.c \
+	src/curl-internal.h \
 	src/curl.c \
+	src/datatypes.h \
 	src/delta.c \
 	src/download.c \
 	src/extra_files.c \

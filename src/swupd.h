@@ -322,7 +322,6 @@ extern bool verify_file(struct file *file, char *filename);
 extern bool verify_file_lazy(char *filename);
 extern int verify_bundle_hash(struct manifest *manifest, struct file *bundle);
 extern void unlink_all_staged_content(struct file *file);
-extern void dump_file_descriptor_leaks(void);
 extern int rm_staging_dir_contents(const char *rel_path);
 void free_file_data(void *data);
 void free_manifest_data(void *data);
@@ -341,6 +340,10 @@ extern int mkdir_p(const char *dir);
 
 extern void run_scripts(bool block);
 extern void run_preupdate_scripts(struct manifest *manifest);
+
+/* filedesc.c */
+extern void dump_file_descriptor_leaks(void);
+extern void close_fds(void);
 
 /* lock.c */
 int p_lockfile(void);

@@ -534,6 +534,7 @@ int swupd_init(int *lock_fd)
 	int ret = 0;
 
 	check_root();
+	close_fds();
 
 	/* Check that our system time is reasonably valid before continuing,
 	 * or the certificate verification will fail with invalid time */

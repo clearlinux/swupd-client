@@ -30,55 +30,76 @@
 
 #include "swupd.h"
 
-void dump_file_descriptor_leaks(void)
+static void foreach_open_fd(void(pf)(int, void *), void *arg)
 {
 	DIR *dir;
 	struct dirent *entry;
+	int dir_fd;
 
 	dir = opendir("/proc/self/fd");
 	if (!dir) {
 		return;
 	}
+	/* we hold an fd open, the one from opendir above */
+	dir_fd = dirfd(dir);
 
-	while (1) {
-		char *filename;
-		char buffer[PATH_MAXLEN + 1];
-		entry = readdir(dir);
-		size_t size;
-		if (!entry) {
-			break;
-		}
-		if (strcmp(entry->d_name, ".") == 0) {
-			continue;
-		}
-		if (strcmp(entry->d_name, "..") == 0) {
-			continue;
-		}
-		/* skip stdin/out/err */
-		if (strcmp(entry->d_name, "0") == 0) {
-			continue;
-		}
-		if (strcmp(entry->d_name, "1") == 0) {
-			continue;
-		}
-		if (strcmp(entry->d_name, "2") == 0) {
+	while ((entry = readdir(dir)) != NULL) {
+		int n;
+		char *ep;
+
+		/* Convert it to an integer */
+		if ((entry->d_name[0] < '0') || (entry->d_name[0] > '9')) {
+			/* ignore anthing that is not a number */
 			continue;
 		}
 
-		/* we hold an fd open, the one from opendir above */
-		sprintf(buffer, "%i", dirfd(dir));
-		if (strcmp(entry->d_name, buffer) == 0) {
-			continue;
+		n = strtol(entry->d_name, &ep, 10);
+		if (*ep) {
+			continue; /* Trailing non digits */
 		}
 
-		string_or_die(&filename, "/proc/self/fd/%s", entry->d_name);
-		memset(&buffer, 0, sizeof(buffer));
-		size = readlink(filename, buffer, PATH_MAXLEN);
-		if (size && !strstr(buffer, "socket")) {
-			fprintf(stderr, "Possible filedescriptor leak: fd_number=\"%s\",fd_details=\"%s\"\n", entry->d_name, buffer);
+		/* Skip stdin, stdout, stderr and the file descriptor we are using */
+		if (n == 0 || n == 1 || n == 2 || n == dir_fd) {
+			continue;
 		}
-		free_string(&filename);
+		(*pf)(n, arg); /* Call user function */
 	}
 
 	closedir(dir);
+}
+
+/* Provide for passing and returning an arg
+ * Internal function
+ */
+static void dump_file_descriptor_leaks_int(int n, void *a)
+{
+	char *filename;
+	char buffer[PATH_MAXLEN + 1];
+	ssize_t size;
+	a = a; /* Silence warning */
+	string_or_die(&filename, "/proc/self/fd/%d", n);
+	if ((size = readlink(filename, buffer, PATH_MAXLEN)) != -1) {
+		buffer[size] = '\0'; /* Supply the terminator */
+		if (!strstr(buffer, "socket")) {
+			fprintf(stderr, "Possible filedescriptor leak: fd_number=\"%d\",fd_details=\"%s\"\n", n, buffer);
+		}
+	}
+	free_string(&filename);
+}
+
+void dump_file_descriptor_leaks(void)
+{
+	foreach_open_fd(&dump_file_descriptor_leaks_int, NULL);
+}
+
+/* Internal function */
+static void close_fds_int(int n, void *arg)
+{
+	arg = arg; /* silence warning */
+	close(n);
+}
+
+void close_fds(void)
+{
+	foreach_open_fd(&close_fds_int, NULL);
 }

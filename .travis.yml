@@ -17,7 +17,7 @@ install:
         - pushd bsdiff-1.0.2 && ./configure --prefix=/usr --disable-tests && make -j48 && sudo make install && popd
         - wget https://curl.haxx.se/download/curl-7.51.0.tar.gz
         - tar -xvf curl-7.51.0.tar.gz
-        - pushd curl-7.51.0 && ./configure --prefix=/usr && make -j48 && sudo make install && popd
+        - pushd curl-7.51.0 && ./configure --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu && make -j48 && sudo make install && popd
         - wget https://download.clearlinux.org/releases/13010/clear/Swupd_Root.pem
         - sudo install -D -m0644 Swupd_Root.pem /usr/share/clear/update-ca/Swupd_Root.pem
         - wget https://github.com/libarchive/libarchive/archive/v3.3.1.tar.gz

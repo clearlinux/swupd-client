@@ -343,7 +343,7 @@ extern void run_preupdate_scripts(struct manifest *manifest);
 
 /* filedesc.c */
 extern void dump_file_descriptor_leaks(void);
-extern void close_fds(void);
+extern void record_fds(void);
 
 /* lock.c */
 int p_lockfile(void);

@@ -6,5 +6,4 @@
 ^Update took .* seconds$
 ^sh: .*/usr/bin/clr-boot-manager: No such file or directory$
 ^sh: .*/usr/bin/clr-boot-manager: not found$
-^Possible filedescriptor leak: .*$
 ^\.+$

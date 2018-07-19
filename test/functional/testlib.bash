@@ -764,6 +764,131 @@ create_bundle() {
 
 }
 
+# Removes a bundle from the target-dir and/or the web-dir
+# Parameters
+# - -L: if this option is set the bundle is removed from the target-dir only,
+#       otherwise it is removed from target-dir and web-dir
+# - BUNDLE_MANIFEST: the manifest of the bundle to be removed
+remove_bundle() {
+
+	local remove_local=false
+	[ "$1" = "-L" ] && { remove_local=true ; shift ; }
+	local bundle_manifest=$1
+	local target_path
+	local version_path
+	local bundle_name
+	local file_names
+	local dir_names
+	local manifest_file
+
+	# if the bundle's manifest is not found just return
+	if [ ! -e "$bundle_manifest" ]; then
+		echo "$(basename $bundle_manifest) not found, maybe the bundle was already removed"
+		return
+	fi
+
+	target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/target-dir
+	version_path=$(dirname "$bundle_manifest")
+	manifest_file=$(basename "$bundle_manifest")
+	bundle_name=${manifest_file#Manifest.}
+
+	# remove all files that are in the manifest from target-dir first
+	file_names=($(awk '/^[FL]...\t/ { print $4 }' "$bundle_manifest"))
+	for fname in ${file_names[@]}; do
+		sudo rm -f "$target_path$fname"
+	done
+	# now remove all directories in the manifest (only if empty else they
+	# may be used by another bundle)
+	dir_names=($(awk '/^D...\t/ { print $4 }' "$bundle_manifest"))
+	for dname in ${dir_names[@]}; do
+		sudo rmdir "$target_path$dname" 2> /dev/null
+	done
+	if [ "$remove_local" = false ]; then
+		# remove all files that are in the manifest from web-dir
+		file_names=($(awk '/^[FL]...\t/ { print $2 }' "$bundle_manifest"))
+		for fname in ${file_names[@]}; do
+			sudo rm "$version_path"/files/"$fname"
+			sudo rm "$version_path"/files/"$fname".tar
+		done
+		# remove zero pack
+		sudo rm "$version_path"/pack-"$bundle_name"-from-0.tar
+		# finally remove the manifest
+		sudo rm "$version_path"/"$manifest_file"
+		sudo rm "$version_path"/"$manifest_file".tar
+	fi
+
+}
+
+# Installs a bundle in target-dir
+# Parameters:
+# - BUNDLE_MANIFEST: the manifest of the bundle to be installed
+
+install_bundle() {
+
+	local bundle_manifest=$1
+	local target_path
+	local file_names
+	local dir_names
+	local link_names
+	local fhash
+	local lhash
+	local fdir
+	local manifest_file
+	local bundle_name
+
+	validate_item "$bundle_manifest"
+	target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/target-dir
+	files_path=$(dirname "$bundle_manifest")/files
+	manifest_file=$(basename "$bundle_manifest")
+	bundle_name=${manifest_file#Manifest.}
+
+	# make sure the bundle is not already installed
+	if [ -e "$target_path"/usr/share/clear/bundles/"$bundle_name" ]; then
+		return
+	fi
+
+	# iterate through the manifest and copy all the files in its
+	# correct place, start with directories
+	dir_names=($(awk '/^D...\t/ { print $4 }' "$bundle_manifest"))
+	for dname in ${dir_names[@]}; do
+		sudo mkdir -p "$target_path$dname"
+	done
+	# now files
+	file_names=($(awk '/^F...\t/ { print $4 }' "$bundle_manifest"))
+	for fname in ${file_names[@]}; do
+		fhash=$(get_hash_from_manifest "$bundle_manifest" "$fname")
+		sudo cp "$files_path"/"$fhash" "$target_path$fname"
+	done
+	# finally links
+	link_names=($(awk '/^L...\t/ { print $4 }' "$bundle_manifest"))
+	for lname in ${link_names[@]}; do
+		lhash=$(get_hash_from_manifest "$bundle_manifest" "$lname")
+		fhash=$(readlink "$files_path"/"$lhash")
+		# is the original link dangling?
+		if [[ $fhash = *"does_not_exist"* ]]; then
+			sudo ln -s "$fhash" "$target_path$lname"
+		else
+			fname=$(awk "/$fhash/ "'{ print $4 }' "$bundle_manifest")
+			sudo ln -s $(basename "$fname") "$target_path$lname"
+		fi
+	done
+
+}
+
+# Cleans up the directories in the state dir
+# Parameters:
+# - ENV_NAME: the name of the test environment to have the state dir cleaned up
+clean_state_dir() {
+
+	local env_name=$1
+	validate_path "$env_name"
+
+	sudo rm -rf "$env_name"/state/{staged,download,delta,telemetry}
+	sudo mkdir -p "$env_name"/state/{staged,download,delta,telemetry}
+	sudo chmod -R 0700 "$env_name"/state
+
+}
+
 # Creates a new test case based on a template
 # Parameters:
 # - NAME: the name (and path) of the test to be generated

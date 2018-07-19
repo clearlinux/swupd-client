@@ -125,7 +125,8 @@ int download_fullfiles(struct list *files, int *num_downloads)
 		return 0;
 	}
 
-	download_handle = swupd_curl_parallel_download_start(MAX_XFER, MAX_XFER_BOTTOM, download_successful);
+	download_handle = swupd_curl_parallel_download_start(MAX_XFER, MAX_XFER_BOTTOM);
+	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, NULL, NULL);
 	fprintf(stderr, "Starting download of remaining update content. This may take a while...\n");
 	if (!download_handle) {
 		/* If we hit this point, the network is accessible but we were

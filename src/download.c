@@ -261,7 +261,7 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 
 		/* if the server returns HTTP 200 the download is successful.
 		 * When using the FILE:// protocol, 0 also indicates success. */
-		if ((response == 200 && curl_ret == CURLE_OK) || (local_download && response == 0)) {
+		if (curl_ret == CURLE_OK && (response == 200 || local_download)) {
 			if (h->success_cb && !h->success_cb(file->data)) {
 				// Retry download if cb return is false. File probably corrupted
 				unlink(file->file.path);
@@ -270,6 +270,13 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 		} else {
 			fprintf(stderr, "Error for %s download: Response %ld - %s\n",
 				file->file.path, response, curl_easy_strerror(msg->data.result));
+
+			//If local download and file doesn't exist set a 404
+			//response code to simulate same behavior as HTTP
+			if (local_download && curl_ret == CURLE_FILE_COULDNT_READ_FILE) {
+				response = 404;
+			}
+
 			//Check if user can handle errors
 			if (!h->error_cb || !h->error_cb(response, file->data)) {
 				h->failed = list_prepend_data(h->failed, file);

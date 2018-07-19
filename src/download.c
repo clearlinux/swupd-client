@@ -79,10 +79,12 @@ struct swupd_curl_parallel_handle {
 	size_t mcurl_size, max_xfer, max_xfer_bottom; /* hysteresis parameters */
 	bool resume_failed;
 
-	CURLM *mcurl;			   /* Curl handle */
-	struct list *failed;		   /* List of failed downloads */
-	struct hashmap *curl_hashmap;      /* Hashmap mentioned above */
-	swupd_curl_download_cb success_cb; /* Callback to sucess function */
+	CURLM *mcurl;			  /* Curl handle */
+	struct list *failed;		  /* List of failed downloads */
+	struct hashmap *curl_hashmap;     /* Hashmap mentioned above */
+	swupd_curl_success_cb success_cb; /* Callback to success function */
+	swupd_curl_error_cb error_cb;     /* Callback to error function */
+	swupd_curl_free_cb free_cb;       /* Callback to free user data*/
 };
 
 /*
@@ -121,6 +123,10 @@ static void free_curl_file(struct swupd_curl_parallel_handle *h, struct multi_cu
 	CURL *curl = file->curl;
 	swupd_download_file_complete(CURLE_OK, &file->file);
 
+	if (h->free_cb) {
+		h->free_cb(file->data);
+	}
+
 	free_string(&file->url);
 	free_string(&file->file.path);
 	if (curl != NULL) {
@@ -138,14 +144,13 @@ static void free_curl_file(struct swupd_curl_parallel_handle *h, struct multi_cu
  * Parameters:
  *  - max_xfer: The maximum number of simultaneos downloads.
  *  - max_xfer_bottom: Minimum number of simultaneos downloads before starting
- *  - sucess_cb(): Callback called for each sucessfull download.
  *
  * Parallel download handler will retry MAX_TRIES times to download each file,
  * ading a timeout between each try.
  *
  * Note: This function is non-blocking.
  */
-void *swupd_curl_parallel_download_start(size_t max_xfer, size_t max_xfer_bottom, swupd_curl_download_cb success_cb)
+void *swupd_curl_parallel_download_start(size_t max_xfer, size_t max_xfer_bottom)
 {
 	struct swupd_curl_parallel_handle *h = calloc(1, sizeof(struct swupd_curl_parallel_handle));
 	if (!h) {
@@ -161,7 +166,6 @@ void *swupd_curl_parallel_download_start(size_t max_xfer, size_t max_xfer_bottom
 
 	h->max_xfer = max_xfer;
 	h->max_xfer_bottom = max_xfer_bottom;
-	h->success_cb = success_cb;
 	h->curl_hashmap = hashmap_new(SWUPD_CURL_HASH_BUCKETS, file_hash_cmp, file_hash_value);
 	h->timeout = RETRY_TIMEOUT;
 
@@ -169,6 +173,35 @@ void *swupd_curl_parallel_download_start(size_t max_xfer, size_t max_xfer_bottom
 error:
 	free(h);
 	return NULL;
+}
+
+/*
+ * Set parallel downloads callbacks.
+ *
+ *  - success_cb(): Called for each successful download, where data is the data
+ *                  informed on swupd_curl_parallel_download_enqueue().
+ *                  success_cb should return true if the download file was
+ *                  handled correctly. Return false to schedule a retry.
+ *  - error_cb():   Called for each failed download, where data is the data
+ *                  informed on swupd_curl_parallel_download_enqueue()
+ *                  and response is the HTTP response code. error_cb should
+ *                  return true if the error was handled by caller or false
+ *                  to schedule a retry.
+ * - free_cb():     Called when data is ready to be freed.
+ */
+void swupd_curl_parallel_download_set_callbacks(void *handle, swupd_curl_success_cb success_cb, swupd_curl_error_cb error_cb, swupd_curl_free_cb free_cb)
+{
+	struct swupd_curl_parallel_handle *h;
+
+	if (!handle) {
+		fprintf(stderr, "Invalid parallel download handle\n");
+		return;
+	}
+	h = handle;
+
+	h->success_cb = success_cb;
+	h->error_cb = error_cb;
+	h->free_cb = free_cb;
 }
 
 // Try to process at most COUNT messages from the curl multi-stack.
@@ -235,14 +268,17 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 				h->failed = list_prepend_data(h->failed, file);
 			}
 		} else {
-			h->failed = list_prepend_data(h->failed, file);
-			//Download resume isn't supported. Disabling it for next try
-			if (curl_ret == CURLE_RANGE_ERROR) {
-				fprintf(stderr, "Range command not supported by server, download resume disabled.\n");
-				h->resume_failed = true;
-			}
 			fprintf(stderr, "Error for %s download: Response %ld - %s\n",
 				file->file.path, response, curl_easy_strerror(msg->data.result));
+			//Check if user can handle errors
+			if (!h->error_cb || !h->error_cb(response, file->data)) {
+				h->failed = list_prepend_data(h->failed, file);
+				//Download resume isn't supported. Disabling it for next try
+				if (curl_ret == CURLE_RANGE_ERROR) {
+					fprintf(stderr, "Range command not supported by server, download resume disabled.\n");
+					h->resume_failed = true;
+				}
+			}
 		}
 
 		/* NOTE: Intentionally no removal of file from hashmap.  All

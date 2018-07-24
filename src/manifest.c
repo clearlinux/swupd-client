@@ -254,6 +254,10 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 			file->is_link = 1;
 		} else if (c[0] == 'M') {
 			file->is_manifest = 1;
+		} else if (c[0] == 'I') {
+			/* ignore this file for future iterative manifest feature */
+			free(file);
+			continue;
 		} else if (c[0] != '.') { /* unknown file type */
 			free(file);
 			goto err;

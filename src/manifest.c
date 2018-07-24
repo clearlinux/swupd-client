@@ -1339,9 +1339,9 @@ static int is_version_data(const char *filename)
 	if (strcmp(filename, "/usr/lib/os-release") == 0 ||
 	    strcmp(filename, "/usr/share/clear/version") == 0 ||
 	    strcmp(filename, "/usr/share/clear/versionstamp") == 0 ||
-	    strcmp(filename, "/usr/share/defaults/swupd/versionurl") == 0 ||
-	    strcmp(filename, "/usr/share/defaults/swupd/contenturl") == 0 ||
-	    strcmp(filename, "/usr/share/defaults/swupd/format") == 0 ||
+	    strcmp(filename, DEFAULT_VERSION_URL_PATH) == 0 ||
+	    strcmp(filename, DEFAULT_CONTENT_URL_PATH) == 0 ||
+	    strcmp(filename, DEFAULT_FORMAT_PATH) == 0 ||
 	    strcmp(filename, "/usr/share/clear/update-ca/Swupd_Root.pem") == 0 ||
 	    strcmp(filename, "/usr/share/clear/os-core-update-index") == 0 ||
 	    strcmp(filename, "/usr/share/clear/allbundles/os-core") == 0) {

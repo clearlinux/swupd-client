@@ -412,6 +412,47 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 	return ret;
 }
 
+/*
+ * Only called when a file has failed to be fixed during a verify or install.
+ * If a low-space warning has been printed, don't check again,
+ * but just warn the user and return.
+*/
+static void check_warn_freespace(const struct file *file)
+{
+	long fs_free;
+	char *original = NULL;
+	static bool no_freespace_flag = false;
+	struct stat st;
+
+	if (!(cmdline_option_install || cmdline_option_fix)) {
+		goto out;
+	}
+
+	/* If true, skip expensive operations for future file failures, decreasing time to completion. */
+	if (no_freespace_flag) {
+		fprintf(stderr, "\tWarning: No space left on device\n");
+		goto out;
+	}
+
+	string_or_die(&original, "%s/staged/%s", state_dir, file->hash);
+	fs_free = get_available_space(path_prefix);
+	if (fs_free < 0 || stat(original, &st) != 0) {
+		fprintf(stderr, "\tWarning: Unable to determine free space on filesystem.\n");
+		goto out;
+	}
+
+	if (fs_free < st.st_size * 1.1) {
+		fprintf(stderr, "\tWarning: File to install (%s) too large by %ldK.\n",
+			file->filename, (st.st_size - fs_free) / 1000);
+		/* set flag to skip checking space on the second failure, assume we're still out of space */
+		no_freespace_flag = true;
+	}
+
+out:
+	fprintf(stderr, "\tContinuing operation...\n");
+	free_string(&original);
+}
+
 /* for each missing but expected file, (re)add the file */
 static void add_missing_files(struct manifest *official_manifest)
 {
@@ -474,6 +515,9 @@ static void add_missing_files(struct manifest *official_manifest)
 		if ((ret != 0) || hash_needs_work(file, local.hash)) {
 			file_not_replaced_count++;
 			printf("\n\tnot fixed\n");
+
+			check_warn_freespace(file);
+
 		} else {
 			file_replaced_count++;
 			file->do_not_update = 1;

@@ -302,44 +302,97 @@ run <some_command>
 assert_file_not_exists /some/file
 ```
 
-*assert_in_output*  
-passes if the provided text is included in the command output, fails otherwise  
+*assert_is_output*  
+passes if the provided text matches the whole command output, fails otherwise  
 Examples:  
 ```bash
 # one line strings
 run <some_command>
-assert_in_output "Successfully installed 1 bundle"
+assert_is_output "Some output"
 
 # multi-line strings
+run <some_command>
+expected_output=$(cat <<-EOM
+  Some text that needs
+  to match exactly with
+  the whole command output
+EOM
+)
+assert_is_output "$expected_output"
+```
+
+*assert_is_not_output*  
+passes if the provided text does not match the whole command output, fails otherwise  
+Examples:  
+```bash
+run <some_command>
+assert_is_not_output "This should not be the command output"
+```
+
+*assert_in_output*  
+passes if the provided text is included in the command output (partial match), fails otherwise  
+Examples:  
+```bash
 run <other_command>
 expected_output=$(cat <<-EOM
-  Some multi-ine text that needs to be present
-  in the exact order
-  some more lines, bla bla
+  Some multi-line output
+  some more lines,
+  bla bla
 EOM
 )
 assert_in_output "$expected_output"
-
-# combination of both
-run <yet_another_command>
-expected_output=$(cat <<-EOM
-  Some multi-ine text that needs to be present
-  in the exact order
-  some more lines, bla bla
-EOM
-)
-assert_in_output "some literall text"
-assert_in_output "$expected_output"
-assert_in_output "more text to be checked"
 ```
 
 *assert_not_in_output*  
-passes if the provided text is not included in the command output, fails otherwise  
+passes if the provided text is not included in the command output (partial match), fails otherwise  
 Examples:  
 ```bash
-# one line strings
 run <some_command>
 assert_not_in_output "Error"
+```
+
+*assert_regex_is_output*  
+similar to assert_is_output but this assertion receives a regular expression, passes
+if the provided regular expression matches the whole command output, fails otherwise  
+Examples:  
+```bash
+# remember to skip characters that are part of the expected
+# output that match special regex characters like .*?()[] 
+run <some_command>
+expected_output=$(cat <<-EOM
+  Some expected text that can have
+  regex characters like .* in it
+  \(skipping these pharenteses\)\.
+EOM
+)
+assert_regex_is_output "$expected_output"
+```
+
+*assert_regex_is_not_output*  
+similar to assert_is_not_output but this assertion receives a regular expression, passes
+if the provided regular expression does not match the command output, fails otherwise  
+Examples:  
+```bash
+run <some_command>
+assert_regex_is_not_output "Error .?"
+```
+
+*assert_regex_in_output*  
+similar to assert_in_output but this assertion receives a regular expression, passes
+if the provided regular expression is part of the command output (partial match), fails otherwise  
+Examples:  
+```bash
+run <some_command>
+assert_regex_in_output "This is part .* of the output"
+```
+
+*assert_regex_not_in_output*  
+similar to assert_not_in_output but this assertion receives a regular expression, passes
+if the provided regular expression is not part of the command output (partial match), fails otherwise  
+Examples:  
+```bash
+run <some_command>
+assert_regex_not_in_output "Error."
 ```
 
 *assert_equal*  

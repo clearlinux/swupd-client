@@ -11,6 +11,6 @@ load "../testlib"
 		There are no updates available
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

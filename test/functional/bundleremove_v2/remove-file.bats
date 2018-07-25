@@ -20,6 +20,6 @@ test_setup() {
 		Successfully removed 1 bundle
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

@@ -26,6 +26,6 @@ test_setup() {
 		test-bundle3
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

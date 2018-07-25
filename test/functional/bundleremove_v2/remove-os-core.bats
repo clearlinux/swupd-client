@@ -12,6 +12,6 @@ load "../testlib"
 		Failed to remove 1 of 1 bundles
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

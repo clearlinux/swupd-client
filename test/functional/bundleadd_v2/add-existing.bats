@@ -19,6 +19,6 @@ test_setup() {
 		1 bundle was already installed
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

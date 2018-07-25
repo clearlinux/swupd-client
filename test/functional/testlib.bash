@@ -126,6 +126,7 @@ set_env_variables() {
 
 	export SWUPD_OPTS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
 	export SWUPD_OPTS_NO_CERT="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir"
+	export SWUPD_OPTS_MIRROR="-p $path/$env_name/target-dir"
 	export TEST_DIRNAME="$path"/"$env_name"
 
 }
@@ -513,6 +514,9 @@ create_test_environment() {
 		printf 'BUG_REPORT_URL="https://bugs.clearlinux.org/jira"\n'
 	} | sudo tee "$env_name"/target-dir/usr/lib/os-release > /dev/null
 	sudo mkdir -p "$env_name"/target-dir/usr/share/clear/bundles
+	sudo mkdir -p "$env_name"/target-dir/usr/share/defaults/swupd
+	printf '1' | sudo tee "$env_name"/target-dir/usr/share/defaults/swupd/format > /dev/null
+	sudo mkdir -p "$env_name"/target-dir/etc
 
 	# state files & dirs
 	sudo mkdir -p "$env_name"/state/{staged,download,delta,telemetry}
@@ -1127,6 +1131,96 @@ assert_not_in_output() {
 		print_assert_failure "The following text was found in the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
 		echo "$(diff -u <(echo "$expected_output") <(echo "$output"))"
+		return 1
+	fi
+
+}
+
+assert_is_output() {
+
+	local expected_output=$1
+	local sep="------------------------------------------------------------------"
+	validate_param expected_output
+
+	if [[ ! "$output" == "$expected_output" ]]; then
+		print_assert_failure "The following text was not the command output:\\n$sep\\n$expected_output\\n$sep"
+		echo -e "Difference:\\n$sep"
+		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		return 1
+	fi
+
+}
+
+assert_is_not_output() {
+
+	local expected_output=$1
+	local sep="------------------------------------------------------------------"
+	validate_param expected_output
+
+	if [[ "$output" == "$expected_output" ]]; then
+		print_assert_failure "The following text was the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
+		echo -e "Difference:\\n$sep"
+		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		return 1
+	fi
+
+}
+
+assert_regex_in_output() {
+
+	local expected_output=$1
+	local sep="------------------------------------------------------------------"
+	validate_param expected_output
+
+	if [[ ! "$output" =~ $expected_output ]]; then
+		print_assert_failure "The following text (regex) was not found in the command output:\\n$sep\\n$expected_output\\n$sep"
+		echo -e "Difference:\\n$sep"
+		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		return 1
+	fi
+
+}
+
+assert_regex_not_in_output() {
+
+	local expected_output=$1
+	local sep="------------------------------------------------------------------"
+	validate_param expected_output
+
+	if [[ "$output" =~ $expected_output ]]; then
+		print_assert_failure "The following text (regex) was found in the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
+		echo -e "Difference:\\n$sep"
+		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		return 1
+	fi
+
+}
+
+assert_regex_is_output() {
+
+	local expected_output=$1
+	local sep="------------------------------------------------------------------"
+	validate_param expected_output
+
+	if [[ ! "$output" =~ ^$expected_output$ ]]; then
+		print_assert_failure "The following text (regex) was not the command output:\\n$sep\\n$expected_output\\n$sep"
+		echo -e "Difference:\\n$sep"
+		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		return 1
+	fi
+
+}
+
+assert_regex_is_not_output() {
+
+	local expected_output=$1
+	local sep="------------------------------------------------------------------"
+	validate_param expected_output
+
+	if [[ "$output" =~ ^$expected_output$ ]]; then
+		print_assert_failure "The following text (regex) was the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
+		echo -e "Difference:\\n$sep"
+		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
 		return 1
 	fi
 

@@ -14,6 +14,6 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS_NO_CERT"
 	assert_status_is_not 0
-	assert_in_output "Unable to determine current OS version"
+	assert_is_output "Unable to determine current OS version"
 
 }

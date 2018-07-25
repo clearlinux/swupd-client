@@ -37,7 +37,7 @@ test_setup() {
 		Error: File content hash mismatch for $TEST_DIRNAME/state/staged/e6d85023c5e619eb43d5cfbfdbdec784afef5a82ffa54e8c93bda3e0883360a3 (bad server data?)
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 

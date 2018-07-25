@@ -18,6 +18,6 @@ test_setup() {
 		No included bundles
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

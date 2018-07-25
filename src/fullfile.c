@@ -99,6 +99,11 @@ static int download_loop(void *download_handle, struct list *files, int *num_dow
 	return swupd_curl_parallel_download_end(download_handle, num_downloads);
 }
 
+static bool download_error(int response, UNUSED_PARAM void *data)
+{
+	return response == 404;
+}
+
 static bool download_successful(void *data)
 {
 	if (!data) {
@@ -126,7 +131,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	}
 
 	download_handle = swupd_curl_parallel_download_start(MAX_XFER, MAX_XFER_BOTTOM);
-	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, NULL, NULL);
+	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, download_error, NULL);
 	fprintf(stderr, "Starting download of remaining update content. This may take a while...\n");
 	if (!download_handle) {
 		/* If we hit this point, the network is accessible but we were

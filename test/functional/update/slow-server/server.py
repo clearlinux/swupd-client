@@ -4,8 +4,9 @@ import http.server as server
 import sys
 import time
 
-
 class SlowResponse(server.BaseHTTPRequestHandler):
+    first_time = True
+
     """Handler that returns data with a set delay between writes"""
     def do_GET(self):
         try:
@@ -15,16 +16,26 @@ class SlowResponse(server.BaseHTTPRequestHandler):
             self.end_headers()
             return
 
-        self.send_response(200)
+        #Simulate partial download
+        partial_download = False
+        if self.path == "//100/pack-os-core-from-10.tar" and SlowResponse.first_time:
+            partial_download = True
+            SlowResponse.first_time = False
+            self.send_response(206)
+        else:
+            self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
         delay = 0.00001 # seconds
 
         while True:
-            b = f.read(1000)
+            b = f.read(100)
             if b == b'':
                 break
+
             self.wfile.write(b)
+            if partial_download:
+                break;
             time.sleep(delay)
         self.wfile.flush()
         f.close()

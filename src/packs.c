@@ -35,9 +35,80 @@
 #include "swupd-build-variant.h"
 #include "swupd.h"
 
-static int download_pack(int oldversion, int newversion, char *module, int is_mix, bool resume_ok)
+/* hysteresis thresholds */
+#define MAX_XFER 25
+#define MAX_XFER_BOTTOM 15
+
+struct pack_data {
+	char *url;
+	char *filename;
+	const char *module;
+	int newversion;
+};
+
+static int finalize_pack_download(const char *module, int newversion, const char *filename)
 {
 	FILE *tarfile = NULL;
+	int err;
+
+	fprintf(stderr, "\nExtracting %s pack for version %i\n", module, newversion);
+	err = extract_to(filename, state_dir);
+
+	unlink(filename);
+
+	if (err == 0) {
+		/* make a zero sized file to prevent redownload */
+		tarfile = fopen(filename, "w");
+		if (tarfile) {
+			fclose(tarfile);
+		}
+	}
+
+	return err;
+}
+
+static void download_free_data(void *data)
+{
+	struct pack_data *pack_data = data;
+
+	if (!data) {
+		return;
+	}
+
+	free_string(&pack_data->url);
+	free_string(&pack_data->filename);
+	free(pack_data);
+}
+
+static bool download_error(int response, void *data)
+{
+	struct pack_data *pack_data = data;
+
+	if (!data) {
+		return false;
+	}
+
+	if (response == 404) {
+		telemetry(TELEMETRY_WARN, "packmissing", "url=%s\n", pack_data->url);
+		return true;
+	}
+
+	return false;
+}
+
+static bool download_successful(void *data)
+{
+	struct pack_data *pack_data = data;
+
+	if (!pack_data) {
+		return false;
+	}
+
+	return finalize_pack_download(pack_data->module, pack_data->newversion, pack_data->filename) == 0;
+}
+
+static int download_pack(void *download_handle, int oldversion, int newversion, char *module, int is_mix)
+{
 	char *url = NULL;
 	int err = -1;
 	char *filename;
@@ -60,47 +131,33 @@ static int download_pack(int oldversion, int newversion, char *module, int is_mi
 			return err;
 		}
 		printf("Linked %s to %s\n", url, filename);
+
+		err = finalize_pack_download(module, newversion, filename);
 		free_string(&url);
+		free_string(&filename);
 	} else {
+		struct pack_data *pack_data;
+
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, newversion, module, oldversion);
 
-		err = swupd_curl_get_file_full(url, filename, NULL, resume_ok);
-		if (err) {
-			if (err == -ENET404) {
-				telemetry(TELEMETRY_WARN, "packmissing",
-					  "url=%s\n", url);
-			}
-			free_string(&url);
-			if ((lstat(filename, &stat) == 0) && (stat.st_size == 0)) {
-				unlink(filename);
-			}
-			free_string(&filename);
-			return err;
+		pack_data = calloc(1, sizeof(struct pack_data));
+		if (!pack_data) {
+			abort();
 		}
-		free_string(&url);
+
+		pack_data->url = url;
+		pack_data->filename = filename;
+		pack_data->module = module;
+		pack_data->newversion = newversion;
+
+		err = swupd_curl_parallel_download_enqueue(download_handle, url, filename, NULL, pack_data);
 	}
 
-	fprintf(stderr, "\nExtracting %s pack for version %i\n", module, newversion);
-	err = extract_to(filename, state_dir);
-
-	unlink(filename);
-	/* make a zero sized file to prevent redownload */
-	tarfile = fopen(filename, "w");
-	free_string(&filename);
-	if (tarfile) {
-		fclose(tarfile);
-	}
-
-	// Only negative return values should indicate errors
-	if (err > 0) {
-		return -err;
-	} else {
-		return err;
-	}
+	return err;
 }
 
 /* pull in packs for base and any subscription */
-int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required, bool resume_ok)
+int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required)
 {
 	struct list *iter;
 	struct sub *sub = NULL;
@@ -108,8 +165,12 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	int is_mix = 0;
 	unsigned int list_length = list_len(subs);
 	unsigned int complete = 0;
+	void *download_handle;
 
 	fprintf(stderr, "Downloading packs...\n");
+	download_handle = swupd_curl_parallel_download_start(MAX_XFER, MAX_XFER_BOTTOM);
+
+	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, download_error, download_free_data);
 	iter = list_head(subs);
 	while (iter) {
 		sub = iter->data;
@@ -124,7 +185,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 		if (bundle) {
 			is_mix = bundle->is_mix;
 		}
-		err = download_pack(sub->oldversion, sub->version, sub->component, is_mix, resume_ok);
+		err = download_pack(download_handle, sub->oldversion, sub->version, sub->component, is_mix);
 		print_progress(complete, list_length);
 		if (err < 0) {
 			if (required) { /* Probably need printf("\n") here */
@@ -137,5 +198,5 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 
 	print_progress(list_length, list_length); /* Force out 100% */
 	printf("\n");
-	return 0;
+	return swupd_curl_parallel_download_end(download_handle, NULL);
 }

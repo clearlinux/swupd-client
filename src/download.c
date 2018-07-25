@@ -268,9 +268,6 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 				h->failed = list_prepend_data(h->failed, file);
 			}
 		} else {
-			fprintf(stderr, "Error for %s download: Response %ld - %s\n",
-				file->file.path, response, curl_easy_strerror(msg->data.result));
-
 			//If local download and file doesn't exist set a 404
 			//response code to simulate same behavior as HTTP
 			if (local_download && curl_ret == CURLE_FILE_COULDNT_READ_FILE) {
@@ -280,6 +277,9 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 			//Check if user can handle errors
 			if (!h->error_cb || !h->error_cb(response, file->data)) {
 				h->failed = list_prepend_data(h->failed, file);
+				fprintf(stderr, "Error for %s download: Response %ld - %s\n",
+					file->file.path, response, curl_easy_strerror(msg->data.result));
+
 				//Download resume isn't supported. Disabling it for next try
 				if (curl_ret == CURLE_RANGE_ERROR) {
 					fprintf(stderr, "Range command not supported by server, download resume disabled.\n");

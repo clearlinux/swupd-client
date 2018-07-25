@@ -8,6 +8,12 @@ port=""
 targetfile="6c27df6efcd6fc401ff1bc67c970b83eef115f6473db4fb9d57e5de317eba96e"
 
 setup() {
+  # Skip this test if not running in Travis CI, because test takes too long for
+  # local development. To run this locally do: TRAVIS=true make check
+  if [ -z "${TRAVIS}" ]; then
+    skip "Skipping slow test for local development, test only runs in CI"
+  fi
+
   for i in $(seq 8081 8181); do
     pushd "$DIR"
     "./server.py" $i &
@@ -24,7 +30,6 @@ setup() {
 
   #create partial tarball
   mkdir "$DIR/state/"
-  dd if=/dev/zero of="$DIR/state/pack-os-core-from-10-to-100.tar" bs=1 count=1 >/dev/null 2>/dev/null
   chown_root "$DIR/state"
   sudo chmod 700  "$DIR/state"
 
@@ -41,8 +46,11 @@ setup() {
 }
 
 teardown() {
-  sudo rm -rf "$DIR/target-dir/usr/bin"
-  kill $server_pid
+  # teardown only if in travis CI
+  if [ -n "${TRAVIS}" ]; then
+    sudo rm -rf "$DIR/target-dir/usr/bin"
+    kill $server_pid
+  fi
 }
 
 @test "update --download with a slow server" {

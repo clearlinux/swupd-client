@@ -276,7 +276,7 @@ static inline void account_delta_miss(void)
 extern void print_statistics(int version1, int version2);
 
 extern int download_fullfiles(struct list *files, int *num_downloads);
-extern int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required, bool resume_ok);
+extern int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required);
 
 extern void apply_deltas(struct manifest *current_manifest);
 extern int untar_full_download(void *data);

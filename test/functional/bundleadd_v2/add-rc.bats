@@ -214,6 +214,8 @@ global_teardown() {
 
 @test "bundle-add output: adding multiple bundles, one valid, one invalid, one already installed, one with a missing file" {
 
+
+	swupd_path=$(realpath $SWUPD_DIR)
 	# for this test we need a bundle with a missing file so it fails when
 	# trying to download the fullfile, remove the full file from test-bundle2
 	file_hash=$(get_hash_from_manifest "$TEST_NAME"/web-dir/10/Manifest.test-bundle2 /bar/test-file2)
@@ -222,19 +224,16 @@ global_teardown() {
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle2 fake-bundle test-bundle3"
 	assert_status_is "$EBUNDLE_INSTALL"
 	expected_output=$(cat <<-EOM
-		Warning: Bundle "fake-bundle" is invalid, skipping it\.\.\.
-		Warning: Bundle "test-bundle3" is already installed, skipping it\.\.\.
-		Starting download of remaining update content\. This may take a while\.\.\.
-		\.
-		Finishing download of update content\.\.\.
-		Error for $file_hash tarfile extraction, .*
-		Installing bundle\(s\) files\.\.\.
-		.Path /bar/test-file2 is missing on the file system \.\.\. fixing
+		Warning: Bundle "fake-bundle" is invalid, skipping it...
+		Warning: Bundle "test-bundle3" is already installed, skipping it...
+		Starting download of remaining update content. This may take a while...
+		Finishing download of update content...
+		Installing bundle(s) files...
+		.Path /bar/test-file2 is missing on the file system ... fixing
 		Error: Failed to download file /bar/test-file2 in verify_fix_path
 		Failed to install 3 of 3 bundles
 		1 bundle was already installed
 	EOM
 	)
-	assert_regex_is_output --identical "$expected_output"
-
+	assert_is_output "$expected_output"
 }

@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/statvfs.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -743,7 +742,6 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	struct list *iter;
 	struct list *to_install_bundles = NULL;
 	struct list *to_install_files = NULL;
-	struct list *ptr;
 	struct manifest *full_mom = NULL;
 	timelist times;
 
@@ -793,26 +791,13 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 
 	/* Step 1.5: Now that we know the bundle is valid, check if we have enough space */
 	if (!skip_diskspace_check) {
-		struct statvfs stat;
 		char *filepath = NULL;
 
-		ptr = list_head(to_install_bundles);
-		while (ptr) {
-			struct manifest *subman;
-			subman = ptr->data;
-			ptr = ptr->next;
-
-			bundle_size += subman->contentsize;
-		}
-
+		bundle_size = get_manifest_list_contentsize(to_install_bundles);
 		filepath = mk_full_filename(path_prefix, "/usr/");
 
 		/* Calculate free space on filepath */
-		if (statvfs(filepath, &stat) != 0) {
-			fs_free = -1;
-		} else {
-			fs_free = stat.f_bsize * stat.f_bavail;
-		}
+		fs_free = get_available_space(filepath);
 		free_string(&filepath);
 
 		/* Add 10% to bundle_size as a 'fudge factor' */

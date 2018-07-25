@@ -395,6 +395,11 @@ typedef enum telem_prio_t {
 } telem_prio_t;
 extern void telemetry(telem_prio_t level, const char *class, const char *fmt, ...);
 
+/* fs.c */
+extern long get_available_space(const char *path);
+/* Calculate the total contentsize of a manifest list */
+extern long get_manifest_list_contentsize(struct list *manifests);
+
 extern struct file **manifest_files_to_array(struct manifest *manifest);
 extern int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize, int size);
 extern void free_manifest_array(struct file **array);

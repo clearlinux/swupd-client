@@ -11,6 +11,6 @@ load "../testlib"
 		Error: Bad bundle name detected - Aborting
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

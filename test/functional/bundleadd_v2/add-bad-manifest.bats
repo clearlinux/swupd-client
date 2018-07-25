@@ -27,6 +27,6 @@ test_setup() {
 		Failed to install 1 of 1 bundles
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

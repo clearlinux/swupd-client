@@ -181,17 +181,23 @@ BATS = \
 	test/functional/checkupdate/version-match/test.bats \
 	test/functional/checkupdate_v2/chk-update-version-match.bats \
 	test/functional/completion/basic/test.bats \
+	test/functional/completion_v2/completion-basic.bats \
 	test/functional/hashdump/file-hash/test.bats \
 	test/functional/hashdump/file-hash-no-path-prefix/test.bats \
+	test/functional/hashdump_v2/hashdump-file-hash.bats \
 	test/functional/mirror/createdir/test.bats \
+	test/functional/mirror_v2/mirror-createdir.bats \
 	test/functional/mirror/createdir-negative/test.bats \
+	test/functional/mirror_v2/mirror-createdir-negative.bats \
 	test/functional/search/content-check-negfull-path/test.bats \
 	test/functional/search/content-check-neglibtest/test.bats \
+	test/functional/search_v2/search-content-check-negative.bats \
 	test/functional/search/content-check-posbin/test.bats \
 	test/functional/search/content-check-posebin/test.bats \
 	test/functional/search/content-check-posfull-path/test.bats \
 	test/functional/search/content-check-poslib32/test.bats \
 	test/functional/search/content-check-poslib64/test.bats \
+	test/functional/search_v2/search-content-check-positive.bats \
 	test/functional/update/apply-full-file-delta/test.bats \
 	test/functional/update/boot-file/test.bats \
 	test/functional/update/boot-skip/test.bats \

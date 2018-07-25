@@ -22,6 +22,6 @@ test_setup() {
 		There is a new OS version available: 100
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

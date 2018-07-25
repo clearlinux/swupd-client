@@ -25,6 +25,6 @@ test_setup() {
 		Error: Bundle list failed
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

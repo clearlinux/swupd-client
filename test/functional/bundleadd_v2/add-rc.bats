@@ -52,7 +52,7 @@ global_teardown() {
 		Successfully installed 1 bundle
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -70,7 +70,7 @@ global_teardown() {
 		Successfully installed 2 bundles
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -88,7 +88,7 @@ global_teardown() {
 		1 bundle was already installed
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -101,7 +101,7 @@ global_teardown() {
 		Failed to install 1 of 1 bundles
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -115,7 +115,7 @@ global_teardown() {
 		Failed to install 2 of 2 bundles
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -129,7 +129,7 @@ global_teardown() {
 		2 bundles were already installed
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -144,7 +144,7 @@ global_teardown() {
 		1 bundle was already installed
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -168,7 +168,7 @@ global_teardown() {
 		1 bundle was already installed
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -187,7 +187,7 @@ global_teardown() {
 		Failed to install 1 of 2 bundles
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -208,7 +208,7 @@ global_teardown() {
 		1 bundle was already installed
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -222,21 +222,19 @@ global_teardown() {
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle2 fake-bundle test-bundle3"
 	assert_status_is "$EBUNDLE_INSTALL"
 	expected_output=$(cat <<-EOM
-		Warning: Bundle "fake-bundle" is invalid, skipping it...
-		Warning: Bundle "test-bundle3" is already installed, skipping it...
-		Starting download of remaining update content. This may take a while...
-		.
-		Finishing download of update content...
-		Error for $file_hash tarfile extraction
-	EOM
-	)
-	assert_in_output "$expected_output"
-	expected_output=$(cat <<-EOM
+		Warning: Bundle "fake-bundle" is invalid, skipping it\.\.\.
+		Warning: Bundle "test-bundle3" is already installed, skipping it\.\.\.
+		Starting download of remaining update content\. This may take a while\.\.\.
+		\.
+		Finishing download of update content\.\.\.
+		Error for $file_hash tarfile extraction, .*
+		Installing bundle\(s\) files\.\.\.
+		.Path /bar/test-file2 is missing on the file system \.\.\. fixing
 		Error: Failed to download file /bar/test-file2 in verify_fix_path
 		Failed to install 3 of 3 bundles
 		1 bundle was already installed
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_regex_is_output "$expected_output"
 
 }

@@ -1111,7 +1111,7 @@ assert_in_output() {
 	if [[ ! "$output" == *"$expected_output"* ]]; then
 		print_assert_failure "The following text was not found in the command output:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		echo "$(diff -u <(echo "$expected_output") <(echo "$output"))"
 		return 1
 	fi
 
@@ -1126,7 +1126,7 @@ assert_not_in_output() {
 	if [[ "$output" == *"$expected_output"* ]]; then
 		print_assert_failure "The following text was found in the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		echo "$(diff -u <(echo "$expected_output") <(echo "$output"))"
 		return 1
 	fi
 

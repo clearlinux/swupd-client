@@ -51,7 +51,6 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'test-bin'
-
 		Bundle test-bundle	\(.* MB to install\)
 		./usr/bin/test-bin
 	EOM
@@ -66,7 +65,6 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for '/usr/lib64/test-lib64'
-
 		Bundle test-bundle2	\(.* MB to install\)
 		./usr/lib64/test-lib64
 	EOM
@@ -82,7 +80,6 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'test-lib32'
-
 		Bundle test-bundle	\(.* MB to install\)
 		./usr/lib/test-lib32
 	EOM
@@ -97,7 +94,6 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'test-lib64'
-
 		Bundle test-bundle2	\(.* MB to install\)
 		./usr/lib64/test-lib64
 	EOM

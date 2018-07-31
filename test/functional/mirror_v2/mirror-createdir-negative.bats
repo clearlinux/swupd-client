@@ -36,7 +36,6 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		.*/etc/swupd: not a directory
 		Unable to set mirror url
-
 		Default version URL not found. Use the -v option instead.
 	EOM
 	)
@@ -53,7 +52,6 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		.*/etc/swupd: not a directory
 		Unable to set mirror url
-
 		Default version URL not found. Use the -v option instead.
 	EOM
 	)

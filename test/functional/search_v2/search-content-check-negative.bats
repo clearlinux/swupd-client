@@ -37,9 +37,7 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Downloading Clear Linux manifests
 		   .* MB total\.\.\.
-
 		Completed manifests download\.
-
 		Search term not found\.
 	EOM
 	)
@@ -53,7 +51,6 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'libtest-nohit'
-
 		Search term not found.
 	EOM
 	)

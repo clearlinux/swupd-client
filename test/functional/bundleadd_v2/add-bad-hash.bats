@@ -32,7 +32,6 @@ test_setup() {
 	assert_file_not_exists "$TEST_NAME"/target-dir/usr/bin/file1
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Error: File content hash mismatch for $TEST_DIRNAME/state/staged/e6d85023c5e619eb43d5cfbfdbdec784afef5a82ffa54e8c93bda3e0883360a3 (bad server data?)
 	EOM

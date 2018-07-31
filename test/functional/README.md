@@ -304,6 +304,8 @@ assert_file_not_exists /some/file
 
 *assert_is_output*  
 passes if the provided text matches the whole command output, fails otherwise  
+**NOTE:** dots and blank lines are removed by default from the output before comparing it to the expected output,
+if you want to disable this behavior use the assertion with the *--identical* option   
 Examples:  
 ```bash
 # one line strings
@@ -319,6 +321,19 @@ expected_output=$(cat <<-EOM
 EOM
 )
 assert_is_output "$expected_output"
+
+# multi-line strings with dots and blank lines
+run <some_command>
+expected_output=$(cat <<-EOM
+  Some text that has dots
+  ..
+  and some empty lines
+  
+  and you want those to be included when
+  comparing the output
+EOM
+)
+assert_is_output --identical "$expected_output"
 ```
 
 *assert_is_not_output*  
@@ -362,7 +377,7 @@ run <some_command>
 expected_output=$(cat <<-EOM
   Some expected text that can have
   regex characters like .* in it
-  \(skipping these pharenteses\)\.
+  \(skipping these parentheses\)\.
 EOM
 )
 assert_regex_is_output "$expected_output"
@@ -409,4 +424,27 @@ Example:
 ```bash
 run <some_command>
 assert_not_equal "$variable1" "$variable2"
+```
+
+### Ignore lists
+When using assertions that compare the command output to an expected output (for example
+assert_is_output, assert_in_output, etc.), blank lines and lines containing only
+dots are removed by default before comparing outputs.  
+Besides removing empty lines and lines with dots from the output, it is also possible to
+use an *ignore list* to remove other patterns that are not important for a test when using these assertions.  
+
+There are three different ignore list files that can be used (but only one can be used at a time):
+- <functional_tests_directory>/<test_theme_directory>/<test_name>.ignore-list: this file is intended
+to specify an ignore-list for only one particular test.
+- <functional_tests_directory>/<test_theme_directory>/ignore-list: this file is intended to
+be used as an ignore-list for a group of test cases that are similar (the same theme).
+- <functional_tests_directory>/ignore-list.global: this is a global ignore-list intended to be
+used as a fallback for all tests.
+
+To disable the use of ignore lists you can use the *--identical* option with every assertion
+that checks a command output.  
+Example:  
+```bash
+assert_is_output --identical "$expected_output"
+assert_regex_not_in_output --identical "$some_other_output"
 ```

@@ -46,7 +46,7 @@ global_teardown() {
 		Successfully removed 1 bundle
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -64,7 +64,7 @@ global_teardown() {
 		Successfully removed 2 bundles
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -81,7 +81,7 @@ global_teardown() {
 		Failed to remove 1 of 1 bundles
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -94,7 +94,7 @@ global_teardown() {
 		Failed to remove 1 of 1 bundles
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -108,7 +108,7 @@ global_teardown() {
 		Failed to remove 2 of 2 bundles
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -129,6 +129,6 @@ global_teardown() {
 		Failed to remove 2 of 3 bundles
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }

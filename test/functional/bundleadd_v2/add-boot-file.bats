@@ -18,10 +18,8 @@ test_setup() {
 	assert_file_exists "$TEST_NAME/target-dir/usr/lib/kernel/test-file"
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while\.\.\.
-		\.
 		Finishing download of update content\.\.\.
 		Installing bundle\(s\) files\.\.\.
-		\.
 		Calling post-update helper scripts\.
 		.*
 		Successfully installed 1 bundle

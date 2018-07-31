@@ -3,7 +3,10 @@
 FUNC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_FILENAME=$(basename "$BATS_TEST_FILENAME")
 TEST_NAME=${TEST_FILENAME%.bats}
+THEME_DIRNAME="$BATS_TEST_DIRNAME"
+
 export TEST_NAME
+export THEME_DIRNAME
 export FUNC_DIR
 export SWUPD_DIR="$FUNC_DIR/../.."
 export SWUPD="$SWUPD_DIR/swupd"
@@ -994,6 +997,8 @@ test_teardown() {
 # The section below contains functions useful for consistent test validation and output
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+sep="------------------------------------------------------------------"
+
 print_assert_failure() {
 
 	local message=$1
@@ -1005,6 +1010,42 @@ print_assert_failure() {
 	echo "------------------------------------------------------------------"
 	echo "$output"
 	echo "------------------------------------------------------------------"
+
+}
+
+use_ignore_list() {
+
+	local ignore_enabled=$1
+	local filtered_output
+	validate_param "$ignore_enabled"
+
+	# if selected, remove things in the ignore list from the actual output
+	if [ "$ignore_enabled" = true ]; then
+		# always remove blank lines and lines with only dots
+		filtered_output=$(echo "$output" | sed -E '/^$/d' | sed -E '/^\.+$/d')
+		# now remove lines that are included in any of the ignore-lists
+		# there are 3 possible ignore-lists that the function is going
+		# to recognize (in order of precedence):
+		# - <functional_tests_directory>/<test_theme_directory>/<test_name>.ignore-list
+		# - <functional_tests_directory>/<test_theme_directory>/ignore-list
+		# - <functional_tests_directory>/ignore-list
+		if [ -f "$THEME_DIRNAME"/"$TEST_NAME".ignore-list ]; then
+			ignore_list="$THEME_DIRNAME"/"$TEST_NAME".ignore-list
+		elif [ -f "$THEME_DIRNAME"/ignore-list ]; then
+			ignore_list="$THEME_DIRNAME"/ignore-list
+		elif [ -f "$FUNC_DIR"/ignore-list ]; then
+			ignore_list="$FUNC_DIR"/ignore-list.global
+		fi
+		while IFS= read -r line; do
+			# if the pattern from the file has a "/" escape it first so it does
+			# not confuses the sed command
+			line="${line////\\/}"
+			filtered_output=$(echo "$filtered_output" | sed -E "/^$line$/d")
+		done < "$ignore_list"
+	else
+		filtered_output="$output"
+	fi
+	echo "$filtered_output"
 
 }
 
@@ -1108,14 +1149,18 @@ assert_file_not_exists() {
 
 assert_in_output() {
 
+	local actual_output
+	local ignore_switch=true
+	local ignore_list
+	[ "$1" = "--identical" ] && { ignore_switch=false ; shift ; }
 	local expected_output=$1
-	local sep="------------------------------------------------------------------"
-	validate_param expected_output
+	validate_param "$expected_output"
 
-	if [[ ! "$output" == *"$expected_output"* ]]; then
+	actual_output=$(use_ignore_list "$ignore_switch")
+	if [[ ! "$actual_output" == *"$expected_output"* ]]; then
 		print_assert_failure "The following text was not found in the command output:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff -u <(echo "$expected_output") <(echo "$output"))"
+		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
 		return 1
 	fi
 
@@ -1123,14 +1168,18 @@ assert_in_output() {
 
 assert_not_in_output() {
 
+	local actual_output
+	local ignore_switch=true
+	local ignore_list
+	[ "$1" = "--identical" ] && { ignore_switch=false ; shift ; }
 	local expected_output=$1
-	local sep="------------------------------------------------------------------"
-	validate_param expected_output
+	validate_param "$expected_output"
 
-	if [[ "$output" == *"$expected_output"* ]]; then
+	actual_output=$(use_ignore_list "$ignore_switch")
+	if [[ "$actual_output" == *"$expected_output"* ]]; then
 		print_assert_failure "The following text was found in the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff -u <(echo "$expected_output") <(echo "$output"))"
+		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
 		return 1
 	fi
 
@@ -1138,14 +1187,18 @@ assert_not_in_output() {
 
 assert_is_output() {
 
+	local actual_output
+	local ignore_switch=true
+	local ignore_list
+	[ "$1" = "--identical" ] && { ignore_switch=false ; shift ; }
 	local expected_output=$1
-	local sep="------------------------------------------------------------------"
-	validate_param expected_output
+	validate_param "$expected_output"
 
-	if [[ ! "$output" == "$expected_output" ]]; then
+	actual_output=$(use_ignore_list "$ignore_switch")
+	if [[ ! "$actual_output" == "$expected_output" ]]; then
 		print_assert_failure "The following text was not the command output:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
 		return 1
 	fi
 
@@ -1153,14 +1206,18 @@ assert_is_output() {
 
 assert_is_not_output() {
 
+	local actual_output
+	local ignore_switch=true
+	local ignore_list
+	[ "$1" = "--identical" ] && { ignore_switch=false ; shift ; }
 	local expected_output=$1
-	local sep="------------------------------------------------------------------"
-	validate_param expected_output
+	validate_param "$expected_output"
 
-	if [[ "$output" == "$expected_output" ]]; then
+	actual_output=$(use_ignore_list "$ignore_switch")
+	if [[ "$actual_output" == "$expected_output" ]]; then
 		print_assert_failure "The following text was the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
 		return 1
 	fi
 
@@ -1168,14 +1225,18 @@ assert_is_not_output() {
 
 assert_regex_in_output() {
 
+	local actual_output
+	local ignore_switch=true
+	local ignore_list
+	[ "$1" = "--identical" ] && { ignore_switch=false ; shift ; }
 	local expected_output=$1
-	local sep="------------------------------------------------------------------"
-	validate_param expected_output
+	validate_param "$expected_output"
 
-	if [[ ! "$output" =~ $expected_output ]]; then
+	actual_output=$(use_ignore_list "$ignore_switch")
+	if [[ ! "$actual_output" =~ $expected_output ]]; then
 		print_assert_failure "The following text (regex) was not found in the command output:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
 		return 1
 	fi
 
@@ -1183,14 +1244,18 @@ assert_regex_in_output() {
 
 assert_regex_not_in_output() {
 
+	local actual_output
+	local ignore_switch=true
+	local ignore_list
+	[ "$1" = "--identical" ] && { ignore_switch=false ; shift ; }
 	local expected_output=$1
-	local sep="------------------------------------------------------------------"
-	validate_param expected_output
+	validate_param "$expected_output"
 
-	if [[ "$output" =~ $expected_output ]]; then
+	actual_output=$(use_ignore_list "$ignore_switch")
+	if [[ "$actual_output" =~ $expected_output ]]; then
 		print_assert_failure "The following text (regex) was found in the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
 		return 1
 	fi
 
@@ -1198,14 +1263,18 @@ assert_regex_not_in_output() {
 
 assert_regex_is_output() {
 
+	local actual_output
+	local ignore_switch=true
+	local ignore_list
+	[ "$1" = "--identical" ] && { ignore_switch=false ; shift ; }
 	local expected_output=$1
-	local sep="------------------------------------------------------------------"
-	validate_param expected_output
+	validate_param "$expected_output"
 
-	if [[ ! "$output" =~ ^$expected_output$ ]]; then
+	actual_output=$(use_ignore_list "$ignore_switch")
+	if [[ ! "$actual_output" =~ ^$expected_output$ ]]; then
 		print_assert_failure "The following text (regex) was not the command output:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
 		return 1
 	fi
 
@@ -1213,14 +1282,18 @@ assert_regex_is_output() {
 
 assert_regex_is_not_output() {
 
+	local actual_output
+	local ignore_switch=true
+	local ignore_list
+	[ "$1" = "--identical" ] && { ignore_switch=false ; shift ; }
 	local expected_output=$1
-	local sep="------------------------------------------------------------------"
-	validate_param expected_output
+	validate_param "$expected_output"
 
-	if [[ "$output" =~ ^$expected_output$ ]]; then
+	actual_output=$(use_ignore_list "$ignore_switch")
+	if [[ "$actual_output" =~ ^$expected_output$ ]]; then
 		print_assert_failure "The following text (regex) was the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff <(echo "$expected_output") <(echo "$output"))"
+		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
 		return 1
 	fi
 

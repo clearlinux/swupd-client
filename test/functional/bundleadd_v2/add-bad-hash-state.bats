@@ -28,10 +28,8 @@ test_setup() {
 	assert_not_equal "$hash_before" "$hash_after"
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
 	EOM

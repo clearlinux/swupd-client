@@ -26,7 +26,6 @@ test_setup() {
 		 #   |-- is-required-by
 		 # * is-also-required-by
 		 # ...
-
 		  * test-bundle2
 		    |-- test-bundle3
 	EOM

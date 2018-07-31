@@ -26,7 +26,6 @@ test_setup() {
 		 #   |-- is-required-by
 		 # * is-also-required-by
 		 # ...
-
 		  * test-bundle2
 		Failed to remove 1 of 1 bundles
 	EOM

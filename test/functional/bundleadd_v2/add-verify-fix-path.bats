@@ -28,13 +28,11 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
 		Update target directory does not exist: $TEST_DIRNAME/target-dir/foo/bar. Auto-fix disabled
 		Path /foo/bar is missing on the file system ... fixing
 		Path /foo/bar/test-file1 is missing on the file system ... fixing
-		.
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
 	EOM

@@ -52,7 +52,7 @@ global_teardown() {
 		Successfully installed 1 bundle
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -70,7 +70,7 @@ global_teardown() {
 		Successfully installed 2 bundles
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -88,7 +88,7 @@ global_teardown() {
 		1 bundle was already installed
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -101,7 +101,7 @@ global_teardown() {
 		Failed to install 1 of 1 bundles
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -115,7 +115,7 @@ global_teardown() {
 		Failed to install 2 of 2 bundles
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -129,7 +129,7 @@ global_teardown() {
 		2 bundles were already installed
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -144,7 +144,7 @@ global_teardown() {
 		1 bundle was already installed
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -168,7 +168,7 @@ global_teardown() {
 		1 bundle was already installed
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -187,7 +187,7 @@ global_teardown() {
 		Failed to install 1 of 2 bundles
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -208,7 +208,7 @@ global_teardown() {
 		1 bundle was already installed
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -235,6 +235,6 @@ global_teardown() {
 		1 bundle was already installed
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_is_output --identical "$expected_output"
 
 }

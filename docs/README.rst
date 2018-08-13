@@ -37,9 +37,9 @@ the current image for the `default` target is
 `travisci/ci-garnet:packer-1512502276-986baf0`
 
 Start a detatched image running /sbin/init (i.e. a system that is
-booted normally). You probably will want this to be privilged, so you can use tools like gdb or strace.
+booted normally). You probably will want this to be privileged, so you can use tools like gdb or strace.
 
-   docker run --name travis-debug -dit --privilged travisci/ci-garnet:packer-1512502276-986baf0 /sbin/init
+   docker run --name travis-debug -dit --privileged travisci/ci-garnet:packer-1512502276-986baf0 /sbin/init
 
 This should
 return pretty quickly. Now connect to it and run a shell.

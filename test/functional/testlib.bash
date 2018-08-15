@@ -130,7 +130,7 @@ write_to_protected_file() {
 			    write_to_protected_file [-a] <file> <stream>
 
 			Options:
-			    -a    If used the text will be appeneded to the file, otherwise it will be overwritten
+			    -a    If used the text will be appended to the file, otherwise it will be overwritten
 			EOM
 		return
 	fi

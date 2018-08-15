@@ -9,7 +9,6 @@ test_setup() {
 	create_bundle -L -n test-bundle2 -f /bar/test-file2 "$TEST_NAME"
 	# add test-bundle1 as dependency of test-bundle2
 	add_dependency_to_manifest "$TEST_NAME"/web-dir/10/Manifest.test-bundle2 test-bundle1
-	update_hashes_in_mom "$TEST_NAME"/web-dir/10/Manifest.MoM
 
 }
 

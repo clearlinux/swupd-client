@@ -11,7 +11,6 @@ test_setup() {
 	# add bundle2 as dependencies of bundle1 and bundle 3 as dependency of bundle2
 	add_dependency_to_manifest "$TEST_NAME"/web-dir/10/Manifest.test-bundle1 test-bundle2
 	add_dependency_to_manifest "$TEST_NAME"/web-dir/10/Manifest.test-bundle2 test-bundle3
-	update_hashes_in_mom "$TEST_NAME"/web-dir/10/Manifest.MoM
 
 }
 

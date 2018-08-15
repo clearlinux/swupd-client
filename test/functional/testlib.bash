@@ -450,7 +450,8 @@ add_dependency_to_manifest() {
 	local dependency=$2
 	local path
 	local manifest_name
-	local bundle_name
+	local version
+	local pre_version
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
@@ -460,14 +461,31 @@ add_dependency_to_manifest() {
 		return
 	fi
 	validate_item "$manifest"
-	path=$(dirname "$manifest")
-	manifest_name=$(basename "$manifest")
-	bundle_name=${manifest_name#Manifest.}
+	validate_param "$dependency"
 
+	path=$(dirname "$(dirname "$manifest")")
+	version=$(basename "$(dirname "$manifest")")
+	manifest_name=$(basename "$manifest")
+
+	# if the provided manifest does not exist in the current version, it means
+	# we need to copy it from a previous version.
+	# this could happen for example if a manifest is created in one version (e.g. 10),
+	# but the dependency should be added in a different, future version (e.g. 20)
+	if [ ! -e "$path"/"$version"/"$manifest_name" ]; then
+		pre_version="$version"
+		while [ "$pre_version" -gt 0 ] && [ ! -e "$path"/"$pre_version"/"$manifest_name" ]; do
+				pre_version=$(awk '/previous/ { print $2 }' "$path"/"$pre_version"/Manifest.MoM)
+		done
+		sudo cp "$path"/"$pre_version"/"$manifest_name" "$path"/"$version"/"$manifest_name"
+		sudo sed -i "s/version:.*/version:\\t$version/" "$manifest"
+		sudo sed -i "s/previous:.*/previous:\\t$pre_version/" "$manifest"
+	fi
+	sudo sed -i "s/timestamp:.*/timestamp:\\t$(date +"%s")/" "$manifest"
 	sudo sed -i "/contentsize:.*/a includes:\\t$dependency" "$manifest"
 	# If a manifest tar already exists for that manifest, renew the manifest tar
 	sudo rm -f "$manifest".tar
 	create_tar "$manifest"
+	update_hashes_in_mom "$path"/"$version"/Manifest.MoM
 
 }
 

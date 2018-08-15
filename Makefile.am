@@ -73,8 +73,6 @@ swupd_LDADD = \
 verifytime_SOURCES = src/verifytime.c
 bin_PROGRAMS += verifytime
 
-dist_bin_SCRIPTS = swupd-add-pkg
-
 EXTRA_DIST += \
 	data/check-update.service \
 	data/check-update.timer \
@@ -316,8 +314,7 @@ MANPAGES = \
 	docs/check-update.timer.4 \
 	docs/swupd-update.service.4 \
 	docs/swupd-update.timer.4 \
-	docs/update-triggers.target.4 \
-	docs/swupd-add-pkg.4
+	docs/update-triggers.target.4
 
 dist_man_MANS = \
 	$(MANPAGES)

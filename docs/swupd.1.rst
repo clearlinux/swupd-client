@@ -413,7 +413,6 @@ SEE ALSO
 * ``swupd-update.service``\(4)
 * ``swupd-update.timer``\(4)
 * ``update-triggers.target``\(4)
-* ``swupd-add-pkg``\(4)
 * https://github.com/clearlinux/swupd-client/
 * https://clearlinux.org/documentation/
 

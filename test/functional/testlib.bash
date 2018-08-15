@@ -58,6 +58,18 @@ generate_random_name() {
 
 }
 
+print_stack() {
+
+	echo "An error occurred"
+	echo "Function stack (most recent on top):"
+	for func in ${FUNCNAME[*]}; do
+		if [ "$func" != "print_stack" ] && [ "$func" != "terminate" ]; then
+			echo -e "\\t$func"
+		fi
+	done
+
+}
+
 terminate() {
 
 	# since the library could be sourced and run from an interactive shell
@@ -67,8 +79,10 @@ terminate() {
 	local msg=$1
 	local param
 	case "$-" in
-		*i*)	: ${param:?"$msg, exiting..."} ;;
-		*)		echo "$msg, exiting..."
+		*i*)	print_stack
+				: "${param:?"$msg, exiting..."}" ;;
+		*)		print_stack
+				echo "$msg, exiting..."
 				exit 1;;
 	esac
 

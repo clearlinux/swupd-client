@@ -1238,7 +1238,7 @@ use_ignore_list() {
 assert_status_is() {
 
 	local expected_status=$1
-	validate_param expected_status
+	validate_param "$expected_status"
 
 	if [ -z "$status" ]; then
 		echo "The \$status environment variable is empty."
@@ -1263,7 +1263,7 @@ assert_status_is() {
 assert_status_is_not() {
 
 	local not_expected_status=$1
-	validate_param not_expected_status
+	validate_param "$not_expected_status"
 
 	if [ -z "$status" ]; then
 		echo "The \$status environment variable is empty."
@@ -1288,7 +1288,7 @@ assert_status_is_not() {
 assert_dir_exists() {
 
 	local vdir=$1
-	validate_param vdir
+	validate_param "$vdir"
 
 	if [ ! -d "$vdir" ]; then
 		print_assert_failure "Directory $vdir should exist, but it does not"
@@ -1300,7 +1300,7 @@ assert_dir_exists() {
 assert_dir_not_exists() {
 
 	local vdir=$1
-	validate_param vdir
+	validate_param "$vdir"
 
 	if [ -d "$vdir" ]; then
 		print_assert_failure "Directory $vdir should not exist, but it does"
@@ -1312,7 +1312,7 @@ assert_dir_not_exists() {
 assert_file_exists() {
 
 	local vfile=$1
-	validate_param vfile
+	validate_param "$vfile"
 
 	if [ ! -f "$vfile" ]; then
 		print_assert_failure "File $vfile should exist, but it does not"
@@ -1324,7 +1324,7 @@ assert_file_exists() {
 assert_file_not_exists() {
 
 	local vfile=$1
-	validate_param vfile
+	validate_param "$vfile"
 
 	if [ -f "$vfile" ]; then
 		print_assert_failure "File $vfile should not exist, but it does"
@@ -1489,8 +1489,8 @@ assert_equal() {
 
 	local val1=$1
 	local val2=$2
-	validate_param val1
-	validate_param val2
+	validate_param "$val1"
+	validate_param "$val2"
 
 	if [ "$val1" != "$val2" ]; then
 		return 1
@@ -1502,8 +1502,8 @@ assert_not_equal() {
 
 	local val1=$1
 	local val2=$2
-	validate_param val1
-	validate_param val2
+	validate_param "$val1"
+	validate_param "$val2"
 
 	if [ "$val1" = "$val2" ]; then
 		return 1

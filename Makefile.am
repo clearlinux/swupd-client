@@ -113,7 +113,6 @@ BATS_LOG_DRIVER = $(tap_driver)
 TESTS = $(dist_check_SCRIPTS)
 
 BATS = \
-	test/documentation/manpages/test.bats \
 	test/functional/bundleadd/add-directory/test.bats \
 	test/functional/bundleadd_v2/add-directory.bats \
 	test/functional/bundleadd/add-existing/test.bats \

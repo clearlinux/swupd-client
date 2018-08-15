@@ -163,7 +163,11 @@ set_env_variables() {
 	export SWUPD_OPTS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
 	export SWUPD_OPTS_NO_CERT="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir"
 	export SWUPD_OPTS_MIRROR="-p $path/$env_name/target-dir"
+	export SWUPD_OPTS_NO_FMT="-S $path/$env_name/state -p $path/$env_name/target-dir -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
 	export TEST_DIRNAME="$path"/"$env_name"
+	export WEBDIR="$env_name"/web-dir
+	export TARGETDIR="$env_name"/target-dir
+	export STATEDIR="$env_name"/state
 
 }
 

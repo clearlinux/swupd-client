@@ -123,11 +123,22 @@ validate_param() {
 # - STREAM: the content to be written
 write_to_protected_file() {
 
-        local arg
-        [ "$1" = "-a" ] && { arg=-a ; shift ; }
-        local file=${1?Missing output file in write_to_protected_file}
-        shift
-        printf "$@" | sudo tee $arg "$file" >/dev/null
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    write_to_protected_file [-a] <file> <stream>
+
+			Options:
+			    -a    If used the text will be appeneded to the file, otherwise it will be overwritten
+			EOM
+		return
+	fi
+	local arg
+	[ "$1" = "-a" ] && { arg=-a ; shift ; }
+	local file=${1?Missing output file in write_to_protected_file}
+	shift
+	printf "$@" | sudo tee $arg "$file" >/dev/null
 
 }
 
@@ -138,6 +149,14 @@ set_env_variables() {
 
 	local env_name=$1
 	local path
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    set_env_variables <environment_name>
+			EOM
+		return
+	fi
 	validate_path "$env_name"
 	path=$(dirname "$(realpath "$env_name")")
 
@@ -157,6 +176,15 @@ create_dir() {
 	local path=$1
 	local hashed_name
 	local directory
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    create_dir <path>
+			EOM
+		return
+	fi
 	validate_path "$path"
 	
 	# most directories have the same hash, so we only need one directory
@@ -181,6 +209,15 @@ create_file() {
  
 	local path=$1
 	local hashed_name
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    create_file <path>
+			EOM
+		return
+	fi
 	validate_path "$path"
 
 	generate_random_content | sudo tee "$path/testfile" > /dev/null
@@ -204,6 +241,15 @@ create_link() {
 	local path=$1
 	local pfile=$2
 	local hashed_name
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    create_link <path> [file_to_point_to]
+			EOM
+		return
+	fi
 	validate_path "$path"
 	
 	# if no file is specified, create one
@@ -228,6 +274,17 @@ create_tar() {
 	local path
 	local item_name
 	local skip_param_validation=false
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    create_tar [--skip-validation] <item>
+
+			Options:
+			    --skip-validation    If set, the function parameters will not be validated
+			EOM
+		return
+	fi
 	[ "$1" = "--skip-validation" ] && { skip_param_validation=true ; shift ; }
 	local item=$1
 
@@ -255,6 +312,15 @@ create_manifest() {
 	local path=$1
 	local name=$2
 	local version
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    create_manifest <path> <bundle_name>
+			EOM
+		return
+	fi
 	validate_path "$path"
 	validate_param "$name"
 
@@ -295,6 +361,18 @@ add_to_manifest() {
 	local manifest=$1
 	local item=$2
 	local item_path=$3
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    add_to_manifest [--skip-validation] <manifest> <item> <item_path_in_fs>
+
+			Options:
+			    --skip-validation    If set, the validation of parameters will be skipped
+			EOM
+		return
+	fi
 
 	if [ "$skip_param_validation" = false ]; then
 		validate_item "$manifest"
@@ -369,6 +447,14 @@ add_dependency_to_manifest() {
 	local path
 	local manifest_name
 	local bundle_name
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    add_dependency_to_manifest <manifest> <dependency>
+			EOM
+		return
+	fi
 	validate_item "$manifest"
 	path=$(dirname "$manifest")
 	manifest_name=$(basename "$manifest")
@@ -389,6 +475,14 @@ remove_from_manifest() {
 
 	local manifest=$1
 	local item=$2
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    remove_from_manifest <manifest> <item>
+			EOM
+		return
+	fi
 	validate_item "$manifest"
 	validate_param "$item"
 
@@ -445,6 +539,15 @@ update_hashes_in_mom() {
 sign_manifest() {
 
 	local manifest=$1
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    sign_manifest <manifest>
+			EOM
+		return
+	fi
 	validate_item "$manifest"
 
 	sudo openssl smime -sign -binary -in "$manifest" \
@@ -461,6 +564,15 @@ get_hash_from_manifest() {
 
 	local manifest=$1
 	local item=$2
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    get_hash_from_manifest <manifest> <name_in_fs>
+			EOM
+		return
+	fi
 	validate_item "$manifest"
 	validate_param "$item"
 
@@ -477,6 +589,16 @@ set_current_version() {
 
 	local env_name=$1
 	local new_version=$2
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		echo "$(cat <<-EOM
+			Usage:
+			    set_current_version <environment_name> <new_version>
+			EOM
+		)"
+		return
+	fi
 	validate_path "$env_name"
 
 	sudo sed -i "s/VERSION_ID=.*/VERSION_ID=$new_version/" "$env_name"/target-dir/usr/lib/os-release
@@ -554,6 +676,15 @@ create_test_environment() {
 destroy_test_environment() { 
 
 	local env_name=$1
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    destroy_test_environment <environment_name>
+			EOM
+		return
+	fi
 	validate_path "$env_name"
 
 	# since the action to be performed is very destructive, at least
@@ -572,7 +703,7 @@ destroy_test_environment() {
 create_bundle() { 
 
 	cb_usage() { 
-		echo $(cat <<-EOF
+		cat <<-EOM
 		Usage:
 		    create_bundle [-L] [-n] <bundle_name> [-v] <version> [-d] <list of dirs> [-f] <list of files> [-l] <list of links> ENV_NAME
 
@@ -599,8 +730,7 @@ create_bundle() {
 
 		    create_bundle -n test-bundle -f /usr/bin/test-1,/usr/bin/test-2,/etc/systemd/test-3 -l /etc/test-link my_test_env
 
-		EOF
-		)
+		EOM
 	}
 	
 	local OPTIND
@@ -617,6 +747,11 @@ create_bundle() {
 	local manifest
 	local local_bundle=false
 
+	# If no parameters are received show help
+	if [ $# -eq 0 ]; then
+		create_bundle -h
+		return
+	fi
 	set -f  # turn off globbing
 	while getopts :v:d:f:l:b:n:L opt; do
 		case "$opt" in
@@ -792,6 +927,18 @@ create_bundle() {
 # - BUNDLE_MANIFEST: the manifest of the bundle to be removed
 remove_bundle() {
 
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    remove_bundle [-L] <bundle_manifest>
+
+			Options:
+			    -L   If set, the bundle will be removed from the target-dir only,
+			         otherwise it is removed from both target-dir and web-dir
+			EOM
+		return
+	fi
 	local remove_local=false
 	[ "$1" = "-L" ] && { remove_local=true ; shift ; }
 	local bundle_manifest=$1
@@ -857,6 +1004,14 @@ install_bundle() {
 	local manifest_file
 	local bundle_name
 
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    install_bundle <bundle_manifest>
+			EOM
+		return
+	fi
 	validate_item "$bundle_manifest"
 	target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/target-dir
 	files_path=$(dirname "$bundle_manifest")/files
@@ -902,6 +1057,14 @@ install_bundle() {
 clean_state_dir() {
 
 	local env_name=$1
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    clean_state_dir <environment_name>
+			EOM
+		return
+	fi
 	validate_path "$env_name"
 
 	sudo rm -rf "$env_name"/state/{staged,download,delta,telemetry}
@@ -917,6 +1080,15 @@ generate_test() {
 
 	local name=$1
 	local path
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    generate_test <test_name>
+			EOM
+		return
+	fi
 	validate_param "$name"
 
 	path=$(dirname "$name")/

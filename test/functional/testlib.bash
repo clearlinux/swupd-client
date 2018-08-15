@@ -348,7 +348,7 @@ create_manifest() {
 #                      are not validated, so use this option carefully
 # - MANIFEST: the relative path to the manifest file
 # - ITEM: the relative path to the item (file, directory, symlink) to be added
-# - ITEM_PATH: the absolute path of the item in the target system when installed
+# - PATH_IN_FS: the absolute path of the item in the target system when installed
 add_to_manifest() { 
 
 	local item_type
@@ -392,7 +392,7 @@ add_to_manifest() {
 	filecount=$((filecount + 1))
 	sudo sed -i "s/filecount:.*/filecount:\\t$filecount/" "$manifest"
 	# add to contentsize 
-	contentsize=$(sudo cat "$manifest" | grep contentsize | awk '{ print $2 }')
+	contentsize=$(awk '/contentsize/ { print $2}' "$manifest")
 	contentsize=$((contentsize + item_size))
 	# get the item type
 	if [ "$(basename "$manifest")" = Manifest.MoM ]; then
@@ -422,7 +422,7 @@ add_to_manifest() {
 	elif [ -d "$item" ]; then
 		item_type=D
 	fi
-	# if the file is in the /usr/lib/kernel dir then it is a boot file
+	# if the file is in the /usr/lib/{kernel, modules} dir then it is a boot file
 	if [ "$(dirname "$item_path")" = "/usr/lib/kernel" ] || [ "$(dirname "$item_path")" = "/usr/lib/modules/" ]; then
 		boot_type="b"
 	fi

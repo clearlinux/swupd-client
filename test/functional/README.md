@@ -165,6 +165,22 @@ To include tests to be run in the CI system:
 TBD  
 <br/>
 
+### Debugging Tests
+
+As mentioned in the [test principles](#test-principles), automated tests should
+create their own test environment including all needed dependencies when the test
+starts, and should clean up after themselves once the test is over. This means
+the test environment will be deleted as soon as the test finishes running.
+Sometimes it is necessary to debug faulty tests, and therefore a persistent test
+environment is required. If you want to temporarily skip the deletion of the test
+environment, you can achieve this by setting the DEBUG_TEST environmental variable
+to *true*.
+```bash
+$ DEBUG_TEST=true bats <theme_directory>/<test_script>.bats
+```
+Note: Remember you will have to delete this test environment manually before running
+the test again or it could have unexpected effects.
+
 ## Test Fixtures
 ### Test Environment
 A test environment is nothing but a directory that contains the necessary file
@@ -425,6 +441,21 @@ Example:
 run <some_command>
 assert_not_equal "$variable1" "$variable2"
 ```
+
+*assert_files_equal*  
+passes if the two files provided are equal, fails otherwise  
+Example:  
+```bash
+run <some_command>
+assert_files_equal foo/bar foo/baz
+```
+
+*assert_files_not_equal*  
+passes if the two files provided are not equal, fails otherwise  
+Example:  
+```bash
+run <some_command>
+assert_files_not_equal foo/bar foo/baz
 
 ### Ignore lists
 When using assertions that compare the command output to an expected output (for example

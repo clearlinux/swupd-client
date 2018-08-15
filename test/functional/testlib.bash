@@ -1175,7 +1175,9 @@ test_setup() {
 # Default test_teardown
 test_teardown() {
 
-	destroy_test_environment "$TEST_NAME"
+	if [ "$DEBUG_TEST" != true ]; then
+		destroy_test_environment "$TEST_NAME"
+	fi
 
 }
 

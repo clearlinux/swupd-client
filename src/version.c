@@ -158,11 +158,6 @@ int check_versions(int *current_version,
 		return -1;
 	}
 
-	/* set preferred version and content server urls */
-	if (*current_version < 0) {
-		return -1;
-	}
-
 	if (requested_version != -1) {
 		if (requested_version <= *current_version) {
 			fprintf(stderr, "Requested version for update (%d) must be greater than current version (%d)\n",

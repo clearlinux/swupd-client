@@ -1510,3 +1510,30 @@ assert_not_equal() {
 	fi
 
 }
+
+assert_files_equal() {
+
+	local val1=$1
+	local val2=$2
+	validate_item "$val1"
+	validate_item "$val2"
+
+	diff -q "$val1" "$val2"
+
+}
+
+assert_files_not_equal() {
+
+	local val1=$1
+	local val2=$2
+	validate_item "$val1"
+	validate_item "$val2"
+
+	if diff -q "$val1" "$val2" > /dev/null; then
+		echo "Files $val1 and $val2 are equal"
+		return 1
+	else
+		return 0
+	fi
+
+}

@@ -808,6 +808,8 @@ create_bundle() {
 		    - for every symlink created a related file will be created and added to the bundle as well (except for dangling links)
 		    - if the '-f' or '-l' options are used, and the directories where the files live don't exist,
 		      they will be automatically created and added to the bundle for each file
+		    - if instead of creating a new file you want to reuse an existing one, you can do this by adding ':' followed by the
+		      path to the file, for example '-f /usr/bin/test-1:my_environment/web-dir/10/files/\$file_hash'
 
 		Example of usage:
 
@@ -924,7 +926,14 @@ create_bundle() {
 	# 3) Create the requested file(s)
 	for val in "${file_list[@]}"; do
 		add_dirs
-		bundle_file=$(create_file "$files_path")
+		# if the user wants to use an existing file, use it, else create a new one
+		if [[ "$val" = *":"* ]]; then
+			bundle_file="${val#*:}"
+			val="${val%:*}"
+			validate_item "$bundle_file"
+		else
+			bundle_file=$(create_file "$files_path")
+		fi
 		if [ "$DEBUG" == true ]; then
 			echo "file -> $bundle_file"
 		fi

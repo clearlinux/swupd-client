@@ -626,7 +626,6 @@ get_hash_from_manifest() {
 
 	local manifest=$1
 	local item=$2
-
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
@@ -638,7 +637,7 @@ get_hash_from_manifest() {
 	validate_item "$manifest"
 	validate_param "$item"
 
-	hash=$(sudo cat "$manifest" | grep "$item" | awk '{ print $2 }')
+	hash=$(sudo cat "$manifest" | grep $'\t'"$item"$ | awk '{ print $2 }')
 	echo "$hash"
 
 }

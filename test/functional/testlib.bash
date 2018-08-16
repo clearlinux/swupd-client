@@ -802,7 +802,32 @@ create_bundle() {
 
 		EOM
 	}
-	
+
+	add_dirs() {
+
+		if [[ "$val" != "/"* ]]; then
+			val=/"$val"
+		fi
+		# if the directories the file is don't exist, add them to the bundle,
+		# do not add all the directories of the tracking file /usr/share/clear/bundles,
+		# this file is added in every bundle by default, it would add too much overhead
+		# for most tests
+		fdir=$(dirname "${val%:*}")
+		if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/usr/share/clear/bundles" ] \
+		&& [ "$fdir" != "/" ]; then
+			bundle_dir=$(create_dir "$files_path")
+			add_to_manifest "$manifest" "$bundle_dir" "$fdir"
+			# add each one of the directories of the path if they are not in the manifest already
+			while [ "$(dirname "$fdir")" != "/" ]; do
+				fdir=$(dirname "$fdir")
+				if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
+					add_to_manifest "$manifest" "$bundle_dir" "$fdir"
+				fi
+			done
+		fi
+
+	}
+
 	local OPTIND
 	local opt
 	local dir_list
@@ -875,8 +900,8 @@ create_bundle() {
 	# Create a zero pack for the bundle and add the directory to it
 	sudo tar -cf "$version_path"/pack-"$bundle_name"-from-0.tar --exclude="$bundle_dir"/*  "$bundle_dir"
 	for val in "${dir_list[@]}"; do
-		# the "/" directory is not allowed in the manifest
-		if [ val != "/" ]; then
+		add_dirs
+		if [ "$val" != "/" ]; then
 			add_to_manifest "$manifest" "$bundle_dir" "$val"
 			if [ "$local_bundle" = true ]; then
 				sudo mkdir -p "$target_path$val"
@@ -886,20 +911,7 @@ create_bundle() {
 	
 	# 3) Create the requested file(s)
 	for val in "${file_list[@]}"; do
-		# if the directories the file is don't exist, add them to the bundle
-		# there are 2 exceptions, the dir of the tracking file and "\"
-		fdir=$(dirname "$val")
-		if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/usr/share/clear/bundles" ] && [ "$fdir" != "/" ]; then
-			bundle_dir=$(create_dir "$files_path")
-			add_to_manifest "$manifest" "$bundle_dir" "$fdir"
-			# add each one of the directories of the path if they are not in the manifest already
-			while [ "$(dirname "$fdir")" != "/" ]; do
-				fdir=$(dirname "$fdir")
-				if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
-					add_to_manifest "$manifest" "$bundle_dir" "$fdir"
-				fi
-			done
-		fi
+		add_dirs
 		bundle_file=$(create_file "$files_path")
 		if [ "$DEBUG" == true ]; then
 			echo "file -> $bundle_file"
@@ -917,6 +929,9 @@ create_bundle() {
 	
 	# 4) Create the requested link(s) in the bundle
 	for val in "${link_list[@]}"; do
+		if [[ "$val" != "/"* ]]; then
+			val=/"$val"
+		fi
 		# if the directory the link is doesn't exist,
 		# add it to the bundle (except if the directory is "/")
 		fdir=$(dirname "$val")
@@ -948,6 +963,9 @@ create_bundle() {
 	
 	# 5) Create the requested dangling link(s) in the bundle
 	for val in "${dangling_link_list[@]}"; do
+		if [[ "$val" != "/"* ]]; then
+			val=/"$val"
+		fi
 		# if the directory the link is doesn't exist,
 		# add it to the bundle (except if the directory is "/")
 		fdir=$(dirname "$val")
@@ -981,6 +999,7 @@ create_bundle() {
 	create_tar "$version_path"/Manifest.MoM
 
 	# 8) Sign the manifest MoM
+	sudo rm -f "$version_path"/Manifest.MoM.sig
 	sign_manifest "$version_path"/Manifest.MoM
 
 	# 9) Create the subscription to the bundle if the local_bundle flag is enabled

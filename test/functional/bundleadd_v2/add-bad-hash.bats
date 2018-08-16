@@ -14,11 +14,7 @@ test_setup() {
 	sudo rm "$TEST_NAME"/web-dir/10/files/"$real_hash".tar
 	create_tar "$TEST_NAME"/web-dir/10/files/"$bad_hash"
 	# also modify it in the bundle manifest and re-create the manifest's tar
-	sudo sed -i "s/$real_hash/$bad_hash/" "$manifest"
-	sudo rm "$manifest".tar
-	create_tar "$manifest"
-	# finally update the MoM with the new manifest hash
-	update_hashes_in_mom "$TEST_NAME"/web-dir/10/Manifest.MoM
+	update_manifest "$manifest" file-hash "$real_hash" "$bad_hash"
 
 }
 

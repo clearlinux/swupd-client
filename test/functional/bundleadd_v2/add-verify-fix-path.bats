@@ -10,11 +10,8 @@ test_setup() {
 	# bundles created with the testlib add all needed directories to the
 	# manifest by default, so we need to remove the directory from test-bundle1
 	# so its missing the path to the file.
-	# also, because the change on Manifest.test-bundle1 its hash will change, so
-	# update the hash in the MoM
 	remove_from_manifest "$TEST_NAME"/web-dir/10/Manifest.test-bundle1 /foo
 	remove_from_manifest "$TEST_NAME"/web-dir/10/Manifest.test-bundle1 /foo/bar
-	update_hashes_in_mom "$TEST_NAME"/web-dir/10/Manifest.MoM
 	# since test-bundle2 is already installed, both directories defined
 	# there already exist, so we need to delete one of the /foo/bar so it
 	# can be fixed using verify_fix_path

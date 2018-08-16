@@ -479,10 +479,10 @@ add_dependency_to_manifest() {
 				pre_version=$(awk '/previous/ { print $2 }' "$path"/"$pre_version"/Manifest.MoM)
 		done
 		sudo cp "$path"/"$pre_version"/"$manifest_name" "$path"/"$version"/"$manifest_name"
-		sudo sed -i "s/version:.*/version:\\t$version/" "$manifest"
-		sudo sed -i "s/previous:.*/previous:\\t$pre_version/" "$manifest"
+		update_manifest -p "$manifest" version "$version"
+		update_manifest -p "$manifest" previous "$pre_version"
 	fi
-	sudo sed -i "s/timestamp:.*/timestamp:\\t$(date +"%s")/" "$manifest"
+	update_manifest -p "$manifest" timestamp "$(date +"%s")"
 	sudo sed -i "/contentsize:.*/a includes:\\t$dependency" "$manifest"
 	# If a manifest tar already exists for that manifest, renew the manifest tar
 	sudo rm -f "$manifest".tar
@@ -538,6 +538,84 @@ remove_from_manifest() {
 		sudo rm -f "$manifest".sig
 		sign_manifest "$manifest"
 	else
+		update_hashes_in_mom "$(dirname "$manifest")"/Manifest.MoM
+	fi
+
+}
+
+# Updates fields in an existing manifest
+# Parameters:
+# - -p: if the p (partial) flag is set the function skips updating the hashes
+#       in the MoM, this is useful if more changes are to be done in order to
+#       reduce time
+# - MANIFEST: the relative path to the manifest file
+# - KEY: the thing to be updated
+# - HASH/NAME: the file name or hash of the record to be updated (if applicable)
+# - VALUE: the value to be used for updating the record
+update_manifest() {
+
+	local partial=false
+	[ "$1" = "-p" ] && { partial=true ; shift ; }
+	local manifest=$1
+	local key=$2
+	local var=$3
+	local value=$4
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    update_manifest [-p] <manifest> <format | version | previous | filecount | timestamp | contentsize> <new_value>
+			    update_manifest [-p] <manifest> <file-status | file-hash | file-version | file-name> <file_hash or file_name> <new_value>
+
+			Options:
+			    -p    if the p flag is set (partial), the function skips updating the MoM's hashes, creating
+			          a tar for the MoM and signing it. It also skips creating the tar for the modified manifest,
+			          this is useful if more updates are to be done in the manifest to avoid extra processing
+			EOM
+		return
+	fi
+	validate_item "$manifest"
+	validate_param "$key"
+	validate_param "$var"
+
+	var="${var////\\/}"
+	value="${value////\\/}"
+
+	case "$key" in
+	format)
+		sudo sed -i "s/MANIFEST.*/MANIFEST\\t$var/" "$manifest"
+		;;
+	version | previous | filecount | timestamp | contentsize)
+		sudo sed -i "s/$key.*/$key:\\t$var/" "$manifest"
+		;;
+	file-status)
+		validate_param "$value"
+		sudo sed -i "/\\t$var$/s/....\(\\t.*\\t.*\\t.*$\)/$value\1/g" "$manifest"
+		sudo sed -i "/\\t$var\\t/s/....\(\\t.*\\t.*\\t.*$\)/$value\1/g" "$manifest"
+		;;
+	file-hash)
+		validate_param "$value"
+		sudo sed -i "/\\t$var$/s/\(....\\t\).*\(\\t.*\\t\)/\1$value\2/g" "$manifest"
+		sudo sed -i "/\\t$var\\t/s/\(....\\t\).*\(\\t.*\\t\)/\1$value\2/g" "$manifest"
+		;;
+	file-version)
+		validate_param "$value"
+		sudo sed -i "/\\t$var$/s/\(....\\t.*\\t\).*\(\\t\)/\1$value\2/g" "$manifest"
+		sudo sed -i "/\\t$var\\t/s/\(....\\t.*\\t\).*\(\\t\)/\1$value\2/g" "$manifest"
+		;;
+	file-name)
+		validate_param "$value"
+		sudo sed -i "/\\t$var$/s/\(....\\t.*\\t.*\\t\).*/\1$value/g" "$manifest"
+		sudo sed -i "/\\t$var\\t/s/\(....\\t.*\\t.*\\t\).*/\1$value/g" "$manifest"
+		;;
+	*)
+		terminate "Please select a valid key for updating the manifest"
+		;;
+	esac
+	# update bundle tars and MoM (unless specified otherwise)
+	if [ "$partial" = false ]; then
+		sudo rm -f  "$manifest".tar
+		create_tar  "$manifest"
 		update_hashes_in_mom "$(dirname "$manifest")"/Manifest.MoM
 	fi
 

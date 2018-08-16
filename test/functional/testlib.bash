@@ -692,13 +692,28 @@ set_latest_version() {
 # Creates a test environment with the basic directory structure needed to
 # validate the swupd client
 # Parameters:
+# - -e: if this option is set the test environment is created empty (withouth bundle os-core)
 # - ENVIRONMENT_NAME: the name of the test environment, this should be typically the test name
 # - VERSION: the version to use for the test environment, if not specified the default is 10
 create_test_environment() { 
 
+	local empty=false
+	[ "$1" = "-e" ] && { empty=true ; shift ; }
 	local env_name=$1 
 	local version=${2:-10}
 	local mom
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    create_test_environment [-e] <environment_name> [initial_version]
+
+			Options:
+			    -e    If set, the test environment is created empty, otherwise it will have
+			          bundle os-core in the web-dir and installed by default.
+			EOM
+		return
+	fi
 	validate_param "$env_name"
 	
 	# create all the files and directories needed
@@ -735,8 +750,10 @@ create_test_environment() {
 	set_env_variables "$env_name"
 
 	# every environment needs to have at least the os-core bundle so this should be
-	# added by default to every test environment
-	create_bundle -L -n os-core -v "$version" -f /usr/bin/core "$env_name"
+	# added by default to every test environment unless specified otherwise
+	if [ "$empty" = false ]; then
+		create_bundle -L -n os-core -v "$version" -f /core "$env_name"
+	fi
 
 }
 

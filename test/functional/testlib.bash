@@ -497,6 +497,10 @@ remove_from_manifest() {
 
 	local manifest=$1
 	local item=$2
+	local filecount
+	local contentsize
+	local item_size
+	local item_hash
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
@@ -510,6 +514,17 @@ remove_from_manifest() {
 
 	# replace every / with \/ in item (if any)
 	item="${item////\\/}"
+	# decrease filecount and contentsize
+	filecount=$(awk '/filecount/ { print $2}' "$manifest")
+	filecount=$((filecount - 1))
+	sudo sed -i "s/filecount:.*/filecount:\\t$filecount/" "$manifest"
+	if [ "$(basename "$manifest")" != Manifest.MoM ]; then
+		contentsize=$(awk '/contentsize/ { print $2}' "$manifest")
+		item_hash=$(get_hash_from_manifest "$manifest" "$item")
+		item_size=$(stat -c "%s" "$(dirname "$manifest")"/files/"$item_hash")
+		contentsize=$((contentsize - item_size))
+		sudo sed -i "s/contentsize:.*/contentsize:\\t$contentsize/" "$manifest"
+	fi
 	# remove the lines that match from the manifest
 	sudo sed -i "/\\t$item$/d" "$manifest"
 	sudo sed -i "/\\t$item\\t/d" "$manifest"
@@ -520,6 +535,8 @@ remove_from_manifest() {
 	if [ "$(basename "$manifest")" = Manifest.MoM ]; then
 		sudo rm -f "$manifest".sig
 		sign_manifest "$manifest"
+	else
+		update_hashes_in_mom "$(dirname "$manifest")"/Manifest.MoM
 	fi
 
 }

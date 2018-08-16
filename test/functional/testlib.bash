@@ -1079,7 +1079,7 @@ remove_bundle() {
 	# may be used by another bundle)
 	dir_names=($(awk '/^D...\t/ { print $4 }' "$bundle_manifest"))
 	for dname in ${dir_names[@]}; do
-		sudo rmdir "$target_path$dname" 2> /dev/null
+		sudo rmdir --ignore-fail-on-non-empty "$target_path$dname" 2> /dev/null
 	done
 	if [ "$remove_local" = false ]; then
 		# remove all files that are in the manifest from web-dir

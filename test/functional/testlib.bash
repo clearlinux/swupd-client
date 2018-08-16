@@ -884,11 +884,6 @@ create_bundle() {
 	# set default values
 	bundle_name=${bundle_name:-$(generate_random_name test-bundle-)}
 	version=${version:-10}
-	if [ -z "$dir_list" ] && [ -z "$file_list" ] && [ -z "$link_list" ] && [ -z "$dangling_link_list" ] ; then
-		# if nothing was specified to be created, at least create
-		# one directory which is the bare minimum for a bundle
-		dir_list=(/usr/bin)
-	fi
 	# all bundles should include their own tracking file, so append it to the
 	# list of files to be created in the bundle
 	file_list+=(/usr/share/clear/bundles/"$bundle_name")

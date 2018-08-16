@@ -468,6 +468,7 @@ Example:
 ```bash
 run <some_command>
 assert_files_not_equal foo/bar foo/baz
+```
 
 ### Ignore lists
 When using assertions that compare the command output to an expected output (for example

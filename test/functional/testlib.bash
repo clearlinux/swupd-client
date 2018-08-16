@@ -1172,8 +1172,13 @@ generate_test() {
 		printf '\t# global cleanup\n\n'
 		printf '}\n\n'
 		printf '@test "<test description>" {\n\n'
-		printf '\trun sudo sh -c "$SWUPD <swupd_command> $SWUPD_OPTS <command_options>"\n'
-		printf '\t# <validations>\n\n'
+		printf '\trun sudo sh -c "$SWUPD <swupd_command> $SWUPD_OPTS <command_options>"\n\n'
+		printf '\t# assert_status_is 0\n'
+		printf '\t# expected_output=$(cat <<-EOM\n'
+		printf '\t# \t<expected output>\n'
+		printf '\t# EOM\n'
+		printf '\t# )\n'
+		printf '\t# assert_is_output "$expected_output"\n\n'
 		printf '}\n\n'
 	} > "$path$name".bats
 	# make the test script executable

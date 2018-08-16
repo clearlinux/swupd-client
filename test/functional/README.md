@@ -221,7 +221,7 @@ necessary for the bundle like files, directories, manifests, packs, etc.
 Use the following command to create a bundle with two files called "test-bundle" in
 the "my_env" test environment.
 ```bash
-create_bundle -n test-bundle -f /foo/bar/test-file1,/baz/test-file2 my_env
+$ create_bundle -n test-bundle -f /foo/bar/test-file1,/baz/test-file2 my_env
 ```
 By creating that bundle the following objects will also be created:
 * A hashed directory (to be used for the /foo, /foo/bar and /baz directories)
@@ -235,7 +235,7 @@ randomly generated so hashes are different)
 
 Another example:
 ```bash
-create_bundle -L -n another-bundle -d /some_dir -f /baz/test-file -l /test-link my_env
+$ create_bundle -L -n another-bundle -d /some_dir -f /baz/test-file -l /test-link my_env
 ```
 This bundle, besides having characteristics similar to the previous bundle will
 have this new characteristics:
@@ -245,6 +245,18 @@ symbolic link is pointing to
 * Since the -L flag was used, the bundle will not only be created in the directory
 for content download, but it will also be installed in the target file system, this
 is useful for tests that need a pre-installed bundle as prerequisite
+
+Sometimes it is useful to create a bundle using an existing file in your system
+instead of letting the helper functions create a random file for you. This can be
+achieved by using the ':' character and specifying the file you want to use.  
+For example:  
+```bash
+$ create_bundle -L -n test-bundle -f /foo/bar/test-file:"$WEBDIR"/10/files/"$hashed_name" my_env
+```
+This will create a bundle that has the file */foo/bar/test-file* in the manifest and
+will refer to the file specified by you. Note that it is your responsibility to copy
+that file to the appropriate directory first (*"$WEBDIR"/\<version\>/files*), and to
+name it properly according to its hash.
 
 The following are some of the functions provided by the test library to create and
 handle test objects:

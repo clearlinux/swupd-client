@@ -674,6 +674,15 @@ set_latest_version() {
 
 	local env_name=$1
 	local new_version=$2
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    set_latest_version <environment_name> <new_version>
+			EOM
+		return
+	fi
 	validate_path "$env_name"
 
 	write_to_protected_file "$env_name"/web-dir/version/formatstaging/latest "$new_version"

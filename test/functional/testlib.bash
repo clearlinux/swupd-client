@@ -720,8 +720,7 @@ create_test_environment() {
 	# web-dir files & dirs
 	sudo mkdir -p "$env_name"/web-dir/version/formatstaging
 	write_to_protected_file "$env_name"/web-dir/version/formatstaging/latest "$version"
-	sudo mkdir -p "$env_name"/web-dir/"$version"/files
-	sudo mkdir -p "$env_name"/web-dir/"$version"/staged
+	sudo mkdir -p "$env_name"/web-dir/"$version"/{files,delta}
 	mom=$(create_manifest "$env_name"/web-dir/"$version" MoM)
 
 	# target-dir files & dirs
@@ -912,7 +911,7 @@ create_bundle() {
 		echo "Directory -> $bundle_dir"
 	fi
 	# Create a zero pack for the bundle and add the directory to it
-	sudo tar -cf "$version_path"/pack-"$bundle_name"-from-0.tar --exclude="$bundle_dir"/*  "$bundle_dir"
+	sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_dir")"
 	for val in "${dir_list[@]}"; do
 		add_dirs
 		if [ "$val" != "/" ]; then
@@ -939,7 +938,7 @@ create_bundle() {
 		fi
 		add_to_manifest "$manifest" "$bundle_file" "$val"
 		# Add the file to the zero pack of the bundle
-		sudo tar -rf "$version_path"/pack-"$bundle_name"-from-0.tar "$bundle_file"
+		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_file")"
 		# if the local_bundle flag is set, copy the files to the target-dir as if the
 		# bundle had been locally installed
 		if [ "$local_bundle" = true ]; then
@@ -963,11 +962,11 @@ create_bundle() {
 			fi
 		fi
 		bundle_link=$(create_link "$files_path")
-		sudo tar -rf "$version_path"/pack-"$bundle_name"-from-0.tar "$bundle_link"
+		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
 		add_to_manifest "$manifest" "$bundle_link" "$val"
 		# Add the file pointed by the link to the zero pack of the bundle
 		pfile=$(basename "$(readlink -f "$bundle_link")")
-		sudo tar -rf "$version_path"/pack-"$bundle_name"-from-0.tar "$files_path"/"$pfile"
+		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$pfile")"
 		if [ "$DEBUG" == true ]; then
 			echo "link -> $bundle_link"
 			echo "file pointed to -> $(readlink -f "$bundle_link")"
@@ -998,7 +997,7 @@ create_bundle() {
 		fi
 		# Create a link passing a file that does not exits
 		bundle_link=$(create_link "$files_path" "$files_path"/"$(generate_random_name does_not_exist-)")
-		sudo tar -rf "$version_path"/pack-"$bundle_name"-from-0.tar "$bundle_link"
+		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
 		add_to_manifest --skip-validation "$manifest" "$bundle_link" "$val"
 		# Add the file pointed by the link to the zero pack of the bundle
 		if [ "$DEBUG" == true ]; then
@@ -1158,6 +1157,42 @@ install_bundle() {
 			sudo ln -s $(basename "$fname") "$target_path$lname"
 		fi
 	done
+
+}
+
+# Adds the specified file to the zero or delta pack for the bundle
+# Parameters:
+# - BUNDLE: the name of the bundle
+# - ITEM: the file or directory to be added into the pack
+# - FROM_VERSION: the from version for the pack, if not specified a zero pack is asumed
+add_to_pack() {
+
+	local bundle=$1
+	local item=$2
+	local version=${3:-0}
+	local item_path
+	local version_path
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    add_to_pack <bundle_name> <item> [from_version]
+			EOM
+		return
+	fi
+
+	item_path=$(dirname "$item")
+	version_path=$(dirname "$item_path")
+
+	# item should be a file from the "delta" or "files" directories
+	# fullfiles are expected to be in the staged dir when extracted
+	if [[ "$item" = *"/files"* ]]; then
+		sudo tar -C "$item_path" -rf "$version_path"/pack-"$bundle"-from-"$version".tar --transform "s,^,staged/," "$(basename "$item")"
+	elif [[ "$item" = *"/delta"* ]]; then
+		sudo tar -C "$version_path" -rf "$version_path"/pack-"$bundle"-from-"$version".tar delta/"$(basename "$item")"
+	else
+		terminate "the provided file is not valid in a zero pack"
+	fi
 
 }
 

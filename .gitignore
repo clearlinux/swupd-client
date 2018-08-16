@@ -3,6 +3,7 @@
 *.o
 *.trs
 *~
+.*.swp
 .cproject
 .deps
 .dirstamp

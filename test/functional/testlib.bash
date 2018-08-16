@@ -36,6 +36,8 @@ export EBADTIME=22  # System time is bad
 export EDOWNLOADPACKS=23  # Pack download failed
 export EBADCERT=24  # unable to verify server SSL certificate
 
+# global constant
+export zero_hash="0000000000000000000000000000000000000000000000000000000000000000"
 
 generate_random_content() { 
 
@@ -549,21 +551,42 @@ update_hashes_in_mom() {
 
 	local manifest=$1
 	local path
+	local bundles
 	local bundle
-	local manifest_name
+	local bundle_old_hash
+	local bundle_new_hash
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    update_hashes_in_mom <manifest>
+			EOM
+		return
+	fi
 	validate_item "$manifest"
 	path=$(dirname "$manifest")
 
 	IFS=$'\n'
-	if [ $(basename "$manifest") = Manifest.MoM ]; then
-		bundles=($(sudo cat "$manifest" | grep -x "M\.\.\..*" | awk '{ print $4 }'))
+	if [ "$(basename "$manifest")" = Manifest.MoM ]; then
+		bundles=("$(sudo cat "$manifest" | grep -x "M\.\.\..*" | awk '{ print $4 }')")
 		for bundle in ${bundles[*]}; do
-			remove_from_manifest "$manifest" $bundle
-			add_to_manifest "$manifest" "$path"/Manifest.$bundle $bundle
+			# if the hash of the manifest changed, update it
+			bundle_old_hash=$(get_hash_from_manifest "$manifest" "$bundle")
+			bundle_new_hash=$(sudo "$SWUPD" hashdump "$path"/Manifest."$bundle" 2> /dev/null)
+			if [ "$bundle_old_hash" != "$bundle_new_hash" ] && [ "$bundle_new_hash" != "$zero_hash" ]; then
+				# replace old hash with new hash
+				sudo sed -i "/\\t$bundle_old_hash\\t/s/\(....\\t\).*\(\\t.*\\t\)/\1$bundle_new_hash\2/g" "$manifest"
+				# replace old version with new version
+				sudo sed -i "/\\t$bundle_new_hash\\t/s/\(....\\t.*\\t\).*\(\\t\)/\1$(basename "$path")\2/g" "$manifest"
+			fi
 		done
-		# since the MoM has changed, sign it again
+		# re-order items on the manifest so they are in the correct order based on version
+		sudo sort -t$'\t' -k3 -s -h -o "$manifest" "$manifest"
+		# since the MoM has changed, sign it again and update its tar
 		sudo rm -f "$manifest".sig
 		sign_manifest "$manifest"
+		sudo rm -f "$manifest".tar
+		create_tar "$manifest"
 	else
 		echo "The provided manifest is not the MoM"
 		return 1

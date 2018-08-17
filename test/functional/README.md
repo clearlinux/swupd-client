@@ -227,6 +227,20 @@ $ create_test_environment my_env 2
 # create a new version 20 based on version 10, format 2
 $ create_version my_env 20 10 2
 ```
+In occasions you may want to create a test environment that has an os-core
+bundle that includes the os-release and format files tracked in the bundle's
+manifest, this is particularly useful for upgrade related tests. To create
+this kind of test environment you can use the *-r* (release) option.
+bash```
+# test environment with a more complete os-core bundle
+$ create_test_environment -r my_env
+```
+In a similar manner is possible to create a test environment with no bundle using
+the *-e* (empty) option.
+bash```
+# empty test environment
+$ create_test_environment -e my_env
+```
 
 The test library provides the following functions for handling test environments:
 * create_test_environment

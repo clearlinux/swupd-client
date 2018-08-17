@@ -782,6 +782,9 @@ create_version() {
 
 	local partial=false
 	local release_files=false
+	# since this function is called with every test environment, some times multiple
+	# times, use simple parsing of arguments instead of using getopts to keep light weight
+	# with the caveat that arguments need to be provided in a specific order
 	[ "$1" = "-p" ] && { partial=true ; shift ; }
 	[ "$1" = "-r" ] && { release_files=true ; shift ; }
 	local env_name=$1
@@ -802,6 +805,9 @@ create_version() {
 			          new version in order to avoid extra processing
 			    -r    if the r flag is set (release), the version is created with hashed os-release
 			          and format files that can be used for creating updates
+
+			Note: if both options -p and -r are to be used, they must be specified in that order or
+			      one option will be ignored.
 			EOM
 		return
 	fi
@@ -874,13 +880,17 @@ create_version() {
 # validate the swupd client
 # Parameters:
 # - -e: if this option is set the test environment is created empty (withouth bundle os-core)
+# - -r: if this option is set the test environment is created with a more complete version of
+#       the os-core bundle that includes release files, it is useful for some tests like update tests
 # - ENVIRONMENT_NAME: the name of the test environment, this should be typically the test name
 # - VERSION: the version to use for the test environment, if not specified the default is 10
 # - FORMAT: the format number to use initially in the environment
 create_test_environment() { 
 
 	local empty=false
+	local release_files=false
 	[ "$1" = "-e" ] && { empty=true ; shift ; }
+	[ "$1" = "-r" ] && { release_files=true ; shift ; }
 	local env_name=$1 
 	local version=${2:-10}
 	local format=${3:-staging}
@@ -888,11 +898,16 @@ create_test_environment() {
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    create_test_environment [-e] <environment_name> [initial_version] [format]
+			    create_test_environment [-e|-r] <environment_name> [initial_version] [format]
 
 			Options:
 			    -e    If set, the test environment is created empty, otherwise it will have
 			          bundle os-core in the web-dir and installed by default.
+			    -r    If set, the test environment is created with a more complete version of
+			          the os-core bundle, a version that includes the os-release and format
+			          files, so it is more useful for some tests, like update tests.
+
+			Note: options -e and -r are mutually exclusive, so you can only use one at a time.
 			EOM
 		return
 	fi
@@ -901,7 +916,11 @@ create_test_environment() {
 	# create all the files and directories needed
 	# web-dir files & dirs
 	sudo mkdir -p "$env_name"
-	create_version -p "$env_name" "$version" "0" "$format"
+	if [ "$release_files" = true ]; then
+		create_version -p -r "$env_name" "$version" "0" "$format"
+	else
+		create_version -p "$env_name" "$version" "0" "$format"
+	fi
 
 	# target-dir files & dirs
 	sudo mkdir -p "$env_name"/target-dir/usr/lib
@@ -921,7 +940,11 @@ create_test_environment() {
 	# every environment needs to have at least the os-core bundle so this should be
 	# added by default to every test environment unless specified otherwise
 	if [ "$empty" = false ]; then
-		create_bundle -L -n os-core -v "$version" -f /core "$env_name"
+		if [ "$release_files" = true ]; then
+			create_bundle -L -n os-core -v "$version" -f /core,/usr/lib/os-release:"$OS_RELEASE",/usr/share/defaults/swupd/format:"$FORMAT" "$env_name"
+		else
+			create_bundle -L -n os-core -v "$version" -f /core "$env_name"
+		fi
 	else
 		create_tar "$env_name"/web-dir/"$version"/Manifest.MoM
 		sign_manifest "$env_name"/web-dir/"$version"/Manifest.MoM

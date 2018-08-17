@@ -767,24 +767,128 @@ set_latest_version() {
 
 }
 
+# Creates a new version of the server side content
+# Parameters:
+# - -p: if the p flag is set (partial), the function skips creating the MoM's
+#       tar and signing it, this is useful if more changes are to be done in the
+#       version in order to avoid extra processing
+# - -r: if the r flag is set (release), the version is created with hashed os-release
+#       and format files that can be used for creating updates
+# - ENVIRONMENT_NAME: the name of the test environment
+# - VERSION: the version of the server side content
+# - FROM_VERSION: the previous version, if nothing is selected defaults to 0
+# - FORMAT: the format to use for the version
+create_version() {
+
+	local partial=false
+	local release_files=false
+	[ "$1" = "-p" ] && { partial=true ; shift ; }
+	[ "$1" = "-r" ] && { release_files=true ; shift ; }
+	local env_name=$1
+	local version=$2
+	local from_version=${3:-0}
+	local format=${4:-staging}
+	local mom
+	local hashed_name
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    create_version [-p] [-r] <environment_name> <new_version> [from_version] [format]
+
+			Options:
+			    -p    if the p flag is set (partial), the function skips creating the MoM's
+			          tar and signing it, this is useful if more changes are to be done in the
+			          new version in order to avoid extra processing
+			    -r    if the r flag is set (release), the version is created with hashed os-release
+			          and format files that can be used for creating updates
+			EOM
+		return
+	fi
+	validate_item "$env_name"
+	validate_param "$version"
+
+	# if the requested version already exists do nothing
+	if [ -d "$env_name"/web-dir/"$version" ]; then
+		echo "the requested version $version already exists"
+		return
+	fi
+
+	sudo mkdir -p "$env_name"/web-dir/"$version"/{files,delta}
+	sudo mkdir -p "$env_name"/web-dir/version/format"$format"
+	write_to_protected_file "$env_name"/web-dir/version/format"$format"/latest "$version"
+	if [ "$format" = staging ]; then
+		format=1
+	fi
+	write_to_protected_file "$env_name"/web-dir/"$version"/format "$format"
+	# create a new os-release file per version
+	{
+		printf 'NAME="Clear Linux Software for Intel Architecture"\n'
+		printf 'VERSION=1\n'
+		printf 'ID=clear-linux-os\n'
+		printf 'VERSION_ID=%s\n' "$version"
+		printf 'PRETTY_NAME="Clear Linux Software for Intel Architecture"\n'
+		printf 'ANSI_COLOR="1;35"\n'
+		printf 'HOME_URL="https://clearlinux.org"\n'
+		printf 'SUPPORT_URL="https://clearlinux.org"\n'
+		printf 'BUG_REPORT_URL="https://bugs.clearlinux.org/jira"\n'
+	} | sudo tee "$env_name"/web-dir/"$version"/os-release > /dev/null
+	# copy hashed versions of os-release and format to the files directory
+	if [ "$release_files" = true ]; then
+		hashed_name=$(sudo "$SWUPD" hashdump "$env_name"/web-dir/"$version"/os-release 2> /dev/null)
+		sudo cp "$env_name"/web-dir/"$version"/os-release "$env_name"/web-dir/"$version"/files/"$hashed_name"
+		create_tar "$env_name"/web-dir/"$version"/files/"$hashed_name"
+		OS_RELEASE="$env_name"/web-dir/"$version"/files/"$hashed_name"
+		export OS_RELEASE
+		hashed_name=$(sudo "$SWUPD" hashdump "$env_name"/web-dir/"$version"/format 2> /dev/null)
+		sudo cp "$env_name"/web-dir/"$version"/format "$env_name"/web-dir/"$version"/files/"$hashed_name"
+		create_tar "$env_name"/web-dir/"$version"/files/"$hashed_name"
+		FORMAT="$env_name"/web-dir/"$version"/files/"$hashed_name"
+		export FORMAT
+	fi
+	# if the previous version is 0 then create a new MoM, otherwise copy the MoM
+	# from the previous version
+	if [ "$from_version" = 0 ]; then
+		mom=$(create_manifest "$env_name"/web-dir/"$version" MoM)
+		if [ "$partial" = false ]; then
+			create_tar "$mom"
+			sign_manifest "$mom"
+		fi
+	else
+		sudo cp "$env_name"/web-dir/"$from_version"/Manifest.MoM "$env_name"/web-dir/"$version"
+		mom="$env_name"/web-dir/"$version"/Manifest.MoM
+		# update MoM info and create the tars
+		update_manifest -p "$mom" format "$format"
+		update_manifest -p "$mom" version "$version"
+		update_manifest -p "$mom" previous "$from_version"
+		update_manifest -p "$mom" timestamp "$(date +"%s")"
+		if [ "$partial" = false ]; then
+			create_tar "$mom"
+			sign_manifest "$mom"
+		fi
+	fi
+
+}
+
 # Creates a test environment with the basic directory structure needed to
 # validate the swupd client
 # Parameters:
 # - -e: if this option is set the test environment is created empty (withouth bundle os-core)
 # - ENVIRONMENT_NAME: the name of the test environment, this should be typically the test name
 # - VERSION: the version to use for the test environment, if not specified the default is 10
+# - FORMAT: the format number to use initially in the environment
 create_test_environment() { 
 
 	local empty=false
 	[ "$1" = "-e" ] && { empty=true ; shift ; }
 	local env_name=$1 
 	local version=${2:-10}
-	local mom
+	local format=${3:-staging}
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    create_test_environment [-e] <environment_name> [initial_version]
+			    create_test_environment [-e] <environment_name> [initial_version] [format]
 
 			Options:
 			    -e    If set, the test environment is created empty, otherwise it will have
@@ -796,27 +900,15 @@ create_test_environment() {
 	
 	# create all the files and directories needed
 	# web-dir files & dirs
-	sudo mkdir -p "$env_name"/web-dir/version/formatstaging
-	write_to_protected_file "$env_name"/web-dir/version/formatstaging/latest "$version"
-	sudo mkdir -p "$env_name"/web-dir/"$version"/{files,delta}
-	mom=$(create_manifest "$env_name"/web-dir/"$version" MoM)
+	sudo mkdir -p "$env_name"
+	create_version -p "$env_name" "$version" "0" "$format"
 
 	# target-dir files & dirs
 	sudo mkdir -p "$env_name"/target-dir/usr/lib
-	{
-		printf 'NAME="Clear Linux Software for Intel Architecture"\n'
-		printf 'VERSION=1\n'
-		printf 'ID=clear-linux-os\n'
-		printf 'VERSION_ID=%s\n' "$version"
-		printf 'PRETTY_NAME="Clear Linux Software for Intel Architecture"\n'
-		printf 'ANSI_COLOR="1;35"\n'
-		printf 'HOME_URL="https://clearlinux.org"\n'
-		printf 'SUPPORT_URL="https://clearlinux.org"\n'
-		printf 'BUG_REPORT_URL="https://bugs.clearlinux.org/jira"\n'
-	} | sudo tee "$env_name"/target-dir/usr/lib/os-release > /dev/null
+	sudo cp "$env_name"/web-dir/"$version"/os-release "$env_name"/target-dir/usr/lib/os-release
 	sudo mkdir -p "$env_name"/target-dir/usr/share/clear/bundles
 	sudo mkdir -p "$env_name"/target-dir/usr/share/defaults/swupd
-	printf '1' | sudo tee "$env_name"/target-dir/usr/share/defaults/swupd/format > /dev/null
+	sudo cp "$env_name"/web-dir/"$version"/format "$env_name"/target-dir/usr/share/defaults/swupd/format
 	sudo mkdir -p "$env_name"/target-dir/etc
 
 	# state files & dirs
@@ -830,6 +922,9 @@ create_test_environment() {
 	# added by default to every test environment unless specified otherwise
 	if [ "$empty" = false ]; then
 		create_bundle -L -n os-core -v "$version" -f /core "$env_name"
+	else
+		create_tar "$env_name"/web-dir/"$version"/Manifest.MoM
+		sign_manifest "$env_name"/web-dir/"$version"/Manifest.MoM
 	fi
 
 }
@@ -962,7 +1057,8 @@ create_bundle() {
 
 	# set default values
 	bundle_name=${bundle_name:-$(generate_random_name test-bundle-)}
-	version=${version:-10}
+	# if no version was provided create the bundle in the earliest version by default
+	version=${version:-$(ls "$env_name"/web-dir | grep -E '^[0-9]+$' | sort -rn | head -n1)}
 	# all bundles should include their own tracking file, so append it to the
 	# list of files to be created in the bundle
 	file_list+=(/usr/share/clear/bundles/"$bundle_name")
@@ -978,6 +1074,8 @@ create_bundle() {
 	if [ "$DEBUG" == true ]; then
 		echo "Manifest -> $manifest"
 	fi
+	# update format in the manifest
+	update_manifest -p "$manifest" format "$(cat "$version_path"/format)"
 	
 	# 2) Create one directory for the bundle and add it the requested
 	# times to the manifest.

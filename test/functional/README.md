@@ -210,13 +210,22 @@ target system
 To create a test environment called "my_env" for a test you would run the following
 command from within the test script.
 ```bash
-# create a test environment for version 10 (default) 
-create_test_environment my_env 
+# create a test environment for version 10 (default),
+# with format "staging" (default)
+$ create_test_environment my_env
 ```
 Or
 ```bash
-# create a test environment for version 20
-create_test_environment my_env 20
+# create a test environment for version 20 with format 1
+$ create_test_environment my_env 20 1
+```
+It is also possible to create a virtual environment with multiple versions, this
+is handy for testing some behaviors, like doing updates or system verifications.
+```bash
+# create a test environment with version 10, format 2
+$ create_test_environment my_env 2
+# create a new version 20 based on version 10, format 2
+$ create_version my_env 20 10 2
 ```
 
 The test library provides the following functions for handling test environments:

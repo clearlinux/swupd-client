@@ -22,7 +22,7 @@ setup() {
   do
     [ -f "$nroff" ] || continue
     echo "$nroff"
-    git diff-index --quiet HEAD "$nroff"
+    git diff --exit-code HEAD "$nroff"
   done
 }
 

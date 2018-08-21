@@ -70,7 +70,13 @@ global_teardown() {
 @test "<test description>" {
 
 	run sudo sh -c "$SWUPD <swupd_command> $SWUPD_OPTS <command_options>"
-	# <validations>
+
+	# assert_status_is 0
+	# expected_output=$(cat <<-EOM
+	# 	<expected output>
+	# EOM
+	# )
+	# assert_is_output "$expected_output"
 
 }
 ```
@@ -162,7 +168,15 @@ $ make check
 ```
 
 To include tests to be run in the CI system:  
-TBD  
+In order for the CI system to run a new test the test needs to be added to the
+BATS variable in the Makefile.am file
+```bash
+BATS = \
+        test/documentation/manpages/test.bats \
+        test/functional/bundleadd_v2/add-directory.bats \
+        test/functional/bundleadd_v2/add-existing.bats \
+        ...
+```  
 <br/>
 
 ### Debugging Tests
@@ -208,6 +222,8 @@ create_test_environment my_env 20
 The test library provides the following functions for handling test environments:
 * create_test_environment
 * destroy_test_environment
+* set_current_version: sets the current version of the system under test to a given value
+* set_latest_version: sets the latest version of the server side content to a given value
 <br/>
 
 ### Test Objects
@@ -255,16 +271,20 @@ $ create_bundle -L -n test-bundle -f /foo/bar/test-file:"$WEBDIR"/10/files/"$has
 ```
 This will create a bundle that has the file */foo/bar/test-file* in the manifest and
 will refer to the file specified by you. Note that it is your responsibility to copy
-that file to the appropriate directory first (*"$WEBDIR"/\<version\>/files*), and to
-name it properly according to its hash.
+that file to the appropriate directory first (*"$WEBDIR"/\<version\>/files*), to
+name it properly according to its hash, and to create a tar for that file.
 
 The following are some of the functions provided by the test library to create and
 handle test objects:
-* create_bundle: creates a bundle
 * create_dir: creates a hashed directory
 * create_file: creates a hashed file
 * create_link: creates a hashed file and a hashed link pointing to the file
 * create_tar: creates a tar of the specified object (manifest, full file, etc.)
+* add_to_pack: adds the specified file or directory to a zero or delta pack
+* create_bundle: creates a bundle
+* install_bundle: copy the files from a test bundle into the target-dir so it
+appears as installed
+* remove_bundle: remove the files from a test bundle from the target-dir
 * create_manifest: creates an empty manifest (with initial headers)
 * add_to_manifest: adds the specified object (directory, file, or link) to the
 manifest, and creates/updates the manifest tar
@@ -272,6 +292,7 @@ manifest, and creates/updates the manifest tar
 and creates/updates the manifest tar
 * remove_from_manifest: removes an object from the manifest, and updates the
 manifest tar
+* update_manifest: updates the specified field of a manifest
 * sign_manifest: signs the manifest using Swupd_Root.pem
 * update_hashes_in_mom: after modifying manifests included in a MoM, this function
 can be run to update the manifest hashes in the MoM

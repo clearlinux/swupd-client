@@ -1305,7 +1305,7 @@ remove_bundle() {
 
 	# if the bundle's manifest is not found just return
 	if [ ! -e "$bundle_manifest" ]; then
-		echo "$(basename $bundle_manifest) not found, maybe the bundle was already removed"
+		echo "$(basename "$bundle_manifest") not found, maybe the bundle was already removed"
 		return
 	fi
 
@@ -1326,17 +1326,15 @@ remove_bundle() {
 		sudo rmdir --ignore-fail-on-non-empty "$target_path$dname" 2> /dev/null
 	done
 	if [ "$remove_local" = false ]; then
-		# remove all files that are in the manifest from web-dir
-		file_names=($(awk '/^[FL]...\t/ { print $2 }' "$bundle_manifest"))
-		for fname in ${file_names[@]}; do
-			sudo rm "$version_path"/files/"$fname"
-			sudo rm "$version_path"/files/"$fname".tar
-		done
-		# remove zero pack
-		sudo rm "$version_path"/pack-"$bundle_name"-from-0.tar
-		# finally remove the manifest
-		sudo rm "$version_path"/"$manifest_file"
-		sudo rm "$version_path"/"$manifest_file".tar
+		# there is no need to remove the files and tars from web-dir/<ver>/files
+		# as long as we remove the manifest from the bundle from all versions
+		# where it shows up and from the MoM, the files may be used by another bundle
+		sudo rm -f "$version_path"/"$manifest_file"
+		sudo rm -f "$version_path"/"$manifest_file".tar
+		# remove packs
+		sudo rm "$version_path"/pack-"$bundle_name"-from-*.tar
+		# finally remove it from the MoM
+		remove_from_manifest "$version_path"/Manifest.MoM "$bundle_name"
 	fi
 
 }

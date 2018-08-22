@@ -344,10 +344,42 @@ create_manifest() {
 	
 }
 
+# Re-creates a manifest's tar, updates the hashes in the MoM and signs it
+# Parameters:
+# - MANIFEST: the manifest file to have its tar re-created
+retar_manifest() {
+
+	local manifest=$1
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    retar_manifest <manifest>
+			EOM
+		return
+	fi
+	validate_item "$manifest"
+
+	sudo rm -f "$manifest".tar
+	create_tar "$manifest"
+	# if the modified manifest is the MoM, sign it again
+	if [ "$(basename "$manifest")" = Manifest.MoM ]; then
+		sudo rm -f "$manifest".sig
+		sign_manifest "$manifest"
+	else
+		# update hashes in MoM, re-creates tar and re-signs MoM
+		update_hashes_in_mom "$(dirname "$manifest")"/Manifest.MoM
+	fi
+
+}
+
 # Adds the specified item to an existing bundle manifest
 # Parameters:
 # - --skip-validation: if this flag is set (as first parameter) the other parameters
 #                      are not validated, so use this option carefully
+# - -p: if the p (partial) flag is set the function skips updating the hashes
+#       in the MoM, this is useful if more changes are to be done in order to
+#       reduce time
 # - MANIFEST: the relative path to the manifest file
 # - ITEM: the relative path to the item (file, directory, symlink) to be added
 # - PATH_IN_FS: the absolute path of the item in the target system when installed
@@ -364,6 +396,8 @@ add_to_manifest() {
 	local file_path
 	local skip_param_validation=false
 	[ "$1" = "--skip-validation" ] && { skip_param_validation=true ; shift ; }
+	local partial=false
+	[ "$1" = "-p" ] && { partial=true ; shift ; }
 	local manifest=$1
 	local item=$2
 	local item_path=$3
@@ -376,6 +410,13 @@ add_to_manifest() {
 
 			Options:
 			    --skip-validation    If set, the validation of parameters will be skipped
+			    -p                   If set (partial), the item will be added to the manifest, but the
+			                         manifest's tar won't be re-created. If the manifest being updated
+			                         is the MoM, it won't be re-signed either. This is useful if more
+			                         updates are to be done in the manifest to avoid extra processing
+
+			    NOTE: if both options --skip-validation and -p are to be used, they must be specified in
+			          that order or one option will be ignored.
 			EOM
 		return
 	fi
@@ -416,7 +457,7 @@ add_to_manifest() {
 				if [ "$file_path" = "/" ]; then
 					file_path=""
 				fi
-				add_to_manifest "$manifest" "$(dirname "$item")"/"$linked_file" "$file_path"/"$(generate_random_name test-file-)"
+				add_to_manifest -p "$manifest" "$(dirname "$item")"/"$linked_file" "$file_path"/"$(generate_random_name test-file-)"
 			fi
 		fi
 	elif [ -f "$item" ]; then
@@ -431,23 +472,24 @@ add_to_manifest() {
 	sudo sed -i "s/contentsize:.*/contentsize:\\t$contentsize/" "$manifest"
 	# add to manifest content
 	write_to_protected_file -a "$manifest" "$item_type.$boot_type.\\t$name\\t$version\\t$item_path\\n"
-	# If a manifest tar already exists for that manifest, renew the manifest tar
-	sudo rm -f "$manifest".tar
-	create_tar "$manifest"
-	# if the modified manifest is the MoM, sign it again since it has changed
-	if [ "$(basename "$manifest")" = Manifest.MoM ]; then
-		sudo rm -f "$manifest".sig
-		sign_manifest "$manifest"
+	# If a manifest tar already exists for that manifest, renew the manifest tar unless specified otherwise
+	if [ "$partial" = false ]; then
+		retar_manifest "$manifest"
 	fi
 
 }
 
 # Adds the specified bundle dependency to an existing bundle manifest
 # Parameters:
+# - -p: if the p (partial) flag is set the function skips updating the hashes
+#       in the MoM, and re-creating the tar, this is useful if more changes are
+#       to be done in order to reduce time
 # - MANIFEST: the relative path to the manifest file
 # - DEPENDENCY: the name of the bundle to be included as a dependency
 add_dependency_to_manifest() {
 
+	local partial=false
+	[ "$1" = "-p" ] && { partial=true ; shift ; }
 	local manifest=$1
 	local dependency=$2
 	local path
@@ -459,6 +501,12 @@ add_dependency_to_manifest() {
 		cat <<-EOM
 			Usage:
 			    add_dependency_to_manifest <manifest> <dependency>
+
+			Options:
+			    -p    If set (partial), the dependency will be added to the manifest,
+			          but the manifest's tar won't be re-created, nor the hash in the
+			          MoM will be updated either. This is useful if more updates are
+			          to be done in the manifest to avoid extra processing
 			EOM
 		return
 	fi
@@ -485,18 +533,24 @@ add_dependency_to_manifest() {
 	update_manifest -p "$manifest" timestamp "$(date +"%s")"
 	sudo sed -i "/contentsize:.*/a includes:\\t$dependency" "$manifest"
 	# If a manifest tar already exists for that manifest, renew the manifest tar
-	sudo rm -f "$manifest".tar
-	create_tar "$manifest"
-	update_hashes_in_mom "$path"/"$version"/Manifest.MoM
+	# unless specified otherwise
+	if [ "$partial" = false ]; then
+		retar_manifest "$manifest"
+	fi
 
 }
 
 # Removes the specified item from an existing bundle manifest
 # Parameters:
+# - -p: if the p (partial) flag is set the function skips updating the hashes
+#       in the MoM, and re-creating the tar, this is useful if more changes are
+#       to be done in order to reduce time
 # - MANIFEST: the relative path to the manifest file
 # - ITEM: either the hash or filename of the item to be removed
 remove_from_manifest() { 
 
+	local partial=false
+	[ "$1" = "-p" ] && { partial=true ; shift ; }
 	local manifest=$1
 	local item=$2
 	local filecount
@@ -508,6 +562,12 @@ remove_from_manifest() {
 		cat <<-EOM
 			Usage:
 			    remove_from_manifest <manifest> <item>
+
+			Options:
+			    -p    If set (partial), the item will be removed from the manifest,
+			          but the manifest's tar won't be re-created, nor the hash in
+			          the MoM will be updated either. This is useful if more updates
+			          are to be done in the manifest to avoid extra processing
 			EOM
 		return
 	fi
@@ -519,26 +579,21 @@ remove_from_manifest() {
 	# decrease filecount and contentsize
 	filecount=$(awk '/filecount/ { print $2}' "$manifest")
 	filecount=$((filecount - 1))
-	sudo sed -i "s/filecount:.*/filecount:\\t$filecount/" "$manifest"
+	update_manifest -p "$manifest" filecount "$filecount"
 	if [ "$(basename "$manifest")" != Manifest.MoM ]; then
 		contentsize=$(awk '/contentsize/ { print $2}' "$manifest")
 		item_hash=$(get_hash_from_manifest "$manifest" "$item")
 		item_size=$(stat -c "%s" "$(dirname "$manifest")"/files/"$item_hash")
 		contentsize=$((contentsize - item_size))
-		sudo sed -i "s/contentsize:.*/contentsize:\\t$contentsize/" "$manifest"
+		update_manifest -p "$manifest" contentsize "$contentsize"
 	fi
 	# remove the lines that match from the manifest
 	sudo sed -i "/\\t$item$/d" "$manifest"
 	sudo sed -i "/\\t$item\\t/d" "$manifest"
 	# If a manifest tar already exists for that manifest, renew the manifest tar
-	sudo rm -f "$manifest".tar
-	create_tar "$manifest"
-	# if the modified manifest is the MoM, sign it again
-	if [ "$(basename "$manifest")" = Manifest.MoM ]; then
-		sudo rm -f "$manifest".sig
-		sign_manifest "$manifest"
-	else
-		update_hashes_in_mom "$(dirname "$manifest")"/Manifest.MoM
+	# unless specified otherwise
+	if [ "$partial" = false ]; then
+		retar_manifest "$manifest"
 	fi
 
 }
@@ -614,9 +669,7 @@ update_manifest() {
 	esac
 	# update bundle tars and MoM (unless specified otherwise)
 	if [ "$partial" = false ]; then
-		sudo rm -f  "$manifest".tar
-		create_tar  "$manifest"
-		update_hashes_in_mom "$(dirname "$manifest")"/Manifest.MoM
+		retar_manifest "$manifest"
 	fi
 
 }
@@ -661,10 +714,7 @@ update_hashes_in_mom() {
 		# re-order items on the manifest so they are in the correct order based on version
 		sudo sort -t$'\t' -k3 -s -h -o "$manifest" "$manifest"
 		# since the MoM has changed, sign it again and update its tar
-		sudo rm -f "$manifest".sig
-		sign_manifest "$manifest"
-		sudo rm -f "$manifest".tar
-		create_tar "$manifest"
+		retar_manifest "$manifest"
 	else
 		echo "The provided manifest is not the MoM"
 		return 1
@@ -1030,12 +1080,12 @@ create_bundle() {
 		if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/usr/share/clear/bundles" ] \
 		&& [ "$fdir" != "/" ]; then
 			bundle_dir=$(create_dir "$files_path")
-			add_to_manifest "$manifest" "$bundle_dir" "$fdir"
+			add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			# add each one of the directories of the path if they are not in the manifest already
 			while [ "$(dirname "$fdir")" != "/" ]; do
 				fdir=$(dirname "$fdir")
 				if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
-					add_to_manifest "$manifest" "$bundle_dir" "$fdir"
+					add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 				fi
 			done
 		fi
@@ -1114,7 +1164,7 @@ create_bundle() {
 	for val in "${dir_list[@]}"; do
 		add_dirs
 		if [ "$val" != "/" ]; then
-			add_to_manifest "$manifest" "$bundle_dir" "$val"
+			add_to_manifest -p "$manifest" "$bundle_dir" "$val"
 			if [ "$local_bundle" = true ]; then
 				sudo mkdir -p "$target_path$val"
 			fi
@@ -1135,7 +1185,7 @@ create_bundle() {
 		if [ "$DEBUG" == true ]; then
 			echo "file -> $bundle_file"
 		fi
-		add_to_manifest "$manifest" "$bundle_file" "$val"
+		add_to_manifest -p "$manifest" "$bundle_file" "$val"
 		# Add the file to the zero pack of the bundle
 		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_file")"
 		# if the local_bundle flag is set, copy the files to the target-dir as if the
@@ -1157,7 +1207,7 @@ create_bundle() {
 		if [ "$fdir" != "/" ]; then
 			if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
 				bundle_dir=$(create_dir "$files_path")
-				add_to_manifest "$manifest" "$bundle_dir" "$fdir"
+				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			fi
 		fi
 		bundle_link=$(create_link "$files_path")
@@ -1191,7 +1241,7 @@ create_bundle() {
 		if [ "$fdir" != "/" ]; then
 			if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
 				bundle_dir=$(create_dir "$files_path")
-				add_to_manifest "$manifest" "$bundle_dir" "$fdir"
+				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			fi
 		fi
 		# Create a link passing a file that does not exits
@@ -1210,18 +1260,14 @@ create_bundle() {
 		fi
 	done
 
-	# 6) Add the bundle to the MoM
+	# 6) Add the bundle to the MoM (do not use -p option so the MoM's tar is created and signed)
 	add_to_manifest "$version_path"/Manifest.MoM "$manifest" "$bundle_name"
 
 	# 7) Create/renew manifest tars
-	sudo rm -f "$version_path"/Manifest.MoM.tar
-	create_tar "$version_path"/Manifest.MoM
+	sudo rm -f "$manifest".tar
+	create_tar "$manifest"
 
-	# 8) Sign the manifest MoM
-	sudo rm -f "$version_path"/Manifest.MoM.sig
-	sign_manifest "$version_path"/Manifest.MoM
-
-	# 9) Create the subscription to the bundle if the local_bundle flag is enabled
+	# 8) Create the subscription to the bundle if the local_bundle flag is enabled
 	if [ "$local_bundle" = true ]; then
 		sudo touch "$target_path"/usr/share/clear/bundles/"$bundle_name"
 	fi

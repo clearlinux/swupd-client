@@ -1595,6 +1595,279 @@ install_bundle() {
 
 }
 
+# Updates one file or directory from a bundle, the update will be created in whatever version
+# is the latest one (from web-dir/formatstaging/latest)
+# Parameters:
+# - -p: if the p (partial) flag is set the function skips updating the hashes
+#       in the MoM, and re-creating the bundle's tar, this is useful if more changes are to be done
+#       in order to reduce time
+# - ENVIRONMENT_NAME: the name of the test environment
+# - BUNDLE_NAME: the name of the bundle to be updated
+# - OPTION: the kind of update to be performed { --add, --add-dir, --delete, --ghost, --rename, --rename-legacy, --update }
+# - FILE_NAME: file or directory of the bundle to add or update
+# - NEW_NAME: when --rename is chosen this parameter receives the new name to assign
+update_bundle() {
+
+	local partial=false
+	[ "$1" = "-p" ] && { partial=true ; shift ; }
+	local env_name=$1
+	local bundle=$2
+	local option=$3
+	local fname=$4
+	local new_name=$5
+	local version
+	local version_path
+	local oldversion
+	local oldversion_path
+	local bundle_manifest
+	local fdir
+	local new_dir
+	local new_file
+	local contentsize
+	local fsize
+	local fhash
+	local fname
+	local new_fhash
+	local new_fsize
+	local new_fname
+	local delta_name
+	local format
+	local files
+	local bundle_file
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    update_bundle [-p] <environment_name> <bundle_name> --add <file_name>[:<path_to_existing_file>]
+			    update_bundle [-p] <environment_name> <bundle_name> --add-dir <directory_name>
+			    update_bundle [-p] <environment_name> <bundle_name> --delete <file_name>
+			    update_bundle [-p] <environment_name> <bundle_name> --ghost <file_name>
+			    update_bundle [-p] <environment_name> <bundle_name> --update <file_name>
+			    update_bundle [-p] <environment_name> <bundle_name> --rename[-legacy] <file_name> <new_name>
+			    update_bundle [-p] <environment_name> <bundle_name> --header-only
+
+			Options:
+			    -p    If set (partial), the bundle will be updated, but the manifest's tar won't
+			          be re-created nor the hash will be updated in the MoM. Use this flag when more
+			          updates or changes will be done to the bundle to save time.
+			EOM
+		return
+	fi
+
+	if [ "$option" = "--header-only" ]; then
+		fname="dummy"
+	fi
+	validate_path "$env_name"
+	validate_param "$bundle"
+	validate_param "$option"
+	validate_param "$fname"
+
+	# make sure fname starts with a slash
+	if [[ "$fname" != "/"* ]]; then
+		fname=/"$fname"
+	fi
+	# the version where the update will be created is the latest version
+	version="$(ls "$env_name"/web-dir | grep -E '^[0-9]+$' | sort -rn | head -n1)"
+	version_path="$env_name"/web-dir/"$version"
+	format=$(cat "$version_path"/format)
+	# find the previous version of this bundle manifest
+	oldversion="$version"
+	while [ "$oldversion" -gt 0 ] && [ ! -e "$env_name"/web-dir/"$oldversion"/Manifest."$bundle" ]; do
+		oldversion=$(awk '/previous/ { print $2 }' "$env_name"/web-dir/"$oldversion"/Manifest.MoM)
+	done
+	if [ "$oldversion" = "$version" ]; then
+		# if old version and new version are the same it means this bundle has already
+		# been modified in this version, so look for the real old version
+		oldversion=$(awk '/previous/ { print $2}' "$env_name"/web-dir/"$oldversion"/Manifest."$bundle")
+	fi
+	oldversion_path="$env_name"/web-dir/"$oldversion"
+	bundle_manifest="$version_path"/Manifest."$bundle"
+	# since we are going to be making updates to the bundle, copy its manifest
+	# from the old version directory to the new one (if not copied already)
+	if [ ! -e "$bundle_manifest" ]; then
+		sudo cp "$oldversion_path"/Manifest."$bundle" "$bundle_manifest"
+	fi
+	update_manifest -p "$bundle_manifest" format "$format"
+	update_manifest -p "$bundle_manifest" version "$version"
+	update_manifest -p "$bundle_manifest" previous "$oldversion"
+	# copy also the bundle's zero pack, untar it the files directory in the new version
+	# and create a tar per file (full files)
+	if [ ! -e "$version_path"/pack-"$bundle"-from-0.tar ]; then
+		sudo cp "$oldversion_path"/pack-"$bundle"-from-0.tar "$version_path"/
+		sudo tar -xf "$version_path"/pack-"$bundle"-from-0.tar --strip-components 1 --directory "$version_path"/files
+		files=("$(ls -I "*.tar" "$version_path"/files)")
+		for bundle_file in ${files[*]}; do
+			if [ ! -e "$version_path"/files/"$bundle_file".tar ]; then
+				create_tar "$version_path"/files/"$bundle_file"
+			fi
+		done
+	fi
+	contentsize=$(awk '/contentsize/ { print $2 }' "$bundle_manifest")
+
+	# these actions apply to all operations except when adding a new file or updating the header only
+	if [ "$option" != "--add" ] && [ "$option" != "--add-dir" ] && [ "$option" != "--add-file" ] && [ "$option" != "--header-only" ]; then
+		fhash=$(get_hash_from_manifest "$bundle_manifest" "$fname")
+		fsize=$(stat -c "%s" "$oldversion_path"/files/"$fhash")
+		# update the version of the file to be updated in the manifest
+		update_manifest -p "$bundle_manifest" file-version "$fname" "$version"
+	fi
+
+	case "$option" in
+	--add | --add-file)
+		# if the directories the file is don't exist, add them to the bundle
+		fdir=$(dirname "${fname%:*}")
+		if [ ! "$(sudo cat "$bundle_manifest" | grep -x "D\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/" ]; then
+			new_dir=$(create_dir "$version_path"/files)
+			add_to_manifest -p "$bundle_manifest" "$new_dir" "$fdir"
+			# add each one of the directories of the path if they are not in the manifest already
+			while [ "$(dirname "$fdir")" != "/" ]; do
+				fdir=$(dirname "$fdir")
+				if [ ! "$(sudo cat "$bundle_manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
+					add_to_manifest -p "$bundle_manifest" "$new_dir" "$fdir"
+				fi
+			done
+			# Add the dir to the delta-pack
+			add_to_pack "$bundle" "$new_dir" "$oldversion"
+		fi
+		# if the user wants to use an existing file, use it, else create a new one
+		if [[ "$fname" = *":"* ]]; then
+			new_file="${fname#*:}"
+			validate_item "$new_file"
+			sudo rsync -aq "$new_file" "$version_path"/files/"$(basename "$new_file")"
+			sudo rsync -aq "$new_file".tar "$version_path"/files/"$(basename "$new_file")".tar
+			new_file="$version_path"/files/"$(basename "$new_file")"
+			fname="${fname%:*}"
+		else
+			new_file=$(create_file "$version_path"/files)
+		fi
+		add_to_manifest -p "$bundle_manifest" "$new_file" "$fname"
+		# contentsize is automatically added by the add_to_manifest function so
+		# all we need is to get the updated value for now
+		contentsize=$(awk '/contentsize/ { print $2 }' "$bundle_manifest")
+		# Add the file to the zero pack of the bundle
+		add_to_pack "$bundle" "$new_file"
+		# Add the file also to the delta-pack
+		add_to_pack "$bundle" "$new_file" "$oldversion"
+		;;
+	--add-dir)
+		# if the directories the file is don't exist, add them to the bundle
+		fdir="$fname"
+		if [ ! "$(sudo cat "$bundle_manifest" | grep -x "D\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/" ]; then
+			new_dir=$(create_dir "$version_path"/files)
+			add_to_manifest -p "$bundle_manifest" "$new_dir" "$fdir"
+			# add each one of the directories of the path if they are not in the manifest already
+			while [ "$(dirname "$fdir")" != "/" ]; do
+				fdir=$(dirname "$fdir")
+				if [ ! "$(sudo cat "$bundle_manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
+					add_to_manifest -p "$bundle_manifest" "$new_dir" "$fdir"
+				fi
+			done
+			# Add the dir to the delta-pack
+			add_to_pack "$bundle" "$new_dir"
+			add_to_pack "$bundle" "$new_dir" "$oldversion"
+		fi
+		contentsize=$(awk '/contentsize/ { print $2 }' "$bundle_manifest")
+		;;
+	--delete | --ghost)
+		# replace the first character of the line that matches with "."
+		sudo sed -i "/\\t${fname////\\/}$/s/./\./1" "$bundle_manifest"
+		sudo sed -i "/\\t${fname////\\/}\\t/s/./\./1" "$bundle_manifest"
+		if [ "$option" = "--delete" ]; then
+			# replace the second character of the line that matches with "d"
+			sudo sed -i "/\\t${fname////\\/}$/s/./d/2" "$bundle_manifest"
+			sudo sed -i "/\\t${fname////\\/}\\t/s/./d/2" "$bundle_manifest"
+			# remove the related file(s) from the version dir (if there)
+			sudo rm -f "$version_path"/files/"$fhash"
+			sudo rm -f "$version_path"/files/"$fhash".tar
+		else
+			# replace the second character of the line that matches with "g"
+			sudo sed -i "/\\t${fname////\\/}$/s/./g/2" "$bundle_manifest"
+			sudo sed -i "/\\t${fname////\\/}\\t/s/./g/2" "$bundle_manifest"
+		fi
+		# replace the hash with 0s
+		update_manifest -p "$bundle_manifest" file-hash "$fname" "$zero_hash"
+		# calculate new contentsize (NOTE: filecount is not decreased)
+		contentsize=$((contentsize - fsize))
+		;;
+	--update)
+		# append random content to the file
+		generate_random_content 1 20 | sudo tee -a "$version_path"/files/"$fhash" > /dev/null
+		# recalculate hash and update file names
+		new_fhash=$(sudo "$SWUPD" hashdump "$version_path"/files/"$fhash" 2> /dev/null)
+		sudo mv "$version_path"/files/"$fhash" "$version_path"/files/"$new_fhash"
+		create_tar "$version_path"/files/"$new_fhash"
+		sudo rm -f "$oldversion_path"/files/"$fhash".tar
+		# update the manifest with the new hash
+		update_manifest -p "$bundle_manifest" file-hash "$fname" "$new_fhash"
+		# calculate new contentsize
+		new_fsize=$(stat -c "%s" "$version_path"/files/"$new_fhash")
+		contentsize=$((contentsize + (new_fsize - fsize)))
+		# update the zero-pack with the new file
+		add_to_pack "$bundle" "$version_path"/files/"$new_fhash"
+		# create the delta-file
+		delta_name="$oldversion-$version-$fhash-$new_fhash"
+		sudo bsdiff "$oldversion_path"/files/"$fhash" "$version_path"/files/"$new_fhash" "$version_path"/delta/"$delta_name"
+		# create or add to the delta-pack
+		add_to_pack "$bundle" "$version_path"/delta/"$delta_name" "$oldversion"
+		;;
+	--rename | --rename-legacy)
+		validate_param "$new_name"
+		# make sure new_name starts with a slash
+		if [[ "$new_name" != "/"* ]]; then
+			new_name=/"$new_name"
+		fi
+		new_fname="${new_name////\\/}"
+		# renames need two records in the manifest, one with the
+		# new name (F...) and one with the old one (.d..)
+		# replace the first character of the old record with "."
+		sudo sed -i "/\\t${fname////\\/}$/s/./\./1" "$bundle_manifest"
+		sudo sed -i "/\\t${fname////\\/}\\t/s/./\./1" "$bundle_manifest"
+		# replace the second character of the old record with "d"
+		sudo sed -i "/\\t${fname////\\/}$/s/./d/2" "$bundle_manifest"
+		sudo sed -i "/\\t${fname////\\/}\\t/s/./d/2" "$bundle_manifest"
+		# add the new name to the manifest
+		add_to_manifest -p "$bundle_manifest" "$oldversion_path"/files/"$fhash" "$new_name"
+		if [ "$option" = "--rename" ]; then
+			# replace the hash of the old record with 0s
+			update_manifest -p "$bundle_manifest" file-hash "$fname" "$zero_hash"
+		else
+			# replace the fourth character of the old record with "r"
+			sudo sed -i "/\\t${fname////\\/}$/s/./r/4" "$bundle_manifest"
+			sudo sed -i "/\\t${fname////\\/}\\t/s/./r/4" "$bundle_manifest"
+			# replace the fourth character of the new record with "r"
+			sudo sed -i "/\\t$new_fname$/s/./r/4" "$bundle_manifest"
+		fi
+		# create the delta-file
+		delta_name="$oldversion-$version-$fhash-$fhash"
+		sudo bsdiff "$oldversion_path"/files/"$fhash" "$oldversion_path"/files/"$fhash" "$version_path"/delta/"$delta_name"
+		# create or add to the delta-pack
+		add_to_pack "$bundle" "$version_path"/delta/"$delta_name" "$oldversion"
+		;;
+	--header-only)
+		# do nothing
+		;;
+	*)
+		terminate "Please select a valid option for updating the bundle: --add, --delete, --ghost, --rename, --update, --header-only"
+		;;
+	esac
+
+	# re-order items on the manifest so they are in the correct order based on version
+	sudo sort -t$'\t' -k3 -s -h -o "$bundle_manifest" "$bundle_manifest"
+
+	update_manifest -p "$bundle_manifest" contentsize "$contentsize"
+	update_manifest -p "$bundle_manifest" timestamp "$(date +"%s")"
+
+	# renew the manifest tar
+	if [ "$partial" = false ]; then
+		sudo rm -f "$bundle_manifest".tar
+		create_tar "$bundle_manifest"
+		# update the mom
+		update_hashes_in_mom "$version_path"/Manifest.MoM
+	fi
+
+}
+
 # Adds the specified file to the zero or delta pack for the bundle
 # Parameters:
 # - BUNDLE: the name of the bundle

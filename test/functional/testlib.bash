@@ -1033,6 +1033,27 @@ create_version() {
 			create_tar "$mom"
 			sign_manifest "$mom"
 		fi
+		# when creating a new version we need to make an update to os-release and format
+		# files in the os-core bundle (unless otherwise specified or if bundle does not exist)
+		if [ "$release_files" = true ]; then
+			oldversion="$version"
+			while [ "$oldversion" -gt 0 ] && [ ! -e "$env_name"/web-dir/"$oldversion"/Manifest.os-core ]; do
+				oldversion=$(awk '/previous/ { print $2 }' "$env_name"/web-dir/"$oldversion"/Manifest.MoM)
+			done
+			# if no os-core manifest was found, nothing else needs to be done
+			if [ -e "$env_name"/web-dir/"$oldversion"/Manifest.os-core ]; then
+				update_bundle -p "$env_name" os-core --header-only
+				if [ ! -z "$(get_hash_from_manifest "$env_name"/web-dir/"$oldversion"/Manifest.os-core /usr/lib/os-release)" ]; then
+					remove_from_manifest -p "$env_name"/web-dir/"$version"/Manifest.os-core /usr/lib/os-release
+				fi
+				update_bundle -p "$env_name" os-core --add /usr/lib/os-release:"$OS_RELEASE"
+				if [ ! -z "$(get_hash_from_manifest "$env_name"/web-dir/"$oldversion"/Manifest.os-core /usr/share/defaults/swupd/format)" ]; then
+					remove_from_manifest -p "$env_name"/web-dir/"$version"/Manifest.os-core /usr/share/defaults/swupd/format
+				fi
+				# update without -p flag to refresh tar and MoM
+				update_bundle "$env_name" os-core --add /usr/share/defaults/swupd/format:"$FORMAT"
+			fi
+		fi
 	fi
 
 }

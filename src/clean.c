@@ -322,8 +322,7 @@ int clean_main(int argc, char **argv)
 	}
 
 	int ret = 0;
-	int lock_fd = 0;
-	ret = swupd_init(&lock_fd);
+	ret = swupd_init();
 	if (ret != 0) {
 		fprintf(stderr, "Failed swupd initialization, exiting now.\n");
 		return ret;
@@ -354,7 +353,7 @@ int clean_main(int argc, char **argv)
 	}
 
 end:
-	swupd_deinit(lock_fd);
+	swupd_deinit();
 	return ret;
 }
 

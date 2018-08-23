@@ -481,7 +481,6 @@ out:
  */
 int remove_bundles(char **bundles)
 {
-	int lock_fd;
 	int ret = 0;
 	int ret_code = 0;
 	int bad = 0;
@@ -491,7 +490,7 @@ int remove_bundles(char **bundles)
 	struct list *subs = NULL;
 	bool mix_exists;
 
-	ret = swupd_init(&lock_fd);
+	ret = swupd_init();
 	if (ret != 0) {
 		fprintf(stderr, "Failed updater initialization, exiting now.\n");
 		return ret;
@@ -511,7 +510,7 @@ int remove_bundles(char **bundles)
 			  ret);
 
 		free_subscriptions(&subs);
-		swupd_deinit(lock_fd);
+		swupd_deinit();
 		return ret;
 	}
 
@@ -648,7 +647,7 @@ int remove_bundles(char **bundles)
 	}
 
 	free_subscriptions(&subs);
-	swupd_deinit(lock_fd);
+	swupd_deinit();
 
 	return ret_code;
 }
@@ -1032,7 +1031,6 @@ out:
  */
 int install_bundles_frontend(char **bundles)
 {
-	int lock_fd;
 	int ret = 0;
 	int current_version;
 	struct list *bundles_list = NULL;
@@ -1043,7 +1041,7 @@ int install_bundles_frontend(char **bundles)
 	bool mix_exists;
 
 	/* initialize swupd and get current version from OS */
-	ret = swupd_init(&lock_fd);
+	ret = swupd_init();
 	if (ret != 0) {
 		fprintf(stderr, "Failed updater initialization, exiting now.\n");
 		return ret;
@@ -1101,7 +1099,7 @@ clean_and_exit:
 
 	free_string(&bundles_list_str);
 	free_subscriptions(&subs);
-	swupd_deinit(lock_fd);
+	swupd_deinit();
 
 	return ret;
 }

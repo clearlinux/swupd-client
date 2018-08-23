@@ -856,7 +856,6 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 int search_main(int argc, char **argv)
 {
 	int ret = 0;
-	int lock_fd = 0;
 	struct manifest *MoM = NULL;
 	struct list *subs = NULL;
 
@@ -864,7 +863,7 @@ int search_main(int argc, char **argv)
 		return EINVALID_OPTION;
 	}
 
-	ret = swupd_init(&lock_fd);
+	ret = swupd_init();
 	if (ret != 0) {
 		fprintf(stderr, "Failed swupd initialization, exiting now.\n");
 		return ret;
@@ -899,6 +898,6 @@ int search_main(int argc, char **argv)
 clean_exit:
 	free_manifest(MoM);
 	free_subscriptions(&subs);
-	swupd_deinit(lock_fd);
+	swupd_deinit();
 	return ret;
 }

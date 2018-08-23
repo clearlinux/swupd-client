@@ -45,7 +45,6 @@ int get_latest_version(char *v_url)
 #define MAX_VERSION_STR_SIZE 11
 
 	char *url = NULL;
-	char *path = NULL;
 	int ret = 0;
 	char version_str[MAX_VERSION_STR_SIZE];
 	struct curl_file_data tmp_version = {
@@ -64,11 +63,7 @@ int get_latest_version(char *v_url)
 
 	string_or_die(&url, "%s/version/format%s/latest", v_url, format_string);
 
-	string_or_die(&path, "%s/server_version", state_dir);
-
-	unlink(path);
-
-	ret = swupd_curl_get_file_full(url, path, &tmp_version, false);
+	ret = swupd_curl_get_file_full(url, NULL, &tmp_version, false);
 	if (ret) {
 		goto out;
 	} else {
@@ -77,7 +72,6 @@ int get_latest_version(char *v_url)
 	}
 
 out:
-	free_string(&path);
 	free_string(&url);
 	cached_version = ret;
 	return ret;

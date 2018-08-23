@@ -881,7 +881,7 @@ int search_main(int argc, char **argv)
 	}
 
 	if (init) {
-		fprintf(stderr, "Successfully retreived manifests. Exiting\n");
+		fprintf(stderr, "Successfully retrieved manifests. Exiting\n");
 		ret = 0;
 		goto clean_exit;
 	}

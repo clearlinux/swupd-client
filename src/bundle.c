@@ -819,7 +819,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 		}
 	}
 
-	/* step 2: download neccessary packs */
+	/* step 2: download necessary packs */
 	grabtime_start(&times, "Download packs");
 	(void)rm_staging_dir_contents("download");
 

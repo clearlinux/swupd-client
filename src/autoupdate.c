@@ -71,7 +71,7 @@ static bool parse_options(int argc, char **argv)
 	}
 
 	if (argc > optind) {
-		fprintf(stderr, "Error: unexpected arguements\n\n");
+		fprintf(stderr, "Error: unexpected arguments\n\n");
 		goto err;
 	}
 

@@ -30,7 +30,7 @@
  * NOTE NOTE NOTE
  *
  * Only use these from the main thread of the program. For multithreaded
- * use, you need to manage your own curl mutli environment.
+ * use, you need to manage your own curl multi environment.
  */
 
 #define _GNU_SOURCE

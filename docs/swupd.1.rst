@@ -155,7 +155,7 @@ SUBCOMMANDS
 
 ``bundle-list``
 
-    List all installed sofware bundles in the local system. Bundles available
+    List all installed software bundles in the local system. Bundles available
     can be listed with the `--all` option.
 
     -  `-a, --all`

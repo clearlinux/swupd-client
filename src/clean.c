@@ -315,6 +315,30 @@ static int clean_staged_manifests(const char *path, bool dry_run, bool all)
 	return ret;
 }
 
+static int clean_init(void)
+{
+	int ret = 0;
+
+	check_root();
+
+	if (!init_globals()) {
+		return EINIT_GLOBALS;
+	}
+
+	if (p_lockfile() < 0) {
+		free_globals();
+		return ELOCK_FILE;
+	}
+
+	return ret;
+}
+
+static void clean_deinit(void)
+{
+	free_globals();
+	v_lockfile();
+}
+
 int clean_main(int argc, char **argv)
 {
 	if (!parse_options(argc, argv)) {
@@ -322,7 +346,7 @@ int clean_main(int argc, char **argv)
 	}
 
 	int ret = 0;
-	ret = swupd_init();
+	ret = clean_init();
 	if (ret != 0) {
 		fprintf(stderr, "Failed swupd initialization, exiting now.\n");
 		return ret;
@@ -353,7 +377,7 @@ int clean_main(int argc, char **argv)
 	}
 
 end:
-	swupd_deinit();
+	clean_deinit();
 	return ret;
 }
 

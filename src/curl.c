@@ -452,6 +452,16 @@ int swupd_curl_get_file(const char *url, char *filename)
 	return swupd_curl_get_file_full(url, filename, NULL, false);
 }
 
+/*
+ * Download a single file SYNCHRONOUSLY to a memory struct
+ *
+ * Returns: Zero on success or a standard < 0 status code on errors.
+ */
+int swupd_curl_get_file_memory(const char *url, struct curl_file_data *file_data)
+{
+	return swupd_curl_get_file_full(url, NULL, file_data, false);
+}
+
 static CURLcode swupd_curl_set_security_opts(CURL *curl)
 {
 	CURLcode curl_ret = CURLE_OK;

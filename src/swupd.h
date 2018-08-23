@@ -293,7 +293,7 @@ extern int swupd_curl_init(void);
 extern void swupd_curl_deinit(void);
 extern double swupd_curl_query_content_size(char *url);
 extern int swupd_curl_get_file(const char *url, char *filename);
-extern int swupd_curl_get_file_full(const char *url, char *filename, struct curl_file_data *file_data, bool resume_ok);
+extern int swupd_curl_get_file_memory(const char *url, struct curl_file_data *file_data);
 
 /* download.c */
 typedef bool (*swupd_curl_success_cb)(void *data);

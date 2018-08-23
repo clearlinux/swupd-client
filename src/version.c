@@ -63,7 +63,7 @@ int get_latest_version(char *v_url)
 
 	string_or_die(&url, "%s/version/format%s/latest", v_url, format_string);
 
-	ret = swupd_curl_get_file_full(url, NULL, &tmp_version, false);
+	ret = swupd_curl_get_file_memory(url, &tmp_version);
 	if (ret) {
 		goto out;
 	} else {

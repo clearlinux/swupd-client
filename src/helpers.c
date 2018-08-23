@@ -202,7 +202,7 @@ static int create_required_dirs(void)
 #define STATE_DIR_COUNT (sizeof(state_dirs) / sizeof(state_dirs[0]))
 	const char *state_dirs[] = { "delta", "staged", "download", "telemetry" };
 
-	// check for existance
+	// check for existence
 	ensure_root_owned_dir(state_dir);
 
 	for (i = 0; i < STATE_DIR_COUNT; i++) {

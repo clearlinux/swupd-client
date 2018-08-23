@@ -151,7 +151,7 @@ static const char **get_sorted_xattr_name_table(const char *names, int n)
 /* copy an xattr blob from a file to another file or to a buffer
  *
  * returned blob_len==0 indicates the blob pointer does not
- * contain valid data.  Given quirks in xattr implemenations (or lack there
+ * contain valid data.  Given quirks in xattr implementations (or lack there
  * of on some kernels or filesystems or OS's) and SSL quirks (the blob and
  * blob length are passed to a hasing function) the blob pointer is set to a
  * canary instead of being left as NULL, simplifying code elsewhere. */

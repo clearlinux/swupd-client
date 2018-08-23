@@ -406,7 +406,7 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 
 	ret = download_fullfiles(official_manifest->files, NULL);
 	if (ret) {
-		fprintf(stderr, "Error: Unable to download neccessary files for this OS release\n");
+		fprintf(stderr, "Error: Unable to download necessary files for this OS release\n");
 	}
 
 	return ret;

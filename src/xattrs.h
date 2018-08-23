@@ -18,7 +18,7 @@ void xattrs_copy(const char *src_filename, const char *dst_filename);
  * Attempt to pack into a data blob the extended attributes of the given file.
  * The data blob will be allocated and possibly filled with first the sorted
  * list of all the extended attributes names, and then their values.
- * The values will be NUL terminated, but the encoding is not reversable so
+ * The values will be NUL terminated, but the encoding is not reversible so
  * is only suitable to use as input to a hashing function.
  * @param filename - The file from which the extended attributes will be
  * read and packed into the data blob.

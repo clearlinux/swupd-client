@@ -212,7 +212,6 @@ static int main_update()
 	struct list *current_subs = NULL;
 	struct list *latest_subs = NULL;
 	int ret;
-	int lock_fd;
 	int retries = 0;
 	int timeout = 10;
 	struct timespec ts_start, ts_stop; // For main swupd update time
@@ -224,7 +223,7 @@ static int main_update()
 
 	srand(time(NULL));
 
-	ret = swupd_init(&lock_fd);
+	ret = swupd_init();
 	if (ret != 0) {
 		/* being here means we already close log by a previously caught error */
 		fprintf(stderr, "Updater failed to initialize, exiting now.\n");
@@ -548,7 +547,7 @@ clean_curl:
 	 * we need and the clean helps us prevent cache bloat. */
 	clean_statedir(false, false);
 	free_subscriptions(&latest_subs);
-	swupd_deinit(lock_fd);
+	swupd_deinit();
 
 	if (nonpack > 0) {
 		printf("%i files were not in a pack\n", nonpack);

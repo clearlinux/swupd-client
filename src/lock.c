@@ -38,13 +38,19 @@
 #include "config.h"
 #include "swupd.h"
 
+static int lock_fd = -1;
+
 /* Try to get a write lock region on the lock file. Returns:
 * >= 0 an fcntl region lock'd fd or exits with a positive error
 * code and a recommended course of action for user.
 */
 int p_lockfile(void)
 {
-	int lock_fd, ret;
+	if (lock_fd > 0) {
+		return -1;
+	}
+
+	int ret;
 	pid_t pid = getpid();
 	struct flock fl = {
 		.l_type = F_WRLCK,
@@ -89,7 +95,9 @@ int p_lockfile(void)
 }
 
 /* closes lock fd and must not unlink lock file (else race allowed) */
-void v_lockfile(int fd)
+void v_lockfile(void)
 {
-	close(fd);
+	if (lock_fd > 0) {
+		close(lock_fd);
+	}
 }

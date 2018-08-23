@@ -698,7 +698,6 @@ int verify_main(int argc, char **argv)
 {
 	struct manifest *official_manifest = NULL;
 	int ret;
-	int lock_fd;
 	int retries = 0;
 	int timeout = 10;
 	struct list *subs = NULL;
@@ -713,7 +712,7 @@ int verify_main(int argc, char **argv)
 	assert(argc >= 0);
 	assert(argv != NULL);
 
-	ret = swupd_init(&lock_fd);
+	ret = swupd_init();
 	if (ret != 0) {
 		fprintf(stderr, "Failed verify initialization, exiting now.\n");
 		goto clean_args_and_exit;
@@ -1020,7 +1019,7 @@ clean_and_exit:
 
 	print_time_stats(&times);
 	free_subscriptions(&subs);
-	swupd_deinit(lock_fd);
+	swupd_deinit();
 
 clean_args_and_exit:
 	if (picky_whitelist) {

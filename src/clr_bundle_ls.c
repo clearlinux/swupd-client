@@ -182,7 +182,6 @@ err:
 
 int bundle_list_main(int argc, char **argv)
 {
-	int lock_fd;
 	int ret;
 
 	if (!parse_options(argc, argv)) {
@@ -198,7 +197,7 @@ int bundle_list_main(int argc, char **argv)
 		return ret;
 	}
 
-	ret = swupd_init(&lock_fd);
+	ret = swupd_init();
 	if (ret != 0) {
 		fprintf(stderr, "Error: Failed updater initialization. Exiting now\n");
 		return ret;
@@ -212,7 +211,7 @@ int bundle_list_main(int argc, char **argv)
 		ret = list_installable_bundles();
 	}
 
-	swupd_deinit(lock_fd);
+	swupd_deinit();
 
 	return ret;
 }

@@ -521,24 +521,26 @@ void free_file_data(void *data)
 	free(file);
 }
 
-void swupd_deinit(int lock_fd)
+void swupd_deinit(void)
 {
 	terminate_signature();
 	swupd_curl_deinit();
 	free_globals();
-	v_lockfile(lock_fd);
+	v_lockfile();
 	dump_file_descriptor_leaks();
 }
 
 /* this function is intended to encapsulate the basic swupd
 * initializations for the majority of commands, that is:
 * 	- Make sure root is the user running the code
-*	- Initialize log facility
-*	- Get the lock
+* 	- Initialize globals
 *	- initialize mounted directories
+*	- Create necessary directories
+*	- Get the lock
 *	- Initialize curl
+*	- Initialize signature checking
 */
-int swupd_init(int *lock_fd)
+int swupd_init(void)
 {
 	int ret = 0;
 
@@ -566,8 +568,7 @@ int swupd_init(int *lock_fd)
 		goto out_fds;
 	}
 
-	*lock_fd = p_lockfile();
-	if (*lock_fd < 0) {
+	if (p_lockfile() < 0) {
 		ret = ELOCK_FILE;
 		goto out_fds;
 	}
@@ -587,7 +588,7 @@ int swupd_init(int *lock_fd)
 	return ret;
 
 out_close_lock:
-	v_lockfile(*lock_fd);
+	v_lockfile();
 out_fds:
 	dump_file_descriptor_leaks();
 

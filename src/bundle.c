@@ -509,7 +509,9 @@ int remove_bundles(char **bundles)
 			  *bundles,
 			  current_version,
 			  ret);
-		swupd_deinit(lock_fd, &subs);
+
+		free_subscriptions(&subs);
+		swupd_deinit(lock_fd);
 		return ret;
 	}
 
@@ -645,7 +647,8 @@ int remove_bundles(char **bundles)
 		fprintf(stderr, "Successfully removed %i bundle%s\n", total, (total > 1 ? "s" : ""));
 	}
 
-	swupd_deinit(lock_fd, &subs);
+	free_subscriptions(&subs);
+	swupd_deinit(lock_fd);
 
 	return ret_code;
 }
@@ -1097,7 +1100,8 @@ clean_and_exit:
 		  ret);
 
 	free_string(&bundles_list_str);
-	swupd_deinit(lock_fd, &subs);
+	free_subscriptions(&subs);
+	swupd_deinit(lock_fd);
 
 	return ret;
 }

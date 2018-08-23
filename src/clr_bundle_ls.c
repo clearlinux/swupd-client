@@ -212,7 +212,7 @@ int bundle_list_main(int argc, char **argv)
 		ret = list_installable_bundles();
 	}
 
-	swupd_deinit(lock_fd, NULL);
+	swupd_deinit(lock_fd);
 
 	return ret;
 }

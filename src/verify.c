@@ -1019,7 +1019,8 @@ clean_and_exit:
 	}
 
 	print_time_stats(&times);
-	swupd_deinit(lock_fd, &subs);
+	free_subscriptions(&subs);
+	swupd_deinit(lock_fd);
 
 clean_args_and_exit:
 	if (picky_whitelist) {

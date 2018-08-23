@@ -547,7 +547,8 @@ clean_curl:
 	/* clean up our cached content from the update. It is likely much more than
 	 * we need and the clean helps us prevent cache bloat. */
 	clean_statedir(false, false);
-	swupd_deinit(lock_fd, &latest_subs);
+	free_subscriptions(&latest_subs);
+	swupd_deinit(lock_fd);
 
 	if (nonpack > 0) {
 		printf("%i files were not in a pack\n", nonpack);

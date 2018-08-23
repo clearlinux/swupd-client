@@ -354,7 +354,7 @@ int clean_main(int argc, char **argv)
 	}
 
 end:
-	swupd_deinit(lock_fd, NULL);
+	swupd_deinit(lock_fd);
 	return ret;
 }
 

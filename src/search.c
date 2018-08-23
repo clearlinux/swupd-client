@@ -898,6 +898,7 @@ int search_main(int argc, char **argv)
 
 clean_exit:
 	free_manifest(MoM);
-	swupd_deinit(lock_fd, &subs);
+	free_subscriptions(&subs);
+	swupd_deinit(lock_fd);
 	return ret;
 }

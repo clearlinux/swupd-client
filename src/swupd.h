@@ -356,7 +356,7 @@ void v_lockfile(int fd);
 extern int swupd_rm(const char *path);
 extern int rm_bundle_file(const char *bundle);
 extern void print_manifest_files(struct manifest *m);
-extern void swupd_deinit(int lock_fd, struct list **subs);
+extern void swupd_deinit(int lock_fd);
 extern int swupd_init(int *lock_fd);
 extern void string_or_die(char **strp, const char *fmt, ...);
 char *strdup_or_die(const char *const str);

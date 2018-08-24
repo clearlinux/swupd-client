@@ -2,24 +2,34 @@
 
 load "../testlib"
 
-server_pid=""
-port=""
-THEME_DIRNAME="$FUNC_DIR/checkupdate_v2"
+global_setup() {
+
+	create_test_environment "$TEST_NAME"
+
+	# start slow response web server
+	start_web_server -s
+}
+
+test_setup() {
+
+	return
+}
 
 test_teardown() {
 
-	echo "terminating web server..." >&3
-	kill "$server_pid" >&3
-	destroy_test_environment "$TEST_NAME"
+	return
+}
 
+global_teardown() {
+
+	destroy_web_server
+	destroy_test_environment "$TEST_NAME"
 }
 
 @test "check-update with a slow server" {
 
 	# Pre-req: create a web server that can serve as a slow content download server
-	echo "starting web server..." >&3
-	start_web_server
-	slow_opts="-p $TEST_NAME/target-dir -F staging -u http://localhost:$port/"
+	slow_opts="-p $TEST_NAME/target-dir -F staging -u http://localhost:$PORT/"
 
 	# test
 	run sudo sh -c "$SWUPD check-update $slow_opts"
@@ -30,32 +40,4 @@ test_teardown() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-
-}
-
-start_web_server() {
-
-	for i in {8080..8180}; do
-		"$THEME_DIRNAME"/server.py $i &
-		sleep .5
-		server_pid=$!
-		if [ -d /proc/$server_pid ]; then
-			port=$i
-			break
-		fi
-	done
-
-	# wait until server becomes available by expecting a successful curl
-	for i in $(seq 1 10); do
-		flag=true
-		curl http://localhost:"$port"/ || flag=false
-		if [ "$flag" == false ]; then
-			sleep .5
-			continue
-		else
-			echo "responding"
-			break
-		fi
-	done
-
 }

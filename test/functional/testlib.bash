@@ -60,6 +60,81 @@ generate_random_name() {
 
 }
 
+# Creates public and private key
+# Parameters:
+# - key_path: path to private key
+# - cert_path: path to public key
+generate_certificate() {
+
+	local key_path=$1
+	local cert_path=$2
+
+	# If incorrect number of parameters are received show usage
+	if [ $# -ne 2 ]; then
+		cat <<-EOM
+			Usage:
+			    generate_certificate <key_path> <cert_path>
+			EOM
+		return
+	fi
+
+	# generate self-signed public and private key
+	openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 \
+		-keyout "$key_path" -out "$cert_path" \
+		-subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost"
+
+}
+
+# Creates the trusted certificate store and adds one certificate
+# Parameters:
+# - cert_path: path of certificate to add to trust store
+create_trusted_cacert() {
+
+	local cert_path=$1
+	local counter=0
+	local subj_hash
+
+	# If incorrect number of parameters are received show usage
+	if [ $# -ne 1 ]; then
+		cat <<-EOM
+			Usage:
+			    create_trusted_cacert <certificate_path>
+			EOM
+		return
+	fi
+
+	# only one test can use the trusted certificate store at the same time to
+	# avoid certificate contamination from other tests and race conditions.
+	until mkdir "$CACERT_DIR"; do
+		sleep 1
+		if [ "$counter" -eq "1000" ]; then
+			echo "Timeout: creating trusted certificate"
+			return 1
+		fi
+		counter=$((counter + 1))
+	done
+
+	# only allow the test that create CACERT_DIR to erase it
+	echo '1' > "$CACERT_DIR/$TEST_NAME.lock"
+
+	# the public key names in the CACERT_DIR must use the following format to
+	# be included by swupd in the trust store: <subject hash>.<number>
+	subj_hash=$(openssl x509 -subject_hash -noout -in "$cert_path")
+	ln -s "$cert_path" "$CACERT_DIR/$subj_hash.0"
+
+}
+
+# Deletes the trusted certificate store
+destroy_trusted_cacert() {
+
+	# only the test that created CACERT_DIR can erase it which stops
+	# tests from erasing CACERT_DIR when they fail before creating it
+	if [ -f "$CACERT_DIR/$TEST_NAME.lock" ]; then
+		rm -rf "$CACERT_DIR"
+	fi
+
+}
+
 print_stack() {
 
 	echo "An error occurred"
@@ -161,6 +236,8 @@ set_env_variables() {
 	fi
 	validate_path "$env_name"
 	path=$(dirname "$(realpath "$env_name")")
+
+	export CACERT_DIR="/tmp/swupd_test_certificates" # trusted key store path
 
 	export SWUPD_OPTS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
 	export SWUPD_OPTS_NO_CERT="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir"

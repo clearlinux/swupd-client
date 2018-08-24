@@ -32,7 +32,7 @@ install:
 script:
         - sudo find test/functional -exec chmod g-w {} \;
         - autoreconf --verbose --warnings=none --install --force &&
-          ./configure CFLAGS="$CFLAGS -fsanitize=address" --enable-signature-verification &&
+          ./configure CFLAGS="$CFLAGS -fsanitize=address" --with-fallback-capaths=/tmp/swupd_test_certificates --enable-signature-verification &&
           make -j48 &&
           sudo sh -c 'umask 0022 && make -j48 check' &&
           sudo sh -c 'umask 0022 && make install' &&

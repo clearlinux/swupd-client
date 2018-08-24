@@ -847,7 +847,7 @@ bump_format() {
 	middle_version_path="$env_name"/web-dir/"$middle_version"
 	new_version="$((version+20))"
 	new_version_path="$env_name"/web-dir/"$new_version"
-	format="$(cat "$env_name"/web-dir/"$version"/format)"
+	format="$(< "$env_name"/web-dir/"$version"/format)"
 	mom="$new_version_path"/Manifest.MoM
 
 	# create two new versions for the format bump, each version separated by 10
@@ -860,7 +860,7 @@ bump_format() {
 
 	# update the new version
 	# copy all manifests in MoM to new version
-	bundles=($(cat "$mom" | grep -x "M\.\.\..*" | awk '{ print $4 }'))
+	bundles=($(awk '/^M\.\.\./ { print $4 }' "$mom"))
 	IFS=$'\n'
 	for bundle in ${bundles[*]}; do
 		# search for the latest manifest version for the bundle
@@ -910,7 +910,7 @@ bump_format() {
 	update_manifest -p "$mom" version "$middle_version"
 	update_manifest -p "$mom" previous "$version"
 	sudo sed -i "/....\\t.*\\t.*\\t.*$/s/\(....\\t.*\\t\).*\(\\t\)/\1$middle_version\2/g" "$mom"
-	bundles=($(cat "$mom" | grep -x "M\.\.\..*" | awk '{ print $4 }'))
+	bundles=($(awk '/^M\.\.\./ { print $4 }' "$mom"))
 	IFS=$'\n'
 	for bundle in ${bundles[*]}; do
 		manifest="$middle_version_path"/Manifest."$bundle"

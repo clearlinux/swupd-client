@@ -238,6 +238,18 @@ set_env_variables() {
 	path=$(dirname "$(realpath "$env_name")")
 
 	export CACERT_DIR="/tmp/swupd_test_certificates" # trusted key store path
+	export PORT_FILE="/tmp/$TEST_NAME-port_file.txt" # stores web server port
+	export SERVER_PID_FILE="/tmp/$TEST_NAME-pid_file.txt" # stores web server pid
+
+	# Add environment variables for PORT and SERVER_PID when web server used
+	if [ -f "$PORT_FILE" ]; then
+		PORT=$(cat "$PORT_FILE")
+		export PORT
+	fi
+
+	if [ -f "$SERVER_PID_FILE" ]; then
+		export SERVER_PID=$(cat "$SERVER_PID_FILE")
+	fi
 
 	export SWUPD_OPTS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
 	export SWUPD_OPTS_NO_CERT="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir"
@@ -1105,6 +1117,101 @@ destroy_test_environment() {
 		fi
 	done
 	sudo rm -rf "$env_name"
+
+}
+
+# creates a web server to host fake swupd content with or without certifiates
+start_web_server() {
+
+	local port
+	local server_args
+	local server_pid
+	local status
+
+	cb_usage() {
+		echo $(cat <<-EOF
+		Usage:
+		    start_web_server [-k] <server priv key> [-p] <server pub key> [-s]
+
+		Options:
+		    -k    Path to server private key which must correspond to the provided server public key
+		    -p    Path to server public key which enables SSL authentication
+		    -s    Use a slow update server
+
+		Notes:
+		    - When the server is using SSL authentication, a pair of corresponding public and private keys must be passed
+		      as arguments.
+
+		Example of usage:
+
+		    The following command will create a web server that uses SSL authentication and inserts a delay for content
+		    updates.
+
+		    start_web_server -k /private_key.pem -p /public_key.pem -s
+
+		EOF
+		)
+	}
+
+	while getopts :k:p:s opt; do
+		case "$opt" in
+			k)	server_args="$server_args --server_key $OPTARG" ;;
+			p)	server_args="$server_args --server_cert $OPTARG" ;;
+			s)	server_args="$server_args --slow_server" ;;
+			*)	cb_usage
+				return ;;
+		esac
+	done
+
+	# start web server and write port/pid numbers to their respective files
+	python3 "$FUNC_DIR"/server.py $server_args --port_file "$PORT_FILE" &
+	server_pid=$!
+
+	echo "$server_pid" > "$SERVER_PID_FILE"
+
+	# wait for server to be available
+	for i in $(seq 1 100); do
+		if [ -f "$PORT_FILE" ]; then
+			port=$(cat "$PORT_FILE")
+			status=0
+
+			# use https when the server is using certificates
+			if [[ "$server_args" = *"--server_cert"* ]]; then
+				curl https://localhost:"$port" || status=$?
+			else
+				curl http://localhost:"$port" || status=$?
+			fi
+
+			# the web server is ready for connections when 0 or 60 is returned. When using
+			# https, exit status 60 will be returned because certificates are not included
+			# in the curl test command
+			if [ "$status" -eq 0 ] || [ "$status" -eq 60 ]; then
+				break
+			fi
+		fi
+
+		if [ "$i" -eq 100 ]; then
+			echo "Timeout: web server not ready"
+			return 1
+		fi
+
+		sleep 1
+	done
+
+}
+
+# kills the test web server and removes the files it creates
+destroy_web_server() {
+
+	local server_pid
+
+	if [ -f "$SERVER_PID_FILE" ]; then
+		server_pid=$(cat "$SERVER_PID_FILE")
+
+		kill "$server_pid"
+		rm -f "$SERVER_PID_FILE"
+		rm -f "$PORT_FILE"
+	fi
 
 }
 

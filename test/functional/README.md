@@ -231,13 +231,13 @@ In occasions you may want to create a test environment that has an os-core
 bundle that includes the os-release and format files tracked in the bundle's
 manifest, this is particularly useful for upgrade related tests. To create
 this kind of test environment you can use the *-r* (release) option.
-bash```
+```bash
 # test environment with a more complete os-core bundle
 $ create_test_environment -r my_env
 ```
 In a similar manner is possible to create a test environment with no bundle using
 the *-e* (empty) option.
-bash```
+```bash
 # empty test environment
 $ create_test_environment -e my_env
 ```
@@ -296,6 +296,72 @@ This will create a bundle that has the file */foo/bar/test-file* in the manifest
 will refer to the file specified by you. Note that it is your responsibility to copy
 that file to the appropriate directory first (*"$WEBDIR"/\<version\>/files*), to
 name it properly according to its hash, and to create a tar for that file.
+
+### Using Multiple Versions
+So far we have been working with a test environment that contains only one version
+of the server side content. To be able to validate other behaviors of the swupd client
+like doing bundle updates, verifying files in the target system, etc. we need to have
+multiple versions. This section shows how that can be accomplished using the test library.
+
+You can create a test environment with multiple versions by using the *create_version*
+function:
+```bash
+# create a test environment with version 10
+$ create_test_environment my_env 10
+
+# create a version 20 based on version 10
+$ create_version my_env 20 10
+
+# create a version 30
+$ create_version my_env 30 20
+```
+Once you have multiple versions you can do all sort of things with that in your
+environment, for example creating bundles in different versions, or adding updates
+to an existing bundle. Updates are always created for the latest version.
+```bash
+$ create_test_environment my_env 10
+$ create_version my_env 20 10
+$ create_version my_env 30 20
+
+# create a bundle in version 20
+$ create_bundle -n test-bundle -v 20 -f /foo/test-file my_env
+
+# create an update in version 30 for test-bundle in which
+# /foo/test-file have changed from the previous version
+$ update_bundle my_env test-bundle --update /foo/test-file
+
+# create an update in version 40 for test-bundle in which
+# /foo/test-file has been renamed, also add one more file
+# to test-bundle
+$ create_version my_env 40 30
+$ update_bundle my_env test-bundle --rename /foo/test-file /foo/new-name
+$ update_bundle my_env test-bundle --add /bar/another-file
+
+# set the current version in the target system to 20
+$ set_current_version my_env 20
+```
+You can also have different formats between versions, this is commonly known as a
+*format bump*. The format refers to the way manifests are set out. You can create
+a format bump in your environment by using the *bump_format* function. Format bumps
+require the creation of two new versions, these versions are created automatically
+with a separation of 10 between each other and between the latest existing version.
+The format will be bumped by one value, so if initially it was 1, it will end up
+being 2. It is important to note that most of the times when doing format bumps you
+want to have an os-core bundle that includes the *os-release* and *format* files as
+tracked files so swupd can handle updates correctly. So it is important you use the
+*-r* flag when creating the test environment and the subsequent versions, this will
+tell the test library to include those files into the os-core bundle that is created
+by default.
+```bash
+# create an environment with version 10 and format 1
+$ create_test_environment -r my_env 10 1
+
+# create a format bump (will create 2 versions: 20 and 30 )
+$ bump_format my_env
+
+# create version 40 (this should use the new format 2)
+$ create_version -r my_env 40 30 2
+```
 
 The following are some of the functions provided by the test library to create and
 handle test objects:

@@ -25,6 +25,7 @@ install:
         - pushd libarchive-3.3.1 && autoreconf -fi && ./configure --prefix=/usr && make -j48 && sudo make install && popd
         - sudo apt-get install python3-docutils
         - sudo apt-get install realpath
+        - sudo apt-get install clang-format-6.0
         - sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
 
 # Ubuntu's default umask is 0002, but this break's swupd hash calculations.
@@ -34,5 +35,6 @@ script:
           ./configure CFLAGS="$CFLAGS -fsanitize=address" --enable-signature-verification &&
           make -j48 &&
           sudo sh -c 'umask 0022 && make -j48 check' &&
-          sudo sh -c 'umask 0022 && make install'
+          sudo sh -c 'umask 0022 && make install' &&
+          make compliant
 after_failure: cat test-suite.log

@@ -237,6 +237,8 @@ set_env_variables() {
 	validate_path "$env_name"
 	path=$(dirname "$(realpath "$env_name")")
 
+	export CLIENT_CERT_DIR="$TEST_NAME/target-dir/etc/swupd"
+	export CLIENT_CERT="$CLIENT_CERT_DIR/client.pem"
 	export CACERT_DIR="/tmp/swupd_test_certificates" # trusted key store path
 	export PORT_FILE="/tmp/$TEST_NAME-port_file.txt" # stores web server port
 	export SERVER_PID_FILE="/tmp/$TEST_NAME-pid_file.txt" # stores web server pid
@@ -245,6 +247,7 @@ set_env_variables() {
 	if [ -f "$PORT_FILE" ]; then
 		PORT=$(cat "$PORT_FILE")
 		export PORT
+		export SWUPD_OPTS_HTTPS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u https://localhost:$PORT/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
 	fi
 
 	if [ -f "$SERVER_PID_FILE" ]; then
@@ -1134,6 +1137,10 @@ start_web_server() {
 		    start_web_server [-k] <server priv key> [-p] <server pub key> [-s]
 
 		Options:
+		    start_web_server [-c] <client pub key> [-p] <server pub key> [-k] <server priv key> [-s]
+
+		Options:
+		    -c    Path to public key to be used for client certificate authentication
 		    -k    Path to server private key which must correspond to the provided server public key
 		    -p    Path to server public key which enables SSL authentication
 		    -s    Use a slow update server
@@ -1153,8 +1160,9 @@ start_web_server() {
 		)
 	}
 
-	while getopts :k:p:s opt; do
+	while getopts :c:k:p:s opt; do
 		case "$opt" in
+			c)	server_args="$server_args --client_cert $OPTARG" ;;
 			k)	server_args="$server_args --server_key $OPTARG" ;;
 			p)	server_args="$server_args --server_cert $OPTARG" ;;
 			s)	server_args="$server_args --slow_server" ;;

@@ -62,6 +62,35 @@ static void swupd_curl_strerror(CURLcode curl_ret)
 	fprintf(stderr, "Curl error: (%d) %s\n", curl_ret, curl_easy_strerror(curl_ret));
 }
 
+/*
+ * Cannot avoid a TOCTOU here with the current curl API.  Only using the curl
+ * API, a curl_easy_setopt does not detect if the client SSL certificate is
+ * present on the filesystem.  This only happens during curl_easy_perform.
+ * The emphasis is rather on how using an SSL client certificate is an opt-in
+ * function rather than an opt-out function.
+ */
+CURLcode swupd_curl_set_optional_client_cert(CURL *curl)
+{
+	CURLcode curl_ret = CURLE_OK;
+	char *client_cert_path;
+
+	client_cert_path = mk_full_filename(path_prefix, SSL_CLIENT_CERT);
+	if (access(client_cert_path, F_OK) == 0) {
+		curl_ret = curl_easy_setopt(curl, CURLOPT_SSLCERT, client_cert_path);
+		if (curl_ret != CURLE_OK) {
+			goto exit;
+		}
+		curl_ret = curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+		if (curl_ret != CURLE_OK) {
+			goto exit;
+		}
+	}
+
+exit:
+	free_string(&client_cert_path);
+	return curl_ret;
+}
+
 static int check_connection(const char *test_capath)
 {
 	CURLcode curl_ret;
@@ -82,6 +111,10 @@ static int check_connection(const char *test_capath)
 			return -1;
 		}
 	}
+	curl_ret = swupd_curl_set_optional_client_cert(curl);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
 
 	curl_ret = curl_easy_perform(curl);
 
@@ -90,6 +123,9 @@ static int check_connection(const char *test_capath)
 		return 0;
 	case CURLE_SSL_CACERT:
 		fprintf(stderr, "Error: unable to verify server SSL certificate\n");
+		return -EBADCERT;
+	case CURLE_SSL_CERTPROBLEM:
+		fprintf(stderr, "Curl: Problem with the local client SSL certificate\n");
 		return -EBADCERT;
 	default:
 		swupd_curl_strerror(curl_ret);
@@ -202,6 +238,11 @@ double swupd_curl_query_content_size(char *url)
 		if (curl_ret != CURLE_OK) {
 			return -1;
 		}
+	}
+
+	curl_ret = swupd_curl_set_optional_client_cert(curl);
+	if (curl_ret != CURLE_OK) {
+		return -1;
 	}
 
 	curl_ret = curl_easy_perform(curl);
@@ -417,6 +458,10 @@ exit:
 			fprintf(stderr, "Curl: Bad SSL Cert file, cannot ensure secure connection\n");
 			err = -1;
 			break;
+		case CURLE_SSL_CERTPROBLEM:
+			fprintf(stderr, "Curl: Problem with the local client SSL certificate\n");
+			ret = -EBADCERT;
+			break;
 		case CURLE_RANGE_ERROR:
 			fprintf(stderr, "Range command not supported by server, download resume disabled.\n");
 
@@ -491,6 +536,11 @@ static CURLcode swupd_curl_set_security_opts(CURL *curl)
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
+	}
+
+	curl_ret = swupd_curl_set_optional_client_cert(curl);
+	if (curl_ret != CURLE_OK) {
+		goto exit;
 	}
 
 exit:

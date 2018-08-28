@@ -405,10 +405,12 @@ create_tar() {
 # Parameters:
 # - PATH: the path where the manifest will be created
 # - BUNDLE_NAME: the name of the bundle which this manifest will be for
+# - FORMAT: the format of the manifest
 create_manifest() {
 
 	local path=$1
 	local name=$2
+	local format=${3:-1}
 	local version
 
 	# If no parameters are received show usage
@@ -424,7 +426,7 @@ create_manifest() {
 
 	version=$(basename "$path")
 	{
-		printf 'MANIFEST\t1\n'
+		printf 'MANIFEST\t%s\n' "$format"
 		printf 'version:\t%s\n' "$version"
 		printf 'previous:\t0\n'
 		printf 'filecount:\t0\n'
@@ -531,7 +533,11 @@ add_to_manifest() {
 	contentsize=$((contentsize + item_size))
 	# get the item type
 	if [ "$(basename "$manifest")" = Manifest.MoM ]; then
-		item_type=M
+		if [[ "$(basename "$item")" == Manifest.*.I.* ]]; then
+			item_type=I
+		else
+			item_type=M
+		fi
 		# MoM has a contentsize of 0, so don't increase this for MoM
 		contentsize=0
 		# files, directories and links are stored already hashed, but since
@@ -1733,6 +1739,7 @@ install_bundle() {
 # - -p: if the p (partial) flag is set the function skips updating the hashes
 #       in the MoM, and re-creating the bundle's tar, this is useful if more changes are to be done
 #       in order to reduce time
+# - -i: if the i (iterative) flag is set the iterative manifests are created with every update
 # - ENVIRONMENT_NAME: the name of the test environment
 # - BUNDLE_NAME: the name of the bundle to be updated
 # - OPTION: the kind of update to be performed { --add, --add-dir, --delete, --ghost, --rename, --rename-legacy, --update }
@@ -1742,6 +1749,8 @@ update_bundle() {
 
 	local partial=false
 	[ "$1" = "-p" ] && { partial=true ; shift ; }
+	local iterative=false
+	[ "$1" = "-i" ] && { iterative=true ; shift ; }
 	local env_name=$1
 	local bundle=$2
 	local option=$3
@@ -1759,6 +1768,7 @@ update_bundle() {
 	local fsize
 	local fhash
 	local fname
+	local filename
 	local new_fhash
 	local new_fsize
 	local new_fname
@@ -1766,23 +1776,33 @@ update_bundle() {
 	local format
 	local files
 	local bundle_file
+	local to_manifest
+	local to_manifest_content
+	local from_manifest
+	local from_manifest_content
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    update_bundle [-p] <environment_name> <bundle_name> --add <file_name>[:<path_to_existing_file>]
-			    update_bundle [-p] <environment_name> <bundle_name> --add-dir <directory_name>
-			    update_bundle [-p] <environment_name> <bundle_name> --delete <file_name>
-			    update_bundle [-p] <environment_name> <bundle_name> --ghost <file_name>
-			    update_bundle [-p] <environment_name> <bundle_name> --update <file_name>
-			    update_bundle [-p] <environment_name> <bundle_name> --rename[-legacy] <file_name> <new_name>
-			    update_bundle [-p] <environment_name> <bundle_name> --header-only
+			    update_bundle [-p] [-i] <environment_name> <bundle_name> --add <file_name>[:<path_to_existing_file>]
+			    update_bundle [-p] [-i] <environment_name> <bundle_name> --add-dir <directory_name>
+			    update_bundle [-p] [-i] <environment_name> <bundle_name> --delete <file_name>
+			    update_bundle [-p] [-i] <environment_name> <bundle_name> --ghost <file_name>
+			    update_bundle [-p] [-i] <environment_name> <bundle_name> --update <file_name>
+			    update_bundle [-p] [-i] <environment_name> <bundle_name> --rename[-legacy] <file_name> <new_name>
+			    update_bundle [-p] [-i] <environment_name> <bundle_name> --header-only
 
 			Options:
 			    -p    If set (partial), the bundle will be updated, but the manifest's tar won't
 			          be re-created nor the hash will be updated in the MoM. Use this flag when more
 			          updates or changes will be done to the bundle to save time.
+			    -i    If set (iterative), the iterative manifests will be created with every bundle
+			          update.
+
+			    NOTE: if both options -p and -i are to be used, they must be specified in that order or
+			          one option will be ignored.
+
 			EOM
 		return
 	fi
@@ -1799,6 +1819,8 @@ update_bundle() {
 	if [[ "$fname" != "/"* ]]; then
 		fname=/"$fname"
 	fi
+	# replace all the "/" in fname with "\/" so they are escaped (e.g. fname=/foo/bar, filename=\/foo\/bar)
+	filename="${fname////\\/}"
 	# the version where the update will be created is the latest version
 	version="$(ls "$env_name"/web-dir | grep -E '^[0-9]+$' | sort -rn | head -n1)"
 	version_path="$env_name"/web-dir/"$version"
@@ -1903,19 +1925,19 @@ update_bundle() {
 		;;
 	--delete | --ghost)
 		# replace the first character of the line that matches with "."
-		sudo sed -i "/\\t${fname////\\/}$/s/./\./1" "$bundle_manifest"
-		sudo sed -i "/\\t${fname////\\/}\\t/s/./\./1" "$bundle_manifest"
+		sudo sed -i "/\\t$filename$/s/./\./1" "$bundle_manifest"
+		sudo sed -i "/\\t$filename\\t/s/./\./1" "$bundle_manifest"
 		if [ "$option" = "--delete" ]; then
 			# replace the second character of the line that matches with "d"
-			sudo sed -i "/\\t${fname////\\/}$/s/./d/2" "$bundle_manifest"
-			sudo sed -i "/\\t${fname////\\/}\\t/s/./d/2" "$bundle_manifest"
+			sudo sed -i "/\\t$filename$/s/./d/2" "$bundle_manifest"
+			sudo sed -i "/\\t$filename\\t/s/./d/2" "$bundle_manifest"
 			# remove the related file(s) from the version dir (if there)
 			sudo rm -f "$version_path"/files/"$fhash"
 			sudo rm -f "$version_path"/files/"$fhash".tar
 		else
 			# replace the second character of the line that matches with "g"
-			sudo sed -i "/\\t${fname////\\/}$/s/./g/2" "$bundle_manifest"
-			sudo sed -i "/\\t${fname////\\/}\\t/s/./g/2" "$bundle_manifest"
+			sudo sed -i "/\\t$filename$/s/./g/2" "$bundle_manifest"
+			sudo sed -i "/\\t$filename\\t/s/./g/2" "$bundle_manifest"
 		fi
 		# replace the hash with 0s
 		update_manifest -p "$bundle_manifest" file-hash "$fname" "$zero_hash"
@@ -1942,6 +1964,8 @@ update_bundle() {
 		sudo bsdiff "$oldversion_path"/files/"$fhash" "$version_path"/files/"$new_fhash" "$version_path"/delta/"$delta_name"
 		# create or add to the delta-pack
 		add_to_pack "$bundle" "$version_path"/delta/"$delta_name" "$oldversion"
+		# keep the modified file for the iterative "from manifest"
+		from_manifest_content="$(awk "/....\t.*\t.*\t$filename/" "$oldversion_path"/Manifest."$bundle")"$'\n'
 		;;
 	--rename | --rename-legacy)
 		validate_param "$new_name"
@@ -1953,11 +1977,11 @@ update_bundle() {
 		# renames need two records in the manifest, one with the
 		# new name (F...) and one with the old one (.d..)
 		# replace the first character of the old record with "."
-		sudo sed -i "/\\t${fname////\\/}$/s/./\./1" "$bundle_manifest"
-		sudo sed -i "/\\t${fname////\\/}\\t/s/./\./1" "$bundle_manifest"
+		sudo sed -i "/\\t$filename$/s/./\./1" "$bundle_manifest"
+		sudo sed -i "/\\t$filename\\t/s/./\./1" "$bundle_manifest"
 		# replace the second character of the old record with "d"
-		sudo sed -i "/\\t${fname////\\/}$/s/./d/2" "$bundle_manifest"
-		sudo sed -i "/\\t${fname////\\/}\\t/s/./d/2" "$bundle_manifest"
+		sudo sed -i "/\\t$filename$/s/./d/2" "$bundle_manifest"
+		sudo sed -i "/\\t$filename\\t/s/./d/2" "$bundle_manifest"
 		# add the new name to the manifest
 		add_to_manifest -p "$bundle_manifest" "$oldversion_path"/files/"$fhash" "$new_name"
 		if [ "$option" = "--rename" ]; then
@@ -1965,8 +1989,8 @@ update_bundle() {
 			update_manifest -p "$bundle_manifest" file-hash "$fname" "$zero_hash"
 		else
 			# replace the fourth character of the old record with "r"
-			sudo sed -i "/\\t${fname////\\/}$/s/./r/4" "$bundle_manifest"
-			sudo sed -i "/\\t${fname////\\/}\\t/s/./r/4" "$bundle_manifest"
+			sudo sed -i "/\\t$filename$/s/./r/4" "$bundle_manifest"
+			sudo sed -i "/\\t$filename\\t/s/./r/4" "$bundle_manifest"
 			# replace the fourth character of the new record with "r"
 			sudo sed -i "/\\t$new_fname$/s/./r/4" "$bundle_manifest"
 		fi
@@ -1986,9 +2010,40 @@ update_bundle() {
 
 	# re-order items on the manifest so they are in the correct order based on version
 	sudo sort -t$'\t' -k3 -s -h -o "$bundle_manifest" "$bundle_manifest"
-
 	update_manifest -p "$bundle_manifest" contentsize "$contentsize"
 	update_manifest -p "$bundle_manifest" timestamp "$(date +"%s")"
+
+	if [ "$iterative" = true ]; then
+		# create the iterative "to manifest"
+		to_manifest="$bundle_manifest".I."$oldversion"
+		# get the manifest header as is
+		to_manifest_content=$(sed "/^[^\\t]*\\t[^\\t]*$/! d" "$bundle_manifest")$'\n'$'\n'
+		# get only those bundles that match the latest version
+		to_manifest_content+=$(sed "/^....\\t.*\\t$version\\t.*$/! d" "$bundle_manifest")$'\n'
+		write_to_protected_file "$to_manifest" "$to_manifest_content"
+		update_manifest "$to_manifest" filecount "$(grep -c -E "^[FDL]..." "$to_manifest")"
+		# TODO(castulo): update the contentsize in the to_manifest
+		# update the MoM, first remove any other iterative manifest for that bundle if one exists
+		if [ -n "$(awk "/$bundle.I.*/"'{ print $4 }' "$version_path"/Manifest.MoM)" ]; then
+			remove_from_manifest -p "$version_path"/Manifest.MoM "$(awk "/$bundle.I.*/"'{ print $4 }' "$version_path"/Manifest.MoM)"
+		fi
+		# now add the iterative manifest
+		add_to_manifest -p "$version_path"/Manifest.MoM "$to_manifest" "$bundle".I."$oldversion"
+
+		# create the iterative "from manifest" (if there are deltas)
+		if [ -n "$from_manifest_content" ]; then
+			from_manifest="$version_path"/"$version"/Manifest."$bundle".D."$oldversion"
+			if [ ! -e "$from_manifest" ]; then
+				sudo mkdir -p "$version_path"/"$version"
+				write_to_protected_file "$from_manifest" "$(sed "/^[^\\t]*\\t[^\\t]*$/! d" "$oldversion_path"/Manifest."$bundle")"$'\n'$'\n'
+			fi
+			write_to_protected_file -a "$from_manifest" "$from_manifest_content"
+			update_manifest -p "$from_manifest" filecount "$(grep -c -E "^(F|D)..." "$from_manifest")"
+			update_manifest -p "$from_manifest" timestamp "$(date +"%s")"
+			# TODO(castulo): update the contentsize in the from_manifest
+			add_to_pack "$bundle" "$from_manifest" "$oldversion"
+		fi
+	fi
 
 	# renew the manifest tar
 	if [ "$partial" = false ]; then
@@ -2030,6 +2085,8 @@ add_to_pack() {
 		sudo tar -C "$item_path" -rf "$version_path"/pack-"$bundle"-from-"$version".tar --transform "s,^,staged/," "$(basename "$item")"
 	elif [[ "$item" = *"/delta"* ]]; then
 		sudo tar -C "$version_path" -rf "$version_path"/pack-"$bundle"-from-"$version".tar delta/"$(basename "$item")"
+	elif [[ "$item" = *"/Manifest."*".D"* ]]; then
+		sudo tar -C "$version_path" -rf "$version_path"/pack-"$bundle"-from-"$version".tar "$(basename "$version_path")"/"$(basename "$item")"
 	else
 		terminate "the provided file is not valid in a zero pack"
 	fi
@@ -2052,7 +2109,7 @@ clean_state_dir() {
 	fi
 	validate_path "$env_name"
 
-	sudo rm -rf "$env_name"/state/{staged,download,delta,telemetry}
+	sudo rm -rf "$env_name"/state
 	sudo mkdir -p "$env_name"/state/{staged,download,delta,telemetry}
 	sudo chmod -R 0700 "$env_name"/state
 

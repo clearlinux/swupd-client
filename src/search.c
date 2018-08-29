@@ -58,7 +58,7 @@ struct bundle_result {
 
 /* per-file scoring struct */
 struct file_result {
-	char filename[PATH_MAX + 1];
+	char *filename;
 	double score;
 };
 
@@ -91,7 +91,7 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 	}
 
 	file = calloc(sizeof(struct file_result), 1);
-	strncpy(file->filename, filename, PATH_MAX);
+	file->filename = strdup_or_die(filename);
 	bundle->files = list_append_data(bundle->files, file);
 	file->score = score;
 	bundle->score += score;
@@ -156,6 +156,14 @@ static void sort_results(void)
 	}
 }
 
+static void file_result_free(void *data)
+{
+	struct file_result *result = data;
+
+	free(result->filename);
+	free(result);
+}
+
 static void free_bundle_result_data(void *data)
 {
 	struct bundle_result *br = (struct bundle_result *)data;
@@ -164,7 +172,7 @@ static void free_bundle_result_data(void *data)
 		return;
 	}
 
-	list_free_list_and_data(br->files, free);
+	list_free_list_and_data(br->files, file_result_free);
 	list_free_list_and_data(br->includes, free);
 	free(br);
 }

@@ -642,9 +642,7 @@ void update_motd(int new_release)
 
 void delete_motd(void)
 {
-	if (unlink(MOTD_FILE) == ENOMEM) {
-		abort();
-	}
+	unlink(MOTD_FILE);
 }
 
 int get_dirfd_path(const char *fullname)

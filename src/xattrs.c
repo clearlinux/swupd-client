@@ -80,9 +80,7 @@ static int xattr_get_value(const char *path, const char *name, char **blob,
 	/* realloc needed len + 1 in case we need to add final zero
 	 * to ensure consistent blob */
 	value = realloc(*blob, *blob_len + len + (action == XATTRS_ACTION_GET_BLOB ? 1 : 0));
-	if (!value) {
-		abort();
-	}
+	ON_NULL_ABORT(value);
 
 	*blob = value;
 
@@ -134,9 +132,7 @@ static const char **get_sorted_xattr_name_table(const char *names, int n)
 	int i;
 
 	table = calloc(1, n * sizeof(char *));
-	if (!table) {
-		abort();
-	}
+	ON_NULL_ABORT(table);
 
 	for (i = 0; i < n; i++) {
 		table[i] = names;
@@ -180,9 +176,7 @@ static void xattrs_do_action(xattrs_action_type_t action,
 	}
 
 	list = calloc(1, len);
-	if (!list) {
-		abort();
-	}
+	ON_NULL_ABORT(list);
 
 	len = llistxattr(src_filename, list, len);
 	if (len <= 0) {
@@ -199,9 +193,7 @@ static void xattrs_do_action(xattrs_action_type_t action,
 
 	if (action == XATTRS_ACTION_GET_BLOB) {
 		value = calloc(1, len);
-		if (!value) {
-			abort();
-		}
+		ON_NULL_ABORT(value);
 
 		value_len = len;
 

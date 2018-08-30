@@ -141,9 +141,7 @@ static int download_pack(void *download_handle, int oldversion, int newversion, 
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, newversion, module, oldversion);
 
 		pack_data = calloc(1, sizeof(struct pack_data));
-		if (!pack_data) {
-			abort();
-		}
+		ON_NULL_ABORT(pack_data);
 
 		pack_data->url = url;
 		pack_data->filename = filename;

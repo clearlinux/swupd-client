@@ -153,9 +153,7 @@ static void free_curl_file(struct swupd_curl_parallel_handle *h, struct multi_cu
 void *swupd_curl_parallel_download_start(size_t max_xfer, size_t max_xfer_bottom)
 {
 	struct swupd_curl_parallel_handle *h = calloc(1, sizeof(struct swupd_curl_parallel_handle));
-	if (!h) {
-		abort();
-	}
+	ON_NULL_ABORT(h);
 
 	h->mcurl = curl_multi_init();
 	if (h->mcurl == NULL) {
@@ -479,9 +477,8 @@ int swupd_curl_parallel_download_enqueue(void *handle, const char *url, const ch
 	h = handle;
 
 	file = calloc(1, sizeof(struct multi_curl_file));
-	if (!file) {
-		abort();
-	}
+	ON_NULL_ABORT(file);
+
 	file->file.path = strdup_or_die(filename);
 	file->url = strdup_or_die(url);
 	file->data = data;

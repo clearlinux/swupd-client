@@ -603,9 +603,7 @@ char *strdup_or_die(const char *const str)
 	char *result;
 
 	result = strdup(str);
-	if (!result) {
-		abort();
-	}
+	ON_NULL_ABORT(result);
 
 	return result;
 }

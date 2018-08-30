@@ -12,6 +12,7 @@
 #include <sys/queue.h>
 
 #include "list.h"
+#include "macros.h"
 #include "swupd-error.h"
 
 #ifdef __cplusplus

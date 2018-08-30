@@ -82,9 +82,7 @@ static struct manifest *alloc_manifest(int version, char *component)
 	struct manifest *manifest;
 
 	manifest = calloc(1, sizeof(struct manifest));
-	if (manifest == NULL) {
-		abort();
-	}
+	ON_NULL_ABORT(manifest);
 
 	manifest->version = version;
 	manifest->component = strdup_or_die(component);
@@ -235,9 +233,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		}
 
 		file = calloc(1, sizeof(struct file));
-		if (file == NULL) {
-			abort();
-		}
+		ON_NULL_ABORT(file);
 		c = line;
 
 		c2 = strchr(c, '\t');
@@ -1310,9 +1306,7 @@ struct file **manifest_files_to_array(struct manifest *manifest)
 	numfiles = manifest->filecount;
 
 	array = malloc(sizeof(struct file *) * numfiles);
-	if (!array) {
-		abort();
-	}
+	ON_NULL_ABORT(array);
 
 	iter = list_head(manifest->files);
 	while (iter) {

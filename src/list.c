@@ -28,6 +28,7 @@
 #include <unistd.h>
 
 #include "list.h"
+#include "macros.h"
 
 static struct list *list_append_item(struct list *list, struct list *item)
 {
@@ -56,9 +57,7 @@ static struct list *list_alloc_item(void *data)
 	struct list *item;
 
 	item = (struct list *)malloc(sizeof(struct list));
-	if (!item) {
-		abort();
-	}
+	ON_NULL_ABORT(item);
 
 	item->data = data;
 	item->next = NULL;
@@ -138,26 +137,12 @@ static struct list *list_merge_sort(struct list *left, unsigned int len, compari
 
 struct list *list_append_data(struct list *list, void *data)
 {
-	struct list *item = NULL;
-
-	item = list_alloc_item(data);
-	if (item) {
-		item = list_append_item(list, item);
-	}
-
-	return item;
+	return list_append_item(list, list_alloc_item(data));
 }
 
 struct list *list_prepend_data(struct list *list, void *data)
 {
-	struct list *item = NULL;
-
-	item = list_alloc_item(data);
-	if (item) {
-		item = list_prepend_item(list, item);
-	}
-
-	return item;
+	return list_prepend_item(list, list_alloc_item(data));
 }
 
 struct list *list_head(struct list *item)
@@ -296,9 +281,6 @@ struct list *list_deep_clone_strs(struct list *list)
 	item = list_tail(list);
 	while (item) {
 		clone = list_prepend_data(clone, strdup(item->data));
-		if (!clone->data) {
-			abort();
-		}
 		item = item->prev;
 	}
 

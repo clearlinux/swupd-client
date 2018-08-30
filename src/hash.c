@@ -86,9 +86,7 @@ static void hmac_sha256_for_data(char *hash,
 	}
 
 	digest_str = calloc((digest_len * 2) + 1, sizeof(char));
-	if (digest_str == NULL) {
-		abort();
-	}
+	ON_NULL_ABORT(digest_str);
 
 	for (i = 0; i < digest_len; i++) {
 		sprintf(&digest_str[i * 2], "%02x", (unsigned int)digest[i]);

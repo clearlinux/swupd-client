@@ -78,20 +78,11 @@ timelist init_timelist(void)
 	return head;
 }
 
-static struct time *alloc_time(timelist *head)
+static struct time *alloc_time()
 {
 	struct time *t = calloc(1, sizeof(struct time));
-	if (t == NULL) {
-		fprintf(stderr, "ERROR: grab_time: Failed to to allocate memory...freeing and removing timing\n");
-		while (!TAILQ_EMPTY(head)) {
-			struct time *iter = TAILQ_FIRST(head);
-			TAILQ_REMOVE(head, iter, times);
-			free(iter);
-		}
-		/* Malloc failed...something bad happened, stop trying and let swupd attempt to finish */
-		verbose_time = false;
-		return NULL;
-	}
+	ON_NULL_ABORT(t);
+
 	return t;
 }
 
@@ -103,10 +94,8 @@ void grabtime_start(timelist *head, const char *name)
 	}
 
 	/* Only create one element for each start/stop block */
-	struct time *t = alloc_time(head);
-	if (t == NULL) {
-		return;
-	}
+	struct time *t = alloc_time();
+
 	clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstart);
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstart);
 	t->name = name;
@@ -608,10 +597,7 @@ void save_cmd(char **argv)
 
 	/* +1 for null terminator */
 	swupd_cmd = malloc(size + 1);
-	if (!swupd_cmd) {
-		/* failed to allocate string */
-		return;
-	}
+	ON_NULL_ABORT(swupd_cmd);
 
 	strcpy(swupd_cmd, "");
 	for (int i = 0; argv[i]; i++) {

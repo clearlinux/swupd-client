@@ -138,10 +138,8 @@ static bool compile_whitelist()
 		size_t len;
 		len = regerror(errcode, picky_whitelist, NULL, 0);
 		error_buffer = malloc(len);
-		if (!error_buffer) {
-			fprintf(stderr, "out of memory\n");
-			goto done;
-		}
+		ON_NULL_ABORT(error_buffer);
+
 		regerror(errcode, picky_whitelist, error_buffer, len);
 		fprintf(stderr, "Invalid --picky-whitelist=%s: %s\n", cmdline_option_picky_whitelist, error_buffer);
 		goto done;

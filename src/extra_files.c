@@ -75,11 +75,8 @@ static int record_filename(const char *name, const struct stat *stat __attribute
 
 	char *savedname = strdup_or_die(relname); /* Only store name relative to top of area */
 	F = realloc(F, (nF + 1) * sizeof(*F));    /* TODO, check realloc is smart, so don't need to double myself */
-	if (!F) {
-		fprintf(stderr, "Out of memory allocating %d filenames\n", nF);
-		abort(); /* For consistency with string_or_die on out of memory*/
-		return -ENOMEM;
-	}
+	ON_NULL_ABORT(F);
+
 	F[nF].filename = savedname;
 	F[nF].dir = (type == FTW_D);
 	F[nF].in_manifest = false; /* Because we do yet know */

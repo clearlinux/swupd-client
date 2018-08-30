@@ -28,6 +28,7 @@
 
 #include "hashmap.h"
 #include "list.h"
+#include "macros.h"
 
 #define HASH_MASK(bits) (HASH_SIZE(bits) - 1)
 
@@ -72,10 +73,8 @@ struct hashmap *hashmap_new(size_t capacity, hash_equal_fn_t equal, hash_fn_t ha
 	size_t real_capacity = HASH_SIZE(mask_bits);
 
 	hashmap = calloc(1, sizeof(struct hashmap) + real_capacity * sizeof(struct list *));
-	if (!hashmap) {
-		abort();
-		return NULL;
-	}
+	ON_NULL_ABORT(hashmap);
+
 	hashmap->mask_bits = mask_bits;
 	hashmap->hash = hash;
 	hashmap->equal = equal;

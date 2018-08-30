@@ -168,9 +168,7 @@ void create_and_append_subscription(struct list **subs, const char *component)
 	struct sub *sub;
 
 	sub = calloc(1, sizeof(struct sub));
-	if (!sub) {
-		abort();
-	}
+	ON_NULL_ABORT(sub);
 
 	sub->component = strdup_or_die(component);
 

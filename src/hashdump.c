@@ -62,9 +62,7 @@ int hashdump_main(int argc, char **argv)
 	int ret;
 
 	file = calloc(1, sizeof(struct file));
-	if (!file) {
-		abort();
-	}
+	ON_NULL_ABORT(file);
 
 	file->use_xattrs = true;
 

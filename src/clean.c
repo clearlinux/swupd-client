@@ -228,9 +228,7 @@ static char *read_mom_contents(int version)
 	}
 
 	contents = malloc(stat.st_size + 1);
-	if (!contents) {
-		goto end;
-	}
+	ON_NULL_ABORT(contents);
 
 	ret = fread(contents, stat.st_size, 1, f);
 	if (ret != 1) {

@@ -84,6 +84,7 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 	}
 	if (!bundle) {
 		bundle = calloc(sizeof(struct bundle_result), 1);
+		ON_NULL_ABORT(bundle);
 		results = list_append_data(results, bundle);
 		strncpy(bundle->bundle_name, bundlename, BUNDLE_NAME_MAXLEN - 1);
 		/* record if the bundle is tracked on the system */
@@ -91,6 +92,7 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 	}
 
 	file = calloc(sizeof(struct file_result), 1);
+	ON_NULL_ABORT(file);
 	file->filename = strdup_or_die(filename);
 	bundle->files = list_append_data(bundle->files, file);
 	file->score = score;
@@ -650,6 +652,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 		/* record contentsize and includes for install size calculation */
 		struct bundle_result *bundle = NULL;
 		bundle = calloc(sizeof(struct bundle_result), 1);
+		ON_NULL_ABORT(bundle);
 		/* copy relevant information over for future use */
 		strncpy(bundle->bundle_name, subman->component, BUNDLE_NAME_MAXLEN - 1);
 		bundle->topsize = subman->contentsize;

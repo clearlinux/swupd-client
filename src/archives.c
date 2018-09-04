@@ -23,6 +23,7 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include <stdlib.h>
+#include <sys/errno.h>
 
 #include "swupd.h"
 
@@ -32,6 +33,7 @@
 static int _archive_check_err(struct archive *ar, int ret)
 {
 	int is_fatal = 0;
+	int error_num = 0;
 
 	if (ret < ARCHIVE_WARN || ret == ARCHIVE_RETRY) {
 		/* error was worse than a warning or error was ARCHIVE_RETRY (greater
@@ -42,6 +44,13 @@ static int _archive_check_err(struct archive *ar, int ret)
 	} else if (ret < ARCHIVE_OK) {
 		/* operation succeeded, warning encountered */
 		fprintf(stderr, "Warning: %s\n", archive_error_string(ar));
+		error_num = archive_errno(ar);
+
+		/* archive_error_string is "Write Failed" on ENOSPC */
+		/* check if the error is ENOSPC and report to user */
+		if (error_num == ENOSPC) {
+			fprintf(stderr, "Warning: %s\n", strerror(error_num));
+		}
 		is_fatal = 0;
 	}
 

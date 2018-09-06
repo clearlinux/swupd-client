@@ -523,11 +523,11 @@ add_to_manifest() {
 	name=$(basename "$item")
 	version=$(basename "$(dirname "$manifest")")
 	# add to filecount
-	filecount=$(awk '/filecount/ { print $2}' "$manifest")
+	filecount=$(awk '/^filecount/ { print $2}' "$manifest")
 	filecount=$((filecount + 1))
-	sudo sed -i "s/filecount:.*/filecount:\\t$filecount/" "$manifest"
+	sudo sed -i "s/^filecount:.*/filecount:\\t$filecount/" "$manifest"
 	# add to contentsize 
-	contentsize=$(awk '/contentsize/ { print $2}' "$manifest")
+	contentsize=$(awk '/^contentsize/ { print $2}' "$manifest")
 	contentsize=$((contentsize + item_size))
 	# get the item type
 	if [ "$(basename "$manifest")" = Manifest.MoM ]; then
@@ -561,7 +561,7 @@ add_to_manifest() {
 	if [ "$(dirname "$item_path")" = "/usr/lib/kernel" ] || [ "$(dirname "$item_path")" = "/usr/lib/modules/" ]; then
 		boot_type="b"
 	fi
-	sudo sed -i "s/contentsize:.*/contentsize:\\t$contentsize/" "$manifest"
+	sudo sed -i "s/^contentsize:.*/contentsize:\\t$contentsize/" "$manifest"
 	# add to manifest content
 	write_to_protected_file -a "$manifest" "$item_type.$boot_type.\\t$name\\t$version\\t$item_path\\n"
 	# If a manifest tar already exists for that manifest, renew the manifest tar unless specified otherwise
@@ -616,14 +616,14 @@ add_dependency_to_manifest() {
 	if [ ! -e "$path"/"$version"/"$manifest_name" ]; then
 		pre_version="$version"
 		while [ "$pre_version" -gt 0 ] && [ ! -e "$path"/"$pre_version"/"$manifest_name" ]; do
-				pre_version=$(awk '/previous/ { print $2 }' "$path"/"$pre_version"/Manifest.MoM)
+				pre_version=$(awk '/^previous/ { print $2 }' "$path"/"$pre_version"/Manifest.MoM)
 		done
 		sudo cp "$path"/"$pre_version"/"$manifest_name" "$path"/"$version"/"$manifest_name"
 		update_manifest -p "$manifest" version "$version"
 		update_manifest -p "$manifest" previous "$pre_version"
 	fi
 	update_manifest -p "$manifest" timestamp "$(date +"%s")"
-	sudo sed -i "/contentsize:.*/a includes:\\t$dependency" "$manifest"
+	sudo sed -i "/^contentsize:.*/a includes:\\t$dependency" "$manifest"
 	# If a manifest tar already exists for that manifest, renew the manifest tar
 	# unless specified otherwise
 	if [ "$partial" = false ]; then
@@ -669,11 +669,11 @@ remove_from_manifest() {
 	# replace every / with \/ in item (if any)
 	item="${item////\\/}"
 	# decrease filecount and contentsize
-	filecount=$(awk '/filecount/ { print $2}' "$manifest")
+	filecount=$(awk '/^filecount/ { print $2}' "$manifest")
 	filecount=$((filecount - 1))
 	update_manifest -p "$manifest" filecount "$filecount"
 	if [ "$(basename "$manifest")" != Manifest.MoM ]; then
-		contentsize=$(awk '/contentsize/ { print $2}' "$manifest")
+		contentsize=$(awk '/^contentsize/ { print $2}' "$manifest")
 		item_hash=$(get_hash_from_manifest "$manifest" "$item")
 		item_size=$(stat -c "%s" "$(dirname "$manifest")"/files/"$item_hash")
 		contentsize=$((contentsize - item_size))
@@ -730,7 +730,7 @@ update_manifest() {
 
 	case "$key" in
 	format)
-		sudo sed -i "s/MANIFEST.*/MANIFEST\\t$var/" "$manifest"
+		sudo sed -i "s/^MANIFEST.*/MANIFEST\\t$var/" "$manifest"
 		;;
 	version | previous | filecount | timestamp | contentsize)
 		sudo sed -i "s/$key.*/$key:\\t$var/" "$manifest"
@@ -1130,7 +1130,7 @@ create_version() {
 		if [ "$release_files" = true ]; then
 			oldversion="$version"
 			while [ "$oldversion" -gt 0 ] && [ ! -e "$env_name"/web-dir/"$oldversion"/Manifest.os-core ]; do
-				oldversion=$(awk '/previous/ { print $2 }' "$env_name"/web-dir/"$oldversion"/Manifest.MoM)
+				oldversion=$(awk '/^previous/ { print $2 }' "$env_name"/web-dir/"$oldversion"/Manifest.MoM)
 			done
 			# if no os-core manifest was found, nothing else needs to be done
 			if [ -e "$env_name"/web-dir/"$oldversion"/Manifest.os-core ]; then
@@ -1806,12 +1806,12 @@ update_bundle() {
 	# find the previous version of this bundle manifest
 	oldversion="$version"
 	while [ "$oldversion" -gt 0 ] && [ ! -e "$env_name"/web-dir/"$oldversion"/Manifest."$bundle" ]; do
-		oldversion=$(awk '/previous/ { print $2 }' "$env_name"/web-dir/"$oldversion"/Manifest.MoM)
+		oldversion=$(awk '/^previous/ { print $2 }' "$env_name"/web-dir/"$oldversion"/Manifest.MoM)
 	done
 	if [ "$oldversion" = "$version" ]; then
 		# if old version and new version are the same it means this bundle has already
 		# been modified in this version, so look for the real old version
-		oldversion=$(awk '/previous/ { print $2}' "$env_name"/web-dir/"$oldversion"/Manifest."$bundle")
+		oldversion=$(awk '/^previous/ { print $2}' "$env_name"/web-dir/"$oldversion"/Manifest."$bundle")
 	fi
 	oldversion_path="$env_name"/web-dir/"$oldversion"
 	bundle_manifest="$version_path"/Manifest."$bundle"
@@ -1835,7 +1835,7 @@ update_bundle() {
 			fi
 		done
 	fi
-	contentsize=$(awk '/contentsize/ { print $2 }' "$bundle_manifest")
+	contentsize=$(awk '/^contentsize/ { print $2 }' "$bundle_manifest")
 
 	# these actions apply to all operations except when adding a new file or updating the header only
 	if [ "$option" != "--add" ] && [ "$option" != "--add-dir" ] && [ "$option" != "--add-file" ] && [ "$option" != "--header-only" ]; then
@@ -1876,7 +1876,7 @@ update_bundle() {
 		add_to_manifest -p "$bundle_manifest" "$new_file" "$fname"
 		# contentsize is automatically added by the add_to_manifest function so
 		# all we need is to get the updated value for now
-		contentsize=$(awk '/contentsize/ { print $2 }' "$bundle_manifest")
+		contentsize=$(awk '/^contentsize/ { print $2 }' "$bundle_manifest")
 		# Add the file to the zero pack of the bundle
 		add_to_pack "$bundle" "$new_file"
 		# Add the file also to the delta-pack
@@ -1899,7 +1899,7 @@ update_bundle() {
 			add_to_pack "$bundle" "$new_dir"
 			add_to_pack "$bundle" "$new_dir" "$oldversion"
 		fi
-		contentsize=$(awk '/contentsize/ { print $2 }' "$bundle_manifest")
+		contentsize=$(awk '/^contentsize/ { print $2 }' "$bundle_manifest")
 		;;
 	--delete | --ghost)
 		# replace the first character of the line that matches with "."

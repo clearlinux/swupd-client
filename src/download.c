@@ -326,7 +326,7 @@ static int poll_fewer_than(struct swupd_curl_parallel_handle *h, size_t xfer_que
 	}
 
 	// There are not enough transfers in queue yet
-	if (h->mcurl_size <= xfer_queue_high) {
+	if (h->mcurl_size < xfer_queue_high) {
 		return 0;
 	}
 

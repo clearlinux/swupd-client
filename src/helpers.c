@@ -512,6 +512,7 @@ void free_file_data(void *data)
 	/* peer is a pointer to file contained
 	 * in another list and must not be disposed */
 	free_string(&file->filename);
+	free_string(&file->bundlename);
 	free_string(&file->staging);
 
 	if (file->header) {

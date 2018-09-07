@@ -124,9 +124,11 @@ struct update_stat {
 
 struct file {
 	char *filename;
+	char *bundlename;
 	char hash[SWUPD_HASH_LEN];
 	bool use_xattrs;
 	int last_change;
+	int from_version;
 	struct update_stat stat;
 
 	unsigned int is_dir : 1;
@@ -136,6 +138,7 @@ struct file {
 	unsigned int is_ghosted : 1;
 	unsigned int is_tracked : 1;
 	unsigned int is_manifest : 1;
+	unsigned int is_iterative : 1;
 
 	unsigned int is_config : 1;
 	unsigned int is_state : 1;

@@ -263,9 +263,8 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		} else if (c[0] == 'M') {
 			file->is_manifest = 1;
 		} else if (c[0] == 'I') {
-			/* ignore this file for future iterative manifest feature */
-			free(file);
-			continue;
+			file->is_manifest = 1;
+			file->is_iterative = 1;
 		} else if (c[0] != '.') { /* unknown file type */
 			free(file);
 			goto err;
@@ -342,6 +341,20 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		c = c2;
 
 		file->filename = strdup_or_die(c);
+		/* If the file is an iterative manifest, copy the from_version and obtain the
+		 * bundle name based on the file name */
+		if (file->is_iterative == 1) {
+			char *ptr;
+			ptr = strrchr(file->filename, '.');
+			if (ptr != NULL) {
+				/* Keep only the bundle name from the file name, the filename should be
+				 * something similar to bundle-name.I.20 */
+				file->bundlename = strndup(file->filename, ptr - file->filename - 2);
+				file->from_version = atoi(ptr + 1);
+			}
+		} else {
+			file->bundlename = strdup_or_die(c);
+		}
 
 		/* Mark every file in a mix manifest as also being mix content since we do not
 		 * have another flag to check for like we do in the MoM */

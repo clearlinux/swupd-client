@@ -36,10 +36,6 @@
 
 #define MODE_RW_O (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 
-#define add_sub_ERR 1
-#define add_sub_NEW 2
-#define add_sub_BADNAME 4
-
 /*
 * list_installable_bundles()
 * Parse the full manifest for the current version of the OS and print

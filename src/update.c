@@ -162,10 +162,10 @@ int add_included_manifests(struct manifest *mom, int current, struct list **subs
 
 	/* Pass the current version here, not the new, otherwise we will never
 	 * hit the Manifest delta path. */
-	if (add_subscriptions(subbed, subs, current, mom, false, 0) >= 0) {
-		ret = 0;
-	} else {
+	if (add_subscriptions(subbed, subs, current, mom, false, 0) & (add_sub_ERR | add_sub_BADNAME)) {
 		ret = -1;
+	} else {
+		ret = 0;
 	}
 	list_free_list(subbed);
 

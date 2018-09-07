@@ -51,6 +51,11 @@ extern "C" {
 
 #define DEFAULT_CONTENTURL "https://cdn.download.clearlinux.org/update/"
 
+/* Return codes for adding subscriptions */
+#define add_sub_ERR 1
+#define add_sub_NEW 2
+#define add_sub_BADNAME 4
+
 struct sub {
 	/* name of bundle/component/subscription */
 	char *component;

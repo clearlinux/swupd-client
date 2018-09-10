@@ -69,6 +69,7 @@ char *content_url = NULL;
 bool content_url_is_local = false;
 char *cert_path = NULL;
 long update_server_port = -1;
+int max_parallel_pack_downloads = -1;
 char *swupd_cmd = NULL;
 
 timelist init_timelist(void)

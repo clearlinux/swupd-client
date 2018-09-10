@@ -301,7 +301,7 @@ extern int swupd_curl_get_file_memory(const char *url, struct curl_file_data *fi
 typedef bool (*swupd_curl_success_cb)(void *data);
 typedef bool (*swupd_curl_error_cb)(int response, void *data);
 typedef void (*swupd_curl_free_cb)(void *data);
-extern void *swupd_curl_parallel_download_start(size_t max_xfer, size_t max_xfer_bottom);
+extern void *swupd_curl_parallel_download_start(size_t max_xfer);
 void swupd_curl_parallel_download_set_callbacks(void *handle, swupd_curl_success_cb success_cb, swupd_curl_error_cb error_cb, swupd_curl_free_cb free_cb);
 extern int swupd_curl_parallel_download_enqueue(void *handle, const char *url, const char *filename, const char *hash, void *data);
 extern int swupd_curl_parallel_download_end(void *handle, int *num_downloads);

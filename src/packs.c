@@ -44,7 +44,6 @@
  * to a larger number, to be defined by tests, after bug is fixed.
 */
 #define MAX_XFER 1
-#define MAX_XFER_BOTTOM 0
 
 struct pack_data {
 	char *url;
@@ -173,7 +172,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	void *download_handle;
 
 	fprintf(stderr, "Downloading packs...\n");
-	download_handle = swupd_curl_parallel_download_start(MAX_XFER, MAX_XFER_BOTTOM);
+	download_handle = swupd_curl_parallel_download_start(MAX_XFER);
 
 	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, download_error, download_free_data);
 	iter = list_head(subs);

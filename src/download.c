@@ -75,8 +75,8 @@
 #define HASH_TO_KEY(hash) (HASH_VALUE(hash[0]) << 4 | HASH_VALUE(hash[1]))
 
 struct swupd_curl_parallel_handle {
-	int timeout;				      /* Retry timeout */
-	size_t mcurl_size, max_xfer, max_xfer_bottom; /* hysteresis parameters */
+	int timeout;		     /* Retry timeout */
+	size_t mcurl_size, max_xfer; /* hysteresis parameters */
 	bool resume_failed;
 
 	CURLM *mcurl;			  /* Curl handle */
@@ -143,14 +143,13 @@ static void free_curl_file(struct swupd_curl_parallel_handle *h, struct multi_cu
  *
  * Parameters:
  *  - max_xfer: The maximum number of simultaneos downloads.
- *  - max_xfer_bottom: Minimum number of simultaneos downloads before starting
  *
  * Parallel download handler will retry MAX_TRIES times to download each file,
  * ading a timeout between each try.
  *
  * Note: This function is non-blocking.
  */
-void *swupd_curl_parallel_download_start(size_t max_xfer, size_t max_xfer_bottom)
+void *swupd_curl_parallel_download_start(size_t max_xfer)
 {
 	struct swupd_curl_parallel_handle *h = calloc(1, sizeof(struct swupd_curl_parallel_handle));
 	ON_NULL_ABORT(h);
@@ -163,7 +162,6 @@ void *swupd_curl_parallel_download_start(size_t max_xfer, size_t max_xfer_bottom
 	curl_multi_setopt(h->mcurl, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX | CURLPIPE_HTTP1);
 
 	h->max_xfer = max_xfer;
-	h->max_xfer_bottom = max_xfer_bottom;
 	h->curl_hashmap = hashmap_new(SWUPD_CURL_HASH_BUCKETS, file_hash_cmp, file_hash_value);
 	h->timeout = RETRY_TIMEOUT;
 
@@ -443,7 +441,7 @@ static int process_download(struct swupd_curl_parallel_handle *h, struct multi_c
 	 * it with a counter variable. */
 	h->mcurl_size++;
 
-	return poll_fewer_than(h, h->max_xfer, h->max_xfer_bottom);
+	return poll_fewer_than(h, h->max_xfer, h->max_xfer / 2);
 
 out_bad:
 	return -1;
@@ -452,7 +450,7 @@ out_bad:
 /*
  * Enqueue a file to be downloaded. If the number of current downloads is higher
  * than max_xfer, this function will be blocked for downloads until the number of
- * current downloads reach max_xfer_bottom.
+ * current downloads reach max_xfer / 2.
  *
  * Parameters:
  *  - handle: Handle created with swupd_curl_parallel_download_start().

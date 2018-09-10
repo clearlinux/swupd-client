@@ -36,8 +36,15 @@
 #include "swupd.h"
 
 /* hysteresis thresholds */
-#define MAX_XFER 25
-#define MAX_XFER_BOTTOM 15
+/* TODO: update MAX_XFER after bug #562 is fixed.
+ *
+ * MAX XFER is the number of simultaneous downloads to be performed at the same
+ * time. This value is set to 1 because of a bug that causes a dowload problem
+ * when extrating a large file while other is being downloaded. Set this value
+ * to a larger number, to be defined by tests, after bug is fixed.
+*/
+#define MAX_XFER 1
+#define MAX_XFER_BOTTOM 0
 
 struct pack_data {
 	char *url;

@@ -499,8 +499,8 @@ void free_file_data(void *data)
 		return;
 	}
 
-	/* peer is a pointer to file contained
-	 * in another list and must not be disposed */
+	/* peer and full_manifest are pointers to files contained
+	 * in other lists and must not be disposed */
 	free_string(&file->filename);
 	free_string(&file->bundlename);
 	free_string(&file->staging);

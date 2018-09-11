@@ -143,7 +143,8 @@ struct file {
 	unsigned int is_mix : 1;
 	unsigned int do_not_update : 1;
 
-	struct file *peer; /* same file in another manifest */
+	struct file *peer;	  /* same file in another manifest */
+	struct file *full_manifest; /* pointer to the full manifest of an iterative manifest */
 	struct header *header;
 	char *staging;
 };
@@ -226,6 +227,7 @@ extern struct manifest *load_manifest_full(int version, bool mix);
 extern struct list *create_update_list(struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
 extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2, bool server);
+extern void link_iterative_manifests(struct list *iterative_manifests, struct list *full_manifests);
 extern void free_manifest(struct manifest *manifest);
 
 extern void grabtime_start(timelist *list, const char *name);

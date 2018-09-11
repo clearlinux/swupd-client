@@ -37,6 +37,8 @@ swupd_SOURCES = \
 	src/lib/list.c \
 	src/lib/list.h \
 	src/lib/macros.h \
+	src/lib/tp.c \
+	src/lib/tp.h \
 	src/lock.c \
 	src/main.c \
 	src/manifest.c \
@@ -68,7 +70,8 @@ swupd_LDADD = \
 	$(openssl_LIBS) \
 	$(curl_LIBS) \
 	$(bsdiff_LIBS) \
-	$(libarchive_LIBS)
+	$(libarchive_LIBS) \
+	$(pthread_LIBS)
 
 verifytime_SOURCES = src/verifytime.c
 bin_PROGRAMS += verifytime

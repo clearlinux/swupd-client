@@ -12,11 +12,29 @@ struct list {
 typedef int (*comparison_fn_t)(const void *a, const void *b);
 typedef void (*list_free_data_fn_t)(void *data);
 
-/* creates a new list item, store data, and inserts item in list (which can
- * be NULL). Returns created link, or NULL if failure. Created link can be
- * used as the list parameter to efficiently append new elements without
- * having to traverse the whole list to find the last one. */
+/*
+ * Creates a new list item, store data and append it to the end of the list.
+ *
+ * Returns the a pointer to the list with the added element.
+ * Note: This function is O(n), so avoid this. Prefer using list_insert_after()
+ * Or list_prepend_data()
+ */
 struct list *list_append_data(struct list *list, void *data);
+
+/*
+ * Creates a new list item, store data and insert it to the list just after
+ * the node pointed by list.
+ *
+ * Returns A pointer to the new inserted element.
+ */
+struct list *list_insert_after(struct list *list, void *data);
+
+/*
+ * Creates a new list item, store data and prepend it to the list just before
+ * the node pointed by list.
+ *
+ * Returns a pointer to the list with the inserted element.
+ */
 struct list *list_prepend_data(struct list *list, void *data);
 
 /* Returns the head or the tail of a list given anyone of its items */

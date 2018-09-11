@@ -32,10 +32,26 @@
 
 static struct list *list_append_item(struct list *list, struct list *item)
 {
-	list = list_tail(list);
+	struct list *p;
+
+	if (!list) {
+		return item;
+	}
+
+	p = list_tail(list);
+
+	p->next = item;
+	item->prev = p;
+
+	return list;
+}
+
+static struct list *list_insert_after_item(struct list *list, struct list *item)
+{
 	if (list) {
-		list->next = item;
+		item->next = list->next;
 		item->prev = list;
+		list->next = item;
 	}
 
 	return item;
@@ -43,10 +59,10 @@ static struct list *list_append_item(struct list *list, struct list *item)
 
 static struct list *list_prepend_item(struct list *list, struct list *item)
 {
-	list = list_head(list);
 	if (list) {
-		list->prev = item;
+		item->prev = list->prev;
 		item->next = list;
+		list->prev = item;
 	}
 
 	return item;
@@ -138,6 +154,11 @@ static struct list *list_merge_sort(struct list *left, unsigned int len, compari
 struct list *list_append_data(struct list *list, void *data)
 {
 	return list_append_item(list, list_alloc_item(data));
+}
+
+struct list *list_insert_after(struct list *list, void *data)
+{
+	return list_insert_after_item(list, list_alloc_item(data));
 }
 
 struct list *list_prepend_data(struct list *list, void *data)

@@ -150,7 +150,7 @@ static int unload_tracked_bundle(const char *bundle_name, struct list **subs)
 		bundles = bundles->next;
 		if (strcmp(bundle->component, bundle_name) == 0) {
 			/* unlink (aka untrack) matching bundle name from tracked ones */
-			*subs = free_bundle(cur_item);
+			*subs = list_head(free_bundle(cur_item));
 			return EXIT_SUCCESS;
 		}
 	}
@@ -185,7 +185,7 @@ static void required_by(struct list **reqd_by, const char *bundle_name, struct m
 					string_or_die(&bundle_str, "%*s|-- %s\n", indent, "", bundle->component);
 				}
 
-				*reqd_by = list_append_data(*reqd_by, bundle_str);
+				*reqd_by = list_insert_after(*reqd_by, bundle_str);
 				required_by(reqd_by, bundle->component, mom, recursion);
 			}
 		}
@@ -1139,7 +1139,7 @@ int list_local_bundles()
 		/* Need to dup the strings as the directory
 		 * may be bigger than the size of the I/O buffer */
 		char *name = strdup_or_die(ent->d_name);
-		bundles = list_append_data(bundles, name);
+		bundles = list_prepend_data(bundles, name);
 	}
 
 	closedir(dir);

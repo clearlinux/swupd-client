@@ -85,7 +85,7 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 	if (!bundle) {
 		bundle = calloc(sizeof(struct bundle_result), 1);
 		ON_NULL_ABORT(bundle);
-		results = list_append_data(results, bundle);
+		results = list_prepend_data(results, bundle);
 		strncpy(bundle->bundle_name, bundlename, BUNDLE_NAME_MAXLEN - 1);
 		/* record if the bundle is tracked on the system */
 		bundle->is_tracked = is_tracked_bundle(bundlename);
@@ -94,7 +94,7 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 	file = calloc(sizeof(struct file_result), 1);
 	ON_NULL_ABORT(file);
 	file->filename = strdup_or_die(filename);
-	bundle->files = list_append_data(bundle->files, file);
+	bundle->files = list_prepend_data(bundle->files, file);
 	file->score = score;
 	bundle->score += score;
 }

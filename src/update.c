@@ -392,7 +392,6 @@ load_current_submanifests:
 
 	/* consolidate the current collective manifests down into one in memory */
 	current_manifest->files = files_from_bundles(current_manifest->submanifests);
-
 	current_manifest->files = consolidate_files(current_manifest->files);
 
 	latest_subs = list_clone(current_subs);

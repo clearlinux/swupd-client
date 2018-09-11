@@ -35,7 +35,7 @@
 
 #include "config.h"
 #include "curl-internal.h"
-#include "hashmap.h"
+#include "lib/hashmap.h"
 #include "swupd.h"
 
 #define MAX_RETRIES 5

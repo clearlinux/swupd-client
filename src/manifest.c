@@ -701,6 +701,15 @@ struct manifest *load_manifest(int current, int version, struct file *file, stru
 retry_load:
 	ret = retrieve_manifests(current, version, file->filename, file, file->is_mix);
 	if (ret != 0) {
+		if (file->is_iterative == 1 && file->full_manifest && !retried) {
+			/* Since the iterative manifest failed to be loaded,
+			 * fall back to using the full manifest */
+			file->full_manifest->peer = file->peer;
+			file = file->full_manifest;
+			file->peer->peer = file;
+			retried = true;
+			goto retry_load;
+		}
 		fprintf(stderr, "Failed to retrieve %d %s manifest\n", version, file->filename);
 		return NULL;
 	}
@@ -954,6 +963,22 @@ void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *su
 
 		if (subbed2) {
 			account_new_bundle();
+		}
+	}
+}
+
+/* Links each iterative manifest from a list with its related full manifest from another list */
+void link_iterative_manifests(struct list *iterative_manifests, struct list *full_manifests)
+{
+	struct list *list;
+	struct file *manifest_file;
+
+	list = iterative_manifests;
+	while (list) {
+		manifest_file = list->data;
+		list = list->next;
+		if (manifest_file->is_iterative == 1) {
+			manifest_file->full_manifest = search_bundle_in_manifests(full_manifests, manifest_file->bundlename);
 		}
 	}
 }
@@ -1414,7 +1439,7 @@ void filter_iterative_manifests(struct list *manifests, int version, struct list
 		file = list->data;
 		/* Keep only iterative manifests that are from the specified version and that are
 		 * already installed */
-		if (file->is_iterative == 1 && file->from_version == version  && is_tracked_bundle(file->bundlename)) {
+		if (file->is_iterative == 1 && file->from_version == version && is_tracked_bundle(file->bundlename)) {
 			*iterative_manifests = list_prepend_data(*iterative_manifests, file);
 		} else if (file->is_iterative != 1) {
 			*full_manifests = list_prepend_data(*full_manifests, file);
@@ -1429,4 +1454,7 @@ void filter_iterative_manifests(struct list *manifests, int version, struct list
 			*iterative_manifests = list_prepend_data(*iterative_manifests, file);
 		}
 	}
+
+	/* link the iterative manifest with its related full manifest */
+	link_iterative_manifests(*iterative_manifests, *full_manifests);
 }

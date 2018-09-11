@@ -11,8 +11,8 @@
 #include <string.h>
 #include <sys/queue.h>
 
-#include "list.h"
-#include "macros.h"
+#include "lib/list.h"
+#include "lib/macros.h"
 #include "swupd-error.h"
 
 #ifdef __cplusplus

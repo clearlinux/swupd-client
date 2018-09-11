@@ -208,6 +208,9 @@ static int main_update()
 	int current_version = -1, server_version = -1;
 	int mix_current_version = -1, mix_server_version = -1;
 	struct manifest *current_manifest = NULL, *server_manifest = NULL;
+	struct list *iterative_manifests = NULL;
+	struct list *full_manifests = NULL;
+	struct list *original_manifests = NULL;
 	struct list *updates = NULL;
 	struct list *current_subs = NULL;
 	struct list *latest_subs = NULL;
@@ -365,6 +368,11 @@ load_server_mom:
 	retries = 0;
 	timeout = 10;
 
+	/* Replace the server manifests with the list that includes the iterative manifests */
+	original_manifests = server_manifest->manifests;
+	filter_iterative_manifests(server_manifest->manifests, current_version, &full_manifests, &iterative_manifests);
+	server_manifest->manifests = iterative_manifests;
+
 load_current_submanifests:
 	/* Read the current collective of manifests that we are subscribed to.
 	 * First load up the old (current) manifests. Statedir could have been cleared
@@ -511,6 +519,10 @@ download_packs:
 
 clean_exit:
 	list_free_list(updates);
+	server_manifest->manifests = NULL;
+	list_free_list_and_data(original_manifests, free_file_data);
+	list_free_list(iterative_manifests);
+	list_free_list(full_manifests);
 	free_manifest(current_manifest);
 	free_manifest(server_manifest);
 

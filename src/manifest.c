@@ -907,10 +907,10 @@ void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *su
 		bool subbed1, subbed2;
 		file1 = list1->data;
 		file2 = list2->data;
-		subbed1 = component_subscribed(subs1, file1->filename);
-		subbed2 = component_subscribed(subs2, file2->filename);
+		subbed1 = component_subscribed(subs1, file1->bundlename);
+		subbed2 = component_subscribed(subs2, file2->bundlename);
 
-		ret = strcmp(file1->filename, file2->filename);
+		ret = strcmp(file1->bundlename, file2->bundlename);
 		if (ret == 0) {
 			file1->peer = file2;
 			file2->peer = file1;
@@ -974,11 +974,11 @@ struct list *recurse_manifest(struct manifest *manifest, struct list *subs, cons
 		file = list->data;
 		list = list->next;
 
-		if (!server && !component && !component_subscribed(subs, file->filename)) {
+		if (!server && !component && !component_subscribed(subs, file->bundlename)) {
 			continue;
 		}
 
-		if (component && !(strcmp(component, file->filename) == 0)) {
+		if (component && !(strcmp(component, file->bundlename) == 0)) {
 			continue;
 		}
 
@@ -1277,7 +1277,25 @@ struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bu
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
-		if (strcmp(file->filename, bundlename) == 0) {
+		if (strcmp(file->bundlename, bundlename) == 0) {
+			return file;
+		}
+	}
+
+	return NULL;
+}
+
+/* Search for a specific Manifest in a list of Manifests */
+struct file *search_bundle_in_manifests(struct list *manifests, const char *bundlename)
+{
+	struct list *iter = NULL;
+	struct file *file;
+
+	iter = list_head(manifests);
+	while (iter) {
+		file = iter->data;
+		iter = iter->next;
+		if (strcmp(file->bundlename, bundlename) == 0) {
 			return file;
 		}
 	}
@@ -1378,4 +1396,37 @@ int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize,
 		}
 	}
 	return ret; // If collisions were found, so manifest is purely additive
+}
+
+/* The function splits a list of manifests into two lists:
+ * - full_manifests: this list will contain all the full manifests that were in the manifests list
+ * - iterative_manifests: this list will contain all the valid iterative manifests from the manifests
+ *   list, plus the full manifest of those bundles that didn't have a valid iterative manifest
+ *   A valid iterative manifest is one that can be used during an update, meaning that the iterative
+ *   manifest must match the "from version" provided, and that it belongs to an already installed bundle*/
+void filter_iterative_manifests(struct list *manifests, int version, struct list **full_manifests, struct list **iterative_manifests)
+{
+	/* Split the manifests into "iterative manifests" and "full manifests" */
+	struct list *list;
+	struct file *file;
+
+	for (list = manifests; list; list = list->next) {
+		file = list->data;
+		/* Keep only iterative manifests that are from the specified version and that are
+		 * already installed */
+		if (file->is_iterative == 1 && file->from_version == version  && is_tracked_bundle(file->bundlename)) {
+			*iterative_manifests = list_prepend_data(*iterative_manifests, file);
+		} else if (file->is_iterative != 1) {
+			*full_manifests = list_prepend_data(*full_manifests, file);
+		}
+	}
+
+	/* Add the full manifest of those bundles that do not have a valid iterative manifest
+	* into the list of iterative_manifests */
+	for (list = *full_manifests; list; list = list->next) {
+		file = list->data;
+		if (!search_bundle_in_manifests(*iterative_manifests, file->bundlename)) {
+			*iterative_manifests = list_prepend_data(*iterative_manifests, file);
+		}
+	}
 }

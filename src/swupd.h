@@ -330,6 +330,7 @@ extern int compute_hash(struct file *file, char *filename) __attribute__((warn_u
 extern struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server);
 extern struct list *consolidate_files(struct list *files);
 extern struct list *filter_out_existing_files(struct list *files);
+extern void filter_iterative_manifests(struct list *manifests, int version, struct list **full_manifests, struct list **iterative_manifests);
 
 extern void populate_file_struct(struct file *file, char *filename);
 extern bool verify_file(struct file *file, char *filename);
@@ -342,6 +343,7 @@ void free_manifest_data(void *data);
 void remove_files_in_manifest_from_fs(struct manifest *m);
 void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2);
 extern struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bundlename);
+extern struct file *search_bundle_in_manifests(struct list *manifests, const char *bundlename);
 extern struct file *search_file_in_manifest(struct manifest *manifest, const char *filename);
 
 extern char *mounted_dirs;

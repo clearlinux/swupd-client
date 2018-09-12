@@ -17,9 +17,9 @@ typedef void (*list_free_data_fn_t)(void *data);
  *
  * Returns the a pointer to the list with the added element.
  * Note: This function is O(n), so avoid this. Prefer using list_insert_after()
- * Or list_prepend_data()
+ * Or list_prepend()
  */
-struct list *list_append_data(struct list *list, void *data);
+struct list *list_append(struct list *list, void *data);
 
 /*
  * Creates a new list item, store data and insert it to the list just after
@@ -35,7 +35,7 @@ struct list *list_insert_after(struct list *list, void *data);
  *
  * Returns a pointer to the list with the inserted element.
  */
-struct list *list_prepend_data(struct list *list, void *data);
+struct list *list_prepend(struct list *list, void *data);
 
 /* Returns the head or the tail of a list given anyone of its items */
 struct list *list_head(struct list *item);

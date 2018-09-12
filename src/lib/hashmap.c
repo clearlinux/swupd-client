@@ -108,7 +108,7 @@ bool hashmap_put(struct hashmap *hashmap, void *data)
 			return false;
 		}
 	}
-	*items = list_prepend_data(*items, data);
+	*items = list_prepend(*items, data);
 
 	return true;
 }

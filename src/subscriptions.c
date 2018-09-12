@@ -174,5 +174,5 @@ void create_and_append_subscription(struct list **subs, const char *component)
 
 	sub->version = 0;
 	sub->oldversion = 0;
-	*subs = list_prepend_data(*subs, sub);
+	*subs = list_prepend(*subs, sub);
 }

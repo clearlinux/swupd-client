@@ -151,7 +151,7 @@ static struct list *list_merge_sort(struct list *left, unsigned int len, compari
 
 /* ------------ Public API ------------ */
 
-struct list *list_append_data(struct list *list, void *data)
+struct list *list_append(struct list *list, void *data)
 {
 	return list_append_item(list, list_alloc_item(data));
 }
@@ -161,7 +161,7 @@ struct list *list_insert_after(struct list *list, void *data)
 	return list_insert_after_item(list, list_alloc_item(data));
 }
 
-struct list *list_prepend_data(struct list *list, void *data)
+struct list *list_prepend(struct list *list, void *data)
 {
 	return list_prepend_item(list, list_alloc_item(data));
 }
@@ -286,7 +286,7 @@ struct list *list_clone(struct list *list)
 
 	item = list_tail(list);
 	while (item) {
-		clone = list_prepend_data(clone, item->data);
+		clone = list_prepend(clone, item->data);
 		item = item->prev;
 	}
 
@@ -301,7 +301,7 @@ struct list *list_deep_clone_strs(struct list *list)
 
 	item = list_tail(list);
 	while (item) {
-		clone = list_prepend_data(clone, strdup(item->data));
+		clone = list_prepend(clone, strdup(item->data));
 		item = item->prev;
 	}
 

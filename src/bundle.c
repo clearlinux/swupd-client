@@ -216,7 +216,7 @@ int show_included_bundles(char *bundle_name)
 
 	// add_subscriptions takes a list, so construct one with only bundle_name
 	struct list *bundles = NULL;
-	bundles = list_prepend_data(bundles, bundle_name);
+	bundles = list_prepend(bundles, bundle_name);
 	ret = add_subscriptions(bundles, &subs, current_version, mom, true, 0);
 	list_free_list(bundles);
 	if (ret != add_sub_NEW) {
@@ -1067,7 +1067,7 @@ int install_bundles_frontend(char **bundles)
 
 	grabtime_start(&times, "Prepend bundles to list");
 	for (; *bundles; ++bundles) {
-		bundles_list = list_prepend_data(bundles_list, *bundles);
+		bundles_list = list_prepend(bundles_list, *bundles);
 		if (*bundles) {
 			char *tmp = bundles_list_str;
 			if (bundles_list_str) {
@@ -1139,7 +1139,7 @@ int list_local_bundles()
 		/* Need to dup the strings as the directory
 		 * may be bigger than the size of the I/O buffer */
 		char *name = strdup_or_die(ent->d_name);
-		bundles = list_prepend_data(bundles, name);
+		bundles = list_prepend(bundles, name);
 	}
 
 	closedir(dir);

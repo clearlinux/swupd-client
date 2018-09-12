@@ -193,7 +193,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		}
 		if (latest && strncmp(component, "MoM", 3) == 0) {
 			if (strncmp(line, "actions:", 8) == 0) {
-				post_update_actions = list_prepend_data(post_update_actions, strdup_or_die(c));
+				post_update_actions = list_prepend(post_update_actions, strdup_or_die(c));
 				if (!post_update_actions->data) {
 					fprintf(stderr, "WARNING: Unable to read post update action from Manifest.MoM. \
 							Another update or verify may be required.\n");
@@ -201,7 +201,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 			}
 		}
 		if (strncmp(line, "includes:", 9) == 0) {
-			includes = list_prepend_data(includes, strdup_or_die(c));
+			includes = list_prepend(includes, strdup_or_die(c));
 		}
 	}
 
@@ -331,10 +331,10 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		}
 
 		if (file->is_manifest) {
-			manifest->manifests = list_prepend_data(manifest->manifests, file);
+			manifest->manifests = list_prepend(manifest->manifests, file);
 		} else {
 			file->is_tracked = 1;
-			manifest->files = list_prepend_data(manifest->files, file);
+			manifest->files = list_prepend(manifest->files, file);
 		}
 		count++;
 	}
@@ -810,7 +810,7 @@ struct list *create_update_list(struct manifest *server)
 			/* check if we need to run scripts/update the bootloader/etc */
 			apply_heuristics(file);
 
-			output = list_prepend_data(output, file);
+			output = list_prepend(output, file);
 			continue;
 		}
 	}
@@ -985,7 +985,7 @@ struct list *recurse_manifest(struct manifest *manifest, struct list *subs, cons
 			return NULL;
 		}
 		if (sub != NULL) {
-			bundles = list_prepend_data(bundles, sub);
+			bundles = list_prepend(bundles, sub);
 		}
 	}
 

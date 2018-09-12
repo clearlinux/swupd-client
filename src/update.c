@@ -156,7 +156,7 @@ int add_included_manifests(struct manifest *mom, int current, struct list **subs
 
 	iter = list_head(*subs);
 	while (iter) {
-		subbed = list_prepend_data(subbed, ((struct sub *)iter->data)->component);
+		subbed = list_prepend(subbed, ((struct sub *)iter->data)->component);
 		iter = iter->next;
 	}
 

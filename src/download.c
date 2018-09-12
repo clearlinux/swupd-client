@@ -261,7 +261,7 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 			if (h->success_cb && !h->success_cb(file->data)) {
 				// Retry download if cb return is false. File probably corrupted
 				unlink(file->file.path);
-				h->failed = list_prepend_data(h->failed, file);
+				h->failed = list_prepend(h->failed, file);
 			}
 		} else {
 			//If local download and file doesn't exist set a 404
@@ -272,7 +272,7 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 
 			//Check if user can handle errors
 			if (!h->error_cb || !h->error_cb(response, file->data)) {
-				h->failed = list_prepend_data(h->failed, file);
+				h->failed = list_prepend(h->failed, file);
 				fprintf(stderr, "Error for %s download: Response %ld - %s\n",
 					file->file.path, response, curl_easy_strerror(msg->data.result));
 

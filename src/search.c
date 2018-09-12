@@ -85,7 +85,7 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 	if (!bundle) {
 		bundle = calloc(sizeof(struct bundle_result), 1);
 		ON_NULL_ABORT(bundle);
-		results = list_prepend_data(results, bundle);
+		results = list_prepend(results, bundle);
 		strncpy(bundle->bundle_name, bundlename, BUNDLE_NAME_MAXLEN - 1);
 		/* record if the bundle is tracked on the system */
 		bundle->is_tracked = is_tracked_bundle(bundlename);
@@ -94,7 +94,7 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 	file = calloc(sizeof(struct file_result), 1);
 	ON_NULL_ABORT(file);
 	file->filename = strdup_or_die(filename);
-	bundle->files = list_prepend_data(bundle->files, file);
+	bundle->files = list_prepend(bundle->files, file);
 	file->score = score;
 	bundle->score += score;
 }
@@ -658,7 +658,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 		bundle->topsize = subman->contentsize;
 		/* do a deep copy of the includes list */
 		bundle->includes = list_deep_clone_strs(subman->includes);
-		bundle_info = list_prepend_data(bundle_info, bundle);
+		bundle_info = list_prepend(bundle_info, bundle);
 
 		if (display_files) {
 			/* Display bundle name. Marked up for pattern matchability */

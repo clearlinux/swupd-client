@@ -726,7 +726,7 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 	 * eg. Path /usr/bin/foo will be broken into /usr,/usr/bin and /usr/bin/foo
 	 */
 	while (strcmp(path, "/") != 0) {
-		path_list = list_prepend_data(path_list, strdup_or_die(path));
+		path_list = list_prepend(path_list, strdup_or_die(path));
 		tmp = strdup_or_die(dirname(path));
 		free_string(&path);
 		path = tmp;

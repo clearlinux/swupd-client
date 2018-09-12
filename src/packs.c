@@ -184,7 +184,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	download_handle = swupd_curl_parallel_download_start(get_max_xfer());
 
 	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, download_error, download_free_data);
-	iter = list_head(subs);
+	iter = subs;
 	while (iter) {
 		sub = iter->data;
 		iter = iter->next;

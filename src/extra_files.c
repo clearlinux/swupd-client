@@ -125,7 +125,7 @@ int walk_tree(struct manifest *manifest, const char *start, bool fix, const rege
 	 * or convert it to an array of pointers, or just pull them off one
 	 * at a time? Try one at a time first.
 	 */
-	struct list *iter = list_head(manifest->files);
+	struct list *iter = manifest->files;
 	while (iter) {
 		struct file *file;
 		struct filerecord *found;

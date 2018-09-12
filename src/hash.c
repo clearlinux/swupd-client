@@ -258,7 +258,7 @@ bool verify_file_lazy(char *filename)
  */
 int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 {
-	struct list *iter = list_head(manifest->manifests);
+	struct list *iter = manifest->manifests;
 	struct file *current;
 	char *local = NULL, *cached;
 	int ret = 0;

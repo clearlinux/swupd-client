@@ -72,7 +72,7 @@ static int download_loop(void *download_handle, struct list *files, int *num_dow
 	unsigned int complete = 0;
 	unsigned int list_length = list_len(files);
 
-	iter = list_head(files);
+	iter = files;
 	while (iter) {
 		struct file *file;
 

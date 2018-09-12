@@ -143,14 +143,14 @@ static int unload_tracked_bundle(const char *bundle_name, struct list **subs)
 	struct list *cur_item;
 	struct sub *bundle;
 
-	bundles = list_head(*subs);
+	bundles = *subs;
 	while (bundles) {
 		bundle = bundles->data;
 		cur_item = bundles;
 		bundles = bundles->next;
 		if (strcmp(bundle->component, bundle_name) == 0) {
 			/* unlink (aka untrack) matching bundle name from tracked ones */
-			*subs = list_head(free_bundle(cur_item));
+			list_free_item_list(subs, cur_item, free_subscription_data);
 			return EXIT_SUCCESS;
 		}
 	}
@@ -165,13 +165,13 @@ static void required_by(struct list **reqd_by, const char *bundle_name, struct m
 	// track recursion level for indentation
 	recursion++;
 
-	b = list_head(mom->submanifests);
+	b = mom->submanifests;
 	while (b) {
 		struct manifest *bundle = b->data;
 		b = b->next;
 
 		int indent = 0;
-		i = list_head(bundle->includes);
+		i = bundle->includes;
 		while (i) {
 			char *name = i->data;
 			i = i->next;
@@ -190,6 +190,7 @@ static void required_by(struct list **reqd_by, const char *bundle_name, struct m
 			}
 		}
 	}
+	*reqd_by = list_head(*reqd_by);
 }
 /* Return recursive list of included bundles */
 int show_included_bundles(char *bundle_name)
@@ -253,7 +254,7 @@ int show_included_bundles(char *bundle_name)
 	fprintf(stderr, "Bundles included by %s:\n\n", bundle_name);
 
 	struct list *iter;
-	iter = list_head(deps);
+	iter = deps;
 	while (iter) {
 		struct manifest *included_bundle = iter->data;
 		iter = iter->next;
@@ -361,7 +362,7 @@ int show_bundle_reqd_by(const char *bundle_name, bool server)
 
 	struct list *iter;
 	char *bundle;
-	iter = list_head(reqd_by);
+	iter = reqd_by;
 	while (iter) {
 		bundle = iter->data;
 		iter = iter->next;
@@ -586,7 +587,7 @@ int remove_bundles(char **bundles)
 		if (reqd_by != NULL) {
 			struct list *iter;
 			char *bundle;
-			iter = list_head(reqd_by);
+			iter = reqd_by;
 			fprintf(stderr, "Error: bundle requested to be removed is required by the following bundles:\n");
 			printf("format:\n");
 			printf(" # * is-required-by\n");
@@ -617,7 +618,7 @@ int remove_bundles(char **bundles)
 
 		/* deduplication needs file list sorted by filename, do so */
 		bundle_manifest->files = list_sort(bundle_manifest->files, file_sort_filename);
-		deduplicate_files_from_manifest(&bundle_manifest, current_mom);
+		deduplicate_files_from_manifest(bundle_manifest, current_mom);
 
 		fprintf(stderr, "Deleting bundle files...\n");
 		remove_files_in_manifest_from_fs(bundle_manifest);
@@ -669,7 +670,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 
 	srand(time(NULL));
 
-	iter = list_head(bundles);
+	iter = bundles;
 	while (iter) {
 		bundle = iter->data;
 		iter = iter->next;
@@ -754,7 +755,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 	ret = add_subscriptions(bundles, subs, current_version, mom, false, 0);
 
 	/* print a message if any of the requested bundles is already installed */
-	iter = list_head(bundles);
+	iter = bundles;
 	while (iter) {
 		char *bundle;
 		bundle = iter->data;
@@ -859,7 +860,7 @@ download_subscribed_packs:
 	 * Do not install any files to the system until the hash has been
 	 * verified. The verify_fix_path also verifies the hashes. */
 	char *hashpath;
-	iter = list_head(to_install_files);
+	iter = to_install_files;
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
@@ -891,7 +892,7 @@ download_subscribed_packs:
 		free_string(&hashpath);
 	}
 
-	iter = list_head(to_install_files);
+	iter = to_install_files;
 	unsigned int list_length = list_len(to_install_files);
 	unsigned int complete = 0;
 	while (iter) {
@@ -937,7 +938,7 @@ download_subscribed_packs:
 		print_progress(complete, list_length * 2);
 	}
 
-	iter = list_head(to_install_files);
+	iter = to_install_files;
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
@@ -986,7 +987,7 @@ download_subscribed_packs:
 out:
 	/* count how many of the requested bundles were actually installed, note that the
 	 * to_install_bundles list could also have extra dependencies */
-	iter = list_head(to_install_bundles);
+	iter = to_install_bundles;
 	while (iter) {
 		struct manifest *to_install_manifest;
 		to_install_manifest = iter->data;

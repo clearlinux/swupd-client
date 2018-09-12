@@ -153,7 +153,7 @@ void apply_deltas(struct manifest *current_manifest)
 		/* TODO: Sort the list of files by hash then walk it
 		 * in parallel with the (sorted) results of readdir. */
 
-		struct list *ll = list_head(current_manifest->files);
+		struct list *ll = current_manifest->files;
 		char *found = NULL;
 		bool bad_on_sys = false;
 

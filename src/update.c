@@ -103,7 +103,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 	/* starting at list_head in the filename alpha-sorted updates list
 	 * means node directories are added before leaf files */
 	fprintf(stderr, "Staging file content\n");
-	iter = list_head(updates);
+	iter = updates;
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
@@ -154,7 +154,7 @@ int add_included_manifests(struct manifest *mom, int current, struct list **subs
 	struct list *iter;
 	int ret;
 
-	iter = list_head(*subs);
+	iter = *subs;
 	while (iter) {
 		subbed = list_prepend(subbed, ((struct sub *)iter->data)->component);
 		iter = iter->next;

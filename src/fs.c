@@ -36,7 +36,7 @@ long get_manifest_list_contentsize(struct list *manifests)
 	long total_size = 0;
 
 	struct list *ptr = NULL;
-	for (ptr = list_head(manifests); ptr; ptr = ptr->next) {
+	for (ptr = manifests; ptr; ptr = ptr->next) {
 		struct manifest *subman;
 		subman = ptr->data;
 

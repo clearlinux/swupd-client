@@ -332,7 +332,7 @@ extern int rm_staging_dir_contents(const char *rel_path);
 void free_file_data(void *data);
 void free_manifest_data(void *data);
 void remove_files_in_manifest_from_fs(struct manifest *m);
-void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2);
+void deduplicate_files_from_manifest(struct manifest *m1, struct manifest *m2);
 extern struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bundlename);
 extern struct file *search_file_in_manifest(struct manifest *manifest, const char *filename);
 
@@ -378,7 +378,7 @@ extern bool on_new_format(void);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);
-struct list *free_bundle(struct list *item);
+void free_subscription_data(void *data);
 extern void create_and_append_subscription(struct list **subs, const char *component);
 
 /* bundle.c */

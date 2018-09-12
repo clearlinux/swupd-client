@@ -307,7 +307,7 @@ int rename_all_files_to_final(struct list *updates)
 	unsigned int complete = 0;
 	unsigned int list_length = list_len(updates);
 
-	list = list_head(updates);
+	list = updates;
 	while (list) {
 		struct file *file;
 		file = list->data;

@@ -545,7 +545,9 @@ clean_curl:
 	}
 	/* clean up our cached content from the update. It is likely much more than
 	 * we need and the clean helps us prevent cache bloat. */
-	clean_statedir(false, false);
+	if (!keepcache) {
+		clean_statedir(false, false);
+	}
 	free_subscriptions(&latest_subs);
 	swupd_deinit();
 
@@ -589,6 +591,7 @@ static const struct option prog_opts[] = {
 	{ "nosigcheck", no_argument, 0, 'n' },
 	{ "ignore-time", no_argument, 0, 'I' },
 	{ "statedir", required_argument, 0, 'S' },
+	{ "keepcache", no_argument, 0, 'k' },
 	{ "certpath", required_argument, 0, 'C' },
 	{ "time", no_argument, 0, 't' },
 	{ "no-scripts", no_argument, 0, 'N' },
@@ -622,6 +625,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
 	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
+	fprintf(stderr, "   -k, --keepcache         Do not delete the swupd state directory content after updating the system\n");
 	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
 	fprintf(stderr, "   -t, --time              Show verbose time output for swupd operations\n");
 	fprintf(stderr, "   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
@@ -636,7 +640,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hm:xnIdtNbTau:P:c:v:sF:p:S:C:D:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hm:xnIdtNbTau:P:c:v:sF:p:S:C:D:k", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -739,6 +743,9 @@ static bool parse_options(int argc, char **argv)
 				fprintf(stderr, "Invalid --max-parallel-pack-downloads argument\n\n");
 				goto err;
 			}
+			break;
+		case 'k':
+			keepcache = true;
 			break;
 		default:
 			fprintf(stderr, "Unrecognized option\n\n");

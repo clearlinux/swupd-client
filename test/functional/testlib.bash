@@ -276,6 +276,7 @@ set_env_variables() {
 	fi
 
 	export SWUPD_OPTS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
+	export SWUPD_OPTS_KEEPCACHE="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I --keepcache"
 	export SWUPD_OPTS_NO_CERT="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir"
 	export SWUPD_OPTS_MIRROR="-p $path/$env_name/target-dir"
 	export SWUPD_OPTS_NO_FMT="-S $path/$env_name/state -p $path/$env_name/target-dir -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
@@ -2360,7 +2361,7 @@ assert_dir_exists() {
 	local vdir=$1
 	validate_param "$vdir"
 
-	if [ ! -d "$vdir" ]; then
+	if sudo test ! -d "$vdir"; then
 		print_assert_failure "Directory $vdir should exist, but it does not"
 		return 1
 	fi
@@ -2372,7 +2373,7 @@ assert_dir_not_exists() {
 	local vdir=$1
 	validate_param "$vdir"
 
-	if [ -d "$vdir" ]; then
+	if sudo test -d "$vdir"; then
 		print_assert_failure "Directory $vdir should not exist, but it does"
 		return 1
 	fi
@@ -2384,7 +2385,7 @@ assert_file_exists() {
 	local vfile=$1
 	validate_param "$vfile"
 
-	if [ ! -f "$vfile" ]; then
+	if sudo test ! -f "$vfile"; then
 		print_assert_failure "File $vfile should exist, but it does not"
 		return 1
 	fi
@@ -2396,7 +2397,7 @@ assert_file_not_exists() {
 	local vfile=$1
 	validate_param "$vfile"
 
-	if [ -f "$vfile" ]; then
+	if sudo test -f "$vfile"; then
 		print_assert_failure "File $vfile should not exist, but it does"
 		return 1
 	fi

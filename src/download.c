@@ -36,6 +36,7 @@
 #include "config.h"
 #include "curl-internal.h"
 #include "lib/hashmap.h"
+#include "lib/thread_pool.h"
 #include "swupd.h"
 
 #define MAX_RETRIES 5
@@ -48,7 +49,8 @@
 // Fixed window added to hysteresis upper bound before it is enforced.
 #define XFER_QUEUE_BUFFER 5
 
-/* This file provides a managed download facility for parallelizing download
+/*
+ * This file provides a managed download facility for parallelizing download
  * files. To use this functionality, create a handler using
  * swupd_curl_parallel_download_start(), enqueue files using
  * swupd_curl_parallel_download_enqueue() and finish the process using
@@ -89,6 +91,7 @@ struct swupd_curl_parallel_handle {
 	CURLM *mcurl;			  /* Curl handle */
 	struct list *failed;		  /* List of failed downloads */
 	struct hashmap *curl_hashmap;     /* Hashmap mentioned above */
+	struct tp *thpool;		  /* Pointer to the threadpool */
 	swupd_curl_success_cb success_cb; /* Callback to success function */
 	swupd_curl_error_cb error_cb;     /* Callback to error function */
 	swupd_curl_free_cb free_cb;       /* Callback to free user data*/
@@ -100,15 +103,27 @@ struct swupd_curl_parallel_handle {
 struct multi_curl_file {
 	struct curl_file file; /* Curl file information */
 
-	int err;	  /* the error code if the file failed to download */
-	char retries;     /* Number of retried performed so far */
-	CURL *curl;       /* curl handle if downloading */
-	char *url;	/* The url to be downloaded from */
-	size_t hash_key;  /* hash_key of this file */
-	const char *hash; /* Unique identifier of this file. */
+	int err;			/* the error code if the file failed to download */
+	char retries;			/* Number of retried performed so far */
+	CURL *curl;			/* curl handle if downloading */
+	char *url;			/* The url to be downloaded from */
+	size_t hash_key;		/* hash_key of this file */
+	const char *hash;		/* Unique identifier of this file. */
+	swupd_curl_success_cb callback; /* Holds original success callback to be wrapped */
 
-	void *data; /* user's data */
+	void *data;     /* user's data */
+	bool cb_retval; /* return value from callback */
 };
+
+/*
+ * Wrap the success callback for each thread.
+ * Return values are added to multi_curl_file's cb_retval
+ */
+static void success_callback_wrapper(void *data)
+{
+	struct multi_curl_file *file = data;
+	file->cb_retval = file->callback(file->data);
+}
 
 static bool file_hash_cmp(const void *a, const void *b)
 {
@@ -166,6 +181,10 @@ void *swupd_curl_parallel_download_start(size_t max_xfer)
 	if (h->mcurl == NULL) {
 		goto error;
 	}
+
+	/* Libarchive is not thread safe when using the archive_disk_write api.
+	 * So for now, use only 1 thread to handle untar/extraction */
+	h->thpool = tp_start(1);
 
 	curl_multi_setopt(h->mcurl, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX | CURLPIPE_HTTP1);
 
@@ -267,16 +286,21 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 		/* if the server returns HTTP 200 the download is successful.
 		 * When using the FILE:// protocol, 0 also indicates success. */
 		if (curl_ret == CURLE_OK && (response == 200 || local_download)) {
-			if (h->success_cb && !h->success_cb(file->data)) {
-				// Retry download if cb return is false. File probably corrupted
-				unlink(file->file.path);
-				h->failed = list_prepend_data(h->failed, file);
-			}
+			/* Wrap the success callback and schedule execution
+			 * Results from the callback will be stored in multi_curl_file's cb_retval
+			 * which is later checked for errors. */
+			file->callback = h->success_cb;
+			tp_task_schedule(h->thpool, (void *)success_callback_wrapper, (void *)file);
+
 		} else {
 			//If local download and file doesn't exist set a 404
 			//response code to simulate same behavior as HTTP
 			if (local_download && curl_ret == CURLE_FILE_COULDNT_READ_FILE) {
 				response = 404;
+				/* Later, each file's cb_retval is checked. 0 indicates failure,
+				 * and a retry. Since 404 with a local file shouldn't
+				 * be retried, set the value >0. */
+				file->cb_retval = 1;
 			}
 
 			//Check if user can handle errors
@@ -558,6 +582,19 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 	while (poll_fewer_than(h, 0, 0) == 0 && retry) {
 		retry = false;
 
+		/* Wait for all threads to complete, re-init pool to handle extra downloads
+		 * This should be replaced by a tp_wait() function once available. */
+		tp_complete(h->thpool);
+		h->thpool = tp_start(1);
+
+		/* Check return values from threads, add failed items to h->failed list to retry */
+		HASHMAP_FOREACH(h->curl_hashmap, i, l, file)
+		{
+			if (file->cb_retval == 0) {
+				h->failed = list_prepend_data(h->failed, file);
+			}
+		}
+
 		// The multi-stack is now emptied.
 		perform_curl_io_and_complete(h, h->mcurl_size);
 
@@ -597,7 +634,7 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 	}
 
 	curl_multi_cleanup(h->mcurl);
-
+	tp_complete(h->thpool);
 	list_free_list(h->failed);
 
 	HASHMAP_FOREACH(h->curl_hashmap, i, l, file)

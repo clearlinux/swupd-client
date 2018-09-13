@@ -27,7 +27,7 @@ _swupd()
     for ((i=COMP_CWORD-1;i>=0;i--))
     do case "${COMP_WORDS[$i]}" in
 	    ("$1")
-		opts="--help --version autoupdate bundle-add bundle-remove bundle-list hashdump update verify check-update search info clean"
+		opts="--help --version autoupdate bundle-add bundle-remove bundle-list hashdump update verify check-update search info clean mirror"
 	    break;;
 	    ("autoupdate")
 		opts="--help --enable --disable "
@@ -61,6 +61,9 @@ _swupd()
 		break;;
 	    ("clean")
 		opts="--all --dry-run --statedir --help "
+		break;;
+	    ("mirror")
+		opts="--help --set --unset --path "
 		break;;
 	esac
     done

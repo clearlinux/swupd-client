@@ -104,6 +104,7 @@ extern bool need_update_boot;
 extern bool need_update_bootloader;
 extern bool need_systemd_reexec;
 extern struct list *post_update_actions;
+extern bool keepcache;
 
 struct update_stat {
 	uint64_t st_mode;

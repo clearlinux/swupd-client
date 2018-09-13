@@ -55,6 +55,7 @@ char *bundle_to_add = NULL;
 struct timeval start_time;
 char *state_dir = NULL;
 int skip_diskspace_check = 0;
+bool keepcache = false;
 
 /* NOTE: Today the content and version server urls are the same in
  * all cases.  It is highly likely these will eventually differ, eg:

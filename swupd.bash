@@ -45,7 +45,7 @@ _swupd()
 		opts="--help --no-xattrs --path "
 		break;;
 	    ("update")
-		opts="--help --download --url --port --contenturl --versionurl --status --format --path --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --migrate --allow-mix-collisions --max-parallel-pack-downloads "
+		opts="--help --download --url --port --contenturl --versionurl --status --format --path --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --migrate --allow-mix-collisions --max-parallel-pack-downloads --keepcache "
 		break;;
 	    ("verify")
 		opts="--help --manifest --path --url --port --contenturl --versionurl --fix --picky --picky-tree --picky-whitelist --install --format --quick --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-pack-downloads "

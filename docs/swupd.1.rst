@@ -302,6 +302,11 @@ SUBCOMMANDS
         Ignore and continue if custom user content conflicts with upstream
         provided content.
 
+    - `-k, --keepcache`
+
+        Do not delete the swupd state directory content after updating the
+        system.
+
 ``verify``
 
     Perform system software installation verification. The program will

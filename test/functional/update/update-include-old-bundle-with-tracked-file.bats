@@ -26,8 +26,8 @@ test_setup() {
 		Update started.
 		Preparing to update from 20 to 30
 		Downloading packs...
-		Extracting os-core pack for version 30
 		Extracting test-bundle3 pack for version 30
+		Extracting os-core pack for version 30
 		Statistics for going from version 20 to version 30:
 		    changed bundles   : 3
 		    new bundles       : 0

@@ -2058,7 +2058,7 @@ update_bundle() {
 		new_fhash=$(sudo "$SWUPD" hashdump "$version_path"/files/"$fhash" 2> /dev/null)
 		sudo mv "$version_path"/files/"$fhash" "$version_path"/files/"$new_fhash"
 		create_tar "$version_path"/files/"$new_fhash"
-		sudo rm -f "$oldversion_path"/files/"$fhash".tar
+		sudo rm -f "$version_path"/files/"$fhash".tar
 		# update the manifest with the new hash
 		update_manifest -p "$bundle_manifest" file-hash "$fname" "$new_fhash"
 		# calculate new contentsize
@@ -2437,6 +2437,40 @@ assert_status_is_not() {
 		echo "------------------------------------------------------------------" >&3
 		echo "$output" >&3
 		echo -e "------------------------------------------------------------------\\n" >&3
+	fi
+
+}
+
+assert_true() {
+
+	local value=$1
+	local message=$2
+
+	# no value or 0 is considered false
+	if [ -z "$value" ] || [ -eq 0 ]; then
+		if [ -n "$message" ]; then
+			print_assert_failure "$message"
+		else
+			print_assert_failure "The expression was expected to be true, but it is false"
+		fi
+		return 1
+	fi
+
+}
+
+assert_false() {
+
+	local value=$1
+	local message=$2
+
+	# no value or 0 is considered false
+	if [ -n "$value" ] || [ -ne 0 ]; then
+		if [ -n "$message" ]; then
+			print_assert_failure "$message"
+		else
+			print_assert_failure "The expression was expected to be false, but it is true"
+		fi
+		return 1
 	fi
 
 }

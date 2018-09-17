@@ -153,10 +153,8 @@ BATS = \
 	test/functional/checkupdate/chk-update-client-certificate.bats \
 	test/functional/completion/completion-basic.bats \
 	test/functional/hashdump/hashdump-file-hash.bats \
-	test/functional/mirror/createdir/test.bats \
-	test/functional/mirror_v2/mirror-createdir.bats \
-	test/functional/mirror/createdir-negative/test.bats \
-	test/functional/mirror_v2/mirror-createdir-negative.bats \
+	test/functional/mirror/mirror-createdir.bats \
+	test/functional/mirror/mirror-createdir-negative.bats \
 	test/functional/search/content-check-negfull-path/test.bats \
 	test/functional/search/content-check-neglibtest/test.bats \
 	test/functional/search_v2/search-content-check-negative.bats \

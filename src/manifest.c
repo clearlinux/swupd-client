@@ -447,7 +447,7 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 {
 	char *url = NULL;
 	char *filename;
-	char *dir;
+	char *dir = NULL;
 	char *basedir;
 	int ret = 0;
 	struct stat sb;
@@ -504,7 +504,6 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 
 untar:
 	ret = extract_to(filename, dir);
-	free_string(&dir);
 	if (ret != 0) {
 		goto out;
 	} else {
@@ -514,6 +513,7 @@ untar:
 	}
 
 out:
+	free_string(&dir);
 	free_string(&filename);
 	free_string(&url);
 	return ret;

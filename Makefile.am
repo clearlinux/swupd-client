@@ -113,32 +113,19 @@ TESTS = $(dist_check_SCRIPTS)
 
 BATS = \
 	test/documentation/manpages/test.bats \
-	test/functional/bundleadd/add-directory/test.bats \
-	test/functional/bundleadd_v2/add-directory.bats \
-	test/functional/bundleadd/add-existing/test.bats \
-	test/functional/bundleadd_v2/add-existing.bats \
-	test/functional/bundleadd/add-multiple/test.bats \
-	test/functional/bundleadd_v2/add-multiple.bats \
-	test/functional/bundleadd/add-rc/test.bats \
-	test/functional/bundleadd_v2/add-rc.bats \
-	test/functional/bundleadd/bad-hash/test.bats \
-	test/functional/bundleadd_v2/add-bad-hash.bats \
-	test/functional/bundleadd/bad-hash-state/test.bats \
-	test/functional/bundleadd_v2/add-bad-hash-state.bats \
-	test/functional/bundleadd/bad-manifest/test.bats \
-	test/functional/bundleadd_v2/add-bad-manifest.bats \
-	test/functional/bundleadd/boot-file/test.bats \
-	test/functional/bundleadd_v2/add-boot-file.bats \
-	test/functional/bundleadd/boot-skip/test.bats \
-	test/functional/bundleadd_v2/add-boot-skip.bats \
-	test/functional/bundleadd/include/test.bats \
-	test/functional/bundleadd_v2/add-include.bats \
-	test/functional/bundleadd/fix-missing-file/test.bats \
-	test/functional/bundleadd/skip-scripts/test.bats \
-	test/functional/bundleadd_v2/add-skip-scripts.bats \
-	test/functional/bundleadd/verify-fix-path/test.bats \
-	test/functional/bundleadd_v2/add-verify-fix-path.bats \
-	test/functional/bundleadd_v2/add-client-certificate.bats \
+	test/functional/bundleadd/add-directory.bats \
+	test/functional/bundleadd/add-existing.bats \
+	test/functional/bundleadd/add-multiple.bats \
+	test/functional/bundleadd/add-rc.bats \
+	test/functional/bundleadd/add-bad-hash.bats \
+	test/functional/bundleadd/add-bad-hash-state.bats \
+	test/functional/bundleadd/add-bad-manifest.bats \
+	test/functional/bundleadd/add-boot-file.bats \
+	test/functional/bundleadd/add-boot-skip.bats \
+	test/functional/bundleadd/add-include.bats \
+	test/functional/bundleadd/add-skip-scripts.bats \
+	test/functional/bundleadd/add-verify-fix-path.bats \
+	test/functional/bundleadd/add-client-certificate.bats \
 	test/functional/bundlelist/all/test.bats \
 	test/functional/bundlelist_v2/list-all.bats \
 	test/functional/bundlelist/deps-flat/test.bats \

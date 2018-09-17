@@ -145,17 +145,12 @@ BATS = \
 	test/functional/bundleremove/remove-multiple.bats \
 	test/functional/bundleremove/remove-rc.bats \
 	test/functional/bundleremove/remove-client-certificate.bats \
-	test/functional/checkupdate/new-version/test.bats \
-	test/functional/checkupdate_v2/chk-update-new-version.bats \
-	test/functional/checkupdate/no-server-content/test.bats \
-	test/functional/checkupdate_v2/chk-update-no-server-content.bats \
-	test/functional/checkupdate/no-target-content/test.bats \
-	test/functional/checkupdate_v2/chk-update-no-target-content.bats \
-	test/functional/checkupdate/slow-server/test.bats \
-	test/functional/checkupdate_v2/chk-update-slow-server.bats \
-	test/functional/checkupdate/version-match/test.bats \
-	test/functional/checkupdate_v2/chk-update-version-match.bats \
-	test/functional/checkupdate_v2/chk-update-client-certificate.bats \
+	test/functional/checkupdate/chk-update-new-version.bats \
+	test/functional/checkupdate/chk-update-no-server-content.bats \
+	test/functional/checkupdate/chk-update-no-target-content.bats \
+	test/functional/checkupdate/chk-update-slow-server.bats \
+	test/functional/checkupdate/chk-update-version-match.bats \
+	test/functional/checkupdate/chk-update-client-certificate.bats \
 	test/functional/completion/basic/test.bats \
 	test/functional/completion_v2/completion-basic.bats \
 	test/functional/hashdump/file-hash/test.bats \

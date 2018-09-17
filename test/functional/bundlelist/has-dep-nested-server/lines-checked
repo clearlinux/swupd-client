@@ -1,8 +1,0 @@
-All installable and installed bundles that have test-bundle as a dependency:
-format:
- # * is-required-by
- #   |-- is-required-by
- # * is-also-required-by
- # ...
-  * test-bundle2
-    |-- test-bundle3

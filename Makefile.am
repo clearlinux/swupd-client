@@ -126,25 +126,16 @@ BATS = \
 	test/functional/bundleadd/add-skip-scripts.bats \
 	test/functional/bundleadd/add-verify-fix-path.bats \
 	test/functional/bundleadd/add-client-certificate.bats \
-	test/functional/bundlelist/all/test.bats \
-	test/functional/bundlelist_v2/list-all.bats \
-	test/functional/bundlelist/deps-flat/test.bats \
-	test/functional/bundlelist_v2/list-deps-flat.bats \
-	test/functional/bundlelist/deps-invalid-bundle/test.bats \
-	test/functional/bundlelist_v2/list-deps-invalid-bundle.bats \
-	test/functional/bundlelist/deps-nested/test.bats \
-	test/functional/bundlelist_v2/list-deps-nested.bats \
-	test/functional/bundlelist/has-dep-nested/test.bats \
-	test/functional/bundlelist_v2/list-has-dep-nested.bats \
-	test/functional/bundlelist/has-dep-nested-not-installed/test.bats \
-	test/functional/bundlelist_v2/list-has-dep-nested-not-installed.bats \
-	test/functional/bundlelist/has-dep-nested-server/test.bats \
-	test/functional/bundlelist_v2/list-has-dep-nested-server.bats \
-	test/functional/bundlelist/no-deps/test.bats \
-	test/functional/bundlelist_v2/list-no-deps.bats \
-	test/functional/bundlelist/none-has-deps/test.bats \
-	test/functional/bundlelist_v2/list-none-has-deps.bats \
-	test/functional/bundlelist_v2/list-client-certificate.bats \
+	test/functional/bundlelist/list-all.bats \
+	test/functional/bundlelist/list-deps-flat.bats \
+	test/functional/bundlelist/list-deps-invalid-bundle.bats \
+	test/functional/bundlelist/list-deps-nested.bats \
+	test/functional/bundlelist/list-has-dep-nested.bats \
+	test/functional/bundlelist/list-has-dep-nested-not-installed.bats \
+	test/functional/bundlelist/list-has-dep-nested-server.bats \
+	test/functional/bundlelist/list-no-deps.bats \
+	test/functional/bundlelist/list-none-has-deps.bats \
+	test/functional/bundlelist/list-client-certificate.bats \
 	test/functional/bundleremove/boot-file/test.bats \
 	test/functional/bundleremove_v2/remove-boot-file.bats \
 	test/functional/bundleremove/include/test.bats \

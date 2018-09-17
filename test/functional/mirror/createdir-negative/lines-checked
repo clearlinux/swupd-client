@@ -1,3 +1,0 @@
-REGEXP:^.*/etc/swupd: not a directory$
-Unable to set mirror url
-Default version URL not found. Use the -v option instead.

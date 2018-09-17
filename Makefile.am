@@ -155,16 +155,9 @@ BATS = \
 	test/functional/hashdump/hashdump-file-hash.bats \
 	test/functional/mirror/mirror-createdir.bats \
 	test/functional/mirror/mirror-createdir-negative.bats \
-	test/functional/search/content-check-negfull-path/test.bats \
-	test/functional/search/content-check-neglibtest/test.bats \
-	test/functional/search_v2/search-content-check-negative.bats \
-	test/functional/search/content-check-posbin/test.bats \
-	test/functional/search/content-check-posebin/test.bats \
-	test/functional/search/content-check-posfull-path/test.bats \
-	test/functional/search/content-check-poslib32/test.bats \
-	test/functional/search/content-check-poslib64/test.bats \
-	test/functional/search_v2/search-content-check-positive.bats \
-	test/functional/search_v2/search-client-certificate.bats \
+	test/functional/search/search-content-check-negative.bats \
+	test/functional/search/search-content-check-positive.bats \
+	test/functional/search/search-client-certificate.bats \
 	test/functional/update/apply-full-file-delta/test.bats \
 	test/functional/update/boot-file/test.bats \
 	test/functional/update/boot-skip/test.bats \

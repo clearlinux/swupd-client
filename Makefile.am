@@ -152,9 +152,7 @@ BATS = \
 	test/functional/checkupdate/chk-update-version-match.bats \
 	test/functional/checkupdate/chk-update-client-certificate.bats \
 	test/functional/completion/completion-basic.bats \
-	test/functional/hashdump/file-hash/test.bats \
-	test/functional/hashdump/file-hash-no-path-prefix/test.bats \
-	test/functional/hashdump_v2/hashdump-file-hash.bats \
+	test/functional/hashdump/hashdump-file-hash.bats \
 	test/functional/mirror/createdir/test.bats \
 	test/functional/mirror_v2/mirror-createdir.bats \
 	test/functional/mirror/createdir-negative/test.bats \

@@ -136,21 +136,15 @@ BATS = \
 	test/functional/bundlelist/list-no-deps.bats \
 	test/functional/bundlelist/list-none-has-deps.bats \
 	test/functional/bundlelist/list-client-certificate.bats \
-	test/functional/bundleremove/boot-file/test.bats \
-	test/functional/bundleremove_v2/remove-boot-file.bats \
-	test/functional/bundleremove/include/test.bats \
-	test/functional/bundleremove_v2/remove-include.bats \
-	test/functional/bundleremove/include-nested/test.bats \
-	test/functional/bundleremove_v2/remove-include-nested.bats \
-	test/functional/bundleremove_v2/remove-os-core.bats \
-	test/functional/bundleremove/parse-args/test.bats \
-	test/functional/bundleremove_v2/remove-parse-args.bats \
-	test/functional/bundleremove/remove-file/test.bats \
-	test/functional/bundleremove_v2/remove-file.bats \
-	test/functional/bundleremove/remove-multiple/test.bats \
-	test/functional/bundleremove_v2/remove-multiple.bats \
-	test/functional/bundleremove_v2/remove-rc.bats \
-	test/functional/bundleremove_v2/remove-client-certificate.bats \
+	test/functional/bundleremove/remove-boot-file.bats \
+	test/functional/bundleremove/remove-include.bats \
+	test/functional/bundleremove/remove-include-nested.bats \
+	test/functional/bundleremove/remove-os-core.bats \
+	test/functional/bundleremove/remove-parse-args.bats \
+	test/functional/bundleremove/remove-file.bats \
+	test/functional/bundleremove/remove-multiple.bats \
+	test/functional/bundleremove/remove-rc.bats \
+	test/functional/bundleremove/remove-client-certificate.bats \
 	test/functional/checkupdate/new-version/test.bats \
 	test/functional/checkupdate_v2/chk-update-new-version.bats \
 	test/functional/checkupdate/no-server-content/test.bats \

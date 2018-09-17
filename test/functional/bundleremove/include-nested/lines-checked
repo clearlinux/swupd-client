@@ -1,9 +1,0 @@
-Error: bundle requested to be removed is required by the following bundles:
-format:
- # * is-required-by
- #   |-- is-required-by
- # * is-also-required-by
- # ...
-  * test-bundle2
-    |-- test-bundle3
-Failed to remove 1 of 1 bundles

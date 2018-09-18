@@ -147,6 +147,16 @@ print_stack() {
 
 }
 
+# when printing a message in a bats test, it is necessary
+# to use file descriptor 3, this wrapper function makes it
+# easier for users of the test library to print to screen
+print() {
+
+	local msg=$1
+	echo "$msg" >&3
+
+}
+
 terminate() {
 
 	# since the library could be sourced and run from an interactive shell

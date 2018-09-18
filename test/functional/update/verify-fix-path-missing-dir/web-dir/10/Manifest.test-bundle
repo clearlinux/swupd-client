@@ -1,9 +1,0 @@
-MANIFEST	3
-version:	10
-previous:	0
-filecount:	2
-timestamp:	1451936779
-contentsize:	17929151
-
-D...	6c27df6efcd6fc401ff1bc67c970b83eef115f6473db4fb9d57e5de317eba96e	10	/usr/bin
-F...	ddff5e545287e632581b82e371de5d4aac2c7eb50d7f357f3b66fb0fdca71dd9	10	/usr/bin/foo

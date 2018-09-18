@@ -1,9 +1,0 @@
-MANIFEST	3
-version:	10
-previous:	0
-filecount:	1
-timestamp:	1451936779
-contentsize:	17929151
-includes:	os-core
-
-F...	e56e570097c2932ff0454cb45ef37964c6a0792e0224013f9e1d837cc22aa9fa	10	/usr/foo2

@@ -1,9 +1,0 @@
-MANIFEST	3
-version:	100
-previous:	0
-filecount:	2
-timestamp:	1451940175
-contentsize:	0
-
-M...	94ffb3abc2ea498ab1d1d340535658d5adc46adedfa545a6ae8c94d4e68042e3	10	os-core
-M...	c18a84af84a01d15470bc2afb85d546d7f500685a224749d3fa787e25ccc338e	100	test-bundle

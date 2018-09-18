@@ -1,9 +1,0 @@
-MANIFEST	3
-version:	10
-previous:	0
-filecount:	2
-timestamp:	1451936779
-contentsize:	17929151
-
-D...	11251b2c86785c8f5a9328b372e42f9356bd6d1dd2ef4dcf431b8999b31c2e26	10	/usr/bin
-F...	c311a3c3d00f9b10a0aad810de58f66e40137bcc633e1115bd90389f8ae6bffc	10	/usr/share/defaults/swupd/format

@@ -1,9 +1,0 @@
-MANIFEST	3
-version:	10
-previous:	0
-filecount:	1
-timestamp:	1451936779
-contentsize:	17929151
-includes:	os-core
-
-F...	dead85caf9cf95df0f721254748df4717b4159513a3e0170ff5fa404dccc32e7	10	/test-bundle2

@@ -1,9 +1,0 @@
-MANIFEST	3
-version:	30
-previous:	20
-filecount:	2
-timestamp:	1451936779
-contentsize:	17929151
-
-F...	b85f1dc2c2317a20f47a36d3257313b131124ffa6d4f19bb060d43014fd386b0	20	/usr/share/clear/bundles/test-bundle2
-.g..	0000000000000000000000000000000000000000000000000000000000000000	30	/testfile

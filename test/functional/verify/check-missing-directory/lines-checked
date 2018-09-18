@@ -1,6 +1,0 @@
-Verifying version 10
-Verifying files
-REGEXP:^Hash mismatch for file: .*/target-dir/usr/bin$
-Inspected 1 files
-  1 files did not match
-Verify successful

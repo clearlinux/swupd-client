@@ -1,9 +1,0 @@
-NAME="Clear Linux Software for Intel Architecture"
-VERSION=1
-ID=clear-linux-os
-VERSION_ID='10'
-PRETTY_NAME="Clear Linux Software for Intel Architecture"
-ANSI_COLOR="1;35"
-HOME_URL="https://clearlinux.org"
-SUPPORT_URL="https://clearlinux.org"
-BUG_REPORT_URL="https://bugs.clearlinux.org/jira"

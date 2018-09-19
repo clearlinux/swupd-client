@@ -592,7 +592,7 @@ There are three different ignore list files that can be used (but only one can b
 to specify an ignore-list for only one particular test.
 - <functional_tests_directory>/<test_theme_directory>/ignore-list: this file is intended to
 be used as an ignore-list for a group of test cases that are similar (the same theme).
-- <functional_tests_directory>/ignore-list.global: this is a global ignore-list intended to be
+- <functional_tests_directory>/ignore-list: this is a global ignore-list intended to be
 used as a fallback for all tests.
 
 To disable the use of ignore lists you can use the *--identical* option with every assertion

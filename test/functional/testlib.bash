@@ -68,20 +68,31 @@ generate_certificate() {
 
 	local key_path=$1
 	local cert_path=$2
+	local config=$3
 
 	# If incorrect number of parameters are received show usage
-	if [ $# -ne 2 ]; then
+	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
 			    generate_certificate <key_path> <cert_path>
 			EOM
 		return
 	fi
+	validate_param "$key_path"
+	validate_param "$cert_path"
 
 	# generate self-signed public and private key
-	openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 \
-		-keyout "$key_path" -out "$cert_path" \
-		-subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost"
+	if [ -z "$config" ]; then
+		openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 \
+			-keyout "$key_path" -out "$cert_path" \
+			-subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost"
+	else
+		validate_item "$config"
+		openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 \
+			-keyout "$key_path" -out "$cert_path" \
+			-subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost" \
+			-config "$config"
+	fi
 
 }
 
@@ -2279,7 +2290,7 @@ use_ignore_list() {
 		elif [ -f "$THEME_DIRNAME"/ignore-list ]; then
 			ignore_list="$THEME_DIRNAME"/ignore-list
 		elif [ -f "$FUNC_DIR"/ignore-list ]; then
-			ignore_list="$FUNC_DIR"/ignore-list.global
+			ignore_list="$FUNC_DIR"/ignore-list
 		fi
 		while IFS= read -r line; do
 			# if the pattern from the file has a "/" escape it first so it does

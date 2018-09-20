@@ -154,6 +154,10 @@ BATS = \
 	test/functional/update/update-boot-file.bats \
 	test/functional/update/update-boot-skip.bats \
 	test/functional/update/update-client-certificate.bats \
+	test/functional/update/update-delta-manifest-invalid.bats \
+	test/functional/update/update-delta-manifest-no-iterative.bats \
+	test/functional/update/update-delta-manifest-and-full.bats \
+	test/functional/update/update-delta-manifest.bats \
 	test/functional/update/update-delta-without-rename-flag.bats \
 	test/functional/update/update-download.bats \
 	test/functional/update/update-include.bats \

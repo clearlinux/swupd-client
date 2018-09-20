@@ -41,6 +41,13 @@
 #define MAX_RETRIES 5
 #define RETRY_TIMEOUT 10
 
+// Wait time when curl has no fd in use in us (100ms)
+#define CURL_NOFD_WAIT 100000
+// Curl timeout in ms
+#define CURL_MULTI_TIMEOUT 500
+// Fixed window added to hysteresis upper bound before it is enforced.
+#define XFER_QUEUE_BUFFER 5
+
 /* This file provides a managed download facility for parallelizing download
  * files. To use this functionality, create a handler using
  * swupd_curl_parallel_download_start(), enqueue files using
@@ -306,18 +313,51 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 	return 0;
 }
 
-/* Fixed window added to hysteresis upper bound before it is enforced. */
-#define BUFFER 5
+static CURLMcode process_curl_multi_wait(CURLM *mcurl, bool *repeats)
+{
+	CURLMcode ret;
+	int numfds = 0;
 
-/* 2 limits, so that we can have hysteresis in behavior. We let the caller
- * add new transfer up until the queue reaches the high threshold. At this point
- * we don't return to the caller and instead process the queue until its len
- * gets below the low threshold */
+	ret = curl_multi_wait(mcurl, NULL, 0, CURL_MULTI_TIMEOUT, &numfds);
+
+	// If numfds is zero curl_multi_wait reached a timeout or there isn't
+	// any fd to process. The first ocurrence we assume it's a timeout.
+	// After that we assume we need to force a sleep before calling
+	// curl_multi_wait() again.
+	if (ret != CURLM_OK && !numfds) {
+		if (*repeats) {
+			usleep(CURL_NOFD_WAIT);
+		}
+		*repeats = true;
+	} else {
+		*repeats = false;
+	}
+
+	return ret;
+}
+
+/* Poll for downloads if the number of enqueued files are between the lower and
+  * higher limits so we can have hysteresis in behavior.
+  *
+  * If the number of scheduled downloads is lower than xfer_queue_high the
+  * function returns without processing the downloads.
+  *
+  * If the number of scheduled downloads is equal or higher than
+  * xfer_queue_high we will process downloads and wait until the length of the
+  * download queue is lower than xfer_queue_low.
+  *
+  * There's a protection to avoid having a download queue larger than
+  * xfer_queue_high + XFER_QUEUE_BUFFER in cases where curl doesn't have any
+  * data to process for any download. In this case we will return an error and
+  * the caller is in charge of setting the last download to be retried.
+  */
 static int poll_fewer_than(struct swupd_curl_parallel_handle *h, size_t xfer_queue_high, size_t xfer_queue_low)
 {
 	CURLMcode curlm_ret;
-	int running;
+	int running = 1;
+	bool repeats = false;
 
+	// Process pending curl writes and reads
 	curlm_ret = curl_multi_perform(h->mcurl, &running);
 	if (curlm_ret != CURLM_OK) {
 		return -1;
@@ -331,27 +371,11 @@ static int poll_fewer_than(struct swupd_curl_parallel_handle *h, size_t xfer_que
 	/* When the high bound for the hysteresis is reached, process events
 	 * until the low bound is reached */
 	while (h->mcurl_size > xfer_queue_low) {
-		int numfds = 0;
 
 		// Wait for activity on the multi-stack
-		curlm_ret = curl_multi_wait(h->mcurl, NULL, 0, 500, &numfds);
+		curlm_ret = process_curl_multi_wait(h->mcurl, &repeats);
 		if (curlm_ret != CURLM_OK) {
 			return -1;
-		}
-
-		/* Either a timeout was hit, or no events to process.
-		 * Note: curl_multi_wait() never sets numfds < 0 */
-		if (numfds == 0) {
-			curlm_ret = curl_multi_perform(h->mcurl, &running);
-			if (curlm_ret != CURLM_OK) {
-				return -1;
-			}
-
-			/* If there are no longer any transfers in progress,
-			 * there is no work left to do. */
-			if (running == 0) {
-				break;
-			}
 		}
 
 		// Do more work before processing the queue
@@ -368,10 +392,8 @@ static int poll_fewer_than(struct swupd_curl_parallel_handle *h, size_t xfer_que
 			return -1;
 		}
 
-		// Do more work, in preparation for the next curl_multi_wait()
-		curlm_ret = curl_multi_perform(h->mcurl, &running);
-		if (curlm_ret != CURLM_OK) {
-			return -1;
+		if (!running) {
+			break;
 		}
 	}
 
@@ -384,10 +406,10 @@ static int poll_fewer_than(struct swupd_curl_parallel_handle *h, size_t xfer_que
 	// attempted, with curl returning no progress each time, resulting in
 	// mcurl_size still being too large. If this condition occurs
 	// (exceeding xfer_queue_high + 1), do not return an error unless no
-	// activity is reported the next BUFFER times. When an error is
+	// activity is reported the next XFER_QUEUE_BUFFER times. When an error is
 	// returned, the most recent attempted transfer is added to the failed
 	// list, later to be retried.
-	if (xfer_queue_low != xfer_queue_high && h->mcurl_size > xfer_queue_high + 1 + BUFFER) {
+	if (xfer_queue_low != xfer_queue_high && h->mcurl_size > xfer_queue_high + XFER_QUEUE_BUFFER) {
 		return -1;
 	}
 

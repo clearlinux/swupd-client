@@ -221,7 +221,7 @@ extern void apply_heuristics(struct file *file);
 
 extern int file_sort_filename(const void *a, const void *b);
 extern int file_sort_filename_reverse(const void *a, const void *b);
-extern struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err);
+extern struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err, bool load_iterative);
 extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only);
 extern struct manifest *load_manifest_full(int version, bool mix);
 extern struct list *create_update_list(struct manifest *server);
@@ -335,7 +335,8 @@ extern long get_manifest_list_contentsize(struct list *manifests);
 extern struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server);
 extern struct list *consolidate_files(struct list *files);
 extern struct list *filter_out_existing_files(struct list *files);
-extern void filter_iterative_manifests(struct list *manifests, int version, struct list **full_manifests, struct list **iterative_manifests);
+extern void consolidate_manifests(struct list *manifests, int version, struct list **consolidated_manifests);
+extern void filter_update_manifests(struct list *update_subs, struct list *manifests, struct list **update_manifests);
 
 extern void populate_file_struct(struct file *file, char *filename);
 extern bool verify_file(struct file *file, char *filename);
@@ -396,6 +397,7 @@ extern char *get_printable_bundle_name(const char *bundle_name, bool is_experime
 struct list *free_list_file(struct list *item);
 struct list *free_bundle(struct list *item);
 extern void create_and_append_subscription(struct list **subs, const char *component);
+extern void filter_update_subscriptions(struct manifest *server_manifest, struct list *current_subs, int current_version, struct list **update_subs, struct list **nonupdate_subs);
 
 /* bundle.c */
 extern bool is_tracked_bundle(const char *bundle_name);

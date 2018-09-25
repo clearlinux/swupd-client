@@ -676,9 +676,9 @@ int verify_main(int argc, char **argv)
 	 * disable checks for mixer state so the user can easily switch back to their
 	 * normal update stream */
 	if (version != sys_version) {
-		official_manifest = load_mom(version, false, false, NULL);
+		official_manifest = load_mom(version, false, false, NULL, false);
 	} else {
-		official_manifest = load_mom(version, false, system_on_mix(), NULL);
+		official_manifest = load_mom(version, false, system_on_mix(), NULL, false);
 	}
 
 	if (!official_manifest) {

@@ -209,12 +209,16 @@ static int main_update()
 	int current_version = -1, server_version = -1;
 	int mix_current_version = -1, mix_server_version = -1;
 	struct manifest *current_manifest = NULL, *server_manifest = NULL;
-	struct list *iterative_manifests = NULL;
-	struct list *full_manifests = NULL;
-	struct list *original_manifests = NULL;
+	struct list *current_manifests = NULL;
+	struct list *server_manifests = NULL;
+	struct list *consolidated_manifests = NULL;
+	struct list *current_manifest_updates = NULL;
+	struct list *server_manifest_updates = NULL;
 	struct list *updates = NULL;
 	struct list *current_subs = NULL;
-	struct list *latest_subs = NULL;
+	struct list *initial_subs = NULL;
+	struct list *update_subs = NULL;
+	struct list *nonupdate_subs = NULL;
 	int ret;
 	int retries = 0;
 	int timeout = 10;
@@ -324,9 +328,9 @@ load_current_mom:
 
 	/* get the from/to MoM manifests */
 	if (system_on_mix()) {
-		current_manifest = load_mom(current_version, false, mix_exists, &manifest_err);
+		current_manifest = load_mom(current_version, false, mix_exists, &manifest_err, false);
 	} else {
-		current_manifest = load_mom(current_version, false, false, &manifest_err);
+		current_manifest = load_mom(current_version, false, false, &manifest_err, false);
 	}
 	if (!current_manifest) {
 		/* TODO: possibly remove this as not getting a "from" manifest is not fatal
@@ -347,9 +351,7 @@ load_current_mom:
 	timeout = 10;
 
 load_server_mom:
-	timelist_timer_stop(global_times); // Close step 2
-	timelist_timer_start(global_times, "Recurse and Consolidate Manifests");
-	server_manifest = load_mom(server_version, true, mix_exists, &manifest_err);
+	server_manifest = load_mom(server_version, true, mix_exists, &manifest_err, true);
 	if (!server_manifest) {
 		if (manifest_err == -ENET404 || manifest_err == -ENOENT) {
 			fprintf(stderr, "The server MoM manifest was not found\n");
@@ -366,17 +368,49 @@ load_server_mom:
 	retries = 0;
 	timeout = 10;
 
-	/* Replace the server manifests with the list that includes the iterative manifests */
-	original_manifests = server_manifest->manifests;
-	filter_iterative_manifests(server_manifest->manifests, current_version, &full_manifests, &iterative_manifests);
-	server_manifest->manifests = iterative_manifests;
+	/* Backup the original manifests */
+	current_manifests = current_manifest->manifests;
+	server_manifests = server_manifest->manifests;
 
+	/* Consolidate the list of manifests in the server so there is only one manifest per bundle,
+	 * the manifest should be an iterative preferable if applicable, else use full manifest */
+	consolidate_manifests(server_manifest->manifests, current_version, &consolidated_manifests);
+	server_manifest->manifests = consolidated_manifests;
+
+	/* Get a list of subscribed bundles that need to be updated */
+	filter_update_subscriptions(server_manifest, current_subs, current_version, &update_subs, &nonupdate_subs);
+	initial_subs = list_clone(update_subs);
+
+	/* The new subscription is seeded from the list of currently installed bundles
+	* This calls add_subscriptions which recurses for new includes */
+	timelist_timer_start(global_times, "Add Included Manifests");
+	ret = add_included_manifests(server_manifest, &update_subs);
+	timelist_timer_stop(global_times);
+	if (ret) {
+		if (ret == -add_sub_BADNAME) {
+			/* this means a bundle(s) was removed in a future version */
+			printf("WARNING: One or more installed bundles are no longer available at version %d.\n",
+			       server_version);
+		} else {
+			ret = EMANIFEST_LOAD;
+			goto clean_exit;
+		}
+	}
+
+	/* Create lists that only contain manifests to be updated/installed */
+	filter_update_manifests(update_subs, current_manifest->manifests, &current_manifest_updates);
+	filter_update_manifests(update_subs, consolidated_manifests, &server_manifest_updates);
+	current_manifest->manifests = current_manifest_updates;
+	server_manifest->manifests = server_manifest_updates;
+
+	timelist_timer_stop(global_times); // Close step 2
+	timelist_timer_start(global_times, "Recurse and Consolidate Manifests");
 load_current_submanifests:
 	/* Read the current collective of manifests that we are subscribed to.
 	 * First load up the old (current) manifests. Statedir could have been cleared
 	 * or corrupt, so don't assume things are already there. Updating subscribed
 	 * manifests is done as part of recurse_manifest */
-	current_manifest->submanifests = recurse_manifest(current_manifest, current_subs, NULL, false);
+	current_manifest->submanifests = recurse_manifest(current_manifest, initial_subs, NULL, false);
 	if (!current_manifest->submanifests) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
@@ -394,29 +428,12 @@ load_current_submanifests:
 	current_manifest->files = files_from_bundles(current_manifest->submanifests);
 	current_manifest->files = consolidate_files(current_manifest->files);
 
-	latest_subs = list_clone(current_subs);
-	set_subscription_versions(server_manifest, current_manifest, &latest_subs);
-	link_submanifests(current_manifest, server_manifest, current_subs, latest_subs, false);
-
-	/* The new subscription is seeded from the list of currently installed bundles
-	 * This calls add_subscriptions which recurses for new includes */
-	timelist_timer_start(global_times, "Add Included Manifests");
-	ret = add_included_manifests(server_manifest, &latest_subs);
-	timelist_timer_stop(global_times);
-	if (ret) {
-		if (ret == -add_sub_BADNAME) {
-			/* this means a bundle(s) was removed in a future version */
-			printf("WARNING: One or more installed bundles are no longer available at version %d.\n",
-			       server_version);
-		} else {
-			ret = EMANIFEST_LOAD;
-			goto clean_exit;
-		}
-	}
+	set_subscription_versions(server_manifest, current_manifest, &update_subs);
+	link_submanifests(current_manifest, server_manifest, initial_subs, initial_subs, false);
 
 load_server_submanifests:
 	/* read the new collective of manifests that we are subscribed to in the new MoM */
-	server_manifest->submanifests = recurse_manifest(server_manifest, latest_subs, NULL, false);
+	server_manifest->submanifests = recurse_manifest(server_manifest, update_subs, NULL, false);
 	if (!server_manifest->submanifests) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
@@ -431,11 +448,10 @@ load_server_submanifests:
 	timeout = 10;
 	/* consolidate the new collective manifests down into one in memory */
 	server_manifest->files = files_from_bundles(server_manifest->submanifests);
-
 	server_manifest->files = consolidate_files(server_manifest->files);
 
-	set_subscription_versions(server_manifest, current_manifest, &latest_subs);
-	link_submanifests(current_manifest, server_manifest, current_subs, latest_subs, true);
+	set_subscription_versions(server_manifest, current_manifest, &update_subs);
+	link_submanifests(current_manifest, server_manifest, initial_subs, update_subs, true);
 
 	/* prepare for an update process based on comparing two in memory manifests */
 	link_manifests(current_manifest, server_manifest);
@@ -447,7 +463,7 @@ load_server_submanifests:
 
 	/* Step 5: get the packs and untar */
 	timelist_timer_start(global_times, "Download Packs");
-	download_subscribed_packs(latest_subs, server_manifest, false);
+	download_subscribed_packs(update_subs, server_manifest, false);
 	timelist_timer_stop(global_times);
 
 	timelist_timer_start(global_times, "Apply deltas");
@@ -511,9 +527,12 @@ load_server_submanifests:
 clean_exit:
 	list_free_list(updates);
 	server_manifest->manifests = NULL;
-	list_free_list_and_data(original_manifests, free_file_data);
-	list_free_list(iterative_manifests);
-	list_free_list(full_manifests);
+	current_manifest->manifests = NULL;
+	list_free_list_and_data(current_manifests, free_file_data);
+	list_free_list_and_data(server_manifests, free_file_data);
+	list_free_list(consolidated_manifests);
+	list_free_list(current_manifest_updates);
+	list_free_list(server_manifest_updates);
 	free_manifest(current_manifest);
 	free_manifest(server_manifest);
 
@@ -541,17 +560,19 @@ clean_curl:
 	if (re_update) {
 		versions_match = version_files_consistent();
 	}
-	if (latest_subs) {
-		list_free_list(current_subs);
-	} else {
-		free_subscriptions(&current_subs);
-	}
+
 	/* clean up our cached content from the update. It is likely much more than
 	 * we need and the clean helps us prevent cache bloat. */
 	if (!keepcache) {
 		clean_statedir(false, false);
 	}
-	free_subscriptions(&latest_subs);
+
+	/* clean the list of subscriptions */
+	list_free_list(current_subs);
+	list_free_list(initial_subs);
+	free_subscriptions(&update_subs);
+	free_subscriptions(&nonupdate_subs);
+
 	swupd_deinit();
 
 	if (ret == 0) {

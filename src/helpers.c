@@ -661,6 +661,16 @@ char *strdup_or_die(const char *const str)
 	return result;
 }
 
+char *strndup_or_die(const char *const str, size_t size)
+{
+	char *result;
+
+	result = strndup(str, size);
+	ON_NULL_ABORT(result);
+
+	return result;
+}
+
 void string_or_die(char **strp, const char *fmt, ...)
 {
 	va_list ap;

@@ -377,6 +377,7 @@ extern int strtoi_err(const char *str, int *value);
 extern int strtoi_err_endptr(const char *str, char **endptr, int *value);
 extern void string_or_die(char **strp, const char *fmt, ...);
 char *strdup_or_die(const char *const str);
+char *strndup_or_die(const char *const str, size_t size);
 extern void free_string(char **s);
 void update_motd(int new_release);
 void delete_motd(void);

@@ -90,7 +90,7 @@ static struct manifest *alloc_manifest(int version, char *component)
 	return manifest;
 }
 
-static struct manifest *manifest_from_file(int version, char *component, bool header_only, bool latest, bool is_mix)
+static struct manifest *manifest_from_file(int version, char *component, bool header_only, bool latest, bool is_mix, bool load_iterative)
 {
 	FILE *infile;
 	char line[MANIFEST_LINE_MAXLEN], *c, *c2;
@@ -251,6 +251,11 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		} else if (c[0] == 'M') {
 			file->is_manifest = 1;
 		} else if (c[0] == 'I') {
+			/* only load iterative manifests when enabled*/
+			if (!load_iterative) {
+				free(file);
+				continue;
+			}
 			file->is_manifest = 1;
 			file->is_iterative = 1;
 		} else if (c[0] != '.') { /* unknown file type */
@@ -327,12 +332,16 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		if (file->is_iterative == 1) {
 			char *ptr;
 			ptr = strrchr(file->filename, '.');
-			if (ptr != NULL) {
-				/* Keep only the bundle name from the file name, the filename should be
-				 * something similar to bundle-name.I.20 */
-				file->bundlename = strndup_or_die(file->filename, ptr - file->filename - 2);
-				file->from_version = atoi(ptr + 1);
+			/* the filename should be something similar to bundle-name.I.20, if it is
+			 * not, drop the iterative manifest */
+			if (ptr == NULL || strncmp(ptr - 2, ".I", 2) != 0 || atoi(ptr + 1) == 0) {
+				free_string(&file->filename);
+				free(file);
+				continue;
 			}
+			/* Keep only the bundle name from the file name */
+			file->bundlename = strndup_or_die(file->filename, ptr - file->filename - 2);
+			file->from_version = atoi(ptr + 1);
 		} else {
 			file->bundlename = strdup_or_die(c);
 		}
@@ -574,7 +583,7 @@ static void remove_manifest_files(char *filename, int version, char *hash)
 
 struct manifest *load_mom(int version, bool latest, bool mix_exists)
 {
-	return load_mom_err(version, latest, mix_exists, NULL);
+	return load_mom_err(version, latest, mix_exists, NULL, false);
 }
 
 /* Loads the MoM (Manifest of Manifests) for VERSION.
@@ -589,7 +598,7 @@ struct manifest *load_mom(int version, bool latest, bool mix_exists)
  * loaded into memory, this function will return NULL. If err is passed, it is set
  * with the error code.
  */
-struct manifest *load_mom_err(int version, bool latest, bool mix_exists, int *err)
+struct manifest *load_mom_err(int version, bool latest, bool mix_exists, int *err, bool load_iterative)
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
@@ -610,7 +619,7 @@ verify_mom:
 		return NULL;
 	}
 
-	manifest = manifest_from_file(version, "MoM", false, latest, mix_exists);
+	manifest = manifest_from_file(version, "MoM", false, latest, mix_exists, load_iterative);
 
 	if (manifest == NULL) {
 		if (retried == false) {
@@ -707,9 +716,7 @@ retry_load:
 		if (file->is_iterative == 1 && file->full_manifest && !retried) {
 			/* Since the iterative manifest failed to be loaded,
 			 * fall back to using the full manifest */
-			file->full_manifest->peer = file->peer;
 			file = file->full_manifest;
-			file->peer->peer = file;
 			retried = true;
 			goto retry_load;
 		}
@@ -730,7 +737,7 @@ retry_load:
 		return NULL;
 	}
 
-	manifest = manifest_from_file(version, file->filename, header_only, false, file->is_mix);
+	manifest = manifest_from_file(version, file->filename, header_only, false, file->is_mix, false);
 
 	if (manifest == NULL) {
 		if (retried == false) {
@@ -759,7 +766,7 @@ struct manifest *load_manifest_full(int version, bool mix)
 		return NULL;
 	}
 
-	manifest = manifest_from_file(version, "full", false, false, false);
+	manifest = manifest_from_file(version, "full", false, false, false, false);
 
 	if (manifest == NULL) {
 		fprintf(stderr, "Failed to load %d Manifest.full\n", version);
@@ -1428,36 +1435,55 @@ int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize,
 
 /* The function splits a list of manifests into two lists:
  * - full_manifests: this list will contain all the full manifests that were in the manifests list
- * - iterative_manifests: this list will contain all the valid iterative manifests from the manifests
+ * - consolidated_manifests: this list will contain all the valid iterative manifests from the manifests
  *   list, plus the full manifest of those bundles that didn't have a valid iterative manifest
  *   A valid iterative manifest is one that can be used during an update, meaning that the iterative
  *   manifest must match the "from version" provided, and that it belongs to an already installed bundle*/
-void filter_iterative_manifests(struct list *manifests, int version, struct list **full_manifests, struct list **iterative_manifests)
+void consolidate_manifests(struct list *manifests, int version, struct list **consolidated_manifests)
 {
-	/* Split the manifests into "iterative manifests" and "full manifests" */
+	struct list *full_manifests = NULL;
 	struct list *list;
 	struct file *file;
 
+	/* Split the manifests into "iterative manifests" and "full manifests" */
 	for (list = manifests; list; list = list->next) {
 		file = list->data;
 		/* Keep only iterative manifests that are from the specified version and that are
 		 * already installed */
-		if (file->is_iterative == 1 && file->from_version == version && is_tracked_bundle(file->bundlename)) {
-			*iterative_manifests = list_prepend_data(*iterative_manifests, file);
+		if (file->is_iterative == 1 && file->from_version <= version && is_tracked_bundle(file->bundlename)) {
+			*consolidated_manifests = list_prepend_data(*consolidated_manifests, file);
 		} else if (file->is_iterative != 1) {
-			*full_manifests = list_prepend_data(*full_manifests, file);
+			full_manifests = list_prepend_data(full_manifests, file);
 		}
 	}
 
 	/* Add the full manifest of those bundles that do not have a valid iterative manifest
-	* into the list of iterative_manifests */
-	for (list = *full_manifests; list; list = list->next) {
+	* into the list of consolidated_manifests */
+	for (list = full_manifests; list; list = list->next) {
 		file = list->data;
-		if (!search_bundle_in_manifests(*iterative_manifests, file->bundlename)) {
-			*iterative_manifests = list_prepend_data(*iterative_manifests, file);
+		if (!search_bundle_in_manifests(*consolidated_manifests, file->bundlename)) {
+			*consolidated_manifests = list_prepend_data(*consolidated_manifests, file);
 		}
 	}
 
 	/* link the iterative manifest with its related full manifest */
-	link_iterative_manifests(*iterative_manifests, *full_manifests);
+	link_iterative_manifests(*consolidated_manifests, full_manifests);
+
+	list_free_list(full_manifests);
+}
+
+/* filters a list of manifests so they only include manifests needed for an update */
+void filter_update_manifests(struct list *update_subs, struct list *manifests, struct list **update_manifests)
+{
+	struct list *list;
+	struct file *file;
+	struct sub *sub;
+
+	for (list = update_subs; list; list = list->next) {
+		sub = list->data;
+		file = search_bundle_in_manifests(manifests, sub->component);
+		if (file) {
+			*update_manifests = list_prepend_data(*update_manifests, file);
+		}
+	}
 }

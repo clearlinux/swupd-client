@@ -176,3 +176,29 @@ void create_and_append_subscription(struct list **subs, const char *component)
 	sub->oldversion = 0;
 	*subs = list_prepend_data(*subs, sub);
 }
+
+/* Separates a list of subscriptions into two, one list will contain all the subscriptions of
+ * bundles that need to be updated, and the other one will contain the rest of the subscriptions */
+void filter_update_subscriptions(struct manifest *server_manifest, struct list *current_subs, int current_version, struct list **update_subs, struct list **nonupdate_subs)
+{
+	struct list *manifests;
+	struct list *subs;
+	struct file *manifest;
+	struct sub *sub;
+
+	for (subs = current_subs; subs; subs = subs->next) {
+		sub = subs->data;
+		for (manifests = server_manifest->manifests; manifests; manifests = manifests->next) {
+			manifest = manifests->data;
+			/* Keep only manifests that changed and that are installed */
+			if (strcmp(manifest->bundlename, sub->component) == 0) {
+				if (manifest->last_change > current_version) {
+					*update_subs = list_prepend_data(*update_subs, sub);
+				} else {
+					*nonupdate_subs = list_prepend_data(*nonupdate_subs, sub);
+				}
+				break;
+			}
+		}
+	}
+}

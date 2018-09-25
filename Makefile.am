@@ -172,6 +172,7 @@ BATS = \
 	test/functional/update/update-include-old-bundle-with-tracked-file.bats \
 	test/functional/update/update-iterative.bats \
 	test/functional/update/update-iterative-and-full.bats \
+	test/functional/update/update-iterative-bad-name.bats \
 	test/functional/update/update-iterative-download-fail.bats \
 	test/functional/update/update-iterative-has-dependency.bats \
 	test/functional/update/update-iterative-has-new-dependency.bats \

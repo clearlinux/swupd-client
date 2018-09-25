@@ -330,7 +330,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 			if (ptr != NULL) {
 				/* Keep only the bundle name from the file name, the filename should be
 				 * something similar to bundle-name.I.20 */
-				file->bundlename = strndup(file->filename, ptr - file->filename - 2);
+				file->bundlename = strndup_or_die(file->filename, ptr - file->filename - 2);
 				file->from_version = atoi(ptr + 1);
 			}
 		} else {

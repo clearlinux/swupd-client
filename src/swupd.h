@@ -375,6 +375,7 @@ extern void swupd_deinit(void);
 extern int swupd_init(void);
 extern void string_or_die(char **strp, const char *fmt, ...);
 char *strdup_or_die(const char *const str);
+char *strndup_or_die(const char *const str, size_t size);
 extern void free_string(char **s);
 void update_motd(int new_release);
 void delete_motd(void);

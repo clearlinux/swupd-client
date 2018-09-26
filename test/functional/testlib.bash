@@ -423,6 +423,72 @@ create_tar() {
 
 }
 
+# Inside the version directory that matches the minversion, update the MoM, bundle manifests, and
+# fullfiles for the minversion update.
+# Parameters:
+# - minversion: new minversion.
+update_minversion() {
+	local minversion=$1
+	local minversion_dir="$WEBDIR"/"$minversion"
+	local line
+	local bundle
+	local version
+
+	# Read the MoM in the minversion's directory to determine bundles that need updates
+	while read line; do
+		# Header fields will not have an integer in 3rd column, so they will be skipped
+		version=$(echo "$line" | awk '{print $3;}')
+		if [[ ! "$version" =~ ^[0-9]+$ ]]; then
+			continue
+		fi
+
+		# Copy bundles older than the minversion to the minversion directory
+		bundle=$(echo "$line" | awk '{print $4;}')
+		if [ "$version" -lt "$minversion" ]; then
+			sudo cp "$WEBDIR"/"$version"/Manifest."$bundle" "$minversion_dir"
+		fi
+
+		# Copy old fullfiles from bundle manifests and update their versions to
+		# reflect the new minversion
+		update_bundle_minversion "$bundle" "$minversion"
+
+	done < "$minversion_dir"/Manifest.MoM
+
+	# Update manifest hashes/versions in MoM
+	update_manifest "$minversion_dir"/Manifest.MoM minversion "$minversion"
+}
+
+# Copy fullfiles with versions changed by a minversion update to the minversion directory. Also
+# update the file versions in the bundle that are older than the minversion to the minversion.
+# Parameters:
+# - bundle: name of bundle
+# - minversion: new minversion
+update_bundle_minversion() {
+	local bundle=$1
+	local minversion=$2
+	local minversion_dir="$WEBDIR"/"$minversion"
+	local file_version
+
+	while read line; do
+		# Header fields will not have an integer in 3rd column, so they will be skipped
+		file_version=$(echo "$line" | awk '{print $3;}')
+		if [[ ! "$file_version" =~ ^[0-9]+$ ]]; then
+			continue
+		fi
+
+		# Copy fullfiles that changed in older versions to minversion
+		file_hash=$(echo "$line" | awk '{print $2;}')
+		if [ "$file_version" -lt "$minversion" ]; then
+			sudo cp "$WEBDIR"/"$file_version"/files/"$file_hash" "$minversion_dir"/files/
+			sudo cp "$WEBDIR"/"$file_version"/files/"$file_hash".tar "$minversion_dir"/files/
+		fi
+
+	done < "$minversion_dir"/Manifest."$bundle"
+
+	# Update versions in bundle manifest
+	update_manifest "$minversion_dir"/Manifest."$bundle" minversion "$minversion"
+}
+
 # Creates an empty manifest in the specified path
 # Parameters:
 # - PATH: the path where the manifest will be created
@@ -433,6 +499,7 @@ create_manifest() {
 	local path=$1
 	local name=$2
 	local format=${3:-1}
+	local minversion="0"
 	local version
 
 	# If no parameters are received show usage
@@ -450,6 +517,11 @@ create_manifest() {
 	{
 		printf 'MANIFEST\t%s\n' "$format"
 		printf 'version:\t%s\n' "$version"
+
+		if [ "$name" = "MoM" ]; then
+			printf 'minversion:\t%s\n' "$minversion"
+		fi
+
 		printf 'previous:\t0\n'
 		printf 'filecount:\t0\n'
 		printf 'timestamp:\t%s\n' "$(date +"%s")"
@@ -735,11 +807,12 @@ update_manifest() {
 	local key=$2
 	local var=$3
 	local value=$4
+	local manifest_version
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    update_manifest [-p] <manifest> <format | version | previous | filecount | timestamp | contentsize> <new_value>
+			    update_manifest [-p] <manifest> <format | minversion | version | previous | filecount | timestamp | contentsize> <new_value>
 			    update_manifest [-p] <manifest> <file-status | file-hash | file-version | file-name> <file_hash or file_name> <new_value>
 
 			Options:
@@ -762,6 +835,18 @@ update_manifest() {
 		;;
 	version | previous | filecount | timestamp | contentsize)
 		sudo sed -i "s/^$key:.*/$key:\\t$var/" "$manifest"
+		;;
+	minversion)
+		# Update minversion field which should only exist in MoM
+		sudo sed -i "s/^$key:.*/$key:\\t$var/" "$manifest"
+
+		# Replace manifest version when older than minversion
+		manifest_version=$(awk '/^version:/ {print $2}' "$manifest")
+		if [ "$manifest_version" -lt "$var" ]; then
+			sudo sed -i "/^version:\t/ s/[0-9]\+/$var/" "$manifest"
+		fi
+		# Replace file versions with minversion when less than minversion
+		sudo gawk -i inplace -v var="$var" '{if($3 != "" && $3<var) {$3=var} print }' OFS="\t" "$manifest"
 		;;
 	file-status)
 		validate_param "$value"

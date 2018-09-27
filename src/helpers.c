@@ -726,14 +726,14 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 	 * eg. Path /usr/bin/foo will be broken into /usr,/usr/bin and /usr/bin/foo
 	 */
 	while (strcmp(path, "/") != 0) {
-		path_list = list_prepend_data(path_list, strdup_or_die(path));
+		path_list = list_prepend(path_list, strdup_or_die(path));
 		tmp = strdup_or_die(dirname(path));
 		free_string(&path);
 		path = tmp;
 	}
 	free_string(&path);
 
-	list1 = list_head(path_list);
+	list1 = path_list;
 	while (list1) {
 		path = list1->data;
 		list1 = list1->next;
@@ -815,7 +815,7 @@ struct list *files_from_bundles(struct list *bundles)
 	struct list *list;
 	struct manifest *bundle;
 
-	list = list_head(bundles);
+	list = bundles;
 	while (list) {
 		struct list *bfiles;
 		bundle = list->data;
@@ -859,7 +859,7 @@ bool string_in_list(char *string_to_check, struct list *list_to_check)
 {
 	struct list *iter;
 
-	iter = list_head(list_to_check);
+	iter = list_to_check;
 	while (iter) {
 		if (strncmp(iter->data, string_to_check, strlen(string_to_check)) == 0) {
 			return true;

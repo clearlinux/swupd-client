@@ -108,7 +108,7 @@ bool hashmap_put(struct hashmap *hashmap, void *data)
 			return false;
 		}
 	}
-	*items = list_prepend_data(*items, data);
+	*items = list_prepend(*items, data);
 
 	return true;
 }
@@ -122,11 +122,7 @@ static struct list *hashmap_get_internal(struct hashmap *hashmap, const void *ke
 		if (hashmap->equal(key, i->data) == 0) {
 			void *data = i->data;
 			if (remove) {
-				//If it's the first element of the list, update head
-				if (i == *items) {
-					*items = i->next;
-				}
-				list_free_item(i, NULL);
+				list_free_item_list(items, i, NULL);
 			}
 			return data;
 		}

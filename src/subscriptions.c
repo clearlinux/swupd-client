@@ -34,7 +34,7 @@
 
 struct list *subs;
 
-static void free_subscription_data(void *data)
+void free_subscription_data(void *data)
 {
 	struct sub *sub = (struct sub *)data;
 
@@ -46,11 +46,6 @@ void free_subscriptions(struct list **subs)
 {
 	list_free_list_and_data(*subs, free_subscription_data);
 	*subs = NULL;
-}
-
-struct list *free_bundle(struct list *item)
-{
-	return list_free_item(item, free_subscription_data);
 }
 
 struct list *free_list_file(struct list *item)
@@ -120,7 +115,7 @@ int component_subscribed(struct list *subs, char *component)
 	struct list *list;
 	struct sub *sub;
 
-	list = list_head(subs);
+	list = subs;
 	while (list) {
 		sub = list->data;
 		list = list->next;
@@ -144,7 +139,7 @@ void set_subscription_versions(struct manifest *latest, struct manifest *current
 	struct file *file;
 	struct sub *sub;
 
-	list = list_head(*subs);
+	list = *subs;
 	while (list) {
 		sub = list->data;
 		list = list->next;
@@ -174,5 +169,5 @@ void create_and_append_subscription(struct list **subs, const char *component)
 
 	sub->version = 0;
 	sub->oldversion = 0;
-	*subs = list_prepend_data(*subs, sub);
+	*subs = list_prepend(*subs, sub);
 }

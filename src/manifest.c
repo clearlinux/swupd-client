@@ -193,7 +193,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		}
 		if (latest && strncmp(component, "MoM", 3) == 0) {
 			if (strncmp(line, "actions:", 8) == 0) {
-				post_update_actions = list_prepend_data(post_update_actions, strdup_or_die(c));
+				post_update_actions = list_prepend(post_update_actions, strdup_or_die(c));
 				if (!post_update_actions->data) {
 					fprintf(stderr, "WARNING: Unable to read post update action from Manifest.MoM. \
 							Another update or verify may be required.\n");
@@ -201,7 +201,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 			}
 		}
 		if (strncmp(line, "includes:", 9) == 0) {
-			includes = list_prepend_data(includes, strdup_or_die(c));
+			includes = list_prepend(includes, strdup_or_die(c));
 		}
 	}
 
@@ -331,10 +331,10 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		}
 
 		if (file->is_manifest) {
-			manifest->manifests = list_prepend_data(manifest->manifests, file);
+			manifest->manifests = list_prepend(manifest->manifests, file);
 		} else {
 			file->is_tracked = 1;
-			manifest->files = list_prepend_data(manifest->files, file);
+			manifest->files = list_prepend(manifest->files, file);
 		}
 		count++;
 	}
@@ -773,7 +773,7 @@ struct list *create_update_list(struct manifest *server)
 
 	update_count = 0;
 	update_skip = 0;
-	list = list_head(server->files);
+	list = server->files;
 	while (list) {
 		struct file *file;
 		file = list->data;
@@ -810,7 +810,7 @@ struct list *create_update_list(struct manifest *server)
 			/* check if we need to run scripts/update the bootloader/etc */
 			apply_heuristics(file);
 
-			output = list_prepend_data(output, file);
+			output = list_prepend(output, file);
 			continue;
 		}
 	}
@@ -829,8 +829,8 @@ void link_manifests(struct manifest *m1, struct manifest *m2)
 	m1->files = list_sort(m1->files, file_sort_filename);
 	m2->files = list_sort(m2->files, file_sort_filename);
 
-	list1 = list_head(m1->files);
-	list2 = list_head(m2->files);
+	list1 = m1->files;
+	list2 = m2->files;
 
 	while (list1 && list2) { /* m1/file1 matches m2/file2 */
 		int ret;
@@ -886,8 +886,8 @@ void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *su
 	m1->manifests = list_sort(m1->manifests, file_sort_filename);
 	m2->manifests = list_sort(m2->manifests, file_sort_filename);
 
-	list1 = list_head(m1->manifests);
-	list2 = list_head(m2->manifests);
+	list1 = m1->manifests;
+	list2 = m2->manifests;
 
 	while (list1 && list2) { /* m1/file1 matches m2/file2 */
 		int ret;
@@ -985,7 +985,7 @@ struct list *recurse_manifest(struct manifest *manifest, struct list *subs, cons
 			return NULL;
 		}
 		if (sub != NULL) {
-			bundles = list_prepend_data(bundles, sub);
+			bundles = list_prepend(bundles, sub);
 		}
 	}
 
@@ -1012,7 +1012,7 @@ struct list *consolidate_files(struct list *files)
 	 * there are Manifest invariants to maintain.
 	 * Note that "file" may be a file, directory or symlink.
 	 */
-	list = list_head(files);
+	list = files;
 	while (list) {
 		next = list->next;
 		if (next == NULL) {
@@ -1093,7 +1093,7 @@ struct list *consolidate_files(struct list *files)
 		}
 	}
 
-	return list;
+	return list_head(list);
 }
 
 /*
@@ -1103,28 +1103,24 @@ struct list *consolidate_files(struct list *files)
  */
 struct list *filter_out_existing_files(struct list *files)
 {
-	struct list *list, *next, *ret;
+	struct list *iter, *cur_item;
 	struct file *file;
 	char *filename;
 
-	ret = files;
-
-	list = list_head(files);
-	while (list) {
-		next = list->next;
-
-		file = list->data;
+	iter = files;
+	while (iter) {
+		cur_item = iter;
+		file = iter->data;
+		iter = iter->next;
 
 		filename = mk_full_filename(path_prefix, file->filename);
 		if (verify_file_lazy(filename)) {
-			ret = list_free_item(list, NULL);
+			list_free_item_list(&files, cur_item, NULL);
 		}
 		free_string(&filename);
-
-		list = next;
 	}
 
-	return ret;
+	return files;
 }
 
 void populate_file_struct(struct file *file, char *filename)
@@ -1180,7 +1176,7 @@ void remove_files_in_manifest_from_fs(struct manifest *m)
 	char *fullfile = NULL;
 	int count = 0;
 
-	iter = list_head(m->files);
+	iter = m->files;
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
@@ -1211,17 +1207,15 @@ void remove_files_in_manifest_from_fs(struct manifest *m)
 *  need to allocate new manifest file list, and since it frees duplicates here,
 *  it does not need to free more elements later.
 */
-void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2)
+void deduplicate_files_from_manifest(struct manifest *m1, struct manifest *m2)
 {
-	struct list *iter1, *iter2, *cur_file, *preserver = NULL;
+	struct list *iter1, *iter2, *cur_file;
 	struct file *file1, *file2 = NULL;
-	struct manifest *bmanifest = NULL;
 	int ret;
 	int count = 0;
 
-	bmanifest = *m1;
-	iter1 = preserver = list_head(bmanifest->files);
-	iter2 = list_head(m2->files);
+	iter1 = m1->files;
+	iter2 = m2->files;
 
 	while (iter1 && iter2) {
 		file1 = iter1->data;
@@ -1237,22 +1231,19 @@ void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2)
 			if (!file1->is_deleted && file2->is_deleted) {
 				continue;
 			}
-			preserver = free_list_file(cur_file);
+			list_free_item_list(&m1->files, cur_file, free_file_data);
 			count++;
 		} else if (ret < 0) {
 			iter1 = iter1->next;
 			/* file already deleted, pull it out of the list */
 			if (file1->is_deleted) {
-				preserver = free_list_file(cur_file);
+				list_free_item_list(&m1->files, cur_file, free_file_data);
 				count++;
 			}
 		} else {
 			iter2 = iter2->next;
 		}
 	}
-
-	/* give me back my list pointer */
-	bmanifest->files = preserver;
 }
 
 struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bundlename)
@@ -1260,7 +1251,7 @@ struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bu
 	struct list *iter = NULL;
 	struct file *file;
 
-	iter = list_head(manifest->manifests);
+	iter = manifest->manifests;
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
@@ -1278,7 +1269,7 @@ struct file *search_file_in_manifest(struct manifest *manifest, const char *file
 	struct list *iter = NULL;
 	struct file *file;
 
-	iter = list_head(manifest->files);
+	iter = manifest->files;
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
@@ -1308,7 +1299,7 @@ struct file **manifest_files_to_array(struct manifest *manifest)
 	array = malloc(sizeof(struct file *) * numfiles);
 	ON_NULL_ABORT(array);
 
-	iter = list_head(manifest->files);
+	iter = manifest->files;
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;

@@ -3,6 +3,13 @@
 
 #include <stdlib.h>
 
+/* Doubly linked list implementation for swupd.
+ *
+ * Note: All functions of this library will execute what is described starting
+ * from the element that is pointed by list pointer and NULL is considered an
+ * empty list.
+ */
+
 struct list {
 	void *data;
 	struct list *prev;
@@ -11,13 +18,29 @@ struct list {
 
 typedef int (*comparison_fn_t)(const void *a, const void *b);
 typedef void (*list_free_data_fn_t)(void *data);
+typedef void* (*list_clone_data_fn_t)(void *data);
 
-/* creates a new list item, store data, and inserts item in list (which can
- * be NULL). Returns created link, or NULL if failure. Created link can be
- * used as the list parameter to efficiently append new elements without
- * having to traverse the whole list to find the last one. */
-struct list *list_append_data(struct list *list, void *data);
-struct list *list_prepend_data(struct list *list, void *data);
+/* Creates a new list item, store data and append it to the end of the list.
+ *
+ * Returns the a pointer to the list with the added element.
+ * Note: This function is O(n), so avoid this. Prefer using list_insert_after()
+ * Or list_prepend()
+ */
+struct list *list_append(struct list *list, void *data);
+
+/* Creates a new list item, store data and insert it to the list just after
+ * the node pointed by list.
+ *
+ * Returns A pointer to the new inserted element.
+ */
+struct list *list_insert_after(struct list *list, void *data);
+
+/* Creates a new list item, store data and prepend it to the list just before
+ * the node pointed by list.
+ *
+ * Returns a pointer to the list with the inserted element.
+ */
+struct list *list_prepend(struct list *list, void *data);
 
 /* Returns the head or the tail of a list given anyone of its items */
 struct list *list_head(struct list *item);
@@ -49,8 +72,13 @@ void list_free_list(struct list *list);
 /* shallow copy of the the list */
 struct list *list_clone(struct list *list);
 
-/* deep copy of a string list */
-struct list *list_deep_clone_strs(struct list *source);
+/* deep copy of a list, also cloning the elements */
+struct list *list_deep_clone(struct list *list, list_clone_data_fn_t clone_fn);
+
+/* Remove item from a list like list_free_item() and if item is the first
+ * element of the list, update parameter list to point to the new first
+ * element. */
+void list_free_item_list(struct list **list, struct list *item, list_free_data_fn_t list_free_data_fn);
 
 /* check list length */
 extern int list_longer_than(struct list *list, int count);

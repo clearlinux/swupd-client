@@ -338,7 +338,7 @@ static int get_all_files(struct manifest *official_manifest, struct list *subs)
 		fprintf(stderr, "Failed - Server-side error, cannot download necessary files\n");
 		return -EDOWNLOADPACKS;
 	}
-	iter = list_head(official_manifest->files);
+	iter = official_manifest->files;
 	while (iter) {
 		struct file *file;
 
@@ -369,7 +369,7 @@ static int check_files_hash(struct list *files)
 	int ret = 1;
 
 	fprintf(stderr, "Verifying files\n");
-	iter = list_head(files);
+	iter = files;
 	while (iter) {
 		struct file *f = iter->data;
 		char *fullname;
@@ -468,7 +468,7 @@ static void add_missing_files(struct manifest *official_manifest)
 	unsigned int list_length = list_len(official_manifest->files);
 	unsigned int complete = 0;
 
-	iter = list_head(official_manifest->files);
+	iter = official_manifest->files;
 	while (iter) {
 		struct file *file;
 		char *fullname;
@@ -596,7 +596,7 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 
 	/* for each expected and present file which hash-mismatches vs
 	 * the manifest, replace the file */
-	iter = list_head(official_manifest->files);
+	iter = official_manifest->files;
 	list_length = list_len(iter);
 
 	while (iter) {
@@ -618,7 +618,7 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 
 	official_manifest->files = list_sort(official_manifest->files, file_sort_filename_reverse);
 
-	iter = list_head(official_manifest->files);
+	iter = official_manifest->files;
 	while (iter) {
 		struct file *file;
 		char *fullname;

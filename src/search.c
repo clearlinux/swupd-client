@@ -85,7 +85,7 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 	if (!bundle) {
 		bundle = calloc(sizeof(struct bundle_result), 1);
 		ON_NULL_ABORT(bundle);
-		results = list_append_data(results, bundle);
+		results = list_prepend(results, bundle);
 		strncpy(bundle->bundle_name, bundlename, BUNDLE_NAME_MAXLEN - 1);
 		/* record if the bundle is tracked on the system */
 		bundle->is_tracked = is_tracked_bundle(bundlename);
@@ -94,7 +94,7 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 	file = calloc(sizeof(struct file_result), 1);
 	ON_NULL_ABORT(file);
 	file->filename = strdup_or_die(filename);
-	bundle->files = list_append_data(bundle->files, file);
+	bundle->files = list_prepend(bundle->files, file);
 	file->score = score;
 	bundle->score += score;
 }
@@ -183,12 +183,11 @@ static void free_bundle_result_data(void *data)
 static void unsee_bundle_results(struct list *bl)
 {
 	struct bundle_result *br;
-	struct list *ptr = list_head(bl);
 
-	while (ptr) {
-		br = ptr->data;
+	while (bl) {
+		br = bl->data;
 		br->seen = false;
-		ptr = ptr->next;
+		bl = bl->next;
 	}
 }
 
@@ -198,7 +197,7 @@ static long calculate_size(char *bname, struct list *bundle_info, bool installed
 	struct list *ptr;
 	struct bundle_result *bi;
 	long size = 0;
-	ptr = list_head(bundle_info);
+	ptr = bundle_info;
 	while (ptr) {
 		bi = ptr->data;
 		ptr = ptr->next;
@@ -221,7 +220,7 @@ static long calculate_size(char *bname, struct list *bundle_info, bool installed
 
 		/* add bundle sizes for includes as well */
 		struct list *ptr2;
-		ptr2 = list_head(bi->includes);
+		ptr2 = bi->includes;
 		while (ptr2) {
 			char *inc = NULL;
 			inc = ptr2->data;
@@ -239,7 +238,7 @@ static void apply_size_penalty(struct list *bundle_info)
 	struct bundle_result *b;
 	struct list *ptr;
 
-	ptr = list_head(results);
+	ptr = results;
 
 	while (ptr) {
 		b = ptr->data;
@@ -259,13 +258,13 @@ static void print_csv_results()
 {
 	struct bundle_result *b;
 	struct list *ptr;
-	ptr = list_head(results);
+	ptr = results;
 	while (ptr) {
 		struct list *fptr;
 		struct file_result *f;
 		b = ptr->data;
 		ptr = ptr->next;
-		fptr = list_head(b->files);
+		fptr = b->files;
 		while (fptr) {
 			f = fptr->data;
 			fptr = fptr->next;
@@ -280,7 +279,7 @@ static void print_final_results(bool display_size)
 	struct list *ptr;
 	int counter = 0;
 
-	ptr = list_head(results);
+	ptr = results;
 	if (num_results != INT_MAX) {
 		printf("Displaying top %d file results per bundle\n\n", num_results);
 	}
@@ -302,7 +301,7 @@ static void print_final_results(bool display_size)
 			       b->is_tracked ? " on system" : " to install");
 		}
 		putchar('\n');
-		ptr2 = list_head(b->files);
+		ptr2 = b->files;
 		while (ptr2 && counter2 < num_results) {
 			f = ptr2->data;
 			ptr2 = ptr2->next;
@@ -657,8 +656,8 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 		strncpy(bundle->bundle_name, subman->component, BUNDLE_NAME_MAXLEN - 1);
 		bundle->topsize = subman->contentsize;
 		/* do a deep copy of the includes list */
-		bundle->includes = list_deep_clone_strs(subman->includes);
-		bundle_info = list_prepend_data(bundle_info, bundle);
+		bundle->includes = list_deep_clone(subman->includes, (list_clone_data_fn_t)strdup_or_die);
+		bundle_info = list_prepend(bundle_info, bundle);
 
 		if (display_files) {
 			/* Display bundle name. Marked up for pattern matchability */

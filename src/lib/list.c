@@ -32,10 +32,26 @@
 
 static struct list *list_append_item(struct list *list, struct list *item)
 {
-	list = list_tail(list);
+	struct list *p;
+
+	if (!list) {
+		return item;
+	}
+
+	p = list_tail(list);
+
+	p->next = item;
+	item->prev = p;
+
+	return list;
+}
+
+static struct list *list_insert_after_item(struct list *list, struct list *item)
+{
 	if (list) {
-		list->next = item;
+		item->next = list->next;
 		item->prev = list;
+		list->next = item;
 	}
 
 	return item;
@@ -43,10 +59,10 @@ static struct list *list_append_item(struct list *list, struct list *item)
 
 static struct list *list_prepend_item(struct list *list, struct list *item)
 {
-	list = list_head(list);
 	if (list) {
-		list->prev = item;
+		item->prev = list->prev;
 		item->next = list;
+		list->prev = item;
 	}
 
 	return item;
@@ -135,12 +151,17 @@ static struct list *list_merge_sort(struct list *left, unsigned int len, compari
 
 /* ------------ Public API ------------ */
 
-struct list *list_append_data(struct list *list, void *data)
+struct list *list_append(struct list *list, void *data)
 {
 	return list_append_item(list, list_alloc_item(data));
 }
 
-struct list *list_prepend_data(struct list *list, void *data)
+struct list *list_insert_after(struct list *list, void *data)
+{
+	return list_insert_after_item(list, list_alloc_item(data));
+}
+
+struct list *list_prepend(struct list *list, void *data)
 {
 	return list_prepend_item(list, list_alloc_item(data));
 }
@@ -169,22 +190,9 @@ struct list *list_tail(struct list *item)
 
 unsigned int list_len(struct list *list)
 {
-	unsigned int len;
-	struct list *item;
+	unsigned int len = 0;
 
-	if (list == NULL) {
-		return 0;
-	}
-
-	len = 1;
-
-	item = list;
-	while ((item = item->next) != NULL) {
-		len++;
-	}
-
-	item = list;
-	while ((item = item->prev) != NULL) {
+	for(; list; list = list->next) {
 		len++;
 	}
 
@@ -193,42 +201,43 @@ unsigned int list_len(struct list *list)
 
 struct list *list_sort(struct list *list, comparison_fn_t comparison_fn)
 {
-	list = list_head(list);
-	unsigned int len = list_len(list);
-	return list_merge_sort(list, len, comparison_fn);
+	if (!comparison_fn) {
+		fprintf(stderr, "Error - Impossible to sort: Sorting function is NULL\n");
+		return list;
+	}
+	return list_merge_sort(list, list_len(list), comparison_fn);
 }
 
 struct list *list_concat(struct list *list1, struct list *list2)
 {
-	struct list *tail;
+	if (!list2) {
+		return list1;
+	}
+	return list_append_item(list1, list2);
+}
 
-	list2 = list_head(list2);
-
-	if (list1 == NULL) {
-		return list2;
+void list_free_item_list(struct list **list, struct list *item, list_free_data_fn_t list_free_data_fn)
+{
+	if (!list || !item) {
+		return;
 	}
 
-	list1 = list_head(list1);
-
-	if (list2) {
-		tail = list_tail(list1);
-
-		tail->next = list2;
-		list2->prev = tail;
+	if (*list == item) {
+		*list = item->next;
 	}
-
-	return list1;
+	list_free_item(item, list_free_data_fn);
 }
 
 struct list *list_free_item(struct list *item, list_free_data_fn_t list_free_data_fn)
 {
 	struct list *ret_item;
 
+	if (!item) {
+		return NULL;
+	}
+
 	if (item->prev) {
 		item->prev->next = item->next;
-		ret_item = item->prev;
-	} else {
-		ret_item = item->next;
 	}
 
 	if (item->next) {
@@ -239,6 +248,7 @@ struct list *list_free_item(struct list *item, list_free_data_fn_t list_free_dat
 		list_free_data_fn(item->data);
 	}
 
+	ret_item = item->next;
 	free(item);
 
 	return ret_item;
@@ -246,10 +256,8 @@ struct list *list_free_item(struct list *item, list_free_data_fn_t list_free_dat
 
 void list_free_list_and_data(struct list *list, list_free_data_fn_t list_free_data_fn)
 {
-	struct list *item = list_head(list);
-
-	while (item) {
-		item = list_free_item(item, list_free_data_fn);
+	while (list) {
+		list = list_free_item(list, list_free_data_fn);
 	}
 }
 
@@ -260,27 +268,21 @@ void list_free_list(struct list *list)
 
 struct list *list_clone(struct list *list)
 {
-	struct list *clone = NULL;
-	struct list *item;
-
-	item = list_tail(list);
-	while (item) {
-		clone = list_prepend_data(clone, item->data);
-		item = item->prev;
-	}
-
-	return clone;
+	return list_deep_clone(list, NULL);
 }
 
-/* deep clone a list of char * */
-struct list *list_deep_clone_strs(struct list *list)
+struct list *list_deep_clone(struct list *list, list_clone_data_fn_t clone_fn)
 {
 	struct list *clone = NULL;
 	struct list *item;
 
 	item = list_tail(list);
 	while (item) {
-		clone = list_prepend_data(clone, strdup(item->data));
+		if (clone_fn) {
+			clone = list_prepend(clone, clone_fn(item->data));
+		} else {
+			clone = list_prepend(clone, item->data);
+		}
 		item = item->prev;
 	}
 
@@ -289,11 +291,8 @@ struct list *list_deep_clone_strs(struct list *list)
 
 int list_longer_than(struct list *list, int count)
 {
-	struct list *item;
-
-	item = list_head(list);
-	while (item) {
-		item = item->next;
+	while (list) {
+		list = list->next;
 		if (count-- < 0) {
 			return 1;
 		}

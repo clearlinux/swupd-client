@@ -113,19 +113,23 @@ TESTS = $(dist_check_SCRIPTS)
 
 BATS = \
 	test/documentation/manpages/test.bats \
-	test/functional/bundleadd/add-directory.bats \
-	test/functional/bundleadd/add-existing.bats \
-	test/functional/bundleadd/add-multiple.bats \
-	test/functional/bundleadd/add-rc.bats \
 	test/functional/bundleadd/add-bad-hash.bats \
 	test/functional/bundleadd/add-bad-hash-state.bats \
 	test/functional/bundleadd/add-bad-manifest.bats \
 	test/functional/bundleadd/add-boot-file.bats \
 	test/functional/bundleadd/add-boot-skip.bats \
-	test/functional/bundleadd/add-include.bats \
-	test/functional/bundleadd/add-skip-scripts.bats \
-	test/functional/bundleadd/add-verify-fix-path.bats \
 	test/functional/bundleadd/add-client-certificate.bats \
+	test/functional/bundleadd/add-directory.bats \
+	test/functional/bundleadd/add-existing.bats \
+	test/functional/bundleadd/add-fall-back-to-fullfile.bats \
+	test/functional/bundleadd/add-include.bats \
+	test/functional/bundleadd/add-multiple.bats \
+	test/functional/bundleadd/add-rc.bats \
+	test/functional/bundleadd/add-skip-scripts.bats \
+	test/functional/bundleadd/add-uses-fullfile.bats \
+	test/functional/bundleadd/add-uses-zeropack.bats \
+	test/functional/bundleadd/add-verify-fix-path.bats \
+	test/functional/bundlelist/list-client-certificate.bats \
 	test/functional/bundlelist/list-all.bats \
 	test/functional/bundlelist/list-deps-flat.bats \
 	test/functional/bundlelist/list-deps-invalid-bundle.bats \
@@ -135,7 +139,6 @@ BATS = \
 	test/functional/bundlelist/list-has-dep-nested-server.bats \
 	test/functional/bundlelist/list-no-deps.bats \
 	test/functional/bundlelist/list-none-has-deps.bats \
-	test/functional/bundlelist/list-client-certificate.bats \
 	test/functional/bundleremove/remove-boot-file.bats \
 	test/functional/bundleremove/remove-include.bats \
 	test/functional/bundleremove/remove-include-nested.bats \

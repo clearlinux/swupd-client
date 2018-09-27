@@ -739,7 +739,7 @@ update_manifest() {
 		sudo sed -i "s/^MANIFEST.*/MANIFEST\\t$var/" "$manifest"
 		;;
 	version | previous | filecount | timestamp | contentsize)
-		sudo sed -i "s/$key.*/$key:\\t$var/" "$manifest"
+		sudo sed -i "s/^$key:.*/$key:\\t$var/" "$manifest"
 		;;
 	file-status)
 		validate_param "$value"

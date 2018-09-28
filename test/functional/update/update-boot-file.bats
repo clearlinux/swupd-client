@@ -4,7 +4,7 @@ load "../testlib"
 
 test_setup() {
 
-	create_test_environment "$TEST_NAME"
+	create_test_environment -r "$TEST_NAME"
 	create_version -p "$TEST_NAME" 100 10
 	update_bundle "$TEST_NAME" os-core --add /usr/lib/kernel/testfile
 
@@ -24,7 +24,7 @@ test_setup() {
 		    new bundles       : 0
 		    deleted bundles   : 0
 		    changed files     : 0
-		    new files         : 4
+		    new files         : 2
 		    deleted files     : 0
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...

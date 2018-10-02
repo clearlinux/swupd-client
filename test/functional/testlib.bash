@@ -961,17 +961,49 @@ bump_format() {
 	new_version="$((version+20))"
 	new_version_path="$env_name"/web-dir/"$new_version"
 	format="$(< "$env_name"/web-dir/"$version"/format)"
-	mom="$new_version_path"/Manifest.MoM
 
 	# create two new versions for the format bump, each version separated by 10
 	# from each other and from the current latest version
 	create_version "$env_name" "$middle_version" "$version" "$format"
 	create_version -r "$env_name" "$new_version" "$middle_version" "$((format+1))"
+
+	# Update the +10 version
+	mom="$middle_version_path"/Manifest.MoM
+
+	# +10 and +20 versions should have matching content
+	sudo rm -rf "$middle_version_path"
+	sudo cp -r "$new_version_path" "$middle_version_path"
+
+	# Update +10 format and versions
+	update_manifest -p "$mom" format "$format"
+	update_manifest -p "$mom" version "$middle_version"
+	update_manifest -p "$mom" previous "$version"
+
+	# The +20 version updates the os-release and format files. Change
+	# the versions of these files in the +10 to the +10's version.
+	update_manifest -p "$mom" file-version os-core "$middle_version"
+	update_manifest -p "$middle_version_path"/Manifest.os-core file-version /usr/lib/os-release "$middle_version"
+	update_manifest -p "$middle_version_path"/Manifest.os-core file-version /usr/share/defaults/swupd/format "$middle_version"
+
+	bundles=($(awk '/^M\.\.\./ { print $4 }' "$mom"))
+	IFS=$'\n'
+	for bundle in ${bundles[*]}; do
+		manifest="$middle_version_path"/Manifest."$bundle"
+		update_manifest -p "$manifest" format "$format"
+		update_manifest -p "$manifest" version "$middle_version"
+		update_manifest "$manifest" previous "$version"
+	done
+	unset IFS
+	update_hashes_in_mom "$mom"
+
+	# update the new version
+	mom="$new_version_path"/Manifest.MoM
+	update_manifest -p "$mom" previous "$middle_version"
+
 	# regardless of where we found the previous version of os-core, update
 	# the previous version to $middle_version
 	update_manifest -p "$new_version_path"/Manifest.os-core previous "$middle_version"
 
-	# update the new version
 	# copy all manifests in MoM to new version
 	bundles=($(awk '/^M\.\.\./ { print $4 }' "$mom"))
 	IFS=$'\n'
@@ -1009,34 +1041,8 @@ bump_format() {
 		create_tar "$manifest"
 	done
 	unset IFS
+	update_manifest "$mom" minversion "$new_version"
 	update_hashes_in_mom "$mom"
-
-	# update the middle version
-	sudo rm -rf "$middle_version_path"/files/*
-	sudo rm -f "$middle_version_path"/Manifest*
-	sudo rm -f "$middle_version_path"/pack*
-	sudo cp -r "$new_version_path"/files/* "$middle_version_path"/files/
-	sudo cp "$new_version_path"/Manifest.* "$middle_version_path"/
-	sudo cp "$new_version_path"/pack* "$middle_version_path"/
-	mom="$middle_version_path"/Manifest.MoM
-	update_manifest -p "$mom" format "$((format))"
-	update_manifest -p "$mom" version "$middle_version"
-	update_manifest -p "$mom" previous "$version"
-	sudo sed -i "/....\\t.*\\t.*\\t.*$/s/\(....\\t.*\\t\).*\(\\t\)/\1$middle_version\2/g" "$mom"
-	bundles=($(awk '/^M\.\.\./ { print $4 }' "$mom"))
-	IFS=$'\n'
-	for bundle in ${bundles[*]}; do
-		manifest="$middle_version_path"/Manifest."$bundle"
-		update_manifest -p "$manifest" format "$((format))"
-		update_manifest -p "$manifest" version "$middle_version"
-		update_manifest -p "$manifest" previous "$version"
-		sudo sed -i "/....\\t.*\\t.*\\t.*$/s/\(....\\t.*\\t\).*\(\\t\)/\1$middle_version\2/g" "$manifest"
-		sudo rm -rf "$manifest".tar
-		create_tar "$manifest"
-	done
-	unset IFS
-	update_hashes_in_mom "$mom"
-
 }
 
 # Signs a manifest with a PEM key and generates the signed manifest in the same location

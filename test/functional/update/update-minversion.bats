@@ -27,7 +27,6 @@ test_setup() {
 		    new bundles       : 0
 		    deleted bundles   : 0
 		    changed files     : 4
-		    new files         : 0
 		    deleted files     : 0
 		Staging file content
 		Applying update

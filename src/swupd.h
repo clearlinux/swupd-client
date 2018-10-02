@@ -242,49 +242,6 @@ static inline int bsearch_file_helper(const void *A, const void *B)
 	return strcmp(key->filename, elem->filename);
 }
 
-extern int swupd_stats[];
-static inline void account_new_file(void)
-{
-	swupd_stats[0]++;
-}
-
-static inline void account_deleted_file(void)
-{
-	swupd_stats[1]++;
-}
-
-static inline void account_changed_file(void)
-{
-	swupd_stats[2]++;
-};
-
-static inline void account_new_bundle(void)
-{
-	swupd_stats[3]++;
-};
-
-static inline void account_deleted_bundle(void)
-{
-	swupd_stats[4]++;
-};
-
-static inline void account_changed_bundle(void)
-{
-	swupd_stats[5]++;
-};
-
-static inline void account_delta_hit(void)
-{
-	swupd_stats[6]++;
-};
-
-static inline void account_delta_miss(void)
-{
-	swupd_stats[7]++;
-};
-
-extern void print_statistics(int version1, int version2);
-
 extern int download_fullfiles(struct list *files, int *num_downloads);
 extern int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required);
 

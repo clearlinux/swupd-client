@@ -719,6 +719,9 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 			continue;
 		}
 		create_and_append_subscription(subs, bundle);
+
+		/* Mark manifest as an included manifest */
+		file->is_included = 1;
 		ret |= add_sub_NEW; /* We have added at least one */
 	}
 out:

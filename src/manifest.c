@@ -91,7 +91,7 @@ static struct manifest *alloc_manifest(int version, char *component)
 	return manifest;
 }
 
-static struct manifest *manifest_from_file(int version, char *component, bool header_only, bool latest, bool is_mix, bool load_iterative)
+static struct manifest *manifest_from_file(int version, char *component, bool header_only, bool latest, bool is_mix, bool load_iterative, bool is_included)
 {
 	FILE *infile;
 	char line[MANIFEST_LINE_MAXLEN], *c, *c2;
@@ -104,6 +104,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 	char *basedir;
 	unsigned long long filecount = 0;
 	unsigned long long contentsize = 0;
+	int minversion = 0;
 	int manifest_hdr_version;
 	int manifest_enc_version;
 
@@ -170,6 +171,15 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 				goto err_close;
 			}
 		}
+
+		if (strncmp(line, "minversion:", 11) == 0) {
+			err = strtoi_err(c, &minversion);
+			if (minversion > version || err != 0) {
+				fprintf(stderr, "Error: Loaded incompatible minversion\n");
+				goto err_close;
+			}
+		}
+
 		if (strncmp(line, "filecount:", 10) == 0) {
 			errno = 0;
 			filecount = strtoull(c, NULL, 10);
@@ -222,6 +232,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 	manifest->filecount = filecount;
 	manifest->contentsize = contentsize;
 	manifest->manifest_version = manifest_enc_version;
+	manifest->minversion = minversion;
 	manifest->includes = includes;
 
 	if (header_only) {
@@ -370,6 +381,14 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		 * have another flag to check for like we do in the MoM */
 		if (is_mix && strcmp(component, "MoM") != 0) {
 			file->is_mix = 1;
+		}
+
+		/* True when the file exists in a bundle that was included in the subscription
+		   list by another bundle */
+		if (is_included) {
+			file->is_included = 1;
+		} else {
+			file->is_included = 0;
 		}
 
 		if (file->is_manifest) {
@@ -562,7 +581,7 @@ verify_mom:
 		return NULL;
 	}
 
-	manifest = manifest_from_file(version, "MoM", false, latest, mix_exists, load_iterative);
+	manifest = manifest_from_file(version, "MoM", false, latest, mix_exists, load_iterative, false);
 
 	if (manifest == NULL) {
 		if (retried == false) {
@@ -676,7 +695,7 @@ retry_load:
 		return NULL;
 	}
 
-	manifest = manifest_from_file(version, file->filename, header_only, false, file->is_mix, false);
+	manifest = manifest_from_file(version, file->filename, header_only, false, file->is_mix, false, file->is_included);
 
 	if (manifest == NULL) {
 		if (retried == false) {
@@ -705,7 +724,7 @@ struct manifest *load_manifest_full(int version, bool mix)
 		return NULL;
 	}
 
-	manifest = manifest_from_file(version, "full", false, false, false, false);
+	manifest = manifest_from_file(version, "full", false, false, false, false, false);
 
 	if (manifest == NULL) {
 		fprintf(stderr, "Failed to load %d Manifest.full\n", version);

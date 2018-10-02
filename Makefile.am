@@ -49,6 +49,7 @@ swupd_SOURCES = \
 	src/signature.h \
 	src/staging.c \
 	src/stats.c \
+	src/stats.h \
 	src/subscriptions.c \
 	src/swupd-build-opts.h \
 	src/swupd-build-variant.h \

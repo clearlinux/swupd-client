@@ -37,6 +37,7 @@
 
 #include "config.h"
 #include "signature.h"
+#include "stats.h"
 #include "swupd-build-variant.h"
 #include "swupd.h"
 #include "xattrs.h"
@@ -898,13 +899,13 @@ void link_manifests(struct manifest *m1, struct manifest *m2)
 			continue;
 		} /* else ret > 0  m1/file1 is after m2/file2 */
 		list2 = list2->next;
-		account_new_file();
+		account_changed_file();
 	}
 
 	// Capture new files if they are at the tail end of the file list
 	while (list2) {
 		list2 = list2->next;
-		account_new_file();
+		account_changed_file();
 	}
 }
 

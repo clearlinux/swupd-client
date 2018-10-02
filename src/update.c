@@ -35,6 +35,7 @@
 
 #include "config.h"
 #include "signature.h"
+#include "stats.h"
 #include "swupd.h"
 
 static int requested_version = -1;

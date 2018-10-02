@@ -499,7 +499,6 @@ create_manifest() {
 	local path=$1
 	local name=$2
 	local format=${3:-1}
-	local minversion="0"
 	local version
 
 	# If no parameters are received show usage
@@ -519,7 +518,7 @@ create_manifest() {
 		printf 'version:\t%s\n' "$version"
 
 		if [ "$name" = "MoM" ]; then
-			printf 'minversion:\t%s\n' "$minversion"
+			printf 'minversion:\t%s\n' "$version"
 		fi
 
 		printf 'previous:\t0\n'

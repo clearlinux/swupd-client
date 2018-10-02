@@ -625,6 +625,9 @@ verify_mom:
 		if (sigcheck) {
 			/* cleanup and try one more time, statedir could have got corrupt/stale */
 			if (retried == false && !mix_exists) {
+				free_string(&filename);
+				free_string(&url);
+				free_manifest(manifest);
 				remove_manifest_files("MoM", version, NULL);
 				retried = true;
 				goto verify_mom;

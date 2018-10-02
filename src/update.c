@@ -454,8 +454,6 @@ load_server_submanifests:
 	set_subscription_versions(server_manifest, current_manifest, &update_subs);
 	link_submanifests(current_manifest, server_manifest, initial_subs, update_subs, true);
 
-	/* prepare for an update process based on comparing two in memory manifests */
-	link_manifests(current_manifest, server_manifest);
 	timelist_timer_stop(global_times);
 	/* Step 4: check disk state before attempting update */
 	timelist_timer_start(global_times, "Pre-Update Scripts");
@@ -476,7 +474,17 @@ load_server_submanifests:
 
 	timelist_timer_start(global_times, "Create Update List");
 
-	updates = create_update_list(server_manifest);
+	/* When the minversion is 0 (set to 0 when missing from MoM header),
+	   delta manifests will not be used and the old update list implementation
+	   will be used. When using the new update list implementation if a
+	   minversion update occurred without a minversion header, all files without
+	   a content change would download fullfiles. */
+	if (server_manifest->minversion == 0) {
+		link_manifests(current_manifest, server_manifest);
+		updates = create_update_list_no_minversion(server_manifest);
+	} else {
+		updates = create_update_list(server_manifest);
+	}
 
 	print_statistics(current_version, server_version);
 	timelist_timer_stop(global_times);

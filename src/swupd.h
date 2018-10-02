@@ -227,6 +227,7 @@ extern struct manifest *load_mom(int version, bool latest, bool mix_exists, int 
 extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only);
 extern struct manifest *load_manifest_full(int version, bool mix);
 extern struct list *create_update_list(struct manifest *server);
+extern struct list *create_update_list_no_minversion(struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
 extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2, bool server);
 extern void link_iterative_manifests(struct list *iterative_manifests, struct list *full_manifests);

@@ -739,8 +739,10 @@ static bool is_installed_and_verified(struct file *file)
 {
 	/* Not safe to perform the hash check if there was a type change
 	 * involving symlinks. */
-	if (file->is_link != file->peer->is_link) {
-		return false;
+	if (file->peer != NULL) {
+		if (file->is_link != file->peer->is_link) {
+			return false;
+		}
 	}
 
 	char *fullname = mk_full_filename(path_prefix, file->filename);
@@ -753,10 +755,83 @@ static bool is_installed_and_verified(struct file *file)
 	return false;
 }
 
+/* Find files which need to be updated.
+
+   Important Note:
+
+   This implementation to create the update list does not depend on the FROM
+   file list and can be used with delta manifests. Also, when a minversion
+   update occurs without a corresponding minversion header field in the MoM,
+   files with version updates and no content changes will be included in the
+   update list. As a result, when the MoM does not specify a minversion, the
+   link_manifests and create_update_list_no_minversion functions should be used. */
+struct list *create_update_list(struct manifest *server)
+{
+	struct list *output = NULL;
+	struct list *list;
+	bool install;
+	int current_version;
+
+	update_count = 0;
+	update_skip = 0;
+	current_version = get_current_version(path_prefix);
+	list = list_head(server->files);
+	while (list) {
+		struct file *file;
+		file = list->data;
+		list = list->next;
+
+		install = false;
+
+		if (file->last_change > current_version) {
+			if (file->last_change == server->minversion) {
+				/* When a file without a content change is updated by a new minversion,
+				   don't include it in the update list. To keep consistent with the
+				   fallback update list, count as a changed file.*/
+				if (is_installed_and_verified(file)) {
+					account_changed_file();
+					continue;
+				}
+			}
+			install = true;
+		} else if (file->is_included) {
+			/* Files added from a newly included bundle that don't exist on the system
+			   are new */
+			if (!is_installed_and_verified(file)) {
+				install = true;
+			}
+		}
+
+		if (install) {
+			if (file->is_deleted) {
+				account_deleted_file();
+			} else {
+				account_changed_file();
+			}
+			/* check and if needed mark as do_not_update */
+			(void)ignore(file);
+			/* check if we need to run scripts/update the bootloader/etc */
+			apply_heuristics(file);
+
+			output = list_prepend_data(output, file);
+			continue;
+		}
+	}
+	update_count = list_len(output) - update_skip;
+
+	return output;
+}
+
 /* Find files which need updated based on differences in last_change.
    Should let further do_not_update policy be handled in the caller, but for
-   now some hacky exclusions are done here. */
-struct list *create_update_list(struct manifest *server)
+   now some hacky exclusions are done here.
+
+   Important Note:
+
+   This implementation depends on the FROM file list and is incompatible with
+   delta manifests. It is kept as a fallback to use when the minversion field
+   is not present in the MoM. */
+struct list *create_update_list_no_minversion(struct manifest *server)
 {
 	struct list *output = NULL;
 	struct list *list;
@@ -810,7 +885,11 @@ struct list *create_update_list(struct manifest *server)
 }
 
 /* m1: old (or current when verifying) manifest
- * m2: new (or official if verifying) manifest */
+ * m2: new (or official if verifying) manifest
+ *
+ * Important Note:
+ *
+ * This function is not safe to use with delta manifests. */
 void link_manifests(struct manifest *m1, struct manifest *m2)
 {
 	struct list *list1, *list2;

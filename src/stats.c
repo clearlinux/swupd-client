@@ -26,19 +26,18 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "swupd.h"
+#include "stats.h"
 
-int swupd_stats[8];
+int swupd_stats[STATISTICS_SIZE];
 
 void print_statistics(int version1, int version2)
 {
 	printf("\n");
 	printf("Statistics for going from version %i to version %i:\n\n", version1, version2);
-	printf("    changed bundles   : %i\n", swupd_stats[5]);
-	printf("    new bundles       : %i\n", swupd_stats[3]);
-	printf("    deleted bundles   : %i\n\n", swupd_stats[4]);
-	printf("    changed files     : %i\n", swupd_stats[2]);
-	printf("    new files         : %i\n", swupd_stats[0]);
-	printf("    deleted files     : %i\n", swupd_stats[1]);
+	printf("    changed bundles   : %i\n", swupd_stats[CHANGED_BUNDLES]);
+	printf("    new bundles       : %i\n", swupd_stats[NEW_BUNDLES]);
+	printf("    deleted bundles   : %i\n\n", swupd_stats[DELETED_BUNDLES]);
+	printf("    changed files     : %i\n", swupd_stats[CHANGED_FILES]);
+	printf("    deleted files     : %i\n", swupd_stats[DELETED_FILES]);
 	printf("\n");
 }

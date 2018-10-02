@@ -53,8 +53,7 @@ test_setup() {
 		    changed bundles   : 1
 		    new bundles       : 6
 		    deleted bundles   : 0
-		    changed files     : 1
-		    new files         : 13
+		    changed files     : 14
 		    deleted files     : 0
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...

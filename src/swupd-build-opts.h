@@ -46,7 +46,67 @@
 #define OPT_BSDTAR "-BSDTAR"
 #endif
 
+#ifdef SWUPD_WITH_XATTRS
+#define OPT_XATTRS "+XATTRS"
+#else
+#define OPT_XATTRS "-XATTRS"
+#endif
+
+#ifdef SWUPD_TAR_SELINUX
+#define OPT_SELINUX "+TAR_SELINUX"
+#else
+#define OPT_SELINUX "-TAR_SELINUX"
+#endif
+
+#ifdef OS_IS_STATELESS
+#define OPT_STATELESS "+STATELESS"
+#else
+#define OPT_STATELESS "-STATELESS"
+#endif
+
+#ifdef CONTENTURL
+#define OPT_C_URL CONTENTURL
+#else
+#define OPT_C_URL "no default set"
+#endif
+
+#ifdef VERSIONURL
+#define OPT_V_URL VERSIONURL
+#else
+#define OPT_V_URL "no default set"
+#endif
+
+#ifdef FORMATID
+#define OPT_FORMAT FORMATID
+#else
+#define OPT_FORMAT "no default set"
+#endif
+
+#ifdef PRE_UPDATE
+#define OPT_PRE PRE_UPDATE
+#else
+#define OPT_PRE "no default set"
+#endif
+
+#ifdef POST_UPDATE
+#define OPT_POST POST_UPDATE
+#else
+#define OPT_POST "no default set"
+#endif
+
 #define BUILD_OPTS \
-	OPT_BZIP2 " " OPT_SIGNATURES " " OPT_COVERAGE " " OPT_BSDTAR
+	OPT_BZIP2 " " OPT_SIGNATURES " " OPT_COVERAGE " " OPT_BSDTAR " " OPT_XATTRS " " OPT_SELINUX " " OPT_STATELESS
+
+#define BUILD_CONFIGURE                                       \
+	"mount point                  " MOUNT_POINT "\n"      \
+	"state directory              " STATE_DIR "\n"        \
+	"bundles directory            " BUNDLES_DIR "\n"      \
+	"certificate path             " CERT_PATH "\n"        \
+	"fallback certificate path    " FALLBACK_CAPATHS "\n" \
+	"content URL                  " OPT_C_URL "\n"        \
+	"version URL                  " OPT_V_URL "\n"        \
+	"format ID                    " OPT_FORMAT "\n"       \
+	"pre-update hook              " OPT_PRE "\n"          \
+	"post-update hook             " OPT_POST "\n"
 
 #endif

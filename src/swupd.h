@@ -191,7 +191,7 @@ extern char *content_url;
 extern bool content_url_is_local;
 extern char *cert_path;
 extern long update_server_port;
-extern int max_parallel_pack_downloads;
+extern int max_parallel_downloads;
 extern char *default_format_path;
 extern bool set_path_prefix(char *path);
 extern int set_content_url(char *url);
@@ -295,6 +295,8 @@ extern int rename_all_files_to_final(struct list *updates);
 extern int rename_staged_file_to_final(struct file *file);
 
 extern int update_device_latest_version(int version);
+
+extern size_t get_max_xfer(size_t default_max_xfer);
 
 /* curl.c */
 

@@ -160,15 +160,6 @@ static int download_pack(void *download_handle, int oldversion, int newversion, 
 	return err;
 }
 
-static size_t get_max_xfer()
-{
-	if (max_parallel_pack_downloads > 0) {
-		return max_parallel_pack_downloads;
-	}
-
-	return MAX_XFER;
-}
-
 /* pull in packs for base and any subscription */
 int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required)
 {
@@ -181,7 +172,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	void *download_handle;
 
 	fprintf(stderr, "Downloading packs...\n");
-	download_handle = swupd_curl_parallel_download_start(get_max_xfer());
+	download_handle = swupd_curl_parallel_download_start(get_max_xfer(MAX_XFER));
 
 	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, download_error, download_free_data);
 	iter = list_head(subs);

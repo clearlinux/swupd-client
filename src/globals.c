@@ -70,7 +70,7 @@ char *content_url = NULL;
 bool content_url_is_local = false;
 char *cert_path = NULL;
 long update_server_port = -1;
-int max_parallel_pack_downloads = -1;
+int max_parallel_downloads = -1;
 char *swupd_cmd = NULL;
 
 timelist init_timelist(void)
@@ -606,4 +606,13 @@ void save_cmd(char **argv)
 		strcat(swupd_cmd, argv[i]);
 		strcat(swupd_cmd, " ");
 	}
+}
+
+size_t get_max_xfer(size_t default_max_xfer)
+{
+	if (max_parallel_downloads > 0) {
+		return max_parallel_downloads;
+	}
+
+	return default_max_xfer;
 }

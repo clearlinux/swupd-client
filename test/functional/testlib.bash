@@ -39,7 +39,7 @@ export EBADCERT=24  # unable to verify server SSL certificate
 # global constant
 export zero_hash="0000000000000000000000000000000000000000000000000000000000000000"
 
-generate_random_content() { 
+generate_random_content() { # swupd_function
 
 	local bottom_range=${1:-5}
 	local top_range=${2:-100}
@@ -49,7 +49,7 @@ generate_random_content() {
 
 }
 
-generate_random_name() { 
+generate_random_name() { # swupd_function
 
 	local prefix=${1:-test-}
 	local uuid
@@ -64,7 +64,7 @@ generate_random_name() {
 # Parameters:
 # - key_path: path to private key
 # - cert_path: path to public key
-generate_certificate() {
+generate_certificate() { # swupd_function
 
 	local key_path=$1
 	local cert_path=$2
@@ -99,7 +99,7 @@ generate_certificate() {
 # Creates the trusted certificate store and adds one certificate
 # Parameters:
 # - cert_path: path of certificate to add to trust store
-create_trusted_cacert() {
+create_trusted_cacert() { # swupd_function
 
 	local cert_path=$1
 	local counter=0
@@ -136,7 +136,7 @@ create_trusted_cacert() {
 }
 
 # Deletes the trusted certificate store
-destroy_trusted_cacert() {
+destroy_trusted_cacert() { # swupd_function
 
 	# only the test that created CACERT_DIR can erase it which stops
 	# tests from erasing CACERT_DIR when they fail before creating it
@@ -161,7 +161,19 @@ print_stack() {
 # when printing a message in a bats test, it is necessary
 # to use file descriptor 3, this wrapper function makes it
 # easier for users of the test library to print to screen
-print() {
+print() { # swupd_function
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Prints a message from a test, the message will be displayed only when
+			running the test using the bats -t flag.
+
+			Usage:
+			    print <msg>
+			EOM
+		return
+	fi
 
 	local msg=$1
 	echo "$msg" >&3
@@ -186,7 +198,7 @@ terminate() {
 
 }
 
-validate_path() { 
+validate_path() {
 
 	local path=$1
 	if [ -z "$path" ] || [ ! -d "$path" ]; then
@@ -195,7 +207,7 @@ validate_path() {
 
 }
 
-validate_item() { 
+validate_item() {
 
 	local vfile=$1
 	if [ -z "$vfile" ] || [ ! -e "$vfile" ]; then
@@ -219,7 +231,7 @@ validate_param() {
 #         otherwise will be overwritten
 # - FILE: the path to the file to write to
 # - STREAM: the content to be written
-write_to_protected_file() {
+write_to_protected_file() { # swupd_function
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
@@ -243,7 +255,7 @@ write_to_protected_file() {
 # Exports environment variables that are dependent on the test environment
 # Parameters:
 # - ENV_NAME: the name of the test environment
-set_env_variables() {
+set_env_variables() { # swupd_function
 
 	local env_name=$1
 	local path
@@ -291,7 +303,7 @@ set_env_variables() {
 # already exists it returns the name
 # Parameters:
 # - PATH: the path where the directory will be created 
-create_dir() { 
+create_dir() { # swupd_function
 	
 	local path=$1
 	local hashed_name
@@ -325,7 +337,7 @@ create_dir() {
 # Generates a file with a hashed name in the specified path
 # Parameters:
 # - PATH: the path where the file will be created    
-create_file() {
+create_file() { # swupd_function
  
 	local path=$1
 	local hashed_name
@@ -356,7 +368,7 @@ create_file() {
 # Parameters:
 # - PATH: the path where the symbolic link will be created
 # - FILE: the path to the file to point to
-create_link() { 
+create_link() { # swupd_function
 
 	local path=$1
 	local pfile=$2
@@ -389,7 +401,7 @@ create_link() {
 # - --skip-validation: if this flag is set (as first parameter) the other parameter
 #                      is not validated, so use this option carefully
 # - ITEM: the relative path to the item (file, directory, link, manifest)
-create_tar() {
+create_tar() { # swupd_function
 
 	local path
 	local item_name
@@ -427,7 +439,7 @@ create_tar() {
 # fullfiles for the minversion update.
 # Parameters:
 # - minversion: new minversion.
-update_minversion() {
+update_minversion() { # swupd_function
 	local minversion=$1
 	local minversion_dir="$WEBDIR"/"$minversion"
 	local line
@@ -463,7 +475,7 @@ update_minversion() {
 # Parameters:
 # - bundle: name of bundle
 # - minversion: new minversion
-update_bundle_minversion() {
+update_bundle_minversion() { # swupd_function
 	local bundle=$1
 	local minversion=$2
 	local minversion_dir="$WEBDIR"/"$minversion"
@@ -494,7 +506,7 @@ update_bundle_minversion() {
 # - PATH: the path where the manifest will be created
 # - BUNDLE_NAME: the name of the bundle which this manifest will be for
 # - FORMAT: the format of the manifest
-create_manifest() {
+create_manifest() { # swupd_function
 
 	local path=$1
 	local name=$2
@@ -535,7 +547,7 @@ create_manifest() {
 # Re-creates a manifest's tar, updates the hashes in the MoM and signs it
 # Parameters:
 # - MANIFEST: the manifest file to have its tar re-created
-retar_manifest() {
+retar_manifest() { # swupd_function
 
 	local manifest=$1
 	# If no parameters are received show usage
@@ -571,7 +583,7 @@ retar_manifest() {
 # - MANIFEST: the relative path to the manifest file
 # - ITEM: the relative path to the item (file, directory, symlink) to be added
 # - PATH_IN_FS: the absolute path of the item in the target system when installed
-add_to_manifest() { 
+add_to_manifest() { # swupd_function
 
 	local item_type
 	local item_size
@@ -678,7 +690,7 @@ add_to_manifest() {
 #       to be done in order to reduce time
 # - MANIFEST: the relative path to the manifest file
 # - DEPENDENCY: the name of the bundle to be included as a dependency
-add_dependency_to_manifest() {
+add_dependency_to_manifest() { # swupd_function
 
 	local partial=false
 	[ "$1" = "-p" ] && { partial=true ; shift ; }
@@ -739,7 +751,7 @@ add_dependency_to_manifest() {
 #       to be done in order to reduce time
 # - MANIFEST: the relative path to the manifest file
 # - ITEM: either the hash or filename of the item to be removed
-remove_from_manifest() { 
+remove_from_manifest() { # swupd_function
 
 	local partial=false
 	[ "$1" = "-p" ] && { partial=true ; shift ; }
@@ -799,7 +811,7 @@ remove_from_manifest() {
 # - KEY: the thing to be updated
 # - HASH/NAME: the file name or hash of the record to be updated (if applicable)
 # - VALUE: the value to be used for updating the record
-update_manifest() {
+update_manifest() { # swupd_function
 
 	local partial=false
 	[ "$1" = "-p" ] && { partial=true ; shift ; }
@@ -883,7 +895,7 @@ update_manifest() {
 # if there are changes in hashes.
 # Parameters:
 # - MANIFEST: the path to the MoM to be updated
-update_hashes_in_mom() {
+update_hashes_in_mom() { # swupd_function
 
 	local manifest=$1
 	local path
@@ -931,7 +943,7 @@ update_hashes_in_mom() {
 # Update all manifests after a format bump
 # Parameters:
 # ENVIRONMENT_NAME: the name of the test environment
-bump_format() {
+bump_format() { # swupd_function
 
 	local env_name=$1
 	local format
@@ -1042,7 +1054,7 @@ bump_format() {
 # Signs a manifest with a PEM key and generates the signed manifest in the same location
 # Parameters:
 # - MANIFEST: the path to the manifest to be signed
-sign_manifest() {
+sign_manifest() { # swupd_function
 
 	local manifest=$1
 
@@ -1066,7 +1078,7 @@ sign_manifest() {
 # Parameters:
 # - MANIFEST: the manifest in which it will be looked at
 # - ITEM: the dir or file to look for in the manifest
-get_hash_from_manifest() {
+get_hash_from_manifest() { # swupd_function
 
 	local manifest=$1
 	local item=$2
@@ -1090,7 +1102,7 @@ get_hash_from_manifest() {
 # Parameters:
 # - ENVIRONMENT_NAME: the name of the test environmnt to act upon
 # - NEW_VERSION: the version for the target to be set to
-set_current_version() {
+set_current_version() { # swupd_function
 
 	local env_name=$1
 	local new_version=$2
@@ -1114,7 +1126,7 @@ set_current_version() {
 # Parameters:
 # - ENVIRONMENT_NAME: the name of the test environmnt to act upon
 # - NEW_VERSION: the version for the target to be set to
-set_latest_version() {
+set_latest_version() { # swupd_function
 
 	local env_name=$1
 	local new_version=$2
@@ -1144,7 +1156,7 @@ set_latest_version() {
 # - VERSION: the version of the server side content
 # - FROM_VERSION: the previous version, if nothing is selected defaults to 0
 # - FORMAT: the format to use for the version
-create_version() {
+create_version() { # swupd_function
 
 	local partial=false
 	local release_files=false
@@ -1272,7 +1284,7 @@ create_version() {
 # - ENVIRONMENT_NAME: the name of the test environment, this should be typically the test name
 # - VERSION: the version to use for the test environment, if not specified the default is 10
 # - FORMAT: the format number to use initially in the environment
-create_test_environment() { 
+create_test_environment() { # swupd_function
 
 	local empty=false
 	local release_files=false
@@ -1342,7 +1354,7 @@ create_test_environment() {
 # Destroys a test environment
 # Parameters:
 # - ENVIRONMENT_NAME: the name of the test environment to be deleted
-destroy_test_environment() { 
+destroy_test_environment() { # swupd_function
 
 	local env_name=$1
 
@@ -1369,7 +1381,7 @@ destroy_test_environment() {
 }
 
 # creates a web server to host fake swupd content with or without certifiates
-start_web_server() {
+start_web_server() { # swupd_function
 
 	local port
 	local server_args
@@ -1454,7 +1466,7 @@ start_web_server() {
 }
 
 # kills the test web server and removes the files it creates
-destroy_web_server() {
+destroy_web_server() { # swupd_function
 
 	local server_pid
 
@@ -1469,7 +1481,7 @@ destroy_web_server() {
 }
 
 # Creates a bundle in the test environment. The bundle can contain files, directories or symlinks.
-create_bundle() { 
+create_bundle() { # swupd_function
 
 	cb_usage() { 
 		cat <<-EOM
@@ -1716,7 +1728,7 @@ create_bundle() {
 # - -L: if this option is set the bundle is removed from the target-dir only,
 #       otherwise it is removed from target-dir and web-dir
 # - BUNDLE_MANIFEST: the manifest of the bundle to be removed
-remove_bundle() {
+remove_bundle() { # swupd_function
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
@@ -1780,7 +1792,7 @@ remove_bundle() {
 # Parameters:
 # - BUNDLE_MANIFEST: the manifest of the bundle to be installed
 
-install_bundle() {
+install_bundle() { # swupd_function
 
 	local bundle_manifest=$1
 	local target_path
@@ -1852,7 +1864,7 @@ install_bundle() {
 # - OPTION: the kind of update to be performed { --add, --add-dir, --delete, --ghost, --rename, --rename-legacy, --update }
 # - FILE_NAME: file or directory of the bundle to add or update
 # - NEW_NAME: when --rename is chosen this parameter receives the new name to assign
-update_bundle() {
+update_bundle() { # swupd_function
 
 	local partial=false
 	[ "$1" = "-p" ] && { partial=true ; shift ; }
@@ -2167,7 +2179,7 @@ update_bundle() {
 # - BUNDLE: the name of the bundle
 # - ITEM: the file or directory to be added into the pack
 # - FROM_VERSION: the from version for the pack, if not specified a zero pack is asumed
-add_to_pack() {
+add_to_pack() { # swupd_function
 
 	local bundle=$1
 	local item=$2
@@ -2203,7 +2215,7 @@ add_to_pack() {
 # Cleans up the directories in the state dir
 # Parameters:
 # - ENV_NAME: the name of the test environment to have the state dir cleaned up
-clean_state_dir() {
+clean_state_dir() { # swupd_function
 
 	local env_name=$1
 	# If no parameters are received show usage
@@ -2225,7 +2237,7 @@ clean_state_dir() {
 # Creates a new test case based on a template
 # Parameters:
 # - NAME: the name (and path) of the test to be generated
-generate_test() {
+generate_test() { # swupd_function
 
 	local name=$1
 	local path
@@ -2391,7 +2403,7 @@ use_ignore_list() {
 
 }
 
-assert_status_is() {
+assert_status_is() { # assertion
 
 	local expected_status=$1
 	validate_param "$expected_status"
@@ -2416,7 +2428,7 @@ assert_status_is() {
 
 }
 
-assert_status_is_not() {
+assert_status_is_not() { # assertion
 
 	local not_expected_status=$1
 	validate_param "$not_expected_status"
@@ -2441,7 +2453,7 @@ assert_status_is_not() {
 
 }
 
-assert_dir_exists() {
+assert_dir_exists() { # assertion
 
 	local vdir=$1
 	validate_param "$vdir"
@@ -2453,7 +2465,7 @@ assert_dir_exists() {
 
 }
 
-assert_dir_not_exists() {
+assert_dir_not_exists() { # assertion
 
 	local vdir=$1
 	validate_param "$vdir"
@@ -2465,7 +2477,7 @@ assert_dir_not_exists() {
 
 }
 
-assert_file_exists() {
+assert_file_exists() { # assertion
 
 	local vfile=$1
 	validate_param "$vfile"
@@ -2477,7 +2489,7 @@ assert_file_exists() {
 
 }
 
-assert_file_not_exists() {
+assert_file_not_exists() { # assertion
 
 	local vfile=$1
 	validate_param "$vfile"
@@ -2489,7 +2501,7 @@ assert_file_not_exists() {
 
 }
 
-assert_in_output() {
+assert_in_output() { # assertion
 
 	local actual_output
 	local ignore_switch=true
@@ -2508,7 +2520,7 @@ assert_in_output() {
 
 }
 
-assert_not_in_output() {
+assert_not_in_output() { # assertion
 
 	local actual_output
 	local ignore_switch=true
@@ -2527,7 +2539,7 @@ assert_not_in_output() {
 
 }
 
-assert_is_output() {
+assert_is_output() { # assertion
 
 	local actual_output
 	local ignore_switch=true
@@ -2546,7 +2558,7 @@ assert_is_output() {
 
 }
 
-assert_is_not_output() {
+assert_is_not_output() { # assertion
 
 	local actual_output
 	local ignore_switch=true
@@ -2565,7 +2577,7 @@ assert_is_not_output() {
 
 }
 
-assert_regex_in_output() {
+assert_regex_in_output() { # assertion
 
 	local actual_output
 	local ignore_switch=true
@@ -2584,7 +2596,7 @@ assert_regex_in_output() {
 
 }
 
-assert_regex_not_in_output() {
+assert_regex_not_in_output() { # assertion
 
 	local actual_output
 	local ignore_switch=true
@@ -2603,7 +2615,7 @@ assert_regex_not_in_output() {
 
 }
 
-assert_regex_is_output() {
+assert_regex_is_output() { # assertion
 
 	local actual_output
 	local ignore_switch=true
@@ -2622,7 +2634,7 @@ assert_regex_is_output() {
 
 }
 
-assert_regex_is_not_output() {
+assert_regex_is_not_output() { # assertion
 
 	local actual_output
 	local ignore_switch=true
@@ -2641,7 +2653,7 @@ assert_regex_is_not_output() {
 
 }
 
-assert_equal() {
+assert_equal() { # assertion
 
 	local val1=$1
 	local val2=$2
@@ -2654,7 +2666,7 @@ assert_equal() {
 
 }
 
-assert_not_equal() {
+assert_not_equal() { # assertion
 
 	local val1=$1
 	local val2=$2
@@ -2667,7 +2679,7 @@ assert_not_equal() {
 
 }
 
-assert_files_equal() {
+assert_files_equal() { # assertion
 
 	local val1=$1
 	local val2=$2
@@ -2678,7 +2690,7 @@ assert_files_equal() {
 
 }
 
-assert_files_not_equal() {
+assert_files_not_equal() { # assertion
 
 	local val1=$1
 	local val2=$2
@@ -2691,5 +2703,47 @@ assert_files_not_equal() {
 	else
 		return 0
 	fi
+
+}
+
+# Displays a menu of functions that can be used from within a test. Functions considered
+# "internal" are not displayed.
+# Functions are not included in the list by default, to mark a function to be included in
+# the help menu, add a comment immediatelly after the function opening bracket with either
+# the keyword swupd_function or assertion depending on the type of function.
+# Parameters:
+# - keyword: a word that could be used to filter functions
+testlib() {
+
+	local keyword=$1
+	local funcs
+	local assertions
+
+	funcs=$(grep "$keyword.*() { [#] swupd_function" "$FUNC_DIR"/testlib.bash | cut -f1 -d "(")
+	assertions=$(grep "$keyword.*() { [#] assertion" "$FUNC_DIR"/testlib.bash | cut -f1 -d "(")
+
+	echo ""
+	if [ -n "$funcs" ]; then
+		echo "------------------------------------------------------"
+		echo "|    Functions provided by the SWUPD test library    |"
+		echo "------------------------------------------------------"
+		if [ -n "$keyword" ]; then
+			echo -e "\\nTestlib functions with the '$keyword' keyword:\\n"
+		fi
+		echo "$funcs" | sort
+	fi
+	echo ""
+
+	if [ -n "$assertions" ]; then
+		echo ""
+		echo "------------------------------------------------------"
+		echo "|                     Assertions                     |"
+		echo "------------------------------------------------------"
+		if [ -n "$keyword" ]; then
+			echo -e "\\nAssertions with the '$keyword' keyword:\\n"
+		fi
+		echo "$assertions"
+	fi
+	echo ""
 
 }

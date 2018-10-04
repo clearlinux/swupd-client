@@ -127,31 +127,32 @@ int get_current_version(char *path_prefix)
 	return v;
 }
 
-void read_versions(int *current_version,
-		   int *server_version,
-		   char *path_prefix)
+int read_versions(int *current_version, int *server_version, char *path_prefix)
 {
 	*current_version = get_current_version(path_prefix);
-
 	*server_version = get_latest_version(NULL);
-}
-
-int check_versions(int *current_version,
-		   int *server_version,
-		   int requested_version,
-		   char *path_prefix)
-{
-	read_versions(current_version, server_version, path_prefix);
 
 	if (*current_version < 0) {
 		fprintf(stderr, "Error: Unable to determine current OS version\n");
+		return ECURRENT_VERSION;
+	}
+	if (*server_version < 0) {
+		fprintf(stderr, "Error: Unable to determine the server version\n");
+		return ENOSWUPDSERVER;
+	}
+
+	return 0;
+}
+
+int check_versions(int *current_version, int *server_version, int requested_version, char *path_prefix)
+{
+	if (read_versions(current_version, server_version, path_prefix) != 0) {
 		return -1;
 	}
 	if (*current_version == 0) {
 		fprintf(stderr, "Update from version 0 not supported yet.\n");
 		return -1;
 	}
-
 	if (requested_version != -1) {
 		if (requested_version <= *current_version) {
 			fprintf(stderr, "Requested version for update (%d) must be greater than current version (%d)\n",

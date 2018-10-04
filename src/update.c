@@ -322,7 +322,7 @@ version_check:
 	grabtime_stop(&times); // Close step 1
 	grabtime_start(&times, "Load Manifests:");
 load_current_mom:
-	/* Step 3: setup manifests */
+	/* Step 3: load FROM/TO MoMs */
 
 	/* get the from/to MoM manifests */
 	if (system_on_mix()) {
@@ -400,9 +400,32 @@ load_server_mom:
 	current_manifest->manifests = current_manifest_updates;
 	server_manifest->manifests = server_manifest_updates;
 
+	set_subscription_versions(server_manifest, current_manifest, &update_subs);
+
 	grabtime_stop(&times); // Close step 2
+
+	/* Step 4: Download packs */
+	grabtime_start(&times, "Download Packs");
+
+download_packs:
+	ret = download_subscribed_packs(update_subs, server_manifest, false);
+	if (ret) {
+		// packs don't always exist, tolerate that but not ENONET
+		if (retries < MAX_TRIES) {
+			increment_retries(&retries, &timeout);
+			printf("Retry #%d downloading packs\n", retries);
+			goto download_packs;
+		}
+		printf("Pack download failed\n");
+		ret = EDOWNLOADPACKS;
+		goto clean_exit;
+	}
+	grabtime_stop(&times);
+
 	grabtime_start(&times, "Recurse and Consolidate Manifests");
 load_current_submanifests:
+	/* Step 5: load subscribed manifests */
+
 	/* Read the current collective of manifests that we are subscribed to.
 	 * First load up the old (current) manifests. Statedir could have been cleared
 	 * or corrupt, so don't assume things are already there. Updating subscribed
@@ -425,7 +448,6 @@ load_current_submanifests:
 	current_manifest->files = files_from_bundles(current_manifest->submanifests);
 	current_manifest->files = consolidate_files(current_manifest->files);
 
-	set_subscription_versions(server_manifest, current_manifest, &update_subs);
 	link_submanifests(current_manifest, server_manifest, initial_subs, initial_subs, false);
 
 load_server_submanifests:
@@ -447,38 +469,20 @@ load_server_submanifests:
 	server_manifest->files = files_from_bundles(server_manifest->submanifests);
 	server_manifest->files = consolidate_files(server_manifest->files);
 
-	set_subscription_versions(server_manifest, current_manifest, &update_subs);
 	link_submanifests(current_manifest, server_manifest, initial_subs, update_subs, true);
 
 	grabtime_stop(&times);
-	/* Step 4: check disk state before attempting update */
+
+	/* Step 6: check disk state before attempting update */
 	grabtime_start(&times, "Pre-Update Scripts");
 	run_preupdate_scripts(server_manifest);
-	grabtime_stop(&times);
-
-	grabtime_start(&times, "Download Packs");
-
-download_packs:
-	/* Step 5: get the packs and untar */
-	ret = download_subscribed_packs(update_subs, server_manifest, false);
-	if (ret) {
-		// packs don't always exist, tolerate that but not ENONET
-		if (retries < MAX_TRIES) {
-			increment_retries(&retries, &timeout);
-			printf("Retry #%d downloading packs\n", retries);
-			goto download_packs;
-		}
-		printf("Pack download failed\n");
-		ret = EDOWNLOADPACKS;
-		goto clean_exit;
-	}
 	grabtime_stop(&times);
 
 	grabtime_start(&times, "Apply deltas");
 	apply_deltas(current_manifest);
 	grabtime_stop(&times);
 
-	/* Step 6: some more housekeeping */
+	/* Step 7: some more housekeeping */
 	/* TODO: consider trying to do less sorting of manifests */
 
 	grabtime_start(&times, "Create Update List");
@@ -497,7 +501,7 @@ download_packs:
 
 	print_statistics(current_version, server_version);
 	grabtime_stop(&times);
-	/* Step 7: apply the update */
+	/* Step 8: apply the update */
 
 	/*
 	 * need update list in filename order to insure directories are

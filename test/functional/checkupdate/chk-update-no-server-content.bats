@@ -14,6 +14,6 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS_NO_CERT"
 	assert_status_is_not 0
-	assert_is_output "Error: server does not report any version"
+	assert_is_output "Error: Unable to determine the server version"
 
 }

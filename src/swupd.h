@@ -207,7 +207,7 @@ extern int main_verify(int current_version);
 extern int walk_tree(struct manifest *, const char *, bool, const regex_t *);
 
 extern int get_latest_version(char *v_url);
-extern void read_versions(int *current_version, int *server_version, char *path_prefix);
+extern int read_versions(int *current_version, int *server_version, char *path_prefix);
 extern int check_versions(int *current_version, int *server_version, int requested_version, char *path_prefix);
 extern int get_current_version(char *path_prefix);
 

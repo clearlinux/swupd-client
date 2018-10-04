@@ -87,7 +87,7 @@ static const struct option prog_opts[] = {
 	{ "time", no_argument, 0, 't' },
 	{ "no-scripts", no_argument, 0, 'N' },
 	{ "no-boot-update", no_argument, 0, 'b' },
-	{ "max-parallel-pack-downloads", required_argument, 0, 'D' },
+	{ "max-parallel-downloads", required_argument, 0, 'D' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -119,7 +119,7 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -t, --time              Show verbose time output for swupd operations\n");
 	fprintf(stderr, "   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
 	fprintf(stderr, "   -b, --no-boot-update    Do not install boot files to the boot partition (containers)\n");
-	fprintf(stderr, "   -D, --max-parallel-pack-downloads=[n] Set the maximum number of parallel pack downloads\n");
+	fprintf(stderr, "   -D, --max-parallel-downloads=[n] Set the maximum number of parallel downloads\n");
 	fprintf(stderr, "\n");
 }
 
@@ -276,8 +276,8 @@ static bool parse_options(int argc, char **argv)
 			cmdline_option_picky_whitelist = optarg;
 			break;
 		case 'D':
-			if (sscanf(optarg, "%d", &max_parallel_pack_downloads) != 1) {
-				fprintf(stderr, "Invalid --max-parallel-pack-downloads argument\n\n");
+			if (sscanf(optarg, "%d", &max_parallel_downloads) != 1) {
+				fprintf(stderr, "Invalid --max-parallel-downloads argument\n\n");
 				goto err;
 			}
 			break;

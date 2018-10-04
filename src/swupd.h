@@ -83,6 +83,7 @@ struct manifest {
 	struct list *manifests;    /* struct file for possible manifests */
 	struct list *submanifests; /* struct manifest for subscribed manifests */
 	struct list *includes;     /* manifest names included in manifest */
+	bool use_delta_manifest;   /* when true, try loading delta manifests and fallback to full */
 	char *component;
 	unsigned int is_mix : 1;
 };

@@ -91,7 +91,7 @@ static struct manifest *alloc_manifest(int version, char *component)
 	return manifest;
 }
 
-static struct manifest *manifest_from_file(int version, char *component, bool header_only, bool latest, bool is_mix, bool load_iterative, bool is_included)
+static struct manifest *manifest_from_file(int version, int delta_manifest_state_dir, char *component, bool header_only, bool latest, bool is_mix, bool load_iterative, bool is_included)
 {
 	FILE *infile;
 	char line[MANIFEST_LINE_MAXLEN], *c, *c2;
@@ -113,7 +113,15 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 	} else {
 		basedir = MIX_STATE_DIR;
 	}
-	string_or_die(&filename, "%s/%i/Manifest.%s", basedir, version, component);
+
+	/* The delta_manifest_state_dir specifies the version directory within the state directory
+	 * to look for a delta manifest. When delta_manifest_state_dir is greater than 0, load a
+	 * delta manifest. Otherwise, load its full manifest equivalent. */
+	if (delta_manifest_state_dir > 0) {
+		string_or_die(&filename, "%s/%i/Manifest.%s.D.%i", basedir, delta_manifest_state_dir, component, version);
+	} else {
+		string_or_die(&filename, "%s/%i/Manifest.%s", basedir, version, component);
+	}
 
 	infile = fopen(filename, "rbm");
 	if (infile == NULL) {
@@ -234,6 +242,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 	manifest->manifest_version = manifest_enc_version;
 	manifest->minversion = minversion;
 	manifest->includes = includes;
+	manifest->use_delta_manifest = false;
 
 	if (header_only) {
 		fclose(infile);
@@ -581,7 +590,7 @@ verify_mom:
 		return NULL;
 	}
 
-	manifest = manifest_from_file(version, "MoM", false, latest, mix_exists, load_iterative, false);
+	manifest = manifest_from_file(version, 0, "MoM", false, latest, mix_exists, load_iterative, false);
 
 	if (manifest == NULL) {
 		if (retried == false) {
@@ -666,41 +675,67 @@ struct manifest *load_manifest(int version, struct file *file, struct manifest *
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
+	int delta_manifest_state_dir = 0;
+	bool delta_manifest = mom->use_delta_manifest;
 	bool retried = false;
 
 retry_load:
-	ret = retrieve_manifests(version, file->filename, file->is_mix);
-	if (ret != 0) {
-		if (file->is_iterative == 1 && file->full_manifest && !retried) {
-			/* Since the iterative manifest failed to be loaded,
-			 * fall back to using the full manifest */
-			file = file->full_manifest;
-			retried = true;
-			goto retry_load;
+	/* TODO: When a delta manifest is not generated because it has no value,
+	 *       a full manifest will be downloaded as a fallback. If the delta
+	 *       pack included an identifier to skip the download, this unnecesary
+	 *       manifest could be skipped over. Issue 616 */
+
+	/* When use_delta_manifest is set to true in the MoM, attempt to load a
+	 * delta manifest and fallback to load a full manifest on failure. The
+	 * delta_manifest_state_dir variable (peer bundle's last change) is used
+	 * by the manifest_from_file function to determine which state directory to
+	 * look for a delta manifest. */
+	if (delta_manifest && file->peer != NULL) {
+		delta_manifest_state_dir = file->peer->last_change;
+	} else {
+		delta_manifest = false;
+		delta_manifest_state_dir = 0;
+
+		ret = retrieve_manifests(version, file->filename, file->is_mix);
+		if (ret != 0) {
+			if (file->is_iterative == 1 && file->full_manifest && !retried) {
+				/* Since the iterative manifest failed to be loaded,
+				 * fall back to using the full manifest */
+				file = file->full_manifest;
+				retried = true;
+				goto retry_load;
+			}
+			fprintf(stderr, "Failed to retrieve %d %s manifest\n", version, file->filename);
+			return NULL;
 		}
-		fprintf(stderr, "Failed to retrieve %d %s manifest\n", version, file->filename);
-		return NULL;
-	}
 
-	if (!header_only) {
-		ret = verify_bundle_hash(mom, file);
-	}
-
-	if (ret != 0) {
-		if (retried == false) {
-			remove_manifest_files(file->filename, version, file->hash);
-			retried = true;
-			goto retry_load;
+		if (!header_only) {
+			ret = verify_bundle_hash(mom, file);
 		}
-		return NULL;
+
+		if (ret != 0) {
+			if (retried == false) {
+				remove_manifest_files(file->filename, version, file->hash);
+				retried = true;
+				goto retry_load;
+			}
+			return NULL;
+		}
 	}
 
-	manifest = manifest_from_file(version, file->filename, header_only, false, file->is_mix, false, file->is_included);
+	manifest = manifest_from_file(version, delta_manifest_state_dir, file->filename, header_only, false, file->is_mix, false, file->is_included);
 
 	if (manifest == NULL) {
 		if (retried == false) {
-			remove_manifest_files(file->filename, version, file->hash);
-			retried = true;
+			/* After failing to load a delta manifest, attempt to load a full
+			 * manifest instead. */
+			if (delta_manifest) {
+				delta_manifest = false;
+				delta_manifest_state_dir = 0;
+			} else {
+				remove_manifest_files(file->filename, version, file->hash);
+				retried = true;
+			}
 			goto retry_load;
 		}
 		fprintf(stderr, "Failed to load %d %s manifest\n", version, file->filename);
@@ -724,7 +759,7 @@ struct manifest *load_manifest_full(int version, bool mix)
 		return NULL;
 	}
 
-	manifest = manifest_from_file(version, "full", false, false, false, false, false);
+	manifest = manifest_from_file(version, 0, "full", false, false, false, false, false);
 
 	if (manifest == NULL) {
 		fprintf(stderr, "Failed to load %d Manifest.full\n", version);

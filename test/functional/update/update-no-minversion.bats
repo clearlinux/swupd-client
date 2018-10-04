@@ -12,13 +12,13 @@ test_setup() {
 	create_version "$TEST_NAME" 20 10 staging
 
 	update_bundle -p "$TEST_NAME" bundle1 --add /file4
-	update_bundle -p "$TEST_NAME" bundle1 --update /file1
-	update_bundle "$TEST_NAME" bundle1 --delete /file2
+	update_bundle -p "$TEST_NAME" bundle1 --delete /file2
+	update_bundle -i "$TEST_NAME" bundle1 --update /file1
 }
 
 @test "Update when missing minversion header" {
 
-	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD update $SWUPD_OPTS_KEEPCACHE"
 	assert_status_is 0
 
 	expected_output=$(cat <<-EOM
@@ -46,6 +46,7 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/file1
 	assert_file_exists "$TARGETDIR"/file3
 	assert_file_exists "$TARGETDIR"/file4
+	assert_file_exists "$STATEDIR"/10/Manifest.bundle1
 
 	assert_file_not_exists "$TARGETDIR"/file2
 }

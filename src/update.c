@@ -367,6 +367,12 @@ load_server_mom:
 	retries = 0;
 	timeout = 10;
 
+	/* Delta manifests are only safe to use when the server MoM specifies
+	 * the minversion */
+	if (server_manifest->minversion > 0) {
+		current_manifest->use_delta_manifest = true;
+	}
+
 	/* Backup the original manifests */
 	current_manifests = current_manifest->manifests;
 	server_manifests = server_manifest->manifests;
@@ -417,6 +423,8 @@ load_server_mom:
 load_current_submanifests:
 	/* Step 5: load subscribed manifests */
 
+	link_submanifests(current_manifest, server_manifest, initial_subs, initial_subs, false);
+
 	/* Read the current collective of manifests that we are subscribed to.
 	 * First load up the old (current) manifests. Statedir could have been cleared
 	 * or corrupt, so don't assume things are already there. Updating subscribed
@@ -438,8 +446,6 @@ load_current_submanifests:
 	/* consolidate the current collective manifests down into one in memory */
 	current_manifest->files = files_from_bundles(current_manifest->submanifests);
 	current_manifest->files = consolidate_files(current_manifest->files);
-
-	link_submanifests(current_manifest, server_manifest, initial_subs, initial_subs, false);
 
 load_server_submanifests:
 	/* read the new collective of manifests that we are subscribed to in the new MoM */

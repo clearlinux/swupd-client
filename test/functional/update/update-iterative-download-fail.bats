@@ -26,9 +26,10 @@ test_setup() {
 
 	# since the iterative manifest was deleted the full manifest should
 	# have been downloaded
-	assert_file_exists "$STATEDIR"/10/Manifest.test-bundle
+	assert_file_exists "$STATEDIR"/20/Manifest.test-bundle.D.10
 	assert_file_exists "$STATEDIR"/20/Manifest.test-bundle
 	# verify not necessary manifests are not downloaded
+	assert_file_not_exists "$STATEDIR"/10/Manifest.test-bundle
 	assert_file_not_exists "$STATEDIR"/10/Manifest.os-core
 	assert_file_not_exists "$STATEDIR"/20/Manifest.os-core
 	# verify the iterative manifest is in the MoM

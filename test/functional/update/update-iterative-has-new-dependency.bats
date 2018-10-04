@@ -28,10 +28,11 @@ test_setup() {
 	# verify downloaded manifests
 	# (test-bundle-2 was added in version 20 but it was not installed in the
 	# target system, so its iterative manifest should not be used)
-	assert_file_exists "$STATEDIR"/10/Manifest.test-bundle-1
+	assert_file_exists "$STATEDIR"/20/Manifest.test-bundle-1.D.10
 	assert_file_exists "$STATEDIR"/20/Manifest.test-bundle-1.I.10
 	assert_file_exists "$STATEDIR"/20/Manifest.test-bundle-2
 	# verify not necessary manifests are not downloaded
+	assert_file_not_exists "$STATEDIR"/10/Manifest.test-bundle-1
 	assert_file_not_exists "$STATEDIR"/10/Manifest.test-bundle-2
 	assert_file_not_exists "$STATEDIR"/20/Manifest.test-bundle-1
 	assert_file_not_exists "$STATEDIR"/20/Manifest.test-bundle-2.I.10

@@ -247,6 +247,13 @@ static bool is_manifest_delta(const char UNUSED_PARAM *dir, const struct dirent 
 	return !strncmp(entry->d_name, prefix, prefix_len);
 }
 
+static bool is_delta_manifest(const char UNUSED_PARAM *dir, const struct dirent *entry)
+{
+	static const char delta_str[] = ".D.";
+
+	return is_manifest(dir, entry) && strstr(entry->d_name, delta_str) != NULL;
+}
+
 static char *read_mom_contents(int version)
 {
 	char *mom_path = NULL;
@@ -341,6 +348,7 @@ static int clean_staged_manifests(const char *path, bool dry_run, bool all)
 		if (mom_contents && strstr(mom_contents, name)) {
 			/* Remove all hash-hint manifest files. */
 			ret = remove_if(version_dir, dry_run, is_hashed_manifest);
+			ret |= remove_if(version_dir, dry_run, is_delta_manifest);
 		} else {
 			/* Remove all manifest files, including hash-hints */
 			ret = remove_if(version_dir, dry_run, is_manifest);

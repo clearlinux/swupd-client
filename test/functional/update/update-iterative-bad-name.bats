@@ -33,13 +33,16 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/test-file2
 	assert_file_exists "$TARGETDIR"/test-file3
 	# verify downloaded manifests
-	assert_file_exists "$STATEDIR"/10/Manifest.test-bundle-1
-	assert_file_exists "$STATEDIR"/10/Manifest.test-bundle-2
-	assert_file_exists "$STATEDIR"/10/Manifest.test-bundle-3
 	assert_file_exists "$STATEDIR"/20/Manifest.test-bundle-1
 	assert_file_exists "$STATEDIR"/20/Manifest.test-bundle-2
 	assert_file_exists "$STATEDIR"/20/Manifest.test-bundle-3
+	assert_file_exists "$STATEDIR"/20/Manifest.test-bundle-1.D.10
+	assert_file_exists "$STATEDIR"/20/Manifest.test-bundle-2.D.10
+	assert_file_exists "$STATEDIR"/20/Manifest.test-bundle-3.D.10
 	# verify not necessary manifests are not downloaded
+	assert_file_not_exists "$STATEDIR"/10/Manifest.test-bundle-1
+	assert_file_not_exists "$STATEDIR"/10/Manifest.test-bundle-2
+	assert_file_not_exists "$STATEDIR"/10/Manifest.test-bundle-3
 	assert_file_not_exists "$STATEDIR"/20/Manifest.test-bundle-1.F.123
 	assert_file_not_exists "$STATEDIR"/20/Manifest.test-bundle-2.I.1A0
 	assert_file_not_exists "$STATEDIR"/20/Manifest.test-bundle-3I10

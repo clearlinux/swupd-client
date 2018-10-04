@@ -2071,6 +2071,10 @@ update_bundle() {
 		contentsize=$((contentsize + (new_fsize - fsize)))
 		# update the zero-pack with the new file
 		add_to_pack "$bundle" "$version_path"/files/"$new_fhash"
+
+		# TODO: Delta packs should be generated for an update from the current version
+		#       to the latest version. If a bundle is updated more than once in a single
+		#       update, an incorrect delta pack will be generated. Issue 615
 		# create the delta-file
 		delta_name="$oldversion-$version-$fhash-$new_fhash"
 		sudo bsdiff "$oldversion_path"/files/"$fhash" "$version_path"/files/"$new_fhash" "$version_path"/delta/"$delta_name"

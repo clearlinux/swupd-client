@@ -26,11 +26,12 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/baz/test-file1
 	assert_file_not_exists "$TARGETDIR"/baz/test-file2
 	# verify downloaded manifests
-	assert_file_exists "$STATEDIR"/10/Manifest.test-bundle-1
 	assert_file_exists "$STATEDIR"/10/Manifest.test-bundle-2
+	assert_file_exists "$STATEDIR"/20/Manifest.test-bundle-1.D.10
 	assert_file_exists "$STATEDIR"/20/Manifest.test-bundle-1.I.10
 	assert_file_exists "$STATEDIR"/30/Manifest.test-bundle-2.I.10
 	# verify not necessary manifests are not downloaded
+	assert_file_not_exists "$STATEDIR"/10/Manifest.test-bundle-1
 	assert_file_not_exists "$STATEDIR"/20/Manifest.test-bundle-1
 	assert_file_not_exists "$STATEDIR"/30/Manifest.test-bundle-2
 	assert_file_not_exists "$STATEDIR"/10/Manifest.os-core
@@ -56,6 +57,6 @@ test_setup() {
 		Update successful. System updated from version 10 to version 30
 	EOM
 	)
-	assert_is_output "$expected_output"
 
+	assert_is_output "$expected_output"
 }

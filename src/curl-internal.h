@@ -22,11 +22,6 @@ struct curl_file {
 extern CURLcode swupd_download_file_create(struct curl_file *file);
 
 /*
- * Create a file in disk to start the download, using append mode.
- */
-extern CURLcode swupd_download_file_append(struct curl_file *file);
-
-/*
  * Close file after the download is finished.
  */
 extern CURLcode swupd_download_file_complete(CURLcode curl_ret, struct curl_file *file);

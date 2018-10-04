@@ -284,7 +284,7 @@ CURLcode swupd_download_file_create(struct curl_file *file)
 	return CURLE_OK;
 }
 
-CURLcode swupd_download_file_append(struct curl_file *file)
+static CURLcode swupd_download_file_append(struct curl_file *file)
 {
 	file->fh = fopen(file->path, "a");
 	if (!file->fh) {
@@ -322,8 +322,8 @@ CURLcode swupd_download_file_complete(CURLcode curl_ret, struct curl_file *file)
  *
  * NOTE: See full_download() for multi/asynchronous downloading of fullfiles.
  */
-int swupd_curl_get_file_full(const char *url, char *filename,
-			     struct curl_file_data *in_memory_file, bool resume_ok)
+static int swupd_curl_get_file_full(const char *url, char *filename,
+				    struct curl_file_data *in_memory_file, bool resume_ok)
 {
 	static bool resume_download_supported = true;
 

@@ -160,7 +160,7 @@ static int download_pack(void *download_handle, int oldversion, int newversion, 
 	return err;
 }
 
-size_t get_max_xfer()
+static size_t get_max_xfer()
 {
 	if (max_parallel_pack_downloads > 0) {
 		return max_parallel_pack_downloads;

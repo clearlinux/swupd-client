@@ -724,6 +724,7 @@ int verify_main(int argc, char **argv)
 		goto clean_args_and_exit;
 	}
 
+	times = init_timelist();
 	/* Gather current manifests */
 	int sys_version = get_current_version(path_prefix);
 	if (!version) {
@@ -757,8 +758,6 @@ int verify_main(int argc, char **argv)
 	if (ret != 0) {
 		fprintf(stderr, "Failed to remove prior downloads, carrying on anyway\n");
 	}
-
-	times = init_timelist();
 
 	grabtime_start(&times, "Load and recurse Manifests");
 

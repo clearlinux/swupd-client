@@ -218,8 +218,7 @@ extern void apply_heuristics(struct file *file);
 
 extern int file_sort_filename(const void *a, const void *b);
 extern int file_sort_filename_reverse(const void *a, const void *b);
-extern struct manifest *load_mom_err(int version, bool latest, bool mix_exists, int *err);
-extern struct manifest *load_mom(int version, bool latest, bool mix_exists);
+extern struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err);
 extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only);
 extern struct manifest *load_manifest_full(int version, bool mix);
 extern struct list *create_update_list(struct manifest *server);

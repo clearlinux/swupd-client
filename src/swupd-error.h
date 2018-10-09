@@ -5,7 +5,7 @@
 
 #define EBUNDLE_MISMATCH 2      /* at least one local bundle mismatches from MoM */
 #define EBUNDLE_REMOVE 3	/* cannot delete local bundle filename */
-#define EMOM_NOTFOUND 4		/* MoM cannot be loaded into memory (this could imply network issue) */
+#define EMOM_LOAD 4		/* MoM cannot be loaded into memory (this could imply network issue) */
 #define ETYPE_CHANGED_FILE_RM 5 /* do_staging() couldn't delete a file which must be deleted */
 #define EDIR_OVERWRITE 6	/* do_staging() couldn't overwrite a directory */
 #define EDOTFILE_WRITE 7	/* do_staging() couldn't create a dotfile */

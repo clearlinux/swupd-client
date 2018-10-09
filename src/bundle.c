@@ -56,9 +56,9 @@ int list_installable_bundles()
 	}
 
 	mix_exists = (check_mix_exists() & system_on_mix());
-	MoM = load_mom(current_version, false, mix_exists);
+	MoM = load_mom(current_version, false, mix_exists, NULL);
 	if (!MoM) {
-		return EMOM_NOTFOUND;
+		return EMOM_LOAD;
 	}
 
 	list = MoM->manifests = list_sort(MoM->manifests, file_sort_filename);
@@ -87,9 +87,9 @@ static int load_bundle_manifest(const char *bundle_name, struct list *subs, int 
 
 	*submanifest = NULL;
 
-	mom = load_mom(version, false, false);
+	mom = load_mom(version, false, false, NULL);
 	if (!mom) {
-		return EMOM_NOTFOUND;
+		return EMOM_LOAD;
 	}
 
 	sub_list = recurse_manifest(mom, subs, bundle_name, false);
@@ -203,10 +203,10 @@ int show_included_bundles(char *bundle_name)
 		goto out;
 	}
 
-	mom = load_mom(current_version, false, false);
+	mom = load_mom(current_version, false, false, NULL);
 	if (!mom) {
 		fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
-		ret = EMOM_NOTFOUND;
+		ret = EMOM_LOAD;
 		goto out;
 	}
 
@@ -301,10 +301,10 @@ int show_bundle_reqd_by(const char *bundle_name, bool server)
 		goto out;
 	}
 
-	current_manifest = load_mom(version, server, false);
+	current_manifest = load_mom(version, server, false, NULL);
 	if (!current_manifest) {
 		fprintf(stderr, "Unable to download/verify %d Manifest.MoM\n", version);
-		ret = EMOM_NOTFOUND;
+		ret = EMOM_LOAD;
 		goto out;
 	}
 
@@ -540,10 +540,10 @@ int remove_bundles(char **bundles)
 			fprintf(stderr, "Removing bundle: %s\n", bundle);
 		}
 
-		current_mom = load_mom(current_version, false, mix_exists);
+		current_mom = load_mom(current_version, false, mix_exists, NULL);
 		if (!current_mom) {
 			fprintf(stderr, "Unable to download/verify %d Manifest.MoM\n", current_version);
-			ret = EMOM_NOTFOUND;
+			ret = EMOM_LOAD;
 			bad++;
 			goto out_free_curl;
 		}
@@ -1052,10 +1052,10 @@ int install_bundles_frontend(char **bundles)
 
 	mix_exists = (check_mix_exists() & system_on_mix());
 
-	mom = load_mom(current_version, false, mix_exists);
+	mom = load_mom(current_version, false, mix_exists, NULL);
 	if (!mom) {
 		fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
-		ret = EMOM_NOTFOUND;
+		ret = EMOM_LOAD;
 		goto clean_and_exit;
 	}
 

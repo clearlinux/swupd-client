@@ -765,9 +765,9 @@ int verify_main(int argc, char **argv)
 	 * disable checks for mixer state so the user can easily switch back to their
 	 * normal update stream */
 	if (version != sys_version) {
-		official_manifest = load_mom(version, false, false);
+		official_manifest = load_mom(version, false, false, NULL);
 	} else {
-		official_manifest = load_mom(version, false, system_on_mix());
+		official_manifest = load_mom(version, false, system_on_mix(), NULL);
 	}
 
 	if (!official_manifest) {
@@ -776,7 +776,7 @@ int verify_main(int argc, char **argv)
 		 * not provided.
 		 */
 		fprintf(stderr, "Unable to download/verify %d Manifest.MoM\n", version);
-		ret = EMOM_NOTFOUND;
+		ret = EMOM_LOAD;
 
 		/* No repair is possible without a manifest, nor is accurate reporting
 		 * of the state of the system. Therefore cleanup, report failure and exit

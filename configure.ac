@@ -241,18 +241,6 @@ AS_IF(
 )
 
 AC_ARG_WITH(
-  [systemdsystemunitdir],
-  [AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [path to systemd system service dir @<:@default=/usr/lib/systemd/system@:>@])],
-  [unitpath=${withval}],
-  [unitpath="$($PKG_CONFIG --variable=systemdsystemunitdir systemd)"]
-)
-AS_IF(
-  [test -z "${unitpath}"],
-  [unitpath=/usr/lib/systemd/system]
-)
-AC_SUBST(SYSTEMD_UNITDIR, [${unitpath}])
-
-AC_ARG_WITH(
   [pre-update],
   [AS_HELP_STRING([--with-pre-update=EXE], [Path to the pre-update executable])],
   [AC_DEFINE_UNQUOTED([PRE_UPDATE], ["$withval"], [pre-update])],

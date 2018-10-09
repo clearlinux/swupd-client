@@ -105,7 +105,7 @@ int rm_staging_dir_contents(const char *rel_path)
 	return ret;
 }
 
-void unlink_all_staged_content(struct file *file)
+static void unlink_all_staged_content(struct file *file)
 {
 	char *filename;
 

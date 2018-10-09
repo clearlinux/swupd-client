@@ -131,7 +131,7 @@ void grabtime_stop(timelist *head)
 
 void print_time_stats(timelist *head)
 {
-	if (verbose_time == false) {
+	if (verbose_time == false || TAILQ_FIRST(head) == NULL) {
 		return;
 	}
 

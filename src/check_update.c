@@ -132,6 +132,7 @@ err:
 static int check_update()
 {
 	int current_version, server_version;
+	int ret;
 
 	check_root();
 	if (!init_globals()) {
@@ -139,16 +140,9 @@ static int check_update()
 	}
 	swupd_curl_init();
 
-	read_versions(&current_version, &server_version, path_prefix);
-
-	if (server_version < 0) {
-		fprintf(stderr, "Error: server does not report any version\n");
-		return ENOSWUPDSERVER;
-	}
-
-	if (current_version < 0) {
-		fprintf(stderr, "Unable to determine current OS version\n");
-		return ECURRENT_VERSION;
+	ret = read_versions(&current_version, &server_version, path_prefix);
+	if (ret != 0) {
+		return ret;
 	} else {
 		fprintf(stderr, "Current OS version: %d\n", current_version);
 		if (current_version < server_version) {

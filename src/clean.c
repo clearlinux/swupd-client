@@ -189,11 +189,55 @@ static bool is_all_digits(const char *s)
 	return true;
 }
 
+static bool is_all_xdigits(const char *s)
+{
+	for (; *s; s++) {
+		if (!isxdigit(*s)) {
+			return false;
+		}
+	}
+	return true;
+}
+
 static bool is_manifest(const char UNUSED_PARAM *dir, const struct dirent *entry)
 {
 	static const char prefix[] = "Manifest.";
 	static const size_t prefix_len = sizeof(prefix) - 1;
 	return !strncmp(entry->d_name, prefix, prefix_len);
+}
+
+static bool is_hashed_manifest(const char UNUSED_PARAM *dir, const struct dirent *entry)
+{
+	/* check that this has the manifest prefix */
+	if (!is_manifest(dir, entry)) {
+		return false;
+	}
+
+	int i;
+	int start = sizeof("Manifest.");
+	const char *ename = entry->d_name + start;
+
+	/* check for the correct number of '.' characters (i.e.
+	 * Manifest.bundlename.hashvalue). Note, this function returns false for
+	 * iterative manifests (Manifest.bundlename.I.version) and delta manifests
+	 * (Manifest.bundlename.D.version) because of the number of '.' characters
+	 * in the file name. Expect 1 '.' because we are starting after the prefix
+	 * 'Manifest.'
+	 */
+	for (i = 0; ename[i]; ename[i] == '.' ? i++ : *ename++) {
+		/* this for loop is counting the occurrances of '.' by incrementing a
+		 * counter (i) when the character is encountered. The 'i' variable is
+		 * used as an index into the string as well. The pointer to the string
+		 * is advanced when a '.' is not encountered, so the index into the
+		 * original string is num_dots + num_not_dots.
+		 */
+	}
+	if (i != 1) {
+		return false;
+	}
+
+	/* grab hash suffix by splitting on last '.' then iterating past it (+ 1) */
+	return is_all_xdigits(strrchr(entry->d_name + start, '.') + 1);
 }
 
 static bool is_manifest_delta(const char UNUSED_PARAM *dir, const struct dirent *entry)
@@ -288,16 +332,19 @@ static int clean_staged_manifests(const char *path, bool dry_run, bool all)
 			continue;
 		}
 
+		char *version_dir;
+		string_or_die(&version_dir, "%s/%s", state_dir, name);
+
 		/* This is not precise: it may keep Manifest files that we don't use, and
 		 * also will keep the previous version. If that extra precision is
 		 * required we should parse the manifest. */
 		if (mom_contents && strstr(mom_contents, name)) {
-			continue;
+			/* Remove all hash-hint manifest files. */
+			ret = remove_if(version_dir, dry_run, is_hashed_manifest);
+		} else {
+			/* Remove all manifest files, including hash-hints */
+			ret = remove_if(version_dir, dry_run, is_manifest);
 		}
-
-		char *version_dir;
-		string_or_die(&version_dir, "%s/%s", state_dir, name);
-		ret = remove_if(version_dir, dry_run, is_manifest);
 
 		/* Remove empty dirs if possible. */
 		(void)rmdir(version_dir);

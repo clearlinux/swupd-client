@@ -771,23 +771,18 @@ static int print_versions()
 	(void)init_globals();
 	swupd_curl_init();
 
-	read_versions(&current_version, &server_version, path_prefix);
-
-	if (current_version < 0) {
-		fprintf(stderr, "Cannot determine current OS version\n");
+	if (read_versions(&current_version, &server_version, path_prefix) != 0) {
 		ret = 2;
 	} else {
+		if (server_version <= current_version) {
+			ret = 1;
+		}
+	}
+	if (current_version > 0) {
 		fprintf(stderr, "Current OS version: %d\n", current_version);
 	}
-
-	if (server_version < 0) {
-		fprintf(stderr, "Cannot get the latest server version. Could not reach server\n");
-		ret = 2;
-	} else {
+	if (server_version > 0) {
 		fprintf(stderr, "Latest server version: %d\n", server_version);
-	}
-	if ((ret == 0) && (server_version <= current_version)) {
-		ret = 1;
 	}
 
 	telemetry(ret ? TELEMETRY_WARN : TELEMETRY_INFO,

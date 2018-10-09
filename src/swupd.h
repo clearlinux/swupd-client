@@ -207,7 +207,7 @@ extern int main_verify(int current_version);
 extern int walk_tree(struct manifest *, const char *, bool, const regex_t *);
 
 extern int get_latest_version(char *v_url);
-extern void read_versions(int *current_version, int *server_version, char *path_prefix);
+extern int read_versions(int *current_version, int *server_version, char *path_prefix);
 extern int check_versions(int *current_version, int *server_version, int requested_version, char *path_prefix);
 extern int get_current_version(char *path_prefix);
 
@@ -335,7 +335,6 @@ extern void populate_file_struct(struct file *file, char *filename);
 extern bool verify_file(struct file *file, char *filename);
 extern bool verify_file_lazy(char *filename);
 extern int verify_bundle_hash(struct manifest *manifest, struct file *bundle);
-extern void unlink_all_staged_content(struct file *file);
 extern int rm_staging_dir_contents(const char *rel_path);
 void free_file_data(void *data);
 void free_manifest_data(void *data);

@@ -83,6 +83,12 @@ static void copyright_header(void)
 	fprintf(stderr, "\n");
 }
 
+static void print_compile_opts(void)
+{
+	printf("Compile-time options: %s\n", BUILD_OPTS);
+	printf("Compile-time configuration:\n%s\n", BUILD_CONFIGURE);
+}
+
 static int subcmd_index(char *arg)
 {
 	struct subcmd *entry = commands;
@@ -115,7 +121,7 @@ static int parse_options(int argc, char **argv, int *index)
 			exit(EXIT_SUCCESS);
 		case 'v':
 			copyright_header();
-			fprintf(stderr, "Compile-time options: %s\n", BUILD_OPTS);
+			print_compile_opts();
 			exit(EXIT_SUCCESS);
 		case '\01':
 			/* found a subcommand, or a random non-option argument */

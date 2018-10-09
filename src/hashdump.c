@@ -83,35 +83,30 @@ int hashdump_main(int argc, char **argv)
 			if (!optarg || !set_path_prefix(optarg)) {
 				fprintf(stderr, "Invalid --basepath argument\n\n");
 				free(file);
-				return EXIT_FAILURE;
+				return EINVALID_OPTION;
 			}
 			use_prefix = true;
 			break;
 		case 'h':
 			usage(argv[0]);
-			exit(0);
-			break;
+			return EXIT_SUCCESS;
 		default:
 			usage(argv[0]);
-			exit(-1);
-			break;
+			return EINVALID_OPTION;
 		}
 	}
 
 	if (optind >= argc) {
 		usage(argv[0]);
-		exit(-1);
+		return EINVALID_OPTION;
+	}
+
+	if (!set_path_prefix(NULL)) {
+		free(file);
+		return EINIT_GLOBALS;
 	}
 
 	file->filename = strdup_or_die(argv[optind]);
-
-	ret = set_path_prefix(NULL);
-	if (!ret) {
-		free_string(&file->filename);
-		free(file);
-		return EXIT_FAILURE;
-	}
-
 	// Accept relative paths if no path_prefix set on command line
 	if (use_prefix) {
 		fullname = mk_full_filename(path_prefix, file->filename);

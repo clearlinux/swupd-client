@@ -139,7 +139,7 @@ int swupd_curl_init(void)
 	CURLcode curl_ret;
 	char *str;
 	char *tok;
-	char *ctx;
+	char *ctx = NULL;
 	int ret;
 	struct stat st;
 

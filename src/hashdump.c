@@ -57,32 +57,27 @@ static void usage(const char *name)
 
 int hashdump_main(int argc, char **argv)
 {
-	struct file *file;
+	struct file file = { 0 };
 	char *fullname = NULL;
 	int ret;
 
-	file = calloc(1, sizeof(struct file));
-	ON_NULL_ABORT(file);
-
-	file->use_xattrs = true;
+	file.use_xattrs = true;
 
 	while (1) {
 		int c;
-		int i;
 
-		c = getopt_long(argc, argv, "np:h", opts, &i);
+		c = getopt_long(argc, argv, "np:h", opts, NULL);
 		if (c == -1) {
 			break;
 		}
 
 		switch (c) {
 		case 'n':
-			file->use_xattrs = false;
+			file.use_xattrs = false;
 			break;
 		case 'p':
 			if (!optarg || !set_path_prefix(optarg)) {
 				fprintf(stderr, "Invalid --path/-p argument\n\n");
-				free(file);
 				return EINVALID_OPTION;
 			}
 			use_prefix = true;
@@ -102,36 +97,33 @@ int hashdump_main(int argc, char **argv)
 	}
 
 	if (!set_path_prefix(NULL)) {
-		free(file);
 		return EINIT_GLOBALS;
 	}
 
-	file->filename = strdup_or_die(argv[optind]);
+	file.filename = strdup_or_die(argv[optind]);
 	// Accept relative paths if no path_prefix set on command line
 	if (use_prefix) {
-		fullname = mk_full_filename(path_prefix, file->filename);
+		fullname = mk_full_filename(path_prefix, file.filename);
 	} else {
-		fullname = strdup_or_die(file->filename);
+		fullname = strdup_or_die(file.filename);
 	}
 
 	fprintf(stderr, "Calculating hash %s xattrs for: %s\n",
-		(file->use_xattrs ? "with" : "without"), fullname);
+		(file.use_xattrs ? "with" : "without"), fullname);
 
-	populate_file_struct(file, fullname);
-	ret = compute_hash(file, fullname);
+	populate_file_struct(&file, fullname);
+	ret = compute_hash(&file, fullname);
 	if (ret != 0) {
 		fprintf(stderr, "compute_hash() failed\n");
 	} else {
-		printf("%s\n", file->hash);
-		if (file->is_dir) {
-			if (is_directory_mounted(fullname)) {
-				fprintf(stderr, "!! dumped hash might not match a manifest hash because a mount is active\n");
-			}
+		printf("%s\n", file.hash);
+		if (file.is_dir && is_directory_mounted(fullname)) {
+			fprintf(stderr, "!! dumped hash might not match a manifest "
+					"hash because a mount is active\n");
 		}
 	}
 
 	free_string(&fullname);
-	free_string(&file->filename);
-	free(file);
+	free_string(&file.filename);
 	return 0;
 }

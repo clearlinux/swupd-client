@@ -247,8 +247,6 @@ static int main_update()
 
 	timelist_timer_start(global_times, "Update Step 1: get versions");
 
-	read_subscriptions(&current_subs);
-
 	handle_mirror_if_stale();
 
 /* Step 1: get versions */
@@ -379,7 +377,9 @@ load_server_mom:
 	server_manifest->manifests = consolidated_manifests;
 
 	/* Get a list of subscribed bundles that need to be updated */
+	read_subscriptions(&current_subs);
 	filter_update_subscriptions(server_manifest, current_subs, current_version, &update_subs, &nonupdate_subs);
+	list_free_list(current_subs);
 	initial_subs = list_clone(update_subs);
 
 	/* The new subscription is seeded from the list of currently installed bundles
@@ -577,7 +577,6 @@ clean_curl:
 	}
 
 	/* clean the list of subscriptions */
-	list_free_list(current_subs);
 	list_free_list(initial_subs);
 	free_subscriptions(&update_subs);
 	free_subscriptions(&nonupdate_subs);

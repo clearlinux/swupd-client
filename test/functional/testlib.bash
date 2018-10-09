@@ -14,7 +14,7 @@ export SWUPD="$SWUPD_DIR/swupd"
 # Error codes
 export EBUNDLE_MISMATCH=2  # at least one local bundle mismatches from MoM
 export EBUNDLE_REMOVE=3  # cannot delete local bundle filename
-export EMOM_NOTFOUND=4  # MoM cannot be loaded into memory (this could imply network issue)
+export EMOM_LOAD=4  # MoM cannot be loaded into memory (this could imply network issue)
 export ETYPE_CHANGED_FILE_RM=5  # do_staging() couldn't delete a file which must be deleted
 export EDIR_OVERWRITE=6  # do_staging() couldn't overwrite a directory
 export EDOTFILE_WRITE=7  # do_staging() couldn't create a dotfile

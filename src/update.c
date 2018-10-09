@@ -315,25 +315,27 @@ version_check:
 	grabtime_stop(&times);
 	grabtime_stop(&times); // Close step 1
 	grabtime_start(&times, "Load Manifests:");
+	int manifest_err;
 load_current_mom:
 	/* Step 3: setup manifests */
 
 	/* get the from/to MoM manifests */
 	if (system_on_mix()) {
-		current_manifest = load_mom(current_version, false, mix_exists);
+		current_manifest = load_mom(current_version, false, mix_exists, &manifest_err);
 	} else {
-		current_manifest = load_mom(current_version, false, false);
+		current_manifest = load_mom(current_version, false, false, &manifest_err);
 	}
 	if (!current_manifest) {
 		/* TODO: possibly remove this as not getting a "from" manifest is not fatal
 		 * - we just don't apply deltas */
-		if (retries < MAX_TRIES) {
+		if (manifest_err == -ENET404 || manifest_err == -ENOENT) {
+			fprintf(stderr, "The current MoM manifest was not found\n");
+		} else if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
-			fprintf(stderr, "Retry #%d downloading from/to MoM Manifests\n", retries);
+			fprintf(stderr, "Retry #%d downloading current MoM manifest\n", retries);
 			goto load_current_mom;
 		}
-		fprintf(stderr, "Failure retrieving manifest from server\n");
-		ret = EMOM_NOTFOUND;
+		ret = EMOM_LOAD;
 		goto clean_exit;
 	}
 
@@ -344,21 +346,17 @@ load_current_mom:
 load_server_mom:
 	grabtime_stop(&times); // Close step 2
 	grabtime_start(&times, "Recurse and Consolidate Manifests");
-	int server_manifest_err;
-	server_manifest = load_mom_err(server_version, true, mix_exists, &server_manifest_err);
+	server_manifest = load_mom(server_version, true, mix_exists, &manifest_err);
 	if (!server_manifest) {
-		if (retries < MAX_TRIES && server_manifest_err != -ENET404) {
+		if (manifest_err == -ENET404 || manifest_err == -ENOENT) {
+			fprintf(stderr, "The server MoM manifest was not found\n");
+			fprintf(stderr, "Version %d not available\n", server_version);
+		} else if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);
-			fprintf(stderr, "Retry #%d downloading server Manifests\n", retries);
+			fprintf(stderr, "Retry #%d downloading server MoM manifest\n", retries);
 			goto load_server_mom;
 		}
-		fprintf(stderr, "Failure retrieving manifest from server\n");
-		if (server_manifest_err == -ENET404) {
-			fprintf(stderr, "Version %d not available\n", server_version);
-		} else {
-			fprintf(stderr, "Unable to load manifest after retrying (config or network problem?)\n");
-		}
-		ret = EMOM_NOTFOUND;
+		ret = EMOM_LOAD;
 		goto clean_exit;
 	}
 

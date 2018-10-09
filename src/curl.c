@@ -435,7 +435,7 @@ exit:
 			err = -ENONET;
 			break;
 		case CURLE_FILE_COULDNT_READ_FILE:
-			err = -1;
+			err = -ENOENT;
 			break;
 		case CURLE_PARTIAL_FILE:
 			fprintf(stderr, "Curl: File incompletely downloaded from '%s' to '%s'\n",

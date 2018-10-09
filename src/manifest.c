@@ -487,11 +487,6 @@ static void remove_manifest_files(char *filename, int version, char *hash)
 	}
 }
 
-struct manifest *load_mom(int version, bool latest, bool mix_exists)
-{
-	return load_mom_err(version, latest, mix_exists, NULL);
-}
-
 /* Loads the MoM (Manifest of Manifests) for VERSION.
  *
  * Implementation note: MoMs are not huge so deltas do not give much benefit,
@@ -504,7 +499,7 @@ struct manifest *load_mom(int version, bool latest, bool mix_exists)
  * loaded into memory, this function will return NULL. If err is passed, it is set
  * with the error code.
  */
-struct manifest *load_mom_err(int version, bool latest, bool mix_exists, int *err)
+struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err)
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;

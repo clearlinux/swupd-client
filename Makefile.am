@@ -167,6 +167,7 @@ BATS = \
 	test/functional/update/update-client-certificate.bats \
 	test/functional/update/update-delta-without-rename-flag.bats \
 	test/functional/update/update-download.bats \
+	test/functional/update/update-fail-to-get-mom.bats \
 	test/functional/update/update-include.bats \
 	test/functional/update/update-include-old-bundle.bats \
 	test/functional/update/update-include-old-bundle-with-tracked-file.bats \

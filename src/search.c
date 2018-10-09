@@ -805,10 +805,10 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 		return ECURRENT_VERSION;
 	}
 
-	*MoM = load_mom(current_version, false, false);
+	*MoM = load_mom(current_version, false, false, NULL);
 	if (!(*MoM)) {
 		fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
-		return EMOM_NOTFOUND;
+		return EMOM_LOAD;
 	}
 
 	list = (*MoM)->manifests;

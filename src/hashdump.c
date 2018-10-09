@@ -81,7 +81,7 @@ int hashdump_main(int argc, char **argv)
 			break;
 		case 'p':
 			if (!optarg || !set_path_prefix(optarg)) {
-				fprintf(stderr, "Invalid --basepath argument\n\n");
+				fprintf(stderr, "Invalid --path/-p argument\n\n");
 				free(file);
 				return EINVALID_OPTION;
 			}

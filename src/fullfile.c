@@ -137,7 +137,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 		/* If we hit this point, the network is accessible but we were
 		 * unable to download the needed files. This is a terminal error
 		 * and we need good logging */
-		return -EFULLDOWNLOAD;
+		return -EFILEDOWNLOAD;
 	}
 
 	return download_loop(download_handle, files, num_downloads);

@@ -537,6 +537,7 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 	int i, downloads = 0;
 	struct list *l;
 	bool retry = true;
+	int ret = 0;
 
 	if (!handle) {
 		fprintf(stderr, "Invalid parallel download handle\n");
@@ -581,6 +582,11 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 		}
 	}
 
+	// If there are download failures at this point return an error
+	if (h->failed != NULL) {
+		ret = -EFILEDOWNLOAD;
+	}
+
 	curl_multi_cleanup(h->mcurl);
 
 	list_free_list(h->failed);
@@ -597,5 +603,5 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 	if (num_downloads) {
 		*num_downloads = downloads;
 	}
-	return 0;
+	return ret;
 }

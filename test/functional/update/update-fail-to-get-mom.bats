@@ -22,6 +22,7 @@ test_setup() {
 		Preparing to update from 10 to 20
 		Failed to retrieve 10 MoM manifest
 		The current MoM manifest was not found
+		Update failed.
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -42,6 +43,7 @@ test_setup() {
 		Failed to retrieve 20 MoM manifest
 		The server MoM manifest was not found
 		Version 20 not available
+		Update failed.
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

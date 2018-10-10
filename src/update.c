@@ -549,17 +549,20 @@ clean_curl:
 	free_subscriptions(&latest_subs);
 	swupd_deinit();
 
-	if (nonpack > 0) {
-		printf("%i files were not in a pack\n", nonpack);
-	}
-
-	if (!download_only) {
-		if ((current_version < server_version) && (ret == 0)) {
-			printf("Update successful. System updated from version %d to version %d\n",
-			       current_version, server_version);
-		} else if (ret == 0) {
-			printf("Update complete. System already up-to-date at version %d\n", current_version);
+	if (ret == 0) {
+		if (nonpack > 0) {
+			printf("%i files were not in a pack\n", nonpack);
 		}
+		if (!download_only) {
+			if (current_version < server_version) {
+				printf("Update successful. System updated from version %d to version %d\n",
+				       current_version, server_version);
+			} else {
+				printf("Update complete. System already up-to-date at version %d\n", current_version);
+			}
+		}
+	} else {
+		printf("Update failed.\n");
 	}
 
 	if (re_update && ret == 0) {

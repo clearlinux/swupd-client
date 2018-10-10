@@ -35,6 +35,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Error: Unable to determine the server version
+		Update failed.
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -52,6 +53,7 @@ test_setup() {
 		Update started.
 		Error: Unable to determine current OS version
 		Unable to determine current OS version
+		Update failed.
 	EOM
 	)
 	assert_is_output "$expected_output"

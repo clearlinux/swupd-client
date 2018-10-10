@@ -124,9 +124,9 @@ used to modify the core behavior and resources that swupd uses.
 
    Show verbose time output for swupd operations
 
-- ``-D, --max-parallel-pack-downloads``
+- ``-D, --max-parallel-downloads``
 
-   Set the maximum number of parallel pack downloads
+   Set the maximum number of parallel downloads
 
 SUBCOMMANDS
 ===========

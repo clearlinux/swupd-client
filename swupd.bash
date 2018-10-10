@@ -33,7 +33,7 @@ _swupd()
 		opts="--help --enable --disable "
 		break;;
 	    ("bundle-add")
-		opts="--help --url --contenturl --versionurl --port --path --format --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-pack-downloads "
+		opts="--help --url --contenturl --versionurl --port --path --format --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads "
 		break;;
 	    ("bundle-remove")
 		opts="--help --path --url --contenturl --versionurl --port --format --force --nosigcheck --ignore-time --statedir --certpath "
@@ -45,10 +45,10 @@ _swupd()
 		opts="--help --no-xattrs --path "
 		break;;
 	    ("update")
-		opts="--help --download --url --port --contenturl --versionurl --status --format --path --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --migrate --allow-mix-collisions --max-parallel-pack-downloads --keepcache "
+		opts="--help --download --url --port --contenturl --versionurl --status --format --path --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --migrate --allow-mix-collisions --max-parallel-downloads --keepcache "
 		break;;
 	    ("verify")
-		opts="--help --manifest --path --url --port --contenturl --versionurl --fix --picky --picky-tree --picky-whitelist --install --format --quick --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-pack-downloads "
+		opts="--help --manifest --path --url --port --contenturl --versionurl --fix --picky --picky-tree --picky-whitelist --install --format --quick --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads "
 		break;;
 	    ("check-update")
 		opts="--help --url --versionurl --port --format --force --nosigcheck --path --statedir "

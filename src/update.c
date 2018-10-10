@@ -87,6 +87,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 	ret = download_fullfiles(updates, &nonpack);
 	if (ret) {
 		fprintf(stderr, "ERROR: Could not download all files, aborting update\n");
+		return ret;
 	}
 
 	if (download_only) {
@@ -432,22 +433,9 @@ load_server_submanifests:
 	run_preupdate_scripts(server_manifest);
 	grabtime_stop(&times);
 
-	grabtime_start(&times, "Download Packs");
-
-download_packs:
 	/* Step 5: get the packs and untar */
-	ret = download_subscribed_packs(latest_subs, server_manifest, false);
-	if (ret) {
-		// packs don't always exist, tolerate that but not ENONET
-		if (retries < MAX_TRIES) {
-			increment_retries(&retries, &timeout);
-			printf("Retry #%d downloading packs\n", retries);
-			goto download_packs;
-		}
-		printf("Pack download failed\n");
-		ret = EDOWNLOADPACKS;
-		goto clean_exit;
-	}
+	grabtime_start(&times, "Download Packs");
+	download_subscribed_packs(latest_subs, server_manifest, false);
 	grabtime_stop(&times);
 
 	grabtime_start(&times, "Apply deltas");
@@ -481,6 +469,7 @@ download_packs:
 	} else if (ret < 0) {
 		// Ensure a positive exit status for the main program.
 		ret = -ret;
+		goto clean_exit;
 	}
 
 	delete_motd();

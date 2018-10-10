@@ -17,7 +17,7 @@
 #define EMANIFEST_LOAD 14       /* cannot load manifest into memory */
 #define EINVALID_OPTION 15      /* invalid command option */
 #define ENOSWUPDSERVER 16       /* no net connection to swupd server */
-#define EFULLDOWNLOAD 17	/* full_download problem */
+#define EFILEDOWNLOAD 17	/* file download problem */
 #define EBUNDLE_INSTALL 18      /* Cannot install bundles */
 #define EREQUIRED_DIRS 19       /* Cannot create required dirs */
 #define ECURRENT_VERSION 20     /* Cannot determine current OS version */

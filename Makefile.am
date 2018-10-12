@@ -81,6 +81,18 @@ EXTRA_DIST += \
 	data/swupd-update.timer \
 	data/verifytime.service
 
+DISTCHECK_CONFIGURE_FLAGS = \
+	--with-systemdsystemunitdir=$$dc_install_base/$(systemdunitdir)
+
+systemdunitdir = @SYSTEMD_UNITDIR@
+
+systemdunit_DATA = \
+	data/check-update.service \
+	data/check-update.timer \
+	data/swupd-update.service \
+	data/swupd-update.timer \
+	data/verifytime.service
+
 distclean-local:
 	rm -rf aclocal.m4 ar-lib autom4te.cache config.guess config.h.in config.h.in~ config.sub configure depcomp install-sh ltmain.sh m4 Makefile.in missing compile
 

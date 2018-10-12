@@ -148,7 +148,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 	return ret;
 }
 
-int add_included_manifests(struct manifest *mom, int current, struct list **subs)
+int add_included_manifests(struct manifest *mom, struct list **subs)
 {
 	struct list *subbed = NULL;
 	struct list *iter;
@@ -162,7 +162,7 @@ int add_included_manifests(struct manifest *mom, int current, struct list **subs
 
 	/* Pass the current version here, not the new, otherwise we will never
 	 * hit the Manifest delta path. */
-	if (add_subscriptions(subbed, subs, current, mom, false, 0) & (add_sub_ERR | add_sub_BADNAME)) {
+	if (add_subscriptions(subbed, subs, mom, false, 0) & (add_sub_ERR | add_sub_BADNAME)) {
 		ret = -1;
 	} else {
 		ret = 0;
@@ -396,7 +396,7 @@ load_current_submanifests:
 	/* The new subscription is seeded from the list of currently installed bundles
 	 * This calls add_subscriptions which recurses for new includes */
 	grabtime_start(&times, "Add Included Manifests");
-	ret = add_included_manifests(server_manifest, current_version, &latest_subs);
+	ret = add_included_manifests(server_manifest, &latest_subs);
 	grabtime_stop(&times);
 	if (ret) {
 		ret = EMANIFEST_LOAD;

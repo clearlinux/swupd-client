@@ -642,7 +642,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 		done_with_bundle = false;
 
 		/* Load sub-manifest */
-		subman = load_manifest(file->last_change, file->last_change, file, MoM, false);
+		subman = load_manifest(file->last_change, file, MoM, false);
 		if (!subman) {
 			fprintf(stderr, "Failed to load manifest %s\n", file->filename);
 			man_load_failures = true;
@@ -834,7 +834,7 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 
 		if (access(untard_file, F_OK) == -1) {
 			/* Do download */
-			subMan = load_manifest(current_version, file->last_change, file, *MoM, false);
+			subMan = load_manifest(file->last_change, file, *MoM, false);
 			if (!subMan) {
 				fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
 			} else {

@@ -202,7 +202,7 @@ extern bool set_state_dir(char *path);
 extern void check_root(void);
 extern void increment_retries(int *retries, int *timeout);
 
-extern int add_included_manifests(struct manifest *mom, int current, struct list **subs);
+extern int add_included_manifests(struct manifest *mom, struct list **subs);
 extern int main_verify(int current_version);
 extern int walk_tree(struct manifest *, const char *, bool, const regex_t *);
 
@@ -218,7 +218,7 @@ extern int file_sort_filename(const void *a, const void *b);
 extern int file_sort_filename_reverse(const void *a, const void *b);
 extern struct manifest *load_mom_err(int version, bool latest, bool mix_exists, int *err);
 extern struct manifest *load_mom(int version, bool latest, bool mix_exists);
-extern struct manifest *load_manifest(int current, int version, struct file *file, struct manifest *mom, bool header_only);
+extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only);
 extern struct manifest *load_manifest_full(int version, bool mix);
 extern struct list *create_update_list(struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
@@ -395,7 +395,7 @@ extern int show_bundle_reqd_by(const char *bundle_name, bool server);
 extern int show_included_bundles(char *bundle_name);
 extern int list_installable_bundles();
 extern int install_bundles_frontend(char **bundles);
-extern int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, bool find_all, int recursion);
+extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
 int list_local_bundles();
 extern int link_or_rename(const char *orig, const char *dest);
 

@@ -817,7 +817,7 @@ int verify_main(int argc, char **argv)
 		}
 	}
 
-	ret = add_included_manifests(official_manifest, version, &subs);
+	ret = add_included_manifests(official_manifest, &subs);
 	if (ret) {
 		ret = EMANIFEST_LOAD;
 		goto clean_and_exit;

@@ -377,73 +377,8 @@ void free_manifest(struct manifest *manifest)
 	free(manifest);
 }
 
-static int try_delta_manifest_download(int current, int new, char *component, struct file *file)
-{
-	char *original = NULL;
-	char *newfile = NULL;
-	char *deltafile = NULL;
-	char *url = NULL;
-	int ret = 0;
-	struct stat buf;
-	if (strcmp(component, "MoM") == 0) {
-		// We don't do MoM deltas.
-		return -1;
-	}
-
-	if (!file->peer) {
-		return -1;
-	}
-
-	string_or_die(&original, "%s/%i/Manifest.%s", state_dir, current, component);
-
-	string_or_die(&deltafile, "%s/Manifest-%s-delta-from-%i-to-%i", state_dir, component, current, new);
-	/* If we cannot get a delta, quit and don't mess with the file struct.
-	 * Populating it early and then exiting early corrupts the manifest list */
-	memset(&buf, 0, sizeof(struct stat));
-	ret = stat(deltafile, &buf);
-	if (ret || buf.st_size == 0) {
-		string_or_die(&url, "%s/%i/Manifest-%s-delta-from-%i", content_url, new, component, current);
-
-		ret = swupd_curl_get_file(url, deltafile);
-		if (ret != 0) {
-			unlink(deltafile);
-			goto out;
-		}
-	}
-
-	/* Now apply the manifest delta */
-	string_or_die(&newfile, "%s/%i/Manifest.%s", state_dir, new, component);
-
-	ret = apply_bsdiff_delta(original, newfile, deltafile);
-	xattrs_copy(original, newfile);
-	if (ret != 0) {
-		unlink(newfile);
-		goto out;
-	} else if ((ret = xattrs_compare(original, newfile)) != 0) {
-		unlink(newfile);
-		goto out;
-	}
-
-	/* This is OK to do because populate_file will completely rewrite the file
-	 * struct contents and not leave stale data behind. Should the
-	 * implementation change, this must be updated to account for uncleared or
-	 * un-updated struct members. */
-	populate_file_struct(file, newfile);
-	ret = compute_hash(file, newfile); // MUST save new hash!
-	if (ret != 0) {
-		ret = -1;
-	}
-out:
-	unlink(deltafile);
-	free_string(&original);
-	free_string(&url);
-	free_string(&newfile);
-	free_string(&deltafile);
-	return ret;
-}
-
 /* TODO: This should deal with nested manifests better */
-static int retrieve_manifests(int current, int version, char *component, struct file *file, bool is_mix)
+static int retrieve_manifests(int version, char *component, bool is_mix)
 {
 	char *url = NULL;
 	char *filename;
@@ -470,13 +405,6 @@ static int retrieve_manifests(int current, int version, char *component, struct 
 	ret = mkdir(dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if ((ret != 0) && (errno != EEXIST)) {
 		goto out;
-	}
-
-	/* FILE is not set for a MoM, only for bundle manifests */
-	if (file && current < version && strcmp(component, "full") != 0) {
-		if (try_delta_manifest_download(current, version, component, file) == 0) {
-			return 0;
-		}
 	}
 
 	/* If it's mix content just hardlink instead of curl download */
@@ -588,7 +516,7 @@ struct manifest *load_mom_err(int version, bool latest, bool mix_exists, int *er
 	bool invalid_sig = false;
 
 verify_mom:
-	ret = retrieve_manifests(version, version, "MoM", NULL, mix_exists);
+	ret = retrieve_manifests(version, "MoM", mix_exists);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to retrieve %d MoM manifest\n", version);
 		if (err) {
@@ -671,25 +599,19 @@ verify_mom:
 /* Loads the MANIFEST for bundle associated with FILE at VERSION, referenced by
  * the given MOM manifest.
  *
- * Value ranges and restrictions:
- *   - CURRENT < VERSION for 'update' subcommand
- *   - CURRENT == VERSION for other subcommands
- *
- * The FILENAME member of FILE contains the name of the bundle. Also, the HASH
- * member of FILE is needed for delta manifest application. The values of
- * CURRENT and VERSION are used to determine which delta manifest to apply.
+ * The FILENAME member of FILE contains the name of the bundle.
  *
  * Note that if the manifest fails to download, or if the manifest fails to be
  * loaded into memory, this function will return NULL.
  */
-struct manifest *load_manifest(int current, int version, struct file *file, struct manifest *mom, bool header_only)
+struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only)
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
 	bool retried = false;
 
 retry_load:
-	ret = retrieve_manifests(current, version, file->filename, file, file->is_mix);
+	ret = retrieve_manifests(version, file->filename, file->is_mix);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to retrieve %d %s manifest\n", version, file->filename);
 		return NULL;
@@ -731,7 +653,7 @@ struct manifest *load_manifest_full(int version, bool mix)
 	struct manifest *manifest = NULL;
 	int ret = 0;
 
-	ret = retrieve_manifests(version, version, "full", NULL, mix);
+	ret = retrieve_manifests(version, "full", mix);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to retrieve %d Manifest.full\n", version);
 		return NULL;
@@ -956,7 +878,6 @@ struct list *recurse_manifest(struct manifest *manifest, struct list *subs, cons
 	struct list *list;
 	struct file *file;
 	struct manifest *sub;
-	int version1, version2;
 
 	manifest->contentsize = 0;
 	list = manifest->manifests;
@@ -972,17 +893,7 @@ struct list *recurse_manifest(struct manifest *manifest, struct list *subs, cons
 			continue;
 		}
 
-		version2 = file->last_change;
-		if (file->peer) {
-			version1 = file->peer->last_change;
-		} else {
-			version1 = version2;
-		}
-		if (version1 > version2) {
-			version1 = version2;
-		}
-
-		sub = load_manifest(version1, version2, file, manifest, false);
+		sub = load_manifest(file->last_change, file, manifest, false);
 		if (!sub) {
 			list_free_list_and_data(bundles, free_manifest_data);
 			return NULL;

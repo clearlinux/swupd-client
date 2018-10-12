@@ -213,7 +213,7 @@ int show_included_bundles(char *bundle_name)
 	// add_subscriptions takes a list, so construct one with only bundle_name
 	struct list *bundles = NULL;
 	bundles = list_prepend_data(bundles, bundle_name);
-	ret = add_subscriptions(bundles, &subs, current_version, mom, true, 0);
+	ret = add_subscriptions(bundles, &subs, mom, true, 0);
 	list_free_list(bundles);
 	if (ret != add_sub_NEW) {
 		// something went wrong or there were no includes, print a message and exit
@@ -315,7 +315,7 @@ int show_bundle_reqd_by(const char *bundle_name, bool server)
 	}
 
 	if (server) {
-		ret = add_included_manifests(current_manifest, version, &subs);
+		ret = add_included_manifests(current_manifest, &subs);
 		if (ret) {
 			fprintf(stderr, "Unable to load server manifest");
 			ret = EMANIFEST_LOAD;
@@ -653,7 +653,7 @@ int remove_bundles(char **bundles)
    2 new subscriptions
    4 bad name given
 */
-int add_subscriptions(struct list *bundles, struct list **subs, int current_version, struct manifest *mom, bool find_all, int recursion)
+int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion)
 {
 	char *bundle;
 	int ret = 0;
@@ -690,7 +690,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 		}
 
 	retry_manifest_download:
-		manifest = load_manifest(current_version, file->last_change, file, mom, true);
+		manifest = load_manifest(file->last_change, file, mom, true);
 		if (!manifest) {
 			if (retries < MAX_TRIES && !content_url_is_local) {
 				increment_retries(&retries, &timeout);
@@ -702,7 +702,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, int current_vers
 		}
 
 		if (manifest->includes) {
-			int r = add_subscriptions(manifest->includes, subs, current_version, mom, find_all, recursion + 1);
+			int r = add_subscriptions(manifest->includes, subs, mom, find_all, recursion + 1);
 			if (r & add_sub_ERR) {
 				free_manifest(manifest);
 				goto out;
@@ -725,7 +725,7 @@ out:
 	return ret;
 }
 
-static int install_bundles(struct list *bundles, struct list **subs, int current_version, struct manifest *mom)
+static int install_bundles(struct list *bundles, struct list **subs, struct manifest *mom)
 {
 	int ret;
 	int retries = 0;
@@ -747,7 +747,7 @@ static int install_bundles(struct list *bundles, struct list **subs, int current
 
 	/* step 1: check bundle args are valid if so populate subs struct */
 	grabtime_start(&times, "Add bundles and recurse");
-	ret = add_subscriptions(bundles, subs, current_version, mom, false, 0);
+	ret = add_subscriptions(bundles, subs, mom, false, 0);
 
 	/* print a message if any of the requested bundles is already installed */
 	iter = list_head(bundles);
@@ -1076,7 +1076,7 @@ int install_bundles_frontend(char **bundles)
 	}
 	grabtime_stop(&times);
 	grabtime_start(&times, "Install bundles");
-	ret = install_bundles(bundles_list, &subs, current_version, mom);
+	ret = install_bundles(bundles_list, &subs, mom);
 	list_free_list(bundles_list);
 	grabtime_stop(&times);
 

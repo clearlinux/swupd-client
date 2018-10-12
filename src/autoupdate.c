@@ -101,7 +101,7 @@ int autoupdate_main(int argc, char **argv)
 		check_root();
 		fprintf(stderr, "Running systemctl to enable updates\n");
 		rc = system("/usr/bin/systemctl unmask --now swupd-update.service swupd-update.timer"
-			    " && /usr/bin/systemctl start swupd-update.timer > /dev/null");
+			    " && /usr/bin/systemctl restart swupd-update.timer > /dev/null");
 		if (rc != -1) {
 			rc = WEXITSTATUS(rc);
 		}

@@ -221,9 +221,11 @@ dist_check_SCRIPTS += test/functional/generate-cert.prereq
 
 parallel_tests = $(BATS:.bats=.log)
 $(parallel_tests) : test/functional/generate-cert.log
+
+install-check:
+	test/installation/test.bats
+
 endif
-
-
 
 if COVERAGE
 AM_CFLAGS += --coverage

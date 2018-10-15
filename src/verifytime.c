@@ -65,13 +65,13 @@ static unsigned long int get_versionstamp(void)
 	return version_num;
 }
 
-static bool set_time(time_t mtime, char *time)
+static bool set_time(time_t mtime)
 {
 	if (stime(&mtime) != 0) {
 		fprintf(stderr, "Failed to set system time");
 		return false;
 	}
-	fprintf(stderr, "Set system time to %s\n", time);
+	fprintf(stderr, "Set system time to %s\n", ctime(&mtime));
 	return true;
 }
 
@@ -96,7 +96,7 @@ int main()
 		 * and fallback to using versionstamp time if it does not work or seem reasonable.
 		 * The system time wasn't sane, so set it here and try again */
 		fprintf(stderr, "Warning: Current time is %s\nAttempting to fix...", asctime(timeinfo));
-		if (set_time(versiontime, asctime(timeinfo)) == false) {
+		if (set_time(versiontime) == false) {
 			return 1;
 		}
 	}

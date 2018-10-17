@@ -96,12 +96,13 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 	char line[MANIFEST_LINE_MAXLEN], *c, *c2;
 	int count = 0;
 	int deleted = 0;
+	int err;
 	struct manifest *manifest;
 	struct list *includes = NULL;
 	char *filename;
 	char *basedir;
-	uint64_t filecount = 0;
-	uint64_t contentsize = 0;
+	unsigned long long filecount = 0;
+	unsigned long long contentsize = 0;
 	int manifest_hdr_version;
 	int manifest_enc_version;
 
@@ -130,8 +131,10 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 	}
 
 	c = &line[9];
-	manifest_enc_version = strtoull(c, NULL, 10);
-	if (manifest_enc_version == 0) {
+	err = strtoi_err(c, NULL, &manifest_enc_version);
+
+	if (manifest_enc_version <= 0 || err != 0) {
+		fprintf(stderr, "Error: Loaded incompatible manifest version\n");
 		goto err_close;
 	}
 
@@ -160,12 +163,14 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		}
 
 		if (strncmp(line, "version:", 8) == 0) {
-			manifest_hdr_version = strtoull(c, NULL, 10);
-			if (manifest_hdr_version != version) {
+			err = strtoi_err(c, NULL, &manifest_hdr_version);
+			if (manifest_hdr_version != version || err != 0) {
+				fprintf(stderr, "Error: Loaded incompatible manifest header version\n");
 				goto err_close;
 			}
 		}
 		if (strncmp(line, "filecount:", 10) == 0) {
+			errno = 0;
 			filecount = strtoull(c, NULL, 10);
 			if (filecount > 4000000) {
 				/* Note on the number 4,000,000. We want this
@@ -178,16 +183,23 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 				 * than about 6,000,000, but close to infinity
 				 * for systems with 64 bit size_t.
 				 */
-				fprintf(stderr, "Error: preposterous (%" PRIu64 ") number of files in %s Manifest, more than 4 million skipping\n",
+				fprintf(stderr, "Error: preposterous (%llu) number of files in %s Manifest, more than 4 million skipping\n",
 					filecount, component);
+				goto err_close;
+			} else if (errno != 0) {
+				fprintf(stderr, "Error: Loaded incompatible manifest filecount\n");
 				goto err_close;
 			}
 		}
 		if (strncmp(line, "contentsize:", 12) == 0) {
+			errno = 0;
 			contentsize = strtoull(c, NULL, 10);
 			if (contentsize > 2000000000000UL) {
-				fprintf(stderr, "Error: preposterous (%" PRIu64 ") size of files in %s Manifest, more than 2TB skipping\n",
+				fprintf(stderr, "Error: preposterous (%llu) size of files in %s Manifest, more than 2TB skipping\n",
 					contentsize, component);
+				goto err_close;
+			} else if (errno != 0) {
+				fprintf(stderr, "Error: Loaded incompatible manifest contentsize\n");
 				goto err_close;
 			}
 		}
@@ -318,7 +330,12 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 			goto err;
 		}
 
-		file->last_change = strtoull(c, NULL, 10);
+		err = strtoi_err(c, NULL, &file->last_change);
+		if (file->last_change <= 0 || err != 0) {
+			fprintf(stderr, "Error: Loaded incompatible manifest last change\n");
+			free(file);
+			goto err;
+		}
 
 		c = c2;
 

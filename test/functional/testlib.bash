@@ -27,7 +27,6 @@ export EMANIFEST_LOAD=14  # cannot load manifest into memory
 export EINVALID_OPTION=15  # invalid command option
 export ENOSWUPDSERVER=16  # no net connection to swupd server
 export EFULLDOWNLOAD=17  # full_download problem
-export ENET404=404  # download 404'd
 export EBUNDLE_INSTALL=18  # Cannot install bundles
 export EREQUIRED_DIRS=19  # Cannot create required dirs
 export ECURRENT_VERSION=20  # Cannot determine current OS version

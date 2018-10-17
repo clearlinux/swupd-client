@@ -56,6 +56,8 @@ extern "C" {
 #define add_sub_NEW 2
 #define add_sub_BADNAME 4
 
+/* download 404'd error code used by curl */
+#define ENET404 404
 struct sub {
 	/* name of bundle/component/subscription */
 	char *component;

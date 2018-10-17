@@ -404,7 +404,7 @@ The non-zero return codes for other operations are listed here:
   - **14**: Unable to load manifest into memory
   - **15**: Invalid command-line option
   - **16**: Unable to connect to update server
-  - **16**, **17**, **404**: File download issue
+  - **16**, **17**: File download issue
   - **18**: Unable to install bundles
   - **19**: Unable to create required directories
   - **20**: Unable to determine current version of the OS

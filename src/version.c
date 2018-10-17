@@ -46,6 +46,7 @@ int get_latest_version(char *v_url)
 
 	char *url = NULL;
 	int ret = 0;
+	int err;
 	char version_str[MAX_VERSION_STR_SIZE];
 	struct curl_file_data tmp_version = {
 		MAX_VERSION_STR_SIZE, 0,
@@ -68,7 +69,11 @@ int get_latest_version(char *v_url)
 		goto out;
 	} else {
 		tmp_version.data[tmp_version.len] = '\0';
-		ret = strtol(tmp_version.data, NULL, MAX_VERSION_CHARS);
+		err = strtoi_err(tmp_version.data, NULL, &ret);
+
+		if (err != 0) {
+			ret = -1;
+		}
 	}
 
 out:
@@ -82,6 +87,7 @@ int get_current_version(char *path_prefix)
 	char line[LINE_MAX];
 	FILE *file;
 	int v = -1;
+	int err;
 	char *buildstamp;
 	char *src, *dest;
 
@@ -117,7 +123,10 @@ int get_current_version(char *path_prefix)
 			}
 			*dest = 0;
 
-			v = strtoull(&line[11], NULL, 10);
+			err = strtoi_err(&line[11], NULL, &v);
+			if (err != 0) {
+				v = -1;
+			}
 			break;
 		}
 	}
@@ -172,6 +181,7 @@ int read_mix_version_file(char *filename, char *path_prefix)
 	char line[LINE_MAX];
 	FILE *file;
 	int v = -1;
+	int err;
 	char *buildstamp;
 
 	string_or_die(&buildstamp, "%s%s", path_prefix, filename);
@@ -193,7 +203,10 @@ int read_mix_version_file(char *filename, char *path_prefix)
 			*c = '\0';
 		}
 
-		v = strtoull(line, NULL, 10);
+		err = strtoi_err(line, NULL, &v);
+		if (err != 0) {
+			v = -1;
+		}
 	}
 	free_string(&buildstamp);
 	fclose(file);

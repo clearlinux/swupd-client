@@ -54,6 +54,7 @@ static void foreach_open_fd(void(pf)(int, void *), void *arg)
 	DIR *dir;
 	struct dirent *entry;
 	int dir_fd;
+	int err;
 
 	dir = opendir("/proc/self/fd");
 	if (!dir) {
@@ -72,7 +73,10 @@ static void foreach_open_fd(void(pf)(int, void *), void *arg)
 			continue;
 		}
 
-		n = strtol(entry->d_name, &ep, 10);
+		err = strtoi_err(entry->d_name, &ep, &n);
+		if (err != 0) {
+			fprintf(stderr, "Warning: invalid fd\n");
+		}
 		if (*ep) {
 			continue; /* Trailing non digits */
 		}

@@ -228,13 +228,19 @@ fail:
 int get_version_from_path(const char *abs_path)
 {
 	int ret = -1;
+	int val;
 	char *ret_str;
 
 	ret = get_value_from_path(&ret_str, abs_path, true);
 	if (ret == 0) {
-		int val = strtoimax(ret_str, NULL, 10);
+		int err = strtoi_err(ret_str, NULL, &val);
 		free_string(&ret_str);
-		return val;
+
+		if (err != 0) {
+			fprintf(stderr, "Error: Invalid version\n");
+		} else {
+			return val;
+		}
 	}
 
 	return -1;
@@ -326,7 +332,7 @@ static bool is_valid_integer_format(char *str)
 	errno = 0;
 
 	version = strtoull(str, &endptr, 10);
-	if ((errno < 0) || (version == 0) || (endptr && *endptr != '\0')) {
+	if ((errno != 0) || (version == 0) || (endptr && *endptr != '\0')) {
 		return false;
 	}
 

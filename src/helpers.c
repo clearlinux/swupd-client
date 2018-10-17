@@ -595,6 +595,37 @@ out_fds:
 	return ret;
 }
 
+/* The strtol function is commonly used to convert a string to a number and
+ * the result is frequently stored in an int type, but type casting a long to
+ * an int can cause overflows. This function returns negative error codes based
+ * on the errno table. The -ERANGE code is returned when the string is out of
+ * range for strtol and the -EOVERFLOW code is returned when the long to int
+ * type conversion overflows.
+*/
+int strtoi_err(const char *str, char **endptr, int *value)
+{
+	long num;
+	int err;
+
+	errno = 0;
+	num = strtol(str, endptr, 10);
+	err = -errno;
+
+	/* When the return value of strtol overflows the int type, don't overflow
+	 * and return an overflow error code. */
+	if (num > INT_MAX) {
+		num = INT_MAX;
+		err = -EOVERFLOW;
+	} else if (num < INT_MIN) {
+		num = INT_MIN;
+		err = -EOVERFLOW;
+	}
+
+	*value = (int)num;
+
+	return err;
+}
+
 /* Return a duplicated copy of the string using strdup().
  * Abort if there's no memory to allocate the new string.
 */
@@ -932,6 +963,7 @@ bool is_current_version(int version)
 bool on_new_format(void)
 {
 	int res = -1;
+	int err;
 	char *ret_str;
 
 	res = get_value_from_path(&ret_str, DEFAULT_FORMAT_PATH, false);
@@ -940,8 +972,13 @@ bool on_new_format(void)
 		return false;
 	}
 
-	res = strtoull(ret_str, NULL, 10);
+	err = strtoi_err(ret_str, NULL, &res);
 	free_string(&ret_str);
+
+	if (err != 0) {
+		return false;
+	}
+
 	/* is_compatible_format returns true if the argument matches the
 	 * format_string, which was read at the beginning of the update. Return the
 	 * opposite of is_compatible_format to indicate when the new format is

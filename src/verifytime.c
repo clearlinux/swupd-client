@@ -19,6 +19,7 @@
  *         Tudor Marcu <tudor.marcu@intel.com>
  *
  */
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,6 +35,7 @@ static unsigned long int get_versionstamp(void)
 	FILE *fp = NULL;
 	char data[11];
 	const char *filename = "/usr/share/clear/versionstamp";
+	unsigned long int version_num;
 
 	if (stat(filename, &statt) == -1) {
 		fprintf(stderr, "%s does not exist!\n", filename);
@@ -53,13 +55,15 @@ static unsigned long int get_versionstamp(void)
 	}
 
 	/* If we read a 0 the versionstamp is wrong/corrupt */
-	if (strtoul(data, NULL, 10) == 0) {
+	errno = 0;
+	version_num = strtoul(data, NULL, 10);
+	if (version_num == 0 || errno != 0) {
 		fclose(fp);
 		return 0;
 	}
 
 	fclose(fp);
-	return strtoul(data, NULL, 10);
+	return version_num;
 }
 
 static bool set_time(time_t mtime, char *time)

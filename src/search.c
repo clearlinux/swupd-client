@@ -381,6 +381,7 @@ static const struct option prog_opts[] = {
 static bool parse_options(int argc, char **argv)
 {
 	int opt;
+	int err;
 
 	while ((opt = getopt_long(argc, argv, "hu:c:v:P:p:F:s:t:mlbinIdS:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
@@ -436,9 +437,8 @@ static bool parse_options(int argc, char **argv)
 
 			break;
 		case 't':
-			errno = 0;
-			num_results = strtol(optarg, NULL, 10);
-			if (errno != 0) {
+			err = strtoi_err(optarg, NULL, &num_results);
+			if (err != 0) {
 				fprintf(stderr, "Invalid --top argument\n\n");
 				goto err;
 			}

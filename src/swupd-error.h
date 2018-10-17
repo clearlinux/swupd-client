@@ -1,6 +1,8 @@
 #ifndef __INCLUDE_GUARD_SWUPD_ERROR_H
 #define __INCLUDE_GUARD_SWUPD_ERROR_H
 
+/* error codes to be used as swupd exit status */
+
 #define EBUNDLE_MISMATCH 2      /* at least one local bundle mismatches from MoM */
 #define EBUNDLE_REMOVE 3	/* cannot delete local bundle filename */
 #define EMOM_NOTFOUND 4		/* MoM cannot be loaded into memory (this could imply network issue) */
@@ -16,7 +18,6 @@
 #define EINVALID_OPTION 15      /* invalid command option */
 #define ENOSWUPDSERVER 16       /* no net connection to swupd server */
 #define EFULLDOWNLOAD 17	/* full_download problem */
-#define ENET404 404		/* download 404'd */
 #define EBUNDLE_INSTALL 18      /* Cannot install bundles */
 #define EREQUIRED_DIRS 19       /* Cannot create required dirs */
 #define ECURRENT_VERSION 20     /* Cannot determine current OS version */

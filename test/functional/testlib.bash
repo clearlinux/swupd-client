@@ -2245,6 +2245,8 @@ generate_test() {
 
 	{
 		printf '#!/usr/bin/env bats\n\n'
+		printf '# Author: <author name>\n'
+		printf '# Email: <author email>\n\n'
 		printf 'load "../testlib"\n\n'
 		printf 'global_setup() {\n\n'
 		printf '\t# global setup\n\n'
@@ -2259,7 +2261,8 @@ generate_test() {
 		printf 'global_teardown() {\n\n'
 		printf '\t# global cleanup\n\n'
 		printf '}\n\n'
-		printf '@test "<test description>" {\n\n'
+		printf '@test "<test ID>: <test description>" {\n\n'
+		printf '\t# <If necessary add a detailed explanation of the test here>\n\n'
 		printf '\trun sudo sh -c "$SWUPD <swupd_command> $SWUPD_OPTS <command_options>"\n\n'
 		printf '\t# assert_status_is 0\n'
 		printf '\t# expected_output=$(cat <<-EOM\n'
@@ -2267,7 +2270,7 @@ generate_test() {
 		printf '\t# EOM\n'
 		printf '\t# )\n'
 		printf '\t# assert_is_output "$expected_output"\n\n'
-		printf '}\n\n'
+		printf '}\n'
 	} > "$path$name".bats
 	# make the test script executable
 	chmod +x "$path$name".bats

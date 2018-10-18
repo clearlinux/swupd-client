@@ -1365,7 +1365,15 @@ destroy_test_environment() { # swupd_function
 			EOM
 		return
 	fi
-	validate_path "$env_name"
+	validate_param "$env_name"
+
+	# if the test environment doesn't exist warn the user but don't terminate script
+	# execution, this function could be called from a test teardown and terminating
+	# at that point will cause incorrect test reporting
+	if [ ! -d "$env_name" ]; then
+		echo "Warning: test environment \"$env_name\" doesn't exist, nothing to destroy."
+		return 1
+	fi
 
 	# since the action to be performed is very destructive, at least
 	# make sure the directory does look like a test environment

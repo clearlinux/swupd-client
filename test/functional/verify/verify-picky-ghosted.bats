@@ -4,7 +4,7 @@ load "../testlib"
 
 test_setup() {
 
-	create_test_environment -u "$TEST_NAME"
+	create_test_environment -r "$TEST_NAME"
 	create_bundle -L -n test-bundle -f /usr/foo -d/usr/share/clear/bundles "$TEST_NAME"
 	update_manifest "$WEBDIR"/10/Manifest.test-bundle file-status /usr/foo .g..
 

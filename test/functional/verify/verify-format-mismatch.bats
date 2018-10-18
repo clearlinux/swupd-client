@@ -4,9 +4,9 @@ load "../testlib"
 
 test_setup() {
 
-	create_test_environment -u "$TEST_NAME" 10 1
+	create_test_environment -r "$TEST_NAME" 10 1
 	bump_format "$TEST_NAME"
-	create_version -u "$TEST_NAME" 40 30 2
+	create_version -r "$TEST_NAME" 40 30 2
 
 }
 

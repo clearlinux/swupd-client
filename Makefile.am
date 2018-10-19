@@ -124,6 +124,7 @@ BATS = \
 	test/functional/bundleadd/add-fall-back-to-fullfile.bats \
 	test/functional/bundleadd/add-include.bats \
 	test/functional/bundleadd/add-multiple.bats \
+	test/functional/bundleadd/add-no-signature.bats \
 	test/functional/bundleadd/add-rc.bats \
 	test/functional/bundleadd/add-skip-scripts.bats \
 	test/functional/bundleadd/add-uses-fullfile.bats \

@@ -151,6 +151,11 @@ BATS = \
 	test/functional/checkupdate/chk-update-client-certificate.bats \
 	test/functional/completion/completion-basic.bats \
 	test/functional/hashdump/hashdump-file-hash.bats \
+	test/functional/install/install.bats \
+	test/functional/install/install-bad.bats \
+	test/functional/install/install-multiple.bats \
+	test/functional/install/install-no-fullfile-fallbacks.bats \
+	test/functional/install/install-no-zero-packs.bats \
 	test/functional/mirror/mirror-createdir.bats \
 	test/functional/mirror/mirror-createdir-negative.bats \
 	test/functional/search/search-content-check-negative.bats \

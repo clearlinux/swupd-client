@@ -1441,6 +1441,14 @@ start_web_server() { # swupd_function
 
 	echo "$server_pid" > "$SERVER_PID_FILE"
 
+	# make sure localhost is present in no_proxy settings
+	if [ -n "$no_proxy" ] && grep -v 'localhost' <<< "$no_proxy"; then
+		no_proxy="${no_proxy},localhost"
+	elif [ -z "$no_proxy" ]; then
+		no_proxy="localhost"
+	fi
+	export no_proxy
+
 	# wait for server to be available
 	for i in $(seq 1 100); do
 		if [ -f "$PORT_FILE" ]; then

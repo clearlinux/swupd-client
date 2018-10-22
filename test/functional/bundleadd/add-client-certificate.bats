@@ -10,7 +10,7 @@ client_key="/tmp/$TEST_NAME-client-key.pem"
 global_setup() {
 
 	# Skip this test for local development because it takes a long time. To run this
-	# test locally, configure swupd with --fallback-ca-paths=/tmp/swup_test_certificates
+	# test locally, configure swupd with --with-fallback-capaths=/tmp/swup_test_certificates
 	# and run: TRAVIS=true make check
 	if [ -z "${TRAVIS}" ]; then
 		return

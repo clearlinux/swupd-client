@@ -94,19 +94,26 @@
 #define OPT_POST "no default set"
 #endif
 
+#ifdef SYSTEMD_UNITDIR_VAR
+#define OPT_SYSTEMD_UNITDIR SYSTEMD_UNITDIR_VAR
+#else
+#define OPT_SYSTEMD_UNITDIR "no default set"
+#endif
+
 #define BUILD_OPTS \
 	OPT_BZIP2 " " OPT_SIGNATURES " " OPT_COVERAGE " " OPT_BSDTAR " " OPT_XATTRS " " OPT_SELINUX " " OPT_STATELESS
 
-#define BUILD_CONFIGURE                                       \
-	"mount point                  " MOUNT_POINT "\n"      \
-	"state directory              " STATE_DIR "\n"        \
-	"bundles directory            " BUNDLES_DIR "\n"      \
-	"certificate path             " CERT_PATH "\n"        \
-	"fallback certificate path    " FALLBACK_CAPATHS "\n" \
-	"content URL                  " OPT_C_URL "\n"        \
-	"version URL                  " OPT_V_URL "\n"        \
-	"format ID                    " OPT_FORMAT "\n"       \
-	"pre-update hook              " OPT_PRE "\n"          \
+#define BUILD_CONFIGURE                                          \
+	"mount point                  " MOUNT_POINT "\n"         \
+	"state directory              " STATE_DIR "\n"           \
+	"bundles directory            " BUNDLES_DIR "\n"         \
+	"certificate path             " CERT_PATH "\n"           \
+	"fallback certificate path    " FALLBACK_CAPATHS "\n"    \
+	"systemd unitdir              " OPT_SYSTEMD_UNITDIR "\n" \
+	"content URL                  " OPT_C_URL "\n"           \
+	"version URL                  " OPT_V_URL "\n"           \
+	"format ID                    " OPT_FORMAT "\n"          \
+	"pre-update hook              " OPT_PRE "\n"             \
 	"post-update hook             " OPT_POST "\n"
 
 #endif

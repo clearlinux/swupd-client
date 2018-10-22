@@ -766,8 +766,7 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 	/* Use a bitwise AND with the add_sub_NEW mask to determine if at least
 	 * one new bundle was subscribed */
 	if (!(ret & add_sub_NEW)) {
-		/* something went wrong, print a message and exit */
-		ret = EBUNDLE_INSTALL;
+		/* something went wrong, nothing will be installed */
 		goto out;
 	}
 
@@ -1009,7 +1008,6 @@ out:
 		fprintf(stderr, "Successfully installed %i bundle%s\n", bundles_installed, (bundles_installed > 1 ? "s" : ""));
 	}
 	if (already_installed) {
-		ret = EBUNDLE_INSTALL;
 		fprintf(stderr, "%i bundle%s already installed\n", already_installed, (already_installed > 1 ? "s were" : " was"));
 	}
 

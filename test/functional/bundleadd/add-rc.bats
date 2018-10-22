@@ -82,7 +82,7 @@ global_teardown() {
 @test "bundle-add output: adding one bundle that is already added" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle3"
-	assert_status_is "$EBUNDLE_INSTALL"
+	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "test-bundle3" is already installed, skipping it...
 		1 bundle was already installed
@@ -122,7 +122,7 @@ global_teardown() {
 @test "bundle-add output: adding multiple bundles, all invalid, both already added" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle3 test-bundle4"
-	assert_status_is "$EBUNDLE_INSTALL"
+	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "test-bundle4" is already installed, skipping it...
 		Warning: Bundle "test-bundle3" is already installed, skipping it...
@@ -155,7 +155,7 @@ global_teardown() {
 @test "bundle-add output: adding multiple bundles, one valid, one already added" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle3"
-	assert_status_is "$EBUNDLE_INSTALL"
+	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "test-bundle3" is already installed, skipping it...
 		Starting download of remaining update content. This may take a while...

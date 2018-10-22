@@ -6,7 +6,7 @@ server_pid=""
 port=""
 THEME_DIRNAME="$FUNC_DIR/update"
 
-test_setup() {
+global_setup() {
 
 	# Skip this test if not running in Travis CI, because test takes too long for
 	# local development. To run this locally do: TRAVIS=true make check
@@ -18,15 +18,22 @@ test_setup() {
 	create_version -p "$TEST_NAME" 100 10
 	update_bundle "$TEST_NAME" test-bundle --update /foo/bar
 
+	start_web_server -d pack-test-bundle-from-10.tar -s
+}
+
+test_setup() {
+	return
 }
 
 test_teardown() {
+	return
+}
+
+global_teardown() {
 
 	# teardown only if in travis CI
 	if [ -n "${TRAVIS}" ]; then
-		print "terminating web server (PID: $server_pid)..."
-		kill "$server_pid" >&3
-		print "server killed"
+		destroy_web_server
 		destroy_test_environment "$TEST_NAME"
 	fi
 
@@ -34,12 +41,7 @@ test_teardown() {
 
 @test "update --download with a slow server" {
 
-	# Pre-req: create a web server that can serve as a slow content download server
-	print "starting web server..."
-	start_web_server
-	slow_opts="-u http://localhost:$port/"
-
-	run sudo sh -c "$SWUPD update $slow_opts $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD update $SWUPD_OPTS_HTTP"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -70,32 +72,5 @@ test_teardown() {
 	)
 	assert_regex_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/bar
-
-}
-
-start_web_server() {
-
-	for i in {8081..8181}; do
-		"$THEME_DIRNAME"/update_slow_server.py $i &
-		sleep .5
-		server_pid=$!
-		if [ -d /proc/$server_pid ]; then
-			port=$i
-			break
-		fi
-	done
-
-	# wait until server becomes available by expecting a successful curl
-	for i in $(seq 1 10); do
-		flag=true
-		curl http://localhost:"$port"/ || flag=false
-		if [ "$flag" == false ]; then
-			sleep .5
-			continue
-		else
-			print "server up"
-			break
-		fi
-	done
 
 }

@@ -5,6 +5,7 @@ load "../testlib"
 global_setup() {
 
 	create_test_environment "$TEST_NAME"
+	create_version "$TEST_NAME" 99990 10 staging
 
 	# start slow response web server
 	start_web_server -s
@@ -28,11 +29,7 @@ global_teardown() {
 
 @test "check-update with a slow server" {
 
-	# Pre-req: create a web server that can serve as a slow content download server
-	slow_opts="-p $TEST_NAME/target-dir -F staging -u http://localhost:$PORT/"
-
-	# test
-	run sudo sh -c "$SWUPD check-update $slow_opts"
+	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS_HTTP_NO_CERT"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Current OS version: 10

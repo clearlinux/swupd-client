@@ -280,6 +280,8 @@ set_env_variables() { # swupd_function
 		PORT=$(cat "$PORT_FILE")
 		export PORT
 		export SWUPD_OPTS_HTTPS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u https://localhost:$PORT/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
+		export SWUPD_OPTS_HTTP="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u http://localhost:$PORT/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
+		export SWUPD_OPTS_HTTP_NO_CERT="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u http://localhost:$PORT/$env_name/web-dir/"
 	fi
 
 	if [ -f "$SERVER_PID_FILE" ]; then
@@ -1398,13 +1400,12 @@ start_web_server() { # swupd_function
 	cb_usage() {
 		echo $(cat <<-EOF
 		Usage:
-		    start_web_server [-k] <server priv key> [-p] <server pub key> [-s]
-
-		Options:
-		    start_web_server [-c] <client pub key> [-p] <server pub key> [-k] <server priv key> [-s]
+		    start_web_server [-c] <client pub key> [-d] <file name> [-k] <server priv key> [-p] <server pub key> [-s]
 
 		Options:
 		    -c    Path to public key to be used for client certificate authentication
+		    -d    File name that will be partially downloaded on the first attempt and successfully
+		          downloaded on the second attempt.
 		    -k    Path to server private key which must correspond to the provided server public key
 		    -p    Path to server public key which enables SSL authentication
 		    -s    Use a slow update server
@@ -1424,9 +1425,10 @@ start_web_server() { # swupd_function
 		)
 	}
 
-	while getopts :c:k:p:s opt; do
+	while getopts :c:d:k:p:s opt; do
 		case "$opt" in
 			c)	server_args="$server_args --client_cert $OPTARG" ;;
+			d)	server_args="$server_args --partial_download_file $OPTARG" ;;
 			k)	server_args="$server_args --server_key $OPTARG" ;;
 			p)	server_args="$server_args --server_cert $OPTARG" ;;
 			s)	server_args="$server_args --slow_server" ;;

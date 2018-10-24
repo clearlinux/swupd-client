@@ -206,6 +206,7 @@ BATS = \
 	test/functional/verify/verify-install-directory.bats \
 	test/functional/verify/verify-install-latest-directory.bats \
 	test/functional/verify/verify-latest-missing.bats \
+	test/functional/verify/verify-picky-downgrade.bats \
 	test/functional/verify/verify-picky-ghosted.bats \
 	test/functional/verify/verify-picky-ghosted-missing.bats \
 	test/functional/verify/verify-skip-scripts.bats

@@ -809,6 +809,26 @@ int verify_main(int argc, char **argv)
 	}
 
 	ret = add_included_manifests(official_manifest, &subs);
+	/* if one or more of the installed bundles were not found in the manifest,
+	 * continue only if --force was used since the bundles could be removed */
+	if (ret == -add_sub_BADNAME) {
+		if (force) {
+			if (cmdline_option_picky && cmdline_option_fix) {
+				fprintf(stderr, "WARNING: One or more installed bundles that are not "
+						"available at version %d will be removed.\n",
+					version);
+			} else if (cmdline_option_picky && !cmdline_option_fix) {
+				fprintf(stderr, "WARNING: One or more installed bundles are not "
+						"available at version %d.\n",
+					version);
+			}
+			ret = 0;
+		} else {
+			fprintf(stderr, "Unable to verify, one or more currently installed bundles "
+					"are not available at version %d. Use --force to override.\n",
+				version);
+		}
+	}
 	if (ret) {
 		ret = EMANIFEST_LOAD;
 		goto clean_and_exit;

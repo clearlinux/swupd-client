@@ -90,9 +90,11 @@ static int qsort_helper(const void *A, const void *B)
 	return strcmp(((struct filerecord *)A)->filename, ((struct filerecord *)B)->filename);
 }
 
-static void handle(const char *filename, bool is_dir, bool fix)
+/* return true if the function deletes the specified filename, otherwise false */
+static bool handle(const char *filename, bool is_dir, bool fix)
 {
 	char *temp;
+	bool ret = true;
 
 	if (fix) {
 		string_or_die(&temp, "%s%s", path_prefix, filename);
@@ -100,19 +102,24 @@ static void handle(const char *filename, bool is_dir, bool fix)
 			is_dir ? "REMOVING DIR %s/\n" : "REMOVING %s\n",
 			filename);
 		if (remove(temp)) {
-			fprintf(stderr, "Removing %s failed: %s", temp, strerror(errno));
+			fprintf(stderr, "Removing %s failed: %s\n", temp, strerror(errno));
+			ret = false;
 		}
 		free_string(&temp);
 	} else {
 		printf("%s%s\n", filename, is_dir ? "/" : "");
+		ret = false;
 	}
+
+	return ret;
 }
 
 /* expect the start to end in /usr and be the absolute path to the root */
-int walk_tree(struct manifest *manifest, const char *start, bool fix, const regex_t *whitelist)
+int walk_tree(struct manifest *manifest, const char *start, bool fix, const regex_t *whitelist, struct file_counts *counts)
 {
 	/* Walk the tree, */
 	int rc;
+	int ret;
 	path_prefix_len = strlen(path_prefix);
 	path_whitelist = whitelist;
 	rc = nftw(start, &record_filename, 0, FTW_ACTIONRETVAL | FTW_PHYS | FTW_MOUNT);
@@ -147,6 +154,7 @@ int walk_tree(struct manifest *manifest, const char *start, bool fix, const rege
 		int skip_len; /* Length of directory name we are skipping
 			       * could have used strlen(skip_dir), but speed! */
 		if (!F[i].in_manifest) {
+			counts->extraneous++;
 			/* Logic to avoid printing out all the files in a
 			 * directory when the directory itself is not present */
 			if (skip_dir) {
@@ -159,15 +167,20 @@ int walk_tree(struct manifest *manifest, const char *start, bool fix, const rege
 			if (F[i].dir) { /* Start of new dir to skip */
 				skip_dir = F[i].filename;
 				skip_len = strlen(skip_dir);
-				handle(F[i].filename, true, fix);
+				ret = handle(F[i].filename, true, fix);
 			} else {
-				handle(F[i].filename, false, fix);
+				ret = handle(F[i].filename, false, fix);
+			}
+			if (ret) {
+				counts->deleted++;
+			} else {
+				counts->not_deleted++;
 			}
 		} else {
 			skip_dir = NULL;
 		}
 	}
-	rc = nF;
+	counts->checked = nF;
 tidy:
 	for (int i = 0; i < nF; i++) {
 		free_string(&F[i].filename);

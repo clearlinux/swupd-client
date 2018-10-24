@@ -164,6 +164,19 @@ struct time {
 	times;
 };
 
+struct file_counts {
+	int checked;
+	int missing;
+	int replaced;
+	int not_replaced;
+	int mismatch;
+	int fixed;
+	int not_fixed;
+	int extraneous;
+	int deleted;
+	int not_deleted;
+};
+
 typedef TAILQ_HEAD(timelist, time) timelist;
 
 extern bool download_only;
@@ -206,7 +219,7 @@ extern void increment_retries(int *retries, int *timeout);
 
 extern int add_included_manifests(struct manifest *mom, struct list **subs);
 extern int main_verify(int current_version);
-extern int walk_tree(struct manifest *, const char *, bool, const regex_t *);
+extern int walk_tree(struct manifest *, const char *, bool, const regex_t *, struct file_counts *);
 
 extern int get_latest_version(char *v_url);
 extern int read_versions(int *current_version, int *server_version, char *path_prefix);

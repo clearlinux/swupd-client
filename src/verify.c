@@ -53,16 +53,7 @@ static regex_t picky_whitelist_buffer;
 static int version = 0;
 
 /* Count of how many files we managed to not fix */
-static int file_checked_count;
-static int file_missing_count;
-static int file_replaced_count;
-static int file_not_replaced_count;
-static int file_mismatch_count;
-static int file_fixed_count;
-static int file_not_fixed_count;
-static int file_extraneous_count;
-static int file_deleted_count;
-static int file_not_deleted_count;
+static struct file_counts counts;
 
 static const struct option prog_opts[] = {
 	{ "help", no_argument, 0, 'h' },
@@ -349,7 +340,7 @@ static int get_all_files(struct manifest *official_manifest, struct list *subs)
 			continue;
 		}
 
-		file_checked_count++;
+		counts.checked++;
 	}
 	return 0;
 }
@@ -488,14 +479,14 @@ static void add_missing_files(struct manifest *official_manifest)
 		populate_file_struct(&local, fullname);
 		ret = compute_hash_lazy(&local, fullname);
 		if (ret != 0) {
-			file_not_replaced_count++;
+			counts.not_replaced++;
 			free_string(&fullname);
 			continue;
 		}
 
 		/* compare the hash and report mismatch */
 		if (hash_is_zeros(local.hash)) {
-			file_missing_count++;
+			counts.missing++;
 			if (cmdline_option_install == false) {
 				/* Log to stdout, so we can post-process */
 				printf("\nMissing file: %s\n", fullname);
@@ -519,13 +510,13 @@ static void add_missing_files(struct manifest *official_manifest)
 			ret = compute_hash(&local, fullname);
 		}
 		if ((ret != 0) || hash_needs_work(file, local.hash)) {
-			file_not_replaced_count++;
+			counts.not_replaced++;
 			printf("\n\tnot fixed\n");
 
 			check_warn_freespace(file);
 
 		} else {
-			file_replaced_count++;
+			counts.replaced++;
 			file->do_not_update = 1;
 			if (cmdline_option_install == false) {
 				printf("\n\tfixed\n");
@@ -549,7 +540,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 		return;
 	}
 
-	file_checked_count++;
+	counts.checked++;
 
 	// do_not_update set by earlier check, so account as checked
 	if (file->do_not_update) {
@@ -561,7 +552,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	if (verify_file(file, fullname)) {
 		goto end;
 	}
-	file_mismatch_count++;
+	counts.mismatch++;
 	/* Log to stdout, so we can post-process it */
 	printf("Hash mismatch for file: %s\n", fullname);
 
@@ -578,10 +569,10 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 
 	/* at the end of all this, verify the hash again to judge success */
 	if (verify_file(file, fullname)) {
-		file_fixed_count++;
+		counts.fixed++;
 		printf("\tfixed\n");
 	} else {
-		file_not_fixed_count++;
+		counts.not_fixed++;
 		printf("\tnot fixed\n");
 	}
 end:
@@ -651,13 +642,13 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 			continue;
 		}
 
-		file_extraneous_count++;
+		counts.extraneous++;
 
 		fd = get_dirfd_path(fullname);
 		if (fd < 0) {
 			fprintf(stderr, "Not safe to delete: %s\n", fullname);
 			free_string(&fullname);
-			file_not_deleted_count++;
+			counts.not_deleted++;
 			continue;
 		}
 
@@ -667,15 +658,15 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 			ret = unlinkat(fd, base, 0);
 			if (ret && errno != ENOENT) {
 				fprintf(stderr, "Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));
-				file_not_deleted_count++;
+				counts.not_deleted++;
 			} else {
 				fprintf(stderr, "Deleted %s\n", fullname);
-				file_deleted_count++;
+				counts.deleted++;
 			}
 		} else {
 			ret = unlinkat(fd, base, AT_REMOVEDIR);
 			if (ret) {
-				file_not_deleted_count++;
+				counts.not_deleted++;
 				if (errno != ENOTEMPTY) {
 					fprintf(stderr, "Failed to remove empty folder %s (%i: %s)\n",
 						fullname, errno, strerror(errno));
@@ -685,7 +676,7 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 				}
 			} else {
 				fprintf(stderr, "Deleted %s\n", fullname);
-				file_deleted_count++;
+				counts.deleted++;
 			}
 		}
 		free_string(&fullname);
@@ -895,28 +886,20 @@ load_submanifests:
 
 		/* removing files could be risky, so only do it if the
 		 * prior phases had no problems */
-		if ((file_not_fixed_count == 0) && (file_not_replaced_count == 0)) {
+		if ((counts.not_fixed == 0) && (counts.not_replaced == 0)) {
 			remove_orphaned_files(official_manifest);
 		}
 		if (cmdline_option_picky) {
 			char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
 			fprintf(stderr, "--picky removing extra files under %s\n", start);
-			ret = walk_tree(official_manifest, start, true, picky_whitelist);
-			if (ret >= 0) {
-				file_checked_count = ret;
-				ret = 0;
-			}
+			ret = walk_tree(official_manifest, start, true, picky_whitelist, &counts);
 			free_string(&start);
 		}
 		grabtime_stop(&times);
 	} else if (cmdline_option_picky) {
 		char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
 		fprintf(stderr, "Generating list of extra files under %s\n", start);
-		ret = walk_tree(official_manifest, start, false, picky_whitelist);
-		if (ret >= 0) {
-			file_checked_count = ret;
-			ret = 0;
-		}
+		ret = walk_tree(official_manifest, start, false, picky_whitelist, &counts);
 		free_string(&start);
 	} else {
 		bool repair = false;
@@ -933,30 +916,31 @@ brick_the_system_and_clean_curl:
 	 */
 
 	/* report a summary of what we managed to do and not do */
-	fprintf(stderr, "Inspected %i files\n", file_checked_count);
+	fprintf(stderr, "Inspected %i files\n", counts.checked);
 
 	if (cmdline_option_fix || cmdline_option_install) {
-		fprintf(stderr, "  %i files were missing\n", file_missing_count);
-		if (file_missing_count) {
-			fprintf(stderr, "    %i of %i missing files were replaced\n", file_replaced_count, file_missing_count);
-			fprintf(stderr, "    %i of %i missing files were not replaced\n", file_not_replaced_count, file_missing_count);
+		fprintf(stderr, "  %i files were missing\n", counts.missing);
+		if (counts.missing) {
+			fprintf(stderr, "    %i of %i missing files were replaced\n", counts.replaced, counts.missing);
+			fprintf(stderr, "    %i of %i missing files were not replaced\n", counts.not_replaced, counts.missing);
 		}
 	}
 
-	if (!cmdline_option_quick && file_mismatch_count > 0) {
-		fprintf(stderr, "  %i files did not match\n", file_mismatch_count);
+	if (!cmdline_option_quick && counts.mismatch > 0) {
+		fprintf(stderr, "  %i files did not match\n", counts.mismatch);
 		if (cmdline_option_fix) {
-			fprintf(stderr, "    %i of %i files were fixed\n", file_fixed_count, file_mismatch_count);
-			fprintf(stderr, "    %i of %i files were not fixed\n", file_not_fixed_count, file_mismatch_count);
+			fprintf(stderr, "    %i of %i files were fixed\n", counts.fixed, counts.mismatch);
+			fprintf(stderr, "    %i of %i files were not fixed\n", counts.not_fixed, counts.mismatch);
 		}
 	}
 
-	if ((file_not_fixed_count == 0) && (file_not_replaced_count == 0) &&
-	    cmdline_option_fix && !cmdline_option_quick) {
-		fprintf(stderr, "  %i files found which should be deleted\n", file_extraneous_count);
-		if (file_extraneous_count) {
-			fprintf(stderr, "    %i of %i files were deleted\n", file_deleted_count, file_extraneous_count);
-			fprintf(stderr, "    %i of %i files were not deleted\n", file_not_deleted_count, file_extraneous_count);
+	if (((counts.not_fixed == 0) && (counts.not_replaced == 0) &&
+	     cmdline_option_fix && !cmdline_option_quick) ||
+	    (!cmdline_option_fix && cmdline_option_picky)) {
+		fprintf(stderr, "  %i files found which should be deleted\n", counts.extraneous);
+		if (counts.extraneous) {
+			fprintf(stderr, "    %i of %i files were deleted\n", counts.deleted, counts.extraneous);
+			fprintf(stderr, "    %i of %i files were not deleted\n", counts.not_deleted, counts.extraneous);
 		}
 	}
 
@@ -969,9 +953,11 @@ brick_the_system_and_clean_curl:
 
 	sync();
 
-	if ((file_not_fixed_count == 0) &&
-	    (file_not_replaced_count == 0) &&
-	    (file_not_deleted_count == 0)) {
+	if ((counts.not_fixed == 0) &&
+	    (counts.not_replaced == 0) &&
+	    ((counts.not_deleted == 0) ||
+	     ((counts.not_deleted != 0) && !cmdline_option_fix)) &&
+	    !ret) {
 		ret = EXIT_SUCCESS;
 	} else {
 		ret = EXIT_FAILURE;
@@ -997,15 +983,15 @@ clean_and_exit:
 		  cmdline_option_fix || cmdline_option_install,
 		  ret,
 		  version,
-		  file_replaced_count,
-		  file_not_replaced_count,
-		  file_missing_count,
-		  file_fixed_count,
-		  file_not_fixed_count,
-		  file_deleted_count,
-		  file_not_deleted_count,
-		  file_mismatch_count,
-		  file_extraneous_count);
+		  counts.replaced,
+		  counts.not_replaced,
+		  counts.missing,
+		  counts.fixed,
+		  counts.not_fixed,
+		  counts.deleted,
+		  counts.not_deleted,
+		  counts.mismatch,
+		  counts.extraneous);
 	if (ret == EXIT_SUCCESS) {
 		if (cmdline_option_fix || cmdline_option_install) {
 			fprintf(stderr, "Fix successful\n");

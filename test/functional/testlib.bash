@@ -1341,7 +1341,7 @@ create_test_environment() { # swupd_function
 	# added by default to every test environment unless specified otherwise
 	if [ "$empty" = false ]; then
 		if [ "$release_files" = true ]; then
-			create_bundle -L -n os-core -v "$version" -f /core,/usr/lib/os-release:"$OS_RELEASE",/usr/share/defaults/swupd/format:"$FORMAT" "$env_name"
+			create_bundle -L -n os-core -v "$version" -d /usr/share/clear/bundles -f /core,/usr/lib/os-release:"$OS_RELEASE",/usr/share/defaults/swupd/format:"$FORMAT" "$env_name"
 		else
 			create_bundle -L -n os-core -v "$version" -f /core "$env_name"
 		fi

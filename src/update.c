@@ -163,8 +163,9 @@ int add_included_manifests(struct manifest *mom, struct list **subs)
 
 	/* Pass the current version here, not the new, otherwise we will never
 	 * hit the Manifest delta path. */
-	if (add_subscriptions(subbed, subs, mom, false, 0) & (add_sub_ERR | add_sub_BADNAME)) {
-		ret = -1;
+	ret = add_subscriptions(subbed, subs, mom, false, 0);
+	if (ret & (add_sub_ERR | add_sub_BADNAME)) {
+		ret = -ret;
 	} else {
 		ret = 0;
 	}

@@ -93,13 +93,6 @@ systemdunit_DATA = \
 	data/swupd-update.timer \
 	data/verifytime.service
 
-distclean-local:
-	rm -rf aclocal.m4 ar-lib autom4te.cache config.guess config.h.in config.h.in~ config.sub configure depcomp install-sh ltmain.sh m4 Makefile.in missing compile
-
-install-exec-hook:
-	perl $(top_srcdir)/scripts/findstatic.pl */*.o | grep -v Checking ||:
-
-
 TEST_EXTENSIONS = .bats .prereq
 
 if ENABLE_TESTS
@@ -224,10 +217,18 @@ dist_check_SCRIPTS += test/functional/generate-cert.prereq
 parallel_tests = $(BATS:.bats=.log)
 $(parallel_tests) : test/functional/generate-cert.log
 
-install-check:
-	test/installation/test.bats
-
 endif
+
+MANPAGES = \
+	docs/swupd.1 \
+	docs/check-update.service.4 \
+	docs/check-update.timer.4 \
+	docs/swupd-update.service.4 \
+	docs/swupd-update.timer.4 \
+	docs/update-triggers.target.4
+
+dist_man_MANS = \
+	$(MANPAGES)
 
 if COVERAGE
 AM_CFLAGS += --coverage
@@ -240,6 +241,12 @@ coverage: coverage-clean
 coverage-clean:
 	rm -rf coverage
 endif
+
+distclean-local:
+	rm -rf aclocal.m4 ar-lib autom4te.cache config.guess config.h.in config.h.in~ config.sub configure depcomp install-sh ltmain.sh m4 Makefile.in missing compile
+
+install-exec-hook:
+	perl $(top_srcdir)/scripts/findstatic.pl */*.o | grep -v Checking ||:
 
 compliant:
 	@git diff --quiet --exit-code src; ret=$$?; \
@@ -278,22 +285,15 @@ release:
 	@git tag -a -m "$(PACKAGE_NAME) release $(PACKAGE_VERSION)" v$(PACKAGE_VERSION)
 	@printf "\nNew release $(PACKAGE_VERSION) tagged!\n\n"
 
-
-MANPAGES = \
-	docs/swupd.1 \
-	docs/check-update.service.4 \
-	docs/check-update.timer.4 \
-	docs/swupd-update.service.4 \
-	docs/swupd-update.timer.4 \
-	docs/update-triggers.target.4
-
-dist_man_MANS = \
-	$(MANPAGES)
-
 man: $(dist_man_MANS)
 
 .rst:
 	mkdir -p "$$(dirname $@)"
 	rst2man.py "$<" > "$@.tmp" && mv -f "$@.tmp" "$@"
 
-test/functional/completion/completion-basic.bats: swupd.bash
+if ENABLE_TESTS
+
+install-check:
+	test/installation/test.bats
+
+endif

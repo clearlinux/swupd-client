@@ -741,12 +741,9 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 	struct list *to_install_bundles = NULL;
 	struct list *to_install_files = NULL;
 	struct manifest *full_mom = NULL;
-	timelist times;
-
-	times = init_timelist();
 
 	/* step 1: check bundle args are valid if so populate subs struct */
-	grabtime_start(&times, "Add bundles and recurse");
+	timelist_timer_start(global_times, "Add bundles and recurse");
 	ret = add_subscriptions(bundles, subs, mom, false, 0);
 
 	/* print a message if any of the requested bundles is already installed */
@@ -778,13 +775,13 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 		ret = ERECURSE_MANIFEST;
 		goto out;
 	}
-	grabtime_stop(&times);
+	timelist_timer_stop(global_times);
 
-	grabtime_start(&times, "Consolidate files from bundles");
+	timelist_timer_start(global_times, "Consolidate files from bundles");
 	to_install_files = files_from_bundles(to_install_bundles);
 	to_install_files = consolidate_files(to_install_files);
 	to_install_files = filter_out_existing_files(to_install_files);
-	grabtime_stop(&times);
+	timelist_timer_stop(global_times);
 
 	/* Step 1.5: Now that we know the bundle is valid, check if we have enough space */
 	if (!skip_diskspace_check) {
@@ -817,7 +814,7 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 	}
 
 	/* step 2: download necessary packs */
-	grabtime_start(&times, "Download packs");
+	timelist_timer_start(global_times, "Download packs");
 	(void)rm_staging_dir_contents("download");
 
 download_subscribed_packs:
@@ -828,23 +825,23 @@ download_subscribed_packs:
 			goto download_subscribed_packs;
 		}
 	}
-	grabtime_stop(&times);
+	timelist_timer_stop(global_times);
 
 	/* step 2.5: Download missing files */
-	grabtime_start(&times, "Download missing files");
+	timelist_timer_start(global_times, "Download missing files");
 	ret = download_fullfiles(to_install_files, NULL);
 	if (ret) {
 		fprintf(stderr, "ERROR: Could not download some files from bundles, aborting bundle installation.\n");
 		goto out;
 	}
-	grabtime_stop(&times);
+	timelist_timer_stop(global_times);
 
 	mom->files = files_from_bundles(mom->submanifests);
 	mom->files = consolidate_files(mom->files);
-	grabtime_stop(&times);
+	timelist_timer_stop(global_times);
 
 	/* step 4: Install all bundle(s) files into the fs */
-	grabtime_start(&times, "Installing bundle(s) files onto filesystem");
+	timelist_timer_start(global_times, "Installing bundle(s) files onto filesystem");
 	fprintf(stderr, "Installing bundle(s) files...\n");
 
 	/* Do an initial check to
@@ -905,7 +902,7 @@ download_subscribed_packs:
 		if (ret) {
 			if (!full_mom) {
 				/* step 3: Add tracked bundles */
-				grabtime_start(&times, "Add tracked bundles");
+				timelist_timer_start(global_times, "Add tracked bundles");
 				read_subscriptions(subs);
 				set_subscription_versions(mom, NULL, subs);
 				mom->submanifests = recurse_manifest(mom, *subs, NULL, false);
@@ -917,7 +914,7 @@ download_subscribed_packs:
 
 				mom->files = files_from_bundles(mom->submanifests);
 				mom->files = consolidate_files(mom->files);
-				grabtime_stop(&times);
+				timelist_timer_stop(global_times);
 				full_mom = mom;
 			}
 			ret = verify_fix_path(file->filename, full_mom);
@@ -946,7 +943,7 @@ download_subscribed_packs:
 		if (!file->staging) {
 			if (!full_mom) {
 				/* step 3: Add tracked bundles */
-				grabtime_start(&times, "Add tracked bundles");
+				timelist_timer_start(global_times, "Add tracked bundles");
 				read_subscriptions(subs);
 				set_subscription_versions(mom, NULL, subs);
 				mom->submanifests = recurse_manifest(mom, *subs, NULL, false);
@@ -958,7 +955,7 @@ download_subscribed_packs:
 
 				mom->files = files_from_bundles(mom->submanifests);
 				mom->files = consolidate_files(mom->files);
-				grabtime_stop(&times);
+				timelist_timer_stop(global_times);
 				full_mom = mom;
 			}
 			file = search_file_in_manifest(full_mom, file->filename);
@@ -971,12 +968,12 @@ download_subscribed_packs:
 	print_progress(list_length * 2, list_length * 2); /* Force out 100% complete */
 	printf("\n");
 	sync();
-	grabtime_stop(&times);
+	timelist_timer_stop(global_times);
 	/* step 5: Run any scripts that are needed to complete update */
 	run_scripts(false);
 
 	ret = 0;
-	print_time_stats(&times);
+	timelist_print_stats(global_times);
 
 out:
 	/* count how many of the requested bundles were actually installed, note that the
@@ -1031,7 +1028,6 @@ int install_bundles_frontend(char **bundles)
 	struct manifest *mom;
 	struct list *subs = NULL;
 	char *bundles_list_str = NULL;
-	timelist times;
 	bool mix_exists;
 
 	/* initialize swupd and get current version from OS */
@@ -1057,9 +1053,7 @@ int install_bundles_frontend(char **bundles)
 		goto clean_and_exit;
 	}
 
-	times = init_timelist();
-
-	grabtime_start(&times, "Prepend bundles to list");
+	timelist_timer_start(global_times, "Prepend bundles to list");
 	for (; *bundles; ++bundles) {
 		bundles_list = list_prepend_data(bundles_list, *bundles);
 		if (*bundles) {
@@ -1072,13 +1066,13 @@ int install_bundles_frontend(char **bundles)
 			free_string(&tmp);
 		}
 	}
-	grabtime_stop(&times);
-	grabtime_start(&times, "Install bundles");
+	timelist_timer_stop(global_times);
+	timelist_timer_start(global_times, "Install bundles");
 	ret = install_bundles(bundles_list, &subs, mom);
 	list_free_list(bundles_list);
-	grabtime_stop(&times);
+	timelist_timer_stop(global_times);
 
-	print_time_stats(&times);
+	timelist_print_stats(global_times);
 
 	free_manifest(mom);
 clean_and_exit:

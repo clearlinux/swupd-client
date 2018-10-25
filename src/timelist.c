@@ -19,10 +19,11 @@
 #define _GNU_SOURCE
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-#include "swupd.h"
+#include "macros.h"
 #include "timelist.h"
 
 struct time {
@@ -36,10 +37,14 @@ struct time {
 	times;
 };
 
-timelist init_timelist(void)
+timelist *timelist_new(void)
 {
-	timelist head = TAILQ_HEAD_INITIALIZER(head);
-	TAILQ_INIT(&head);
+	timelist *head = malloc(sizeof(timelist));
+	ON_NULL_ABORT(head);
+	TAILQ_INIT(head);
+
+	timelist_timer_start(head, "Total execution time");
+
 	return head;
 }
 
@@ -51,10 +56,32 @@ static struct time *alloc_time()
 	return t;
 }
 
-/* Fill the time struct for later processing */
-void grabtime_start(timelist *head, const char *name)
+static bool timer_stop(struct time *t)
 {
-	if (verbose_time == false) {
+	if (t->complete) {
+		return false;
+	}
+
+	clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstop);
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstop);
+	t->complete = true;
+	return true;
+}
+
+static void timer_stop_all(timelist *head)
+{
+	struct time *t;
+
+	TAILQ_FOREACH(t, head, times)
+	{
+		timer_stop(t);
+	}
+}
+
+/* Fill the time struct for later processing */
+void timelist_timer_start(timelist *head, const char *name)
+{
+	if (!head) {
 		return;
 	}
 
@@ -68,9 +95,9 @@ void grabtime_start(timelist *head, const char *name)
 	TAILQ_INSERT_HEAD(head, t, times);
 }
 
-void grabtime_stop(timelist *head)
+void timelist_timer_stop(timelist *head)
 {
-	if (verbose_time == false) {
+	if (!head) {
 		return;
 	}
 
@@ -78,23 +105,22 @@ void grabtime_stop(timelist *head)
 
 	TAILQ_FOREACH(t, head, times)
 	{
-		if (!t->complete) {
-			clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstop);
-			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstop);
-			t->complete = true;
+		if (timer_stop(t)) {
 			return;
 		}
 	}
 }
 
-void print_time_stats(timelist *head)
+void timelist_print_stats(timelist *head)
 {
-	if (verbose_time == false || TAILQ_FIRST(head) == NULL) {
+	if (!head) {
 		return;
 	}
 
 	double delta = 0;
 	struct time *t;
+
+	timer_stop_all(head);
 
 	fprintf(stderr, "\nRaw elapsed time stats:\n");
 	TAILQ_FOREACH_REVERSE(t, head, timelist, times)
@@ -105,13 +131,28 @@ void print_time_stats(timelist *head)
 		}
 	}
 	fprintf(stderr, "\nCPU process time stats:\n");
-	while (!TAILQ_EMPTY(head)) {
-		t = TAILQ_LAST(head, timelist);
+	TAILQ_FOREACH_REVERSE(t, head, timelist, times)
+	{
 		if (t->complete == true) {
 			delta = (t->procstop.tv_sec - t->procstart.tv_sec) * 1000 + (t->procstop.tv_nsec / 1000000.0) - (t->procstart.tv_nsec / 1000000.0);
 			fprintf(stderr, "%10.2f ms: %s\n", delta, t->name);
 		}
+	}
+}
+
+void timelist_free(timelist *head)
+{
+	if (!head) {
+		return;
+	}
+
+	struct time *t;
+
+	while (!TAILQ_EMPTY(head)) {
+		t = TAILQ_LAST(head, timelist);
 		TAILQ_REMOVE(head, t, times);
 		free(t);
 	}
+
+	free(head);
 }

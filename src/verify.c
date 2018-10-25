@@ -698,7 +698,6 @@ int verify_main(int argc, char **argv)
 	int retries = 0;
 	int timeout = 10;
 	struct list *subs = NULL;
-	timelist times;
 
 	if (!parse_options(argc, argv)) {
 		ret = EINVALID_OPTION;
@@ -715,7 +714,6 @@ int verify_main(int argc, char **argv)
 		goto clean_args_and_exit;
 	}
 
-	times = init_timelist();
 	/* Gather current manifests */
 	int sys_version = get_current_version(path_prefix);
 	if (!version) {
@@ -750,7 +748,7 @@ int verify_main(int argc, char **argv)
 		fprintf(stderr, "Failed to remove prior downloads, carrying on anyway\n");
 	}
 
-	grabtime_start(&times, "Load and recurse Manifests");
+	timelist_timer_start(global_times, "Load and recurse Manifests");
 
 	/* When the version we are verifying against does not match our system version
 	 * disable checks for mixer state so the user can easily switch back to their
@@ -847,13 +845,13 @@ load_submanifests:
 		ret = ERECURSE_MANIFEST;
 		goto clean_and_exit;
 	}
-	grabtime_stop(&times);
-	grabtime_start(&times, "Consolidate files from bundles");
+	timelist_timer_stop(global_times);
+	timelist_timer_start(global_times, "Consolidate files from bundles");
 	official_manifest->files = files_from_bundles(official_manifest->submanifests);
 
 	official_manifest->files = consolidate_files(official_manifest->files);
-	grabtime_stop(&times);
-	grabtime_start(&times, "Get required files");
+	timelist_timer_stop(global_times);
+	timelist_timer_start(global_times, "Get required files");
 	/* when fixing or installing we need input files. */
 	if (cmdline_option_fix || cmdline_option_install) {
 		ret = get_required_files(official_manifest, subs);
@@ -862,7 +860,7 @@ load_submanifests:
 			goto clean_and_exit;
 		}
 	}
-	grabtime_stop(&times);
+	timelist_timer_stop(global_times);
 
 	/* preparation work complete. */
 
@@ -886,10 +884,10 @@ load_submanifests:
 		 * is already there. It's also the most safe operation, adding files rarely
 		 * has unintended side effect. So lets do the safest thing first.
 		 */
-		grabtime_start(&times, "Add missing files");
+		timelist_timer_start(global_times, "Add missing files");
 		fprintf(stderr, "Adding any missing files\n");
 		add_missing_files(official_manifest);
-		grabtime_stop(&times);
+		timelist_timer_stop(global_times);
 	}
 
 	if (cmdline_option_quick) {
@@ -900,7 +898,7 @@ load_submanifests:
 	if (cmdline_option_fix) {
 		bool repair = true;
 
-		grabtime_start(&times, "Fixing modified files");
+		timelist_timer_start(global_times, "Fixing modified files");
 		fprintf(stderr, "Fixing modified files\n");
 		deal_with_hash_mismatches(official_manifest, repair);
 
@@ -915,7 +913,7 @@ load_submanifests:
 			ret = walk_tree(official_manifest, start, true, picky_whitelist, &counts);
 			free_string(&start);
 		}
-		grabtime_stop(&times);
+		timelist_timer_stop(global_times);
 	} else if (cmdline_option_picky) {
 		char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
 		fprintf(stderr, "Generating list of extra files under %s\n", start);
@@ -1028,7 +1026,7 @@ clean_and_exit:
 		}
 	}
 
-	print_time_stats(&times);
+	timelist_print_stats(global_times);
 	free_subscriptions(&subs);
 	swupd_deinit();
 

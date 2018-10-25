@@ -55,6 +55,7 @@ char *bundle_to_add = NULL;
 char *state_dir = NULL;
 int skip_diskspace_check = 0;
 bool keepcache = false;
+timelist *global_times = NULL;
 
 /* NOTE: Today the content and version server urls are the same in
  * all cases.  It is highly likely these will eventually differ, eg:
@@ -487,6 +488,10 @@ bool init_globals(void)
 	set_cert_path(NULL);
 #endif
 
+	if (verbose_time) {
+		global_times = timelist_new();
+	}
+
 	return true;
 }
 
@@ -503,6 +508,8 @@ void free_globals(void)
 	free_string(&state_dir);
 	list_free_list(post_update_actions);
 	free_string(&bundle_to_add);
+	timelist_free(global_times);
+	global_times = NULL;
 }
 
 void save_cmd(char **argv)

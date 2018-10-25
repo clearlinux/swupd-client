@@ -186,6 +186,7 @@ extern char *swupd_cmd;
 extern char *bundle_to_add;
 extern char *state_dir;
 extern int skip_diskspace_check;
+extern timelist *global_times;
 
 extern char *version_url;
 extern char *content_url;

@@ -197,7 +197,6 @@ extern void free_globals(void);
 extern void save_cmd(char **argv);
 extern char *swupd_cmd;
 extern char *bundle_to_add;
-extern struct timeval start_time;
 extern char *state_dir;
 extern int skip_diskspace_check;
 

@@ -87,7 +87,7 @@ _swupd()
 		fi ;;
 	    ("bundle-remove")
 		opts+=" $(unset CDPATH; test -d /usr/share/clear/bundles && \
-			cd /usr/share/clear/bundles && LC_ALL=C ls | grep -v '^os-core' )"
+			find /usr/share/clear/bundles/ -maxdepth 1 -type f ! -name os-core -printf '%f ')"
 		;;
 	    ("hashdump")
 		# Add in filenames. TODO add in directory completion

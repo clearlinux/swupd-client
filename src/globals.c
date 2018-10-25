@@ -111,21 +111,16 @@ void grabtime_stop(timelist *head)
 		return;
 	}
 
-	struct time *t = TAILQ_FIRST(head);
+	struct time *t;
 
-	if (t->complete == true) {
-		TAILQ_FOREACH(t, head, times)
-		{
-			if (t->complete != true) {
-				clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstop);
-				clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstop);
-				t->complete = true;
-			}
+	TAILQ_FOREACH(t, head, times)
+	{
+		if (!t->complete) {
+			clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstop);
+			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstop);
+			t->complete = true;
+			return;
 		}
-	} else {
-		clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstop);
-		clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstop);
-		t->complete = true;
 	}
 }
 

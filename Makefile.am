@@ -56,6 +56,8 @@ swupd_SOURCES = \
 	src/swupd-internal.h \
 	src/swupd.h \
 	src/telemetry.c \
+	src/timelist.c \
+	src/timelist.h \
 	src/update.c \
 	src/verify.c \
 	src/version.c \

@@ -48,9 +48,9 @@ global_teardown() {
 		Update started.
 		Preparing to update from 10 to 100
 		Downloading packs...
-		Error for .*update-slow-server/state/pack-test-bundle-from-10-to-100.tar download: Response 206 - No error
+		Error for .*/state/pack-test-bundle-from-10-to-100.tar download: Response 206 - No error
 		Starting download retry #1 for .*100/pack-test-bundle-from-10.tar
-		Error for .*update-slow-server/state/pack-test-bundle-from-10-to-100.tar download: Response 200 - Requested range was not delivered by the server
+		Error for .*/state/pack-test-bundle-from-10-to-100.tar download: Response 200 - Requested range was not delivered by the server
 		Range command not supported by server, download resume disabled.
 		Starting download retry #2 for .*100/pack-test-bundle-from-10.tar
 		Extracting test-bundle pack for version 100

@@ -1,4 +1,4 @@
-#!bin/bash
+#!/usr/bin/bash
 
 FUNC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_FILENAME=$(basename "$BATS_TEST_FILENAME")
@@ -175,7 +175,7 @@ print() { # swupd_function
 	fi
 
 	local msg=$1
-	echo "$msg" >&3
+	echo -e "$msg" >&3
 
 }
 
@@ -1364,6 +1364,9 @@ destroy_test_environment() { # swupd_function
 		cat <<-EOM
 			Usage:
 			    destroy_test_environment <environment_name>
+
+			Note: if you want your test environment to be preserved for debugging
+			      purposes, set DEBUG_TEST=true before running your test.
 			EOM
 		return
 	fi
@@ -1375,6 +1378,12 @@ destroy_test_environment() { # swupd_function
 	if [ ! -d "$env_name" ]; then
 		echo "Warning: test environment \"$env_name\" doesn't exist, nothing to destroy."
 		return 1
+	fi
+
+	if [ "$DEBUG_TEST" = true ]; then
+		local msg="Warning: DEBUG_TEST is set to true, the test environment will be preserved"
+		print "$msg\n" 2>/dev/null || echo "$msg"
+		return
 	fi
 
 	# since the action to be performed is very destructive, at least
@@ -2313,13 +2322,47 @@ generate_test() { # swupd_function
 # tests since all tests require at least the creation of a  test environment
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+global_setup_used=true
+global_env=false
+
 setup() {
 
-	# the first time setup runs, run the global_setup
+	# a global environment will always use number 1, so check for that
+	# environment first
+	if [ -d "$TEST_NAME"_1 ]; then
+		# if a global environment is found we want to continue using that
+		# as our test environment for the rest of the tests, if not continue
+		# numbering the envs according to the test number
+		if [ -e "$TEST_NAME"_1/.global_env ]; then
+			TEST_NAME="$TEST_NAME"_1
+			global_env=true
+		else
+			TEST_NAME="$TEST_NAME"_"$BATS_TEST_NUMBER"
+		fi
+	else
+		TEST_NAME="$TEST_NAME"_"$BATS_TEST_NUMBER"
+	fi
+	# if a test environment already exists for the current test,
+	# remove it regardless of the value of DEBUG_TEST, this is
+	# important to avoid corrupt test data
+	if [[ ( -d "$TEST_NAME" && "$global_env" = false )  ||
+	( -d "$TEST_NAME" && "$global_env" = true && "$BATS_TEST_NUMBER" -eq 1 ) ]]; then
+		print "\nAn old test environment was found for this test: $TEST_NAME"
+		print "Deleting it..."
+		DEBUG_TEST=false destroy_test_environment "$TEST_NAME"
+	fi
+	# only the first time setup runs, run the global_setup
 	if [ "$BATS_TEST_NUMBER" -eq 1 ]; then
 		global_setup
+		# if the test environment was created in the global_setup, set the
+		# swupd environment variables accordingly
+		if [ "$global_setup_used" = true ] && [ -d "$TEST_NAME" ]; then
+			sudo touch "$TEST_NAME"/.global_env
+			print "Global test environment created $TEST_NAME"
+		fi
 	fi
-	# in case the env was created in global_setup set environment variables
+	# if the environment was created in the global_setup, set
+	# environment variables again so they are available for every test
 	if [ -d "$TEST_NAME" ]; then
 		set_env_variables "$TEST_NAME"
 	fi
@@ -2329,6 +2372,10 @@ setup() {
 
 teardown() {
 
+	if [ "$DEBUG_TEST" = true ] && [ "$global_env" = true ] && [ -d "$TEST_NAME" ]; then
+		print "Saving a copy of the state dir in $TEST_NAME/state_$BATS_TEST_NUMBER"
+		sudo cp -r "$TEST_NAME"/state "$TEST_NAME"/state_"$BATS_TEST_NUMBER"
+	fi
 	test_teardown
 	# if the last test just ran, run the global teardown
 	if [ "$BATS_TEST_NUMBER" -eq "${#BATS_TEST_NAMES[@]}" ]; then
@@ -2339,8 +2386,8 @@ teardown() {
 
 global_setup() {
 
-	# dummy value in case function is not defined
-	return
+	# no global_setup was used by the user
+	global_setup_used=false
 
 }
 
@@ -2361,9 +2408,7 @@ test_setup() {
 # Default test_teardown
 test_teardown() {
 
-	if [ "$DEBUG_TEST" != true ]; then
-		destroy_test_environment "$TEST_NAME"
-	fi
+	destroy_test_environment "$TEST_NAME"
 
 }
 

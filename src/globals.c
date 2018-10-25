@@ -52,7 +52,6 @@ char *format_string = NULL;
 char *path_prefix = NULL; /* must always end in '/' */
 char *mounted_dirs = NULL;
 char *bundle_to_add = NULL;
-struct timeval start_time;
 char *state_dir = NULL;
 int skip_diskspace_check = 0;
 bool keepcache = false;
@@ -505,8 +504,6 @@ void set_cert_path(char UNUSED_PARAM *path)
 bool init_globals(void)
 {
 	int ret;
-
-	gettimeofday(&start_time, NULL);
 
 	ret = set_state_dir(NULL);
 	if (!ret) {

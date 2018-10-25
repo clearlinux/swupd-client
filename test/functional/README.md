@@ -214,8 +214,6 @@ to *true*.
 ```bash
 $ DEBUG_TEST=true bats <theme_directory>/<test_script>.bats
 ```
-Note: Remember you will have to delete this test environment manually before running
-the test again or it could have unexpected effects.
 
 ## Test Fixtures
 ### Test Environment

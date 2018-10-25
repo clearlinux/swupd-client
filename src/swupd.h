@@ -9,11 +9,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/queue.h>
 
 #include "list.h"
 #include "macros.h"
 #include "swupd-error.h"
+#include "timelist.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -153,17 +153,6 @@ struct filerecord {
 	bool in_manifest;
 };
 
-struct time {
-	struct timespec procstart;
-	struct timespec procstop;
-	struct timespec rawstart;
-	struct timespec rawstop;
-	const char *name;
-	bool complete;
-	TAILQ_ENTRY(time)
-	times;
-};
-
 struct file_counts {
 	int checked;
 	int missing;
@@ -176,8 +165,6 @@ struct file_counts {
 	int deleted;
 	int not_deleted;
 };
-
-typedef TAILQ_HEAD(timelist, time) timelist;
 
 extern bool download_only;
 extern bool verify_esp_only;
@@ -238,12 +225,8 @@ extern void link_manifests(struct manifest *m1, struct manifest *m2);
 extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2, bool server);
 extern void free_manifest(struct manifest *manifest);
 
-extern void grabtime_start(timelist *list, const char *name);
-extern void grabtime_stop(timelist *list);
-extern void print_time_stats(timelist *list);
 extern int get_value_from_path(char **contents, const char *path, bool is_abs_path);
 extern int get_version_from_path(const char *abs_path);
-extern timelist init_timelist(void);
 
 extern int extract_to(const char *tarfile, const char *outputdir);
 

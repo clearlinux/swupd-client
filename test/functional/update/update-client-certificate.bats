@@ -62,8 +62,6 @@ global_teardown() {
 		return
 	fi
 
-	destroy_web_server
-	destroy_trusted_cacert
 
 	destroy_test_environment "$TEST_NAME"
 }

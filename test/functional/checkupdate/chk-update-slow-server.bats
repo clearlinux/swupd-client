@@ -23,7 +23,6 @@ test_teardown() {
 
 global_teardown() {
 
-	destroy_web_server
 	destroy_test_environment "$TEST_NAME"
 }
 

@@ -65,6 +65,9 @@ if __name__ == '__main__':
                              fail with partial download error and succeed on 2nd \
                              download.')
 
+    parser.add_argument('--pid_file',
+                        help='File path to write pid used by web server')
+
     parser.add_argument('--port_file',
                         help='File path to write port used by web server')
 
@@ -91,6 +94,12 @@ if __name__ == '__main__':
         request_handler = server.SimpleHTTPRequestHandler
 
     httpd = server.HTTPServer(addr, request_handler)
+
+    # write pid to file to be read by other processes
+    if args.pid_file:
+        pid = os.getpid()
+        with open (args.pid_file, "w") as f:
+            f.write(str(pid))
 
     # write port to file which can be read by other processes
     if args.port_file:

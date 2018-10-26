@@ -82,7 +82,7 @@ generate_certificate() { # swupd_function
 
 	# generate self-signed public and private key
 	if [ -z "$config" ]; then
-		openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 \
+		sudo openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 \
 			-keyout "$key_path" -out "$cert_path" \
 			-subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost"
 	else
@@ -271,9 +271,9 @@ set_env_variables() { # swupd_function
 
 	export CLIENT_CERT_DIR="$TEST_NAME/target-dir/etc/swupd"
 	export CLIENT_CERT="$CLIENT_CERT_DIR/client.pem"
-	export CACERT_DIR="/tmp/swupd_test_certificates" # trusted key store path
-	export PORT_FILE="/tmp/$TEST_NAME-port_file.txt" # stores web server port
-	export SERVER_PID_FILE="/tmp/$TEST_NAME-pid_file.txt" # stores web server pid
+	export CACERT_DIR="$SWUPD_DIR/swupd_test_certificates" # trusted key store path
+	export PORT_FILE="$TEST_NAME/port_file.txt" # stores web server port
+	export SERVER_PID_FILE="$TEST_NAME/pid_file.txt" # stores web server pid
 
 	# Add environment variables for PORT and SERVER_PID when web server used
 	if [ -f "$PORT_FILE" ]; then
@@ -1447,10 +1447,7 @@ start_web_server() { # swupd_function
 	done
 
 	# start web server and write port/pid numbers to their respective files
-	python3 "$FUNC_DIR"/server.py $server_args --port_file "$PORT_FILE" &
-	server_pid=$!
-
-	echo "$server_pid" > "$SERVER_PID_FILE"
+	sudo python3 "$FUNC_DIR"/server.py $server_args --port_file "$PORT_FILE" --pid_file "$SERVER_PID_FILE" &
 
 	# make sure localhost is present in no_proxy settings
 	if [ -n "$no_proxy" ] && grep -v 'localhost' <<< "$no_proxy"; then
@@ -1497,11 +1494,7 @@ destroy_web_server() { # swupd_function
 	local server_pid
 
 	if [ -f "$SERVER_PID_FILE" ]; then
-		server_pid=$(cat "$SERVER_PID_FILE")
-
-		kill "$server_pid"
-		rm -f "$SERVER_PID_FILE"
-		rm -f "$PORT_FILE"
+		sudo kill "$(<$SERVER_PID_FILE)"
 	fi
 
 }

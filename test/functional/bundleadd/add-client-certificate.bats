@@ -2,15 +2,15 @@
 
 load "../testlib"
 
-server_pub="/tmp/$TEST_NAME-server-pub.pem"
-server_key="/tmp/$TEST_NAME-server-key.pem"
-client_pub="/tmp/$TEST_NAME-client-pub.pem"
-client_key="/tmp/$TEST_NAME-client-key.pem"
+server_pub="$PWD/$TEST_NAME"_1/server-pub.pem
+server_key="$PWD/$TEST_NAME"_1/server-key.pem
+client_pub="$PWD/$TEST_NAME"_1/client-pub.pem
+client_key="$PWD/$TEST_NAME"_1/client-key.pem
 
 global_setup() {
 
-	# Skip this test for local development because it takes a long time. To run this
-	# test locally, configure swupd with --with-fallback-capaths=/tmp/swup_test_certificates
+	# Skip this test for local development because it takes a long time. To run this test locally,
+	# configure swupd with --with-fallback-capaths=<path to top level of repo>/swupd_test_certificates
 	# and run: TRAVIS=true make check
 	if [ -z "${TRAVIS}" ]; then
 		return
@@ -61,11 +61,6 @@ global_teardown() {
 
 	destroy_web_server
 	destroy_trusted_cacert
-
-	rm -f "$client_key"
-	rm -f "$client_pub"
-	rm -f "$server_key"
-	rm -f "$server_pub"
 
 	destroy_test_environment "$TEST_NAME"
 }

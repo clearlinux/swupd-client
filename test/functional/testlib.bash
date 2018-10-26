@@ -1312,7 +1312,10 @@ create_test_environment() { # swupd_function
 		return
 	fi
 	validate_param "$env_name"
-	
+
+	# clean test environment when test interrupted
+	trap "destroy_test_environment $TEST_NAME" INT
+
 	# create all the files and directories needed
 	# web-dir files & dirs
 	sudo mkdir -p "$env_name"
@@ -1371,6 +1374,9 @@ destroy_test_environment() { # swupd_function
 		return
 	fi
 	validate_param "$env_name"
+
+	destroy_web_server
+	destroy_trusted_cacert
 
 	# if the test environment doesn't exist warn the user but don't terminate script
 	# execution, this function could be called from a test teardown and terminating

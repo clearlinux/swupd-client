@@ -33,7 +33,6 @@ global_teardown() {
 
 	# teardown only if in travis CI
 	if [ -n "${TRAVIS}" ]; then
-		destroy_web_server
 		destroy_test_environment "$TEST_NAME"
 	fi
 

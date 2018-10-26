@@ -67,7 +67,9 @@ global_teardown() {
 
 }
 
-@test "<test description>" {
+@test "<test ID>: <test description>" {
+
+	# <If necessary add a detailed explanation of the test here>
 
 	run sudo sh -c "$SWUPD <swupd_command> $SWUPD_OPTS <command_options>"
 
@@ -104,18 +106,38 @@ if this is the case you can go ahead and remove the local test_teardown definiti
 test script so the pre-defined one is used, if you have more specific cleanup needs you will
 need to overwrite the function.
 
-6. The global_teardown() function contains commands that are run only once per test
+7. The global_teardown() function contains commands that are run only once per test
 script, it runs once all tests in the scripts have finished.
 
-7. Every test within the test file starts with the @test identifier followed
-by a description of the test. Add one or more tests to the script as needed.
+8. Every test within the test file starts with the @test identifier followed
+by a unique ID and a description of the test. Add one or more tests to the script as needed.
+The test ID is formed by the group ID followed by the next available number for that group.
+To figure out the correct group ID refer to the [table](#test-groups) below.
 
-8. From within each test, execute the command you want to validate by using
+9. From within each test, execute the command you want to validate by using
 the `run` helper.
 
-9. Validate that the program under test performed as expected by using one
+10. Validate that the program under test performed as expected by using one
 or more of the [assertions](#assertions) provided by the test library.
 <br/>
+
+### Test Groups
+
+| Main Business Scenarios                        | Commands      | Group ID |
+| ---------------------------------------------- | ------------- | -------- |
+| Install new bundles                            | bundle-add    | ADD      |
+| Uninstall bundles                              | bundle-remove | REM      |
+| List bundles                                   | bundle-list   | LST      |
+| Verify installed content for a an OS version   | verify        | VER      |
+| Update installed bundles                       | update        | UPD      |
+| Enable / disable automatic system updates      | autoupdate    | AUT      |
+| Check if a new OS version is available         | check-update  | CHK      |
+| Search Clear Linux for a binary or library     | search        | SRH      |
+| Dump the HMAC hash of a file                   | hashdump      | HSD      |
+| Show version and update URLs                   | info          | INF      |
+| Clean cached files                             | clean         | CLN      |
+| Configure mirror URL for swupd content         | mirror        | MIR      |
+| Usability                                      | N/A           | USA      |
 
 ### Test Principles
 
@@ -601,4 +623,37 @@ Example:
 ```bash
 assert_is_output --identical "$expected_output"
 assert_regex_not_in_output --identical "$some_other_output"
+```
+
+## How to get help
+To get a complete list of the functions and assertions provided by the test library run the following
+commands:
+```
+$ source testlib.bash
+$ testlib
+```
+To see the usage information of each function, from your terminal, just type the name of the terminal
+with no arguments and hit enter.
+
+For example:
+```
+$ update_bundle
+Usage:
+    update_bundle [-p] [-i] <environment_name> <bundle_name> --add <file_name>[:<path_to_existing_file>]
+    update_bundle [-p] [-i] <environment_name> <bundle_name> --add-dir <directory_name>
+    update_bundle [-p] [-i] <environment_name> <bundle_name> --delete <file_name>
+    update_bundle [-p] [-i] <environment_name> <bundle_name> --ghost <file_name>
+    update_bundle [-p] [-i] <environment_name> <bundle_name> --update <file_name>
+    update_bundle [-p] [-i] <environment_name> <bundle_name> --rename[-legacy] <file_name> <new_name>
+    update_bundle [-p] [-i] <environment_name> <bundle_name> --header-only
+
+Options:
+    -p    If set (partial), the bundle will be updated, but the manifest's tar won't
+          be re-created nor the hash will be updated in the MoM. Use this flag when more
+          updates or changes will be done to the bundle to save time.
+    -i    If set (iterative), the iterative manifests will be created with every bundle
+          update.
+
+    NOTE: if both options -p and -i are to be used, they must be specified in that order or
+          one option will be ignored.
 ```

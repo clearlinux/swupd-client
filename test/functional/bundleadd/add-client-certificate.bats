@@ -70,7 +70,7 @@ global_teardown() {
 	destroy_test_environment "$TEST_NAME"
 }
 
-@test "add bundle with valid client cert" {
+@test "ADD023: Adding a bundle over HTTPS with a valid client certificate" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS_HTTPS test-bundle"
 
@@ -78,7 +78,7 @@ global_teardown() {
 	assert_file_exists "$TEST_NAME"/target-dir/usr/bin/test-file
 }
 
-@test "add bundle with no client cert" {
+@test "ADD024: Try adding bundle over HTTPS with no client certificate" {
 
 	# remove client certificate
 	sudo rm "$CLIENT_CERT"
@@ -93,7 +93,7 @@ global_teardown() {
 	assert_in_output "$expected_output"
 }
 
-@test "add bundle with invalid client cert" {
+@test "ADD025: Try adding bundle over HTTPS with an invalid client certificate" {
 
 	# make client certificate invalid
 	sudo sh -c "echo foo > $CLIENT_CERT"

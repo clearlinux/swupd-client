@@ -10,7 +10,7 @@ test_setup() {
 
 }
 
-@test "bundle-add add bundle containing boot file with boot update override" {
+@test "ADD028: Adding a bundle containing a boot file without updating the boot files" {
 
 	run sudo sh -c "$SWUPD bundle-add -b $SWUPD_OPTS test-bundle"
 

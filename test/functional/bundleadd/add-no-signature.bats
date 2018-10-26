@@ -10,7 +10,7 @@ test_setup() {
 
 }
 
-@test "Try adding a bundle without a MoM signature" {
+@test "ADD026: Try adding a bundle without a MoM signature" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
@@ -26,7 +26,7 @@ test_setup() {
 
 }
 
-@test "Force adding a bundle without a MoM signature using --nosigcheck" {
+@test "ADD027: Force adding a bundle without a MoM signature" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS --nosigcheck test-bundle"
 

@@ -9,7 +9,7 @@ test_setup() {
 
 }
 
-@test "bundle-add uses fullfile for bundles with less than eleven files" {
+@test "ADD018: When adding a bundle with less than 10 files, fullfiles should be used" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 

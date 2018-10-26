@@ -12,7 +12,7 @@ test_setup() {
 
 }
 
-@test "bundle-add falls back to using fullfiles when a file is missing in the zero pack" {
+@test "ADD021: When adding a bundle and a file is missing in the pack, it falls back to using fullfiles" {
 
 	# ----- extra setup -----
 	# replace the original zero pack with one with one file missing

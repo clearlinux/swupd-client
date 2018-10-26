@@ -9,12 +9,12 @@ test_setup() {
 
 }
 
-@test "bundle-add add bundle containing a directory" {
+@test "ADD012: adding a bundle containing a directory" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
 	assert_status_is 0
-	assert_dir_exists "$TEST_NAME/target-dir/usr/bin/test"
+	assert_dir_exists "$TARGETDIR"/usr/bin/test
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...

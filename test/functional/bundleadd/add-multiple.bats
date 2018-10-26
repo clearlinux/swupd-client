@@ -11,7 +11,7 @@ test_setup() {
 
 }
 
-@test "bundle-add add multiple bundles" {
+@test "ADD020: Adding multiple bundles, one uses fullfiles, one uses the zero pack" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle2"
 

@@ -38,7 +38,7 @@ global_teardown() {
 # Good Cases (all good bundles)
 # ------------------------------------------
 
-@test "bundle-add output: adding one bundle" {
+@test "ADD001: Adding one bundle" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 	assert_status_is 0
@@ -53,10 +53,12 @@ global_teardown() {
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
+	assert_file_exists "$TARGETDIR"/foo/test-file1
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 
 }
 
-@test "bundle-add output: adding multiple bundles" {
+@test "ADD002: Adding multiple bundles" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle2"
 	assert_status_is 0
@@ -71,6 +73,8 @@ global_teardown() {
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
+	assert_file_exists "$TARGETDIR"/bar/test-file2
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
 
 }
 
@@ -79,7 +83,7 @@ global_teardown() {
 # Bad Cases (all bad bundles)
 # ------------------------------------------
 
-@test "bundle-add output: adding one bundle that is already added" {
+@test "ADD003: Try adding one bundle that is already added" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle3"
 	assert_status_is 0
@@ -92,7 +96,7 @@ global_teardown() {
 
 }
 
-@test "bundle-add output: adding one bundle that does not exist" {
+@test "ADD004: Try adding one bundle that does not exist" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS fake-bundle"
 	assert_status_is "$EBUNDLE_INSTALL"
@@ -105,7 +109,7 @@ global_teardown() {
 
 }
 
-@test "bundle-add output: adding multiple bundles, all invalid, both non existent" {
+@test "ADD005: Try adding multiple bundles, all invalid, both non existent" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS fake-bundle1 fake-bundle2"
 	assert_status_is "$EBUNDLE_INSTALL"
@@ -119,7 +123,7 @@ global_teardown() {
 
 }
 
-@test "bundle-add output: adding multiple bundles, all invalid, both already added" {
+@test "ADD006: Try adding multiple bundles, all invalid, both already added" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle3 test-bundle4"
 	assert_status_is 0
@@ -133,7 +137,7 @@ global_teardown() {
 
 }
 
-@test "bundle-add output: adding multiple bundles, all invalid, one already added, one invalid" {
+@test "ADD007: Try adding multiple bundles, all invalid, one already added, one invalid" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS fake-bundle test-bundle3"
 	assert_status_is "$EBUNDLE_INSTALL"
@@ -152,7 +156,7 @@ global_teardown() {
 # Partial Cases (at least one good bundle)
 # ------------------------------------------
 
-@test "bundle-add output: adding multiple bundles, one valid, one already added" {
+@test "ADD008: Adding multiple bundles, one valid, one already added" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle3"
 	assert_status_is 0
@@ -169,10 +173,14 @@ global_teardown() {
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
+	assert_file_exists "$TARGETDIR"/foo/test-file1
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGETDIR"/baz/test-file3
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
 
 }
 
-@test "bundle-add output: adding multiple bundles, one valid, one non existent" {
+@test "ADD009: Try adding multiple bundles, one valid, one non existent" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 fake-bundle"
 	assert_status_is "$EBUNDLE_INSTALL"
@@ -188,10 +196,12 @@ global_teardown() {
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
+	assert_file_exists "$TARGETDIR"/foo/test-file1
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 
 }
 
-@test "bundle-add output: adding multiple bundles, one valid, one already added, one non existent" {
+@test "ADD010: Try adding multiple bundles, one valid, one already added, one non existent" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle3 fake-bundle"
 	assert_status_is "$EBUNDLE_INSTALL"
@@ -209,11 +219,12 @@ global_teardown() {
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
+	assert_file_exists "$TARGETDIR"/foo/test-file1
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 
 }
 
-@test "bundle-add output: adding multiple bundles, one valid, one invalid, one already installed, one with a missing file" {
-
+@test "ADD011: Try adding multiple bundles, one valid, one invalid, one already installed, one with a missing file" {
 
 	swupd_path=$(realpath $SWUPD_DIR)
 	# for this test we need a bundle with a missing file so it fails when
@@ -221,7 +232,9 @@ global_teardown() {
 	file_hash=$(get_hash_from_manifest "$TEST_NAME"/web-dir/10/Manifest.test-bundle2 /bar/test-file2)
 	sudo rm "$TEST_NAME"/web-dir/10/files/"$file_hash"
 	sudo rm "$TEST_NAME"/web-dir/10/files/"$file_hash".tar
+
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle2 fake-bundle test-bundle3"
+
 	assert_status_is "$EBUNDLE_INSTALL"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "fake-bundle" is invalid, skipping it...
@@ -236,4 +249,5 @@ global_teardown() {
 	EOM
 	)
 	assert_is_output "$expected_output"
+
 }

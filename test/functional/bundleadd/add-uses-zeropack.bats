@@ -10,7 +10,7 @@ test_setup() {
 
 }
 
-@test "bundle-add uses zero packs for bundles with more than ten files" {
+@test "ADD019: When adding a bundle with more than 10 files, zero packs should be used" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 

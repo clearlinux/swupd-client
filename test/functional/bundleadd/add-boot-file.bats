@@ -10,7 +10,7 @@ test_setup() {
 
 }
 
-@test "bundle-add add bundle containing boot file" {
+@test "ADD014: adding a bundle containing a boot file" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 

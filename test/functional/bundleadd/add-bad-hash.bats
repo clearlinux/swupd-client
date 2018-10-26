@@ -18,7 +18,7 @@ test_setup() {
 
 }
 
-@test "bundle-add add bundle containing file with different hash from what is listed in manifest" {
+@test "ADD015: Try adding a bundle containing a file with different hash from what is listed in manifest" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 

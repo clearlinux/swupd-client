@@ -12,7 +12,7 @@ test_setup() {
 
 }
 
-@test "bundle-add verify include support" {
+@test "ADD013: adding a bundle that includes another bundle" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 

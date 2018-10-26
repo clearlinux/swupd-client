@@ -19,7 +19,7 @@ test_setup() {
 
 }
 
-@test "bundle-add verify_fix_path support" {
+@test "ADD022: When adding a bundle and a path is missing on the fs, bundle-add fixes it" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 	assert_status_is 0

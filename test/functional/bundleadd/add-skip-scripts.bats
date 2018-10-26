@@ -10,7 +10,7 @@ test_setup() {
 
 }
 
-@test "bundle-add add bundle with --no-scripts" {
+@test "ADD029: Adding a bundle without running the post-update scripts" {
 
 	run sudo sh -c "$SWUPD bundle-add --no-scripts $SWUPD_OPTS test-bundle"
 	assert_status_is 0

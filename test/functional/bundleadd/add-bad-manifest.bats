@@ -14,7 +14,7 @@ test_setup() {
 
 }
 
-@test "bundle-add add bundle with invalid number of files in manifest" {
+@test "ADD016: Try adding a bundle with invalid number of files in manifest" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 	assert_status_is_not 0

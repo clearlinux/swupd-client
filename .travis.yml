@@ -26,6 +26,7 @@ install:
         - sudo apt-get install python3-docutils
         - sudo apt-get install realpath
         - sudo apt-get install clang-format-6.0
+        - sudo apt-get install shellcheck
         - sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
 
 # Ubuntu's default umask is 0002, but this break's swupd hash calculations.
@@ -37,5 +38,6 @@ script:
           sudo sh -c 'umask 0022 && make -j48 check' &&
           sudo sh -c 'umask 0022 && make install' &&
           sudo sh -c 'umask 0022 && make install-check' &&
-          make compliant
+          make compliant &&
+          make shellcheck
 after_failure: cat test-suite.log

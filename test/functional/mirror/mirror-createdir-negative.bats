@@ -46,7 +46,7 @@ global_teardown() {
 @test "mirror /etc/swupd is a symlink to a file" {
 
 	sudo touch "$TEST_NAME"/target-dir/foo
-	sudo ln -s $(realpath "$TEST_NAME"/target-dir/foo) "$TEST_NAME"/target-dir/etc/swupd
+	sudo ln -s "$(realpath "$TEST_NAME"/target-dir/foo)" "$TEST_NAME"/target-dir/etc/swupd
 	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file $SWUPD_OPTS_MIRROR"
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM

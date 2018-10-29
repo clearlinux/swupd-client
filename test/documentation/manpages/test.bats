@@ -5,7 +5,7 @@ setup() {
   type -t rst2man.py > /dev/null
   # Change to the toplevel git directory
   type -t git >/dev/null || skip
-  cd "$(git rev-parse --show-toplevel)"
+  cd "$(git rev-parse --show-toplevel)" || return 1
 }
 
 @test "Check manual pages are up to date" {

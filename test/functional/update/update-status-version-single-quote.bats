@@ -5,7 +5,7 @@ load "../testlib"
 test_setup() {
 
 	create_test_environment -e "$TEST_NAME"
-	set_current_version "$TEST_NAME" "\'10\'"
+	set_current_version "$TEST_NAME" "\\'10\\'"
 	set_latest_version "$TEST_NAME" 100
 
 }

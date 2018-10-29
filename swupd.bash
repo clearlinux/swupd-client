@@ -68,7 +68,7 @@ _swupd()
 	esac
     done
     # Add in additional completion options if we need to
-    if (( $i >= 0 ))
+    if (( i >= 0 ))
     then
 	case "${COMP_WORDS[$i]}" in
 	    ("bundle-add")
@@ -77,7 +77,7 @@ _swupd()
 		then MoM=/usr/share/clear/bundles/.MoM
 		elif [ -r /var/lib/swupd/version ] &&
 		       installed=$(</var/lib/swupd/version) &&
-		       [ -r /var/lib/swupd/$installed/Manifest.MoM ]
+		       [ -r "/var/lib/swupd/$installed/Manifest.MoM" ]
 		then
 		    MoM=/var/lib/swupd/$installed/Manifest.MoM
 		fi
@@ -96,10 +96,10 @@ _swupd()
 	esac
     fi
 
-    COMPREPLY=($(compgen -W "${opts}" -- ${2}));
+    COMPREPLY=($(compgen -W "${opts}" -- "${2}"));
     return 0
 }
-if [ ${BASH_VERSINFO[0]} -gt 4 ] || ( [ ${BASH_VERSINFO[0]} -eq 4 ] && [ ${BASH_VERSINFO[1]} -ge 4 ] )
+if [ "${BASH_VERSINFO[0]}" -gt 4 ] || { [ "${BASH_VERSINFO[0]}" -eq 4 ] && [ "${BASH_VERSINFO[1]}" -ge 4 ]; }
 then
 	complete -F _swupd -o nosort swupd
 else

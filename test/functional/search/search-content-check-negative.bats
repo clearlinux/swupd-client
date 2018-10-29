@@ -36,9 +36,9 @@ global_teardown() {
 	assert_in_output "Searching for '/usr/lib64/test-lib100'"
 	expected_output=$(cat <<-EOM
 		Downloading Clear Linux manifests
-		   .* MB total\.\.\.
-		Completed manifests download\.
-		Search term not found\.
+		   .* MB total\\.\\.\\.
+		Completed manifests download\\.
+		Search term not found\\.
 	EOM
 	)
 	assert_regex_in_output "$expected_output"

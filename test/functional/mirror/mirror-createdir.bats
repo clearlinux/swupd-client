@@ -39,8 +39,8 @@ global_teardown() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_equal "http://example.com/swupd-file" $(<$TEST_NAME/target-dir/etc/swupd/mirror_contenturl)
-	assert_equal "http://example.com/swupd-file" $(<$TEST_NAME/target-dir/etc/swupd/mirror_versionurl)
+	assert_equal "http://example.com/swupd-file" "$(<"$TEST_NAME"/target-dir/etc/swupd/mirror_contenturl)"
+	assert_equal "http://example.com/swupd-file" "$(<"$TEST_NAME"/target-dir/etc/swupd/mirror_versionurl)"
 
 }
 
@@ -57,15 +57,15 @@ global_teardown() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_equal "http://example.com/swupd-file" $(<$TEST_NAME/target-dir/etc/swupd/mirror_contenturl)
-	assert_equal "http://example.com/swupd-file" $(<$TEST_NAME/target-dir/etc/swupd/mirror_versionurl)
+	assert_equal "http://example.com/swupd-file" "$(<"$TEST_NAME"/target-dir/etc/swupd/mirror_contenturl)"
+	assert_equal "http://example.com/swupd-file" "$(<"$TEST_NAME"/target-dir/etc/swupd/mirror_versionurl)"
 
 }
 
 @test "mirror /etc/swupd is a symlink to a directory" {
 
 	sudo mkdir "$TEST_NAME"/target-dir/foo
-	sudo ln -s $(realpath "$TEST_NAME"/target-dir/foo) "$TEST_NAME"/target-dir/etc/swupd
+	sudo ln -s "$(realpath "$TEST_NAME"/target-dir/foo)" "$TEST_NAME"/target-dir/etc/swupd
 	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file $SWUPD_OPTS_MIRROR"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -78,7 +78,7 @@ global_teardown() {
 	assert_is_output "$expected_output"
   
   	! [[ -L "$TEST_NAME/target-dir/etc/swupd" ]]
-	assert_equal "http://example.com/swupd-file" $(<$TEST_NAME/target-dir/etc/swupd/mirror_contenturl)
-	assert_equal "http://example.com/swupd-file" $(<$TEST_NAME/target-dir/etc/swupd/mirror_versionurl)
+	assert_equal "http://example.com/swupd-file" "$(<"$TEST_NAME"/target-dir/etc/swupd/mirror_contenturl)"
+	assert_equal "http://example.com/swupd-file" "$(<"$TEST_NAME"/target-dir/etc/swupd/mirror_versionurl)"
 
 }

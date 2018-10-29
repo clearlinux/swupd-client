@@ -24,7 +24,7 @@ test_teardown() {
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install -m latest"
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
-		Curl error: \(37\) Couldn.t read a file:// file
+		Curl error: \\(37\\) Couldn.t read a file:// file
 		Failed verify initialization, exiting now.
 	EOM
 	)

@@ -18,7 +18,7 @@ test_setup() {
 	# replace the original zero pack with one with one file missing
 	sudo mkdir "$TEST_NAME"/temp
 	sudo tar -C "$TEST_NAME"/temp -xf "$WEBDIR"/10/pack-test-bundle1-from-0.tar
-	removed_file="$(ls "$TEST_NAME"/temp/staged | head -1)"
+	removed_file="$(find "$TEST_NAME"/temp/staged -type f -printf '%f' -quit)"
 	sudo rm "$TEST_NAME"/temp/staged/"$removed_file"
 	sudo rm "$WEBDIR"/10/pack-test-bundle1-from-0.tar
 	sudo tar -C "$TEST_NAME"/temp -cf "$WEBDIR"/10/pack-test-bundle1-from-0.tar staged

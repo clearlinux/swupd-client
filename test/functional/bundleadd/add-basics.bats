@@ -226,7 +226,6 @@ global_teardown() {
 
 @test "ADD011: Try adding multiple bundles, one valid, one invalid, one already installed, one with a missing file" {
 
-	swupd_path=$(realpath $SWUPD_DIR)
 	# for this test we need a bundle with a missing file so it fails when
 	# trying to download the fullfile, remove the full file from test-bundle2
 	file_hash=$(get_hash_from_manifest "$TEST_NAME"/web-dir/10/Manifest.test-bundle2 /bar/test-file2)

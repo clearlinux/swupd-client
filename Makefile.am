@@ -277,6 +277,18 @@ compliant:
 	fi; \
 	exit 1
 
+# Ignore SC2207 because that's the standard way to fill COMPREPLY
+# Ignore SC1008 because scripts are using an unsupported shebang
+# TODO: Run shellcheck in testlib after issue #662 is fixed
+shellcheck:
+	shellcheck -e SC2207 swupd.bash
+	find -name "*.bats" -exec sh -c "\
+		echo checking {}; \
+		sed 's/^@.*/func() {/' {} | \
+		sed 's/^load.*/source test\/functional\/testlib.bash/' | \
+		shellcheck -s bash -x -e SC1008 /dev/stdin \
+		" \;
+
 release:
 	@git rev-parse v$(PACKAGE_VERSION) &> /dev/null; \
 	if [ "$$?" -eq 0 ]; then \

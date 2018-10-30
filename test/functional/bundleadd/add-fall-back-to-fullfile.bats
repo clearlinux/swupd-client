@@ -58,7 +58,7 @@ test_setup() {
 
 }
 
-@test "bundle-add falls back to using fullfiles when the zero pack is missing" {
+@test "ADD031: When adding a bundle and the zero pack is missing, it falls back to using fullfiles" {
 
 	# ----- extra setup -----
 	# remove the original zero pack

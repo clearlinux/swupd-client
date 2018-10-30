@@ -2258,19 +2258,32 @@ generate_test() { # swupd_function
 
 	local name=$1
 	local path
+	local id
 
 	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
+	usage () {
 		cat <<-EOM
 			Usage:
-			    generate_test <test_name>
+			    generate_test <group_dir>/<test_name>
 			EOM
+	}
+	if [ $# -eq 0 ]; then
+		usage
 		return
 	fi
 	validate_param "$name"
-
 	path=$(dirname "$name")/
+	validate_path "$path"
+	if [[ "$(dirname "$(realpath "$path")")" != *swupd-client/test/functional ]]; then
+		echo -e "All tests should be grouped within a directory\n"
+		usage
+		return 1
+	fi
 	name=$(basename "$name")
+	id=$(get_next_available_id "$path")
+	if [ $? == 1 ]; then
+		id="<test ID>"
+	fi
 
 	{
 		printf '#!/usr/bin/env bats\n\n'
@@ -2281,28 +2294,117 @@ generate_test() { # swupd_function
 		printf '\t# global setup\n\n'
 		printf '}\n\n'
 		printf 'test_setup() {\n\n'
+		# shellcheck disable=SC2016
 		printf '\t# create_test_environment "$TEST_NAME"\n'
+		# shellcheck disable=SC2016
 		printf '\t# create_bundle -n <bundle_name> -f <file_1>,<file_2>,<file_N> "$TEST_NAME"\n\n'
 		printf '}\n\n'
 		printf 'test_teardown() {\n\n'
+		# shellcheck disable=SC2016
 		printf '\t# destroy_test_environment "$TEST_NAME"\n\n'
 		printf '}\n\n'
 		printf 'global_teardown() {\n\n'
 		printf '\t# global cleanup\n\n'
 		printf '}\n\n'
-		printf '@test "<test ID>: <test description>" {\n\n'
+		printf '@test "%s: <test description>" {\n\n' "$id"
 		printf '\t# <If necessary add a detailed explanation of the test here>\n\n'
+		# shellcheck disable=SC2016
 		printf '\trun sudo sh -c "$SWUPD <swupd_command> $SWUPD_OPTS <command_options>"\n\n'
 		printf '\t# assert_status_is 0\n'
+		# shellcheck disable=SC2016
 		printf '\t# expected_output=$(cat <<-EOM\n'
 		printf '\t# \t<expected output>\n'
 		printf '\t# EOM\n'
 		printf '\t# )\n'
+		# shellcheck disable=SC2016
 		printf '\t# assert_is_output "$expected_output"\n\n'
 		printf '}\n'
 	} > "$path$name".bats
 	# make the test script executable
 	chmod +x "$path$name".bats
+
+}
+
+# Gets the next available ID for the specified test group
+# Parameters:
+# - GROUP_DIRECTORY: the path to the directory of the test group
+get_next_available_id() { # swupd_function
+
+	local test_dir=$1
+	local id=0
+	local group
+	local test_list
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    get_next_available_id <test_directory>
+			EOM
+		return
+	fi
+	validate_path "$test_dir"
+
+	# shellcheck disable=SC2126
+	id=$(grep -r --include="*.bats" "@test .* {" "$test_dir" | wc -l)
+	id=$((id+1))
+	test_dir=$(basename "$(realpath "$test_dir")")
+	case "$test_dir" in
+		bundleadd) group=ADD;;
+		bundleremove) group=REM;;
+		bundlelist) group=LST;;
+		verify) group=VER;;
+		update) group=UPD;;
+		checkupdate) group=AUT;;
+		search) group=SRH;;
+		hashdump) group=HSD;;
+		mirror) group=MIR;;
+		completion) group=USA;;
+		autoupdate) group=AUT;;
+		info) group=INF;;
+		clean) group=CLN;;
+		*) group=UNKNOWN;;
+	esac
+	id=$(printf "$group%03d\n" $id)
+	test_list="$(list_tests "$test_dir")"
+	# if the next available ID is not really available it means the list is messed up
+	if [ "${test_list/$id}" != "$test_list" ]; then
+		echo -e "There is a problem with the current IDs, one ID seems to be missing from the list:\n"
+		echo "$test_list"
+		echo -e "\nPlease fix the IDs as appropriate and try running the command again.\n"
+		return 1
+	else
+		echo "$id"
+	fi
+
+}
+
+# Prints the list of tests in a directory
+# Parameters:
+# - GROUP_DIRECTORY: the path to the directory of the test group
+list_tests() { # swupd_function
+
+	local test_dir=$1
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    list_tests --all
+			    list_tests <test_directory>
+			EOM
+		return
+	fi
+
+	if [ "$test_dir" = --all ]; then
+		grep -rh --include="*.bats" "@test .* {" . | sed "s/@test \"//" | sed "s/\" {.*//" | sort
+	else
+		validate_path "$test_dir"
+		if [[ "$(dirname "$(realpath "$test_dir")")" != *swupd-client/test/functional ]]; then
+			echo "Invalid test group directory"
+			return 1
+		fi
+		ls "$test_dir"/*.bats >/dev/null 2>&1 || return 0
+		grep -rh --include="*.bats" "@test .* {" "$test_dir" | sed "s/@test \"//" | sed "s/\" {.*//" | sort
+	fi
 
 }
 

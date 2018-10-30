@@ -9,7 +9,7 @@ test_setup() {
 
 }
 
-@test "ADD012: adding a bundle containing a directory" {
+@test "ADD012: Adding a bundle containing a directory" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 

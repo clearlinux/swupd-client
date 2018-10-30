@@ -966,7 +966,9 @@ brick_the_system_and_clean_curl:
 		// always run in a fix or install case
 		need_update_boot = true;
 		need_update_bootloader = true;
+		timelist_timer_start(global_times, "Run Scripts");
 		run_scripts(false);
+		timelist_timer_stop(global_times);
 	}
 
 	sync();

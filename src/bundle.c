@@ -970,7 +970,9 @@ download_subscribed_packs:
 	sync();
 	timelist_timer_stop(global_times);
 	/* step 5: Run any scripts that are needed to complete update */
+	timelist_timer_start(global_times, "Run Scripts");
 	run_scripts(false);
+	timelist_timer_stop(global_times);
 
 	ret = 0;
 	timelist_print_stats(global_times);

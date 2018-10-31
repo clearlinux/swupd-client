@@ -205,6 +205,7 @@ BATS = \
 	test/functional/verify/verify-client-certificate.bats \
 	test/functional/verify/verify-directory-tree-deleted.bats \
 	test/functional/verify/verify-empty-dir-deleted.bats \
+	test/functional/verify/verify-fix.bats \
 	test/functional/verify/verify-fix-version-mismatch.bats \
 	test/functional/verify/verify-fix-version-mismatch-override.bats \
 	test/functional/verify/verify-format-mismatch.bats \

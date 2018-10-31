@@ -42,7 +42,6 @@ src/*.gcno
 stamp-h1
 swupd
 swupd-client*tar.gz
-swupd_*
 tap-driver.sh
 test-driver
 test-suite.log

@@ -251,7 +251,7 @@ AS_IF(
   [unitpath=/usr/lib/systemd/system]
 )
 AC_SUBST(SYSTEMD_UNITDIR, [${unitpath}])
-AC_DEFINE_UNQUOTED([SYSTEMD_UNITDIR_VAR], ["${unitpath}"], [systemdsystemunitdir])]
+AC_DEFINE_UNQUOTED([SYSTEMD_UNITDIR_VAR], ["${unitpath}"], [systemdsystemunitdir])
 
 AC_ARG_WITH(
   [pre-update],

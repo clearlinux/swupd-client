@@ -137,9 +137,8 @@ test_setup() {
 	ROOT_DIR="${PWD}/${TEST_NAME}"
 
 	# TODO: use -S ${ROOT_DIR}/var/lib/swupd/ when #665 gets fixed
-	# TODO: Add -t
 	SWUPD_OPTS_SHORT="-u ${URL} -p ${ROOT_DIR} -S ${ROOT_DIR}/swupd/"
-	SWUPD_OPTS="$SWUPD_OPTS_SHORT --no-scripts"
+	SWUPD_OPTS="$SWUPD_OPTS_SHORT --no-scripts -t"
 }
 
 test_teardown() {

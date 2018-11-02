@@ -24,14 +24,14 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...
 		Adding any missing files
-		Missing file: .+/target-dir/usr/bin
+		Missing file: .*/target-dir/usr/bin
 		.fixed
 		Fixing modified files
 		.Hash mismatch for file: .*/target-dir/usr/lib/os-release
 		.fixed
-		Hash mismatch for file: .*/target-dir/usr/share/defaults/swupd/format
+		.Hash mismatch for file: .*/target-dir/usr/share/defaults/swupd/format
 		.fixed
-		Inspected 10 files
+		Inspected 12 files
 		  1 files were missing
 		    1 of 1 missing files were replaced
 		    0 of 1 missing files were not replaced

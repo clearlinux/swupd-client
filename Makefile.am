@@ -196,7 +196,7 @@ BATS = \
 	test/functional/verify/verify-boot-file-mismatch-fix.bats \
 	test/functional/verify/verify-boot-skip.bats \
 	test/functional/verify/verify-check-missing-directory.bats \
-	test/functional/verify/verify-client-certificate.bats
+	test/functional/verify/verify-client-certificate.bats \
 	test/functional/verify/verify-directory-tree-deleted.bats \
 	test/functional/verify/verify-empty-dir-deleted.bats \
 	test/functional/verify/verify-fix-version-mismatch.bats \

@@ -49,8 +49,8 @@ test_setup() {
 		Finishing download of update content...
 		Adding any missing files
 		Fixing modified files
-		.Hash mismatch for file: .*/target-dir/usr/lib/os-release
-		.*fixed
+		Hash mismatch for file: .*/target-dir/usr/lib/os-release
+		.fixed
 		--picky removing extra files under .*/target-dir/usr
 		REMOVING /usr/share/clear/bundles/test-bundle2
 		REMOVING /usr/foo/file_3
@@ -93,8 +93,8 @@ test_setup() {
 		Finishing download of update content...
 		Adding any missing files
 		Fixing modified files
-		.Hash mismatch for file: .*/target-dir/usr/lib/os-release
-		.*fixed
+		Hash mismatch for file: .*/target-dir/usr/lib/os-release
+		.fixed
 		--picky removing extra files under .*/target-dir/bar
 		REMOVING /bar/file_5
 		REMOVING /bar/file_4

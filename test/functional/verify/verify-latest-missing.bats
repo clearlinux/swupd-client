@@ -28,6 +28,6 @@ test_teardown() {
 		Failed verify initialization, exiting now.
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_in_output "$expected_output"
 	
 }

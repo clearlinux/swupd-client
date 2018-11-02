@@ -18,7 +18,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Verifying files
-		.Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile
+		Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile
 		Inspected 7 files
 		  1 files did not match
 		Verify successful

@@ -27,9 +27,9 @@ test_setup() {
 		Missing file: .*/target-dir/usr/bin
 		.fixed
 		Fixing modified files
-		.Hash mismatch for file: .*/target-dir/usr/lib/os-release
+		Hash mismatch for file: .*/target-dir/usr/lib/os-release
 		.fixed
-		.Hash mismatch for file: .*/target-dir/usr/share/defaults/swupd/format
+		Hash mismatch for file: .*/target-dir/usr/share/defaults/swupd/format
 		.fixed
 		Inspected 12 files
 		  1 files were missing

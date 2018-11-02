@@ -554,7 +554,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	}
 	counts.mismatch++;
 	/* Log to stdout, so we can post-process it */
-	printf("Hash mismatch for file: %s\n", fullname);
+	printf("\nHash mismatch for file: %s\n", fullname);
 
 	/* if not repairing, we're done */
 	if (!repair) {

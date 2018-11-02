@@ -22,7 +22,7 @@ test_setup() {
 		Finishing download of update content...
 		Adding any missing files
 		Fixing modified files
-		.Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile
+		Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile
 		.fixed
 		Inspected 7 files
 		  0 files were missing

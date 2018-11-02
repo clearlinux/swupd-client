@@ -18,7 +18,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Verifying files
-		.Hash mismatch for file: .*/target-dir/foo
+		Hash mismatch for file: .*/target-dir/foo
 		Inspected 4 files
 		  1 files did not match
 		Verify successful

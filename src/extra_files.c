@@ -154,6 +154,8 @@ int walk_tree(struct manifest *manifest, const char *start, bool fix, const rege
 		int skip_len; /* Length of directory name we are skipping
 			       * could have used strlen(skip_dir), but speed! */
 		if (!F[i].in_manifest) {
+			/* Account for these files not in the manifest as inspected also */
+			counts->checked++;
 			counts->extraneous++;
 			/* Logic to avoid printing out all the files in a
 			 * directory when the directory itself is not present */
@@ -180,7 +182,6 @@ int walk_tree(struct manifest *manifest, const char *start, bool fix, const rege
 			skip_dir = NULL;
 		}
 	}
-	counts->checked = nF;
 tidy:
 	for (int i = 0; i < nF; i++) {
 		free_string(&F[i].filename);

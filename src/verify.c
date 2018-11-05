@@ -339,8 +339,6 @@ static int get_all_files(struct manifest *official_manifest, struct list *subs)
 		if (file->is_deleted) {
 			continue;
 		}
-
-		counts.checked++;
 	}
 	return 0;
 }
@@ -451,7 +449,7 @@ out:
 }
 
 /* for each missing but expected file, (re)add the file */
-static void add_missing_files(struct manifest *official_manifest)
+static void add_missing_files(struct manifest *official_manifest, bool repair)
 {
 	int ret;
 	struct file local;
@@ -487,13 +485,18 @@ static void add_missing_files(struct manifest *official_manifest)
 		/* compare the hash and report mismatch */
 		if (hash_is_zeros(local.hash)) {
 			counts.missing++;
-			if (cmdline_option_install == false) {
+			if (!repair || (repair && cmdline_option_install == false)) {
 				/* Log to stdout, so we can post-process */
 				printf("\nMissing file: %s\n", fullname);
 			}
 		} else {
 			free_string(&fullname);
 			continue;
+		}
+
+		/* if not repairing, we're done */
+		if (!repair) {
+			goto out;
 		}
 
 		/* install the new file (on miscompare + fix) */
@@ -522,6 +525,7 @@ static void add_missing_files(struct manifest *official_manifest)
 				printf("\n\tfixed\n");
 			}
 		}
+	out:
 		free_string(&fullname);
 		print_progress(complete, list_length);
 	}
@@ -535,15 +539,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	int ret;
 
 	// Note: boot files not marked as deleted are candidates for verify/fix
-	if (file->is_deleted ||
-	    ignore(file)) {
-		return;
-	}
-
-	counts.checked++;
-
-	// do_not_update set by earlier check, so account as checked
-	if (file->do_not_update) {
+	if (file->is_deleted || ignore(file) || file->do_not_update) {
 		return;
 	}
 
@@ -552,9 +548,13 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	if (verify_file(file, fullname)) {
 		goto end;
 	}
-	counts.mismatch++;
-	/* Log to stdout, so we can post-process it */
-	printf("\nHash mismatch for file: %s\n", fullname);
+	// do not account for missing files at this point, they are
+	// accounted for in a different stage, only account for mismatch
+	if (access(fullname, F_OK) == 0) {
+		counts.mismatch++;
+		/* Log to stdout, so we can post-process it */
+		printf("\nHash mismatch for file: %s\n", fullname);
+	}
 
 	/* if not repairing, we're done */
 	if (!repair) {
@@ -602,7 +602,7 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 	printf("\n"); /* Finish update progress message */
 }
 
-static void remove_orphaned_files(struct manifest *official_manifest)
+static void remove_orphaned_files(struct manifest *official_manifest, bool repair)
 {
 	int ret;
 	struct list *iter;
@@ -638,11 +638,16 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 
 		if (lstat(fullname, &sb) != 0) {
 			/* correctly, the file is not present */
-			free_string(&fullname);
-			continue;
+			goto out;
 		}
 
 		counts.extraneous++;
+		printf("File that should be deleted: %s\n", fullname);
+
+		/* if not repairing, we're done */
+		if (!repair) {
+			goto out;
+		}
 
 		fd = get_dirfd_path(fullname);
 		if (fd < 0) {
@@ -660,7 +665,7 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 				fprintf(stderr, "Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));
 				counts.not_deleted++;
 			} else {
-				fprintf(stderr, "Deleted %s\n", fullname);
+				fprintf(stderr, "\tdeleted\n");
 				counts.deleted++;
 			}
 		} else {
@@ -675,12 +680,13 @@ static void remove_orphaned_files(struct manifest *official_manifest)
 					fprintf(stderr, "Couldn't remove directory containing untracked files: %s\n", fullname);
 				}
 			} else {
-				fprintf(stderr, "Deleted %s\n", fullname);
+				fprintf(stderr, "\tdeleted\n");
 				counts.deleted++;
 			}
 		}
-		free_string(&fullname);
 		close(fd);
+	out:
+		free_string(&fullname);
 	}
 }
 
@@ -714,7 +720,7 @@ int verify_main(int argc, char **argv)
 		goto clean_args_and_exit;
 	}
 
-	/* Gather current manifests */
+	/* Get the current system version and the version to verify against */
 	int sys_version = get_current_version(path_prefix);
 	if (!version) {
 		if (sys_version < 0) {
@@ -725,6 +731,7 @@ int verify_main(int argc, char **argv)
 		version = sys_version;
 	}
 
+	/* If "latest" was chosen, get latest version */
 	if (version == -1) {
 		version = get_latest_version(NULL);
 		if (version < 0) {
@@ -750,6 +757,7 @@ int verify_main(int argc, char **argv)
 
 	timelist_timer_start(global_times, "Load and recurse Manifests");
 
+	/* Gather current manifests */
 	/* When the version we are verifying against does not match our system version
 	 * disable checks for mixer state so the user can easily switch back to their
 	 * normal update stream */
@@ -848,10 +856,13 @@ load_submanifests:
 	timelist_timer_stop(global_times);
 	timelist_timer_start(global_times, "Consolidate files from bundles");
 	official_manifest->files = files_from_bundles(official_manifest->submanifests);
-
 	official_manifest->files = consolidate_files(official_manifest->files);
 	timelist_timer_stop(global_times);
 	timelist_timer_start(global_times, "Get required files");
+
+	/* get the initial number of files to be inspected */
+	counts.checked = list_len(official_manifest->files);
+
 	/* when fixing or installing we need input files. */
 	if (cmdline_option_fix || cmdline_option_install) {
 		ret = get_required_files(official_manifest, subs);
@@ -884,9 +895,11 @@ load_submanifests:
 		 * is already there. It's also the most safe operation, adding files rarely
 		 * has unintended side effect. So lets do the safest thing first.
 		 */
+		bool repair = true;
+
 		timelist_timer_start(global_times, "Add missing files");
 		fprintf(stderr, "Adding any missing files\n");
-		add_missing_files(official_manifest);
+		add_missing_files(official_manifest, repair);
 		timelist_timer_stop(global_times);
 	}
 
@@ -905,7 +918,7 @@ load_submanifests:
 		/* removing files could be risky, so only do it if the
 		 * prior phases had no problems */
 		if ((counts.not_fixed == 0) && (counts.not_replaced == 0)) {
-			remove_orphaned_files(official_manifest);
+			remove_orphaned_files(official_manifest, repair);
 		}
 		if (cmdline_option_picky) {
 			char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
@@ -923,7 +936,12 @@ load_submanifests:
 		bool repair = false;
 
 		fprintf(stderr, "Verifying files\n");
-		deal_with_hash_mismatches(official_manifest, repair);
+		add_missing_files(official_manifest, repair);
+		/* quick only checks for missing files, so it is done here */
+		if (!cmdline_option_quick) {
+			deal_with_hash_mismatches(official_manifest, repair);
+			remove_orphaned_files(official_manifest, repair);
+		}
 	}
 
 brick_the_system_and_clean_curl:
@@ -934,29 +952,27 @@ brick_the_system_and_clean_curl:
 	 */
 
 	/* report a summary of what we managed to do and not do */
-	fprintf(stderr, "Inspected %i files\n", counts.checked);
+	fprintf(stderr, "Inspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
 
-	if (cmdline_option_fix || cmdline_option_install) {
-		fprintf(stderr, "  %i files were missing\n", counts.missing);
-		if (counts.missing) {
+	if (counts.missing) {
+		fprintf(stderr, "  %i file%s %s missing\n", counts.missing, (counts.missing > 1 ? "s" : ""), (counts.missing > 1 ? "were" : "was"));
+		if (cmdline_option_fix || cmdline_option_install) {
 			fprintf(stderr, "    %i of %i missing files were replaced\n", counts.replaced, counts.missing);
 			fprintf(stderr, "    %i of %i missing files were not replaced\n", counts.not_replaced, counts.missing);
 		}
 	}
 
-	if (!cmdline_option_quick && counts.mismatch > 0) {
-		fprintf(stderr, "  %i files did not match\n", counts.mismatch);
+	if (counts.mismatch) {
+		fprintf(stderr, "  %i file%s did not match\n", counts.mismatch, (counts.mismatch > 1 ? "s" : ""));
 		if (cmdline_option_fix) {
 			fprintf(stderr, "    %i of %i files were fixed\n", counts.fixed, counts.mismatch);
 			fprintf(stderr, "    %i of %i files were not fixed\n", counts.not_fixed, counts.mismatch);
 		}
 	}
 
-	if (((counts.not_fixed == 0) && (counts.not_replaced == 0) &&
-	     cmdline_option_fix && !cmdline_option_quick) ||
-	    (!cmdline_option_fix && cmdline_option_picky)) {
-		fprintf(stderr, "  %i files found which should be deleted\n", counts.extraneous);
-		if (counts.extraneous) {
+	if (counts.extraneous) {
+		fprintf(stderr, "  %i file%s found which should be deleted\n", counts.extraneous, (counts.extraneous > 1 ? "s" : ""));
+		if (cmdline_option_fix) {
 			fprintf(stderr, "    %i of %i files were deleted\n", counts.deleted, counts.extraneous);
 			fprintf(stderr, "    %i of %i files were not deleted\n", counts.not_deleted, counts.extraneous);
 		}

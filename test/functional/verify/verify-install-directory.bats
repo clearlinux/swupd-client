@@ -25,7 +25,7 @@ test_setup() {
 		Finishing download of update content...
 		Adding any missing files
 		Inspected 5 files
-		  1 files were missing
+		  1 file was missing
 		    1 of 1 missing files were replaced
 		    0 of 1 missing files were not replaced
 		Calling post-update helper scripts.

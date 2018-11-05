@@ -20,10 +20,10 @@ test_setup() {
 		Verifying files
 		Adding any missing files
 		Fixing modified files
-		Deleted .*/target-dir/testdir
-		Inspected 1 files
-		  0 files were missing
-		  1 files found which should be deleted
+		File that should be deleted: .*/target-dir/testdir
+		.deleted
+		Inspected 2 files
+		  1 file found which should be deleted
 		    1 of 1 files were deleted
 		    0 of 1 files were not deleted
 		Calling post-update helper scripts.

@@ -34,7 +34,6 @@ test_setup() {
 		  3 files were missing
 		    3 of 3 missing files were replaced
 		    0 of 3 missing files were not replaced
-		  0 files found which should be deleted
 		Calling post-update helper scripts.
 		Fix successful
 	EOM

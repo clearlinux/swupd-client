@@ -22,9 +22,7 @@ test_setup() {
 		Verifying files
 		Adding any missing files
 		Fixing modified files
-		Inspected 6 files
-		  0 files were missing
-		  0 files found which should be deleted
+		Inspected 7 files
 		WARNING: post-update helper scripts skipped due to --no-scripts argument
 		Fix successful
 	EOM

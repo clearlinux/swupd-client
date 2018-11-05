@@ -20,9 +20,7 @@ test_setup() {
 		Verifying files
 		Adding any missing files
 		Fixing modified files
-		Inspected 4 files
-		  0 files were missing
-		  0 files found which should be deleted
+		Inspected 5 files
 		Calling post-update helper scripts.
 		WARNING: boot files update skipped due to --no-boot-update argument
 		Fix successful

@@ -25,11 +25,9 @@ test_setup() {
 		Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile
 		.fixed
 		Inspected 7 files
-		  0 files were missing
-		  1 files did not match
+		  1 file did not match
 		    1 of 1 files were fixed
 		    0 of 1 files were not fixed
-		  0 files found which should be deleted
 		Calling post-update helper scripts.
 		Fix successful
 	EOM

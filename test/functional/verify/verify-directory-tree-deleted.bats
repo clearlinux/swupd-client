@@ -25,11 +25,13 @@ test_setup() {
 		Verifying files
 		Adding any missing files
 		Fixing modified files
-		Deleted .*/target-dir/testdir1/testdir2/testfile
-		Deleted .*/target-dir/testdir1/testdir2
-		Deleted .*/target-dir/testdir1
-		Inspected 1 files
-		  0 files were missing
+		File that should be deleted: .*/target-dir/testdir1/testdir2/testfile
+		.deleted
+		File that should be deleted: .*/target-dir/testdir1/testdir2
+		.deleted
+		File that should be deleted: .*/target-dir/testdir1
+		.deleted
+		Inspected 4 files
 		  3 files found which should be deleted
 		    3 of 3 files were deleted
 		    0 of 3 files were not deleted

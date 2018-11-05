@@ -56,9 +56,8 @@ test_setup() {
 		REMOVING /usr/foo/file_3
 		REMOVING /usr/foo/file_2
 		REMOVING DIR /usr/foo/
-		Inspected 15 files
-		  0 files were missing
-		  1 files did not match
+		Inspected 17 files
+		  1 file did not match
 		    1 of 1 files were fixed
 		    0 of 1 files were not fixed
 		  4 files found which should be deleted
@@ -99,9 +98,8 @@ test_setup() {
 		REMOVING /bar/file_5
 		REMOVING /bar/file_4
 		REMOVING DIR /bar/
-		Inspected 3 files
-		  0 files were missing
-		  1 files did not match
+		Inspected 16 files
+		  1 file did not match
 		    1 of 1 files were fixed
 		    0 of 1 files were not fixed
 		  3 files found which should be deleted
@@ -136,10 +134,8 @@ test_setup() {
 		/usr/foo/file_3
 		/usr/foo/file_2
 		/usr/foo/
-		Inspected 15 files
+		Inspected 17 files
 		  4 files found which should be deleted
-		    0 of 4 files were deleted
-		    4 of 4 files were not deleted
 		Verify successful
 	EOM
 	)

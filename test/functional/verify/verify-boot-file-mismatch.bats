@@ -20,7 +20,7 @@ test_setup() {
 		Verifying files
 		Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile
 		Inspected 7 files
-		  1 files did not match
+		  1 file did not match
 		Verify successful
 	EOM
 	)

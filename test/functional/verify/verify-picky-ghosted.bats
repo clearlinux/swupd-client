@@ -19,10 +19,8 @@ test_setup() {
 		Verifying files
 		Adding any missing files
 		Fixing modified files
-		--picky removing extra files under .*
-		Inspected 12 files
-		  0 files were missing
-		  0 files found which should be deleted
+		--picky removing extra files under .*/target-dir/usr
+		Inspected 13 files
 		Calling post-update helper scripts.
 		Fix successful
 	EOM

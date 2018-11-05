@@ -32,13 +32,12 @@ test_setup() {
 		Hash mismatch for file: .*/target-dir/usr/share/defaults/swupd/format
 		.fixed
 		Inspected 12 files
-		  1 files were missing
+		  1 file was missing
 		    1 of 1 missing files were replaced
 		    0 of 1 missing files were not replaced
 		  2 files did not match
 		    2 of 2 files were fixed
 		    0 of 2 files were not fixed
-		  0 files found which should be deleted
 		Calling post-update helper scripts.
 		Fix successful
 	EOM

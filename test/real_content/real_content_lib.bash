@@ -17,6 +17,7 @@ source "$SCRIPT_PATH/../functional/testlib.bash"
 #                Default is 10.
 # $BUNDLE_LIST: List of bundles to be installed on the system besides os-core
 #               and os-core-update. If empty, install all bundles.
+# $BASE_DIR:    A base dir different from current directory
 
 export SWUPD_OPTS # Swupd options to use in tests
 export SWUPD_OPTS_SHORT # Swupd options to use in tests (for bundle-list)
@@ -99,6 +100,9 @@ test_setup() {
 		MAX_VERSIONS=10
 	fi
 
+	if [ -z "$BASE_DIR" ]; then
+		BASE_DIR=$PWD
+	fi
 	# Using github clr-bundles project to get official clear releases
 	# version list is sorted from newer to older
 	# TODO: Discover available versions to work with custom mixers
@@ -132,9 +136,9 @@ test_setup() {
 		return 1
 	fi
 
-	sudo rm -rf "$TEST_NAME"
-	sudo mkdir -p "$TEST_NAME"
-	ROOT_DIR="${PWD}/${TEST_NAME}"
+	ROOT_DIR="${BASE_DIR}${TEST_NAME}"
+	sudo rm -rf "$ROOT_DIR"
+	sudo mkdir -p "$ROOT_DIR"
 
 	# TODO: use -S ${ROOT_DIR}/var/lib/swupd/ when #665 gets fixed
 	SWUPD_OPTS_SHORT="-u ${URL} -p ${ROOT_DIR} -S ${ROOT_DIR}/swupd/"

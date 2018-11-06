@@ -194,14 +194,11 @@ BATS = \
 	test/functional/update/update-verify-fix-path-hash-mismatch.bats \
 	test/functional/update/update-verify-fix-path-missing-dir.bats \
 	test/functional/update/update-verify-fullfile-hash.bats \
-	test/functional/verify/verify-add-missing-directory.bats \
 	test/functional/verify/verify-add-missing-include.bats \
 	test/functional/verify/verify-add-missing-include-old.bats \
+	test/functional/verify/verify-boot-file.bats \
 	test/functional/verify/verify-boot-file-deleted.bats \
-	test/functional/verify/verify-boot-file-mismatch.bats \
-	test/functional/verify/verify-boot-file-mismatch-fix.bats \
 	test/functional/verify/verify-boot-skip.bats \
-	test/functional/verify/verify-check-missing-directory.bats \
 	test/functional/verify/verify-client-certificate.bats \
 	test/functional/verify/verify-directory-tree-deleted.bats \
 	test/functional/verify/verify-empty-dir-deleted.bats \
@@ -211,12 +208,16 @@ BATS = \
 	test/functional/verify/verify-format-mismatch.bats \
 	test/functional/verify/verify-format-mismatch-override.bats \
 	test/functional/verify/verify-ghosted.bats \
+	test/functional/verify/verify-good.bats \
 	test/functional/verify/verify-install-directory.bats \
 	test/functional/verify/verify-install-latest-directory.bats \
 	test/functional/verify/verify-latest-missing.bats \
+	test/functional/verify/verify-missing-file.bats \
+	test/functional/verify/verify-picky.bats \
 	test/functional/verify/verify-picky-downgrade.bats \
 	test/functional/verify/verify-picky-ghosted.bats \
 	test/functional/verify/verify-picky-ghosted-missing.bats \
+	test/functional/verify/verify-picky-whitelist.bats \
 	test/functional/verify/verify-skip-scripts.bats
 
 dist_check_SCRIPTS = $(BATS)

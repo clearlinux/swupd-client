@@ -12,7 +12,7 @@ test_setup() {
 
 }
 
-@test "verify ghosted file not added during --picky" {
+@test "VER026: Verify ghosted files are not added during --picky" {
 
 	run sudo sh -c "$SWUPD verify --fix --picky $SWUPD_OPTS"
 	assert_status_is 0

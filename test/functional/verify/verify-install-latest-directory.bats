@@ -11,9 +11,9 @@ test_setup() {
 
 }
 
-@test "verify install a directory using latest" {
+@test "VER023: Verify installs a missing directory on a system based on the latest version" {
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install -m latest"
+	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install --manifest=latest"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Verifying version 100

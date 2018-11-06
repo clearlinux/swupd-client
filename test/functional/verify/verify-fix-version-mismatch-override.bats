@@ -14,7 +14,7 @@ test_setup() {
 
 }
 
-@test "verify version mismatch override" {
+@test "VER019: Verify fix can be forced to continue when there is a version mismatch" {
 
 	run sudo sh -c "$SWUPD verify --fix -m 10 --force $SWUPD_OPTS"
 	assert_status_is 0

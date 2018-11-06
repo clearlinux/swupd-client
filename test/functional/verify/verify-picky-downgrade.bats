@@ -12,9 +12,9 @@ test_setup() {
 
 }
 
-@test "Verify using an older version won't remove an installed bundle that was not available then" {
+@test "VER027: Verify using an older version won't remove an installed bundle that was not available then" {
 
-	run sudo sh -c "$SWUPD verify --fix --picky -m 10 $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD verify --fix --picky --manifest=10 $SWUPD_OPTS"
 
 	assert_status_is "$EMANIFEST_LOAD"
 	expected_output=$(cat <<-EOM
@@ -34,9 +34,9 @@ test_setup() {
 
 }
 
-@test "Verify can be forced to remove installed bundles that were not available in a previous version" {
+@test "VER028: Verify can be forced to remove installed bundles that were not available in a previous version" {
 
-	run sudo sh -c "$SWUPD verify --fix --picky --force -m 10 $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD verify --fix --picky --manifest=10 --force $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -77,9 +77,9 @@ test_setup() {
 
 }
 
-@test "Verify can remove files in a specified location that were not available in a previous version" {
+@test "VER029: Verify can remove files in a specified location that were not available in a previous version" {
 
-	run sudo sh -c "$SWUPD verify --fix --picky --picky-tree=/bar --force -m 10 $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD verify --fix --picky --picky-tree=/bar --manifest=10 --force $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -120,9 +120,9 @@ test_setup() {
 
 }
 
-@test "Verify can show files that would be removed if not available in a previous version" {
+@test "VER030: Verify can show files that would be removed if not available in a previous version" {
 
-	run sudo sh -c "$SWUPD verify --picky --force -m 10 $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD verify --picky --manifest=10 --force $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM

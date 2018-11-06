@@ -11,10 +11,10 @@ test_setup() {
 
 }
 
-@test "verify format mismatch override" {
+@test "VER021: Verify can be forced to continue when there is a format mismatch" {
 
 	# the -x option bypasses the fatal error
-	run sudo sh -c "$SWUPD verify --fix -F 1 -m 40 -x $SWUPD_OPTS_NO_FMT"
+	run sudo sh -c "$SWUPD verify --fix --format=1 --manifest=40 --force $SWUPD_OPTS_NO_FMT"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Verifying version 40

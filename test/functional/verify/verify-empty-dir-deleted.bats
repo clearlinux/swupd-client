@@ -11,7 +11,7 @@ test_setup() {
 
 }
 
-@test "verify delete already removed directory" {
+@test "VER008: Verify fix is able to remove an empty directory" {
 
 	run sudo sh -c "$SWUPD verify --fix $SWUPD_OPTS"
 	assert_status_is 0

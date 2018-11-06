@@ -61,14 +61,14 @@ global_teardown() {
 	destroy_test_environment "$TEST_NAME"
 }
 
-@test "verify with valid client cert" {
+@test "VER013: Verify installed content on a system over HTTPS with a valid client certificate" {
 
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS_HTTPS"
 
 	assert_status_is 0
 }
 
-@test "verify with no client cert" {
+@test "VER014: Try verifying installed content on a system over HTTPS with no client certificate" {
 
 	# remove client certificate
 	sudo rm "$CLIENT_CERT"
@@ -83,7 +83,7 @@ global_teardown() {
 	assert_in_output "$expected_output"
 }
 
-@test "verify with invalid client cert" {
+@test "VER015: Try verifying installed content on a system over HTTPS with an invalid client certificate" {
 
 	# make client certificate invalid
 	sudo sh -c "echo foo > $CLIENT_CERT"

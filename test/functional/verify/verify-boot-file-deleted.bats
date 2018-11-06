@@ -6,12 +6,12 @@ test_setup() {
 
 	create_test_environment -e "$TEST_NAME"
 	create_bundle -L -n os-core -f /usr/lib/kernel/testfile "$TEST_NAME"
-	update_manifest "$WEBDIR"/10/Manifest.os-core file-status /usr/lib/kernel/testfile .db.
+	update_manifest -p "$WEBDIR"/10/Manifest.os-core file-status /usr/lib/kernel/testfile .db.
 	update_manifest "$WEBDIR"/10/Manifest.os-core file-hash /usr/lib/kernel/testfile "$zero_hash"
 
 }
 
-@test "verify add missing boot file" {
+@test "VER009: Verify does not delete boot files from the system" {
 
 	run sudo sh -c "$SWUPD verify --fix $SWUPD_OPTS"
 	assert_status_is 0

@@ -11,7 +11,7 @@ test_setup() {
 
 }
 
-@test "verify version mismatch enforcement" {
+@test "VER018: Verify fix enforces the use of the correct version" {
 
 	run sudo sh -c "$SWUPD verify --fix -m 10 $SWUPD_OPTS"
 	assert_status_is "$EMANIFEST_LOAD"

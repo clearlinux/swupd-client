@@ -14,7 +14,7 @@ test_setup() {
 
 }
 
-@test "verify add missing old include" {
+@test "VER012: Verify fixes a system that has a missing dependency from a previous version" {
 
 	run sudo sh -c "$SWUPD verify --fix $SWUPD_OPTS"
 	assert_status_is 0

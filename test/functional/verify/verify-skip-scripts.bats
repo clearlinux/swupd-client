@@ -12,7 +12,7 @@ test_setup() {
 
 }
 
-@test "verify override post-update scripts" {
+@test "VER017: Verify can skip running the post-update scripts and boot update tool" {
 
 	run sudo sh -c "$SWUPD verify --fix --no-scripts $SWUPD_OPTS"
 	assert_status_is 0

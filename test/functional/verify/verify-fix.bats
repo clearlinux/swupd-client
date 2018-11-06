@@ -24,7 +24,7 @@ test_setup() {
 
 }
 
-@test "Verify shows modified files, new files and deleted files" {
+@test "VER031: Verify shows modified files, new files and deleted files" {
 
 	# verify should show tracked files with a hash mismatch,
 	# it should also show tracked files that were marked to be removed,
@@ -61,7 +61,7 @@ test_setup() {
 
 }
 
-@test "Verify fixes modified files, new files and deleted files" {
+@test "VER032: Verify fixes modified files, new files and deleted files" {
 
 	# verify --fix should fix tracked files with a hash mismatch,
 	# it should also delete tracked files that were marked to be removed,
@@ -114,7 +114,7 @@ test_setup() {
 
 }
 
-@test "Verify fixes modified files, new files, deleted files, and removes untracked files" {
+@test "VER033: Verify fixes modified files, new files, deleted files, and removes untracked files" {
 
 	# verify --fix --picky should fix tracked files with a hash mismatch,
 	# it should also delete tracked files that were marked to be removed,
@@ -169,7 +169,7 @@ test_setup() {
 
 }
 
-@test "Verify fixes modified files, new files, deleted files, and removes untracked files from a specified location" {
+@test "VER034: Verify fixes modified files, new files, deleted files, and removes untracked files from a specified location" {
 
 	# verify --fix --picky should fix tracked files with a hash mismatch,
 	# it should also delete tracked files that were marked to be removed,

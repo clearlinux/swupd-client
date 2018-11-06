@@ -10,7 +10,7 @@ test_setup() {
 
 }
 
-@test "verify ghosted file skipped" {
+@test "VER010: Verify does not delete ghosted files from the system" {
 
 	run sudo sh -c "$SWUPD verify --fix $SWUPD_OPTS"
 	assert_status_is 0

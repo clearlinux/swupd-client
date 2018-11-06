@@ -19,9 +19,9 @@ test_teardown() {
 
 }
 
-@test "verify install using latest with missing version file on server" {
+@test "VER024: Try using verify based on the latest version and a version file can't be found on server" {
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install -m latest"
+	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install --manifest=latest"
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
 		Curl error: \\(37\\) Couldn.t read a file:// file

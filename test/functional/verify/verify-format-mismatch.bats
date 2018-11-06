@@ -10,9 +10,9 @@ test_setup() {
 
 }
 
-@test "verify format mismatch enforcement" {
+@test "VER020: Verify enforces the use of the correct format" {
 
-	run sudo sh -c "$SWUPD verify --fix -F 1 -m 40 $SWUPD_OPTS_NO_FMT"
+	run sudo sh -c "$SWUPD verify --fix --format=1 --manifest=40 $SWUPD_OPTS_NO_FMT"
 	assert_status_is "$EMANIFEST_LOAD"
 	expected_output=$(cat <<-EOM
 		Verifying version 40

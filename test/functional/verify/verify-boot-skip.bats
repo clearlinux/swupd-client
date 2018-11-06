@@ -11,9 +11,9 @@ test_setup() {
 
 }
 
-@test "verify override boot update" {
+@test "VER016: Verify can skip the installation of updated boot files" {
 
-	run sudo sh -c "$SWUPD verify --fix -b $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD verify --fix --no-boot-update $SWUPD_OPTS"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Verifying version 10

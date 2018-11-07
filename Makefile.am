@@ -159,6 +159,7 @@ BATS = \
 	test/functional/update/update-apply-full-file-delta.bats \
 	test/functional/update/update-boot-file.bats \
 	test/functional/update/update-boot-skip.bats \
+	test/functional/update/update-bundle-removed.bats \
 	test/functional/update/update-client-certificate.bats \
 	test/functional/update/update-delta-without-rename-flag.bats \
 	test/functional/update/update-download.bats \

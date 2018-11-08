@@ -283,6 +283,10 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 				fprintf(stderr, "Error for %s download: Response %ld - %s\n",
 					file->file.path, response, curl_easy_strerror(msg->data.result));
 
+				if (curl_ret == CURLE_WRITE_ERROR) {
+					fprintf(stderr, "Check free space for %s ?\n", state_dir);
+				}
+
 				//Download resume isn't supported. Disabling it for next try
 				if (curl_ret == CURLE_RANGE_ERROR) {
 					fprintf(stderr, "Range command not supported by server, download resume disabled.\n");

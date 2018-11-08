@@ -448,6 +448,7 @@ exit:
 			break;
 		case CURLE_WRITE_ERROR:
 			fprintf(stderr, "Curl: Error downloading to local file - %s\n", filename);
+			fprintf(stderr, "Check free space for %s ?", state_dir);
 			err = -EIO;
 			break;
 		case CURLE_OPERATION_TIMEDOUT:

@@ -20,7 +20,10 @@ PKG_CHECK_MODULES([bsdiff], [bsdiff])
 PKG_CHECK_MODULES([lzma], [liblzma])
 PKG_CHECK_MODULES([zlib], [zlib])
 PKG_CHECK_MODULES([curl], [libcurl])
-PKG_CHECK_MODULES([openssl], [libcrypto >= 1.0.1])
+PKG_CHECK_MODULES([openssl], [libcrypto >= 1.1.0],
+  [AC_DEFINE([HAVE_OPENSSL11], [1], [Use OpenSSL 1.1])],
+  [PKG_CHECK_MODULES([openssl10], [libcrypto < 1.1.0])]
+)
 PKG_CHECK_MODULES([libarchive], [libarchive])
 
 

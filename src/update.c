@@ -395,8 +395,14 @@ load_current_submanifests:
 	ret = add_included_manifests(server_manifest, &latest_subs);
 	timelist_timer_stop(global_times);
 	if (ret) {
-		ret = EMANIFEST_LOAD;
-		goto clean_exit;
+		if (ret == -add_sub_BADNAME) {
+			/* this means a bundle(s) was removed in a future version */
+			printf("WARNING: One or more installed bundles are no longer available at version %d.\n",
+			       server_version);
+		} else {
+			ret = EMANIFEST_LOAD;
+			goto clean_exit;
+		}
 	}
 
 load_server_submanifests:

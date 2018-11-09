@@ -775,16 +775,17 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 		ret = ERECURSE_MANIFEST;
 		goto out;
 	}
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Add bundles and recurse
 
 	timelist_timer_start(global_times, "Consolidate files from bundles");
 	to_install_files = files_from_bundles(to_install_bundles);
 	to_install_files = consolidate_files(to_install_files);
 	to_install_files = filter_out_existing_files(to_install_files);
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Consolidate files from bundles
 
 	/* Step 1.5: Now that we know the bundle is valid, check if we have enough space */
 	if (!skip_diskspace_check) {
+		timelist_timer_start(global_times, "Check disk space availability");
 		char *filepath = NULL;
 
 		bundle_size = get_manifest_list_contentsize(to_install_bundles);
@@ -811,6 +812,7 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 
 			goto out;
 		}
+		timelist_timer_stop(global_times); // closing: Check disk space availability
 	}
 
 	/* step 2: download necessary packs */
@@ -825,7 +827,7 @@ download_subscribed_packs:
 			goto download_subscribed_packs;
 		}
 	}
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Download packs
 
 	/* step 2.5: Download missing files */
 	timelist_timer_start(global_times, "Download missing files");
@@ -834,11 +836,10 @@ download_subscribed_packs:
 		fprintf(stderr, "ERROR: Could not download some files from bundles, aborting bundle installation.\n");
 		goto out;
 	}
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Download missing files
 
 	mom->files = files_from_bundles(mom->submanifests);
 	mom->files = consolidate_files(mom->files);
-	timelist_timer_stop(global_times);
 
 	/* step 4: Install all bundle(s) files into the fs */
 	timelist_timer_start(global_times, "Installing bundle(s) files onto filesystem");
@@ -914,7 +915,7 @@ download_subscribed_packs:
 
 				mom->files = files_from_bundles(mom->submanifests);
 				mom->files = consolidate_files(mom->files);
-				timelist_timer_stop(global_times);
+				timelist_timer_stop(global_times); // closing: Add tracked bundles
 				full_mom = mom;
 			}
 			ret = verify_fix_path(file->filename, full_mom);
@@ -955,7 +956,7 @@ download_subscribed_packs:
 
 				mom->files = files_from_bundles(mom->submanifests);
 				mom->files = consolidate_files(mom->files);
-				timelist_timer_stop(global_times);
+				timelist_timer_stop(global_times); // closing: Add tracked bundles
 				full_mom = mom;
 			}
 			file = search_file_in_manifest(full_mom, file->filename);
@@ -968,14 +969,13 @@ download_subscribed_packs:
 	print_progress(list_length * 2, list_length * 2); /* Force out 100% complete */
 	printf("\n");
 	sync();
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Installing bundle(s) files onto filesystem
 	/* step 5: Run any scripts that are needed to complete update */
 	timelist_timer_start(global_times, "Run Scripts");
 	run_scripts(false);
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Run Scripts
 
 	ret = 0;
-	timelist_print_stats(global_times);
 
 out:
 	/* count how many of the requested bundles were actually installed, note that the
@@ -1068,11 +1068,11 @@ int install_bundles_frontend(char **bundles)
 			free_string(&tmp);
 		}
 	}
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Prepend bundles to list
 	timelist_timer_start(global_times, "Install bundles");
 	ret = install_bundles(bundles_list, &subs, mom);
 	list_free_list(bundles_list);
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Install bundles
 
 	timelist_print_stats(global_times);
 

@@ -106,7 +106,9 @@ static void dump_file_descriptor_leaks_int(int n, void *a)
 	string_or_die(&filename, "/proc/self/fd/%d", n);
 	if ((size = readlink(filename, buffer, PATH_MAXLEN)) != -1) {
 		buffer[size] = '\0'; /* Supply the terminator */
-		if (!strstr(buffer, "socket")) {
+		if (!strstr(buffer, "socket") &&
+		    !strstr(buffer, "/dev/random") &&
+		    !strstr(buffer, "/dev/urandom")) {
 			fprintf(stderr, "Possible filedescriptor leak: fd_number=\"%d\",fd_details=\"%s\"\n", n, buffer);
 		}
 	}

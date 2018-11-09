@@ -36,6 +36,7 @@
 #include <openssl/crypto.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
+#include <openssl/x509v3.h>
 
 #include "config.h"
 #include "signature.h"
@@ -339,6 +340,11 @@ static int validate_certificate(void)
 
 	X509_STORE_set_verify_cb_func(store, verify_callback);
 
+	if (X509_STORE_set_purpose(store, X509_PURPOSE_ANY) != 1) {
+		fprintf(stderr, "Failed X509_STORE_set_purpose() for %s\n", CERTNAME);
+		goto error;
+	}
+
 	/* Add the certificates to be verified to the store */
 	if (!(lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file()))) {
 		fprintf(stderr, "Failed X509_STORE_add_lookup() for %s\n", CERTNAME);
@@ -371,7 +377,6 @@ static int validate_certificate(void)
 		fprintf(stderr, "Failed X509_STORE_CTX_init() for %s\n", CERTNAME);
 		goto error;
 	}
-
 	/* Specify which cert to validate in the verify context.
 	 * This is required because we may add multiple certs to the X509 store,
 	 * but we want to validate a specific one out of the group/chain. */

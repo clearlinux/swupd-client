@@ -150,7 +150,6 @@ void terminate_signature(void)
 	if (cert) {
 		cert = NULL;
 	}
-	ERR_remove_thread_state(NULL);
 	CRYPTO_cleanup_all_ex_data();
 }
 
@@ -396,14 +395,14 @@ error:
 		X509_STORE_CTX_free(verify_ctx);
 	}
 
-	return verify_ctx->error;
+	return X509_STORE_CTX_get_error(verify_ctx);
 }
 
 int verify_callback(int ok, X509_STORE_CTX *stor)
 {
 	if (!ok) {
 		fprintf(stderr, "Certificate verification error: %s\n",
-			X509_verify_cert_error_string(stor->error));
+			X509_verify_cert_error_string(X509_STORE_CTX_get_error(stor)));
 	}
 	return ok;
 }

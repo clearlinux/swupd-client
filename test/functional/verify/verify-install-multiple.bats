@@ -6,21 +6,22 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME" 10
 	create_bundle -n test-bundle -f /file_1,/file_2 "$TEST_NAME"
-	sudo mkdir -p "$TARGETDIR"/usr/share/clear/bundles
-	# note the typo on the next line
-	sudo touch "$TARGETDIR"/usr/share/clear/bundles/test-bundl
+	sudo touch "$TARGETDIR"/usr/share/clear/bundles/test-bundle
 
 }
 
-@test "install bundle with invalid name" {
+@test "install multiple bundles" {
 
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install -m 10"
 
-	assert_status_is $EMANIFEST_LOAD
+	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Warning: Bundle "test-bundl" is invalid, skipping it...
+		Fix successful
 	EOM
 	)
 	assert_in_output "$expected_output"
+	assert_file_exists "$TARGETDIR"/file_1
+	assert_file_exists "$TARGETDIR"/file_2
+	assert_file_exists "$TARGETDIR"/core
 
 }

@@ -6,24 +6,26 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME" 10
 	create_bundle -n test-bundle -f /file_1,/file_2 "$TEST_NAME"
-	sudo mkdir -p "$TARGETDIR"/usr/share/clear/bundles
 	sudo touch "$TARGETDIR"/usr/share/clear/bundles/test-bundle
 	sudo rm "$WEBDIR"/10/pack-test-bundle-from-0.tar
 	sudo rm "$WEBDIR"/10/pack-os-core-from-0.tar
-	sudo rm -rf "$WEBDIR"/10/files/*
 
 }
 
-@test "install bundle with no zero packs and no fullfile fallbacks" {
+@test "install bundle with no zero packs" {
 
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install -m 10"
 
-	# no way to get content, everything should fail
-	assert_status_is 1
+	# everything should still work
+	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Fix did not fully succeed
+		Fix successful
 	EOM
 	)
 	assert_in_output "$expected_output"
+	assert_file_exists "$TARGETDIR"/file_1
+	assert_file_exists "$TARGETDIR"/file_2
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle
 
 }

@@ -185,7 +185,7 @@ int extract_to(const char *tarfile, const char *outputdir)
 	 * returncode to the result of archive_write_close in case it fails */
 	r = archive_write_close(ext);
 	/* call _archive_check_err() for correct error message */
-	_archive_check_err(ext, r);
+	(void)_archive_check_err(ext, r);
 out:
 	/* archive_write_free calls archive_write_close but does not report the
 	 * error. If 'goto out' is called, we already have an error we are handling

@@ -64,7 +64,7 @@ global_teardown() {
 	destroy_test_environment "$TEST_NAME"
 }
 
-@test "remove bundle with valid client cert" {
+@test "REM014: Removing bundle over HTTPS with a valid client certificate" {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS_HTTPS test-bundle"
 
@@ -72,7 +72,7 @@ global_teardown() {
 	assert_file_not_exists "$TEST_NAME"/target-dir/foo/test-file
 }
 
-@test "remove bundle with no client cert" {
+@test "REM015: Try removing a bundle over HTTPS with no client certificate" {
 
 	# remove client certificate
 	sudo rm "$CLIENT_CERT"
@@ -87,7 +87,7 @@ global_teardown() {
 	assert_in_output "$expected_output"
 }
 
-@test "remove bundle with invalid client cert" {
+@test "REM016: Try removing a bundle over HTTPS with an invalid client certificate" {
 
 	# make client certificate invalid
 	sudo sh -c "echo foo > $CLIENT_CERT"

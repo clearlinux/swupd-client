@@ -31,20 +31,19 @@
 
 static unsigned long int get_versionstamp(void)
 {
-	struct stat statt;
 	FILE *fp = NULL;
 	char data[11];
 	const char *filename = "/usr/share/clear/versionstamp";
 	unsigned long int version_num;
 
-	if (stat(filename, &statt) == -1) {
-		fprintf(stderr, "%s does not exist!\n", filename);
-		return 0;
-	}
-
+	errno = 0;
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
-		fprintf(stderr, "Failed to open %s\n", filename);
+		if (errno == ENOENT) {
+			fprintf(stderr, "%s does not exist!\n", filename);
+		} else {
+			fprintf(stderr, "Failed to open %s\n", filename);
+		}
 		return 0;
 	}
 

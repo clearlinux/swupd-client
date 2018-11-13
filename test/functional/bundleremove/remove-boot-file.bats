@@ -9,11 +9,17 @@ test_setup() {
 
 }
 
-@test "bundle-remove remove bundle containing a boot file" {
+@test "REM008: Removing a bundle containing a boot file" {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle"
+
 	assert_status_is 0
+	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle
 	assert_file_not_exists "$TARGETDIR"/usr/lib/kernel/testfile
+	assert_dir_not_exists "$TARGETDIR"/usr/lib/kernel
+	# these files should not be deleted because they are also part of os-core
+	assert_dir_exists "$TARGETDIR"/usr/lib
+	assert_dir_exists "$TARGETDIR"/usr/
 	expected_output=$(cat <<-EOM
 		Deleting bundle files...
 		Total deleted files: 2
@@ -21,5 +27,6 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
+	# TODO(castulo): The total deleted files should have been 3, change once bug #690 is fixed
 
 }

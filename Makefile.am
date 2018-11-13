@@ -134,15 +134,14 @@ BATS = \
 	test/functional/bundlelist/list-has-dep-nested-server.bats \
 	test/functional/bundlelist/list-no-deps.bats \
 	test/functional/bundlelist/list-none-has-deps.bats \
+	test/functional/bundleremove/remove-basics.bats \
 	test/functional/bundleremove/remove-boot-file.bats \
+	test/functional/bundleremove/remove-client-certificate.bats \
 	test/functional/bundleremove/remove-include.bats \
 	test/functional/bundleremove/remove-include-nested.bats \
 	test/functional/bundleremove/remove-os-core.bats \
 	test/functional/bundleremove/remove-parse-args.bats \
-	test/functional/bundleremove/remove-file.bats \
-	test/functional/bundleremove/remove-multiple.bats \
-	test/functional/bundleremove/remove-rc.bats \
-	test/functional/bundleremove/remove-client-certificate.bats \
+	test/functional/bundleremove/remove-with-dependency.bats \
 	test/functional/checkupdate/chk-update-new-version.bats \
 	test/functional/checkupdate/chk-update-no-server-content.bats \
 	test/functional/checkupdate/chk-update-no-target-content.bats \

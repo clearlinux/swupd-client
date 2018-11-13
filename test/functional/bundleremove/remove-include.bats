@@ -8,16 +8,19 @@ test_setup() {
 	create_bundle -L -n test-bundle1 -f /foo/test-file1 "$TEST_NAME"
 	create_bundle -L -n test-bundle2 -f /bar/test-file2 "$TEST_NAME"
 	# add test-bundle1 as dependency of test-bundle2
-	add_dependency_to_manifest "$TEST_NAME"/web-dir/10/Manifest.test-bundle2 test-bundle1
+	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle2 test-bundle1
 
 }
 
-@test "bundle-remove remove bundle containing a file" {
+@test "REM010: Try removing a bundle that is a dependency of another bundle" {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle1"
+
 	assert_status_is "$EBUNDLE_REMOVE"
-	assert_file_exists "$TEST_NAME"/target-dir/foo/test-file1
-	assert_file_exists "$TEST_NAME"/target-dir/bar/test-file2
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/foo/test-file1
+	assert_file_exists "$TARGETDIR"/bar/test-file2
 	expected_output=$(cat <<-EOM
 		Error: bundle requested to be removed is required by the following bundles:
 		format:

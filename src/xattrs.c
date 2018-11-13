@@ -31,6 +31,8 @@
 #include "swupd.h"
 #include "xattrs.h"
 
+#define NULL_BLOB 0xdeadcafe
+
 enum xattrs_action_type_t_ {
 	XATTRS_ACTION_COPY,
 	XATTRS_ACTION_GET_BLOB
@@ -41,26 +43,7 @@ typedef enum xattrs_action_type_t_ xattrs_action_type_t;
 /* If SWUPD_WITH_XATTRS is not defined, create functions to override
  * glibc's interface to the system calls
  */
-#ifndef SWUPD_WITH_XATTRS
-/* Silly little function to ignore 4 parameters to keep gcc quiet */
-#ifdef UNUSED
-#undef UNUSED
-#endif
-#define UNUSED(x) x __attribute__((__unused__))
-static int dummy4(const char *UNUSED(p), const char *UNUSED(n), void *UNUSED(b), size_t UNUSED(l))
-{
-	return 0;
-}
-/* Return a length of zero attribute names, i.e. there are none.
- * Not a perfect emulation, but good enough
- */
-#define llistxattr(p, b, l) dummy4(p, p, b, l)
-/* If by some chance we have an attribute name and try and get its
- * value then set errno and return an error.
- */
-#define lgetxattr(p, n, b, l) ((errno = ENOTSUP, dummy4(p, n, b, l), -1))
-
-#endif
+#ifdef SWUPD_WITH_XATTRS
 
 static int xattr_get_value(const char *path, const char *name, char **blob,
 			   size_t *blob_len, xattrs_action_type_t action)
@@ -170,7 +153,7 @@ static void xattrs_do_action(xattrs_action_type_t action,
 	if (len <= 0) {
 		if (action == XATTRS_ACTION_GET_BLOB) {
 			*blob_len = 0;
-			*blob = (void *)0xdeadcafe;
+			*blob = (void *)NULL_BLOB;
 		}
 		return; // no xattrs, this is OK
 	}
@@ -182,7 +165,7 @@ static void xattrs_do_action(xattrs_action_type_t action,
 	if (len <= 0) {
 		if (action == XATTRS_ACTION_GET_BLOB) {
 			*blob_len = 0;
-			*blob = (void *)0xdeadcafe;
+			*blob = (void *)NULL_BLOB;
 		}
 		free(list);
 		return; // no xattrs, this is OK
@@ -237,7 +220,7 @@ static void xattrs_do_action(xattrs_action_type_t action,
 			*blob = value;
 		} else {
 			*blob_len = 0;
-			*blob = (void *)0xdeadcafe;
+			*blob = (void *)NULL_BLOB;
 		}
 	}
 
@@ -293,3 +276,22 @@ out:
 
 	return ret;
 }
+
+#else
+
+void xattrs_copy(const char UNUSED_PARAM *src_filename, const char UNUSED_PARAM *dst_filename)
+{
+}
+
+void xattrs_get_blob(const char UNUSED_PARAM *filename, char **blob, size_t *blob_len)
+{
+	*blob = (void *)NULL_BLOB;
+	*blob_len = 0;
+}
+
+int xattrs_compare(const char UNUSED_PARAM *filename1, const char UNUSED_PARAM *filename2)
+{
+	return 0;
+}
+
+#endif

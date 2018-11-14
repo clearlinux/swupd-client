@@ -428,7 +428,7 @@ static void track_installed(const char *bundle_name)
 	 * user installed themselves just copy the entire system tracking directory
 	 * into the state tracking directory. */
 	if (!is_populated_dir(dst)) {
-		ret = mkdir_p(dst);
+		ret = mkdir(dst, S_IRWXU);
 		if (ret) {
 			goto out;
 		}

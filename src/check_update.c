@@ -29,6 +29,7 @@
 #include <unistd.h>
 
 #include "swupd.h"
+#include "verifytime.h"
 
 static void print_help(const char *name)
 {
@@ -42,8 +43,10 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	fprintf(stderr, "   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
+	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
 	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
+	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
 	fprintf(stderr, "\n");
 }
 
@@ -57,6 +60,8 @@ static const struct option prog_opts[] = {
 	{ "nosigcheck", no_argument, 0, 'n' },
 	{ "path", required_argument, 0, 'p' },
 	{ "statedir", required_argument, 0, 'S' },
+	{ "ignore-time", no_argument, 0, 'I' },
+	{ "certpath", required_argument, 0, 'C' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -64,7 +69,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hxnu:v:P:F:p:S:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hIxnu:v:P:F:p:S:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -116,6 +121,16 @@ static bool parse_options(int argc, char **argv)
 		case 'n':
 			sigcheck = false;
 			break;
+		case 'I':
+			timecheck = false;
+			break;
+		case 'C':
+			if (!optarg) {
+				fprintf(stderr, "Invalid --certpath argument\n\n");
+				goto err;
+			}
+			set_cert_path(optarg);
+			break;
 		default:
 			fprintf(stderr, "error: unrecognized option\n\n");
 			goto err;
@@ -135,6 +150,13 @@ static int check_update()
 	int ret;
 
 	check_root();
+	/* Check that our system time is reasonably valid before continuing,
+	* or the certificate verification will fail with invalid time */
+	if (timecheck) {
+		if (!verify_time()) {
+			return EBADTIME;
+		}
+	}
 	if (!init_globals()) {
 		return EINIT_GLOBALS;
 	}

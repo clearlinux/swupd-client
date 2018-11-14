@@ -189,7 +189,7 @@ int copy_all(const char *src, const char *dst)
 int mkdir_p(const char *dir)
 {
 	char *cmd;
-	string_or_die(&cmd, "umask 077 ; mkdir -p %s", dir);
+	string_or_die(&cmd, "mkdir -p %s", dir);
 	int ret = system(cmd);
 	free_string(&cmd);
 	return ret;
@@ -204,13 +204,19 @@ static int create_required_dirs(void)
 	const char *state_dirs[] = { "delta", "staged", "download", "telemetry" };
 
 	// check for existence
-	ensure_root_owned_dir(state_dir);
+	if (ensure_root_owned_dir(state_dir)) {
+		//state dir doesn't exist
+		if (mkdir_p(state_dir) != 0 || chmod(state_dir, S_IRWXU) != 0) {
+			fprintf(stderr, "Error: failed to create %s\n", state_dir);
+			return -1;
+		}
+	}
 
 	for (i = 0; i < STATE_DIR_COUNT; i++) {
 		string_or_die(&dir, "%s/%s", state_dir, state_dirs[i]);
 		ret = ensure_root_owned_dir(dir);
 		if (ret) {
-			ret = mkdir_p(dir);
+			ret = mkdir(dir, S_IRWXU);
 			if (ret) {
 				fprintf(stderr, "Error: failed to create %s\n", dir);
 				return -1;

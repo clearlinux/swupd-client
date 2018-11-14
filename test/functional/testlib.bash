@@ -2362,11 +2362,12 @@ get_next_available_id() { # swupd_function
 		bundlelist) group=LST;;
 		verify) group=VER;;
 		update) group=UPD;;
-		checkupdate) group=AUT;;
+		checkupdate) group=CHK;;
 		search) group=SRH;;
 		hashdump) group=HSD;;
 		mirror) group=MIR;;
 		completion) group=USA;;
+		usability) group=USA;;
 		autoupdate) group=AUT;;
 		info) group=INF;;
 		clean) group=CLN;;

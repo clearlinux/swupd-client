@@ -55,7 +55,7 @@ char *bundle_to_add = NULL;
 char *state_dir = NULL;
 int skip_diskspace_check = 0;
 bool keepcache = false;
-timelist *global_times = NULL;
+struct timelist *global_times = NULL;
 
 /* NOTE: Today the content and version server urls are the same in
  * all cases.  It is highly likely these will eventually differ, eg:

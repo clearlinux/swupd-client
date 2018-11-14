@@ -4,11 +4,12 @@ load "../testlib"
 
 test_setup() {
 
-	create_test_environment "$TEST_NAME" 10
+	create_test_environment -e "$TEST_NAME" 10
+	create_bundle -n os-core -f /core "$TEST_NAME"
 
 }
 
-@test "install only os-core" {
+@test "VER037: Install only os-core" {
 
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install -m 10"
 

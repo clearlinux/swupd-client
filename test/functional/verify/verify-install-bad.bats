@@ -11,11 +11,11 @@ test_setup() {
 
 }
 
-@test "install bundle with invalid name" {
+@test "VER038: Install bundle with invalid name" {
 
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install -m 10"
 
-	assert_status_is $EMANIFEST_LOAD
+	assert_status_is "$EMANIFEST_LOAD"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "test-bundl" is invalid, skipping it...
 	EOM

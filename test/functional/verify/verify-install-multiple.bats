@@ -4,13 +4,17 @@ load "../testlib"
 
 test_setup() {
 
-	create_test_environment "$TEST_NAME" 10
+	create_test_environment -e "$TEST_NAME" 10
+	create_bundle -n os-core -f /core "$TEST_NAME"
 	create_bundle -n test-bundle -f /file_1,/file_2 "$TEST_NAME"
+	# we will make swupd believe these bundles are already installed
+	# by creating their tracking file in the system
+	sudo touch "$TARGETDIR"/usr/share/clear/bundles/os-core
 	sudo touch "$TARGETDIR"/usr/share/clear/bundles/test-bundle
 
 }
 
-@test "install multiple bundles" {
+@test "VER039: Install multiple bundles" {
 
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install -m 10"
 

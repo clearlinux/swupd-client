@@ -30,6 +30,7 @@
 typedef TAILQ_HEAD(timelist_head, time) timelist_head;
 
 struct timelist {
+	int current_nest;
 	timelist_head head;
 };
 
@@ -40,13 +41,14 @@ struct time {
 	struct timespec rawstop;
 	const char *name;
 	bool complete;
+	int nest;
 	TAILQ_ENTRY(time)
 	times;
 };
 
 struct timelist *timelist_new(void)
 {
-	struct timelist *list= malloc(sizeof(struct timelist));
+	struct timelist *list = calloc(sizeof(struct timelist), 1);
 	ON_NULL_ABORT(list);
 	TAILQ_INIT(&list->head);
 
@@ -93,12 +95,18 @@ void timelist_timer_start(struct timelist *list, const char *name)
 	}
 
 	/* Only create one element for each start/stop block */
-	struct time *t = alloc_time();
+	struct time *t = alloc_time(), *prev;
 
 	clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstart);
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstart);
 	t->name = name;
 	t->complete = false;
+
+	prev = TAILQ_LAST(&list->head, timelist_head);
+	list->current_nest++;
+	if (prev && !prev->complete) {
+		t->nest = list->current_nest;
+	}
 	TAILQ_INSERT_HEAD(&list->head, t, times);
 }
 
@@ -113,9 +121,26 @@ void timelist_timer_stop(struct timelist *list)
 	TAILQ_FOREACH(t, &list->head, times)
 	{
 		if (timer_stop(t)) {
+			list->current_nest--;
 			return;
 		}
 	}
+}
+
+static void print_stat(double delta, struct time *t)
+{
+
+	fprintf(stderr, "%10.2f ms: ", delta);
+	if (t->nest) {
+		int i;
+
+		for (i = 2; i < t->nest; i++) {
+			fprintf(stderr, "    ");
+		}
+		fprintf(stderr, "|-- ");
+	}
+
+	fprintf(stderr, "%s\n", t->name);
 }
 
 void timelist_print_stats(struct timelist *list)
@@ -134,7 +159,7 @@ void timelist_print_stats(struct timelist *list)
 	{
 		if (t->complete == true) {
 			delta = (t->rawstop.tv_sec - t->rawstart.tv_sec) * 1000 + (t->rawstop.tv_nsec / 1000000.0) - (t->rawstart.tv_nsec / 1000000.0);
-			fprintf(stderr, "%10.2f ms: %s\n", delta, t->name);
+			print_stat(delta, t);
 		}
 	}
 	fprintf(stderr, "\nCPU process time stats:\n");
@@ -142,7 +167,7 @@ void timelist_print_stats(struct timelist *list)
 	{
 		if (t->complete == true) {
 			delta = (t->procstop.tv_sec - t->procstart.tv_sec) * 1000 + (t->procstop.tv_nsec / 1000000.0) - (t->procstart.tv_nsec / 1000000.0);
-			fprintf(stderr, "%10.2f ms: %s\n", delta, t->name);
+			print_stat(delta, t);
 		}
 	}
 }

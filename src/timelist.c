@@ -24,6 +24,7 @@
 #include <time.h>
 
 #include "macros.h"
+#include "swupd.h"
 #include "timelist.h"
 
 struct time {
@@ -31,7 +32,7 @@ struct time {
 	struct timespec procstop;
 	struct timespec rawstart;
 	struct timespec rawstop;
-	const char *name;
+	char *name;
 	bool complete;
 	TAILQ_ENTRY(time)
 	times;
@@ -81,6 +82,11 @@ static void timer_stop_all(timelist *head)
 /* Fill the time struct for later processing */
 void timelist_timer_start(timelist *head, const char *name)
 {
+	struct time *prev_t;
+	char *decorated_name = NULL;
+	int count = 0;
+	int number_of_spaces = 0;
+
 	if (!head) {
 		return;
 	}
@@ -90,8 +96,27 @@ void timelist_timer_start(timelist *head, const char *name)
 
 	clock_gettime(CLOCK_MONOTONIC_RAW, &t->rawstart);
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t->procstart);
-	t->name = name;
+
+	/* look for all elements in the queue and count how many of those
+	 * are still not complete, those are "parent" times */
+	TAILQ_FOREACH_REVERSE(prev_t, head, timelist, times)
+	{
+		if (prev_t->complete == false) {
+			count++;
+		}
+	}
+	/* we want to indent each one of the child times with four spaces,
+	 * starting on the second level child, we don't want any space in the
+	 * first child. */
+	if (count) {
+		number_of_spaces = (count - 1) * 4;
+	}
+
+	/* build the decorated name that will be inserted */
+	string_or_die(&decorated_name, "%*s%s%s", number_of_spaces, "", count ? "|-- " : "", name);
+	t->name = decorated_name;
 	t->complete = false;
+
 	TAILQ_INSERT_HEAD(head, t, times);
 }
 
@@ -150,6 +175,7 @@ void timelist_free(timelist *head)
 
 	while (!TAILQ_EMPTY(head)) {
 		t = TAILQ_LAST(head, timelist);
+		free_string(&t->name);
 		TAILQ_REMOVE(head, t, times);
 		free(t);
 	}

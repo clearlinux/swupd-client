@@ -4,7 +4,7 @@ load "../testlib"
 
 @test "CHK002: Check for available updates when we are at latest" {
 
-	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS_NO_CERT"
+	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
 
 	assert_status_is 1
 	expected_output=$(cat <<-EOM

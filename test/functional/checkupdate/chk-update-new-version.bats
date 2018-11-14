@@ -15,7 +15,7 @@ test_setup() {
 
 @test "CHK001: Check for available updates when there is a new version available" {
 
-	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS_NO_CERT"
+	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM

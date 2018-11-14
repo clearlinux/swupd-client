@@ -66,7 +66,7 @@ global_teardown() {
 
 @test "CHK006: Check for available updates over HTTPS with a valid client certificate" {
 
-	opts="-S $TEST_DIRNAME/state -p $TEST_DIRNAME/target-dir -F staging -u https://localhost:$PORT/$TEST_NAME/web-dir"
+	opts="-S $TEST_DIRNAME/state -p $TEST_DIRNAME/target-dir -F staging -u https://localhost:$PORT/$TEST_NAME/web-dir -I"
 
 	run sudo sh -c "$SWUPD check-update $opts"
 
@@ -75,7 +75,7 @@ global_teardown() {
 
 @test "CHK007: Try checking for available updates over HTTPS with no client certificate" {
 
-	opts="-S $TEST_DIRNAME/state -p $TEST_DIRNAME/target-dir -F staging -u https://localhost:$PORT/$TEST_NAME/web-dir"
+	opts="-S $TEST_DIRNAME/state -p $TEST_DIRNAME/target-dir -F staging -u https://localhost:$PORT/$TEST_NAME/web-dir -I"
 
 	# remove client certificate
 	sudo rm "$CLIENT_CERT"
@@ -92,7 +92,7 @@ global_teardown() {
 
 @test "CHK008: Try checking for available updates over HTTPS with an invalid client certificate" {
 
-	opts="-S $TEST_DIRNAME/state -p $TEST_DIRNAME/target-dir -F staging -u https://localhost:$PORT/$TEST_NAME/web-dir"
+	opts="-S $TEST_DIRNAME/state -p $TEST_DIRNAME/target-dir -F staging -u https://localhost:$PORT/$TEST_NAME/web-dir -I"
 
 	# make client certificate invalid
 	sudo sh -c "echo foo > $CLIENT_CERT"

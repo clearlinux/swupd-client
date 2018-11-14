@@ -28,7 +28,7 @@ global_teardown() {
 
 @test "CHK003: Check for available updates with a slow server" {
 
-	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS_HTTP_NO_CERT"
+	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS_HTTP"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Current OS version: 10

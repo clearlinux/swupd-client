@@ -14,7 +14,7 @@ test_setup() {
 
 }
 
-@test "bundle-list list bundle deps with nested included bundles" {
+@test "LST007: List bundle's dependencies when bundle has nested dependencies" {
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --deps test-bundle1"
 	assert_status_is 0

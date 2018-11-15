@@ -136,6 +136,7 @@ BATS = \
 	test/functional/bundlelist/list-has-dep-nested.bats \
 	test/functional/bundlelist/list-has-dep-nested-not-installed.bats \
 	test/functional/bundlelist/list-has-dep-nested-server.bats \
+	test/functional/bundlelist/list-installed.bats \
 	test/functional/bundlelist/list-no-deps.bats \
 	test/functional/bundlelist/list-none-has-deps.bats \
 	test/functional/bundleremove/remove-basics.bats \

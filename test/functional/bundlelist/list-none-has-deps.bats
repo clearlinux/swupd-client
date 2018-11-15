@@ -10,9 +10,10 @@ test_setup() {
 
 }
 
-@test "bundle-list list bundle has-deps with no dependent bundles" {
+@test "LST012: List bundles that have a given bundle as dependency (and there are none)" {
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --has-dep test-bundle1"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		No bundles have test-bundle1 as a dependency

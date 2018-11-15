@@ -14,9 +14,10 @@ test_setup() {
 
 }
 
-@test "bundle-list list bundle has-deps with --all dependent packages" {
+@test "LST010: List all bundles that have a given bundle as dependency" {
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --has-dep test-bundle1 --all"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		All installable and installed bundles that have test-bundle1 as a dependency:

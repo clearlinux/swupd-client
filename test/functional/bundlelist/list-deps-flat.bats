@@ -14,9 +14,10 @@ test_setup() {
 
 }
 
-@test "bundle-list list bundle deps with flat included bundles" {
+@test "LST006: List bundle's dependencies when bundle has flat dependencies" {
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --deps test-bundle1"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Bundles included by test-bundle1:

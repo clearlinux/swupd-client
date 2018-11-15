@@ -178,15 +178,6 @@ int is_populated_dir(char *dirname)
 	return 0;
 }
 
-int copy_all(const char *src, const char *dst)
-{
-	char *cmd;
-	string_or_die(&cmd, "cp -a %s %s 2> /dev/null", src, dst);
-	int ret = system(cmd);
-	free_string(&cmd);
-	return ret;
-}
-
 int mkdir_p(const char *dir)
 {
 	char *cmd;

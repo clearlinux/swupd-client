@@ -32,6 +32,12 @@ extern long get_available_space(const char *path);
  */
 int run_command_full(const char *stdout_file, const char *stderr_file, const char *cmd, ...);
 
+/* copy_all: Runs cp -a [src] [dst] using run_command_quiet */
+int copy_all(const char *src, const char *dst);
+
+/* copy: Runs cp [src] [dst] using run_command_quiet */
+int copy(const char *src, const char *dst);
+
 #ifdef __cplusplus
 }
 #endif

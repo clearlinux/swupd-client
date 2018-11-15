@@ -593,7 +593,6 @@ verify_mom:
 	}
 	/* Make a copy of the Manifest for the completion code */
 	if (latest) {
-		char *momcopy;
 		char *momdir;
 		char *momfile;
 
@@ -601,15 +600,10 @@ verify_mom:
 		string_or_die(&momfile, "%s/Manifest.MoM", momdir);
 		swupd_rm(momfile);
 		mkdir_p(momdir);
-		string_or_die(&momcopy, "/bin/cp \"%s\" \"%s\" 2>/dev/null",
-			      filename, momfile);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-result"
-		(void)system(momcopy); /* If it fails it fails */
-#pragma GCC diagnostic pop
+
+		copy(filename, momfile);
 		free_string(&momdir);
 		free_string(&momfile);
-		free(momcopy);
 	}
 	free_string(&filename);
 	free_string(&url);

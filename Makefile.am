@@ -2,7 +2,27 @@ SUFFIXES= .rst
 
 EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash
 
-AM_CFLAGS = -fPIC -O2 -g -Wall -W -Wformat-security -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99
+AM_CFLAGS = -fPIC -O2 -g -D_FORTIFY_SOURCE=2 -fno-common \
+	-fstack-protector-strong -fstack-clash-protection -fcf-protection -fpie -std=gnu99 \
+	-Wall \
+	-Wextra \
+	-Wfatal-errors \
+	-Werror \
+	-Wformat-security \
+	-Werror=implicit-function-declaration \
+	-Wpointer-arith \
+	-Wlogical-op \
+	-Wunreachable-code \
+	-Wswitch-default \
+	-Wcast-align \
+	-Wbad-function-cast \
+	-Winline \
+	-Wundef \
+	-Wnested-externs \
+	-Wno-missing-field-initializers \
+	-Wredundant-decls
+
+AM_LDFLAGS = -pie
 ACLOCAL_AMFLAGS = -I m4
 
 bin_PROGRAMS = swupd

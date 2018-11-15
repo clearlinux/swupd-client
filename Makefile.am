@@ -25,7 +25,6 @@ swupd_SOURCES = \
 	src/download.c \
 	src/extra_files.c \
 	src/filedesc.c \
-	src/fs.c \
 	src/fullfile.c \
 	src/globals.c \
 	src/hash.c \
@@ -55,6 +54,7 @@ swupd_SOURCES = \
 	src/swupd-error.h \
 	src/swupd-internal.h \
 	src/swupd.h \
+	src/sys.c \
 	src/telemetry.c \
 	src/timelist.c \
 	src/timelist.h \

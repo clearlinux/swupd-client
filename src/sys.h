@@ -38,6 +38,8 @@ int copy_all(const char *src, const char *dst);
 /* copy: Runs cp [src] [dst] using run_command_quiet */
 int copy(const char *src, const char *dst);
 
+int mkdir_p(const char *dir);
+
 #ifdef __cplusplus
 }
 #endif

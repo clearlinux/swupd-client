@@ -178,15 +178,6 @@ int is_populated_dir(char *dirname)
 	return 0;
 }
 
-int mkdir_p(const char *dir)
-{
-	char *cmd;
-	string_or_die(&cmd, "mkdir -p %s", dir);
-	int ret = system(cmd);
-	free_string(&cmd);
-	return ret;
-}
-
 static int create_required_dirs(void)
 {
 	int ret = 0;

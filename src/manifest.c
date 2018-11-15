@@ -586,7 +586,7 @@ verify_mom:
 		fprintf(stderr, "FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
 				"  --nosigcheck, but system security may be compromised\n");
 		string_or_die(&log_cmd, "echo \"swupd security notice:"
-					" --nosigcheck used to bypass MoM signature verification failure\" | systemd-cat --priority=\"err\" --identifier=\"swupd\"");
+					" --nosigcheck used to bypass MoM signature verification failure\" | /usr/bin/systemd-cat --priority=\"err\" --identifier=\"swupd\"");
 		if (system(log_cmd)) {
 			/* useless noise to suppress gcc & glibc conspiring
 			 * to make us check the result of system */

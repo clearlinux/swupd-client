@@ -152,3 +152,8 @@ int mkdir_p(const char *dir)
 {
 	return run_command_quiet("/bin/mkdir", "-p", dir, NULL);
 }
+
+int rm_rf(const char *file)
+{
+	return run_command_quiet("/bin/rm", "-rf", file, NULL);
+}

@@ -40,6 +40,8 @@ int copy(const char *src, const char *dst);
 
 int mkdir_p(const char *dir);
 
+int rm_rf(const char *file);
+
 #ifdef __cplusplus
 }
 #endif

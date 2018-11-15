@@ -40,16 +40,13 @@
 static int create_staging_renamedir(char *rename_tmpdir)
 {
 	int ret;
-	char *rmcommand = NULL;
 
-	string_or_die(&rmcommand, "rm -fr %s", rename_tmpdir);
-	if (!system(rmcommand)) {
+	if (rm_rf(rename_tmpdir) != 0) {
 		/* Not fatal but pretty scary, likely to really fail at the
 		 * next command too. Pass for now as printing may just cause
 		 * confusion */
 		;
 	}
-	free_string(&rmcommand);
 
 	ret = mkdir(rename_tmpdir, S_IRWXU);
 	if (ret == -1 && errno != EEXIST) {

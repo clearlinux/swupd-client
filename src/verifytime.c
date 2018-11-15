@@ -19,8 +19,9 @@
  *         Tudor Marcu <tudor.marcu@intel.com>
  *
  */
+#include "verifytime.h"
+
 #include <errno.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -75,7 +76,7 @@ static bool set_time(time_t mtime)
 	return true;
 }
 
-int main()
+bool verify_time()
 {
 	time_t currtime;
 	struct tm *timeinfo;
@@ -86,7 +87,7 @@ int main()
 
 	versionstamp = get_versionstamp();
 	if (versionstamp == 0) {
-		return 1;
+		return true;
 	}
 	time_t versiontime = (time_t)versionstamp;
 
@@ -97,9 +98,9 @@ int main()
 		 * The system time wasn't sane, so set it here and try again */
 		fprintf(stderr, "Warning: Current time is %s\nAttempting to fix...", asctime(timeinfo));
 		if (set_time(versiontime) == false) {
-			return 1;
+			return true;
 		}
 	}
 
-	return 0;
+	return false;
 }

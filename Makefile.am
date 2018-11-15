@@ -60,6 +60,7 @@ swupd_SOURCES = \
 	src/timelist.h \
 	src/update.c \
 	src/verify.c \
+	src/verifytime.c \
 	src/version.c \
 	src/xattrs.c \
 	src/xattrs.h
@@ -73,7 +74,10 @@ swupd_LDADD = \
 	$(bsdiff_LIBS) \
 	$(libarchive_LIBS)
 
-verifytime_SOURCES = src/verifytime.c
+verifytime_SOURCES = src/verifytime.h \
+	src/verifytime.c \
+	src/verifytime_main.c
+
 bin_PROGRAMS += verifytime
 
 EXTRA_DIST += \

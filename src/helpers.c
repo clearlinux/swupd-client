@@ -40,6 +40,7 @@
 #include "signature.h"
 #include "swupd-build-variant.h"
 #include "swupd.h"
+#include "verifytime.h"
 
 void check_root(void)
 {
@@ -550,7 +551,7 @@ int swupd_init(void)
 	/* Check that our system time is reasonably valid before continuing,
 	 * or the certificate verification will fail with invalid time */
 	if (timecheck) {
-		if (system("verifytime") != 0) {
+		if (!verify_time()) {
 			ret = EBADTIME;
 			goto out_fds;
 		}

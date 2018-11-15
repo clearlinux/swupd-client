@@ -10,9 +10,10 @@ test_setup() {
 
 }
 
-@test "bundle-list all bundles" {
+@test "LST002: List all available bundles" {
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --all"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		os-core

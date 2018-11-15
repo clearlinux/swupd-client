@@ -10,9 +10,10 @@ test_setup() {
 
 }
 
-@test "bundle-list list bundle deps with no included bundles" {
+@test "LST008: List bundle's dependencies when bundle has no dependencies" {
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --deps test-bundle1"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		No included bundles

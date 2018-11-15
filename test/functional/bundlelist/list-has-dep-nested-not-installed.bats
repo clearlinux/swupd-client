@@ -14,9 +14,10 @@ test_setup() {
 
 }
 
-@test "bundle-list list bundle has-deps with bundle not installed" {
+@test "LST013: Try listing bundles that have a given bundle as dependency (and the bundle is not installed)" {
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --has-dep test-bundle1"
+
 	assert_status_is "$EBUNDLE_NOT_TRACKED"
 	expected_output=$(cat <<-EOM
 		Error: Bundle "test-bundle1" does not seem to be installed

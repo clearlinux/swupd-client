@@ -2,10 +2,6 @@
 
 load "../testlib"
 
-server_pid=""
-port=""
-THEME_DIRNAME="$FUNC_DIR/update"
-
 global_setup() {
 
 	# Skip this test if not running in Travis CI, because test takes too long for

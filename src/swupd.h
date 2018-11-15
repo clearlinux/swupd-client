@@ -14,6 +14,7 @@
 #include "list.h"
 #include "macros.h"
 #include "swupd-error.h"
+#include "sys.h"
 #include "timelist.h"
 
 #ifdef __cplusplus
@@ -320,6 +321,8 @@ extern int compute_hash_lazy(struct file *file, char *filename);
 extern int compute_hash(struct file *file, char *filename) __attribute__((warn_unused_result));
 
 /* manifest.c */
+/* Calculate the total contentsize of a manifest list */
+extern long get_manifest_list_contentsize(struct list *manifests);
 extern struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server);
 extern struct list *consolidate_files(struct list *files);
 extern struct list *filter_out_existing_files(struct list *files);
@@ -402,11 +405,6 @@ typedef enum telem_prio_t {
 	TELEMETRY_CRIT
 } telem_prio_t;
 extern void telemetry(telem_prio_t level, const char *class, const char *fmt, ...);
-
-/* fs.c */
-extern long get_available_space(const char *path);
-/* Calculate the total contentsize of a manifest list */
-extern long get_manifest_list_contentsize(struct list *manifests);
 
 extern struct file **manifest_files_to_array(struct manifest *manifest);
 extern int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize, int size);

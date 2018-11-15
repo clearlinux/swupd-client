@@ -17,7 +17,7 @@
  *
  */
 
-#include "swupd.h"
+#include "sys.h"
 #include <sys/statvfs.h>
 
 long get_available_space(const char *path)
@@ -29,19 +29,4 @@ long get_available_space(const char *path)
 	}
 
 	return stat.f_bsize * stat.f_bavail;
-}
-
-long get_manifest_list_contentsize(struct list *manifests)
-{
-	long total_size = 0;
-
-	struct list *ptr = NULL;
-	for (ptr = list_head(manifests); ptr; ptr = ptr->next) {
-		struct manifest *subman;
-		subman = ptr->data;
-
-		total_size += subman->contentsize;
-	}
-
-	return total_size;
 }

@@ -35,15 +35,9 @@
 
 static bool in_container(void)
 {
-	char *detect_container_cmd = NULL;
-	bool ret = false;
 	/* systemd-detect-virt -c does container detection only *
          * The return code is zero if the system is in a container */
-	string_or_die(&detect_container_cmd, "/usr/bin/systemd-detect-virt -c");
-	ret = !system(detect_container_cmd);
-	free_string(&detect_container_cmd);
-
-	return ret;
+	return !run_command("/usr/bin/systemd-detect-virt", "-c");
 }
 
 static void update_boot(void)

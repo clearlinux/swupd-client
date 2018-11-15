@@ -270,7 +270,9 @@ version_check:
 				fclose(verfile);
 			}
 
-			if (system("/usr/bin/mixin build") != 0) {
+			if (run_command("/usr/bin/mixin"
+					"build",
+					NULL) != 0) {
 				fprintf(stderr, "ERROR: Could not execute mixin\n");
 				ret = EXIT_FAILURE;
 				goto clean_curl;

@@ -64,7 +64,7 @@ global_teardown() {
 	destroy_test_environment "$TEST_NAME"
 }
 
-@test "check update with valid client cert" {
+@test "CHK006: Check for available updates over HTTPS with a valid client certificate" {
 
 	opts="-S $TEST_DIRNAME/state -p $TEST_DIRNAME/target-dir -F staging -u https://localhost:$PORT/$TEST_NAME/web-dir"
 
@@ -73,7 +73,7 @@ global_teardown() {
 	assert_status_is 0
 }
 
-@test "check update with no client cert" {
+@test "CHK007: Try checking for available updates over HTTPS with no client certificate" {
 
 	opts="-S $TEST_DIRNAME/state -p $TEST_DIRNAME/target-dir -F staging -u https://localhost:$PORT/$TEST_NAME/web-dir"
 
@@ -90,7 +90,7 @@ global_teardown() {
 	assert_in_output "$expected_output"
 }
 
-@test "check update with invalid client cert" {
+@test "CHK008: Try checking for available updates over HTTPS with an invalid client certificate" {
 
 	opts="-S $TEST_DIRNAME/state -p $TEST_DIRNAME/target-dir -F staging -u https://localhost:$PORT/$TEST_NAME/web-dir"
 

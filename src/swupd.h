@@ -344,7 +344,6 @@ extern char *mk_full_filename(const char *prefix, const char *path);
 extern bool is_directory_mounted(const char *filename);
 extern bool is_under_mounted_directory(const char *filename);
 extern int is_populated_dir(char *dirname);
-extern int copy_all(const char *src, const char *dst);
 extern int mkdir_p(const char *dir);
 
 extern void run_scripts(bool block);

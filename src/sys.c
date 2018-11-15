@@ -137,3 +137,13 @@ long get_available_space(const char *path)
 
 	return stat.f_bsize * stat.f_bavail;
 }
+
+int copy_all(const char *src, const char *dst)
+{
+	return run_command_quiet("/bin/cp", "-a", src, dst, NULL);
+}
+
+int copy(const char *src, const char *dst)
+{
+	return run_command_quiet("/bin/cp", src, dst, NULL);
+}

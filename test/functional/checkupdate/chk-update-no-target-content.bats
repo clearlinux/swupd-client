@@ -10,9 +10,10 @@ test_setup() {
 
 }
 
-@test "check-update with no target version file available" {
+@test "CHK005: Check for available updates with no target version file available" {
 
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS_NO_CERT"
+
 	assert_status_is_not 0
 	assert_is_output "Error: Unable to determine current OS version"
 

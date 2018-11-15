@@ -142,12 +142,12 @@ BATS = \
 	test/functional/bundleremove/remove-os-core.bats \
 	test/functional/bundleremove/remove-parse-args.bats \
 	test/functional/bundleremove/remove-with-dependency.bats \
+	test/functional/checkupdate/chk-update-client-certificate.bats \
 	test/functional/checkupdate/chk-update-new-version.bats \
 	test/functional/checkupdate/chk-update-no-server-content.bats \
 	test/functional/checkupdate/chk-update-no-target-content.bats \
 	test/functional/checkupdate/chk-update-slow-server.bats \
 	test/functional/checkupdate/chk-update-version-match.bats \
-	test/functional/checkupdate/chk-update-client-certificate.bats \
 	test/functional/completion/completion-basic.bats \
 	test/functional/hashdump/hashdump-file-hash.bats \
 	test/functional/verify/verify-install.bats \

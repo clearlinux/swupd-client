@@ -13,9 +13,10 @@ test_setup() {
 
 }
 
-@test "check-update with a new version available" {
+@test "CHK001: Check for available updates when there is a new version available" {
 
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS_NO_CERT"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Current OS version: 10

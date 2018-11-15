@@ -26,7 +26,7 @@ global_teardown() {
 	destroy_test_environment "$TEST_NAME"
 }
 
-@test "check-update with a slow server" {
+@test "CHK003: Check for available updates with a slow server" {
 
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS_HTTP_NO_CERT"
 	assert_status_is 0

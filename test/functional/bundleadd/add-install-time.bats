@@ -18,31 +18,31 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...
-		Installing bundle\(s\) files...
+		Installing bundle\\(s\\) files...
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
 		Raw elapsed time stats:
 		.* ms: Total execution time
-		.* ms: Prepend bundles to list
-		.* ms: Install bundles
-		.* ms: Add bundles and recurse
-		.* ms: Consolidate files from bundles
-		.* ms: Check disk space availability
-		.* ms: Download packs
-		.* ms: Download missing files
-		.* ms: Installing bundle\(s\) files onto filesystem
-		.* ms: Run Scripts
+		.* ms: |-- Prepend bundles to list
+		.* ms: |-- Install bundles
+		.* ms:     |-- Add bundles and recurse
+		.* ms:     |-- Consolidate files from bundles
+		.* ms:     |-- Check disk space availability
+		.* ms:     |-- Download packs
+		.* ms:     |-- Download missing files
+		.* ms:     |-- Installing bundle\\(s\\) files onto filesystem
+		.* ms:     |-- Run Scripts
 		CPU process time stats:
 		.* ms: Total execution time
-		.* ms: Prepend bundles to list
-		.* ms: Install bundles
-		.* ms: Add bundles and recurse
-		.* ms: Consolidate files from bundles
-		.* ms: Check disk space availability
-		.* ms: Download packs
-		.* ms: Download missing files
-		.* ms: Installing bundle\(s\) files onto filesystem
-		.* ms: Run Scripts
+		.* ms: |-- Prepend bundles to list
+		.* ms: |-- Install bundles
+		.* ms:     |-- Add bundles and recurse
+		.* ms:     |-- Consolidate files from bundles
+		.* ms:     |-- Check disk space availability
+		.* ms:     |-- Download packs
+		.* ms:     |-- Download missing files
+		.* ms:     |-- Installing bundle\\(s\\) files onto filesystem
+		.* ms:     |-- Run Scripts
 	EOM
 	)
 

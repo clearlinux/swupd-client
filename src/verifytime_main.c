@@ -20,5 +20,9 @@
 
 int main()
 {
-	return verify_time() ? 1 : 0;
+	if (verify_time()) {
+		return 0; // Success
+	}
+
+	return 1; // Error
 }

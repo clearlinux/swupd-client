@@ -87,7 +87,7 @@ bool verify_time()
 
 	versionstamp = get_versionstamp();
 	if (versionstamp == 0) {
-		return true;
+		return false;
 	}
 	time_t versiontime = (time_t)versionstamp;
 
@@ -98,9 +98,9 @@ bool verify_time()
 		 * The system time wasn't sane, so set it here and try again */
 		fprintf(stderr, "Warning: Current time is %s\nAttempting to fix...", asctime(timeinfo));
 		if (set_time(versiontime) == false) {
-			return true;
+			return false;
 		}
 	}
 
-	return false;
+	return true;
 }

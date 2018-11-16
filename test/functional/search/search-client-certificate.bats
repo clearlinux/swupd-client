@@ -62,14 +62,14 @@ global_teardown() {
 	destroy_test_environment "$TEST_NAME"
 }
 
-@test "search with valid client cert" {
+@test "SRH012: Search for bundles over HTTPS with a valid client certificate" {
 
 	run sudo sh -c "$SWUPD search $SWUPD_OPTS_HTTPS test-file"
 
 	assert_status_is 0
 }
 
-@test "search with no client cert" {
+@test "SRH013: Try searching for bundles over HTTPS with no client certificate" {
 
 	# remove client certificate
 	sudo rm "$CLIENT_CERT"
@@ -84,7 +84,7 @@ global_teardown() {
 	assert_in_output "$expected_output"
 }
 
-@test "search with invalid client cert" {
+@test "SRH014: Try searching for bundles over HTTPS with an invalid client certificate" {
 
 	# make client certificate invalid
 	sudo sh -c "echo foo > $CLIENT_CERT"

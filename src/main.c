@@ -19,6 +19,7 @@
 
 #define _GNU_SOURCE // for basename()
 #include <getopt.h>
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -157,6 +158,12 @@ int main(int argc, char **argv)
 	int index;
 	int ret;
 
+	/* Set locale to system locale
+	 * Change from the standard (C) to system locale, so libarchive can
+	 * handle filename conversions.
+	 * More information on the libarchive problem:
+	 * https://github.com/libarchive/libarchive/wiki/Filenames */
+	setlocale(LC_ALL, "");
 	if (parse_options(argc, argv, &index) < 0) {
 		return EINVALID_OPTION;
 	}

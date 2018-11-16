@@ -16,25 +16,25 @@ test_teardown() {
 
 }
 
-@test "autocomplete exists" {
+@test "USA001: Verify the script for autocomplete exists" {
 
 	assert_file_exists "$SWUPD_DIR"/swupd.bash
 
 }
 
-@test "autocomplete syntax" {
+@test "USA002: Verify the autocomplete syntax" {
 
 	bash "$SWUPD_DIR"/swupd.bash
 
 }
 
-@test "autocomplete has autoupdate" {
+@test "USA003: Autocomplete has autoupdate" {
 
 	grep -q  '("autoupdate")' "$SWUPD_DIR"/swupd.bash
 
 }
 
-@test "autocomplete has expected hashdump opts" {
+@test "USA004: Autocomplete has expected hashdump opts" {
 
 	grep -q  'opts="--help --no-xattrs --path "' "$SWUPD_DIR"/swupd.bash
 

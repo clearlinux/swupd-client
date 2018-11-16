@@ -17,7 +17,7 @@ test_setup() {
 
 test_teardown() {
 
-	sudo rm -rf "$TEST_NAME"/target-dir/etc/swupd
+	sudo rm -rf "$TARGETDIR"/etc/swupd
 
 }
 
@@ -27,11 +27,12 @@ global_teardown() {
 
 }
 
-@test "mirror /etc/swupd is a file" {
+@test "MIR004: Try setting up a mirror when /etc/swupd is a file instead of a directory" {
 
-	sudo touch "$TEST_NAME"/target-dir/etc/swupd
+	sudo touch "$TARGETDIR"/etc/swupd
 
 	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file $SWUPD_OPTS_MIRROR"
+
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
 		.*/etc/swupd: not a directory
@@ -43,11 +44,13 @@ global_teardown() {
 
 }
 
-@test "mirror /etc/swupd is a symlink to a file" {
+@test "MIR005: Try setting up a mirror when /etc/swupd is a symlink to a file instead of a directory" {
 
-	sudo touch "$TEST_NAME"/target-dir/foo
-	sudo ln -s "$(realpath "$TEST_NAME"/target-dir/foo)" "$TEST_NAME"/target-dir/etc/swupd
+	sudo touch "$TARGETDIR"/foo
+	sudo ln -s "$(realpath "$TARGETDIR"/foo)" "$TARGETDIR"/etc/swupd
+
 	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file $SWUPD_OPTS_MIRROR"
+
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
 		.*/etc/swupd: not a directory

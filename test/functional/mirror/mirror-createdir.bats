@@ -17,7 +17,7 @@ test_setup() {
 
 test_teardown() {
 
-	sudo rm -rf "$TEST_NAME"/target-dir/etc/swupd
+	sudo rm -rf "$TARGETDIR"/etc/swupd
 
 }
 
@@ -27,9 +27,10 @@ global_teardown() {
 
 }
 
-@test "mirror /etc/swupd does not exist" {
+@test "MIR001: Setting a mirror when /etc/swupd doesn't exist" {
 
 	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file $SWUPD_OPTS_MIRROR"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Set upstream mirror to http://example.com/swupd-file
@@ -39,15 +40,17 @@ global_teardown() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_equal "http://example.com/swupd-file" "$(<"$TEST_NAME"/target-dir/etc/swupd/mirror_contenturl)"
-	assert_equal "http://example.com/swupd-file" "$(<"$TEST_NAME"/target-dir/etc/swupd/mirror_versionurl)"
+	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
+	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
 
 }
 
-@test "mirror /etc/swupd already exists" {
+@test "MIR002: Setting a mirror when /etc/swupd already exist" {
 
-	sudo mkdir -p "$TEST_NAME"/target-dir/etc/swupd
+	sudo mkdir -p "$TARGETDIR"/etc/swupd
+
 	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file $SWUPD_OPTS_MIRROR"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Set upstream mirror to http://example.com/swupd-file
@@ -57,16 +60,18 @@ global_teardown() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_equal "http://example.com/swupd-file" "$(<"$TEST_NAME"/target-dir/etc/swupd/mirror_contenturl)"
-	assert_equal "http://example.com/swupd-file" "$(<"$TEST_NAME"/target-dir/etc/swupd/mirror_versionurl)"
+	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
+	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
 
 }
 
-@test "mirror /etc/swupd is a symlink to a directory" {
+@test "MIR003: Setting a mirror when /etc/swupd is a symlink to a directory" {
 
-	sudo mkdir "$TEST_NAME"/target-dir/foo
-	sudo ln -s "$(realpath "$TEST_NAME"/target-dir/foo)" "$TEST_NAME"/target-dir/etc/swupd
+	sudo mkdir "$TARGETDIR"/foo
+	sudo ln -s "$(realpath "$TARGETDIR"/foo)" "$TARGETDIR"/etc/swupd
+
 	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file $SWUPD_OPTS_MIRROR"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Set upstream mirror to http://example.com/swupd-file
@@ -77,8 +82,8 @@ global_teardown() {
 	)
 	assert_is_output "$expected_output"
   
-  	! [[ -L "$TEST_NAME/target-dir/etc/swupd" ]]
-	assert_equal "http://example.com/swupd-file" "$(<"$TEST_NAME"/target-dir/etc/swupd/mirror_contenturl)"
-	assert_equal "http://example.com/swupd-file" "$(<"$TEST_NAME"/target-dir/etc/swupd/mirror_versionurl)"
+  	! [[ -L "$TARGETDIR/etc/swupd" ]]
+	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
+	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
 
 }

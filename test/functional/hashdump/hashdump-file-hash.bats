@@ -5,7 +5,7 @@ load "../testlib"
 global_setup() {
 
 	create_test_environment "$TEST_NAME"
-	printf "test-data" | sudo tee "$TEST_NAME"/target-dir/test-hash > /dev/null
+	printf "test-data" | sudo tee "$TARGETDIR"/test-hash > /dev/null
 
 }
 
@@ -27,9 +27,10 @@ global_teardown() {
 
 }
 
-@test "hashdump with prefix" {
+@test "HSD001: Calculate the hash of a file" {
 
-	run sudo sh -c "$SWUPD hashdump --path=$TEST_NAME/target-dir /test-hash"
+	run sudo sh -c "$SWUPD hashdump $TARGETDIR/test-hash"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Calculating hash with xattrs for: .*/target-dir/test-hash
@@ -40,9 +41,26 @@ global_teardown() {
 
 }
 
-@test "hashdump with no prefix" {
+@test "HSD002: Try calculating the hash of a file that does not exist" {
 
-	run sudo sh -c "$SWUPD hashdump $TEST_NAME/target-dir/test-hash"
+	# attempting to calculate the hash from a non existent file should still
+	# succeed but should return a hash of all zeros
+
+	run sudo sh -c "$SWUPD hashdump $TARGETDIR/fake-file"
+
+	assert_status_is 0
+	expected_output=$(cat <<-EOM
+		Calculating hash with xattrs for: .*/target-dir/fake-file
+		0000000000000000000000000000000000000000000000000000000000000000
+	EOM
+	)
+	assert_regex_is_output "$expected_output"
+
+}
+
+@test "HSD003: Calculate the hash of a file specifying its path separatelly" {
+
+	run sudo sh -c "$SWUPD hashdump --path=$TARGETDIR test-hash"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM

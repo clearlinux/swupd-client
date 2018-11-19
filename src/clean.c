@@ -26,20 +26,19 @@
 
 #include "swupd.h"
 
-static void print_help()
+static void print_help(void)
 {
 	fprintf(stderr,
 		"Usage:\n"
-		"	swupd clean [options]\n"
+		"   swupd clean [OPTION...]\n\n"
 		"\n"
 		"Remove cached content used for updates from state directory.\n"
 		"\n"
 		"Options:\n"
 		"   --all                   Remove all the content including recent metadata\n"
 		"   --dry-run               Just print files that would be removed\n"
-		"   -S, --statedir DIR      Specify alternate swupd state directory\n"
-		"   -h, --help              Display this help message\n"
 		"\n");
+	global_print_help();
 }
 
 static struct {
@@ -56,35 +55,29 @@ static struct timespec now;
 static const struct option prog_opts[] = {
 	{ "help", no_argument, 0, 'h' },
 	{ "all", no_argument, &options.all, 1 },
-	{ "statedir", required_argument, 0, 'S' },
 	{ "dry-run", no_argument, &options.dry_run, 1 },
-	{ 0, 0, 0, 0 }
+};
+
+static const struct global_options opts = {
+	prog_opts,
+	sizeof(prog_opts) / sizeof(struct option),
+	NULL,
+	print_help,
 };
 
 static bool parse_options(int argc, char **argv)
 {
-	int opt;
-	while ((opt = getopt_long(argc, argv, "hS:", prog_opts, NULL)) != -1) {
-		switch (opt) {
-		case '?':
-			return false;
-		case 'h':
-			print_help();
-			exit(0);
-		case 'S':
-			if (!optarg || !set_state_dir(optarg)) {
-				fprintf(stderr, "Invalid --statedir argument\n\n");
-				return false;
-			}
-			break;
-		case 0:
-			/* Handle options that don't have shortcut. */
-			break;
-		default:
-			fprintf(stderr, "Error: unrecognized option: -%c,\n\n", opt);
-			return false;
-		}
+	int optind = global_parse_options(argc, argv, &opts);
+
+	if (optind < 0) {
+		return false;
 	}
+
+	if (argc > optind) {
+		fprintf(stderr, "Error: unexpected arguments\n\n");
+		return false;
+	}
+
 	return true;
 }
 
@@ -387,6 +380,7 @@ static void clean_deinit(void)
 int clean_main(int argc, char **argv)
 {
 	if (!parse_options(argc, argv)) {
+		print_help();
 		return EXIT_FAILURE;
 	}
 

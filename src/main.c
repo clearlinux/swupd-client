@@ -128,7 +128,7 @@ static int parse_options(int argc, char **argv, int *index)
 			/* found a subcommand, or a random non-option argument */
 			ret = subcmd_index(optarg);
 			if (ret < 0) {
-				fprintf(stderr, "error: unrecognized subcommand `%s'\n\n",
+				fprintf(stderr, "Error: unrecognized subcommand `%s'\n\n",
 					optarg);
 				goto error;
 			} else {

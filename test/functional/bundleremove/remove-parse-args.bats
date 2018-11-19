@@ -7,6 +7,6 @@ load "../testlib"
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS"
 
 	assert_status_is "$EINVALID_OPTION"
-	assert_in_output "error: missing bundle(s) to be removed"
+	assert_in_output "Error: missing bundle(s) to be removed"
 
 }

@@ -328,15 +328,16 @@ static char *bin_paths[] = {
 	NULL
 };
 
-static void print_help(const char *name)
+static void print_help(void)
 {
 	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "	swupd %s [Options] 'search_term'\n", basename((char *)name));
+	fprintf(stderr, "   swupd search [OPTION...] 'search_term'\n\n");
 	fprintf(stderr, "		'search_term': A substring of a binary, library or filename (default)\n");
 	fprintf(stderr, "		Return: Bundle name : filename matching search term\n\n");
 
-	fprintf(stderr, "Help Options:\n");
-	fprintf(stderr, "   -h, --help              Display this help\n");
+	global_print_help();
+
+	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "   -l, --library           Search paths where libraries are located for a match\n");
 	fprintf(stderr, "   -b, --binary            Search paths where binaries are located for a match\n");
 	fprintf(stderr, "   -s, --scope=[query type] 'b' or 'o' for first hit per (b)undle, or one hit total across the (o)s\n");
@@ -344,166 +345,91 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -m, --csv               Output all results in CSV format (machine-readable)\n");
 	fprintf(stderr, "   -d, --display-files	   Output full file list, no search done\n");
 	fprintf(stderr, "   -i, --init              Download all manifests then return, no search done\n");
-	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
-	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
-	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
-	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
-	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
-	fprintf(stderr, "   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
-	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
-	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
-	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
 }
 
 static const struct option prog_opts[] = {
-	{ "help", no_argument, 0, 'h' },
-	{ "url", required_argument, 0, 'u' },
-	{ "contenturl", required_argument, 0, 'c' },
-	{ "versionurl", required_argument, 0, 'v' },
-	{ "library", no_argument, 0, 'l' },
 	{ "binary", no_argument, 0, 'b' },
+	{ "csv", no_argument, 0, 'm' },
+	{ "display-files", no_argument, 0, 'd' },
+	{ "init", no_argument, 0, 'i' },
+	{ "library", no_argument, 0, 'l' },
 	{ "scope", required_argument, 0, 's' },
 	{ "top", required_argument, 0, 't' },
-	{ "csv", no_argument, 0, 'm' },
-	{ "port", required_argument, 0, 'P' },
-	{ "path", required_argument, 0, 'p' },
-	{ "format", required_argument, 0, 'F' },
-	{ "init", no_argument, 0, 'i' },
-	{ "nosigcheck", no_argument, 0, 'n' },
-	{ "ignore-time", no_argument, 0, 'I' },
-	{ "display-files", no_argument, 0, 'd' },
-	{ "statedir", required_argument, 0, 'S' },
-	{ "certpath", required_argument, 0, 'C' },
-	{ 0, 0, 0, 0 }
+};
+
+static bool parse_opt(int opt, char *optarg)
+{
+	int err;
+
+	switch (opt) {
+	case 's':
+		if (!optarg || (strcmp(optarg, "b") && (strcmp(optarg, "o")))) {
+			fprintf(stderr, "Invalid --scope argument. Must be 'b' or 'o'\n\n");
+			return false;
+		}
+
+		if (!strcmp(optarg, "b")) {
+			scope = 'b';
+		} else if (!strcmp(optarg, "o")) {
+			scope = 'o';
+		}
+
+		return true;
+	case 't':
+		err = strtoi_err(optarg, &num_results);
+		if (err != 0) {
+			fprintf(stderr, "Invalid --top argument\n\n");
+			return false;
+		}
+		return true;
+	case 'm':
+		csv_format = true;
+		return true;
+	case 'l':
+		if (search_type != '0') {
+			fprintf(stderr, "Error, cannot specify multiple search types "
+					"(-l and -b are mutually exclusive)\n");
+			return false;
+		}
+
+		search_type = 'l';
+		return true;
+	case 'i':
+		init = true;
+		return true;
+	case 'b':
+		if (search_type != '0') {
+			fprintf(stderr, "Error, cannot specify multiple search types "
+					"(-l and -b are mutually exclusive)\n");
+			return false;
+		}
+
+		search_type = 'b';
+		return true;
+	case 'd':
+		display_files = true;
+		return true;
+	}
+	return false;
+}
+
+static const struct global_options opts = {
+	prog_opts,
+	sizeof(prog_opts) / sizeof(struct option),
+	parse_opt,
+	print_help,
 };
 
 static bool parse_options(int argc, char **argv)
 {
-	int opt;
-	int err;
+	int optind = global_parse_options(argc, argv, &opts);
 
-	while ((opt = getopt_long(argc, argv, "hu:c:v:P:p:F:s:t:mlbinIdS:C:", prog_opts, NULL)) != -1) {
-		switch (opt) {
-		case '?':
-		case 'h':
-			print_help(argv[0]);
-			exit(0);
-		case 'u':
-			if (!optarg) {
-				fprintf(stderr, "error: invalid --url argument\n\n");
-				goto err;
-			}
-			set_version_url(optarg);
-			set_content_url(optarg);
-			break;
-		case 'c':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --contenturl argument\n\n");
-				goto err;
-			}
-			set_content_url(optarg);
-			break;
-		case 'v':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --versionurl argument\n\n");
-				goto err;
-			}
-			set_version_url(optarg);
-			break;
-		case 'P':
-			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
-				fprintf(stderr, "Invalid --port argument\n\n");
-				goto err;
-			}
-			break;
-		case 'p': /* default empty path_prefix verifies the running OS */
-			if (!optarg || !set_path_prefix(optarg)) {
-				fprintf(stderr, "Invalid --path argument\n\n");
-				goto err;
-			}
-			break;
-		case 's':
-			if (!optarg || (strcmp(optarg, "b") && (strcmp(optarg, "o")))) {
-				fprintf(stderr, "Invalid --scope argument. Must be 'b' or 'o'\n\n");
-				goto err;
-			}
-
-			if (!strcmp(optarg, "b")) {
-				scope = 'b';
-			} else if (!strcmp(optarg, "o")) {
-				scope = 'o';
-			}
-
-			break;
-		case 't':
-			err = strtoi_err(optarg, &num_results);
-			if (err != 0) {
-				fprintf(stderr, "Invalid --top argument\n\n");
-				goto err;
-			}
-			break;
-		case 'm':
-			csv_format = true;
-			break;
-		case 'F':
-			if (!optarg || !set_format_string(optarg)) {
-				fprintf(stderr, "Invalid --format argument\n\n");
-				goto err;
-			}
-			break;
-		case 'S':
-			if (!optarg || !set_state_dir(optarg)) {
-				fprintf(stderr, "Invalid --statedir argument\n\n");
-				goto err;
-			}
-			break;
-		case 'l':
-			if (search_type != '0') {
-				fprintf(stderr, "Error, cannot specify multiple search types "
-						"(-l and -b are mutually exclusive)\n");
-				goto err;
-			}
-
-			search_type = 'l';
-			break;
-		case 'i':
-			init = true;
-			break;
-		case 'n':
-			sigcheck = false;
-			break;
-		case 'I':
-			timecheck = false;
-			break;
-		case 'b':
-			if (search_type != '0') {
-				fprintf(stderr, "Error, cannot specify multiple search types "
-						"(-l and -b are mutually exclusive)\n");
-				goto err;
-			}
-
-			search_type = 'b';
-			break;
-		case 'd':
-			display_files = true;
-			break;
-		case 'C':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --certpath argument\n\n");
-				goto err;
-			}
-			set_cert_path(optarg);
-			break;
-		default:
-			fprintf(stderr, "Error: unrecognized option: -'%c',\n\n", opt);
-			goto err;
-		}
+	if (optind < 0) {
+		return false;
 	}
 
 	if ((optind == argc) && (!init) && (!display_files)) {
 		fprintf(stderr, "Error: Search term missing\n\n");
-		print_help(argv[0]);
 		return false;
 	}
 
@@ -520,10 +446,6 @@ static bool parse_options(int argc, char **argv)
 	}
 
 	return true;
-
-err:
-	print_help(argv[0]);
-	return false;
 }
 
 /* file_search()

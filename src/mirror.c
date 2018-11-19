@@ -30,25 +30,72 @@
 
 #include "swupd.h"
 
-static void print_help(const char *name)
+static char *set = NULL;
+static bool unset = false;
+
+static void print_help(void)
 {
 	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd %s [options] [mirror_url]\n\n", basename((char *)name));
-	fprintf(stderr, "Help Options:\n");
-	fprintf(stderr, "   -h, --help              Show help options\n");
+	fprintf(stderr, "   swupd mirror [OPTION...]\n\n");
+
+	//TODO: Add documentation explaining this command
+
+	global_print_help();
+
+	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "   -s, --set               set mirror url\n");
 	fprintf(stderr, "   -u, --unset             unset mirror url\n");
-	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to set/unset the mirror url for (eg: a chroot or btrfs subvol\n");
 	fprintf(stderr, "\n");
 }
 
 static const struct option prog_opts[] = {
-	{ "help", no_argument, 0, 'h' },
 	{ "set", required_argument, 0, 's' },
 	{ "unset", no_argument, 0, 'u' },
-	{ "path", required_argument, 0, 'p' },
-	{ 0, 0, 0, 0 }
 };
+
+static bool parse_opt(int opt, char *optarg)
+{
+	switch (opt) {
+	case 's':
+		if (unset) {
+			fprintf(stderr, "cannot set and unset at the same time\n");
+			return false;
+		}
+		set = optarg;
+		return true;
+	case 'u':
+		if (set != NULL) {
+			fprintf(stderr, "cannot set and unset at the same time\n");
+			return false;
+		}
+		unset = true;
+		return true;
+	}
+	return false;
+}
+
+static const struct global_options opts = {
+	prog_opts,
+	sizeof(prog_opts) / sizeof(struct option),
+	parse_opt,
+	print_help,
+};
+
+static bool parse_options(int argc, char **argv)
+{
+	int ind = global_parse_options(argc, argv, &opts);
+
+	if (ind < 0) {
+		return false;
+	}
+
+	if (argc > ind) {
+		fprintf(stderr, "Error: unexpected arguments\n\n");
+		return false;
+	}
+
+	return true;
+}
 
 static int unset_mirror_url()
 {
@@ -193,65 +240,13 @@ out:
 	free_string(&ret_str);
 }
 
-char *set = NULL;
-bool unset = false;
-
-static int parse_options(int argc, char **argv)
-{
-	int opt, ret = 0;
-
-	while ((opt = getopt_long(argc, argv, "hs:up:", prog_opts, NULL)) != -1) {
-		switch (opt) {
-		case '?':
-			ret = EINVALID_OPTION;
-			goto out;
-		case 'h':
-			print_help(argv[0]);
-			exit(EXIT_SUCCESS);
-		case 'p':
-			if (!set_path_prefix(optarg)) {
-				fprintf(stderr, "Invalid --path argument\n\n");
-				ret = EINVALID_OPTION;
-				goto out;
-			}
-			break;
-		case 's':
-			if (unset) {
-				fprintf(stderr, "cannot set and unset at the same time\n");
-				ret = EINVALID_OPTION;
-				goto out;
-			}
-			set = optarg;
-			break;
-		case 'u':
-			if (set != NULL) {
-				fprintf(stderr, "cannot set and unset at the same time\n");
-				ret = EINVALID_OPTION;
-				goto out;
-			}
-			unset = true;
-			break;
-		default:
-			fprintf(stderr, "error: unrecognized option\n\n");
-			ret = EINVALID_OPTION;
-			goto out;
-		}
-	}
-
-out:
-	if (ret == EINVALID_OPTION) {
-		print_help(argv[0]);
-	}
-	return ret;
-}
-
 /* return 0 if update available, non-zero if not */
 int mirror_main(int argc, char **argv)
 {
 	int ret = 0;
-	ret = parse_options(argc, argv);
-	if (ret != 0) {
-		return ret;
+	if (!parse_options(argc, argv)) {
+		print_help();
+		return EINVALID_OPTION;
 	}
 
 	if (set != NULL) {

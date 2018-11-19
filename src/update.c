@@ -571,180 +571,85 @@ static bool cmd_line_status = false;
 
 static const struct option prog_opts[] = {
 	{ "download", no_argument, 0, 'd' },
-	{ "help", no_argument, 0, 'h' },
 	{ "manifest", required_argument, 0, 'm' },
-	{ "url", required_argument, 0, 'u' },
-	{ "port", required_argument, 0, 'P' },
-	{ "contenturl", required_argument, 0, 'c' },
-	{ "versionurl", required_argument, 0, 'v' },
 	{ "status", no_argument, 0, 's' },
-	{ "format", required_argument, 0, 'F' },
-	{ "path", required_argument, 0, 'p' },
-	{ "nosigcheck", no_argument, 0, 'n' },
-	{ "ignore-time", no_argument, 0, 'I' },
-	{ "statedir", required_argument, 0, 'S' },
 	{ "keepcache", no_argument, 0, 'k' },
-	{ "certpath", required_argument, 0, 'C' },
-	{ "time", no_argument, 0, 't' },
-	{ "no-scripts", no_argument, 0, 'N' },
-	{ "no-boot-update", no_argument, 0, 'b' },
-	{ "max-parallel-downloads", required_argument, 0, 'D' },
 	{ "migrate", no_argument, 0, 'T' },
 	{ "allow-mix-collisions", no_argument, 0, 'a' },
-	{ 0, 0, 0, 0 }
 };
 
-static void print_help(const char *name)
+static void print_help(void)
 {
 	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd %s [OPTION...]\n\n", basename((char *)name));
-	fprintf(stderr, "Help Options:\n");
-	fprintf(stderr, "   -h, --help              Show help options\n\n");
-	fprintf(stderr, "Application Options:\n");
+	fprintf(stderr, "   swupd update [OPTION...]\n\n");
+
+	//TODO: Add documentation explaining this command
+
+	global_print_help();
+
+	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "   -m, --manifest=M        Update to version M, also accepts 'latest' (default)\n");
 	fprintf(stderr, "   -d, --download          Download all content, but do not actually install the update\n");
-	//TODO: "remove user configurable url when alternative exists"
-	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
-	fprintf(stderr, "   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
-	//TODO: "remove user configurable content url when alternative exists"
-	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
-	//TODO: "remove user configurable version url when alternative exists"
-	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
 	fprintf(stderr, "   -s, --status            Show current OS version and latest version available on server\n");
-	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
-	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
-	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
-	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
 	fprintf(stderr, "   -k, --keepcache         Do not delete the swupd state directory content after updating the system\n");
-	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
-	fprintf(stderr, "   -t, --time              Show verbose time output for swupd operations\n");
-	fprintf(stderr, "   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
-	fprintf(stderr, "   -b, --no-boot-update    Do not update the boot files using clr-boot-manager\n");
-	fprintf(stderr, "   -D, --max-parallel-downloads=[n] Set the maximum number of parallel downloads\n");
 	fprintf(stderr, "   -T, --migrate           Migrate to augmented upstream/mix content\n");
 	fprintf(stderr, "   -a, --allow-mix-collisions	Ignore and continue if custom user content conflicts with upstream provided content\n");
 	fprintf(stderr, "\n");
 }
 
+static bool parse_opt(int opt, char *optarg)
+{
+	switch (opt) {
+	case 'm':
+		if (strcmp("latest", optarg) == 0) {
+			requested_version = -1;
+		} else if (sscanf(optarg, "%i", &requested_version) != 1) {
+			fprintf(stderr, "Invalid --manifest argument\n\n");
+			return false;
+		}
+		return true;
+	case 'a':
+		allow_mix_collisions = true;
+		return true;
+	case 'd':
+		download_only = true;
+		return true;
+	case 's':
+		cmd_line_status = true;
+		return true;
+	case 'T':
+		migrate = true;
+		fprintf(stderr, "Attempting to migrate to your mix content...\n\n");
+		return true;
+	case 'k':
+		keepcache = true;
+		return true;
+	}
+
+	return false;
+}
+
+static const struct global_options opts = {
+	prog_opts,
+	sizeof(prog_opts) / sizeof(struct option),
+	parse_opt,
+	print_help,
+};
+
 static bool parse_options(int argc, char **argv)
 {
-	int opt;
+	int ind = global_parse_options(argc, argv, &opts);
 
-	while ((opt = getopt_long(argc, argv, "hm:nIdtNbTau:P:c:v:sF:p:S:C:D:k", prog_opts, NULL)) != -1) {
-		switch (opt) {
-		case '?':
-		case 'h':
-			print_help(argv[0]);
-			exit(EXIT_SUCCESS);
-		case 'm':
-			if (strcmp("latest", optarg) == 0) {
-				requested_version = -1;
-			} else if (sscanf(optarg, "%i", &requested_version) != 1) {
-				fprintf(stderr, "Invalid --manifest argument\n\n");
-				goto err;
-			}
-			break;
-		case 'a':
-			allow_mix_collisions = true;
-			break;
-		case 'd':
-			download_only = true;
-			break;
-		case 'u':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --url argument\n\n");
-				goto err;
-			}
-			set_version_url(optarg);
-			set_content_url(optarg);
-			break;
-		case 't':
-			verbose_time = true;
-			break;
-		case 'N':
-			no_scripts = true;
-			break;
-		case 'b':
-			no_boot_update = true;
-			break;
-		case 'P':
-			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
-				fprintf(stderr, "Invalid --port argument\n\n");
-				goto err;
-			}
-			break;
-		case 'c':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --contenturl argument\n\n");
-				goto err;
-			}
-			set_content_url(optarg);
-			break;
-		case 'v':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --versionurl argument\n\n");
-				goto err;
-			}
-			set_version_url(optarg);
-			break;
-		case 's':
-			cmd_line_status = true;
-			break;
-		case 'F':
-			if (!optarg || !set_format_string(optarg)) {
-				fprintf(stderr, "Invalid --format argument\n\n");
-				goto err;
-			}
-			break;
-		case 'S':
-			if (!optarg || !set_state_dir(optarg)) {
-				fprintf(stderr, "Invalid --statedir argument\n\n");
-				goto err;
-			}
-			break;
-		case 'p': /* default empty path_prefix updates the running OS */
-			if (!optarg || !set_path_prefix(optarg)) {
-				fprintf(stderr, "Invalid --path argument\n\n");
-				goto err;
-			}
-			break;
-		case 'T':
-			migrate = true;
-			fprintf(stderr, "Attempting to migrate to your mix content...\n\n");
-			break;
-		case 'n':
-			sigcheck = false;
-			break;
-		case 'I':
-			timecheck = false;
-			break;
-		case 'C':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --certpath argument\n\n");
-				goto err;
-			}
-			set_cert_path(optarg);
-			break;
-		case 'D':
-			if (sscanf(optarg, "%d", &max_parallel_downloads) != 1) {
-				fprintf(stderr, "Invalid --max-parallel-downloads argument\n\n");
-				goto err;
-			}
-			break;
-		case 'k':
-			keepcache = true;
-			break;
-		default:
-			fprintf(stderr, "Unrecognized option\n\n");
-			goto err;
-		}
+	if (ind < 0) {
+		return false;
+	}
+
+	if (argc > ind) {
+		fprintf(stderr, "Error: unexpected arguments\n\n");
+		return false;
 	}
 
 	return true;
-err:
-	print_help(argv[0]);
-	return false;
 }
 
 /* return 0 if server_version is ahead of current_version,

@@ -37,163 +37,65 @@
 
 static char **bundles;
 
-static void print_help(const char *name)
+static void print_help(void)
 {
 	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd %s [options] [bundle1 bundle2 (...)]\n\n", basename((char *)name));
-	fprintf(stderr, "Help Options:\n");
-	fprintf(stderr, "   -h, --help              Show help options\n");
-	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
-	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
-	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
-	fprintf(stderr, "   -P, --port=[port #]        Port number to connect to at the url for version string and content file downloads\n");
-	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
-	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
-	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
-	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
-	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
-	fprintf(stderr, "   -t, --time              Show verbose time output for swupd operations\n");
-	fprintf(stderr, "   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
-	fprintf(stderr, "   -b, --no-boot-update    Do not update the boot files using clr-boot-manager\n");
-	fprintf(stderr, "   -D, --max-parallel-downloads=[n] Set the maximum number of parallel downloads\n");
+	fprintf(stderr, "   swupd bundle-add [OPTION...] [bundle1 bundle2 (...)]\n\n");
+
+	//TODO: Add documentation explaining this command
+
+	global_print_help();
+
+	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "   --skip-diskspace-check  Do not check free disk space before adding bundle\n");
 	fprintf(stderr, "\n");
 }
 
 static const struct option prog_opts[] = {
-	{ "help", no_argument, 0, 'h' },
-	{ "url", required_argument, 0, 'u' },
-	{ "contenturl", required_argument, 0, 'c' },
-	{ "versionurl", required_argument, 0, 'v' },
-	{ "port", required_argument, 0, 'P' },
 	{ "list", no_argument, 0, 'l' },
-	{ "path", required_argument, 0, 'p' },
-	{ "format", required_argument, 0, 'F' },
-	{ "nosigcheck", no_argument, 0, 'n' },
-	{ "ignore-time", no_argument, 0, 'I' },
-	{ "statedir", required_argument, 0, 'S' },
-	{ "certpath", required_argument, 0, 'C' },
-	{ "time", no_argument, 0, 't' },
-	{ "no-scripts", no_argument, 0, 'N' },
-	{ "no-boot-update", no_argument, 0, 'b' },
-	{ "max-parallel-downloads", required_argument, 0, 'D' },
 	{ "skip-diskspace-check", no_argument, &skip_diskspace_check, 1 },
-	{ 0, 0, 0, 0 }
+};
+
+static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
+{
+	switch (opt) {
+	case 'l':
+		fprintf(stderr, "Error: [-l, --list] option is deprecated, use\n"
+				"bundle-list [-a|--all] sub-command instead.\n\n");
+		exit(EXIT_FAILURE);
+	}
+	return false;
+}
+
+static const struct global_options opts = {
+	prog_opts,
+	sizeof(prog_opts) / sizeof(struct option),
+	parse_opt,
+	print_help,
 };
 
 static bool parse_options(int argc, char **argv)
 {
-	int opt;
+	int optind = global_parse_options(argc, argv, &opts);
 
-	while ((opt = getopt_long(argc, argv, "hnIu:c:v:P:p:F:lS:tNbC:D:", prog_opts, NULL)) != -1) {
-		switch (opt) {
-		case '?':
-		case 'h':
-			print_help(argv[0]);
-			exit(EXIT_SUCCESS);
-		case 'u':
-			if (!optarg) {
-				fprintf(stderr, "error: invalid --url argument\n\n");
-				goto err;
-			}
-			set_version_url(optarg);
-			set_content_url(optarg);
-			break;
-		case 'c':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --contenturl argument\n\n");
-				goto err;
-			}
-			set_content_url(optarg);
-			break;
-		case 'v':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --versionurl argument\n\n");
-				goto err;
-			}
-			set_version_url(optarg);
-			break;
-		case 'p': /* default empty path_prefix verifies the running OS */
-			if (!optarg || !set_path_prefix(optarg)) {
-				fprintf(stderr, "Invalid --path argument\n\n");
-				goto err;
-			}
-			break;
-		case 'P':
-			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
-				fprintf(stderr, "Invalid --port argument\n\n");
-				goto err;
-			}
-			break;
-		case 'F':
-			if (!optarg || !set_format_string(optarg)) {
-				fprintf(stderr, "Invalid --format argument\n\n");
-				goto err;
-			}
-			break;
-		case 'S':
-			if (!optarg || !set_state_dir(optarg)) {
-				fprintf(stderr, "Invalid --statedir argument\n\n");
-				goto err;
-			}
-			break;
-		case 'l':
-			fprintf(stderr, "error: [-l, --list] option is deprecated, use\n"
-					"bundle-list [-a|--all] sub-command instead.\n\n");
-			exit(EXIT_FAILURE);
-		case 'n':
-			sigcheck = false;
-			break;
-		case 'I':
-			timecheck = false;
-			break;
-		case 't':
-			verbose_time = true;
-			break;
-		case 'N':
-			no_scripts = true;
-			break;
-		case 'b':
-			no_boot_update = true;
-			break;
-		case 'C':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --certpath argument\n\n");
-				goto err;
-			}
-			set_cert_path(optarg);
-			break;
-		case 'D':
-			if (sscanf(optarg, "%d", &max_parallel_downloads) != 1) {
-				fprintf(stderr, "Invalid --max-parallel-downloads argument\n\n");
-				goto err;
-			}
-			break;
-		case 0:
-			break;
-		default:
-			fprintf(stderr, "error: unrecognized option\n\n");
-			goto err;
-		}
+	if (optind < 0) {
+		return false;
 	}
 
 	if (argc <= optind) {
-		fprintf(stderr, "error: missing bundle(s) to be installed\n\n");
-		goto err;
+		fprintf(stderr, "Error: missing bundle(s) to be installed\n\n");
+		return false;
 	}
 
 	bundles = argv + optind;
 
 	return true;
-err:
-	print_help(argv[0]);
-	return false;
 }
 
 int bundle_add_main(int argc, char **argv)
 {
 	if (!parse_options(argc, argv)) {
+		print_help();
 		return EINVALID_OPTION;
 	}
 

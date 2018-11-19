@@ -3,6 +3,7 @@
 
 #include <curl/curl.h>
 #include <dirent.h>
+#include <getopt.h>
 #include <limits.h>
 #include <regex.h>
 #include <stdbool.h>
@@ -178,7 +179,6 @@ extern bool no_scripts;
 extern bool no_boot_update;
 extern char *format_string;
 extern char *path_prefix;
-extern bool set_format_string(char *userinput);
 extern bool init_globals(void);
 extern void free_globals(void);
 extern void save_cmd(char **argv);
@@ -193,13 +193,8 @@ extern char *content_url;
 extern bool content_url_is_local;
 extern char *cert_path;
 extern long update_server_port;
-extern int max_parallel_downloads;
 extern char *default_format_path;
 extern bool set_path_prefix(char *path);
-extern int set_content_url(char *url);
-extern int set_version_url(char *url);
-extern void set_cert_path(char *path);
-extern bool set_state_dir(char *path);
 
 extern void check_root(void);
 extern void increment_retries(int *retries, int *timeout);
@@ -426,6 +421,18 @@ extern void print_update_conf_info(void);
 extern void handle_mirror_if_stale(void);
 
 extern int clean_statedir(bool all, bool dry_run);
+
+/* Parameter parsing in global.c */
+extern struct global_const global;
+struct global_options {
+	const struct option *longopts;
+	const int longopts_len;
+	bool (*parse_opt)(int opt, char *optarg);
+	void (*print_help)(void);
+};
+
+void global_print_help(void);
+int global_parse_options(int argc, char **argv, const struct global_options *opts);
 
 /* some disk sizes constants for the various features:
  *   ...consider adding build automation to catch at build time

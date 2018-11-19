@@ -31,111 +31,13 @@
 #include "swupd.h"
 #include "verifytime.h"
 
-static void print_help(const char *name)
+static void print_help(void)
 {
 	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd %s [options] bundlename\n\n", basename((char *)name));
-	fprintf(stderr, "Help Options:\n");
-	fprintf(stderr, "   -h, --help              Show help options\n");
-	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
-	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
-	fprintf(stderr, "   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
-	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
-	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
-	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
-	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
-	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
-	fprintf(stderr, "\n");
-}
+	fprintf(stderr, "   swupd check-update [OPTION...]\n\n");
+	//TODO: Add documentation explaining this command
 
-static const struct option prog_opts[] = {
-	{ "help", no_argument, 0, 'h' },
-	{ "url", required_argument, 0, 'u' },
-	{ "versionurl", required_argument, 0, 'v' },
-	{ "port", required_argument, 0, 'P' },
-	{ "format", required_argument, 0, 'F' },
-	{ "nosigcheck", no_argument, 0, 'n' },
-	{ "path", required_argument, 0, 'p' },
-	{ "statedir", required_argument, 0, 'S' },
-	{ "ignore-time", no_argument, 0, 'I' },
-	{ "certpath", required_argument, 0, 'C' },
-	{ 0, 0, 0, 0 }
-};
-
-static bool parse_options(int argc, char **argv)
-{
-	int opt;
-
-	while ((opt = getopt_long(argc, argv, "hInu:v:P:F:p:S:C:", prog_opts, NULL)) != -1) {
-		switch (opt) {
-		case '?':
-		case 'h':
-			print_help(argv[0]);
-			exit(EXIT_SUCCESS);
-		case 'u':
-			if (!optarg) {
-				fprintf(stderr, "error: invalid --url argument\n\n");
-				goto err;
-			}
-			set_content_url(optarg);
-			set_version_url(optarg);
-			break;
-		case 'v':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --versionurl argument\n\n");
-				goto err;
-			}
-			set_content_url(optarg);
-			set_version_url(optarg);
-			break;
-		case 'P':
-			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
-				fprintf(stderr, "Invalid --port argument\n\n");
-				goto err;
-			}
-			break;
-		case 'F':
-			if (!optarg || !set_format_string(optarg)) {
-				fprintf(stderr, "Invalid --format argument\n\n");
-				goto err;
-			}
-			break;
-		case 'S':
-			if (!optarg || !set_state_dir(optarg)) {
-				fprintf(stderr, "Invalid --statedir argument\n\n");
-				goto err;
-			}
-			break;
-		case 'p': /* default empty path_prefix checks the running OS */
-			if (!optarg || !set_path_prefix(optarg)) {
-				fprintf(stderr, "Invalid --path argument\n\n");
-				goto err;
-			}
-			break;
-		case 'n':
-			sigcheck = false;
-			break;
-		case 'I':
-			timecheck = false;
-			break;
-		case 'C':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --certpath argument\n\n");
-				goto err;
-			}
-			set_cert_path(optarg);
-			break;
-		default:
-			fprintf(stderr, "error: unrecognized option\n\n");
-			goto err;
-		}
-	}
-
-	return true;
-err:
-	print_help(argv[0]);
-	return false;
+	global_print_help();
 }
 
 /* Return 0 if there is an update available, nonzero if not */
@@ -173,12 +75,36 @@ static int check_update()
 	}
 }
 
+static const struct global_options opts = {
+	NULL,
+	0,
+	NULL,
+	print_help,
+};
+
+static bool parse_options(int argc, char **argv)
+{
+	int optind = global_parse_options(argc, argv, &opts);
+
+	if (optind < 0) {
+		return false;
+	}
+
+	if (argc > optind) {
+		fprintf(stderr, "Error: unexpected arguments\n\n");
+		return false;
+	}
+
+	return true;
+}
+
 /* return 0 if update available, non-zero if not */
 int check_update_main(int argc, char **argv)
 {
 	int ret;
 
 	if (!parse_options(argc, argv)) {
+		print_help();
 		return EINVALID_OPTION;
 	}
 

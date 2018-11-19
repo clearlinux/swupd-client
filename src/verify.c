@@ -56,61 +56,33 @@ static int version = 0;
 static struct file_counts counts;
 
 static const struct option prog_opts[] = {
-	{ "help", no_argument, 0, 'h' },
-	{ "manifest", required_argument, 0, 'm' },
-	{ "path", required_argument, 0, 'p' },
-	{ "url", required_argument, 0, 'u' },
-	{ "port", required_argument, 0, 'P' },
-	{ "contenturl", required_argument, 0, 'c' },
-	{ "versionurl", required_argument, 0, 'v' },
 	{ "fix", no_argument, 0, 'f' },
-	{ "install", no_argument, 0, 'i' },
-	{ "ignore-time", no_argument, 0, 'I' },
-	{ "format", required_argument, 0, 'F' },
-	{ "quick", no_argument, 0, 'q' },
 	{ "force", no_argument, 0, 'x' },
-	{ "nosigcheck", no_argument, 0, 'n' },
+	{ "install", no_argument, 0, 'i' },
+	{ "manifest", required_argument, 0, 'm' },
 	{ "picky", no_argument, 0, 'Y' },
 	{ "picky-tree", required_argument, 0, 'X' },
 	{ "picky-whitelist", required_argument, 0, 'w' },
-	{ "statedir", required_argument, 0, 'S' },
-	{ "certpath", required_argument, 0, 'C' },
-	{ "time", no_argument, 0, 't' },
-	{ "no-scripts", no_argument, 0, 'N' },
-	{ "no-boot-update", no_argument, 0, 'b' },
-	{ "max-parallel-downloads", required_argument, 0, 'D' },
-	{ 0, 0, 0, 0 }
+	{ "quick", no_argument, 0, 'q' },
 };
 
-static void print_help(const char *name)
+static void print_help(void)
 {
 	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd %s [OPTION...]\n\n", basename((char *)name));
-	fprintf(stderr, "Help Options:\n");
-	fprintf(stderr, "   -h, --help              Show help options\n\n");
-	fprintf(stderr, "Application Options:\n");
+	fprintf(stderr, "   swupd verify [OPTION...]\n\n");
+
+	//TODO: Add documentation explaining this command
+
+	global_print_help();
+
+	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "   -m, --manifest=M        Verify against manifest version M\n");
-	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
-	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
-	fprintf(stderr, "   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
-	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
-	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version file downloads\n");
 	fprintf(stderr, "   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files)\n");
 	fprintf(stderr, "   -Y, --picky             List (without --fix) or remove (with --fix) files which should not exist\n");
 	fprintf(stderr, "   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
 	fprintf(stderr, "   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
 	fprintf(stderr, "   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory\n");
-	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	fprintf(stderr, "   -q, --quick             Don't compare hashes, only fix missing files\n");
-	fprintf(stderr, "   -x, --force             Attempt to proceed even if non-critical errors found\n");
-	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
-	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
-	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
-	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
-	fprintf(stderr, "   -t, --time              Show verbose time output for swupd operations\n");
-	fprintf(stderr, "   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
-	fprintf(stderr, "   -b, --no-boot-update    Do not install boot files to the boot partition (containers)\n");
-	fprintf(stderr, "   -D, --max-parallel-downloads=[n] Set the maximum number of parallel downloads\n");
 	fprintf(stderr, "\n");
 }
 
@@ -145,164 +117,6 @@ done:
 		free_string(&error_buffer);
 	}
 	return success;
-}
-
-static bool parse_options(int argc, char **argv)
-{
-	int opt;
-	while ((opt = getopt_long(argc, argv, "hxnItNbm:p:u:P:c:v:fYX:w:iF:qS:C:D:", prog_opts, NULL)) != -1) {
-		switch (opt) {
-		case '?':
-		case 'h':
-			print_help(argv[0]);
-			exit(EXIT_SUCCESS);
-		case 'm':
-			if (strcmp("latest", optarg) == 0) {
-				version = -1;
-			} else if (sscanf(optarg, "%i", &version) != 1) {
-				fprintf(stderr, "Invalid --manifest argument\n\n");
-				goto err;
-			}
-			break;
-		case 'p': /* default empty path_prefix verifies the running OS */
-			if (!optarg || !set_path_prefix(optarg)) {
-				fprintf(stderr, "Invalid --path argument\n\n");
-				goto err;
-			}
-			break;
-		case 'u':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --url argument\n\n");
-				goto err;
-			}
-			set_version_url(optarg);
-			set_content_url(optarg);
-			break;
-		case 'P':
-			if (sscanf(optarg, "%ld", &update_server_port) != 1) {
-				fprintf(stderr, "Invalid --port argument\n\n");
-				goto err;
-			}
-			break;
-		case 'c':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --contenturl argument\n\n");
-				goto err;
-			}
-			set_content_url(optarg);
-			break;
-		case 'v':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --versionurl argument\n\n");
-				goto err;
-			}
-			set_version_url(optarg);
-			break;
-		case 'f':
-			cmdline_option_fix = true;
-			break;
-		case 'i':
-			cmdline_option_install = true;
-			cmdline_option_quick = true;
-			break;
-		case 'F':
-			if (!optarg || !set_format_string(optarg)) {
-				fprintf(stderr, "Invalid --format argument\n\n");
-				goto err;
-			}
-			break;
-		case 'S':
-			if (!optarg || !set_state_dir(optarg)) {
-				fprintf(stderr, "Invalid --statedir argument\n\n");
-				goto err;
-			}
-			break;
-		case 'q':
-			cmdline_option_quick = true;
-			break;
-		case 'x':
-			force = true;
-			break;
-		case 'n':
-			sigcheck = false;
-			break;
-		case 'I':
-			timecheck = false;
-			break;
-		case 't':
-			verbose_time = true;
-			break;
-		case 'N':
-			no_scripts = true;
-			break;
-		case 'b':
-			no_boot_update = true;
-			break;
-		case 'C':
-			if (!optarg) {
-				fprintf(stderr, "Invalid --certpath argument\n\n");
-				goto err;
-			}
-			set_cert_path(optarg);
-			break;
-		case 'Y':
-			cmdline_option_picky = true;
-			break;
-		case 'X':
-			if (!optarg) {
-				fprintf(stderr, "Missing --picky-tree argument\n\n");
-				goto err;
-			}
-			if (optarg[0] != '/') {
-				fprintf(stderr, "--picky-tree must be an absolute path, for example /usr\n\n");
-				goto err;
-			}
-			cmdline_option_picky_tree = optarg;
-			break;
-		case 'w':
-			if (!optarg) {
-				fprintf(stderr, "Missing --picky-whitelist argument\n\n");
-				goto err;
-			}
-			cmdline_option_picky_whitelist = optarg;
-			break;
-		case 'D':
-			if (sscanf(optarg, "%d", &max_parallel_downloads) != 1) {
-				fprintf(stderr, "Invalid --max-parallel-downloads argument\n\n");
-				goto err;
-			}
-			break;
-		default:
-			fprintf(stderr, "Unrecognized option\n\n");
-			goto err;
-		}
-	}
-
-	if (cmdline_option_install) {
-		if (version == 0) {
-			fprintf(stderr, "--install option requires -m version option\n");
-			return false;
-		}
-		if (path_prefix == NULL) {
-			fprintf(stderr, "--install option requires --path option\n");
-			return false;
-		}
-		if (cmdline_option_fix) {
-			fprintf(stderr, "--install and --fix options are mutually exclusive\n");
-			return false;
-		}
-	} else if (version == -1) {
-		fprintf(stderr, "-m latest only supported with --install\n");
-		return false;
-	}
-	if (!compile_whitelist()) {
-		return false;
-	}
-
-	return true;
-err:
-	print_help(argv[0]);
-	return false;
 }
 
 static bool hash_needs_work(struct file *file, char *hash)
@@ -690,6 +504,99 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 	}
 }
 
+static bool parse_opt(int opt, char *optarg)
+{
+	switch (opt) {
+	case 'm':
+		if (strcmp("latest", optarg) == 0) {
+			version = -1;
+		} else if (sscanf(optarg, "%i", &version) != 1) {
+			fprintf(stderr, "Invalid --manifest argument\n\n");
+			return false;
+		}
+		return true;
+	case 'f':
+		cmdline_option_fix = true;
+		return true;
+	case 'x':
+		force = true;
+		return true;
+	case 'i':
+		cmdline_option_install = true;
+		cmdline_option_quick = true;
+		return true;
+	case 'q':
+		cmdline_option_quick = true;
+		return true;
+	case 'Y':
+		cmdline_option_picky = true;
+		return true;
+	case 'X':
+		if (!optarg) {
+			fprintf(stderr, "Missing --picky-tree argument\n\n");
+			return false;
+		}
+		if (optarg[0] != '/') {
+			fprintf(stderr, "--picky-tree must be an absolute path, for example /usr\n\n");
+			return false;
+		}
+		cmdline_option_picky_tree = optarg;
+		return true;
+	case 'w':
+		if (!optarg) {
+			fprintf(stderr, "Missing --picky-whitelist argument\n\n");
+			return false;
+		}
+		cmdline_option_picky_whitelist = optarg;
+		return true;
+	}
+	return false;
+}
+
+static const struct global_options opts = {
+	prog_opts,
+	sizeof(prog_opts) / sizeof(struct option),
+	parse_opt,
+	print_help,
+};
+
+static bool parse_options(int argc, char **argv)
+{
+	int ind = global_parse_options(argc, argv, &opts);
+
+	if (ind < 0) {
+		return false;
+	}
+
+	if (argc > ind) {
+		fprintf(stderr, "Error: unexpected arguments\n\n");
+		return false;
+	}
+
+	if (cmdline_option_install) {
+		if (version == 0) {
+			fprintf(stderr, "--install option requires -m version option\n");
+			return false;
+		}
+		if (path_prefix == NULL) {
+			fprintf(stderr, "--install option requires --path option\n");
+			return false;
+		}
+		if (cmdline_option_fix) {
+			fprintf(stderr, "--install and --fix options are mutually exclusive\n");
+			return false;
+		}
+	} else if (version == -1) {
+		fprintf(stderr, "-m latest only supported with --install\n");
+		return false;
+	}
+	if (!compile_whitelist()) {
+		return false;
+	}
+
+	return true;
+}
+
 /* This function does a simple verification of files listed in the
  * subscribed bundle manifests.  If the optional "fix" or "install" parameter
  * is specified, the disk will be modified at each point during the
@@ -707,6 +614,7 @@ int verify_main(int argc, char **argv)
 
 	if (!parse_options(argc, argv)) {
 		ret = EINVALID_OPTION;
+		print_help();
 		goto clean_args_and_exit;
 	}
 

@@ -41,7 +41,6 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version string download\n");
 	fprintf(stderr, "   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
 	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	fprintf(stderr, "   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
 	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
@@ -56,7 +55,6 @@ static const struct option prog_opts[] = {
 	{ "versionurl", required_argument, 0, 'v' },
 	{ "port", required_argument, 0, 'P' },
 	{ "format", required_argument, 0, 'F' },
-	{ "force", no_argument, 0, 'x' },
 	{ "nosigcheck", no_argument, 0, 'n' },
 	{ "path", required_argument, 0, 'p' },
 	{ "statedir", required_argument, 0, 'S' },
@@ -69,7 +67,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hIxnu:v:P:F:p:S:C:", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hInu:v:P:F:p:S:C:", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -114,9 +112,6 @@ static bool parse_options(int argc, char **argv)
 				fprintf(stderr, "Invalid --path argument\n\n");
 				goto err;
 			}
-			break;
-		case 'x':
-			force = true;
 			break;
 		case 'n':
 			sigcheck = false;

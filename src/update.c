@@ -580,7 +580,6 @@ static const struct option prog_opts[] = {
 	{ "status", no_argument, 0, 's' },
 	{ "format", required_argument, 0, 'F' },
 	{ "path", required_argument, 0, 'p' },
-	{ "force", no_argument, 0, 'x' },
 	{ "nosigcheck", no_argument, 0, 'n' },
 	{ "ignore-time", no_argument, 0, 'I' },
 	{ "statedir", required_argument, 0, 'S' },
@@ -614,7 +613,6 @@ static void print_help(const char *name)
 	fprintf(stderr, "   -s, --status            Show current OS version and latest version available on server\n");
 	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
 	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
-	fprintf(stderr, "   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
 	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
@@ -633,7 +631,7 @@ static bool parse_options(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "hm:xnIdtNbTau:P:c:v:sF:p:S:C:D:k", prog_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hm:nIdtNbTau:P:c:v:sF:p:S:C:D:k", prog_opts, NULL)) != -1) {
 		switch (opt) {
 		case '?':
 		case 'h':
@@ -710,9 +708,6 @@ static bool parse_options(int argc, char **argv)
 				fprintf(stderr, "Invalid --path argument\n\n");
 				goto err;
 			}
-			break;
-		case 'x':
-			force = true;
 			break;
 		case 'T':
 			migrate = true;

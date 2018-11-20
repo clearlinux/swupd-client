@@ -73,8 +73,8 @@ _swupd()
 	case "${COMP_WORDS[$i]}" in
 	    ("bundle-add")
 		MoM=""
-		if [ -r /usr/share/clear/bundles/.MoM ]
-		then MoM=/usr/share/clear/bundles/.MoM
+		if [ -r /var/tmp/swupd/.MoM ]
+		then MoM=/var/tmp/swupd/.MoM
 		elif [ -r /var/lib/swupd/version ] &&
 		       installed=$(</var/lib/swupd/version) &&
 		       [ -r "/var/lib/swupd/$installed/Manifest.MoM" ]

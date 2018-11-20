@@ -594,13 +594,21 @@ verify_mom:
 	/* Make a copy of the Manifest for the completion code */
 	if (latest) {
 		char *momcopy;
-		rm_bundle_file(".MoM");
-		string_or_die(&momcopy, "/bin/cp \"%s\" \"%s/%s/.MoM\" 2>/dev/null",
-			      filename, path_prefix, BUNDLES_DIR);
+		char *momdir;
+		char *momfile;
+
+		string_or_die(&momdir, "%s/var/tmp/swupd", path_prefix);
+		string_or_die(&momfile, "%s/.MoM", momdir);
+		swupd_rm(momfile);
+		mkdir_p(momdir);
+		string_or_die(&momcopy, "/bin/cp \"%s\" \"%s\" 2>/dev/null",
+			      filename, momfile);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
 		(void)system(momcopy); /* If it fails it fails */
 #pragma GCC diagnostic pop
+		free_string(&momdir);
+		free_string(&momfile);
 		free(momcopy);
 	}
 	free_string(&filename);

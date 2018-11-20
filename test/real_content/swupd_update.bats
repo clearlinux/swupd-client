@@ -107,8 +107,6 @@ test_teardown() {
 }
 
 verify_system() {
-	# TODO: This is a bug in verify --picky #632
-	sudo rm -f "${ROOT_DIR}/usr/share/clear/bundles/.MoM"
 
 	run sudo sh -c "$SWUPD verify --picky $SWUPD_OPTS 2>/dev/null"
 	if [ -n "$output" ]; then

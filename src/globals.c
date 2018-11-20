@@ -549,7 +549,7 @@ static const struct option global_opts[] = {
 	{ "format", required_argument, 0, 'F' },
 	{ "help", no_argument, 0, 'h' },
 	{ "ignore-time", no_argument, 0, 'I' },
-	{ "max-parallel-downloads", required_argument, 0, 'D' },
+	{ "max-parallel-downloads", required_argument, 0, 'W' },
 	{ "no-boot-update", no_argument, 0, 'b' },
 	{ "no-scripts", no_argument, 0, 'N' },
 	{ "nosigcheck", no_argument, 0, 'n' },
@@ -559,6 +559,8 @@ static const struct option global_opts[] = {
 	{ "time", no_argument, 0, 't' },
 	{ "url", required_argument, 0, 'u' },
 	{ "versionurl", required_argument, 0, 'v' },
+	//TODO: -D option is deprecated. Remove that on a Major release
+	{ "", required_argument, 0, 'D' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -636,12 +638,23 @@ static bool global_parse_opt(int opt, char *optarg)
 		}
 		set_cert_path(optarg);
 		return true;
-	case 'D':
+	case 'W':
 		if (sscanf(optarg, "%d", &max_parallel_downloads) != 1) {
 			fprintf(stderr, "Invalid --max-parallel-downloads argument\n\n");
 			return false;
 		}
 		return true;
+	}
+
+	return false;
+}
+
+static bool global_parse_deprecated(int opt, char *optarg)
+{
+	switch (opt) {
+	case 'D':
+		fprintf(stderr, "Deprecated option -D was renamed. Prefer using -W or --max-parallel-downloads.\n\n");
+		return global_parse_opt('W', optarg);
 	}
 
 	return false;
@@ -686,7 +699,7 @@ void global_print_help(void)
 	fprintf(stderr, "   -t, --time              Show verbose time output for swupd operations\n");
 	fprintf(stderr, "   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
 	fprintf(stderr, "   -b, --no-boot-update    Do not install boot files to the boot partition (containers)\n");
-	fprintf(stderr, "   -D, --max-parallel-downloads=[n] Set the maximum number of parallel downloads\n");
+	fprintf(stderr, "   -W, --max-parallel-downloads=[n] Set the maximum number of parallel downloads\n");
 	fprintf(stderr, "\n");
 }
 
@@ -729,6 +742,11 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 
 		// Try to parse global options
 		if (global_parse_opt(opt, optarg)) {
+			continue;
+		}
+
+		// Try to parse deprecated global options
+		if (global_parse_deprecated(opt, optarg)) {
 			continue;
 		}
 

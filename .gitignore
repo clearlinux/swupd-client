@@ -58,6 +58,5 @@ test/functional/*/*/test.log
 test/functional/*/*/debug.log
 test/functional/*/*/state
 test/functional/*/*/lines-output
-test/functional/*/*/target-dir/usr/share/clear/bundles/.MoM
 test/functional/*/*.log
 verifytime

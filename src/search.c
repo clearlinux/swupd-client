@@ -341,7 +341,7 @@ static void print_help(void)
 	fprintf(stderr, "   -l, --library           Search paths where libraries are located for a match\n");
 	fprintf(stderr, "   -b, --binary            Search paths where binaries are located for a match\n");
 	fprintf(stderr, "   -s, --scope=[query type] 'b' or 'o' for first hit per (b)undle, or one hit total across the (o)s\n");
-	fprintf(stderr, "   -t, --top=[NUM]         Only display the top NUM results for each bundle\n");
+	fprintf(stderr, "   -T, --top=[NUM]         Only display the top NUM results for each bundle\n");
 	fprintf(stderr, "   -m, --csv               Output all results in CSV format (machine-readable)\n");
 	fprintf(stderr, "   -d, --display-files	   Output full file list, no search done\n");
 	fprintf(stderr, "   -i, --init              Download all manifests then return, no search done\n");
@@ -354,7 +354,9 @@ static const struct option prog_opts[] = {
 	{ "init", no_argument, 0, 'i' },
 	{ "library", no_argument, 0, 'l' },
 	{ "scope", required_argument, 0, 's' },
-	{ "top", required_argument, 0, 't' },
+	{ "top", required_argument, 0, 'T' },
+	//TODO: -t option is deprecated. Remove that on a Major release
+	{ "", required_argument, 0, 't' },
 };
 
 static bool parse_opt(int opt, char *optarg)
@@ -376,6 +378,9 @@ static bool parse_opt(int opt, char *optarg)
 
 		return true;
 	case 't':
+		fprintf(stderr, "Deprecated option -t was renamed. Prefer using -T or --top.\n\n");
+		/* fallthrough */
+	case 'T':
 		err = strtoi_err(optarg, &num_results);
 		if (err != 0) {
 			fprintf(stderr, "Invalid --top argument\n\n");

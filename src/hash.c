@@ -73,6 +73,7 @@ static void hmac_sha256_for_data(char *hash,
 	unsigned char digest[EVP_MAX_MD_SIZE];
 	unsigned int digest_len = 0;
 	char *digest_str;
+	size_t digest_str_len;
 	unsigned int i;
 
 	if (data == NULL) {
@@ -85,11 +86,12 @@ static void hmac_sha256_for_data(char *hash,
 		return;
 	}
 
-	digest_str = calloc((digest_len * 2) + 1, sizeof(char));
+	digest_str_len = (digest_len * 2) + 1;
+	digest_str = calloc(digest_str_len, sizeof(char));
 	ON_NULL_ABORT(digest_str);
 
 	for (i = 0; i < digest_len; i++) {
-		sprintf(&digest_str[i * 2], "%02x", (unsigned int)digest[i]);
+		snprintf(&digest_str[i * 2], digest_str_len, "%02x", (unsigned int)digest[i]);
 	}
 
 	hash_assign(digest_str, hash);

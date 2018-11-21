@@ -563,12 +563,8 @@ static double guess_score(char *bundle, char *file, char *search_term)
 	char dirname[PATH_MAX];
 	char *bname;
 
-	strcpy(dirname, file);
 	// calculate basename
-	bname = strrchr(dirname, '/');
-	// set dirname to be just the dirname
-	*bname = '\0';
-	bname++;
+	bname = basename(file);
 
 	/* The following score and multiplier transformations are experimental
 	 * heuristics and should be updated over time based on results and

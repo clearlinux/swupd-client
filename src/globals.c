@@ -148,7 +148,7 @@ int get_version_from_path(const char *abs_path)
 
 	ret = get_value_from_path(&ret_str, abs_path, true);
 	if (ret == 0) {
-		int err = strtoi_err(ret_str, NULL, &val);
+		int err = strtoi_err(ret_str, &val);
 		free_string(&ret_str);
 
 		if (err != 0) {

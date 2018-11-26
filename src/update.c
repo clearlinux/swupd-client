@@ -384,7 +384,11 @@ load_server_mom:
 
 	/* Get a list of subscribed bundles that need to be updated */
 	read_subscriptions(&current_subs);
-	filter_update_subscriptions(server_manifest, current_subs, current_version, &update_subs, &nonupdate_subs);
+	ret = filter_update_subscriptions(server_manifest, current_subs, current_version, &update_subs, &nonupdate_subs);
+	if (ret) {
+		printf("WARNING: One or more installed bundles are no longer available at version %d.\n",
+		       server_version);
+	}
 	list_free_list(current_subs);
 	initial_subs = list_clone(update_subs);
 
@@ -395,8 +399,8 @@ load_server_mom:
 	timelist_timer_stop(global_times);
 	if (ret) {
 		if (ret == -add_sub_BADNAME) {
-			/* this means a bundle(s) was removed in a future version */
-			printf("WARNING: One or more installed bundles are no longer available at version %d.\n",
+			/* this means a bundle(s) in the updated subscription list was removed in a future version */
+			printf("WARNING: One or more bundles in update_subs list are no longer available at version %d.\n",
 			       server_version);
 		} else {
 			ret = EMANIFEST_LOAD;

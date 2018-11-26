@@ -179,12 +179,13 @@ void create_and_append_subscription(struct list **subs, const char *component)
 
 /* Separates a list of subscriptions into two, one list will contain all the subscriptions of
  * bundles that need to be updated, and the other one will contain the rest of the subscriptions */
-void filter_update_subscriptions(struct manifest *server_manifest, struct list *current_subs, int current_version, struct list **update_subs, struct list **nonupdate_subs)
+int filter_update_subscriptions(struct manifest *server_manifest, struct list *current_subs, int current_version, struct list **update_subs, struct list **nonupdate_subs)
 {
 	struct list *manifests;
 	struct list *subs;
 	struct file *manifest;
 	struct sub *sub;
+	int ret = 0;
 
 	for (subs = current_subs; subs; subs = subs->next) {
 		sub = subs->data;
@@ -200,5 +201,12 @@ void filter_update_subscriptions(struct manifest *server_manifest, struct list *
 				break;
 			}
 		}
+
+		/* subscribed bundle not found in server MoM, so its entry was removed*/
+		if (manifests == NULL) {
+			fprintf(stderr, "Warning: Subscribed bundle %s removed from server MoM\n", sub->component);
+			ret = -add_sub_BADNAME;
+		}
 	}
+	return ret;
 }

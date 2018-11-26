@@ -27,7 +27,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Warning: Bundle "test-bundle1" is invalid, skipping it...
+		Warning: Subscribed bundle test-bundle1 removed from server MoM
 		WARNING: One or more installed bundles are no longer available at version 20.
 		Downloading packs...
 		Extracting os-core pack for version 20

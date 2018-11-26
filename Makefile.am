@@ -171,7 +171,6 @@ BATS = \
 	test/functional/update/update-boot-skip.bats \
 	test/functional/update/update-bundle-removed.bats \
 	test/functional/update/update-client-certificate.bats \
-	test/functional/update/update-delta-without-rename-flag.bats \
 	test/functional/update/update-download.bats \
 	test/functional/update/update-fail-to-get-mom.bats \
 	test/functional/update/update-include.bats \
@@ -179,6 +178,7 @@ BATS = \
 	test/functional/update/update-include-old-bundle-with-tracked-file.bats \
 	test/functional/update/update-minversion.bats \
 	test/functional/update/update-missing-os-core.bats \
+	test/functional/update/update-newest-added.bats \
 	test/functional/update/update-newest-deleted.bats \
 	test/functional/update/update-newest-ghosted.bats \
 	test/functional/update/update-older-server-version.bats \
@@ -192,8 +192,6 @@ BATS = \
 	test/functional/update/update-status.bats \
 	test/functional/update/update-status-no-server-content.bats \
 	test/functional/update/update-status-no-target-content.bats \
-	test/functional/update/update-status-version-double-quote.bats \
-	test/functional/update/update-status-version-single-quote.bats \
 	test/functional/update/update-use-full-file.bats \
 	test/functional/update/update-use-pack.bats \
 	test/functional/update/update-verify-fix-path-hash-mismatch.bats \

@@ -11,9 +11,13 @@ test_setup() {
 
 }
 
-@test "update simple rename" {
+@test "UPD002: Updating a system where a file was renamed in the newer version" {
+
+	# renames are now considered a deletion of a file + an addition
+	# of a file, so the rename flags are not used anymore in manifests
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

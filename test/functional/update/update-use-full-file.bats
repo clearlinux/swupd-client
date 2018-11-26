@@ -13,9 +13,10 @@ test_setup() {
 	
 }
 
-@test "update use full file" {
+@test "UPD006: Update falls back to using full files if no packs are available" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

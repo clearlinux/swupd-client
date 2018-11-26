@@ -15,9 +15,10 @@ test_setup() {
 
 }
 
-@test "update rename ghosted file" {
+@test "UPD022: Updating a system where a file was renamed (legacy rename) and ghosted in the newer version" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

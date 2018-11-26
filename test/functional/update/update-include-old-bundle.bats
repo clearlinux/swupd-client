@@ -13,9 +13,12 @@ test_setup() {
 
 }
 
-@test "update include a bundle from an older release" {
+@test "UPD012: Update a system where an old dependency is added in the newer version" {
+
+	# the "old" dependency is one that was not updated in the last version
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

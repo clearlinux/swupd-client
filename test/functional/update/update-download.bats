@@ -10,9 +10,10 @@ test_setup() {
 
 }
 
-@test "update only download packs" {
+@test "UPD032: Download the update content only" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS --download"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

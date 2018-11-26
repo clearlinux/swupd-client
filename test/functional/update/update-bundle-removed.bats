@@ -14,7 +14,7 @@ test_setup() {
 
 }
 
-@test "Updating a system where a bundle was removed in the newer version" {
+@test "UPD008: Updating a system where a bundle was removed in the newer version" {
 
 	# If a bundle happens to be removed from the content server (or mix) it means the
 	# bundle won't be in the MoM anymore, so the bundle in the system will look like an

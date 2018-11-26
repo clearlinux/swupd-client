@@ -34,7 +34,7 @@ global_teardown() {
 
 }
 
-@test "update --download with a slow server" {
+@test "UPD025: Updating a system using a slow server" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS_HTTP"
 

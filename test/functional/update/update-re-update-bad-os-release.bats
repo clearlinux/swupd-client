@@ -15,9 +15,10 @@ test_setup() {
 
 }
 
-@test "update re-update bad os-release" {
+@test "UPD024: Try updating a system across a format bump with a bad os-release file" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS_NO_FMT"
+
 	assert_status_is 1
 	expected_output=$(cat <<-EOM
 		Update started.

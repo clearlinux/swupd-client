@@ -13,9 +13,10 @@ test_setup() {
 
 }
 
-@test "update verify_fix_path corrects missing directory" {
+@test "UPD029: Update corrects a missing directory in the target system" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

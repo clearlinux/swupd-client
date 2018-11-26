@@ -10,7 +10,7 @@ test_setup() {
 
 }
 
-@test "update add boot file" {
+@test "UPD007: Updating a system where a boot file was added in the newer version" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 	assert_status_is 0

@@ -13,9 +13,10 @@ test_setup() {
 
 }
 
-@test "update always add os-core to tracked bundles" {
+@test "UPD014: Update always adds os-core to tracked bundles" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

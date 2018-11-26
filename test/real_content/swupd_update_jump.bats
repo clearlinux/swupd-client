@@ -2,11 +2,10 @@
 
 load "real_content_lib"
 
-# Test update in delta pack range
-@test "RC001: Incremental Updates" {
+# Test update out of the delta pack range
+@test "RC003: Update from 2 distant versions" {
 	# shellcheck disable=SC2153
 	echo "Install minimal system with oldest version (${VERSION[0]})"
-
 	run sudo sh -c "$SWUPD verify --install $SWUPD_OPTS -m ${VERSION[0]} -F $FORMAT"
 	assert_status_is 0
 	check_version "${VERSION[0]}"
@@ -18,14 +17,11 @@ load "real_content_lib"
 
 	install_bundles
 
-	i=1
-	while [ ! -z "${VERSION[$i]}" ]; do
-		echo "Update system to next version (${VERSION[$i]})"
-		run sudo sh -c "$SWUPD update $SWUPD_OPTS -m ${VERSION[$i]}"
-		assert_status_is 0
-		check_version "${VERSION[$i]}"
-		verify_system
+	version=${VERSION[${#VERSION[@]} -1]}
 
-		i=$((i+1))
-	done
+	echo "Update system to last version ($version)"
+	run sudo sh -c "$SWUPD update $SWUPD_OPTS -m ${version}"
+	assert_status_is 0
+	check_version "$version"
+	verify_system
 }

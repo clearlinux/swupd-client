@@ -56,6 +56,16 @@ install_bundles() {
 	if [ -z "$BUNDLE_LIST" ]; then
 		run sudo sh -c "$SWUPD bundle-list --all $SWUPD_OPTS_SHORT"
 		BUNDLE_LIST=$(echo "$output" | tr '\n' ' ')
+		num_pkgs=$(echo "$output" | wc -l)
+
+		cur_version=$(grep VERSION_ID "${ROOT_DIR}/usr/lib/os-release" | cut -d = -f 2)
+		num_pkgs_mom=$(sh -c "curl ${URL}/$cur_version/Manifest.MoM 2>/dev/null | grep ^M\\\\. | wc -l")
+
+		if [ "$num_pkgs" -ne "$num_pkgs_mom" ]; then
+			print "Number of packages on bundle-list --all is $num_pkgs. Expected is $num_pkgs_mom:"
+			print "$BUNDLE_LIST"
+			return 1
+		fi
 	fi
 
 	print "Install bundles: $BUNDLE_LIST"

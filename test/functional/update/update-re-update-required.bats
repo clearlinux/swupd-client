@@ -10,9 +10,10 @@ test_setup() {
 
 }
 
-@test "update re-update required" {
+@test "UPD023: Updating a system across a format bump" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS_NO_FMT"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

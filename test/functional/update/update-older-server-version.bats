@@ -8,7 +8,7 @@ test_setup() {
 
 }
 
-@test "update with a server older than the target system" {
+@test "UPD019: Try updating a system where the server is older than the target system" {
 
 	set_current_version "$TEST_NAME" 20
 
@@ -25,7 +25,7 @@ test_setup() {
 
 }
 
-@test "update with no server version file available" {
+@test "UPD020: Try updating a system where there is no server version file available" {
 
 	sudo rm -rf "$WEBDIR"/version
 
@@ -42,7 +42,7 @@ test_setup() {
 
 }
 
-@test "update with no target version file available" {
+@test "UPD021: Try updating a system where there is no target version file available" {
 
 	sudo rm -rf "$TARGETDIR"/usr/lib/os-release
 

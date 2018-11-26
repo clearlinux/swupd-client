@@ -19,9 +19,10 @@ test_setup() {
 
 }
 
-@test "update fullfile hashes verified" {
+@test "UPD028: Try updating a system having a corrupt fullfile in the server" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+
 	assert_status_is 1
 	expected_output=$(cat <<-EOM
 		Update started.

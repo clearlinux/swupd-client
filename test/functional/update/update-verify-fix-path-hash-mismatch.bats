@@ -16,9 +16,10 @@ test_setup() {
 
 }
 
-@test "update verify_fix_path corrects hash mismatch" {
+@test "UPD030: Update corrects a directory that has a hash mismatch" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

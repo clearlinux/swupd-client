@@ -10,9 +10,10 @@ test_setup() {
 
 }
 
-@test "update --status with no target content" {
+@test "UPD038: Try showing current OS version when there is no target content" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS --status"
+
 	assert_status_is 2
 	expected_output=$(cat <<-EOM
 		Error: Unable to determine current OS version

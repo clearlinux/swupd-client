@@ -13,7 +13,7 @@ test_setup() {
 	sudo rm -f "$WEBDIR"/20/files/*
 }
 
-@test "skip fullfile download for unchanged file in minversion update " {
+@test "UPD015: Skip fullfile download for unchanged file in minversion update" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 	assert_status_is 0

@@ -11,9 +11,10 @@ test_setup() {
 
 }
 
-@test "update skip post-update scripts" {
+@test "UPD033: Updating a system without running the post-update scripts" {
 
 	run sudo sh -c "$SWUPD update --no-scripts $SWUPD_OPTS"
+
 	# Should still be successful
 	assert_status_is 0
 	expected_output=$(cat <<-EOM

@@ -14,9 +14,10 @@ test_setup() {
 
 }
 
-@test "update full file with bad hash in state dir" {
+@test "UPD026: Update should discard full files with bad hash in the state dir" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

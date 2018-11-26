@@ -9,7 +9,7 @@ test_setup() {
 
 }
 
-@test "update do not re-attempt download 'from' MoM if it was not found" {
+@test "UPD009: Try updating a system where the 'from' MoM is not found" {
 
 	# remove the "from" mom
 	sudo rm -rf "$WEBDIR"/10/Manifest.MoM.tar
@@ -29,7 +29,7 @@ test_setup() {
 
 }
 
-@test "update do not re-attempt download 'to' MoM if it was not found" {
+@test "UPD010: Try updating a system where the 'to' MoM is not found" {
 
 	# remove the "to" mom
 	sudo rm -rf "$WEBDIR"/20/Manifest.MoM.tar

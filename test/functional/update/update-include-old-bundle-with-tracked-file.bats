@@ -18,7 +18,7 @@ test_setup() {
 
 }
 
-@test "update include a bundle from an older release" {
+@test "UPD013: Update a system where a dependency that contains an already tracked file is added in the newer version" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 	assert_status_is 0

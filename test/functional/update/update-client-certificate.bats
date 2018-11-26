@@ -66,14 +66,14 @@ global_teardown() {
 	destroy_test_environment "$TEST_NAME"
 }
 
-@test "update with valid client cert" {
+@test "UPD016: Update a system over HTTPS with a valid client certificate" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS_HTTPS"
 
 	assert_status_is 0
 }
 
-@test "update with no client cert" {
+@test "UPD017: Try updating a system over HTTPS with no client certificate" {
 
 	# remove client certificate
 	sudo rm "$CLIENT_CERT"
@@ -88,7 +88,7 @@ global_teardown() {
 	assert_in_output "$expected_output"
 }
 
-@test "update with invalid client cert" {
+@test "UPD018: Try updating a system over HTTPS with an invalid client certificate" {
 
 	# make client certificate invalid
 	sudo sh -c "echo foo > $CLIENT_CERT"

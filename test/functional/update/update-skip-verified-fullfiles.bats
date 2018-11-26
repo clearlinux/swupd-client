@@ -20,9 +20,10 @@ test_setup() {
 
 }
 
-@test "update fullfile download skipped when hash verifies correctly" {
+@test "UPD027: Update skips fullfile download when the hash for the file verifies correctly" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

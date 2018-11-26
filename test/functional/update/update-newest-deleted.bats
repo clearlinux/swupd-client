@@ -17,9 +17,10 @@ test_setup() {
 
 }
 
-@test "update where the newest version of a file was deleted" {
+@test "UPD003: Updating a system where a file was deleted in the newer version" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

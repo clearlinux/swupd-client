@@ -33,9 +33,10 @@ test_setup() {
 
 }
 
-@test "update with includes" {
+@test "UPD011: Update a system where nested dependencies are added in the newer version" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

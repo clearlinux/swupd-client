@@ -10,9 +10,10 @@ test_setup() {
 
 }
 
-@test "update add boot file with --no-boot-update" {
+@test "UPD031: Updating a system where a boot file was added but not updated in the newer version" {
 
-	run sudo sh -c "$SWUPD update -b $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD update --no-boot-update $SWUPD_OPTS"
+
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.

@@ -9,9 +9,10 @@ test_setup() {
 
 }
 
-@test "update --status with no server content" {
+@test "UPD037: Try showing latest version available on server when there is no server content" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS --status"
+
 	assert_status_is 2
 	expected_output=$(cat <<-EOM
 		Error: Unable to determine the server version
@@ -20,4 +21,3 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 }
-

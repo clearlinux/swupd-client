@@ -166,7 +166,6 @@ BATS = \
 	test/functional/search/search-content-check-negative.bats \
 	test/functional/search/search-content-check-positive.bats \
 	test/functional/search/search-client-certificate.bats \
-	test/functional/update/update-apply-full-file-delta.bats \
 	test/functional/update/update-boot-file.bats \
 	test/functional/update/update-boot-skip.bats \
 	test/functional/update/update-bundle-removed.bats \

@@ -22,11 +22,10 @@ test_setup() {
 	assert_dir_exists "$TARGETDIR"/usr/
 	expected_output=$(cat <<-EOM
 		Deleting bundle files...
-		Total deleted files: 2
+		Total deleted files: 3
 		Successfully removed 1 bundle
 	EOM
 	)
 	assert_is_output "$expected_output"
-	# TODO(castulo): The total deleted files should have been 3, change once bug #690 is fixed
 
 }

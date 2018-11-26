@@ -5,8 +5,8 @@ load "../testlib"
 global_setup() {
 
 	create_test_environment "$TEST_NAME"
-	create_bundle -L -n test-bundle1 -d /foo -f /test-file1,/bar/test-file2,/bat/test-file3 "$TEST_NAME"
-	create_bundle -L -n test-bundle2 -f /bat/test-file4 "$TEST_NAME"
+	create_bundle -L -n test-bundle1 -d /foo -f /test-file1,/bar/test-file2,/bat/test-file3,/bat/common "$TEST_NAME"
+	create_bundle -L -n test-bundle2 -f /bat/test-file4,/bat/common "$TEST_NAME"
 	create_bundle -n test-bundle3 -f /baz/test-file5 "$TEST_NAME"
 
 }
@@ -51,14 +51,14 @@ global_teardown() {
 	# bundle2 was not removed
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TARGETDIR"/bat/test-file4
+	assert_file_exists "$TARGETDIR"/bat/common
 	expected_output=$(cat <<-EOM
 		Deleting bundle files...
-		Total deleted files: 5
+		Total deleted files: 6
 		Successfully removed 1 bundle
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
-	# TODO(castulo): The total deleted files should have been 6, change once bug #690 is fixed
 
 }
 
@@ -73,21 +73,22 @@ global_teardown() {
 	assert_file_not_exists "$TARGETDIR"/test-file1
 	assert_file_not_exists "$TARGETDIR"/bar/test-file2
 	assert_file_not_exists "$TARGETDIR"/bat/test-file3
+	assert_file_not_exists "$TARGETDIR"/bat/test-file4
+	assert_file_not_exists "$TARGETDIR"/bat/common
 	assert_dir_not_exists "$TARGETDIR"/foo
 	assert_dir_not_exists "$TARGETDIR"/bar
 	assert_dir_not_exists "$TARGETDIR"/bat
 	expected_output=$(cat <<-EOM
 		Removing bundle: test-bundle1
 		Deleting bundle files...
-		Total deleted files: 5
+		Total deleted files: 6
 		Removing bundle: test-bundle2
 		Deleting bundle files...
-		Total deleted files: 2
+		Total deleted files: 4
 		Successfully removed 2 bundles
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
-	# TODO(castulo): The total deleted files should have been 7 + 2, change once bug #690 is fixed
 
 }
 
@@ -156,16 +157,16 @@ global_teardown() {
 	# bundle2 was not removed
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TARGETDIR"/bat/test-file4
+	assert_file_exists "$TARGETDIR"/bat/common
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "test-bundle3" is not installed, skipping it...
 		Removing bundle: test-bundle1
 		Deleting bundle files...
-		Total deleted files: 5
+		Total deleted files: 6
 		Failed to remove 1 of 2 bundles
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
-	# TODO(castulo): The total deleted files should have been 6, change once bug #690 is fixed
 
 }
 
@@ -183,15 +184,15 @@ global_teardown() {
 	# bundle2 was not removed
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TARGETDIR"/bat/test-file4
+	assert_file_exists "$TARGETDIR"/bat/common
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "fake-bundle" is not installed, skipping it...
 		Removing bundle: test-bundle1
 		Deleting bundle files...
-		Total deleted files: 5
+		Total deleted files: 6
 		Failed to remove 1 of 2 bundles
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
-	# TODO(castulo): The total deleted files should have been 6, change once bug #690 is fixed
 
 }

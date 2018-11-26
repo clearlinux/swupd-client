@@ -1108,19 +1108,22 @@ void remove_files_in_manifest_from_fs(struct manifest *m)
 	struct list *iter = NULL;
 	struct file *file = NULL;
 	char *fullfile = NULL;
-	int count = 0;
+	int count = list_len(m->files);
 
 	iter = list_head(m->files);
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
 		string_or_die(&fullfile, "%s/%s", path_prefix, file->filename);
-		if (swupd_rm(fullfile) != 0) {
-			free_string(&fullfile);
-			continue;
+		if (swupd_rm(fullfile) == -1) {
+			/* if a -1 is returned it means there was an issue deleting the
+			 * file or directory, in that case decrease the counter of deleted
+			 * files.
+			 * Note: If a file didn't exist it will still be counted as deleted,
+			 * this is a limitation */
+			count--;
 		}
 		free_string(&fullfile);
-		count++;
 	}
 	fprintf(stderr, "Total deleted files: %i\n", count);
 }

@@ -545,8 +545,14 @@ load_server_submanifests:
 
 clean_exit:
 	list_free_list(updates);
-	server_manifest->manifests = NULL;
-	current_manifest->manifests = NULL;
+
+	if (server_manifest != NULL) {
+		server_manifest->manifests = NULL;
+	}
+	if (current_manifest != NULL) {
+		current_manifest->manifests = NULL;
+	}
+
 	list_free_list_and_data(current_manifests, free_file_data);
 	list_free_list_and_data(server_manifests, free_file_data);
 	list_free_list(consolidated_manifests);

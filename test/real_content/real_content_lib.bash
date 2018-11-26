@@ -59,7 +59,7 @@ install_bundles() {
 
 	print "Install bundles: $BUNDLE_LIST"
 
-	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS $BUNDLE_LIST"
+	run sudo sh -c "$SWUPD bundle-add --skip-diskspace-check $SWUPD_OPTS $BUNDLE_LIST"
 	assert_status_is 0
 	verify_system
 }

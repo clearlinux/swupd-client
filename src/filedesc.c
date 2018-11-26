@@ -73,7 +73,7 @@ static void foreach_open_fd(void(pf)(int, void *), void *arg)
 			continue;
 		}
 
-		err = strtoi_err(entry->d_name, &ep, &n);
+		err = strtoi_err_endptr(entry->d_name, &ep, &n);
 		if (err != 0) {
 			fprintf(stderr, "Warning: invalid fd\n");
 		}

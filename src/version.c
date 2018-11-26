@@ -69,7 +69,7 @@ int get_latest_version(char *v_url)
 		goto out;
 	} else {
 		tmp_version.data[tmp_version.len] = '\0';
-		err = strtoi_err(tmp_version.data, NULL, &ret);
+		err = strtoi_err(tmp_version.data, &ret);
 
 		if (err != 0) {
 			ret = -1;
@@ -123,7 +123,7 @@ int get_current_version(char *path_prefix)
 			}
 			*dest = 0;
 
-			err = strtoi_err(&line[11], NULL, &v);
+			err = strtoi_err(&line[11], &v);
 			if (err != 0) {
 				v = -1;
 			}
@@ -203,7 +203,7 @@ int read_mix_version_file(char *filename, char *path_prefix)
 			*c = '\0';
 		}
 
-		err = strtoi_err(line, NULL, &v);
+		err = strtoi_err(line, &v);
 		if (err != 0) {
 			v = -1;
 		}

@@ -131,7 +131,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 	}
 
 	c = &line[9];
-	err = strtoi_err(c, NULL, &manifest_enc_version);
+	err = strtoi_err(c, &manifest_enc_version);
 
 	if (manifest_enc_version <= 0 || err != 0) {
 		fprintf(stderr, "Error: Loaded incompatible manifest version\n");
@@ -163,7 +163,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		}
 
 		if (strncmp(line, "version:", 8) == 0) {
-			err = strtoi_err(c, NULL, &manifest_hdr_version);
+			err = strtoi_err(c, &manifest_hdr_version);
 			if (manifest_hdr_version != version || err != 0) {
 				fprintf(stderr, "Error: Loaded incompatible manifest header version\n");
 				goto err_close;
@@ -330,7 +330,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 			goto err;
 		}
 
-		err = strtoi_err(c, NULL, &file->last_change);
+		err = strtoi_err(c, &file->last_change);
 		if (file->last_change <= 0 || err != 0) {
 			fprintf(stderr, "Error: Loaded incompatible manifest last change\n");
 			free(file);

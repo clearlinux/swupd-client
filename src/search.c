@@ -437,7 +437,7 @@ static bool parse_options(int argc, char **argv)
 
 			break;
 		case 't':
-			err = strtoi_err(optarg, NULL, &num_results);
+			err = strtoi_err(optarg, &num_results);
 			if (err != 0) {
 				fprintf(stderr, "Invalid --top argument\n\n");
 				goto err;

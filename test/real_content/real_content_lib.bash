@@ -57,7 +57,7 @@ install_bundles() {
 		BUNDLE_LIST=$(echo "$output" | tr '\n' ' ')
 	fi
 
-	echo "Install bundles: $BUNDLE_LIST"
+	print "Install bundles: $BUNDLE_LIST"
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS $BUNDLE_LIST"
 	assert_status_is 0
@@ -70,7 +70,7 @@ check_version() {
 	version="$1"
 	cur_version=$(grep VERSION_ID "${ROOT_DIR}/usr/lib/os-release" | cut -d = -f 2)
 	if [ "$version" -ne "$cur_version" ]; then
-		echo "Version $version is different from expected $cur_version"
+		print "Version $version is different from expected $cur_version"
 		return 1
 	fi
 }
@@ -79,8 +79,8 @@ verify_system() {
 
 	run sudo sh -c "$SWUPD verify --picky $SWUPD_OPTS 2>/dev/null"
 	if [ -n "$output" ]; then
-		echo "Verify found extra files in the system:"
-		echo "$output"
+		print "Verify found extra files in the system:"
+		print "$output"
 		return 1
 	fi
 
@@ -104,7 +104,7 @@ test_setup() {
 	# TODO: Discover available versions to work with custom mixers
 	read -r -d '\n' -a version_list < <(git ls-remote --tags https://github.com/clearlinux/clr-bundles.git | grep -v {} | grep -v latest | sed "s/.*refs\\/tags\\///" | sort -gr | head -n "$MAX_VERSIONS" | sort -g) || echo
 	if [ "${#version_list[@]}" -eq 0 ]; then
-		echo "Impossible to get versions list"
+		print "Impossible to get versions list"
 		return 1
 	fi
 
@@ -128,7 +128,7 @@ test_setup() {
 	# Not enough versions to run the test
 	if [ -z "${VERSION[0]}" ] || [ -z "${VERSION[1]}" ]; then
 		# TODO: This is going to break on first release in a new format
-		echo "We need at least 2 versions in format $FORMAT to continue with this test"
+		print "We need at least 2 versions in format $FORMAT to continue with this test"
 		return 1
 	fi
 

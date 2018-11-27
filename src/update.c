@@ -599,12 +599,18 @@ static void print_help(void)
 
 static bool parse_opt(int opt, char *optarg)
 {
+	int err;
+
 	switch (opt) {
 	case 'm':
 		if (strcmp("latest", optarg) == 0) {
 			requested_version = -1;
-		} else if (sscanf(optarg, "%i", &requested_version) != 1) {
-			fprintf(stderr, "Invalid --manifest argument\n\n");
+			return true;
+		}
+
+		err = strtoi_err(optarg, &requested_version);
+		if (err < 0 || requested_version < 0) {
+			fprintf(stderr, "Invalid --manifest argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;

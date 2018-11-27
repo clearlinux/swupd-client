@@ -70,7 +70,7 @@ char *version_url = NULL;
 char *content_url = NULL;
 bool content_url_is_local = false;
 char *cert_path = NULL;
-long update_server_port = -1;
+int update_server_port = -1;
 static int max_parallel_downloads = -1;
 char *swupd_cmd = NULL;
 
@@ -566,6 +566,8 @@ static const struct option global_opts[] = {
 
 static bool global_parse_opt(int opt, char *optarg)
 {
+	int err;
+
 	switch (opt) {
 	case 0:
 		/* Handle options that don't have shortcut. */
@@ -585,8 +587,9 @@ static bool global_parse_opt(int opt, char *optarg)
 		set_content_url(optarg);
 		return true;
 	case 'P':
-		if (sscanf(optarg, "%ld", &update_server_port) != 1) {
-			fprintf(stderr, "Invalid --port argument\n\n");
+		err = strtoi_err(optarg, &update_server_port);
+		if (err < 0 || update_server_port < 0) {
+			fprintf(stderr, "Invalid --port argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;
@@ -639,8 +642,9 @@ static bool global_parse_opt(int opt, char *optarg)
 		set_cert_path(optarg);
 		return true;
 	case 'W':
-		if (sscanf(optarg, "%d", &max_parallel_downloads) != 1) {
-			fprintf(stderr, "Invalid --max-parallel-downloads argument\n\n");
+		err = strtoi_err(optarg, &max_parallel_downloads);
+		if (err < 0 || max_parallel_downloads <= 0) {
+			fprintf(stderr, "Invalid --max-parallel-downloads argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;

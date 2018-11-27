@@ -506,12 +506,18 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 
 static bool parse_opt(int opt, char *optarg)
 {
+	int err;
+
 	switch (opt) {
 	case 'm':
 		if (strcmp("latest", optarg) == 0) {
 			version = -1;
-		} else if (sscanf(optarg, "%i", &version) != 1) {
-			fprintf(stderr, "Invalid --manifest argument\n\n");
+			return true;
+		}
+
+		err = strtoi_err(optarg, &version);
+		if (err < 0 || version < 0) {
+			fprintf(stderr, "Invalid --manifest argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;

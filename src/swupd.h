@@ -192,7 +192,7 @@ extern char *version_url;
 extern char *content_url;
 extern bool content_url_is_local;
 extern char *cert_path;
-extern long update_server_port;
+extern int update_server_port;
 extern char *default_format_path;
 extern bool set_path_prefix(char *path);
 

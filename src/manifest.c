@@ -598,7 +598,7 @@ verify_mom:
 		char *momfile;
 
 		string_or_die(&momdir, "%s/var/tmp/swupd", path_prefix);
-		string_or_die(&momfile, "%s/.MoM", momdir);
+		string_or_die(&momfile, "%s/Manifest.MoM", momdir);
 		swupd_rm(momfile);
 		mkdir_p(momdir);
 		string_or_die(&momcopy, "/bin/cp \"%s\" \"%s\" 2>/dev/null",

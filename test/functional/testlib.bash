@@ -2272,7 +2272,7 @@ generate_test() { # swupd_function
 	usage () {
 		cat <<-EOM
 			Usage:
-			    generate_test <group_dir>/<test_name>
+			    generate_test [relative_path]/<test_name>
 			EOM
 	}
 	if [ $# -eq 0 ]; then
@@ -2280,10 +2280,10 @@ generate_test() { # swupd_function
 		return
 	fi
 	validate_param "$name"
-	path=$(dirname "$name")/
-	validate_path "$path"
-	if [[ "$(dirname "$(realpath "$path")")" != *swupd-client/test/functional ]]; then
-		echo -e "All tests should be grouped within a directory\n"
+
+	path=$(dirname "$(realpath "$name")")
+	if [[ "$path" != *swupd-client/test/functional/* ]]; then
+		echo -e "All functional tests should be grouped within a directory in swupd-client/test/functional/<group_dir>/\n"
 		usage
 		return 1
 	fi
@@ -2327,9 +2327,9 @@ generate_test() { # swupd_function
 		# shellcheck disable=SC2016
 		printf '\t# assert_is_output "$expected_output"\n\n'
 		printf '}\n'
-	} > "$path$name".bats
+	} > "$path"/"$name".bats
 	# make the test script executable
-	chmod +x "$path$name".bats
+	chmod +x "$path"/"$name".bats
 
 }
 
@@ -2379,7 +2379,7 @@ get_next_available_id() { # swupd_function
 	if [ "${test_list/$id}" != "$test_list" ]; then
 		echo -e "There is a problem with the current IDs, one ID seems to be missing from the list:\n"
 		echo "$test_list"
-		echo -e "\nPlease fix the IDs as appropriate and try running the command again.\n"
+		echo -e "\nPlease fix the IDs as appropriate and try running the command again\n"
 		return 1
 	else
 		echo "$id"
@@ -2404,9 +2404,8 @@ list_tests() { # swupd_function
 	fi
 
 	if [ "$test_dir" = --all ]; then
-		grep -rh --include="*.bats" "@test .* {" . | sed "s/@test \"//" | sed "s/\" {.*//" | sort
+		grep -rh --include="*.bats" "@test .* {" "$FUNC_DIR" | sed "s/@test \"//" | sed "s/\" {.*//" | sort
 	else
-		validate_path "$test_dir"
 		if [[ "$(dirname "$(realpath "$test_dir")")" != *swupd-client/test/functional ]]; then
 			echo "Invalid test group directory"
 			return 1

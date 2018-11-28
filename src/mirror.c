@@ -65,6 +65,13 @@ static int unset_mirror_url()
 		goto out;
 	}
 
+	/* we need to set the version and content URLs again if not they will
+	 * remain with the value from the mirror */
+	free_string(&version_url);
+	free_string(&content_url);
+	set_version_url(NULL);
+	set_content_url(NULL);
+
 out:
 	free_string(&content_path);
 	free_string(&version_path);
@@ -161,7 +168,7 @@ void handle_mirror_if_stale(void)
 	char *fullpath = NULL;
 
 	fullpath = mk_full_filename(path_prefix, DEFAULT_VERSION_URL_PATH);
-	int ret = get_value_from_path(&ret_str, fullpath, false);
+	int ret = get_value_from_path(&ret_str, fullpath, true);
 	if (ret != 0 || ret_str == NULL) {
 		/* no versionurl file here, might not exist under --path argument */
 		goto out;
@@ -181,6 +188,9 @@ void handle_mirror_if_stale(void)
 			mirror_version,
 			central_version);
 		unset_mirror_url();
+		/* we need to re-set the cached_version to latest using the central version,
+		 * since at the moment the cached_version is the outdated mirror version */
+		get_latest_version(ret_str);
 		goto out;
 	}
 	if (diff > MIRROR_STALE_WARN) {

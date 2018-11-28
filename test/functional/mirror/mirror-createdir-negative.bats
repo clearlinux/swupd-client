@@ -38,7 +38,9 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		.*/etc/swupd: not a directory
 		Unable to set mirror url
-		Default version URL not found. Use the -v option instead.
+		Installed version: 10
+		Version URL:       file://.*/web-dir
+		Content URL:       file://.*/web-dir
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -57,7 +59,9 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		.*/etc/swupd: not a directory
 		Unable to set mirror url
-		Default version URL not found. Use the -v option instead.
+		Installed version: 10
+		Version URL:       file://.*/web-dir
+		Content URL:       file://.*/web-dir
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

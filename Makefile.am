@@ -196,6 +196,9 @@ BATS = \
 	test/functional/update/update-verify-fix-path-hash-mismatch.bats \
 	test/functional/update/update-verify-fix-path-missing-dir.bats \
 	test/functional/update/update-verify-fullfile-hash.bats \
+	test/functional/update/update-with-mirror.bats \
+	test/functional/update/update-with-old-mirror.bats \
+	test/functional/update/update-with-slightly-old-mirror.bats \
 	test/functional/verify/verify-add-missing-include.bats \
 	test/functional/verify/verify-add-missing-include-old.bats \
 	test/functional/verify/verify-boot-file.bats \

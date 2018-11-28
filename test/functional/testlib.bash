@@ -269,6 +269,13 @@ set_env_variables() { # swupd_function
 	validate_path "$env_name"
 	path=$(dirname "$(realpath "$env_name")")
 
+	# different options for swupd
+	export SWUPD_OPTS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -C $FUNC_DIR/Swupd_Root.pem -I"
+	export SWUPD_OPTS_KEEPCACHE="$SWUPD_OPTS --keepcache"
+	export SWUPD_OPTS_NO_CERT="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging"
+	export SWUPD_OPTS_MIRROR="-p $path/$env_name/target-dir"
+	export SWUPD_OPTS_NO_FMT="-S $path/$env_name/state -p $path/$env_name/target-dir -C $FUNC_DIR/Swupd_Root.pem -I"
+
 	export CLIENT_CERT_DIR="$TEST_NAME/target-dir/etc/swupd"
 	export CLIENT_CERT="$CLIENT_CERT_DIR/client.pem"
 	export CACERT_DIR="$SWUPD_DIR/swupd_test_certificates" # trusted key store path
@@ -279,8 +286,8 @@ set_env_variables() { # swupd_function
 	if [ -f "$PORT_FILE" ]; then
 		PORT=$(cat "$PORT_FILE")
 		export PORT
-		export SWUPD_OPTS_HTTPS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u https://localhost:$PORT/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
-		export SWUPD_OPTS_HTTP="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u http://localhost:$PORT/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
+		export SWUPD_OPTS_HTTPS="$SWUPD_OPTS -u https://localhost:$PORT/$env_name/web-dir"
+		export SWUPD_OPTS_HTTP="$SWUPD_OPTS -u http://localhost:$PORT/$env_name/web-dir"
 		export SWUPD_OPTS_HTTP_NO_CERT="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u http://localhost:$PORT/$env_name/web-dir/"
 	fi
 
@@ -288,11 +295,6 @@ set_env_variables() { # swupd_function
 		export SERVER_PID=$(cat "$SERVER_PID_FILE")
 	fi
 
-	export SWUPD_OPTS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
-	export SWUPD_OPTS_KEEPCACHE="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I --keepcache"
-	export SWUPD_OPTS_NO_CERT="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -u file://$path/$env_name/web-dir"
-	export SWUPD_OPTS_MIRROR="-p $path/$env_name/target-dir"
-	export SWUPD_OPTS_NO_FMT="-S $path/$env_name/state -p $path/$env_name/target-dir -u file://$path/$env_name/web-dir -C $FUNC_DIR/Swupd_Root.pem -I"
 	export TEST_DIRNAME="$path"/"$env_name"
 	export WEBDIR="$env_name"/web-dir
 	export TARGETDIR="$env_name"/target-dir
@@ -1304,6 +1306,7 @@ create_test_environment() { # swupd_function
 	local env_name=$1 
 	local version=${2:-10}
 	local format=${3:-staging}
+	local path
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
@@ -1336,12 +1339,15 @@ create_test_environment() { # swupd_function
 	fi
 
 	# target-dir files & dirs
+	path=$(dirname "$(realpath "$env_name")")
 	sudo mkdir -p "$env_name"/target-dir/usr/lib
 	sudo cp "$env_name"/web-dir/"$version"/os-release "$env_name"/target-dir/usr/lib/os-release
 	sudo mkdir -p "$env_name"/target-dir/usr/share/clear/bundles
 	sudo mkdir -p "$env_name"/target-dir/usr/share/defaults/swupd
 	sudo cp "$env_name"/web-dir/"$version"/format "$env_name"/target-dir/usr/share/defaults/swupd/format
-	sudo mkdir -p "$env_name"/target-dir/etc
+	write_to_protected_file "$env_name"/target-dir/usr/share/defaults/swupd/versionurl "file://$path/$env_name/web-dir"
+	write_to_protected_file "$env_name"/target-dir/usr/share/defaults/swupd/contenturl "file://$path/$env_name/web-dir"
+	sudo mkdir -p "$env_name"/target-dir/etc/swupd
 
 	# state files & dirs
 	sudo mkdir -p "$env_name"/state/{staged,download,delta,telemetry}

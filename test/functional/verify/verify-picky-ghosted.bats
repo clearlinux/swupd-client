@@ -20,7 +20,12 @@ test_setup() {
 		Adding any missing files
 		Fixing modified files
 		--picky removing extra files under .*/target-dir/usr
-		Inspected 13 files
+		REMOVING /usr/share/defaults/swupd/versionurl
+		REMOVING /usr/share/defaults/swupd/contenturl
+		Inspected 15 files
+		  2 files found which should be deleted
+		    2 of 2 files were deleted
+		    0 of 2 files were not deleted
 		Calling post-update helper scripts.
 		Fix successful
 	EOM

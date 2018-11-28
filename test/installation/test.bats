@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-@test "Check if all files were installed successfully in a full install" {
+@test "INS001: Check if all files were installed successfully in a full install" {
 	# Binaries
 	[ -x /usr/bin/swupd ]
 	[ -x /usr/bin/verifytime ]

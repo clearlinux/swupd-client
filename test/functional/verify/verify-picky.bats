@@ -28,12 +28,14 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Generating list of extra files under .*/target-dir/usr
+		/usr/share/defaults/swupd/versionurl
+		/usr/share/defaults/swupd/contenturl
 		/usr/foo/bar/file2
 		/usr/foo/bar/
 		/usr/foo/
 		/usr/file1
-		Inspected 15 files
-		  4 files found which should be deleted
+		Inspected 17 files
+		  6 files found which should be deleted
 		Verify successful
 	EOM
 	)

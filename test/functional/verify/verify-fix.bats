@@ -143,16 +143,18 @@ test_setup() {
 		.deleted
 		--picky removing extra files under .*/target-dir/usr
 		REMOVING /usr/untracked_file3
-		Inspected 19 files
+		REMOVING /usr/share/defaults/swupd/versionurl
+		REMOVING /usr/share/defaults/swupd/contenturl
+		Inspected 21 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
 		    0 of 2 missing files were not replaced
 		  2 files did not match
 		    2 of 2 files were fixed
 		    0 of 2 files were not fixed
-		  2 files found which should be deleted
-		    2 of 2 files were deleted
-		    0 of 2 files were not deleted
+		  4 files found which should be deleted
+		    4 of 4 files were deleted
+		    0 of 4 files were not deleted
 		Calling post-update helper scripts.
 		Fix successful
 	EOM
@@ -166,6 +168,8 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/bat/untracked_file1
 	assert_file_exists "$TARGETDIR"/bar/untracked_file2
 	assert_file_not_exists "$TARGETDIR"/usr/untracked_file3
+	assert_file_not_exists "$TARGETDIR"/usr/share/defaults/swupd/versionurl
+	assert_file_not_exists "$TARGETDIR"/usr/share/defaults/swupd/contenturl
 
 }
 

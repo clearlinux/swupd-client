@@ -52,17 +52,19 @@ test_setup() {
 		Hash mismatch for file: .*/target-dir/usr/lib/os-release
 		.fixed
 		--picky removing extra files under .*/target-dir/usr
+		REMOVING /usr/share/defaults/swupd/versionurl
+		REMOVING /usr/share/defaults/swupd/contenturl
 		REMOVING /usr/share/clear/bundles/test-bundle2
 		REMOVING /usr/foo/file_3
 		REMOVING /usr/foo/file_2
 		REMOVING DIR /usr/foo/
-		Inspected 17 files
+		Inspected 19 files
 		  1 file did not match
 		    1 of 1 files were fixed
 		    0 of 1 files were not fixed
-		  4 files found which should be deleted
-		    4 of 4 files were deleted
-		    0 of 4 files were not deleted
+		  6 files found which should be deleted
+		    6 of 6 files were deleted
+		    0 of 6 files were not deleted
 		Calling post-update helper scripts.
 		Fix successful
 	EOM
@@ -130,12 +132,14 @@ test_setup() {
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
 		WARNING: One or more installed bundles are not available at version 10.
 		Generating list of extra files under .*/target-dir/usr
+		/usr/share/defaults/swupd/versionurl
+		/usr/share/defaults/swupd/contenturl
 		/usr/share/clear/bundles/test-bundle2
 		/usr/foo/file_3
 		/usr/foo/file_2
 		/usr/foo/
-		Inspected 17 files
-		  4 files found which should be deleted
+		Inspected 19 files
+		  6 files found which should be deleted
 		Verify successful
 	EOM
 	)
@@ -145,5 +149,7 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/bar/file_4
 	assert_file_exists "$TARGETDIR"/bar/file_5
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/usr/share/defaults/swupd/versionurl
+	assert_file_exists "$TARGETDIR"/usr/share/defaults/swupd/contenturl
 
 }

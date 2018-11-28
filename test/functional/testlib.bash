@@ -1420,6 +1420,36 @@ destroy_test_environment() { # swupd_function
 
 }
 
+# creates a mirror of whatever is in web-dir
+# Parameters:
+# - ENVIRONMENT_NAME: the name of the test environment where the mirror will be created
+create_mirror() { # swupd_function
+
+	local env_name=$1
+	local path
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    create_mirror <environment_name>
+			EOM
+		return
+	fi
+	validate_param "$env_name"
+	path=$(dirname "$(realpath "$env_name")")
+
+	# create the mirror
+	sudo mkdir "$env_name"/mirror
+	sudo cp -r "$env_name"/web-dir "$env_name"/mirror
+	export MIRROR="$env_name"/mirror/web-dir
+
+	# set the mirror in the target-dir
+	write_to_protected_file "$env_name"/target-dir/etc/swupd/mirror_versionurl "file://$path/$MIRROR"
+	write_to_protected_file "$env_name"/target-dir/etc/swupd/mirror_contenturl "file://$path/$MIRROR"
+
+}
+
 # creates a web server to host fake swupd content with or without certifiates
 start_web_server() { # swupd_function
 

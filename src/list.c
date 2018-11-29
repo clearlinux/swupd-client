@@ -29,6 +29,7 @@
 
 #include "list.h"
 #include "macros.h"
+#include "swupd.h"
 
 static struct list *list_append_item(struct list *list, struct list *item)
 {
@@ -280,7 +281,7 @@ struct list *list_deep_clone_strs(struct list *list)
 
 	item = list_tail(list);
 	while (item) {
-		clone = list_prepend_data(clone, strdup(item->data));
+		clone = list_prepend_data(clone, strdup_or_die(item->data));
 		item = item->prev;
 	}
 

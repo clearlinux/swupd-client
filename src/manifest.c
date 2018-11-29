@@ -299,6 +299,8 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		} else if (c[3] == 'm') {
 			file->is_mix = 1;
 			manifest->is_mix = 1;
+		} else if (c[3] == 'e') {
+			file->is_experimental = 1;
 		} else if (c[3] != '.') { /* unknown modifier #3 */
 			free(file);
 			goto err;

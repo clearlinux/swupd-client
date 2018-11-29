@@ -191,6 +191,24 @@ AS_IF(
 )
 
 AC_ARG_WITH(
+  [system-alias-path],
+  [AS_HELP_STRING([--with-system-alias-path=PATH], [Default system alias path])],
+  [system_alias_path=${withval}],
+  [system_alias_path="/usr/share/defaults/swupd/alias.d/"]
+)
+AC_SUBST(SYSTEM_ALIAS_PATH, [${system_alias_path}])
+AC_DEFINE_UNQUOTED([SYSTEM_ALIAS_PATH], ["${system_alias_path}"], [system-alias-path])
+
+AC_ARG_WITH(
+  [user-alias-path],
+  [AS_HELP_STRING([--with-user-alias-path=PATH], [Default user alias path])],
+  [user_alias_path=${withval}],
+  [user_alias_path="/etc/swupd/alias.d/"]
+)
+AC_SUBST(USER_ALIAS_PATH, [${user_alias_path}])
+AC_DEFINE_UNQUOTED([USER_ALIAS_PATH], ["${user_alias_path}"], [user-alias-path])
+
+AC_ARG_WITH(
   [contenturl],
   [AS_HELP_STRING([--with-contenturl=URL], [Default content url])],
   [AC_DEFINE_UNQUOTED([CONTENTURL], ["$withval"], [Default content url])]
@@ -300,7 +318,7 @@ AS_IF(
 
 AC_SUBST([cert_path], ["$cert_path"])
 
-AC_CONFIG_FILES([Makefile data/check-update.service data/swupd-update.service])
+AC_CONFIG_FILES([Makefile data/check-update.service data/swupd-update.service docs/swupd-alias.7.rst])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])
 AC_OUTPUT
 
@@ -312,6 +330,8 @@ swupd-client
 
 Configuration to build swupd-client:
 
+  System alias path:			${system_alias_path}
+  User alias path:			${user_alias_path}
   Content URL:				${CONTENTURL}
   Version URL:				${VERSIONURL}
   Format Identifier:			${FORMATID}

@@ -146,6 +146,9 @@ SUBCOMMANDS
     Installs new software bundles. Any bundle name listed after
     `bundle-list --all` will be downloaded and installed.
 
+    The names can also be aliases that are not actual bundles names but instead
+    are names in an alias configuration file. See ``swupd-alias``\(7)
+
     -  `--skip-diskspace-check`
 
         Skip checking for available disk space before installing a bundle.

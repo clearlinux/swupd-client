@@ -10,6 +10,7 @@ bin_PROGRAMS = swupd
 AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS)
 
 swupd_SOURCES = \
+	src/alias.c \
 	src/archives.c \
 	src/autoupdate.c \
 	src/bundle.c \
@@ -112,6 +113,7 @@ TESTS = $(dist_check_SCRIPTS)
 
 BATS = \
 	test/documentation/manpages/test.bats \
+	test/functional/bundleadd/add-alias-basic.bats \
 	test/functional/bundleadd/add-bad-hash.bats \
 	test/functional/bundleadd/add-bad-hash-state.bats \
 	test/functional/bundleadd/add-bad-manifest.bats \
@@ -238,6 +240,7 @@ endif
 
 MANPAGES = \
 	docs/swupd.1 \
+	docs/swupd-alias.7 \
 	docs/check-update.service.4 \
 	docs/check-update.timer.4 \
 	docs/swupd-update.service.4 \

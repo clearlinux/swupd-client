@@ -45,6 +45,7 @@
 */
 int list_installable_bundles()
 {
+	char *name;
 	struct list *list;
 	struct file *file;
 	struct manifest *MoM = NULL;
@@ -67,7 +68,9 @@ int list_installable_bundles()
 	while (list) {
 		file = list->data;
 		list = list->next;
-		printf("%s\n", file->filename);
+		get_bundle_name(&name, file);
+		printf("%s\n", name);
+		free_string(&name);
 	}
 
 	free_manifest(MoM);

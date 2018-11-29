@@ -382,6 +382,7 @@ extern void print_progress(unsigned int count, unsigned int max);
 extern bool is_compatible_format(int format_num);
 extern bool is_current_version(int version);
 extern bool on_new_format(void);
+extern void get_bundle_name(char **name, struct file *bundle_manifest);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);

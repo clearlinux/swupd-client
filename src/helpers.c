@@ -1174,3 +1174,45 @@ exit:
 	}
 	return err;
 }
+
+static int lex_sort(const void *a, const void *b)
+{
+	const char *name1 = (char *)a;
+	const char *name2 = (char *)b;
+	return strcmp(name1, name2);
+}
+
+/* Get a list of files in a directory sorted by filename
+ * with their fullpath, returns NULL on error (errno set by
+ * opendir).
+ */
+struct list *get_dir_files_sorted(char *path)
+{
+	DIR *dir = NULL;
+	struct dirent *ent = NULL;
+	struct list *files = NULL;
+
+	dir = opendir(path);
+	if (!dir) {
+		/* caller should use errno for detecting issues */
+		return NULL;
+	}
+
+	errno = 0;
+	while ((ent = readdir(dir))) {
+		char *name = NULL;
+		if (ent->d_name[0] == '.') {
+			continue;
+		}
+		string_or_die(&name, "%s/%s", path, ent->d_name);
+		files = list_prepend_data(files, name);
+	}
+
+	if (!ent && errno) {
+		list_free_list_and_data(files, free);
+		files = NULL;
+	}
+	(void)closedir(dir);
+
+	return list_sort(files, lex_sort);
+}

@@ -1198,3 +1198,9 @@ struct list *get_dir_files_sorted(char *path)
 
 	return list_sort(files, lex_sort);
 }
+
+/* Appends the (experimental) label if applicable to the bundle name */
+void get_bundle_name(char **name, struct file *bundle_manifest)
+{
+	string_or_die(name, "%s%s", bundle_manifest->filename, bundle_manifest->is_experimental ? " (experimental)" : "");
+}

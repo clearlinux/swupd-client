@@ -140,6 +140,7 @@ struct file {
 	unsigned int is_boot : 1;
 	unsigned int is_orphan : 1;
 	unsigned int is_mix : 1;
+	unsigned int is_experimental : 1;
 	unsigned int do_not_update : 1;
 
 	struct file *peer; /* same file in another manifest */

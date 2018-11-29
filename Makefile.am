@@ -134,6 +134,7 @@ BATS = \
 	test/functional/bundlelist/list-deps-flat.bats \
 	test/functional/bundlelist/list-deps-invalid-bundle.bats \
 	test/functional/bundlelist/list-deps-nested.bats \
+	test/functional/bundlelist/list-experimental.bats \
 	test/functional/bundlelist/list-has-dep-nested.bats \
 	test/functional/bundlelist/list-has-dep-nested-not-installed.bats \
 	test/functional/bundlelist/list-has-dep-nested-server.bats \

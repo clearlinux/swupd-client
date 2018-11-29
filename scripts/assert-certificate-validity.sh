@@ -19,7 +19,7 @@ fi
 
 openssl_verify()
 {
-	openssl smime -verify -in "$1" -inform der -content "$2" -CAfile "$3" > /dev/null 2>&1
+	openssl smime -verify -purpose any -in "$1" -inform der -content "$2" -CAfile "$3" > /dev/null 2>&1
 
 }
 

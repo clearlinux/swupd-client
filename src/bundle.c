@@ -758,6 +758,11 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 			/* track as installed since they tried to install it */
 			track_installed(bundle);
 		}
+		/* warn the user if the bundle to be installed is experimental */
+		file = search_bundle_in_manifest(mom, bundle);
+		if (file && file->is_experimental) {
+			fprintf(stderr, "Warning: Bundle %s is experimental\n", bundle);
+		}
 	}
 
 	/* Use a bitwise AND with the add_sub_NEW mask to determine if at least

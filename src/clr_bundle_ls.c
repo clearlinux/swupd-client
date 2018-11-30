@@ -126,22 +126,18 @@ int bundle_list_main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	if (cmdline_local) {
-		set_path_prefix(NULL);
-		ret = list_local_bundles();
-		if (ret) {
-			check_root();
-		}
-		return ret;
-	}
-
 	ret = swupd_init();
-	if (ret != 0) {
+	/* if swupd fails to initialize, the only list command we can still attempt is
+	 * listing locally installed bundles (with the limitation of not showing what
+	 * bundles are experimental) */
+	if (ret != 0 && !cmdline_local) {
 		fprintf(stderr, "Error: Failed updater initialization. Exiting now\n");
 		return ret;
 	}
 
-	if (cmdline_option_deps != NULL) {
+	if (cmdline_local) {
+		ret = list_local_bundles();
+	} else if (cmdline_option_deps != NULL) {
 		ret = show_included_bundles(cmdline_option_deps);
 	} else if (cmdline_option_has_dep != NULL) {
 		ret = show_bundle_reqd_by(cmdline_option_has_dep, cmdline_option_all);

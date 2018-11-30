@@ -1130,10 +1130,27 @@ clean_and_exit:
  */
 int list_local_bundles()
 {
+	char *name;
 	char *path = NULL;
 	struct list *bundles = NULL;
 	struct list *item = NULL;
+	struct manifest *MoM = NULL;
+	struct file *bundle_manifest = NULL;
+	int current_version;
+	bool mix_exists;
 
+	current_version = get_current_version(path_prefix);
+	if (current_version < 0) {
+		goto skip_mom;
+	}
+
+	mix_exists = (check_mix_exists() & system_on_mix());
+	MoM = load_mom(current_version, false, mix_exists, NULL);
+	if (!MoM) {
+		printf("Warning: Could not determine which installed bundles are experimental\n");
+	}
+
+skip_mom:
 	string_or_die(&path, "%s/%s", path_prefix, BUNDLES_DIR);
 
 	errno = 0;
@@ -1147,7 +1164,16 @@ int list_local_bundles()
 	item = bundles;
 
 	while (item) {
-		printf("%s\n", basename((char *)item->data));
+		if (MoM) {
+			bundle_manifest = search_bundle_in_manifest(MoM, basename((char *)item->data));
+		}
+		if (bundle_manifest) {
+			get_bundle_name(&name, bundle_manifest);
+		} else {
+			string_or_die(&name, basename((char *)item->data));
+		}
+		printf("%s\n", name);
+		free_string(&name);
 		free(item->data);
 		item = item->next;
 	}
@@ -1155,6 +1181,7 @@ int list_local_bundles()
 	list_free_list(bundles);
 
 	free_string(&path);
+	free_manifest(MoM);
 
 	return 0;
 }

@@ -1200,7 +1200,10 @@ struct list *get_dir_files_sorted(char *path)
 }
 
 /* Appends the (experimental) label if applicable to the bundle name */
-void get_bundle_name(char **name, struct file *bundle_manifest)
+char *get_printable_bundle_name(const char *bundle_name, bool is_experimental)
 {
-	string_or_die(name, "%s%s", bundle_manifest->filename, bundle_manifest->is_experimental ? " (experimental)" : "");
+	char *printable_name = NULL;
+
+	string_or_die(&printable_name, "%s%s", bundle_name, is_experimental ? " (experimental)" : "");
+	return printable_name;
 }

@@ -68,7 +68,7 @@ int list_installable_bundles()
 	while (list) {
 		file = list->data;
 		list = list->next;
-		get_bundle_name(&name, file);
+		name = get_printable_bundle_name(file->filename, file->is_experimental);
 		printf("%s\n", name);
 		free_string(&name);
 	}
@@ -1168,7 +1168,7 @@ skip_mom:
 			bundle_manifest = search_bundle_in_manifest(MoM, basename((char *)item->data));
 		}
 		if (bundle_manifest) {
-			get_bundle_name(&name, bundle_manifest);
+			name = get_printable_bundle_name(bundle_manifest->filename, bundle_manifest->is_experimental);
 		} else {
 			string_or_die(&name, basename((char *)item->data));
 		}

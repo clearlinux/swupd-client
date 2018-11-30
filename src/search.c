@@ -53,6 +53,7 @@ struct bundle_result {
 	struct list *files;
 	struct list *includes;
 	bool is_tracked;
+	bool is_experimental;
 	bool seen;
 };
 
@@ -65,7 +66,7 @@ struct file_result {
 static struct list *results;
 
 /* add a bundle_result to the results list */
-static void add_bundle_file_result(char *bundlename, char *filename, double score)
+static void add_bundle_file_result(char *bundlename, char *filename, double score, bool is_experimental)
 {
 	struct bundle_result *bundle = NULL;
 	struct file_result *file;
@@ -89,6 +90,7 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 		strncpy(bundle->bundle_name, bundlename, BUNDLE_NAME_MAXLEN - 1);
 		/* record if the bundle is tracked on the system */
 		bundle->is_tracked = is_tracked_bundle(bundlename);
+		bundle->is_experimental = is_experimental;
 	}
 
 	file = calloc(sizeof(struct file_result), 1);
@@ -276,6 +278,7 @@ static void print_csv_results()
 
 static void print_final_results(bool display_size)
 {
+	char *name = NULL;
 	struct bundle_result *b;
 	struct list *ptr;
 	int counter = 0;
@@ -295,7 +298,9 @@ static void print_final_results(bool display_size)
 		/* do not print the size information when the scope is only one bundle ('o')
 		 * because we did not load all bundles and therefore do not have include sizes
 		 * for the result */
-		printf("Bundle %s\t%s", b->bundle_name, b->is_tracked ? "[installed]\t" : "");
+		name = get_printable_bundle_name(b->bundle_name, b->is_experimental);
+		printf("Bundle %s\t%s", name, b->is_tracked ? "[installed]\t" : "");
+		free_string(&name);
 		if (display_size) {
 			printf("(%li MB%s)",
 			       b->size / 1000 / 1000, /* convert from bytes->KB->MB */
@@ -532,12 +537,12 @@ static double guess_score(char *bundle, char *file, char *search_term)
 /* report_finds()
  * Report out, respecting verbosity
  */
-static void report_find(char *bundle, char *file, char *search_term)
+static void report_find(char *bundle, char *file, char *search_term, bool is_experimental)
 {
 	double score;
 
 	score = guess_score(bundle, file, search_term);
-	add_bundle_file_result(bundle, file, score);
+	add_bundle_file_result(bundle, file, score, is_experimental);
 }
 
 /* do_search()
@@ -604,14 +609,14 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 			} else if (search_type == '0') {
 				/* Search for exact match, not path addition */
 				if (file_search(subfile->filename, "", search_term)) {
-					report_find(file->filename, subfile->filename, search_term);
+					report_find(file->filename, subfile->filename, search_term, file->is_experimental);
 					hit = true;
 				}
 			} else if (search_type == 'l') {
 				/* Check each supported library path for a match */
 				for (i = 0; lib_paths[i] != NULL; i++) {
 					if (file_search(subfile->filename, lib_paths[i], search_term)) {
-						report_find(file->filename, subfile->filename, search_term);
+						report_find(file->filename, subfile->filename, search_term, file->is_experimental);
 						hit = true;
 					}
 				}
@@ -619,7 +624,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 				/* Check each supported path for binaries */
 				for (i = 0; bin_paths[i] != NULL; i++) {
 					if (file_search(subfile->filename, bin_paths[i], search_term)) {
-						report_find(file->filename, subfile->filename, search_term);
+						report_find(file->filename, subfile->filename, search_term, file->is_experimental);
 						hit = true;
 					}
 				}

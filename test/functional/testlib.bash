@@ -1539,23 +1539,38 @@ set_upstream_server() { # swupd_function
 # creates a web server to host fake swupd content with or without certifiates
 start_web_server() { # swupd_function
 
+	local OPTIND
+	local opt
 	local port
 	local server_args
 	local server_pid
 	local status
 
-	cb_usage() {
-		echo $(cat <<-EOF
+	web_server_usage() {
+		cat <<-EOF
 		Usage:
-		    start_web_server [-c] <client pub key> [-d] <file name> [-k] <server priv key> [-p] <server pub key> [-s]
+		    start_web_server [-c] <client pub key> [-d] <file name> [-k] <server priv key> [-p] <server pub key>
+		                     [-s] [-H] [-t] <delay value> [-l] <chunk length> [-r] [-P] <port> [-D] <dir to server>
+		                     [-n] <number of normal requests>
 
 		Options:
 		    -c    Path to public key to be used for client certificate authentication
-		    -d    File name that will be partially downloaded on the first attempt and successfully
-		          downloaded on the second attempt.
-		    -k    Path to server private key which must correspond to the provided server public key
 		    -p    Path to server public key which enables SSL authentication
-		    -s    Use a slow update server
+		    -k    Path to server private key which must correspond to the provided server public key
+		    -P    If specified, the server will attempt to use the selected port
+		    -r    Reachable from other machines in the network
+		    -D    The relative path to the directory to serve. If not specified, the directory to
+		          serve is the current working directory
+		    -s    Use a slow server
+		    -n    The server will respond normally for the first N number of requests, and will start
+		          responding slowly / or hang after that
+		    -t    Used to fine tune the slow server function. It sets the delay value (in miliseconds)
+		          used to sleep between reads
+		    -l    Used to fine tune the slow server function. It sets the length of the chunk of data
+		          read in each cycle by the server
+		    -H    Hangs the server
+		    -d    File name that will be partially downloaded on the first attempt and successfully
+		          downloaded on the second attempt
 
 		Notes:
 		    - When the server is using SSL authentication, a pair of corresponding public and private keys must be passed
@@ -1569,23 +1584,33 @@ start_web_server() { # swupd_function
 		    start_web_server -k /private_key.pem -p /public_key.pem -s
 
 		EOF
-		)
 	}
 
-	while getopts :c:d:k:p:s opt; do
+	while getopts :c:d:k:p:st:rP:D:l:n:H opt; do
 		case "$opt" in
-			c)	server_args="$server_args --client_cert $OPTARG" ;;
-			d)	server_args="$server_args --partial_download_file $OPTARG" ;;
-			k)	server_args="$server_args --server_key $OPTARG" ;;
-			p)	server_args="$server_args --server_cert $OPTARG" ;;
-			s)	server_args="$server_args --slow_server" ;;
-			*)	cb_usage
+			c)	server_args="$server_args --client-cert $OPTARG" ;;
+			d)	server_args="$server_args --partial-download-file $OPTARG" ;;
+			k)	server_args="$server_args --server-key $OPTARG" ;;
+			p)	server_args="$server_args --server-cert $OPTARG" ;;
+			s)	server_args="$server_args --slow-server" ;;
+			t)	server_args="$server_args --time-delay $OPTARG" ;;
+			r)	server_args="$server_args --reachable" ;;
+			P)	server_args="$server_args --port $OPTARG" ;;
+			D)	server_args="$server_args --directory $OPTARG" ;;
+			l)	server_args="$server_args --chunk-length $OPTARG" ;;
+			n)	server_args="$server_args --after-requests $OPTARG" ;;
+			H)	server_args="$server_args --hang-server" ;;
+			*)	web_server_usage
 				return ;;
 		esac
 	done
 
 	# start web server and write port/pid numbers to their respective files
-	sudo sh -c "python3 $FUNC_DIR/server.py $server_args --port_file $PORT_FILE --pid_file $SERVER_PID_FILE &"
+	if [ -n "$PORT_FILE" ] && [ -n "$SERVER_PID_FILE" ]; then
+		sudo sh -c "python3 $FUNC_DIR/server.py $server_args --port-file $PORT_FILE --pid-file $SERVER_PID_FILE &"
+	else
+		sudo sh -c "python3 $FUNC_DIR/server.py $server_args &"
+	fi
 
 	# make sure localhost is present in no_proxy settings
 	if [ -n "$no_proxy" ] && grep -v 'localhost' <<< "$no_proxy"; then
@@ -1602,10 +1627,13 @@ start_web_server() { # swupd_function
 			status=0
 
 			# use https when the server is using certificates
-			if [[ "$server_args" = *"--server_cert"* ]]; then
-				curl https://localhost:"$port" || status=$?
+			if [[ "$server_args" = *"--server-cert"* ]]; then
+				# to avoid hanging the server while testing for the connection to be ready
+				# when the -H (hang server) option is set, we need to use the special url
+				# "/test-connection"
+				curl https://localhost:"$port"/test-connection || status=$?
 			else
-				curl http://localhost:"$port" || status=$?
+				curl http://localhost:"$port"/test-connection || status=$?
 			fi
 
 			# the web server is ready for connections when 0 or 60 is returned. When using

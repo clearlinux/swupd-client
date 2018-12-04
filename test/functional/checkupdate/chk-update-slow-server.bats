@@ -8,7 +8,7 @@ test_setup() {
 	create_version "$TEST_NAME" 99990 10 staging
 
 	# start slow response web server
-	start_web_server -s
+	start_web_server -s -l 1
 
 	# Set the web server as our upstream server
 	port=$(get_web_server_port "$TEST_NAME")

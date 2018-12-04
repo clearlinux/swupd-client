@@ -11,6 +11,7 @@ import time
 partial_download_file = ""
 slow_server = False
 
+
 class TestServer(server.BaseHTTPRequestHandler):
     first_time = True
 
@@ -20,12 +21,12 @@ class TestServer(server.BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             f = open(os.getcwd() + self.path, 'rb')
-        except:
+        except Exception:
             self.send_response(404)
             self.end_headers()
             return
 
-        #Simulate partial download
+        # Simulate partial download
         partial_download = False
         split_paths = os.path.split(self.path)
 
@@ -45,14 +46,15 @@ class TestServer(server.BaseHTTPRequestHandler):
 
             self.wfile.write(b)
             if partial_download:
-                break;
+                break
 
             # Insert delay for slow server
             if slow_server:
-                delay = 0.00001 # seconds
+                delay = 0.00001  # seconds
                 time.sleep(delay)
         self.wfile.flush()
         f.close()
+
 
 if __name__ == '__main__':
 
@@ -61,9 +63,9 @@ if __name__ == '__main__':
     parser.add_argument('--client_cert', help='client public key')
 
     parser.add_argument('--partial_download_file', default="",
-                       help='file name to download partially. On first download \
-                             fail with partial download error and succeed on 2nd \
-                             download.')
+                        help='file name to download partially. On first '
+                        'download fail with partial download error and succeed'
+                        ' on 2nd download.')
 
     parser.add_argument('--pid_file',
                         help='File path to write pid used by web server')
@@ -98,22 +100,25 @@ if __name__ == '__main__':
     # write pid to file to be read by other processes
     if args.pid_file:
         pid = os.getpid()
-        with open (args.pid_file, "w") as f:
+        with open(args.pid_file, "w") as f:
             f.write(str(pid))
 
     # write port to file which can be read by other processes
     if args.port_file:
         port = httpd.socket.getsockname()[1]
-        with open (args.port_file, "w") as f:
+        with open(args.port_file, "w") as f:
             f.write(str(port))
 
     # configure ssl certificates
     if args.server_cert and args.server_key:
-        wrap_socket_args = { 'certfile': args.server_cert, 'keyfile': args.server_key, 'server_side': True }
+        wrap_socket_args = {'certfile': args.server_cert,
+                            'keyfile': args.server_key,
+                            'server_side': True}
 
         # add client certificate
         if args.client_cert:
-            wrap_socket_args.update({ 'ca_certs': args.client_cert, 'cert_reqs': ssl.CERT_REQUIRED })
+            wrap_socket_args.update({'ca_certs': args.client_cert,
+                                     'cert_reqs': ssl.CERT_REQUIRED})
 
         httpd.socket = ssl.wrap_socket(httpd.socket, **wrap_socket_args)
 

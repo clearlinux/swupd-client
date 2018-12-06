@@ -1450,6 +1450,92 @@ create_mirror() { # swupd_function
 
 }
 
+# sets the url of where the version will be retrieved
+# Parameters:
+# - ENVIRONMENT_NAME: the name of the test environment
+# - VERSION_URL: the url from where the version will be retrieved. Examples:
+#        file://some_path/test_environment/web-dir
+#        http://some_server:port/some_path/test_environment/web-dir
+set_version_url() { # swupd_function
+
+	local env_name=$1
+	local version_url=$2
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    set_version_url <environment_name> <version_url>
+
+			Example:
+			    set_version_url "\$TEST_ENVIRONMENT" http://server:port/path/web-dir
+			EOM
+		return
+	fi
+	validate_path "$env_name"
+	validate_param "$version_url"
+
+	write_to_protected_file "$env_name"/target-dir/usr/share/defaults/swupd/versionurl "$version_url"
+
+}
+
+# sets the url of where the content will be retrieved
+# Parameters:
+# - ENVIRONMENT_NAME: the name of the test environment
+# - VERSION_URL: the url from where the content will be retrieved. Examples:
+#        file://some_path/test_environment/web-dir
+#        http://some_server:port/some_path/test_environment/web-dir
+set_content_url() { # swupd_function
+
+	local env_name=$1
+	local content_url=$2
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    set_content_url <environment_name> <content_url>
+
+			Example:
+			    set_content_url "\$TEST_ENVIRONMENT" http://server:port/path/web-dir
+			EOM
+		return
+	fi
+	validate_path "$env_name"
+	validate_param "$content_url"
+
+	write_to_protected_file "$env_name"/target-dir/usr/share/defaults/swupd/contenturl "$content_url"
+
+}
+
+# sets the url of the default upstream server
+# Parameters:
+# - ENVIRONMENT_NAME: the name of the test environment
+# - URL: the url of the default upstream server
+#   Examples:
+#        file://some_path/test_environment/web-dir
+#        http://some_server:port/some_path/test_environment/web-dir
+set_upstream_server() { # swupd_function
+
+	local env_name=$1
+	local url=$2
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    set_upstream_server <environment_name> <server_url>
+
+			Example:
+			    set_upstream_server "\$TEST_ENVIRONMENT" http://server:port/path/web-dir
+			EOM
+		return
+	fi
+	validate_path "$env_name"
+	validate_param "$url"
+
+	set_version_url "$env_name" "$url"
+	set_content_url "$env_name" "$url"
+
+}
+
 # creates a web server to host fake swupd content with or without certifiates
 start_web_server() { # swupd_function
 
@@ -1499,7 +1585,7 @@ start_web_server() { # swupd_function
 	done
 
 	# start web server and write port/pid numbers to their respective files
-	sudo python3 "$FUNC_DIR"/server.py $server_args --port_file "$PORT_FILE" --pid_file "$SERVER_PID_FILE" &
+	sudo sh -c "python3 $FUNC_DIR/server.py $server_args --port_file $PORT_FILE --pid_file $SERVER_PID_FILE &"
 
 	# make sure localhost is present in no_proxy settings
 	if [ -n "$no_proxy" ] && grep -v 'localhost' <<< "$no_proxy"; then
@@ -1512,7 +1598,7 @@ start_web_server() { # swupd_function
 	# wait for server to be available
 	for i in $(seq 1 100); do
 		if [ -f "$PORT_FILE" ]; then
-			port=$(cat "$PORT_FILE")
+			port=$(get_web_server_port)
 			status=0
 
 			# use https when the server is using certificates
@@ -1537,6 +1623,38 @@ start_web_server() { # swupd_function
 
 		sleep 1
 	done
+
+	print "Web server port: $port"
+	print "Web server PID: $(cat "$SERVER_PID_FILE")"
+
+}
+
+# gets the port used by the web server if found
+get_web_server_port() { # swupd_function
+
+	local env_name=$1
+
+	if [ -z "$PORT_FILE" ] && [ -z "$env_name" ]; then
+		cat <<-EOM
+			Usage:
+		        get_web_server_port [ENV_NAME]
+
+			Note: the ENV_NAME does not need to be specified if the PORT_FILE env
+			      variable is set.
+
+			EOM
+		terminate "No port file was found. Please specify a test environment"
+	fi
+
+	if [ -z "$PORT_FILE" ] && [ -n "$env_name" ]; then
+		PORT_FILE="$env_name/port_file.txt"
+	fi
+
+	if [ ! -e "$PORT_FILE" ]; then
+		terminate "The specified port file was not found"
+	fi
+
+	echo $(cat "$PORT_FILE")
 
 }
 

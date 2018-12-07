@@ -287,8 +287,6 @@ extern int download_subscribed_packs(struct list *subs, struct manifest *mom, bo
 extern void apply_deltas(struct manifest *current_manifest);
 extern int untar_full_download(void *data);
 
-extern struct list *get_dir_files_sorted(char *path);
-
 extern int do_staging(struct file *file, struct manifest *manifest);
 extern int rename_all_files_to_final(struct list *updates);
 extern int rename_staged_file_to_final(struct file *file);

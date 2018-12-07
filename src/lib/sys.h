@@ -45,6 +45,9 @@ int mkdir_p(const char *dir);
 /* Remove a file using /bin/rm -rf */
 int rm_rf(const char *file);
 
+/* Return a list of all files in a directory, sorted lexicographically */
+struct list *get_dir_files_sorted(char *path);
+
 #ifdef __cplusplus
 }
 #endif

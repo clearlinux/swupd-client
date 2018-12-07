@@ -56,3 +56,40 @@ void free_string(char **s)
 		*s = NULL;
 	}
 }
+
+char *string_join(const char *separator, struct list *strings)
+{
+	char *str, *ret;
+	size_t str_size = 1; // 1 for '\0'
+	size_t sep_size, printed;
+	struct list *i;
+
+	if (!separator) {
+		separator = "";
+	}
+	sep_size = strlen(separator);
+
+	for (i = strings; i; i = i->next) {
+		str_size += strlen(i->data);
+		str_size += sep_size;
+	}
+
+	ret = str = malloc(str_size);
+	ON_NULL_ABORT(str);
+	str[0] = '\0';
+
+	for (i = strings; i; i = i->next) {
+		printed = snprintf(str, str_size, "%s%s",
+				   i == strings ? "" : separator, (char *)i->data);
+		if (printed >= str_size) {
+			goto error; //shouldn't happen
+		}
+		str_size -= printed;
+		str += printed;
+	}
+
+	return ret;
+error:
+	free(ret);
+	return NULL;
+}

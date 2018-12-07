@@ -1,6 +1,8 @@
 #ifndef SWUPD_STRINGS_H
 #define SWUPD_STRINGS_H
 
+#include "list.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,6 +19,9 @@ char *strdup_or_die(const char *const str);
 
 /* Free string and set it's value to NULL */
 void free_string(char **s);
+
+/* Join strings from string list separated by the separator */
+char *string_join(const char *separator, struct list *string);
 
 #ifdef __cplusplus
 }

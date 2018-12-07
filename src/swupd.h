@@ -197,6 +197,8 @@ extern char *cert_path;
 extern int update_server_port;
 extern char *default_format_path;
 extern bool set_path_prefix(char *path);
+extern int set_content_url(char *url);
+extern int set_version_url(char *url);
 
 extern void check_root(void);
 extern void increment_retries(int *retries, int *timeout);

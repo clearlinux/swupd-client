@@ -201,7 +201,7 @@ static int set_url(char **global, char *url, const char *path)
  * NULL, content_url will be set to its value. Otherwise, the value is read
  * from the 'contenturl' configuration file.
  */
-static int set_content_url(char *url)
+int set_content_url(char *url)
 {
 	if (content_url) {
 		/* Only set once; we assume the first successful set is the best choice */
@@ -226,7 +226,7 @@ static int set_content_url(char *url)
  * NULL, version_url will be set to its value. Otherwise, the value is read
  * from the 'versionurl' configuration file.
  */
-static int set_version_url(char *url)
+int set_version_url(char *url)
 {
 	if (version_url) {
 		/* Only set once; we assume the first successful set is the best choice */

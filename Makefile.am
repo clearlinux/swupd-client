@@ -21,7 +21,6 @@ swupd_SOURCES = \
 	src/clr_bundle_rm.c \
 	src/curl-internal.h \
 	src/curl.c \
-	src/datatypes.h \
 	src/delta.c \
 	src/download.c \
 	src/extra_files.c \
@@ -30,15 +29,19 @@ swupd_SOURCES = \
 	src/globals.c \
 	src/hash.c \
 	src/hashdump.c \
-	src/hashmap.c \
-	src/hashmap.h \
 	src/helpers.c \
 	src/heuristics.c \
 	src/info.c \
-	src/list.c \
-	src/list.h \
+	src/lib/hashmap.c \
+	src/lib/hashmap.h \
+	src/lib/list.c \
+	src/lib/list.h \
+	src/lib/macros.h \
+	src/lib/strings.c \
+	src/lib/strings.h \
+	src/lib/sys.c \
+	src/lib/sys.h \
 	src/lock.c \
-	src/macros.h \
 	src/main.c \
 	src/manifest.c \
 	src/mirror.c \
@@ -55,7 +58,6 @@ swupd_SOURCES = \
 	src/swupd-error.h \
 	src/swupd-internal.h \
 	src/swupd.h \
-	src/sys.c \
 	src/telemetry.c \
 	src/timelist.c \
 	src/timelist.h \
@@ -278,7 +280,7 @@ compliant:
 	elif [ $$ret -gt 1 ]; then \
 		exit $$ret; \
 	fi; \
-	clang-format -i -style=file src/*.h src/*.c; ret=$$?; \
+	clang-format -i -style=file src/**/*.h src/**/*.c; ret=$$?; \
 	if [ $$ret -ne 0 ]; then \
 		exit $$ret; \
 	fi; \

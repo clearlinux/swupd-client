@@ -11,10 +11,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "list.h"
-#include "macros.h"
+#include "lib/list.h"
+#include "lib/macros.h"
+#include "lib/strings.h"
+#include "lib/sys.h"
 #include "swupd-error.h"
-#include "sys.h"
 #include "timelist.h"
 
 #ifdef __cplusplus
@@ -368,9 +369,6 @@ extern void swupd_deinit(void);
 extern int swupd_init(void);
 extern int strtoi_err(const char *str, int *value);
 extern int strtoi_err_endptr(const char *str, char **endptr, int *value);
-extern void string_or_die(char **strp, const char *fmt, ...);
-char *strdup_or_die(const char *const str);
-extern void free_string(char **s);
 void update_motd(int new_release);
 void delete_motd(void);
 extern int get_dirfd_path(const char *fullname);

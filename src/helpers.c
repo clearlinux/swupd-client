@@ -647,38 +647,6 @@ int strtoi_err(const char *str, int *value)
 	return 0;
 }
 
-/* Return a duplicated copy of the string using strdup().
- * Abort if there's no memory to allocate the new string.
-*/
-char *strdup_or_die(const char *const str)
-{
-	char *result;
-
-	result = strdup(str);
-	ON_NULL_ABORT(result);
-
-	return result;
-}
-
-void string_or_die(char **strp, const char *fmt, ...)
-{
-	va_list ap;
-
-	va_start(ap, fmt);
-	if (vasprintf(strp, fmt, ap) < 0) {
-		abort();
-	}
-	va_end(ap);
-}
-
-void free_string(char **s)
-{
-	if (s) {
-		free(*s);
-		*s = NULL;
-	}
-}
-
 void update_motd(int new_release)
 {
 	FILE *motd_fp = NULL;

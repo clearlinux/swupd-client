@@ -5,7 +5,8 @@
 extern "C" {
 #endif
 
-extern long get_available_space(const char *path);
+/* Return the free available space in the partition mounted in path */
+long get_available_space(const char *path);
 
 /* run_command_quiet: runs a command redirecting the standard and error outputs
  * redirected to /dev/null. */
@@ -38,8 +39,10 @@ int copy_all(const char *src, const char *dst);
 /* copy: Runs cp [src] [dst] using run_command_quiet */
 int copy(const char *src, const char *dst);
 
+/* Recursively create a directory and its parent dirs. */
 int mkdir_p(const char *dir);
 
+/* Remove a file using /bin/rm -rf */
 int rm_rf(const char *file);
 
 #ifdef __cplusplus

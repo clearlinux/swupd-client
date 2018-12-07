@@ -29,7 +29,7 @@
 
 #include "list.h"
 #include "macros.h"
-#include "swupd.h"
+#include "strings.h"
 
 static struct list *list_append_item(struct list *list, struct list *item)
 {

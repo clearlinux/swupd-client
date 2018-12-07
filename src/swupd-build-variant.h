@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 #include "config.h"
-#include "list.h"
+#include "lib/list.h"
 #include "swupd.h"
 
 #ifdef SWUPD_WITH_BSDTAR

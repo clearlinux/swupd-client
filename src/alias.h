@@ -1,7 +1,7 @@
 #ifndef __ALIAS__
 #define __ALIAS__
 
-#include "list.h"
+#include "lib/list.h"
 
 struct alias_lookup {
 	char *alias;

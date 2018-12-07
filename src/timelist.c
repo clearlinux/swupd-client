@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "macros.h"
+#include "memory.h"
 #include "swupd.h"
 #include "timelist.h"
 

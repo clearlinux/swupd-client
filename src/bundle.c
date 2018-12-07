@@ -1070,43 +1070,26 @@ int install_bundles_frontend(char **bundles)
 	aliases = get_alias_definitions();
 	for (; *bundles; ++bundles) {
 		struct list *alias_bundles = get_alias_bundles(aliases, *bundles);
-		struct list *iter = alias_bundles;
-		char *alias_list_str = NULL;
-		char *btmp = bundles_list_str;
-		while (iter) {
-			char *b = iter->data;
-			iter = iter->next;
-			char *tmp = alias_list_str;
-			if (alias_list_str) {
-				string_or_die(&alias_list_str, "%s, %s", alias_list_str, b);
-			} else {
-				string_or_die(&alias_list_str, "%s", b);
-			}
-			free_string(&tmp);
-		}
+		char *alias_list_str = string_join(", ", alias_bundles);
+
 		if (strcmp(*bundles, alias_list_str) != 0) {
 			fprintf(stderr, "Alias %s will install bundle(s): %s\n", *bundles, alias_list_str);
 		}
-		if (bundles_list_str) {
-			string_or_die(&bundles_list_str, "%s, %s", bundles_list_str, alias_list_str);
-		} else {
-			string_or_die(&bundles_list_str, "%s", alias_list_str);
-		}
 		free_string(&alias_list_str);
-		free_string(&btmp);
 		bundles_list = list_concat(alias_bundles, bundles_list);
 	}
+	list_free_list_and_data(aliases, free_alias_lookup);
+
 	timelist_timer_stop(global_times); // closing: Prepend bundles to list
 	timelist_timer_start(global_times, "Install bundles");
 	ret = install_bundles(bundles_list, &subs, mom);
-	list_free_list_and_data(bundles_list, free);
-	list_free_list_and_data(aliases, free_alias_lookup);
 	timelist_timer_stop(global_times); // closing: Install bundles
 
 	timelist_print_stats(global_times);
 
 	free_manifest(mom);
 clean_and_exit:
+	bundles_list_str = string_join(", ", bundles_list);
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
 		  "bundleadd",
 		  "bundles=%s\n"
@@ -1116,6 +1099,7 @@ clean_and_exit:
 		  current_version,
 		  ret);
 
+	list_free_list_and_data(bundles_list, free);
 	free_string(&bundles_list_str);
 	free_subscriptions(&subs);
 	swupd_deinit();

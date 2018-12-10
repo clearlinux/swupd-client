@@ -2609,6 +2609,9 @@ global_env=false
 
 setup() {
 
+	print "\n$sep"
+	print "$alt_sep"
+	print "$sep"
 	# a global environment will always use number 1, so check for that
 	# environment first
 	if [ -d "$TEST_NAME"_1 ]; then
@@ -2649,6 +2652,7 @@ setup() {
 		set_env_variables "$TEST_NAME"
 	fi
 	test_setup
+	print "Test setup complete. Starting test execution..."
 
 }
 
@@ -2663,6 +2667,7 @@ teardown() {
 	if [ "$BATS_TEST_NUMBER" -eq "${#BATS_TEST_NAMES[@]}" ]; then
 		global_teardown
 	fi
+	print "Test teardown complete."
 
 }
 
@@ -2699,6 +2704,7 @@ test_teardown() {
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 sep="------------------------------------------------------------------"
+alt_sep="++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
 print_assert_failure() {
 

@@ -28,6 +28,11 @@ global_setup() {
 	create_trusted_cacert "$server_pub"
 
 	start_web_server -c "$client_pub" -p "$server_pub" -k "$server_key"
+
+	# Set the web server as our upstream server
+	port=$(get_web_server_port "$TEST_NAME")
+	set_upstream_server "$TEST_NAME" "https://localhost:$port/$TEST_NAME/web-dir"
+
 }
 
 test_setup() {
@@ -63,7 +68,7 @@ global_teardown() {
 
 @test "VER013: Verify installed content on a system over HTTPS with a valid client certificate" {
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS_HTTPS"
+	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
 
 	assert_status_is 0
 }
@@ -73,7 +78,7 @@ global_teardown() {
 	# remove client certificate
 	sudo rm "$CLIENT_CERT"
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS_HTTPS"
+	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
 	assert_status_is "$ECURL_INIT"
 
 	expected_output=$(cat <<-EOM
@@ -88,7 +93,7 @@ global_teardown() {
 	# make client certificate invalid
 	sudo sh -c "echo foo > $CLIENT_CERT"
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS_HTTPS"
+	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
 	assert_status_is "$ECURL_INIT"
 
 	expected_output=$(cat <<-EOM

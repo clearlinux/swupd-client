@@ -17,7 +17,9 @@ global_setup() {
 	fi
 
 	create_test_environment "$TEST_NAME"
-	create_test_environment "$TEST_NAME" 100
+	create_version "$TEST_NAME" 100 10
+
+	create_bundle -n test-bundle -f /usr/bin/test-file "$TEST_NAME"
 
 	sudo mkdir -p "$CLIENT_CERT_DIR"
 
@@ -29,6 +31,11 @@ global_setup() {
 	create_trusted_cacert "$server_pub"
 
 	start_web_server -c "$client_pub" -p "$server_pub" -k "$server_key"
+
+	# Set the web server as our upstream server
+	port=$(get_web_server_port "$TEST_NAME")
+	set_upstream_server "$TEST_NAME" "https://localhost:$port/$TEST_NAME/web-dir"
+
 }
 
 test_setup() {
@@ -66,21 +73,17 @@ global_teardown() {
 
 @test "CHK006: Check for available updates over HTTPS with a valid client certificate" {
 
-	opts="-S $TEST_DIRNAME/state -p $TEST_DIRNAME/target-dir -F staging -u https://localhost:$PORT/$TEST_NAME/web-dir -I"
-
-	run sudo sh -c "$SWUPD check-update $opts"
+	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
 
 	assert_status_is 0
 }
 
 @test "CHK007: Try checking for available updates over HTTPS with no client certificate" {
 
-	opts="-S $TEST_DIRNAME/state -p $TEST_DIRNAME/target-dir -F staging -u https://localhost:$PORT/$TEST_NAME/web-dir -I"
-
 	# remove client certificate
 	sudo rm "$CLIENT_CERT"
 
-	run sudo sh -c "$SWUPD check-update $opts"
+	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
 	assert_status_is "$ENOSWUPDSERVER"
 
 	expected_output=$(cat <<-EOM
@@ -92,12 +95,10 @@ global_teardown() {
 
 @test "CHK008: Try checking for available updates over HTTPS with an invalid client certificate" {
 
-	opts="-S $TEST_DIRNAME/state -p $TEST_DIRNAME/target-dir -F staging -u https://localhost:$PORT/$TEST_NAME/web-dir -I"
-
 	# make client certificate invalid
 	sudo sh -c "echo foo > $CLIENT_CERT"
 
-	run sudo sh -c "$SWUPD check-update $opts"
+	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
 	assert_status_is "$ENOSWUPDSERVER"
 
 	expected_output=$(cat <<-EOM

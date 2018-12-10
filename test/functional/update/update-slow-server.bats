@@ -2,8 +2,7 @@
 
 load "../testlib"
 
-global_setup() {
-
+test_setup() {
 	# Skip this test if not running in Travis CI, because test takes too long for
 	# local development. To run this locally do: TRAVIS=true make check
 	if [ -z "${TRAVIS}" ]; then
@@ -15,18 +14,14 @@ global_setup() {
 	update_bundle "$TEST_NAME" test-bundle --update /foo/bar
 
 	start_web_server -d pack-test-bundle-from-10.tar -s
-}
 
-test_setup() {
-	return
+	# Set the web server as our upstream server
+	port=$(get_web_server_port "$TEST_NAME")
+	set_upstream_server "$TEST_NAME" "http://localhost:$port/$TEST_NAME/web-dir"
+
 }
 
 test_teardown() {
-	return
-}
-
-global_teardown() {
-
 	# teardown only if in travis CI
 	if [ -n "${TRAVIS}" ]; then
 		destroy_test_environment "$TEST_NAME"
@@ -36,7 +31,7 @@ global_teardown() {
 
 @test "UPD025: Updating a system using a slow server" {
 
-	run sudo sh -c "$SWUPD update $SWUPD_OPTS_HTTP"
+	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM

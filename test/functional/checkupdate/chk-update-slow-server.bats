@@ -2,33 +2,28 @@
 
 load "../testlib"
 
-global_setup() {
+test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_version "$TEST_NAME" 99990 10 staging
 
 	# start slow response web server
 	start_web_server -s
-}
 
-test_setup() {
+	# Set the web server as our upstream server
+	port=$(get_web_server_port "$TEST_NAME")
+	set_upstream_server "$TEST_NAME" "http://localhost:$port/$TEST_NAME/web-dir"
 
-	return
 }
 
 test_teardown() {
-
-	return
-}
-
-global_teardown() {
 
 	destroy_test_environment "$TEST_NAME"
 }
 
 @test "CHK003: Check for available updates with a slow server" {
 
-	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS_HTTP"
+	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Current OS version: 10

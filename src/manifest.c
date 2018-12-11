@@ -278,6 +278,8 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 			file->is_deleted = 1;
 			file->is_ghosted = 1;
 			deleted++;
+		} else if (c[1] == 'e') {
+			file->is_experimental = 1;
 		} else if (c[1] != '.') { /* unknown modifier #1 */
 			free(file);
 			goto err;
@@ -299,8 +301,6 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		} else if (c[3] == 'm') {
 			file->is_mix = 1;
 			manifest->is_mix = 1;
-		} else if (c[3] == 'e') {
-			file->is_experimental = 1;
 		} else if (c[3] != '.') { /* unknown modifier #3 */
 			free(file);
 			goto err;

@@ -688,7 +688,7 @@ add_to_manifest() { # swupd_function
 	fi
 	sudo sed -i "s/^contentsize:.*/contentsize:\\t$contentsize/" "$manifest"
 	# add to manifest content
-	write_to_protected_file -a "$manifest" "$item_type.$boot_type$experimental\\t$name\\t$version\\t$item_path\\n"
+	write_to_protected_file -a "$manifest" "$item_type$experimental$boot_type.\\t$name\\t$version\\t$item_path\\n"
 	# If a manifest tar already exists for that manifest, renew the manifest tar unless specified otherwise
 	if [ "$partial" = false ]; then
 		retar_manifest "$manifest"

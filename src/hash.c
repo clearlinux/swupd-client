@@ -222,7 +222,7 @@ int compute_hash(struct file *file, char *filename)
 
 bool verify_file(struct file *file, char *filename)
 {
-	struct file local = {};
+	struct file local = { 0 };
 
 	local.filename = file->filename;
 	/*
@@ -245,7 +245,7 @@ bool verify_file(struct file *file, char *filename)
 
 bool verify_file_lazy(char *filename)
 {
-	struct file local = {};
+	struct file local = { 0 };
 
 	if (compute_hash_lazy(&local, filename) != 0) {
 		return false;

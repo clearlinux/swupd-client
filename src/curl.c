@@ -91,11 +91,34 @@ exit:
 	return curl_ret;
 }
 
+static CURLcode swupd_curl_set_timeouts(CURL *curl)
+{
+	CURLcode curl_ret;
+
+	curl_ret = curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, SWUPD_CURL_CONNECT_TIMEOUT);
+	if (curl_ret != CURLE_OK) {
+		goto exit;
+	}
+
+	curl_ret = curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, SWUPD_CURL_LOW_SPEED_LIMIT);
+	if (curl_ret != CURLE_OK) {
+		goto exit;
+	}
+
+	curl_ret = curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, SWUPD_CURL_RCV_TIMEOUT);
+	if (curl_ret != CURLE_OK) {
+		goto exit;
+	}
+
+exit:
+	return curl_ret;
+}
+
 static int check_connection(const char *test_capath)
 {
 	CURLcode curl_ret;
 
-	curl_ret = curl_easy_setopt(curl, CURLOPT_URL, version_url);
+	curl_ret = swupd_curl_set_basic_options(curl, version_url);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
@@ -111,10 +134,6 @@ static int check_connection(const char *test_capath)
 			return -1;
 		}
 	}
-	curl_ret = swupd_curl_set_optional_client_cert(curl);
-	if (curl_ret != CURLE_OK) {
-		return -1;
-	}
 
 	curl_ret = curl_easy_perform(curl);
 
@@ -127,6 +146,8 @@ static int check_connection(const char *test_capath)
 	case CURLE_SSL_CERTPROBLEM:
 		fprintf(stderr, "Warning: Problem with the local client SSL certificate\n");
 		return -EBADCERT;
+	case CURLE_OPERATION_TIMEDOUT:
+		return -CURLE_OPERATION_TIMEDOUT;
 	default:
 		swupd_curl_strerror(curl_ret);
 		/* something bad, stop */
@@ -159,6 +180,9 @@ int swupd_curl_init(void)
 	ret = check_connection(NULL);
 	if (ret == 0) {
 		return 0;
+	} else if (ret == -CURLE_OPERATION_TIMEDOUT) {
+		fprintf(stderr, "Error: Communicating with server timed out.\n");
+		return -1;
 	}
 
 	if (FALLBACK_CAPATHS[0]) {
@@ -589,17 +613,7 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url)
 		}
 	}
 
-	curl_ret = curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, SWUPD_CURL_CONNECT_TIMEOUT);
-	if (curl_ret != CURLE_OK) {
-		goto exit;
-	}
-
-	curl_ret = curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, SWUPD_CURL_LOW_SPEED_LIMIT);
-	if (curl_ret != CURLE_OK) {
-		goto exit;
-	}
-
-	curl_ret = curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, SWUPD_CURL_RCV_TIMEOUT);
+	curl_ret = swupd_curl_set_timeouts(curl);
 	if (curl_ret != CURLE_OK) {
 		goto exit;
 	}

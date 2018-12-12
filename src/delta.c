@@ -41,7 +41,7 @@
 static bool compute_hash_from_file(char *filename, char *hash)
 {
 	/* TODO: implement this without the indirection of creating a file... */
-	struct file f = {};
+	struct file f = { 0 };
 
 	f.filename = filename;
 	f.use_xattrs = true;
@@ -135,8 +135,8 @@ void apply_deltas(struct manifest *current_manifest)
 		char *delta_file;
 		string_or_die(&delta_file, "%s/%s", delta_dir, delta_name);
 
-		char from[SWUPD_HASH_LEN] = {};
-		char to[SWUPD_HASH_LEN] = {};
+		char from[SWUPD_HASH_LEN] = { 0 };
+		char to[SWUPD_HASH_LEN] = { 0 };
 		if (!check_delta_filename(delta_name, &from[0], &to[0])) {
 			fprintf(stderr, "Invalid name for delta file: %s\n", delta_file);
 			goto next;

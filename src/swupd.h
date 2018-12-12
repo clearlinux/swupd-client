@@ -253,32 +253,32 @@ static inline void account_deleted_file(void)
 static inline void account_changed_file(void)
 {
 	swupd_stats[2]++;
-};
+}
 
 static inline void account_new_bundle(void)
 {
 	swupd_stats[3]++;
-};
+}
 
 static inline void account_deleted_bundle(void)
 {
 	swupd_stats[4]++;
-};
+}
 
 static inline void account_changed_bundle(void)
 {
 	swupd_stats[5]++;
-};
+}
 
 static inline void account_delta_hit(void)
 {
 	swupd_stats[6]++;
-};
+}
 
 static inline void account_delta_miss(void)
 {
 	swupd_stats[7]++;
-};
+}
 
 extern void print_statistics(int version1, int version2);
 

@@ -648,6 +648,8 @@ static bool global_parse_opt(int opt, char *optarg)
 			return false;
 		}
 		return true;
+	default:
+		return false;
 	}
 
 	return false;
@@ -659,6 +661,8 @@ static bool global_parse_deprecated(int opt, char *optarg)
 	case 'D':
 		fprintf(stderr, "Deprecated option -D was renamed. Prefer using -W or --max-parallel-downloads.\n\n");
 		return global_parse_opt('W', optarg);
+	default:
+		return false;
 	}
 
 	return false;

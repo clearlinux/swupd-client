@@ -555,6 +555,8 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		cmdline_option_picky_whitelist = optarg;
 		return true;
+	default:
+		return false;
 	}
 	return false;
 }

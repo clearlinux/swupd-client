@@ -26,7 +26,6 @@ cscope.*
 data/check-update.service
 data/swupd-update.service
 docs/*.html
-docs/swupd-alias.7.rst
 depcomp
 functional-tests.log
 fuzzout/

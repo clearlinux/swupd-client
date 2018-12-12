@@ -230,11 +230,8 @@ if __name__ == "__main__":
         # since this is going to change the working directory for python
         # it needs to be run in the end so it does not affect other variables
         # that were based on the original path
-        directory = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            args.directory)
         # change the current working dir to that one we want to serve
-        os.chdir(directory)
+        os.chdir(args.directory)
 
     try:
         httpd.serve_forever()

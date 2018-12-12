@@ -185,6 +185,7 @@ BATS = \
 	test/functional/update/update-newest-added.bats \
 	test/functional/update/update-newest-deleted.bats \
 	test/functional/update/update-newest-ghosted.bats \
+	test/functional/update/update-non-responsive.bats \
 	test/functional/update/update-older-server-version.bats \
 	test/functional/update/update-rename.bats \
 	test/functional/update/update-rename-ghosted.bats \

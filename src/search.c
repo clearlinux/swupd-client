@@ -419,6 +419,8 @@ static bool parse_opt(int opt, char *optarg)
 	case 'd':
 		display_files = true;
 		return true;
+	default:
+		return false;
 	}
 	return false;
 }

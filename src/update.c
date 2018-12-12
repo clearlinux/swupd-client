@@ -630,6 +630,8 @@ static bool parse_opt(int opt, char *optarg)
 	case 'k':
 		keepcache = true;
 		return true;
+	default:
+		return false;
 	}
 
 	return false;

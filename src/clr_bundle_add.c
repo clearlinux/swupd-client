@@ -63,6 +63,8 @@ static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 		fprintf(stderr, "Error: [-l, --list] option is deprecated, use\n"
 				"bundle-list [-a|--all] sub-command instead.\n\n");
 		exit(EXIT_FAILURE);
+	default:
+		return false;
 	}
 	return false;
 }

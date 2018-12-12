@@ -90,6 +90,8 @@ static bool parse_opt(int opt, char *optarg)
 		atexit(free_deps);
 		cmdline_local = false;
 		return true;
+	default:
+		return false;
 	}
 	return false;
 }

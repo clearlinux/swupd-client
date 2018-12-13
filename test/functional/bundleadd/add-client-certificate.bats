@@ -85,7 +85,7 @@ global_teardown() {
 	assert_status_is "$ECURL_INIT"
 
 	expected_output=$(cat <<-EOM
-			Error: unable to verify server SSL certificate
+			Warning: Unable to verify server SSL certificate
 	EOM
 	)
 	assert_in_output "$expected_output"
@@ -100,7 +100,7 @@ global_teardown() {
 	assert_status_is "$ECURL_INIT"
 
 	expected_output=$(cat <<-EOM
-			Curl: Problem with the local client SSL certificate
+			Warning: Problem with the local client SSL certificate
 	EOM
 	)
 	assert_in_output "$expected_output"

@@ -122,10 +122,10 @@ static int check_connection(const char *test_capath)
 	case CURLE_OK:
 		return 0;
 	case CURLE_SSL_CACERT:
-		fprintf(stderr, "Error: unable to verify server SSL certificate\n");
+		fprintf(stderr, "Warning: Unable to verify server SSL certificate\n");
 		return -EBADCERT;
 	case CURLE_SSL_CERTPROBLEM:
-		fprintf(stderr, "Curl: Problem with the local client SSL certificate\n");
+		fprintf(stderr, "Warning: Problem with the local client SSL certificate\n");
 		return -EBADCERT;
 	default:
 		swupd_curl_strerror(curl_ret);
@@ -171,6 +171,7 @@ int swupd_curl_init(void)
 				continue;
 			}
 
+			fprintf(stderr, "Trying fallback CA path %s\n", tok);
 			ret = check_connection(tok);
 			if (ret == 0) {
 				capath = strdup_or_die(tok);

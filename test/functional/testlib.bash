@@ -336,23 +336,30 @@ create_dir() { # swupd_function
 
 # Generates a file with a hashed name in the specified path
 # Parameters:
-# - PATH: the path where the file will be created    
+# - PATH: the path where the file will be created
+# - SIZE: the size of the file (in bytes), if nothing is specified the size
+#         will be random but fairly small
 create_file() { # swupd_function
  
 	local path=$1
+	local size=$2
 	local hashed_name
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    create_file <path>
+			    create_file <path> [size in bytes]
 			EOM
 		return
 	fi
 	validate_path "$path"
 
-	generate_random_content | sudo tee "$path/testfile" > /dev/null
+	if [ -n "$size" ]; then
+		head -c "$size" /dev/urandom | sudo tee "$path/testfile" > /dev/null
+	else
+		generate_random_content | sudo tee "$path/testfile" > /dev/null
+	fi
 	hashed_name=$(sudo "$SWUPD" hashdump "$path"/testfile 2> /dev/null)
 	sudo mv "$path"/testfile "$path"/"$hashed_name"
 	# since tar is all we use, create a tar for the new file

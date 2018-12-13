@@ -2320,6 +2320,8 @@ generate_test() { # swupd_function
 	local name=$1
 	local path
 	local id
+	local git_name
+	local git_email
 
 	# If no parameters are received show usage
 	usage () {
@@ -2345,11 +2347,19 @@ generate_test() { # swupd_function
 	if [ $? == 1 ]; then
 		id="<test ID>"
 	fi
+	git_name=$(git config -l | grep user.name | sed 's/user.name=//')
+	if [ -z "$git_name" ]; then
+		git_name="<author name>"
+	fi
+	git_email=$(git config -l | grep user.email | sed 's/user.email=//')
+	if [ -z "$git_email" ]; then
+		git_email="<author email>"
+	fi
 
 	{
 		printf '#!/usr/bin/env bats\n\n'
-		printf '# Author: <author name>\n'
-		printf '# Email: <author email>\n\n'
+		printf '# Author: %s\n' "$git_name"
+		printf '# Email: %s\n\n' "$git_email"
 		printf 'load "../testlib"\n\n'
 		printf 'global_setup() {\n\n'
 		printf '\t# global setup\n\n'

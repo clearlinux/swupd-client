@@ -345,6 +345,9 @@ load_current_mom:
 		goto clean_exit;
 	}
 
+	/* Backup the original manifests */
+	current_manifests = current_manifest->manifests;
+
 	/*  Reset the retries and timeout for subsequent download calls */
 	retries = 0;
 	timeout = 10;
@@ -364,6 +367,9 @@ load_server_mom:
 		goto clean_exit;
 	}
 
+	/* Backup the original manifests */
+	server_manifests = server_manifest->manifests;
+
 	retries = 0;
 	timeout = 10;
 
@@ -372,10 +378,6 @@ load_server_mom:
 	if (server_manifest->minversion > 0) {
 		current_manifest->use_delta_manifest = true;
 	}
-
-	/* Backup the original manifests */
-	current_manifests = current_manifest->manifests;
-	server_manifests = server_manifest->manifests;
 
 	/* Consolidate the list of manifests in the server so there is only one manifest per bundle,
 	 * the manifest should be an iterative preferable if applicable, else use full manifest */

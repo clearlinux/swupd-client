@@ -206,6 +206,7 @@ int filter_update_subscriptions(struct manifest *server_manifest, struct list *c
 		if (manifests == NULL) {
 			fprintf(stderr, "Warning: Subscribed bundle %s removed from server MoM\n", sub->component);
 			ret = -add_sub_BADNAME;
+			subs = free_bundle(subs);
 		}
 	}
 	return ret;

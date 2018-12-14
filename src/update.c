@@ -220,6 +220,7 @@ static int main_update()
 	bool mix_exists;
 	bool re_update = false;
 	bool versions_match = false;
+	char *mixin_verfile = NULL;
 
 	srand(time(NULL));
 
@@ -269,6 +270,15 @@ version_check:
 				fprintf(verfile, "%d", server_version);
 				fclose(verfile);
 			}
+
+			/* The .valid-mix file contains the mixin version. When updating
+			 * to a new upstream version, erase this file so that mixin can
+			 * recreate it with a version based on the new upstream. */
+			string_or_die(&mixin_verfile, "%s/%s", MIX_DIR, ".valid-mix");
+			if (remove(mixin_verfile)) {
+				fprintf(stderr, "ERROR: Unable to remove %s\n", mixin_verfile);
+			}
+			free_string(&mixin_verfile);
 
 			if (run_command("/usr/bin/mixin"
 					"build",

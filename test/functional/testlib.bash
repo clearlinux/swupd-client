@@ -175,7 +175,13 @@ print() { # swupd_function
 	fi
 
 	local msg=$1
-	echo -e "$msg" >&3
+	# if file descriptor 3 is not available (for example when sourcing the library
+	# from the command line) use std output instead
+	if { >&3; } 2> /dev/null; then
+		echo -e "$msg" >&3
+	else
+		echo -e "$msg"
+	fi
 
 }
 

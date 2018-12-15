@@ -1635,9 +1635,9 @@ start_web_server() { # swupd_function
 				# to avoid hanging the server while testing for the connection to be ready
 				# when the -H (hang server) option is set, we need to use the special url
 				# "/test-connection"
-				curl https://localhost:"$port"/test-connection || status=$?
+				curl https://localhost:"$port"/test-connection > /dev/null --silent || status=$?
 			else
-				curl http://localhost:"$port"/test-connection || status=$?
+				curl http://localhost:"$port"/test-connection > /dev/null --silent || status=$?
 			fi
 
 			# the web server is ready for connections when 0 or 60 is returned. When using

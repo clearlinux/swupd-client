@@ -230,6 +230,15 @@ validate_param() {
 
 }
 
+validate_number() {
+
+	local param=$1
+	if ! [[ $param =~ ^[0-9]+([.][0-9]+)?$ ]] ; then
+		terminate "Bad parameter provided, expecting a number"
+	fi
+
+}
+
 # Writes to a file that is owned by root
 # Parameters:
 # - "-a": if set, the text will be appeneded to the file,
@@ -264,6 +273,7 @@ set_env_variables() { # swupd_function
 
 	local env_name=$1
 	local path
+	local testfs_path
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
@@ -274,19 +284,25 @@ set_env_variables() { # swupd_function
 	fi
 	validate_path "$env_name"
 	path=$(dirname "$(realpath "$env_name")")
+	testfs_path="$path"/"$env_name"/testfs
+
+	export TEST_DIRNAME="$path"/"$env_name"
+	export WEBDIR="$env_name"/web-dir
+	export TARGETDIR="$env_name"/testfs/target-dir
+	export STATEDIR="$env_name"/testfs/state
 
 	# different options for swupd
-	export SWUPD_OPTS="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging -C $FUNC_DIR/Swupd_Root.pem -I"
+	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $FUNC_DIR/Swupd_Root.pem -I"
 	export SWUPD_OPTS_KEEPCACHE="$SWUPD_OPTS --keepcache"
-	export SWUPD_OPTS_NO_CERT="-S $path/$env_name/state -p $path/$env_name/target-dir -F staging"
-	export SWUPD_OPTS_MIRROR="-p $path/$env_name/target-dir"
-	export SWUPD_OPTS_NO_FMT="-S $path/$env_name/state -p $path/$env_name/target-dir -C $FUNC_DIR/Swupd_Root.pem -I"
+	export SWUPD_OPTS_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -F staging"
+	export SWUPD_OPTS_MIRROR="-p $testfs_path/target-dir"
+	export SWUPD_OPTS_NO_FMT="-S $testfs_path/state -p $testfs_path/target-dir -C $FUNC_DIR/Swupd_Root.pem -I"
 
-	export CLIENT_CERT_DIR="$TEST_NAME/target-dir/etc/swupd"
+	export CLIENT_CERT_DIR="$testfs_path/target-dir/etc/swupd"
 	export CLIENT_CERT="$CLIENT_CERT_DIR/client.pem"
 	export CACERT_DIR="$SWUPD_DIR/swupd_test_certificates" # trusted key store path
-	export PORT_FILE="$TEST_NAME/port_file.txt" # stores web server port
-	export SERVER_PID_FILE="$TEST_NAME/pid_file.txt" # stores web server pid
+	export PORT_FILE="$path/$env_name/port_file.txt" # stores web server port
+	export SERVER_PID_FILE="$path/$env_name/pid_file.txt" # stores web server pid
 
 	# Add environment variables for PORT and SERVER_PID when web server used
 	if [ -f "$PORT_FILE" ]; then
@@ -297,11 +313,6 @@ set_env_variables() { # swupd_function
 	if [ -f "$SERVER_PID_FILE" ]; then
 		export SERVER_PID=$(cat "$SERVER_PID_FILE")
 	fi
-
-	export TEST_DIRNAME="$path"/"$env_name"
-	export WEBDIR="$env_name"/web-dir
-	export TARGETDIR="$env_name"/target-dir
-	export STATEDIR="$env_name"/state
 
 }
 
@@ -362,7 +373,7 @@ create_file() { # swupd_function
 	validate_path "$path"
 
 	if [ -n "$size" ]; then
-		head -c "$size" /dev/urandom | sudo tee "$path/testfile" > /dev/null
+		< /dev/urandom tr -dc 'a-zA-Z0-9-_!@#$%^&*()_+{}|:<>?=' | head -c "$size" | sudo tee "$path/testfile" > /dev/null
 	else
 		generate_random_content | sudo tee "$path/testfile" > /dev/null
 	fi
@@ -1141,7 +1152,7 @@ set_current_version() { # swupd_function
 	fi
 	validate_path "$env_name"
 
-	sudo sed -i "s/VERSION_ID=.*/VERSION_ID=$new_version/" "$env_name"/target-dir/usr/lib/os-release
+	sudo sed -i "s/VERSION_ID=.*/VERSION_ID=$new_version/" "$env_name"/testfs/target-dir/usr/lib/os-release
 
 }
 
@@ -1309,19 +1320,10 @@ create_version() { # swupd_function
 # - FORMAT: the format number to use initially in the environment
 create_test_environment() { # swupd_function
 
-	local empty=false
-	local release_files=false
-	[ "$1" = "-e" ] && { empty=true ; shift ; }
-	[ "$1" = "-r" ] && { release_files=true ; shift ; }
-	local env_name=$1 
-	local version=${2:-10}
-	local format=${3:-staging}
-	local path
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
+	cte_usage() {
 		cat <<-EOM
 			Usage:
-			    create_test_environment [-e|-r] <environment_name> [initial_version] [format]
+			    create_test_environment [-e|-r] [-s <size in MB>] <environment_name> [initial_version] [format]
 
 			Options:
 			    -e    If set, the test environment is created empty, otherwise it will have
@@ -1329,12 +1331,47 @@ create_test_environment() { # swupd_function
 			    -r    If set, the test environment is created with a more complete version of
 			          the os-core bundle, a version that includes the os-release and format
 			          files, so it is more useful for some tests, like update tests.
+			    -s    If used, specifies the maximum size the test environment has in MB, this
+			          can be useful when testing scenarios bound to the disk size.
 
 			Note: options -e and -r are mutually exclusive, so you can only use one at a time.
-			EOM
+		EOM
+	}
+
+	local OPTIND
+	local opt
+	local empty=false
+	local release_files=false
+	local size=0
+	local path
+	local tagetdir
+	local statedir
+	local fs
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		create_test_environment -h
 		return
 	fi
+
+	while getopts :ers: opt; do
+		case "$opt" in
+			e)	empty=true
+				release_files=false ;;
+			r)	release_files=true
+				empty=false ;;
+			s)	size="$OPTARG" ;;
+			*)	cte_usage
+				return ;;
+		esac
+	done
+	shift $((OPTIND-1))
+
+	local env_name=$1
+	local version=${2:-10}
+	local format=${3:-staging}
 	validate_param "$env_name"
+	validate_number "$size"
 
 	# clean test environment when test interrupted
 	trap "destroy_test_environment $TEST_NAME" INT
@@ -1348,20 +1385,32 @@ create_test_environment() { # swupd_function
 		create_version -p "$env_name" "$version" "0" "$format"
 	fi
 
+	# if a size was selected, create the FS,
+	# if not just use a normal directory
+	if [ "$size" -gt 0 ]; then
+		print "Creating a test file system..."
+		print "Created: $(create_test_fs "$env_name" "$size") ($size MB)"
+		sudo touch "$env_name"/.testfs
+	else
+		sudo mkdir -p "$env_name"/testfs
+	fi
+	targetdir="$env_name"/testfs/target-dir
+	statedir="$env_name"/testfs/state
+
 	# target-dir files & dirs
 	path=$(dirname "$(realpath "$env_name")")
-	sudo mkdir -p "$env_name"/target-dir/usr/lib
-	sudo cp "$env_name"/web-dir/"$version"/os-release "$env_name"/target-dir/usr/lib/os-release
-	sudo mkdir -p "$env_name"/target-dir/usr/share/clear/bundles
-	sudo mkdir -p "$env_name"/target-dir/usr/share/defaults/swupd
-	sudo cp "$env_name"/web-dir/"$version"/format "$env_name"/target-dir/usr/share/defaults/swupd/format
-	write_to_protected_file "$env_name"/target-dir/usr/share/defaults/swupd/versionurl "file://$path/$env_name/web-dir"
-	write_to_protected_file "$env_name"/target-dir/usr/share/defaults/swupd/contenturl "file://$path/$env_name/web-dir"
-	sudo mkdir -p "$env_name"/target-dir/etc/swupd
+	sudo mkdir -p "$targetdir"/usr/lib
+	sudo cp "$env_name"/web-dir/"$version"/os-release "$targetdir"/usr/lib/os-release
+	sudo mkdir -p "$targetdir"/usr/share/clear/bundles
+	sudo mkdir -p "$targetdir"/usr/share/defaults/swupd
+	sudo cp "$env_name"/web-dir/"$version"/format "$targetdir"/usr/share/defaults/swupd/format
+	write_to_protected_file "$targetdir"/usr/share/defaults/swupd/versionurl "file://$path/$env_name/web-dir"
+	write_to_protected_file "$targetdir"/usr/share/defaults/swupd/contenturl "file://$path/$env_name/web-dir"
+	sudo mkdir -p "$targetdir"/etc/swupd
 
 	# state files & dirs
-	sudo mkdir -p "$env_name"/state/{staged,download,delta,telemetry}
-	sudo chmod -R 0700 "$env_name"/state
+	sudo mkdir -p "$statedir"/{staged,download,delta,telemetry}
+	sudo chmod -R 0700 "$statedir"
 
 	# export environment variables that are dependent of the test env
 	set_env_variables "$env_name"
@@ -1420,13 +1469,72 @@ destroy_test_environment() { # swupd_function
 
 	# since the action to be performed is very destructive, at least
 	# make sure the directory does look like a test environment
-	for var in "state" "target-dir" "web-dir"; do
-		if [ ! -d "$env_name/$var" ]; then
+	for var in "testfs" "web-dir"; do
+		if [ ! -d "$env_name"/"$var" ]; then
 			echo "The name provided doesn't seem to be a valid test environment"
 			return 1
 		fi
 	done
+
+	# if a test fs was created, destroy it
+	if [ -e "$env_name"/.testfs ]; then
+		destroy_test_fs "$env_name"
+	fi
+
 	sudo rm -rf "$env_name"
+
+}
+
+# Creates a test fiile system of a given size
+create_test_fs() { # swupd_function
+
+	local env_name=$1
+	local size=$2
+	local fsfile
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    create_test_fs <environment_name> <size_in_MB>
+			EOM
+		return
+	fi
+	validate_path "$env_name"
+	validate_param "$size"
+	fsfile=/tmp/"$env_name"
+
+	# create a file of the appropriate size
+	dd if=/dev/zero of="$fsfile" bs=1M count="$size" >& /dev/null
+	# create loop device and format it
+	sudo losetup -f "$fsfile"
+	mkfs.ext4 "$fsfile" >& /dev/null
+	# mount the fs
+	sudo mkdir "$env_name"/testfs
+	sudo mount "$fsfile" "$env_name"/testfs -o sync
+
+	# return the fs
+	echo "$env_name"/testfs
+
+}
+
+destroy_test_fs() { # swupd_function
+
+	local env_name=$1
+	local fsfile
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    destroy_test_fs <environment_name>
+			EOM
+		return
+	fi
+	validate_path "$env_name"
+	fsfile=/tmp/"$env_name"
+
+	sudo umount "$env_name"/testfs
+	sudo losetup -d "$(losetup -j "$fsfile" -nO NAME)"
+	rm "$fsfile"
 
 }
 
@@ -1455,8 +1563,8 @@ create_mirror() { # swupd_function
 	export MIRROR="$env_name"/mirror/web-dir
 
 	# set the mirror in the target-dir
-	write_to_protected_file "$env_name"/target-dir/etc/swupd/mirror_versionurl "file://$path/$MIRROR"
-	write_to_protected_file "$env_name"/target-dir/etc/swupd/mirror_contenturl "file://$path/$MIRROR"
+	write_to_protected_file "$env_name"/testfs/target-dir/etc/swupd/mirror_versionurl "file://$path/$MIRROR"
+	write_to_protected_file "$env_name"/testfs/target-dir/etc/swupd/mirror_contenturl "file://$path/$MIRROR"
 
 }
 
@@ -1484,7 +1592,7 @@ set_version_url() { # swupd_function
 	validate_path "$env_name"
 	validate_param "$version_url"
 
-	write_to_protected_file "$env_name"/target-dir/usr/share/defaults/swupd/versionurl "$version_url"
+	write_to_protected_file "$env_name"/testfs/target-dir/usr/share/defaults/swupd/versionurl "$version_url"
 
 }
 
@@ -1512,7 +1620,7 @@ set_content_url() { # swupd_function
 	validate_path "$env_name"
 	validate_param "$content_url"
 
-	write_to_protected_file "$env_name"/target-dir/usr/share/defaults/swupd/contenturl "$content_url"
+	write_to_protected_file "$env_name"/testfs/target-dir/usr/share/defaults/swupd/contenturl "$content_url"
 
 }
 
@@ -1819,7 +1927,7 @@ create_bundle() { # swupd_function
 	validate_path "$env_name"
 	version_path="$env_name"/web-dir/"$version"
 	files_path="$version_path"/files
-	target_path="$env_name"/target-dir
+	target_path="$env_name"/testfs/target-dir
 
 	# 1) create the initial manifest
 	manifest=$(create_manifest "$version_path" "$bundle_name")
@@ -1992,7 +2100,7 @@ remove_bundle() { # swupd_function
 		return
 	fi
 
-	target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/target-dir
+	target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir
 	version_path=$(dirname "$bundle_manifest")
 	manifest_file=$(basename "$bundle_manifest")
 	bundle_name=${manifest_file#Manifest.}
@@ -2048,7 +2156,7 @@ install_bundle() { # swupd_function
 		return
 	fi
 	validate_item "$bundle_manifest"
-	target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/target-dir
+	target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir
 	files_path=$(dirname "$bundle_manifest")/files
 	manifest_file=$(basename "$bundle_manifest")
 	bundle_name=${manifest_file#Manifest.}
@@ -2462,9 +2570,9 @@ clean_state_dir() { # swupd_function
 	fi
 	validate_path "$env_name"
 
-	sudo rm -rf "$env_name"/state
-	sudo mkdir -p "$env_name"/state/{staged,download,delta,telemetry}
-	sudo chmod -R 0700 "$env_name"/state
+	sudo rm -rf "$env_name"/testfs/state
+	sudo mkdir -p "$env_name"/testfs/state/{staged,download,delta,telemetry}
+	sudo chmod -R 0700 "$env_name"/testfs/state
 
 }
 
@@ -2698,7 +2806,7 @@ teardown() {
 
 	if [ "$DEBUG_TEST" = true ] && [ "$global_env" = true ] && [ -d "$TEST_NAME" ]; then
 		print "Saving a copy of the state dir in $TEST_NAME/state_$BATS_TEST_NUMBER"
-		sudo cp -r "$TEST_NAME"/state "$TEST_NAME"/state_"$BATS_TEST_NUMBER"
+		sudo cp -r "$TEST_NAME"/testfs/state "$TEST_NAME"/state_"$BATS_TEST_NUMBER"
 	fi
 	test_teardown
 	# if the last test just ran, run the global teardown

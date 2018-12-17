@@ -22,9 +22,9 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
-	assert_file_exists "$TEST_NAME"/target-dir/test-file1
-	assert_file_exists "$TEST_NAME"/target-dir/test-file2
-	assert_file_exists "$TEST_NAME"/target-dir/test-file3
+	assert_file_exists "$TARGETDIR"/test-file1
+	assert_file_exists "$TARGETDIR"/test-file2
+	assert_file_exists "$TARGETDIR"/test-file3
 	expected_output=$(cat <<-EOM
 		Error: bundle requested to be removed is required by the following bundles:
 		format:

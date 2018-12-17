@@ -73,7 +73,7 @@ global_teardown() {
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
 	assert_status_is 0
-	assert_file_exists "$TEST_NAME"/target-dir/usr/bin/test-file
+	assert_file_exists "$TARGETDIR"/usr/bin/test-file
 }
 
 @test "ADD024: Try adding bundle over HTTPS with no client certificate" {

@@ -385,11 +385,13 @@ restart_download:
 		goto exit;
 	}
 
+	debug("CURL - start sync download: %s -> %s\n", url, in_memory_file ? "<memory>" : filename);
 	curl_ret = curl_easy_perform(curl);
 	if (curl_ret == CURLE_OK || curl_ret == CURLE_HTTP_RETURNED_ERROR) {
 		curl_ret = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &ret);
 	}
 
+	debug("CURL - completed sync download: curl ret %d, http response  %d\n", curl_ret, ret);
 exit:
 	if (!in_memory_file) {
 		curl_ret = swupd_download_file_complete(curl_ret, &local);

@@ -258,6 +258,7 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 		}
 		local_download = strncmp(url, "file://", 7) == 0;
 
+		debug("CURL - complete ASYNC download: %s -> %s\n", file->url, file->file.path);
 		/* Get error code from easy handle and augment it if
 		 * completing the download encounters further problems. */
 		curl_ret = swupd_download_file_complete(msg->data.result, &file->file);
@@ -458,6 +459,7 @@ static int process_download(struct swupd_curl_parallel_handle *h, struct multi_c
 		goto out_bad;
 	}
 
+	debug("CURL - start ASYNC download: %s -> %s\n", file->url, file->file.path);
 	curlm_ret = curl_multi_add_handle(h->mcurl, curl);
 	if (curlm_ret != CURLM_OK) {
 		goto out_bad;

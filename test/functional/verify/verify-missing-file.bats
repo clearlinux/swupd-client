@@ -25,8 +25,8 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_file_not_exists "$TEST_NAME"/target-dir/foo/test-file1
-	assert_file_exists "$TEST_NAME"/target-dir/bar/test-file2
+	assert_file_not_exists "$TARGETDIR"/foo/test-file1
+	assert_file_exists "$TARGETDIR"/bar/test-file2
 
 }
 
@@ -52,7 +52,7 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_file_exists "$TEST_NAME"/target-dir/foo/test-file1
-	assert_file_exists "$TEST_NAME"/target-dir/bar/test-file2
+	assert_file_exists "$TARGETDIR"/foo/test-file1
+	assert_file_exists "$TARGETDIR"/bar/test-file2
 
 }

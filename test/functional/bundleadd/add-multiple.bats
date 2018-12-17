@@ -16,10 +16,10 @@ test_setup() {
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle2"
 
 	assert_status_is 0
-	assert_dir_exists "$TEST_NAME/target-dir/usr/bin"
-	assert_dir_exists "$TEST_NAME/target-dir/media/lib"
-	assert_file_exists "$TEST_NAME/target-dir/usr/bin/10"
-	assert_file_exists "$TEST_NAME/target-dir/media/lib/file2"
+	assert_dir_exists "$TARGETDIR/usr/bin"
+	assert_dir_exists "$TARGETDIR/media/lib"
+	assert_file_exists "$TARGETDIR/usr/bin/10"
+	assert_file_exists "$TARGETDIR/media/lib/file2"
 	expected_output=$(cat <<-EOM
 		Downloading packs...
 		Extracting test-bundle1 pack for version 10

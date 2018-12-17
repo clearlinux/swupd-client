@@ -15,6 +15,7 @@
 #include "lib/macros.h"
 #include "lib/strings.h"
 #include "lib/sys.h"
+#include "lib/log.h"
 #include "swupd-error.h"
 #include "timelist.h"
 

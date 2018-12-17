@@ -23,6 +23,7 @@
 #define _GNU_SOURCE
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -148,4 +149,35 @@ void *hashmap_pop(struct hashmap *hashmap, const void *key)
 bool hashmap_contains(struct hashmap *hashmap, const void *key)
 {
 	return hashmap_get_internal(hashmap, key, false) != NULL;
+}
+
+void hashmap_print(struct hashmap *hashmap, void(print_data)(void *data))
+{
+	struct list *l;
+	void *out_data;
+	int i;
+	size_t count = 0;
+
+	if (!hashmap) {
+		return;
+	}
+
+	printf("Hashmap (bits: %x, size: %d)\n", hashmap->mask_bits,
+	       HASH_SIZE(hashmap->mask_bits));
+
+	for (i = 0; i < HASH_SIZE(hashmap->mask_bits); i++) {
+		printf("map[%d] list(%d) {", i, list_len(hashmap->map[i]));
+		for (l = hashmap->map[i], out_data = l ? l->data : NULL;
+		     l && (out_data = l->data); l = l->next) {
+			if (print_data) {
+				print_data(out_data);
+			}
+			count++;
+		}
+		printf("}\n");
+	}
+
+	printf("Total elements: %ld\n", count);
+
+	return;
 }

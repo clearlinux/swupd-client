@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "lib/log.h"
 #include "swupd.h"
 bool allow_mix_collisions = false;
 bool force = false;
@@ -72,6 +73,7 @@ bool content_url_is_local = false;
 char *cert_path = NULL;
 int update_server_port = -1;
 static int max_parallel_downloads = -1;
+static int log_level = LOG_INFO;
 char *swupd_cmd = NULL;
 
 /* If the MIX_BUNDLES_DIR has the valid-mix flag file we can run through
@@ -559,6 +561,8 @@ static const struct option global_opts[] = {
 	{ "time", no_argument, 0, 't' },
 	{ "url", required_argument, 0, 'u' },
 	{ "versionurl", required_argument, 0, 'v' },
+	{ "quiet", no_argument, &log_level, LOG_ERROR },
+	{ "debug", no_argument, &log_level, LOG_DEBUG },
 	//TODO: -D option is deprecated. Remove that on a Major release
 	{ "", required_argument, 0, 'D' },
 	{ 0, 0, 0, 0 }
@@ -756,6 +760,14 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 
 		ret = -1;
 		goto end;
+	}
+
+	set_log_level(log_level);
+	//TODO: Remove this on a major release
+	if (log_level == LOG_ERROR) {
+		print("Experimental option --quiet. Not fully supported yet.\n");
+	} else if (log_level == LOG_DEBUG) {
+		print("Experimental option --debug. Not fully supported yet.\n");
 	}
 
 end:

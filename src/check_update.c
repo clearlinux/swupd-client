@@ -29,6 +29,7 @@
 #include <unistd.h>
 
 #include "swupd.h"
+#include "lib/log.h"
 #include "verifytime.h"
 
 static void print_help(void)

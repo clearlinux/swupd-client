@@ -69,6 +69,12 @@ void hashmap_free_hash_and_data(struct hashmap *hashmap, free_data_fn_t free_dat
  * Hash function helper to calculate a good hash to be used with strings.
  */
 size_t hashmap_hash_from_string(const char *key);
+
+/*
+ * Print a hashmap, for debug purposes.
+ */
+void hashmap_print(struct hashmap *hashmap, void(print_data)(void *data));
+
 /*
  * Loop through all elements in the hashmap.
  *

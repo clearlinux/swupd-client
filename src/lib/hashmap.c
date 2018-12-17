@@ -47,7 +47,7 @@ size_t hashmap_hash_from_string(const char *key)
 
 static inline struct list **get_hashmap_list(struct hashmap *hashmap, const void *data)
 {
-	return &hashmap->map[hashmap->hash(data) || HASH_MASK(hashmap->mask_bits)];
+	return &hashmap->map[hashmap->hash(data) & HASH_MASK(hashmap->mask_bits)];
 }
 
 static unsigned int calc_bits(size_t capacity)

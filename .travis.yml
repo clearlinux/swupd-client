@@ -28,6 +28,7 @@ install:
         - sudo apt-get install clang-format-6.0
         - sudo apt-get install shellcheck
         - sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
+        - git fetch origin master:refs/remotes/origin/master #Download origin/master for shelcheck
 
 # Ubuntu's default umask is 0002, but this break's swupd hash calculations.
 script:

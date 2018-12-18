@@ -302,6 +302,14 @@ compliant:
 # Ignore SC1008 because scripts are using an unsupported shebang
 # TODO: Run shellcheck in testlib after issue #662 is fixed
 shellcheck:
+	for i in $$(git diff --name-only origin/master HEAD | \grep -E "\.bats|\.bash" | \grep -v testlib.bash); do \
+		echo checking "$$i"; \
+		sed 's/^@.*/func() {/' "$$i" | \
+		sed 's/^load.*/source test\/functional\/testlib.bash/' | \
+		shellcheck -s bash -x -e SC1008 /dev/stdin; \
+	done
+
+shellcheck-all:
 	shellcheck -e SC2207 swupd.bash
 	find -name "*.bats" -exec sh -c "\
 		echo checking {}; \

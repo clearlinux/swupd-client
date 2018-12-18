@@ -310,6 +310,66 @@ CURLcode swupd_download_file_complete(CURLcode curl_ret, struct curl_file *file)
 	return curl_ret;
 }
 
+int process_curl_error_codes(int curl_ret, long response, const char *url, const char *filename)
+{
+	if (curl_ret == CURLE_OK) {
+		/* curl command succeeded, download might've failed, let our caller handle */
+		switch (response) {
+		case 200:
+		case 206:
+		case 0:
+			return 0;
+		case 403:
+			return -EPERM;
+		case 404:
+			return -ENOENT;
+		default:
+			return -ECOMM;
+		}
+	} else { /* download failed but let our caller do it */
+		switch (curl_ret) {
+		case CURLE_COULDNT_RESOLVE_PROXY:
+			fprintf(stderr, "Curl: Could not resolve proxy\n");
+			return -1;
+		case CURLE_COULDNT_RESOLVE_HOST:
+			fprintf(stderr, "Curl: Could not resolve host - '%s'\n", url);
+			return -1;
+		case CURLE_COULDNT_CONNECT:
+			fprintf(stderr, "Curl: Could not connect to host or proxy\n");
+			return -ENONET;
+		case CURLE_FILE_COULDNT_READ_FILE:
+			return -ENOENT;
+		case CURLE_PARTIAL_FILE:
+			fprintf(stderr, "Curl: File incompletely downloaded from '%s' to %s''\n",
+				url, filename);
+			return -1;
+		case CURLE_RECV_ERROR:
+			fprintf(stderr, "Curl: Failure receiving data from server\n");
+			return -ENOLINK;
+		case CURLE_WRITE_ERROR:
+			fprintf(stderr, "Curl: Error downloading to local file - %s\n", filename);
+			fprintf(stderr, "Check free space for %s?\n", state_dir);
+			return -EIO;
+		case CURLE_OPERATION_TIMEDOUT:
+			fprintf(stderr, "Curl: Communicating with server timed out.\n");
+			return -ETIMEDOUT;
+		case CURLE_SSL_CACERT_BADFILE:
+			fprintf(stderr, "Curl: Bad SSL Cert file, cannot ensure secure connection\n");
+			return -1;
+		case CURLE_SSL_CERTPROBLEM:
+			fprintf(stderr, "Curl: Problem with the local client SSL certificate\n");
+			return -1;
+		case CURLE_RANGE_ERROR:
+			fprintf(stderr, "Range command not supported by server, download resume disabled.\n");
+			return -ERANGE;
+		default:
+			swupd_curl_strerror(curl_ret);
+			return -1;
+		}
+	}
+	return -1;
+}
+
 /*
  * Download a single file SYNCHRONOUSLY
  *
@@ -328,10 +388,9 @@ static int swupd_curl_get_file_full(const char *url, char *filename,
 	static bool resume_download_supported = true;
 
 	CURLcode curl_ret;
-	long ret = 0;
-	int err = -1;
+	long response = 0;
+	int err;
 	struct curl_file local = { 0 };
-	bool local_download = strncmp(url, "file://", 7) == 0;
 
 	if (!curl) {
 		return -1;
@@ -386,101 +445,23 @@ restart_download:
 
 	curl_ret = curl_easy_perform(curl);
 	if (curl_ret == CURLE_OK || curl_ret == CURLE_HTTP_RETURNED_ERROR) {
-		curl_ret = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &ret);
+		curl_ret = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 	}
 
 exit:
 	if (!in_memory_file) {
 		curl_ret = swupd_download_file_complete(curl_ret, &local);
 	}
-	if (curl_ret == CURLE_OK) {
-		/* curl command succeeded, download might've failed, let our caller handle */
-		switch (ret) {
-		case 200:
-		case 206:
-			err = 0;
-			break;
-		case 0:
-			/* When using the FILE:// protocol, 0 indicates success.
-			 * Otherwise, it means the web server hasn't responded yet.
-			 */
-			if (local_download) {
-				err = 0;
-			} else {
-				err = -ETIMEDOUT;
-			}
-			break;
-		case 403:
-			err = -EACCES;
-			break;
-		case 404:
-			err = -ENET404;
-			break;
-		default:
-			err = -1;
-			break;
-		}
-	} else { /* download failed but let our caller do it */
-		switch (curl_ret) {
-		case CURLE_COULDNT_RESOLVE_PROXY:
-			fprintf(stderr, "Curl: Could not resolve proxy\n");
-			err = -1;
-			break;
-		case CURLE_COULDNT_RESOLVE_HOST:
-			fprintf(stderr, "Curl: Could not resolve host - '%s'\n", url);
-			err = -1;
-			break;
-		case CURLE_COULDNT_CONNECT:
-			fprintf(stderr, "Curl: Could not connect to host or proxy\n");
-			err = -ENONET;
-			break;
-		case CURLE_FILE_COULDNT_READ_FILE:
-			err = -ENOENT;
-			break;
-		case CURLE_PARTIAL_FILE:
-			fprintf(stderr, "Curl: File incompletely downloaded from '%s' to '%s'\n",
-				url, filename);
-			err = -1;
-			break;
-		case CURLE_RECV_ERROR:
-			fprintf(stderr, "Curl: Failure receiving data from server\n");
-			err = -ENOLINK;
-			break;
-		case CURLE_WRITE_ERROR:
-			fprintf(stderr, "Curl: Error downloading to local file - %s\n", filename);
-			fprintf(stderr, "Check free space for %s?\n", state_dir);
-			err = -EIO;
-			break;
-		case CURLE_OPERATION_TIMEDOUT:
-			fprintf(stderr, "Curl: Communicating with server timed out.\n");
-			err = -ETIMEDOUT;
-			break;
-		case CURLE_SSL_CACERT_BADFILE:
-			fprintf(stderr, "Curl: Bad SSL Cert file, cannot ensure secure connection\n");
-			err = -1;
-			break;
-		case CURLE_SSL_CERTPROBLEM:
-			fprintf(stderr, "Curl: Problem with the local client SSL certificate\n");
-			ret = -EBADCERT;
-			break;
-		case CURLE_RANGE_ERROR:
-			fprintf(stderr, "Range command not supported by server, download resume disabled.\n");
 
-			//Reset variables
-			ret = 0;
-			err = -1;
-			memset(&local, 0, sizeof(local));
+	err = process_curl_error_codes(curl_ret, response, url, filename);
+	if (err == -ERANGE) {
+		//Reset variable
+		memset(&local, 0, sizeof(local));
 
-			//Disable download resume
-			resume_download_supported = false;
-			goto restart_download;
-		default:
-			swupd_curl_strerror(curl_ret);
-			err = -1;
-			break;
-		}
+		//Disable download resume
+		resume_download_supported = false;
+		goto restart_download;
 	}
-
 	if (err && !resume_ok) {
 		unlink(filename);
 	}

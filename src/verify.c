@@ -760,7 +760,7 @@ int verify_main(int argc, char **argv)
 
 	set_subscription_versions(official_manifest, NULL, &subs);
 load_submanifests:
-	official_manifest->submanifests = recurse_manifest(official_manifest, subs, NULL, false);
+	official_manifest->submanifests = recurse_manifest(official_manifest, subs, NULL, false, NULL);
 	if (!official_manifest->submanifests) {
 		if (retries < MAX_TRIES) {
 			increment_retries(&retries, &timeout);

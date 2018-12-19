@@ -620,7 +620,7 @@ verify_mom:
  * Note that if the manifest fails to download, or if the manifest fails to be
  * loaded into memory, this function will return NULL.
  */
-struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only)
+struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err)
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
@@ -630,6 +630,9 @@ retry_load:
 	ret = retrieve_manifests(version, file->filename, file->is_mix);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to retrieve %d %s manifest\n", version, file->filename);
+		if (err) {
+			*err = ret;
+		}
 		return NULL;
 	}
 
@@ -643,6 +646,9 @@ retry_load:
 			retried = true;
 			goto retry_load;
 		}
+		if (err) {
+			*err = ESIGNATURE;
+		}
 		return NULL;
 	}
 
@@ -655,6 +661,9 @@ retry_load:
 			goto retry_load;
 		}
 		fprintf(stderr, "Failed to load %d %s manifest\n", version, file->filename);
+		if (err) {
+			*err = EMANIFEST_LOAD;
+		}
 		return NULL;
 	}
 
@@ -888,7 +897,7 @@ void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *su
 
 /* if component is specified explicitly, pull in submanifest only for that
  * if component is not specified, pull in any tracked component submanifest */
-struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server)
+struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server, int *err)
 {
 	struct list *bundles = NULL;
 	struct list *list;
@@ -909,7 +918,7 @@ struct list *recurse_manifest(struct manifest *manifest, struct list *subs, cons
 			continue;
 		}
 
-		sub = load_manifest(file->last_change, file, manifest, false);
+		sub = load_manifest(file->last_change, file, manifest, false, err);
 		if (!sub) {
 			list_free_list_and_data(bundles, free_manifest_data);
 			return NULL;

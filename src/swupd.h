@@ -220,7 +220,7 @@ extern void apply_heuristics(struct file *file);
 extern int file_sort_filename(const void *a, const void *b);
 extern int file_sort_filename_reverse(const void *a, const void *b);
 extern struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err);
-extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only);
+extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err);
 extern struct manifest *load_manifest_full(int version, bool mix);
 extern struct list *create_update_list(struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
@@ -327,7 +327,7 @@ extern int compute_hash(struct file *file, char *filename) __attribute__((warn_u
 /* manifest.c */
 /* Calculate the total contentsize of a manifest list */
 extern long get_manifest_list_contentsize(struct list *manifests);
-extern struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server);
+extern struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server, int *err);
 extern struct list *consolidate_files(struct list *files);
 extern struct list *filter_out_existing_files(struct list *files);
 

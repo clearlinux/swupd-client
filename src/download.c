@@ -100,6 +100,7 @@ struct swupd_curl_parallel_handle {
 struct multi_curl_file {
 	struct curl_file file; /* Curl file information */
 
+	int err;  /* the error code if the file failed to download */
 	char retries;     /* Number of retried performed so far */
 	CURL *curl;       /* curl handle if downloading */
 	char *url;	/* The url to be downloaded from */
@@ -286,12 +287,14 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 
 				if (curl_ret == CURLE_WRITE_ERROR) {
 					fprintf(stderr, "Check free space for %s?\n", state_dir);
+					file->err = CURLE_WRITE_ERROR;
 				}
 
 				//Download resume isn't supported. Disabling it for next try
 				if (curl_ret == CURLE_RANGE_ERROR) {
 					fprintf(stderr, "Range command not supported by server, download resume disabled.\n");
 					h->resume_failed = true;
+					file->err = CURLE_RANGE_ERROR;
 				}
 			}
 		}
@@ -562,7 +565,7 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 		for (l = h->failed; l;) {
 			struct multi_curl_file *file = l->data;
 
-			if (file->retries < MAX_RETRIES) {
+			if (file->retries < MAX_RETRIES && file->err != CURLE_WRITE_ERROR) {
 				struct list *next;
 
 				file->retries++;

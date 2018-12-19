@@ -97,7 +97,7 @@ static int load_bundle_manifest(const char *bundle_name, struct list *subs, int 
 		return EMOM_LOAD;
 	}
 
-	sub_list = recurse_manifest(mom, subs, bundle_name, false);
+	sub_list = recurse_manifest(mom, subs, bundle_name, false, NULL);
 	if (!sub_list) {
 		ret = ERECURSE_MANIFEST;
 		goto free_out;
@@ -236,7 +236,7 @@ int show_included_bundles(char *bundle_name)
 		ret = 1;
 		goto out;
 	}
-	deps = recurse_manifest(mom, subs, NULL, false);
+	deps = recurse_manifest(mom, subs, NULL, false, NULL);
 	if (!deps) {
 		fprintf(stderr, "Error: Cannot load included bundles\n");
 		ret = ERECURSE_MANIFEST;
@@ -339,7 +339,7 @@ int show_bundle_reqd_by(const char *bundle_name, bool server)
 	}
 
 	/* load all submanifests */
-	current_manifest->submanifests = recurse_manifest(current_manifest, subs, NULL, server);
+	current_manifest->submanifests = recurse_manifest(current_manifest, subs, NULL, server, NULL);
 	if (!current_manifest->submanifests) {
 		fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
 		ret = ERECURSE_MANIFEST;
@@ -573,7 +573,7 @@ int remove_bundles(char **bundles)
 		set_subscription_versions(current_mom, NULL, &subs);
 
 		/* load all submanifests minus the one to be removed */
-		current_mom->submanifests = recurse_manifest(current_mom, subs, NULL, false);
+		current_mom->submanifests = recurse_manifest(current_mom, subs, NULL, false, NULL);
 		if (!current_mom->submanifests) {
 			fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
 			ret = ERECURSE_MANIFEST;
@@ -661,6 +661,7 @@ int remove_bundles(char **bundles)
 int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion)
 {
 	char *bundle;
+	int manifest_err;
 	int ret = 0;
 	int retries = 0;
 	int timeout = 10;
@@ -695,9 +696,9 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 		}
 
 	retry_manifest_download:
-		manifest = load_manifest(file->last_change, file, mom, true);
+		manifest = load_manifest(file->last_change, file, mom, true, &manifest_err);
 		if (!manifest) {
-			if (retries < MAX_TRIES && !content_url_is_local) {
+			if (retries < MAX_TRIES && manifest_err != -EIO && !content_url_is_local) {
 				increment_retries(&retries, &timeout);
 				goto retry_manifest_download;
 			}
@@ -779,7 +780,7 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 
 	set_subscription_versions(mom, NULL, subs);
 
-	to_install_bundles = recurse_manifest(mom, *subs, NULL, false);
+	to_install_bundles = recurse_manifest(mom, *subs, NULL, false, NULL);
 	if (!to_install_bundles) {
 		fprintf(stderr, "Error: Cannot load to install bundles\n");
 		ret = ERECURSE_MANIFEST;
@@ -916,7 +917,7 @@ download_subscribed_packs:
 				timelist_timer_start(global_times, "Add tracked bundles");
 				read_subscriptions(subs);
 				set_subscription_versions(mom, NULL, subs);
-				mom->submanifests = recurse_manifest(mom, *subs, NULL, false);
+				mom->submanifests = recurse_manifest(mom, *subs, NULL, false, NULL);
 				if (!mom->submanifests) {
 					fprintf(stderr, "Error: Cannot load installed bundles\n");
 					ret = ERECURSE_MANIFEST;
@@ -957,7 +958,7 @@ download_subscribed_packs:
 				timelist_timer_start(global_times, "Add tracked bundles");
 				read_subscriptions(subs);
 				set_subscription_versions(mom, NULL, subs);
-				mom->submanifests = recurse_manifest(mom, *subs, NULL, false);
+				mom->submanifests = recurse_manifest(mom, *subs, NULL, false, NULL);
 				if (!mom->submanifests) {
 					fprintf(stderr, "Error: Cannot load installed bundles\n");
 					ret = ERECURSE_MANIFEST;

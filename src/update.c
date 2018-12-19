@@ -328,7 +328,7 @@ load_current_mom:
 		 * - we just don't apply deltas */
 		if (manifest_err == -ENET404 || manifest_err == -ENOENT) {
 			fprintf(stderr, "The current MoM manifest was not found\n");
-		} else if (retries < MAX_TRIES) {
+		} else if (retries < MAX_TRIES && manifest_err != -EIO) {
 			increment_retries(&retries, &timeout);
 			fprintf(stderr, "Retry #%d downloading current MoM manifest\n", retries);
 			goto load_current_mom;
@@ -349,7 +349,7 @@ load_server_mom:
 		if (manifest_err == -ENET404 || manifest_err == -ENOENT) {
 			fprintf(stderr, "The server MoM manifest was not found\n");
 			fprintf(stderr, "Version %d not available\n", server_version);
-		} else if (retries < MAX_TRIES) {
+		} else if (retries < MAX_TRIES && manifest_err != -EIO) {
 			increment_retries(&retries, &timeout);
 			fprintf(stderr, "Retry #%d downloading server MoM manifest\n", retries);
 			goto load_server_mom;
@@ -366,9 +366,9 @@ load_current_submanifests:
 	 * First load up the old (current) manifests. Statedir could have been cleared
 	 * or corrupt, so don't assume things are already there. Updating subscribed
 	 * manifests is done as part of recurse_manifest */
-	current_manifest->submanifests = recurse_manifest(current_manifest, current_subs, NULL, false);
+	current_manifest->submanifests = recurse_manifest(current_manifest, current_subs, NULL, false, &manifest_err);
 	if (!current_manifest->submanifests) {
-		if (retries < MAX_TRIES) {
+		if (retries < MAX_TRIES && manifest_err != -EIO) {
 			increment_retries(&retries, &timeout);
 			fprintf(stderr, "Retry #%d downloading current sub-manifests\n", retries);
 			goto load_current_submanifests;
@@ -400,16 +400,16 @@ load_current_submanifests:
 			printf("WARNING: One or more installed bundles are no longer available at version %d.\n",
 			       server_version);
 		} else {
-			ret = EMANIFEST_LOAD;
+			ret = ERECURSE_MANIFEST;
 			goto clean_exit;
 		}
 	}
 
 load_server_submanifests:
 	/* read the new collective of manifests that we are subscribed to in the new MoM */
-	server_manifest->submanifests = recurse_manifest(server_manifest, latest_subs, NULL, false);
+	server_manifest->submanifests = recurse_manifest(server_manifest, latest_subs, NULL, false, &manifest_err);
 	if (!server_manifest->submanifests) {
-		if (retries < MAX_TRIES) {
+		if (retries < MAX_TRIES && manifest_err != -EIO) {
 			increment_retries(&retries, &timeout);
 			printf("Retry #%d downloading server sub-manifests\n", retries);
 			goto load_server_submanifests;

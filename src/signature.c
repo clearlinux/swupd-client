@@ -84,11 +84,14 @@ bool initialize_signature(void)
 			BIO *b;
 			time_t currtime = 0;
 			struct tm *timeinfo;
+			char time_str[50];
 
 			/* The system time wasn't sane, print out what it is and the cert validity range */
 			time(&currtime);
 			timeinfo = localtime(&currtime);
-			fprintf(stderr, "Warning: Current time is %s\n", asctime(timeinfo));
+
+			strftime(time_str, sizeof(time_str), "%a %b %d %H:%M:%S %Y", timeinfo);
+			fprintf(stderr, "Warning: Current time is %s\n", time_str);
 			fprintf(stderr, "Certificate validity is:\n");
 			b = BIO_new_fp(stdout, BIO_NOCLOSE);
 			if (b == NULL) {

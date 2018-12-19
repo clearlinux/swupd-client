@@ -96,7 +96,10 @@ bool verify_time()
 		/* TODO: Get even better time than the versionstamp using a collection of servers,
 		 * and fallback to using versionstamp time if it does not work or seem reasonable.
 		 * The system time wasn't sane, so set it here and try again */
-		fprintf(stderr, "Warning: Current time is %s\nAttempting to fix...", asctime(timeinfo));
+		char time_str[50];
+
+		strftime(time_str, sizeof(time_str), "%a %b %d %H:%M:%S %Y", timeinfo);
+		fprintf(stderr, "Warning: Current time is %s\nAttempting to fix...", time_str);
 		if (set_time(versiontime) == false) {
 			return false;
 		}

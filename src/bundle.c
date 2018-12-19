@@ -734,8 +734,6 @@ out:
 static int install_bundles(struct list *bundles, struct list **subs, struct manifest *mom)
 {
 	int ret;
-	int retries = 0;
-	int timeout = 10;
 	int bundles_failed = 0;
 	int already_installed = 0;
 	int bundles_installed = 0;
@@ -830,13 +828,8 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 	timelist_timer_start(global_times, "Download packs");
 	(void)rm_staging_dir_contents("download");
 
-download_subscribed_packs:
-	if (list_longer_than(to_install_files, 10) && download_subscribed_packs(*subs, mom, true)) {
-		if (retries < MAX_TRIES && !content_url_is_local) {
-			increment_retries(&retries, &timeout);
-			printf("\nRetry #%d downloading subscribed packs\n", retries);
-			goto download_subscribed_packs;
-		}
+	if (list_longer_than(to_install_files, 10)) {
+		download_subscribed_packs(*subs, mom, true);
 	}
 	timelist_timer_stop(global_times); // closing: Download packs
 

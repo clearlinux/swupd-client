@@ -213,6 +213,7 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 	CURLMsg *msg;
 	long response;
 	CURLcode curl_ret;
+	int err;
 
 	while (count > 0) {
 		CURL *handle;
@@ -261,10 +262,8 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 		/* Get error code from easy handle and augment it if
 		 * completing the download encounters further problems. */
 		curl_ret = swupd_download_file_complete(msg->data.result, &file->file);
-
-		/* if the server returns HTTP 200 the download is successful.
-		 * When using the FILE:// protocol, 0 also indicates success. */
-		if (curl_ret == CURLE_OK && (response == 200 || local_download)) {
+		err = process_curl_error_codes(curl_ret, response, url, file->file.path);
+		if (err == 0) {
 			if (h->success_cb && !h->success_cb(file->data)) {
 				// Retry download if cb return is false. File probably corrupted
 				unlink(file->file.path);
@@ -283,12 +282,8 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 				fprintf(stderr, "Error for %s download: Response %ld - %s\n",
 					file->file.path, response, curl_easy_strerror(msg->data.result));
 
-				if (curl_ret == CURLE_WRITE_ERROR) {
-					fprintf(stderr, "Check free space for %s?\n", state_dir);
-				}
-
 				//Download resume isn't supported. Disabling it for next try
-				if (curl_ret == CURLE_RANGE_ERROR) {
+				if (err == -ERANGE) {
 					fprintf(stderr, "Range command not supported by server, download resume disabled.\n");
 					h->resume_failed = true;
 				}

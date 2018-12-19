@@ -31,6 +31,8 @@ extern CURLcode swupd_download_file_complete(CURLcode curl_ret, struct curl_file
  */
 extern CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url);
 
+extern int process_curl_error_codes(int curl_ret, long response, const char *url, const char *filename);
+
 #ifdef __cplusplus
 }
 #endif

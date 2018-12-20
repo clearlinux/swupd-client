@@ -357,6 +357,7 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle, i
 				response = -1; // Force error
 			}
 		}
+		debug("process_curl_error_codes: curl_ret = %d, response = %d\n", curl_ret, response);
 		/* curl command succeeded, download might've failed, let our caller handle */
 		switch (response) {
 		case 206:
@@ -368,18 +369,20 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle, i
 			*err = 0;
 			return DOWNLOAD_STATUS_COMPLETED;
 		case 403:
-			fprintf(stderr, "Curl: Download failed: Forbidden (403) - '%s'\n", url);
+			debug("Curl: Download failed: Forbidden (403) - '%s'\n", url);
 			*err = -EPERM;
 			return DOWNLOAD_STATUS_FORBIDDEN;
 		case 404:
-			fprintf(stderr, "Curl: Download failed: File not found (403) - '%s'\n", url);
+			debug("Curl: Download failed: File not found (404) - '%s'\n", url);
 			*err = -ENOENT;
 			return DOWNLOAD_STATUS_NOT_FOUND;
 		default:
+			fprintf(stderr, "Curl: Download failed: response (%ld) -  '%s'\n", response, url);
 			*err = -ECOMM;
 			return DOWNLOAD_STATUS_ERROR;
 		}
 	} else { /* download failed but let our caller do it */
+		debug("process_curl_error_codes: curl_ret = %d\n", curl_ret);
 		switch (curl_ret) {
 		case CURLE_COULDNT_RESOLVE_PROXY:
 			fprintf(stderr, "Curl: Could not resolve proxy\n");
@@ -390,39 +393,39 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle, i
 			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_COULDNT_CONNECT:
-			fprintf(stderr, "Curl: Could not connect to host or proxy\n");
+			fprintf(stderr, "Curl: Could not connect to host or proxy - '%s'\n", url);
 			*err = -ENONET;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_FILE_COULDNT_READ_FILE:
 			*err = -ENOENT;
 			return DOWNLOAD_STATUS_NOT_FOUND;
 		case CURLE_PARTIAL_FILE:
-			fprintf(stderr, "Curl: File incompletely downloaded from '%s''\n", url);
+			fprintf(stderr, "Curl: File incompletely downloaded - '%s'\n", url);
 			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_RECV_ERROR:
-			fprintf(stderr, "Curl: Failure receiving data from server\n");
+			fprintf(stderr, "Curl: Failure receiving data from server - '%s'\n", url);
 			*err = -ENOLINK;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_WRITE_ERROR:
-			fprintf(stderr, "Curl: Error downloading to local file - %s\n", url);
+			fprintf(stderr, "Curl: Error downloading to local file - '%s'\n", url);
 			fprintf(stderr, "Check free space for %s?\n", state_dir);
 			*err = -EIO;
-			return DOWNLOAD_STATUS_ERROR;
+			return DOWNLOAD_STATUS_WRITE_ERROR;
 		case CURLE_OPERATION_TIMEDOUT:
-			fprintf(stderr, "Curl: Communicating with server timed out.\n");
+			fprintf(stderr, "Curl: Communicating with server timed out - '%s'\n", url);
 			*err = -ETIMEDOUT;
 			return DOWNLOAD_STATUS_TIMEOUT;
 		case CURLE_SSL_CACERT_BADFILE:
-			fprintf(stderr, "Curl: Bad SSL Cert file, cannot ensure secure connection\n");
+			fprintf(stderr, "Curl: Bad SSL Cert file, cannot ensure secure connection - '%s'\n", url);
 			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_SSL_CERTPROBLEM:
-			fprintf(stderr, "Curl: Problem with the local client SSL certificate\n");
+			fprintf(stderr, "Curl: Problem with the local client SSL certificate - '%s'\n", url);
 			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_RANGE_ERROR:
-			fprintf(stderr, "Range command not supported by server, download resume disabled.\n");
+			fprintf(stderr, "Range command not supported by server, download resume disabled - '%s'\n", url);
 			*err = -ERANGE;
 			return DOWNLOAD_STATUS_RANGE_ERROR;
 		default:
@@ -509,15 +512,15 @@ restart_download:
 	debug("CURL - start sync download: %s -> %s\n", url, in_memory_file ? "<memory>" : filename);
 	curl_ret = curl_easy_perform(curl);
 
-	debug("CURL - completed sync download: curl ret %d\n", curl_ret);
 exit:
 	if (!in_memory_file) {
 		curl_ret = swupd_download_file_complete(curl_ret, &local);
 	}
 
 	status = process_curl_error_codes(curl_ret, curl, &err);
+	debug("CURL - complete sync download: %s -> %s, status=%d\n", url, in_memory_file ? "<memory>" : filename, status);
 	if (status == DOWNLOAD_STATUS_RANGE_ERROR) {
-		//Reset variable
+		// Reset variable
 		memset(&local, 0, sizeof(local));
 
 		//Disable download resume

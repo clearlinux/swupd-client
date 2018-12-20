@@ -86,7 +86,7 @@ static void download_free_data(void *data)
 	free(pack_data);
 }
 
-static bool download_error(int response, void *data)
+static bool download_error(enum download_status status, void *data)
 {
 	struct pack_data *pack_data = data;
 
@@ -94,7 +94,7 @@ static bool download_error(int response, void *data)
 		return false;
 	}
 
-	if (response == 404) {
+	if (status == DOWNLOAD_STATUS_NOT_FOUND) {
 		telemetry(TELEMETRY_WARN, "packmissing", "url=%s\n", pack_data->url);
 		return true;
 	}

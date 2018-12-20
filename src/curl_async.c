@@ -101,9 +101,8 @@ struct swupd_curl_parallel_handle {
  * Struct represinting a single file being downloaded.
  */
 struct multi_curl_file {
-	struct curl_file file; /* Curl file information */
-
-	int err;			/* the error code if the file failed to download */
+	struct curl_file file;		/* Curl file information */
+	enum download_status status;    /* status of last download try */
 	char retries;			/* Number of retried performed so far */
 	CURL *curl;			/* curl handle if downloading */
 	char *url;			/* The url to be downloaded from */
@@ -231,14 +230,12 @@ void swupd_curl_parallel_download_set_callbacks(void *handle, swupd_curl_success
 static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, int count)
 {
 	CURLMsg *msg;
-	long response;
 	CURLcode curl_ret;
+	int err;
 
 	while (count > 0) {
 		CURL *handle;
 		struct multi_curl_file *file;
-		char *url = NULL;
-		bool local_download;
 
 		/* This function may return NULL before processing the
 		 * requested number of messages (stored in variable "count").
@@ -259,11 +256,6 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 		}
 
 		handle = msg->easy_handle;
-		response = 404;
-		curl_ret = curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &response);
-		if (curl_ret != CURLE_OK) {
-			continue;
-		}
 
 		curl_ret = curl_easy_getinfo(handle, CURLINFO_PRIVATE, (char **)&file);
 		if (curl_ret != CURLE_OK) {
@@ -271,54 +263,25 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 			continue;
 		}
 
-		curl_ret = curl_easy_getinfo(handle, CURLINFO_EFFECTIVE_URL, &url);
-		if (curl_ret != CURLE_OK) {
-			curl_easy_cleanup(handle);
-			continue;
-		}
-		local_download = strncmp(url, "file://", 7) == 0;
-
-		debug("CURL - complete ASYNC download: %s -> %s\n", file->url, file->file.path);
 		/* Get error code from easy handle and augment it if
 		 * completing the download encounters further problems. */
 		curl_ret = swupd_download_file_complete(msg->data.result, &file->file);
-
-		/* if the server returns HTTP 200 the download is successful.
-		 * When using the FILE:// protocol, 0 also indicates success. */
-		if (curl_ret == CURLE_OK && (response == 200 || local_download)) {
+		file->status = process_curl_error_codes(curl_ret, handle, &err);
+		debug("CURL - complete ASYNC download: %s -> %s, status=%d\n", file->url, file->file.path, file->status);
+		if (file->status == DOWNLOAD_STATUS_COMPLETED) {
 			/* Wrap the success callback and schedule execution
 			 * Results from the callback will be stored in multi_curl_file's cb_retval
 			 * which is later checked for errors. */
 			file->callback = h->success_cb;
 			tp_task_schedule(h->thpool, (void *)success_callback_wrapper, (void *)file);
-
 		} else {
-			//If local download and file doesn't exist set a 404
-			//response code to simulate same behavior as HTTP
-			if (local_download && curl_ret == CURLE_FILE_COULDNT_READ_FILE) {
-				response = 404;
-				/* Later, each file's cb_retval is checked. 0 indicates failure,
-				 * and a retry. Since 404 with a local file shouldn't
-				 * be retried, set the value >0. */
-				file->cb_retval = 1;
-			}
-
 			//Check if user can handle errors
-			if (!h->error_cb || !h->error_cb(response, file->data)) {
-				h->failed = list_prepend_data(h->failed, file);
-				fprintf(stderr, "Error for %s download: Response %ld - %s\n",
-					file->file.path, response, curl_easy_strerror(msg->data.result));
-
-				if (curl_ret == CURLE_WRITE_ERROR) {
-					fprintf(stderr, "Check free space for %s?\n", state_dir);
-					file->err = CURLE_WRITE_ERROR;
-				}
-
+			if (!h->error_cb || h->error_cb(file->status, file->data)) {
+				file->cb_retval = true; // Don't retry download if error was handled
+			} else {
 				//Download resume isn't supported. Disabling it for next try
-				if (curl_ret == CURLE_RANGE_ERROR) {
-					fprintf(stderr, "Range command not supported by server, download resume disabled.\n");
+				if (file->status == DOWNLOAD_STATUS_RANGE_ERROR) {
 					h->resume_failed = true;
-					file->err = CURLE_RANGE_ERROR;
 				}
 			}
 		}
@@ -590,7 +553,7 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 		/* Check return values from threads, add failed items to h->failed list to retry */
 		HASHMAP_FOREACH(h->curl_hashmap, i, l, file)
 		{
-			if (file->cb_retval == 0) {
+			if (!file->cb_retval) {
 				h->failed = list_prepend_data(h->failed, file);
 			}
 		}
@@ -602,7 +565,8 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 		for (l = h->failed; l;) {
 			struct multi_curl_file *file = l->data;
 
-			if (file->retries < MAX_RETRIES && file->err != CURLE_WRITE_ERROR) {
+			if (file->retries < MAX_RETRIES &&
+			    file->status != DOWNLOAD_STATUS_WRITE_ERROR) {
 				struct list *next;
 
 				file->retries++;

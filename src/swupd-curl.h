@@ -1,6 +1,8 @@
 #ifndef __SWUPD_CURL__
 #define __SWUPD_CURL__
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -11,8 +13,20 @@ struct curl_file_data {
 	char *data;
 };
 
+/* Download status code */
+enum download_status {
+	DOWNLOAD_STATUS_COMPLETED = 0,
+	DOWNLOAD_STATUS_PARTIAL_FILE,
+	DOWNLOAD_STATUS_NOT_FOUND,
+	DOWNLOAD_STATUS_FORBIDDEN,
+	DOWNLOAD_STATUS_TIMEOUT,
+	DOWNLOAD_STATUS_RANGE_ERROR,
+	DOWNLOAD_STATUS_WRITE_ERROR,
+	DOWNLOAD_STATUS_ERROR,
+};
+
 typedef bool (*swupd_curl_success_cb)(void *data);
-typedef bool (*swupd_curl_error_cb)(int response, void *data);
+typedef bool (*swupd_curl_error_cb)(enum download_status status, void *data);
 typedef void (*swupd_curl_free_cb)(void *data);
 
 int swupd_curl_init(void);

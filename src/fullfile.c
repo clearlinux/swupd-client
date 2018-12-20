@@ -28,7 +28,7 @@
 
 /* hysteresis thresholds */
 //FIXME #562
-#define MAX_XFER 25
+#define MAX_XFER 27
 
 static void download_mix_file(struct file *file)
 {

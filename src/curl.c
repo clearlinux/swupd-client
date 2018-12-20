@@ -314,7 +314,7 @@ CURLcode swupd_download_file_create(struct curl_file *file)
 	return CURLE_OK;
 }
 
-static CURLcode swupd_download_file_append(struct curl_file *file)
+CURLcode swupd_download_file_append(struct curl_file *file)
 {
 	file->fh = fopen(file->path, "a");
 	if (!file->fh) {

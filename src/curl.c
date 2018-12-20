@@ -44,7 +44,7 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "curl-internal.h"
+#include "swupd-curl-internal.h"
 #include "swupd.h"
 
 #define SWUPD_CURL_LOW_SPEED_LIMIT 1

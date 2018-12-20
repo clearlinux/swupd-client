@@ -99,9 +99,9 @@ static int download_loop(void *download_handle, struct list *files, int *num_dow
 	return swupd_curl_parallel_download_end(download_handle, num_downloads);
 }
 
-static bool download_error(int response, UNUSED_PARAM void *data)
+static bool download_error(enum download_status status, UNUSED_PARAM void *data)
 {
-	return response == 404;
+	return status == DOWNLOAD_STATUS_NOT_FOUND;
 }
 
 static bool download_successful(void *data)

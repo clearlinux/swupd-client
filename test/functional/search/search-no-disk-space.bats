@@ -33,7 +33,7 @@ test_setup() {
 	assert_status_is "$EMOM_LOAD"
 	expected_output=$(cat <<-EOM
 		Searching for 'test-bundle2'
-		Curl: Error downloading to local file - $TEST_DIRNAME/testfs/state/10/Manifest.MoM.tar
+		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
 		Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 10 MoM manifest
 		Cannot load official manifest MoM for version 10
@@ -64,7 +64,7 @@ test_setup() {
 		Searching for 'test-bundle2'
 		Downloading Clear Linux manifests
 		.* MB total...
-		Curl: Error downloading to local file - $TEST_DIRNAME/testfs/state/10/Manifest.test-bundle1.tar
+		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle1.tar'
 		Check free space for $TEST_DIRNAME/testfs/state\\?
 		Failed to retrieve 10 test-bundle1 manifest
 		Cannot load test-bundle1 sub-manifest for version 10

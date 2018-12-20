@@ -33,7 +33,7 @@ test_setup() {
 
 	assert_status_is "$EMOM_LOAD"
 	expected_output=$(cat <<-EOM
-		Curl: Error downloading to local file - $TEST_DIRNAME/testfs/state/10/Manifest.MoM.tar
+		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
 		Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 10 MoM manifest
 		Cannot load official manifest MoM for version 10
@@ -61,7 +61,7 @@ test_setup() {
 
 	assert_status_is "$EBUNDLE_INSTALL"
 	expected_output=$(cat <<-EOM
-		Curl: Error downloading to local file - $TEST_DIRNAME/testfs/state/10/Manifest.test-bundle.tar
+		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
 		Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 10 test-bundle manifest
 		Unable to download manifest test-bundle version 10, exiting now
@@ -109,31 +109,31 @@ test_setup() {
 	assert_status_is "$EBUNDLE_INSTALL"
 	expected_output=$(cat <<-EOM
 		Downloading packs...
-		Error for $TEST_DIRNAME/testfs/state/pack-test-bundle-from-0-to-10.tar download: Response 200 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/pack-test-bundle-from-0.tar'
 		Check free space for $TEST_DIRNAME/testfs/state\\?
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...
-		Error for $TEST_DIRNAME/testfs/state/download/.*.tar download: Response 200 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error for $TEST_DIRNAME/testfs/state/download/.*.tar download: Response 200 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error for $TEST_DIRNAME/testfs/state/download/.*.tar download: Response 200 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error for $TEST_DIRNAME/testfs/state/download/.*.tar download: Response 200 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error for $TEST_DIRNAME/testfs/state/download/.*.tar download: Response 200 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error for $TEST_DIRNAME/testfs/state/download/.*.tar download: Response 200 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error for $TEST_DIRNAME/testfs/state/download/.*.tar download: Response 200 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error for $TEST_DIRNAME/testfs/state/download/.*.tar download: Response 200 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error for $TEST_DIRNAME/testfs/state/download/.*.tar download: Response 200 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error for $TEST_DIRNAME/testfs/state/download/.*.tar download: Response 200 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error for $TEST_DIRNAME/testfs/state/download/.*.tar download: Response 200 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Check free space for $TEST_DIRNAME/testfs/state\\?
 		ERROR: Could not download some files from bundles, aborting bundle installation.
 		Failed to install 1 of 1 bundles

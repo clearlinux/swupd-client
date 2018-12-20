@@ -7,6 +7,8 @@
 
 #include <curl/curl.h>
 
+#include "swupd-curl.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,17 +32,6 @@ extern CURLcode swupd_download_file_complete(CURLcode curl_ret, struct curl_file
  * Set swupd default basic options to curl handler.
  */
 extern CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url);
-
-/* Download status code */
-enum download_status {
-	DOWNLOAD_STATUS_COMPLETED = 0,
-	DOWNLOAD_STATUS_PARTIAL_FILE,
-	DOWNLOAD_STATUS_NOT_FOUND,
-	DOWNLOAD_STATUS_FORBIDDEN,
-	DOWNLOAD_STATUS_TIMEOUT,
-	DOWNLOAD_STATUS_RANGE_ERROR,
-	DOWNLOAD_STATUS_ERROR,
-};
 
 /* Process download curl return code 'curl_ret' and if needed the response code to
  * fill 'err' with an error code and return the status of this download. */

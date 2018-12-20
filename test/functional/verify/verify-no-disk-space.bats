@@ -41,7 +41,7 @@ test_setup() {
 	assert_status_is "$EMOM_LOAD"
 	expected_output=$(cat <<-EOM
 		Verifying version 20
-		Curl: Error downloading to local file - $TEST_DIRNAME/testfs/state/20/Manifest.MoM.tar
+		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.MoM.tar'
 		Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 20 MoM manifest
 		Unable to download/verify 20 Manifest.MoM
@@ -71,7 +71,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Verifying version 20
 		WARNING: the force or picky option is specified; ignoring version mismatch for verify --fix
-		Curl: Error downloading to local file - $TEST_DIRNAME/testfs/state/20/Manifest.test-bundle.tar
+		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.test-bundle.tar'
 		Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 20 test-bundle manifest
 		Unable to download manifest test-bundle version 20, exiting now
@@ -98,7 +98,7 @@ test_setup() {
 		Verifying files
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...
-		Error for $TEST_DIRNAME/testfs/state/download/.$fhash.tar download: Response 0 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$fhash.tar'
 		Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Unable to download necessary files for this OS release
 		Error: Fix did not fully succeed

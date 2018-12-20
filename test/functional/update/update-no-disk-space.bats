@@ -40,7 +40,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Curl: Error downloading to local file - $TEST_DIRNAME/testfs/state/10/Manifest.MoM.tar
+		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
 		Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 10 MoM manifest
 		Update failed.
@@ -70,7 +70,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Curl: Error downloading to local file - $TEST_DIRNAME/testfs/state/20/Manifest.MoM.tar
+		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.MoM.tar'
 		Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 20 MoM manifest
 		Update failed.
@@ -100,7 +100,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Curl: Error downloading to local file - $TEST_DIRNAME/testfs/state/10/Manifest.test-bundle.tar
+		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
 		Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 10 test-bundle manifest
 		Cannot load current MoM sub-manifests, exiting
@@ -131,7 +131,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Curl: Error downloading to local file - $TEST_DIRNAME/testfs/state/20/Manifest.test-bundle.tar
+		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.test-bundle.tar'
 		Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 20 test-bundle manifest
 		Unable to download manifest test-bundle version 20, exiting now
@@ -156,7 +156,7 @@ test_setup() {
 		Update started.
 		Preparing to update from 10 to 20
 		Downloading packs...
-		Error for $TEST_DIRNAME/testfs/state/pack-test-bundle-from-10-to-20.tar download: Response 0 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/pack-test-bundle-from-10.tar'
 		Check free space for $TEST_DIRNAME/testfs/state?
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 1
@@ -167,7 +167,7 @@ test_setup() {
 		    deleted files     : 0
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...
-		Error for $TEST_DIRNAME/testfs/state/download/.$file_hash.tar download: Response 0 - Failed writing received data to disk/application
+		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$file_hash.tar'
 		Check free space for $TEST_DIRNAME/testfs/state?
 		ERROR: Could not download all files, aborting update
 		Update failed.

@@ -95,7 +95,7 @@ test_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.
-		Curl: Communicating with server timed out.
+		Curl: Communicating with server timed out - '.*/version/formatstaging/latest'
 		Preparing to update from 10 to 20
 		Downloading packs...
 		Extracting os-core pack for version 20
@@ -115,7 +115,7 @@ test_teardown() {
 		Update successful. System updated from version 10 to version 20
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_regex_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/test_file1
 
 }

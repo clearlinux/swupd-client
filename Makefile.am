@@ -166,11 +166,6 @@ BATS = \
 	test/functional/checkupdate/chk-update-version-match.bats \
 	test/functional/completion/completion-basic.bats \
 	test/functional/hashdump/hashdump-file-hash.bats \
-	test/functional/verify/verify-install.bats \
-	test/functional/verify/verify-install-bad.bats \
-	test/functional/verify/verify-install-multiple.bats \
-	test/functional/verify/verify-install-no-fullfile-fallbacks.bats \
-	test/functional/verify/verify-install-no-zero-packs.bats \
 	test/functional/mirror/mirror-createdir.bats \
 	test/functional/mirror/mirror-createdir-negative.bats \
 	test/functional/search/search-content-check-negative.bats \
@@ -227,10 +222,16 @@ BATS = \
 	test/functional/verify/verify-format-mismatch-override.bats \
 	test/functional/verify/verify-ghosted.bats \
 	test/functional/verify/verify-good.bats \
+	test/functional/verify/verify-install-bad.bats \
+	test/functional/verify/verify-install.bats \
 	test/functional/verify/verify-install-directory.bats \
 	test/functional/verify/verify-install-latest-directory.bats \
+	test/functional/verify/verify-install-multiple.bats \
+	test/functional/verify/verify-install-no-fullfile-fallbacks.bats \
+	test/functional/verify/verify-install-no-zero-packs.bats \
 	test/functional/verify/verify-latest-missing.bats \
 	test/functional/verify/verify-missing-file.bats \
+	test/functional/verify/verify-no-disk-space.bats \
 	test/functional/verify/verify-picky.bats \
 	test/functional/verify/verify-picky-downgrade.bats \
 	test/functional/verify/verify-picky-ghosted.bats \

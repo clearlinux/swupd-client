@@ -425,6 +425,7 @@ static int process_download(struct swupd_curl_parallel_handle *h, struct multi_c
 	file->curl = curl;
 
 	if (file->retries > 0 && !h->resume_failed && lstat(file->file.path, &stat) == 0) {
+		fprintf(stderr, "Curl: Resuming download for '%s'\n", file->url);
 		curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
 		if (curl_ret != CURLE_OK) {
 			goto out_bad;

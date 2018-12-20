@@ -40,10 +40,11 @@ test_teardown() {
 		Update started.
 		Preparing to update from 10 to 100
 		Downloading packs...
-		Curl: Partial file downloaded from '.*pack-test-bundle-from-10.tar'
-		Starting download retry #1 for .*100/pack-test-bundle-from-10.tar
-		Range command not supported by server, download resume disabled.
-		Starting download retry #2 for .*100/pack-test-bundle-from-10.tar
+		Curl: File incompletely downloaded - '.*/100/pack-test-bundle-from-10.tar'
+		Starting download retry #1 for .*/100/pack-test-bundle-from-10.tar
+		Curl: Resuming download for '.*/100/pack-test-bundle-from-10.tar'
+		Range command not supported by server, download resume disabled - '.*/100/pack-test-bundle-from-10.tar'
+		Starting download retry #2 for .*/100/pack-test-bundle-from-10.tar
 		Extracting test-bundle pack for version 100
 		Statistics for going from version 10 to version 100:
 		    changed bundles   : 1

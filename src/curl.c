@@ -471,6 +471,7 @@ restart_download:
 		local.path = filename;
 
 		if (resume_ok && resume_download_supported && lstat(filename, &stat) == 0) {
+			fprintf(stderr, "Curl: Resuming download for '%s'\n", url);
 			curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
 			if (curl_ret != CURLE_OK) {
 				goto exit;

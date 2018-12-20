@@ -429,16 +429,19 @@ static int process_download(struct swupd_curl_parallel_handle *h, struct multi_c
 		if (curl_ret != CURLE_OK) {
 			goto out_bad;
 		}
+		curl_ret = swupd_download_file_append(&file->file);
+	} else {
+		curl_ret = swupd_download_file_create(&file->file);
+	}
+	if (curl_ret != CURLE_OK) {
+		goto out_bad;
 	}
 
 	curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void *)file);
 	if (curl_ret != CURLE_OK) {
 		goto out_bad;
 	}
-	curl_ret = swupd_download_file_create(&file->file);
-	if (curl_ret != CURLE_OK) {
-		goto out_bad;
-	}
+
 	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)file->file.fh);
 	if (curl_ret != CURLE_OK) {
 		goto out_bad;

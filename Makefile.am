@@ -168,6 +168,7 @@ BATS = \
 	test/functional/bundleremove/remove-client-certificate.bats \
 	test/functional/bundleremove/remove-include.bats \
 	test/functional/bundleremove/remove-include-nested.bats \
+	test/functional/bundleremove/remove-no-disk-space.bats \
 	test/functional/bundleremove/remove-os-core.bats \
 	test/functional/bundleremove/remove-parse-args.bats \
 	test/functional/bundleremove/remove-with-dependency.bats \

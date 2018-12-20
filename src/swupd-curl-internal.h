@@ -31,6 +31,21 @@ extern CURLcode swupd_download_file_complete(CURLcode curl_ret, struct curl_file
  */
 extern CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url);
 
+/* Download status code */
+enum download_status {
+	DOWNLOAD_STATUS_COMPLETED = 0,
+	DOWNLOAD_STATUS_PARTIAL_FILE,
+	DOWNLOAD_STATUS_NOT_FOUND,
+	DOWNLOAD_STATUS_FORBIDDEN,
+	DOWNLOAD_STATUS_TIMEOUT,
+	DOWNLOAD_STATUS_RANGE_ERROR,
+	DOWNLOAD_STATUS_ERROR,
+};
+
+/* Process download curl return code 'curl_ret' and if needed the response code to
+ * fill 'err' with an error code and return the status of this download. */
+enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle, int *err);
+
 #ifdef __cplusplus
 }
 #endif

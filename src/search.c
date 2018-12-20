@@ -716,7 +716,7 @@ static double query_total_download_size(struct list *list)
  * Description: To search Clear bundles for a particular entry, a complete set of
  *		manifests must be downloaded. This function does so, asynchronously, using
  *		the curl_multi interface */
-static int download_manifests(struct manifest **MoM, struct list **subs)
+static int download_manifests(struct manifest **MoM)
 {
 	struct list *list = NULL;
 	struct file *file = NULL;
@@ -724,6 +724,8 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 	struct manifest *subMan = NULL;
 	int current_version;
 	int ret = 0;
+	int count = 0;
+	int manifest_err;
 	double size;
 	bool did_download = false;
 
@@ -750,9 +752,6 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 
 	while (list) {
 		file = list->data;
-		list = list->next;
-
-		create_and_append_subscription(subs, file->filename);
 
 		string_or_die(&untard_file, "%s/%i/Manifest.%s", state_dir, file->last_change,
 			      file->filename);
@@ -762,9 +761,17 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 
 		if (access(untard_file, F_OK) == -1) {
 			/* Do download */
-			subMan = load_manifest(file->last_change, file, *MoM, false, NULL);
+			subMan = load_manifest(file->last_change, file, *MoM, false, &manifest_err);
 			if (!subMan) {
-				fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
+				fprintf(stderr, "Cannot load %s sub-manifest for version %i\n", file->filename, current_version);
+				count++;
+				/* if the manifest failed to download because there is no disk space
+				 * remove it from the list so we don't re-attempt while searching */
+				if (manifest_err == -EIO) {
+					list = list_free_item(list, free_file_data);
+				}
+				ret = ERECURSE_MANIFEST;
+				goto out;
 			} else {
 				did_download = true;
 			}
@@ -780,13 +787,19 @@ static int download_manifests(struct manifest **MoM, struct list **subs)
 			free_string(&url);
 		}
 
+	out:
 		unlink(tarfile);
 		free_string(&untard_file);
 		free_string(&tarfile);
+		list = list->next;
 	}
 
 	if (did_download) {
-		fprintf(stderr, "Completed manifests download.\n\n");
+		if (ret) {
+			fprintf(stderr, "%i manifest%s failed to download.\n\n", count, (count > 1 ? "s" : ""));
+		} else {
+			fprintf(stderr, "Completed manifests download.\n\n");
+		}
 	}
 
 	return ret;
@@ -796,7 +809,6 @@ int search_main(int argc, char **argv)
 {
 	int ret = 0;
 	struct manifest *MoM = NULL;
-	struct list *subs = NULL;
 
 	if (!parse_options(argc, argv)) {
 		return EINVALID_OPTION;
@@ -812,10 +824,14 @@ int search_main(int argc, char **argv)
 		fprintf(stderr, "Searching for '%s'\n\n", search_string);
 	}
 
-	ret = download_manifests(&MoM, &subs);
+	ret = download_manifests(&MoM);
 	if (ret != 0) {
-		fprintf(stderr, "Error: Failed to download manifests\n");
-		goto clean_exit;
+		if (ret == ERECURSE_MANIFEST ) {
+			fprintf(stderr, "Warning: One or more manifests failed to download, search results will be partial.\n");
+		} else {
+			fprintf(stderr, "Error: Failed to download manifests\n");
+			goto clean_exit;
+		}
 	}
 
 	if (init) {
@@ -835,8 +851,9 @@ int search_main(int argc, char **argv)
 	do_search(MoM, search_type, search_string);
 
 clean_exit:
-	free_manifest(MoM);
-	free_subscriptions(&subs);
+	if (MoM) {
+		free_manifest(MoM);
+	}
 	swupd_deinit();
 	return ret;
 }

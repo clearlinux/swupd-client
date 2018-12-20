@@ -326,7 +326,7 @@ load_current_mom:
 	if (!current_manifest) {
 		/* TODO: possibly remove this as not getting a "from" manifest is not fatal
 		 * - we just don't apply deltas */
-		if (manifest_err == -ENET404 || manifest_err == -ENOENT) {
+		if (manifest_err == -ENOENT) {
 			fprintf(stderr, "The current MoM manifest was not found\n");
 		} else if (retries < MAX_TRIES && manifest_err != -EIO) {
 			increment_retries(&retries, &timeout);
@@ -346,7 +346,7 @@ load_server_mom:
 	timelist_timer_start(global_times, "Recurse and Consolidate Manifests");
 	server_manifest = load_mom(server_version, true, mix_exists, &manifest_err);
 	if (!server_manifest) {
-		if (manifest_err == -ENET404 || manifest_err == -ENOENT) {
+		if (manifest_err == -ENOENT) {
 			fprintf(stderr, "The server MoM manifest was not found\n");
 			fprintf(stderr, "Version %d not available\n", server_version);
 		} else if (retries < MAX_TRIES && manifest_err != -EIO) {

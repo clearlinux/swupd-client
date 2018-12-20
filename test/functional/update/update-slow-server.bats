@@ -42,8 +42,8 @@ test_teardown() {
 		Downloading packs...
 		Error for .*/state/pack-test-bundle-from-10-to-100.tar download: Response 206 - Transferred a partial file
 		Starting download retry #1 for .*100/pack-test-bundle-from-10.tar
-		Error for .*/state/pack-test-bundle-from-10-to-100.tar download: Response 200 - Requested range was not delivered by the server
 		Range command not supported by server, download resume disabled.
+		Error for .*/state/pack-test-bundle-from-10-to-100.tar download: Response 200 - Requested range was not delivered by the server
 		Starting download retry #2 for .*100/pack-test-bundle-from-10.tar
 		Extracting test-bundle pack for version 100
 		Statistics for going from version 10 to version 100:

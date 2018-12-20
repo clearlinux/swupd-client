@@ -16,6 +16,7 @@
 #include "lib/macros.h"
 #include "lib/strings.h"
 #include "lib/sys.h"
+#include "swupd-curl.h"
 #include "swupd-error.h"
 #include "timelist.h"
 
@@ -86,12 +87,6 @@ struct manifest {
 	struct list *includes;     /* manifest names included in manifest */
 	char *component;
 	unsigned int is_mix : 1;
-};
-
-struct curl_file_data {
-	size_t capacity;
-	size_t len;
-	char *data;
 };
 
 struct header;
@@ -295,23 +290,6 @@ extern int rename_staged_file_to_final(struct file *file);
 extern int update_device_latest_version(int version);
 
 extern size_t get_max_xfer(size_t default_max_xfer);
-
-/* curl.c */
-
-extern int swupd_curl_init(void);
-extern void swupd_curl_deinit(void);
-extern double swupd_curl_query_content_size(char *url);
-extern int swupd_curl_get_file(const char *url, char *filename);
-extern int swupd_curl_get_file_memory(const char *url, struct curl_file_data *file_data);
-
-/* download.c */
-typedef bool (*swupd_curl_success_cb)(void *data);
-typedef bool (*swupd_curl_error_cb)(int response, void *data);
-typedef void (*swupd_curl_free_cb)(void *data);
-extern void *swupd_curl_parallel_download_start(size_t max_xfer);
-void swupd_curl_parallel_download_set_callbacks(void *handle, swupd_curl_success_cb success_cb, swupd_curl_error_cb error_cb, swupd_curl_free_cb free_cb);
-extern int swupd_curl_parallel_download_enqueue(void *handle, const char *url, const char *filename, const char *hash, void *data);
-extern int swupd_curl_parallel_download_end(void *handle, int *num_downloads);
 
 extern void free_subscriptions(struct list **subs);
 extern void read_subscriptions(struct list **subs);

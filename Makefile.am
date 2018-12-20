@@ -32,10 +32,9 @@ swupd_SOURCES = \
 	src/clr_bundle_add.c \
 	src/clr_bundle_ls.c \
 	src/clr_bundle_rm.c \
-	src/curl-internal.h \
 	src/curl.c \
+	src/curl_async.c \
 	src/delta.c \
-	src/download.c \
 	src/extra_files.c \
 	src/filedesc.c \
 	src/fullfile.c \
@@ -73,6 +72,8 @@ swupd_SOURCES = \
 	src/subscriptions.c \
 	src/swupd-build-opts.h \
 	src/swupd-build-variant.h \
+	src/swupd-curl-internal.h \
+	src/swupd-curl.h \
 	src/swupd-error.h \
 	src/swupd-internal.h \
 	src/swupd.h \

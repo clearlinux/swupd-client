@@ -34,9 +34,9 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "curl-internal.h"
 #include "lib/hashmap.h"
 #include "lib/thread_pool.h"
+#include "swupd-curl-internal.h"
 #include "swupd.h"
 
 #define MAX_RETRIES 5

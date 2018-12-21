@@ -3,6 +3,7 @@
 load "../testlib"
 
 test_setup() {
+
 	# Skip this test if not running in Travis CI, because test takes too long for
 	# local development. To run this locally do: TRAVIS=true make check
 	if [ -z "${TRAVIS}" ]; then
@@ -13,15 +14,16 @@ test_setup() {
 	create_version -p "$TEST_NAME" 100 10
 	update_bundle "$TEST_NAME" test-bundle --update /foo/bar
 
-	start_web_server -d pack-test-bundle-from-10.tar -s
+	start_web_server -D "$WEBDIR" -d 100/pack-test-bundle-from-10.tar -s
 
 	# Set the web server as our upstream server
 	port=$(get_web_server_port "$TEST_NAME")
-	set_upstream_server "$TEST_NAME" "http://localhost:$port/$TEST_NAME/web-dir"
+	set_upstream_server "$TEST_NAME" "http://localhost:$port"
 
 }
 
 test_teardown() {
+
 	# teardown only if in travis CI
 	if [ -n "${TRAVIS}" ]; then
 		destroy_test_environment "$TEST_NAME"
@@ -38,7 +40,7 @@ test_teardown() {
 		Update started.
 		Preparing to update from 10 to 100
 		Downloading packs...
-		Error for .*/state/pack-test-bundle-from-10-to-100.tar download: Response 206 - No error
+		Error for .*/state/pack-test-bundle-from-10-to-100.tar download: Response 206 - Transferred a partial file
 		Starting download retry #1 for .*100/pack-test-bundle-from-10.tar
 		Error for .*/state/pack-test-bundle-from-10-to-100.tar download: Response 200 - Requested range was not delivered by the server
 		Range command not supported by server, download resume disabled.

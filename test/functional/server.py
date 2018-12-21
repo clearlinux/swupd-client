@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
 
 import argparse
+import datetime
+import email.utils
 import http.server as server
 import os
 import ssl
 import sys
 import time
+import urllib.parse
+from http import HTTPStatus
 
 
 # global variable initialization
 slow_server = False
 hang_server = False
-partial_download_file = ""
+partial_download_file = None
 threshold = 0
 time_delay = 0
 length = 16*1024
@@ -20,18 +24,37 @@ length = 16*1024
 class SimpleServer(server.SimpleHTTPRequestHandler):
 
     counter = 0
+    first_time = True
 
     def do_GET(self):
         """Serve a GET request."""
+
+        response = HTTPStatus.OK
+
+        # if the partial download option was set and the server is
+        # currently serving the file that was requested as partial
+        if self.path == "/{}".format(partial_download_file):
+            if SimpleServer.first_time:
+                SimpleServer.first_time = False
+                response = HTTPStatus.PARTIAL_CONTENT
+
         self.hang_server()
-        f = self.send_head()
+
+        f = self.send_head(response)
         if f:
             try:
-                while 1:
+                # start serving the requested URL
+                while True:
                     buf = f.read(length)
                     if not buf:
                         break
                     self.wfile.write(buf)
+
+                    # if the partial download was set break
+                    # after readng the fist chunk of data
+                    if response == HTTPStatus.PARTIAL_CONTENT:
+                        break
+
                     # only start delaying responses after the threshold has
                     # been passed
                     if SimpleServer.counter > threshold:
@@ -39,14 +62,8 @@ class SimpleServer(server.SimpleHTTPRequestHandler):
             finally:
                 f.close()
 
-    def do_HEAD(self):
-        """Serve a HEAD request."""
-        self.hang_server()
-        f = self.send_head()
-        if f:
-            f.close()
-
     def hang_server(self):
+        """Hangs the server if set and the threshold has been reached"""
 
         # to avoid hanging the server while testing for the connection to be
         # ready when the --hang-server option is set, the server provides the
@@ -62,47 +79,91 @@ class SimpleServer(server.SimpleHTTPRequestHandler):
                 while True:
                     pass
 
+    def do_HEAD(self):
+        """Serve a HEAD request."""
+        self.hang_server()
+        f = self.send_head()
+        if f:
+            f.close()
 
-class TestServer(server.BaseHTTPRequestHandler):
-    first_time = True
+    def send_head(self, status=HTTPStatus.OK):
+        """Common code for GET and HEAD commands.
 
-    """Handler that returns data with a set delay between writes and/or
-       simulates a partial download on the first download attempt for the
-       file specified by partial_download_file."""
-    def do_GET(self):
+        This sends the response code and MIME headers.
+
+        Return value is either a file object (which has to be copied
+        to the outputfile by the caller unless the command was HEAD,
+        and must be closed by the caller under all circumstances), or
+        None, in which case the caller has nothing further to do.
+
+        """
+        path = self.translate_path(self.path)
+        f = None
+        if os.path.isdir(path):
+            parts = urllib.parse.urlsplit(self.path)
+            if not parts.path.endswith('/'):
+                # redirect browser - doing basically what apache does
+                self.send_response(HTTPStatus.MOVED_PERMANENTLY)
+                new_parts = (parts[0], parts[1], parts[2] + '/',
+                             parts[3], parts[4])
+                new_url = urllib.parse.urlunsplit(new_parts)
+                self.send_header("Location", new_url)
+                self.end_headers()
+                return None
+            for index in "index.html", "index.htm":
+                index = os.path.join(path, index)
+                if os.path.exists(index):
+                    path = index
+                    break
+            else:
+                return self.list_directory(path)
+        ctype = self.guess_type(path)
         try:
-            f = open(os.getcwd() + self.path, "rb")
-        except Exception:
-            self.send_response(404)
+            f = open(path, 'rb')
+        except OSError:
+            self.send_error(HTTPStatus.NOT_FOUND, "File not found")
+            return None
+
+        try:
+            fs = os.fstat(f.fileno())
+            # Use browser cache if possible
+            if ("If-Modified-Since" in self.headers
+                    and "If-None-Match" not in self.headers):
+                # compare If-Modified-Since and time of last file modification
+                try:
+                    ims = email.utils.parsedate_to_datetime(
+                        self.headers["If-Modified-Since"])
+                except (TypeError, IndexError, OverflowError, ValueError):
+                    # ignore ill-formed values
+                    pass
+                else:
+                    if ims.tzinfo is None:
+                        # obsolete format with no timezone, cf.
+                        # https://tools.ietf.org/html/rfc7231#section-7.1.1.1
+                        ims = ims.replace(tzinfo=datetime.timezone.utc)
+                    if ims.tzinfo is datetime.timezone.utc:
+                        # compare to UTC datetime of last modification
+                        last_modif = datetime.datetime.fromtimestamp(
+                            fs.st_mtime, datetime.timezone.utc)
+                        # remove microseconds, like in If-Modified-Since
+                        last_modif = last_modif.replace(microsecond=0)
+
+                        if last_modif <= ims:
+                            self.send_response(HTTPStatus.NOT_MODIFIED)
+                            self.end_headers()
+                            f.close()
+                            return None
+
+            self.send_response(status)
+            self.send_header("Content-type", ctype)
+            self.send_header("Content-Length", str(fs[6]))
+            self.send_header("Last-Modified",
+                             self.date_time_string(fs.st_mtime))
             self.end_headers()
-            return
-
-        # Simulate partial download
-        partial_download = False
-        split_paths = os.path.split(self.path)
-
-        if split_paths[1] == partial_download_file and TestServer.first_time:
-            partial_download = True
-            TestServer.first_time = False
-            self.send_response(206)
-        else:
-            self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-
-        while True:
-            b = f.read(length)
-            if b == b"":
-                break
-
-            self.wfile.write(b)
-            if partial_download:
-                break
-
-            # Insert delay for slow server
-            time.sleep(time_delay)
-        self.wfile.flush()
-        f.close()
+            return f
+        except Exception:
+            f.close()
+            raise
 
 
 def parse_arguments():
@@ -181,13 +242,7 @@ if __name__ == "__main__":
     threshold = args.after_requests
     hang_server = args.hang_server
 
-    # The TestServer is used when simulating partial file download
-    # Otherwise use the SimpleServer
-    if partial_download_file:
-        request_handler = TestServer
-    else:
-        request_handler = SimpleServer
-    httpd = server.HTTPServer(addr, request_handler)
+    httpd = server.HTTPServer(addr, SimpleServer)
 
     # write pid to file to be read by other processes
     pid = os.getpid()

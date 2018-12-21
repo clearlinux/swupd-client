@@ -64,13 +64,13 @@ static int check_update()
 	if (ret != 0) {
 		return ret;
 	} else {
-		fprintf(stderr, "Current OS version: %d\n", current_version);
+		info("Current OS version: %d\n", current_version);
 		if (current_version < server_version) {
-			fprintf(stderr, "There is a new OS version available: %d\n", server_version);
+			info("There is a new OS version available: %d\n", server_version);
 			update_motd(server_version);
 			return 0; /* update available */
 		} else if (current_version >= server_version) {
-			fprintf(stderr, "There are no updates available\n");
+			info("There are no updates available\n");
 		}
 		return 1; /* No update available */
 	}
@@ -92,7 +92,7 @@ static bool parse_options(int argc, char **argv)
 	}
 
 	if (argc > optind) {
-		fprintf(stderr, "Error: unexpected arguments\n\n");
+		error("unexpected arguments\n\n");
 		return false;
 	}
 

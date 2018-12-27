@@ -28,8 +28,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "swupd.h"
 #include "lib/log.h"
+#include "swupd.h"
 #include "verifytime.h"
 
 static void print_help(void)

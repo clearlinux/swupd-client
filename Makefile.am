@@ -297,7 +297,7 @@ compliant:
 	elif [ $$ret -gt 1 ]; then \
 		exit $$ret; \
 	fi; \
-	clang-format -i -style=file src/**/*.h src/**/*.c; ret=$$?; \
+	clang-format -i -style=file src/*.[ch] src/lib/*.[ch] ; ret=$$?; \
 	if [ $$ret -ne 0 ]; then \
 		exit $$ret; \
 	fi; \

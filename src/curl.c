@@ -220,9 +220,9 @@ void swupd_curl_deinit(void)
 	curl_global_cleanup();
 }
 
-static size_t filesize_from_header_cb(void UNUSED_PARAM *func, size_t size, size_t nmemb, void UNUSED_PARAM *data)
+static size_t dummy_write_cb(void UNUSED_PARAM *func, size_t size, size_t nmemb, void UNUSED_PARAM *data)
 {
-	/* Drop the header, we just want file size */
+	/* Drop the content */
 	return (size_t)(size * nmemb);
 }
 
@@ -243,12 +243,17 @@ double swupd_curl_query_content_size(char *url)
 		return -1;
 	}
 
-	curl_ret = curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, filesize_from_header_cb);
+	curl_ret = curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, dummy_write_cb);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
 
 	curl_ret = curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
+	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, dummy_write_cb);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}

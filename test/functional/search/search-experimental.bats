@@ -44,11 +44,8 @@ global_teardown() {
 	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-bundle1"
 
 	assert_status_is 0
-	assert_in_output "Searching for 'test-bundle1'"
-	# there is going to be a whole lot of content within the line
-	# above and the lines below so we are excluding those from the
-	# check
 	expected_output=$(cat <<-EOM
+		Searching for 'test-bundle1'
 		Downloading Clear Linux manifests
 		.* MB total...
 		Completed manifests download.

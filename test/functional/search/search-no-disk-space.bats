@@ -60,15 +60,8 @@ test_setup() {
 	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-bundle2"
 
 	assert_status_is "$ERECURSE_MANIFEST"
-	assert_in_output "Searching for 'test-bundle2'"
-	# there is going to be a whole lot of content within the line
-	# above and the lines below so we are excluding those from the
-	# check
-	# TODO(castulo): there is a strange behavior with the way search
-	# works on travis, it adds all the content of the downloaded manifests
-	# into the command output. Once we figure out why this happens we
-	# need to check for the whole output using only one assertion
 	expected_output=$(cat <<-EOM
+		Searching for 'test-bundle2'
 		Downloading Clear Linux manifests
 		.* MB total...
 		Curl: Error downloading to local file - $TEST_DIRNAME/testfs/state/10/Manifest.test-bundle1.tar
@@ -81,6 +74,6 @@ test_setup() {
 		./usr/share/clear/bundles/test-bundle2
 	EOM
 	)
-	assert_regex_in_output "$expected_output"
+	assert_regex_is_output "$expected_output"
 
 }

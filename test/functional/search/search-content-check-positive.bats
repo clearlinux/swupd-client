@@ -49,7 +49,7 @@ global_teardown() {
 		./usr/share/clear/bundles/test-bundle1
 	EOM
 	)
-	assert_regex_in_output "$expected_output"
+	assert_regex_is_output "$expected_output"
 
 }
 

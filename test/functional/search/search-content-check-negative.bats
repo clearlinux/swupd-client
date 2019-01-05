@@ -46,7 +46,7 @@ global_teardown() {
 		Search term not found.
 	EOM
 	)
-	assert_regex_in_output "$expected_output"
+	assert_regex_is_output "$expected_output"
 
 }
 

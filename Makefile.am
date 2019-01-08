@@ -5,7 +5,6 @@ EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash
 AM_CFLAGS = -fPIC -O2 -g -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99 \
 	-Wall \
 	-Wextra \
-	-Wpedantic \
 	-Wformat-security \
 	-Wlogical-op \
 	-Wunreachable-code \

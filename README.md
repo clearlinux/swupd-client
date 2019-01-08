@@ -11,6 +11,8 @@ Use github issue report tool (https://github.com/clearlinux/swupd-client/issues)
 
 To help us to reproduce a bug reported, please attach the swupd command line, the command output, swupd version ('swupd -v' output) and clear linux version ('swupd info' output).
 
+For other questions, contact us in Clear Linux mailing list (dev@lists.clearlinux.org) or IRC channel ( #clearlinux on Freenode).
+
 ## How to contribute
 
 Swupd client is open for contributions, so we are more than willing to review your patches!

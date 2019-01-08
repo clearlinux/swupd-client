@@ -1783,6 +1783,9 @@ create_bundle() { # swupd_function
 	local manifest
 	local local_bundle=false
 	local experimental=false
+	local pfile
+	local pfile_name
+	local pfile_path
 
 	# If no parameters are received show help
 	if [ $# -eq 0 ]; then
@@ -1888,23 +1891,33 @@ create_bundle() { # swupd_function
 				bundle_dir=$(create_dir "$files_path")
 				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			fi
+		else
+			fdir=""
 		fi
-		bundle_link=$(create_link "$files_path")
-		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
-		add_to_manifest "$manifest" "$bundle_link" "$val"
-		# Add the file pointed by the link to the zero pack of the bundle
-		pfile=$(basename "$(readlink -f "$bundle_link")")
+		# first create the file that will be pointed by the symlink
+		pfile=$(create_file "$files_path")
+		pfile_name=$(generate_random_name file_)
+		pfile_path="$fdir"/"$pfile_name"
+		# temporarily rename the file to the name it will have in the file system
+		# so we can create the symlink with the correct name
+		sudo mv "$pfile" "$(dirname "$pfile")"/"$pfile_name"
+		bundle_link=$(create_link "$files_path" "$(dirname "$pfile")"/"$pfile_name")
+		sudo mv "$(dirname "$pfile")"/"$pfile_name" "$pfile"
+		# add the pointed file to the zero pack and manifest
 		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$pfile")"
+		add_to_manifest "$manifest" "$pfile" "$pfile_path"
+		# add the symlink to zero pack and manifest
+		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
+		add_to_manifest -s "$manifest" "$bundle_link" "$val"
 		if [ "$DEBUG" == true ]; then
 			echo "link -> $bundle_link"
-			echo "file pointed to -> $(readlink -f "$bundle_link")"
+			echo "file pointed to -> $pfile"
 		fi
 		if [ "$local_bundle" = true ]; then
 			sudo mkdir -p "$target_path$(dirname "$val")"
 			# if local_bundle is enabled copy the link to target-dir but also
 			# copy the file it points to
-			pfile_path=$(awk "/$(basename $pfile)/"'{ print $4 }' "$manifest")
-			sudo cp "$files_path"/"$pfile" "$target_path$pfile_path"
+			sudo cp "$pfile" "$target_path$pfile_path"
 			sudo ln -rs "$target_path$pfile_path" "$target_path$val"
 		fi
 	done
@@ -1922,6 +1935,8 @@ create_bundle() { # swupd_function
 				bundle_dir=$(create_dir "$files_path")
 				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			fi
+		else
+			fdir=""
 		fi
 		# Create a link passing a file that does not exits
 		bundle_link=$(create_link "$files_path" "$files_path"/"$(generate_random_name does_not_exist-)")
@@ -2133,6 +2148,7 @@ update_bundle() { # swupd_function
 	local to_manifest_content
 	local from_manifest
 	local from_manifest_content
+	local file_tar
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
@@ -2206,7 +2222,10 @@ update_bundle() { # swupd_function
 		files=("$(ls -I "*.tar" "$version_path"/files)")
 		for bundle_file in ${files[*]}; do
 			if [ ! -e "$version_path"/files/"$bundle_file".tar ]; then
-				create_tar "$version_path"/files/"$bundle_file"
+				# find the existing tar in previous versions and copy
+				# it to the current directory
+				file_tar=$(sudo find -name "$bundle_file".tar | head -n 1)
+				sudo cp "$file_tar" "$version_path"/files/"$bundle_file".tar
 			fi
 		done
 	fi

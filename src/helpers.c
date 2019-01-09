@@ -690,13 +690,9 @@ int get_dirfd_path(const char *fullname)
 	}
 
 	if (strcmp(real_path, dir) != 0) {
-		/* FIXME: Should instead check to see if real_path is marked
-		 * non-deleted in the consolidated manifest. If it is
-		 * non-deleted, then we must not delete the file (and also not
-		 * flag an error); otherwise, it can be safely deleted. Until
-		 * that check is implemented, always skip the file, because we
-		 * cannot safely determine if it can be deleted. */
-		ret = -1;
+		/* The path to the file contains a symlink, skip the file,
+		 * because we cannot safely determine if it can be deleted. */
+		ret = -2;
 		close(fd);
 	} else {
 		ret = fd;

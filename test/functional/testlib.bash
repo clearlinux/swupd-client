@@ -1755,14 +1755,14 @@ create_bundle() { # swupd_function
 		# this file is added in every bundle by default, it would add too much overhead
 		# for most tests
 		fdir=$(dirname "${val%:*}")
-		if [ ! "$(sudo cat "$manifest" | grep -x "[D|L]\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/usr/share/clear/bundles" ] \
+		if [ ! "$(sudo cat "$manifest" | grep -x "[DL]\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/usr/share/clear/bundles" ] \
 		&& [ "$fdir" != "/" ]; then
 			bundle_dir=$(create_dir "$files_path")
 			add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			# add each one of the directories of the path if they are not in the manifest already
 			while [ "$(dirname "$fdir")" != "/" ]; do
 				fdir=$(dirname "$fdir")
-				if [ ! "$(sudo cat "$manifest" | grep -x "[D|L]\\.\\.\\..*$fdir")" ]; then
+				if [ ! "$(sudo cat "$manifest" | grep -x "[DL]\\.\\.\\..*$fdir")" ]; then
 					add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 				fi
 			done
@@ -1867,7 +1867,7 @@ create_bundle() { # swupd_function
 		# add it to the bundle (except if the directory is "/")
 		fdir=$(dirname "$val")
 		if [ "$fdir" != "/" ]; then
-			if [ ! "$(sudo cat "$manifest" | grep -x "[D|L]\\.\\.\\..*$fdir")" ]; then
+			if [ ! "$(sudo cat "$manifest" | grep -x "[DL]\\.\\.\\..*$fdir")" ]; then
 				bundle_dir=$(create_dir "$files_path")
 				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			fi
@@ -1935,7 +1935,7 @@ create_bundle() { # swupd_function
 		# add it to the bundle (except if the directory is "/")
 		fdir=$(dirname "$val")
 		if [ "$fdir" != "/" ]; then
-			if [ ! "$(sudo cat "$manifest" | grep -x "[D|L]\\.\\.\\..*$fdir")" ]; then
+			if [ ! "$(sudo cat "$manifest" | grep -x "[DL]\\.\\.\\..*$fdir")" ]; then
 				bundle_dir=$(create_dir "$files_path")
 				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			fi
@@ -1979,7 +1979,7 @@ create_bundle() { # swupd_function
 		# add it to the bundle (except if the directory is "/")
 		fdir=$(dirname "$val")
 		if [ "$fdir" != "/" ]; then
-			if [ ! "$(sudo cat "$manifest" | grep -x "[D|L]\\.\\.\\..*$fdir")" ]; then
+			if [ ! "$(sudo cat "$manifest" | grep -x "[DL]\\.\\.\\..*$fdir")" ]; then
 				bundle_dir=$(create_dir "$files_path")
 				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			fi

@@ -455,20 +455,22 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 			goto out;
 		}
 
+		fd = get_dirfd_path(fullname);
+		if (fd < 0) {
+			if (fd == -1) {
+				counts.extraneous++;
+				counts.not_deleted++;
+			}
+			goto out;
+		}
+
 		counts.extraneous++;
 		printf("File that should be deleted: %s\n", fullname);
 
 		/* if not repairing, we're done */
 		if (!repair) {
+			close(fd);
 			goto out;
-		}
-
-		fd = get_dirfd_path(fullname);
-		if (fd < 0) {
-			fprintf(stderr, "Not safe to delete: %s\n", fullname);
-			free_string(&fullname);
-			counts.not_deleted++;
-			continue;
 		}
 
 		base = basename(fullname);

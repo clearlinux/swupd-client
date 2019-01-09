@@ -1722,7 +1722,8 @@ create_bundle() { # swupd_function
 		    -v    The version for the bundle, if non selected version 10 will be used
 		    -d    Comma-separated list of directories to be included in the bundle
 		    -f    Comma-separated list of files to be created and included in the bundle
-		    -l    Comma-separated list of symlinks to be created and included in the bundle
+		    -l    Comma-separated list of symlinks to files to be created and included in the bundle
+		    -c    Comma-separated list of symlinks to directories to be created and included in the bundle
 		    -b    Comma-separated list of dangling (broken) symlinks to be created and included in the bundle
 
 		Notes:
@@ -1754,14 +1755,14 @@ create_bundle() { # swupd_function
 		# this file is added in every bundle by default, it would add too much overhead
 		# for most tests
 		fdir=$(dirname "${val%:*}")
-		if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/usr/share/clear/bundles" ] \
+		if [ ! "$(sudo cat "$manifest" | grep -x "[D|L]\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/usr/share/clear/bundles" ] \
 		&& [ "$fdir" != "/" ]; then
 			bundle_dir=$(create_dir "$files_path")
 			add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			# add each one of the directories of the path if they are not in the manifest already
 			while [ "$(dirname "$fdir")" != "/" ]; do
 				fdir=$(dirname "$fdir")
-				if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
+				if [ ! "$(sudo cat "$manifest" | grep -x "[D|L]\\.\\.\\..*$fdir")" ]; then
 					add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 				fi
 			done
@@ -1775,6 +1776,7 @@ create_bundle() { # swupd_function
 	local file_list
 	local link_list
 	local dangling_link_list
+	local dlink_list
 	local version
 	local bundle_name
 	local env_name
@@ -1786,6 +1788,8 @@ create_bundle() { # swupd_function
 	local pfile
 	local pfile_name
 	local pfile_path
+	local dir_name
+	local dir_path
 
 	# If no parameters are received show help
 	if [ $# -eq 0 ]; then
@@ -1793,12 +1797,13 @@ create_bundle() { # swupd_function
 		return
 	fi
 	set -f  # turn off globbing
-	while getopts :v:d:f:l:b:n:Le opt; do
+	while getopts :v:d:f:l:b:c:n:Le opt; do
 		case "$opt" in
 			d)	IFS=, read -r -a dir_list <<< "$OPTARG"  ;;
 			f)	IFS=, read -r -a file_list <<< "$OPTARG" ;;
 			l)	IFS=, read -r -a link_list <<< "$OPTARG" ;;
 			b)	IFS=, read -r -a dangling_link_list <<< "$OPTARG" ;;
+			c)	IFS=, read -r -a dlink_list <<< "$OPTARG" ;;
 			n)	bundle_name="$OPTARG" ;;
 			v)	version="$OPTARG" ;;
 			L)	local_bundle=true ;;
@@ -1853,7 +1858,50 @@ create_bundle() { # swupd_function
 		fi
 	done
 	
-	# 3) Create the requested file(s)
+	# 3) Create the requested link(s) to directories in the bundle
+	for val in "${dlink_list[@]}"; do
+		if [[ "$val" != "/"* ]]; then
+			val=/"$val"
+		fi
+		# if the directory the link is doesn't exist,
+		# add it to the bundle (except if the directory is "/")
+		fdir=$(dirname "$val")
+		if [ "$fdir" != "/" ]; then
+			if [ ! "$(sudo cat "$manifest" | grep -x "[D|L]\\.\\.\\..*$fdir")" ]; then
+				bundle_dir=$(create_dir "$files_path")
+				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
+			fi
+		else
+			fdir=""
+		fi
+		# first create the directory that will be pointed by the symlink
+		bundle_dir=$(create_dir "$files_path")
+		dir_name=$(generate_random_name dir_)
+		dir_path="$fdir"/"$dir_name"
+		# temporarily rename the dir to the name it will have in the file system
+		# so we can create the symlink with the correct name
+		sudo mv "$bundle_dir" "$(dirname "$bundle_dir")"/"$dir_name"
+		bundle_link=$(create_link "$files_path" "$(dirname "$bundle_dir")"/"$dir_name")
+		sudo mv "$(dirname "$bundle_dir")"/"$dir_name" "$bundle_dir"
+		# add the pointed file to the manifest (no need to add it to the pack)
+		add_to_manifest "$manifest" "$bundle_dir" "$dir_path"
+		# add the symlink to zero pack and manifest
+		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
+		add_to_manifest -s "$manifest" "$bundle_link" "$val"
+		if [ "$DEBUG" == true ]; then
+			echo "link -> $bundle_link"
+			echo "directory pointed to -> $bundle_dir"
+		fi
+		if [ "$local_bundle" = true ]; then
+			sudo mkdir -p "$target_path$(dirname "$val")"
+			# if local_bundle is enabled copy the link to target-dir but also
+			# copy the dir it points to
+			sudo cp -r "$bundle_dir" "$target_path$dir_path"
+			sudo ln -rs "$target_path$dir_path" "$target_path$val"
+		fi
+	done
+
+	# 4) Create the requested file(s)
 	for val in "${file_list[@]}"; do
 		add_dirs
 		# if the user wants to use an existing file, use it, else create a new one
@@ -1878,7 +1926,7 @@ create_bundle() { # swupd_function
 		fi 
 	done
 	
-	# 4) Create the requested link(s) in the bundle
+	# 5) Create the requested link(s) to files in the bundle
 	for val in "${link_list[@]}"; do
 		if [[ "$val" != "/"* ]]; then
 			val=/"$val"
@@ -1887,7 +1935,7 @@ create_bundle() { # swupd_function
 		# add it to the bundle (except if the directory is "/")
 		fdir=$(dirname "$val")
 		if [ "$fdir" != "/" ]; then
-			if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
+			if [ ! "$(sudo cat "$manifest" | grep -x "[D|L]\\.\\.\\..*$fdir")" ]; then
 				bundle_dir=$(create_dir "$files_path")
 				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			fi
@@ -1921,8 +1969,8 @@ create_bundle() { # swupd_function
 			sudo ln -rs "$target_path$pfile_path" "$target_path$val"
 		fi
 	done
-	
-	# 5) Create the requested dangling link(s) in the bundle
+
+	# 6) Create the requested dangling link(s) in the bundle
 	for val in "${dangling_link_list[@]}"; do
 		if [[ "$val" != "/"* ]]; then
 			val=/"$val"
@@ -1931,7 +1979,7 @@ create_bundle() { # swupd_function
 		# add it to the bundle (except if the directory is "/")
 		fdir=$(dirname "$val")
 		if [ "$fdir" != "/" ]; then
-			if [ ! "$(sudo cat "$manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
+			if [ ! "$(sudo cat "$manifest" | grep -x "[D|L]\\.\\.\\..*$fdir")" ]; then
 				bundle_dir=$(create_dir "$files_path")
 				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			fi
@@ -1954,18 +2002,18 @@ create_bundle() { # swupd_function
 		fi
 	done
 
-	# 6) Add the bundle to the MoM (do not use -p option so the MoM's tar is created and signed)
+	# 7) Add the bundle to the MoM (do not use -p option so the MoM's tar is created and signed)
 	if [ "$experimental" = true ]; then
 		add_to_manifest -e "$version_path"/Manifest.MoM "$manifest" "$bundle_name"
 	else
 		add_to_manifest "$version_path"/Manifest.MoM "$manifest" "$bundle_name"
 	fi
 
-	# 7) Create/renew manifest tars
+	# 8) Create/renew manifest tars
 	sudo rm -f "$manifest".tar
 	create_tar "$manifest"
 
-	# 8) Create the subscription to the bundle if the local_bundle flag is enabled
+	# 9) Create the subscription to the bundle if the local_bundle flag is enabled
 	if [ "$local_bundle" = true ]; then
 		sudo touch "$target_path"/usr/share/clear/bundles/"$bundle_name"
 	fi

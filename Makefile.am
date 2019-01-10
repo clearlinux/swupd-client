@@ -231,6 +231,7 @@ BATS = \
 	test/functional/verify/verify-boot-file.bats \
 	test/functional/verify/verify-boot-file-deleted.bats \
 	test/functional/verify/verify-boot-skip.bats \
+	test/functional/verify/verify-bundle.bats \
 	test/functional/verify/verify-client-certificate.bats \
 	test/functional/verify/verify-directory-tree-deleted.bats \
 	test/functional/verify/verify-empty-dir-deleted.bats \

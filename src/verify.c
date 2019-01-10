@@ -45,6 +45,7 @@ static const char *cmdline_option_picky_tree = "/usr";
 static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
 static bool cmdline_option_install = false;
 static bool cmdline_option_quick = false;
+static struct list *cmdline_bundles = NULL;
 
 /* picky_whitelist points to picky_whitelist_buffer if and only if regcomp() was called for it */
 static regex_t *picky_whitelist;
@@ -64,6 +65,7 @@ static const struct option prog_opts[] = {
 	{ "picky-tree", required_argument, 0, 'X' },
 	{ "picky-whitelist", required_argument, 0, 'w' },
 	{ "quick", no_argument, 0, 'q' },
+	{ "bundles", required_argument, 0, 'B' },
 };
 
 static void print_help(void)
@@ -83,6 +85,7 @@ static void print_help(void)
 	fprintf(stderr, "   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
 	fprintf(stderr, "   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory\n");
 	fprintf(stderr, "   -q, --quick             Don't compare hashes, only fix missing files\n");
+	fprintf(stderr, "   -B, --bundles=[BUNDLES] Ensure BUNDLES are installed correctly. Example: --bundles=os-core,vi\n");
 	fprintf(stderr, "\n");
 }
 
@@ -557,6 +560,20 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		cmdline_option_picky_whitelist = optarg;
 		return true;
+	case 'B': {
+		char *arg_copy = strdup_or_die(optarg);
+		char *token = strtok(arg_copy, ",");
+		while (token) {
+			cmdline_bundles = list_prepend_data(cmdline_bundles, strdup_or_die(token));
+			token = strtok(NULL, ",");
+		}
+		free(arg_copy);
+		if (!cmdline_bundles) {
+			fprintf(stderr, "Missing --bundle argument\n\n");
+			return false;
+		}
+		return true;
+	}
 	default:
 		return false;
 	}
@@ -661,7 +678,14 @@ int verify_main(int argc, char **argv)
 
 	fprintf(stderr, "Verifying version %i\n", version);
 
-	read_subscriptions(&subs);
+	if (cmdline_bundles) {
+		while (cmdline_bundles) {
+			create_and_append_subscription(&subs, cmdline_bundles->data);
+			cmdline_bundles = list_free_item(cmdline_bundles, free);
+		}
+	} else {
+		read_subscriptions(&subs);
+	}
 
 	/*
 	 * FIXME: We need a command line option to override this in case the

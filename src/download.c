@@ -100,7 +100,7 @@ struct swupd_curl_parallel_handle {
 struct multi_curl_file {
 	struct curl_file file; /* Curl file information */
 
-	int err;  /* the error code if the file failed to download */
+	int err;	  /* the error code if the file failed to download */
 	char retries;     /* Number of retried performed so far */
 	CURL *curl;       /* curl handle if downloading */
 	char *url;	/* The url to be downloaded from */

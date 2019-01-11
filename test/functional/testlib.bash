@@ -2380,7 +2380,7 @@ update_bundle() { # swupd_function
 			if [ ! -e "$version_path"/files/"$bundle_file".tar ]; then
 				# find the existing tar in previous versions and copy
 				# it to the current directory
-				file_tar=$(sudo find -name "$bundle_file".tar | head -n 1)
+				file_tar=$(sudo find "$WEBDIR" -name "$bundle_file".tar | head -n 1)
 				sudo cp "$file_tar" "$version_path"/files/"$bundle_file".tar
 			fi
 		done

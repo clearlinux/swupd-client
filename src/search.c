@@ -828,7 +828,7 @@ int search_main(int argc, char **argv)
 
 	ret = download_manifests(&MoM);
 	if (ret != 0) {
-		if (ret == ERECURSE_MANIFEST ) {
+		if (ret == ERECURSE_MANIFEST) {
 			fprintf(stderr, "Warning: One or more manifests failed to download, search results will be partial.\n");
 		} else {
 			fprintf(stderr, "Error: Failed to download manifests\n");

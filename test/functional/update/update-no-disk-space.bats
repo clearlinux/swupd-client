@@ -26,7 +26,7 @@ test_setup() {
 
 }
 
-@test "UPD042: Updating a system with no disk space left (downloading the current MoM)" {
+@test "UPD045: Updating a system with no disk space left (downloading the current MoM)" {
 
 	# When updating a system and we run out of disk space while downloading the
 	# MoMs we should not retry the download since it will fail for sure
@@ -50,7 +50,7 @@ test_setup() {
 
 }
 
-@test "UPD043: Updating a system with no disk space left (downloading the server MoM)" {
+@test "UPD046: Updating a system with no disk space left (downloading the server MoM)" {
 
 	# When updating a system and we run out of disk space while downloading the
 	# MoMs we should not retry the download since it will fail for sure
@@ -80,7 +80,7 @@ test_setup() {
 
 }
 
-@test "UPD044: Updating a system with no disk space left (downloading the current bundle manifests)" {
+@test "UPD047: Updating a system with no disk space left (downloading the current bundle manifests)" {
 
 	# When updating a system and we run out of disk space while downloading the
 	# bundle manifest we should not retry the download since it will fail for sure
@@ -111,7 +111,7 @@ test_setup() {
 
 }
 
-@test "UPD045: Updating a system with no disk space left (downloading the server bundle manifests)" {
+@test "UPD048: Updating a system with no disk space left (downloading the server bundle manifests)" {
 
 	# When updating a system and we run out of disk space while downloading the
 	# bundle manifest we should not retry the download since it will fail for sure
@@ -142,7 +142,7 @@ test_setup() {
 
 }
 
-@test "UPD046: Updating a system with no disk space left (downloading the bundle files)" {
+@test "UPD049: Updating a system with no disk space left (downloading the bundle files)" {
 
 	# When updating a system and we run out of disk space while downloading the
 	# bundle files we should not retry the download since it will fail for sure

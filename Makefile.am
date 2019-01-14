@@ -327,9 +327,8 @@ compliant:
 
 # Ignore SC2207 because that's the standard way to fill COMPREPLY
 # Ignore SC1008 because scripts are using an unsupported shebang
-# TODO: Run shellcheck in testlib after issue #662 is fixed
 shellcheck:
-	for i in $$(git diff --name-only origin/master HEAD | \grep -E "\.bats|\.bash" | \grep -v testlib.bash); do \
+	for i in $$(git diff --name-only origin/master HEAD | \grep -E "\.bats|\.bash"); do \
 		echo checking "$$i"; \
 		sed 's/^@.*/func() {/' "$$i" | \
 		sed 's/^load.*/source test\/functional\/testlib.bash/' | \

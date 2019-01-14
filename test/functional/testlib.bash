@@ -43,7 +43,7 @@ generate_random_content() { # swupd_function
 	local bottom_range=${1:-5}
 	local top_range=${2:-100}
 	local range=$((top_range - bottom_range + 1))
-	local number_of_lines=$((RANDOM%range+$bottom_range))
+	local number_of_lines=$((RANDOM%range + bottom_range))
 	< /dev/urandom tr -dc 'a-zA-Z0-9-_!@#$%^&*()_+{}|:<>?=' | fold -w 100 | head -n $number_of_lines
 
 }
@@ -52,7 +52,7 @@ generate_random_name() { # swupd_function
 
 	local prefix=${1:-test-}
 	local uuid
-	
+
 	# generate random 8 character alphanumeric string (lowercase only)
 	uuid=$(< /dev/urandom tr -dc 'a-f0-9' | fold -w 8 | head -n 1)
 	echo "$prefix$uuid"
@@ -177,7 +177,7 @@ print() { # swupd_function
 	local msg=$1
 	# if file descriptor 3 is not available (for example when sourcing the library
 	# from the command line) use std output instead
-	if { >&3; } 2> /dev/null; then
+	if { true >&3; } 2> /dev/null; then
 		echo -e "$msg" >&3
 	else
 		echo -e "$msg"
@@ -262,7 +262,7 @@ write_to_protected_file() { # swupd_function
 	[ "$1" = "-a" ] && { arg=-a ; shift ; }
 	local file=${1?Missing output file in write_to_protected_file}
 	shift
-	printf "$@" | sudo tee $arg "$file" >/dev/null
+	printf '%b' "$@" | sudo tee $arg "$file" >/dev/null
 
 }
 
@@ -311,7 +311,8 @@ set_env_variables() { # swupd_function
 	fi
 
 	if [ -f "$SERVER_PID_FILE" ]; then
-		export SERVER_PID=$(cat "$SERVER_PID_FILE")
+		SERVER_PID=$(cat "$SERVER_PID_FILE")
+		export SERVER_PID
 	fi
 
 }
@@ -319,9 +320,9 @@ set_env_variables() { # swupd_function
 # Creates a directory with a hashed name in the specified path, if a directory
 # already exists it returns the name
 # Parameters:
-# - PATH: the path where the directory will be created 
+# - PATH: the path where the directory will be created
 create_dir() { # swupd_function
-	
+
 	local path=$1
 	local hashed_name
 	local directory
@@ -335,7 +336,7 @@ create_dir() { # swupd_function
 		return
 	fi
 	validate_path "$path"
-	
+
 	# most directories have the same hash, so we only need one directory
 	# in the files directory, if there is already one just return the path/name
 	directory=$(find "$path"/* -type d 2> /dev/null)
@@ -357,7 +358,7 @@ create_dir() { # swupd_function
 # - SIZE: the size of the file (in bytes), if nothing is specified the size
 #         will be random but fairly small
 create_file() { # swupd_function
- 
+
 	local path=$1
 	local size=$2
 	local hashed_name
@@ -407,7 +408,7 @@ create_link() { # swupd_function
 		return
 	fi
 	validate_path "$path"
-	
+
 	# if no file is specified, create one
 	if [ -z "$pfile" ]; then
 		pfile=$(create_file "$path")
@@ -471,7 +472,7 @@ update_minversion() { # swupd_function
 	local version
 
 	# Read the MoM in the minversion's directory to determine bundles that need updates
-	while read line; do
+	while read -r line; do
 		# Header fields will not have an integer in 3rd column, so they will be skipped
 		version=$(echo "$line" | awk '{print $3;}')
 		if [[ ! "$version" =~ ^[0-9]+$ ]]; then
@@ -505,7 +506,7 @@ update_bundle_minversion() { # swupd_function
 	local minversion_dir="$WEBDIR"/"$minversion"
 	local file_version
 
-	while read line; do
+	while read -r line; do
 		# Header fields will not have an integer in 3rd column, so they will be skipped
 		file_version=$(echo "$line" | awk '{print $3;}')
 		if [[ ! "$file_version" =~ ^[0-9]+$ ]]; then
@@ -565,7 +566,7 @@ create_manifest() { # swupd_function
 		printf '\n'
 	} | sudo tee "$path"/Manifest."$name" > /dev/null
 	echo "$path/Manifest.$name"
-	
+
 }
 
 # Re-creates a manifest's tar, updates the hashes in the MoM and signs it
@@ -668,7 +669,7 @@ add_to_manifest() { # swupd_function
 	filecount=$(awk '/^filecount/ { print $2}' "$manifest")
 	filecount=$((filecount + 1))
 	sudo sed -i "s/^filecount:.*/filecount:\\t$filecount/" "$manifest"
-	# add to contentsize 
+	# add to contentsize
 	contentsize=$(awk '/^contentsize/ { print $2}' "$manifest")
 	contentsize=$((contentsize + item_size))
 	# get the item type
@@ -690,7 +691,7 @@ add_to_manifest() { # swupd_function
 		# its associated file too, unless it is a dangling link
 		linked_file=$(readlink "$item")
 		if [ -e "$(dirname "$item")"/"$linked_file" ]; then
-			if [ ! "$(sudo cat "$manifest" | grep "$linked_file")" ]; then
+			if ! sudo cat "$manifest" | grep -q "$linked_file"; then
 				file_path="$(dirname "$item_path")"
 				if [ "$file_path" = "/" ]; then
 					file_path=""
@@ -889,30 +890,30 @@ update_manifest() { # swupd_function
 		# Replace manifest version when older than minversion
 		manifest_version=$(awk '/^version:/ {print $2}' "$manifest")
 		if [ "$manifest_version" -lt "$var" ]; then
-			sudo sed -i "/^version:\t/ s/[0-9]\+/$var/" "$manifest"
+			sudo sed -i "/^version:\\t/ s/[0-9]\\+/$var/" "$manifest"
 		fi
 		# Replace file versions with minversion when less than minversion
-		sudo gawk -i inplace -v var="$var" '{if($3 != "" && $3<var) {$3=var} print }' OFS="\t" "$manifest"
+		sudo gawk -i inplace -v var="$var" '{if($3 != "" && $3<var) {$3=var} print }' OFS="\\t" "$manifest"
 		;;
 	file-status)
 		validate_param "$value"
-		sudo sed -i "/\\t$var$/s/....\(\\t.*\\t.*\\t.*$\)/$value\1/g" "$manifest"
-		sudo sed -i "/\\t$var\\t/s/....\(\\t.*\\t.*\\t.*$\)/$value\1/g" "$manifest"
+		sudo sed -i "/\\t$var$/s/....\\(\\t.*\\t.*\\t.*$\\)/$value\\1/g" "$manifest"
+		sudo sed -i "/\\t$var\\t/s/....\\(\\t.*\\t.*\\t.*$\\)/$value\\1/g" "$manifest"
 		;;
 	file-hash)
 		validate_param "$value"
-		sudo sed -i "/\\t$var$/s/\(....\\t\).*\(\\t.*\\t\)/\1$value\2/g" "$manifest"
-		sudo sed -i "/\\t$var\\t/s/\(....\\t\).*\(\\t.*\\t\)/\1$value\2/g" "$manifest"
+		sudo sed -i "/\\t$var$/s/\\(....\\t\\).*\\(\\t.*\\t\\)/\\1$value\\2/g" "$manifest"
+		sudo sed -i "/\\t$var\\t/s/\\(....\\t\\).*\\(\\t.*\\t\\)/\\1$value\\2/g" "$manifest"
 		;;
 	file-version)
 		validate_param "$value"
-		sudo sed -i "/\\t$var$/s/\(....\\t.*\\t\).*\(\\t\)/\1$value\2/g" "$manifest"
-		sudo sed -i "/\\t$var\\t/s/\(....\\t.*\\t\).*\(\\t\)/\1$value\2/g" "$manifest"
+		sudo sed -i "/\\t$var$/s/\\(....\\t.*\\t\\).*\\(\\t\\)/\\1$value\\2/g" "$manifest"
+		sudo sed -i "/\\t$var\\t/s/\\(....\\t.*\\t\\).*\\(\\t\\)/\\1$value\\2/g" "$manifest"
 		;;
 	file-name)
 		validate_param "$value"
-		sudo sed -i "/\\t$var$/s/\(....\\t.*\\t.*\\t\).*/\1$value/g" "$manifest"
-		sudo sed -i "/\\t$var\\t/s/\(....\\t.*\\t.*\\t\).*/\1$value/g" "$manifest"
+		sudo sed -i "/\\t$var$/s/\\(....\\t.*\\t.*\\t\\).*/\\1$value/g" "$manifest"
+		sudo sed -i "/\\t$var\\t/s/\\(....\\t.*\\t.*\\t\\).*/\\1$value/g" "$manifest"
 		;;
 	*)
 		terminate "Please select a valid key for updating the manifest"
@@ -950,16 +951,16 @@ update_hashes_in_mom() { # swupd_function
 
 	IFS=$'\n'
 	if [ "$(basename "$manifest")" = Manifest.MoM ]; then
-		bundles=("$(sudo cat "$manifest" | grep -x "M\.\.\..*" | awk '{ print $4 }')")
+		bundles=("$(sudo cat "$manifest" | grep -x "M\\.\\.\\..*" | awk '{ print $4 }')")
 		for bundle in ${bundles[*]}; do
 			# if the hash of the manifest changed, update it
 			bundle_old_hash=$(get_hash_from_manifest "$manifest" "$bundle")
 			bundle_new_hash=$(sudo "$SWUPD" hashdump "$path"/Manifest."$bundle" 2> /dev/null)
 			if [ "$bundle_old_hash" != "$bundle_new_hash" ] && [ "$bundle_new_hash" != "$zero_hash" ]; then
 				# replace old hash with new hash
-				sudo sed -i "/\\t$bundle_old_hash\\t/s/\(....\\t\).*\(\\t.*\\t\)/\1$bundle_new_hash\2/g" "$manifest"
+				sudo sed -i "/\\t$bundle_old_hash\\t/s/\\(....\\t\\).*\\(\\t.*\\t\\)/\\1$bundle_new_hash\\2/g" "$manifest"
 				# replace old version with new version
-				sudo sed -i "/\\t$bundle_new_hash\\t/s/\(....\\t.*\\t\).*\(\\t\)/\1$(basename "$path")\2/g" "$manifest"
+				sudo sed -i "/\\t$bundle_new_hash\\t/s/\\(....\\t.*\\t\\).*\\(\\t\\)/\\1$(basename "$path")\\2/g" "$manifest"
 			fi
 		done
 		# re-order items on the manifest so they are in the correct order based on version
@@ -1001,6 +1002,10 @@ bump_format() { # swupd_function
 	validate_path "$env_name"
 
 	# find the latest version and MoM
+	# shellcheck disable=SC2010
+	# SC2010: Don't use ls | grep. Use a glob.
+	# Exception: ls has sorting options that are tricky
+	# to get right with other commands.
 	version="$(ls "$env_name"/web-dir | grep -E '^[0-9]+$' | sort -rn | head -n1)"
 	middle_version="$((version+10))"
 	middle_version_path="$env_name"/web-dir/"$middle_version"
@@ -1019,7 +1024,7 @@ bump_format() { # swupd_function
 
 	# update the new version
 	# copy all manifests in MoM to new version
-	bundles=($(awk '/^M\.\.\./ { print $4 }' "$mom"))
+	mapfile -t bundles < <(awk '/^M\.\.\./ { print $4 }' "$mom")
 	IFS=$'\n'
 	for bundle in ${bundles[*]}; do
 		# search for the latest manifest version for the bundle
@@ -1050,7 +1055,7 @@ bump_format() { # swupd_function
 		fi
 		update_manifest -p "$manifest" format "$((format+1))"
 		# update manifest content with latest version
-		sudo sed -i "/....\\t.*\\t.*\\t.*$/s/\(....\\t.*\\t\).*\(\\t\)/\1$new_version\2/g" "$manifest"
+		sudo sed -i "/....\\t.*\\t.*\\t.*$/s/\\(....\\t.*\\t\\).*\\(\\t\\)/\\1$new_version\\2/g" "$manifest"
 		sudo rm -rf "$manifest".tar
 		create_tar "$manifest"
 	done
@@ -1068,15 +1073,15 @@ bump_format() { # swupd_function
 	update_manifest -p "$mom" format "$((format))"
 	update_manifest -p "$mom" version "$middle_version"
 	update_manifest -p "$mom" previous "$version"
-	sudo sed -i "/....\\t.*\\t.*\\t.*$/s/\(....\\t.*\\t\).*\(\\t\)/\1$middle_version\2/g" "$mom"
-	bundles=($(awk '/^M\.\.\./ { print $4 }' "$mom"))
+	sudo sed -i "/....\\t.*\\t.*\\t.*$/s/\\(....\\t.*\\t\\).*\\(\\t\\)/\\1$middle_version\\2/g" "$mom"
+	mapfile -t bundles < <(awk '/^M\.\.\./ { print $4 }' "$mom")
 	IFS=$'\n'
 	for bundle in ${bundles[*]}; do
 		manifest="$middle_version_path"/Manifest."$bundle"
 		update_manifest -p "$manifest" format "$((format))"
 		update_manifest -p "$manifest" version "$middle_version"
 		update_manifest -p "$manifest" previous "$version"
-		sudo sed -i "/....\\t.*\\t.*\\t.*$/s/\(....\\t.*\\t\).*\(\\t\)/\1$middle_version\2/g" "$manifest"
+		sudo sed -i "/....\\t.*\\t.*\\t.*$/s/\\(....\\t.*\\t\\).*\\(\\t\\)/\\1$middle_version\\2/g" "$manifest"
 		sudo rm -rf "$manifest".tar
 		create_tar "$manifest"
 	done
@@ -1143,11 +1148,10 @@ set_current_version() { # swupd_function
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
-		echo "$(cat <<-EOM
+		cat <<-EOM
 			Usage:
 			    set_current_version <environment_name> <new_version>
 			EOM
-		)"
 		return
 	fi
 	validate_path "$env_name"
@@ -1294,11 +1298,11 @@ create_version() { # swupd_function
 			# if no os-core manifest was found, nothing else needs to be done
 			if [ -e "$env_name"/web-dir/"$oldversion"/Manifest.os-core ]; then
 				update_bundle -p "$env_name" os-core --header-only
-				if [ ! -z "$(get_hash_from_manifest "$env_name"/web-dir/"$oldversion"/Manifest.os-core /usr/lib/os-release)" ]; then
+				if [ -n "$(get_hash_from_manifest "$env_name"/web-dir/"$oldversion"/Manifest.os-core /usr/lib/os-release)" ]; then
 					remove_from_manifest -p "$env_name"/web-dir/"$version"/Manifest.os-core /usr/lib/os-release
 				fi
 				update_bundle -p "$env_name" os-core --add /usr/lib/os-release:"$OS_RELEASE"
-				if [ ! -z "$(get_hash_from_manifest "$env_name"/web-dir/"$oldversion"/Manifest.os-core /usr/share/defaults/swupd/format)" ]; then
+				if [ -n "$(get_hash_from_manifest "$env_name"/web-dir/"$oldversion"/Manifest.os-core /usr/share/defaults/swupd/format)" ]; then
 					remove_from_manifest -p "$env_name"/web-dir/"$version"/Manifest.os-core /usr/share/defaults/swupd/format
 				fi
 				# update without -p flag to refresh tar and MoM
@@ -1344,9 +1348,8 @@ create_test_environment() { # swupd_function
 	local release_files=false
 	local size=0
 	local path
-	local tagetdir
+	local targetdir
 	local statedir
-	local fs
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
@@ -1374,7 +1377,7 @@ create_test_environment() { # swupd_function
 	validate_number "$size"
 
 	# clean test environment when test interrupted
-	trap "destroy_test_environment $TEST_NAME" INT
+	trap 'destroy_test_environment $TEST_NAME' INT
 
 	# create all the files and directories needed
 	# web-dir files & dirs
@@ -1463,7 +1466,7 @@ destroy_test_environment() { # swupd_function
 
 	if [ "$DEBUG_TEST" = true ]; then
 		local msg="Warning: DEBUG_TEST is set to true, the test environment will be preserved"
-		print "$msg\n" 2>/dev/null || echo "$msg"
+		print "$msg\\n" 2>/dev/null || echo "$msg"
 		return
 	fi
 
@@ -1661,7 +1664,6 @@ start_web_server() { # swupd_function
 	local opt
 	local port
 	local server_args
-	local server_pid
 	local status
 
 	web_server_usage() {
@@ -1800,17 +1802,15 @@ get_web_server_port() { # swupd_function
 		terminate "The specified port file was not found"
 	fi
 
-	echo $(cat "$PORT_FILE")
+	cat "$PORT_FILE"
 
 }
 
 # kills the test web server and removes the files it creates
 destroy_web_server() { # swupd_function
 
-	local server_pid
-
 	if [ -f "$SERVER_PID_FILE" ]; then
-		sudo kill "$(<$SERVER_PID_FILE)"
+		sudo kill "$(<"$SERVER_PID_FILE")"
 	fi
 
 }
@@ -1818,7 +1818,7 @@ destroy_web_server() { # swupd_function
 # Creates a bundle in the test environment. The bundle can contain files, directories or symlinks.
 create_bundle() { # swupd_function
 
-	cb_usage() { 
+	cb_usage() {
 		cat <<-EOM
 		Usage:
 		    create_bundle [-L] [-e] [-n] <bundle_name> [-v] <version> [-d] <list of dirs> [-f] <list of files> [-l] <list of links> ENV_NAME
@@ -1863,14 +1863,14 @@ create_bundle() { # swupd_function
 		# this file is added in every bundle by default, it would add too much overhead
 		# for most tests
 		fdir=$(dirname "${val%:*}")
-		if [ ! "$(sudo cat "$manifest" | grep -x "[DL]\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/usr/share/clear/bundles" ] \
+		if ! sudo cat "$manifest" | grep -qx "[DL]\\.\\.\\..*$fdir" && [ "$fdir" != "/usr/share/clear/bundles" ] \
 		&& [ "$fdir" != "/" ]; then
 			bundle_dir=$(create_dir "$files_path")
 			add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			# add each one of the directories of the path if they are not in the manifest already
 			while [ "$(dirname "$fdir")" != "/" ]; do
 				fdir=$(dirname "$fdir")
-				if [ ! "$(sudo cat "$manifest" | grep -x "[DL]\\.\\.\\..*$fdir")" ]; then
+				if ! sudo cat "$manifest" | grep -qx "[DL]\\.\\.\\..*$fdir"; then
 					add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 				fi
 			done
@@ -1921,11 +1921,15 @@ create_bundle() { # swupd_function
 		esac
 	done
 	set +f  # turn globbing back on
-	env_name=${@:$OPTIND:1}
+	env_name=${*:$OPTIND:1}
 
 	# set default values
 	bundle_name=${bundle_name:-$(generate_random_name test-bundle-)}
-	# if no version was provided create the bundle in the earliest version by default
+	# if no version was provided create the bundle in the earliest version by defaulti
+	# shellcheck disable=SC2010
+	# SC2010: Don't use ls | grep. Use a glob.
+	# Exception: ls has sorting options that are tricky
+	# to get right with other commands.
 	version=${version:-$(ls "$env_name"/web-dir | grep -E '^[0-9]+$' | sort -rn | head -n1)}
 	# all bundles should include their own tracking file, so append it to the
 	# list of files to be created in the bundle
@@ -1944,7 +1948,7 @@ create_bundle() { # swupd_function
 	fi
 	# update format in the manifest
 	update_manifest -p "$manifest" format "$(cat "$version_path"/format)"
-	
+
 	# 2) Create one directory for the bundle and add it the requested
 	# times to the manifest.
 	# Every bundle has to have at least one directory,
@@ -1965,7 +1969,7 @@ create_bundle() { # swupd_function
 			fi
 		fi
 	done
-	
+
 	# 3) Create the requested link(s) to directories in the bundle
 	for val in "${dlink_list[@]}"; do
 		if [[ "$val" != "/"* ]]; then
@@ -1975,7 +1979,7 @@ create_bundle() { # swupd_function
 		# add it to the bundle (except if the directory is "/")
 		fdir=$(dirname "$val")
 		if [ "$fdir" != "/" ]; then
-			if [ ! "$(sudo cat "$manifest" | grep -x "[DL]\\.\\.\\..*$fdir")" ]; then
+			if ! sudo cat "$manifest" | grep -qx "[DL]\\.\\.\\..*$fdir"; then
 				bundle_dir=$(create_dir "$files_path")
 				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			fi
@@ -2031,9 +2035,9 @@ create_bundle() { # swupd_function
 		if [ "$local_bundle" = true ]; then
 			sudo mkdir -p "$target_path$(dirname "$val")"
 			sudo cp "$bundle_file" "$target_path$val"
-		fi 
+		fi
 	done
-	
+
 	# 5) Create the requested link(s) to files in the bundle
 	for val in "${link_list[@]}"; do
 		if [[ "$val" != "/"* ]]; then
@@ -2043,7 +2047,7 @@ create_bundle() { # swupd_function
 		# add it to the bundle (except if the directory is "/")
 		fdir=$(dirname "$val")
 		if [ "$fdir" != "/" ]; then
-			if [ ! "$(sudo cat "$manifest" | grep -x "[DL]\\.\\.\\..*$fdir")" ]; then
+			if ! sudo cat "$manifest" | grep -qx "[DL]\\.\\.\\..*$fdir"; then
 				bundle_dir=$(create_dir "$files_path")
 				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			fi
@@ -2087,7 +2091,7 @@ create_bundle() { # swupd_function
 		# add it to the bundle (except if the directory is "/")
 		fdir=$(dirname "$val")
 		if [ "$fdir" != "/" ]; then
-			if [ ! "$(sudo cat "$manifest" | grep -x "[DL]\\.\\.\\..*$fdir")" ]; then
+			if ! sudo cat "$manifest" | grep -qx "[DL]\\.\\.\\..*$fdir"; then
 				bundle_dir=$(create_dir "$files_path")
 				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			fi
@@ -2169,14 +2173,14 @@ remove_bundle() { # swupd_function
 	bundle_name=${manifest_file#Manifest.}
 
 	# remove all files that are in the manifest from target-dir first
-	file_names=($(awk '/^[FL]...\t/ { print $4 }' "$bundle_manifest"))
-	for fname in ${file_names[@]}; do
+	mapfile -t file_names < <(awk '/^[FL]...\t/ { print $4 }' "$bundle_manifest")
+	for fname in "${file_names[@]}"; do
 		sudo rm -f "$target_path$fname"
 	done
 	# now remove all directories in the manifest (only if empty else they
 	# may be used by another bundle)
-	dir_names=($(awk '/^D...\t/ { print $4 }' "$bundle_manifest"))
-	for dname in ${dir_names[@]}; do
+	mapfile -t dir_names < <(awk '/^D...\t/ { print $4 }' "$bundle_manifest")
+	for dname in "${dir_names[@]}"; do
 		sudo rmdir --ignore-fail-on-non-empty "$target_path$dname" 2> /dev/null
 	done
 	if [ "$remove_local" = false ]; then
@@ -2231,19 +2235,19 @@ install_bundle() { # swupd_function
 
 	# iterate through the manifest and copy all the files in its
 	# correct place, start with directories
-	dir_names=($(awk '/^D...\t/ { print $4 }' "$bundle_manifest"))
-	for dname in ${dir_names[@]}; do
+	mapfile -t dir_names < <(awk '/^D...\t/ { print $4 }' "$bundle_manifest")
+	for dname in "${dir_names[@]}"; do
 		sudo mkdir -p "$target_path$dname"
 	done
 	# now files
-	file_names=($(awk '/^F...\t/ { print $4 }' "$bundle_manifest"))
-	for fname in ${file_names[@]}; do
+	mapfile -t file_names < <(awk '/^F...\t/ { print $4 }' "$bundle_manifest")
+	for fname in "${file_names[@]}"; do
 		fhash=$(get_hash_from_manifest "$bundle_manifest" "$fname")
 		sudo cp "$files_path"/"$fhash" "$target_path$fname"
 	done
 	# finally links
-	link_names=($(awk '/^L...\t/ { print $4 }' "$bundle_manifest"))
-	for lname in ${link_names[@]}; do
+	mapfile -t link_names < <(awk '/^L...\t/ { print $4 }' "$bundle_manifest")
+	for lname in "${link_names[@]}"; do
 		lhash=$(get_hash_from_manifest "$bundle_manifest" "$lname")
 		fhash=$(readlink "$files_path"/"$lhash")
 		# is the original link dangling?
@@ -2251,7 +2255,7 @@ install_bundle() { # swupd_function
 			sudo ln -s "$fhash" "$target_path$lname"
 		else
 			fname=$(awk "/$fhash/ "'{ print $4 }' "$bundle_manifest")
-			sudo ln -s $(basename "$fname") "$target_path$lname"
+			sudo ln -s "$(basename "$fname")" "$target_path$lname"
 		fi
 	done
 
@@ -2347,6 +2351,10 @@ update_bundle() { # swupd_function
 	# replace all the "/" in fname with "\/" so they are escaped (e.g. fname=/foo/bar, filename=\/foo\/bar)
 	filename="${fname////\\/}"
 	# the version where the update will be created is the latest version
+        # shellcheck disable=SC2010
+        # SC2010: Don't use ls | grep. Use a glob.
+        # Exception: ls has sorting options that are tricky
+        # to get right with other commands.
 	version="$(ls "$env_name"/web-dir | grep -E '^[0-9]+$' | sort -rn | head -n1)"
 	version_path="$env_name"/web-dir/"$version"
 	format=$(cat "$version_path"/format)
@@ -2399,13 +2407,13 @@ update_bundle() { # swupd_function
 	--add | --add-file)
 		# if the directories the file is don't exist, add them to the bundle
 		fdir=$(dirname "${fname%:*}")
-		if [ ! "$(sudo cat "$bundle_manifest" | grep -x "D\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/" ]; then
+		if ! sudo cat "$bundle_manifest" | grep -qx "D\\.\\.\\..*$fdir" && [ "$fdir" != "/" ]; then
 			new_dir=$(create_dir "$version_path"/files)
 			add_to_manifest -p "$bundle_manifest" "$new_dir" "$fdir"
 			# add each one of the directories of the path if they are not in the manifest already
 			while [ "$(dirname "$fdir")" != "/" ]; do
 				fdir=$(dirname "$fdir")
-				if [ ! "$(sudo cat "$bundle_manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
+				if ! sudo cat "$bundle_manifest" | grep -qx "D\\.\\.\\..*$fdir"; then
 					add_to_manifest -p "$bundle_manifest" "$new_dir" "$fdir"
 				fi
 			done
@@ -2435,13 +2443,13 @@ update_bundle() { # swupd_function
 	--add-dir)
 		# if the directories the file is don't exist, add them to the bundle
 		fdir="$fname"
-		if [ ! "$(sudo cat "$bundle_manifest" | grep -x "D\\.\\.\\..*$fdir")" ] && [ "$fdir" != "/" ]; then
+		if ! sudo cat "$bundle_manifest" | grep -qx "D\\.\\.\\..*$fdir" && [ "$fdir" != "/" ]; then
 			new_dir=$(create_dir "$version_path"/files)
 			add_to_manifest -p "$bundle_manifest" "$new_dir" "$fdir"
 			# add each one of the directories of the path if they are not in the manifest already
 			while [ "$(dirname "$fdir")" != "/" ]; do
 				fdir=$(dirname "$fdir")
-				if [ ! "$(sudo cat "$bundle_manifest" | grep -x "D\\.\\.\\..*$fdir")" ]; then
+				if ! sudo cat "$bundle_manifest" | grep -qx "D\\.\\.\\..*$fdir"; then
 					add_to_manifest -p "$bundle_manifest" "$new_dir" "$fdir"
 				fi
 			done
@@ -2453,8 +2461,8 @@ update_bundle() { # swupd_function
 		;;
 	--delete | --ghost)
 		# replace the first character of the line that matches with "."
-		sudo sed -i "/\\t$filename$/s/./\./1" "$bundle_manifest"
-		sudo sed -i "/\\t$filename\\t/s/./\./1" "$bundle_manifest"
+		sudo sed -i "/\\t$filename$/s/./\\./1" "$bundle_manifest"
+		sudo sed -i "/\\t$filename\\t/s/./\\./1" "$bundle_manifest"
 		if [ "$option" = "--delete" ]; then
 			# replace the second character of the line that matches with "d"
 			sudo sed -i "/\\t$filename$/s/./d/2" "$bundle_manifest"
@@ -2493,7 +2501,7 @@ update_bundle() { # swupd_function
 		# create or add to the delta-pack
 		add_to_pack "$bundle" "$version_path"/delta/"$delta_name" "$oldversion"
 		# keep the modified file for the iterative "from manifest"
-		from_manifest_content="$(awk "/....\t.*\t.*\t$filename/" "$oldversion_path"/Manifest."$bundle")"$'\n'
+		from_manifest_content="$(awk "/....\\t.*\\t.*\\t$filename/" "$oldversion_path"/Manifest."$bundle")"$'\n'
 		;;
 	--rename | --rename-legacy)
 		validate_param "$new_name"
@@ -2505,8 +2513,8 @@ update_bundle() { # swupd_function
 		# renames need two records in the manifest, one with the
 		# new name (F...) and one with the old one (.d..)
 		# replace the first character of the old record with "."
-		sudo sed -i "/\\t$filename$/s/./\./1" "$bundle_manifest"
-		sudo sed -i "/\\t$filename\\t/s/./\./1" "$bundle_manifest"
+		sudo sed -i "/\\t$filename$/s/./\\./1" "$bundle_manifest"
+		sudo sed -i "/\\t$filename\\t/s/./\\./1" "$bundle_manifest"
 		# replace the second character of the old record with "d"
 		sudo sed -i "/\\t$filename$/s/./d/2" "$bundle_manifest"
 		sudo sed -i "/\\t$filename\\t/s/./d/2" "$bundle_manifest"
@@ -2669,7 +2677,7 @@ generate_test() { # swupd_function
 
 	path=$(dirname "$(realpath "$name")")
 	if [[ "$path" != *swupd-client/test/functional/* ]]; then
-		echo -e "All functional tests should be grouped within a directory in swupd-client/test/functional/<group_dir>/\n"
+		echo -e "All functional tests should be grouped within a directory in swupd-client/test/functional/<group_dir>/\\n"
 		usage
 		return 1
 	fi
@@ -2767,13 +2775,13 @@ get_next_available_id() { # swupd_function
 		clean) group=CLN;;
 		*) group=UNKNOWN;;
 	esac
-	id=$(printf "$group%03d\n" $id)
+	id=$(printf "$group%03d\\n" $id)
 	test_list="$(list_tests "$test_dir")"
 	# if the next available ID is not really available it means the list is messed up
 	if [ "${test_list/$id}" != "$test_list" ]; then
-		echo -e "There is a problem with the current IDs, one ID seems to be missing from the list:\n"
+		echo -e "There is a problem with the current IDs, one ID seems to be missing from the list:\\n"
 		echo "$test_list"
-		echo -e "\nPlease fix the IDs as appropriate and try running the command again\n"
+		echo -e "\\nPlease fix the IDs as appropriate and try running the command again\\n"
 		return 1
 	else
 		echo "$id"
@@ -2822,7 +2830,7 @@ global_env=false
 
 setup() {
 
-	print "\n$sep"
+	print "\\n$sep"
 	print "$alt_sep"
 	print "$sep"
 	# a global environment will always use number 1, so check for that
@@ -2845,7 +2853,7 @@ setup() {
 	# important to avoid corrupt test data
 	if [[ ( -d "$TEST_NAME" && "$global_env" = false )  ||
 	( -d "$TEST_NAME" && "$global_env" = true && "$BATS_TEST_NUMBER" -eq 1 ) ]]; then
-		print "\nAn old test environment was found for this test: $TEST_NAME"
+		print "\\nAn old test environment was found for this test: $TEST_NAME"
 		print "Deleting it..."
 		DEBUG_TEST=false destroy_test_environment "$TEST_NAME"
 	fi
@@ -2928,6 +2936,9 @@ print_assert_failure() {
 	echo -e "$message"
 	echo "Command output:"
 	echo "------------------------------------------------------------------"
+	# shellcheck disable=SC2154
+	# SC2154: var is referenced but not assigned
+	# the output variable is being assigned and exported by bats
 	echo "$output"
 	echo "------------------------------------------------------------------"
 
@@ -3080,7 +3091,7 @@ assert_in_output() { # assertion
 	if [[ ! "$actual_output" == *"$expected_output"* ]]; then
 		print_assert_failure "The following text was not found in the command output:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
+		diff -u <(echo "$expected_output") <(echo "$actual_output")
 		return 1
 	fi
 
@@ -3099,7 +3110,7 @@ assert_not_in_output() { # assertion
 	if [[ "$actual_output" == *"$expected_output"* ]]; then
 		print_assert_failure "The following text was found in the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
+		diff -u <(echo "$expected_output") <(echo "$actual_output")
 		return 1
 	fi
 
@@ -3118,7 +3129,7 @@ assert_is_output() { # assertion
 	if [[ ! "$actual_output" == "$expected_output" ]]; then
 		print_assert_failure "The following text was not the command output:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
+		diff -u <(echo "$expected_output") <(echo "$actual_output")
 		return 1
 	fi
 
@@ -3137,7 +3148,7 @@ assert_is_not_output() { # assertion
 	if [[ "$actual_output" == "$expected_output" ]]; then
 		print_assert_failure "The following text was the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
+		diff -u <(echo "$expected_output") <(echo "$actual_output")
 		return 1
 	fi
 
@@ -3156,7 +3167,7 @@ assert_regex_in_output() { # assertion
 	if [[ ! "$actual_output" =~ $expected_output ]]; then
 		print_assert_failure "The following text (regex) was not found in the command output:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
+		diff -u <(echo "$expected_output") <(echo "$actual_output")
 		return 1
 	fi
 
@@ -3175,7 +3186,7 @@ assert_regex_not_in_output() { # assertion
 	if [[ "$actual_output" =~ $expected_output ]]; then
 		print_assert_failure "The following text (regex) was found in the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
+		diff -u <(echo "$expected_output") <(echo "$actual_output")
 		return 1
 	fi
 
@@ -3194,7 +3205,7 @@ assert_regex_is_output() { # assertion
 	if [[ ! "$actual_output" =~ ^$expected_output$ ]]; then
 		print_assert_failure "The following text (regex) was not the command output:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
+		diff -u <(echo "$expected_output") <(echo "$actual_output")
 		return 1
 	fi
 
@@ -3213,7 +3224,7 @@ assert_regex_is_not_output() { # assertion
 	if [[ "$actual_output" =~ ^$expected_output$ ]]; then
 		print_assert_failure "The following text (regex) was the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		echo "$(diff -u <(echo "$expected_output") <(echo "$actual_output"))"
+		diff -u <(echo "$expected_output") <(echo "$actual_output")
 		return 1
 	fi
 

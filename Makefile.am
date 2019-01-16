@@ -24,6 +24,7 @@ AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS)
 
 swupd_SOURCES = \
 	src/alias.c \
+	src/alias.h \
 	src/archives.c \
 	src/autoupdate.c \
 	src/bundle.c \
@@ -58,7 +59,6 @@ swupd_SOURCES = \
 	src/lock.c \
 	src/lib/log.c \
 	src/lib/log.h \
-	src/macros.h \
 	src/main.c \
 	src/manifest.c \
 	src/mirror.c \

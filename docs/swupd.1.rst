@@ -353,7 +353,7 @@ SUBCOMMANDS
         Matched directories get skipped completely.
 
         The default is to ignore ``/usr/lib/kernel``,
-        ``/usr/lib/modules``, and ``/usr/local``.
+        ``/usr/lib/modules``, ``/usr/src`` and ``/usr/local``.
 
         Examples:
 

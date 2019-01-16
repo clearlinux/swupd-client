@@ -36,7 +36,7 @@
 
 static int replace_fd(int fd, const char *fd_file)
 {
-	int new_fd;
+	int new_fd, replaced_fd;
 
 	if (!fd_file) {
 		return 0;
@@ -46,7 +46,9 @@ static int replace_fd(int fd, const char *fd_file)
 		return new_fd;
 	}
 
-	return dup2(new_fd, fd);
+	replaced_fd = dup2(new_fd, fd);
+	close(new_fd);
+	return replaced_fd;
 }
 
 int run_command_full(const char *stdout_file, const char *stderr_file, const char *cmd, ...)

@@ -37,7 +37,7 @@
 #include "signature.h"
 #include "swupd.h"
 
-static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|/usr/local";
+static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src";
 
 static bool cmdline_option_fix = false;
 static bool cmdline_option_picky = false;

@@ -73,19 +73,11 @@ static bool parse_opt(int opt, char *optarg)
 		cmdline_local = false;
 		return true;
 	case 'D':
-		if (!optarg) {
-			fprintf(stderr, "Invalid --has-dep argument\n\n");
-			return false;
-		}
 		string_or_die(&cmdline_option_has_dep, "%s", optarg);
 		atexit(free_has_dep);
 		cmdline_local = false;
 		return true;
 	case 'd':
-		if (!optarg) {
-			fprintf(stderr, "Invalid --deps argument\n\n");
-			return false;
-		}
 		string_or_die(&cmdline_option_deps, "%s", optarg);
 		atexit(free_deps);
 		cmdline_local = false;

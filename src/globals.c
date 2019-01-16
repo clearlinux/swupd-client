@@ -577,16 +577,12 @@ static bool global_parse_opt(int opt, char *optarg)
 		/* Handle options that don't have shortcut. */
 		return true;
 	case 'p': /* default empty path_prefix verifies the running OS */
-		if (!optarg || !set_path_prefix(optarg)) {
+		if (!set_path_prefix(optarg)) {
 			fprintf(stderr, "Invalid --path argument\n\n");
 			return false;
 		}
 		return true;
 	case 'u':
-		if (!optarg) {
-			fprintf(stderr, "Invalid --url argument\n\n");
-			return false;
-		}
 		set_version_url(optarg);
 		set_content_url(optarg);
 		return true;
@@ -598,27 +594,19 @@ static bool global_parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'c':
-		if (!optarg) {
-			fprintf(stderr, "Invalid --contenturl argument\n\n");
-			return false;
-		}
 		set_content_url(optarg);
 		return true;
 	case 'v':
-		if (!optarg) {
-			fprintf(stderr, "Invalid --versionurl argument\n\n");
-			return false;
-		}
 		set_version_url(optarg);
 		return true;
 	case 'F':
-		if (!optarg || !set_format_string(optarg)) {
+		if (!set_format_string(optarg)) {
 			fprintf(stderr, "Invalid --format argument\n\n");
 			return false;
 		}
 		return true;
 	case 'S':
-		if (!optarg || !set_state_dir(optarg)) {
+		if (!set_state_dir(optarg)) {
 			fprintf(stderr, "Invalid --statedir argument\n\n");
 			return false;
 		}
@@ -639,10 +627,6 @@ static bool global_parse_opt(int opt, char *optarg)
 		no_boot_update = true;
 		return true;
 	case 'C':
-		if (!optarg) {
-			fprintf(stderr, "Invalid --certpath argument\n\n");
-			return false;
-		}
 		set_cert_path(optarg);
 		return true;
 	case 'W':

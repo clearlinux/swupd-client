@@ -76,7 +76,7 @@ int hashdump_main(int argc, char **argv)
 			file.use_xattrs = false;
 			break;
 		case 'p':
-			if (!optarg || !set_path_prefix(optarg)) {
+			if (!set_path_prefix(optarg)) {
 				fprintf(stderr, "Invalid --path/-p argument\n\n");
 				return EINVALID_OPTION;
 			}

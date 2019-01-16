@@ -543,10 +543,6 @@ static bool parse_opt(int opt, char *optarg)
 		cmdline_option_picky = true;
 		return true;
 	case 'X':
-		if (!optarg) {
-			fprintf(stderr, "Missing --picky-tree argument\n\n");
-			return false;
-		}
 		if (optarg[0] != '/') {
 			fprintf(stderr, "--picky-tree must be an absolute path, for example /usr\n\n");
 			return false;
@@ -554,10 +550,6 @@ static bool parse_opt(int opt, char *optarg)
 		cmdline_option_picky_tree = optarg;
 		return true;
 	case 'w':
-		if (!optarg) {
-			fprintf(stderr, "Missing --picky-whitelist argument\n\n");
-			return false;
-		}
 		cmdline_option_picky_whitelist = optarg;
 		return true;
 	case 'B': {

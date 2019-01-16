@@ -370,7 +370,7 @@ static bool parse_opt(int opt, char *optarg)
 
 	switch (opt) {
 	case 's':
-		if (!optarg || (strcmp(optarg, "b") && (strcmp(optarg, "o")))) {
+		if (strcmp(optarg, "b") && (strcmp(optarg, "o"))) {
 			fprintf(stderr, "Invalid --scope argument. Must be 'b' or 'o'\n\n");
 			return false;
 		}

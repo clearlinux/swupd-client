@@ -144,7 +144,7 @@ static size_t file_hash_value(const void *data)
 static void free_curl_file(struct swupd_curl_parallel_handle *h, struct multi_curl_file *file)
 {
 	CURL *curl = file->curl;
-	swupd_download_file_complete(CURLE_OK, &file->file);
+	swupd_download_file_close(CURLE_OK, &file->file);
 
 	if (h->free_cb) {
 		h->free_cb(file->data);
@@ -281,7 +281,7 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 
 		/* Get error code from easy handle and augment it if
 		 * completing the download encounters further problems. */
-		curl_ret = swupd_download_file_complete(msg->data.result, &file->file);
+		curl_ret = swupd_download_file_close(msg->data.result, &file->file);
 		file->status = process_curl_error_codes(curl_ret, handle, &err);
 		debug("CURL - complete ASYNC download: %s -> %s, status=%d\n", file->url, file->file.path, file->status);
 		if (file->status == DOWNLOAD_STATUS_COMPLETED) {

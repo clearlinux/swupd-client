@@ -331,7 +331,7 @@ CURLcode swupd_download_file_append(struct curl_file *file)
 	return CURLE_OK;
 }
 
-CURLcode swupd_download_file_complete(CURLcode curl_ret, struct curl_file *file)
+CURLcode swupd_download_file_close(CURLcode curl_ret, struct curl_file *file)
 {
 	if (file->fh) {
 		if (fclose(file->fh)) {
@@ -522,7 +522,7 @@ restart_download:
 
 exit:
 	if (!in_memory_file) {
-		curl_ret = swupd_download_file_complete(curl_ret, &local);
+		curl_ret = swupd_download_file_close(curl_ret, &local);
 	}
 
 	status = process_curl_error_codes(curl_ret, curl, &err);

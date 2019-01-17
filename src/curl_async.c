@@ -36,8 +36,8 @@
 #include "config.h"
 #include "lib/hashmap.h"
 #include "lib/thread_pool.h"
-#include "swupd-curl-internal.h"
 #include "swupd.h"
+#include "swupd_curl_internal.h"
 
 #define MAX_RETRIES 5
 #define RETRY_TIMEOUT 10

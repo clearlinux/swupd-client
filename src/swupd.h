@@ -16,8 +16,8 @@
 #include "lib/macros.h"
 #include "lib/strings.h"
 #include "lib/sys.h"
-#include "swupd-curl.h"
-#include "swupd-error.h"
+#include "swupd_curl.h"
+#include "swupd_error.h"
 #include "timelist.h"
 
 #ifdef __cplusplus

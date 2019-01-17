@@ -70,12 +70,12 @@ swupd_SOURCES = \
 	src/staging.c \
 	src/stats.c \
 	src/subscriptions.c \
-	src/swupd-build-opts.h \
-	src/swupd-build-variant.h \
-	src/swupd-curl-internal.h \
-	src/swupd-curl.h \
-	src/swupd-error.h \
-	src/swupd-internal.h \
+	src/swupd_build_opts.h \
+	src/swupd_build_variant.h \
+	src/swupd_curl_internal.h \
+	src/swupd_curl.h \
+	src/swupd_error.h \
+	src/swupd_internal.h \
 	src/swupd.h \
 	src/telemetry.c \
 	src/timelist.c \

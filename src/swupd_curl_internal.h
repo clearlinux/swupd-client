@@ -7,7 +7,7 @@
 
 #include <curl/curl.h>
 
-#include "swupd-curl.h"
+#include "swupd_curl.h"
 
 #ifdef __cplusplus
 extern "C" {

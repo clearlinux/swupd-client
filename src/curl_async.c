@@ -569,7 +569,7 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 
 	// If there are download failures at this point return an error
 	if (h->failed != NULL) {
-		ret = -EFILEDOWNLOAD;
+		ret = -SWUPD_COULDNT_DOWNLOAD_FILE;
 	}
 
 	curl_multi_cleanup(h->mcurl);

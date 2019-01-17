@@ -84,7 +84,7 @@ global_teardown() {
 	sudo rm "$CLIENT_CERT"
 
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
-	assert_status_is "$ENOSWUPDSERVER"
+	assert_status_is "$SWUPD_SERVER_CONNECTION_ERROR"
 
 	expected_output=$(cat <<-EOM
 			Warning: Curl - Unable to verify server SSL certificate
@@ -99,7 +99,7 @@ global_teardown() {
 	sudo sh -c "echo foo > $CLIENT_CERT"
 
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
-	assert_status_is "$ENOSWUPDSERVER"
+	assert_status_is "$SWUPD_SERVER_CONNECTION_ERROR"
 
 	expected_output=$(cat <<-EOM
 			Warning: Curl - Problem with the local client SSL certificate

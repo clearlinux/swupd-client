@@ -36,7 +36,7 @@ test_setup() {
 
 	run sudo sh -c "timeout 30 $SWUPD update $SWUPD_OPTS"
 
-	assert_status_is "$EMOM_LOAD"
+	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
@@ -66,7 +66,7 @@ test_setup() {
 
 	run sudo sh -c "timeout 30 $SWUPD update $SWUPD_OPTS"
 
-	assert_status_is "$EMOM_LOAD"
+	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
@@ -96,7 +96,7 @@ test_setup() {
 
 	run sudo sh -c "timeout 30 $SWUPD update $SWUPD_OPTS"
 
-	assert_status_is "$ERECURSE_MANIFEST"
+	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
@@ -127,7 +127,7 @@ test_setup() {
 
 	run sudo sh -c "timeout 30 $SWUPD update $SWUPD_OPTS"
 
-	assert_status_is "$ERECURSE_MANIFEST"
+	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
@@ -151,7 +151,7 @@ test_setup() {
 
 	run sudo sh -c "timeout 30 $SWUPD update $SWUPD_OPTS"
 
-	assert_status_is "$EFILEDOWNLOAD"
+	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20

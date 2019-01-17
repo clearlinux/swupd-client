@@ -541,36 +541,36 @@ int swupd_init(void)
 	 * or the certificate verification will fail with invalid time */
 	if (timecheck) {
 		if (!verify_time()) {
-			ret = EBADTIME;
+			ret = SWUPD_BAD_TIME;
 			goto out_fds;
 		}
 	}
 
 	if (!init_globals()) {
-		ret = EINIT_GLOBALS;
+		ret = SWUPD_INIT_GLOBALS_FAILED;
 		goto out_fds;
 	}
 
 	get_mounted_directories();
 
 	if (create_required_dirs()) {
-		ret = EREQUIRED_DIRS;
+		ret = SWUPD_COULDNT_CREATE_DIRS;
 		goto out_fds;
 	}
 
 	if (p_lockfile() < 0) {
-		ret = ELOCK_FILE;
+		ret = SWUPD_LOCK_FILE_FAILED;
 		goto out_fds;
 	}
 
 	if (swupd_curl_init() != 0) {
-		ret = ECURL_INIT;
+		ret = SWUPD_CURL_INIT_FAILED;
 		goto out_close_lock;
 	}
 
 	/* If --nosigcheck, we do not attempt any signature checking */
 	if (sigcheck && !initialize_signature()) {
-		ret = ESIGNATURE;
+		ret = SWUPD_COULDNT_VERIFY_SIGNATURE;
 		terminate_signature();
 		goto out_close_lock;
 	}

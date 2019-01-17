@@ -33,7 +33,7 @@ void print_update_conf_info()
 int info_main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 {
 	if (!init_globals()) {
-		return EINIT_GLOBALS;
+		return SWUPD_INIT_GLOBALS_FAILED;
 	}
 
 	print_update_conf_info();

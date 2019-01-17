@@ -30,7 +30,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-bundle2"
 
-	assert_status_is "$EMOM_LOAD"
+	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Searching for 'test-bundle2'
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
@@ -59,7 +59,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-bundle2"
 
-	assert_status_is "$ERECURSE_MANIFEST"
+	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Searching for 'test-bundle2'
 		Downloading Clear Linux manifests

@@ -58,7 +58,7 @@ static bool parse_options(int argc, char **argv)
 		switch (opt) {
 		case '?':
 			print_help(argv[0]);
-			exit(EINVALID_OPTION);
+			exit(SWUPD_INVALID_OPTION);
 		case 'h':
 			print_help(argv[0]);
 			exit(EXIT_SUCCESS);
@@ -90,7 +90,7 @@ static void policy_warn(void)
 int autoupdate_main(int argc, char **argv)
 {
 	if (!parse_options(argc, argv)) {
-		return EINVALID_OPTION;
+		return SWUPD_INVALID_OPTION;
 	}
 	if (enable && disable) {
 		fprintf(stderr, "Can not enable and disable at the same time\n");
@@ -137,10 +137,10 @@ int autoupdate_main(int argc, char **argv)
 			rc = WEXITSTATUS(rc);
 		}
 		switch (rc) {
-		case 0:
+		case SWUPD_OK:
 			printf("Enabled\n");
 			break;
-		case 1:
+		case SWUPD_NO:
 			printf("Disabled\n");
 			break;
 		default:

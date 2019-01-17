@@ -360,12 +360,12 @@ static int clean_init(void)
 	check_root();
 
 	if (!init_globals()) {
-		return EINIT_GLOBALS;
+		return SWUPD_INIT_GLOBALS_FAILED;
 	}
 
 	if (p_lockfile() < 0) {
 		free_globals();
-		return ELOCK_FILE;
+		return SWUPD_LOCK_FILE_FAILED;
 	}
 
 	return ret;

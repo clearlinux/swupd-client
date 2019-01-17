@@ -14,7 +14,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
-	assert_status_is "$EMOM_LOAD"
+	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Warning: Removing corrupt Manifest.MoM artifacts and re-downloading...
 		WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM version 10

@@ -333,7 +333,7 @@ load_current_mom:
 			fprintf(stderr, "Retry #%d downloading current MoM manifest\n", retries);
 			goto load_current_mom;
 		}
-		ret = EMOM_LOAD;
+		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto clean_exit;
 	}
 
@@ -354,7 +354,7 @@ load_server_mom:
 			fprintf(stderr, "Retry #%d downloading server MoM manifest\n", retries);
 			goto load_server_mom;
 		}
-		ret = EMOM_LOAD;
+		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto clean_exit;
 	}
 
@@ -373,7 +373,7 @@ load_current_submanifests:
 			fprintf(stderr, "Retry #%d downloading current sub-manifests\n", retries);
 			goto load_current_submanifests;
 		}
-		ret = ERECURSE_MANIFEST;
+		ret = SWUPD_RECURSE_MANIFEST;
 		printf("Cannot load current MoM sub-manifests, exiting\n");
 		goto clean_exit;
 	}
@@ -400,7 +400,7 @@ load_current_submanifests:
 			printf("WARNING: One or more installed bundles are no longer available at version %d.\n",
 			       server_version);
 		} else {
-			ret = ERECURSE_MANIFEST;
+			ret = SWUPD_RECURSE_MANIFEST;
 			goto clean_exit;
 		}
 	}
@@ -414,7 +414,7 @@ load_server_submanifests:
 			printf("Retry #%d downloading server sub-manifests\n", retries);
 			goto load_server_submanifests;
 		}
-		ret = ERECURSE_MANIFEST;
+		ret = SWUPD_RECURSE_MANIFEST;
 		printf("Error: Cannot load server MoM sub-manifests, exiting\n");
 		goto clean_exit;
 	}
@@ -703,7 +703,7 @@ int update_main(int argc, char **argv)
 	int ret = 0;
 
 	if (!parse_options(argc, argv)) {
-		return EINVALID_OPTION;
+		return SWUPD_INVALID_OPTION;
 	}
 
 	if (cmd_line_status) {

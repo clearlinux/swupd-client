@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 	 * https://github.com/libarchive/libarchive/wiki/Filenames */
 	setlocale(LC_ALL, "");
 	if (parse_options(argc, argv, &index) < 0) {
-		return EINVALID_OPTION;
+		return SWUPD_INVALID_OPTION;
 	}
 
 	save_cmd(argv);

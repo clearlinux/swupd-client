@@ -143,11 +143,11 @@ int read_versions(int *current_version, int *server_version, char *path_prefix)
 
 	if (*current_version < 0) {
 		fprintf(stderr, "Error: Unable to determine current OS version\n");
-		return ECURRENT_VERSION;
+		return SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
 	if (*server_version < 0) {
 		fprintf(stderr, "Error: Unable to determine the server version\n");
-		return ENOSWUPDSERVER;
+		return SWUPD_SERVER_CONNECTION_ERROR;
 	}
 
 	return 0;

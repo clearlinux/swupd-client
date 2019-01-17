@@ -142,10 +142,10 @@ static int check_connection(const char *test_capath)
 		return 0;
 	case CURLE_SSL_CACERT:
 		warn("Curl - Unable to verify server SSL certificate\n");
-		return -EBADCERT;
+		return -SWUPD_BAD_CERT;
 	case CURLE_SSL_CERTPROBLEM:
 		warn("Curl - Problem with the local client SSL certificate\n");
-		return -EBADCERT;
+		return -SWUPD_BAD_CERT;
 	case CURLE_OPERATION_TIMEDOUT:
 		return -CURLE_OPERATION_TIMEDOUT;
 	default:

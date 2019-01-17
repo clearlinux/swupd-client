@@ -52,11 +52,11 @@ static int check_update()
 	* or the certificate verification will fail with invalid time */
 	if (timecheck) {
 		if (!verify_time()) {
-			return EBADTIME;
+			return SWUPD_BAD_TIME;
 		}
 	}
 	if (!init_globals()) {
-		return EINIT_GLOBALS;
+		return SWUPD_INIT_GLOBALS_FAILED;
 	}
 	swupd_curl_init();
 
@@ -68,11 +68,11 @@ static int check_update()
 		if (current_version < server_version) {
 			info("There is a new OS version available: %d\n", server_version);
 			update_motd(server_version);
-			return 0; /* update available */
+			return SWUPD_OK; /* update available */
 		} else if (current_version >= server_version) {
 			info("There are no updates available\n");
 		}
-		return 1; /* No update available */
+		return SWUPD_NO; /* No update available */
 	}
 }
 
@@ -106,7 +106,7 @@ int check_update_main(int argc, char **argv)
 
 	if (!parse_options(argc, argv)) {
 		print_help();
-		return EINVALID_OPTION;
+		return SWUPD_INVALID_OPTION;
 	}
 
 	ret = check_update();

@@ -734,13 +734,13 @@ static int download_manifests(struct manifest **MoM)
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
 		fprintf(stderr, "Error: Unable to determine current OS version\n");
-		return ECURRENT_VERSION;
+		return SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
 
 	*MoM = load_mom(current_version, false, false, NULL);
 	if (!(*MoM)) {
 		fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
-		return EMOM_LOAD;
+		return SWUPD_COULDNT_LOAD_MOM;
 	}
 
 	list = (*MoM)->manifests;
@@ -772,7 +772,7 @@ static int download_manifests(struct manifest **MoM)
 				if (manifest_err == -EIO) {
 					list = list_free_item(list, free_file_data);
 				}
-				ret = ERECURSE_MANIFEST;
+				ret = SWUPD_RECURSE_MANIFEST;
 				goto out;
 			} else {
 				did_download = true;
@@ -813,7 +813,7 @@ int search_main(int argc, char **argv)
 	struct manifest *MoM = NULL;
 
 	if (!parse_options(argc, argv)) {
-		return EINVALID_OPTION;
+		return SWUPD_INVALID_OPTION;
 	}
 
 	ret = swupd_init();
@@ -828,7 +828,7 @@ int search_main(int argc, char **argv)
 
 	ret = download_manifests(&MoM);
 	if (ret != 0) {
-		if (ret == ERECURSE_MANIFEST) {
+		if (ret == SWUPD_RECURSE_MANIFEST) {
 			fprintf(stderr, "Warning: One or more manifests failed to download, search results will be partial.\n");
 		} else {
 			fprintf(stderr, "Error: Failed to download manifests\n");

@@ -7,6 +7,10 @@
 extern "C" {
 #endif
 
+/*
+ * Struct to keep files downloaded to memory and used by
+ * swupd_curl_get_file_memory()
+ */
 struct curl_file_data {
 	size_t capacity;
 	size_t len;
@@ -25,19 +29,110 @@ enum download_status {
 	DOWNLOAD_STATUS_ERROR,
 };
 
+/*
+ * Callback to be called when a download is successful.
+ */
 typedef bool (*swupd_curl_success_cb)(void *data);
+
+/*
+ * Callback to be called when a download has failed. 'status' indicates the
+ * error occurred.
+ */
 typedef bool (*swupd_curl_error_cb)(enum download_status status, void *data);
+
+/*
+ * Callback called when 'data' is no longer needed, so user's can free it
+ */
 typedef void (*swupd_curl_free_cb)(void *data);
 
+/*
+ * Init the swupd curl.
+ * Must be called before any curl operation.
+ */
 int swupd_curl_init(void);
+
+/*
+ * Close curl and release all memory allocated by swupd_curl_init().
+ */
 void swupd_curl_deinit(void);
+
+/*
+ * Query the file content size of 'url' without downloading the full file.
+ */
 double swupd_curl_query_content_size(char *url);
+
+/*
+ * Download 'url' and save it in 'filename'.
+ *
+ * Returns 0 on success and a negative number on errors
+ */
 int swupd_curl_get_file(const char *url, char *filename);
+
+/*
+ * Download 'url' to memory, saving it on 'file_data'
+ *
+ * Returns 0 on success and a negative number on errors
+ */
 int swupd_curl_get_file_memory(const char *url, struct curl_file_data *file_data);
 
+/*
+ * Start a parallel download element.
+ *
+ * Parameters:
+ *  - max_xfer: The maximum number of simultaneos downloads.
+ *
+ * Parallel download handler will retry MAX_TRIES times to download each file,
+ * ading a timeout between each try.
+ *
+ * Note: This function is non-blocking.
+ */
 void *swupd_curl_parallel_download_start(size_t max_xfer);
+
+/*
+ * Set parallel downloads callbacks.
+ *
+ *  - success_cb(): Called for each successful download, where data is the data
+ *                  informed on swupd_curl_parallel_download_enqueue().
+ *                  success_cb should return true if the download file was
+ *                  handled correctly. Return false to schedule a retry.
+ *  - error_cb():   Called for each failed download, where data is the data
+ *                  informed on swupd_curl_parallel_download_enqueue()
+ *                  and response is the HTTP response code. error_cb should
+ *                  return true if the error was handled by caller or false
+ *                  to schedule a retry.
+ * - free_cb():     Called when data is ready to be freed.
+ */
 void swupd_curl_parallel_download_set_callbacks(void *handle, swupd_curl_success_cb success_cb, swupd_curl_error_cb error_cb, swupd_curl_free_cb free_cb);
+
+/*
+ * Enqueue a file to be downloaded. If the number of current downloads is higher
+ * than max_xfer, this function will be blocked for downloads until the number of
+ * current downloads reach max_xfer / 2.
+ *
+ * Parameters:
+ *  - handle: Handle created with swupd_curl_parallel_download_start().
+ *  - url: The url to be downloaded.
+ *  - filename: Full path of the filename to save the download content.
+ *  - hash: Optional hex string with hash to be used as unique identifier of this
+ *    file. If NULL, filename will be used as the identifier. String MUST contain
+ *    only characters in '0123456789abcdef'.
+ *  - data: User data to be informed to success_cb().
+ *
+ * Note: This function MAY be blocked.
+ */
 int swupd_curl_parallel_download_enqueue(void *handle, const char *url, const char *filename, const char *hash, void *data);
+
+/*
+ * Finish all pending downloads and free memory allocated by parallel download
+ * handler.
+ *
+ * Parameters:
+ *  - handle: Handle created with swupd_curl_parallel_download_start().
+ *  - num_downloads: Optional int pointer to be filled with the number of
+ *    files enqueued for download using this handler. Include failed downloads.
+ *
+ * Note: This function MAY be blocked.
+ */
 int swupd_curl_parallel_download_end(void *handle, int *num_downloads);
 
 #ifdef __cplusplus

@@ -176,17 +176,6 @@ static void reevaluate_number_of_parallel_downloads(struct swupd_curl_parallel_h
 	printf("Reducing number of parallel downloads to %ld\n", h->max_xfer);
 }
 
-/*
- * Start a parallel download element.
- *
- * Parameters:
- *  - max_xfer: The maximum number of simultaneos downloads.
- *
- * Parallel download handler will retry MAX_TRIES times to download each file,
- * ading a timeout between each try.
- *
- * Note: This function is non-blocking.
- */
 void *swupd_curl_parallel_download_start(size_t max_xfer)
 {
 	struct swupd_curl_parallel_handle *h = calloc(1, sizeof(struct swupd_curl_parallel_handle));
@@ -213,20 +202,6 @@ error:
 	return NULL;
 }
 
-/*
- * Set parallel downloads callbacks.
- *
- *  - success_cb(): Called for each successful download, where data is the data
- *                  informed on swupd_curl_parallel_download_enqueue().
- *                  success_cb should return true if the download file was
- *                  handled correctly. Return false to schedule a retry.
- *  - error_cb():   Called for each failed download, where data is the data
- *                  informed on swupd_curl_parallel_download_enqueue()
- *                  and response is the HTTP response code. error_cb should
- *                  return true if the error was handled by caller or false
- *                  to schedule a retry.
- * - free_cb():     Called when data is ready to be freed.
- */
 void swupd_curl_parallel_download_set_callbacks(void *handle, swupd_curl_success_cb success_cb, swupd_curl_error_cb error_cb, swupd_curl_free_cb free_cb)
 {
 	struct swupd_curl_parallel_handle *h;
@@ -350,21 +325,22 @@ static CURLMcode process_curl_multi_wait(CURLM *mcurl, bool *repeats)
 	return ret;
 }
 
-/* Poll for downloads if the number of enqueued files are between the lower and
-  * higher limits so we can have hysteresis in behavior.
-  *
-  * If the number of scheduled downloads is lower than xfer_queue_high the
-  * function returns without processing the downloads.
-  *
-  * If the number of scheduled downloads is equal or higher than
-  * xfer_queue_high we will process downloads and wait until the length of the
-  * download queue is lower than xfer_queue_low.
-  *
-  * There's a protection to avoid having a download queue larger than
-  * xfer_queue_high + XFER_QUEUE_BUFFER in cases where curl doesn't have any
-  * data to process for any download. In this case we will return an error and
-  * the caller is in charge of setting the last download to be retried.
-  */
+/*
+ * Poll for downloads if the number of enqueued files are between the lower and
+ * higher limits so we can have hysteresis in behavior.
+ *
+ * If the number of scheduled downloads is lower than xfer_queue_high the
+ * function returns without processing the downloads.
+ *
+ * If the number of scheduled downloads is equal or higher than
+ * xfer_queue_high we will process downloads and wait until the length of the
+ * download queue is lower than xfer_queue_low.
+ *
+ * There's a protection to avoid having a download queue larger than
+ * xfer_queue_high + XFER_QUEUE_BUFFER in cases where curl doesn't have any
+ * data to process for any download. In this case we will return an error and
+ * the caller is in charge of setting the last download to be retried.
+ */
 static int poll_fewer_than(struct swupd_curl_parallel_handle *h, size_t xfer_queue_high, size_t xfer_queue_low)
 {
 	CURLMcode curlm_ret;
@@ -488,22 +464,6 @@ out_bad:
 	return -1;
 }
 
-/*
- * Enqueue a file to be downloaded. If the number of current downloads is higher
- * than max_xfer, this function will be blocked for downloads until the number of
- * current downloads reach max_xfer / 2.
- *
- * Parameters:
- *  - handle: Handle created with swupd_curl_parallel_download_start().
- *  - url: The url to be downloaded.
- *  - filename: Full path of the filename to save the download content.
- *  - hash: Optional hex string with hash to be used as unique identifier of this
- *    file. If NULL, filename will be used as the identifier. String MUST contain
- *    only characters in '0123456789abcdef'.
- *  - data: User data to be informed to success_cb().
- *
- * Note: This function MAY be blocked.
- */
 int swupd_curl_parallel_download_enqueue(void *handle, const char *url, const char *filename, const char *hash, void *data)
 {
 	struct swupd_curl_parallel_handle *h;
@@ -538,17 +498,6 @@ int swupd_curl_parallel_download_enqueue(void *handle, const char *url, const ch
 	return process_download(h, file);
 }
 
-/*
- * Finish all pending downloads and free memory allocated by parallel download
- * handler.
- *
- * Parameters:
- *  - handle: Handle created with swupd_curl_parallel_download_start().
- *  - num_downloads: Optional int pointer to be filled with the number of
- *    files enqueued for download using this handler. Include failed downloads.
- *
- * Note: This function MAY be blocked.
- */
 int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 {
 	struct swupd_curl_parallel_handle *h;

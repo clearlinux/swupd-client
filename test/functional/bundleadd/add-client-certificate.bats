@@ -82,7 +82,7 @@ global_teardown() {
 	sudo rm "$CLIENT_CERT"
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
-	assert_status_is "$ECURL_INIT"
+	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 
 	expected_output=$(cat <<-EOM
 			Warning: Curl - Unable to verify server SSL certificate
@@ -97,7 +97,7 @@ global_teardown() {
 	sudo sh -c "echo foo > $CLIENT_CERT"
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
-	assert_status_is "$ECURL_INIT"
+	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 
 	expected_output=$(cat <<-EOM
 			Warning: Curl - Problem with the local client SSL certificate

@@ -48,7 +48,7 @@ test_teardown() {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
-	assert_status_is "$ECURL_INIT"
+	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 	expected_output=$(cat <<-EOM
 		Error: Curl - Communicating with server timed out
 		Updater failed to initialize, exiting now.
@@ -70,7 +70,7 @@ test_teardown() {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
-	assert_status_is "$ECURL_INIT"
+	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 	expected_output=$(cat <<-EOM
 		Error: Curl - Communicating with server timed out
 		Updater failed to initialize, exiting now.

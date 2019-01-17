@@ -16,7 +16,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
-	assert_status_is "$EMOM_LOAD"
+	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
@@ -36,7 +36,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
-	assert_status_is "$EMOM_LOAD"
+	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20

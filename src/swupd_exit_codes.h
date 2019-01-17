@@ -1,29 +1,36 @@
 #ifndef __INCLUDE_GUARD_SWUPD_ERROR_H
 #define __INCLUDE_GUARD_SWUPD_ERROR_H
 
-/* error codes to be used as swupd exit status */
+/* codes to be used as swupd exit status */
 
-#define EBUNDLE_MISMATCH 2      /* at least one local bundle mismatches from MoM */
-#define EBUNDLE_REMOVE 3	/* cannot delete local bundle filename */
-#define EMOM_LOAD 4		/* MoM cannot be loaded into memory (this could imply network issue) */
-#define ETYPE_CHANGED_FILE_RM 5 /* do_staging() couldn't delete a file which must be deleted */
-#define EDIR_OVERWRITE 6	/* do_staging() couldn't overwrite a directory */
-#define EDOTFILE_WRITE 7	/* do_staging() couldn't create a dotfile */
-#define ERECURSE_MANIFEST 8     /* error while recursing a manifest */
-#define ELOCK_FILE 9		/* cannot get the lock */
-#define ECURL_INIT 11		/* cannot initialize curl agent */
-#define EINIT_GLOBALS 12	/* cannot initialize globals */
-#define EBUNDLE_NOT_TRACKED 13  /* bundle is not tracked on the system */
-#define EMANIFEST_LOAD 14       /* cannot load manifest into memory */
-#define EINVALID_OPTION 15      /* invalid command option */
-#define ENOSWUPDSERVER 16       /* no net connection to swupd server */
-#define EFILEDOWNLOAD 17	/* file download problem */
-#define EBUNDLE_INSTALL 18      /* Cannot install bundles */
-#define EREQUIRED_DIRS 19       /* Cannot create required dirs */
-#define ECURRENT_VERSION 20     /* Cannot determine current OS version */
-#define ESIGNATURE 21		/* Cannot initialize signature verification */
-#define EBADTIME 22		/* System time is bad */
-#define EDOWNLOADPACKS 23       /* Pack download failed */
-#define EBADCERT 24		/* unable to verify server SSL certificate */
+typedef enum {
+
+	SWUPD_OK = 0,			/* 0 success */
+	SWUPD_NO,			/* 1 used by swupd to respond "No" in different situations:
+                                          - if used with check-update it means no update is available
+                                          - if used with autoupdate it means automatic updating is disabled*/
+	SWUPD_COULDNT_REMOVE_BUNDLE,    /* 2 cannot delete local bundle filename */
+	SWUPD_COULDNT_LOAD_MOM,		/* 3 MoM cannot be loaded into memory (this could imply network issue) */
+	SWUPD_COULDNT_REMOVE_FILE,      /* 4 couldn't delete a file which must be deleted */
+	SWUPD_COULDNT_OVERWRITE_DIR,    /* 5 couldn't overwrite a directory */
+	SWUPD_COULDNT_CREATE_DOTFILE,   /* 6 couldn't create a dotfile */
+	SWUPD_RECURSE_MANIFEST,		/* 7 error while recursing a manifest */
+	SWUPD_LOCK_FILE_FAILED,		/* 8 cannot get the lock */
+	SWUPD_CURL_INIT_FAILED,		/* 9 cannot initialize curl agent */
+	SWUPD_INIT_GLOBALS_FAILED,      /* 10 cannot initialize globals */
+	SWUPD_BUNDLE_NOT_TRACKED,       /* 11 bundle is not tracked on the system */
+	SWUPD_COULDNT_LOAD_MANIFEST,    /* 12 cannot load manifest into memory */
+	SWUPD_INVALID_OPTION,		/* 13 invalid command option */
+	SWUPD_SERVER_CONNECTION_ERROR,  /* 14 no network connection to swupd server */
+	SWUPD_COULDNT_DOWNLOAD_FILE,    /* 15 file download problem */
+	SWUPD_COULDNT_INSTALL_BUNDLE,   /* 16 cannot install bundles */
+	SWUPD_COULDNT_CREATE_DIRS,      /* 17 cannot create required directories */
+	SWUPD_CURRENT_VERSION_UNKNOWN,  /* 18 cannot determine current OS version */
+	SWUPD_COULDNT_VERIFY_SIGNATURE, /* 19 cannot initialize signature verification */
+	SWUPD_BAD_TIME,			/* 20 system time is bad */
+	SWUPD_COULDNT_DOWNLOAD_PACK,    /* 21 pack download failed */
+	SWUPD_BAD_CERT			/* 22 unable to verify server SSL certificate */
+
+} swupd_code;
 
 #endif

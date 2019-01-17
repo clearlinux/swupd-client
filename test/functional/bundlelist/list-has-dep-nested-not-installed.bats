@@ -18,7 +18,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --has-dep test-bundle1"
 
-	assert_status_is "$EBUNDLE_NOT_TRACKED"
+	assert_status_is "$SWUPD_BUNDLE_NOT_TRACKED"
 	expected_output=$(cat <<-EOM
 		Error: Bundle "test-bundle1" does not seem to be installed
 		       try passing --all to check uninstalled bundles

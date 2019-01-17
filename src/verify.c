@@ -143,7 +143,7 @@ static int get_all_files(struct manifest *official_manifest, struct list *subs)
 		 * 	logging needed */
 		fprintf(stderr, "zero pack downloads failed. \n");
 		fprintf(stderr, "Failed - Server-side error, cannot download necessary files\n");
-		return -EDOWNLOADPACKS;
+		return -SWUPD_COULDNT_DOWNLOAD_PACK;
 	}
 	return ret;
 }
@@ -620,7 +620,7 @@ int verify_main(int argc, char **argv)
 	struct list *subs = NULL;
 
 	if (!parse_options(argc, argv)) {
-		ret = EINVALID_OPTION;
+		ret = SWUPD_INVALID_OPTION;
 		print_help();
 		goto clean_args_and_exit;
 	}
@@ -640,7 +640,7 @@ int verify_main(int argc, char **argv)
 	if (!version) {
 		if (sys_version < 0) {
 			fprintf(stderr, "Error: Unable to determine current OS version\n");
-			ret = ECURRENT_VERSION;
+			ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 			goto clean_and_exit;
 		}
 		version = sys_version;
@@ -695,7 +695,7 @@ int verify_main(int argc, char **argv)
 		 * not provided.
 		 */
 		fprintf(stderr, "Unable to download/verify %d Manifest.MoM\n", version);
-		ret = EMOM_LOAD;
+		ret = SWUPD_COULDNT_LOAD_MOM;
 
 		/* No repair is possible without a manifest, nor is accurate reporting
 		 * of the state of the system. Therefore cleanup, report failure and exit
@@ -715,7 +715,7 @@ int verify_main(int argc, char **argv)
 			if (latest > 0) {
 				fprintf(stderr, "Latest supported version to verify: %d\n", latest);
 			}
-			ret = EMANIFEST_LOAD;
+			ret = SWUPD_COULDNT_LOAD_MANIFEST;
 			goto clean_and_exit;
 		}
 	}
@@ -731,7 +731,7 @@ int verify_main(int argc, char **argv)
 		} else {
 			fprintf(stderr, "ERROR: Fixing to a different version requires "
 					"--force or --picky\n");
-			ret = EMANIFEST_LOAD;
+			ret = SWUPD_COULDNT_LOAD_MANIFEST;
 			goto clean_and_exit;
 		}
 	}
@@ -758,7 +758,7 @@ int verify_main(int argc, char **argv)
 		}
 	}
 	if (ret) {
-		ret = EMANIFEST_LOAD;
+		ret = SWUPD_COULDNT_LOAD_MANIFEST;
 		goto clean_and_exit;
 	}
 
@@ -772,7 +772,7 @@ load_submanifests:
 			goto load_submanifests;
 		}
 		fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
-		ret = ERECURSE_MANIFEST;
+		ret = SWUPD_RECURSE_MANIFEST;
 		goto clean_and_exit;
 	}
 	timelist_timer_stop(global_times);

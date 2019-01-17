@@ -14,7 +14,7 @@ test_setup() {
 @test "VER018: Verify fix enforces the use of the correct version" {
 
 	run sudo sh -c "$SWUPD verify --fix -m 10 $SWUPD_OPTS"
-	assert_status_is "$EMANIFEST_LOAD"
+	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		ERROR: Fixing to a different version requires --force or --picky

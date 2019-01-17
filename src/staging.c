@@ -121,7 +121,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 			//file type changed, move old out of the way for new
 			ret = swupd_rm(statfile);
 			if (ret < 0) {
-				ret = -ETYPE_CHANGED_FILE_RM;
+				ret = -SWUPD_COULDNT_REMOVE_FILE;
 				goto out;
 			}
 		}
@@ -162,7 +162,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 			goto out;
 		}
 		if (ret < 0) {
-			ret = -EDIR_OVERWRITE;
+			ret = -SWUPD_COULDNT_OVERWRITE_DIR;
 			goto out;
 		}
 	} else { /* (!file->is_dir && !S_ISDIR(stat.st_mode)) */
@@ -210,7 +210,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 		err = lstat(file->staging, &buf);
 		if (err != 0) {
 			free_string(&file->staging);
-			ret = -EDOTFILE_WRITE;
+			ret = -SWUPD_COULDNT_CREATE_DOTFILE;
 			goto out;
 		}
 	}

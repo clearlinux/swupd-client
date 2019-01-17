@@ -16,7 +16,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle1"
 
-	assert_status_is "$EBUNDLE_REMOVE"
+	assert_status_is "$SWUPD_COULDNT_REMOVE_BUNDLE"
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TARGETDIR"/foo/test-file1

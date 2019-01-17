@@ -11,29 +11,30 @@ export FUNC_DIR
 export SWUPD_DIR="$FUNC_DIR/../.."
 export SWUPD="$SWUPD_DIR/swupd"
 
-# Error codes
-export EBUNDLE_MISMATCH=2  # at least one local bundle mismatches from MoM
-export EBUNDLE_REMOVE=3  # cannot delete local bundle filename
-export EMOM_LOAD=4  # MoM cannot be loaded into memory (this could imply network issue)
-export ETYPE_CHANGED_FILE_RM=5  # do_staging() couldn't delete a file which must be deleted
-export EDIR_OVERWRITE=6  # do_staging() couldn't overwrite a directory
-export EDOTFILE_WRITE=7  # do_staging() couldn't create a dotfile
-export ERECURSE_MANIFEST=8  # error while recursing a manifest
-export ELOCK_FILE=9  # cannot get the lock
-export ECURL_INIT=11  # cannot initialize curl agent
-export EINIT_GLOBALS=12  # cannot initialize globals
-export EBUNDLE_NOT_TRACKED=13  # bundle is not tracked on the system
-export EMANIFEST_LOAD=14  # cannot load manifest into memory
-export EINVALID_OPTION=15  # invalid command option
-export ENOSWUPDSERVER=16  # no net connection to swupd server
-export EFILEDOWNLOAD=17  # file download problem
-export EBUNDLE_INSTALL=18  # Cannot install bundles
-export EREQUIRED_DIRS=19  # Cannot create required dirs
-export ECURRENT_VERSION=20  # Cannot determine current OS version
-export ESIGNATURE=21  # Cannot initialize signature verification
-export EBADTIME=22  # System time is bad
-export EDOWNLOADPACKS=23  # Pack download failed
-export EBADCERT=24  # unable to verify server SSL certificate
+# Exit codes
+export SWUPD_OK=0
+export SWUPD_NO=1
+export SWUPD_COULDNT_REMOVE_BUNDLE=2  # cannot delete local bundle filename
+export SWUPD_COULDNT_LOAD_MOM=3  # MoM cannot be loaded into memory (this could imply network issue)
+export SWUPD_COULDNT_REMOVE_FILE=4  # do_staging() couldn't delete a file which must be deleted
+export SWUPD_COULDNT_OVERWRITE_DIR=5  # do_staging() couldn't overwrite a directory
+export SWUPD_COULDNT_CREATE_DOTFILE=6  # do_staging() couldn't create a dotfile
+export SWUPD_RECURSE_MANIFEST=7  # error while recursing a manifest
+export SWUPD_LOCK_FILE_FAILED=8  # cannot get the lock
+export SWUPD_CURL_INIT_FAILED=9  # cannot initialize curl agent
+export SWUPD_INIT_GLOBALS_FAILED=10  # cannot initialize globals
+export SWUPD_BUNDLE_NOT_TRACKED=11  # bundle is not tracked on the system
+export SWUPD_COULDNT_LOAD_MANIFEST=12  # cannot load manifest into memory
+export SWUPD_INVALID_OPTION=13  # invalid command option
+export SWUPD_SERVER_CONNECTION_ERROR=14  # no net connection to swupd server
+export SWUPD_COULDNT_DOWNLOAD_FILE=15  # file download problem
+export SWUPD_COULDNT_INSTALL_BUNDLE=16  # Cannot install bundles
+export SWUPD_COULDNT_CREATE_DIRS=17  # Cannot create required dirs
+export SWUPD_CURRENT_VERSION_UNKNOWN=18  # Cannot determine current OS version
+export SWUPD_COULDNT_VERIFY_SIGNATURE=19  # Cannot initialize signature verification
+export SWUPD_BAD_TIME=20  # System time is bad
+export SWUPD_COULDNT_DOWNLOAD_PACK=21  # Pack download failed
+export SWUPD_BAD_CERT=22  # unable to verify server SSL certificate
 
 # global constant
 export zero_hash="0000000000000000000000000000000000000000000000000000000000000000"

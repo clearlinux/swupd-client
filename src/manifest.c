@@ -549,7 +549,7 @@ verify_mom:
 		}
 		fprintf(stderr, "Failed to load %d MoM manifest\n", version);
 		if (err) {
-			*err = EMANIFEST_LOAD;
+			*err = SWUPD_COULDNT_LOAD_MANIFEST;
 		}
 		return NULL;
 	}
@@ -579,7 +579,7 @@ verify_mom:
 			free_string(&url);
 			free_manifest(manifest);
 			if (err) {
-				*err = ESIGNATURE;
+				*err = SWUPD_COULDNT_VERIFY_SIGNATURE;
 			}
 			return NULL;
 		}
@@ -647,7 +647,7 @@ retry_load:
 			goto retry_load;
 		}
 		if (err) {
-			*err = ESIGNATURE;
+			*err = SWUPD_COULDNT_VERIFY_SIGNATURE;
 		}
 		return NULL;
 	}
@@ -662,7 +662,7 @@ retry_load:
 		}
 		fprintf(stderr, "Failed to load %d %s manifest\n", version, file->filename);
 		if (err) {
-			*err = EMANIFEST_LOAD;
+			*err = SWUPD_COULDNT_LOAD_MANIFEST;
 		}
 		return NULL;
 	}

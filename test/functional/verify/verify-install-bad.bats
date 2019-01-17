@@ -15,7 +15,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install -m 10"
 
-	assert_status_is "$EMANIFEST_LOAD"
+	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "test-bundl" is invalid, skipping it...
 	EOM

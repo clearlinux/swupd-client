@@ -28,7 +28,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle"
 
-	assert_status_is "$EMOM_LOAD"
+	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
@@ -58,7 +58,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle"
 
-	assert_status_is "$ERECURSE_MANIFEST"
+	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.os-core.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
@@ -86,12 +86,12 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle"
 
-	assert_status_is "$ERECURSE_MANIFEST"
+	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 10 test-bundle manifest
-		Error: Cannot load test-bundle sub-manifest (ret = 8)
+		Error: Cannot load test-bundle sub-manifest (ret = $SWUPD_RECURSE_MANIFEST)
 		Failed to remove 1 of 1 bundles
 	EOM
 	)

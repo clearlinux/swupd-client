@@ -78,7 +78,7 @@ int hashdump_main(int argc, char **argv)
 		case 'p':
 			if (!set_path_prefix(optarg)) {
 				fprintf(stderr, "Invalid --path/-p argument\n\n");
-				return EINVALID_OPTION;
+				return SWUPD_INVALID_OPTION;
 			}
 			use_prefix = true;
 			break;
@@ -87,17 +87,17 @@ int hashdump_main(int argc, char **argv)
 			return EXIT_SUCCESS;
 		default:
 			usage(argv[0]);
-			return EINVALID_OPTION;
+			return SWUPD_INVALID_OPTION;
 		}
 	}
 
 	if (optind >= argc) {
 		usage(argv[0]);
-		return EINVALID_OPTION;
+		return SWUPD_INVALID_OPTION;
 	}
 
 	if (!set_path_prefix(NULL)) {
-		return EINIT_GLOBALS;
+		return SWUPD_INIT_GLOBALS_FAILED;
 	}
 
 	file.filename = strdup_or_die(argv[optind]);

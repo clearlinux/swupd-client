@@ -258,7 +258,7 @@ int mirror_main(int argc, char **argv)
 	int ret = 0;
 	if (!parse_options(argc, argv)) {
 		print_help();
-		return EINVALID_OPTION;
+		return SWUPD_INVALID_OPTION;
 	}
 
 	if (set != NULL) {
@@ -282,7 +282,7 @@ int mirror_main(int argc, char **argv)
 
 	/* init globals here after the new URL is configured */
 	if (!init_globals()) {
-		return EINIT_GLOBALS;
+		return SWUPD_INIT_GLOBALS_FAILED;
 	}
 
 	/* print new configuration */

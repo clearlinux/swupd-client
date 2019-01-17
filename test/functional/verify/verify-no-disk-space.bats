@@ -38,7 +38,7 @@ test_setup() {
 
 	run sudo sh -c "timeout 30 $SWUPD verify --fix --force --manifest=20 $SWUPD_OPTS"
 
-	assert_status_is "$EMOM_LOAD"
+	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Verifying version 20
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.MoM.tar'
@@ -67,7 +67,7 @@ test_setup() {
 
 	run sudo sh -c "timeout 30 $SWUPD verify --fix --force --manifest=20 $SWUPD_OPTS"
 
-	assert_status_is "$EMANIFEST_LOAD"
+	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Verifying version 20
 		WARNING: the force or picky option is specified; ignoring version mismatch for verify --fix
@@ -91,7 +91,7 @@ test_setup() {
 
 	run sudo sh -c "timeout 30 $SWUPD verify --fix --force --manifest=20 $SWUPD_OPTS"
 
-	assert_status_is "$EFILEDOWNLOAD"
+	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
 		Verifying version 20
 		WARNING: the force or picky option is specified; ignoring version mismatch for verify --fix

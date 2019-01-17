@@ -100,7 +100,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle3"
 
-	assert_status_is "$EBUNDLE_NOT_TRACKED"
+	assert_status_is "$SWUPD_BUNDLE_NOT_TRACKED"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "test-bundle3" is not installed, skipping it...
 		Failed to remove 1 of 1 bundles
@@ -114,7 +114,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS fake-bundle"
 
-	assert_status_is "$EBUNDLE_NOT_TRACKED"
+	assert_status_is "$SWUPD_BUNDLE_NOT_TRACKED"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "fake-bundle" is not installed, skipping it...
 		Failed to remove 1 of 1 bundles
@@ -128,7 +128,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS fake-bundle test-bundle3"
 
-	assert_status_is "$EBUNDLE_NOT_TRACKED"
+	assert_status_is "$SWUPD_BUNDLE_NOT_TRACKED"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "fake-bundle" is not installed, skipping it...
 		Warning: Bundle "test-bundle3" is not installed, skipping it...
@@ -147,7 +147,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle3 test-bundle1"
 	
-	assert_status_is "$EBUNDLE_NOT_TRACKED"
+	assert_status_is "$SWUPD_BUNDLE_NOT_TRACKED"
 	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 	assert_file_not_exists "$TARGETDIR"/test-file1
 	assert_file_not_exists "$TARGETDIR"/bar/test-file2
@@ -174,7 +174,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS fake-bundle test-bundle1"
 
-	assert_status_is "$EBUNDLE_NOT_TRACKED"
+	assert_status_is "$SWUPD_BUNDLE_NOT_TRACKED"
 	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 	assert_file_not_exists "$TARGETDIR"/test-file1
 	assert_file_not_exists "$TARGETDIR"/bar/test-file2

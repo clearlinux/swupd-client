@@ -98,7 +98,7 @@ int bundle_add_main(int argc, char **argv)
 {
 	if (!parse_options(argc, argv)) {
 		print_help();
-		return EINVALID_OPTION;
+		return SWUPD_INVALID_OPTION;
 	}
 
 	return install_bundles_frontend(bundles);

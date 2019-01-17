@@ -59,7 +59,7 @@ static char *capath = NULL;
 /* Pretty print curl return status */
 static void swupd_curl_strerror(CURLcode curl_ret)
 {
-	fprintf(stderr, "Curl error: (%d) %s\n", curl_ret, curl_easy_strerror(curl_ret));
+	error("Curl - Download error - (%d) %s\n", curl_ret, curl_easy_strerror(curl_ret));
 }
 
 /*
@@ -141,10 +141,10 @@ static int check_connection(const char *test_capath)
 	case CURLE_OK:
 		return 0;
 	case CURLE_SSL_CACERT:
-		fprintf(stderr, "Warning: Unable to verify server SSL certificate\n");
+		warn("Curl - Unable to verify server SSL certificate\n");
 		return -EBADCERT;
 	case CURLE_SSL_CERTPROBLEM:
-		fprintf(stderr, "Warning: Problem with the local client SSL certificate\n");
+		warn("Curl - Problem with the local client SSL certificate\n");
 		return -EBADCERT;
 	case CURLE_OPERATION_TIMEDOUT:
 		return -CURLE_OPERATION_TIMEDOUT;
@@ -171,13 +171,13 @@ int swupd_curl_init(void)
 
 	curl_ret = curl_global_init(CURL_GLOBAL_ALL);
 	if (curl_ret != CURLE_OK) {
-		fprintf(stderr, "Error: failed to initialize CURL environment\n");
+		error("Curl - Failed to initialize environment\n");
 		return -1;
 	}
 
 	curl = curl_easy_init();
 	if (curl == NULL) {
-		fprintf(stderr, "Error: failed to initialize CURL session\n");
+		error("Curl - Failed to initialize session\n");
 		curl_global_cleanup();
 		return -1;
 	}
@@ -186,7 +186,7 @@ int swupd_curl_init(void)
 	if (ret == 0) {
 		return 0;
 	} else if (ret == -CURLE_OPERATION_TIMEDOUT) {
-		fprintf(stderr, "Error: Communicating with server timed out.\n");
+		error("Curl - Communicating with server timed out\n");
 		return -1;
 	}
 
@@ -200,7 +200,7 @@ int swupd_curl_init(void)
 				continue;
 			}
 
-			fprintf(stderr, "Trying fallback CA path %s\n", tok);
+			warn("Curl - Trying fallback CA path %s\n", tok);
 			ret = check_connection(tok);
 			if (ret == 0) {
 				capath = strdup_or_die(tok);
@@ -313,8 +313,8 @@ CURLcode swupd_download_file_create(struct curl_file *file)
 {
 	file->fh = fopen(file->path, "w");
 	if (!file->fh) {
-		fprintf(stderr, "Cannot open file for write \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
-			file->path, strerror(errno));
+		error("Curl - Cannot open file for write \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
+		      file->path, strerror(errno));
 		return CURLE_WRITE_ERROR;
 	}
 	return CURLE_OK;
@@ -324,8 +324,8 @@ CURLcode swupd_download_file_append(struct curl_file *file)
 {
 	file->fh = fopen(file->path, "a");
 	if (!file->fh) {
-		fprintf(stderr, "Cannot open file for append \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
-			file->path, strerror(errno));
+		error("Curl - Cannot open file for append \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
+		      file->path, strerror(errno));
 		return CURLE_WRITE_ERROR;
 	}
 	return CURLE_OK;
@@ -335,8 +335,8 @@ CURLcode swupd_download_file_close(CURLcode curl_ret, struct curl_file *file)
 {
 	if (file->fh) {
 		if (fclose(file->fh)) {
-			fprintf(stderr, "Cannot close file after write \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
-				file->path, strerror(errno));
+			error("Curl - Cannot close file after write \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
+			      file->path, strerror(errno));
 			if (curl_ret == CURLE_OK) {
 				curl_ret = CURLE_WRITE_ERROR;
 			}
@@ -363,11 +363,11 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle, i
 				response = -1; // Force error
 			}
 		}
-		debug("process_curl_error_codes: curl_ret = %d, response = %d\n", curl_ret, response);
+		debug("Curl: process_curl_error_codes: curl_ret = %d, response = %d\n", curl_ret, response);
 		/* curl command succeeded, download might've failed, let our caller handle */
 		switch (response) {
 		case 206:
-			fprintf(stderr, "Curl: Partial file downloaded from '%s'\n", url);
+			error("Curl - Partial file downloaded from '%s'\n", url);
 			*err = -1;
 			return DOWNLOAD_STATUS_PARTIAL_FILE;
 		case 200:
@@ -375,63 +375,63 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle, i
 			*err = 0;
 			return DOWNLOAD_STATUS_COMPLETED;
 		case 403:
-			debug("Curl: Download failed: Forbidden (403) - '%s'\n", url);
+			debug("Curl: Download failed - forbidden (403) - '%s'\n", url);
 			*err = -EPERM;
 			return DOWNLOAD_STATUS_FORBIDDEN;
 		case 404:
-			debug("Curl: Download failed: File not found (404) - '%s'\n", url);
+			debug("Curl: Download failed - file not found (404) - '%s'\n", url);
 			*err = -ENOENT;
 			return DOWNLOAD_STATUS_NOT_FOUND;
 		default:
-			fprintf(stderr, "Curl: Download failed: response (%ld) -  '%s'\n", response, url);
+			error("Curl - Download failed: response (%ld) -  '%s'\n", response, url);
 			*err = -ECOMM;
 			return DOWNLOAD_STATUS_ERROR;
 		}
 	} else { /* download failed but let our caller do it */
-		debug("process_curl_error_codes: curl_ret = %d\n", curl_ret);
+		debug("Curl: process_curl_error_codes - curl_ret = %d\n", curl_ret);
 		switch (curl_ret) {
 		case CURLE_COULDNT_RESOLVE_PROXY:
-			fprintf(stderr, "Curl: Could not resolve proxy\n");
+			error("Curl - Could not resolve proxy\n");
 			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_COULDNT_RESOLVE_HOST:
-			fprintf(stderr, "Curl: Could not resolve host - '%s'\n", url);
+			error("Curl - Could not resolve host - '%s'\n", url);
 			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_COULDNT_CONNECT:
-			fprintf(stderr, "Curl: Could not connect to host or proxy - '%s'\n", url);
+			error("Curl - Could not connect to host or proxy - '%s'\n", url);
 			*err = -ENONET;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_FILE_COULDNT_READ_FILE:
 			*err = -ENOENT;
 			return DOWNLOAD_STATUS_NOT_FOUND;
 		case CURLE_PARTIAL_FILE:
-			fprintf(stderr, "Curl: File incompletely downloaded - '%s'\n", url);
+			error("Curl - File incompletely downloaded - '%s'\n", url);
 			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_RECV_ERROR:
-			fprintf(stderr, "Curl: Failure receiving data from server - '%s'\n", url);
+			error("Curl - Failure receiving data from server - '%s'\n", url);
 			*err = -ENOLINK;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_WRITE_ERROR:
-			fprintf(stderr, "Curl: Error downloading to local file - '%s'\n", url);
-			fprintf(stderr, "Check free space for %s?\n", state_dir);
+			error("Curl - Error downloading to local file - '%s'\n", url);
+			error("Curl - Check free space for %s?\n", state_dir);
 			*err = -EIO;
 			return DOWNLOAD_STATUS_WRITE_ERROR;
 		case CURLE_OPERATION_TIMEDOUT:
-			fprintf(stderr, "Curl: Communicating with server timed out - '%s'\n", url);
+			error("Curl - Communicating with server timed out - '%s'\n", url);
 			*err = -ETIMEDOUT;
 			return DOWNLOAD_STATUS_TIMEOUT;
 		case CURLE_SSL_CACERT_BADFILE:
-			fprintf(stderr, "Curl: Bad SSL Cert file, cannot ensure secure connection - '%s'\n", url);
+			error("Curl - Bad SSL Cert file, cannot ensure secure connection - '%s'\n", url);
 			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_SSL_CERTPROBLEM:
-			fprintf(stderr, "Curl: Problem with the local client SSL certificate - '%s'\n", url);
+			error("Curl - Problem with the local client SSL certificate - '%s'\n", url);
 			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_RANGE_ERROR:
-			fprintf(stderr, "Range command not supported by server, download resume disabled - '%s'\n", url);
+			error("Curl - Range command not supported by server, download resume disabled - '%s'\n", url);
 			*err = -ERANGE;
 			return DOWNLOAD_STATUS_RANGE_ERROR;
 		default:
@@ -478,7 +478,7 @@ restart_download:
 		local.path = filename;
 
 		if (resume_ok && resume_download_supported && lstat(filename, &stat) == 0) {
-			fprintf(stderr, "Curl: Resuming download for '%s'\n", url);
+			print("Curl: Resuming download for '%s'\n", url);
 			curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
 			if (curl_ret != CURLE_OK) {
 				goto exit;
@@ -517,7 +517,7 @@ restart_download:
 		goto exit;
 	}
 
-	debug("CURL - start sync download: %s -> %s\n", url, in_memory_file ? "<memory>" : filename);
+	debug("Curl: Start sync download: %s -> %s\n", url, in_memory_file ? "<memory>" : filename);
 	curl_ret = curl_easy_perform(curl);
 
 exit:
@@ -526,7 +526,7 @@ exit:
 	}
 
 	status = process_curl_error_codes(curl_ret, curl, &err);
-	debug("CURL - complete sync download: %s -> %s, status=%d\n", url, in_memory_file ? "<memory>" : filename, status);
+	debug("Curl: Complete sync download: %s -> %s, status=%d\n", url, in_memory_file ? "<memory>" : filename, status);
 	if (status == DOWNLOAD_STATUS_RANGE_ERROR) {
 		// Reset variable
 		memset(&local, 0, sizeof(local));

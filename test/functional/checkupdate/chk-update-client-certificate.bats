@@ -87,7 +87,7 @@ global_teardown() {
 	assert_status_is "$ENOSWUPDSERVER"
 
 	expected_output=$(cat <<-EOM
-			Warning: Unable to verify server SSL certificate
+			Warning: Curl - Unable to verify server SSL certificate
 	EOM
 	)
 	assert_in_output "$expected_output"
@@ -102,7 +102,7 @@ global_teardown() {
 	assert_status_is "$ENOSWUPDSERVER"
 
 	expected_output=$(cat <<-EOM
-			Warning: Problem with the local client SSL certificate
+			Warning: Curl - Problem with the local client SSL certificate
 	EOM
 	)
 	assert_in_output "$expected_output"

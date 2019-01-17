@@ -50,7 +50,7 @@ test_teardown() {
 
 	assert_status_is "$ECURL_INIT"
 	expected_output=$(cat <<-EOM
-		Error: Communicating with server timed out.
+		Error: Curl - Communicating with server timed out
 		Updater failed to initialize, exiting now.
 	EOM
 	)
@@ -72,7 +72,7 @@ test_teardown() {
 
 	assert_status_is "$ECURL_INIT"
 	expected_output=$(cat <<-EOM
-		Error: Communicating with server timed out.
+		Error: Curl - Communicating with server timed out
 		Updater failed to initialize, exiting now.
 	EOM
 	)
@@ -95,7 +95,7 @@ test_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.
-		Curl: Communicating with server timed out - '.*/version/formatstaging/latest'
+		Error: Curl - Communicating with server timed out - '.*/version/formatstaging/latest'
 		Preparing to update from 10 to 20
 		Downloading packs...
 		Extracting os-core pack for version 20

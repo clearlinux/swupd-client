@@ -164,6 +164,11 @@ int swupd_curl_init(void)
 	int ret;
 	struct stat st;
 
+	if (curl) {
+		warn("Curl has already been initialized\n");
+		return 0;
+	}
+
 	curl_ret = curl_global_init(CURL_GLOBAL_ALL);
 	if (curl_ret != CURLE_OK) {
 		fprintf(stderr, "Error: failed to initialize CURL environment\n");
@@ -210,13 +215,13 @@ int swupd_curl_init(void)
 
 void swupd_curl_deinit(void)
 {
-	if (curl) {
-		curl_easy_cleanup(curl);
+	if (!curl) {
+		return;
 	}
+
+	curl_easy_cleanup(curl);
 	curl = NULL;
-
 	free_string(&capath);
-
 	curl_global_cleanup();
 }
 
@@ -232,6 +237,7 @@ double swupd_curl_query_content_size(char *url)
 	double content_size;
 
 	if (!curl) {
+		error("Curl hasn't been initialized\n");
 		return -1;
 	}
 
@@ -459,6 +465,7 @@ static int swupd_curl_get_file_full(const char *url, char *filename,
 	struct curl_file local = { 0 };
 
 	if (!curl) {
+		error("Curl hasn't been initialized\n");
 		return -1;
 	}
 restart_download:

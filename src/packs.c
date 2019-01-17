@@ -32,8 +32,8 @@
 
 #include "config.h"
 #include "signature.h"
-#include "swupd-build-variant.h"
 #include "swupd.h"
+#include "swupd_build_variant.h"
 
 /* hysteresis thresholds */
 /* TODO: update MAX_XFER after bug #562 is fixed.

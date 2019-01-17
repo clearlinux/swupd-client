@@ -37,8 +37,8 @@
 
 #include "config.h"
 #include "signature.h"
-#include "swupd-build-variant.h"
 #include "swupd.h"
+#include "swupd_build_variant.h"
 #include "xattrs.h"
 
 #define MANIFEST_LINE_MAXLEN 8192

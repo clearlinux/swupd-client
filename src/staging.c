@@ -33,8 +33,8 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "swupd-build-variant.h"
 #include "swupd.h"
+#include "swupd_build_variant.h"
 
 /* clean then recreate temporary folder for tar renames */
 static int create_staging_renamedir(char *rename_tmpdir)

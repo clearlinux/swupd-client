@@ -24,9 +24,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "swupd-build-opts.h"
-#include "swupd-internal.h"
 #include "swupd.h"
+#include "swupd_build_opts.h"
+#include "swupd_internal.h"
 
 struct subcmd {
 	char *name;

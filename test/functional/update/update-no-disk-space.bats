@@ -40,8 +40,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
-		Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
+		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 10 MoM manifest
 		Update failed.
 	EOM
@@ -70,8 +70,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.MoM.tar'
-		Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.MoM.tar'
+		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 20 MoM manifest
 		Update failed.
 	EOM
@@ -100,8 +100,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
-		Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
+		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 10 test-bundle manifest
 		Cannot load current MoM sub-manifests, exiting
 		Update failed.
@@ -131,8 +131,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.test-bundle.tar'
-		Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.test-bundle.tar'
+		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 20 test-bundle manifest
 		Unable to download manifest test-bundle version 20, exiting now
 		Update failed.
@@ -156,8 +156,8 @@ test_setup() {
 		Update started.
 		Preparing to update from 10 to 20
 		Downloading packs...
-		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/pack-test-bundle-from-10.tar'
-		Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/pack-test-bundle-from-10.tar'
+		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 1
 		    new bundles       : 0
@@ -167,8 +167,8 @@ test_setup() {
 		    deleted files     : 0
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...
-		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$file_hash.tar'
-		Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$file_hash.tar'
+		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		ERROR: Could not download all files, aborting update
 		Update failed.
 	EOM

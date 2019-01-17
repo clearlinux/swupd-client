@@ -30,8 +30,8 @@ test_setup() {
 
 	assert_status_is "$EMOM_LOAD"
 	expected_output=$(cat <<-EOM
-		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
-		Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
+		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 10 MoM manifest
 		Unable to download/verify 10 Manifest.MoM
 		Failed to remove 1 of 1 bundles
@@ -60,8 +60,8 @@ test_setup() {
 
 	assert_status_is "$ERECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
-		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.os-core.tar'
-		Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.os-core.tar'
+		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 10 os-core manifest
 		Error: Cannot load MoM sub-manifests
 		Failed to remove 1 of 1 bundles
@@ -88,8 +88,8 @@ test_setup() {
 
 	assert_status_is "$ERECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
-		Curl: Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
-		Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
+		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Failed to retrieve 10 test-bundle manifest
 		Error: Cannot load test-bundle sub-manifest (ret = 8)
 		Failed to remove 1 of 1 bundles

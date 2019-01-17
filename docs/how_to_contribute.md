@@ -19,22 +19,28 @@ Swupd code style is defined on .clang-format and checked with "make compliant". 
 You are going to see different comment styles in swupd codebase. We are working on improving the quality of function comments on header files, so for new code, always comment all new exported (non static) functions you create in the header file. It's also well appreciated if you add comments to undocumented functions you have changed.
 
  - Use /* */ for multiline or single line header comments. It's ok to use // for comments in the code
- - Start comment in the first line, just after /*
  - If needed, use '' to highlight the variable name or a value
  - If function returns a value, describe what is returned
 
 Some examples of good comments:
 
 ```c
-/* Returns 1 if 'list' is longer than 'count'. Returns 0 otherwise */
+/*
+ * Returns 1 if 'list' is longer than 'count'. Returns 0 otherwise
+ */
 extern int list_longer_than(struct list *list, int count);
 
-/* Returns a duplicated copy of the string using strdup().
- * Abort if there's no memory to allocate the new string. */
+/*
+ * Returns a duplicated copy of the string using strdup().
+ * Abort if there's no memory to allocate the new string.
+ */
 char *strdup_or_die(const char *const str);
 
 ...
-return NO_ERRORS; // No errors reported
+/* Check if the command was a success */
+if (success) {
+    return NO_ERRORS; // No errors reported
+}
 ...
 ```
 

@@ -17,7 +17,7 @@
 #include "lib/strings.h"
 #include "lib/sys.h"
 #include "swupd_curl.h"
-#include "swupd_error.h"
+#include "swupd_exit_codes.h"
 #include "timelist.h"
 
 #ifdef __cplusplus

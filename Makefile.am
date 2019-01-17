@@ -74,7 +74,7 @@ swupd_SOURCES = \
 	src/swupd_build_variant.h \
 	src/swupd_curl_internal.h \
 	src/swupd_curl.h \
-	src/swupd_error.h \
+	src/swupd_exit_codes.h \
 	src/swupd_internal.h \
 	src/swupd.h \
 	src/telemetry.c \

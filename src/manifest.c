@@ -1270,7 +1270,7 @@ static int cmpnames(const void *a, const void *b)
 	return strcmp((*(struct file **)a)->filename, (*(struct file **)b)->filename);
 }
 
-static int is_version_data(const char *filename)
+static bool is_version_data(const char *filename)
 {
 	if (strcmp(filename, "/usr/lib/os-release") == 0 ||
 	    strcmp(filename, "/usr/share/clear/version") == 0 ||
@@ -1281,9 +1281,9 @@ static int is_version_data(const char *filename)
 	    strcmp(filename, "/usr/share/clear/update-ca/Swupd_Root.pem") == 0 ||
 	    strcmp(filename, "/usr/share/clear/os-core-update-index") == 0 ||
 	    strcmp(filename, "/usr/share/clear/allbundles/os-core") == 0) {
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize, int size)

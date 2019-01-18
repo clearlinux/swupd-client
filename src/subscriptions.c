@@ -115,7 +115,7 @@ void read_subscriptions(struct list **subs)
 	*subs = list_sort(*subs, subscription_sort_component);
 }
 
-int component_subscribed(struct list *subs, char *component)
+bool component_subscribed(struct list *subs, char *component)
 {
 	struct list *list;
 	struct sub *sub;
@@ -126,11 +126,11 @@ int component_subscribed(struct list *subs, char *component)
 		list = list->next;
 
 		if (strcmp(sub->component, component) == 0) {
-			return 1;
+			return true;
 		}
 	}
 
-	return 0;
+	return false;
 }
 
 /* For the given subscription list (subs), set each subscription version as

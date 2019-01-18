@@ -291,7 +291,7 @@ extern size_t get_max_xfer(size_t default_max_xfer);
 
 extern void free_subscriptions(struct list **subs);
 extern void read_subscriptions(struct list **subs);
-extern int component_subscribed(struct list *subs, char *component);
+extern bool component_subscribed(struct list *subs, char *component);
 extern void set_subscription_versions(struct manifest *latest, struct manifest *current, struct list **subs);
 
 extern void hash_assign(const char *src, char *dest);
@@ -323,7 +323,7 @@ extern char *mounted_dirs;
 extern char *mk_full_filename(const char *prefix, const char *path);
 extern bool is_directory_mounted(const char *filename);
 extern bool is_under_mounted_directory(const char *filename);
-extern int is_populated_dir(char *dirname);
+extern bool is_populated_dir(char *dirname);
 
 extern void run_scripts(bool block);
 extern void run_preupdate_scripts(struct manifest *manifest);

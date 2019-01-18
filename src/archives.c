@@ -32,7 +32,7 @@
  * Check and print archive errors */
 static int _archive_check_err(struct archive *ar, int ret)
 {
-	int is_fatal = 0;
+	int is_fatal = false;
 	int error_num = 0;
 
 	if (ret < ARCHIVE_WARN || ret == ARCHIVE_RETRY) {
@@ -40,7 +40,7 @@ static int _archive_check_err(struct archive *ar, int ret)
 		 * than ARCHIVE_WARN), which indicates failure with retry possible.
 		 * Regardless, indicate that the operation did not succeed.  */
 		fprintf(stderr, "Error: %s\n", archive_error_string(ar));
-		is_fatal = 1;
+		is_fatal = true;
 	} else if (ret < ARCHIVE_OK) {
 		/* operation succeeded, warning encountered */
 		fprintf(stderr, "Warning: %s\n", archive_error_string(ar));
@@ -51,7 +51,7 @@ static int _archive_check_err(struct archive *ar, int ret)
 		if (error_num == ENOSPC) {
 			fprintf(stderr, "Warning: %s\n", strerror(error_num));
 		}
-		is_fatal = 0;
+		is_fatal = false;
 	}
 
 	return is_fatal;
@@ -80,6 +80,7 @@ static int copy_data(struct archive *ar, struct archive *aw)
 			return r;
 		}
 	}
+	return 0;
 }
 
 /* extract_to(tarfile, outputdir)

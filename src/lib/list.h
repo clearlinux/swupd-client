@@ -1,6 +1,7 @@
 #ifndef __LIST__
 #define __LIST__
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 struct list {
@@ -53,6 +54,6 @@ struct list *list_clone(struct list *list);
 struct list *list_deep_clone_strs(struct list *source);
 
 /* check list length */
-extern int list_longer_than(struct list *list, int count);
+extern bool list_longer_than(struct list *list, int count);
 
 #endif

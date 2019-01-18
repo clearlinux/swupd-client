@@ -23,6 +23,7 @@
 
 #define _GNU_SOURCE
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -288,7 +289,7 @@ struct list *list_deep_clone_strs(struct list *list)
 	return clone;
 }
 
-int list_longer_than(struct list *list, int count)
+bool list_longer_than(struct list *list, int count)
 {
 	struct list *item;
 
@@ -296,8 +297,8 @@ int list_longer_than(struct list *list, int count)
 	while (item) {
 		item = item->next;
 		if (count-- < 0) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }

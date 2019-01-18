@@ -159,23 +159,23 @@ static int ensure_root_owned_dir(const char *dirname)
 	return true; /* doesn't exist now */
 }
 
-int is_populated_dir(char *dirname)
+bool is_populated_dir(char *dirname)
 {
 	int n = 0;
 	struct dirent *d;
 	DIR *dir = opendir(dirname);
 	if (dir == NULL) {
-		return 0;
+		return false;
 	}
 	while ((d = readdir(dir)) != NULL) {
 		/* account for '.' and '..' */
 		if (++n > 2) {
 			closedir(dir);
-			return 1;
+			return true;
 		}
 	}
 	closedir(dir);
-	return 0;
+	return false;
 }
 
 static int create_required_dirs(void)

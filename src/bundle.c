@@ -847,7 +847,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	(void)rm_staging_dir_contents("download");
 
 	if (list_longer_than(to_install_files, 10)) {
-		download_subscribed_packs(*subs, mom, true);
+		download_subscribed_packs(*subs, mom);
 	}
 	timelist_timer_stop(global_times); // closing: Download packs
 

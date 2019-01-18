@@ -161,11 +161,10 @@ static int download_pack(void *download_handle, int oldversion, int newversion, 
 }
 
 /* pull in packs for base and any subscription */
-int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required)
+int download_subscribed_packs(struct list *subs, struct manifest *mom)
 {
 	struct list *iter;
 	struct sub *sub = NULL;
-	int err;
 	int is_mix = 0;
 	unsigned int list_length = list_len(subs);
 	unsigned int complete = 0;
@@ -189,15 +188,8 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 		if (bundle) {
 			is_mix = bundle->is_mix;
 		}
-		err = download_pack(download_handle, sub->oldversion, sub->version, sub->component, is_mix);
+		download_pack(download_handle, sub->oldversion, sub->version, sub->component, is_mix);
 		print_progress(complete, list_length);
-		if (err < 0) {
-			if (required) { /* Probably need printf("\n") here */
-				return err;
-			} else {
-				continue;
-			}
-		}
 	}
 
 	print_progress(list_length, list_length); /* Force out 100% */

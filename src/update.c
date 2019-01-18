@@ -437,7 +437,7 @@ load_server_submanifests:
 
 	/* Step 5: get the packs and untar */
 	timelist_timer_start(global_times, "Download Packs");
-	download_subscribed_packs(latest_subs, server_manifest, false);
+	download_subscribed_packs(latest_subs, server_manifest);
 	timelist_timer_stop(global_times);
 
 	timelist_timer_start(global_times, "Apply deltas");

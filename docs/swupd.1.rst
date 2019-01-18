@@ -410,27 +410,28 @@ returns ``0`` if automatic updating is enabled.
 
 The non-zero return codes for other operations are listed here:
 
-  - **2**: Unable to delete bundle
-  - **3**: Unable to download or read MoM manifest
-  - **4**: Unable to delete a file
-  - **5**: Unable to overwrite a directory
-  - **6**: Unable to create a dotfile
-  - **7**: Unable to recursively load included manifests
-  - **8**: Unable to obtain lock on state directory
-  - **9**: Unable to initialize curl agent
-  - **10**: Initialization error
-  - **11**: Bundle not tracked on system
-  - **12**: Unable to load manifest into memory
-  - **13**: Invalid command-line option
-  - **14**: Unable to connect to update server
-  - **15**: File download issue
-  - **16**: Unable to install bundles
-  - **17**: Unable to create required directories
-  - **18**: Unable to determine current version of the OS
-  - **19**: Unable to initialize signature verification
-  - **20**: System time is off by a large margin
-  - **21**: Pack download issue
-  - **22**: Unable to verify server SSL certificate
+  - **2**: Unable to download or read MoM manifest
+  - **3**: Unable to delete a file
+  - **4**: Unable to overwrite a directory
+  - **5**: Unable to create a dotfile
+  - **6**: Unable to recursively load included manifests
+  - **7**: Unable to obtain lock on state directory
+  - **8**: Unable to initialize curl agent
+  - **9**: Initialization error
+  - **10**: Bundle not tracked on system
+  - **11**: Unable to load manifest into memory
+  - **12**: Invalid command-line option
+  - **13**: Unable to connect to update server
+  - **14**: File download issue
+  - **15**: Unable to install bundles
+  - **16**: Unable to create required directories
+  - **17**: Unable to determine current version of the OS
+  - **18**: Unable to initialize signature verification
+  - **19**: System time is off by a large margin
+  - **20**: Pack download issue
+  - **21**: Unable to verify server SSL certificate
+  - **22**: A required bundle was removed or was attempted to be removed
+  - **23**: The specified bundle is invalid
 
 
 SEE ALSO

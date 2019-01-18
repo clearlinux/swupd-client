@@ -152,7 +152,7 @@ static int unload_tracked_bundle(const char *bundle_name, struct list **subs)
 		if (strcmp(bundle->component, bundle_name) == 0) {
 			/* unlink (aka untrack) matching bundle name from tracked ones */
 			*subs = free_bundle(cur_item);
-			return EXIT_SUCCESS;
+			return SWUPD_OK;
 		}
 	}
 
@@ -315,7 +315,7 @@ int show_bundle_reqd_by(const char *bundle_name, bool server)
 
 	if (!search_bundle_in_manifest(current_manifest, bundle_name)) {
 		fprintf(stderr, "Bundle name %s is invalid, aborting dependency list\n", bundle_name);
-		ret = SWUPD_COULDNT_REMOVE_BUNDLE;
+		ret = SWUPD_INVALID_BUNDLE;
 		goto out;
 	}
 
@@ -480,9 +480,9 @@ out:
  *  	performing a unlink(2) for each filename.
  *  6) Done.
  */
-int remove_bundles(char **bundles)
+swupd_code remove_bundles(char **bundles)
 {
-	int ret = 0;
+	int ret = SWUPD_OK;
 	int ret_code = 0;
 	int bad = 0;
 	int total = 0;
@@ -528,7 +528,7 @@ int remove_bundles(char **bundles)
 		*/
 		if (strcmp(bundle, "os-core") == 0) {
 			fprintf(stderr, "Warning: Bundle \"os-core\" not allowed to be removed\n");
-			ret = SWUPD_BUNDLE_NOT_TRACKED;
+			ret = SWUPD_REQUIRED_BUNDLE_ERROR;
 			bad++;
 			goto out_free_curl;
 		}
@@ -555,7 +555,7 @@ int remove_bundles(char **bundles)
 
 		if (!search_bundle_in_manifest(current_mom, bundle)) {
 			fprintf(stderr, "Bundle name is invalid, aborting removal\n");
-			ret = SWUPD_COULDNT_REMOVE_BUNDLE;
+			ret = SWUPD_INVALID_BUNDLE;
 			bad++;
 			goto out_free_mom;
 		}
@@ -600,7 +600,7 @@ int remove_bundles(char **bundles)
 			}
 
 			list_free_list_and_data(reqd_by, free);
-			ret = SWUPD_COULDNT_REMOVE_BUNDLE;
+			ret = SWUPD_REQUIRED_BUNDLE_ERROR;
 			bad++;
 			goto out_free_mom;
 		}
@@ -636,6 +636,7 @@ int remove_bundles(char **bundles)
 			  bundle,
 			  current_version,
 			  ret);
+		/* if at least one of the bundles fails to be removed, exit with a failure */
 		if (ret) {
 			ret_code = ret;
 		}

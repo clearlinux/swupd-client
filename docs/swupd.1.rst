@@ -410,26 +410,27 @@ returns ``0`` if automatic updating is enabled.
 
 The non-zero return codes for other operations are listed here:
 
-  - **2**: At least one local bundle could not be found in the MoM manifest
-  - **3**: Unable to delete bundle
-  - **4**: Unable to download or read MoM manifest
-  - **5**, **6**, **7**: File staging error
-  - **8**: Unable to recursively load included manifests
-  - **9**: Unable to obtain lock on state directory
-  - **11**: Unable to initialize curl agent
-  - **12**: Initialization error
-  - **13**: Bundle not tracked on system
-  - **14**: Unable to load manifest into memory
-  - **15**: Invalid command-line option
-  - **16**: Unable to connect to update server
-  - **16**, **17**: File download issue
-  - **18**: Unable to install bundles
-  - **19**: Unable to create required directories
-  - **20**: Unable to determine current version of the OS
-  - **21**: Unable to initialize signature verification
-  - **22**: System time is off by a large margin
-  - **23**: Pack download issue
-  - **24**: Unable to verify server SSL certificate
+  - **2**: Unable to delete bundle
+  - **3**: Unable to download or read MoM manifest
+  - **4**: Unable to delete a file
+  - **5**: Unable to overwrite a directory
+  - **6**: Unable to create a dotfile
+  - **7**: Unable to recursively load included manifests
+  - **8**: Unable to obtain lock on state directory
+  - **9**: Unable to initialize curl agent
+  - **10**: Initialization error
+  - **11**: Bundle not tracked on system
+  - **12**: Unable to load manifest into memory
+  - **13**: Invalid command-line option
+  - **14**: Unable to connect to update server
+  - **15**: File download issue
+  - **16**: Unable to install bundles
+  - **17**: Unable to create required directories
+  - **18**: Unable to determine current version of the OS
+  - **19**: Unable to initialize signature verification
+  - **20**: System time is off by a large margin
+  - **21**: Pack download issue
+  - **22**: Unable to verify server SSL certificate
 
 
 SEE ALSO

@@ -49,6 +49,20 @@ void string_or_die(char **strp, const char *fmt, ...)
 	va_end(ap);
 }
 
+char *str_or_die(const char *fmt, ...)
+{
+	char *str;
+	va_list ap;
+
+	va_start(ap, fmt);
+	if (vasprintf(&str, fmt, ap) < 0) {
+		abort();
+	}
+	va_end(ap);
+
+	return str;
+}
+
 void free_string(char **s)
 {
 	if (s) {

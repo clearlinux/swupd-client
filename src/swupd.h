@@ -281,7 +281,7 @@ extern int download_subscribed_packs(struct list *subs, struct manifest *mom, bo
 extern void apply_deltas(struct manifest *current_manifest);
 extern int untar_full_download(void *data);
 
-extern int do_staging(struct file *file, struct manifest *manifest);
+extern swupd_code do_staging(struct file *file, struct manifest *manifest);
 extern int rename_all_files_to_final(struct list *updates);
 extern int rename_staged_file_to_final(struct file *file);
 
@@ -347,7 +347,7 @@ extern int strtoi_err_endptr(const char *str, char **endptr, int *value);
 void update_motd(int new_release);
 void delete_motd(void);
 extern int get_dirfd_path(const char *fullname);
-extern int verify_fix_path(char *targetpath, struct manifest *manifest);
+extern swupd_code verify_fix_path(char *targetpath, struct manifest *manifest);
 extern struct list *files_from_bundles(struct list *bundles);
 extern bool version_files_consistent(void);
 extern bool string_in_list(char *string_to_check, struct list *list_to_check);

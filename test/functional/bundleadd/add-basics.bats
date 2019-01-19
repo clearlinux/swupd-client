@@ -99,7 +99,7 @@ global_teardown() {
 @test "ADD004: Try adding one bundle that does not exist" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS fake-bundle"
-	assert_status_is "$SWUPD_COULDNT_INSTALL_BUNDLE"
+	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "fake-bundle" is invalid, skipping it...
 		Failed to install 1 of 1 bundles
@@ -112,7 +112,7 @@ global_teardown() {
 @test "ADD005: Try adding multiple bundles, all invalid, both non existent" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS fake-bundle1 fake-bundle2"
-	assert_status_is "$SWUPD_COULDNT_INSTALL_BUNDLE"
+	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "fake-bundle2" is invalid, skipping it...
 		Warning: Bundle "fake-bundle1" is invalid, skipping it...
@@ -140,7 +140,7 @@ global_teardown() {
 @test "ADD007: Try adding multiple bundles, all invalid, one already added, one invalid" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS fake-bundle test-bundle3"
-	assert_status_is "$SWUPD_COULDNT_INSTALL_BUNDLE"
+	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "fake-bundle" is invalid, skipping it...
 		Warning: Bundle "test-bundle3" is already installed, skipping it...
@@ -183,7 +183,7 @@ global_teardown() {
 @test "ADD009: Try adding multiple bundles, one valid, one non existent" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 fake-bundle"
-	assert_status_is "$SWUPD_COULDNT_INSTALL_BUNDLE"
+	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "fake-bundle" is invalid, skipping it...
 		Starting download of remaining update content. This may take a while...
@@ -204,7 +204,7 @@ global_teardown() {
 @test "ADD010: Try adding multiple bundles, one valid, one already added, one non existent" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle3 fake-bundle"
-	assert_status_is "$SWUPD_COULDNT_INSTALL_BUNDLE"
+	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "fake-bundle" is invalid, skipping it...
 		Warning: Bundle "test-bundle3" is already installed, skipping it...
@@ -234,7 +234,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle2 fake-bundle test-bundle3"
 
-	assert_status_is "$SWUPD_COULDNT_INSTALL_BUNDLE"
+	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "fake-bundle" is invalid, skipping it...
 		Warning: Bundle "test-bundle3" is already installed, skipping it...

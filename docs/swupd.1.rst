@@ -423,15 +423,20 @@ The non-zero return codes for other operations are listed here:
   - **12**: Invalid command-line option
   - **13**: Unable to connect to update server
   - **14**: File download issue
-  - **15**: Unable to install bundles
-  - **16**: Unable to create required directories
-  - **17**: Unable to determine current version of the OS
-  - **18**: Unable to initialize signature verification
-  - **19**: System time is off by a large margin
-  - **20**: Pack download issue
-  - **21**: Unable to verify server SSL certificate
-  - **22**: A required bundle was removed or was attempted to be removed
-  - **23**: The specified bundle is invalid
+  - **15**: Unable to create required directories
+  - **16**: Unable to determine current version of the OS
+  - **17**: Unable to initialize signature verification
+  - **18**: System time is off by a large margin
+  - **19**: Pack download issue
+  - **20**: Unable to verify server SSL certificate
+  - **21**: A required bundle was removed or was attempted to be removed
+  - **22**: The specified bundle is invalid
+  - **23**: There is not enough disk space left (or it cannot be determined)
+  - **24**: Unable to untar a file
+  - **25**: The required path was not found in any manifest
+  - **26**: Unexpected condition found
+  - **27**: Unable to rename a directory
+  - **28**: Unable to rename a file
 
 
 SEE ALSO

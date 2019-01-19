@@ -62,7 +62,7 @@ static int create_staging_renamedir(char *rename_tmpdir)
 //TODO: "do_staging is currently not able to be run in parallel"
 /* Consider adding a remove_leftovers() that runs in verify/fix in order to
  * allow this function to mkdtemp create folders for parallel build */
-int do_staging(struct file *file, struct manifest *MoM)
+swupd_code do_staging(struct file *file, struct manifest *MoM)
 {
 	char *statfile = NULL, *tmp = NULL, *tmp2 = NULL;
 	char *dir, *base, *rel_dir;
@@ -121,7 +121,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 			//file type changed, move old out of the way for new
 			ret = swupd_rm(statfile);
 			if (ret < 0) {
-				ret = -SWUPD_COULDNT_REMOVE_FILE;
+				ret = SWUPD_COULDNT_REMOVE_FILE;
 				goto out;
 			}
 		}
@@ -143,11 +143,12 @@ int do_staging(struct file *file, struct manifest *MoM)
 		string_or_die(&rename_tmpdir, "%s/tmprenamedir", state_dir);
 		ret = create_staging_renamedir(rename_tmpdir);
 		if (ret) {
+			ret = SWUPD_COULDNT_CREATE_DIRS;
 			goto out;
 		}
 		string_or_die(&rename_target, "%s/%s", rename_tmpdir, base);
 		if (rename(original, rename_target)) {
-			ret = -errno;
+			ret = SWUPD_COULDNT_RENAME_DIR;
 			goto out;
 		}
 		string_or_die(&tarcommand, TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -cf - './%s' 2> /dev/null | " TAR_COMMAND " -C '%s%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
@@ -158,11 +159,11 @@ int do_staging(struct file *file, struct manifest *MoM)
 		}
 		free_string(&tarcommand);
 		if (rename(rename_target, original)) {
-			ret = -errno;
+			ret = -SWUPD_COULDNT_RENAME_DIR;
 			goto out;
 		}
 		if (ret < 0) {
-			ret = -SWUPD_COULDNT_OVERWRITE_DIR;
+			ret = SWUPD_COULDNT_OVERWRITE_DIR;
 			goto out;
 		}
 	} else { /* (!file->is_dir && !S_ISDIR(stat.st_mode)) */
@@ -184,7 +185,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 			string_or_die(&rename_target, "%s/staged/.update.%s", state_dir, base);
 			ret = rename(original, rename_target);
 			if (ret) {
-				ret = -errno;
+				ret = SWUPD_COULDNT_RENAME_FILE;
 				goto out;
 			}
 			string_or_die(&tarcommand, TAR_COMMAND " -C '%s/staged' " TAR_PERM_ATTR_ARGS " -cf - '.update.%s' 2> /dev/null | " TAR_COMMAND " -C '%s%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
@@ -196,7 +197,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 			free_string(&tarcommand);
 			ret = rename(rename_target, original);
 			if (ret) {
-				ret = -errno;
+				ret = SWUPD_COULDNT_RENAME_FILE;
 				goto out;
 			}
 		}
@@ -210,7 +211,7 @@ int do_staging(struct file *file, struct manifest *MoM)
 		err = lstat(file->staging, &buf);
 		if (err != 0) {
 			free_string(&file->staging);
-			ret = -SWUPD_COULDNT_CREATE_DOTFILE;
+			ret = SWUPD_COULDNT_CREATE_DOTFILE;
 			goto out;
 		}
 	}

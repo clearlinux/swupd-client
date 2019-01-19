@@ -59,7 +59,7 @@ test_setup() {
 
 	run sudo sh -c "timeout 30 $SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
-	assert_status_is "$SWUPD_COULDNT_INSTALL_BUNDLE"
+	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
@@ -79,7 +79,7 @@ test_setup() {
 
 	run sudo sh -c "timeout 30 $SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
-	assert_status_is "$SWUPD_COULDNT_INSTALL_BUNDLE"
+	assert_status_is "$SWUPD_DISK_SPACE_ERROR"
 	expected_output=$(cat <<-EOM
 		Error: Bundle too large by 11M.
 		NOTE: currently, swupd only checks /usr/ (or the passed-in path with /usr/ appended) for available space.
@@ -106,7 +106,7 @@ test_setup() {
 
 	run sudo sh -c "timeout 30 $SWUPD bundle-add --skip-diskspace-check $SWUPD_OPTS test-bundle"
 
-	assert_status_is "$SWUPD_COULDNT_INSTALL_BUNDLE"
+	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
 		Downloading packs...
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/pack-test-bundle-from-0.tar'

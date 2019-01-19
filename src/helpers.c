@@ -715,14 +715,14 @@ static void free_path_data(void *data)
  * by breaking it into sub-paths and fixing them top down.
  * Here, target_MoM is the consolidated manifest for the version you are trying to update/verify.
  */
-int verify_fix_path(char *targetpath, struct manifest *target_MoM)
+swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 {
 	struct list *path_list = NULL; /* path_list contains the subparts in the path */
 	char *path;
 	char *tmp = NULL, *target = NULL;
 	char *url = NULL;
 	struct stat sb;
-	int ret = 0;
+	int ret = SWUPD_OK;
 	struct file *file;
 	char *tar_dotfile = NULL;
 	struct list *list1 = NULL;
@@ -766,13 +766,13 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 			fprintf(stderr, "Error: Path %s not found in any of the subscribed manifests"
 					"in verify_fix_path for path_prefix %s\n",
 				path, path_prefix);
-			ret = -1;
+			ret = SWUPD_PATH_NOT_IN_MANIFEST;
 			goto end;
 		}
 
 		if (file->is_deleted) {
 			fprintf(stderr, "Error: Path %s found deleted in verify_fix_path\n", path);
-			ret = -1;
+			ret = SWUPD_UNEXPECTED_CONDITION;
 			goto end;
 		}
 
@@ -802,17 +802,20 @@ int verify_fix_path(char *targetpath, struct manifest *target_MoM)
 
 		if (ret != 0) {
 			fprintf(stderr, "Error: Failed to download file %s in verify_fix_path\n", file->filename);
+			ret = SWUPD_COULDNT_DOWNLOAD_FILE;
 			unlink(tar_dotfile);
 			goto end;
 		}
 		if (untar_full_download(file) != 0) {
 			fprintf(stderr, "Error: Failed to untar file %s\n", file->filename);
-			ret = -1;
+			ret = SWUPD_COULDNT_UNTAR_FILE;
 			goto end;
 		}
 
 		ret = do_staging(file, target_MoM);
 		if (ret != 0) {
+			/* do_staging returns a swupd_code on error,
+			* just propagate the error */
 			fprintf(stderr, "Error: Path %s failed to stage in verify_fix_path\n", path);
 			goto end;
 		}

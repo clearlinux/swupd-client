@@ -25,15 +25,20 @@ typedef enum {
 	SWUPD_INVALID_OPTION,		/* 12 invalid command option */
 	SWUPD_SERVER_CONNECTION_ERROR,  /* 13 no network connection to swupd server */
 	SWUPD_COULDNT_DOWNLOAD_FILE,    /* 14 file download problem */
-	SWUPD_COULDNT_INSTALL_BUNDLE,   /* 15 cannot install bundles */
-	SWUPD_COULDNT_CREATE_DIRS,      /* 16 cannot create required directories */
-	SWUPD_CURRENT_VERSION_UNKNOWN,  /* 17 cannot determine current OS version */
-	SWUPD_COULDNT_VERIFY_SIGNATURE, /* 18 cannot initialize signature verification */
-	SWUPD_BAD_TIME,			/* 19 system time is bad */
-	SWUPD_COULDNT_DOWNLOAD_PACK,    /* 20 pack download failed */
-	SWUPD_BAD_CERT,			/* 21 unable to verify server SSL certificate */
-	SWUPD_REQUIRED_BUNDLE_ERROR,    /* 22 a required bundle is missing or was attempted to be removed */
-	SWUPD_INVALID_BUNDLE		/* 23 the specified bundle is invalid */
+	SWUPD_COULDNT_CREATE_DIRS,      /* 15 cannot create required directories */
+	SWUPD_CURRENT_VERSION_UNKNOWN,  /* 16 cannot determine current OS version */
+	SWUPD_COULDNT_VERIFY_SIGNATURE, /* 17 cannot initialize signature verification */
+	SWUPD_BAD_TIME,			/* 18 system time is bad */
+	SWUPD_COULDNT_DOWNLOAD_PACK,    /* 19 pack download failed */
+	SWUPD_BAD_CERT,			/* 20 unable to verify server SSL certificate */
+	SWUPD_REQUIRED_BUNDLE_ERROR,    /* 21 a required bundle is missing or was attempted to be removed */
+	SWUPD_INVALID_BUNDLE,		/* 22 the specified bundle is invalid */
+	SWUPD_DISK_SPACE_ERROR,		/* 23 not enough disk space left (or it cannot be determined) */
+	SWUPD_COULDNT_UNTAR_FILE,       /* 24 couldn't untar a file */
+	SWUPD_PATH_NOT_IN_MANIFEST,     /* 25 the required path is not in any manifest */
+	SWUPD_UNEXPECTED_CONDITION,     /* 26 an unexpected condition was found */
+	SWUPD_COULDNT_RENAME_DIR,       /* 27 couldn't rename a directory */
+	SWUPD_COULDNT_RENAME_FILE       /* 28 couldn't rename a file */
 
 } swupd_code;
 

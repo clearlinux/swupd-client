@@ -732,7 +732,7 @@ out:
 	return ret;
 }
 
-static int install_bundles(struct list *bundles, struct list **subs, struct manifest *mom)
+static swupd_code install_bundles(struct list *bundles, struct list **subs, struct manifest *mom)
 {
 	int ret;
 	int bundles_failed = 0;
@@ -746,6 +746,7 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 	struct list *to_install_bundles = NULL;
 	struct list *to_install_files = NULL;
 	struct manifest *full_mom = NULL;
+	bool invalid_bundle_provided = false;
 
 	/* step 1: check bundle args are valid if so populate subs struct */
 	timelist_timer_start(global_times, "Add bundles and recurse");
@@ -774,7 +775,21 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 	 * one new bundle was subscribed */
 	if (!(ret & add_sub_NEW)) {
 		/* something went wrong, nothing will be installed */
+		if (ret & add_sub_ERR) {
+			ret = SWUPD_COULDNT_LOAD_MANIFEST;
+		} else if (ret & add_sub_BADNAME) {
+			ret = SWUPD_INVALID_BUNDLE;
+		} else {
+			/* this means the user tried to add a bundle that
+			 * was already installed, nothing to do here */
+			ret = SWUPD_OK;
+		}
 		goto out;
+	}
+	/* If at least one of the provided bundles was invalid set this flag
+	 * so we can check it before exiting the program */
+	if (ret & add_sub_BADNAME) {
+		invalid_bundle_provided = true;
 	}
 
 	set_subscription_versions(mom, NULL, subs);
@@ -807,7 +822,7 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 
 		/* Add 10% to bundle_size as a 'fudge factor' */
 		if (((bundle_size * 1.1) > fs_free && !skip_diskspace_check) || fs_free < 0) {
-			ret = SWUPD_COULDNT_INSTALL_BUNDLE;
+			ret = SWUPD_DISK_SPACE_ERROR;
 
 			if (fs_free > 0) {
 				fprintf(stderr, "Error: Bundle too large by %ldM.\n", (bundle_size - fs_free) / 1000 / 1000);
@@ -838,6 +853,8 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 	timelist_timer_start(global_times, "Download missing files");
 	ret = download_fullfiles(to_install_files, NULL);
 	if (ret) {
+		/* make sure the return code is positive */
+		ret = abs(ret);
 		fprintf(stderr, "ERROR: Could not download some files from bundles, aborting bundle installation.\n");
 		goto out;
 	}
@@ -878,7 +895,7 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 			ret = swupd_rm(hashpath);
 			if (ret) {
 				fprintf(stderr, "Error: could not remove bad file %s\n", hashpath);
-				ret = SWUPD_COULDNT_INSTALL_BUNDLE;
+				ret = SWUPD_COULDNT_REMOVE_FILE;
 				free_string(&hashpath);
 				goto out;
 			}
@@ -926,7 +943,8 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 			ret = verify_fix_path(file->filename, full_mom);
 		}
 		if (ret) {
-			ret = SWUPD_COULDNT_INSTALL_BUNDLE;
+			/* verify_fix_path returns a swupd_code on error,
+			 * just propagate the error */
 			goto out;
 		}
 
@@ -980,7 +998,7 @@ static int install_bundles(struct list *bundles, struct list **subs, struct mani
 	run_scripts(false);
 	timelist_timer_stop(global_times); // closing: Run Scripts
 
-	ret = 0;
+	ret = SWUPD_OK;
 
 out:
 	/* count how many of the requested bundles were actually installed, note that the
@@ -1006,7 +1024,6 @@ out:
 		bundles_failed = bundles_requested - bundles_installed - already_installed;
 	}
 	if (bundles_failed > 0) {
-		ret = SWUPD_COULDNT_INSTALL_BUNDLE;
 		fprintf(stderr, "Failed to install %i of %i bundles\n", bundles_failed, bundles_requested - already_installed);
 	} else if (bundles_installed) {
 		fprintf(stderr, "Successfully installed %i bundle%s\n", bundles_installed, (bundles_installed > 1 ? "s" : ""));
@@ -1020,6 +1037,11 @@ out:
 	}
 	if (to_install_bundles) {
 		list_free_list_and_data(to_install_bundles, free_manifest_data);
+	}
+	/* if one or more of the requested bundles was invalid, and
+	 * there is no other error return SWUPD_INVALID_BUNDLE */
+	if (invalid_bundle_provided && !ret) {
+		ret = SWUPD_INVALID_BUNDLE;
 	}
 	return ret;
 }

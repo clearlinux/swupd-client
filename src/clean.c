@@ -86,21 +86,21 @@ typedef bool(remove_predicate_func)(const char *dir, const struct dirent *entry)
 /* Remove files from path for which pred returns true.
  * Currently it doesn't recursively remove directories.
  */
-static int remove_if(const char *path, bool dry_run, remove_predicate_func pred)
+static swupd_code remove_if(const char *path, bool dry_run, remove_predicate_func pred)
 {
-	int ret = 0;
+	int ret = SWUPD_OK;
 	DIR *dir;
 
 	dir = opendir(path);
 	if (!dir) {
-		return errno;
+		return SWUPD_COULDNT_LIST_DIR;
 	}
 
 	char *file = NULL;
 
 	while (true) {
 		free_string(&file);
-		ret = 0;
+		ret = SWUPD_OK;
 
 		/* Reset errno to distinguish between a previous
 		 * failure and the end of stream. */
@@ -109,7 +109,7 @@ static int remove_if(const char *path, bool dry_run, remove_predicate_func pred)
 		entry = readdir(dir);
 		if (!entry) {
 			if (errno) {
-				ret = errno;
+				ret = SWUPD_COULDNT_LIST_DIR;
 			}
 			break;
 		}
@@ -280,13 +280,13 @@ end:
 	return contents;
 }
 
-static int clean_staged_manifests(const char *path, bool dry_run, bool all)
+static swupd_code clean_staged_manifests(const char *path, bool dry_run, bool all)
 {
 	DIR *dir;
 
 	dir = opendir(path);
 	if (!dir) {
-		return errno;
+		return SWUPD_COULDNT_LIST_DIR;
 	}
 
 	/* NOTE: Currently Manifest files have their timestamp from generation
@@ -304,7 +304,7 @@ static int clean_staged_manifests(const char *path, bool dry_run, bool all)
 		}
 	}
 
-	int ret = 0;
+	int ret = SWUPD_OK;
 	while (true) {
 		/* Reset errno to properly identify the end of stream. */
 		errno = 0;
@@ -312,7 +312,7 @@ static int clean_staged_manifests(const char *path, bool dry_run, bool all)
 		entry = readdir(dir);
 		if (!entry) {
 			if (errno) {
-				ret = errno;
+				ret = SWUPD_COULDNT_LIST_DIR;
 			}
 			break;
 		}
@@ -381,10 +381,10 @@ int clean_main(int argc, char **argv)
 {
 	if (!parse_options(argc, argv)) {
 		print_help();
-		return EXIT_FAILURE;
+		return SWUPD_INVALID_OPTION;
 	}
 
-	int ret = 0;
+	int ret = SWUPD_OK;
 	ret = clean_init();
 	if (ret != 0) {
 		fprintf(stderr, "Failed swupd initialization, exiting now.\n");
@@ -394,6 +394,7 @@ int clean_main(int argc, char **argv)
 	if (!options.all) {
 		ret = clock_gettime(CLOCK_REALTIME, &now);
 		if (ret != 0) {
+			ret = SWUPD_COULDNT_GET_TIME;
 			perror("couldn't read current time to decide what files to clean");
 			goto end;
 		}

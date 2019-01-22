@@ -157,7 +157,7 @@ int compute_hash_lazy(struct file *file, char *filename)
  * a "0000000..." hash is returned as is our convention in the manifest
  * for deleted files.  Otherwise file->hash is set to a non-zero hash. */
 /* TODO: how should we properly handle compute_hash() failures? */
-int compute_hash(struct file *file, char *filename)
+swupd_code compute_hash(struct file *file, char *filename)
 {
 	int ret;
 	char key[SWUPD_HASH_LEN];
@@ -167,7 +167,7 @@ int compute_hash(struct file *file, char *filename)
 
 	if (file->is_deleted) {
 		hash_set_zeros(file->hash);
-		return 0;
+		return SWUPD_OK;
 	}
 
 	hash_set_zeros(key);
@@ -184,9 +184,9 @@ int compute_hash(struct file *file, char *filename)
 					       (const unsigned char *)key,
 					       key_len,
 					       link);
-			return 0;
+			return SWUPD_OK;
 		} else {
-			return -1;
+			return SWUPD_COMPUTE_HASH_ERROR;
 		}
 	}
 
@@ -196,13 +196,13 @@ int compute_hash(struct file *file, char *filename)
 				       (const unsigned char *)key,
 				       key_len,
 				       SWUPD_HASH_DIRNAME); //Make independent of dirname
-		return 0;
+		return SWUPD_OK;
 	}
 
 	/* if we get here, this is a regular file */
 	fl = fopen(filename, "r");
 	if (!fl) {
-		return -1;
+		return SWUPD_COMPUTE_HASH_ERROR;
 	}
 	blob = mmap(NULL, file->stat.st_size, PROT_READ, MAP_PRIVATE, fileno(fl), 0);
 	if (blob == MAP_FAILED && file->stat.st_size != 0) {
@@ -217,7 +217,7 @@ int compute_hash(struct file *file, char *filename)
 			     file->stat.st_size);
 	munmap(blob, file->stat.st_size);
 	fclose(fl);
-	return 0;
+	return SWUPD_OK;
 }
 
 bool verify_file(struct file *file, char *filename)

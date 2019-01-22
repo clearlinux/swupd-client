@@ -439,6 +439,7 @@ The non-zero return codes for other operations are listed here:
   - **28**: Unable to rename a file
   - **29**: Unable to execute another program in a subprocess
   - **30**: Unable to list the content of a directory
+  - **31**: An error ocurred computing the hash of a file
 
 
 SEE ALSO

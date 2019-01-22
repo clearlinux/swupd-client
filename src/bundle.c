@@ -43,7 +43,7 @@
 * Parse the full manifest for the current version of the OS and print
 *   all available bundles.
 */
-int list_installable_bundles()
+swupd_code list_installable_bundles()
 {
 	char *name;
 	struct list *list;
@@ -138,7 +138,7 @@ bool is_tracked_bundle(const char *bundle_name)
  * bundles, this function search for bundle_name into subs
  * struct and if it found then free it from the list.
  */
-static int unload_tracked_bundle(const char *bundle_name, struct list **subs)
+static swupd_code unload_tracked_bundle(const char *bundle_name, struct list **subs)
 {
 	struct list *bundles;
 	struct list *cur_item;
@@ -193,7 +193,7 @@ static void required_by(struct list **reqd_by, const char *bundle_name, struct m
 	}
 }
 /* Return recursive list of included bundles */
-int show_included_bundles(char *bundle_name)
+swupd_code show_included_bundles(char *bundle_name)
 {
 	int ret = 0;
 	int current_version = CURRENT_OS_VERSION;
@@ -225,15 +225,17 @@ int show_included_bundles(char *bundle_name)
 		char *m = NULL;
 		if (ret & add_sub_ERR) {
 			string_or_die(&m, "Processing error");
+			ret = SWUPD_COULDNT_LOAD_MANIFEST;
 		} else if (ret & add_sub_BADNAME) {
 			string_or_die(&m, "Bad bundle name detected");
+			ret = SWUPD_INVALID_BUNDLE;
 		} else {
 			string_or_die(&m, "Unknown error");
+			ret = SWUPD_UNEXPECTED_CONDITION;
 		}
 
 		fprintf(stderr, "Error: %s - Aborting\n", m);
 		free_string(&m);
-		ret = 1;
 		goto out;
 	}
 	deps = recurse_manifest(mom, subs, NULL, false, NULL);
@@ -247,7 +249,7 @@ int show_included_bundles(char *bundle_name)
 	 * if deps only has one bundle in it, no included packages were found */
 	if (list_len(deps) == 1) {
 		fprintf(stderr, "No included bundles\n");
-		ret = 0;
+		ret = SWUPD_OK;
 		goto out;
 	}
 
@@ -266,7 +268,7 @@ int show_included_bundles(char *bundle_name)
 		printf("%s\n", included_bundle->component);
 	}
 
-	ret = 0;
+	ret = SWUPD_OK;
 
 out:
 	if (mom) {
@@ -284,7 +286,7 @@ out:
 	return ret;
 }
 
-int show_bundle_reqd_by(const char *bundle_name, bool server)
+swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 {
 	int ret = 0;
 	int version = CURRENT_OS_VERSION;
@@ -349,7 +351,7 @@ int show_bundle_reqd_by(const char *bundle_name, bool server)
 	required_by(&reqd_by, bundle_name, current_manifest, 0);
 	if (reqd_by == NULL) {
 		fprintf(stderr, "No bundles have %s as a dependency\n", bundle_name);
-		ret = 0;
+		ret = SWUPD_OK;
 		goto out;
 	}
 
@@ -370,7 +372,7 @@ int show_bundle_reqd_by(const char *bundle_name, bool server)
 		free_string(&bundle);
 	}
 
-	ret = 0;
+	ret = SWUPD_OK;
 
 out:
 	if (current_manifest) {
@@ -1129,7 +1131,7 @@ clean_and_exit:
  * /usr/share/clear/bundles/), get the list of local bundles and print
  * them sorted.
  */
-int list_local_bundles()
+swupd_code list_local_bundles()
 {
 	char *name;
 	char *path = NULL;
@@ -1159,7 +1161,7 @@ skip_mom:
 	if (!bundles && errno) {
 		perror("couldn't open bundles directory");
 		free_string(&path);
-		return EXIT_FAILURE;
+		return SWUPD_COULDNT_LIST_DIR;
 	}
 
 	item = bundles;
@@ -1184,5 +1186,5 @@ skip_mom:
 	free_string(&path);
 	free_manifest(MoM);
 
-	return 0;
+	return SWUPD_OK;
 }

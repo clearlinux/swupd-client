@@ -127,7 +127,7 @@ out:
 	return ret;
 }
 
-static int write_to_path(char *content, char *path)
+static swupd_code write_to_path(char *content, char *path)
 {
 	char *dir, *tmp = NULL;
 	struct stat dirstat;
@@ -139,16 +139,19 @@ static int write_to_path(char *content, char *path)
 	if (ret && EEXIST != errno) {
 		fprintf(stderr, "mkdir\n");
 		perror(dir);
+		ret = SWUPD_COULDNT_CREATE_DIRS;
 		goto out;
 	}
 
 	/* Make sure we have a directory, for better user feedback */
 	if ((ret = stat(dir, &dirstat))) {
 		perror(dir);
+		ret = SWUPD_COULDNT_CREATE_DIRS;
 		goto out;
 	} else if (!S_ISDIR(dirstat.st_mode)) {
 		fprintf(stderr, "%s: not a directory\n", dir);
-		ret = 1;
+		ret = SWUPD_COULDNT_CREATE_DIRS;
+		;
 		goto out;
 	}
 
@@ -157,17 +160,19 @@ static int write_to_path(char *content, char *path)
 	fp = fopen(path, "w");
 	if (fp == NULL) {
 		perror(path);
-		ret = 1;
+		ret = SWUPD_WRITE_FILE_ERROR;
 		goto out;
 	}
 
 	/* and write to the file */
 	ret = fputs(content, fp);
 	if (ret < 0 || ret == EOF) {
+		ret = SWUPD_WRITE_FILE_ERROR;
 		fprintf(stderr, "%s: write failed\n", path);
 	}
 
 	if ((ret = fclose(fp))) {
+		ret = SWUPD_WRITE_FILE_ERROR;
 		fprintf(stderr, "fclose\n");
 		perror(path);
 	}
@@ -177,11 +182,11 @@ out:
 	return ret;
 }
 
-static int set_mirror_url(char *url)
+static swupd_code set_mirror_url(char *url)
 {
 	char *content_path;
 	char *version_path;
-	int ret = 0;
+	int ret = SWUPD_OK;
 	bool need_unset = false;
 	/* concatenate path_prefix and configuration paths if necessary
 	 * if path_prefix is NULL the second argument will be returned */
@@ -190,14 +195,14 @@ static int set_mirror_url(char *url)
 
 	/* write url to path_prefix/MIRROR_CONTENT_URL_PATH */
 	ret = write_to_path(url, content_path);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		need_unset = true;
 		goto out;
 	}
 
 	/* write url to path_prefix/MIRROR_VERSION_URL_PATH */
 	ret = write_to_path(url, version_path);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		need_unset = true;
 		goto out;
 	}
@@ -255,7 +260,7 @@ out:
 /* return 0 if update available, non-zero if not */
 int mirror_main(int argc, char **argv)
 {
-	int ret = 0;
+	int ret = SWUPD_OK;
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
@@ -263,7 +268,7 @@ int mirror_main(int argc, char **argv)
 
 	if (set != NULL) {
 		ret = set_mirror_url(set);
-		if (ret != 0) {
+		if (ret != SWUPD_OK) {
 			fprintf(stderr, "Unable to set mirror url\n");
 		} else {
 			fprintf(stderr, "Set upstream mirror to %s\n", set);
@@ -272,8 +277,9 @@ int mirror_main(int argc, char **argv)
 		ret = unset_mirror_url();
 		if (ret == -ENOENT) {
 			fprintf(stderr, "No mirror url configuration to remove\n");
-			ret = 0;
+			ret = SWUPD_OK;
 		} else if (ret != 0) {
+			ret = SWUPD_COULDNT_REMOVE_FILE;
 			fprintf(stderr, "Unable to remove mirror configuration\n");
 		} else { /* ret == 0 */
 			fprintf(stderr, "Mirror url configuration removed\n");

@@ -42,7 +42,8 @@ typedef enum {
 	SWUPD_SUBPROCESS_ERROR,		/* 29 failure to execute another program in a subprocess */
 	SWUPD_COULDNT_LIST_DIR,		/* 30 couldn't list the content of a directory */
 	SWUPD_COMPUTE_HASH_ERROR,       /* 31 there was an error computing the hash of the specified file */
-	SWUPD_COULDNT_GET_TIME		/* 32 couldn't get current system time */
+	SWUPD_COULDNT_GET_TIME,		/* 32 couldn't get current system time */
+	SWUPD_WRITE_FILE_ERROR		/* 33 there was a an error while creating/writing to a file */
 
 } swupd_code;
 

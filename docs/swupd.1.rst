@@ -441,6 +441,7 @@ The non-zero return codes for other operations are listed here:
   - **30**: Unable to list the content of a directory
   - **31**: An error ocurred computing the hash of a file
   - **32**: Unable to get current system time
+  - **33**: Unable to create or write a file
 
 
 SEE ALSO

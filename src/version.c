@@ -136,7 +136,7 @@ int get_current_version(char *path_prefix)
 	return v;
 }
 
-int read_versions(int *current_version, int *server_version, char *path_prefix)
+swupd_code read_versions(int *current_version, int *server_version, char *path_prefix)
 {
 	*current_version = get_current_version(path_prefix);
 	*server_version = get_latest_version(NULL);
@@ -150,7 +150,7 @@ int read_versions(int *current_version, int *server_version, char *path_prefix)
 		return SWUPD_SERVER_CONNECTION_ERROR;
 	}
 
-	return 0;
+	return SWUPD_OK;
 }
 
 int check_versions(int *current_version, int *server_version, int requested_version, char *path_prefix)

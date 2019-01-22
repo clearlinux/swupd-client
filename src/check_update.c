@@ -42,7 +42,7 @@ static void print_help(void)
 }
 
 /* Return 0 if there is an update available, nonzero if not */
-static int check_update()
+static swupd_code check_update()
 {
 	int current_version, server_version;
 	int ret;
@@ -61,7 +61,7 @@ static int check_update()
 	swupd_curl_init();
 
 	ret = read_versions(&current_version, &server_version, path_prefix);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		return ret;
 	} else {
 		info("Current OS version: %d\n", current_version);

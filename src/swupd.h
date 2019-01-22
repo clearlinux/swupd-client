@@ -298,7 +298,7 @@ extern void hash_assign(const char *src, char *dest);
 extern bool hash_equal(const char *hash1, const char *hash2);
 extern bool hash_is_zeros(char *hash);
 extern int compute_hash_lazy(struct file *file, char *filename);
-extern int compute_hash(struct file *file, char *filename) __attribute__((warn_unused_result));
+extern swupd_code compute_hash(struct file *file, char *filename) __attribute__((warn_unused_result));
 
 /* manifest.c */
 /* Calculate the total contentsize of a manifest list */

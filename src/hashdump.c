@@ -84,7 +84,7 @@ int hashdump_main(int argc, char **argv)
 			break;
 		case 'h':
 			usage(argv[0]);
-			return EXIT_SUCCESS;
+			return SWUPD_OK;
 		default:
 			usage(argv[0]);
 			return SWUPD_INVALID_OPTION;
@@ -125,5 +125,5 @@ int hashdump_main(int argc, char **argv)
 
 	free_string(&fullname);
 	free_string(&file.filename);
-	return 0;
+	return SWUPD_OK;
 }

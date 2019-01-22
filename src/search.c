@@ -718,7 +718,7 @@ static double query_total_download_size(struct list *list)
  * Description: To search Clear bundles for a particular entry, a complete set of
  *		manifests must be downloaded. This function does so, asynchronously, using
  *		the curl_multi interface */
-static int download_manifests(struct manifest **MoM)
+static swupd_code download_manifests(struct manifest **MoM)
 {
 	struct list *list = NULL;
 	struct file *file = NULL;
@@ -809,7 +809,7 @@ static int download_manifests(struct manifest **MoM)
 
 int search_main(int argc, char **argv)
 {
-	int ret = 0;
+	int ret = SWUPD_OK;
 	struct manifest *MoM = NULL;
 
 	if (!parse_options(argc, argv)) {
@@ -838,7 +838,7 @@ int search_main(int argc, char **argv)
 
 	if (init) {
 		fprintf(stderr, "Successfully retrieved manifests. Exiting\n");
-		ret = 0;
+		ret = SWUPD_OK;
 		goto clean_exit;
 	}
 
@@ -846,7 +846,7 @@ int search_main(int argc, char **argv)
 	if (!display_files &&
 	    ((strlen(search_string) <= 0) || (strlen(search_string) > NAME_MAX))) {
 		fprintf(stderr, "Error - search string invalid\n");
-		ret = EXIT_FAILURE;
+		ret = SWUPD_INVALID_OPTION;
 		goto clean_exit;
 	}
 

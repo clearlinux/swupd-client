@@ -87,6 +87,26 @@ static void policy_warn(void)
 			"out of compliance with your IT policy\n\n");
 }
 
+static int system_command(const char *cmd)
+{
+	int ret;
+
+	ret = system(cmd);
+	if (ret == -1) {
+		/* it wasn't possible to create the shell process */
+		return SWUPD_SUBPROCESS_ERROR;
+	}
+
+	ret = WEXITSTATUS(ret);
+
+	if (ret == 126 || ret == 128) {
+		/* the command invoked cannot execute or was not found */
+		return SWUPD_SUBPROCESS_ERROR;
+	}
+
+	return ret;
+}
+
 int autoupdate_main(int argc, char **argv)
 {
 	if (!parse_options(argc, argv)) {
@@ -94,48 +114,41 @@ int autoupdate_main(int argc, char **argv)
 	}
 	if (enable && disable) {
 		fprintf(stderr, "Can not enable and disable at the same time\n");
-		exit(EXIT_FAILURE);
+		return SWUPD_INVALID_OPTION;
 	}
 	if (enable) {
 		int rc;
 		check_root();
 		fprintf(stderr, "Running systemctl to enable updates\n");
-		rc = system("/usr/bin/systemctl unmask --now swupd-update.service swupd-update.timer"
-			    " && /usr/bin/systemctl restart swupd-update.timer > /dev/null");
-		if (rc != -1) {
-			rc = WEXITSTATUS(rc);
+		rc = system_command("/usr/bin/systemctl unmask --now swupd-update.service swupd-update.timer"
+				    " && /usr/bin/systemctl restart swupd-update.timer > /dev/null");
+		if (rc) {
+			return SWUPD_SUBPROCESS_ERROR;
 		}
-		return (rc);
+		return SWUPD_OK;
 	} else if (disable) {
 		int rc;
 		check_root();
 		policy_warn();
 		fprintf(stderr, "Running systemctl to disable updates\n");
-		rc = system("/usr/bin/systemctl mask --now swupd-update.service swupd-update.timer > /dev/null");
-		if (rc != -1) {
-			rc = WEXITSTATUS(rc);
+		rc = system_command("/usr/bin/systemctl mask --now swupd-update.service swupd-update.timer > /dev/null");
+		if (rc) {
+			return SWUPD_SUBPROCESS_ERROR;
 		}
-		return (rc);
+		return SWUPD_OK;
 	} else {
 		/* In a container, "/usr/bin/systemctl" will return 1 with
 		 * "Failed to connect to bus: No such file or directory"
 		 * However /usr/bin/systemctl is-enabled ... will not fail, even when it
 		 * should. Check that systemctl is working before reporting the output
 		 * of is-enabled. */
-		int rc = system("/usr/bin/systemctl > /dev/null 2>&1");
-		if (rc != -1) {
-			rc = WEXITSTATUS(rc);
-		}
-
+		int rc = system_command("/usr/bin/systemctl > /dev/null 2>&1");
 		if (rc) {
 			fprintf(stderr, "Unable to determine autoupdate status\n");
-			return rc;
+			return SWUPD_SUBPROCESS_ERROR;
 		}
 
-		rc = system("/usr/bin/systemctl is-enabled swupd-update.service > /dev/null");
-		if (rc != -1) {
-			rc = WEXITSTATUS(rc);
-		}
+		rc = system_command("/usr/bin/systemctl is-enabled swupd-update.service > /dev/null");
 		switch (rc) {
 		case SWUPD_OK:
 			printf("Enabled\n");
@@ -144,6 +157,7 @@ int autoupdate_main(int argc, char **argv)
 			printf("Disabled\n");
 			break;
 		default:
+			rc = SWUPD_SUBPROCESS_ERROR;
 			fprintf(stderr, "Unable to determine autoupdate status\n");
 		}
 		return (rc);

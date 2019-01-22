@@ -365,12 +365,12 @@ extern void create_and_append_subscription(struct list **subs, const char *compo
 /* bundle.c */
 extern bool is_tracked_bundle(const char *bundle_name);
 extern swupd_code remove_bundles(char **bundles);
-extern int show_bundle_reqd_by(const char *bundle_name, bool server);
-extern int show_included_bundles(char *bundle_name);
-extern int list_installable_bundles();
+extern swupd_code show_bundle_reqd_by(const char *bundle_name, bool server);
+extern swupd_code show_included_bundles(char *bundle_name);
+extern swupd_code list_installable_bundles();
 extern int install_bundles_frontend(char **bundles);
 extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
-int list_local_bundles();
+swupd_code list_local_bundles();
 extern int link_or_rename(const char *orig, const char *dest);
 
 /* telemetry.c */

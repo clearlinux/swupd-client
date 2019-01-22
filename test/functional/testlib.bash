@@ -42,6 +42,7 @@ export SWUPD_UNEXPECTED_CONDITION=26  # an unexpected condition was found
 export SWUPD_COULDNT_RENAME_DIR=27  # couldn't rename a directory
 export SWUPD_COULDNT_RENAME_FILE=28  # couldn't rename a file
 export SWUPD_SUBPROCESS_ERROR=29  # failure to execute another program in a subprocess
+export SWUPD_COULDNT_LIST_DIR=30  # couldn't list the content of a directory
 
 # global constant
 export zero_hash="0000000000000000000000000000000000000000000000000000000000000000"

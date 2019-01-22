@@ -117,7 +117,7 @@ int bundle_list_main(int argc, char **argv)
 
 	if (!parse_options(argc, argv)) {
 		print_help();
-		return EXIT_FAILURE;
+		return SWUPD_INVALID_OPTION;
 	}
 
 	ret = swupd_init();

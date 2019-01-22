@@ -438,6 +438,7 @@ The non-zero return codes for other operations are listed here:
   - **27**: Unable to rename a directory
   - **28**: Unable to rename a file
   - **29**: Unable to execute another program in a subprocess
+  - **30**: Unable to list the content of a directory
 
 
 SEE ALSO

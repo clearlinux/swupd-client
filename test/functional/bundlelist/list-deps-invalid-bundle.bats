@@ -6,7 +6,7 @@ load "../testlib"
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --deps not-a-bundle"
 
-	assert_status_is 1
+	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "not-a-bundle" is invalid, skipping it...
 		Error: Bad bundle name detected - Aborting

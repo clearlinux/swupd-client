@@ -39,7 +39,8 @@ typedef enum {
 	SWUPD_UNEXPECTED_CONDITION,     /* 26 an unexpected condition was found */
 	SWUPD_COULDNT_RENAME_DIR,       /* 27 couldn't rename a directory */
 	SWUPD_COULDNT_RENAME_FILE,      /* 28 couldn't rename a file */
-	SWUPD_SUBPROCESS_ERROR		/* 29 failure to execute another program in a subprocess */
+	SWUPD_SUBPROCESS_ERROR,		/* 29 failure to execute another program in a subprocess */
+	SWUPD_COULDNT_LIST_DIR		/* 30 couldn't list the content of a directory */
 
 } swupd_code;
 

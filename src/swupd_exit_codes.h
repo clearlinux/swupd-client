@@ -38,7 +38,8 @@ typedef enum {
 	SWUPD_PATH_NOT_IN_MANIFEST,     /* 25 the required path is not in any manifest */
 	SWUPD_UNEXPECTED_CONDITION,     /* 26 an unexpected condition was found */
 	SWUPD_COULDNT_RENAME_DIR,       /* 27 couldn't rename a directory */
-	SWUPD_COULDNT_RENAME_FILE       /* 28 couldn't rename a file */
+	SWUPD_COULDNT_RENAME_FILE,      /* 28 couldn't rename a file */
+	SWUPD_SUBPROCESS_ERROR		/* 29 failure to execute another program in a subprocess */
 
 } swupd_code;
 

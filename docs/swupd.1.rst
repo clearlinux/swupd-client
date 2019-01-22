@@ -437,6 +437,7 @@ The non-zero return codes for other operations are listed here:
   - **26**: Unexpected condition found
   - **27**: Unable to rename a directory
   - **28**: Unable to rename a file
+  - **29**: Unable to execute another program in a subprocess
 
 
 SEE ALSO

@@ -31,7 +31,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
-	assert_status_is 1
+	assert_status_is "$SWUPD_SERVER_CONNECTION_ERROR"
 	expected_output=$(cat <<-EOM
 		Update started.
 		Error: Unable to determine the server version
@@ -48,7 +48,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
-	assert_status_is 1
+	assert_status_is "$SWUPD_CURRENT_VERSION_UNKNOWN"
 	expected_output=$(cat <<-EOM
 		Update started.
 		Error: Unable to determine current OS version

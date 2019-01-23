@@ -127,7 +127,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	void *download_handle;
 
 	if (!files) {
-		return 0;
+		return SWUPD_OK;
 	}
 
 	download_handle = swupd_curl_parallel_download_start(get_max_xfer(MAX_XFER));

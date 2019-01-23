@@ -442,6 +442,7 @@ The non-zero return codes for other operations are listed here:
   - **31**: An error ocurred computing the hash of a file
   - **32**: Unable to get current system time
   - **33**: Unable to create or write a file
+  - **34**: Collisions found between a mix and upstream
 
 
 SEE ALSO

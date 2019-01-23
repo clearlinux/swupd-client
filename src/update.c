@@ -117,7 +117,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 		/* todo: hash check */
 
 		ret = do_staging(file, server_manifest);
-		if (ret < 0) {
+		if (ret != 0) {
 			fprintf(stderr, "File staging failed: %s\n", file->filename);
 			return ret;
 		}
@@ -133,6 +133,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 	printf("Applying update\n");
 	ret = rename_all_files_to_final(updates);
 	if (ret != 0) {
+		ret = SWUPD_COULDNT_RENAME_FILE;
 		return ret;
 	}
 
@@ -204,7 +205,7 @@ static bool need_new_upstream(int server)
 	return false;
 }
 
-static int main_update()
+static swupd_code main_update()
 {
 	int current_version = -1, server_version = -1;
 	int mix_current_version = -1, mix_server_version = -1;
@@ -246,16 +247,14 @@ static int main_update()
 /* Step 1: get versions */
 version_check:
 	ret = check_versions(&current_version, &server_version, requested_version, path_prefix);
-
-	if (ret < 0) {
-		ret = EXIT_FAILURE;
+	if (ret != SWUPD_OK) {
 		goto clean_curl;
 	}
 
 	if (mix_exists) {
 		check_mix_versions(&mix_current_version, &mix_server_version, path_prefix);
 		if (mix_current_version == -1 || mix_server_version == -1) {
-			ret = EXIT_FAILURE;
+			ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 			goto clean_curl;
 		}
 		/* Check if a new upstream version is available so we can update to it still */
@@ -272,7 +271,7 @@ version_check:
 
 			if (run_command("/usr/bin/mixin", "build", NULL) != 0) {
 				fprintf(stderr, "ERROR: Could not execute mixin\n");
-				ret = EXIT_FAILURE;
+				ret = SWUPD_SUBPROCESS_ERROR;
 				goto clean_curl;
 			}
 
@@ -282,11 +281,11 @@ version_check:
 			if (ret > 0) {
 				printf("\n\t!! %i collisions were found between mix and upstream, please re-create mix !!\n", ret);
 				if (!allow_mix_collisions) {
-					ret = EXIT_FAILURE;
+					ret = SWUPD_MIX_COLLISIONS;
 					goto clean_curl;
 				}
 			} else if (ret < 0) {
-				ret = EXIT_FAILURE;
+				ret = SWUPD_COULDNT_LOAD_MANIFEST;
 				goto clean_curl;
 			}
 
@@ -298,7 +297,7 @@ version_check:
 
 	if (server_version <= current_version) {
 		fprintf(stderr, "Version on server (%i) is not newer than system version (%i)\n", server_version, current_version);
-		ret = EXIT_SUCCESS;
+		ret = SWUPD_OK;
 		goto clean_curl;
 	}
 
@@ -307,7 +306,7 @@ version_check:
 
 	if (rm_staging_dir_contents("download")) {
 		fprintf(stderr, "Error cleaning download directory\n");
-		ret = EXIT_FAILURE;
+		ret = SWUPD_COULDNT_REMOVE_FILE;
 		goto clean_curl;
 	}
 	timelist_timer_stop(global_times);
@@ -469,9 +468,9 @@ load_server_submanifests:
 		 * should not affect exit status. */
 		(void)update_device_latest_version(server_version);
 		printf("Update was applied.\n");
-	} else if (ret < 0) {
+	} else if (ret != 0) {
 		// Ensure a positive exit status for the main program.
-		ret = -ret;
+		ret = abs(ret);
 		goto clean_exit;
 	}
 
@@ -494,7 +493,7 @@ load_server_submanifests:
 		int fd = open(MIXED_FILE, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 		if (fd == -1) {
 			fprintf(stderr, "ERROR: Failed to create 'mixed' statefile\n");
-			ret = -1;
+			ret = SWUPD_WRITE_FILE_ERROR;
 		}
 		close(fd);
 	}
@@ -662,9 +661,9 @@ static bool parse_options(int argc, char **argv)
 
 /* return 0 if server_version is ahead of current_version,
  * 1 if the current_version is current or ahead
- * 2 if one or more versions can't be found
+ * a code > 1 if one or more versions can't be found
  */
-static int print_versions()
+static swupd_code print_versions()
 {
 	int current_version, server_version, ret = 0;
 
@@ -672,11 +671,10 @@ static int print_versions()
 	(void)init_globals();
 	swupd_curl_init();
 
-	if (read_versions(&current_version, &server_version, path_prefix) != 0) {
-		ret = 2;
-	} else {
+	ret = read_versions(&current_version, &server_version, path_prefix);
+	if (ret == SWUPD_OK) {
 		if (server_version <= current_version) {
-			ret = 1;
+			ret = SWUPD_NO;
 		}
 	}
 	if (current_version > 0) {
@@ -700,7 +698,7 @@ static int print_versions()
 
 int update_main(int argc, char **argv)
 {
-	int ret = 0;
+	int ret = SWUPD_OK;
 
 	if (!parse_options(argc, argv)) {
 		return SWUPD_INVALID_OPTION;

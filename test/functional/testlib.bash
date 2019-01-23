@@ -46,6 +46,7 @@ export SWUPD_COULDNT_LIST_DIR=30  # couldn't list the content of a directory
 export SWUPD_COMPUTE_HASH_ERROR=31  # there was an error computing the hash of the specified file
 export SWUPD_COULDNT_GET_TIME=32  # couldn't get current system time
 export SWUPD_WRITE_FILE_ERROR=33  # there was a an error while creating/writing to a file
+export SWUPD_MIX_COLLISIONS=34  # collisions were found between mix and upstream
 
 # global constant
 export zero_hash="0000000000000000000000000000000000000000000000000000000000000000"

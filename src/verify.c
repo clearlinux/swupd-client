@@ -134,7 +134,6 @@ static bool hash_needs_work(struct file *file, char *hash)
 static int get_all_files(struct manifest *official_manifest, struct list *subs)
 {
 	int ret;
-	struct list *iter;
 
 	/* for install we need everything so synchronously download zero packs */
 	ret = download_subscribed_packs(subs, official_manifest, true);
@@ -146,18 +145,7 @@ static int get_all_files(struct manifest *official_manifest, struct list *subs)
 		fprintf(stderr, "Failed - Server-side error, cannot download necessary files\n");
 		return -EDOWNLOADPACKS;
 	}
-	iter = list_head(official_manifest->files);
-	while (iter) {
-		struct file *file;
-
-		file = iter->data;
-		iter = iter->next;
-
-		if (file->is_deleted) {
-			continue;
-		}
-	}
-	return 0;
+	return ret;
 }
 
 /*

@@ -14,7 +14,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS --status"
 
-	assert_status_is 2
+	assert_status_is "$SWUPD_CURRENT_VERSION_UNKNOWN"
 	expected_output=$(cat <<-EOM
 		Error: Unable to determine current OS version
 		Latest server version: 100

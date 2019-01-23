@@ -530,9 +530,9 @@ void swupd_deinit(void)
 *	- Initialize curl
 *	- Initialize signature checking
 */
-int swupd_init(void)
+swupd_code swupd_init(void)
 {
-	int ret = 0;
+	int ret = SWUPD_OK;
 
 	check_root();
 	record_fds();

@@ -47,6 +47,8 @@ export SWUPD_COMPUTE_HASH_ERROR=31  # there was an error computing the hash of t
 export SWUPD_COULDNT_GET_TIME=32  # couldn't get current system time
 export SWUPD_WRITE_FILE_ERROR=33  # there was a an error while creating/writing to a file
 export SWUPD_MIX_COLLISIONS=34  # collisions were found between mix and upstream
+export SWUPD_OUT_OF_MEMORY=35  # swupd ran out of memory
+export SWUPD_VERIFY_FAILED=36  # verify could not fix/replace/delete one or more files
 
 # global constant
 export zero_hash="0000000000000000000000000000000000000000000000000000000000000000"

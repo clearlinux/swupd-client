@@ -293,7 +293,10 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 		} else {
 			//Check if user can handle errors
 			if (!h->error_cb || h->error_cb(file->status, file->data)) {
-				file->cb_retval = true; // Don't retry download if error was handled
+				// Don't retry download if error was handled
+				file->retries = MAX_RETRIES;
+				file->cb_retval = true;
+				h->failed = list_prepend_data(h->failed, file);
 			} else {
 				//Download resume isn't supported. Disabling it for next try
 				if (file->status == DOWNLOAD_STATUS_RANGE_ERROR) {

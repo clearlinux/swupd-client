@@ -21,7 +21,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install -m 10"
 
 	# no way to get content, everything should fail
-	assert_status_is 1
+	assert_status_is "$EFILEDOWNLOAD"
 	expected_output=$(cat <<-EOM
 		Fix did not fully succeed
 	EOM

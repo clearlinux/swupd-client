@@ -141,7 +141,7 @@ static int get_all_files(struct manifest *official_manifest, struct list *subs)
 		/* If we hit this point, we know we have a network connection, therefore
 		 * 	the error is server-side. This is also a critical error, so detailed
 		 * 	logging needed */
-		fprintf(stderr, "zero pack downloads failed. \n");
+		fprintf(stderr, "zero pack downloads failed\n");
 		fprintf(stderr, "Failed - Server-side error, cannot download necessary files\n");
 		return -SWUPD_COULDNT_DOWNLOAD_PACK;
 	}
@@ -651,7 +651,7 @@ int verify_main(int argc, char **argv)
 		version = get_latest_version(NULL);
 		if (version < 0) {
 			fprintf(stderr, "Unable to get latest version for install\n");
-			ret = EXIT_FAILURE;
+			ret = SWUPD_SERVER_CONNECTION_ERROR;
 			goto clean_and_exit;
 		}
 	}
@@ -674,6 +674,7 @@ int verify_main(int argc, char **argv)
 
 	ret = rm_staging_dir_contents("download");
 	if (ret != 0) {
+		ret = SWUPD_COULDNT_REMOVE_FILE;
 		fprintf(stderr, "Failed to remove prior downloads, carrying on anyway\n");
 	}
 
@@ -731,7 +732,7 @@ int verify_main(int argc, char **argv)
 		} else {
 			fprintf(stderr, "ERROR: Fixing to a different version requires "
 					"--force or --picky\n");
-			ret = SWUPD_COULDNT_LOAD_MANIFEST;
+			ret = SWUPD_INVALID_OPTION;
 			goto clean_and_exit;
 		}
 	}
@@ -739,27 +740,30 @@ int verify_main(int argc, char **argv)
 	ret = add_included_manifests(official_manifest, &subs);
 	/* if one or more of the installed bundles were not found in the manifest,
 	 * continue only if --force was used since the bundles could be removed */
-	if (ret == -add_sub_BADNAME) {
-		if (force) {
-			if (cmdline_option_picky && cmdline_option_fix) {
-				fprintf(stderr, "WARNING: One or more installed bundles that are not "
-						"available at version %d will be removed.\n",
-					version);
-			} else if (cmdline_option_picky && !cmdline_option_fix) {
-				fprintf(stderr, "WARNING: One or more installed bundles are not "
-						"available at version %d.\n",
-					version);
-			}
-			ret = 0;
-		} else {
-			fprintf(stderr, "Unable to verify, one or more currently installed bundles "
-					"are not available at version %d. Use --force to override.\n",
-				version);
-		}
-	}
 	if (ret) {
-		ret = SWUPD_COULDNT_LOAD_MANIFEST;
-		goto clean_and_exit;
+		if (ret == -add_sub_BADNAME) {
+			if (force) {
+				if (cmdline_option_picky && cmdline_option_fix) {
+					fprintf(stderr, "WARNING: One or more installed bundles that are not "
+							"available at version %d will be removed.\n",
+						version);
+				} else if (cmdline_option_picky && !cmdline_option_fix) {
+					fprintf(stderr, "WARNING: One or more installed bundles are not "
+							"available at version %d.\n",
+						version);
+				}
+				ret = SWUPD_OK;
+			} else {
+				fprintf(stderr, "Unable to verify, one or more currently installed bundles "
+						"are not available at version %d. Use --force to override.\n",
+					version);
+				ret = SWUPD_INVALID_BUNDLE;
+				goto clean_and_exit;
+			}
+		} else {
+			ret = SWUPD_COULDNT_LOAD_MANIFEST;
+			goto clean_and_exit;
+		}
 	}
 
 	set_subscription_versions(official_manifest, NULL, &subs);
@@ -789,7 +793,7 @@ load_submanifests:
 	if (cmdline_option_fix || cmdline_option_install) {
 		ret = get_required_files(official_manifest, subs);
 		if (ret != 0) {
-			ret = -ret;
+			ret = SWUPD_COULDNT_DOWNLOAD_FILE;
 			goto clean_and_exit;
 		}
 	}
@@ -916,9 +920,14 @@ brick_the_system_and_clean_curl:
 	    ((counts.not_deleted == 0) ||
 	     ((counts.not_deleted != 0) && !cmdline_option_fix)) &&
 	    !ret) {
-		ret = EXIT_SUCCESS;
+		ret = SWUPD_OK;
 	} else {
-		ret = EXIT_FAILURE;
+		/* If something failed to be fixed/replaced/deleted but the ret value
+		 * is zero then use a generic error message for verify, use the actual
+		 * ret value otherwise */
+		if (!ret) {
+			ret = SWUPD_VERIFY_FAILED;
+		}
 	}
 
 	/* this concludes the critical section, after this point it's clean up time, the disk content is finished and final */
@@ -950,7 +959,7 @@ clean_and_exit:
 		  counts.not_deleted,
 		  counts.mismatch,
 		  counts.extraneous);
-	if (ret == EXIT_SUCCESS) {
+	if (ret == SWUPD_OK) {
 		if (cmdline_option_fix || cmdline_option_install) {
 			fprintf(stderr, "Fix successful\n");
 		} else {

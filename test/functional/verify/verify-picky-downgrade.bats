@@ -16,7 +16,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD verify --fix --picky --manifest=10 $SWUPD_OPTS"
 
-	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
+	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		WARNING: the force or picky option is specified; ignoring version mismatch for verify --fix

@@ -443,6 +443,8 @@ The non-zero return codes for other operations are listed here:
   - **32**: Unable to get current system time
   - **33**: Unable to create or write a file
   - **34**: Collisions found between a mix and upstream
+  - **35**: swupd ran out of memory
+  - **36**: Unable to fix/replace/delete one or more files
 
 
 SEE ALSO

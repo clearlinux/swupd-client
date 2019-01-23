@@ -200,7 +200,7 @@ extern void increment_retries(int *retries, int *timeout);
 
 extern int add_included_manifests(struct manifest *mom, struct list **subs);
 extern int main_verify(int current_version);
-extern int walk_tree(struct manifest *, const char *, bool, const regex_t *, struct file_counts *);
+extern swupd_code walk_tree(struct manifest *, const char *, bool, const regex_t *, struct file_counts *);
 
 extern int get_latest_version(char *v_url);
 extern swupd_code read_versions(int *current_version, int *server_version, char *path_prefix);
@@ -341,7 +341,7 @@ extern int swupd_rm(const char *path);
 extern int rm_bundle_file(const char *bundle);
 extern void print_manifest_files(struct manifest *m);
 extern void swupd_deinit(void);
-extern int swupd_init(void);
+extern swupd_code swupd_init(void);
 extern int strtoi_err(const char *str, int *value);
 extern int strtoi_err_endptr(const char *str, char **endptr, int *value);
 void update_motd(int new_release);

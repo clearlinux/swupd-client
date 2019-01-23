@@ -115,7 +115,7 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 }
 
 /* expect the start to end in /usr and be the absolute path to the root */
-int walk_tree(struct manifest *manifest, const char *start, bool fix, const regex_t *whitelist, struct file_counts *counts)
+swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix, const regex_t *whitelist, struct file_counts *counts)
 {
 	/* Walk the tree, */
 	int rc;
@@ -125,6 +125,7 @@ int walk_tree(struct manifest *manifest, const char *start, bool fix, const rege
 	rc = nftw(start, &record_filename, 0, FTW_ACTIONRETVAL | FTW_PHYS | FTW_MOUNT);
 	const char *skip_dir = NULL; /* Skip files below this in printout */
 	if (rc) {
+		rc = SWUPD_OUT_OF_MEMORY;
 		goto tidy; /* Already printed out of memory */
 	}
 	qsort(F, nF, sizeof(*F), &qsort_helper);

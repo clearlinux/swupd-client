@@ -21,11 +21,19 @@ test_setup() {
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install -m 10"
 
 	# no way to get content, everything should fail
-	assert_status_is "$EFILEDOWNLOAD"
+	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
-		Fix did not fully succeed
+		Verifying version 10
+		Downloading packs...
+		zero pack downloads failed
+		Failed - Server-side error, cannot download necessary files
+		Verifying files
+		Starting download of remaining update content. This may take a while...
+		Finishing download of update content...
+		Error: Unable to download necessary files for this OS release
+		Error: Fix did not fully succeed
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

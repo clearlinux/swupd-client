@@ -4,7 +4,7 @@ Swupd is open for code contributions. Nevertheless, if you are planning to propo
 
 When your code is ready, open a pull request to have your patches reviewed. Patches are only going to be merged after being reviewed and approved by at least 2 maintainers (with some exceptions for trivial patches), all functional tests passes and enough tests are added to test the proposed functionality or bug fix.
 
-You should also add tests to the feature or bug fix you are proposing. That's how we ensure we won't have software regressions or we won't break any functionality in the future. For more information about function tests, take a look at the [functional test documentation](test/functional/README.md)
+You should also add tests to the feature or bug fix you are proposing. That's how we ensure we won't have software regressions or we won't break any functionality in the future. For more information about function tests, take a look at the [functional test documentation](test/functional/README.md).
 
 ## Error handling
 
@@ -51,6 +51,19 @@ Always use meaningful function names, specially non-static functions. Avoid plur
 ### Line Length
 
 Avoid extremely long lines. Don't use lines longer than 80~100 characters.
+
+### Return Codes
+
+When writing functions that return a code consider the following guidelines:
+
+ - swupd should always exit with a [swupd code](src/swupd_exit_codes.h).
+ - When a function returns a boolean state, prefer to explicitly return *true*/*false* instead of returning *0*/*1*.
+ - Avoid using a *"catch all"* error in your code that would make harder debugging a failure.
+ - Internally, swupd functions can return values other than a [swupd code](src/swupd_exit_codes.h) as long as those values are not propagated all the way to the end user.
+   For example a function could return an error defined in any of these files:
+   - /usr/include/asm-generic/errno-base.h
+   - /usr/include/asm-generic/errno.h
+   - /usr/include/curl/curl.h
 
 ## Swupd generic library
 

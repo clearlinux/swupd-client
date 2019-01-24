@@ -410,41 +410,40 @@ returns ``0`` if automatic updating is enabled.
 
 The non-zero return codes for other operations are listed here:
 
-  - **2**: Unable to download or read MoM manifest
-  - **3**: Unable to delete a file
-  - **4**: Unable to overwrite a directory
-  - **5**: Unable to create a dotfile
-  - **6**: Unable to recursively load included manifests
-  - **7**: Unable to obtain lock on state directory
-  - **8**: Unable to initialize curl agent
-  - **9**: Initialization error
-  - **10**: Bundle not tracked on system
-  - **11**: Unable to load manifest into memory
-  - **12**: Invalid command-line option
-  - **13**: Unable to connect to update server
-  - **14**: File download issue
-  - **15**: Unable to create required directories
-  - **16**: Unable to determine current version of the OS
-  - **17**: Unable to initialize signature verification
-  - **18**: System time is off by a large margin
-  - **19**: Pack download issue
-  - **20**: Unable to verify server SSL certificate
-  - **21**: A required bundle was removed or was attempted to be removed
-  - **22**: The specified bundle is invalid
-  - **23**: There is not enough disk space left (or it cannot be determined)
-  - **24**: Unable to untar a file
-  - **25**: The required path was not found in any manifest
-  - **26**: Unexpected condition found
-  - **27**: Unable to rename a directory
-  - **28**: Unable to rename a file
-  - **29**: Unable to execute another program in a subprocess
-  - **30**: Unable to list the content of a directory
-  - **31**: An error ocurred computing the hash of a file
-  - **32**: Unable to get current system time
-  - **33**: Unable to create or write a file
-  - **34**: Collisions found between a mix and upstream
-  - **35**: swupd ran out of memory
-  - **36**: Unable to fix/replace/delete one or more files
+  - **2**: A required bundle was removed or was attempted to be removed
+  - **3**: The specified bundle is invalid
+  - **4**: Unable to download or read MoM manifest
+  - **5**: Unable to delete a file
+  - **6**: Unable to rename a directory
+  - **7**: Unable to create a file
+  - **8**: Unable to recursively load included manifests
+  - **9**: Unable to obtain lock on state directory
+  - **10**: Unable to rename a file
+  - **11**: Unable to initialize curl agent
+  - **12**: Initialization error
+  - **13**: Bundle not tracked on system
+  - **14**: Unable to load manifest into memory
+  - **15**: Invalid command-line option
+  - **16**: Unable to connect to update server
+  - **17**: File download issue
+  - **18**: Unable to untar a file
+  - **19**: Unable to create required directory
+  - **20**: Unable to determine current version of the OS
+  - **21**: Unable to initialize signature verification
+  - **22**: System time is off by a large margin
+  - **23**: Pack download issue
+  - **24**: Unable to verify server SSL certificate
+  - **25**: There is not enough disk space left (or it cannot be determined)
+  - **26**: The required path was not found in any manifest
+  - **27**: Unexpected condition found
+  - **28**: Unable to execute another program in a subprocess
+  - **29**: Unable to list the content of a directory
+  - **30**: An error ocurred computing the hash of a file
+  - **31**: Unable to get current system time
+  - **32**: Unable to write a file
+  - **33**: Collisions found between a mix and upstream
+  - **34**: swupd ran out of memory
+  - **35**: Unable to fix/replace/delete one or more files
 
 
 SEE ALSO

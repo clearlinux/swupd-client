@@ -554,7 +554,7 @@ enum swupd_code swupd_init(void)
 	get_mounted_directories();
 
 	if (create_required_dirs()) {
-		ret = SWUPD_COULDNT_CREATE_DIRS;
+		ret = SWUPD_COULDNT_CREATE_DIR;
 		goto out_fds;
 	}
 
@@ -570,7 +570,7 @@ enum swupd_code swupd_init(void)
 
 	/* If --nosigcheck, we do not attempt any signature checking */
 	if (sigcheck && !initialize_signature()) {
-		ret = SWUPD_COULDNT_VERIFY_SIGNATURE;
+		ret = SWUPD_SIGNATURE_VERIFICATION_FAILED;
 		terminate_signature();
 		goto out_close_lock;
 	}

@@ -139,18 +139,18 @@ static enum swupd_code write_to_path(char *content, char *path)
 	if (ret && EEXIST != errno) {
 		fprintf(stderr, "mkdir\n");
 		perror(dir);
-		ret = SWUPD_COULDNT_CREATE_DIRS;
+		ret = SWUPD_COULDNT_CREATE_DIR;
 		goto out;
 	}
 
 	/* Make sure we have a directory, for better user feedback */
 	if ((ret = stat(dir, &dirstat))) {
 		perror(dir);
-		ret = SWUPD_COULDNT_CREATE_DIRS;
+		ret = SWUPD_COULDNT_CREATE_DIR;
 		goto out;
 	} else if (!S_ISDIR(dirstat.st_mode)) {
 		fprintf(stderr, "%s: not a directory\n", dir);
-		ret = SWUPD_COULDNT_CREATE_DIRS;
+		ret = SWUPD_COULDNT_CREATE_DIR;
 		;
 		goto out;
 	}
@@ -160,19 +160,19 @@ static enum swupd_code write_to_path(char *content, char *path)
 	fp = fopen(path, "w");
 	if (fp == NULL) {
 		perror(path);
-		ret = SWUPD_WRITE_FILE_ERROR;
+		ret = SWUPD_COULDNT_WRITE_FILE;
 		goto out;
 	}
 
 	/* and write to the file */
 	ret = fputs(content, fp);
 	if (ret < 0 || ret == EOF) {
-		ret = SWUPD_WRITE_FILE_ERROR;
+		ret = SWUPD_COULDNT_WRITE_FILE;
 		fprintf(stderr, "%s: write failed\n", path);
 	}
 
 	if ((ret = fclose(fp))) {
-		ret = SWUPD_WRITE_FILE_ERROR;
+		ret = SWUPD_COULDNT_WRITE_FILE;
 		fprintf(stderr, "fclose\n");
 		perror(path);
 	}

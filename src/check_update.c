@@ -42,7 +42,7 @@ static void print_help(void)
 }
 
 /* Return 0 if there is an update available, nonzero if not */
-static swupd_code check_update()
+static enum swupd_code check_update()
 {
 	int current_version, server_version;
 	int ret;
@@ -100,7 +100,7 @@ static bool parse_options(int argc, char **argv)
 }
 
 /* return 0 if update available, non-zero if not */
-int check_update_main(int argc, char **argv)
+enum swupd_code check_update_main(int argc, char **argv)
 {
 	int ret;
 

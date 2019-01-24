@@ -200,11 +200,11 @@ extern void increment_retries(int *retries, int *timeout);
 
 extern int add_included_manifests(struct manifest *mom, struct list **subs);
 extern int main_verify(int current_version);
-extern swupd_code walk_tree(struct manifest *, const char *, bool, const regex_t *, struct file_counts *);
+extern enum swupd_code walk_tree(struct manifest *, const char *, bool, const regex_t *, struct file_counts *);
 
 extern int get_latest_version(char *v_url);
-extern swupd_code read_versions(int *current_version, int *server_version, char *path_prefix);
-extern swupd_code check_versions(int *current_version, int *server_version, int requested_version, char *path_prefix);
+extern enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix);
+extern enum swupd_code check_versions(int *current_version, int *server_version, int requested_version, char *path_prefix);
 extern int get_current_version(char *path_prefix);
 
 extern bool ignore(struct file *file);
@@ -281,7 +281,7 @@ extern int download_subscribed_packs(struct list *subs, struct manifest *mom, bo
 extern void apply_deltas(struct manifest *current_manifest);
 extern int untar_full_download(void *data);
 
-extern swupd_code do_staging(struct file *file, struct manifest *manifest);
+extern enum swupd_code do_staging(struct file *file, struct manifest *manifest);
 extern int rename_all_files_to_final(struct list *updates);
 extern int rename_staged_file_to_final(struct file *file);
 
@@ -298,7 +298,7 @@ extern void hash_assign(const char *src, char *dest);
 extern bool hash_equal(const char *hash1, const char *hash2);
 extern bool hash_is_zeros(char *hash);
 extern int compute_hash_lazy(struct file *file, char *filename);
-extern swupd_code compute_hash(struct file *file, char *filename) __attribute__((warn_unused_result));
+extern enum swupd_code compute_hash(struct file *file, char *filename) __attribute__((warn_unused_result));
 
 /* manifest.c */
 /* Calculate the total contentsize of a manifest list */
@@ -341,13 +341,13 @@ extern int swupd_rm(const char *path);
 extern int rm_bundle_file(const char *bundle);
 extern void print_manifest_files(struct manifest *m);
 extern void swupd_deinit(void);
-extern swupd_code swupd_init(void);
+extern enum swupd_code swupd_init(void);
 extern int strtoi_err(const char *str, int *value);
 extern int strtoi_err_endptr(const char *str, char **endptr, int *value);
 void update_motd(int new_release);
 void delete_motd(void);
 extern int get_dirfd_path(const char *fullname);
-extern swupd_code verify_fix_path(char *targetpath, struct manifest *manifest);
+extern enum swupd_code verify_fix_path(char *targetpath, struct manifest *manifest);
 extern struct list *files_from_bundles(struct list *bundles);
 extern bool version_files_consistent(void);
 extern bool string_in_list(char *string_to_check, struct list *list_to_check);
@@ -364,13 +364,13 @@ extern void create_and_append_subscription(struct list **subs, const char *compo
 
 /* bundle.c */
 extern bool is_tracked_bundle(const char *bundle_name);
-extern swupd_code remove_bundles(char **bundles);
-extern swupd_code show_bundle_reqd_by(const char *bundle_name, bool server);
-extern swupd_code show_included_bundles(char *bundle_name);
-extern swupd_code list_installable_bundles();
-extern int install_bundles_frontend(char **bundles);
+extern enum swupd_code remove_bundles(char **bundles);
+extern enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server);
+extern enum swupd_code show_included_bundles(char *bundle_name);
+extern enum swupd_code list_installable_bundles();
+extern enum swupd_code install_bundles_frontend(char **bundles);
 extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
-swupd_code list_local_bundles();
+enum swupd_code list_local_bundles();
 extern int link_or_rename(const char *orig, const char *dest);
 
 /* telemetry.c */
@@ -395,7 +395,7 @@ extern void print_update_conf_info(void);
 
 extern void handle_mirror_if_stale(void);
 
-extern int clean_statedir(bool all, bool dry_run);
+extern enum swupd_code clean_statedir(bool all, bool dry_run);
 
 /* Parameter parsing in global.c */
 extern struct global_const global;

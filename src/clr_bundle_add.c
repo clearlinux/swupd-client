@@ -94,7 +94,7 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-int bundle_add_main(int argc, char **argv)
+enum swupd_code bundle_add_main(int argc, char **argv)
 {
 	if (!parse_options(argc, argv)) {
 		print_help();

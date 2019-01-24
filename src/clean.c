@@ -86,7 +86,7 @@ typedef bool(remove_predicate_func)(const char *dir, const struct dirent *entry)
 /* Remove files from path for which pred returns true.
  * Currently it doesn't recursively remove directories.
  */
-static swupd_code remove_if(const char *path, bool dry_run, remove_predicate_func pred)
+static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicate_func pred)
 {
 	int ret = SWUPD_OK;
 	DIR *dir;
@@ -280,7 +280,7 @@ end:
 	return contents;
 }
 
-static swupd_code clean_staged_manifests(const char *path, bool dry_run, bool all)
+static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bool all)
 {
 	DIR *dir;
 
@@ -377,7 +377,7 @@ static void clean_deinit(void)
 	v_lockfile();
 }
 
-int clean_main(int argc, char **argv)
+enum swupd_code clean_main(int argc, char **argv)
 {
 	if (!parse_options(argc, argv)) {
 		print_help();
@@ -425,7 +425,7 @@ end:
  * /var/lib/swupd). It will remove all files except relevant manifests unless
  * all is set to true. Setting dry_run to true will print the files that would
  * be removed but will not actually remove them. */
-int clean_statedir(bool dry_run, bool all)
+enum swupd_code clean_statedir(bool dry_run, bool all)
 {
 
 	char *staged_dir = NULL;

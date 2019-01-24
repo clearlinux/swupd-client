@@ -6,7 +6,7 @@
  * Always add new codes last
 */
 
-typedef enum {
+enum swupd_code {
 
 	SWUPD_OK = 0,			/* 0 success */
 	SWUPD_NO,			/* 1 used by swupd to respond "No" in different situations:
@@ -48,6 +48,6 @@ typedef enum {
 	SWUPD_OUT_OF_MEMORY,		/* 35 swupd ran out of memory */
 	SWUPD_VERIFY_FAILED		/* 36 verify could not fix/replace/delete one or more files */
 
-} swupd_code;
+} ;
 
 #endif

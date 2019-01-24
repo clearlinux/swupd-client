@@ -30,7 +30,7 @@ void print_update_conf_info()
 	printf("Content URL:       %s\n", content_url);
 }
 
-int info_main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
+enum swupd_code info_main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 {
 	if (!init_globals()) {
 		return SWUPD_INIT_GLOBALS_FAILED;

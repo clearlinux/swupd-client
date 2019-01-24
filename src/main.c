@@ -31,7 +31,7 @@
 struct subcmd {
 	char *name;
 	char *doc;
-	int (*mainfunc)(int, char **);
+	enum swupd_code (*mainfunc)(int, char **);
 };
 
 static struct subcmd commands[] = {

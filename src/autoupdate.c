@@ -107,7 +107,7 @@ static int system_command(const char *cmd)
 	return ret;
 }
 
-int autoupdate_main(int argc, char **argv)
+enum swupd_code autoupdate_main(int argc, char **argv)
 {
 	if (!parse_options(argc, argv)) {
 		return SWUPD_INVALID_OPTION;

@@ -55,7 +55,7 @@ static void usage(const char *name)
 	fprintf(stderr, "\n");
 }
 
-int hashdump_main(int argc, char **argv)
+enum swupd_code hashdump_main(int argc, char **argv)
 {
 	struct file file = { 0 };
 	char *fullname = NULL;

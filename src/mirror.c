@@ -127,7 +127,7 @@ out:
 	return ret;
 }
 
-static swupd_code write_to_path(char *content, char *path)
+static enum swupd_code write_to_path(char *content, char *path)
 {
 	char *dir, *tmp = NULL;
 	struct stat dirstat;
@@ -182,7 +182,7 @@ out:
 	return ret;
 }
 
-static swupd_code set_mirror_url(char *url)
+static enum swupd_code set_mirror_url(char *url)
 {
 	char *content_path;
 	char *version_path;
@@ -258,7 +258,7 @@ out:
 }
 
 /* return 0 if update available, non-zero if not */
-int mirror_main(int argc, char **argv)
+enum swupd_code mirror_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
 	if (!parse_options(argc, argv)) {

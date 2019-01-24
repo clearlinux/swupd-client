@@ -111,7 +111,7 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-int bundle_list_main(int argc, char **argv)
+enum swupd_code bundle_list_main(int argc, char **argv)
 {
 	int ret;
 

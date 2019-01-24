@@ -136,7 +136,7 @@ int get_current_version(char *path_prefix)
 	return v;
 }
 
-swupd_code read_versions(int *current_version, int *server_version, char *path_prefix)
+enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix)
 {
 	*current_version = get_current_version(path_prefix);
 	*server_version = get_latest_version(NULL);
@@ -153,7 +153,7 @@ swupd_code read_versions(int *current_version, int *server_version, char *path_p
 	return SWUPD_OK;
 }
 
-swupd_code check_versions(int *current_version, int *server_version, int requested_version, char *path_prefix)
+enum swupd_code check_versions(int *current_version, int *server_version, int requested_version, char *path_prefix)
 {
 	int ret;
 

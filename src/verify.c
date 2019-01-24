@@ -611,7 +611,7 @@ static bool parse_options(int argc, char **argv)
  * found to not match the manifest.  This is notably different from update,
  * which attempts to atomically (or nearly atomically) activate a set of
  * pre-computed and validated staged changes as a group. */
-int verify_main(int argc, char **argv)
+enum swupd_code verify_main(int argc, char **argv)
 {
 	struct manifest *official_manifest = NULL;
 	int ret;

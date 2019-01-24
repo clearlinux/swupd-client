@@ -43,7 +43,7 @@
 * Parse the full manifest for the current version of the OS and print
 *   all available bundles.
 */
-swupd_code list_installable_bundles()
+enum swupd_code list_installable_bundles()
 {
 	char *name;
 	struct list *list;
@@ -138,7 +138,7 @@ bool is_tracked_bundle(const char *bundle_name)
  * bundles, this function search for bundle_name into subs
  * struct and if it found then free it from the list.
  */
-static swupd_code unload_tracked_bundle(const char *bundle_name, struct list **subs)
+static enum swupd_code unload_tracked_bundle(const char *bundle_name, struct list **subs)
 {
 	struct list *bundles;
 	struct list *cur_item;
@@ -193,7 +193,7 @@ static void required_by(struct list **reqd_by, const char *bundle_name, struct m
 	}
 }
 /* Return recursive list of included bundles */
-swupd_code show_included_bundles(char *bundle_name)
+enum swupd_code show_included_bundles(char *bundle_name)
 {
 	int ret = 0;
 	int current_version = CURRENT_OS_VERSION;
@@ -286,7 +286,7 @@ out:
 	return ret;
 }
 
-swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
+enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 {
 	int ret = 0;
 	int version = CURRENT_OS_VERSION;
@@ -482,7 +482,7 @@ out:
  *  	performing a unlink(2) for each filename.
  *  6) Done.
  */
-swupd_code remove_bundles(char **bundles)
+enum swupd_code remove_bundles(char **bundles)
 {
 	int ret = SWUPD_OK;
 	int ret_code = 0;
@@ -734,7 +734,7 @@ out:
 	return ret;
 }
 
-static swupd_code install_bundles(struct list *bundles, struct list **subs, struct manifest *mom)
+static enum swupd_code install_bundles(struct list *bundles, struct list **subs, struct manifest *mom)
 {
 	int ret;
 	int bundles_failed = 0;
@@ -1051,7 +1051,7 @@ out:
 /* Bundle install one ore more bundles passed in bundles
  * param as a null terminated array of strings
  */
-int install_bundles_frontend(char **bundles)
+enum swupd_code install_bundles_frontend(char **bundles)
 {
 	int ret = 0;
 	int current_version;
@@ -1131,7 +1131,7 @@ clean_and_exit:
  * /usr/share/clear/bundles/), get the list of local bundles and print
  * them sorted.
  */
-swupd_code list_local_bundles()
+enum swupd_code list_local_bundles()
 {
 	char *name;
 	char *path = NULL;

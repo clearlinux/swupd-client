@@ -530,7 +530,7 @@ void swupd_deinit(void)
 *	- Initialize curl
 *	- Initialize signature checking
 */
-swupd_code swupd_init(void)
+enum swupd_code swupd_init(void)
 {
 	int ret = SWUPD_OK;
 
@@ -715,7 +715,7 @@ static void free_path_data(void *data)
  * by breaking it into sub-paths and fixing them top down.
  * Here, target_MoM is the consolidated manifest for the version you are trying to update/verify.
  */
-swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
+enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 {
 	struct list *path_list = NULL; /* path_list contains the subparts in the path */
 	char *path;

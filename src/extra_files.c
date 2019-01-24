@@ -115,7 +115,7 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 }
 
 /* expect the start to end in /usr and be the absolute path to the root */
-swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix, const regex_t *whitelist, struct file_counts *counts)
+enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix, const regex_t *whitelist, struct file_counts *counts)
 {
 	/* Walk the tree, */
 	int rc;

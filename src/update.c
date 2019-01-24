@@ -205,7 +205,7 @@ static bool need_new_upstream(int server)
 	return false;
 }
 
-static swupd_code main_update()
+static enum swupd_code main_update()
 {
 	int current_version = -1, server_version = -1;
 	int mix_current_version = -1, mix_server_version = -1;
@@ -663,7 +663,7 @@ static bool parse_options(int argc, char **argv)
  * 1 if the current_version is current or ahead
  * a code > 1 if one or more versions can't be found
  */
-static swupd_code print_versions()
+static enum swupd_code print_versions()
 {
 	int current_version, server_version, ret = 0;
 
@@ -696,7 +696,7 @@ static swupd_code print_versions()
 	return ret;
 }
 
-int update_main(int argc, char **argv)
+enum swupd_code update_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
 

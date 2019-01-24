@@ -157,7 +157,7 @@ int compute_hash_lazy(struct file *file, char *filename)
  * a "0000000..." hash is returned as is our convention in the manifest
  * for deleted files.  Otherwise file->hash is set to a non-zero hash. */
 /* TODO: how should we properly handle compute_hash() failures? */
-swupd_code compute_hash(struct file *file, char *filename)
+enum swupd_code compute_hash(struct file *file, char *filename)
 {
 	int ret;
 	char key[SWUPD_HASH_LEN];

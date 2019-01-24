@@ -718,7 +718,7 @@ static double query_total_download_size(struct list *list)
  * Description: To search Clear bundles for a particular entry, a complete set of
  *		manifests must be downloaded. This function does so, asynchronously, using
  *		the curl_multi interface */
-static swupd_code download_manifests(struct manifest **MoM)
+static enum swupd_code download_manifests(struct manifest **MoM)
 {
 	struct list *list = NULL;
 	struct file *file = NULL;
@@ -807,7 +807,7 @@ static swupd_code download_manifests(struct manifest **MoM)
 	return ret;
 }
 
-int search_main(int argc, char **argv)
+enum swupd_code search_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
 	struct manifest *MoM = NULL;

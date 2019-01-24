@@ -394,7 +394,7 @@ enum swupd_code clean_main(int argc, char **argv)
 	if (!options.all) {
 		ret = clock_gettime(CLOCK_REALTIME, &now);
 		if (ret != 0) {
-			ret = SWUPD_COULDNT_GET_TIME;
+			ret = SWUPD_TIME_UNKNOWN;
 			perror("couldn't read current time to decide what files to clean");
 			goto end;
 		}

@@ -579,7 +579,7 @@ verify_mom:
 			free_string(&url);
 			free_manifest(manifest);
 			if (err) {
-				*err = SWUPD_COULDNT_VERIFY_SIGNATURE;
+				*err = SWUPD_SIGNATURE_VERIFICATION_FAILED;
 			}
 			return NULL;
 		}
@@ -647,7 +647,7 @@ retry_load:
 			goto retry_load;
 		}
 		if (err) {
-			*err = SWUPD_COULDNT_VERIFY_SIGNATURE;
+			*err = SWUPD_SIGNATURE_VERIFICATION_FAILED;
 		}
 		return NULL;
 	}

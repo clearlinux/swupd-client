@@ -125,7 +125,7 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 	rc = nftw(start, &record_filename, 0, FTW_ACTIONRETVAL | FTW_PHYS | FTW_MOUNT);
 	const char *skip_dir = NULL; /* Skip files below this in printout */
 	if (rc) {
-		rc = SWUPD_OUT_OF_MEMORY;
+		rc = SWUPD_OUT_OF_MEMORY_ERROR;
 		goto tidy; /* Already printed out of memory */
 	}
 	qsort(F, nF, sizeof(*F), &qsort_helper);

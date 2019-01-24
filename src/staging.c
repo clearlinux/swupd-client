@@ -143,7 +143,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		string_or_die(&rename_tmpdir, "%s/tmprenamedir", state_dir);
 		ret = create_staging_renamedir(rename_tmpdir);
 		if (ret) {
-			ret = SWUPD_COULDNT_CREATE_DIRS;
+			ret = SWUPD_COULDNT_CREATE_DIR;
 			goto out;
 		}
 		string_or_die(&rename_target, "%s/%s", rename_tmpdir, base);
@@ -154,16 +154,19 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		string_or_die(&tarcommand, TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -cf - './%s' 2> /dev/null | " TAR_COMMAND " -C '%s%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
 			      rename_tmpdir, base, path_prefix, rel_dir);
 		ret = system(tarcommand);
+		if (ret == -1) {
+			ret = SWUPD_SUBPROCESS_ERROR;
+		}
 		if (WIFEXITED(ret)) {
 			ret = WEXITSTATUS(ret);
 		}
 		free_string(&tarcommand);
 		if (rename(rename_target, original)) {
-			ret = -SWUPD_COULDNT_RENAME_DIR;
+			ret = SWUPD_COULDNT_RENAME_DIR;
 			goto out;
 		}
-		if (ret < 0) {
-			ret = SWUPD_COULDNT_OVERWRITE_DIR;
+		if (ret) {
+			ret = SWUPD_COULDNT_RENAME_DIR;
 			goto out;
 		}
 	} else { /* (!file->is_dir && !S_ISDIR(stat.st_mode)) */
@@ -191,6 +194,9 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 			string_or_die(&tarcommand, TAR_COMMAND " -C '%s/staged' " TAR_PERM_ATTR_ARGS " -cf - '.update.%s' 2> /dev/null | " TAR_COMMAND " -C '%s%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
 				      state_dir, base, path_prefix, rel_dir);
 			ret = system(tarcommand);
+			if (ret == -1) {
+				ret = SWUPD_SUBPROCESS_ERROR;
+			}
 			if (WIFEXITED(ret)) {
 				ret = WEXITSTATUS(ret);
 			}
@@ -211,7 +217,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		err = lstat(file->staging, &buf);
 		if (err != 0) {
 			free_string(&file->staging);
-			ret = SWUPD_COULDNT_CREATE_DOTFILE;
+			ret = SWUPD_COULDNT_CREATE_FILE;
 			goto out;
 		}
 	}

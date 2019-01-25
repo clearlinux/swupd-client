@@ -72,6 +72,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	char *targetpath = NULL;
 	char *rename_target = NULL;
 	char *rename_tmpdir = NULL;
+	char real_path[4096] = {0};
 	int ret;
 	struct stat s;
 
@@ -101,6 +102,21 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 
 	} else if (!S_ISDIR(s.st_mode)) {
 		fprintf(stderr, "Error: Update target exists but is NOT a directory: %s\n", targetpath);
+	}
+	if (!realpath(targetpath, real_path)) {
+		ret = -1;
+		goto out;
+	} else if (strcmp(path_prefix, targetpath) !=0 &&
+		   strcmp(targetpath, real_path) != 0) {
+		/*
+		 * targetpath and real_path should always be equal but
+		 * in the case of the targetpath being the path_prefix
+		 * there is a trailing '/' in path_prefix but realpath
+		 * doesn't keep the trailing '/' so check for that case
+		 * specifically.
+		 */
+		ret = -1;
+		goto out;
 	}
 
 	free_string(&targetpath);

@@ -344,12 +344,13 @@ bool set_path_prefix(char *path)
 	if (path != NULL) {
 		int len;
 		char *tmp;
+		char real_path[PATH_MAX] = {0};
 
 		/* in case multiple -p options are passed */
 		free_string(&path_prefix);
 		string_or_die(&tmp, "%s", path);
 
-		/* ensure path_prefix is absolute, at least '/', ends in '/',
+		/* ensure path_prefix is fully resolved and at least ends in '/',
 		 * and is a valid dir */
 		if (tmp[0] != '/') {
 			char *cwd;
@@ -365,6 +366,14 @@ bool set_path_prefix(char *path)
 			string_or_die(&tmp, "%s/%s", cwd, path);
 			free_string(&cwd);
 		}
+
+		if (!realpath(tmp, real_path)) {
+			fprintf(stderr, "Bad path_prefix %s (%s), cannot continue.\n",
+				path_prefix, strerror(errno));
+			return false;
+		}
+		free_string(&tmp);
+		string_or_die(&tmp, "%s/", real_path);
 
 		len = strlen(tmp);
 		if (!len || (tmp[len - 1] != '/')) {

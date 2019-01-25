@@ -414,7 +414,7 @@ static void set_cert_path(char *path)
 			string_or_die(&cert_path, "%s", MIX_CERT);
 		} else {
 			// CERT_PATH is guaranteed to be valid at this point.
-			string_or_die(&cert_path, "%s", CERT_PATH);
+			string_or_die(&cert_path, "%s%s", path_prefix, CERT_PATH);
 		}
 	}
 }

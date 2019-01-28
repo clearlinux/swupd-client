@@ -19,6 +19,9 @@
 
 #define _GNU_SOURCE
 
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -92,4 +95,44 @@ char *string_join(const char *separator, struct list *strings)
 error:
 	free(ret);
 	return NULL;
+}
+
+int strtoi_err_endptr(const char *str, char **endptr, int *value)
+{
+	long num;
+	int err;
+
+	errno = 0;
+	num = strtol(str, endptr, 10);
+	err = -errno;
+
+	/* When the return value of strtol overflows the int type, don't overflow
+	 * and return an overflow error code. */
+	if (num > INT_MAX) {
+		num = INT_MAX;
+		err = -ERANGE;
+	} else if (num < INT_MIN) {
+		num = INT_MIN;
+		err = -ERANGE;
+	}
+
+	*value = (int)num;
+
+	return err;
+}
+
+int strtoi_err(const char *str, int *value)
+{
+	char *endptr;
+	int err = strtoi_err_endptr(str, &endptr, value);
+
+	if (err) {
+		return err;
+	}
+
+	if (*endptr != '\0' && !isspace(*endptr)) {
+		return -EINVAL;
+	}
+
+	return 0;
 }

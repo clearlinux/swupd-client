@@ -22,7 +22,6 @@
  */
 
 #define _GNU_SOURCE
-#include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -34,7 +33,6 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include "config.h"
@@ -583,68 +581,6 @@ out_fds:
 	dump_file_descriptor_leaks();
 
 	return ret;
-}
-
-/* strtoi_err: Safely convert and string to integer avoiding overflows.
- *
- * The strtol function is commonly used to convert a string to a number and
- * the result is frequently stored in an int type, but type casting a long to
- * an int can cause overflows.
- *
- * This function returns negative error codes based on the errno table:
- * -ERANGE is returned when the string is out of range for int value
- *
- * endptr is set with the value of the first invalid character in the string.
-*/
-int strtoi_err_endptr(const char *str, char **endptr, int *value)
-{
-	long num;
-	int err;
-
-	errno = 0;
-	num = strtol(str, endptr, 10);
-	err = -errno;
-
-	/* When the return value of strtol overflows the int type, don't overflow
-	 * and return an overflow error code. */
-	if (num > INT_MAX) {
-		num = INT_MAX;
-		err = -ERANGE;
-	} else if (num < INT_MIN) {
-		num = INT_MIN;
-		err = -ERANGE;
-	}
-
-	*value = (int)num;
-
-	return err;
-}
-
-/* strtoi_err: Safely convert and string to integer avoiding overflows
- *
- * The strtol function is commonly used to convert a string to a number and
- * the result is frequently stored in an int type, but type casting a long to
- * an int can cause overflows.
- *
- * This function returns negative error codes based on the errno table:
- * -ERANGE is returned when the string is out of range for int value
- * -EINVAL is returned when the string isn't a valid number or has any invalid
- * trailing character.
-*/
-int strtoi_err(const char *str, int *value)
-{
-	char *endptr;
-	int err = strtoi_err_endptr(str, &endptr, value);
-
-	if (err) {
-		return err;
-	}
-
-	if (*endptr != '\0' && !isspace(*endptr)) {
-		return -EINVAL;
-	}
-
-	return 0;
 }
 
 void update_motd(int new_release)

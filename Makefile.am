@@ -134,7 +134,6 @@ BATS_LOG_DRIVER = $(tap_driver)
 TESTS = $(dist_check_SCRIPTS)
 
 BATS = \
-	test/documentation/manpages/test.bats \
 	test/functional/bundleadd/add-alias-basic.bats \
 	test/functional/bundleadd/add-bad-hash.bats \
 	test/functional/bundleadd/add-bad-hash-state.bats \
@@ -270,6 +269,7 @@ $(parallel_tests) : test/functional/generate-cert.log
 
 endif
 
+if ENABLE_MANPAGE
 MANPAGES = \
 	docs/swupd.1 \
 	docs/swupd-alias.7 \
@@ -281,6 +281,10 @@ MANPAGES = \
 
 dist_man_MANS = \
 	$(MANPAGES)
+
+clean-local:
+	rm -rf $(MANPAGES)
+endif
 
 if COVERAGE
 AM_CFLAGS += --coverage

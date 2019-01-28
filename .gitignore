@@ -25,7 +25,10 @@ coverage/
 cscope.*
 data/check-update.service
 data/swupd-update.service
-docs/*.html
+docs/*.1
+docs/*.4
+docs/*.7
+docs/swupd-alias.7.rst
 depcomp
 functional-tests.log
 fuzzout/

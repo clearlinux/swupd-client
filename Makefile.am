@@ -101,6 +101,8 @@ verifytime_SOURCES = src/verifytime.h \
 	src/verifytime.c \
 	src/verifytime_main.c
 
+verifytime_LDADD =
+
 bin_PROGRAMS += verifytime
 
 EXTRA_DIST += \
@@ -122,16 +124,15 @@ systemdunit_DATA = \
 	data/swupd-update.timer \
 	data/verifytime.service
 
-TEST_EXTENSIONS = .bats .prereq
+TEST_EXTENSIONS = .bats .prereq .test
 
 if ENABLE_TESTS
 tap_driver = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 	$(top_srcdir)/tap-driver.sh
 
-LOG_DRIVER = $(tap_driver)
 BATS_LOG_DRIVER = $(tap_driver)
 
-TESTS = $(dist_check_SCRIPTS)
+TESTS = $(dist_check_SCRIPTS) $(UNIT_TESTS)
 
 BATS = \
 	test/functional/bundleadd/add-alias-basic.bats \
@@ -260,12 +261,18 @@ BATS = \
 	test/functional/verify/verify-picky-whitelist.bats \
 	test/functional/verify/verify-skip-scripts.bats
 
+UNIT_TESTS = \
+	test/unit/test_strings.test
+
 dist_check_SCRIPTS = $(BATS)
 # Must be run before all other tests
 dist_check_SCRIPTS += test/functional/generate-cert.prereq
 
 parallel_tests = $(BATS:.bats=.log)
 $(parallel_tests) : test/functional/generate-cert.log
+
+check_PROGRAMS = $(UNIT_TESTS)
+LDADD = $(swupd_LDADD) $(swupd_OBJECTS:src/main.o=)
 
 endif
 

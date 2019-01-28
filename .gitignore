@@ -52,6 +52,6 @@ test/*.gcno
 test/documentation/manpages/test.log
 test/functional/Swupd_Root.pem
 test/functional/private.pem
-test/functional/*.log
-test/functional/*/*.log
+test/**/*.log
+test/unit/test_*.test
 verifytime

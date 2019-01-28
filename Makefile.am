@@ -44,6 +44,7 @@ swupd_SOURCES = \
 	src/hashdump.c \
 	src/helpers.c \
 	src/heuristics.c \
+	src/lib/progress.c \
 	src/info.c \
 	src/lib/hashmap.c \
 	src/lib/hashmap.h \

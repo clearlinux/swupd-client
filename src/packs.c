@@ -34,6 +34,7 @@
 #include "signature.h"
 #include "swupd.h"
 #include "swupd_build_variant.h"
+#include "lib/progress.h"
 
 //TODO: Move to progress bar
 static unsigned int complete = 0;
@@ -72,7 +73,6 @@ static int finalize_pack_download(const char *filename)
 		if (tarfile) {
 			fclose(tarfile);
 		}
-		print_progress(++complete, num_packs);
 	}
 
 	return err;
@@ -111,12 +111,16 @@ static bool download_error(enum download_status status, void *data)
 static bool download_successful(void *data)
 {
 	struct pack_data *pack_data = data;
+	int ret;
 
 	if (!pack_data) {
 		return false;
 	}
 
-	return finalize_pack_download(pack_data->filename) == 0;
+	ret = finalize_pack_download(pack_data->filename) == 0;
+	progress_update(++complete, NULL);
+
+	return ret;
 }
 
 static int download_pack(void *download_handle, struct pack_data *pack_data)
@@ -197,7 +201,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom)
 		return 0; // no packs to download
 	}
 
-	print("Downloading packs for:\n");
+	print("Packs to download:\n");
 	for (i = packs; i; i = i->next) {
 		struct pack_data *pack_data = i->data;
 		print("\t%s\n", pack_data->component);
@@ -209,7 +213,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom)
 
 	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, download_error, download_free_data);
 
-	print_progress(0, num_packs);
+	progress_start("Downloading and extracting packs", num_packs);
 	complete = 0;
 	for (i = packs; i; i = i->next) {
 		struct pack_data *pack_data = i->data;
@@ -218,7 +222,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom)
 	}
 
 	ret = swupd_curl_parallel_download_end(download_handle, NULL);
-	print_progress(num_packs, num_packs); /* Force out 100% */
+	progress_end(); /* Force out 100% */
 	print("\n")
 	return ret;
 }

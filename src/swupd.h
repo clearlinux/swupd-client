@@ -342,8 +342,6 @@ extern int rm_bundle_file(const char *bundle);
 extern void print_manifest_files(struct manifest *m);
 extern void swupd_deinit(void);
 extern enum swupd_code swupd_init(void);
-extern int strtoi_err(const char *str, int *value);
-extern int strtoi_err_endptr(const char *str, char **endptr, int *value);
 void update_motd(int new_release);
 void delete_motd(void);
 extern int get_dirfd_path(const char *fullname);

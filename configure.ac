@@ -86,6 +86,12 @@ AS_IF(
 )
 AM_CONDITIONAL([ENABLE_TESTS], [test "$enable_tests" != "no"])
 
+AC_ARG_ENABLE(
+  [manpage],
+  [AS_HELP_STRING([--disable-manpage], [Disable manpage creation])]
+)
+AM_CONDITIONAL([ENABLE_MANPAGE], [test "$enable_manpage" != "no"])
+
 have_coverage=no
 AC_ARG_ENABLE(
   [coverage],

@@ -56,6 +56,13 @@ static CURL *curl = NULL;
 /* alternative CA Path */
 static char *capath = NULL;
 
+/* values for retry strategies */
+enum retry_strategy {
+	DONT_RETRY = 0,
+	RETRY_NOW,
+	RETRY_DELAY
+};
+
 /* Pretty print curl return status */
 static void swupd_curl_strerror(CURLcode curl_ret)
 {
@@ -346,9 +353,7 @@ CURLcode swupd_download_file_close(CURLcode curl_ret, struct curl_file *file)
 	return curl_ret;
 }
 
-// TODO: err is only needed because retry code is spread all over swupd.
-// Remove this error code return when #211 is fixed
-enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle, int *err)
+enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 {
 	char *url;
 	if (curl_easy_getinfo(curl_handle, CURLINFO_EFFECTIVE_URL, &url) != CURLE_OK) {
@@ -368,23 +373,18 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle, i
 		switch (response) {
 		case 206:
 			error("Curl - Partial file downloaded from '%s'\n", url);
-			*err = -1;
 			return DOWNLOAD_STATUS_PARTIAL_FILE;
 		case 200:
 		case 0:
-			*err = 0;
 			return DOWNLOAD_STATUS_COMPLETED;
 		case 403:
 			debug("Curl: Download failed - forbidden (403) - '%s'\n", url);
-			*err = -EPERM;
 			return DOWNLOAD_STATUS_FORBIDDEN;
 		case 404:
 			debug("Curl: Download failed - file not found (404) - '%s'\n", url);
-			*err = -ENOENT;
 			return DOWNLOAD_STATUS_NOT_FOUND;
 		default:
 			error("Curl - Download failed: response (%ld) -  '%s'\n", response, url);
-			*err = -ECOMM;
 			return DOWNLOAD_STATUS_ERROR;
 		}
 	} else { /* download failed but let our caller do it */
@@ -392,51 +392,39 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle, i
 		switch (curl_ret) {
 		case CURLE_COULDNT_RESOLVE_PROXY:
 			error("Curl - Could not resolve proxy\n");
-			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_COULDNT_RESOLVE_HOST:
 			error("Curl - Could not resolve host - '%s'\n", url);
-			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_COULDNT_CONNECT:
 			error("Curl - Could not connect to host or proxy - '%s'\n", url);
-			*err = -ENONET;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_FILE_COULDNT_READ_FILE:
-			*err = -ENOENT;
 			return DOWNLOAD_STATUS_NOT_FOUND;
 		case CURLE_PARTIAL_FILE:
 			error("Curl - File incompletely downloaded - '%s'\n", url);
-			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_RECV_ERROR:
 			error("Curl - Failure receiving data from server - '%s'\n", url);
-			*err = -ENOLINK;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_WRITE_ERROR:
 			error("Curl - Error downloading to local file - '%s'\n", url);
 			error("Curl - Check free space for %s?\n", state_dir);
-			*err = -EIO;
 			return DOWNLOAD_STATUS_WRITE_ERROR;
 		case CURLE_OPERATION_TIMEDOUT:
 			error("Curl - Communicating with server timed out - '%s'\n", url);
-			*err = -ETIMEDOUT;
 			return DOWNLOAD_STATUS_TIMEOUT;
 		case CURLE_SSL_CACERT_BADFILE:
 			error("Curl - Bad SSL Cert file, cannot ensure secure connection - '%s'\n", url);
-			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_SSL_CERTPROBLEM:
 			error("Curl - Problem with the local client SSL certificate - '%s'\n", url);
-			*err = -1;
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_RANGE_ERROR:
 			error("Curl - Range command not supported by server, download resume disabled - '%s'\n", url);
-			*err = -ERANGE;
 			return DOWNLOAD_STATUS_RANGE_ERROR;
 		default:
 			swupd_curl_strerror(curl_ret);
-			*err = -1;
 		}
 	}
 	return DOWNLOAD_STATUS_ERROR;
@@ -460,7 +448,6 @@ static int swupd_curl_get_file_full(const char *url, char *filename,
 	static bool resume_download_supported = true;
 
 	CURLcode curl_ret;
-	int err;
 	enum download_status status;
 	struct curl_file local = { 0 };
 
@@ -525,7 +512,7 @@ exit:
 		curl_ret = swupd_download_file_close(curl_ret, &local);
 	}
 
-	status = process_curl_error_codes(curl_ret, curl, &err);
+	status = process_curl_error_codes(curl_ret, curl);
 	debug("Curl: Complete sync download: %s -> %s, status=%d\n", url, in_memory_file ? "<memory>" : filename, status);
 	if (status == DOWNLOAD_STATUS_RANGE_ERROR) {
 		// Reset variable
@@ -539,7 +526,90 @@ exit:
 		unlink(filename);
 	}
 
-	return err;
+	return -status;
+}
+
+/*
+ * Determines what strategy to use based on the return code:
+ * - do not retry: if the fault indicates that the failure isn't transient or
+ *                 is unlikely to be successful if repeated (i.e. disk full)
+ * - retry immediately: if the specific fault reported is unusual or rare, it
+ *                      might have been caused by unusual circumstances, the
+ *                      same failure is unlikely to be repeated (e.g. corrupt
+ *                      network package)
+ * - retry after a delay: if the fault is caused by a transient fault (like
+ *                        network connectivity)
+ */
+static enum retry_strategy determine_strategy(int ret_code)
+{
+	/* we don't need to retry if the content URL is local */
+	if (content_url_is_local) {
+		return DONT_RETRY;
+	}
+
+	switch (ret_code) {
+	case DOWNLOAD_STATUS_FORBIDDEN:
+	case DOWNLOAD_STATUS_NOT_FOUND:
+	case DOWNLOAD_STATUS_WRITE_ERROR:
+		return DONT_RETRY;
+	case DOWNLOAD_STATUS_RANGE_ERROR:
+	case DOWNLOAD_STATUS_PARTIAL_FILE:
+		return RETRY_NOW;
+	case DOWNLOAD_STATUS_ERROR:
+	case DOWNLOAD_STATUS_TIMEOUT:
+		return RETRY_DELAY;
+	default:
+		return RETRY_NOW;
+	}
+}
+
+static int retry_download_loop(const char *url, char *filename, struct curl_file_data *in_memory_file, bool resume_ok)
+{
+
+	int current_retry = 0;
+	int sleep_time = 10;
+	int strategy;
+	int ret;
+
+	for (;;) {
+
+		/* download file */
+		ret = swupd_curl_get_file_full(url, filename, in_memory_file, resume_ok);
+
+		if (ret == DOWNLOAD_STATUS_COMPLETED) {
+			/* operation successful */
+			break;
+		}
+		/* operation failed, determine retry strategy.
+		 * The value of ret on error will be < 0 */
+		current_retry++;
+		strategy = determine_strategy(-ret);
+		switch (strategy) {
+		case DONT_RETRY:
+			/* don't retry just return the failure */
+			return ret;
+		case RETRY_NOW:
+			/* if we have reached the retry limit just return the failure,
+			 * if not try again immediately */
+			if (current_retry <= MAX_TRIES) {
+				continue;
+			}
+			return ret;
+		case RETRY_DELAY:
+			/* if we have reached the retry limit just return the failure,
+			 * if not, wait for the delay and try again */
+			if (current_retry <= MAX_TRIES) {
+				sleep(sleep_time);
+				sleep_time *= 2;
+				continue;
+			}
+			return ret;
+		default:
+			return SWUPD_UNEXPECTED_CONDITION;
+		}
+	}
+
+	return ret;
 }
 
 /*
@@ -549,7 +619,7 @@ exit:
  */
 int swupd_curl_get_file(const char *url, char *filename)
 {
-	return swupd_curl_get_file_full(url, filename, NULL, false);
+	return retry_download_loop(url, filename, NULL, false);
 }
 
 /*
@@ -559,7 +629,7 @@ int swupd_curl_get_file(const char *url, char *filename)
  */
 int swupd_curl_get_file_memory(const char *url, struct curl_file_data *file_data)
 {
-	return swupd_curl_get_file_full(url, NULL, file_data, false);
+	return retry_download_loop(url, NULL, file_data, false);
 }
 
 static CURLcode swupd_curl_set_security_opts(CURL *curl)

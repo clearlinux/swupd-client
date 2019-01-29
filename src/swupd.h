@@ -196,7 +196,6 @@ extern int set_content_url(char *url);
 extern int set_version_url(char *url);
 
 extern void check_root(void);
-extern void increment_retries(int *retries, int *timeout);
 
 extern int add_included_manifests(struct manifest *mom, struct list **subs);
 extern int main_verify(int current_version);

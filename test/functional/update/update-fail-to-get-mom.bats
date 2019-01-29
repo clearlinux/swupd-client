@@ -21,7 +21,6 @@ test_setup() {
 		Update started.
 		Preparing to update from 10 to 20
 		Failed to retrieve 10 MoM manifest
-		The current MoM manifest was not found
 		Update failed.
 	EOM
 	)
@@ -41,8 +40,6 @@ test_setup() {
 		Update started.
 		Preparing to update from 10 to 20
 		Failed to retrieve 20 MoM manifest
-		The server MoM manifest was not found
-		Version 20 not available
 		Update failed.
 	EOM
 	)

@@ -40,7 +40,7 @@ extern CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url);
 
 /* Process download curl return code 'curl_ret' and if needed the response code to
  * fill 'err' with an error code and return the status of this download. */
-enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle, int *err);
+enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle);
 
 #ifdef __cplusplus
 }

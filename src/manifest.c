@@ -397,7 +397,7 @@ void free_manifest(struct manifest *manifest)
 }
 
 /* TODO: This should deal with nested manifests better */
-static int retrieve_manifests(int version, char *component, bool is_mix)
+static int retrieve_manifest(int version, char *component, bool is_mix)
 {
 	char *url = NULL;
 	char *filename;
@@ -529,8 +529,8 @@ struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err)
 	bool perform_sig_verify = !(migrate && mix_exists);
 	bool invalid_sig = false;
 
-verify_mom:
-	ret = retrieve_manifests(version, "MoM", mix_exists);
+retry_load:
+	ret = retrieve_manifest(version, "MoM", mix_exists);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to retrieve %d MoM manifest\n", version);
 		if (err) {
@@ -545,7 +545,7 @@ verify_mom:
 		if (retried == false) {
 			remove_manifest_files("MoM", version, NULL);
 			retried = true;
-			goto verify_mom;
+			goto retry_load;
 		}
 		fprintf(stderr, "Failed to load %d MoM manifest\n", version);
 		if (err) {
@@ -572,7 +572,7 @@ verify_mom:
 				free_manifest(manifest);
 				remove_manifest_files("MoM", version, NULL);
 				retried = true;
-				goto verify_mom;
+				goto retry_load;
 			}
 			fprintf(stderr, "WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM version %d\n", version);
 			free_string(&filename);
@@ -627,7 +627,7 @@ struct manifest *load_manifest(int version, struct file *file, struct manifest *
 	bool retried = false;
 
 retry_load:
-	ret = retrieve_manifests(version, file->filename, file->is_mix);
+	ret = retrieve_manifest(version, file->filename, file->is_mix);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to retrieve %d %s manifest\n", version, file->filename);
 		if (err) {
@@ -678,7 +678,7 @@ struct manifest *load_manifest_full(int version, bool mix)
 	struct manifest *manifest = NULL;
 	int ret = 0;
 
-	ret = retrieve_manifests(version, "full", mix);
+	ret = retrieve_manifest(version, "full", mix);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to retrieve %d Manifest.full\n", version);
 		return NULL;

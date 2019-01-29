@@ -666,8 +666,6 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 	char *bundle;
 	int manifest_err;
 	int ret = 0;
-	int retries = 0;
-	int timeout = 10;
 	struct file *file;
 	struct list *iter;
 	struct manifest *manifest;
@@ -698,13 +696,8 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 			continue;
 		}
 
-	retry_manifest_download:
 		manifest = load_manifest(file->last_change, file, mom, true, &manifest_err);
 		if (!manifest) {
-			if (retries < MAX_TRIES && manifest_err != -EIO && !content_url_is_local) {
-				increment_retries(&retries, &timeout);
-				goto retry_manifest_download;
-			}
 			fprintf(stderr, "Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
 			ret |= add_sub_ERR;
 			goto out;

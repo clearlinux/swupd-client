@@ -615,8 +615,6 @@ enum swupd_code verify_main(int argc, char **argv)
 {
 	struct manifest *official_manifest = NULL;
 	int ret;
-	int retries = 0;
-	int timeout = 10;
 	struct list *subs = NULL;
 
 	if (!parse_options(argc, argv)) {
@@ -767,14 +765,8 @@ enum swupd_code verify_main(int argc, char **argv)
 	}
 
 	set_subscription_versions(official_manifest, NULL, &subs);
-load_submanifests:
 	official_manifest->submanifests = recurse_manifest(official_manifest, subs, NULL, false, NULL);
 	if (!official_manifest->submanifests) {
-		if (retries < MAX_TRIES) {
-			increment_retries(&retries, &timeout);
-			fprintf(stderr, "Retry #%d downloading MoM sub-manifests\n", retries);
-			goto load_submanifests;
-		}
 		fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
 		ret = SWUPD_RECURSE_MANIFEST;
 		goto clean_and_exit;

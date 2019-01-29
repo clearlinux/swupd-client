@@ -34,7 +34,10 @@ extern "C" {
 
 #define UNUSED_PARAM __attribute__((__unused__))
 
+/* values used for configuring downloads */
 #define MAX_TRIES 3
+#define RETRY_DELAY 10
+#define DELAY_MULTIPLIER 2
 
 #define SWUPD_HASH_DIRNAME "DIRECTORY"
 #define SWUPD_DEFAULTS "/usr/share/defaults/swupd/"

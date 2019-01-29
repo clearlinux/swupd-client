@@ -39,9 +39,6 @@
 #include "swupd.h"
 #include "swupd_curl_internal.h"
 
-#define MAX_RETRIES 5
-#define RETRY_TIMEOUT 10
-
 // Wait time when curl has no fd in use in us (100ms)
 #define CURL_NOFD_WAIT 100000
 // Curl timeout in ms
@@ -84,7 +81,7 @@
 #define HASH_TO_KEY(hash) (HASH_VALUE(hash[0]) << 4 | HASH_VALUE(hash[1]))
 
 struct swupd_curl_parallel_handle {
-	int timeout;		     /* Retry timeout */
+	int retry_delay;	     /* Retry delay */
 	size_t mcurl_size, max_xfer; /* hysteresis parameters */
 	bool resume_failed;
 	int last_retry; /* keep the largest retry number so far */
@@ -194,7 +191,7 @@ void *swupd_curl_parallel_download_start(size_t max_xfer)
 
 	h->max_xfer = max_xfer;
 	h->curl_hashmap = hashmap_new(SWUPD_CURL_HASH_BUCKETS, file_hash_cmp, file_hash_value);
-	h->timeout = RETRY_TIMEOUT;
+	h->retry_delay = RETRY_DELAY;
 
 	return h;
 error:
@@ -268,7 +265,7 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 			//Check if user can handle errors
 			if (!h->error_cb || h->error_cb(file->status, file->data)) {
 				// Don't retry download if error was handled
-				file->retries = MAX_RETRIES;
+				file->retries = MAX_TRIES;
 				file->cb_retval = true;
 				h->failed = list_prepend_data(h->failed, file);
 			} else {
@@ -536,7 +533,7 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 		for (l = h->failed; l;) {
 			struct multi_curl_file *file = l->data;
 
-			if (file->retries < MAX_RETRIES &&
+			if (file->retries < MAX_TRIES &&
 			    file->status != DOWNLOAD_STATUS_WRITE_ERROR) {
 				struct list *next;
 
@@ -561,8 +558,8 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 			l = l->next;
 		}
 		if (retry) {
-			sleep(h->timeout);
-			h->timeout *= 2;
+			sleep(h->retry_delay);
+			h->retry_delay *= DELAY_MULTIPLIER;
 		}
 	}
 

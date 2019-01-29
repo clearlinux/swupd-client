@@ -60,7 +60,7 @@ static char *capath = NULL;
 enum retry_strategy {
 	DONT_RETRY = 0,
 	RETRY_NOW,
-	RETRY_DELAY
+	RETRY_WITH_DELAY
 };
 
 /* Pretty print curl return status */
@@ -557,7 +557,7 @@ static enum retry_strategy determine_strategy(int ret_code)
 		return RETRY_NOW;
 	case DOWNLOAD_STATUS_ERROR:
 	case DOWNLOAD_STATUS_TIMEOUT:
-		return RETRY_DELAY;
+		return RETRY_WITH_DELAY;
 	default:
 		return RETRY_NOW;
 	}
@@ -567,7 +567,7 @@ static int retry_download_loop(const char *url, char *filename, struct curl_file
 {
 
 	int current_retry = 0;
-	int sleep_time = 10;
+	int sleep_time = RETRY_DELAY;
 	int strategy;
 	int ret;
 
@@ -595,12 +595,12 @@ static int retry_download_loop(const char *url, char *filename, struct curl_file
 				continue;
 			}
 			return ret;
-		case RETRY_DELAY:
+		case RETRY_WITH_DELAY:
 			/* if we have reached the retry limit just return the failure,
 			 * if not, wait for the delay and try again */
 			if (current_retry <= MAX_TRIES) {
 				sleep(sleep_time);
-				sleep_time *= 2;
+				sleep_time *= DELAY_MULTIPLIER;
 				continue;
 			}
 			return ret;

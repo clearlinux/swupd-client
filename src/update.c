@@ -40,13 +40,6 @@ static int requested_version = -1;
 
 int nonpack;
 
-void increment_retries(int *retries, int *timeout)
-{
-	(*retries)++;
-	sleep(*timeout);
-	*timeout *= 2;
-}
-
 /* This loads the upstream Clear Manifest.Full and local
  * Manifest.full, and then checks that there are no conflicts between
  * the files they both include */
@@ -214,8 +207,6 @@ static enum swupd_code main_update()
 	struct list *current_subs = NULL;
 	struct list *latest_subs = NULL;
 	int ret;
-	int retries = 0;
-	int timeout = 10;
 	struct timespec ts_start, ts_stop; // For main swupd update time
 	double delta;
 	bool mix_exists;
@@ -313,7 +304,7 @@ version_check:
 	timelist_timer_stop(global_times); // Close step 1
 	timelist_timer_start(global_times, "Load Manifests:");
 	int manifest_err;
-load_current_mom:
+
 	/* Step 3: setup manifests */
 
 	/* get the from/to MoM manifests */
@@ -325,59 +316,28 @@ load_current_mom:
 	if (!current_manifest) {
 		/* TODO: possibly remove this as not getting a "from" manifest is not fatal
 		 * - we just don't apply deltas */
-		if (manifest_err == -ENOENT) {
-			fprintf(stderr, "The current MoM manifest was not found\n");
-		} else if (retries < MAX_TRIES && manifest_err != -EIO) {
-			increment_retries(&retries, &timeout);
-			fprintf(stderr, "Retry #%d downloading current MoM manifest\n", retries);
-			goto load_current_mom;
-		}
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto clean_exit;
 	}
 
-	/*  Reset the retries and timeout for subsequent download calls */
-	retries = 0;
-	timeout = 10;
-
-load_server_mom:
 	timelist_timer_stop(global_times); // Close step 2
 	timelist_timer_start(global_times, "Recurse and Consolidate Manifests");
 	server_manifest = load_mom(server_version, true, mix_exists, &manifest_err);
 	if (!server_manifest) {
-		if (manifest_err == -ENOENT) {
-			fprintf(stderr, "The server MoM manifest was not found\n");
-			fprintf(stderr, "Version %d not available\n", server_version);
-		} else if (retries < MAX_TRIES && manifest_err != -EIO) {
-			increment_retries(&retries, &timeout);
-			fprintf(stderr, "Retry #%d downloading server MoM manifest\n", retries);
-			goto load_server_mom;
-		}
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto clean_exit;
 	}
 
-	retries = 0;
-	timeout = 10;
-
-load_current_submanifests:
 	/* Read the current collective of manifests that we are subscribed to.
 	 * First load up the old (current) manifests. Statedir could have been cleared
 	 * or corrupt, so don't assume things are already there. Updating subscribed
 	 * manifests is done as part of recurse_manifest */
 	current_manifest->submanifests = recurse_manifest(current_manifest, current_subs, NULL, false, &manifest_err);
 	if (!current_manifest->submanifests) {
-		if (retries < MAX_TRIES && manifest_err != -EIO) {
-			increment_retries(&retries, &timeout);
-			fprintf(stderr, "Retry #%d downloading current sub-manifests\n", retries);
-			goto load_current_submanifests;
-		}
 		ret = SWUPD_RECURSE_MANIFEST;
 		printf("Cannot load current MoM sub-manifests, exiting\n");
 		goto clean_exit;
 	}
-	retries = 0;
-	timeout = 10;
 
 	/* consolidate the current collective manifests down into one in memory */
 	current_manifest->files = files_from_bundles(current_manifest->submanifests);
@@ -404,21 +364,14 @@ load_current_submanifests:
 		}
 	}
 
-load_server_submanifests:
 	/* read the new collective of manifests that we are subscribed to in the new MoM */
 	server_manifest->submanifests = recurse_manifest(server_manifest, latest_subs, NULL, false, &manifest_err);
 	if (!server_manifest->submanifests) {
-		if (retries < MAX_TRIES && manifest_err != -EIO) {
-			increment_retries(&retries, &timeout);
-			printf("Retry #%d downloading server sub-manifests\n", retries);
-			goto load_server_submanifests;
-		}
 		ret = SWUPD_RECURSE_MANIFEST;
 		printf("Error: Cannot load server MoM sub-manifests, exiting\n");
 		goto clean_exit;
 	}
-	retries = 0;
-	timeout = 10;
+
 	/* consolidate the new collective manifests down into one in memory */
 	server_manifest->files = files_from_bundles(server_manifest->submanifests);
 

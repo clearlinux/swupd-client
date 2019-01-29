@@ -769,7 +769,7 @@ static enum swupd_code download_manifests(struct manifest **MoM)
 				count++;
 				/* if the manifest failed to download because there is no disk space
 				 * remove it from the list so we don't re-attempt while searching */
-				if (manifest_err == -EIO) {
+				if (manifest_err == -DOWNLOAD_STATUS_WRITE_ERROR) {
 					list = list_free_item(list, free_file_data);
 				}
 				ret = SWUPD_RECURSE_MANIFEST;

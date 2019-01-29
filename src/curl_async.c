@@ -222,7 +222,6 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 {
 	CURLMsg *msg;
 	CURLcode curl_ret;
-	int err;
 
 	while (count > 0) {
 		CURL *handle;
@@ -257,7 +256,7 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 		/* Get error code from easy handle and augment it if
 		 * completing the download encounters further problems. */
 		curl_ret = swupd_download_file_close(msg->data.result, &file->file);
-		file->status = process_curl_error_codes(curl_ret, handle, &err);
+		file->status = process_curl_error_codes(curl_ret, handle);
 		debug("Curl: Complete ASYNC download: %s -> %s, status=%d\n", file->url, file->file.path, file->status);
 		if (file->status == DOWNLOAD_STATUS_COMPLETED) {
 			/* Wrap the success callback and schedule execution

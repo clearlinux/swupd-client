@@ -1685,7 +1685,7 @@ start_web_server() { # swupd_function
 		Usage:
 		    start_web_server [-c] <client pub key> [-d] <file name> [-k] <server priv key> [-p] <server pub key>
 		                     [-s] [-H] [-t] <delay value> [-l] <chunk length> [-r] [-P] <port> [-D] <dir to server>
-		                     [-n] <number of normal requests>
+		                     [-n] <number of normal requests> [-f] <HTTP code>
 
 		Options:
 		    -c    Path to public key to be used for client certificate authentication
@@ -1705,6 +1705,7 @@ start_web_server() { # swupd_function
 		    -H    Hangs the server
 		    -d    File name that will be partially downloaded on the first attempt and successfully
 		          downloaded on the second attempt
+		    -f    Forces the web server to respond with a specific code to any request
 
 		Notes:
 		    - When the server is using SSL authentication, a pair of corresponding public and private keys must be passed
@@ -1720,7 +1721,7 @@ start_web_server() { # swupd_function
 		EOF
 	}
 
-	while getopts :c:d:k:p:st:rP:D:l:n:H opt; do
+	while getopts :c:d:k:p:st:rP:D:l:n:Hf: opt; do
 		case "$opt" in
 			c)	server_args="$server_args --client-cert $OPTARG" ;;
 			d)	server_args="$server_args --partial-download-file $OPTARG" ;;
@@ -1734,6 +1735,7 @@ start_web_server() { # swupd_function
 			l)	server_args="$server_args --chunk-length $OPTARG" ;;
 			n)	server_args="$server_args --after-requests $OPTARG" ;;
 			H)	server_args="$server_args --hang-server" ;;
+			f)	server_args="$server_args --force-response $OPTARG" ;;
 			*)	web_server_usage
 				return ;;
 		esac

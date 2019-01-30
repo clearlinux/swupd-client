@@ -81,7 +81,7 @@ int swupd_curl_get_file_memory(const char *url, struct curl_file_data *file_data
  * Parameters:
  *  - max_xfer: The maximum number of simultaneos downloads.
  *
- * Parallel download handler will retry MAX_TRIES times to download each file,
+ * Parallel download handler will retry max_retries times to download each file,
  * ading a timeout between each try.
  *
  * Note: This function is non-blocking.

@@ -567,7 +567,7 @@ static int retry_download_loop(const char *url, char *filename, struct curl_file
 {
 
 	int current_retry = 0;
-	int sleep_time = RETRY_DELAY;
+	int sleep_time = retry_delay;
 	int strategy;
 	int ret;
 
@@ -591,17 +591,34 @@ static int retry_download_loop(const char *url, char *filename, struct curl_file
 		case RETRY_NOW:
 			/* if we have reached the retry limit just return the failure,
 			 * if not try again immediately */
-			if (current_retry <= MAX_TRIES) {
-				continue;
+			if (max_retries) {
+				if (current_retry <= max_retries) {
+					fprintf(stderr, "Retry #%d downloading from %s\n", current_retry, url);
+					continue;
+				} else {
+					fprintf(stderr, "Maximum number of retries reached\n");
+				}
+			} else {
+				fprintf(stderr, "Download retries is disabled\n");
 			}
 			return ret;
 		case RETRY_WITH_DELAY:
 			/* if we have reached the retry limit just return the failure,
 			 * if not, wait for the delay and try again */
-			if (current_retry <= MAX_TRIES) {
-				sleep(sleep_time);
-				sleep_time *= DELAY_MULTIPLIER;
-				continue;
+			if (max_retries) {
+				if (current_retry <= max_retries) {
+					if (sleep_time) {
+						fprintf(stderr, "Waiting %d seconds before retrying the download\n", sleep_time);
+					}
+					fprintf(stderr, "Retry #%d downloading from %s\n", current_retry, url);
+					sleep(sleep_time);
+					sleep_time = (sleep_time * DELAY_MULTIPLIER) > MAX_DELAY ? MAX_DELAY : (sleep_time * DELAY_MULTIPLIER);
+					continue;
+				} else {
+					fprintf(stderr, "Maximum number of retries reached\n");
+				}
+			} else {
+				fprintf(stderr, "Download retries is disabled\n");
 			}
 			return ret;
 		default:

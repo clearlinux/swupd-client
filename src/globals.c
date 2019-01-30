@@ -58,6 +58,8 @@ char *state_dir = NULL;
 int skip_diskspace_check = 0;
 bool keepcache = false;
 timelist *global_times = NULL;
+int max_retries = 3;
+int retry_delay = 10;
 
 /* NOTE: Today the content and version server urls are the same in
  * all cases.  It is highly likely these will eventually differ, eg:
@@ -565,6 +567,8 @@ static const struct option global_opts[] = {
 	{ "debug", no_argument, &log_level, LOG_DEBUG },
 	//TODO: -D option is deprecated. Remove that on a Major release
 	{ "", required_argument, 0, 'D' },
+	{ "max-retries", required_argument, 0, 'r' },
+	{ "retry-delay", required_argument, 0, 'd' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -636,6 +640,20 @@ static bool global_parse_opt(int opt, char *optarg)
 			return false;
 		}
 		return true;
+	case 'r':
+		err = strtoi_err(optarg, &max_retries);
+		if (err < 0 || max_retries < 0) {
+			fprintf(stderr, "Invalid --max-retries argument: %s\n\n", optarg);
+			return false;
+		}
+		return true;
+	case 'd':
+		err = strtoi_err(optarg, &retry_delay);
+		if (err < 0 || retry_delay < 0 || retry_delay > 60) {
+			fprintf(stderr, "Invalid --retry-delay argument: %s (should be between 0 - %d seconds)\n\n", optarg, MAX_DELAY);
+			return false;
+		}
+		return true;
 	default:
 		return false;
 	}
@@ -681,7 +699,7 @@ void global_print_help(void)
 {
 	fprintf(stderr, "Global Options:\n");
 	fprintf(stderr, "   -h, --help              Show help options\n");
-	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol\n");
+	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol)\n");
 	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
 	fprintf(stderr, "   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
 	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
@@ -696,6 +714,8 @@ void global_print_help(void)
 	fprintf(stderr, "   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
 	fprintf(stderr, "   -b, --no-boot-update    Do not install boot files to the boot partition (containers)\n");
 	fprintf(stderr, "   -W, --max-parallel-downloads=[n] Set the maximum number of parallel downloads\n");
+	fprintf(stderr, "   -r, --max-retries       Maximum number of retries for download failures\n");
+	fprintf(stderr, "   -d, --retry-delay       Initial delay between download retries, this will be doubled for each retry\n");
 	fprintf(stderr, "\n");
 }
 

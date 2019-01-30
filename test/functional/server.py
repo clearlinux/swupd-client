@@ -19,6 +19,7 @@ partial_download_file = None
 threshold = 0
 time_delay = 0
 length = 16*1024
+response = HTTPStatus.OK
 
 
 class SimpleServer(server.SimpleHTTPRequestHandler):
@@ -29,18 +30,18 @@ class SimpleServer(server.SimpleHTTPRequestHandler):
     def do_GET(self):
         """Serve a GET request."""
 
-        response = HTTPStatus.OK
+        status_code = response
 
         # if the partial download option was set and the server is
         # currently serving the file that was requested as partial
         if self.path == "/{}".format(partial_download_file):
             if SimpleServer.first_time:
                 SimpleServer.first_time = False
-                response = HTTPStatus.PARTIAL_CONTENT
+                status_code = HTTPStatus.PARTIAL_CONTENT
 
         self.hang_server()
 
-        f = self.send_head(response)
+        f = self.send_head(status_code)
         if f:
             try:
                 # start serving the requested URL
@@ -52,7 +53,7 @@ class SimpleServer(server.SimpleHTTPRequestHandler):
 
                     # if the partial download was set break
                     # after readng the fist chunk of data
-                    if response == HTTPStatus.PARTIAL_CONTENT:
+                    if status_code == HTTPStatus.PARTIAL_CONTENT:
                         break
 
                     # only start delaying responses after the threshold has
@@ -221,6 +222,10 @@ def parse_arguments():
                         "download fail with partial download error and succeed"
                         " on 2nd download.")
 
+    parser.add_argument("--force-response", type=int, default=HTTPStatus.OK,
+                        help="forces the web server to respond with a specific"
+                        "code to any request")
+
     return parser.parse_args()
 
 
@@ -241,6 +246,7 @@ if __name__ == "__main__":
     print("Chunk length: ", length)
     threshold = args.after_requests
     hang_server = args.hang_server
+    response = args.force_response
 
     httpd = server.HTTPServer(addr, SimpleServer)
 

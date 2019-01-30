@@ -183,7 +183,6 @@ BATS = \
 	test/functional/checkupdate/chk-update-no-target-content.bats \
 	test/functional/checkupdate/chk-update-slow-server.bats \
 	test/functional/checkupdate/chk-update-version-match.bats \
-	test/functional/completion/completion-basic.bats \
 	test/functional/hashdump/hashdump-file-hash.bats \
 	test/functional/mirror/mirror-createdir.bats \
 	test/functional/mirror/mirror-createdir-negative.bats \
@@ -227,6 +226,8 @@ BATS = \
 	test/functional/update/update-with-mirror.bats \
 	test/functional/update/update-with-old-mirror.bats \
 	test/functional/update/update-with-slightly-old-mirror.bats \
+	test/functional/usability/usa-completion-basic.bats \
+	test/functional/usability/usa-download-retries.bats \
 	test/functional/verify/verify-add-missing-include.bats \
 	test/functional/verify/verify-add-missing-include-old.bats \
 	test/functional/verify/verify-boot-file.bats \

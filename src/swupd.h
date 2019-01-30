@@ -34,10 +34,9 @@ extern "C" {
 
 #define UNUSED_PARAM __attribute__((__unused__))
 
-/* values used for configuring downloads */
-#define MAX_TRIES 3
-#define RETRY_DELAY 10
+/* value used for configuring downloads */
 #define DELAY_MULTIPLIER 2
+#define MAX_DELAY 60
 
 #define SWUPD_HASH_DIRNAME "DIRECTORY"
 #define SWUPD_DEFAULTS "/usr/share/defaults/swupd/"
@@ -187,6 +186,8 @@ extern char *bundle_to_add;
 extern char *state_dir;
 extern int skip_diskspace_check;
 extern timelist *global_times;
+extern int max_retries;
+extern int retry_delay;
 
 extern char *version_url;
 extern char *content_url;

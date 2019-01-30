@@ -191,7 +191,7 @@ void *swupd_curl_parallel_download_start(size_t max_xfer)
 
 	h->max_xfer = max_xfer;
 	h->curl_hashmap = hashmap_new(SWUPD_CURL_HASH_BUCKETS, file_hash_cmp, file_hash_value);
-	h->retry_delay = RETRY_DELAY;
+	h->retry_delay = retry_delay;
 
 	return h;
 error:
@@ -265,7 +265,7 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 			//Check if user can handle errors
 			if (!h->error_cb || h->error_cb(file->status, file->data)) {
 				// Don't retry download if error was handled
-				file->retries = MAX_TRIES;
+				file->retries = max_retries;
 				file->cb_retval = true;
 				h->failed = list_prepend_data(h->failed, file);
 			} else {
@@ -533,7 +533,7 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 		for (l = h->failed; l;) {
 			struct multi_curl_file *file = l->data;
 
-			if (file->retries < MAX_TRIES &&
+			if (file->retries < max_retries &&
 			    file->status != DOWNLOAD_STATUS_WRITE_ERROR) {
 				struct list *next;
 
@@ -559,7 +559,7 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 		}
 		if (retry) {
 			sleep(h->retry_delay);
-			h->retry_delay *= DELAY_MULTIPLIER;
+			h->retry_delay = (h->retry_delay * DELAY_MULTIPLIER) > MAX_DELAY ? MAX_DELAY : (h->retry_delay * DELAY_MULTIPLIER);
 		}
 	}
 

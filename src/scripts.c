@@ -43,6 +43,8 @@ static bool in_container(void)
 static void update_boot(void)
 {
 	char *boot_update_cmd = NULL;
+	char *scriptname;
+	struct stat s;
 	__attribute__((unused)) int ret = 0;
 
 	/* Don't run clr-boot-manager update in a container on the rootfs */
@@ -51,13 +53,22 @@ static void update_boot(void)
 	}
 
 	if (strcmp("/", path_prefix) == 0) {
+		string_or_die(&scriptname, "/usr/bin/clr-boot-manager");
 		string_or_die(&boot_update_cmd, "/usr/bin/clr-boot-manager update");
 	} else {
+		string_or_die(&scriptname, "%s/usr/bin/clr-boot-manager", path_prefix);
 		string_or_die(&boot_update_cmd, "%s/usr/bin/clr-boot-manager update --path %s", path_prefix, path_prefix);
 	}
 
-	ret = system(boot_update_cmd);
+	/* make sure the script exists before attempting to execute it */
+	if (stat(scriptname, &s) == 0 && (S_ISREG(s.st_mode))) {
+		ret = system(boot_update_cmd);
+	} else {
+		fprintf(stderr, "WARNING: post-update helper script (%s) not found, it will be skipped\n", scriptname);
+	}
+
 	free_string(&boot_update_cmd);
+	free_string(&scriptname);
 }
 
 static void update_triggers(bool block)

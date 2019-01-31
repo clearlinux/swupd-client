@@ -18,12 +18,15 @@ test_setup() {
 	assert_file_exists "$TARGETDIR/usr/lib/kernel/test-file"
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
+		.
 		Finishing download of update content...
 		Installing bundle(s) files...
+		.
 		Calling post-update helper scripts.
+		WARNING: post-update helper script ($TEST_DIRNAME/testfs/target-dir//usr/bin/clr-boot-manager) not found, it will be skipped
 		Successfully installed 1 bundle
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }

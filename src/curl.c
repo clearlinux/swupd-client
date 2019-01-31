@@ -438,12 +438,12 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
  *   interrupted download if necessary.
  * - If failure to download, partial download is not deleted.
  *
- * Returns: Zero on success or a standard < 0 status code on errors.
+ * Returns: Zero (DOWNLOAD_STATUS_COMPLETED) on success or a status code > 0 on errors.
  *
  * NOTE: See full_download() for multi/asynchronous downloading of fullfiles.
  */
-static int swupd_curl_get_file_full(const char *url, char *filename,
-				    struct curl_file_data *in_memory_file, bool resume_ok)
+static enum download_status swupd_curl_get_file_full(const char *url, char *filename,
+						     struct curl_file_data *in_memory_file, bool resume_ok)
 {
 	static bool resume_download_supported = true;
 
@@ -451,10 +451,6 @@ static int swupd_curl_get_file_full(const char *url, char *filename,
 	enum download_status status;
 	struct curl_file local = { 0 };
 
-	if (!curl) {
-		error("Curl hasn't been initialized\n");
-		return -1;
-	}
 restart_download:
 	curl_easy_reset(curl);
 
@@ -526,7 +522,7 @@ exit:
 		unlink(filename);
 	}
 
-	return -status;
+	return status;
 }
 
 /*
@@ -540,14 +536,14 @@ exit:
  * - retry after a delay: if the fault is caused by a transient fault (like
  *                        network connectivity)
  */
-static enum retry_strategy determine_strategy(int ret_code)
+static enum retry_strategy determine_strategy(int status)
 {
 	/* we don't need to retry if the content URL is local */
 	if (content_url_is_local) {
 		return DONT_RETRY;
 	}
 
-	switch (ret_code) {
+	switch (status) {
 	case DOWNLOAD_STATUS_FORBIDDEN:
 	case DOWNLOAD_STATUS_NOT_FOUND:
 	case DOWNLOAD_STATUS_WRITE_ERROR:
@@ -571,6 +567,11 @@ static int retry_download_loop(const char *url, char *filename, struct curl_file
 	int strategy;
 	int ret;
 
+	if (!curl) {
+		error("Curl hasn't been initialized\n");
+		return -1;
+	}
+
 	for (;;) {
 
 		/* download file */
@@ -580,50 +581,37 @@ static int retry_download_loop(const char *url, char *filename, struct curl_file
 			/* operation successful */
 			break;
 		}
-		/* operation failed, determine retry strategy.
-		 * The value of ret on error will be < 0 */
+
+		/* operation failed, determine retry strategy */
 		current_retry++;
-		strategy = determine_strategy(-ret);
-		switch (strategy) {
-		case DONT_RETRY:
-			/* don't retry just return the failure */
-			return ret;
-		case RETRY_NOW:
-			/* if we have reached the retry limit just return the failure,
-			 * if not try again immediately */
-			if (max_retries) {
-				if (current_retry <= max_retries) {
-					fprintf(stderr, "Retry #%d downloading from %s\n", current_retry, url);
-					continue;
-				} else {
-					fprintf(stderr, "Maximum number of retries reached\n");
-				}
-			} else {
-				fprintf(stderr, "Download retries is disabled\n");
-			}
-			return ret;
-		case RETRY_WITH_DELAY:
-			/* if we have reached the retry limit just return the failure,
-			 * if not, wait for the delay and try again */
-			if (max_retries) {
-				if (current_retry <= max_retries) {
-					if (sleep_time) {
-						fprintf(stderr, "Waiting %d seconds before retrying the download\n", sleep_time);
-					}
-					fprintf(stderr, "Retry #%d downloading from %s\n", current_retry, url);
-					sleep(sleep_time);
-					sleep_time = (sleep_time * DELAY_MULTIPLIER) > MAX_DELAY ? MAX_DELAY : (sleep_time * DELAY_MULTIPLIER);
-					continue;
-				} else {
-					fprintf(stderr, "Maximum number of retries reached\n");
-				}
-			} else {
-				fprintf(stderr, "Download retries is disabled\n");
-			}
-			return ret;
-		default:
-			return SWUPD_UNEXPECTED_CONDITION;
+		strategy = determine_strategy(ret);
+		if (strategy == DONT_RETRY) {
+			/* don't retry just return a failure */
+			return -EIO;
 		}
+
+		/* if we got to this point and we haven't reached the retry limit,
+		 * we need to retry, otherwise just return the failure */
+		if (strategy == RETRY_NOW) {
+			sleep_time = 0;
+		}
+		if (max_retries) {
+			if (current_retry <= max_retries) {
+				if (sleep_time) {
+					fprintf(stderr, "Waiting %d seconds before retrying the download\n", sleep_time);
+				}
+				sleep(sleep_time);
+				sleep_time = (sleep_time * DELAY_MULTIPLIER) > MAX_DELAY ? MAX_DELAY : (sleep_time * DELAY_MULTIPLIER);
+				fprintf(stderr, "Retry #%d downloading from %s\n", current_retry, url);
+				continue;
+			} else {
+				fprintf(stderr, "Maximum number of retries reached\n");
+			}
+		} else {
+			fprintf(stderr, "Download retries is disabled\n");
+		}
+		/* we ran out of retries, return an error */
+		return -ECOMM;
 	}
 
 	return ret;

@@ -551,7 +551,7 @@ static void report_find(char *bundle, char *file, char *search_term, bool is_exp
  * Description: Perform a lookup of the specified search string in all Clear manifests
  * for the current os release.
  */
-static void do_search(struct manifest *MoM, char search_type, char *search_term)
+static enum swupd_code do_search(struct manifest *MoM, char search_type, char *search_term)
 {
 	struct list *list;
 	struct list *sublist;
@@ -560,6 +560,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 	struct list *bundle_info = NULL;
 	struct manifest *subman = NULL;
 	int i;
+	int ret = SWUPD_OK;
 	bool done_with_bundle, done_with_search = false;
 	bool hit = false;
 	bool man_load_failures = false;
@@ -655,6 +656,7 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 
 	if (!hit_count) {
 		fprintf(stderr, "Search term not found.\n");
+		ret = SWUPD_NO;
 	}
 
 	bool display_size = (scope != 'o' && !man_load_failures);
@@ -675,6 +677,8 @@ static void do_search(struct manifest *MoM, char search_type, char *search_term)
 		print_final_results(display_size);
 	}
 	list_free_list_and_data(results, free_bundle_result_data);
+
+	return ret;
 }
 
 static double query_total_download_size(struct list *list)
@@ -850,7 +854,12 @@ enum swupd_code search_main(int argc, char **argv)
 		goto clean_exit;
 	}
 
-	do_search(MoM, search_type, search_string);
+	if (ret == SWUPD_RECURSE_MANIFEST) {
+		/* if not all manifests could be downloaded return SWUPD_RECURSE_MANIFEST */
+		do_search(MoM, search_type, search_string);
+	} else {
+		ret = do_search(MoM, search_type, search_string);
+	}
 
 clean_exit:
 	if (MoM) {

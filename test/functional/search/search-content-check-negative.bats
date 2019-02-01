@@ -37,7 +37,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD search $SWUPD_OPTS fake-file"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Searching for 'fake-file'
 		Downloading Clear Linux manifests
@@ -54,7 +54,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD search $SWUPD_OPTS /usr/lib64/test-lib100"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Searching for '/usr/lib64/test-lib100'
 		Search term not found.
@@ -68,7 +68,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD search $SWUPD_OPTS -l libtest-nohit"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Searching for 'libtest-nohit'
 		Search term not found.

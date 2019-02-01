@@ -30,21 +30,36 @@ global_teardown() {
 
 }
 
+@test "SRH012: User downloads all the manifests without actually searching for anything" {
+
+	# when using the --init option with search, it should not
+	# really search for anything but the MoM and all manifests
+	# in it should be downloaded to the local system
+
+	run sudo sh -c "$SWUPD search $SWUPD_OPTS --init"
+
+	assert_status_is "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		Downloading Clear Linux manifests
+		.* MB total...
+		Completed manifests download.
+		Successfully retrieved manifests. Exiting
+	EOM
+	)
+	assert_regex_is_output "$expected_output"
+
+}
+
 @test "SRH001: Search for a bundle" {
 
 	# it should find the bundle since the tracking file has the
-	# same name as the bundle, also the first time we run search
-	# it needs to download the manifests, so we need to account
-	# for those messages in this first test
+	# same name as the bundle
 
 	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-bundle1"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'test-bundle1'
-		Downloading Clear Linux manifests
-		.* MB total...
-		Completed manifests download.
 		Bundle test-bundle1	\\(0 MB to install\\)
 		./usr/share/clear/bundles/test-bundle1
 	EOM

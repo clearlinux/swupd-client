@@ -19,5 +19,5 @@ args="\
 --prefix=/usr \
 --enable-silent-rules"
 
-./configure CFLAGS="-g -O2 $CFLAGS" $args "$@"
+./configure "$args" "$@"
 make clean

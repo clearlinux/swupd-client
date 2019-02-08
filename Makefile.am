@@ -2,7 +2,8 @@ SUFFIXES= .rst
 
 EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash
 
-AM_CFLAGS = -fPIC -O2 -g -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99 \
+AM_CFLAGS = -fPIC -g -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99 \
+	-O$(OPTIMIZE) \
 	-Wall \
 	-Wextra \
 	-Wformat-security \

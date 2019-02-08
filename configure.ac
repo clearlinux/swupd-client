@@ -31,6 +31,18 @@ AC_CHECK_PROGS(TAR, tar)
 
 # Enable/disable options
 AC_ARG_ENABLE(
+  [optimizations],
+  [AS_HELP_STRING([--disable-optimizations], [Disable compiler optimizations (enabled by default)])],
+  compiler_optimizations="$enableval",
+  [AC_SUBST(OPTIMIZE, [2])]
+)
+AS_IF(
+  [test -n "$compiler_optimizations" -a x"$compiler_optimizations" = "xno"],
+  [AC_SUBST(OPTIMIZE, [0])],
+  [AC_SUBST(OPTIMIZE, [2])]
+)
+
+AC_ARG_ENABLE(
   [bzip2],
   [AS_HELP_STRING([--disable-bzip2], [Do not use bzip2 compression (uses bzip2 by default)])]
 )

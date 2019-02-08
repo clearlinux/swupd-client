@@ -465,14 +465,17 @@ clean_curl:
 		  "current_version=%d\n"
 		  "server_version=%d\n"
 		  "result=%d\n"
-		  "time=%5.1f\n",
+		  "time=%5.1f\n"
+		  "bytes=%ld\n",
 		  current_version,
 		  server_version,
 		  ret,
-		  delta);
+		  delta,
+		  total_curl_sz);
 
 	if (server_version > current_version) {
-		printf("Update took %0.1f seconds\n", delta);
+		printf("Update took %0.1f seconds, %ld bytes transferred\n", delta,
+		       total_curl_sz);
 	}
 	timelist_print_stats(global_times);
 
@@ -641,10 +644,12 @@ static enum swupd_code print_versions()
 		  "check",
 		  "result=%d\n"
 		  "version_current=%d\n"
-		  "version_server=%d\n",
+		  "version_server=%d\n"
+		  "bytes=%ld\n",
 		  ret,
 		  current_version,
-		  server_version);
+		  server_version,
+		  total_curl_sz);
 
 	return ret;
 }

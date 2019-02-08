@@ -107,6 +107,8 @@ extern bool need_systemd_reexec;
 extern struct list *post_update_actions;
 extern bool keepcache;
 
+extern curl_off_t total_curl_sz;
+
 struct update_stat {
 	uint64_t st_mode;
 	uint64_t st_uid;

@@ -53,6 +53,8 @@
 
 static CURL *curl = NULL;
 
+curl_off_t total_curl_sz = 0;
+
 /* alternative CA Path */
 static char *capath = NULL;
 
@@ -359,6 +361,13 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 	if (curl_easy_getinfo(curl_handle, CURLINFO_EFFECTIVE_URL, &url) != CURLE_OK) {
 		url = "<not available>";
 	}
+
+	/*
+	 * retrieve bytes transferred, errors or not
+	 */
+	curl_off_t curl_sz;
+	curl_easy_getinfo(curl_handle, CURLINFO_SIZE_DOWNLOAD_T, &curl_sz);
+	total_curl_sz += curl_sz;
 
 	if (curl_ret == CURLE_OK || curl_ret == CURLE_HTTP_RETURNED_ERROR ||
 	    curl_ret == CURLE_RECV_ERROR) {

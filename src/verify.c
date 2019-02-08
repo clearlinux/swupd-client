@@ -938,7 +938,8 @@ clean_and_exit:
 		  "file_deleted_count=%d\n"
 		  "file_not_deleted_count=%d\n"
 		  "file_mismatch_count=%d\n"
-		  "file_extraneous_count=%d\n",
+		  "file_extraneous_count=%d\n"
+		  "bytes=%ld\n",
 		  cmdline_option_fix || cmdline_option_install,
 		  ret,
 		  version,
@@ -950,7 +951,8 @@ clean_and_exit:
 		  counts.deleted,
 		  counts.not_deleted,
 		  counts.mismatch,
-		  counts.extraneous);
+		  counts.extraneous,
+		  total_curl_sz);
 	if (ret == SWUPD_OK) {
 		if (cmdline_option_fix || cmdline_option_install) {
 			fprintf(stderr, "Fix successful\n");

@@ -507,10 +507,12 @@ enum swupd_code remove_bundles(char **bundles)
 			  "bundleremove",
 			  "bundle=%s\n"
 			  "current_version=%d\n"
-			  "result=%d\n",
+			  "result=%d\n"
+			  "bytes=%ld\n",
 			  *bundles,
 			  current_version,
-			  ret);
+			  ret,
+			  total_curl_sz);
 
 		free_subscriptions(&subs);
 		swupd_deinit();
@@ -634,10 +636,12 @@ enum swupd_code remove_bundles(char **bundles)
 			  "bundleremove",
 			  "bundle=%s\n"
 			  "current_version=%d\n"
-			  "result=%d\n",
+			  "result=%d\n"
+			  "bytes=%ld\n",
 			  bundle,
 			  current_version,
-			  ret);
+			  ret,
+			  total_curl_sz);
 		/* if at least one of the bundles fails to be removed, exit with a failure */
 		if (ret) {
 			ret_code = ret;
@@ -1106,10 +1110,12 @@ clean_and_exit:
 		  "bundleadd",
 		  "bundles=%s\n"
 		  "current_version=%d\n"
-		  "result=%d\n",
+		  "result=%d\n"
+		  "bytes=%ld\n",
 		  bundles_list_str,
 		  current_version,
-		  ret);
+		  ret,
+		  total_curl_sz);
 
 	list_free_list_and_data(bundles_list, free);
 	free_string(&bundles_list_str);

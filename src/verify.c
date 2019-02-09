@@ -735,7 +735,7 @@ enum swupd_code verify_main(int argc, char **argv)
 		}
 	}
 
-	ret = add_included_manifests(official_manifest, &subs);
+	ret = add_included_manifests(version, official_manifest, &subs);
 	/* if one or more of the installed bundles were not found in the manifest,
 	 * continue only if --force was used since the bundles could be removed */
 	if (ret) {
@@ -765,7 +765,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	}
 
 	set_subscription_versions(official_manifest, NULL, &subs);
-	official_manifest->submanifests = recurse_manifest(official_manifest, subs, NULL, false, NULL);
+	official_manifest->submanifests = recurse_manifest(version, official_manifest, subs, NULL, false, NULL);
 	if (!official_manifest->submanifests) {
 		fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
 		ret = SWUPD_RECURSE_MANIFEST;

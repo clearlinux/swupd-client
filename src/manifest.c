@@ -396,8 +396,66 @@ void free_manifest(struct manifest *manifest)
 	free(manifest);
 }
 
+static int try_manifest_delta_download(int from, int to, char *component)
+{
+	char *from_manifest = NULL;
+	char *to_manifest = NULL;
+	char *manifest_delta = NULL;
+	char *url = NULL;
+	int ret = 0;
+
+	if (from <= 0 || from > to) {
+		// We don't have deltas for going back
+		return -1;
+	}
+
+	if (strcmp(component, "MoM") == 0) {
+		// We don't do MoM deltas.
+		return -1;
+	}
+
+	if (strcmp(component, "full") == 0) {
+		// We don't do full manifest deltas.
+		return -1;
+	}
+
+	string_or_die(&from_manifest, "%s/%i/Manifest.%s", state_dir, from, component);
+	string_or_die(&to_manifest, "%s/%i/Manifest.%s", state_dir, to, component);
+	string_or_die(&manifest_delta, "%s/Manifest-%s-delta-from-%i-to-%i", state_dir, component, from, to);
+
+	if (!file_exits(manifest_delta)) {
+		string_or_die(&url, "%s/%i/Manifest-%s-delta-from-%i", content_url, to, component, from);
+		ret = swupd_curl_get_file(url, manifest_delta);
+		free_string(&url);
+		if (ret != 0) {
+			unlink(manifest_delta);
+			goto out;
+		}
+	}
+
+	/* Now apply the manifest delta */
+
+	ret = apply_bsdiff_delta(from_manifest, to_manifest, manifest_delta);
+	if (ret != 0) {
+		unlink(to_manifest);
+		goto out;
+	}
+
+	xattrs_copy(to_manifest, from_manifest);
+	if ((ret = xattrs_compare(from_manifest, to_manifest)) != 0) {
+		unlink(to_manifest);
+		goto out;
+	}
+
+out:
+	free_string(&to_manifest);
+	free_string(&from_manifest);
+	free_string(&manifest_delta);
+	return ret;
+}
+
 /* TODO: This should deal with nested manifests better */
-static int retrieve_manifest(int version, char *component, bool is_mix)
+static int retrieve_manifest(int current, int version, char *component, bool is_mix)
 {
 	char *url = NULL;
 	char *filename;
@@ -419,6 +477,11 @@ static int retrieve_manifest(int version, char *component, bool is_mix)
 		goto out;
 	}
 	free_string(&filename);
+
+	if (try_manifest_delta_download(current, version, component) == 0) {
+		ret = 0;
+		goto out;
+	}
 
 	string_or_die(&dir, "%s/%i", state_dir, version);
 	ret = mkdir(dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -530,7 +593,7 @@ struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err)
 	bool invalid_sig = false;
 
 retry_load:
-	ret = retrieve_manifest(version, "MoM", mix_exists);
+	ret = retrieve_manifest(0, version, "MoM", mix_exists);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to retrieve %d MoM manifest\n", version);
 		if (err) {
@@ -620,14 +683,14 @@ retry_load:
  * Note that if the manifest fails to download, or if the manifest fails to be
  * loaded into memory, this function will return NULL.
  */
-struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err)
+struct manifest *load_manifest(int current_version, int version, struct file *file, struct manifest *mom, bool header_only, int *err)
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
 	bool retried = false;
 
 retry_load:
-	ret = retrieve_manifest(version, file->filename, file->is_mix);
+	ret = retrieve_manifest(current_version, version, file->filename, file->is_mix);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to retrieve %d %s manifest\n", version, file->filename);
 		if (err) {
@@ -639,7 +702,6 @@ retry_load:
 	if (!header_only) {
 		ret = verify_bundle_hash(mom, file);
 	}
-
 	if (ret != 0) {
 		if (retried == false) {
 			remove_manifest_files(file->filename, version, file->hash);
@@ -678,7 +740,7 @@ struct manifest *load_manifest_full(int version, bool mix)
 	struct manifest *manifest = NULL;
 	int ret = 0;
 
-	ret = retrieve_manifest(version, "full", mix);
+	ret = retrieve_manifest(0, version, "full", mix);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to retrieve %d Manifest.full\n", version);
 		return NULL;
@@ -897,7 +959,7 @@ void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *su
 
 /* if component is specified explicitly, pull in submanifest only for that
  * if component is not specified, pull in any tracked component submanifest */
-struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server, int *err)
+struct list *recurse_manifest(int current_version, struct manifest *manifest, struct list *subs, const char *component, bool server, int *err)
 {
 	struct list *bundles = NULL;
 	struct list *list;
@@ -918,7 +980,7 @@ struct list *recurse_manifest(struct manifest *manifest, struct list *subs, cons
 			continue;
 		}
 
-		sub = load_manifest(file->last_change, file, manifest, false, err);
+		sub = load_manifest(current_version, file->last_change, file, manifest, false, err);
 		if (!sub) {
 			list_free_list_and_data(bundles, free_manifest_data);
 			return NULL;

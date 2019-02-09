@@ -142,7 +142,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 	return ret;
 }
 
-int add_included_manifests(struct manifest *mom, struct list **subs)
+int add_included_manifests(int current_version, struct manifest *mom, struct list **subs)
 {
 	struct list *subbed = NULL;
 	struct list *iter;
@@ -156,7 +156,7 @@ int add_included_manifests(struct manifest *mom, struct list **subs)
 
 	/* Pass the current version here, not the new, otherwise we will never
 	 * hit the Manifest delta path. */
-	ret = add_subscriptions(subbed, subs, mom, false, 0);
+	ret = add_subscriptions(current_version, subbed, subs, mom, false, 0);
 	if (ret & (add_sub_ERR | add_sub_BADNAME)) {
 		ret = -ret;
 	} else {
@@ -332,7 +332,7 @@ version_check:
 	 * First load up the old (current) manifests. Statedir could have been cleared
 	 * or corrupt, so don't assume things are already there. Updating subscribed
 	 * manifests is done as part of recurse_manifest */
-	current_manifest->submanifests = recurse_manifest(current_manifest, current_subs, NULL, false, &manifest_err);
+	current_manifest->submanifests = recurse_manifest(current_version, current_manifest, current_subs, NULL, false, &manifest_err);
 	if (!current_manifest->submanifests) {
 		ret = SWUPD_RECURSE_MANIFEST;
 		printf("Cannot load current MoM sub-manifests, exiting\n");
@@ -351,7 +351,7 @@ version_check:
 	/* The new subscription is seeded from the list of currently installed bundles
 	 * This calls add_subscriptions which recurses for new includes */
 	timelist_timer_start(global_times, "Add Included Manifests");
-	ret = add_included_manifests(server_manifest, &latest_subs);
+	ret = add_included_manifests(current_version, server_manifest, &latest_subs);
 	timelist_timer_stop(global_times);
 	if (ret) {
 		if (ret == -add_sub_BADNAME) {
@@ -365,7 +365,7 @@ version_check:
 	}
 
 	/* read the new collective of manifests that we are subscribed to in the new MoM */
-	server_manifest->submanifests = recurse_manifest(server_manifest, latest_subs, NULL, false, &manifest_err);
+	server_manifest->submanifests = recurse_manifest(current_version, server_manifest, latest_subs, NULL, false, &manifest_err);
 	if (!server_manifest->submanifests) {
 		ret = SWUPD_RECURSE_MANIFEST;
 		printf("Error: Cannot load server MoM sub-manifests, exiting\n");

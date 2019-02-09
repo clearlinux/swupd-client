@@ -97,7 +97,7 @@ static int load_bundle_manifest(const char *bundle_name, struct list *subs, int 
 		return SWUPD_COULDNT_LOAD_MOM;
 	}
 
-	sub_list = recurse_manifest(mom, subs, bundle_name, false, NULL);
+	sub_list = recurse_manifest(0, mom, subs, bundle_name, false, NULL);
 	if (!sub_list) {
 		ret = SWUPD_RECURSE_MANIFEST;
 		goto free_out;
@@ -218,7 +218,7 @@ enum swupd_code show_included_bundles(char *bundle_name)
 	// add_subscriptions takes a list, so construct one with only bundle_name
 	struct list *bundles = NULL;
 	bundles = list_prepend_data(bundles, bundle_name);
-	ret = add_subscriptions(bundles, &subs, mom, true, 0);
+	ret = add_subscriptions(0, bundles, &subs, mom, true, 0);
 	list_free_list(bundles);
 	if (ret != add_sub_NEW) {
 		// something went wrong or there were no includes, print a message and exit
@@ -238,7 +238,7 @@ enum swupd_code show_included_bundles(char *bundle_name)
 		free_string(&m);
 		goto out;
 	}
-	deps = recurse_manifest(mom, subs, NULL, false, NULL);
+	deps = recurse_manifest(0, mom, subs, NULL, false, NULL);
 	if (!deps) {
 		fprintf(stderr, "Error: Cannot load included bundles\n");
 		ret = SWUPD_RECURSE_MANIFEST;
@@ -322,7 +322,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 	}
 
 	if (server) {
-		ret = add_included_manifests(current_manifest, &subs);
+		ret = add_included_manifests(version, current_manifest, &subs);
 		if (ret) {
 			fprintf(stderr, "Unable to load server manifest");
 			ret = SWUPD_COULDNT_LOAD_MANIFEST;
@@ -341,7 +341,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 	}
 
 	/* load all submanifests */
-	current_manifest->submanifests = recurse_manifest(current_manifest, subs, NULL, server, NULL);
+	current_manifest->submanifests = recurse_manifest(0, current_manifest, subs, NULL, server, NULL);
 	if (!current_manifest->submanifests) {
 		fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
 		ret = SWUPD_RECURSE_MANIFEST;
@@ -575,7 +575,7 @@ enum swupd_code remove_bundles(char **bundles)
 		set_subscription_versions(current_mom, NULL, &subs);
 
 		/* load all submanifests minus the one to be removed */
-		current_mom->submanifests = recurse_manifest(current_mom, subs, NULL, false, NULL);
+		current_mom->submanifests = recurse_manifest(0, current_mom, subs, NULL, false, NULL);
 		if (!current_mom->submanifests) {
 			fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
 			ret = SWUPD_RECURSE_MANIFEST;
@@ -661,7 +661,7 @@ enum swupd_code remove_bundles(char **bundles)
    2 new subscriptions
    4 bad name given
 */
-int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion)
+int add_subscriptions(int current_version, struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion)
 {
 	char *bundle;
 	int manifest_err;
@@ -696,7 +696,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 			continue;
 		}
 
-		manifest = load_manifest(file->last_change, file, mom, true, &manifest_err);
+		manifest = load_manifest(current_version, file->last_change, file, mom, true, &manifest_err);
 		if (!manifest) {
 			fprintf(stderr, "Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
 			ret |= add_sub_ERR;
@@ -704,7 +704,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 		}
 
 		if (manifest->includes) {
-			int r = add_subscriptions(manifest->includes, subs, mom, find_all, recursion + 1);
+			int r = add_subscriptions(current_version, manifest->includes, subs, mom, find_all, recursion + 1);
 			if (r & add_sub_ERR) {
 				free_manifest(manifest);
 				goto out;
@@ -745,7 +745,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 	/* step 1: check bundle args are valid if so populate subs struct */
 	timelist_timer_start(global_times, "Add bundles and recurse");
-	ret = add_subscriptions(bundles, subs, mom, false, 0);
+	ret = add_subscriptions(0, bundles, subs, mom, false, 0);
 
 	/* print a message if any of the requested bundles is already installed */
 	iter = list_head(bundles);
@@ -789,7 +789,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 	set_subscription_versions(mom, NULL, subs);
 
-	to_install_bundles = recurse_manifest(mom, *subs, NULL, false, NULL);
+	to_install_bundles = recurse_manifest(0, mom, *subs, NULL, false, NULL);
 	if (!to_install_bundles) {
 		fprintf(stderr, "Error: Cannot load to install bundles\n");
 		ret = SWUPD_RECURSE_MANIFEST;
@@ -923,7 +923,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 				timelist_timer_start(global_times, "Add tracked bundles");
 				read_subscriptions(subs);
 				set_subscription_versions(mom, NULL, subs);
-				mom->submanifests = recurse_manifest(mom, *subs, NULL, false, NULL);
+				mom->submanifests = recurse_manifest(0, mom, *subs, NULL, false, NULL);
 				if (!mom->submanifests) {
 					fprintf(stderr, "Error: Cannot load installed bundles\n");
 					ret = SWUPD_RECURSE_MANIFEST;
@@ -965,7 +965,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 				timelist_timer_start(global_times, "Add tracked bundles");
 				read_subscriptions(subs);
 				set_subscription_versions(mom, NULL, subs);
-				mom->submanifests = recurse_manifest(mom, *subs, NULL, false, NULL);
+				mom->submanifests = recurse_manifest(0, mom, *subs, NULL, false, NULL);
 				if (!mom->submanifests) {
 					fprintf(stderr, "Error: Cannot load installed bundles\n");
 					ret = SWUPD_RECURSE_MANIFEST;

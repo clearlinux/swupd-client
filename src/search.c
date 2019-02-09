@@ -573,7 +573,7 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 		done_with_bundle = false;
 
 		/* Load sub-manifest */
-		subman = load_manifest(file->last_change, file, MoM, false, NULL);
+		subman = load_manifest(0, file->last_change, file, MoM, false, NULL);
 		if (!subman) {
 			fprintf(stderr, "Failed to load manifest %s\n", file->filename);
 			man_load_failures = true;
@@ -767,7 +767,7 @@ static enum swupd_code download_manifests(struct manifest **MoM)
 
 		if (access(untard_file, F_OK) == -1) {
 			/* Do download */
-			subMan = load_manifest(file->last_change, file, *MoM, false, &manifest_err);
+			subMan = load_manifest(0, file->last_change, file, *MoM, false, &manifest_err);
 			if (!subMan) {
 				fprintf(stderr, "Cannot load %s sub-manifest for version %i\n", file->filename, current_version);
 				count++;

@@ -201,7 +201,7 @@ extern int set_version_url(char *url);
 
 extern void check_root(void);
 
-extern int add_included_manifests(struct manifest *mom, struct list **subs);
+extern int add_included_manifests(int current_version, struct manifest *mom, struct list **subs);
 extern int main_verify(int current_version);
 extern enum swupd_code walk_tree(struct manifest *, const char *, bool, const regex_t *, struct file_counts *);
 
@@ -216,7 +216,7 @@ extern void apply_heuristics(struct file *file);
 extern int file_sort_filename(const void *a, const void *b);
 extern int file_sort_filename_reverse(const void *a, const void *b);
 extern struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err);
-extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err);
+extern struct manifest *load_manifest(int curent_version, int version, struct file *file, struct manifest *mom, bool header_only, int *err);
 extern struct manifest *load_manifest_full(int version, bool mix);
 extern struct list *create_update_list(struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
@@ -306,7 +306,7 @@ extern enum swupd_code compute_hash(struct file *file, char *filename) __attribu
 /* manifest.c */
 /* Calculate the total contentsize of a manifest list */
 extern long get_manifest_list_contentsize(struct list *manifests);
-extern struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server, int *err);
+extern struct list *recurse_manifest(int current_version, struct manifest *manifest, struct list *subs, const char *component, bool server, int *err);
 extern struct list *consolidate_files(struct list *files);
 extern struct list *filter_out_existing_files(struct list *files);
 
@@ -370,7 +370,7 @@ extern enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 extern enum swupd_code show_included_bundles(char *bundle_name);
 extern enum swupd_code list_installable_bundles();
 extern enum swupd_code install_bundles_frontend(char **bundles);
-extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
+extern int add_subscriptions(int current_version, struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
 enum swupd_code list_local_bundles();
 extern int link_or_rename(const char *orig, const char *dest);
 

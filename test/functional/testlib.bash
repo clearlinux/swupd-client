@@ -2607,6 +2607,28 @@ update_bundle() { # swupd_function
 
 }
 
+# Creates a manifest delta file for one bundle
+# is the latest one (from web-dir/formatstaging/latest)
+# Parameters:
+# - BUNDLE_NAME: the name of the bundle to be updated
+# - VERSION: the version of the server side content
+# - FROM_VERSION: the previous version, if nothing is selected defaults to 0
+create_delta_manifest() { # swupd_function
+	local bundle=$1
+	local version=$2
+	local from_version=$3
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    create_delta_manifest <bundle_name> <item> [from_version]
+			EOM
+		return
+	fi
+
+	sudo bsdiff "$WEBDIR/$from_version/Manifest.$bundle" "$WEBDIR/$version/Manifest.$bundle" "$WEBDIR/$version/Manifest-$bundle-delta-from-$from_version"
+}
+
 # Adds the specified file to the zero or delta pack for the bundle
 # Parameters:
 # - BUNDLE: the name of the bundle

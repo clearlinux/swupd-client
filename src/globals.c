@@ -34,7 +34,6 @@
 #include "lib/log.h"
 #include "swupd.h"
 bool allow_mix_collisions = false;
-bool force = false;
 bool migrate = false;
 bool sigcheck = true;
 bool timecheck = true;
@@ -705,7 +704,6 @@ void global_print_help(void)
 	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
 	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version file downloads\n");
 	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	fprintf(stderr, "   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
 	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
 	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");

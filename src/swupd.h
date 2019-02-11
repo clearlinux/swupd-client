@@ -93,7 +93,6 @@ struct header;
 
 extern bool allow_mix_collisions;
 extern bool verbose_time;
-extern bool force;
 extern bool migrate;
 extern bool sigcheck;
 extern bool timecheck;

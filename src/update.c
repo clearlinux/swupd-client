@@ -211,7 +211,7 @@ static enum swupd_code check_versions(int *current_version, int *server_version,
 		return SWUPD_INVALID_OPTION;
 	}
 	if (requested_version != -1) {
-		if (requested_version <= *current_version) {
+		if (requested_version < *current_version) {
 			fprintf(stderr, "Requested version for update (%d) must be greater than current version (%d)\n",
 				requested_version, *current_version);
 			return SWUPD_INVALID_OPTION;
@@ -313,7 +313,12 @@ version_check:
 	}
 
 	if (server_version <= current_version) {
-		fprintf(stderr, "Version on server (%i) is not newer than system version (%i)\n", server_version, current_version);
+		if (requested_version == server_version) {
+			fprintf(stderr, "Requested version (%i)", requested_version);
+		} else {
+			fprintf(stderr, "Version on server (%i)", server_version);
+		}
+		fprintf(stderr, " is not newer than system version (%i)\n", current_version);
 		ret = SWUPD_OK;
 		goto clean_curl;
 	}

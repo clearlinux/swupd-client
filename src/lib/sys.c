@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/statvfs.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -204,4 +205,15 @@ struct list *get_dir_files_sorted(char *path)
 	(void)closedir(dir);
 
 	return list_sort(files, lex_sort);
+}
+
+bool file_exits(const char *filename)
+{
+	struct stat sb;
+
+	if (stat(filename, &sb) == 0) {
+		return true;
+	}
+
+	return false;
 }

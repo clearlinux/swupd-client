@@ -92,13 +92,6 @@ used to modify the core behavior and resources that swupd uses.
    not supported by your version of ``swupd``, you should subtract ``1``
    from the number and try again until it succeeds.
 
--  ``-f, --force``
-
-   Forces completion of swupd beyond critical failures. This may ignore
-   filesystem errors, configuration errors and other errors which are
-   considered fatal, and could damage an installation if not addressed
-   properly.
-
 -  ``-S, --statedir={path}``
 
    Specify an alternate swupd state directory. Normally ``swupd`` uses

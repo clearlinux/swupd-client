@@ -39,6 +39,7 @@
 
 static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src";
 
+static bool cmdline_option_force = false;
 static bool cmdline_option_fix = false;
 static bool cmdline_option_picky = false;
 static const char *cmdline_option_picky_tree = "/usr";
@@ -80,6 +81,7 @@ static void print_help(void)
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "   -m, --manifest=M        Verify against manifest version M\n");
 	fprintf(stderr, "   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files)\n");
+	fprintf(stderr, "   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	fprintf(stderr, "   -Y, --picky             List (without --fix) or remove (with --fix) files which should not exist\n");
 	fprintf(stderr, "   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
 	fprintf(stderr, "   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
@@ -518,7 +520,7 @@ static bool parse_opt(int opt, char *optarg)
 		cmdline_option_fix = true;
 		return true;
 	case 'x':
-		force = true;
+		cmdline_option_force = true;
 		return true;
 	case 'i':
 		cmdline_option_install = true;
@@ -703,7 +705,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	}
 
 	if (!is_compatible_format(official_manifest->manifest_version)) {
-		if (force) {
+		if (cmdline_option_force) {
 			fprintf(stderr, "WARNING: the force option is specified; ignoring"
 					" format mismatch for verify\n");
 		} else {
@@ -724,7 +726,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	 * fixing to a different version, print an error message that they need to
 	 * specify --force or --picky. */
 	if (cmdline_option_fix && !is_current_version(version)) {
-		if (cmdline_option_picky || force) {
+		if (cmdline_option_picky || cmdline_option_force) {
 			fprintf(stderr, "WARNING: the force or picky option is specified; "
 					"ignoring version mismatch for verify --fix\n");
 		} else {
@@ -740,7 +742,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	 * continue only if --force was used since the bundles could be removed */
 	if (ret) {
 		if (ret == -add_sub_BADNAME) {
-			if (force) {
+			if (cmdline_option_force) {
 				if (cmdline_option_picky && cmdline_option_fix) {
 					fprintf(stderr, "WARNING: One or more installed bundles that are not "
 							"available at version %d will be removed.\n",

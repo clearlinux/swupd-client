@@ -198,6 +198,32 @@ static bool need_new_upstream(int server)
 	return false;
 }
 
+static enum swupd_code check_versions(int *current_version, int *server_version, int requested_version, char *path_prefix)
+{
+	int ret;
+
+	ret = read_versions(current_version, server_version, path_prefix);
+	if (ret != SWUPD_OK) {
+		return ret;
+	}
+	if (*current_version == 0) {
+		fprintf(stderr, "Update from version 0 not supported yet.\n");
+		return SWUPD_INVALID_OPTION;
+	}
+	if (requested_version != -1) {
+		if (requested_version <= *current_version) {
+			fprintf(stderr, "Requested version for update (%d) must be greater than current version (%d)\n",
+				requested_version, *current_version);
+			return SWUPD_INVALID_OPTION;
+		}
+		if (requested_version < *server_version) {
+			*server_version = requested_version;
+		}
+	}
+
+	return SWUPD_OK;
+}
+
 static enum swupd_code main_update()
 {
 	int current_version = -1, server_version = -1;

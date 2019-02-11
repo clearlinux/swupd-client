@@ -1,6 +1,8 @@
 #ifndef __SWUPD_SYS__
 #define __SWUPD_SYS__
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,6 +49,11 @@ int rm_rf(const char *file);
 
 /* Return a list of all files in a directory, sorted lexicographically */
 struct list *get_dir_files_sorted(char *path);
+
+/*
+ * Checks if a file exists in the filesystem.
+ */
+bool file_exits(const char *filename);
 
 #ifdef __cplusplus
 }

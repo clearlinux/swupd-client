@@ -18,9 +18,11 @@
  */
 #include "verifytime.h"
 
+#include <stdlib.h>
+
 int main()
 {
-	if (verify_time()) {
+	if (verify_time(NULL)) {
 		return 0; // Success
 	}
 

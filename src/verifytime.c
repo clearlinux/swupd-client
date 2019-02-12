@@ -19,6 +19,7 @@
  *         Tudor Marcu <tudor.marcu@intel.com>
  *
  */
+#define _GNU_SOURCE
 #include "verifytime.h"
 
 #include <errno.h>
@@ -30,12 +31,17 @@
 
 #define DAY_SECONDS 86400
 
-static unsigned long int get_versionstamp(void)
+static unsigned long int get_versionstamp(char *path_prefix)
 {
 	FILE *fp = NULL;
 	char data[11];
-	const char *filename = "/usr/share/clear/versionstamp";
+	char *filename;
 	unsigned long int version_num;
+
+	if (asprintf(&filename, "%s/usr/share/clear/versionstamp", path_prefix ? path_prefix : "") < 0) {
+		fprintf(stderr, "Failed to get the versionstamp\n");
+		return 0;
+	}
 
 	errno = 0;
 	fp = fopen(filename, "r");
@@ -45,24 +51,26 @@ static unsigned long int get_versionstamp(void)
 		} else {
 			fprintf(stderr, "Failed to open %s\n", filename);
 		}
-		return 0;
+		version_num = 0;
+		goto exit;
 	}
 
 	if (fgets(data, 11, fp) == NULL) {
 		fprintf(stderr, "Failed to read %s\n", filename);
-		fclose(fp);
-		return 0;
+		version_num = 0;
+		goto close_and_exit;
 	}
 
 	/* If we read a 0 the versionstamp is wrong/corrupt */
 	errno = 0;
 	version_num = strtoul(data, NULL, 10);
-	if (version_num == 0 || errno != 0) {
-		fclose(fp);
-		return 0;
+	if (errno != 0) {
+		version_num = 0;
 	}
-
+close_and_exit:
 	fclose(fp);
+exit:
+	free(filename);
 	return version_num;
 }
 
@@ -76,7 +84,7 @@ static bool set_time(time_t mtime)
 	return true;
 }
 
-bool verify_time()
+bool verify_time(char *path_prefix)
 {
 	time_t currtime;
 	struct tm *timeinfo;
@@ -85,7 +93,7 @@ bool verify_time()
 	time(&currtime);
 	timeinfo = localtime(&currtime);
 
-	versionstamp = get_versionstamp();
+	versionstamp = get_versionstamp(path_prefix);
 	if (versionstamp == 0) {
 		return false;
 	}

@@ -370,6 +370,7 @@ bool set_path_prefix(char *path)
 		if (!realpath(tmp, real_path)) {
 			fprintf(stderr, "Bad path_prefix %s (%s), cannot continue.\n",
 				path_prefix, strerror(errno));
+			free_string(&tmp);
 			return false;
 		}
 		free_string(&tmp);

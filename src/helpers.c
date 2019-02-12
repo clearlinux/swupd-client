@@ -538,9 +538,14 @@ enum swupd_code swupd_init(void)
 	/* Check that our system time is reasonably valid before continuing,
 	 * or the certificate verification will fail with invalid time */
 	if (timecheck) {
-		if (!verify_time()) {
-			ret = SWUPD_BAD_TIME;
-			goto out_fds;
+		if (!verify_time(path_prefix)) {
+			/* in the case we are doing an installation to an empty directory
+			 * using swupd verify --install, we won't have a valid versionstamp
+			 * in path_prefix, so try searching without the path_prefix */
+			if (!verify_time(NULL)) {
+				ret = SWUPD_BAD_TIME;
+				goto out_fds;
+			}
 		}
 	}
 

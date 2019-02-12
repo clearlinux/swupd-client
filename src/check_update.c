@@ -51,7 +51,7 @@ static enum swupd_code check_update()
 	/* Check that our system time is reasonably valid before continuing,
 	* or the certificate verification will fail with invalid time */
 	if (timecheck) {
-		if (!verify_time()) {
+		if (!verify_time(path_prefix)) {
 			return SWUPD_BAD_TIME;
 		}
 	}

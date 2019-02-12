@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 /* verifytime.c */
-bool verify_time();
+bool verify_time(char *);
 
 #ifdef __cplusplus
 }

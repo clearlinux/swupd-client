@@ -165,10 +165,10 @@ static void reevaluate_number_of_parallel_downloads(struct swupd_curl_parallel_h
 	}
 
 	h->last_retry = retry;
-	h->max_xfer = h->max_xfer / 3;
-	if (h->max_xfer == 0) {
-		h->max_xfer = 1;
-	}
+
+	// It's not expected to have any retry if the connection is good
+	// So stop downloading in parallel if the connection is bad
+	h->max_xfer = 1;
 
 	print("Curl: Reducing number of parallel downloads to %ld\n", h->max_xfer);
 }

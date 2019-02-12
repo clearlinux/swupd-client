@@ -505,8 +505,8 @@ clean_curl:
 		  total_curl_sz);
 
 	if (server_version > current_version) {
-		printf("Update took %0.1f seconds, %ld bytes transferred\n", delta,
-		       total_curl_sz);
+		printf("Update took %0.1f seconds, %ld MB transferred\n", delta,
+		       total_curl_sz / 1000 / 1000);
 	}
 	timelist_print_stats(global_times);
 

@@ -170,7 +170,7 @@ static void reevaluate_number_of_parallel_downloads(struct swupd_curl_parallel_h
 		h->max_xfer = 1;
 	}
 
-	print("Curl: Reducing number of parallel downloads to %ld\n", h->max_xfer);
+	print("Curl - Reducing number of parallel downloads to %ld\n", h->max_xfer);
 }
 
 void *swupd_curl_parallel_download_start(size_t max_xfer)
@@ -254,7 +254,7 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 		 * completing the download encounters further problems. */
 		curl_ret = swupd_download_file_close(msg->data.result, &file->file);
 		file->status = process_curl_error_codes(curl_ret, handle);
-		debug("Curl: Complete ASYNC download: %s -> %s, status=%d\n", file->url, file->file.path, file->status);
+		debug("Curl - Complete ASYNC download: %s -> %s, status=%d\n", file->url, file->file.path, file->status);
 		if (file->status == DOWNLOAD_STATUS_COMPLETED) {
 			/* Wrap the success callback and schedule execution
 			 * Results from the callback will be stored in multi_curl_file's cb_retval
@@ -416,7 +416,7 @@ static int process_download(struct swupd_curl_parallel_handle *h, struct multi_c
 	file->curl = curl;
 
 	if (file->retries > 0 && !h->resume_failed && lstat(file->file.path, &stat) == 0) {
-		print("Curl: Resuming download for '%s'\n", file->url);
+		print("Curl - Resuming download for '%s'\n", file->url);
 		curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
 		if (curl_ret != CURLE_OK) {
 			goto out_bad;
@@ -444,7 +444,7 @@ static int process_download(struct swupd_curl_parallel_handle *h, struct multi_c
 		goto out_bad;
 	}
 
-	debug("Curl: Start ASYNC download: %s -> %s\n", file->url, file->file.path);
+	debug("Curl - Start ASYNC download: %s -> %s\n", file->url, file->file.path);
 	curlm_ret = curl_multi_add_handle(h->mcurl, curl);
 	if (curlm_ret != CURLM_OK) {
 		goto out_bad;
@@ -550,7 +550,7 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 				// Retry was probably scheduled because of network problems, so
 				// reevaluate the number of parallel downloads
 				reevaluate_number_of_parallel_downloads(h, file->retries);
-				print("Curl: Starting download retry #%d for %s\n", file->retries, file->url);
+				print("Curl - Starting download retry #%d for %s\n", file->retries, file->url);
 				process_download(h, file);
 				retry = true;
 				continue;

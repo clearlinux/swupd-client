@@ -391,7 +391,7 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 				response = -1; // Force error
 			}
 		}
-		debug("Curl: process_curl_error_codes: curl_ret = %d, response = %d\n", curl_ret, response);
+		debug("Curl - process_curl_error_codes: curl_ret = %d, response = %d\n", curl_ret, response);
 		/* curl command succeeded, download might've failed, let our caller handle */
 		switch (response) {
 		case 206:
@@ -401,17 +401,17 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 		case 0:
 			return DOWNLOAD_STATUS_COMPLETED;
 		case 403:
-			debug("Curl: Download failed - forbidden (403) - '%s'\n", url);
+			debug("Curl - Download failed - forbidden (403) - '%s'\n", url);
 			return DOWNLOAD_STATUS_FORBIDDEN;
 		case 404:
-			debug("Curl: Download failed - file not found (404) - '%s'\n", url);
+			debug("Curl - Download failed - file not found (404) - '%s'\n", url);
 			return DOWNLOAD_STATUS_NOT_FOUND;
 		default:
 			error("Curl - Download failed: response (%ld) -  '%s'\n", response, url);
 			return DOWNLOAD_STATUS_ERROR;
 		}
 	} else { /* download failed but let our caller do it */
-		debug("Curl: process_curl_error_codes - curl_ret = %d\n", curl_ret);
+		debug("Curl - process_curl_error_codes - curl_ret = %d\n", curl_ret);
 		switch (curl_ret) {
 		case CURLE_COULDNT_RESOLVE_PROXY:
 			error("Curl - Could not resolve proxy\n");
@@ -484,7 +484,7 @@ restart_download:
 		local.path = filename;
 
 		if (resume_ok && resume_download_supported && lstat(filename, &stat) == 0) {
-			print("Curl: Resuming download for '%s'\n", url);
+			print("Curl - Resuming download for '%s'\n", url);
 			curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
 			if (curl_ret != CURLE_OK) {
 				goto exit;
@@ -523,7 +523,7 @@ restart_download:
 		goto exit;
 	}
 
-	debug("Curl: Start sync download: %s -> %s\n", url, in_memory_file ? "<memory>" : filename);
+	debug("Curl - Start sync download: %s -> %s\n", url, in_memory_file ? "<memory>" : filename);
 	curl_ret = curl_easy_perform(curl);
 
 exit:
@@ -532,7 +532,7 @@ exit:
 	}
 
 	status = process_curl_error_codes(curl_ret, curl);
-	debug("Curl: Complete sync download: %s -> %s, status=%d\n", url, in_memory_file ? "<memory>" : filename, status);
+	debug("Curl - Complete sync download: %s -> %s, status=%d\n", url, in_memory_file ? "<memory>" : filename, status);
 	if (status == DOWNLOAD_STATUS_RANGE_ERROR) {
 		// Reset variable
 		memset(&local, 0, sizeof(local));

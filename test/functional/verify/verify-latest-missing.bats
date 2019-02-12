@@ -6,7 +6,7 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	# remove the formatstaging/latest
-	sudo rm -rf "$WEBDIR"
+	sudo rm -rf "$WEBDIR/version/formatstaging/latest"
 
 }
 
@@ -24,8 +24,8 @@ test_teardown() {
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --install --manifest=latest"
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
-		Error: Curl - Download error - \\(37\\) Couldn.t read a file:// file
-		Failed verify initialization, exiting now.
+		Unable to get latest version for install
+		Error: Fix did not fully succeed
 	EOM
 	)
 	assert_regex_in_output "$expected_output"

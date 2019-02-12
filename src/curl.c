@@ -126,7 +126,9 @@ exit:
 static int check_connection(const char *test_capath)
 {
 	CURLcode curl_ret;
+	long response = 0;
 
+	debug("Curl - check_connection url: %s\n", version_url);
 	curl_ret = swupd_curl_set_basic_options(curl, version_url);
 	if (curl_ret != CURLE_OK) {
 		return -1;
@@ -150,16 +152,23 @@ static int check_connection(const char *test_capath)
 	case CURLE_OK:
 		return 0;
 	case CURLE_SSL_CACERT:
-		warn("Curl - Unable to verify server SSL certificate\n");
+		debug("Curl - Unable to verify server SSL certificate\n");
 		return -SWUPD_BAD_CERT;
 	case CURLE_SSL_CERTPROBLEM:
-		warn("Curl - Problem with the local client SSL certificate\n");
+		debug("Curl - Problem with the local client SSL certificate\n");
 		return -SWUPD_BAD_CERT;
 	case CURLE_OPERATION_TIMEDOUT:
+		debug("Curl - Timed out\n");
 		return -CURLE_OPERATION_TIMEDOUT;
+	case CURLE_HTTP_RETURNED_ERROR:
+		if (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response) != CURLE_OK) {
+			response = 0;
+		}
+		debug("Curl - process_curl_error_codes: curl_ret = %d, response = %d\n", curl_ret, response);
+		return -1;
 	default:
-		swupd_curl_strerror(curl_ret);
-		/* something bad, stop */
+		debug("Curl - Download error - (%d) %s\n", curl_ret,
+		      curl_easy_strerror(curl_ret));
 		return -1;
 	}
 }
@@ -209,7 +218,7 @@ int swupd_curl_init(void)
 				continue;
 			}
 
-			warn("Curl - Trying fallback CA path %s\n", tok);
+			debug("Curl - Trying fallback CA path %s\n", tok);
 			ret = check_connection(tok);
 			if (ret == 0) {
 				capath = strdup_or_die(tok);
@@ -217,6 +226,11 @@ int swupd_curl_init(void)
 			}
 		}
 		free_string(&str);
+	}
+
+	if (ret != 0) {
+		error("Failed to connect to server using local SSL ceritificates\n");
+		info("Try to run 'clrtrust generate' to regenerate SSL certificates\n");
 	}
 
 	return ret;

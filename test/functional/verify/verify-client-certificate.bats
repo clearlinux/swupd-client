@@ -78,14 +78,14 @@ global_teardown() {
 	# remove client certificate
 	sudo rm "$CLIENT_CERT"
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --debug"
 	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 
 	expected_output=$(cat <<-EOM
-			Warning: Curl - Unable to verify server SSL certificate
+			.*Curl - Unable to verify server SSL certificate
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_regex_in_output "$expected_output"
 }
 
 @test "VER015: Try verifying installed content on a system over HTTPS with an invalid client certificate" {
@@ -93,12 +93,12 @@ global_teardown() {
 	# make client certificate invalid
 	sudo sh -c "echo foo > $CLIENT_CERT"
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --debug"
 	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 
 	expected_output=$(cat <<-EOM
-			Warning: Curl - Problem with the local client SSL certificate
+			.*Curl - Problem with the local client SSL certificate
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_regex_in_output "$expected_output"
 }

@@ -537,7 +537,7 @@ static void set_untracked_manifest_files(struct manifest *manifest)
 {
 	struct list *files;
 
-	if (!manifest || is_tracked_bundle(manifest->component)) {
+	if (!manifest || is_installed_bundle(manifest->component)) {
 		return;
 	}
 

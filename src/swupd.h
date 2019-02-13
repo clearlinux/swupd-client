@@ -364,7 +364,7 @@ struct list *free_bundle(struct list *item);
 extern void create_and_append_subscription(struct list **subs, const char *component);
 
 /* bundle.c */
-extern bool is_tracked_bundle(const char *bundle_name);
+extern bool is_installed_bundle(const char *bundle_name);
 extern enum swupd_code remove_bundles(char **bundles);
 extern enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server);
 extern enum swupd_code show_included_bundles(char *bundle_name);

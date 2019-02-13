@@ -113,10 +113,10 @@ free_out:
 	return ret;
 }
 
-/* Finds out whether bundle_name is tracked bundle on
+/* Finds out whether bundle_name is installed bundle on
 *  current system.
 */
-bool is_tracked_bundle(const char *bundle_name)
+bool is_installed_bundle(const char *bundle_name)
 {
 	struct stat statb;
 	char *filename = NULL;
@@ -294,7 +294,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 	struct list *subs = NULL;
 	struct list *reqd_by = NULL;
 
-	if (!server && !is_tracked_bundle(bundle_name)) {
+	if (!server && !is_installed_bundle(bundle_name)) {
 		fprintf(stderr, "Error: Bundle \"%s\" does not seem to be installed\n", bundle_name);
 		fprintf(stderr, "       try passing --all to check uninstalled bundles\n");
 		ret = SWUPD_BUNDLE_NOT_TRACKED;
@@ -537,7 +537,7 @@ enum swupd_code remove_bundles(char **bundles)
 			goto out_free_curl;
 		}
 
-		if (!is_tracked_bundle(bundle)) {
+		if (!is_installed_bundle(bundle)) {
 			fprintf(stderr, "Warning: Bundle \"%s\" is not installed, skipping it...\n", bundle);
 			ret = SWUPD_BUNDLE_NOT_TRACKED;
 			bad++;
@@ -717,7 +717,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 		}
 		free_manifest(manifest);
 
-		if (!find_all && is_tracked_bundle(bundle)) {
+		if (!find_all && is_installed_bundle(bundle)) {
 			continue;
 		}
 
@@ -757,10 +757,10 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		char *bundle;
 		bundle = iter->data;
 		iter = iter->next;
-		if (is_tracked_bundle(bundle)) {
+		if (is_installed_bundle(bundle)) {
 			fprintf(stderr, "Warning: Bundle \"%s\" is already installed, skipping it...\n", bundle);
 			already_installed++;
-			/* track as installed since they tried to install it */
+			/* track as installed since the user tried to install */
 			track_installed(bundle);
 		}
 		/* warn the user if the bundle to be installed is experimental */

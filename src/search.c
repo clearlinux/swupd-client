@@ -88,8 +88,8 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 		ON_NULL_ABORT(bundle);
 		results = list_append_data(results, bundle);
 		strncpy(bundle->bundle_name, bundlename, BUNDLE_NAME_MAXLEN - 1);
-		/* record if the bundle is tracked on the system */
-		bundle->is_tracked = is_tracked_bundle(bundlename);
+		/* record if the bundle is installed on the system */
+		bundle->is_tracked = is_installed_bundle(bundlename);
 		bundle->is_experimental = is_experimental;
 	}
 
@@ -216,7 +216,7 @@ static long calculate_size(char *bname, struct list *bundle_info, bool installed
 		 *
 		 * Otherwise only add the contentsize of bundles not already
 		 * installed on the system. */
-		if (installed || !is_tracked_bundle(bname)) {
+		if (installed || !is_installed_bundle(bname)) {
 			size += bi->topsize;
 			bi->seen = true;
 		}

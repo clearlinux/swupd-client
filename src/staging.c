@@ -72,7 +72,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	char *targetpath = NULL;
 	char *rename_target = NULL;
 	char *rename_tmpdir = NULL;
-	char real_path[4096] = {0};
+	char real_path[4096] = { 0 };
 	int ret;
 	struct stat s;
 
@@ -106,7 +106,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	if (!realpath(targetpath, real_path)) {
 		ret = -1;
 		goto out;
-	} else if (strcmp(path_prefix, targetpath) !=0 &&
+	} else if (strcmp(path_prefix, targetpath) != 0 &&
 		   strcmp(targetpath, real_path) != 0) {
 		/*
 		 * targetpath and real_path should always be equal but

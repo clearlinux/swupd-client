@@ -344,7 +344,7 @@ bool set_path_prefix(char *path)
 	if (path != NULL) {
 		int len;
 		char *tmp;
-		char real_path[PATH_MAX] = {0};
+		char real_path[PATH_MAX] = { 0 };
 
 		/* in case multiple -p options are passed */
 		free_string(&path_prefix);

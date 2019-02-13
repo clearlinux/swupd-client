@@ -229,8 +229,11 @@ int swupd_curl_init(void)
 	}
 
 	if (ret != 0) {
-		error("Failed to connect to server using local SSL ceritificates\n");
-		info("Try to run 'clrtrust generate' to regenerate SSL certificates\n");
+		error("Failed to connect to update server: %s\n", version_url);
+		info("Possible solutions for this problem are:\n"
+		     "\tFix the system clock\n"
+		     "\tRun 'swupd info' to check if the urls are correct\n"
+		     "\tRun  'clrtrust generate' to regenerate SSL certificates\n");
 	}
 
 	return ret;

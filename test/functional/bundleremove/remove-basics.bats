@@ -5,8 +5,8 @@ load "../testlib"
 global_setup() {
 
 	create_test_environment "$TEST_NAME"
-	create_bundle -L -n test-bundle1 -d /foo -f /test-file1,/bar/test-file2,/bat/test-file3,/bat/common "$TEST_NAME"
-	create_bundle -L -n test-bundle2 -f /bat/test-file4,/bat/common "$TEST_NAME"
+	create_bundle -L -t -n test-bundle1 -d /foo -f /test-file1,/bar/test-file2,/bat/test-file3,/bat/common "$TEST_NAME"
+	create_bundle -L -t -n test-bundle2 -f /bat/test-file4,/bat/common "$TEST_NAME"
 	create_bundle -n test-bundle3 -f /baz/test-file5 "$TEST_NAME"
 
 }
@@ -48,10 +48,12 @@ global_teardown() {
 	assert_file_not_exists "$TARGETDIR"/bat/test-file3
 	assert_dir_not_exists "$TARGETDIR"/foo
 	assert_dir_not_exists "$TARGETDIR"/bar
+	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
 	# bundle2 was not removed
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TARGETDIR"/bat/test-file4
 	assert_file_exists "$TARGETDIR"/bat/common
+	assert_file_exists "$STATEDIR"/bundles/test-bundle2
 	expected_output=$(cat <<-EOM
 		Deleting bundle files...
 		Total deleted files: 6
@@ -78,6 +80,8 @@ global_teardown() {
 	assert_dir_not_exists "$TARGETDIR"/foo
 	assert_dir_not_exists "$TARGETDIR"/bar
 	assert_dir_not_exists "$TARGETDIR"/bat
+	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
+	assert_file_not_exists "$STATEDIR"/bundles/test-bundle2
 	expected_output=$(cat <<-EOM
 		Removing bundle: test-bundle1
 		Deleting bundle files...

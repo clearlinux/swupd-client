@@ -119,7 +119,6 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		goto out;
 	}
 
-	free_string(&targetpath);
 	string_or_die(&target, "%s%s/.update.%s", path_prefix, rel_dir, base);
 	ret = swupd_rm(target);
 	if (ret < 0 && ret != -ENOENT) {
@@ -240,6 +239,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 
 out:
 	free_string(&target);
+	free_string(&targetpath);
 	free_string(&original);
 	free_string(&rename_target);
 	free_string(&rename_tmpdir);

@@ -435,31 +435,45 @@ static void track_installed(const char *bundle_name)
 	 * user installed themselves just copy the entire system tracking directory
 	 * into the state tracking directory. */
 	if (!is_populated_dir(dst)) {
-		ret = mkdir(dst, S_IRWXU);
+		char *rmfile;
+		ret = rm_rf(dst);
 		if (ret) {
 			goto out;
 		}
-		src = mk_full_filename(path_prefix, "/usr/share/clear/bundles/*");
+		src = mk_full_filename(path_prefix, "/usr/share/clear/bundles");
 		/* at the point this function is called <bundle_name> is already
 		 * installed on the system and therefore has a tracking file under
 		 * /usr/share/clear/bundles. A simple cp -a of that directory will
 		 * accurately track that bundle as manually installed. */
-		ret = copy_all(src, dst);
+		ret = copy_all(src, state_dir);
 		free_string(&src);
+		if (ret) {
+			goto out;
+		}
+		/* remove uglies that live in the system tracking directory */
+		rmfile = mk_full_filename(dst, ".MoM");
+		(void)unlink(rmfile);
+		free_string(&rmfile);
+		/* set perms on the directory correctly */
+		ret = chmod(dst, S_IRWXU);
 		if (ret) {
 			goto out;
 		}
 	}
 
 	char *tracking_file = mk_full_filename(dst, bundle_name);
-	int fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH);
+	int fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 	free_string(&tracking_file);
 	if (fd < 0) {
+		ret = -1;
 		goto out;
 	}
 	close(fd);
 
 out:
+	if (ret) {
+		debug("Issue creating tracking file in %s for %s\n", dst, bundle_name);
+	}
 	free_string(&dst);
 }
 

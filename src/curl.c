@@ -233,7 +233,7 @@ int swupd_curl_init(void)
 		info("Possible solutions for this problem are:\n"
 		     "\tFix the system clock\n"
 		     "\tRun 'swupd info' to check if the urls are correct\n"
-		     "\tRun  'clrtrust generate' to regenerate SSL certificates\n");
+		     "\tCheck if the server SSL certificate is trusted by your system ('clrtrust generate' may help)\n");
 	}
 
 	return ret;

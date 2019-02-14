@@ -28,6 +28,7 @@ swupd_SOURCES = \
 	src/alias.h \
 	src/archives.c \
 	src/autoupdate.c \
+	src/binary_loader.c \
 	src/bundle.c \
 	src/check_update.c \
 	src/clean.c \
@@ -50,6 +51,8 @@ swupd_SOURCES = \
 	src/lib/hashmap.h \
 	src/lib/list.c \
 	src/lib/list.h \
+	src/lib/log.c \
+	src/lib/log.h \
 	src/lib/macros.h \
 	src/lib/strings.c \
 	src/lib/strings.h \
@@ -58,8 +61,6 @@ swupd_SOURCES = \
 	src/lib/thread_pool.c \
 	src/lib/thread_pool.h \
 	src/lock.c \
-	src/lib/log.c \
-	src/lib/log.h \
 	src/main.c \
 	src/manifest.c \
 	src/mirror.c \
@@ -71,13 +72,13 @@ swupd_SOURCES = \
 	src/staging.c \
 	src/stats.c \
 	src/subscriptions.c \
+	src/swupd.h \
 	src/swupd_build_opts.h \
 	src/swupd_build_variant.h \
-	src/swupd_curl_internal.h \
 	src/swupd_curl.h \
+	src/swupd_curl_internal.h \
 	src/swupd_exit_codes.h \
 	src/swupd_internal.h \
-	src/swupd.h \
 	src/telemetry.c \
 	src/timelist.c \
 	src/timelist.h \
@@ -229,6 +230,7 @@ BATS = \
 	test/functional/update/update-with-slightly-old-mirror.bats \
 	test/functional/usability/usa-completion-basic.bats \
 	test/functional/usability/usa-download-retries.bats \
+	test/functional/usability/usa-external-modules.bats \
 	test/functional/verify/verify-add-missing-include.bats \
 	test/functional/verify/verify-add-missing-include-old.bats \
 	test/functional/verify/verify-boot-file.bats \

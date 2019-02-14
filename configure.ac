@@ -174,6 +174,17 @@ AS_IF(
   [AC_DEFINE(OS_IS_STATELESS, 1, [OS is stateless])]
 )
 
+external_modules="yes"
+AC_ARG_ENABLE(
+  [external-modules],
+  [AS_HELP_STRING([--disable-external-modules], [Disable external modules (enabled by default)])],
+  external_modules="$enableval"
+)
+AS_IF(
+  [test -n "$external_modules" -a x"$external_modules" = "xyes"],
+  [AC_DEFINE(EXTERNAL_MODULES_SUPPORT, 1, [external modules are supported])]
+)
+
 
 # With/without options
 AC_ARG_WITH(
@@ -360,4 +371,5 @@ Configuration to build swupd-client:
   Run Tests:				${TESTS}
   Use extended file attributes		${XATTR}
   Use --selinux option for tar		${TARSELINUX}
+  External modules support		${external_modules}
 ])

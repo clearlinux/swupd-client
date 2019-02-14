@@ -47,6 +47,9 @@ static struct subcmd commands[] = {
 	{ "info", "Show the version and the update URLs", info_main },
 	{ "clean", "Clean cached files", clean_main },
 	{ "mirror", "Configure mirror url for swupd content", mirror_main },
+#ifdef EXTERNAL_MODULES_SUPPORT
+	{ "inspector", "Inspect swupd manifests for debugging purposes", binary_loader_main },
+#endif
 	{ 0 }
 };
 

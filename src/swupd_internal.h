@@ -13,5 +13,6 @@ extern enum swupd_code search_main(int argc, char **argv);
 extern enum swupd_code info_main(int argc, char **argv);
 extern enum swupd_code clean_main(int argc, char **argv);
 extern enum swupd_code mirror_main(int argc, char **argv);
+extern enum swupd_code binary_loader_main(int argc, char **argv);
 
 #endif

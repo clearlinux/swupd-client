@@ -55,6 +55,11 @@ struct list *get_dir_files_sorted(char *path);
  */
 bool file_exits(const char *filename);
 
+/*
+ * Checks if a file exists in the filesystem and is executable.
+ */
+bool file_is_executable(const char *filename);
+
 #ifdef __cplusplus
 }
 #endif

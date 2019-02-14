@@ -217,3 +217,14 @@ bool file_exits(const char *filename)
 
 	return false;
 }
+
+bool file_is_executable(const char *filename)
+{
+	struct stat sb;
+
+	if (stat(filename, &sb) == 0 && (sb.st_mode & S_IXUSR)) {
+		return true;
+	}
+
+	return false;
+}

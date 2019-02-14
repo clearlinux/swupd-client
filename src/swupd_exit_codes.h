@@ -45,7 +45,8 @@ enum swupd_code {
 	SWUPD_COULDNT_WRITE_FILE,	    /* 32 couldn't write to a file */
 	SWUPD_MIX_COLLISIONS,		     /* 33 collisions were found between mix and upstream */
 	SWUPD_OUT_OF_MEMORY_ERROR,	   /* 34 swupd ran out of memory */
-	SWUPD_VERIFY_FAILED		     /* 35 verify could not fix/replace/delete one or more files */
+	SWUPD_VERIFY_FAILED,		     /* 35 verify could not fix/replace/delete one or more files */
+	SWUPD_INVALID_BINARY,		     /* 36 binary to be executed is missing or invalid */
 
 };
 

@@ -437,6 +437,7 @@ The non-zero return codes for other operations are listed here:
   - **33**: Collisions found between a mix and upstream
   - **34**: swupd ran out of memory
   - **35**: Unable to fix/replace/delete one or more files
+  - **36**: Unable to execute binary, is either missing or invalid
 
 
 SEE ALSO

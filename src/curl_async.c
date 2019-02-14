@@ -439,7 +439,7 @@ static int process_download(struct swupd_curl_parallel_handle *h, struct multi_c
 		goto out_bad;
 	}
 
-	curl_ret = swupd_curl_set_basic_options(curl, file->url);
+	curl_ret = swupd_curl_set_basic_options(curl, file->url, true);
 	if (curl_ret != CURLE_OK) {
 		goto out_bad;
 	}

@@ -129,7 +129,7 @@ static int check_connection(const char *test_capath)
 	long response = 0;
 
 	debug("Curl - check_connection url: %s\n", version_url);
-	curl_ret = swupd_curl_set_basic_options(curl, version_url);
+	curl_ret = swupd_curl_set_basic_options(curl, version_url, false);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
@@ -522,7 +522,7 @@ restart_download:
 		}
 	}
 
-	curl_ret = swupd_curl_set_basic_options(curl, url);
+	curl_ret = swupd_curl_set_basic_options(curl, url, true);
 	if (curl_ret != CURLE_OK) {
 		goto exit;
 	}
@@ -704,7 +704,7 @@ exit:
 	return curl_ret;
 }
 
-CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url)
+CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_error)
 {
 	static bool use_ssl = true;
 
@@ -749,10 +749,12 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url)
 		goto exit;
 	}
 
-	/* Avoid downloading HTML files for error responses if the HTTP code is >= 400 */
-	curl_ret = curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
-	if (curl_ret != CURLE_OK) {
-		goto exit;
+	if (fail_on_error) {
+		/* Avoid downloading HTML files for error responses if the HTTP code is >= 400 */
+		curl_ret = curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+		if (curl_ret != CURLE_OK) {
+			goto exit;
+		}
 	}
 
 exit:

@@ -36,7 +36,7 @@ extern CURLcode swupd_download_file_close(CURLcode curl_ret, struct curl_file *f
 /*
  * Set swupd default basic options to curl handler.
  */
-extern CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url);
+extern CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_error);
 
 /* Process download curl return code 'curl_ret' and if needed the response code to
  * fill 'err' with an error code and return the status of this download. */

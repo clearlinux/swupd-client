@@ -40,12 +40,23 @@ static bool in_container(void)
 	return !run_command("/usr/bin/systemd-detect-virt", "-c");
 }
 
+static void run_script(char *scriptname, char *cmd)
+{
+	struct stat s;
+	__attribute__((unused)) int ret = 0;
+
+	/* make sure the script exists before attempting to execute it */
+	if (stat(scriptname, &s) == 0 && (S_ISREG(s.st_mode))) {
+		ret = system(cmd);
+	} else {
+		fprintf(stderr, "WARNING: post-update helper script (%s) not found, it will be skipped\n", scriptname);
+	}
+}
+
 static void update_boot(void)
 {
 	char *boot_update_cmd = NULL;
 	char *scriptname;
-	struct stat s;
-	__attribute__((unused)) int ret = 0;
 
 	/* Don't run clr-boot-manager update in a container on the rootfs */
 	if (strcmp("/", path_prefix) == 0 && in_container()) {
@@ -60,12 +71,7 @@ static void update_boot(void)
 		string_or_die(&boot_update_cmd, "%s/usr/bin/clr-boot-manager update --path %s", path_prefix, path_prefix);
 	}
 
-	/* make sure the script exists before attempting to execute it */
-	if (stat(scriptname, &s) == 0 && (S_ISREG(s.st_mode))) {
-		ret = system(boot_update_cmd);
-	} else {
-		fprintf(stderr, "WARNING: post-update helper script (%s) not found, it will be skipped\n", scriptname);
-	}
+	run_script(scriptname, boot_update_cmd);
 
 	free_string(&boot_update_cmd);
 	free_string(&scriptname);
@@ -74,6 +80,7 @@ static void update_boot(void)
 static void update_triggers(bool block)
 {
 	char *cmd = NULL;
+	char *scriptname;
 	char const *block_flag = NULL;
 	char const *reexec_flag = NULL;
 	__attribute__((unused)) int ret = 0;
@@ -109,6 +116,7 @@ static void update_triggers(bool block)
 			ret = system("/usr/bin/clr-service-restart");
 		}
 
+		string_or_die(&scriptname, "/usr/bin/systemctl");
 		string_or_die(&cmd, "/usr/bin/systemctl %s restart update-triggers.target", block_flag);
 	} else {
 		/* These must block so that new update triggers are executed after */
@@ -119,13 +127,16 @@ static void update_triggers(bool block)
 		}
 
 		if (strcmp("/", path_prefix) == 0) {
+			string_or_die(&scriptname, "%s", POST_UPDATE);
 			string_or_die(&cmd, "%s %s %s", POST_UPDATE, reexec_flag, block_flag);
 		} else {
+			string_or_die(&scriptname, "%s%s", path_prefix, POST_UPDATE);
 			string_or_die(&cmd, "%s/%s %s %s %s", path_prefix, POST_UPDATE, path_prefix, reexec_flag, block_flag);
 		}
 	}
-	ret = system(cmd);
+	run_script(scriptname, cmd);
 
+	free_string(&scriptname);
 	free_string(&cmd);
 }
 

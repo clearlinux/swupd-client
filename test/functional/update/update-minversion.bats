@@ -8,9 +8,9 @@ test_setup() {
 	create_bundle -L -n bundle1 -v 10 -f /file1 "$TEST_NAME"
 
 	create_version "$TEST_NAME" 20 10 staging
-	update_minversion 20
+	set_as_minversion "$WEBDIR"/20
 
-	sudo rm -f "$WEBDIR"/20/files/*
+	sudo rm -rf "$WEBDIR"/20/files/*
 }
 
 @test "UPD015: Skip fullfile download for unchanged file in minversion update" {

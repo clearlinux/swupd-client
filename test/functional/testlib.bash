@@ -474,70 +474,81 @@ create_tar() { # swupd_function
 
 }
 
-# Inside the version directory that matches the minversion, update the MoM, bundle manifests, and
-# fullfiles for the minversion update.
+# Sets an existing version as minversion.
 # Parameters:
-# - minversion: new minversion.
-update_minversion() { # swupd_function
-	local minversion=$1
-	local minversion_dir="$WEBDIR"/"$minversion"
-	local line
+# - MINVERSION_PATH: the path of the version to be set as minversion
+set_as_minversion() { # swupd_function
+
+	local minversion_path=$1
+	local webdir_path
+	local minversion
+	local previous_version
+	local bundles
 	local bundle
-	local version
+	local mom
+	local manifest
+	local files
+	local bundle_file
 
-	# Read the MoM in the minversion's directory to determine bundles that need updates
-	while read -r line; do
-		# Header fields will not have an integer in 3rd column, so they will be skipped
-		version=$(echo "$line" | awk '{print $3;}')
-		if [[ ! "$version" =~ ^[0-9]+$ ]]; then
-			continue
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    set_as_minversion <version_path>
+			EOM
+		return
+	fi
+	validate_path "$minversion_path"
+
+	minversion="$(basename "$minversion_path")"
+	webdir_path="$(dirname "$minversion_path")"
+
+	# copy all manifests in MoM to the minversion
+	mom="$minversion_path"/Manifest.MoM
+
+	mapfile -t bundles < <(awk '/^M\.\.\./ { print $4 }' "$mom")
+	IFS=$'\n'
+	for bundle in ${bundles[*]}; do
+
+		# search for the latest manifest version for the bundle
+		manifest="$minversion_path"/Manifest."$bundle"
+		if [ ! -e "$manifest" ]; then
+			previous_version="$minversion"
+			while [ "$previous_version" -gt 0 ] && [ ! -e "$manifest" ]; do
+				previous_version="$(awk '/previous/ { print $2 }' "$mom")"
+				manifest="$webdir_path"/"$previous_version"/Manifest."$bundle"
+				mom="$webdir_path"/"$previous_version"/Manifest.MoM
+			done
+			sudo cp "$manifest" "$webdir_path"/"$minversion"/Manifest."$bundle"
+			manifest="$webdir_path"/"$minversion"/Manifest."$bundle"
+			mom="$webdir_path"/"$minversion"/Manifest.MoM
+			# copy the zero pack also from the old version to the new one
+			sudo cp "$webdir_path"/"$previous_version"/pack-"$bundle"-from-0.tar "$webdir_path"/"$minversion"/pack-"$bundle"-from-0.tar
+			# extract the content of the zero pack in the files directory so we have
+			# all files available to create future delta packs
+			sudo tar -xf "$webdir_path"/"$minversion"/pack-"$bundle"-from-0.tar --strip-components 1 --directory "$webdir_path"/"$minversion"/files
+			files=("$(ls -I "*.tar" "$webdir_path"/"$minversion"/files)")
+			for bundle_file in ${files[*]}; do
+				if [ ! -e "$webdir_path"/"$minversion"/files/"$bundle_file".tar ]; then
+					create_tar "$webdir_path"/"$minversion"/files/"$bundle_file"
+				fi
+			done
+			update_manifest -p "$manifest" version "$minversion"
+			update_manifest -p "$manifest" previous "$previous_version"
 		fi
 
-		# Copy bundles older than the minversion to the minversion directory
-		bundle=$(echo "$line" | awk '{print $4;}')
-		if [ "$version" -lt "$minversion" ]; then
-			sudo cp "$WEBDIR"/"$version"/Manifest."$bundle" "$minversion_dir"
-		fi
+		# update manifest content with latest version
+		sudo sed -i "/....\\t.*\\t.*\\t.*$/s/\\(....\\t.*\\t\\).*\\(\\t\\)/\\1$minversion\\2/g" "$manifest"
+		sudo rm -rf "$manifest".tar
+		create_tar "$manifest"
 
-		# Copy old fullfiles from bundle manifests and update their versions to
-		# reflect the new minversion
-		update_bundle_minversion "$bundle" "$minversion"
+	done
+	unset IFS
 
-	done < "$minversion_dir"/Manifest.MoM
+	# update the MoM
+	update_manifest "$mom" minversion "$minversion"
+	update_hashes_in_mom "$mom"
 
-	# Update manifest hashes/versions in MoM
-	update_manifest "$minversion_dir"/Manifest.MoM minversion "$minversion"
-}
-
-# Copy fullfiles with versions changed by a minversion update to the minversion directory. Also
-# update the file versions in the bundle that are older than the minversion to the minversion.
-# Parameters:
-# - bundle: name of bundle
-# - minversion: new minversion
-update_bundle_minversion() { # swupd_function
-	local bundle=$1
-	local minversion=$2
-	local minversion_dir="$WEBDIR"/"$minversion"
-	local file_version
-
-	while read -r line; do
-		# Header fields will not have an integer in 3rd column, so they will be skipped
-		file_version=$(echo "$line" | awk '{print $3;}')
-		if [[ ! "$file_version" =~ ^[0-9]+$ ]]; then
-			continue
-		fi
-
-		# Copy fullfiles that changed in older versions to minversion
-		file_hash=$(echo "$line" | awk '{print $2;}')
-		if [ "$file_version" -lt "$minversion" ]; then
-			sudo cp "$WEBDIR"/"$file_version"/files/"$file_hash" "$minversion_dir"/files/
-			sudo cp "$WEBDIR"/"$file_version"/files/"$file_hash".tar "$minversion_dir"/files/
-		fi
-
-	done < "$minversion_dir"/Manifest."$bundle"
-
-	# Update versions in bundle manifest
-	update_manifest "$minversion_dir"/Manifest."$bundle" minversion "$minversion"
 }
 
 # Creates an empty manifest in the specified path
@@ -1010,6 +1021,9 @@ bump_format() { # swupd_function
 		cat <<-EOM
 			Usage:
 			    bump_format <environment_name>
+
+			    Note: bump_format can only be used in an environment that has the
+			          os-core bundle and release files (create_test_environment -r MY_ENV)
 			EOM
 		return
 	fi
@@ -1027,8 +1041,13 @@ bump_format() { # swupd_function
 	new_version_path="$env_name"/web-dir/"$new_version"
 	format="$(< "$env_name"/web-dir/"$version"/format)"
 
-	# create two new versions for the format bump, each version separated by 10
-	# from each other and from the current latest version
+	# if the environment doesn't have os-core or was not created with release files exit
+	manifest="$env_name"/web-dir/"$version"/Manifest.os-core
+	if [ ! -e "$manifest" ] || ! grep -qx "F\\.\\.\\..*/usr/lib/os-release$" "$manifest"; then
+		terminate "bump_format can only be used in an environment that has the os-core bundle and release files"
+	fi
+
+	# create a +10 and a +20 versions for the format bump
 	create_version "$env_name" "$middle_version" "$version" "$format"
 	create_version -r "$env_name" "$new_version" "$middle_version" "$((format+1))"
 
@@ -1061,53 +1080,10 @@ bump_format() { # swupd_function
 	unset IFS
 	update_hashes_in_mom "$mom"
 
-	# update the new version
+	# update the minversion
 	mom="$new_version_path"/Manifest.MoM
-	update_manifest -p "$mom" previous "$middle_version"
-
-	# regardless of where we found the previous version of os-core, update
-	# the previous version to $middle_version
 	update_manifest -p "$new_version_path"/Manifest.os-core previous "$middle_version"
-
-	# copy all manifests in MoM to new version
-	mapfile -t bundles < <(awk '/^M\.\.\./ { print $4 }' "$mom")
-	IFS=$'\n'
-	for bundle in ${bundles[*]}; do
-		# search for the latest manifest version for the bundle
-		manifest="$new_version_path"/Manifest."$bundle"
-		if [ ! -e "$manifest" ]; then
-			previous_version="$new_version"
-			while [ "$previous_version" -gt 0 ] && [ ! -e "$manifest" ]; do
-				previous_version="$(awk '/previous/ { print $2 }' "$mom")"
-				manifest="$env_name"/web-dir/"$previous_version"/Manifest."$bundle"
-				mom="$env_name"/web-dir/"$previous_version"/Manifest.MoM
-			done
-			sudo cp "$manifest" "$env_name"/web-dir/"$new_version"/Manifest."$bundle"
-			manifest="$env_name"/web-dir/"$new_version"/Manifest."$bundle"
-			mom="$env_name"/web-dir/"$new_version"/Manifest.MoM
-			# copy the zero pack also from the old version to the new one
-			sudo cp "$env_name"/web-dir/"$previous_version"/pack-"$bundle"-from-0.tar "$env_name"/web-dir/"$new_version"/pack-"$bundle"-from-0.tar
-			# extract the content of the zero pack in the files directory so we have
-			# all files available to create future delta packs
-			sudo tar -xf "$env_name"/web-dir/"$new_version"/pack-"$bundle"-from-0.tar --strip-components 1 --directory "$env_name"/web-dir/"$new_version"/files
-			files=("$(ls -I "*.tar" "$env_name"/web-dir/"$new_version"/files)")
-			for bundle_file in ${files[*]}; do
-				if [ ! -e "$env_name"/web-dir/"$new_version"/files/"$bundle_file".tar ]; then
-					create_tar "$env_name"/web-dir/"$new_version"/files/"$bundle_file"
-				fi
-			done
-			update_manifest -p "$manifest" version "$new_version"
-			update_manifest -p "$manifest" previous "$previous_version"
-		fi
-		update_manifest -p "$manifest" format "$((format+1))"
-		# update manifest content with latest version
-		sudo sed -i "/....\\t.*\\t.*\\t.*$/s/\\(....\\t.*\\t\\).*\\(\\t\\)/\\1$new_version\\2/g" "$manifest"
-		sudo rm -rf "$manifest".tar
-		create_tar "$manifest"
-	done
-	unset IFS
-	update_manifest "$mom" minversion "$new_version"
-	update_hashes_in_mom "$mom"
+	set_as_minversion "$new_version_path"
 
 }
 

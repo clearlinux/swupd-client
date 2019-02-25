@@ -37,7 +37,7 @@ size_t hashmap_hash_from_string(const char *key)
 {
 	size_t hash = 0;
 
-	while (key) {
+	while (*key) {
 		hash = hash * 29 /* a prime number */ + *key;
 		key++;
 	}

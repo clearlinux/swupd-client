@@ -37,6 +37,7 @@ test_setup() {
 		WARNING: removing stale mirror configuration. Mirror version (20) is too far behind upstream version (1000)
 		Preparing to update from 10 to 1000
 		Downloading packs...
+		Extracting test-bundle1 pack for version 1000
 		Statistics for going from version 10 to version 1000:
 		    changed bundles   : 1
 		    new bundles       : 0
@@ -50,7 +51,6 @@ test_setup() {
 		Applying update
 		Update was applied.
 		Calling post-update helper scripts.
-		2 files were not in a pack
 		Update successful. System updated from version 10 to version 1000
 	EOM
 	)

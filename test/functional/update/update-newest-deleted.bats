@@ -26,6 +26,8 @@ test_setup() {
 		Update started.
 		Preparing to update from 10 to 30
 		Downloading packs...
+		Extracting os-core pack for version 30
+		Extracting test-bundle2 pack for version 30
 		Statistics for going from version 10 to version 30:
 		    changed bundles   : 3
 		    new bundles       : 0

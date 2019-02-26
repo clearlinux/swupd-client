@@ -322,6 +322,7 @@ copy_manifest() {
 	local bundle_file
 	local file_tar
 	local format
+	local prev_ver
 
 	from_path="$env_name"/web-dir/"$from_version"
 	to_path="$env_name"/web-dir/"$to_version"
@@ -336,22 +337,19 @@ copy_manifest() {
 	update_manifest -p "$to_path"/Manifest."$bundle" previous "$from_version"
 	update_manifest "$to_path"/Manifest."$bundle" format "$format"
 
-	# copy the bundle's zero pack from the from_version,
-	# untar it the files directory in the to_version
-	# and copy the tar file of each fullfile
-	if [ ! -e "$to_path"/pack-"$bundle"-from-0.tar ]; then
-		sudo cp "$from_path"/pack-"$bundle"-from-0.tar "$to_path"/
-		sudo tar -xf "$to_path"/pack-"$bundle"-from-0.tar --strip-components 1 --directory "$to_path"/files
-		files=("$(ls -I "*.tar" "$to_path"/files)")
-		for bundle_file in ${files[*]}; do
-			if [ ! -e "$to_path"/files/"$bundle_file".tar ]; then
-				# find the existing tar in previous versions and copy
-				# it to the current directory
-				file_tar=$(sudo find "$env_name"/web-dir -name "$bundle_file".tar | head -n 1)
-				sudo cp "$file_tar" "$to_path"/files/"$bundle_file".tar
-			fi
-		done
-	fi
+	# untar the zero pack into the files directory in the to_version
+	sudo tar -xf "$to_path"/pack-"$bundle"-from-0.tar --strip-components 1 --directory "$to_path"/files
+
+	# copy the tar file of each fullfile from a previous version
+	files=("$(ls -I "*.tar" "$to_path"/files)")
+	for bundle_file in ${files[*]}; do
+		if [ ! -e "$to_path"/files/"$bundle_file".tar ]; then
+			# find the existing tar in previous versions and copy
+			# it to the current directory
+			file_tar=$(sudo find "$env_name"/web-dir -name "$bundle_file".tar | head -n 1)
+			sudo cp "$file_tar" "$to_path"/files/"$bundle_file".tar
+		fi
+	done
 
 }
 
@@ -1421,6 +1419,9 @@ create_version() { # swupd_function
 				update_bundle "$env_name" os-core --add /usr/share/defaults/swupd/format:"$FORMAT"
 			fi
 		fi
+
+		# copy the packs from the previous version
+		sudo cp "$env_name"/web-dir/"$from_version"/pack-*.tar "$env_name"/web-dir/"$version"
 	fi
 
 }
@@ -2430,6 +2431,7 @@ update_bundle() { # swupd_function
 	local to_manifest_content
 	local from_manifest
 	local from_manifest_content
+	local pre_ver
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
@@ -2536,8 +2538,16 @@ update_bundle() { # swupd_function
 
 		# Add the file to the zero pack of the bundle
 		add_to_pack "$bundle" "$new_file"
-		# Add the file also to the delta-pack
-		add_to_pack "$bundle" "$new_file" "$oldversion"
+
+		# Add the new file to all previous delta-packs
+		pre_ver="$version"
+		while [ "$pre_ver" -ge 0 ]; do
+			pre_ver=$(get_manifest_previous_version "$env_name" MoM "$pre_ver")
+			if [ "$pre_ver" -eq 0 ]; then
+				break
+			fi
+			add_to_pack "$bundle" "$new_file" "$pre_ver"
+		done
 		;;
 
 	--add-dir)

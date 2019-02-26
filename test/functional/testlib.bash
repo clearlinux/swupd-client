@@ -253,6 +253,108 @@ validate_number() {
 
 }
 
+# Gets the latest version that exists in the environment
+get_latest_version() {
+
+	local env_name=$1
+
+	# shellcheck disable=SC2010
+	# SC2010: Don't use ls | grep. Use a glob.
+	# Exception: ls has sorting options that are tricky
+	# to get right with other commands.
+	ls "$env_name"/web-dir | grep -E '^[0-9]+$' | sort -rn | head -n1
+
+}
+
+# Gets the current version of the test environment
+get_system_version() {
+
+	local env_name=$1
+
+	awk -F = '/VERSION_ID/{ print $NF }' "$env_name"/testfs/target-dir/usr/lib/os-release
+
+}
+
+# Gets the previous version where a bundle manifest is found
+get_manifest_previous_version() {
+
+	local env_name=$1
+	local bundle=$2
+	local init_version=$3
+	local prev_version
+
+	if [ -z "$init_version" ]; then
+		init_version=$(get_latest_version "$env_name")
+	fi
+	if [ ! -e "$env_name"/web-dir/"$init_version" ]; then
+		terminate "The initial version provided '$init_version' does not exist."
+	fi
+
+	# if a manifest for the specified bundle exist in the initial version,
+	# use the manifest to find its previous manifest
+	if [ -e "$env_name"/web-dir/"$init_version"/Manifest."$bundle" ]; then
+		awk '/^previous/ { print $2 }' "$env_name"/web-dir/"$init_version"/Manifest."$bundle"
+		return
+	fi
+
+	# look backwards through versions strating from init_version
+	# until we find the previous version of the bundle manifest
+	prev_version="$init_version"
+	while [ "$prev_version" -gt 0 ] && [ ! -e "$env_name"/web-dir/"$prev_version"/Manifest."$bundle" ]; do
+		prev_version=$(awk '/^previous/ { print $2 }' "$env_name"/web-dir/"$prev_version"/Manifest.MoM)
+	done
+
+	echo "$prev_version"
+
+}
+
+# Copies a manifest from one version to another in a test environment
+copy_manifest() {
+
+	local env_name=$1
+	local bundle=$2
+	local from_version=$3
+	local to_version=$4
+	local from_path
+	local to_path
+	local manifest
+	local files
+	local bundle_file
+	local file_tar
+	local format
+
+	from_path="$env_name"/web-dir/"$from_version"
+	to_path="$env_name"/web-dir/"$to_version"
+
+	if [ ! -e "$to_path"/Manifest."$bundle" ]; then
+		sudo cp "$from_path"/Manifest."$bundle" "$to_path"/Manifest."$bundle"
+	fi
+
+	# update the manifest's header
+	format=$(cat "$to_path"/format)
+	update_manifest -p "$to_path"/Manifest."$bundle" version "$to_version"
+	update_manifest -p "$to_path"/Manifest."$bundle" previous "$from_version"
+	update_manifest "$to_path"/Manifest."$bundle" format "$format"
+
+	# copy the bundle's zero pack from the from_version,
+	# untar it the files directory in the to_version
+	# and copy the tar file of each fullfile
+	if [ ! -e "$to_path"/pack-"$bundle"-from-0.tar ]; then
+		sudo cp "$from_path"/pack-"$bundle"-from-0.tar "$to_path"/
+		sudo tar -xf "$to_path"/pack-"$bundle"-from-0.tar --strip-components 1 --directory "$to_path"/files
+		files=("$(ls -I "*.tar" "$to_path"/files)")
+		for bundle_file in ${files[*]}; do
+			if [ ! -e "$to_path"/files/"$bundle_file".tar ]; then
+				# find the existing tar in previous versions and copy
+				# it to the current directory
+				file_tar=$(sudo find "$env_name"/web-dir -name "$bundle_file".tar | head -n 1)
+				sudo cp "$file_tar" "$to_path"/files/"$bundle_file".tar
+			fi
+		done
+	fi
+
+}
+
 # Writes to a file that is owned by root
 # Parameters:
 # - "-a": if set, the text will be appeneded to the file,
@@ -1030,11 +1132,7 @@ bump_format() { # swupd_function
 	validate_path "$env_name"
 
 	# find the latest version and MoM
-	# shellcheck disable=SC2010
-	# SC2010: Don't use ls | grep. Use a glob.
-	# Exception: ls has sorting options that are tricky
-	# to get right with other commands.
-	version="$(ls "$env_name"/web-dir | grep -E '^[0-9]+$' | sort -rn | head -n1)"
+	version=$(get_latest_version "$env_name")
 	middle_version="$((version+10))"
 	middle_version_path="$env_name"/web-dir/"$middle_version"
 	new_version="$((version+20))"
@@ -2311,13 +2409,10 @@ update_bundle() { # swupd_function
 	local new_fname
 	local delta_name
 	local format
-	local files
-	local bundle_file
 	local to_manifest
 	local to_manifest_content
 	local from_manifest
 	local from_manifest_content
-	local file_tar
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
@@ -2357,54 +2452,27 @@ update_bundle() { # swupd_function
 	if [[ "$fname" != "/"* ]]; then
 		fname=/"$fname"
 	fi
+
 	# replace all the "/" in fname with "\/" so they are escaped (e.g. fname=/foo/bar, filename=\/foo\/bar)
 	filename="${fname////\\/}"
-	# the version where the update will be created is the latest version
-        # shellcheck disable=SC2010
-        # SC2010: Don't use ls | grep. Use a glob.
-        # Exception: ls has sorting options that are tricky
-        # to get right with other commands.
-	version="$(ls "$env_name"/web-dir | grep -E '^[0-9]+$' | sort -rn | head -n1)"
+
+	# collect usefule variables considering the version where
+	# the update will be created is always the latest version
+	version=$(get_latest_version "$env_name")
 	version_path="$env_name"/web-dir/"$version"
-	format=$(cat "$version_path"/format)
-	# find the previous version of this bundle manifest
-	oldversion="$version"
-	while [ "$oldversion" -gt 0 ] && [ ! -e "$env_name"/web-dir/"$oldversion"/Manifest."$bundle" ]; do
-		oldversion=$(awk '/^previous/ { print $2 }' "$env_name"/web-dir/"$oldversion"/Manifest.MoM)
-	done
-	if [ "$oldversion" = "$version" ]; then
-		# if old version and new version are the same it means this bundle has already
-		# been modified in this version, so look for the real old version
-		oldversion=$(awk '/^previous/ { print $2}' "$env_name"/web-dir/"$oldversion"/Manifest."$bundle")
-	fi
-	oldversion_path="$env_name"/web-dir/"$oldversion"
 	bundle_manifest="$version_path"/Manifest."$bundle"
+	format=$(cat "$version_path"/format)
+
+	# find the previous version of this bundle manifest
+	oldversion=$(get_manifest_previous_version "$env_name" "$bundle" "$version")
+	oldversion_path="$env_name"/web-dir/"$oldversion"
+
 	# since we are going to be making updates to the bundle, copy its manifest
 	# from the old version directory to the new one (if not copied already)
-	if [ ! -e "$bundle_manifest" ]; then
-		sudo cp "$oldversion_path"/Manifest."$bundle" "$bundle_manifest"
-	fi
-	update_manifest -p "$bundle_manifest" format "$format"
-	update_manifest -p "$bundle_manifest" version "$version"
-	update_manifest -p "$bundle_manifest" previous "$oldversion"
-	# copy also the bundle's zero pack, untar it the files directory in the new version
-	# and create a tar per file (full files)
-	if [ ! -e "$version_path"/pack-"$bundle"-from-0.tar ]; then
-		sudo cp "$oldversion_path"/pack-"$bundle"-from-0.tar "$version_path"/
-		sudo tar -xf "$version_path"/pack-"$bundle"-from-0.tar --strip-components 1 --directory "$version_path"/files
-		files=("$(ls -I "*.tar" "$version_path"/files)")
-		for bundle_file in ${files[*]}; do
-			if [ ! -e "$version_path"/files/"$bundle_file".tar ]; then
-				# find the existing tar in previous versions and copy
-				# it to the current directory
-				file_tar=$(sudo find "$WEBDIR" -name "$bundle_file".tar | head -n 1)
-				sudo cp "$file_tar" "$version_path"/files/"$bundle_file".tar
-			fi
-		done
-	fi
+	copy_manifest "$env_name" "$bundle" "$oldversion" "$version"
 	contentsize=$(awk '/^contentsize/ { print $2 }' "$bundle_manifest")
 
-	# these actions apply to all operations except when adding a new file or updating the header only
+	# these actions apply to all operations that modify an existing file somehow
 	if [ "$option" != "--add" ] && [ "$option" != "--add-dir" ] && [ "$option" != "--add-file" ] && [ "$option" != "--header-only" ]; then
 		fhash=$(get_hash_from_manifest "$bundle_manifest" "$fname")
 		fsize=$(stat -c "%s" "$oldversion_path"/files/"$fhash")
@@ -2413,7 +2481,9 @@ update_bundle() { # swupd_function
 	fi
 
 	case "$option" in
+
 	--add | --add-file)
+
 		# if the directories the file is don't exist, add them to the bundle
 		fdir=$(dirname "${fname%:*}")
 		if ! sudo cat "$bundle_manifest" | grep -qx "D\\.\\.\\..*$fdir" && [ "$fdir" != "/" ]; then
@@ -2429,6 +2499,7 @@ update_bundle() { # swupd_function
 			# Add the dir to the delta-pack
 			add_to_pack "$bundle" "$new_dir" "$oldversion"
 		fi
+
 		# if the user wants to use an existing file, use it, else create a new one
 		if [[ "$fname" = *":"* ]]; then
 			new_file="${fname#*:}"
@@ -2441,15 +2512,19 @@ update_bundle() { # swupd_function
 			new_file=$(create_file "$version_path"/files)
 		fi
 		add_to_manifest -p "$bundle_manifest" "$new_file" "$fname"
+
 		# contentsize is automatically added by the add_to_manifest function so
 		# all we need is to get the updated value for now
 		contentsize=$(awk '/^contentsize/ { print $2 }' "$bundle_manifest")
+
 		# Add the file to the zero pack of the bundle
 		add_to_pack "$bundle" "$new_file"
 		# Add the file also to the delta-pack
 		add_to_pack "$bundle" "$new_file" "$oldversion"
 		;;
+
 	--add-dir)
+
 		# if the directories the file is don't exist, add them to the bundle
 		fdir="$fname"
 		if ! sudo cat "$bundle_manifest" | grep -qx "D\\.\\.\\..*$fdir" && [ "$fdir" != "/" ]; then
@@ -2466,9 +2541,12 @@ update_bundle() { # swupd_function
 			add_to_pack "$bundle" "$new_dir"
 			add_to_pack "$bundle" "$new_dir" "$oldversion"
 		fi
+
 		contentsize=$(awk '/^contentsize/ { print $2 }' "$bundle_manifest")
 		;;
+
 	--delete | --ghost)
+
 		# replace the first character of the line that matches with "."
 		sudo sed -i "/\\t$filename$/s/./\\./1" "$bundle_manifest"
 		sudo sed -i "/\\t$filename\\t/s/./\\./1" "$bundle_manifest"
@@ -2484,25 +2562,33 @@ update_bundle() { # swupd_function
 			sudo sed -i "/\\t$filename$/s/./g/2" "$bundle_manifest"
 			sudo sed -i "/\\t$filename\\t/s/./g/2" "$bundle_manifest"
 		fi
+
 		# replace the hash with 0s
 		update_manifest -p "$bundle_manifest" file-hash "$fname" "$zero_hash"
+
 		# calculate new contentsize (NOTE: filecount is not decreased)
 		contentsize=$((contentsize - fsize))
 		;;
+
 	--update)
+
 		# append random content to the file
 		generate_random_content 1 20 | sudo tee -a "$version_path"/files/"$fhash" > /dev/null
+
 		# recalculate hash and update file names
 		new_fhash=$(sudo "$SWUPD" hashdump "$version_path"/files/"$fhash" 2> /dev/null)
 		sudo mv "$version_path"/files/"$fhash" "$version_path"/files/"$new_fhash"
 		create_tar "$version_path"/files/"$new_fhash"
-		sudo rm -f "$oldversion_path"/files/"$fhash".tar
+		sudo rm -f "$version_path"/files/"$fhash".tar
+
 		# update the manifest with the new hash
 		update_manifest -p "$bundle_manifest" file-hash "$fname" "$new_fhash"
+
 		# calculate new contentsize
 		new_fsize=$(stat -c "%s" "$version_path"/files/"$new_fhash")
 		contentsize=$((contentsize + (new_fsize - fsize)))
-		# update the zero-pack with the new file
+
+		# update the zero-pack with the new file (leave the old file, it doesn't matter)
 		add_to_pack "$bundle" "$version_path"/files/"$new_fhash"
 		# create the delta-file
 		delta_name="$oldversion-$version-$fhash-$new_fhash"
@@ -2512,13 +2598,16 @@ update_bundle() { # swupd_function
 		# keep the modified file for the iterative "from manifest"
 		from_manifest_content="$(awk "/....\\t.*\\t.*\\t$filename/" "$oldversion_path"/Manifest."$bundle")"$'\n'
 		;;
+
 	--rename | --rename-legacy)
+
 		validate_param "$new_name"
 		# make sure new_name starts with a slash
 		if [[ "$new_name" != "/"* ]]; then
 			new_name=/"$new_name"
 		fi
 		new_fname="${new_name////\\/}"
+
 		# renames need two records in the manifest, one with the
 		# new name (F...) and one with the old one (.d..)
 		# replace the first character of the old record with "."
@@ -2527,6 +2616,7 @@ update_bundle() { # swupd_function
 		# replace the second character of the old record with "d"
 		sudo sed -i "/\\t$filename$/s/./d/2" "$bundle_manifest"
 		sudo sed -i "/\\t$filename\\t/s/./d/2" "$bundle_manifest"
+
 		# add the new name to the manifest
 		add_to_manifest -p "$bundle_manifest" "$oldversion_path"/files/"$fhash" "$new_name"
 		if [ "$option" = "--rename" ]; then
@@ -2539,18 +2629,24 @@ update_bundle() { # swupd_function
 			# replace the fourth character of the new record with "r"
 			sudo sed -i "/\\t$new_fname$/s/./r/4" "$bundle_manifest"
 		fi
+
 		# create the delta-file
 		delta_name="$oldversion-$version-$fhash-$fhash"
 		sudo bsdiff "$oldversion_path"/files/"$fhash" "$oldversion_path"/files/"$fhash" "$version_path"/delta/"$delta_name"
+
 		# create or add to the delta-pack
 		add_to_pack "$bundle" "$version_path"/delta/"$delta_name" "$oldversion"
 		;;
+
 	--header-only)
+
 		# do nothing
 		;;
+
 	*)
 		terminate "Please select a valid option for updating the bundle: --add, --delete, --ghost, --rename, --update, --header-only"
 		;;
+
 	esac
 
 	# re-order items on the manifest so they are in the correct order based on version

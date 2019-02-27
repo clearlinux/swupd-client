@@ -322,7 +322,6 @@ copy_manifest() {
 	local bundle_file
 	local file_tar
 	local format
-	local prev_ver
 
 	from_path="$env_name"/web-dir/"$from_version"
 	to_path="$env_name"/web-dir/"$to_version"
@@ -1381,12 +1380,18 @@ create_version() { # swupd_function
 	# if the previous version is 0 then create a new MoM, otherwise copy the MoM
 	# from the previous version
 	if [ "$from_version" = 0 ]; then
+
 		mom=$(create_manifest "$env_name"/web-dir/"$version" MoM)
 		if [ "$partial" = false ]; then
 			create_tar "$mom"
 			sign_manifest "$mom"
 		fi
+
 	else
+
+		# copy the packs from the previous version
+		sudo cp "$env_name"/web-dir/"$from_version"/pack-*.tar "$env_name"/web-dir/"$version"
+
 		sudo cp "$env_name"/web-dir/"$from_version"/Manifest.MoM "$env_name"/web-dir/"$version"
 		mom="$env_name"/web-dir/"$version"/Manifest.MoM
 		# update MoM info and create the tars
@@ -1420,8 +1425,6 @@ create_version() { # swupd_function
 			fi
 		fi
 
-		# copy the packs from the previous version
-		sudo cp "$env_name"/web-dir/"$from_version"/pack-*.tar "$env_name"/web-dir/"$version"
 	fi
 
 }
@@ -2564,9 +2567,28 @@ update_bundle() { # swupd_function
 					add_to_manifest -p "$bundle_manifest" "$new_dir" "$fdir"
 				fi
 			done
-			# Add the dir to the delta-pack
-			add_to_pack "$bundle" "$new_dir"
-			add_to_pack "$bundle" "$new_dir" "$oldversion"
+
+			# since directories usually have the same hash, add it to
+			# the zero pack only if it doesn't already have one
+			if ! tar -tf "$version_path"/pack-"$bundle"-from-0.tar | grep -q "${new_dir##*/}"; then
+				add_to_pack "$bundle" "$new_dir"
+			fi
+
+			# Add the dir to all previous delta-packs if not already there
+			pre_ver="$version"
+			while [ "$pre_ver" -ge 0 ]; do
+				pre_ver=$(get_manifest_previous_version "$env_name" MoM "$pre_ver")
+				if [ "$pre_ver" -eq 0 ]; then
+					break
+				fi
+				if [ -e "$version_path"/pack-"$bundle"-from-"$pre_ver".tar ]; then
+					if tar -tf "$version_path"/pack-"$bundle"-from-"$pre_ver".tar | grep -q "${new_dir##*/}"; then
+						continue
+					fi
+				fi
+				add_to_pack "$bundle" "$new_dir" "$pre_ver"
+			done
+
 		fi
 
 		contentsize=$(awk '/^contentsize/ { print $2 }' "$bundle_manifest")

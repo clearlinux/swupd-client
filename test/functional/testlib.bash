@@ -2435,6 +2435,7 @@ update_bundle() { # swupd_function
 	local from_manifest
 	local from_manifest_content
 	local pre_ver
+	local pre_hash
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
@@ -2639,11 +2640,44 @@ update_bundle() { # swupd_function
 
 		# update the zero-pack with the new file (leave the old file, it doesn't matter)
 		add_to_pack "$bundle" "$version_path"/files/"$new_fhash"
-		# create the delta-file
-		delta_name="$oldversion-$version-$fhash-$new_fhash"
-		sudo bsdiff "$oldversion_path"/files/"$fhash" "$version_path"/files/"$new_fhash" "$version_path"/delta/"$delta_name"
-		# create or add to the delta-pack
-		add_to_pack "$bundle" "$version_path"/delta/"$delta_name" "$oldversion"
+
+		# create delta packs for all previous versions
+		pre_ver="$version"
+		while [ "$pre_ver" -ge 0 ]; do
+
+			pre_ver=$(get_manifest_previous_version "$env_name" MoM "$pre_ver")
+			if [ "$pre_ver" -eq 0 ]; then
+				break
+			fi
+
+			# if the manifest doesn't exist in that version, but exists in the MoM
+			# the bundle didn't go through any changes there, copy if from previous version
+			if [ ! -e "$env_name"/web-dir/"$pre_ver"/Manifest."$bundle" ]; then
+				local pv
+				pv=$(awk "/M\\.\\.\\.\\t.*\\t.*\\t$bundle/"'{ print $3 }' "$env_name"/web-dir/"$pre_ver"/Manifest.MoM)
+				if [ -z "$pv" ]; then
+					# the bundle didn't exist in earlier versions, break from the loop
+					break
+				fi
+				copy_manifest "$env_name" "$bundle" "$pv" "$pre_ver"
+			fi
+
+			# create the delta file
+			pre_hash=$(get_hash_from_manifest "$env_name"/web-dir/"$pre_ver"/Manifest."$bundle" "$fname")
+			# if the file didn't exist in that version we need to add the whole file
+			# not just the delta
+			if [ -z "$pre_hash" ]; then
+				add_to_pack "$bundle" "$version_path"/files/"$new_fhash" "$pre_ver"
+				continue
+			fi
+			delta_name="$pre_ver-$version-$pre_hash-$new_fhash"
+			sudo bsdiff "$env_name"/web-dir/"$pre_ver"/files/"$pre_hash" "$version_path"/files/"$new_fhash" "$version_path"/delta/"$delta_name"
+
+			# create or add to the delta-pack
+			add_to_pack "$bundle" "$version_path"/delta/"$delta_name" "$pre_ver"
+
+		done
+
 		# keep the modified file for the iterative "from manifest"
 		from_manifest_content="$(awk "/....\\t.*\\t.*\\t$filename/" "$oldversion_path"/Manifest."$bundle")"$'\n'
 		;;

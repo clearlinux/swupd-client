@@ -41,7 +41,6 @@ test_setup() {
 		Applying update
 		Update was applied.
 		Calling post-update helper scripts.
-		1 files were not in a pack
 		Update successful. System updated from version 10 to version 30
 	EOM
 	)

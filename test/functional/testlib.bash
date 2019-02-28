@@ -2713,12 +2713,42 @@ update_bundle() { # swupd_function
 			sudo sed -i "/\\t$new_fname$/s/./r/4" "$bundle_manifest"
 		fi
 
-		# create the delta-file
-		delta_name="$oldversion-$version-$fhash-$fhash"
-		sudo bsdiff "$oldversion_path"/files/"$fhash" "$oldversion_path"/files/"$fhash" "$version_path"/delta/"$delta_name"
+		pre_ver="$version"
+		while [ "$pre_ver" -ge 0 ]; do
 
-		# create or add to the delta-pack
-		add_to_pack "$bundle" "$version_path"/delta/"$delta_name" "$oldversion"
+			pre_ver=$(get_manifest_previous_version "$env_name" MoM "$pre_ver")
+			if [ "$pre_ver" -eq 0 ]; then
+				break
+			fi
+
+			# if the manifest doesn't exist in that version, but exists in the MoM
+			# the bundle didn't go through any changes there, copy if from previous version
+			if [ ! -e "$env_name"/web-dir/"$pre_ver"/Manifest."$bundle" ]; then
+				local pv
+				pv=$(awk "/M\\.\\.\\.\\t.*\\t.*\\t$bundle/"'{ print $3 }' "$env_name"/web-dir/"$pre_ver"/Manifest.MoM)
+				if [ -z "$pv" ]; then
+					# the bundle didn't exist in earlier versions, break from the loop
+					break
+				fi
+				copy_manifest "$env_name" "$bundle" "$pv" "$pre_ver"
+			fi
+
+			# if the file didn't exist in that version we need to add the whole file
+			# not just the delta
+			if ! grep -q "$fhash" "$env_name"/web-dir/"$pre_ver"/Manifest."$bundle"; then
+				add_to_pack "$bundle" "$version_path"/files/"$fhash" "$pre_ver"
+				continue
+			fi
+
+			# create the delta file
+			delta_name="$pre_ver-$version-$fhash-$fhash"
+			sudo bsdiff "$env_name"/web-dir/"$pre_ver"/files/"$fhash" "$version_path"/files/"$fhash" "$version_path"/delta/"$delta_name"
+
+			# create or add to the delta-pack
+			add_to_pack "$bundle" "$version_path"/delta/"$delta_name" "$pre_ver"
+
+		done
+
 		;;
 
 	--header-only)

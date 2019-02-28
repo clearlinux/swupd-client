@@ -69,7 +69,7 @@ global_teardown() {
 
 @test "SRH012: Search for bundles over HTTPS with a valid client certificate" {
 
-	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-file"
+	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS test-file"
 
 	assert_status_is 0
 }
@@ -79,7 +79,7 @@ global_teardown() {
 	# remove client certificate
 	sudo rm "$CLIENT_CERT"
 
-	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-file --debug"
+	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS test-file --debug"
 	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 
 	expected_output=$(cat <<-EOM
@@ -94,7 +94,7 @@ global_teardown() {
 	# make client certificate invalid
 	sudo sh -c "echo foo > $CLIENT_CERT"
 
-	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-file --debug"
+	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS test-file --debug"
 	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 
 	expected_output=$(cat <<-EOM

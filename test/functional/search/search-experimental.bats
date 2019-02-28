@@ -41,7 +41,7 @@ global_teardown() {
 	# for those messages. If the bundle is experimental it should
 	# swhow that
 
-	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-bundle1"
+	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS test-bundle1"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -63,7 +63,7 @@ global_teardown() {
 	# same name as the bundle. If the bundle is experimental it
 	# should swhow that
 
-	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-bundle2"
+	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS test-bundle2"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -80,7 +80,7 @@ global_teardown() {
 
 	# If the bundle is experimental it should swhow that
 
-	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-file1"
+	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS test-file1"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -97,7 +97,7 @@ global_teardown() {
 
 	# If the bundle is experimental it should swhow that
 
-	run sudo sh -c "$SWUPD search --binary $SWUPD_OPTS test-bin"
+	run sudo sh -c "$SWUPD search-legacy --binary $SWUPD_OPTS test-bin"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -114,7 +114,7 @@ global_teardown() {
 
 	# If the bundle is experimental it should swhow that
 
-	run sudo sh -c "$SWUPD search --library $SWUPD_OPTS test-lib32"
+	run sudo sh -c "$SWUPD search-legacy --library $SWUPD_OPTS test-lib32"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM

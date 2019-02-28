@@ -36,7 +36,7 @@ global_teardown() {
 	# really search for anything but the MoM and all manifests
 	# in it should be downloaded to the local system
 
-	run sudo sh -c "$SWUPD search $SWUPD_OPTS --init"
+	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS --init"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -55,7 +55,7 @@ global_teardown() {
 	# it should find the bundle since the tracking file has the
 	# same name as the bundle
 
-	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-bundle1"
+	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS test-bundle1"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -70,7 +70,7 @@ global_teardown() {
 
 @test "SRH002: Search for a file" {
 
-	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-file2"
+	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS test-file2"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -85,7 +85,7 @@ global_teardown() {
 
 @test "SRH003: Search for a file that is in multiple bundles" {
 
-	run sudo sh -c "$SWUPD search $SWUPD_OPTS common"
+	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS common"
 
 	assert_status_is 0
 	# search finds the files in different order, sometimes, test-bundle1
@@ -108,7 +108,7 @@ global_teardown() {
 
 @test "SRH004: Search for a file that is in multiple bundles in different locations" {
 
-	run sudo sh -c "$SWUPD search $SWUPD_OPTS test-file3"
+	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS test-file3"
 
 	assert_status_is 0
 	# search finds the files in different order, sometimes, test-bundle1
@@ -134,7 +134,7 @@ global_teardown() {
 	# test-file3 is in two bundles but in different path, since we
 	# are specifying a path, search should only find one
 
-	run sudo sh -c "$SWUPD search $SWUPD_OPTS /bar/test-file3"
+	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS /bar/test-file3"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -149,7 +149,7 @@ global_teardown() {
 
 @test "SRH006: Search for a binary" {
 
-	run sudo sh -c "$SWUPD search --binary $SWUPD_OPTS test-bin"
+	run sudo sh -c "$SWUPD search-legacy --binary $SWUPD_OPTS test-bin"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -164,7 +164,7 @@ global_teardown() {
 
 @test "SRH007: Search for a library (lib32)" {
 
-	run sudo sh -c "$SWUPD search --library $SWUPD_OPTS test-lib32"
+	run sudo sh -c "$SWUPD search-legacy --library $SWUPD_OPTS test-lib32"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -179,7 +179,7 @@ global_teardown() {
 
 @test "SRH008: Search for a library (lib 64)" {
 
-	run sudo sh -c "$SWUPD search --library $SWUPD_OPTS test-lib64"
+	run sudo sh -c "$SWUPD search-legacy --library $SWUPD_OPTS test-lib64"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM

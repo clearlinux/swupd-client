@@ -214,6 +214,7 @@ BATS = \
 	test/functional/update/update-rename-ghosted.bats \
 	test/functional/update/update-re-update-bad-os-release.bats \
 	test/functional/update/update-re-update-required.bats \
+	test/functional/update/update-show-time.bats \
 	test/functional/update/update-skip-scripts.bats \
 	test/functional/update/update-slow-server.bats \
 	test/functional/update/update-statedir-bad-hash.bats \

@@ -248,20 +248,22 @@ static enum swupd_code main_update()
 		return ret;
 	}
 
+	/* start the timer used to report the total time to telemetry */
 	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
-	timelist_timer_start(global_times, "Main Update");
 
-	mix_exists = check_mix_exists();
-
+	/* Preparation steps */
+	timelist_timer_start(global_times, "Prepare for update");
 	fprintf(stderr, "Update started.\n");
 
-	timelist_timer_start(global_times, "Update Step 1: get versions");
+	mix_exists = check_mix_exists();
 
 	read_subscriptions(&current_subs);
 
 	handle_mirror_if_stale();
+	timelist_timer_stop(global_times); // closing: Prepare for update
 
-/* Step 1: get versions */
+	/* Step 1: get versions */
+	timelist_timer_start(global_times, "Get versions");
 version_check:
 	ret = check_versions(&current_version, &server_version, requested_version, path_prefix);
 	if (ret != SWUPD_OK) {
@@ -324,19 +326,21 @@ version_check:
 	}
 
 	fprintf(stderr, "Preparing to update from %i to %i\n", current_version, server_version);
-	/* Step 2: housekeeping */
+	timelist_timer_stop(global_times); // closing: Get versions
 
+	/* Step 2: housekeeping */
+	timelist_timer_start(global_times, "Clean up download directory");
 	if (rm_staging_dir_contents("download")) {
 		fprintf(stderr, "Error cleaning download directory\n");
 		ret = SWUPD_COULDNT_REMOVE_FILE;
 		goto clean_curl;
 	}
-	timelist_timer_stop(global_times);
-	timelist_timer_stop(global_times); // Close step 1
-	timelist_timer_start(global_times, "Load Manifests:");
-	int manifest_err;
+	timelist_timer_stop(global_times); // closing: Clean up download directory
 
 	/* Step 3: setup manifests */
+	timelist_timer_start(global_times, "Load manifests");
+	timelist_timer_start(global_times, "Load MoM manifests");
+	int manifest_err;
 
 	/* get the from/to MoM manifests */
 	if (system_on_mix()) {
@@ -351,14 +355,14 @@ version_check:
 		goto clean_exit;
 	}
 
-	timelist_timer_stop(global_times); // Close step 2
-	timelist_timer_start(global_times, "Recurse and Consolidate Manifests");
 	server_manifest = load_mom(server_version, true, mix_exists, &manifest_err);
 	if (!server_manifest) {
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto clean_exit;
 	}
+	timelist_timer_stop(global_times); // closing: Load MoM manifests
 
+	timelist_timer_start(global_times, "Recurse and consolidate bundle manifests");
 	/* Read the current collective of manifests that we are subscribed to.
 	 * First load up the old (current) manifests. Statedir could have been cleared
 	 * or corrupt, so don't assume things are already there. Updating subscribed
@@ -372,18 +376,15 @@ version_check:
 
 	/* consolidate the current collective manifests down into one in memory */
 	current_manifest->files = files_from_bundles(current_manifest->submanifests);
-
 	current_manifest->files = consolidate_files(current_manifest->files);
-
 	latest_subs = list_clone(current_subs);
 	set_subscription_versions(server_manifest, current_manifest, &latest_subs);
 	link_submanifests(current_manifest, server_manifest, current_subs, latest_subs, false);
 
 	/* The new subscription is seeded from the list of currently installed bundles
 	 * This calls add_subscriptions which recurses for new includes */
-	timelist_timer_start(global_times, "Add Included Manifests");
+	timelist_timer_start(global_times, "Add included bundle manifests");
 	ret = add_included_manifests(server_manifest, &latest_subs);
-	timelist_timer_stop(global_times);
 	if (ret) {
 		if (ret == -add_sub_BADNAME) {
 			/* this means a bundle(s) was removed in a future version */
@@ -394,6 +395,7 @@ version_check:
 			goto clean_exit;
 		}
 	}
+	timelist_timer_stop(global_times); // closing: Add included bundle manifests
 
 	/* read the new collective of manifests that we are subscribed to in the new MoM */
 	server_manifest->submanifests = recurse_manifest(server_manifest, latest_subs, NULL, false, &manifest_err);
@@ -405,45 +407,41 @@ version_check:
 
 	/* consolidate the new collective manifests down into one in memory */
 	server_manifest->files = files_from_bundles(server_manifest->submanifests);
-
 	server_manifest->files = consolidate_files(server_manifest->files);
-
 	set_subscription_versions(server_manifest, current_manifest, &latest_subs);
 	link_submanifests(current_manifest, server_manifest, current_subs, latest_subs, true);
 
 	/* prepare for an update process based on comparing two in memory manifests */
 	link_manifests(current_manifest, server_manifest);
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Recurse and consolidate bundle manifests
+	timelist_timer_stop(global_times); // closing: Load manifests
+
 	/* Step 4: check disk state before attempting update */
-	timelist_timer_start(global_times, "Pre-Update Scripts");
+	timelist_timer_start(global_times, "Run pre-update scripts");
 	run_preupdate_scripts(server_manifest);
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Run pre-update scripts
 
 	/* Step 5: get the packs and untar */
-	timelist_timer_start(global_times, "Download Packs");
+	timelist_timer_start(global_times, "Download packs");
 	download_subscribed_packs(latest_subs, server_manifest, false);
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Download packs
 
 	timelist_timer_start(global_times, "Apply deltas");
 	apply_deltas(current_manifest);
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Apply deltas
 
 	/* Step 6: some more housekeeping */
 	/* TODO: consider trying to do less sorting of manifests */
-
-	timelist_timer_start(global_times, "Create Update List");
-
+	timelist_timer_start(global_times, "Create update list");
 	updates = create_update_list(server_manifest);
 
 	print_statistics(current_version, server_version);
-	timelist_timer_stop(global_times);
-	/* Step 7: apply the update */
+	timelist_timer_stop(global_times); // closing: Create update list
 
-	/*
-	 * need update list in filename order to insure directories are
-	 * created before their contents
-	 */
-	timelist_timer_start(global_times, "Update Loop");
+	/* Step 7: apply the update */
+	/* need update list in filename order to insure directories are
+	 * created before their contents */
+	timelist_timer_start(global_times, "Update loop");
 	updates = list_sort(updates, file_sort_filename);
 
 	ret = update_loop(updates, server_manifest);
@@ -459,18 +457,18 @@ version_check:
 	}
 
 	delete_motd();
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Update loop
+
 	/* Run any scripts that are needed to complete update */
-	timelist_timer_start(global_times, "Run Scripts");
+	timelist_timer_start(global_times, "Run post-update scripts");
 
 	/* Determine if another update is needed so the scripts block */
 	int new_current_version = get_current_version(path_prefix);
 	if (on_new_format() && (requested_version == -1 || (requested_version > new_current_version))) {
 		re_update = true;
 	}
-
 	run_scripts(re_update);
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(global_times); // closing: Run post-update scripts
 
 	/* Create the state file that will tell swupd it's on a mix on future runs */
 	if (mix_exists && !system_on_mix()) {
@@ -488,7 +486,6 @@ clean_exit:
 	free_manifest(server_manifest);
 
 clean_curl:
-	timelist_timer_stop(global_times);
 	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_stop);
 	delta = ts_stop.tv_sec - ts_start.tv_sec + ts_stop.tv_nsec / 1000000000.0 - ts_start.tv_nsec / 1000000000.0;
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,

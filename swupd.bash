@@ -27,7 +27,7 @@ _swupd()
     for ((i=COMP_CWORD-1;i>=0;i--))
     do case "${COMP_WORDS[$i]}" in
 	    ("$1")
-		opts="--help --version autoupdate bundle-add bundle-remove bundle-list hashdump update verify check-update search info clean mirror"
+		opts="--help --version autoupdate bundle-add bundle-remove bundle-list hashdump update verify check-update search search-file info clean mirror"
 	    break;;
 	    ("autoupdate")
 		opts="--help --enable --disable "
@@ -54,6 +54,9 @@ _swupd()
 		opts="--help --url --versionurl --port --format --force --nosigcheck --path --statedir "
 		break;;
 	    ("search")
+		opts="--help"
+		break;;
+	    ("search-file")
 		opts="--help --library --binary --scope --top --csv --display-files --init --ignore-time --url --contenturl --versionurl --port --path --format --statedir --certpath "
 		break;;
 	    ("info")
@@ -96,7 +99,7 @@ _swupd()
 	esac
     fi
 
-    COMPREPLY=($(compgen -W "${opts}" -- "${2}"));
+    COMPREPLY=("$(compgen -W "${opts}" -- "${2}")");
     return 0
 }
 if [ "${BASH_VERSINFO[0]}" -gt 4 ] || { [ "${BASH_VERSINFO[0]}" -eq 4 ] && [ "${BASH_VERSINFO[1]}" -ge 4 ]; }

@@ -43,7 +43,7 @@ static struct subcmd commands[] = {
 	{ "update", "Update to latest OS version", update_main },
 	{ "verify", "Verify content for OS version", verify_main },
 	{ "check-update", "Check if a new OS version is available", check_update_main },
-	{ "search-legacy", "Legacy command to search Clear Linux for a binary or library", search_main },
+	{ "search-file", "Command to search files in Clear Linux bundles", search_main },
 	{ "info", "Show the version and the update URLs", info_main },
 	{ "clean", "Clean cached files", clean_main },
 	{ "mirror", "Configure mirror url for swupd content", mirror_main },

@@ -43,13 +43,12 @@ static struct subcmd commands[] = {
 	{ "update", "Update to latest OS version", update_main },
 	{ "verify", "Verify content for OS version", verify_main },
 	{ "check-update", "Check if a new OS version is available", check_update_main },
-	{ "search", "Searches for the best bundle to install a binary or library.", binary_loader_main },
 	{ "search-legacy", "Legacy command to search Clear Linux for a binary or library", search_main },
 	{ "info", "Show the version and the update URLs", info_main },
 	{ "clean", "Clean cached files", clean_main },
 	{ "mirror", "Configure mirror url for swupd content", mirror_main },
 #ifdef EXTERNAL_MODULES_SUPPORT
-	{ "inspector", "Inspect swupd manifests for debugging purposes", binary_loader_main },
+	{ "search", "Searches for the best bundle to install a binary or library.", binary_loader_main },
 #endif
 	{ 0 }
 };

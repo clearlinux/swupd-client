@@ -28,7 +28,7 @@ test_setup() {
 	# fill up all the space in the disk
 	sudo dd if=/dev/zero of="$TEST_NAME"/testfs/dummy >& /dev/null || print "Using all space left in disk"
 
-	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS test-bundle2"
+	run sudo sh -c "$SWUPD search-file $SWUPD_OPTS test-bundle2"
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
@@ -57,7 +57,7 @@ test_setup() {
 	sudo mv "$big_manifest" "$WEBDIR"/10/Manifest.test-bundle1
 	sudo mv "$big_manifest".tar "$WEBDIR"/10/Manifest.test-bundle1.tar
 
-	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS test-bundle2"
+	run sudo sh -c "$SWUPD search-file $SWUPD_OPTS test-bundle2"
 
 	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM

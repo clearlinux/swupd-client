@@ -35,7 +35,7 @@ global_teardown() {
 	# manifests, so we need to account for those messages in
 	# this first test
 
-	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS fake-file"
+	run sudo sh -c "$SWUPD search-file $SWUPD_OPTS fake-file"
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
@@ -52,7 +52,7 @@ global_teardown() {
 
 @test "SRH010: Try searching for a file that does not exist using the full path" {
 
-	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS /usr/lib64/test-lib100"
+	run sudo sh -c "$SWUPD search-file $SWUPD_OPTS /usr/lib64/test-lib100"
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
@@ -66,7 +66,7 @@ global_teardown() {
 
 @test "SRH011: Try searching for a library that does not exist" {
 
-	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS -l libtest-nohit"
+	run sudo sh -c "$SWUPD search-file $SWUPD_OPTS -l libtest-nohit"
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM

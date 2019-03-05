@@ -43,13 +43,11 @@ static char search_type = '0';
 static char scope = '0';
 static int num_results = INT_MAX;
 
-/* bundle_result contains the information to print along with
- * the internal relevancy score used to sort the output */
+/* bundle_result contains the information to print */
 struct bundle_result {
 	char bundle_name[BUNDLE_NAME_MAXLEN];
 	long topsize;
 	long size;
-	double score;
 	struct list *files;
 	struct list *includes;
 	bool is_tracked;
@@ -57,19 +55,12 @@ struct bundle_result {
 	bool seen;
 };
 
-/* per-file scoring struct */
-struct file_result {
-	char *filename;
-	double score;
-};
-
 static struct list *results;
 
 /* add a bundle_result to the results list */
-static void add_bundle_file_result(char *bundlename, char *filename, double score, bool is_experimental)
+static void add_bundle_file_result(char *bundlename, char *filename, bool is_experimental)
 {
 	struct bundle_result *bundle = NULL;
-	struct file_result *file;
 	struct list *ptr;
 
 	ptr = results;
@@ -92,13 +83,7 @@ static void add_bundle_file_result(char *bundlename, char *filename, double scor
 		bundle->is_tracked = is_installed_bundle(bundlename);
 		bundle->is_experimental = is_experimental;
 	}
-
-	file = calloc(sizeof(struct file_result), 1);
-	ON_NULL_ABORT(file);
-	file->filename = strdup_or_die(filename);
-	bundle->files = list_append_data(bundle->files, file);
-	file->score = score;
-	bundle->score += score;
+	bundle->files = list_append_data(bundle->files, strdup_or_die(filename));
 }
 
 static int bundle_cmp(const void *a, const void *b)
@@ -106,13 +91,9 @@ static int bundle_cmp(const void *a, const void *b)
 	const struct bundle_result *A, *B;
 	A = (struct bundle_result *)a;
 	B = (struct bundle_result *)b;
-	if (A->score > B->score) {
-		return -1;
-	} else if (A->score < B->score) {
-		return 1;
-	} else {
-		return 0;
-	}
+
+	/* lexicographical order */
+	return strcmp(A->bundle_name, B->bundle_name);
 }
 
 static int bundle_size_cmp(const void *a, const void *b)
@@ -120,6 +101,7 @@ static int bundle_size_cmp(const void *a, const void *b)
 	const struct bundle_result *A, *B;
 	A = (struct bundle_result *)a;
 	B = (struct bundle_result *)b;
+
 	// smaller before larger
 	if (A->size < B->size) {
 		return -1;
@@ -132,16 +114,12 @@ static int bundle_size_cmp(const void *a, const void *b)
 
 static int file_cmp(const void *a, const void *b)
 {
-	const struct file_result *A, *B;
-	A = (struct file_result *)a;
-	B = (struct file_result *)b;
-	if (A->score > B->score) {
-		return -1;
-	} else if (A->score < B->score) {
-		return 1;
-	} else {
-		return 0;
-	}
+	const char *A, *B;
+	A = (char *)a;
+	B = (char *)b;
+
+	/* lexicographical order */
+	return strcmp(A, B);
 }
 
 static void sort_results(void)
@@ -160,14 +138,6 @@ static void sort_results(void)
 	}
 }
 
-static void file_result_free(void *data)
-{
-	struct file_result *result = data;
-
-	free(result->filename);
-	free(result);
-}
-
 static void free_bundle_result_data(void *data)
 {
 	struct bundle_result *br = (struct bundle_result *)data;
@@ -176,7 +146,7 @@ static void free_bundle_result_data(void *data)
 		return;
 	}
 
-	list_free_list_and_data(br->files, file_result_free);
+	list_free_list_and_data(br->files, free);
 	list_free_list_and_data(br->includes, free);
 	free(br);
 }
@@ -200,10 +170,12 @@ static long calculate_size(char *bname, struct list *bundle_info, bool installed
 	struct list *ptr;
 	struct bundle_result *bi;
 	long size = 0;
+
 	ptr = list_head(bundle_info);
 	while (ptr) {
 		bi = ptr->data;
 		ptr = ptr->next;
+
 		if (bi->seen || strcmp(bname, bi->bundle_name) != 0) {
 			continue;
 		}
@@ -236,7 +208,7 @@ static long calculate_size(char *bname, struct list *bundle_info, bool installed
 	return size;
 }
 
-static void apply_size_penalty(struct list *bundle_info)
+static void add_bundle_size(struct list *bundle_info)
 {
 	struct bundle_result *b;
 	struct list *ptr;
@@ -249,29 +221,28 @@ static void apply_size_penalty(struct list *bundle_info)
 
 		/* unsee all bundles before calculating size */
 		unsee_bundle_results(bundle_info);
+
 		/* calculate bundle size for recursive includes */
 		b->size = calculate_size(b->bundle_name, bundle_info, b->is_tracked);
-		/* Arbitrarily assign a score penalty based on how large the bundle is.
-		 * This is set to negative 1/10th of the bundle size. */
-		b->score -= (0.01 * b->size);
 	}
 }
 
 static void print_csv_results()
 {
-	struct bundle_result *b;
+	struct bundle_result *bundle;
 	struct list *ptr;
+
 	ptr = list_head(results);
 	while (ptr) {
 		struct list *fptr;
-		struct file_result *f;
-		b = ptr->data;
+		char *filename;
+		bundle = ptr->data;
 		ptr = ptr->next;
-		fptr = list_head(b->files);
+		fptr = list_head(bundle->files);
 		while (fptr) {
-			f = fptr->data;
+			filename = fptr->data;
 			fptr = fptr->next;
-			printf("%s,%s\n", f->filename, b->bundle_name);
+			printf("%s,%s\n", filename, bundle->bundle_name);
 		}
 	}
 }
@@ -289,7 +260,7 @@ static void print_final_results(bool display_size)
 	}
 	while (ptr) {
 		struct list *ptr2;
-		struct file_result *f;
+		char *filename;
 		int counter2 = 0;
 
 		b = ptr->data;
@@ -309,9 +280,9 @@ static void print_final_results(bool display_size)
 		putchar('\n');
 		ptr2 = list_head(b->files);
 		while (ptr2 && counter2 < num_results) {
-			f = ptr2->data;
+			filename = ptr2->data;
 			ptr2 = ptr2->next;
-			printf("\t%s\n", f->filename);
+			printf("\t%s\n", filename);
 			counter2++;
 		}
 
@@ -490,63 +461,6 @@ static bool file_search(char *filename, char *path, char *search_term)
 	return false;
 }
 
-static double guess_score(char *bundle, char *file, char *search_term)
-{
-	double multiplier = 1.0;
-	double score = 1.0;
-	char dirname[PATH_MAX];
-	char *bname;
-
-	// calculate basename
-	bname = basename(file);
-
-	/* The following score and multiplier transformations are experimental
-	 * heuristics and should be updated over time based on results and
-	 * feedback from swupd search usage */
-
-	/* dev bundles are less important */
-	if (strstr(bundle, "-dev")) {
-		multiplier /= 10;
-	}
-
-	/* files in /usr/bin are more important */
-	if (strcmp(dirname, "/usr/bin") == 0) {
-		score += 5;
-	}
-
-	/* files in /usr/include are not as important as other files */
-	if (strcmp(dirname, "/usr/include") == 0) {
-		multiplier /= 2;
-	}
-
-	/* if the search term is in the bundle name this is probably the bundle the
-	 * user is looking for. Give it a slight bump. */
-	if (strstr(bundle, search_term)) {
-		score += 0.5;
-	}
-
-	/* slightly favor shorter filenames */
-	score += (2.0 / strlen(file));
-
-	/* if the search term matches the basename give it a substantial score bump */
-	if (strcmp(bname, search_term) == 0) {
-		multiplier *= 5;
-	}
-
-	return multiplier * score;
-}
-
-/* report_finds()
- * Report out, respecting verbosity
- */
-static void report_find(char *bundle, char *file, char *search_term, bool is_experimental)
-{
-	double score;
-
-	score = guess_score(bundle, file, search_term);
-	add_bundle_file_result(bundle, file, score, is_experimental);
-}
-
 /* do_search()
  * Description: Perform a lookup of the specified search string in all Clear manifests
  * for the current os release.
@@ -584,11 +498,13 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 		struct bundle_result *bundle = NULL;
 		bundle = calloc(sizeof(struct bundle_result), 1);
 		ON_NULL_ABORT(bundle);
+
 		/* copy relevant information over for future use */
 		strncpy(bundle->bundle_name, subman->component, BUNDLE_NAME_MAXLEN - 1);
 		bundle->topsize = subman->contentsize;
 		/* do a deep copy of the includes list */
 		bundle->includes = list_deep_clone_strs(subman->includes);
+
 		bundle_info = list_prepend_data(bundle_info, bundle);
 
 		if (display_files) {
@@ -612,14 +528,14 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 			} else if (search_type == '0') {
 				/* Search for exact match, not path addition */
 				if (file_search(subfile->filename, "", search_term)) {
-					report_find(file->filename, subfile->filename, search_term, file->is_experimental);
+					add_bundle_file_result(file->filename, subfile->filename, file->is_experimental);
 					hit = true;
 				}
 			} else if (search_type == 'l') {
 				/* Check each supported library path for a match */
 				for (i = 0; lib_paths[i] != NULL; i++) {
 					if (file_search(subfile->filename, lib_paths[i], search_term)) {
-						report_find(file->filename, subfile->filename, search_term, file->is_experimental);
+						add_bundle_file_result(file->filename, subfile->filename, file->is_experimental);
 						hit = true;
 					}
 				}
@@ -627,7 +543,7 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 				/* Check each supported path for binaries */
 				for (i = 0; bin_paths[i] != NULL; i++) {
 					if (file_search(subfile->filename, bin_paths[i], search_term)) {
-						report_find(file->filename, subfile->filename, search_term, file->is_experimental);
+						add_bundle_file_result(file->filename, subfile->filename, file->is_experimental);
 						hit = true;
 					}
 				}
@@ -654,20 +570,22 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 		free_manifest(subman);
 	}
 
-	if (!hit_count) {
+	if (!hit_count && !display_files) {
 		fprintf(stderr, "Search term not found.\n");
 		ret = SWUPD_NO;
 	}
 
 	bool display_size = (scope != 'o' && !man_load_failures);
 	if (display_size) {
-		apply_size_penalty(bundle_info);
+		add_bundle_size(bundle_info);
 	}
 	list_free_list_and_data(bundle_info, free_bundle_result_data);
 
 	if (num_results != INT_MAX) {
+		/* sort alphabetically */
 		sort_results();
 	} else {
+		/* sort by bundle size */
 		results = list_sort(results, bundle_size_cmp);
 	}
 
@@ -826,8 +744,11 @@ enum swupd_code search_main(int argc, char **argv)
 		return ret;
 	}
 
-	if (!init) {
+	if (!init && !display_files) {
 		fprintf(stderr, "Searching for '%s'\n\n", search_string);
+	}
+	if (display_files) {
+		fprintf(stderr, "Displaying all bundles and their files:\n\n");
 	}
 
 	ret = download_manifests(&MoM);

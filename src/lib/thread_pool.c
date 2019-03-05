@@ -29,6 +29,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "log.h"
 #include "macros.h"
 #include "thread_pool.h"
 
@@ -69,8 +70,8 @@ static void *thread_run(void *data)
 				// Not an error, we can continue
 				continue;
 			}
-			fprintf(stderr, "Error - Thread communication failed: %d - %s\n",
-				errno, strerror(errno));
+			error("Thread communication failed: %d - %s\n",
+			      errno, strerror(errno));
 			return NULL;
 		}
 
@@ -85,11 +86,24 @@ struct tp *tp_start(int num_threads)
 	int i;
 	struct tp *tp;
 
+	if (num_threads < 0) {
+		error("Number of threads (%d) shouldn't be negative\n", num_threads);
+		return NULL;
+	}
+
 	tp = calloc(1, sizeof(struct tp) + num_threads * sizeof(pthread_t *));
 	ON_NULL_ABORT(tp);
 
 	tp->num_threads = num_threads;
+	if (num_threads == 0) {
+		//We don't need to create threads
+		return tp;
+	}
+
+	// Create threads communication
 	if (pipe2(tp->pipe_fds, O_DIRECT | O_CLOEXEC) < 0) {
+		debug("No support for pipe2(..., O_DIRECT | O_CLOEXEC) syscall\n");
+		debug("Error %d - %s\n", errno, strerror(errno));
 		goto error;
 	}
 
@@ -117,6 +131,13 @@ int tp_task_schedule(struct tp *tp, tp_task_run_t run, void *data)
 	int r = -1;
 	struct task task;
 
+	if (tp->num_threads == 0) {
+		// Run task
+		run(data);
+		return 0;
+	}
+
+	// Use threads
 	task.run = run;
 	task.data = data;
 
@@ -127,8 +148,8 @@ int tp_task_schedule(struct tp *tp, tp_task_run_t run, void *data)
 				// Not an error, we can continue
 				continue;
 			}
-			fprintf(stderr, "Error: thread pool task scheduling failed: %d - %s",
-				errno, strerror(errno));
+			error("Thread pool task scheduling failed: %d - %s\n",
+			      errno, strerror(errno));
 			return r;
 		}
 	}
@@ -139,6 +160,13 @@ int tp_task_schedule(struct tp *tp, tp_task_run_t run, void *data)
 void tp_complete(struct tp *tp)
 {
 	int i;
+	if (!tp) {
+		return;
+	}
+
+	if (tp->num_threads == 0) {
+		goto free_tp;
+	}
 
 	// Close pipe so threads will get an EOF when all tasks are completed
 	close(tp->pipe_fds[1]);
@@ -148,5 +176,17 @@ void tp_complete(struct tp *tp)
 	}
 
 	close(tp->pipe_fds[0]);
+
+free_tp:
 	free(tp);
+}
+
+int tp_get_num_threads(struct tp *tp)
+{
+	if (!tp) {
+		error("Invalid thread pool: NULL\n");
+		return 0;
+	}
+
+	return tp->num_threads;
 }

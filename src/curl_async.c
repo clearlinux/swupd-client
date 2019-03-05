@@ -186,6 +186,16 @@ void *swupd_curl_parallel_download_start(size_t max_xfer)
 	/* Libarchive is not thread safe when using the archive_disk_write api.
 	 * So for now, use only 1 thread to handle untar/extraction */
 	h->thpool = tp_start(1);
+	if (!h->thpool) {
+		h->thpool = tp_start(0);
+		if (!h->thpool) {
+			error("Unable to create a thread pool");
+			goto error;
+		}
+
+		warn("Curl - Unable to create a thread pool - downloading files synchronously\n");
+		max_xfer = 0;
+	}
 
 	curl_multi_setopt(h->mcurl, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX | CURLPIPE_HTTP1);
 
@@ -513,10 +523,11 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 	while (poll_fewer_than(h, 0, 0) == 0 && retry) {
 		retry = false;
 
-		/* Wait for all threads to complete, re-init pool to handle extra downloads
-		 * This should be replaced by a tp_wait() function once available. */
-		tp_complete(h->thpool);
-		h->thpool = tp_start(1);
+		/* Wait for all threads to complete */
+		if (tp_get_num_threads(h->thpool) > 0) {
+			tp_complete(h->thpool);
+			h->thpool = tp_start(1);
+		}
 
 		/* Check return values from threads, add failed items to h->failed list to retry */
 		HASHMAP_FOREACH(h->curl_hashmap, i, l, file)

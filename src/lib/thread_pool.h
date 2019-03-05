@@ -37,6 +37,11 @@ int tp_task_schedule(struct tp *tp, tp_task_run_t run, void *data);
  */
 void tp_complete(struct tp *tp);
 
+/*
+ * Get the number of threads created by this thread pool.
+ */
+int tp_get_num_threads(struct tp *tp);
+
 //TODO: Implement a tp_wait() function
 
 #endif

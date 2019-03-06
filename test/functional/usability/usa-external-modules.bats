@@ -17,7 +17,7 @@ test_setup() {
 		print "swupd-search not found in the system, creating a mock one..."
 		{
 			printf '#!/bin/bash\n'
-			printf 'echo "Searches for the best bundle to install a binary or library."\n'
+			printf 'echo "Bundle with the best search result:"\n'
 			# shellcheck disable=SC2016
 			printf 'echo "Fake search invoked successfully with these arguments: $1 $2 $3"\n'
 		} | sudo tee /usr/bin/swupd-search > /dev/null
@@ -45,10 +45,10 @@ test_teardown() {
 @test "USA008: The external module swupd-search can be called from swupd" {
 
 	# swupd should be able to run enabled external programs
-	run sudo sh -c "$SWUPD search"
+	run sudo sh -c "$SWUPD search os-core"
 
 	assert_status_is 0
-	assert_in_output "Searches for the best bundle to install a binary or library."
+	assert_in_output "Bundle with the best search result:"
 
 }
 

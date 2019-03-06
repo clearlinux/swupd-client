@@ -41,7 +41,7 @@ global_teardown() {
 
 @test "SRH023: search shows the results in alphabetical order" {
 
-	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS -T 10 alfa"
+	run sudo sh -c "$SWUPD search-file $SWUPD_OPTS --order=alpha alfa"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -64,7 +64,7 @@ global_teardown() {
 
 @test "SRH024: search shows the results ordered by bundle size (smallest first)" {
 
-	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS alfa"
+	run sudo sh -c "$SWUPD search-file $SWUPD_OPTS --order=size alfa"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -87,7 +87,7 @@ global_teardown() {
 
 @test "SRH025: search can show all files in all bundles" {
 
-	run sudo sh -c "$SWUPD search-legacy $SWUPD_OPTS -d"
+	run sudo sh -c "$SWUPD search-file $SWUPD_OPTS -d"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -120,5 +120,27 @@ global_teardown() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
+
+}
+
+@test "SRH026: search limits the results" {
+
+	run sudo sh -c "$SWUPD search-file $SWUPD_OPTS --top=3 alfa"
+
+	assert_status_is 0
+	expected_output=$(cat <<-EOM
+		Bundle alfa-charly	\\(2 MB to install\\)
+		./usr/share/clear/bundles/alfa-charly
+		Bundle alfa-zulu	\\(1 MB to install\\)
+		./alfaromeo/echo
+		./bar/alfa
+		./foo/alfa
+		.file results truncated...
+		Bundle victor	\\(3 MB to install\\)
+		./alfa/zulu
+		./bar/alfa
+	EOM
+	)
+	assert_regex_in_output "$expected_output"
 
 }

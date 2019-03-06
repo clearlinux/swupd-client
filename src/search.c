@@ -39,9 +39,15 @@ bool display_files = false; /* Just display all files found in Manifest set */
 bool csv_format = false;
 bool init = false;
 
+enum sort_type {
+	alpha,
+	size
+};
+
 static char search_type = '0';
 static char scope = '0';
 static int num_results = INT_MAX;
+static int sort = alpha;
 
 /* bundle_result contains the information to print */
 struct bundle_result {
@@ -321,6 +327,9 @@ static void print_help(void)
 	fprintf(stderr, "   -m, --csv               Output all results in CSV format (machine-readable)\n");
 	fprintf(stderr, "   -d, --display-files	   Output full file list, no search done\n");
 	fprintf(stderr, "   -i, --init              Download all manifests then return, no search done\n");
+	fprintf(stderr, "   -o, --order=[ORDER]     Sort the output. ORDER is one of the following values:\n");
+	fprintf(stderr, "                           'alpha' to order alphabetically (default)\n");
+	fprintf(stderr, "                           'size' to order by bundle size (smaller to larger)\n");
 }
 
 static const struct option prog_opts[] = {
@@ -332,6 +341,7 @@ static const struct option prog_opts[] = {
 	{ "scope", required_argument, 0, 's' },
 	{ "top", required_argument, 0, 'T' },
 	//TODO: -t option is deprecated. Remove that on a Major release
+	{ "order", required_argument, 0, 'o' },
 	{ "", required_argument, 0, 't' },
 };
 
@@ -340,6 +350,16 @@ static bool parse_opt(int opt, char *optarg)
 	int err;
 
 	switch (opt) {
+	case 'o':
+		if (!strcmp(optarg, "alpha")) {
+			sort = alpha;
+		} else if (!strcmp(optarg, "size")) {
+			sort = size;
+		} else {
+			fprintf(stderr, "Invalid --order argument\n\n");
+			return false;
+		}
+		return true;
 	case 's':
 		if (strcmp(optarg, "b") && (strcmp(optarg, "o"))) {
 			fprintf(stderr, "Invalid --scope argument. Must be 'b' or 'o'\n\n");
@@ -581,10 +601,10 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 	}
 	list_free_list_and_data(bundle_info, free_bundle_result_data);
 
-	if (num_results != INT_MAX) {
+	if (sort == alpha) {
 		/* sort alphabetically */
 		sort_results();
-	} else {
+	} else if (sort == size) {
 		/* sort by bundle size */
 		results = list_sort(results, bundle_size_cmp);
 	}

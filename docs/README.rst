@@ -102,7 +102,7 @@ Once this is done, you can actually run the job, this is the script section of t
        S script
           sudo find test/functional -exec chmod g-w {} \;
           autoreconf --verbose --warnings=none --install --force &&
-          ./configure --enable-signature-verification &&
+          ./configure &&
           make -j48 &&
           sudo sh -c 'umask 0022 && make -j48 check' &&
           sudo sh -c 'umask 0022 && make install'

@@ -46,7 +46,7 @@ find test/functional -exec chmod g-w {} \;
 
 # Configure the build
 autoreconf --verbose --warnings=none --install --force || die_fatal "Configure failure"
-./configure --enable-signature-verification  || die_fatal "Configure failure"
+./configure || die_fatal "Configure failure"
 
 # Build error
 make $jobCount || die_fatal "Build failure"

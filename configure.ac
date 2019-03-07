@@ -62,13 +62,14 @@ AS_IF(
 
 AC_ARG_ENABLE(
   [signature-verification],
-  [AS_HELP_STRING([--enable-signature-verification], [Enable signature check (disabled by default)])],
-  [AC_DEFINE([SIGNATURES], 1, [Enable signature check as default])]
+  [AS_HELP_STRING([--disable-signature-verification], [Disable signature check (enabled by default)])]
 )
-SIGVERIFICATION="no"
+SIGVERIFICATION="yes"
 AS_IF(
-  [test -n "$enable_signature_verification" -a "$enable_signature_verification" = "yes"],
-  [SIGVERIFICATION="$enable_signature_verification"]
+  [test "x$enable_signature_verification" != "xno"],
+  [AC_DEFINE(SIGNATURES, 1, [Enable signature check])
+     SIGVERIFICATION="yes"],
+  [SIGVERIFICATION="no"]
 )
 
 AC_ARG_ENABLE(

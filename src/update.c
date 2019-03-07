@@ -240,8 +240,6 @@ static enum swupd_code main_update()
 	bool re_update = false;
 	bool versions_match = false;
 
-	srand(time(NULL));
-
 	ret = swupd_init();
 	if (ret != 0) {
 		/* being here means we already close log by a previously caught error */

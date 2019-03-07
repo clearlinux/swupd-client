@@ -688,8 +688,6 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 	struct list *iter;
 	struct manifest *manifest;
 
-	srand(time(NULL));
-
 	iter = list_head(bundles);
 	while (iter) {
 		bundle = iter->data;

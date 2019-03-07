@@ -34,7 +34,7 @@ install:
 script:
         - sudo find test/functional -exec chmod g-w {} \;
         - autoreconf --verbose --warnings=none --install --force &&
-          ./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --with-fallback-capaths=$TRAVIS_BUILD_DIR/swupd_test_certificates --enable-signature-verification --with-systemdsystemunitdir=/usr/lib/systemd/system &&
+          ./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --with-fallback-capaths=$TRAVIS_BUILD_DIR/swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system &&
           make -j48 &&
           sudo sh -c 'umask 0022 && make -j48 check' &&
           sudo sh -c 'umask 0022 && make install' &&

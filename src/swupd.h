@@ -188,6 +188,7 @@ extern int skip_diskspace_check;
 extern timelist *global_times;
 extern int max_retries;
 extern int retry_delay;
+extern bool json_output;
 
 extern char *version_url;
 extern char *content_url;

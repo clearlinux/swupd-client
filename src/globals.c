@@ -65,7 +65,6 @@ int retry_delay = 10;
  * swupd-version.01.org and swupd-files.01.org as this enables
  * different quality of server and control of the servers
  */
-bool download_only;
 bool verbose_time = false;
 bool have_manifest_diskspace = false; /* assume no until checked */
 char *version_url = NULL;

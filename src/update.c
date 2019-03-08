@@ -37,6 +37,7 @@
 #include "swupd.h"
 
 static int requested_version = -1;
+static bool download_only;
 
 int nonpack;
 

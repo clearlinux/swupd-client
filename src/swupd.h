@@ -167,7 +167,6 @@ struct file_counts {
 	int not_deleted;
 };
 
-extern bool download_only;
 extern bool verify_esp_only;
 extern bool have_manifest_diskspace;
 extern bool have_network;

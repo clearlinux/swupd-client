@@ -48,12 +48,14 @@ static void print_help(void)
 
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "   --skip-diskspace-check  Do not check free disk space before adding bundle\n");
+	fprintf(stderr, "   -j, --json-output       Print all output as a JSON stream\n");
 	fprintf(stderr, "\n");
 }
 
 static const struct option prog_opts[] = {
 	{ "list", no_argument, 0, 'l' },
 	{ "skip-diskspace-check", no_argument, &skip_diskspace_check, 1 },
+	{ "json-output", no_argument, 0, 'j' },
 };
 
 static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
@@ -63,6 +65,9 @@ static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 		fprintf(stderr, "Error: [-l, --list] option is deprecated, use\n"
 				"bundle-list [-a|--all] sub-command instead.\n\n");
 		exit(EXIT_FAILURE);
+	case 'j':
+		json_output = true;
+		return true;
 	default:
 		return false;
 	}

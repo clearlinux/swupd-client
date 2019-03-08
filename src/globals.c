@@ -59,7 +59,6 @@ bool keepcache = false;
 timelist *global_times = NULL;
 int max_retries = 3;
 int retry_delay = 10;
-bool json_output = false;
 
 /* NOTE: Today the content and version server urls are the same in
  * all cases.  It is highly likely these will eventually differ, eg:

@@ -47,6 +47,8 @@ swupd_SOURCES = \
 	src/helpers.c \
 	src/heuristics.c \
 	src/info.c \
+	src/lib/formatter_json.c \
+	src/lib/formatter_json.h \
 	src/lib/hashmap.c \
 	src/lib/hashmap.h \
 	src/lib/list.c \

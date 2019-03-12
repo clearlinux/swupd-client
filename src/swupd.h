@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "lib/formatter_json.h"
 #include "lib/list.h"
 #include "lib/log.h"
 #include "lib/macros.h"

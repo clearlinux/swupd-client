@@ -51,6 +51,16 @@ int strtoi_err(const char *str, int *value);
  */
 int strtoi_err_endptr(const char *str, char **endptr, int *value);
 
+/*
+ * Creates a new string converting all characters from the original string
+ * to its lower case values.
+ *
+ * This function returns a pointer to the new string.
+ *
+ * The memory of the new string has to be freed after using it.
+ */
+char *str_tolower(const char *str);
+
 #ifdef __cplusplus
 }
 #endif

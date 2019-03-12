@@ -136,3 +136,17 @@ int strtoi_err(const char *str, int *value)
 
 	return 0;
 }
+
+char *str_tolower(const char *str)
+{
+	char *str_lower = malloc(strlen(str) + 1);
+
+	ON_NULL_ABORT(str_lower);
+
+	for (int i = 0; str[i]; i++) {
+		str_lower[i] = tolower(str[i]);
+	}
+	str_lower[strlen(str)] = '\0';
+
+	return str_lower;
+}

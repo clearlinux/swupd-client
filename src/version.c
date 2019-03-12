@@ -142,11 +142,11 @@ enum swupd_code read_versions(int *current_version, int *server_version, char *p
 	*server_version = get_latest_version(NULL);
 
 	if (*current_version < 0) {
-		fprintf(stderr, "Error: Unable to determine current OS version\n");
+		error("Unable to determine current OS version\n");
 		return SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
 	if (*server_version < 0) {
-		fprintf(stderr, "Error: Unable to determine the server version\n");
+		error("Unable to determine the server version\n");
 		return SWUPD_SERVER_CONNECTION_ERROR;
 	}
 

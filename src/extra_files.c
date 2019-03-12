@@ -98,11 +98,11 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 
 	if (fix) {
 		string_or_die(&temp, "%s%s", path_prefix, filename);
-		fprintf(stderr,
-			is_dir ? "REMOVING DIR %s/\n" : "REMOVING %s\n",
-			filename);
+		info(
+		    is_dir ? "REMOVING DIR %s/\n" : "REMOVING %s\n",
+		    filename);
 		if (remove(temp)) {
-			fprintf(stderr, "Removing %s failed: %s\n", temp, strerror(errno));
+			info("Removing %s failed: %s\n", temp, strerror(errno));
 			ret = false;
 		}
 		free_string(&temp);

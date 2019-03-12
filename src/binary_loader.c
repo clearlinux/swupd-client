@@ -72,7 +72,7 @@ enum swupd_code binary_loader_main(int argc, char **argv)
 	params = create_params_list(binary_name, argc - 1, argv + 1);
 	ret = execv(full_binary_path, params);
 	if (ret < 0) {
-		fprintf(stderr, "Running %s failed\n", binary_name);
+		error("Running %s failed\n", binary_name);
 		ret = SWUPD_SUBPROCESS_ERROR;
 	}
 

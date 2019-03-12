@@ -54,7 +54,7 @@ enum swupd_code list_installable_bundles()
 
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
-		fprintf(stderr, "Error: Unable to determine current OS version\n");
+		error("Unable to determine current OS version\n");
 		return SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
 
@@ -203,14 +203,14 @@ enum swupd_code show_included_bundles(char *bundle_name)
 
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
-		fprintf(stderr, "Error: Unable to determine current OS version\n");
+		error("Unable to determine current OS version\n");
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 		goto out;
 	}
 
 	mom = load_mom(current_version, false, false, NULL);
 	if (!mom) {
-		fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
+		info("Cannot load official manifest MoM for version %i\n", current_version);
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto out;
 	}
@@ -234,13 +234,13 @@ enum swupd_code show_included_bundles(char *bundle_name)
 			ret = SWUPD_UNEXPECTED_CONDITION;
 		}
 
-		fprintf(stderr, "Error: %s - Aborting\n", m);
+		error("%s - Aborting\n", m);
 		free_string(&m);
 		goto out;
 	}
 	deps = recurse_manifest(mom, subs, NULL, false, NULL);
 	if (!deps) {
-		fprintf(stderr, "Error: Cannot load included bundles\n");
+		error("Cannot load included bundles\n");
 		ret = SWUPD_RECURSE_MANIFEST;
 		goto out;
 	}
@@ -248,12 +248,12 @@ enum swupd_code show_included_bundles(char *bundle_name)
 	/* deps now includes the bundle indicated by bundle_name
 	 * if deps only has one bundle in it, no included packages were found */
 	if (list_len(deps) == 1) {
-		fprintf(stderr, "No included bundles\n");
+		info("No included bundles\n");
 		ret = SWUPD_OK;
 		goto out;
 	}
 
-	fprintf(stderr, "Bundles included by %s:\n\n", bundle_name);
+	info("Bundles included by %s:\n\n", bundle_name);
 
 	struct list *iter;
 	iter = list_head(deps);
@@ -295,28 +295,28 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 	struct list *reqd_by = NULL;
 
 	if (!server && !is_installed_bundle(bundle_name)) {
-		fprintf(stderr, "Error: Bundle \"%s\" does not seem to be installed\n", bundle_name);
-		fprintf(stderr, "       try passing --all to check uninstalled bundles\n");
+		error("Bundle \"%s\" does not seem to be installed\n", bundle_name);
+		info("       try passing --all to check uninstalled bundles\n");
 		ret = SWUPD_BUNDLE_NOT_TRACKED;
 		goto out;
 	}
 
 	version = get_current_version(path_prefix);
 	if (version < 0) {
-		fprintf(stderr, "Error: Unable to determine current OS version\n");
+		error("Unable to determine current OS version\n");
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 		goto out;
 	}
 
 	current_manifest = load_mom(version, server, false, NULL);
 	if (!current_manifest) {
-		fprintf(stderr, "Unable to download/verify %d Manifest.MoM\n", version);
+		info("Unable to download/verify %d Manifest.MoM\n", version);
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto out;
 	}
 
 	if (!search_bundle_in_manifest(current_manifest, bundle_name)) {
-		fprintf(stderr, "Bundle name %s is invalid, aborting dependency list\n", bundle_name);
+		info("Bundle name %s is invalid, aborting dependency list\n", bundle_name);
 		ret = SWUPD_INVALID_BUNDLE;
 		goto out;
 	}
@@ -324,7 +324,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 	if (server) {
 		ret = add_included_manifests(current_manifest, &subs);
 		if (ret) {
-			fprintf(stderr, "Unable to load server manifest");
+			info("Unable to load server manifest");
 			ret = SWUPD_COULDNT_LOAD_MANIFEST;
 			goto out;
 		}
@@ -335,7 +335,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 		/* now popout the one to be processed */
 		ret = unload_tracked_bundle(bundle_name, &subs);
 		if (ret != 0) {
-			fprintf(stderr, "Unable to untrack %s\n", bundle_name);
+			info("Unable to untrack %s\n", bundle_name);
 			goto out;
 		}
 	}
@@ -343,24 +343,24 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 	/* load all submanifests */
 	current_manifest->submanifests = recurse_manifest(current_manifest, subs, NULL, server, NULL);
 	if (!current_manifest->submanifests) {
-		fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
+		error("Cannot load MoM sub-manifests\n");
 		ret = SWUPD_RECURSE_MANIFEST;
 		goto out;
 	}
 
 	required_by(&reqd_by, bundle_name, current_manifest, 0);
 	if (reqd_by == NULL) {
-		fprintf(stderr, "No bundles have %s as a dependency\n", bundle_name);
+		info("No bundles have %s as a dependency\n", bundle_name);
 		ret = SWUPD_OK;
 		goto out;
 	}
 
-	fprintf(stderr, server ? "All installable and installed " : "Installed ");
-	fprintf(stderr, "bundles that have %s as a dependency:\n", bundle_name);
-	fprintf(stderr, "format:\n");
-	fprintf(stderr, " # * is-required-by\n");
-	fprintf(stderr, " #   |-- is-required-by\n");
-	fprintf(stderr, " # * is-also-required-by\n # ...\n\n");
+	info(server ? "All installable and installed " : "Installed ");
+	info("bundles that have %s as a dependency:\n", bundle_name);
+	info("format:\n");
+	info(" # * is-required-by\n");
+	info(" #   |-- is-required-by\n");
+	info(" # * is-also-required-by\n # ...\n\n");
 
 	struct list *iter;
 	char *bundle;
@@ -380,7 +380,7 @@ out:
 	}
 
 	if (ret) {
-		fprintf(stderr, "Error: Bundle list failed\n");
+		error("Bundle list failed\n");
 	}
 
 	if (reqd_by) {
@@ -509,13 +509,13 @@ enum swupd_code remove_bundles(char **bundles)
 
 	ret = swupd_init();
 	if (ret != 0) {
-		fprintf(stderr, "Failed updater initialization, exiting now.\n");
+		info("Failed updater initialization, exiting now.\n");
 		return ret;
 	}
 
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
-		fprintf(stderr, "Error: Unable to determine current OS version\n");
+		error("Unable to determine current OS version\n");
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 		telemetry(TELEMETRY_CRIT,
 			  "bundleremove",
@@ -545,14 +545,14 @@ enum swupd_code remove_bundles(char **bundles)
 		* anyways, better catch here and return success, no extra work to be done.
 		*/
 		if (strcmp(bundle, "os-core") == 0) {
-			fprintf(stderr, "Warning: Bundle \"os-core\" not allowed to be removed\n");
+			warn("Bundle \"os-core\" not allowed to be removed\n");
 			ret = SWUPD_REQUIRED_BUNDLE_ERROR;
 			bad++;
 			goto out_free_curl;
 		}
 
 		if (!is_installed_bundle(bundle)) {
-			fprintf(stderr, "Warning: Bundle \"%s\" is not installed, skipping it...\n", bundle);
+			warn("Bundle \"%s\" is not installed, skipping it...\n", bundle);
 			ret = SWUPD_BUNDLE_NOT_TRACKED;
 			bad++;
 			goto out_free_curl;
@@ -560,19 +560,19 @@ enum swupd_code remove_bundles(char **bundles)
 
 		/* only show this message if there are multiple bundles to be removed */
 		if (*(bundles + 1) || total > 0) {
-			fprintf(stderr, "Removing bundle: %s\n", bundle);
+			info("Removing bundle: %s\n", bundle);
 		}
 
 		current_mom = load_mom(current_version, false, mix_exists, NULL);
 		if (!current_mom) {
-			fprintf(stderr, "Unable to download/verify %d Manifest.MoM\n", current_version);
+			info("Unable to download/verify %d Manifest.MoM\n", current_version);
 			ret = SWUPD_COULDNT_LOAD_MOM;
 			bad++;
 			goto out_free_curl;
 		}
 
 		if (!search_bundle_in_manifest(current_mom, bundle)) {
-			fprintf(stderr, "Bundle name is invalid, aborting removal\n");
+			info("Bundle name is invalid, aborting removal\n");
 			ret = SWUPD_INVALID_BUNDLE;
 			bad++;
 			goto out_free_mom;
@@ -593,7 +593,7 @@ enum swupd_code remove_bundles(char **bundles)
 		/* load all submanifests minus the one to be removed */
 		current_mom->submanifests = recurse_manifest(current_mom, subs, NULL, false, NULL);
 		if (!current_mom->submanifests) {
-			fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
+			error("Cannot load MoM sub-manifests\n");
 			ret = SWUPD_RECURSE_MANIFEST;
 			bad++;
 			goto out_free_mom;
@@ -606,7 +606,7 @@ enum swupd_code remove_bundles(char **bundles)
 			struct list *iter;
 			char *bundle;
 			iter = list_head(reqd_by);
-			fprintf(stderr, "Error: bundle requested to be removed is required by the following bundles:\n");
+			error("bundle requested to be removed is required by the following bundles:\n");
 			printf("format:\n");
 			printf(" # * is-required-by\n");
 			printf(" #   |-- is-required-by\n");
@@ -629,7 +629,7 @@ enum swupd_code remove_bundles(char **bundles)
 		/* Now that we have the consolidated list of all files, load bundle to be removed submanifest */
 		ret = load_bundle_manifest(bundle, subs, current_version, &bundle_manifest);
 		if (ret != 0 || !bundle_manifest) {
-			fprintf(stderr, "Error: Cannot load %s sub-manifest (ret = %d)\n", bundle, ret);
+			error("Cannot load %s sub-manifest (ret = %d)\n", bundle, ret);
 			bad++;
 			goto out_free_mom;
 		}
@@ -638,7 +638,7 @@ enum swupd_code remove_bundles(char **bundles)
 		bundle_manifest->files = list_sort(bundle_manifest->files, file_sort_filename);
 		deduplicate_files_from_manifest(&bundle_manifest, current_mom);
 
-		fprintf(stderr, "Deleting bundle files...\n");
+		info("Deleting bundle files...\n");
 		remove_files_in_manifest_from_fs(bundle_manifest);
 		remove_tracked(bundle_manifest->component);
 
@@ -663,9 +663,9 @@ enum swupd_code remove_bundles(char **bundles)
 	}
 
 	if (bad > 0) {
-		fprintf(stderr, "Failed to remove %i of %i bundles\n", bad, total);
+		info("Failed to remove %i of %i bundles\n", bad, total);
 	} else {
-		fprintf(stderr, "Successfully removed %i bundle%s\n", total, (total > 1 ? "s" : ""));
+		info("Successfully removed %i bundle%s\n", total, (total > 1 ? "s" : ""));
 	}
 
 	free_subscriptions(&subs);
@@ -695,7 +695,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 
 		file = search_bundle_in_manifest(mom, bundle);
 		if (!file) {
-			fprintf(stderr, "Warning: Bundle \"%s\" is invalid, skipping it...\n", bundle);
+			warn("Bundle \"%s\" is invalid, skipping it...\n", bundle);
 			ret |= add_sub_BADNAME; /* Use this to get non-zero exit code */
 			continue;
 		}
@@ -714,7 +714,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 
 		manifest = load_manifest(file->last_change, file, mom, true, &manifest_err);
 		if (!manifest) {
-			fprintf(stderr, "Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
+			info("Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
 			ret |= add_sub_ERR;
 			goto out;
 		}
@@ -770,7 +770,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		bundle = iter->data;
 		iter = iter->next;
 		if (is_installed_bundle(bundle)) {
-			fprintf(stderr, "Warning: Bundle \"%s\" is already installed, skipping it...\n", bundle);
+			warn("Bundle \"%s\" is already installed, skipping it...\n", bundle);
 			already_installed++;
 			/* track as installed since the user tried to install */
 			track_installed(bundle);
@@ -778,7 +778,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		/* warn the user if the bundle to be installed is experimental */
 		file = search_bundle_in_manifest(mom, bundle);
 		if (file && file->is_experimental) {
-			fprintf(stderr, "Warning: Bundle %s is experimental\n", bundle);
+			warn("Bundle %s is experimental\n", bundle);
 		}
 	}
 
@@ -807,7 +807,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 	to_install_bundles = recurse_manifest(mom, *subs, NULL, false, NULL);
 	if (!to_install_bundles) {
-		fprintf(stderr, "Error: Cannot load to install bundles\n");
+		error("Cannot load to install bundles\n");
 		ret = SWUPD_RECURSE_MANIFEST;
 		goto out;
 	}
@@ -836,15 +836,15 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 			ret = SWUPD_DISK_SPACE_ERROR;
 
 			if (fs_free > 0) {
-				fprintf(stderr, "Error: Bundle too large by %ldM.\n", (bundle_size - fs_free) / 1000 / 1000);
+				error("Bundle too large by %ldM.\n", (bundle_size - fs_free) / 1000 / 1000);
 			} else {
-				fprintf(stderr, "Error: Unable to determine free space on filesystem.\n");
+				error("Unable to determine free space on filesystem.\n");
 			}
 
-			fprintf(stderr, "NOTE: currently, swupd only checks /usr/ "
-					"(or the passed-in path with /usr/ appended) for available space.\n");
-			fprintf(stderr, "To skip this error and install anyways, "
-					"add the --skip-diskspace-check flag to your command.\n");
+			info("NOTE: currently, swupd only checks /usr/ "
+			     "(or the passed-in path with /usr/ appended) for available space.\n");
+			info("To skip this error and install anyways, "
+			     "add the --skip-diskspace-check flag to your command.\n");
 
 			goto out;
 		}
@@ -866,7 +866,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	if (ret) {
 		/* make sure the return code is positive */
 		ret = abs(ret);
-		fprintf(stderr, "ERROR: Could not download some files from bundles, aborting bundle installation.\n");
+		error("Could not download some files from bundles, aborting bundle installation.\n");
 		goto out;
 	}
 	timelist_timer_stop(global_times); // closing: Download missing files
@@ -876,7 +876,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 	/* step 4: Install all bundle(s) files into the fs */
 	timelist_timer_start(global_times, "Installing bundle(s) files onto filesystem");
-	fprintf(stderr, "Installing bundle(s) files...\n");
+	info("Installing bundle(s) files...\n");
 
 	/* Do an initial check to
 	 * 1. make sure the file actually downloaded, if not continue on to the
@@ -901,11 +901,11 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 		ret = verify_file(file, hashpath);
 		if (!ret) {
-			fprintf(stderr, "Warning: hash check failed for %s\n", file->filename);
-			fprintf(stderr, "         will attempt to download fullfile for %s\n", file->filename);
+			warn("hash check failed for %s\n", file->filename);
+			info("         will attempt to download fullfile for %s\n", file->filename);
 			ret = swupd_rm(hashpath);
 			if (ret) {
-				fprintf(stderr, "Error: could not remove bad file %s\n", hashpath);
+				error("could not remove bad file %s\n", hashpath);
 				ret = SWUPD_COULDNT_REMOVE_FILE;
 				free_string(&hashpath);
 				goto out;
@@ -941,7 +941,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 				set_subscription_versions(mom, NULL, subs);
 				mom->submanifests = recurse_manifest(mom, *subs, NULL, false, NULL);
 				if (!mom->submanifests) {
-					fprintf(stderr, "Error: Cannot load installed bundles\n");
+					error("Cannot load installed bundles\n");
 					ret = SWUPD_RECURSE_MANIFEST;
 					goto out;
 				}
@@ -983,7 +983,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 				set_subscription_versions(mom, NULL, subs);
 				mom->submanifests = recurse_manifest(mom, *subs, NULL, false, NULL);
 				if (!mom->submanifests) {
-					fprintf(stderr, "Error: Cannot load installed bundles\n");
+					error("Cannot load installed bundles\n");
 					ret = SWUPD_RECURSE_MANIFEST;
 					goto out;
 				}
@@ -1035,12 +1035,12 @@ out:
 		bundles_failed = bundles_requested - bundles_installed - already_installed;
 	}
 	if (bundles_failed > 0) {
-		fprintf(stderr, "Failed to install %i of %i bundles\n", bundles_failed, bundles_requested - already_installed);
+		info("Failed to install %i of %i bundles\n", bundles_failed, bundles_requested - already_installed);
 	} else if (bundles_installed) {
-		fprintf(stderr, "Successfully installed %i bundle%s\n", bundles_installed, (bundles_installed > 1 ? "s" : ""));
+		info("Successfully installed %i bundle%s\n", bundles_installed, (bundles_installed > 1 ? "s" : ""));
 	}
 	if (already_installed) {
-		fprintf(stderr, "%i bundle%s already installed\n", already_installed, (already_installed > 1 ? "s were" : " was"));
+		info("%i bundle%s already installed\n", already_installed, (already_installed > 1 ? "s were" : " was"));
 	}
 
 	if (to_install_files) {
@@ -1074,13 +1074,13 @@ enum swupd_code install_bundles_frontend(char **bundles)
 	/* initialize swupd and get current version from OS */
 	ret = swupd_init();
 	if (ret != 0) {
-		fprintf(stderr, "Failed updater initialization, exiting now.\n");
+		info("Failed updater initialization, exiting now.\n");
 		return ret;
 	}
 
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
-		fprintf(stderr, "Error: Unable to determine current OS version\n");
+		error("Unable to determine current OS version\n");
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 		goto clean_and_exit;
 	}
@@ -1089,7 +1089,7 @@ enum swupd_code install_bundles_frontend(char **bundles)
 
 	mom = load_mom(current_version, false, mix_exists, NULL);
 	if (!mom) {
-		fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
+		info("Cannot load official manifest MoM for version %i\n", current_version);
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto clean_and_exit;
 	}
@@ -1101,7 +1101,7 @@ enum swupd_code install_bundles_frontend(char **bundles)
 		char *alias_list_str = string_join(", ", alias_bundles);
 
 		if (strcmp(*bundles, alias_list_str) != 0) {
-			fprintf(stderr, "Alias %s will install bundle(s): %s\n", *bundles, alias_list_str);
+			info("Alias %s will install bundle(s): %s\n", *bundles, alias_list_str);
 		}
 		free_string(&alias_list_str);
 		bundles_list = list_concat(alias_bundles, bundles_list);

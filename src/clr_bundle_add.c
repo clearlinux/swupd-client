@@ -66,7 +66,8 @@ static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 				"bundle-list [-a|--all] sub-command instead.\n\n");
 		exit(EXIT_FAILURE);
 	case 'j':
-		json_output = true;
+		set_json_format();
+		json_start("bundle-add");
 		return true;
 	default:
 		return false;
@@ -101,10 +102,13 @@ static bool parse_options(int argc, char **argv)
 
 enum swupd_code bundle_add_main(int argc, char **argv)
 {
+	int ret;
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
 
-	return install_bundles_frontend(bundles);
+	ret = install_bundles_frontend(bundles);
+	json_end("bundle-add");
+	return ret;
 }

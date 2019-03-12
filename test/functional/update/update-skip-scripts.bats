@@ -34,7 +34,7 @@ test_setup() {
 		Staging file content
 		Applying update
 		Update was applied.
-		WARNING: post-update helper scripts skipped due to --no-scripts argument
+		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Update successful. System updated from version 10 to version 100
 	EOM
 	)

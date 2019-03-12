@@ -134,7 +134,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 	err = strtoi_err(c, &manifest_enc_version);
 
 	if (manifest_enc_version <= 0 || err != 0) {
-		fprintf(stderr, "Error: Loaded incompatible manifest version\n");
+		error("Loaded incompatible manifest version\n");
 		goto err_close;
 	}
 
@@ -165,7 +165,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 		if (strncmp(line, "version:", 8) == 0) {
 			err = strtoi_err(c, &manifest_hdr_version);
 			if (manifest_hdr_version != version || err != 0) {
-				fprintf(stderr, "Error: Loaded incompatible manifest header version\n");
+				error("Loaded incompatible manifest header version\n");
 				goto err_close;
 			}
 		}
@@ -183,11 +183,11 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 				 * than about 6,000,000, but close to infinity
 				 * for systems with 64 bit size_t.
 				 */
-				fprintf(stderr, "Error: preposterous (%llu) number of files in %s Manifest, more than 4 million skipping\n",
-					filecount, component);
+				error("preposterous (%llu) number of files in %s Manifest, more than 4 million skipping\n",
+				      filecount, component);
 				goto err_close;
 			} else if (errno != 0) {
-				fprintf(stderr, "Error: Loaded incompatible manifest filecount\n");
+				error("Loaded incompatible manifest filecount\n");
 				goto err_close;
 			}
 		}
@@ -195,11 +195,11 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 			errno = 0;
 			contentsize = strtoull(c, NULL, 10);
 			if (contentsize > 2000000000000UL) {
-				fprintf(stderr, "Error: preposterous (%llu) size of files in %s Manifest, more than 2TB skipping\n",
-					contentsize, component);
+				error("preposterous (%llu) size of files in %s Manifest, more than 2TB skipping\n",
+				      contentsize, component);
 				goto err_close;
 			} else if (errno != 0) {
-				fprintf(stderr, "Error: Loaded incompatible manifest contentsize\n");
+				error("Loaded incompatible manifest contentsize\n");
 				goto err_close;
 			}
 		}
@@ -207,7 +207,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 			if (strncmp(line, "actions:", 8) == 0) {
 				post_update_actions = list_prepend_data(post_update_actions, strdup_or_die(c));
 				if (!post_update_actions->data) {
-					fprintf(stderr, "WARNING: Unable to read post update action from Manifest.MoM. \
+					warn("Unable to read post update action from Manifest.MoM. \
 							Another update or verify may be required.\n");
 				}
 			}
@@ -334,7 +334,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 
 		err = strtoi_err(c, &file->last_change);
 		if (file->last_change <= 0 || err != 0) {
-			fprintf(stderr, "Error: Loaded incompatible manifest last change\n");
+			error("Loaded incompatible manifest last change\n");
 			free(file);
 			goto err;
 		}
@@ -556,7 +556,7 @@ static void remove_manifest_files(char *filename, int version, char *hash)
 {
 	char *file;
 
-	fprintf(stderr, "Warning: Removing corrupt Manifest.%s artifacts and re-downloading...\n", filename);
+	warn("Removing corrupt Manifest.%s artifacts and re-downloading...\n", filename);
 	string_or_die(&file, "%s/%i/Manifest.%s", state_dir, version, filename);
 	unlink(file);
 	free_string(&file);
@@ -599,7 +599,7 @@ struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err)
 retry_load:
 	ret = retrieve_manifest(0, version, "MoM", mix_exists);
 	if (ret != 0) {
-		fprintf(stderr, "Failed to retrieve %d MoM manifest\n", version);
+		info("Failed to retrieve %d MoM manifest\n", version);
 		if (err) {
 			*err = ret;
 		}
@@ -614,7 +614,7 @@ retry_load:
 			retried = true;
 			goto retry_load;
 		}
-		fprintf(stderr, "Failed to load %d MoM manifest\n", version);
+		info("Failed to load %d MoM manifest\n", version);
 		if (err) {
 			*err = SWUPD_COULDNT_LOAD_MANIFEST;
 		}
@@ -641,7 +641,7 @@ retry_load:
 				retried = true;
 				goto retry_load;
 			}
-			fprintf(stderr, "WARNING!!! FAILED TO VERIFY SIGNATURE OF Manifest.MoM version %d\n", version);
+			warn("FAILED TO VERIFY SIGNATURE OF Manifest.MoM version %d!!!\n", version);
 			free_string(&filename);
 			free_string(&url);
 			free_manifest(manifest);
@@ -650,8 +650,8 @@ retry_load:
 			}
 			return NULL;
 		}
-		fprintf(stderr, "FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
-				"  --nosigcheck, but system security may be compromised\n");
+		info("FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
+		     "  --nosigcheck, but system security may be compromised\n");
 		string_or_die(&log_cmd, "echo \"swupd security notice:"
 					" --nosigcheck used to bypass MoM signature verification failure\" | /usr/bin/systemd-cat --priority=\"err\" --identifier=\"swupd\"");
 		if (system(log_cmd)) {
@@ -698,7 +698,7 @@ retry_load:
 	prev_version = file->peer ? file->peer->last_change : 0;
 	ret = retrieve_manifest(prev_version, version, file->filename, file->is_mix);
 	if (ret != 0) {
-		fprintf(stderr, "Failed to retrieve %d %s manifest\n", version, file->filename);
+		info("Failed to retrieve %d %s manifest\n", version, file->filename);
 		if (err) {
 			*err = ret;
 		}
@@ -729,7 +729,7 @@ retry_load:
 			retried = true;
 			goto retry_load;
 		}
-		fprintf(stderr, "Failed to load %d %s manifest\n", version, file->filename);
+		info("Failed to load %d %s manifest\n", version, file->filename);
 		if (err) {
 			*err = SWUPD_COULDNT_LOAD_MANIFEST;
 		}
@@ -749,14 +749,14 @@ struct manifest *load_manifest_full(int version, bool mix)
 
 	ret = retrieve_manifest(0, version, "full", mix);
 	if (ret != 0) {
-		fprintf(stderr, "Failed to retrieve %d Manifest.full\n", version);
+		info("Failed to retrieve %d Manifest.full\n", version);
 		return NULL;
 	}
 
 	manifest = manifest_from_file(version, "full", false, false, false);
 
 	if (manifest == NULL) {
-		fprintf(stderr, "Failed to load %d Manifest.full\n", version);
+		info("Failed to load %d Manifest.full\n", version);
 		return NULL;
 	}
 
@@ -1203,7 +1203,7 @@ void remove_files_in_manifest_from_fs(struct manifest *m)
 		}
 		free_string(&fullfile);
 	}
-	fprintf(stderr, "Total deleted files: %i\n", count);
+	info("Total deleted files: %i\n", count);
 }
 
 /* free all files found in m1 that happens to be
@@ -1371,7 +1371,7 @@ int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize,
 			if (hash_equal(a[i]->hash, (*found)->hash)) {
 				continue;
 			}
-			fprintf(stderr, "ERROR: Conflict found for file: %s\n", a[i]->filename);
+			error("Conflict found for file: %s\n", a[i]->filename);
 			ret++;
 		}
 	}

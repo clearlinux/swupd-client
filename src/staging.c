@@ -94,14 +94,14 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 
 	if ((ret == -1) && (errno == ENOENT)) {
 		if (MoM) {
-			fprintf(stderr, "Update target directory does not exist: %s. Trying to fix it\n", targetpath);
+			info("Update target directory does not exist: %s. Trying to fix it\n", targetpath);
 			verify_fix_path(dir, MoM);
 		} else {
-			fprintf(stderr, "Update target directory does not exist: %s. Auto-fix disabled\n", targetpath);
+			info("Update target directory does not exist: %s. Auto-fix disabled\n", targetpath);
 		}
 
 	} else if (!S_ISDIR(s.st_mode)) {
-		fprintf(stderr, "Error: Update target exists but is NOT a directory: %s\n", targetpath);
+		error("Update target exists but is NOT a directory: %s\n", targetpath);
 	}
 	if (!realpath(targetpath, real_path)) {
 		ret = -1;
@@ -122,7 +122,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	string_or_die(&target, "%s%s/.update.%s", path_prefix, rel_dir, base);
 	ret = swupd_rm(target);
 	if (ret < 0 && ret != -ENOENT) {
-		fprintf(stderr, "Error: Failed to remove %s\n", target);
+		error("Failed to remove %s\n", target);
 	}
 
 	string_or_die(&statfile, "%s%s", path_prefix, file->filename);
@@ -302,15 +302,15 @@ int rename_staged_file_to_final(struct file *file)
 			/* this will fail if the directory was not already emptied */
 			ret = rename(target, lostnfound);
 			if (ret < 0 && errno != ENOTEMPTY && errno != EEXIST) {
-				fprintf(stderr, "Error: failed to move %s to lost+found: %s\n",
-					base, strerror(errno));
+				error("failed to move %s to lost+found: %s\n",
+				      base, strerror(errno));
 			}
 			free_string(&lostnfound);
 		} else {
 			ret = rename(file->staging, target);
 			if (ret < 0) {
-				fprintf(stderr, "Error: failed to rename staged %s to final: %s\n",
-					file->hash, strerror(errno));
+				error("failed to rename staged %s to final: %s\n",
+				      file->hash, strerror(errno));
 			}
 			unlink(file->staging);
 		}

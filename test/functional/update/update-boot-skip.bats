@@ -33,7 +33,7 @@ test_setup() {
 		Applying update
 		Update was applied.
 		Calling post-update helper scripts.
-		WARNING: boot files update skipped due to --no-boot-update argument
+		Warning: boot files update skipped due to --no-boot-update argument
 		Update successful. System updated from version 10 to version 100
 	EOM
 	)

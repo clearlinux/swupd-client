@@ -75,7 +75,7 @@ static void foreach_open_fd(void(pf)(int, void *), void *arg)
 
 		err = strtoi_err_endptr(entry->d_name, &ep, &n);
 		if (err != 0) {
-			fprintf(stderr, "Warning: invalid fd\n");
+			warn("invalid fd\n");
 		}
 		if (*ep) {
 			continue; /* Trailing non digits */
@@ -109,7 +109,7 @@ static void dump_file_descriptor_leaks_int(int n, void *a)
 		if (!strstr(buffer, "socket") &&
 		    !strstr(buffer, "/dev/random") &&
 		    !strstr(buffer, "/dev/urandom")) {
-			fprintf(stderr, "Possible filedescriptor leak: fd_number=\"%d\",fd_details=\"%s\"\n", n, buffer);
+			info("Possible filedescriptor leak: fd_number=\"%d\",fd_details=\"%s\"\n", n, buffer);
 		}
 	}
 	free_string(&filename);

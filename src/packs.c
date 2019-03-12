@@ -57,7 +57,7 @@ static int finalize_pack_download(const char *module, int newversion, const char
 	FILE *tarfile = NULL;
 	int err;
 
-	fprintf(stderr, "\nExtracting %s pack for version %i\n", module, newversion);
+	info("\nExtracting %s pack for version %i\n", module, newversion);
 	err = extract_to(filename, state_dir);
 
 	unlink(filename);
@@ -171,7 +171,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	unsigned int complete = 0;
 	void *download_handle;
 
-	fprintf(stderr, "Downloading packs...\n");
+	info("Downloading packs...\n");
 	download_handle = swupd_curl_parallel_download_start(get_max_xfer(MAX_XFER));
 
 	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, download_error, download_free_data);

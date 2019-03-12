@@ -49,7 +49,7 @@ static void run_script(char *scriptname, char *cmd)
 	if (stat(scriptname, &s) == 0 && (S_ISREG(s.st_mode))) {
 		ret = system(cmd);
 	} else {
-		fprintf(stderr, "WARNING: post-update helper script (%s) not found, it will be skipped\n", scriptname);
+		warn("post-update helper script (%s) not found, it will be skipped\n", scriptname);
 	}
 }
 
@@ -100,8 +100,8 @@ static void update_triggers(bool block)
 
 		ret = system("/usr/bin/systemctl > /dev/null 2>&1");
 		if (ret != 0) {
-			fprintf(stderr, "WARNING: systemctl not operable, "
-					"unable to run systemd update triggers\n");
+			warn("systemctl not operable, "
+			     "unable to run systemd update triggers\n");
 			return;
 		}
 		/* These must block so that new update triggers are executed after */
@@ -143,17 +143,17 @@ static void update_triggers(bool block)
 void run_scripts(bool block)
 {
 	if (no_scripts) {
-		fprintf(stderr, "WARNING: post-update helper scripts skipped due to "
-				"--no-scripts argument\n");
+		warn("post-update helper scripts skipped due to "
+		     "--no-scripts argument\n");
 		return;
 	}
 
-	fprintf(stderr, "Calling post-update helper scripts.\n");
+	info("Calling post-update helper scripts.\n");
 
 	if (need_update_boot || need_update_bootloader) {
 		if (no_boot_update) {
-			fprintf(stderr, "WARNING: boot files update skipped due to "
-					"--no-boot-update argument\n");
+			warn("boot files update skipped due to "
+			     "--no-boot-update argument\n");
 		} else {
 			update_boot();
 		}

@@ -23,7 +23,7 @@ test_setup() {
 		Adding any missing files
 		Fixing modified files
 		Inspected 7 files
-		WARNING: post-update helper scripts skipped due to --no-scripts argument
+		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Fix successful
 	EOM
 	)

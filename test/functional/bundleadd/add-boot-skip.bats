@@ -21,7 +21,7 @@ test_setup() {
 		Finishing download of update content...
 		Installing bundle(s) files...
 		Calling post-update helper scripts.
-		WARNING: boot files update skipped due to --no-boot-update argument
+		Warning: boot files update skipped due to --no-boot-update argument
 		Successfully installed 1 bundle
 	EOM
 	)

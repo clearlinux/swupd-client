@@ -41,7 +41,7 @@ static void download_mix_file(struct file *file)
 	if (link_or_rename(url, filename) == 0) {
 		untar_full_download(file);
 	} else {
-		fprintf(stderr, "Failed to copy local mix file: %s\n", file->staging);
+		info("Failed to copy local mix file: %s\n", file->staging);
 	}
 
 	free_string(&url);
@@ -95,7 +95,7 @@ static int download_loop(void *download_handle, struct list *files, int *num_dow
 	print_progress(list_length, list_length); /* Force out 100% */
 	printf("\n");
 
-	fprintf(stderr, "Finishing download of update content...\n");
+	info("Finishing download of update content...\n");
 	return swupd_curl_parallel_download_end(download_handle, num_downloads);
 }
 
@@ -111,8 +111,8 @@ static bool download_successful(void *data)
 	}
 
 	if (untar_full_download(data) != 0) {
-		fprintf(stderr, "Error for %s tarfile extraction, (check free space for %s?)\n",
-			((struct file *)data)->hash, state_dir);
+		info("Error for %s tarfile extraction, (check free space for %s?)\n",
+		     ((struct file *)data)->hash, state_dir);
 	}
 	return true;
 }
@@ -132,7 +132,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 
 	download_handle = swupd_curl_parallel_download_start(get_max_xfer(MAX_XFER));
 	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, download_error, NULL);
-	fprintf(stderr, "Starting download of remaining update content. This may take a while...\n");
+	info("Starting download of remaining update content. This may take a while...\n");
 	if (!download_handle) {
 		/* If we hit this point, the network is accessible but we were
 		 * unable to download the needed files. This is a terminal error

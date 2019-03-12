@@ -22,7 +22,7 @@ test_setup() {
 		Fixing modified files
 		Inspected 5 files
 		Calling post-update helper scripts.
-		WARNING: boot files update skipped due to --no-boot-update argument
+		Warning: boot files update skipped due to --no-boot-update argument
 		Fix successful
 	EOM
 	)

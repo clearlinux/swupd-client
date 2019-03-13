@@ -58,6 +58,14 @@ void json_end(const char *op)
 	}
 }
 
+void json_status(int status)
+{
+	if (json_format) {
+		fprintf(stderr, "{ \"type\" : \"status\", \"status\" : \"%d\" },\n", status);
+		fflush(stderr);
+	}
+}
+
 void format_to_json(const char *msg_type, const char *msg, va_list args_list)
 {
 	char *full_msg;

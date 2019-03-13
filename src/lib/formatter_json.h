@@ -29,6 +29,11 @@ void json_start(const char *);
  */
 void json_end(const char *);
 
+/*
+ * Reports the status of an operation into the JSON stream
+ */
+void json_status(int);
+
 #ifdef __cplusplus
 }
 #endif

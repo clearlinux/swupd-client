@@ -109,6 +109,7 @@ enum swupd_code bundle_add_main(int argc, char **argv)
 	}
 
 	ret = install_bundles_frontend(bundles);
+	json_status(ret);
 	json_end("bundle-add");
 	return ret;
 }

@@ -134,7 +134,9 @@ void print_step_progress(struct step step, unsigned int count, unsigned int max)
 	static int last_percentage = -1;
 	static unsigned int last_step = 0;
 
-	if (isatty(fileno(stdout)) || json_format) {
+	/* make sure we don't have a division by zero */
+	if (max != 0) {
+
 		/* Only print when the percentage changes, so a maximum of 100 times per run */
 		int percentage = (int)(100 * ((float)count / (float)max));
 		if (percentage != last_percentage || step.current != last_step) {
@@ -147,16 +149,15 @@ void print_step_progress(struct step step, unsigned int count, unsigned int max)
 					step.current, step.total, percentage, step.description);
 			} else {
 				printf("\r\t...%d%%", percentage);
+				if (!isatty(fileno(stdout))) {
+					/* if not in a tty add new lines so every percentage
+					 * is in its own line */
+					printf("\n");
+				}
 			}
 			fflush(stdout);
 			last_percentage = percentage;
 			last_step = step.current;
-		}
-	} else {
-		/* Print the first one, then every 10 after that */
-		if (count % 10 == 1) {
-			printf(".");
-			fflush(stdout);
 		}
 	}
 }

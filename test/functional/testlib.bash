@@ -3175,8 +3175,8 @@ use_ignore_list() {
 
 	# if selected, remove things in the ignore list from the actual output
 	if [ "$ignore_enabled" = true ]; then
-		# always remove blank lines and lines with only dots
-		filtered_output=$(echo "$output" | sed -E '/^$/d' | sed -E '/^\.+$/d')
+		# always remove blank lines, lines with only dots and lines with progress percentage
+		filtered_output=$(echo "$output" | sed -E '/^$/d' | sed -E '/^\.+$/d' | sed -E '/^.\t\.\.\.[0-9]{1,3}%$/d')
 		# now remove lines that are included in any of the ignore-lists
 		# there are 3 possible ignore-lists that the function is going
 		# to recognize (in order of precedence):

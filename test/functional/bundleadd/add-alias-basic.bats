@@ -45,15 +45,13 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 
@@ -70,15 +68,13 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Alias alias1 will install bundle(s): alias-bundle1
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/alias-file1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/alias-bundle1
 
@@ -95,15 +91,13 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Alias alias1 will install bundle(s): alias-bundle1
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/alias-file1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/alias-bundle1
 
@@ -120,15 +114,13 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Alias alias1 will install bundle(s): alias-bundle2, alias-bundle1
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Successfully installed 2 bundles
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/alias-file1
 	assert_file_exists "$TARGETDIR"/foo/alias-file2
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/alias-bundle1
@@ -148,15 +140,13 @@ global_teardown() {
 		Alias alias1 will install bundle(s): alias-bundle1
 		Alias alias2 will install bundle(s): alias-bundle2
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Successfully installed 2 bundles
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/alias-file1
 	assert_file_exists "$TARGETDIR"/foo/alias-file2
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/alias-bundle1
@@ -178,15 +168,13 @@ global_teardown() {
 		Alias alias1 will install bundle(s): alias-bundle1
 		Alias alias2 will install bundle(s): alias-bundle2
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Successfully installed 2 bundles
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/alias-file1
 	assert_file_exists "$TARGETDIR"/foo/alias-file2
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/alias-bundle1
@@ -208,15 +196,13 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Alias alias1 will install bundle(s): alias-bundle1
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/alias-file1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/alias-bundle1
 
@@ -235,15 +221,13 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Alias alias1 will install bundle(s): alias-bundle1
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Successfully installed 2 bundles
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/alias-file1
 	assert_file_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/alias-bundle1
@@ -264,15 +248,13 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Alias alias1 will install bundle(s): alias-bundle1
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/alias-file1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/alias-bundle1
 
@@ -290,15 +272,13 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Alias alias1 will install bundle(s): alias-bundle1
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/alias-file1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/alias-bundle1
 
@@ -318,15 +298,13 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Alias alias1 will install bundle(s): alias-bundle1
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/alias-file1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/alias-bundle1
 

@@ -340,9 +340,7 @@ static const struct option prog_opts[] = {
 	{ "library", no_argument, 0, 'l' },
 	{ "scope", required_argument, 0, 's' },
 	{ "top", required_argument, 0, 'T' },
-	//TODO: -t option is deprecated. Remove that on a Major release
 	{ "order", required_argument, 0, 'o' },
-	{ "", required_argument, 0, 't' },
 };
 
 static bool parse_opt(int opt, char *optarg)
@@ -373,9 +371,6 @@ static bool parse_opt(int opt, char *optarg)
 		}
 
 		return true;
-	case 't':
-		warn("Deprecated option -t was renamed. Prefer using -T or --top.\n\n");
-		/* fallthrough */
 	case 'T':
 		err = strtoi_err(optarg, &num_results);
 		if (err != 0) {

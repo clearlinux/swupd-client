@@ -152,6 +152,7 @@ BATS = \
 	test/functional/bundleadd/add-fall-back-to-fullfile.bats \
 	test/functional/bundleadd/add-include.bats \
 	test/functional/bundleadd/add-install-time.bats \
+	test/functional/bundleadd/add-json.bats \
 	test/functional/bundleadd/add-multiple.bats \
 	test/functional/bundleadd/add-no-disk-space.bats \
 	test/functional/bundleadd/add-no-signature.bats \

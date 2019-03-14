@@ -249,11 +249,6 @@ SUBCOMMANDS
         Perform collection and download of all required manifest
         resources needed to perform the search, then exit.
 
-    - `-d, --display-files`
-
-        Do not search for any particular string, instead, print out all
-        files, paths, etc. listed in any manifest, and exit.
-
     - `-s, --scope={b|o}`
 
         Restrict search to only list the first match found in **bundle**

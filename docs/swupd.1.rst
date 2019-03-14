@@ -249,11 +249,6 @@ SUBCOMMANDS
         Perform collection and download of all required manifest
         resources needed to perform the search, then exit.
 
-    - `-s, --scope={b|o}`
-
-        Restrict search to only list the first match found in **bundle**
-        or **os**.
-
 ``update``
 
     Performs a system software update.

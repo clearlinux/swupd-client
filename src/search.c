@@ -39,13 +39,13 @@ bool csv_format = false;
 bool init = false;
 
 enum sort_type {
-	alpha,
-	size
+	SORT_TYPE_ALPHA,
+	SORT_TYPE_SIZE
 };
 
 static char search_type = '0';
 static int num_results = INT_MAX;
-static int sort = alpha;
+static int sort = SORT_TYPE_ALPHA;
 
 /* bundle_result contains the information to print */
 struct bundle_result {
@@ -341,9 +341,9 @@ static bool parse_opt(int opt, char *optarg)
 	switch (opt) {
 	case 'o':
 		if (!strcmp(optarg, "alpha")) {
-			sort = alpha;
+			sort = SORT_TYPE_ALPHA;
 		} else if (!strcmp(optarg, "size")) {
-			sort = size;
+			sort = SORT_TYPE_SIZE;
 		} else {
 			error("Invalid --order argument\n\n");
 			return false;
@@ -553,10 +553,10 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 	}
 	list_free_list_and_data(bundle_info, free_bundle_result_data);
 
-	if (sort == alpha) {
+	if (sort == SORT_TYPE_ALPHA) {
 		/* sort alphabetically */
 		sort_results();
-	} else if (sort == size) {
+	} else if (sort == SORT_TYPE_SIZE) {
 		/* sort by bundle size */
 		results = list_sort(results, bundle_size_cmp);
 	}

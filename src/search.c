@@ -445,7 +445,7 @@ static bool file_search(char *filename, char *path, char *search_term)
  * Description: Perform a lookup of the specified search string in all Clear manifests
  * for the current os release.
  */
-static enum swupd_code do_search(struct manifest *MoM, char search_type, char *search_term)
+static enum swupd_code do_search(struct manifest *mom, char search_type, char *search_term)
 {
 	struct list *list;
 	struct list *sublist;
@@ -460,13 +460,13 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 	bool man_load_failures = false;
 	long hit_count = 0;
 
-	list = MoM->manifests;
+	list = mom->manifests;
 	while (list && !done_with_search) {
 		file = list->data;
 		list = list->next;
 
 		/* Load sub-manifest */
-		subman = load_manifest(file->last_change, file, MoM, false, NULL);
+		subman = load_manifest(file->last_change, file, mom, false, NULL);
 		if (!subman) {
 			warn("Failed to load manifest %s\n", file->filename);
 			man_load_failures = true;
@@ -609,93 +609,52 @@ static double query_total_download_size(struct list *list)
 }
 
 /* download_manifests()
- * Description: To search Clear bundles for a particular entry, a complete set of
- *		manifests must be downloaded. This function does so, asynchronously, using
- *		the curl_multi interface */
-static enum swupd_code download_manifests(struct manifest **MoM)
+ * Download all manifests and return a list of manifest headers.
+ */
+static enum swupd_code download_all_manifests(struct manifest *mom)
 {
-	struct list *list = NULL;
-	struct file *file = NULL;
-	char *tarfile, *untard_file, *url = NULL;
-	struct manifest *subMan = NULL;
-	int current_version;
+	struct manifest *manifest = NULL;
+	struct list *list;
 	int ret = 0;
-	int count = 0;
-	int manifest_err;
+	int failed_count = 0;
 	double size;
-	bool did_download = false;
+	unsigned int complete = 0;
+	unsigned int total;
 
-	current_version = get_current_version(path_prefix);
-	if (current_version < 0) {
-		error("Error: Unable to determine current OS version\n");
-		return SWUPD_CURRENT_VERSION_UNKNOWN;
-	}
-
-	*MoM = load_mom(current_version, false, false, NULL);
-	if (!(*MoM)) {
-		error("Cannot load official manifest MoM for version %i\n", current_version);
-		return SWUPD_COULDNT_LOAD_MOM;
-	}
-
-	list = (*MoM)->manifests;
-	size = query_total_download_size(list);
-	if (size == -1) {
-		info("Downloading manifests. Expect a delay, up to 100MB may be downloaded\n");
+	size = query_total_download_size(mom->manifests);
+	if (size < 0) {
+		fprintf(stderr, "Downloading manifests. Expect a delay, up to 100MB may be downloaded\n");
 	} else if (size > 0) {
-		info("Downloading Clear Linux manifests\n");
-		info("   %.2f MB total...\n\n", size);
+		info("Downloading all Clear Linux manifests (%.2f MB)\n", size);
 	}
 
-	while (list) {
-		file = list->data;
+	total = list_len(mom->manifests);
+	for (list = mom->manifests; list; list = list->next) {
+		struct file *file = list->data;
+		int manifest_err;
 
-		string_or_die(&untard_file, "%s/%i/Manifest.%s", state_dir, file->last_change,
-			      file->filename);
+		/* Do download */
+		manifest = load_manifest(file->last_change, file, mom, true, &manifest_err);
+		progress_report(complete, total);
+		complete++;
+		if (!manifest) {
+			fprintf(stderr, "Cannot load %s manifest for version %i\n",
+				file->filename, file->last_change);
+			failed_count++;
+			ret = SWUPD_RECURSE_MANIFEST;
 
-		string_or_die(&tarfile, "%s/%i/Manifest.%s.tar", state_dir, file->last_change,
-			      file->filename);
-
-		if (access(untard_file, F_OK) == -1) {
-			/* Do download */
-			subMan = load_manifest(file->last_change, file, *MoM, false, &manifest_err);
-			if (!subMan) {
-				error("Cannot load %s sub-manifest for version %i\n", file->filename, current_version);
-				count++;
-				/* if the manifest failed to download because there is no disk space
-				 * remove it from the list so we don't re-attempt while searching */
-				if (manifest_err == -EIO) {
-					list = list_free_item(list, free_file_data);
-				}
-				ret = SWUPD_RECURSE_MANIFEST;
-				goto out;
-			} else {
-				did_download = true;
+			/* if the manifest failed to download because there is
+			 * no disk space, stop trying to download. */
+			if (manifest_err == -EIO) {
+				break;
 			}
-
-			free_manifest(subMan);
 		}
-
-		if (access(untard_file, F_OK) == -1) {
-			string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url, current_version,
-				      file->filename);
-
-			error("Failure reading from %s\n", url);
-			free_string(&url);
-		}
-
-	out:
-		unlink(tarfile);
-		free_string(&untard_file);
-		free_string(&tarfile);
-		list = list->next;
+		free_manifest(manifest);
 	}
+	progress_report(total, total);
 
-	if (did_download) {
-		if (ret) {
-			error("%i manifest%s failed to download.\n\n", count, (count > 1 ? "s" : ""));
-		} else {
-			info("Completed manifests download.\n\n");
-		}
+	if (ret) {
+		warn("Failed to download %i manifest%s - search results will be partial\n", failed_count, (failed_count > 1 ? "s" : ""));
 	}
 
 	return ret;
@@ -704,7 +663,8 @@ static enum swupd_code download_manifests(struct manifest **MoM)
 enum swupd_code search_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK, search_ret = SWUPD_OK;
-	struct manifest *MoM = NULL;
+	struct manifest *mom = NULL;
+	int current_version;
 
 	if (!parse_options(argc, argv)) {
 		return SWUPD_INVALID_OPTION;
@@ -716,15 +676,22 @@ enum swupd_code search_main(int argc, char **argv)
 		return ret;
 	}
 
-	//TODO: Improve download manifest function
-	ret = download_manifests(&MoM);
-	if (ret != 0) {
-		if (ret == SWUPD_RECURSE_MANIFEST) {
-			warn("One or more manifests failed to download, search results will be partial.\n");
-		} else {
-			error("Failed to download manifests\n");
-			goto clean_exit;
-		}
+	current_version = get_current_version(path_prefix);
+	if (current_version < 0) {
+		fprintf(stderr, "Error: Unable to determine current OS version\n");
+		return SWUPD_CURRENT_VERSION_UNKNOWN;
+	}
+
+	mom = load_mom(current_version, false, false, NULL);
+	if (!mom) {
+		fprintf(stderr, "Cannot load official manifest mom for version %i\n", current_version);
+		return SWUPD_COULDNT_LOAD_MOM;
+	}
+
+	ret = download_all_manifests(mom);
+	if (ret != 0 && ret != SWUPD_RECURSE_MANIFEST) {
+		error("Failed to download manifests\n");
+		goto clean_exit;
 	}
 
 	if (init) {
@@ -742,14 +709,14 @@ enum swupd_code search_main(int argc, char **argv)
 		goto clean_exit;
 	}
 
-	search_ret = do_search(MoM, search_type, search_string);
+	search_ret = do_search(mom, search_type, search_string);
 	// Keep any ret error code even if search is successful
 	if (search_ret != SWUPD_OK) {
 		ret = search_ret;
 	}
 
 clean_exit:
-	free_manifest(MoM);
+	free_manifest(mom);
 
 	swupd_deinit();
 	return ret;

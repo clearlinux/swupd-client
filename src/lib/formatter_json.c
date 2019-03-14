@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "formatter_json.h"
 #include "log.h"
@@ -94,11 +95,68 @@ void format_to_json(const char *msg_type, const char *msg, va_list args_list)
 	}
 
 	/* add the JSON format and print immediately */
-	fprintf(stderr, "{ \"type\" : \"%s\", \"msg\" : \"%s\" },\n", type ? type : "info", full_msg);
-	fflush(stderr);
+	if (strcmp(full_msg, " ") != 0) {
+		fprintf(stderr, "{ \"type\" : \"%s\", \"msg\" : \"%s\" },\n", type ? type : "info", full_msg);
+		fflush(stderr);
+	}
 
 	free_string(&full_msg);
 	if (type) {
 		free_string(&type);
+	}
+}
+
+void print_progress(unsigned int count, unsigned int max)
+{
+	struct step step;
+	step.current = 0;
+	step.total = 0;
+	step.description = "";
+
+	print_step_progress(step, count, max);
+}
+
+void complete_step(unsigned int current, unsigned int total, char *description)
+{
+	struct step step;
+
+	step.current = current;
+	step.total = total;
+	step.description = description;
+
+	if (json_format) {
+		print_step_progress(step, 1, 1);
+	}
+}
+
+void print_step_progress(struct step step, unsigned int count, unsigned int max)
+{
+	static int last_percentage = -1;
+	static unsigned int last_step = 0;
+
+	if (isatty(fileno(stdout)) || json_format) {
+		/* Only print when the percentage changes, so a maximum of 100 times per run */
+		int percentage = (int)(100 * ((float)count / (float)max));
+		if (percentage != last_percentage || step.current != last_step) {
+			if (json_format) {
+				fprintf(stderr, "{ \"type\" : \"progress\", "
+						"\"currentStep\" : \"%d\", "
+						"\"totalSteps\" : \"%d\", "
+						"\"stepCompletion\" : \"%d\", "
+						"\"stepDescription\" : \"%s\" },\n",
+					step.current, step.total, percentage, step.description);
+			} else {
+				printf("\r\t...%d%%", percentage);
+			}
+			fflush(stdout);
+			last_percentage = percentage;
+			last_step = step.current;
+		}
+	} else {
+		/* Print the first one, then every 10 after that */
+		if (count % 10 == 1) {
+			printf(".");
+			fflush(stdout);
+		}
 	}
 }

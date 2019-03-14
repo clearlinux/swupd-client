@@ -352,7 +352,6 @@ extern enum swupd_code verify_fix_path(char *targetpath, struct manifest *manife
 extern struct list *files_from_bundles(struct list *bundles);
 extern bool version_files_consistent(void);
 extern bool string_in_list(char *string_to_check, struct list *list_to_check);
-extern void print_progress(unsigned int count, unsigned int max);
 extern bool is_compatible_format(int format_num);
 extern bool is_current_version(int version);
 extern bool on_new_format(void);

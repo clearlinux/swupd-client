@@ -33,7 +33,7 @@ _swupd()
 		opts="--help --enable --disable "
 		break;;
 	    ("bundle-add")
-		opts="--help --url --contenturl --versionurl --port --path --format --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads "
+		opts="--help --url --contenturl --versionurl --port --path --format --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --json-output"
 		break;;
 	    ("bundle-remove")
 		opts="--help --path --url --contenturl --versionurl --port --format --force --nosigcheck --ignore-time --statedir --certpath "

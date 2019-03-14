@@ -831,27 +831,6 @@ bool string_in_list(char *string_to_check, struct list *list_to_check)
 	return false;
 }
 
-void print_progress(unsigned int count, unsigned int max)
-{
-	static int last_percentage = -1;
-
-	if (isatty(fileno(stdout))) {
-		/* Only print when the percentage changes, so a maximum of 100 times per run */
-		int percentage = (int)(100 * ((float)count / (float)max));
-		if (percentage != last_percentage) {
-			printf("\r\t...%d%%", percentage);
-			fflush(stdout);
-			last_percentage = percentage;
-		}
-	} else {
-		// Print the first one, then every 10 after that
-		if (count % 10 == 1) {
-			printf(".");
-			fflush(stdout);
-		}
-	}
-}
-
 /* Compare formats of the global variable (format_string) and the format number
  * from a manifest (usually a MoM). Because "staging" is treated specially and
  * never appears in a manifest, it is skipped. */

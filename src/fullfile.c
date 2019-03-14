@@ -67,7 +67,7 @@ static void download_file(void *download_handle, struct file *file)
 	free_string(&targetfile);
 }
 
-static int download_loop(void *download_handle, struct list *files, int *num_downloads)
+static int download_loop(void *download_handle, struct list *files, int *num_downloads, struct step step)
 {
 	struct list *iter;
 	unsigned int complete = 0;
@@ -90,10 +90,10 @@ static int download_loop(void *download_handle, struct list *files, int *num_dow
 		} else {
 			download_file(download_handle, file);
 		}
-		print_progress(complete, list_length);
+		print_step_progress(step, complete, list_length);
 	}
-	print_progress(list_length, list_length); /* Force out 100% */
-	printf("\n");
+	print_step_progress(step, list_length, list_length); /* Force out 100% */
+	info("\n");
 
 	info("Finishing download of update content...\n");
 	return swupd_curl_parallel_download_end(download_handle, num_downloads);
@@ -122,7 +122,7 @@ static bool download_successful(void *data)
  *
  * Return 0 on success or a negative number or errors.
  */
-int download_fullfiles(struct list *files, int *num_downloads)
+int download_fullfiles(struct list *files, int *num_downloads, struct step step)
 {
 	void *download_handle;
 
@@ -140,5 +140,5 @@ int download_fullfiles(struct list *files, int *num_downloads)
 		return -SWUPD_COULDNT_DOWNLOAD_FILE;
 	}
 
-	return download_loop(download_handle, files, num_downloads);
+	return download_loop(download_handle, files, num_downloads, step);
 }

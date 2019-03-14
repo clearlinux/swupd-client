@@ -44,15 +44,24 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
-		.
+		.*...33%
+		.*...66%
+		.*...100%
+
 		Finishing download of update content...
-		Installing bundle(s) files...
-		.
+		Installing bundle\(s\) files...
+		.*...16%
+		.*...33%
+		.*...50%
+		.*...66%
+		.*...83%
+		.*...100%
+
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_regex_is_output --identical "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 
@@ -64,15 +73,13 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		..
 		Calling post-update helper scripts.
 		Successfully installed 2 bundles
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/bar/test-file2
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
 
@@ -163,16 +170,14 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "test-bundle3" is already installed, skipping it...
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
 		1 bundle was already installed
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 	assert_file_exists "$TARGETDIR"/baz/test-file3
@@ -187,15 +192,13 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "fake-bundle" is invalid, skipping it...
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Failed to install 1 of 2 bundles
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 
@@ -209,16 +212,14 @@ global_teardown() {
 		Warning: Bundle "fake-bundle" is invalid, skipping it...
 		Warning: Bundle "test-bundle3" is already installed, skipping it...
 		Starting download of remaining update content. This may take a while...
-		.
 		Finishing download of update content...
 		Installing bundle(s) files...
-		.
 		Calling post-update helper scripts.
 		Failed to install 1 of 2 bundles
 		1 bundle was already installed
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 

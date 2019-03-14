@@ -44,7 +44,6 @@ enum sort_type {
 };
 
 static char search_type = '0';
-static char scope = '0';
 static int num_results = INT_MAX;
 static int sort = alpha;
 
@@ -271,9 +270,6 @@ static void print_final_results(bool display_size)
 		b = ptr->data;
 		ptr = ptr->next;
 		counter++;
-		/* do not print the size information when the scope is only one bundle ('o')
-		 * because we did not load all bundles and therefore do not have include sizes
-		 * for the result */
 		name = get_printable_bundle_name(b->bundle_name, b->is_experimental);
 		info("Bundle %s\t%s", name, b->is_tracked ? "[installed]\t" : "");
 		free_string(&name);
@@ -321,7 +317,6 @@ static void print_help(void)
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "   -l, --library           Search paths where libraries are located for a match\n");
 	fprintf(stderr, "   -b, --binary            Search paths where binaries are located for a match\n");
-	fprintf(stderr, "   -s, --scope=[query type] 'b' or 'o' for first hit per (b)undle, or one hit total across the (o)s\n");
 	fprintf(stderr, "   -T, --top=[NUM]         Only display the top NUM results for each bundle\n");
 	fprintf(stderr, "   -m, --csv               Output all results in CSV format (machine-readable)\n");
 	fprintf(stderr, "   -i, --init              Download all manifests then return, no search done\n");
@@ -335,7 +330,6 @@ static const struct option prog_opts[] = {
 	{ "csv", no_argument, 0, 'm' },
 	{ "init", no_argument, 0, 'i' },
 	{ "library", no_argument, 0, 'l' },
-	{ "scope", required_argument, 0, 's' },
 	{ "top", required_argument, 0, 'T' },
 	{ "order", required_argument, 0, 'o' },
 };
@@ -354,19 +348,6 @@ static bool parse_opt(int opt, char *optarg)
 			error("Invalid --order argument\n\n");
 			return false;
 		}
-		return true;
-	case 's':
-		if (strcmp(optarg, "b") && (strcmp(optarg, "o"))) {
-			error("Invalid --scope argument. Must be 'b' or 'o'\n\n");
-			return false;
-		}
-
-		if (!strcmp(optarg, "b")) {
-			scope = 'b';
-		} else if (!strcmp(optarg, "o")) {
-			scope = 'o';
-		}
-
 		return true;
 	case 'T':
 		err = strtoi_err(optarg, &num_results);
@@ -474,7 +455,7 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 	struct manifest *subman = NULL;
 	int i;
 	int ret = SWUPD_OK;
-	bool done_with_bundle, done_with_search = false;
+	bool done_with_search = false;
 	bool hit = false;
 	bool man_load_failures = false;
 	long hit_count = 0;
@@ -483,7 +464,6 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 	while (list && !done_with_search) {
 		file = list->data;
 		list = list->next;
-		done_with_bundle = false;
 
 		/* Load sub-manifest */
 		subman = load_manifest(file->last_change, file, MoM, false, NULL);
@@ -513,7 +493,7 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 
 		/* Loop through sub-manifest, searching for files matching the desired pattern */
 		sublist = subman->files;
-		while (sublist && !done_with_bundle) {
+		while (sublist) {
 			subfile = sublist->data;
 			sublist = sublist->next;
 
@@ -554,13 +534,6 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 
 			/* Determine the level of completion we've reached */
 			if (hit) {
-				if (scope == 'b') {
-					done_with_bundle = true;
-				} else if (scope == 'o') {
-					done_with_bundle = true;
-					done_with_search = true;
-				}
-
 				hit_count++;
 			}
 			hit = false;
@@ -574,7 +547,7 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 		ret = SWUPD_NO;
 	}
 
-	bool display_size = (scope != 'o' && !man_load_failures);
+	bool display_size = !man_load_failures;
 	if (display_size) {
 		add_bundle_size(bundle_info);
 	}

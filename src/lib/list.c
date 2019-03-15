@@ -302,3 +302,19 @@ bool list_longer_than(struct list *list, int count)
 	}
 	return false;
 }
+
+void *list_search(struct list *list, const void *item, comparison_fn_t comparison_fn)
+{
+	for (; list; list = list->next) {
+		if (comparison_fn(list->data, item) == 0) {
+			return list->data;
+		}
+	}
+
+	return NULL;
+}
+
+int list_strcmp(const void *a, const void *b)
+{
+	return strcmp((const char *)a, (const char *)b);
+}

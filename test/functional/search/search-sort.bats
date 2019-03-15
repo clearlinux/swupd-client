@@ -45,15 +45,15 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Bundle alfa-charly	\\(2 MB to install\\)
+		Bundle alfa-charly \\(2 MB to install\\)
 		./usr/share/clear/bundles/alfa-charly
-		Bundle alfa-zulu	\\(1 MB to install\\)
+		Bundle alfa-zulu \\(1 MB to install\\)
 		./alfaromeo/echo
 		./bar/alfa
 		./foo/alfa
 		./usr/share/clear/bundles/alfa-zulu
 		./yankee/alfalfa
-		Bundle victor	\\(3 MB to install\\)
+		Bundle victor \\(3 MB to install\\)
 		./alfa/zulu
 		./bar/alfa
 	EOM
@@ -68,15 +68,15 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Bundle alfa-zulu	\\(1 MB to install\\)
+		Bundle alfa-zulu \\(1 MB to install\\)
 		./usr/share/clear/bundles/alfa-zulu
 		./bar/alfa
 		./foo/alfa
 		./alfaromeo/echo
 		./yankee/alfalfa
-		Bundle alfa-charly	\\(2 MB to install\\)
+		Bundle alfa-charly \\(2 MB to install\\)
 		./usr/share/clear/bundles/alfa-charly
-		Bundle victor	\\(3 MB to install\\)
+		Bundle victor \\(3 MB to install\\)
 		./alfa/zulu
 		./bar/alfa
 	EOM
@@ -87,39 +87,39 @@ global_teardown() {
 
 @test "SRH025: search can show all files in all bundles" {
 
-	run sudo sh -c "$SWUPD search-file $SWUPD_OPTS -d"
+	run sudo sh -c "$SWUPD search-file $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Displaying all bundles and their files:
-		--Bundle: alfa-charly--
-		    /usr/share/clear/bundles/alfa-charly
-		    /medium-file
-		    /kilo
-		    /tango/sierra
-		    /foxtrot
-		--Bundle: victor--
-		    /usr/share/clear/bundles/victor
-		    /large-file
-		    /papa
-		    /alfa/zulu
-		    /bar/alfa
-		    /yankee
-		--Bundle: alfa-zulu--
-		    /usr/share/clear/bundles/alfa-zulu
-		    /small-file
-		    /bar/alfa
-		    /foo/delta
-		    /foo/alfa
-		    /foo/quebec
-		    /alfaromeo/echo
-		    /yankee/alfalfa
-		--Bundle: os-core--
-		    /usr/share/clear/bundles/os-core
-		    /core
+		Searching for ''
+		Bundle alfa-charly .*
+		./usr/share/clear/bundles/alfa-charly
+		./medium-file
+		./kilo
+		./tango/sierra
+		./foxtrot
+		Bundle alfa-zulu .*
+		./usr/share/clear/bundles/alfa-zulu
+		./small-file
+		./bar/alfa
+		./foo/delta
+		./foo/alfa
+		./foo/quebec
+		./alfaromeo/echo
+		./yankee/alfalfa
+		Bundle os-core .*
+		./usr/share/clear/bundles/os-core
+		./core
+		Bundle victor .*
+		./usr/share/clear/bundles/victor
+		./large-file
+		./papa
+		./alfa/zulu
+		./bar/alfa
+		./yankee
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_in_output "$expected_output"
 
 }
 
@@ -129,14 +129,16 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Bundle alfa-charly	\\(2 MB to install\\)
+		Searching for 'alfa'
+		Displaying only top 3 file results per bundle
+		File results may be truncated
+		Bundle alfa-charly \\(2 MB to install\\)
 		./usr/share/clear/bundles/alfa-charly
-		Bundle alfa-zulu	\\(1 MB to install\\)
-		./alfaromeo/echo
+		Bundle alfa-zulu \\(1 MB to install\\)
+		./usr/share/clear/bundles/alfa-zulu
 		./bar/alfa
 		./foo/alfa
-		.file results truncated...
-		Bundle victor	\\(3 MB to install\\)
+		Bundle victor \\(3 MB to install\\)
 		./alfa/zulu
 		./bar/alfa
 	EOM

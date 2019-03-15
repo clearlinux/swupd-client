@@ -45,12 +45,8 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Downloading Clear Linux manifests \\(.* MB\\)
 		Searching for 'test-bundle1'
-		Downloading Clear Linux manifests
-		.* MB total...
-		Completed manifests download.
-		Bundle test-bundle1 \\(experimental\\)	\\(0 MB to install\\)
-		./usr/share/clear/bundles/test-bundle1
 	EOM
 	)
 	assert_regex_in_output "$expected_output"
@@ -68,7 +64,7 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'test-bundle2'
-		Bundle test-bundle2 \\(experimental\\)	\\[installed\\]	\\(0 MB on system\\)
+		Bundle test-bundle2 \\(experimental\\) \\[installed\\] \\(0 MB on system\\)
 		./usr/share/clear/bundles/test-bundle2
 	EOM
 	)
@@ -85,7 +81,7 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'test-file1'
-		Bundle test-bundle1 \\(experimental\\)	\\(0 MB to install\\)
+		Bundle test-bundle1 \\(experimental\\) \\(0 MB to install\\)
 		./foo/test-file1
 	EOM
 	)
@@ -102,7 +98,7 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'test-bin'
-		Bundle test-bundle1 \\(experimental\\)	\\(0 MB to install\\)
+		Bundle test-bundle1 \\(experimental\\) \\(0 MB to install\\)
 		./usr/bin/test-bin
 	EOM
 	)
@@ -119,7 +115,7 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'test-lib32'
-		Bundle test-bundle1 \\(experimental\\)	\\(0 MB to install\\)
+		Bundle test-bundle1 \\(experimental\\) \\(0 MB to install\\)
 		./usr/lib/test-lib32
 	EOM
 	)

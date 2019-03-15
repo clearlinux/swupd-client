@@ -40,9 +40,7 @@ global_teardown() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Downloading Clear Linux manifests
-		.* MB total...
-		Completed manifests download.
+		Downloading Clear Linux manifests \\(.* MB\\)
 		Successfully retrieved manifests. Exiting
 	EOM
 	)
@@ -60,7 +58,7 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'test-bundle1'
-		Bundle test-bundle1	\\(0 MB to install\\)
+		Bundle test-bundle1 \\(0 MB to install\\)
 		./usr/share/clear/bundles/test-bundle1
 	EOM
 	)
@@ -75,7 +73,7 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'test-file2'
-		Bundle test-bundle2	\\(0 MB to install\\)
+		Bundle test-bundle2 \\(0 MB to install\\)
 		./bar/test-file2
 	EOM
 	)
@@ -92,13 +90,13 @@ global_teardown() {
 	# will be listed first and sometimes test-bundle2 will be listed first
 	# so we need to check them separatelly
 	expected_output=$(cat <<-EOM
-		Bundle test-bundle1	\\(0 MB to install\\)
+		Bundle test-bundle1 \\(0 MB to install\\)
 		./common
 	EOM
 	)
 	assert_regex_in_output "$expected_output"
 	expected_output=$(cat <<-EOM
-		Bundle test-bundle2	\\(0 MB to install\\)
+		Bundle test-bundle2 \\(0 MB to install\\)
 		./common
 	EOM
 	)
@@ -115,13 +113,13 @@ global_teardown() {
 	# will be listed first and sometimes test-bundle2 will be listed first
 	# so we need to check them separatelly
 	expected_output=$(cat <<-EOM
-		Bundle test-bundle1	\\(0 MB to install\\)
+		Bundle test-bundle1 \\(0 MB to install\\)
 		./foo/test-file3
 	EOM
 	)
 	assert_regex_in_output "$expected_output"
 	expected_output=$(cat <<-EOM
-		Bundle test-bundle2	\\(0 MB to install\\)
+		Bundle test-bundle2 \\(0 MB to install\\)
 		./bar/test-file3
 	EOM
 	)
@@ -139,7 +137,7 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for '/bar/test-file3'
-		Bundle test-bundle2	\\(0 MB to install\\)
+		Bundle test-bundle2 \\(0 MB to install\\)
 		./bar/test-file3
 	EOM
 	)
@@ -154,7 +152,7 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'test-bin'
-		Bundle test-bundle1	\\(0 MB to install\\)
+		Bundle test-bundle1 \\(0 MB to install\\)
 		./usr/bin/test-bin
 	EOM
 	)
@@ -169,7 +167,7 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'test-lib32'
-		Bundle test-bundle1	\\(0 MB to install\\)
+		Bundle test-bundle1 \\(0 MB to install\\)
 		./usr/lib/test-lib32
 	EOM
 	)
@@ -184,10 +182,28 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Searching for 'test-lib64'
-		Bundle test-bundle2	\\(0 MB to install\\)
+		Bundle test-bundle2 \\(0 MB to install\\)
 		./usr/lib64/test-lib64
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
+
+}
+
+@test "SRH010: Search for a library and binary" {
+
+	run sudo sh -c "$SWUPD search-file --library --binary $SWUPD_OPTS test-"
+
+	assert_status_is 0
+	expected_output=$(cat <<-EOM
+		Searching for 'test-'
+		Bundle test-bundle1 \\(0 MB to install\\)
+		./usr/lib/test-lib32
+		./usr/bin/test-bin
+		Bundle test-bundle2 \\(0 MB to install\\)
+		./usr/lib64/test-lib64
+	EOM
+	)
+	assert_regex_in_output "$expected_output"
 
 }

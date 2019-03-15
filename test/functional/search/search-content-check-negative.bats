@@ -39,11 +39,9 @@ global_teardown() {
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
+		Downloading Clear Linux manifests \\(.* MB\\)
 		Searching for 'fake-file'
-		Downloading Clear Linux manifests
-		.* MB total...
-		Completed manifests download.
-		Search term not found.
+		Search term not found
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -57,7 +55,7 @@ global_teardown() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Searching for '/usr/lib64/test-lib100'
-		Search term not found.
+		Search term not found
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -71,7 +69,7 @@ global_teardown() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Searching for 'libtest-nohit'
-		Search term not found.
+		Search term not found
 	EOM
 	)
 	assert_is_output "$expected_output"

@@ -32,12 +32,10 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Searching for 'test-bundle2'
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		Error: Failed to retrieve 10 MoM manifest
+		Failed to retrieve 10 MoM manifest
 		Error: Cannot load official manifest MoM for version 10
-		Error: Failed to download manifests
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -61,16 +59,14 @@ test_setup() {
 
 	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
-		Searching for 'test-bundle2'
-		Downloading Clear Linux manifests
-		.* MB total...
+		Downloading Clear Linux manifests \\(.* MB\\)
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle1.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error: Failed to retrieve 10 test-bundle1 manifest
-		Error: Cannot load test-bundle1 sub-manifest for version 10
-		Error: 1 manifest failed to download.
-		Warning: One or more manifests failed to download, search results will be partial.
-		Bundle test-bundle2	\\(0 MB to install\\)
+		Failed to retrieve 10 test-bundle1 manifest
+		Error: Cannot load test-bundle1 manifest for version 10
+		Warning: Failed to download 1 manifest - search results will be partial
+		Searching for 'test-bundle2'
+		Bundle test-bundle2 \\(0 MB to install\\)
 		./usr/share/clear/bundles/test-bundle2
 	EOM
 	)

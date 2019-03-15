@@ -107,7 +107,7 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 		}
 		free_string(&temp);
 	} else {
-		printf("%s%s\n", filename, is_dir ? "/" : "");
+		info("%s%s\n", filename, is_dir ? "/" : "");
 		ret = false;
 	}
 

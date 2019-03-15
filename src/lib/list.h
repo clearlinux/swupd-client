@@ -56,4 +56,20 @@ struct list *list_deep_clone_strs(struct list *source);
 /* check list length */
 extern bool list_longer_than(struct list *list, int count);
 
+/*
+ * Search 'item' on 'list' using 'comparisson_fn' function to compare elements.
+ * 'comparison_fn' is always called with one item from the 'list' as first
+ * argument and 'item' as the second.
+ * If one element is found it is returned. NULL is returned otherwise.
+ *
+ * Note: you can use list_strcmp to search a string in a string list:
+ *       list_search(list, "my_string", list_strcmp);
+ */
+void *list_search(struct list *list, const void *item, comparison_fn_t comparison_fn);
+
+/*
+ * strcmp to be used with list_search() or list_sort() on a list of strings.
+ */
+int list_strcmp(const void *a, const void *b);
+
 #endif

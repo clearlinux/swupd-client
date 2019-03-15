@@ -203,6 +203,7 @@ BATS = \
 	test/functional/update/update-include.bats \
 	test/functional/update/update-include-old-bundle.bats \
 	test/functional/update/update-include-old-bundle-with-tracked-file.bats \
+	test/functional/update/update-manifest-delta.bats \
 	test/functional/update/update-minversion.bats \
 	test/functional/update/update-missing-os-core.bats \
 	test/functional/update/update-newest-added.bats \

@@ -1361,7 +1361,7 @@ int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize,
 	int ret = 0;
 
 	qsort(b, size, sizeof(struct file *), cmpnames);
-	printf("Checking manifest uniqueness...\n");
+	info("Checking manifest uniqueness...\n");
 	for (int i = 0; i < searchsize; i++) {
 		found = bsearch(a[i], b, size, sizeof(struct file *), bsearch_file_helper);
 		if (found) {

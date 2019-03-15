@@ -30,8 +30,45 @@ void print_update_conf_info()
 	printf("Content URL:       %s\n", content_url);
 }
 
+static void print_help(void)
+{
+	fprintf(stderr, "Usage:\n");
+	fprintf(stderr, "   swupd info [OPTION...]\n\n");
+
+	global_print_help();
+	fprintf(stderr, "\n");
+}
+
+static const struct global_options opts = {
+	NULL,
+	0,
+	NULL,
+	print_help,
+};
+
+static bool parse_options(int argc, char **argv)
+{
+	int ind = global_parse_options(argc, argv, &opts);
+
+	if (ind < 0) {
+		return false;
+	}
+
+	if (argc > ind) {
+		error("Unexpected arguments\n\n");
+		return false;
+	}
+
+	return true;
+}
+
 enum swupd_code info_main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 {
+	if (!parse_options(argc, argv)) {
+		print_help();
+		return SWUPD_INVALID_OPTION;
+	}
+
 	if (!init_globals()) {
 		return SWUPD_INIT_GLOBALS_FAILED;
 	}

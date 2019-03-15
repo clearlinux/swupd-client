@@ -136,7 +136,7 @@ static int download_pack(void *download_handle, int oldversion, int newversion, 
 			free_string(&url);
 			return err;
 		}
-		printf("Linked %s to %s\n", url, filename);
+		info("Linked %s to %s\n", url, filename);
 
 		err = finalize_pack_download(module, newversion, filename);
 		free_string(&url);

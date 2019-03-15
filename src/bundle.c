@@ -69,7 +69,7 @@ enum swupd_code list_installable_bundles()
 		file = list->data;
 		list = list->next;
 		name = get_printable_bundle_name(file->filename, file->is_experimental);
-		printf("%s\n", name);
+		info("%s\n", name);
 		free_string(&name);
 	}
 
@@ -265,7 +265,7 @@ enum swupd_code show_included_bundles(char *bundle_name)
 			continue;
 		}
 
-		printf("%s\n", included_bundle->component);
+		info("%s\n", included_bundle->component);
 	}
 
 	ret = SWUPD_OK;
@@ -368,7 +368,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 	while (iter) {
 		bundle = iter->data;
 		iter = iter->next;
-		printf("%s", bundle);
+		info("%s", bundle);
 		free_string(&bundle);
 	}
 
@@ -607,14 +607,14 @@ enum swupd_code remove_bundles(char **bundles)
 			char *bundle;
 			iter = list_head(reqd_by);
 			error("bundle requested to be removed is required by the following bundles:\n");
-			printf("format:\n");
-			printf(" # * is-required-by\n");
-			printf(" #   |-- is-required-by\n");
-			printf(" # * is-also-required-by\n # ...\n\n");
+			info("format:\n");
+			info(" # * is-required-by\n");
+			info(" #   |-- is-required-by\n");
+			info(" # * is-also-required-by\n # ...\n\n");
 			while (iter) {
 				bundle = iter->data;
 				iter = iter->next;
-				fprintf(stderr, "%s", bundle);
+				info("%s", bundle);
 			}
 
 			list_free_list_and_data(reqd_by, free);
@@ -1174,7 +1174,7 @@ enum swupd_code list_local_bundles()
 	mix_exists = (check_mix_exists() & system_on_mix());
 	MoM = load_mom(current_version, false, mix_exists, NULL);
 	if (!MoM) {
-		printf("Warning: Could not determine which installed bundles are experimental\n");
+		warn("Could not determine which installed bundles are experimental\n");
 	}
 
 skip_mom:
@@ -1199,7 +1199,7 @@ skip_mom:
 		} else {
 			string_or_die(&name, basename((char *)item->data));
 		}
-		printf("%s\n", name);
+		info("%s\n", name);
 		free_string(&name);
 		free(item->data);
 		item = item->next;

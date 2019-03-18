@@ -385,4 +385,7 @@ if ENABLE_TESTS
 install-check:
 	test/installation/test.bats
 
+unit-check:
+	env TEST_SUITE_LOG=unit_tests.log TESTS=$(UNIT_TESTS) make -e check
+
 endif

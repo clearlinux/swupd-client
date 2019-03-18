@@ -30,15 +30,18 @@ install:
         - sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
         - git fetch origin master:refs/remotes/origin/master #Download origin/master for shelcheck
 
+before_script:
+        - autoreconf --verbose --warnings=none --install --force
+        - ./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --with-fallback-capaths=$TRAVIS_BUILD_DIR/swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system
+        - make compliant
+        - make shellcheck
+
 # Ubuntu's default umask is 0002, but this break's swupd hash calculations.
 script:
         - sudo find test/functional -exec chmod g-w {} \;
-        - autoreconf --verbose --warnings=none --install --force &&
-          ./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --with-fallback-capaths=$TRAVIS_BUILD_DIR/swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system &&
-          make -j48 &&
+        - make -j48 &&
           sudo sh -c 'umask 0022 && make -j48 check' &&
           sudo sh -c 'umask 0022 && make install' &&
-          sudo sh -c 'umask 0022 && make install-check' &&
-          make compliant &&
-          make shellcheck
+          sudo sh -c 'umask 0022 && make install-check'
+
 after_failure: cat test-suite.log

@@ -2,6 +2,10 @@ sudo: required
 dist: xenial
 language: c
 
+env:
+    global:
+        - MAKEFLAGS="-j 32"
+
 # Pre-install missing build dependencies:
 # - libcheck 0.9.10 is slightly too old, since 0.9.12 adds TAP support
 # - bsdiff 1.* is the Clear Linux OS fork
@@ -39,8 +43,8 @@ before_script:
 # Ubuntu's default umask is 0002, but this break's swupd hash calculations.
 script:
         - sudo find test/functional -exec chmod g-w {} \;
-        - make -j48 &&
-          sudo sh -c 'umask 0022 && make -j48 check' &&
+        - make &&
+          make check &&
           sudo sh -c 'umask 0022 && make install' &&
           sudo sh -c 'umask 0022 && make install-check'
 

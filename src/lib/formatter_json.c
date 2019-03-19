@@ -19,28 +19,26 @@
 
 #define _GNU_SOURCE
 
-#include <ctype.h>
-#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <unistd.h>
 
 #include "formatter_json.h"
 #include "log.h"
+#include "progress.h"
 #include "strings.h"
 
 static int json_format = 0;
 
 static void log_json(FILE *out UNUSED, const char *file UNUSED, int line UNUSED, const char *label, const char *format, va_list args_list)
 {
-	format_to_json(label, format, args_list);
+	json_message(label, format, args_list);
 }
 
 void set_json_format(void)
 {
 	json_format = 1;
-	set_log_function(log_json);
+	log_set_function(log_json);
+	progress_set_format(json_progress, json_start, json_end);
 }
 
 void json_start(const char *op)
@@ -51,10 +49,10 @@ void json_start(const char *op)
 	}
 }
 
-void json_end(const char *op)
+void json_end(const char *op, int status)
 {
 	if (json_format) {
-		fprintf(stderr, "{ \"type\" : \"end\", \"section\" : \"%s\" }\n]\n", op);
+		fprintf(stderr, "{ \"type\" : \"end\", \"section\" : \"%s\", \"status\" : %d }\n]\n", op, status);
 		fflush(stderr);
 	}
 }
@@ -62,12 +60,12 @@ void json_end(const char *op)
 void json_status(int status)
 {
 	if (json_format) {
-		fprintf(stderr, "{ \"type\" : \"status\", \"status\" : \"%d\" },\n", status);
+		fprintf(stderr, "{ \"type\" : \"status\", \"status\" : %d },\n", status);
 		fflush(stderr);
 	}
 }
 
-void format_to_json(const char *msg_type, const char *msg, va_list args_list)
+void json_message(const char *msg_type, const char *msg, va_list args_list)
 {
 	char *full_msg;
 	char *type = NULL;
@@ -106,58 +104,12 @@ void format_to_json(const char *msg_type, const char *msg, va_list args_list)
 	}
 }
 
-void print_progress(unsigned int count, unsigned int max)
+void json_progress(char *step_description, unsigned int current_step, unsigned int total_steps, int percentage)
 {
-	struct step step;
-	step.current = 0;
-	step.total = 0;
-	step.description = "";
-
-	print_step_progress(step, count, max);
-}
-
-void complete_step(unsigned int current, unsigned int total, char *description)
-{
-	struct step step;
-
-	step.current = current;
-	step.total = total;
-	step.description = description;
-
-	if (json_format) {
-		print_step_progress(step, 1, 1);
-	}
-}
-
-void print_step_progress(struct step step, unsigned int count, unsigned int max)
-{
-	static int last_percentage = -1;
-	static unsigned int last_step = 0;
-
-	/* make sure we don't have a division by zero */
-	if (max != 0) {
-
-		/* Only print when the percentage changes, so a maximum of 100 times per run */
-		int percentage = (int)(100 * ((float)count / (float)max));
-		if (percentage != last_percentage || step.current != last_step) {
-			if (json_format) {
-				fprintf(stderr, "{ \"type\" : \"progress\", "
-						"\"currentStep\" : \"%d\", "
-						"\"totalSteps\" : \"%d\", "
-						"\"stepCompletion\" : \"%d\", "
-						"\"stepDescription\" : \"%s\" },\n",
-					step.current, step.total, percentage, step.description);
-			} else {
-				printf("\r\t...%d%%", percentage);
-				if (!isatty(fileno(stdout))) {
-					/* if not in a tty add new lines so every percentage
-					 * is in its own line */
-					printf("\n");
-				}
-			}
-			fflush(stdout);
-			last_percentage = percentage;
-			last_step = step.current;
-		}
-	}
+	fprintf(stderr, "{ \"type\" : \"progress\", "
+			"\"currentStep\" : %d, "
+			"\"totalSteps\" : %d, "
+			"\"stepCompletion\" : %d, "
+			"\"stepDescription\" : \"%s\" },\n",
+		current_step, total_steps, percentage, step_description);
 }

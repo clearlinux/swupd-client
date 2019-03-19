@@ -8,22 +8,12 @@ extern "C" {
 #endif
 
 #define UNUSED __attribute__((__unused__))
-
-struct step {
-	unsigned int current;
-	unsigned int total;
-	char *description;
-};
+#define JSON_FORMAT 1
 
 /*
  * Enables the JSON formatter
  */
 void set_json_format(void);
-
-/*
- * Converts the provided message to a JSON formatted stream
- */
-void format_to_json(const char *, const char *, va_list);
 
 /*
  * Generates the initial message of a JSON stream
@@ -33,7 +23,7 @@ void json_start(const char *);
 /*
  * Generates the final message of a JSON stream
  */
-void json_end(const char *);
+void json_end(const char *, int);
 
 /*
  * Reports the status of an operation into the JSON stream
@@ -41,15 +31,14 @@ void json_end(const char *);
 void json_status(int);
 
 /*
- * Reports the progress of a step in a given action into the JSON stream
+ * Converts the provided message to a JSON stream
  */
-void print_step_progress(struct step step, unsigned int, unsigned int);
-void complete_step(unsigned int, unsigned int, char *);
+void json_message(const char *, const char *, va_list);
 
 /*
- * Old function to print the progress of an action
+ * Prints the progress of a given step into the JSON stream
  */
-void print_progress(unsigned int, unsigned int);
+void json_progress(char *, unsigned int, unsigned int, int);
 
 #ifdef __cplusplus
 }

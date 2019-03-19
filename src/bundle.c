@@ -758,12 +758,10 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	struct list *to_install_files = NULL;
 	struct manifest *full_mom = NULL;
 	bool invalid_bundle_provided = false;
-	const int steps = 7;
-	struct step step;
-	step.total = steps;
 
 	/* step 1: check bundle args are valid if so populate subs struct */
 	timelist_timer_start(global_times, "Add bundles and recurse");
+	progress_set_step(1, "download_bundle_manifests");
 	ret = add_subscriptions(bundles, subs, mom, false, 0);
 
 	/* print a message if any of the requested bundles is already installed */
@@ -814,17 +812,19 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		ret = SWUPD_RECURSE_MANIFEST;
 		goto out;
 	}
+	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Add bundles and recurse
-	complete_step(1, steps, "download_bundle_manifests");
 
 	timelist_timer_start(global_times, "Consolidate files from bundles");
+	progress_set_step(2, "consolidate_files");
 	to_install_files = files_from_bundles(to_install_bundles);
 	to_install_files = consolidate_files(to_install_files);
 	to_install_files = filter_out_existing_files(to_install_files);
+	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Consolidate files from bundles
-	complete_step(2, steps, "consolidate_files");
 
-	/* Step 1.5: Now that we know the bundle is valid, check if we have enough space */
+	/* Step 3: Now that we know the bundle is valid, check if we have enough space */
+	progress_set_step(3, "check_disk_space_availability");
 	if (!skip_diskspace_check) {
 		timelist_timer_start(global_times, "Check disk space availability");
 		char *filepath = NULL;
@@ -855,24 +855,27 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		}
 		timelist_timer_stop(global_times); // closing: Check disk space availability
 	}
-	complete_step(3, steps, "check_disk_space_availability");
+	progress_complete_step();
 
-	/* step 2: download necessary packs */
+	/* step 4: download necessary packs */
 	timelist_timer_start(global_times, "Download packs");
 	(void)rm_staging_dir_contents("download");
 
+	progress_set_step(4, "download_packs");
 	if (list_longer_than(to_install_files, 10)) {
-		step.current = 4;
-		step.description = "download_packs";
-		download_subscribed_packs(*subs, mom, true, step);
+		download_subscribed_packs(*subs, mom, true);
+	} else {
+		/* the progress would be completed within the
+		 * download_subscribed_packs function, since we
+		 * didn't run it, manually mark the step as completed */
+		progress_complete_step();
 	}
 	timelist_timer_stop(global_times); // closing: Download packs
 
-	/* step 2.5: Download missing files */
+	/* step 5: Download missing files */
 	timelist_timer_start(global_times, "Download missing files");
-	step.current = 5;
-	step.description = "download_fullfiles";
-	ret = download_fullfiles(to_install_files, NULL, step);
+	progress_set_step(5, "download_fullfiles");
+	ret = download_fullfiles(to_install_files, NULL);
 	if (ret) {
 		/* make sure the return code is positive */
 		ret = abs(ret);
@@ -884,11 +887,10 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	mom->files = files_from_bundles(mom->submanifests);
 	mom->files = consolidate_files(mom->files);
 
-	/* step 4: Install all bundle(s) files into the fs */
+	/* step 6: Install all bundle(s) files into the fs */
 	timelist_timer_start(global_times, "Installing bundle(s) files onto filesystem");
 	info("Installing bundle(s) files...\n");
-	step.current = 6;
-	step.description = "installing_files";
+	progress_set_step(6, "installing_files");
 
 	/* Do an initial check to
 	 * 1. make sure the file actually downloaded, if not continue on to the
@@ -973,7 +975,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 		/* two loops are necessary, first to stage, then to rename. Total is
 		 * list_length * 2 */
-		print_step_progress(step, complete, list_length * 2);
+		progress_report(complete, list_length * 2);
 	}
 
 	iter = list_head(to_install_files);
@@ -1010,17 +1012,18 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 		rename_staged_file_to_final(file);
 		// This is the second half of this process
-		print_step_progress(step, complete, list_length * 2);
+		progress_report(complete, list_length * 2);
 	}
-	print_step_progress(step, list_length * 2, list_length * 2); /* Force out 100% complete */
+	progress_report(list_length * 2, list_length * 2); /* Force out 100% complete */
 	info("\n");
 	sync();
 	timelist_timer_stop(global_times); // closing: Installing bundle(s) files onto filesystem
-	/* step 5: Run any scripts that are needed to complete update */
+	/* step 7: Run any scripts that are needed to complete update */
 	timelist_timer_start(global_times, "Run Scripts");
+	progress_set_step(7, "run_scripts");
 	run_scripts(false);
 	timelist_timer_stop(global_times); // closing: Run Scripts
-	complete_step(7, steps, "run_scripts");
+	progress_complete_step();
 
 	ret = SWUPD_OK;
 

@@ -345,10 +345,10 @@ int rename_all_files_to_final(struct list *updates)
 			update_good += 1;
 		}
 
-		print_progress(complete, list_length);
+		progress_report(complete, list_length);
 	}
 
-	print_progress(list_length, list_length); /* Force out 100% */
+	progress_report(list_length, list_length); /* Force out 100% */
 	printf("\n");
 	return update_count - update_good - update_errs - (update_skip - skip);
 }

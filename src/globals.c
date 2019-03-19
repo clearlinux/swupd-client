@@ -777,7 +777,7 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 		goto end;
 	}
 
-	set_log_level(log_level);
+	log_set_level(log_level);
 	//TODO: Remove this on a major release
 	if (log_level == LOG_ERROR) {
 		print("Experimental option --quiet. Not fully supported yet.\n");

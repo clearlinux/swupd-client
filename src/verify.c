@@ -138,13 +138,9 @@ static bool hash_needs_work(struct file *file, char *hash)
 static int get_all_files(struct manifest *official_manifest, struct list *subs)
 {
 	int ret;
-	struct step step;
-
-	/* TODO(castulo): when the --json-output flag is added to the verify command,
-	 * this step struct will need to include info from the current update step */
 
 	/* for install we need everything so synchronously download zero packs */
-	ret = download_subscribed_packs(subs, official_manifest, true, step);
+	ret = download_subscribed_packs(subs, official_manifest, true);
 	if (ret < 0) { // require zero pack
 		/* If we hit this point, we know we have a network connection, therefore
 		 * 	the error is server-side. This is also a critical error, so detailed
@@ -177,7 +173,7 @@ static int check_files_hash(struct list *files)
 		char *fullname;
 		bool valid;
 
-		print_progress(complete, total);
+		progress_report(complete, total);
 		complete++;
 		iter = iter->next;
 		if (f->is_deleted || f->do_not_update) {
@@ -193,7 +189,7 @@ static int check_files_hash(struct list *files)
 			ret = 0;
 		}
 	}
-	print_progress(total, total);
+	progress_report(total, total);
 	printf("\n");
 
 	return ret;
@@ -203,10 +199,6 @@ static int check_files_hash(struct list *files)
 static int get_required_files(struct manifest *official_manifest, struct list *subs)
 {
 	int ret;
-	struct step step;
-
-	/* TODO(castulo): when the --json-output flag is added to the verify command,
-	 * this step struct will need to include info from the current update step */
 
 	if (cmdline_option_install) {
 		get_all_files(official_manifest, subs);
@@ -216,7 +208,7 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 		return 0;
 	}
 
-	ret = download_fullfiles(official_manifest->files, NULL, step);
+	ret = download_fullfiles(official_manifest->files, NULL);
 	if (ret) {
 		fprintf(stderr, "Error: Unable to download necessary files for this OS release\n");
 	}
@@ -344,9 +336,9 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 		}
 	out:
 		free_string(&fullname);
-		print_progress(complete, list_length);
+		progress_report(complete, list_length);
 	}
-	print_progress(list_length, list_length);
+	progress_report(list_length, list_length);
 	printf("\n");
 }
 
@@ -414,7 +406,7 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 		complete++;
 
 		check_and_fix_one(file, official_manifest, repair);
-		print_progress(complete, list_length);
+		progress_report(complete, list_length);
 	}
 	printf("\n"); /* Finish update progress message */
 }

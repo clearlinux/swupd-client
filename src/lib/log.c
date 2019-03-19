@@ -57,12 +57,12 @@ static void log_internal(FILE *out, const char *file, int line, const char *labe
 	vfprintf(out, format, args_list);
 }
 
-void set_log_level(int log_level)
+void log_set_level(int log_level)
 {
 	cur_log_level = log_level;
 }
 
-void set_log_function(log_fn_t log_fn)
+void log_set_function(log_fn_t log_fn)
 {
 	if (log_fn) {
 		log_function = log_fn;

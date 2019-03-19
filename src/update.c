@@ -76,12 +76,8 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 	int ret;
 	struct file *file;
 	struct list *iter;
-	struct step step;
 
-	/* TODO(castulo): when the --json-output flag is added to the update command,
-	 * this step struct will need to include info from the current update step */
-
-	ret = download_fullfiles(updates, &nonpack, step);
+	ret = download_fullfiles(updates, &nonpack);
 	if (ret) {
 		fprintf(stderr, "ERROR: Could not download all files, aborting update\n");
 		return ret;
@@ -243,9 +239,6 @@ static enum swupd_code main_update()
 	bool mix_exists;
 	bool re_update = false;
 	bool versions_match = false;
-	struct step step;
-	/* TODO(castulo): when the --json-output flag is added to the update command,
-	* this step struct will need to include info from the current update step */
 
 	ret = swupd_init();
 	if (ret != 0) {
@@ -429,7 +422,7 @@ version_check:
 
 	/* Step 5: get the packs and untar */
 	timelist_timer_start(global_times, "Download packs");
-	download_subscribed_packs(latest_subs, server_manifest, false, step);
+	download_subscribed_packs(latest_subs, server_manifest, false);
 	timelist_timer_stop(global_times); // closing: Download packs
 
 	timelist_timer_start(global_times, "Apply deltas");

@@ -56,6 +56,8 @@ swupd_SOURCES = \
 	src/lib/log.c \
 	src/lib/log.h \
 	src/lib/macros.h \
+	src/lib/progress.c \
+	src/lib/progress.h \
 	src/lib/strings.c \
 	src/lib/strings.h \
 	src/lib/sys.c \

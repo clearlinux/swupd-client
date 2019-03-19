@@ -2,20 +2,31 @@ sudo: required
 dist: xenial
 language: c
 
+stages:
+        - "Static Analysis"
+        - test
+
 env:
-    global:
-        - MAKEFLAGS="-j 2"
-    matrix:
-        - FUNCTIONAL_TESTS=test/functional/update
-        - FUNCTIONAL_TESTS=test/functional/verify
-        - FUNCTIONAL_TESTS=test/functional/bundleadd
-        - FUNCTIONAL_TESTS=test/functional/bundleremove
-        - FUNCTIONAL_TESTS=test/functional/bundlelist
-        - FUNCTIONAL_TESTS=test/functional/search
-        - FUNCTIONAL_TESTS=test/functional/checkupdate
-        - FUNCTIONAL_TESTS=test/functional/hashdump
-        - FUNCTIONAL_TESTS=test/functional/mirror
-        - FUNCTIONAL_TESTS=test/functional/usability
+        global:
+                - MAKEFLAGS="-j 2"
+
+jobs:
+        include:
+                - stage: "Static Analysis"
+                  name: "Static Analysis & Unit Tests"
+                  script: make compliant && make shellcheck && sudo sh -c 'umask 0022 && make unit-check'
+                - stage: test
+                  name: "Functional Tests - update"
+                  script: bats test/functional/update
+                - stage: test
+                  name: "Functional Tests - verify, search"
+                  script: bats test/functional/{verify,search}
+                - stage: test
+                  name: "Functional Tests - bundle-add, bundle-remove, bundle-list"
+                  script: bats test/functional/{bundleadd,bundleremove,bundlelist}
+                - stage: test
+                  name: "Functional Tests - checkupdate, hashdump, mirror, usability"
+                  script: bats test/functional/{checkupdate,hashdump,mirror,usability}
 
 # Pre-install missing build dependencies:
 # - libcheck 0.9.10 is slightly too old, since 0.9.12 adds TAP support
@@ -45,18 +56,12 @@ install:
         - sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
         - git fetch origin master:refs/remotes/origin/master #Download origin/master for shelcheck
 
+# Ubuntu's default umask is 0002, but this break's swupd hash calculations.
 before_script:
         - autoreconf --verbose --warnings=none --install --force
         - ./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --with-fallback-capaths=$TRAVIS_BUILD_DIR/swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system
-        - make compliant
-        - make shellcheck
         - bats test/functional/generate-cert.prereq
-
-# Ubuntu's default umask is 0002, but this break's swupd hash calculations.
-script:
         - sudo find test/functional -exec chmod g-w {} \;
         - make &&
           sudo sh -c 'umask 0022 && make install' &&
-          sudo sh -c 'umask 0022 && make install-check' &&
-          sudo sh -c 'umask 0022 && make unit-check' &&
-          bats "$FUNCTIONAL_TESTS"
+          sudo sh -c 'umask 0022 && make install-check'

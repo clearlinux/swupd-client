@@ -67,7 +67,6 @@ static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 		exit(EXIT_FAILURE);
 	case 'j':
 		set_json_format();
-		json_start("bundle-add");
 		return true;
 	default:
 		return false;
@@ -103,13 +102,15 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code bundle_add_main(int argc, char **argv)
 {
 	int ret;
+	const int steps_in_bundleadd = 7;
+
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
 
+	progress_init_steps("bundle-add", steps_in_bundleadd);
 	ret = install_bundles_frontend(bundles);
-	json_status(ret);
-	json_end("bundle-add");
+	progress_finish_steps("bundle-add", ret);
 	return ret;
 }

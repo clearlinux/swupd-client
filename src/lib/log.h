@@ -14,16 +14,16 @@ extern "C" {
 #define LOG_DEBUG 8
 
 typedef void (*log_fn_t)(FILE *out, const char *file, int line, const char *label, const char *format, va_list args_list);
-void set_log_function(log_fn_t log_fn);
+void log_set_function(log_fn_t log_fn);
 
 /*
  * Set the minimum priority log to be printed by log functions.
  */
-void set_log_level(int log_level);
+void log_set_level(int log_level);
 
 /*
  * Print a message to 'out' if 'log_level' is greater or equal the log level
- * set by set_log_level().
+ * set by log_set_level().
  */
 void log_full(int log_level, FILE *out, const char *file, int line, const char *label, const char *format, ...);
 

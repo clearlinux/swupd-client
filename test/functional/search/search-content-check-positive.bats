@@ -207,3 +207,20 @@ global_teardown() {
 	assert_regex_in_output "$expected_output"
 
 }
+
+@test "SRH012: Search using regular expressions" {
+
+	run sudo sh -c "$SWUPD search-file --regexp $SWUPD_OPTS ^/usr/lib.*lib.*$"
+
+	#Searching for '^/usr/lib.*lib.*$'
+	assert_status_is 0
+	expected_output=$(cat <<-EOM
+		Bundle test-bundle1 \\(0 MB to install\\)
+		./usr/lib/test-lib32
+		Bundle test-bundle2 \\(0 MB to install\\)
+		./usr/lib64/test-lib64
+	EOM
+	)
+	assert_regex_in_output "$expected_output"
+
+}

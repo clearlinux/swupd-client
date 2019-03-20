@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
+#include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,7 +37,6 @@
 
 /*
  * TODO:
- * - Support regular expressions
  * - Support exact match
  * - Improve bundle total size algorithm by moving total size to manifest struct
  */
@@ -65,6 +65,8 @@ static bool init = false;
 static enum search_type search_type = SEARCH_TYPE_ALL;
 static int num_results = INT_MAX;
 static int sort = SORT_TYPE_ALPHA_BUNDLES_ONLY;
+static int regexp = 0;
+static regex_t regexp_comp;
 
 // Context
 static struct list *bundle_size_cache = NULL;
@@ -261,6 +263,15 @@ static bool is_path_in_search_type(const char *filename)
 	return found;
 }
 
+static bool file_matches(const char *filename, const char *search_term)
+{
+	if (!regexp) {
+		return strcasestr(filename, search_term) != NULL;
+	}
+
+	return regexec(&regexp_comp, filename, 0, NULL, 0) == 0;
+}
+
 static int search_in_manifest(struct manifest *mom, struct file *manifest_file, const char *search_term)
 {
 	struct list *l;
@@ -294,7 +305,7 @@ static int search_in_manifest(struct manifest *mom, struct file *manifest_file, 
 			continue;
 		}
 
-		if (strcasestr(file->filename, search_term)) {
+		if (file_matches(file->filename, search_term)) {
 			if (count == 0) {
 				print_bundle(manifest_file);
 			}
@@ -335,11 +346,20 @@ static int do_search(struct manifest *mom, const char *search_term)
 	int ret = 0;
 	int found = 0;
 	int err;
+	int regexp_err;
 
 	if (sort == SORT_TYPE_ALPHA_BUNDLES_ONLY || sort == SORT_TYPE_ALPHA) {
 		mom->manifests = list_sort(mom->manifests, manifest_name_cmp);
 	} else if (sort == SORT_TYPE_SIZE) {
 		mom->manifests = list_sort(mom->manifests, manifest_size_cmp);
+	}
+
+	if (regexp) {
+		regexp_err = regcomp(&regexp_comp, search_term, REG_NOSUB | REG_EXTENDED);
+		if (regexp_err) {
+			print_regexp_error(regexp_err, &regexp_comp);
+			goto error;
+		}
 	}
 
 	if (num_results != INT_MAX) {
@@ -359,6 +379,11 @@ static int do_search(struct manifest *mom, const char *search_term)
 		}
 	}
 
+	if (regexp) {
+		regfree(&regexp_comp);
+	}
+
+error:
 	return ret < 0 ? ret : found;
 }
 
@@ -479,8 +504,9 @@ static const struct option prog_opts[] = {
 	{ "csv", no_argument, 0, 'm' },
 	{ "init", no_argument, 0, 'i' },
 	{ "library", no_argument, 0, 'l' },
-	{ "top", required_argument, 0, 'T' },
 	{ "order", required_argument, 0, 'o' },
+	{ "top", required_argument, 0, 'T' },
+	{ "regexp", no_argument, &regexp, 1 },
 };
 
 static bool parse_opt(int opt, char *optarg)

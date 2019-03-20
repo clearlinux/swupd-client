@@ -94,7 +94,6 @@ static void print_help(void)
 static bool compile_whitelist()
 {
 	int errcode;
-	char *error_buffer = NULL;
 	char *full_regex = NULL;
 	bool success = false;
 
@@ -105,22 +104,14 @@ static bool compile_whitelist()
 	errcode = regcomp(&picky_whitelist_buffer, full_regex, REG_NOSUB | REG_EXTENDED);
 	picky_whitelist = &picky_whitelist_buffer;
 	if (errcode) {
-		size_t len;
-		len = regerror(errcode, picky_whitelist, NULL, 0);
-		error_buffer = malloc(len);
-		ON_NULL_ABORT(error_buffer);
-
-		regerror(errcode, picky_whitelist, error_buffer, len);
-		error("Invalid --picky-whitelist=%s: %s\n", cmdline_option_picky_whitelist, error_buffer);
+		error("Problem processing --picky-whitelist=%s\n", cmdline_option_picky_whitelist);
+		print_regexp_error(errcode, picky_whitelist);
 		goto done;
 	}
 	success = true;
 
 done:
 	free_string(&full_regex);
-	if (error_buffer) {
-		free_string(&error_buffer);
-	}
 	return success;
 }
 

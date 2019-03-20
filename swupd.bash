@@ -57,7 +57,7 @@ _swupd()
 		opts="--help"
 		break;;
 	    ("search-file")
-		opts="--help --library --binary --top --csv --init --ignore-time --url --contenturl --versionurl --port --path --format --statedir --certpath -debug --quiet "
+		opts="--help --library --binary --top --csv --init --ignore-time --url --contenturl --versionurl --port --path --format --statedir --certpath --regexp --debug --quiet "
 		break;;
 	    ("info")
 		opts="--debug --quiet "

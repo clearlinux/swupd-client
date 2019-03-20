@@ -686,6 +686,7 @@ enum swupd_code update_main(int argc, char **argv)
 	int ret = SWUPD_OK;
 
 	if (!parse_options(argc, argv)) {
+		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
 

@@ -1052,3 +1052,19 @@ char *get_printable_bundle_name(const char *bundle_name, bool is_experimental)
 	string_or_die(&printable_name, "%s%s", bundle_name, is_experimental ? " (experimental)" : "");
 	return printable_name;
 }
+
+/* Helper to print regexp errors */
+void print_regexp_error(int errcode, regex_t *regexp)
+{
+	size_t len;
+	char *error_buffer = NULL;
+
+	len = regerror(errcode, regexp, NULL, 0);
+	error_buffer = malloc(len);
+	ON_NULL_ABORT(error_buffer);
+
+	regerror(errcode, regexp, error_buffer, len);
+	error("Invalid regular expression: %s\n", error_buffer)
+
+	    free(error_buffer);
+}

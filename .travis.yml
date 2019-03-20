@@ -9,6 +9,15 @@ stages:
 env:
         global:
                 - MAKEFLAGS="-j 2"
+                - UPDATE_TOTAL="$(find test/functional/update -name *.bats | wc -l)"
+                - UPDATE_SUBGROUP1_TOTAL=17
+                - UPDATE_SUBGROUP2_TOTAL="$((UPDATE_TOTAL - UPDATE_SUBGROUP1_TOTAL))"
+                - UPDATE_SUBGROUP1="$(find test/functional/update -name *.bats | head -n $UPDATE_SUBGROUP1_TOTAL | tr '\n' ' ')"
+                - UPDATE_SUBGROUP2="$(find test/functional/update -name *.bats | tail -n $UPDATE_SUBGROUP2_TOTAL | tr '\n' ' ')"
+                - GROUP1="$UPDATE_SUBGROUP1"
+                - GROUP2="$UPDATE_SUBGROUP2 $(find test/functional/{checkupdate,hashdump,mirror,usability} -name *.bats -printf '%p ')"
+                - GROUP3="$(find test/functional/{verify,search} -name *.bats -printf '%p ')"
+                - GROUP4="$(find test/functional/{bundleadd,bundleremove,bundlelist} -name *.bats -printf '%p ')"
 
 jobs:
         include:
@@ -16,17 +25,17 @@ jobs:
                   name: "Static Analysis & Unit Tests"
                   script: make compliant && make shellcheck && sudo sh -c 'umask 0022 && make unit-check'
                 - stage: test
-                  name: "Functional Tests - update"
-                  script: bats test/functional/update
+                  name: "Functional Tests - update (group 1)"
+                  script: env TESTS="$GROUP1" make -e check
+                - stage: test
+                  name: "Functional Tests - update (group 2), checkupdate, hashdump, mirror, usability"
+                  script: env TESTS="$GROUP2" make -e check
                 - stage: test
                   name: "Functional Tests - verify, search"
-                  script: bats test/functional/{verify,search}
+                  script: env TESTS="$GROUP3" make -e check
                 - stage: test
                   name: "Functional Tests - bundle-add, bundle-remove, bundle-list"
-                  script: bats test/functional/{bundleadd,bundleremove,bundlelist}
-                - stage: test
-                  name: "Functional Tests - checkupdate, hashdump, mirror, usability"
-                  script: bats test/functional/{checkupdate,hashdump,mirror,usability}
+                  script: env TESTS="$GROUP4" make -e check
 
 # Pre-install missing build dependencies:
 # - libcheck 0.9.10 is slightly too old, since 0.9.12 adds TAP support
@@ -60,8 +69,10 @@ install:
 before_script:
         - autoreconf --verbose --warnings=none --install --force
         - ./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --with-fallback-capaths=$TRAVIS_BUILD_DIR/swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system
-        - bats test/functional/generate-cert.prereq
         - sudo find test/functional -exec chmod g-w {} \;
         - make &&
           sudo sh -c 'umask 0022 && make install' &&
           sudo sh -c 'umask 0022 && make install-check'
+
+after_failure:
+        - cat test-suite.log

@@ -48,7 +48,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 
 	/* line 1: MANIFEST\t<version> */
 	line[0] = 0;
-	if (fgets(line, MANIFEST_LINE_MAXLEN - 1, infile) == NULL) {
+	if (fgets(line, MANIFEST_LINE_MAXLEN, infile) == NULL) {
 		goto err_close;
 	}
 
@@ -68,7 +68,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 	while (strcmp(line, "\n") != 0) {
 		/* read the header */
 		line[0] = 0;
-		if (fgets(line, MANIFEST_LINE_MAXLEN - 1, infile) == NULL) {
+		if (fgets(line, MANIFEST_LINE_MAXLEN, infile) == NULL) {
 			break;
 		}
 		c = strchr(line, '\n');
@@ -155,7 +155,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 		struct file *file;
 
 		line[0] = 0;
-		if (fgets(line, MANIFEST_LINE_MAXLEN - 1, infile) == NULL) {
+		if (fgets(line, MANIFEST_LINE_MAXLEN, infile) == NULL) {
 			break;
 		}
 		c = strchr(line, '\n');

@@ -42,7 +42,7 @@ test_setup() {
 		Preparing to update from 10 to 20
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		Failed to retrieve 10 MoM manifest
+		Error: Failed to retrieve 10 MoM manifest
 		Update failed.
 	EOM
 	)
@@ -72,7 +72,7 @@ test_setup() {
 		Preparing to update from 10 to 20
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.MoM.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		Failed to retrieve 20 MoM manifest
+		Error: Failed to retrieve 20 MoM manifest
 		Update failed.
 	EOM
 	)
@@ -102,8 +102,8 @@ test_setup() {
 		Preparing to update from 10 to 20
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		Failed to retrieve 10 test-bundle manifest
-		Cannot load current MoM sub-manifests, exiting
+		Error: Failed to retrieve 10 test-bundle manifest
+		Error: Cannot load current MoM sub-manifests, exiting
 		Update failed.
 	EOM
 	)
@@ -133,8 +133,8 @@ test_setup() {
 		Preparing to update from 10 to 20
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		Failed to retrieve 20 test-bundle manifest
-		Unable to download manifest test-bundle version 20, exiting now
+		Error: Failed to retrieve 20 test-bundle manifest
+		Error: Unable to download manifest test-bundle version 20, exiting now
 		Update failed.
 	EOM
 	)
@@ -169,7 +169,7 @@ test_setup() {
 		Finishing download of update content...
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$file_hash.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		ERROR: Could not download all files, aborting update
+		Error: Could not download all files, aborting update
 		Update failed.
 	EOM
 	)

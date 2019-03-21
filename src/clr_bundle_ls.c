@@ -45,18 +45,18 @@ static void free_deps(void)
 
 static void print_help(void)
 {
-	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd bundle-list [OPTIONS...]\n\n");
+	print("Usage:\n");
+	print("   swupd bundle-list [OPTIONS...]\n\n");
 
 	//TODO: Add documentation explaining this command
 
 	global_print_help();
 
-	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "   -a, --all               List all available bundles for the current version of Clear Linux\n");
-	fprintf(stderr, "   -d, --deps=[BUNDLE]     List bundles included by BUNDLE\n");
-	fprintf(stderr, "   -D, --has-dep=[BUNDLE]  List dependency tree of all bundles which have BUNDLE as a dependency\n");
-	fprintf(stderr, "\n");
+	print("Options:\n");
+	print("   -a, --all               List all available bundles for the current version of Clear Linux\n");
+	print("   -d, --deps=[BUNDLE]     List bundles included by BUNDLE\n");
+	print("   -D, --has-dep=[BUNDLE]  List dependency tree of all bundles which have BUNDLE as a dependency\n");
+	print("\n");
 }
 
 static const struct option prog_opts[] = {
@@ -104,7 +104,7 @@ static bool parse_options(int argc, char **argv)
 	}
 
 	if (argc > ind) {
-		fprintf(stderr, "Error: unexpected arguments\n\n");
+		error("unexpected arguments\n\n");
 		return false;
 	}
 
@@ -125,7 +125,7 @@ enum swupd_code bundle_list_main(int argc, char **argv)
 	 * listing locally installed bundles (with the limitation of not showing what
 	 * bundles are experimental) */
 	if (ret != 0 && !cmdline_local) {
-		fprintf(stderr, "Error: Failed updater initialization. Exiting now\n");
+		error("Failed updater initialization. Exiting now\n");
 		return ret;
 	}
 

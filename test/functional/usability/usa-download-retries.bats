@@ -35,9 +35,9 @@ test_setup() {
 		Error: Curl - Download failed: response (204) -  'http://localhost:$port/10/Manifest.MoM.tar'
 		Retry #4 downloading from http://localhost:$port/10/Manifest.MoM.tar
 		Error: Curl - Download failed: response (204) -  'http://localhost:$port/10/Manifest.MoM.tar'
-		Maximum number of retries reached
-		Failed to retrieve 10 MoM manifest
-		Cannot load official manifest MoM for version 10
+		Warning: Maximum number of retries reached
+		Error: Failed to retrieve 10 MoM manifest
+		Error: Cannot load official manifest MoM for version 10
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -55,8 +55,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Error: Curl - Download failed: response (204) -  'http://localhost:$port/10/Manifest.MoM.tar'
 		Download retries is disabled
-		Failed to retrieve 10 MoM manifest
-		Cannot load official manifest MoM for version 10
+		Error: Failed to retrieve 10 MoM manifest
+		Error: Cannot load official manifest MoM for version 10
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -81,9 +81,9 @@ test_setup() {
 		Waiting 4 seconds before retrying the download
 		Retry #3 downloading from http://localhost:$port/10/Manifest.MoM.tar
 		Error: Curl - Download failed: response (204) -  'http://localhost:$port/10/Manifest.MoM.tar'
-		Maximum number of retries reached
-		Failed to retrieve 10 MoM manifest
-		Cannot load official manifest MoM for version 10
+		Warning: Maximum number of retries reached
+		Error: Failed to retrieve 10 MoM manifest
+		Error: Cannot load official manifest MoM for version 10
 	EOM
 	)
 	assert_is_output "$expected_output"

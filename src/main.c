@@ -61,36 +61,36 @@ static const struct option prog_opts[] = {
 
 static void print_help(const char *name)
 {
-	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "    %s [OPTION...]\n", basename((char *)name));
-	fprintf(stderr, " or %s [OPTION...] SUBCOMMAND [OPTION...]\n\n", basename((char *)name));
-	fprintf(stderr, "Help Options:\n");
-	fprintf(stderr, "   -h, --help              Show help options\n");
-	fprintf(stderr, "   -v, --version           Output version information and exit\n\n");
-	fprintf(stderr, "Subcommands:\n");
+	print("Usage:\n");
+	print("    %s [OPTION...]\n", basename((char *)name));
+	print(" or %s [OPTION...] SUBCOMMAND [OPTION...]\n\n", basename((char *)name));
+	print("Help Options:\n");
+	print("   -h, --help              Show help options\n");
+	print("   -v, --version           Output version information and exit\n\n");
+	print("Subcommands:\n");
 
 	struct subcmd *entry = commands;
 
 	while (entry->name != NULL) {
-		fprintf(stderr, "   %-20s    %-30s\n", entry->name, entry->doc);
+		print("   %-20s    %-30s\n", entry->name, entry->doc);
 		entry++;
 	}
-	fprintf(stderr, "\n");
-	fprintf(stderr, "To view subcommand options, run `%s SUBCOMMAND --help'\n", basename((char *)name));
+	print("\n");
+	print("To view subcommand options, run `%s SUBCOMMAND --help'\n", basename((char *)name));
 }
 
 /* this function prints the copyright message for the --version command */
 static void copyright_header(void)
 {
-	fprintf(stderr, PACKAGE " " VERSION "\n");
-	fprintf(stderr, "   Copyright (C) 2012-2018 Intel Corporation\n");
-	fprintf(stderr, "\n");
+	print(PACKAGE " " VERSION "\n");
+	print("   Copyright (C) 2012-2018 Intel Corporation\n");
+	print("\n");
 }
 
 static void print_compile_opts(void)
 {
-	printf("Compile-time options: %s\n", BUILD_OPTS);
-	printf("Compile-time configuration:\n%s\n", BUILD_CONFIGURE);
+	info("Compile-time options: %s\n", BUILD_OPTS);
+	info("Compile-time configuration:\n%s\n", BUILD_CONFIGURE);
 }
 
 static int subcmd_index(char *arg)
@@ -131,8 +131,8 @@ static int parse_options(int argc, char **argv, int *index)
 			/* found a subcommand, or a random non-option argument */
 			ret = subcmd_index(optarg);
 			if (ret < 0) {
-				fprintf(stderr, "Error: unrecognized subcommand `%s'\n\n",
-					optarg);
+				error("unrecognized subcommand `%s'\n\n",
+				      optarg);
 				goto error;
 			} else {
 				*index = ret;
@@ -140,7 +140,7 @@ static int parse_options(int argc, char **argv, int *index)
 			}
 		case '?':
 			/* for unknown options, an error message is printed automatically */
-			fprintf(stderr, "\n");
+			info("\n");
 			goto error;
 		default:
 			/* should be unreachable */

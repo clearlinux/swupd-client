@@ -122,9 +122,9 @@ int get_value_from_path(char **contents, const char *path, bool is_abs_path)
 	line[0] = 0;
 	if (fgets(line, LINE_MAX, file) == NULL) {
 		if (ferror(file)) {
-			fprintf(stderr, "Error: Unable to read data from %s\n", rel_path);
+			error("Unable to read data from %s\n", rel_path);
 		} else if (feof(file)) {
-			fprintf(stderr, "Error: Contents of %s are empty\n", rel_path);
+			error("Contents of %s are empty\n", rel_path);
 		}
 		goto fail;
 	}
@@ -155,7 +155,7 @@ int get_version_from_path(const char *abs_path)
 		free_string(&ret_str);
 
 		if (err != 0) {
-			fprintf(stderr, "Error: Invalid version\n");
+			error("Invalid version\n");
 		} else {
 			return val;
 		}
@@ -265,7 +265,7 @@ static bool set_state_dir(char *path)
 {
 	if (path) {
 		if (path[0] != '/') {
-			fprintf(stderr, "state dir must be a full path starting with '/', not '%c'\n", path[0]);
+			error("state dir must be a full path starting with '/', not '%c'\n", path[0]);
 			return false;
 		}
 
@@ -273,7 +273,7 @@ static bool set_state_dir(char *path)
 		 * reconstructed, make sure we never set those by accident and nuke the
 		 * system. */
 		if (!strcmp(path, "/") || !strcmp(path, "/var") || !strcmp(path, "/usr")) {
-			fprintf(stderr, "Refusing to use '%s' as a state dir because it might be erased first.\n", path);
+			error("Refusing to use '%s' as a state dir because it might be erased first.\n", path);
 			return false;
 		}
 
@@ -356,7 +356,7 @@ bool set_path_prefix(char *path)
 
 			cwd = get_current_dir_name();
 			if (cwd == NULL) {
-				fprintf(stderr, "Unable to get current directory name (%s)\n", strerror(errno));
+				error("Unable to get current directory name (%s)\n", strerror(errno));
 				free_string(&tmp);
 				return false;
 			}
@@ -367,8 +367,8 @@ bool set_path_prefix(char *path)
 		}
 
 		if (!realpath(tmp, real_path)) {
-			fprintf(stderr, "Bad path_prefix %s (%s), cannot continue.\n",
-				path_prefix, strerror(errno));
+			error("Bad path_prefix %s (%s), cannot continue.\n",
+			      path_prefix, strerror(errno));
 			free_string(&tmp);
 			return false;
 		}
@@ -394,8 +394,8 @@ bool set_path_prefix(char *path)
 	}
 	ret = stat(path_prefix, &statbuf);
 	if (ret != 0 || !S_ISDIR(statbuf.st_mode)) {
-		fprintf(stderr, "Bad path_prefix %s (%s), cannot continue.\n",
-			path_prefix, strerror(errno));
+		error("Bad path_prefix %s (%s), cannot continue.\n",
+		      path_prefix, strerror(errno));
 		return false;
 	}
 
@@ -462,7 +462,7 @@ bool init_globals(void)
 		/* Fallback to configure time format_string if other sources fail */
 		set_format_string(FORMATID);
 #else
-		fprintf(stderr, "Unable to determine format id. Use the -F option instead.\n");
+		error("Unable to determine format id. Use the -F option instead.\n");
 		exit(EXIT_FAILURE);
 #endif
 	}
@@ -477,7 +477,7 @@ bool init_globals(void)
 		ret = -1;
 #endif
 		if (ret) {
-			fprintf(stderr, "\nDefault version URL not found. Use the -v option instead.\n");
+			error("\nDefault version URL not found. Use the -v option instead.\n");
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -492,7 +492,7 @@ bool init_globals(void)
 		ret = -1;
 #endif
 		if (ret) {
-			fprintf(stderr, "\nDefault content URL not found. Use the -c option instead.\n");
+			error("\nDefault content URL not found. Use the -c option instead.\n");
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -590,7 +590,7 @@ static bool global_parse_opt(int opt, char *optarg)
 		return true;
 	case 'p': /* default empty path_prefix verifies the running OS */
 		if (!set_path_prefix(optarg)) {
-			fprintf(stderr, "Invalid --path argument\n\n");
+			error("Invalid --path argument\n\n");
 			return false;
 		}
 		return true;
@@ -601,7 +601,7 @@ static bool global_parse_opt(int opt, char *optarg)
 	case 'P':
 		err = strtoi_err(optarg, &update_server_port);
 		if (err < 0 || update_server_port < 0) {
-			fprintf(stderr, "Invalid --port argument: %s\n\n", optarg);
+			error("Invalid --port argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;
@@ -613,13 +613,13 @@ static bool global_parse_opt(int opt, char *optarg)
 		return true;
 	case 'F':
 		if (!set_format_string(optarg)) {
-			fprintf(stderr, "Invalid --format argument\n\n");
+			error("Invalid --format argument\n\n");
 			return false;
 		}
 		return true;
 	case 'S':
 		if (!set_state_dir(optarg)) {
-			fprintf(stderr, "Invalid --statedir argument\n\n");
+			error("Invalid --statedir argument\n\n");
 			return false;
 		}
 		return true;
@@ -644,21 +644,21 @@ static bool global_parse_opt(int opt, char *optarg)
 	case 'W':
 		err = strtoi_err(optarg, &max_parallel_downloads);
 		if (err < 0 || max_parallel_downloads <= 0) {
-			fprintf(stderr, "Invalid --max-parallel-downloads argument: %s\n\n", optarg);
+			error("Invalid --max-parallel-downloads argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;
 	case 'r':
 		err = strtoi_err(optarg, &max_retries);
 		if (err < 0 || max_retries < 0) {
-			fprintf(stderr, "Invalid --max-retries argument: %s\n\n", optarg);
+			error("Invalid --max-retries argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;
 	case 'd':
 		err = strtoi_err(optarg, &retry_delay);
 		if (err < 0 || retry_delay < 0 || retry_delay > 60) {
-			fprintf(stderr, "Invalid --retry-delay argument: %s (should be between 0 - %d seconds)\n\n", optarg, MAX_DELAY);
+			error("Invalid --retry-delay argument: %s (should be between 0 - %d seconds)\n\n", optarg, MAX_DELAY);
 			return false;
 		}
 		return true;
@@ -673,7 +673,7 @@ static bool global_parse_deprecated(int opt, char *optarg)
 {
 	switch (opt) {
 	case 'D':
-		fprintf(stderr, "Deprecated option -D was renamed. Prefer using -W or --max-parallel-downloads.\n\n");
+		warn("Deprecated option -D was renamed. Prefer using -W or --max-parallel-downloads.\n\n");
 		return global_parse_opt('W', optarg);
 	default:
 		return false;
@@ -705,25 +705,25 @@ static char *generate_optstring(struct option *opts, int num_opts)
 
 void global_print_help(void)
 {
-	fprintf(stderr, "Global Options:\n");
-	fprintf(stderr, "   -h, --help              Show help options\n");
-	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol)\n");
-	fprintf(stderr, "   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
-	fprintf(stderr, "   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
-	fprintf(stderr, "   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
-	fprintf(stderr, "   -v, --versionurl=[URL]  RFC-3986 encoded url for version file downloads\n");
-	fprintf(stderr, "   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
-	fprintf(stderr, "   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
-	fprintf(stderr, "   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
-	fprintf(stderr, "   -S, --statedir          Specify alternate swupd state directory\n");
-	fprintf(stderr, "   -C, --certpath          Specify alternate path to swupd certificates\n");
-	fprintf(stderr, "   -t, --time              Show verbose time output for swupd operations\n");
-	fprintf(stderr, "   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
-	fprintf(stderr, "   -b, --no-boot-update    Do not install boot files to the boot partition (containers)\n");
-	fprintf(stderr, "   -W, --max-parallel-downloads=[n] Set the maximum number of parallel downloads\n");
-	fprintf(stderr, "   -r, --max-retries       Maximum number of retries for download failures\n");
-	fprintf(stderr, "   -d, --retry-delay       Initial delay between download retries, this will be doubled for each retry\n");
-	fprintf(stderr, "\n");
+	print("Global Options:\n");
+	print("   -h, --help              Show help options\n");
+	print("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol)\n");
+	print("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
+	print("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
+	print("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
+	print("   -v, --versionurl=[URL]  RFC-3986 encoded url for version file downloads\n");
+	print("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
+	print("   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
+	print("   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
+	print("   -S, --statedir          Specify alternate swupd state directory\n");
+	print("   -C, --certpath          Specify alternate path to swupd certificates\n");
+	print("   -t, --time              Show verbose time output for swupd operations\n");
+	print("   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
+	print("   -b, --no-boot-update    Do not install boot files to the boot partition (containers)\n");
+	print("   -W, --max-parallel-downloads=[n] Set the maximum number of parallel downloads\n");
+	print("   -r, --max-retries       Maximum number of retries for download failures\n");
+	print("   -d, --retry-delay       Initial delay between download retries, this will be doubled for each retry\n");
+	print("\n");
 }
 
 int global_parse_options(int argc, char **argv, const struct global_options *opts)

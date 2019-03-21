@@ -33,7 +33,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		Failed to retrieve 10 MoM manifest
+		Error: Failed to retrieve 10 MoM manifest
 		Warning: Could not determine which installed bundles are experimental
 		os-core
 		test-bundle1
@@ -57,7 +57,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		Failed to retrieve 10 MoM manifest
+		Error: Failed to retrieve 10 MoM manifest
 	EOM
 	)
 	assert_is_output "$expected_output"

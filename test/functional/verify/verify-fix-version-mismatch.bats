@@ -17,8 +17,8 @@ test_setup() {
 	assert_status_is "$SWUPD_INVALID_OPTION"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
-		ERROR: Fixing to a different version requires --force or --picky
-		Error: Fix did not fully succeed
+		Error: Fixing to a different version requires --force or --picky
+		Fix did not fully succeed
 	EOM
 	)
 	assert_is_output "$expected_output"

@@ -22,6 +22,7 @@
 #define _GNU_SOURCE
 #include "verifytime.h"
 
+#include "lib/log.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,7 +40,7 @@ static unsigned long int get_versionstamp(char *path_prefix)
 	unsigned long int version_num;
 
 	if (asprintf(&filename, "%s/usr/share/clear/versionstamp", path_prefix ? path_prefix : "") < 0) {
-		fprintf(stderr, "Failed to get the versionstamp\n");
+		error("Failed to get the versionstamp\n");
 		return 0;
 	}
 
@@ -47,16 +48,16 @@ static unsigned long int get_versionstamp(char *path_prefix)
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
 		if (errno == ENOENT) {
-			fprintf(stderr, "%s does not exist!\n", filename);
+			error("%s does not exist!\n", filename);
 		} else {
-			fprintf(stderr, "Failed to open %s\n", filename);
+			error("Failed to open %s\n", filename);
 		}
 		version_num = 0;
 		goto exit;
 	}
 
 	if (fgets(data, 11, fp) == NULL) {
-		fprintf(stderr, "Failed to read %s\n", filename);
+		error("Failed to read %s\n", filename);
 		version_num = 0;
 		goto close_and_exit;
 	}
@@ -77,10 +78,10 @@ exit:
 static bool set_time(time_t mtime)
 {
 	if (stime(&mtime) != 0) {
-		fprintf(stderr, "Failed to set system time");
+		error("Failed to set system time");
 		return false;
 	}
-	fprintf(stderr, "Set system time to %s\n", ctime(&mtime));
+	info("Set system time to %s\n", ctime(&mtime));
 	return true;
 }
 
@@ -107,7 +108,7 @@ bool verify_time(char *path_prefix)
 		char time_str[50];
 
 		strftime(time_str, sizeof(time_str), "%a %b %d %H:%M:%S %Y", timeinfo);
-		fprintf(stderr, "Warning: Current time is %s\nAttempting to fix...", time_str);
+		warn("Current time is %s\nAttempting to fix...", time_str);
 		if (set_time(versiontime) == false) {
 			return false;
 		}

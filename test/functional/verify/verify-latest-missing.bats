@@ -25,7 +25,7 @@ test_teardown() {
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
 		Unable to get latest version for install
-		Error: Fix did not fully succeed
+		Fix did not fully succeed
 	EOM
 	)
 	assert_regex_in_output "$expected_output"

@@ -91,24 +91,26 @@ bool initialize_signature(void)
 			timeinfo = localtime(&currtime);
 
 			strftime(time_str, sizeof(time_str), "%a %b %d %H:%M:%S %Y", timeinfo);
-			fprintf(stderr, "Warning: Current time is %s\n", time_str);
-			fprintf(stderr, "Certificate validity is:\n");
+			warn("Current time is %s\n", time_str);
+			info("Certificate validity is:\n");
 			b = BIO_new_fp(stdout, BIO_NOCLOSE);
 			if (b == NULL) {
-				fprintf(stderr, "Failed to create BIO wrapping stream\n");
+				error("Failed to create BIO wrapping stream\n");
 				goto fail;
 			}
 			/* The ASN1_TIME_print function does not include a newline... */
 			if (!ASN1_TIME_print(b, X509_get_notBefore(cert))) {
-				fprintf(stderr, "\nFailed to get certificate begin date\n");
+				info("\n");
+				error("Failed to get certificate begin date\n");
 				goto fail;
 			}
-			fprintf(stderr, "\n");
+			info("\n");
 			if (!ASN1_TIME_print(b, X509_get_notAfter(cert))) {
-				fprintf(stderr, "\nFailed to get certificate expiration date\n");
+				info("\n");
+				error("Failed to get certificate expiration date\n");
 				goto fail;
 			}
-			fprintf(stderr, "\n");
+			info("\n");
 			BIO_free(b);
 		}
 		goto fail;
@@ -124,7 +126,7 @@ bool initialize_signature(void)
 
 	return true;
 fail:
-	fprintf(stderr, "Failed to verify certificate: %s\n", X509_verify_cert_error_string(ret));
+	error("Failed to verify certificate: %s\n", X509_verify_cert_error_string(ret));
 	return false;
 }
 
@@ -291,19 +293,19 @@ static bool get_pubkey(void)
 {
 	fp_pubkey = fopen(CERTNAME, "re");
 	if (!fp_pubkey) {
-		fprintf(stderr, "Failed fopen %s\n", CERTNAME);
+		error("Failed fopen %s\n", CERTNAME);
 		goto error;
 	}
 
 	cert = PEM_read_X509(fp_pubkey, NULL, NULL, NULL);
 	if (!cert) {
-		fprintf(stderr, "Failed PEM_read_X509() for %s\n", CERTNAME);
+		error("Failed PEM_read_X509() for %s\n", CERTNAME);
 		goto error;
 	}
 
 	pkey = X509_get_pubkey(cert);
 	if (!pkey) {
-		fprintf(stderr, "Failed X509_get_pubkey() for %s\n", CERTNAME);
+		error("Failed X509_get_pubkey() for %s\n", CERTNAME);
 		X509_free(cert);
 		goto error;
 	}
@@ -337,33 +339,33 @@ static int validate_certificate(void)
 
 	/* create the cert store and set the verify callback */
 	if (!(store = X509_STORE_new())) {
-		fprintf(stderr, "Failed X509_STORE_new() for %s\n", CERTNAME);
+		error("Failed X509_STORE_new() for %s\n", CERTNAME);
 		goto error;
 	}
 
 	X509_STORE_set_verify_cb_func(store, verify_callback);
 
 	if (X509_STORE_set_purpose(store, X509_PURPOSE_ANY) != 1) {
-		fprintf(stderr, "Failed X509_STORE_set_purpose() for %s\n", CERTNAME);
+		error("Failed X509_STORE_set_purpose() for %s\n", CERTNAME);
 		goto error;
 	}
 
 	/* Add the certificates to be verified to the store */
 	if (!(lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file()))) {
-		fprintf(stderr, "Failed X509_STORE_add_lookup() for %s\n", CERTNAME);
+		error("Failed X509_STORE_add_lookup() for %s\n", CERTNAME);
 		goto error;
 	}
 
 	/*  Load the our Root cert, which can be in either DER or PEM format */
 	if (!X509_load_cert_file(lookup, CERTNAME, X509_FILETYPE_PEM)) {
-		fprintf(stderr, "Failed X509_load_cert_file() for %s\n", CERTNAME);
+		error("Failed X509_load_cert_file() for %s\n", CERTNAME);
 		goto error;
 	}
 
 	if (crl) {
 		if (!(lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file())) ||
 		    (X509_load_crl_file(lookup, crl, X509_FILETYPE_PEM) != 1)) {
-			fprintf(stderr, "Failed X509 crl init for %s\n", CERTNAME);
+			error("Failed X509 crl init for %s\n", CERTNAME);
 			goto error;
 		}
 		/* set the flags of the store so that CLRs are consulted */
@@ -372,12 +374,12 @@ static int validate_certificate(void)
 
 	/* create a verification context and initialize it */
 	if (!(verify_ctx = X509_STORE_CTX_new())) {
-		fprintf(stderr, "Failed X509_STORE_CTX_new() for %s\n", CERTNAME);
+		error("Failed X509_STORE_CTX_new() for %s\n", CERTNAME);
 		goto error;
 	}
 
 	if (X509_STORE_CTX_init(verify_ctx, store, cert, NULL) != 1) {
-		fprintf(stderr, "Failed X509_STORE_CTX_init() for %s\n", CERTNAME);
+		error("Failed X509_STORE_CTX_init() for %s\n", CERTNAME);
 		goto error;
 	}
 	/* Specify which cert to validate in the verify context.
@@ -387,7 +389,7 @@ static int validate_certificate(void)
 
 	/* verify the certificate */
 	if (X509_verify_cert(verify_ctx) != 1) {
-		fprintf(stderr, "Failed X509_verify_cert() for %s\n", CERTNAME);
+		error("Failed X509_verify_cert() for %s\n", CERTNAME);
 		goto error;
 	}
 
@@ -409,8 +411,8 @@ error:
 int verify_callback(int ok, X509_STORE_CTX *stor)
 {
 	if (!ok) {
-		fprintf(stderr, "Certificate verification error: %s\n",
-			X509_verify_cert_error_string(X509_STORE_CTX_get_error(stor)));
+		error("Certificate verification error: %s\n",
+		      X509_verify_cert_error_string(X509_STORE_CTX_get_error(stor)));
 	}
 	return ok;
 }

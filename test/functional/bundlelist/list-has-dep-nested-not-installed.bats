@@ -20,9 +20,9 @@ test_setup() {
 
 	assert_status_is "$SWUPD_BUNDLE_NOT_TRACKED"
 	expected_output=$(cat <<-EOM
-		Error: Bundle "test-bundle1" does not seem to be installed
+		Bundle "test-bundle1" does not seem to be installed
 		       try passing --all to check uninstalled bundles
-		Error: Bundle list failed
+		Bundle list failed
 	EOM
 	)
 	assert_is_output "$expected_output"

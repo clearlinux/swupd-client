@@ -94,10 +94,10 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 
 	if ((ret == -1) && (errno == ENOENT)) {
 		if (MoM) {
-			info("Update target directory does not exist: %s. Trying to fix it\n", targetpath);
+			warn("Update target directory does not exist: %s. Trying to fix it\n", targetpath);
 			verify_fix_path(dir, MoM);
 		} else {
-			info("Update target directory does not exist: %s. Auto-fix disabled\n", targetpath);
+			warn("Update target directory does not exist: %s. Auto-fix disabled\n", targetpath);
 		}
 
 	} else if (!S_ISDIR(s.st_mode)) {
@@ -349,6 +349,6 @@ int rename_all_files_to_final(struct list *updates)
 	}
 
 	progress_report(list_length, list_length); /* Force out 100% */
-	printf("\n");
+	info("\n");
 	return update_count - update_good - update_errs - (update_skip - skip);
 }

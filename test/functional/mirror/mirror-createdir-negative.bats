@@ -37,7 +37,7 @@ global_teardown() {
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
 		.*/etc/swupd: not a directory
-		Unable to set mirror url
+		Warning: Unable to set mirror url
 		Installed version: 10
 		Version URL:       file://.*/web-dir
 		Content URL:       file://.*/web-dir
@@ -58,7 +58,7 @@ global_teardown() {
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
 		.*/etc/swupd: not a directory
-		Unable to set mirror url
+		Warning: Unable to set mirror url
 		Installed version: 10
 		Version URL:       file://.*/web-dir
 		Content URL:       file://.*/web-dir

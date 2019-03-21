@@ -34,8 +34,8 @@
 
 static void print_help(void)
 {
-	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd check-update [OPTION...]\n\n");
+	print("Usage:\n");
+	print("   swupd check-update [OPTION...]\n\n");
 	//TODO: Add documentation explaining this command
 
 	global_print_help();
@@ -64,13 +64,13 @@ static enum swupd_code check_update()
 	if (ret != SWUPD_OK) {
 		return ret;
 	} else {
-		info("Current OS version: %d\n", current_version);
+		print("Current OS version: %d\n", current_version);
 		if (current_version < server_version) {
-			info("There is a new OS version available: %d\n", server_version);
+			print("There is a new OS version available: %d\n", server_version);
 			update_motd(server_version);
 			return SWUPD_OK; /* update available */
 		} else if (current_version >= server_version) {
-			info("There are no updates available\n");
+			print("There are no updates available\n");
 		}
 		return SWUPD_NO; /* No update available */
 	}

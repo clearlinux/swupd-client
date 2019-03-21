@@ -599,7 +599,7 @@ struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err)
 retry_load:
 	ret = retrieve_manifest(0, version, "MoM", mix_exists);
 	if (ret != 0) {
-		info("Failed to retrieve %d MoM manifest\n", version);
+		error("Failed to retrieve %d MoM manifest\n", version);
 		if (err) {
 			*err = ret;
 		}
@@ -614,7 +614,7 @@ retry_load:
 			retried = true;
 			goto retry_load;
 		}
-		info("Failed to load %d MoM manifest\n", version);
+		error("Failed to load %d MoM manifest\n", version);
 		if (err) {
 			*err = SWUPD_COULDNT_LOAD_MANIFEST;
 		}
@@ -641,7 +641,7 @@ retry_load:
 				retried = true;
 				goto retry_load;
 			}
-			warn("FAILED TO VERIFY SIGNATURE OF Manifest.MoM version %d!!!\n", version);
+			error("FAILED TO VERIFY SIGNATURE OF Manifest.MoM version %d!!!\n", version);
 			free_string(&filename);
 			free_string(&url);
 			free_manifest(manifest);
@@ -650,7 +650,7 @@ retry_load:
 			}
 			return NULL;
 		}
-		info("FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
+		warn("FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
 		     "  --nosigcheck, but system security may be compromised\n");
 		string_or_die(&log_cmd, "echo \"swupd security notice:"
 					" --nosigcheck used to bypass MoM signature verification failure\" | /usr/bin/systemd-cat --priority=\"err\" --identifier=\"swupd\"");
@@ -698,7 +698,7 @@ retry_load:
 	prev_version = file->peer ? file->peer->last_change : 0;
 	ret = retrieve_manifest(prev_version, version, file->filename, file->is_mix);
 	if (ret != 0) {
-		info("Failed to retrieve %d %s manifest\n", version, file->filename);
+		error("Failed to retrieve %d %s manifest\n", version, file->filename);
 		if (err) {
 			*err = ret;
 		}
@@ -729,7 +729,7 @@ retry_load:
 			retried = true;
 			goto retry_load;
 		}
-		info("Failed to load %d %s manifest\n", version, file->filename);
+		error("Failed to load %d %s manifest\n", version, file->filename);
 		if (err) {
 			*err = SWUPD_COULDNT_LOAD_MANIFEST;
 		}
@@ -749,14 +749,14 @@ struct manifest *load_manifest_full(int version, bool mix)
 
 	ret = retrieve_manifest(0, version, "full", mix);
 	if (ret != 0) {
-		info("Failed to retrieve %d Manifest.full\n", version);
+		error("Failed to retrieve %d Manifest.full\n", version);
 		return NULL;
 	}
 
 	manifest = manifest_from_file(version, "full", false, false, false);
 
 	if (manifest == NULL) {
-		info("Failed to load %d Manifest.full\n", version);
+		error("Failed to load %d Manifest.full\n", version);
 		return NULL;
 	}
 

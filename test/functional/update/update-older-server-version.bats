@@ -52,7 +52,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Error: Unable to determine current OS version
-		Unable to determine current OS version
+		Warning: Unable to determine current OS version
 		Update failed.
 	EOM
 	)

@@ -20,7 +20,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Failed to retrieve 10 MoM manifest
+		Error: Failed to retrieve 10 MoM manifest
 		Update failed.
 	EOM
 	)
@@ -39,7 +39,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Failed to retrieve 20 MoM manifest
+		Error: Failed to retrieve 20 MoM manifest
 		Update failed.
 	EOM
 	)

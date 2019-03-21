@@ -29,6 +29,7 @@
 
 #include "hashmap.h"
 #include "list.h"
+#include "log.h"
 #include "macros.h"
 
 #define HASH_MASK(bits) (HASH_SIZE(bits) - 1)
@@ -162,11 +163,11 @@ void hashmap_print(struct hashmap *hashmap, void(print_data)(void *data))
 		return;
 	}
 
-	printf("Hashmap (bits: %x, size: %d)\n", hashmap->mask_bits,
-	       HASH_SIZE(hashmap->mask_bits));
+	info("Hashmap (bits: %x, size: %d)\n", hashmap->mask_bits,
+	     HASH_SIZE(hashmap->mask_bits));
 
 	for (i = 0; i < HASH_SIZE(hashmap->mask_bits); i++) {
-		printf("map[%d] list(%d) {", i, list_len(hashmap->map[i]));
+		info("map[%d] list(%d) {", i, list_len(hashmap->map[i]));
 		for (l = hashmap->map[i], out_data = l ? l->data : NULL;
 		     l && (out_data = l->data); l = l->next) {
 			if (print_data) {
@@ -174,10 +175,10 @@ void hashmap_print(struct hashmap *hashmap, void(print_data)(void *data))
 			}
 			count++;
 		}
-		printf("}\n");
+		info("}\n");
 	}
 
-	printf("Total elements: %ld\n", count);
+	info("Total elements: %ld\n", count);
 
 	return;
 }

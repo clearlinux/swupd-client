@@ -105,7 +105,9 @@ swupd_LDADD = \
 
 verifytime_SOURCES = src/verifytime.h \
 	src/verifytime.c \
-	src/verifytime_main.c
+	src/verifytime_main.c \
+	src/lib/log.c \
+	src/lib/log.h
 
 verifytime_LDADD =
 

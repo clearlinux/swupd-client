@@ -147,20 +147,20 @@ void timelist_print_stats(timelist *head)
 
 	timer_stop_all(head);
 
-	fprintf(stderr, "\nRaw elapsed time stats:\n");
+	info("\nRaw elapsed time stats:\n");
 	TAILQ_FOREACH_REVERSE(t, head, timelist, times)
 	{
 		if (t->complete == true) {
 			delta = (t->rawstop.tv_sec - t->rawstart.tv_sec) * 1000 + (t->rawstop.tv_nsec / 1000000.0) - (t->rawstart.tv_nsec / 1000000.0);
-			fprintf(stderr, "%10.2f ms: %s\n", delta, t->name);
+			info("%10.2f ms: %s\n", delta, t->name);
 		}
 	}
-	fprintf(stderr, "\nCPU process time stats:\n");
+	info("\nCPU process time stats:\n");
 	TAILQ_FOREACH_REVERSE(t, head, timelist, times)
 	{
 		if (t->complete == true) {
 			delta = (t->procstop.tv_sec - t->procstart.tv_sec) * 1000 + (t->procstop.tv_nsec / 1000000.0) - (t->procstart.tv_nsec / 1000000.0);
-			fprintf(stderr, "%10.2f ms: %s\n", delta, t->name);
+			info("%10.2f ms: %s\n", delta, t->name);
 		}
 	}
 }

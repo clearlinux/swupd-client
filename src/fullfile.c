@@ -41,7 +41,7 @@ static void download_mix_file(struct file *file)
 	if (link_or_rename(url, filename) == 0) {
 		untar_full_download(file);
 	} else {
-		info("Failed to copy local mix file: %s\n", file->staging);
+		warn("Failed to copy local mix file: %s\n", file->staging);
 	}
 
 	free_string(&url);
@@ -111,7 +111,7 @@ static bool download_successful(void *data)
 	}
 
 	if (untar_full_download(data) != 0) {
-		info("Error for %s tarfile extraction, (check free space for %s?)\n",
+		warn("Error for %s tarfile extraction, (check free space for %s?)\n",
 		     ((struct file *)data)->hash, state_dir);
 	}
 	return true;

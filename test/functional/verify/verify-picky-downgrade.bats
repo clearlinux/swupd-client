@@ -19,10 +19,10 @@ test_setup() {
 	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
-		WARNING: the force or picky option is specified; ignoring version mismatch for verify --fix
+		Warning: the force or picky option is specified; ignoring version mismatch for verify --fix
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
-		Unable to verify, one or more currently installed bundles are not available at version 10. Use --force to override.
-		Error: Fix did not fully succeed
+		Error: Unable to verify, one or more currently installed bundles are not available at version 10. Use --force to override.
+		Fix did not fully succeed
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -41,9 +41,9 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Verifying version 10
-		WARNING: the force or picky option is specified; ignoring version mismatch for verify --fix
+		Warning: the force or picky option is specified; ignoring version mismatch for verify --fix
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
-		WARNING: One or more installed bundles that are not available at version 10 will be removed.
+		Warning: One or more installed bundles that are not available at version 10 will be removed.
 		Verifying files
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...
@@ -86,9 +86,9 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Verifying version 10
-		WARNING: the force or picky option is specified; ignoring version mismatch for verify --fix
+		Warning: the force or picky option is specified; ignoring version mismatch for verify --fix
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
-		WARNING: One or more installed bundles that are not available at version 10 will be removed.
+		Warning: One or more installed bundles that are not available at version 10 will be removed.
 		Verifying files
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...
@@ -130,7 +130,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
-		WARNING: One or more installed bundles are not available at version 10.
+		Warning: One or more installed bundles are not available at version 10.
 		Generating list of extra files under .*/target-dir/usr
 		/usr/share/defaults/swupd/versionurl
 		/usr/share/defaults/swupd/contenturl

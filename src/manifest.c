@@ -77,314 +77,47 @@ int file_sort_filename_reverse(const void *a, const void *b)
 	return -ret;
 }
 
-static struct manifest *alloc_manifest(int version, char *component)
-{
-	struct manifest *manifest;
-
-	manifest = calloc(1, sizeof(struct manifest));
-	ON_NULL_ABORT(manifest);
-
-	manifest->version = version;
-	manifest->component = strdup_or_die(component);
-
-	return manifest;
-}
-
 static struct manifest *manifest_from_file(int version, char *component, bool header_only, bool is_mix)
 {
-	FILE *infile;
-	char line[MANIFEST_LINE_MAXLEN], *c, *c2;
-	int count = 0;
-	int deleted = 0;
-	int err;
-	struct manifest *manifest;
-	struct list *includes = NULL;
 	char *filename;
 	char *basedir;
-	unsigned long long filecount = 0;
-	unsigned long long contentsize = 0;
-	int manifest_hdr_version;
-	int manifest_enc_version;
+	struct manifest *manifest;
 
 	if (!is_mix) {
 		basedir = state_dir;
 	} else {
 		basedir = MIX_STATE_DIR;
 	}
-	string_or_die(&filename, "%s/%i/Manifest.%s", basedir, version, component);
 
-	infile = fopen(filename, "rbm");
-	if (infile == NULL) {
-		free_string(&filename);
+	string_or_die(&filename, "%s/%i/Manifest.%s", basedir, version, component);
+	manifest = manifest_parse(component, filename, header_only);
+	free(filename);
+
+	if (!manifest) {
 		return NULL;
 	}
-	free_string(&filename);
 
-	/* line 1: MANIFEST\t<version> */
-	line[0] = 0;
-	if (fgets(line, MANIFEST_LINE_MAXLEN - 1, infile) == NULL) {
-		goto err_close;
+	if (manifest->version != version) {
+		error("Loaded incompatible manifest header version for %s: %d != %d\n", component, manifest->version, version);
+		free_manifest(manifest);
+
+		return NULL;
 	}
 
-	if (strncmp(line, "MANIFEST\t", 9) != 0) {
-		goto err_close;
-	}
+	/* Mark every file in a mix manifest as also being mix content since we do not
+	 * have another flag to check for like we do in the MoM */
+	if (strcmp(component, "MoM") != 0) {
+		if (is_mix != 0) {
+			struct list *l;
+			for (l = manifest->manifests; l; l = l->next) {
+				struct file *file = l->data;
 
-	c = &line[9];
-	err = strtoi_err(c, &manifest_enc_version);
-
-	if (manifest_enc_version <= 0 || err != 0) {
-		error("Loaded incompatible manifest version\n");
-		goto err_close;
-	}
-
-	line[0] = 0;
-	while (strcmp(line, "\n") != 0) {
-		/* read the header */
-		line[0] = 0;
-		if (fgets(line, MANIFEST_LINE_MAXLEN - 1, infile) == NULL) {
-			break;
-		}
-		c = strchr(line, '\n');
-		if (c) {
-			*c = 0;
-		} else {
-			goto err_close;
-		}
-
-		if (strlen(line) == 0) {
-			break;
-		}
-		c = strchr(line, '\t');
-		if (c) {
-			c++;
-		} else {
-			goto err_close;
-		}
-
-		if (strncmp(line, "version:", 8) == 0) {
-			err = strtoi_err(c, &manifest_hdr_version);
-			if (manifest_hdr_version != version || err != 0) {
-				error("Loaded incompatible manifest header version\n");
-				goto err_close;
+				file->is_mix = 1;
 			}
 		}
-		if (strncmp(line, "filecount:", 10) == 0) {
-			errno = 0;
-			filecount = strtoull(c, NULL, 10);
-			if (filecount > 4000000) {
-				/* Note on the number 4,000,000. We want this
-				 * to be big enough to allow Manifest.Full to
-				 * pass (currently about 450,000 March 18) but
-				 * small enough that when multiplied by
-				 * sizeof(struct file) it fits into
-				 * size_t. For a system with size_t being a 32
-				 * bit value, this constrains it to be less
-				 * than about 6,000,000, but close to infinity
-				 * for systems with 64 bit size_t.
-				 */
-				error("preposterous (%llu) number of files in %s Manifest, more than 4 million skipping\n",
-				      filecount, component);
-				goto err_close;
-			} else if (errno != 0) {
-				error("Loaded incompatible manifest filecount\n");
-				goto err_close;
-			}
-		}
-		if (strncmp(line, "contentsize:", 12) == 0) {
-			errno = 0;
-			contentsize = strtoull(c, NULL, 10);
-			if (contentsize > 2000000000000UL) {
-				error("preposterous (%llu) size of files in %s Manifest, more than 2TB skipping\n",
-				      contentsize, component);
-				goto err_close;
-			} else if (errno != 0) {
-				error("Loaded incompatible manifest contentsize\n");
-				goto err_close;
-			}
-		}
-		if (strncmp(line, "includes:", 9) == 0) {
-			includes = list_prepend_data(includes, strdup_or_die(c));
-		}
 	}
 
-	manifest = alloc_manifest(version, component);
-	manifest->filecount = filecount;
-	manifest->contentsize = contentsize;
-	manifest->manifest_version = manifest_enc_version;
-	manifest->includes = includes;
-
-	if (header_only) {
-		fclose(infile);
-		return manifest;
-	}
-
-	/* empty line */
-	while (!feof(infile)) {
-		struct file *file;
-
-		line[0] = 0;
-		if (fgets(line, MANIFEST_LINE_MAXLEN - 1, infile) == NULL) {
-			break;
-		}
-		c = strchr(line, '\n');
-		if (c) {
-			*c = 0;
-		}
-		if (strlen(line) == 0) {
-			break;
-		}
-
-		file = calloc(1, sizeof(struct file));
-		ON_NULL_ABORT(file);
-		c = line;
-
-		c2 = strchr(c, '\t');
-		if (c2) {
-			*c2 = 0;
-			c2++;
-		}
-
-		if (c[0] == 'F') {
-			file->is_file = 1;
-		} else if (c[0] == 'D') {
-			file->is_dir = 1;
-		} else if (c[0] == 'L') {
-			file->is_link = 1;
-		} else if (c[0] == 'M') {
-			file->is_manifest = 1;
-		} else if (c[0] == 'I') {
-			/* ignore this file for future iterative manifest feature */
-			free(file);
-			continue;
-		} else if (c[0] != '.') { /* unknown file type */
-			free(file);
-			goto err;
-		}
-
-		if (c[1] == 'd') {
-			file->is_deleted = 1;
-			deleted++;
-		} else if (c[1] == 'g') {
-			file->is_deleted = 1;
-			file->is_ghosted = 1;
-			deleted++;
-		} else if (c[1] == 'e') {
-			file->is_experimental = 1;
-		} else if (c[1] != '.') { /* unknown modifier #1 */
-			free(file);
-			goto err;
-		}
-
-		if (c[2] == 'C') {
-			file->is_config = 1;
-		} else if (c[2] == 's') {
-			file->is_state = 1;
-		} else if (c[2] == 'b') {
-			file->is_boot = 1;
-		} else if (c[2] != '.') { /* unknown modifier #2 */
-			free(file);
-			goto err;
-		}
-
-		if (c[3] == 'r') {
-			/* rename flag is ignored */
-		} else if (c[3] == 'm') {
-			file->is_mix = 1;
-			manifest->is_mix = 1;
-		} else if (c[3] != '.') { /* unknown modifier #3 */
-			free(file);
-			goto err;
-		}
-
-		c = c2;
-		if (!c) {
-			free(file);
-			continue;
-		}
-		c2 = strchr(c, '\t');
-		if (c2) {
-			*c2 = 0;
-			c2++;
-		} else {
-			free(file);
-			goto err;
-		}
-
-		hash_assign(c, file->hash);
-
-		c = c2;
-		c2 = strchr(c, '\t');
-		if (c2) {
-			*c2 = 0;
-			c2++;
-		} else {
-			free(file);
-			goto err;
-		}
-
-		err = strtoi_err(c, &file->last_change);
-		if (file->last_change <= 0 || err != 0) {
-			error("Loaded incompatible manifest last change\n");
-			free(file);
-			goto err;
-		}
-
-		c = c2;
-
-		file->filename = strdup_or_die(c);
-
-		/* Mark every file in a mix manifest as also being mix content since we do not
-		 * have another flag to check for like we do in the MoM */
-		if (is_mix && strcmp(component, "MoM") != 0) {
-			file->is_mix = 1;
-		}
-
-		if (file->is_manifest) {
-			manifest->manifests = list_prepend_data(manifest->manifests, file);
-		} else {
-			file->is_tracked = 1;
-			manifest->files = list_prepend_data(manifest->files, file);
-		}
-		count++;
-	}
-
-	fclose(infile);
 	return manifest;
-err:
-	free_manifest(manifest);
-err_close:
-	fclose(infile);
-	return NULL;
-}
-
-void free_manifest_data(void *data)
-{
-	struct manifest *manifest = (struct manifest *)data;
-
-	free_manifest(manifest);
-}
-
-void free_manifest(struct manifest *manifest)
-{
-	if (!manifest) {
-		return;
-	}
-
-	if (manifest->manifests) {
-		list_free_list_and_data(manifest->manifests, free_file_data);
-	}
-	if (manifest->submanifests) {
-		list_free_list(manifest->files);
-		list_free_list_and_data(manifest->submanifests, free_manifest_data);
-	} else {
-		list_free_list_and_data(manifest->files, free_file_data);
-	}
-	if (manifest->includes) {
-		list_free_list_and_data(manifest->includes, free);
-	}
-	free_string(&manifest->component);
-	free(manifest);
 }
 
 static int try_manifest_delta_download(int from, int to, char *component)

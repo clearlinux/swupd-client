@@ -67,6 +67,8 @@ swupd_SOURCES = \
 	src/lock.c \
 	src/main.c \
 	src/manifest.c \
+	src/manifest.h \
+	src/manifest_parser.c \
 	src/mirror.c \
 	src/packs.c \
 	src/scripts.c \

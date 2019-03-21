@@ -18,6 +18,7 @@
 #include "lib/progress.h"
 #include "lib/strings.h"
 #include "lib/sys.h"
+#include "manifest.h"
 #include "swupd_curl.h"
 #include "swupd_exit_codes.h"
 #include "timelist.h"
@@ -76,19 +77,6 @@ struct sub {
 
 	/* oldversion: set to 0 by calloc(), possibly overridden by MoM read */
 	int oldversion;
-};
-
-struct manifest {
-	int version;
-	int manifest_version;
-	uint64_t filecount;
-	uint64_t contentsize;
-	struct list *files;
-	struct list *manifests;    /* struct file for possible manifests */
-	struct list *submanifests; /* struct manifest for subscribed manifests */
-	struct list *includes;     /* manifest names included in manifest */
-	char *component;
-	unsigned int is_mix : 1;
 };
 
 struct header;
@@ -221,7 +209,6 @@ extern struct manifest *load_manifest_full(int version, bool mix);
 extern struct list *create_update_list(struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
 extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2, bool server);
-extern void free_manifest(struct manifest *manifest);
 
 extern int get_value_from_path(char **contents, const char *path, bool is_abs_path);
 extern int get_version_from_path(const char *abs_path);
@@ -316,7 +303,6 @@ extern bool verify_file_lazy(char *filename);
 extern int verify_bundle_hash(struct manifest *manifest, struct file *bundle);
 extern int rm_staging_dir_contents(const char *rel_path);
 void free_file_data(void *data);
-void free_manifest_data(void *data);
 void remove_files_in_manifest_from_fs(struct manifest *m);
 void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2);
 extern struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bundlename);

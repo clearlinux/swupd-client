@@ -44,13 +44,14 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 	struct list *includes = NULL;
 	unsigned long long filecount = 0;
 	unsigned long long contentsize = 0;
-	int manifest_hdr_version;
-	int manifest_enc_version;
 
 	infile = fopen(filename, "rbm");
 	if (infile == NULL) {
 		return NULL;
 	}
+
+	manifest = calloc(1, sizeof(struct manifest));
+	ON_NULL_ABORT(manifest);
 
 	/* line 1: MANIFEST\t<version> */
 	line[0] = 0;
@@ -63,9 +64,9 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 	}
 
 	c = line + strlen_const(MANIFEST_HEADER);
-	err = strtoi_err(c, &manifest_enc_version);
+	err = strtoi_err(c, &manifest->manifest_version);
 
-	if (manifest_enc_version <= 0 || err != 0) {
+	if (manifest->manifest_version <= 0 || err != 0) {
 		error("Loaded incompatible manifest version\n");
 		goto err_close;
 	}
@@ -77,16 +78,19 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 		if (fgets(line, MANIFEST_LINE_MAXLEN, infile) == NULL) {
 			break;
 		}
+
+		// Remove line break
 		c = strchr(line, '\n');
-		if (c) {
-			*c = 0;
-		} else {
+		if (!c) {
 			goto err_close;
 		}
+		*c = 0;
 
-		if (strlen(line) == 0) {
+		if (c == line) {
 			break;
 		}
+
+		// Look for separator
 		c = strchr(line, '\t');
 		if (c) {
 			c++;
@@ -94,14 +98,13 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			goto err_close;
 		}
 
-		if (strncmp_const(line, "version:") == 0) {
-			err = strtoi_err(c, &manifest_hdr_version);
+		if (strncmp_const(line, "version:\t") == 0) {
+			err = strtoi_err(c, &manifest->version);
 			if (err != 0) {
 				error("Invalid manifest version on %s\n", filename);
 				goto err_close;
 			}
-		}
-		if (strncmp_const(line, "filecount:") == 0) {
+		} else if (strncmp_const(line, "filecount:\t") == 0) {
 			errno = 0;
 			filecount = strtoull(c, NULL, 10);
 			if (filecount > 4000000) {
@@ -122,8 +125,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 				error("Loaded incompatible manifest filecount\n");
 				goto err_close;
 			}
-		}
-		if (strncmp_const(line, "contentsize:") == 0) {
+		} else if (strncmp_const(line, "contentsize:\t") == 0) {
 			errno = 0;
 			contentsize = strtoull(c, NULL, 10);
 			if (contentsize > 2000000000000UL) {
@@ -134,21 +136,14 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 				error("Loaded incompatible manifest contentsize\n");
 				goto err_close;
 			}
-		}
-
-		if (strncmp_const(line, "includes:") == 0) {
+		} else if (strncmp_const(line, "includes:\t") == 0) {
 			includes = list_prepend_data(includes, strdup_or_die(c));
 		}
 	}
 
-	manifest = calloc(1, sizeof(struct manifest));
-	ON_NULL_ABORT(manifest);
-
-	manifest->version = manifest_hdr_version;
 	manifest->component = strdup_or_die(component);
 	manifest->filecount = filecount;
 	manifest->contentsize = contentsize;
-	manifest->manifest_version = manifest_enc_version;
 	manifest->includes = includes;
 
 	if (header_only) {
@@ -160,92 +155,87 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 	while (!feof(infile)) {
 		struct file *file;
 
-		line[0] = 0;
 		if (fgets(line, MANIFEST_LINE_MAXLEN, infile) == NULL) {
 			break;
 		}
+
+		// Remove line break
 		c = strchr(line, '\n');
-		if (c) {
-			*c = 0;
+		if (!c || c == line) {
+			goto err_close;
 		}
-		if (strlen(line) == 0) {
-			break;
+		*c = 0;
+
+		// Look for separator
+		c = strchr(line, '\t');
+		if (c) {
+			c++;
+		} else {
+			goto err_close;
 		}
 
 		file = calloc(1, sizeof(struct file));
 		ON_NULL_ABORT(file);
-		c = line;
 
-		c2 = strchr(c, '\t');
-		if (c2) {
-			*c2 = 0;
-			c2++;
-		}
-
-		if (c[0] == 'F') {
+		if (line[0] == 'F') {
 			file->is_file = 1;
-		} else if (c[0] == 'D') {
+		} else if (line[0] == 'D') {
 			file->is_dir = 1;
-		} else if (c[0] == 'L') {
+		} else if (line[0] == 'L') {
 			file->is_link = 1;
-		} else if (c[0] == 'M') {
+		} else if (line[0] == 'M') {
 			file->is_manifest = 1;
-		} else if (c[0] == 'I') {
+		} else if (line[0] == 'I') {
 			/* ignore this file for future iterative manifest feature */
 			free(file);
 			continue;
-		} else if (c[0] != '.') { /* unknown file type */
+		} else if (line[0] != '.') { /* unknown file type */
 			free(file);
-			goto err;
+			goto err_close;
 		}
 
-		if (c[1] == 'd') {
+		if (line[1] == 'd') {
 			file->is_deleted = 1;
 			deleted++;
-		} else if (c[1] == 'g') {
+		} else if (line[1] == 'g') {
 			file->is_deleted = 1;
 			file->is_ghosted = 1;
 			deleted++;
-		} else if (c[1] == 'e') {
+		} else if (line[1] == 'e') {
 			file->is_experimental = 1;
-		} else if (c[1] != '.') { /* unknown modifier #1 */
+		} else if (line[1] != '.') { /* unknown modifier #1 */
 			free(file);
-			goto err;
+			goto err_close;
 		}
 
-		if (c[2] == 'C') {
+		if (line[2] == 'C') {
 			file->is_config = 1;
-		} else if (c[2] == 's') {
+		} else if (line[2] == 's') {
 			file->is_state = 1;
-		} else if (c[2] == 'b') {
+		} else if (line[2] == 'b') {
 			file->is_boot = 1;
-		} else if (c[2] != '.') { /* unknown modifier #2 */
+		} else if (line[2] != '.') { /* unknown modifier #2 */
 			free(file);
-			goto err;
+			goto err_close;
 		}
 
-		if (c[3] == 'r') {
+		if (line[3] == 'r') {
 			/* rename flag is ignored */
-		} else if (c[3] == 'm') {
+		} else if (line[3] == 'm') {
 			file->is_mix = 1;
 			manifest->is_mix = 1;
-		} else if (c[3] != '.') { /* unknown modifier #3 */
+		} else if (line[3] != '.') { /* unknown modifier #3 */
 			free(file);
-			goto err;
+			goto err_close;
 		}
 
-		c = c2;
-		if (!c) {
-			free(file);
-			continue;
-		}
 		c2 = strchr(c, '\t');
 		if (c2) {
 			*c2 = 0;
 			c2++;
 		} else {
 			free(file);
-			goto err;
+			goto err_close;
 		}
 
 		hash_assign(c, file->hash);
@@ -257,14 +247,14 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			c2++;
 		} else {
 			free(file);
-			goto err;
+			goto err_close;
 		}
 
 		err = strtoi_err(c, &file->last_change);
 		if (file->last_change <= 0 || err != 0) {
 			error("Loaded incompatible manifest last change\n");
 			free(file);
-			goto err;
+			goto err_close;
 		}
 
 		c = c2;
@@ -282,9 +272,9 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 
 	fclose(infile);
 	return manifest;
-err:
-	free_manifest(manifest);
+
 err_close:
+	free_manifest(manifest);
 	fclose(infile);
 	return NULL;
 }

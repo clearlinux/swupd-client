@@ -90,7 +90,7 @@ static struct manifest *alloc_manifest(int version, char *component)
 	return manifest;
 }
 
-static struct manifest *manifest_from_file(int version, char *component, bool header_only, bool latest, bool is_mix)
+static struct manifest *manifest_from_file(int version, char *component, bool header_only, bool is_mix)
 {
 	FILE *infile;
 	char line[MANIFEST_LINE_MAXLEN], *c, *c2;
@@ -201,15 +201,6 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 			} else if (errno != 0) {
 				error("Loaded incompatible manifest contentsize\n");
 				goto err_close;
-			}
-		}
-		if (latest && strncmp(component, "MoM", 3) == 0) {
-			if (strncmp(line, "actions:", 8) == 0) {
-				post_update_actions = list_prepend_data(post_update_actions, strdup_or_die(c));
-				if (!post_update_actions->data) {
-					warn("Unable to read post update action from Manifest.MoM. \
-							Another update or verify may be required.\n");
-				}
 			}
 		}
 		if (strncmp(line, "includes:", 9) == 0) {
@@ -606,7 +597,7 @@ retry_load:
 		return NULL;
 	}
 
-	manifest = manifest_from_file(version, "MoM", false, latest, mix_exists);
+	manifest = manifest_from_file(version, "MoM", false, mix_exists);
 
 	if (manifest == NULL) {
 		if (retried == false) {
@@ -721,7 +712,7 @@ retry_load:
 		return NULL;
 	}
 
-	manifest = manifest_from_file(version, file->filename, header_only, false, file->is_mix);
+	manifest = manifest_from_file(version, file->filename, header_only, file->is_mix);
 
 	if (manifest == NULL) {
 		if (retried == false) {
@@ -753,7 +744,7 @@ struct manifest *load_manifest_full(int version, bool mix)
 		return NULL;
 	}
 
-	manifest = manifest_from_file(version, "full", false, false, false);
+	manifest = manifest_from_file(version, "full", false, false);
 
 	if (manifest == NULL) {
 		error("Failed to load %d Manifest.full\n", version);

@@ -47,7 +47,6 @@ bool need_update_boot = false;
 bool need_update_bootloader = false;
 bool need_systemd_reexec = false;
 bool update_complete = false;
-struct list *post_update_actions = NULL;
 bool ignore_orphans = true;
 char *format_string = NULL;
 char *path_prefix = NULL; /* must always end in '/' */
@@ -519,7 +518,6 @@ void free_globals(void)
 	free_string(&format_string);
 	free_string(&mounted_dirs);
 	free_string(&state_dir);
-	list_free_list(post_update_actions);
 	free_string(&bundle_to_add);
 	timelist_free(global_times);
 	global_times = NULL;

@@ -455,7 +455,7 @@ create_dir() { # swupd_function
 	directory=$(find "$path"/* -type d 2> /dev/null)
 	if [ ! "$directory" ]; then
 		sudo mkdir "$path"/testdir
-		hashed_name=$(sudo "$SWUPD" hashdump "$path"/testdir 2> /dev/null)
+		hashed_name=$(sudo "$SWUPD" hashdump --quiet "$path"/testdir)
 		sudo mv "$path"/testdir "$path"/"$hashed_name"
 		# since tar is all we use, create a tar for the new dir
 		create_tar "$path"/"$hashed_name"
@@ -491,7 +491,7 @@ create_file() { # swupd_function
 	else
 		generate_random_content | sudo tee "$path/testfile" > /dev/null
 	fi
-	hashed_name=$(sudo "$SWUPD" hashdump "$path"/testfile 2> /dev/null)
+	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$path"/testfile)
 	sudo mv "$path"/testfile "$path"/"$hashed_name"
 	# since tar is all we use, create a tar for the new file
 	create_tar "$path"/"$hashed_name"
@@ -527,7 +527,7 @@ create_link() { # swupd_function
 		pfile=$(create_file "$path")
 	fi
 	sudo ln -rs "$pfile" "$path"/testlink
-	hashed_name=$(sudo "$SWUPD" hashdump "$path"/testlink 2> /dev/null)
+	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$path"/testlink)
 	sudo mv "$path"/testlink "$path"/"$hashed_name"
 	create_tar --skip-validation "$path"/"$hashed_name"
 	echo "$path/$hashed_name"
@@ -808,7 +808,7 @@ add_to_manifest() { # swupd_function
 		# files, directories and links are stored already hashed, but since
 		# manifests are not stored hashed, we need to calculate the hash
 		# of the manifest before adding it to the MoM
-		name=$(sudo "$SWUPD" hashdump "$item" 2> /dev/null)
+		name=$(sudo "$SWUPD" hashdump --quiet "$item")
 	elif [ -L "$item" ]; then
 		item_type=L
 		# when adding a link to a bundle, we need to make sure we add
@@ -1079,7 +1079,7 @@ update_hashes_in_mom() { # swupd_function
 		for bundle in ${bundles[*]}; do
 			# if the hash of the manifest changed, update it
 			bundle_old_hash=$(get_hash_from_manifest "$manifest" "$bundle")
-			bundle_new_hash=$(sudo "$SWUPD" hashdump "$path"/Manifest."$bundle" 2> /dev/null)
+			bundle_new_hash=$(sudo "$SWUPD" hashdump --quiet "$path"/Manifest."$bundle")
 			if [ "$bundle_old_hash" != "$bundle_new_hash" ] && [ "$bundle_new_hash" != "$zero_hash" ]; then
 				# replace old hash with new hash
 				sudo sed -i "/\\t$bundle_old_hash\\t/s/\\(....\\t\\).*\\(\\t.*\\t\\)/\\1$bundle_new_hash\\2/g" "$manifest"
@@ -1349,12 +1349,12 @@ create_version() { # swupd_function
 	} | sudo tee "$env_name"/web-dir/"$version"/os-release > /dev/null
 	# copy hashed versions of os-release and format to the files directory
 	if [ "$release_files" = true ]; then
-		hashed_name=$(sudo "$SWUPD" hashdump "$env_name"/web-dir/"$version"/os-release 2> /dev/null)
+		hashed_name=$(sudo "$SWUPD" hashdump --quiet "$env_name"/web-dir/"$version"/os-release)
 		sudo cp "$env_name"/web-dir/"$version"/os-release "$env_name"/web-dir/"$version"/files/"$hashed_name"
 		create_tar "$env_name"/web-dir/"$version"/files/"$hashed_name"
 		OS_RELEASE="$env_name"/web-dir/"$version"/files/"$hashed_name"
 		export OS_RELEASE
-		hashed_name=$(sudo "$SWUPD" hashdump "$env_name"/web-dir/"$version"/format 2> /dev/null)
+		hashed_name=$(sudo "$SWUPD" hashdump --quiet "$env_name"/web-dir/"$version"/format)
 		sudo cp "$env_name"/web-dir/"$version"/format "$env_name"/web-dir/"$version"/files/"$hashed_name"
 		create_tar "$env_name"/web-dir/"$version"/files/"$hashed_name"
 		FORMAT="$env_name"/web-dir/"$version"/files/"$hashed_name"
@@ -2609,7 +2609,7 @@ update_bundle() { # swupd_function
 		generate_random_content 1 20 | sudo tee -a "$version_path"/files/"$fhash" > /dev/null
 
 		# recalculate hash and update file names
-		new_fhash=$(sudo "$SWUPD" hashdump "$version_path"/files/"$fhash" 2> /dev/null)
+		new_fhash=$(sudo "$SWUPD" hashdump --quiet "$version_path"/files/"$fhash")
 		sudo mv "$version_path"/files/"$fhash" "$version_path"/files/"$new_fhash"
 		create_tar "$version_path"/files/"$new_fhash"
 		sudo rm -f "$version_path"/files/"$fhash".tar

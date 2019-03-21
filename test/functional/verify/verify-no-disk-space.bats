@@ -43,9 +43,9 @@ test_setup() {
 		Verifying version 20
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.MoM.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		Failed to retrieve 20 MoM manifest
-		Unable to download/verify 20 Manifest.MoM
-		Error: Fix did not fully succeed
+		Error: Failed to retrieve 20 MoM manifest
+		Error: Unable to download/verify 20 Manifest.MoM
+		Fix did not fully succeed
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -70,12 +70,12 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Verifying version 20
-		WARNING: the force or picky option is specified; ignoring version mismatch for verify --fix
+		Warning: the force or picky option is specified; ignoring version mismatch for verify --fix
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		Failed to retrieve 20 test-bundle manifest
-		Unable to download manifest test-bundle version 20, exiting now
-		Error: Fix did not fully succeed
+		Error: Failed to retrieve 20 test-bundle manifest
+		Error: Unable to download manifest test-bundle version 20, exiting now
+		Fix did not fully succeed
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -94,14 +94,14 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
 		Verifying version 20
-		WARNING: the force or picky option is specified; ignoring version mismatch for verify --fix
+		Warning: the force or picky option is specified; ignoring version mismatch for verify --fix
 		Verifying files
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$fhash.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Unable to download necessary files for this OS release
-		Error: Fix did not fully succeed
+		Fix did not fully succeed
 	EOM
 	)
 	assert_is_output "$expected_output"

@@ -619,13 +619,13 @@ int get_dirfd_path(const char *fullname)
 
 	fd = open(dir, O_RDONLY);
 	if (fd < 0) {
-		info("Failed to open dir %s (%s)\n", dir, strerror(errno));
+		error("Failed to open dir %s (%s)\n", dir, strerror(errno));
 		goto out;
 	}
 
 	real_path = realpath(dir, NULL);
 	if (!real_path) {
-		info("Failed to get real path of %s (%s)\n", dir, strerror(errno));
+		error("Failed to get real path of %s (%s)\n", dir, strerror(errno));
 		close(fd);
 		goto out;
 	}
@@ -1015,7 +1015,7 @@ int untar_full_download(void *data)
 	err = extract_to(tarfile, outputdir);
 	free_string(&outputdir);
 	if (err) {
-		info("ignoring tar extract failure for fullfile %s.tar (ret %d)\n",
+		warn("ignoring tar extract failure for fullfile %s.tar (ret %d)\n",
 		     file->hash, err);
 		goto exit;
 		/* TODO: respond to ARCHIVE_RETRY error codes

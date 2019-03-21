@@ -32,13 +32,13 @@ int swupd_stats[8];
 
 void print_statistics(int version1, int version2)
 {
-	printf("\n");
-	printf("Statistics for going from version %i to version %i:\n\n", version1, version2);
-	printf("    changed bundles   : %i\n", swupd_stats[5]);
-	printf("    new bundles       : %i\n", swupd_stats[3]);
-	printf("    deleted bundles   : %i\n\n", swupd_stats[4]);
-	printf("    changed files     : %i\n", swupd_stats[2]);
-	printf("    new files         : %i\n", swupd_stats[0]);
-	printf("    deleted files     : %i\n", swupd_stats[1]);
-	printf("\n");
+	info("\n");
+	info("Statistics for going from version %i to version %i:\n\n", version1, version2);
+	info("    changed bundles   : %i\n", swupd_stats[5]);
+	info("    new bundles       : %i\n", swupd_stats[3]);
+	info("    deleted bundles   : %i\n\n", swupd_stats[4]);
+	info("    changed files     : %i\n", swupd_stats[2]);
+	info("    new files         : %i\n", swupd_stats[0]);
+	info("    deleted files     : %i\n", swupd_stats[1]);
+	info("\n");
 }

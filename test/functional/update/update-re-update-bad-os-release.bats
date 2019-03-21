@@ -39,7 +39,7 @@ test_setup() {
 		Update was applied.
 		Calling post-update helper scripts.
 		Update successful. System updated from version 10 to version 20
-		ERROR: Inconsistency between version files, exiting now.
+		Error: Inconsistency between version files, exiting now.
 	EOM
 	)
 	assert_is_output "$expected_output"

@@ -109,7 +109,7 @@ static void dump_file_descriptor_leaks_int(int n, void *a)
 		if (!strstr(buffer, "socket") &&
 		    !strstr(buffer, "/dev/random") &&
 		    !strstr(buffer, "/dev/urandom")) {
-			info("Possible filedescriptor leak: fd_number=\"%d\",fd_details=\"%s\"\n", n, buffer);
+			warn("Possible filedescriptor leak: fd_number=\"%d\",fd_details=\"%s\"\n", n, buffer);
 		}
 	}
 	free_string(&filename);

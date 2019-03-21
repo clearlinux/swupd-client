@@ -49,7 +49,7 @@ static int check_manifests_uniqueness(int clrver, int mixver)
 	struct manifest *clear = load_manifest_full(clrver, false);
 	struct manifest *mixer = load_manifest_full(mixver, true);
 	if (!clear || !mixer) {
-		fprintf(stderr, "ERROR: Could not load full manifests\n");
+		error("Could not load full manifests\n");
 		return -1;
 	}
 
@@ -57,7 +57,7 @@ static int check_manifests_uniqueness(int clrver, int mixver)
 	struct file **mixerfull = manifest_files_to_array(mixer);
 
 	if (clearfull == NULL || mixerfull == NULL) {
-		fprintf(stderr, "Could not convert full manifest to array\n");
+		error("Could not convert full manifest to array\n");
 		return -1;
 	}
 
@@ -79,7 +79,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 
 	ret = download_fullfiles(updates, &nonpack);
 	if (ret) {
-		fprintf(stderr, "ERROR: Could not download all files, aborting update\n");
+		error("Could not download all files, aborting update\n");
 		return ret;
 	}
 
@@ -96,7 +96,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 
 	/* starting at list_head in the filename alpha-sorted updates list
 	 * means node directories are added before leaf files */
-	fprintf(stderr, "Staging file content\n");
+	info("Staging file content\n");
 	iter = list_head(updates);
 	while (iter) {
 		file = iter->data;
@@ -112,7 +112,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 
 		ret = do_staging(file, server_manifest);
 		if (ret != 0) {
-			fprintf(stderr, "File staging failed: %s\n", file->filename);
+			error("File staging failed: %s\n", file->filename);
 			return ret;
 		}
 	}
@@ -124,7 +124,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 	sync();
 
 	/* rename to apply update */
-	printf("Applying update\n");
+	info("Applying update\n");
 	ret = rename_all_files_to_final(updates);
 	if (ret != 0) {
 		ret = SWUPD_COULDNT_RENAME_FILE;
@@ -171,12 +171,12 @@ int add_included_manifests(struct manifest *mom, struct list **subs)
 static int re_exec_update(bool versions_match)
 {
 	if (!versions_match) {
-		fprintf(stderr, "ERROR: Inconsistency between version files, exiting now.\n");
+		error("Inconsistency between version files, exiting now.\n");
 		return 1;
 	}
 
 	if (!swupd_cmd) {
-		fprintf(stderr, "ERROR: Unable to determine re-update command, exiting now.\n");
+		error("Unable to determine re-update command, exiting now.\n");
 		return 1;
 	}
 
@@ -208,13 +208,13 @@ static enum swupd_code check_versions(int *current_version, int *server_version,
 		return ret;
 	}
 	if (*current_version == 0) {
-		fprintf(stderr, "Update from version 0 not supported yet.\n");
+		error("Update from version 0 not supported yet.\n");
 		return SWUPD_INVALID_OPTION;
 	}
 	if (requested_version != -1) {
 		if (requested_version < *current_version) {
-			fprintf(stderr, "Requested version for update (%d) must be greater than current version (%d)\n",
-				requested_version, *current_version);
+			error("Requested version for update (%d) must be greater than current version (%d)\n",
+			      requested_version, *current_version);
 			return SWUPD_INVALID_OPTION;
 		}
 		if (requested_version < *server_version) {
@@ -243,7 +243,7 @@ static enum swupd_code main_update()
 	ret = swupd_init();
 	if (ret != 0) {
 		/* being here means we already close log by a previously caught error */
-		fprintf(stderr, "Updater failed to initialize, exiting now.\n");
+		error("Updater failed to initialize, exiting now.\n");
 		return ret;
 	}
 
@@ -252,7 +252,7 @@ static enum swupd_code main_update()
 
 	/* Preparation steps */
 	timelist_timer_start(global_times, "Prepare for update");
-	fprintf(stderr, "Update started.\n");
+	info("Update started.\n");
 
 	mix_exists = check_mix_exists();
 
@@ -277,18 +277,18 @@ version_check:
 		}
 		/* Check if a new upstream version is available so we can update to it still */
 		if (need_new_upstream(server_version)) {
-			printf("NEW CLEAR AVAILABLE %d\n", server_version);
+			info("NEW CLEAR AVAILABLE %d\n", server_version);
 			/* Update the upstreamversion that will be used to generate the new mix content */
 			FILE *verfile = fopen(MIX_DIR "upstreamversion", "w+");
 			if (!verfile) {
-				fprintf(stderr, "ERROR: fopen() %s/upstreamversion returned %s\n", MIX_DIR, strerror(errno));
+				error("fopen() %s/upstreamversion returned %s\n", MIX_DIR, strerror(errno));
 			} else {
 				fprintf(verfile, "%d", server_version);
 				fclose(verfile);
 			}
 
 			if (run_command("/usr/bin/mixin", "build", NULL) != 0) {
-				fprintf(stderr, "ERROR: Could not execute mixin\n");
+				error("Could not execute mixin\n");
 				ret = SWUPD_SUBPROCESS_ERROR;
 				goto clean_curl;
 			}
@@ -297,7 +297,8 @@ version_check:
 			check_mix_versions(&mix_current_version, &mix_server_version, path_prefix);
 			ret = check_manifests_uniqueness(server_version, mix_server_version);
 			if (ret > 0) {
-				printf("\n\t!! %i collisions were found between mix and upstream, please re-create mix !!\n", ret);
+				info("\n");
+				warn("%i collisions were found between mix and upstream, please re-create mix !!\n", ret);
 				if (!allow_mix_collisions) {
 					ret = SWUPD_MIX_COLLISIONS;
 					goto clean_curl;
@@ -315,22 +316,22 @@ version_check:
 
 	if (server_version <= current_version) {
 		if (requested_version == server_version) {
-			fprintf(stderr, "Requested version (%i)", requested_version);
+			info("Requested version (%i)", requested_version);
 		} else {
-			fprintf(stderr, "Version on server (%i)", server_version);
+			info("Version on server (%i)", server_version);
 		}
-		fprintf(stderr, " is not newer than system version (%i)\n", current_version);
+		info(" is not newer than system version (%i)\n", current_version);
 		ret = SWUPD_OK;
 		goto clean_curl;
 	}
 
-	fprintf(stderr, "Preparing to update from %i to %i\n", current_version, server_version);
+	info("Preparing to update from %i to %i\n", current_version, server_version);
 	timelist_timer_stop(global_times); // closing: Get versions
 
 	/* Step 2: housekeeping */
 	timelist_timer_start(global_times, "Clean up download directory");
 	if (rm_staging_dir_contents("download")) {
-		fprintf(stderr, "Error cleaning download directory\n");
+		error("There was a problem cleaning download directory\n");
 		ret = SWUPD_COULDNT_REMOVE_FILE;
 		goto clean_curl;
 	}
@@ -369,7 +370,7 @@ version_check:
 	current_manifest->submanifests = recurse_manifest(current_manifest, current_subs, NULL, false, &manifest_err);
 	if (!current_manifest->submanifests) {
 		ret = SWUPD_RECURSE_MANIFEST;
-		printf("Cannot load current MoM sub-manifests, exiting\n");
+		error("Cannot load current MoM sub-manifests, exiting\n");
 		goto clean_exit;
 	}
 
@@ -387,8 +388,8 @@ version_check:
 	if (ret) {
 		if (ret == -add_sub_BADNAME) {
 			/* this means a bundle(s) was removed in a future version */
-			printf("WARNING: One or more installed bundles are no longer available at version %d.\n",
-			       server_version);
+			warn("One or more installed bundles are no longer available at version %d.\n",
+			     server_version);
 		} else {
 			ret = SWUPD_RECURSE_MANIFEST;
 			goto clean_exit;
@@ -400,7 +401,7 @@ version_check:
 	server_manifest->submanifests = recurse_manifest(server_manifest, latest_subs, NULL, false, &manifest_err);
 	if (!server_manifest->submanifests) {
 		ret = SWUPD_RECURSE_MANIFEST;
-		printf("Error: Cannot load server MoM sub-manifests, exiting\n");
+		error("Cannot load server MoM sub-manifests, exiting\n");
 		goto clean_exit;
 	}
 
@@ -448,7 +449,7 @@ version_check:
 		/* Failure to write the version file in the state directory
 		 * should not affect exit status. */
 		(void)update_device_latest_version(server_version);
-		printf("Update was applied.\n");
+		info("Update was applied.\n");
 	} else if (ret != 0) {
 		// Ensure a positive exit status for the main program.
 		ret = abs(ret);
@@ -473,7 +474,7 @@ version_check:
 	if (mix_exists && !system_on_mix()) {
 		int fd = open(MIXED_FILE, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 		if (fd == -1) {
-			fprintf(stderr, "ERROR: Failed to create 'mixed' statefile\n");
+			error("Failed to create 'mixed' statefile\n");
 			ret = SWUPD_COULDNT_CREATE_FILE;
 		}
 		close(fd);
@@ -501,8 +502,8 @@ clean_curl:
 		  total_curl_sz);
 
 	if (server_version > current_version) {
-		printf("Update took %0.1f seconds, %ld MB transferred\n", delta,
-		       total_curl_sz / 1000 / 1000);
+		info("Update took %0.1f seconds, %ld MB transferred\n", delta,
+		     total_curl_sz / 1000 / 1000);
 	}
 	timelist_print_stats(global_times);
 
@@ -525,18 +526,18 @@ clean_curl:
 
 	if (ret == 0) {
 		if (nonpack > 0) {
-			printf("%i files were not in a pack\n", nonpack);
+			info("%i files were not in a pack\n", nonpack);
 		}
 		if (!download_only) {
 			if (current_version < server_version) {
-				printf("Update successful. System updated from version %d to version %d\n",
-				       current_version, server_version);
+				print("Update successful. System updated from version %d to version %d\n",
+				      current_version, server_version);
 			} else {
-				printf("Update complete. System already up-to-date at version %d\n", current_version);
+				print("Update complete. System already up-to-date at version %d\n", current_version);
 			}
 		}
 	} else {
-		printf("Update failed.\n");
+		print("Update failed.\n");
 	}
 
 	if (re_update && ret == 0) {
@@ -562,21 +563,21 @@ static const struct option prog_opts[] = {
 
 static void print_help(void)
 {
-	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd update [OPTION...]\n\n");
+	print("Usage:\n");
+	print("   swupd update [OPTION...]\n\n");
 
 	//TODO: Add documentation explaining this command
 
 	global_print_help();
 
-	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "   -m, --manifest=M        Update to version M, also accepts 'latest' (default)\n");
-	fprintf(stderr, "   -d, --download          Download all content, but do not actually install the update\n");
-	fprintf(stderr, "   -s, --status            Show current OS version and latest version available on server\n");
-	fprintf(stderr, "   -k, --keepcache         Do not delete the swupd state directory content after updating the system\n");
-	fprintf(stderr, "   -T, --migrate           Migrate to augmented upstream/mix content\n");
-	fprintf(stderr, "   -a, --allow-mix-collisions	Ignore and continue if custom user content conflicts with upstream provided content\n");
-	fprintf(stderr, "\n");
+	print("Options:\n");
+	print("   -m, --manifest=M        Update to version M, also accepts 'latest' (default)\n");
+	print("   -d, --download          Download all content, but do not actually install the update\n");
+	print("   -s, --status            Show current OS version and latest version available on server\n");
+	print("   -k, --keepcache         Do not delete the swupd state directory content after updating the system\n");
+	print("   -T, --migrate           Migrate to augmented upstream/mix content\n");
+	print("   -a, --allow-mix-collisions	Ignore and continue if custom user content conflicts with upstream provided content\n");
+	print("\n");
 }
 
 static bool parse_opt(int opt, char *optarg)
@@ -592,7 +593,7 @@ static bool parse_opt(int opt, char *optarg)
 
 		err = strtoi_err(optarg, &requested_version);
 		if (err < 0 || requested_version < 0) {
-			fprintf(stderr, "Invalid --manifest argument: %s\n\n", optarg);
+			error("Invalid --manifest argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;
@@ -607,7 +608,7 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case 'T':
 		migrate = true;
-		fprintf(stderr, "Attempting to migrate to your mix content...\n\n");
+		error("Attempting to migrate to your mix content...\n\n");
 		return true;
 	case 'k':
 		keepcache = true;
@@ -635,7 +636,7 @@ static bool parse_options(int argc, char **argv)
 	}
 
 	if (argc > ind) {
-		fprintf(stderr, "Error: unexpected arguments\n\n");
+		error("unexpected arguments\n\n");
 		return false;
 	}
 
@@ -661,10 +662,10 @@ static enum swupd_code print_versions()
 		}
 	}
 	if (current_version > 0) {
-		fprintf(stderr, "Current OS version: %d\n", current_version);
+		info("Current OS version: %d\n", current_version);
 	}
 	if (server_version > 0) {
-		fprintf(stderr, "Latest server version: %d\n", server_version);
+		info("Latest server version: %d\n", server_version);
 	}
 
 	telemetry(ret ? TELEMETRY_WARN : TELEMETRY_INFO,

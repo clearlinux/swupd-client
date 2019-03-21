@@ -51,7 +51,7 @@ test_teardown() {
 	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 	expected_output=$(cat <<-EOM
 		Error: Curl - Communicating with server timed out
-		Updater failed to initialize, exiting now.
+		Error: Updater failed to initialize, exiting now.
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -73,7 +73,7 @@ test_teardown() {
 	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 	expected_output=$(cat <<-EOM
 		Error: Curl - Communicating with server timed out
-		Updater failed to initialize, exiting now.
+		Error: Updater failed to initialize, exiting now.
 	EOM
 	)
 	assert_is_output "$expected_output"

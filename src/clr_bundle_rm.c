@@ -40,15 +40,15 @@ static char **bundles;
 
 static void print_help(void)
 {
-	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd bundle-remove [OPTION...] [bundle1 bundle2 (...)]\n\n");
+	print("Usage:\n");
+	print("   swupd bundle-remove [OPTION...] [bundle1 bundle2 (...)]\n\n");
 
 	//TODO: Add documentation explaining this command
 
 	global_print_help();
 
-	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "\n");
+	print("Options:\n");
+	print("\n");
 }
 
 static const struct global_options opts = {
@@ -67,7 +67,7 @@ static bool parse_options(int argc, char **argv)
 	}
 
 	if (argc <= ind) {
-		fprintf(stderr, "Error: missing bundle(s) to be removed\n\n");
+		error("missing bundle(s) to be removed\n\n");
 		return false;
 	}
 

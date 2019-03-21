@@ -248,7 +248,7 @@ static void print_csv_results()
 		while (fptr) {
 			filename = fptr->data;
 			fptr = fptr->next;
-			printf("%s,%s\n", filename, bundle->bundle_name);
+			info("%s,%s\n", filename, bundle->bundle_name);
 		}
 	}
 }
@@ -262,7 +262,7 @@ static void print_final_results(bool display_size)
 
 	ptr = list_head(results);
 	if (num_results != INT_MAX) {
-		printf("Displaying top %d file results per bundle\n\n", num_results);
+		info("Displaying top %d file results per bundle\n\n", num_results);
 	}
 	while (ptr) {
 		struct list *ptr2;
@@ -276,26 +276,26 @@ static void print_final_results(bool display_size)
 		 * because we did not load all bundles and therefore do not have include sizes
 		 * for the result */
 		name = get_printable_bundle_name(b->bundle_name, b->is_experimental);
-		printf("Bundle %s\t%s", name, b->is_tracked ? "[installed]\t" : "");
+		info("Bundle %s\t%s", name, b->is_tracked ? "[installed]\t" : "");
 		free_string(&name);
 		if (display_size) {
-			printf("(%li MB%s)",
-			       b->size / 1000 / 1000, /* convert from bytes->KB->MB */
-			       b->is_tracked ? " on system" : " to install");
+			info("(%li MB%s)",
+			     b->size / 1000 / 1000, /* convert from bytes->KB->MB */
+			     b->is_tracked ? " on system" : " to install");
 		}
 		putchar('\n');
 		ptr2 = list_head(b->files);
 		while (ptr2 && counter2 < num_results) {
 			filename = ptr2->data;
 			ptr2 = ptr2->next;
-			printf("\t%s\n", filename);
+			info("\t%s\n", filename);
 			counter2++;
 		}
 
 		if (ptr2) {
-			printf("\tfile results truncated...\n");
+			info("\tfile results truncated...\n");
 		}
-		printf("\n");
+		info("\n");
 	}
 }
 
@@ -312,24 +312,24 @@ static char *bin_paths[] = {
 
 static void print_help(void)
 {
-	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd search [OPTION...] 'search_term'\n\n");
-	fprintf(stderr, "		'search_term': A substring of a binary, library or filename (default)\n");
-	fprintf(stderr, "		Return: Bundle name : filename matching search term\n\n");
+	print("Usage:\n");
+	print("   swupd search [OPTION...] 'search_term'\n\n");
+	print("		'search_term': A substring of a binary, library or filename (default)\n");
+	print("		Return: Bundle name : filename matching search term\n\n");
 
 	global_print_help();
 
-	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "   -l, --library           Search paths where libraries are located for a match\n");
-	fprintf(stderr, "   -b, --binary            Search paths where binaries are located for a match\n");
-	fprintf(stderr, "   -s, --scope=[query type] 'b' or 'o' for first hit per (b)undle, or one hit total across the (o)s\n");
-	fprintf(stderr, "   -T, --top=[NUM]         Only display the top NUM results for each bundle\n");
-	fprintf(stderr, "   -m, --csv               Output all results in CSV format (machine-readable)\n");
-	fprintf(stderr, "   -d, --display-files	   Output full file list, no search done\n");
-	fprintf(stderr, "   -i, --init              Download all manifests then return, no search done\n");
-	fprintf(stderr, "   -o, --order=[ORDER]     Sort the output. ORDER is one of the following values:\n");
-	fprintf(stderr, "                           'alpha' to order alphabetically (default)\n");
-	fprintf(stderr, "                           'size' to order by bundle size (smaller to larger)\n");
+	print("Options:\n");
+	print("   -l, --library           Search paths where libraries are located for a match\n");
+	print("   -b, --binary            Search paths where binaries are located for a match\n");
+	print("   -s, --scope=[query type] 'b' or 'o' for first hit per (b)undle, or one hit total across the (o)s\n");
+	print("   -T, --top=[NUM]         Only display the top NUM results for each bundle\n");
+	print("   -m, --csv               Output all results in CSV format (machine-readable)\n");
+	print("   -d, --display-files	   Output full file list, no search done\n");
+	print("   -i, --init              Download all manifests then return, no search done\n");
+	print("   -o, --order=[ORDER]     Sort the output. ORDER is one of the following values:\n");
+	print("                           'alpha' to order alphabetically (default)\n");
+	print("                           'size' to order by bundle size (smaller to larger)\n");
 }
 
 static const struct option prog_opts[] = {
@@ -356,13 +356,13 @@ static bool parse_opt(int opt, char *optarg)
 		} else if (!strcmp(optarg, "size")) {
 			sort = size;
 		} else {
-			fprintf(stderr, "Invalid --order argument\n\n");
+			error("Invalid --order argument\n\n");
 			return false;
 		}
 		return true;
 	case 's':
 		if (strcmp(optarg, "b") && (strcmp(optarg, "o"))) {
-			fprintf(stderr, "Invalid --scope argument. Must be 'b' or 'o'\n\n");
+			error("Invalid --scope argument. Must be 'b' or 'o'\n\n");
 			return false;
 		}
 
@@ -374,12 +374,12 @@ static bool parse_opt(int opt, char *optarg)
 
 		return true;
 	case 't':
-		fprintf(stderr, "Deprecated option -t was renamed. Prefer using -T or --top.\n\n");
+		warn("Deprecated option -t was renamed. Prefer using -T or --top.\n\n");
 		/* fallthrough */
 	case 'T':
 		err = strtoi_err(optarg, &num_results);
 		if (err != 0) {
-			fprintf(stderr, "Invalid --top argument\n\n");
+			error("Invalid --top argument\n\n");
 			return false;
 		}
 		return true;
@@ -388,8 +388,8 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case 'l':
 		if (search_type != '0') {
-			fprintf(stderr, "Error, cannot specify multiple search types "
-					"(-l and -b are mutually exclusive)\n");
+			error("cannot specify multiple search types "
+			      "(-l and -b are mutually exclusive)\n");
 			return false;
 		}
 
@@ -400,8 +400,8 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case 'b':
 		if (search_type != '0') {
-			fprintf(stderr, "Error, cannot specify multiple search types "
-					"(-l and -b are mutually exclusive)\n");
+			error("cannot specify multiple search types "
+			      "(-l and -b are mutually exclusive)\n");
 			return false;
 		}
 
@@ -432,19 +432,19 @@ static bool parse_options(int argc, char **argv)
 	}
 
 	if ((optind == argc) && (!init) && (!display_files)) {
-		fprintf(stderr, "Error: Search term missing\n\n");
+		error("Search term missing\n\n");
 		return false;
 	}
 
 	if ((optind == argc - 1) && (display_files)) {
-		fprintf(stderr, "Error: Cannot supply a search term and -d, --display-files together\n");
+		error("Cannot supply a search term and -d, --display-files together\n");
 		return false;
 	}
 
 	search_string = argv[optind];
 
 	if (optind + 1 < argc) {
-		fprintf(stderr, "Error, only 1 search term supported at a time\n");
+		error("only 1 search term supported at a time\n");
 		return false;
 	}
 
@@ -460,7 +460,7 @@ static bool file_search(char *filename, char *path, char *search_term)
 	char *pos;
 
 	if (display_files) {
-		printf("    %s\n", filename);
+		info("    %s\n", filename);
 		return false;
 	}
 
@@ -509,7 +509,7 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 		/* Load sub-manifest */
 		subman = load_manifest(file->last_change, file, MoM, false, NULL);
 		if (!subman) {
-			fprintf(stderr, "Failed to load manifest %s\n", file->filename);
+			warn("Failed to load manifest %s\n", file->filename);
 			man_load_failures = true;
 			continue;
 		}
@@ -529,7 +529,7 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 
 		if (display_files) {
 			/* Display bundle name. Marked up for pattern matchability */
-			fprintf(stderr, "--Bundle: %s--\n", file->filename);
+			info("--Bundle: %s--\n", file->filename);
 		}
 
 		/* Loop through sub-manifest, searching for files matching the desired pattern */
@@ -568,7 +568,7 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 					}
 				}
 			} else {
-				fprintf(stderr, "Unrecognized search type. -b or -l supported\n");
+				error("Unrecognized search type. -b or -l supported\n");
 				done_with_search = true;
 				break;
 			}
@@ -591,7 +591,7 @@ static enum swupd_code do_search(struct manifest *MoM, char search_type, char *s
 	}
 
 	if (!hit_count && !display_files) {
-		fprintf(stderr, "Search term not found.\n");
+		info("Search term not found.\n");
 		ret = SWUPD_NO;
 	}
 
@@ -675,23 +675,23 @@ static enum swupd_code download_manifests(struct manifest **MoM)
 
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
-		fprintf(stderr, "Error: Unable to determine current OS version\n");
+		error("Error: Unable to determine current OS version\n");
 		return SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
 
 	*MoM = load_mom(current_version, false, false, NULL);
 	if (!(*MoM)) {
-		fprintf(stderr, "Cannot load official manifest MoM for version %i\n", current_version);
+		error("Cannot load official manifest MoM for version %i\n", current_version);
 		return SWUPD_COULDNT_LOAD_MOM;
 	}
 
 	list = (*MoM)->manifests;
 	size = query_total_download_size(list);
 	if (size == -1) {
-		fprintf(stderr, "Downloading manifests. Expect a delay, up to 100MB may be downloaded\n");
+		info("Downloading manifests. Expect a delay, up to 100MB may be downloaded\n");
 	} else if (size > 0) {
-		fprintf(stderr, "Downloading Clear Linux manifests\n");
-		fprintf(stderr, "   %.2f MB total...\n\n", size);
+		info("Downloading Clear Linux manifests\n");
+		info("   %.2f MB total...\n\n", size);
 	}
 
 	while (list) {
@@ -707,7 +707,7 @@ static enum swupd_code download_manifests(struct manifest **MoM)
 			/* Do download */
 			subMan = load_manifest(file->last_change, file, *MoM, false, &manifest_err);
 			if (!subMan) {
-				fprintf(stderr, "Cannot load %s sub-manifest for version %i\n", file->filename, current_version);
+				error("Cannot load %s sub-manifest for version %i\n", file->filename, current_version);
 				count++;
 				/* if the manifest failed to download because there is no disk space
 				 * remove it from the list so we don't re-attempt while searching */
@@ -727,7 +727,7 @@ static enum swupd_code download_manifests(struct manifest **MoM)
 			string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url, current_version,
 				      file->filename);
 
-			fprintf(stderr, "Error: Failure reading from %s\n", url);
+			error("Failure reading from %s\n", url);
 			free_string(&url);
 		}
 
@@ -740,9 +740,9 @@ static enum swupd_code download_manifests(struct manifest **MoM)
 
 	if (did_download) {
 		if (ret) {
-			fprintf(stderr, "%i manifest%s failed to download.\n\n", count, (count > 1 ? "s" : ""));
+			error("%i manifest%s failed to download.\n\n", count, (count > 1 ? "s" : ""));
 		} else {
-			fprintf(stderr, "Completed manifests download.\n\n");
+			info("Completed manifests download.\n\n");
 		}
 	}
 
@@ -760,29 +760,29 @@ enum swupd_code search_main(int argc, char **argv)
 
 	ret = swupd_init();
 	if (ret != 0) {
-		fprintf(stderr, "Failed swupd initialization, exiting now.\n");
+		error("Failed swupd initialization, exiting now.\n");
 		return ret;
 	}
 
 	if (!init && !display_files) {
-		fprintf(stderr, "Searching for '%s'\n\n", search_string);
+		info("Searching for '%s'\n\n", search_string);
 	}
 	if (display_files) {
-		fprintf(stderr, "Displaying all bundles and their files:\n\n");
+		info("Displaying all bundles and their files:\n\n");
 	}
 
 	ret = download_manifests(&MoM);
 	if (ret != 0) {
 		if (ret == SWUPD_RECURSE_MANIFEST) {
-			fprintf(stderr, "Warning: One or more manifests failed to download, search results will be partial.\n");
+			warn("One or more manifests failed to download, search results will be partial.\n");
 		} else {
-			fprintf(stderr, "Error: Failed to download manifests\n");
+			error("Failed to download manifests\n");
 			goto clean_exit;
 		}
 	}
 
 	if (init) {
-		fprintf(stderr, "Successfully retrieved manifests. Exiting\n");
+		print("Successfully retrieved manifests. Exiting\n");
 		ret = SWUPD_OK;
 		goto clean_exit;
 	}
@@ -790,7 +790,7 @@ enum swupd_code search_main(int argc, char **argv)
 	/* Arbitrary upper limit to ensure we aren't getting handed garbage */
 	if (!display_files &&
 	    ((strlen(search_string) <= 0) || (strlen(search_string) > NAME_MAX))) {
-		fprintf(stderr, "Error - search string invalid\n");
+		error("search string invalid\n");
 		ret = SWUPD_INVALID_OPTION;
 		goto clean_exit;
 	}

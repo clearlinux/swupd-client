@@ -31,13 +31,13 @@
 
 static void print_help(const char *name)
 {
-	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd %s [options]\n\n", basename((char *)name));
-	fprintf(stderr, "Help Options:\n");
-	fprintf(stderr, "   -h, --help              Show help options\n");
-	fprintf(stderr, "       --enable            enable autoupdates\n");
-	fprintf(stderr, "       --disable           disable autoupdates\n");
-	fprintf(stderr, "\n");
+	print("Usage:\n");
+	print("   swupd %s [options]\n\n", basename((char *)name));
+	print("Help Options:\n");
+	print("   -h, --help              Show help options\n");
+	print("       --enable            enable autoupdates\n");
+	print("       --disable           disable autoupdates\n");
+	print("\n");
 }
 
 static int enable;
@@ -65,13 +65,13 @@ static bool parse_options(int argc, char **argv)
 		case 0: /* getopt_long has set the flag */
 			break;
 		default:
-			fprintf(stderr, "Error: unrecognized option\n\n");
+			error("unrecognized option\n\n");
 			goto err;
 		}
 	}
 
 	if (argc > optind) {
-		fprintf(stderr, "Error: unexpected arguments\n\n");
+		error("unexpected arguments\n\n");
 		goto err;
 	}
 
@@ -83,8 +83,8 @@ err:
 
 static void policy_warn(void)
 {
-	fprintf(stderr, "Warning: disabling automatic updates may take you "
-			"out of compliance with your IT policy\n\n");
+	warn("disabling automatic updates may take you "
+	     "out of compliance with your IT policy\n\n");
 }
 
 static int system_command(const char *cmd)
@@ -113,13 +113,13 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 		return SWUPD_INVALID_OPTION;
 	}
 	if (enable && disable) {
-		fprintf(stderr, "Can not enable and disable at the same time\n");
+		error("Can not enable and disable at the same time\n");
 		return SWUPD_INVALID_OPTION;
 	}
 	if (enable) {
 		int rc;
 		check_root();
-		fprintf(stderr, "Running systemctl to enable updates\n");
+		info("Running systemctl to enable updates\n");
 		rc = system_command("/usr/bin/systemctl unmask --now swupd-update.service swupd-update.timer"
 				    " && /usr/bin/systemctl restart swupd-update.timer > /dev/null");
 		if (rc) {
@@ -130,7 +130,7 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 		int rc;
 		check_root();
 		policy_warn();
-		fprintf(stderr, "Running systemctl to disable updates\n");
+		info("Running systemctl to disable updates\n");
 		rc = system_command("/usr/bin/systemctl mask --now swupd-update.service swupd-update.timer > /dev/null");
 		if (rc) {
 			return SWUPD_SUBPROCESS_ERROR;
@@ -144,21 +144,21 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 		 * of is-enabled. */
 		int rc = system_command("/usr/bin/systemctl > /dev/null 2>&1");
 		if (rc) {
-			fprintf(stderr, "Unable to determine autoupdate status\n");
+			error("Unable to determine autoupdate status\n");
 			return SWUPD_SUBPROCESS_ERROR;
 		}
 
 		rc = system_command("/usr/bin/systemctl is-enabled swupd-update.service > /dev/null");
 		switch (rc) {
 		case SWUPD_OK:
-			printf("Enabled\n");
+			print("Enabled\n");
 			break;
 		case SWUPD_NO:
-			printf("Disabled\n");
+			print("Disabled\n");
 			break;
 		default:
 			rc = SWUPD_SUBPROCESS_ERROR;
-			fprintf(stderr, "Unable to determine autoupdate status\n");
+			error("Unable to determine autoupdate status\n");
 		}
 		return (rc);
 	}

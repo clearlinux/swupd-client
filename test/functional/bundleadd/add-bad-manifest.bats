@@ -22,8 +22,8 @@ test_setup() {
 		Error: preposterous (9000000) number of files in test-bundle Manifest, more than 4 million skipping
 		Warning: Removing corrupt Manifest.test-bundle artifacts and re-downloading...
 		Error: preposterous (9000000) number of files in test-bundle Manifest, more than 4 million skipping
-		Failed to load 10 test-bundle manifest
-		Unable to download manifest test-bundle version 10, exiting now
+		Error: Failed to load 10 test-bundle manifest
+		Error: Unable to download manifest test-bundle version 10, exiting now
 		Failed to install 1 of 1 bundles
 	EOM
 	)

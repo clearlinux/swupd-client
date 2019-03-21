@@ -488,7 +488,7 @@ restart_download:
 		local.path = filename;
 
 		if (resume_ok && resume_download_supported && lstat(filename, &stat) == 0) {
-			print("Curl - Resuming download for '%s'\n", url);
+			info("Curl - Resuming download for '%s'\n", url);
 			curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
 			if (curl_ret != CURLE_OK) {
 				goto exit;
@@ -625,17 +625,17 @@ static int retry_download_loop(const char *url, char *filename, struct curl_file
 		if (max_retries) {
 			if (current_retry <= max_retries) {
 				if (sleep_time) {
-					fprintf(stderr, "Waiting %d seconds before retrying the download\n", sleep_time);
+					info("Waiting %d seconds before retrying the download\n", sleep_time);
 				}
 				sleep(sleep_time);
 				sleep_time = (sleep_time * DELAY_MULTIPLIER) > MAX_DELAY ? MAX_DELAY : (sleep_time * DELAY_MULTIPLIER);
-				fprintf(stderr, "Retry #%d downloading from %s\n", current_retry, url);
+				info("Retry #%d downloading from %s\n", current_retry, url);
 				continue;
 			} else {
-				fprintf(stderr, "Maximum number of retries reached\n");
+				warn("Maximum number of retries reached\n");
 			}
 		} else {
-			fprintf(stderr, "Download retries is disabled\n");
+			info("Download retries is disabled\n");
 		}
 		/* we ran out of retries, return an error */
 		return -ECOMM;

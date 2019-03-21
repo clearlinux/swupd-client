@@ -18,8 +18,8 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Verifying version 40
-		WARNING: the force option is specified; ignoring format mismatch for verify
-		WARNING: the force or picky option is specified; ignoring version mismatch for verify --fix
+		Warning: the force option is specified; ignoring format mismatch for verify
+		Warning: the force or picky option is specified; ignoring version mismatch for verify --fix
 		Verifying files
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...

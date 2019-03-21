@@ -28,16 +28,16 @@
 
 static void print_help(void)
 {
-	fprintf(stderr,
-		"Usage:\n"
-		"   swupd clean [OPTION...]\n\n"
-		"\n"
-		"Remove cached content used for updates from state directory.\n"
-		"\n"
-		"Options:\n"
-		"   --all                   Remove all the content including recent metadata\n"
-		"   --dry-run               Just print files that would be removed\n"
-		"\n");
+	print(
+	    "Usage:\n"
+	    "   swupd clean [OPTION...]\n\n"
+	    "\n"
+	    "Remove cached content used for updates from state directory.\n"
+	    "\n"
+	    "Options:\n"
+	    "   --all                   Remove all the content including recent metadata\n"
+	    "   --dry-run               Just print files that would be removed\n"
+	    "\n");
 	global_print_help();
 }
 
@@ -74,7 +74,7 @@ static bool parse_options(int argc, char **argv)
 	}
 
 	if (argc > optind) {
-		fprintf(stderr, "Error: unexpected arguments\n\n");
+		error("unexpected arguments\n\n");
 		return false;
 	}
 
@@ -123,7 +123,7 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 		struct stat stat;
 		ret = lstat(file, &stat);
 		if (ret != 0) {
-			fprintf(stderr, "couldn't access %s: %s\n", file, strerror(errno));
+			warn("couldn't access %s: %s\n", file, strerror(errno));
 			continue;
 		}
 
@@ -132,7 +132,7 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 		}
 
 		if (dry_run) {
-			printf("%s\n", file);
+			info("%s\n", file);
 		} else {
 			if (S_ISDIR(stat.st_mode)) {
 				ret = rmdir(file);
@@ -140,7 +140,7 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 				ret = unlink(file);
 			}
 			if (ret != 0) {
-				fprintf(stderr, "couldn't remove file %s: %s\n", file, strerror(errno));
+				warn("couldn't remove file %s: %s\n", file, strerror(errno));
 			}
 		}
 		if (ret == 0) {
@@ -298,7 +298,7 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 	if (!all) {
 		int current_version = get_current_version(path_prefix);
 		if (current_version < 0) {
-			fprintf(stderr, "Unable to determine current OS version\n");
+			warn("Unable to determine current OS version\n");
 		} else {
 			mom_contents = read_mom_contents(current_version);
 		}
@@ -387,7 +387,7 @@ enum swupd_code clean_main(int argc, char **argv)
 	int ret = SWUPD_OK;
 	ret = clean_init();
 	if (ret != 0) {
-		fprintf(stderr, "Failed swupd initialization, exiting now.\n");
+		error("Failed swupd initialization, exiting now.\n");
 		return ret;
 	}
 
@@ -395,7 +395,7 @@ enum swupd_code clean_main(int argc, char **argv)
 		ret = clock_gettime(CLOCK_REALTIME, &now);
 		if (ret != 0) {
 			ret = SWUPD_TIME_UNKNOWN;
-			perror("couldn't read current time to decide what files to clean");
+			error("couldn't read current time to decide what files to clean");
 			goto end;
 		}
 	}
@@ -411,9 +411,9 @@ enum swupd_code clean_main(int argc, char **argv)
 	ret = clean_statedir(options.dry_run, options.all);
 	/* TODO: Also print the bytes removed, need to take into account the hardlinks. */
 	if (options.dry_run) {
-		printf("Would remove %d files.\n", stats.files_removed);
+		print("Would remove %d files.\n", stats.files_removed);
 	} else {
-		printf("%d files removed.\n", stats.files_removed);
+		print("%d files removed.\n", stats.files_removed);
 	}
 
 end:

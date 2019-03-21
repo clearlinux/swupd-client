@@ -32,8 +32,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		Failed to retrieve 10 MoM manifest
-		Unable to download/verify 10 Manifest.MoM
+		Error: Failed to retrieve 10 MoM manifest
+		Error: Unable to download/verify 10 Manifest.MoM
 		Failed to remove 1 of 1 bundles
 	EOM
 	)
@@ -62,7 +62,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.os-core.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		Failed to retrieve 10 os-core manifest
+		Error: Failed to retrieve 10 os-core manifest
 		Error: Cannot load MoM sub-manifests
 		Failed to remove 1 of 1 bundles
 	EOM
@@ -90,7 +90,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		Failed to retrieve 10 test-bundle manifest
+		Error: Failed to retrieve 10 test-bundle manifest
 		Error: Cannot load test-bundle sub-manifest (ret = $SWUPD_RECURSE_MANIFEST)
 		Failed to remove 1 of 1 bundles
 	EOM

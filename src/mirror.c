@@ -35,17 +35,17 @@ static bool unset = false;
 
 static void print_help(void)
 {
-	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd mirror [OPTION...]\n\n");
+	print("Usage:\n");
+	print("   swupd mirror [OPTION...]\n\n");
 
 	//TODO: Add documentation explaining this command
 
 	global_print_help();
 
-	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "   -s, --set               set mirror url\n");
-	fprintf(stderr, "   -u, --unset             unset mirror url\n");
-	fprintf(stderr, "\n");
+	print("Options:\n");
+	print("   -s, --set               set mirror url\n");
+	print("   -u, --unset             unset mirror url\n");
+	print("\n");
 }
 
 static const struct option prog_opts[] = {
@@ -58,14 +58,14 @@ static bool parse_opt(int opt, char *optarg)
 	switch (opt) {
 	case 's':
 		if (unset) {
-			fprintf(stderr, "cannot set and unset at the same time\n");
+			error("cannot set and unset at the same time\n");
 			return false;
 		}
 		set = optarg;
 		return true;
 	case 'u':
 		if (set != NULL) {
-			fprintf(stderr, "cannot set and unset at the same time\n");
+			error("cannot set and unset at the same time\n");
 			return false;
 		}
 		unset = true;
@@ -92,7 +92,7 @@ static bool parse_options(int argc, char **argv)
 	}
 
 	if (argc > ind) {
-		fprintf(stderr, "Error: unexpected arguments\n\n");
+		error("unexpected arguments\n\n");
 		return false;
 	}
 
@@ -137,19 +137,18 @@ static enum swupd_code write_to_path(char *content, char *path)
 	/* attempt to make the directory, ok if already exists */
 	int ret = mkdir(dir, S_IRWXU | S_IRWXG | S_IRWXO);
 	if (ret && EEXIST != errno) {
-		fprintf(stderr, "mkdir\n");
-		perror(dir);
+		error("failed to create directory %s\n", dir);
 		ret = SWUPD_COULDNT_CREATE_DIR;
 		goto out;
 	}
 
 	/* Make sure we have a directory, for better user feedback */
 	if ((ret = stat(dir, &dirstat))) {
-		perror(dir);
+		error("%s: failed to create directory\n", dir);
 		ret = SWUPD_COULDNT_CREATE_DIR;
 		goto out;
 	} else if (!S_ISDIR(dirstat.st_mode)) {
-		fprintf(stderr, "%s: not a directory\n", dir);
+		error("%s: not a directory\n", dir);
 		ret = SWUPD_COULDNT_CREATE_DIR;
 		;
 		goto out;
@@ -159,7 +158,7 @@ static enum swupd_code write_to_path(char *content, char *path)
 	FILE *fp = NULL;
 	fp = fopen(path, "w");
 	if (fp == NULL) {
-		perror(path);
+		error("%s: failed to open file\n", path);
 		ret = SWUPD_COULDNT_WRITE_FILE;
 		goto out;
 	}
@@ -168,13 +167,12 @@ static enum swupd_code write_to_path(char *content, char *path)
 	ret = fputs(content, fp);
 	if (ret < 0 || ret == EOF) {
 		ret = SWUPD_COULDNT_WRITE_FILE;
-		fprintf(stderr, "%s: write failed\n", path);
+		error("%s: write failed\n", path);
 	}
 
 	if ((ret = fclose(fp))) {
 		ret = SWUPD_COULDNT_WRITE_FILE;
-		fprintf(stderr, "fclose\n");
-		perror(path);
+		error("%s: failed to close file\n", path);
 	}
 
 out:
@@ -237,10 +235,10 @@ void handle_mirror_if_stale(void)
 	 * will be used due to the diff being negative. */
 	int diff = central_version - mirror_version;
 	if (diff > MIRROR_STALE_UNSET || mirror_version == -1) {
-		fprintf(stderr, "WARNING: removing stale mirror configuration. "
-				"Mirror version (%d) is too far behind upstream version (%d)\n",
-			mirror_version,
-			central_version);
+		warn("removing stale mirror configuration. "
+		     "Mirror version (%d) is too far behind upstream version (%d)\n",
+		     mirror_version,
+		     central_version);
 		unset_mirror_url();
 		/* we need to re-set the cached_version to latest using the central version,
 		 * since at the moment the cached_version is the outdated mirror version */
@@ -248,9 +246,9 @@ void handle_mirror_if_stale(void)
 		goto out;
 	}
 	if (diff > MIRROR_STALE_WARN) {
-		fprintf(stderr, "WARNING: mirror version (%d) is behind upstream version (%d)\n",
-			mirror_version,
-			central_version);
+		warn("mirror version (%d) is behind upstream version (%d)\n",
+		     mirror_version,
+		     central_version);
 	}
 out:
 	free_string(&fullpath);
@@ -269,20 +267,20 @@ enum swupd_code mirror_main(int argc, char **argv)
 	if (set != NULL) {
 		ret = set_mirror_url(set);
 		if (ret != SWUPD_OK) {
-			fprintf(stderr, "Unable to set mirror url\n");
+			warn("Unable to set mirror url\n");
 		} else {
-			fprintf(stderr, "Set upstream mirror to %s\n", set);
+			print("Set upstream mirror to %s\n", set);
 		}
 	} else if (unset) {
 		ret = unset_mirror_url();
 		if (ret == -ENOENT) {
-			fprintf(stderr, "No mirror url configuration to remove\n");
+			info("No mirror url configuration to remove\n");
 			ret = SWUPD_OK;
 		} else if (ret != 0) {
 			ret = SWUPD_COULDNT_REMOVE_FILE;
-			fprintf(stderr, "Unable to remove mirror configuration\n");
+			warn("Unable to remove mirror configuration\n");
 		} else { /* ret == 0 */
-			fprintf(stderr, "Mirror url configuration removed\n");
+			print("Mirror url configuration removed\n");
 		}
 	}
 

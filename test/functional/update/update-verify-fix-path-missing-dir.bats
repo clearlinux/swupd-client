@@ -23,7 +23,7 @@ test_setup() {
 		Preparing to update from 10 to 100
 		Downloading packs...
 		Extracting test-bundle pack for version 100
-		Couldn.t use delta file .*
+		Warning: Couldn.t use delta file .*
 		Statistics for going from version 10 to version 100:
 		    changed bundles   : 1
 		    new bundles       : 0
@@ -34,7 +34,7 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...
 		Staging file content
-		Update target directory does not exist: .*/target-dir/usr/foo. Trying to fix it
+		Warning: Update target directory does not exist: .*/target-dir/usr/foo. Trying to fix it
 		Path /usr/foo is missing on the file system ... fixing
 		Applying update
 		Update was applied.

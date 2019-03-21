@@ -102,7 +102,7 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 		    is_dir ? "REMOVING DIR %s/\n" : "REMOVING %s\n",
 		    filename);
 		if (remove(temp)) {
-			info("Removing %s failed: %s\n", temp, strerror(errno));
+			error("Removing %s failed: %s\n", temp, strerror(errno));
 			ret = false;
 		}
 		free_string(&temp);

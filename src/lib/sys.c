@@ -19,6 +19,7 @@
 
 #include "sys.h"
 #include "list.h"
+#include "log.h"
 #include "memory.h"
 #include "strings.h"
 
@@ -58,7 +59,7 @@ int run_command_full(const char *stdout_file, const char *stderr_file, const cha
 
 	pid = fork();
 	if (pid < 0) {
-		fprintf(stderr, "run_command %s failed: %i (%s)\n", cmd, errno, strerror(errno));
+		error("run_command %s failed: %i (%s)\n", cmd, errno, strerror(errno));
 		return -errno;
 	}
 
@@ -66,8 +67,8 @@ int run_command_full(const char *stdout_file, const char *stderr_file, const cha
 	if (pid > 0) {
 		while ((ret = waitpid(pid, &child_ret, 0)) < 0) {
 			if (errno != EINTR) {
-				fprintf(stderr, "run_command %s failed: %i (%s)\n",
-					cmd, errno, strerror(errno));
+				error("run_command %s failed: %i (%s)\n",
+				      cmd, errno, strerror(errno));
 				return -errno;
 			}
 		}
@@ -121,7 +122,7 @@ int run_command_full(const char *stdout_file, const char *stderr_file, const cha
 
 	ret = execve(cmd, params, NULL);
 	if (ret < 0) {
-		fprintf(stderr, "run_command %s failed: %i (%s)\n", cmd, errno, strerror(errno));
+		error("run_command %s failed: %i (%s)\n", cmd, errno, strerror(errno));
 	}
 	free(params);
 	free(short_cmd);

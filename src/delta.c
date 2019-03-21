@@ -66,12 +66,12 @@ static void apply_one_delta(char *from_file, char *to_staged, char *delta_file, 
 
 	char hash[SWUPD_HASH_LEN];
 	if (!compute_hash_from_file(to_staged, &hash[0])) {
-		info("Couldn't use delta file %s: hash calculation failed\n", delta_file);
+		warn("Couldn't use delta file %s: hash calculation failed\n", delta_file);
 		(void)remove(to_staged);
 		return;
 	}
 	if (!hash_equal(hash, to_hash)) {
-		info("Couldn't use delta file %s: application resulted in wrong hash\n", delta_file);
+		warn("Couldn't use delta file %s: application resulted in wrong hash\n", delta_file);
 		(void)remove(to_staged);
 	}
 }
@@ -138,7 +138,7 @@ void apply_deltas(struct manifest *current_manifest)
 		char from[SWUPD_HASH_LEN] = { 0 };
 		char to[SWUPD_HASH_LEN] = { 0 };
 		if (!check_delta_filename(delta_name, &from[0], &to[0])) {
-			info("Invalid name for delta file: %s\n", delta_file);
+			warn("Invalid name for delta file: %s\n", delta_file);
 			goto next;
 		}
 
@@ -178,7 +178,7 @@ void apply_deltas(struct manifest *current_manifest)
 		}
 
 		if (!found) {
-			info("Couldn't use delta file %s: ", delta_file);
+			warn("Couldn't use delta file %s: ", delta_file);
 			if (bad_on_sys) {
 				info("'from' file corrupted on system, consider running 'swupd verify --fix'\n");
 			} else {

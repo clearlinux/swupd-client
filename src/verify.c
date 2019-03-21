@@ -71,26 +71,24 @@ static const struct option prog_opts[] = {
 
 static void print_help(void)
 {
-	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd verify [OPTION...]\n\n");
+	print("Usage:\n");
+	print("   swupd verify [OPTION...]\n\n");
 
 	//TODO: Add documentation explaining this command
 
 	global_print_help();
 
-	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "   -m, --manifest=M        Verify against manifest version M\n");
-	fprintf(stderr, "   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files)\n");
-	fprintf(stderr, "   -x, --force             Attempt to proceed even if non-critical errors found\n");
-	fprintf(stderr, "   -Y, --picky             List (without --fix) or remove (with --fix) files which should not exist\n");
-	fprintf(stderr, "   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
-	fprintf(stderr, "   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky.\n");
-	fprintf(stderr, "                           Matched directories get skipped. Example: /var|/etc/machine-id.\n");
-	fprintf(stderr, "                           Default: %s\n", picky_whitelist_default);
-	fprintf(stderr, "   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory\n");
-	fprintf(stderr, "   -q, --quick             Don't compare hashes, only fix missing files\n");
-	fprintf(stderr, "   -B, --bundles=[BUNDLES] Ensure BUNDLES are installed correctly. Example: --bundles=os-core,vi\n");
-	fprintf(stderr, "\n");
+	print("Options:\n");
+	print("   -m, --manifest=M        Verify against manifest version M\n");
+	print("   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files)\n");
+	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
+	print("   -Y, --picky             List (without --fix) or remove (with --fix) files which should not exist\n");
+	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
+	print("   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
+	print("   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory\n");
+	print("   -q, --quick             Don't compare hashes, only fix missing files\n");
+	print("   -B, --bundles=[BUNDLES] Ensure BUNDLES are installed correctly. Example: --bundles=os-core,vi\n");
+	print("\n");
 }
 
 static bool compile_whitelist()
@@ -113,7 +111,7 @@ static bool compile_whitelist()
 		ON_NULL_ABORT(error_buffer);
 
 		regerror(errcode, picky_whitelist, error_buffer, len);
-		fprintf(stderr, "Invalid --picky-whitelist=%s: %s\n", cmdline_option_picky_whitelist, error_buffer);
+		error("Invalid --picky-whitelist=%s: %s\n", cmdline_option_picky_whitelist, error_buffer);
 		goto done;
 	}
 	success = true;
@@ -145,8 +143,7 @@ static int get_all_files(struct manifest *official_manifest, struct list *subs)
 		/* If we hit this point, we know we have a network connection, therefore
 		 * 	the error is server-side. This is also a critical error, so detailed
 		 * 	logging needed */
-		fprintf(stderr, "zero pack downloads failed\n");
-		fprintf(stderr, "Failed - Server-side error, cannot download necessary files\n");
+		error("zero pack downloads failed\n");
 		return -SWUPD_COULDNT_DOWNLOAD_PACK;
 	}
 	return ret;
@@ -166,7 +163,7 @@ static int check_files_hash(struct list *files)
 	unsigned int total = list_len(files);
 	int ret = 1;
 
-	fprintf(stderr, "Verifying files\n");
+	info("Verifying files\n");
 	iter = list_head(files);
 	while (iter) {
 		struct file *f = iter->data;
@@ -190,7 +187,7 @@ static int check_files_hash(struct list *files)
 		}
 	}
 	progress_report(total, total);
-	printf("\n");
+	info("\n");
 
 	return ret;
 }
@@ -210,7 +207,7 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 
 	ret = download_fullfiles(official_manifest->files, NULL);
 	if (ret) {
-		fprintf(stderr, "Error: Unable to download necessary files for this OS release\n");
+		error("Unable to download necessary files for this OS release\n");
 	}
 
 	return ret;
@@ -234,26 +231,27 @@ static void check_warn_freespace(const struct file *file)
 
 	/* If true, skip expensive operations for future file failures, decreasing time to completion. */
 	if (no_freespace_flag) {
-		fprintf(stderr, "\tWarning: No space left on device\n");
+
+		warn("No space left on device\n");
 		goto out;
 	}
 
 	string_or_die(&original, "%s/staged/%s", state_dir, file->hash);
 	fs_free = get_available_space(path_prefix);
 	if (fs_free < 0 || stat(original, &st) != 0) {
-		fprintf(stderr, "\tWarning: Unable to determine free space on filesystem.\n");
+		warn("Unable to determine free space on filesystem.\n");
 		goto out;
 	}
 
 	if (fs_free < st.st_size * 1.1) {
-		fprintf(stderr, "\tWarning: File to install (%s) too large by %ldK.\n",
-			file->filename, (st.st_size - fs_free) / 1000);
+		warn("File to install (%s) too large by %ldK.\n",
+		     file->filename, (st.st_size - fs_free) / 1000);
 		/* set flag to skip checking space on the second failure, assume we're still out of space */
 		no_freespace_flag = true;
 	}
 
 out:
-	fprintf(stderr, "\tContinuing operation...\n");
+	info("\tContinuing operation...\n");
 	free_string(&original);
 }
 
@@ -296,7 +294,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 			counts.missing++;
 			if (!repair || (repair && cmdline_option_install == false)) {
 				/* Log to stdout, so we can post-process */
-				printf("\nMissing file: %s\n", fullname);
+				info("\nMissing file: %s\n", fullname);
 			}
 		} else {
 			free_string(&fullname);
@@ -323,7 +321,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 		}
 		if ((ret != 0) || hash_needs_work(file, local.hash)) {
 			counts.not_replaced++;
-			printf("\n\tnot fixed\n");
+			info("\n\tnot fixed\n");
 
 			check_warn_freespace(file);
 
@@ -331,7 +329,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 			counts.replaced++;
 			file->do_not_update = 1;
 			if (cmdline_option_install == false) {
-				printf("\n\tfixed\n");
+				info("\n\tfixed\n");
 			}
 		}
 	out:
@@ -339,7 +337,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 		progress_report(complete, list_length);
 	}
 	progress_report(list_length, list_length);
-	printf("\n");
+	info("\n");
 }
 
 static void check_and_fix_one(struct file *file, struct manifest *official_manifest, bool repair)
@@ -362,7 +360,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	if (access(fullname, F_OK) == 0) {
 		counts.mismatch++;
 		/* Log to stdout, so we can post-process it */
-		printf("\nHash mismatch for file: %s\n", fullname);
+		info("\nHash mismatch for file: %s\n", fullname);
 	}
 
 	/* if not repairing, we're done */
@@ -379,10 +377,10 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	/* at the end of all this, verify the hash again to judge success */
 	if (verify_file(file, fullname)) {
 		counts.fixed++;
-		printf("\tfixed\n");
+		info("\tfixed\n");
 	} else {
 		counts.not_fixed++;
-		printf("\tnot fixed\n");
+		info("\tnot fixed\n");
 	}
 end:
 	free_string(&fullname);
@@ -408,7 +406,7 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 		check_and_fix_one(file, official_manifest, repair);
 		progress_report(complete, list_length);
 	}
-	printf("\n"); /* Finish update progress message */
+	info("\n"); /* Finish update progress message */
 }
 
 static void remove_orphaned_files(struct manifest *official_manifest, bool repair)
@@ -460,7 +458,7 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 		}
 
 		counts.extraneous++;
-		printf("File that should be deleted: %s\n", fullname);
+		info("File that should be deleted: %s\n", fullname);
 
 		/* if not repairing, we're done */
 		if (!repair) {
@@ -473,10 +471,10 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 		if (!S_ISDIR(sb.st_mode)) {
 			ret = unlinkat(fd, base, 0);
 			if (ret && errno != ENOENT) {
-				fprintf(stderr, "Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));
+				warn("Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));
 				counts.not_deleted++;
 			} else {
-				fprintf(stderr, "\tdeleted\n");
+				info("\tdeleted\n");
 				counts.deleted++;
 			}
 		} else {
@@ -484,14 +482,14 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 			if (ret) {
 				counts.not_deleted++;
 				if (errno != ENOTEMPTY) {
-					fprintf(stderr, "Failed to remove empty folder %s (%i: %s)\n",
-						fullname, errno, strerror(errno));
+					warn("Failed to remove empty folder %s (%i: %s)\n",
+					     fullname, errno, strerror(errno));
 				} else {
 					//FIXME: Add force removal option?
-					fprintf(stderr, "Couldn't remove directory containing untracked files: %s\n", fullname);
+					warn("Couldn't remove directory containing untracked files: %s\n", fullname);
 				}
 			} else {
-				fprintf(stderr, "\tdeleted\n");
+				info("\tdeleted\n");
 				counts.deleted++;
 			}
 		}
@@ -514,7 +512,7 @@ static bool parse_opt(int opt, char *optarg)
 
 		err = strtoi_err(optarg, &version);
 		if (err < 0 || version < 0) {
-			fprintf(stderr, "Invalid --manifest argument: %s\n\n", optarg);
+			error("Invalid --manifest argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;
@@ -536,7 +534,7 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case 'X':
 		if (optarg[0] != '/') {
-			fprintf(stderr, "--picky-tree must be an absolute path, for example /usr\n\n");
+			error("--picky-tree must be an absolute path, for example /usr\n\n");
 			return false;
 		}
 		cmdline_option_picky_tree = optarg;
@@ -553,7 +551,7 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		free(arg_copy);
 		if (!cmdline_bundles) {
-			fprintf(stderr, "Missing --bundle argument\n\n");
+			error("Missing --bundle argument\n\n");
 			return false;
 		}
 		return true;
@@ -580,25 +578,25 @@ static bool parse_options(int argc, char **argv)
 	}
 
 	if (argc > ind) {
-		fprintf(stderr, "Error: unexpected arguments\n\n");
+		error("unexpected arguments\n\n");
 		return false;
 	}
 
 	if (cmdline_option_install) {
 		if (version == 0) {
-			fprintf(stderr, "--install option requires -m version option\n");
+			error("--install option requires -m version option\n");
 			return false;
 		}
 		if (path_prefix == NULL) {
-			fprintf(stderr, "--install option requires --path option\n");
+			error("--install option requires --path option\n");
 			return false;
 		}
 		if (cmdline_option_fix) {
-			fprintf(stderr, "--install and --fix options are mutually exclusive\n");
+			error("--install and --fix options are mutually exclusive\n");
 			return false;
 		}
 	} else if (version == -1) {
-		fprintf(stderr, "-m latest only supported with --install\n");
+		error("-m latest only supported with --install\n");
 		return false;
 	}
 	if (!compile_whitelist()) {
@@ -633,7 +631,7 @@ enum swupd_code verify_main(int argc, char **argv)
 
 	ret = swupd_init();
 	if (ret != 0) {
-		fprintf(stderr, "Failed verify initialization, exiting now.\n");
+		error("Failed verify initialization, exiting now.\n");
 		goto clean_args_and_exit;
 	}
 
@@ -641,7 +639,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	int sys_version = get_current_version(path_prefix);
 	if (!version) {
 		if (sys_version < 0) {
-			fprintf(stderr, "Error: Unable to determine current OS version\n");
+			error("Unable to determine current OS version\n");
 			ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 			goto clean_and_exit;
 		}
@@ -652,13 +650,13 @@ enum swupd_code verify_main(int argc, char **argv)
 	if (version == -1) {
 		version = get_latest_version(NULL);
 		if (version < 0) {
-			fprintf(stderr, "Unable to get latest version for install\n");
+			error("Unable to get latest version for install\n");
 			ret = SWUPD_SERVER_CONNECTION_ERROR;
 			goto clean_and_exit;
 		}
 	}
 
-	fprintf(stderr, "Verifying version %i\n", version);
+	info("Verifying version %i\n", version);
 
 	if (cmdline_bundles) {
 		while (cmdline_bundles) {
@@ -677,7 +675,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	ret = rm_staging_dir_contents("download");
 	if (ret != 0) {
 		ret = SWUPD_COULDNT_REMOVE_FILE;
-		fprintf(stderr, "Failed to remove prior downloads, carrying on anyway\n");
+		warn("Failed to remove prior downloads, carrying on anyway\n");
 	}
 
 	timelist_timer_start(global_times, "Load and recurse Manifests");
@@ -697,7 +695,7 @@ enum swupd_code verify_main(int argc, char **argv)
 		 * is not available, or if there is a server error and a manifest is
 		 * not provided.
 		 */
-		fprintf(stderr, "Unable to download/verify %d Manifest.MoM\n", version);
+		error("Unable to download/verify %d Manifest.MoM\n", version);
 		ret = SWUPD_COULDNT_LOAD_MOM;
 
 		/* No repair is possible without a manifest, nor is accurate reporting
@@ -708,15 +706,15 @@ enum swupd_code verify_main(int argc, char **argv)
 
 	if (!is_compatible_format(official_manifest->manifest_version)) {
 		if (cmdline_option_force) {
-			fprintf(stderr, "WARNING: the force option is specified; ignoring"
-					" format mismatch for verify\n");
+			warn("the force option is specified; ignoring"
+			     " format mismatch for verify\n");
 		} else {
-			fprintf(stderr, "ERROR: Mismatching formats detected when verifying %d"
-					" (expected: %s; actual: %d)\n",
-				version, format_string, official_manifest->manifest_version);
+			error("Mismatching formats detected when verifying %d"
+			      " (expected: %s; actual: %d)\n",
+			      version, format_string, official_manifest->manifest_version);
 			int latest = get_latest_version(NULL);
 			if (latest > 0) {
-				fprintf(stderr, "Latest supported version to verify: %d\n", latest);
+				info("Latest supported version to verify: %d\n", latest);
 			}
 			ret = SWUPD_COULDNT_LOAD_MANIFEST;
 			goto clean_and_exit;
@@ -729,11 +727,11 @@ enum swupd_code verify_main(int argc, char **argv)
 	 * specify --force or --picky. */
 	if (cmdline_option_fix && !is_current_version(version)) {
 		if (cmdline_option_picky || cmdline_option_force) {
-			fprintf(stderr, "WARNING: the force or picky option is specified; "
-					"ignoring version mismatch for verify --fix\n");
+			warn("the force or picky option is specified; "
+			     "ignoring version mismatch for verify --fix\n");
 		} else {
-			fprintf(stderr, "ERROR: Fixing to a different version requires "
-					"--force or --picky\n");
+			error("Fixing to a different version requires "
+			      "--force or --picky\n");
 			ret = SWUPD_INVALID_OPTION;
 			goto clean_and_exit;
 		}
@@ -746,19 +744,19 @@ enum swupd_code verify_main(int argc, char **argv)
 		if (ret == -add_sub_BADNAME) {
 			if (cmdline_option_force) {
 				if (cmdline_option_picky && cmdline_option_fix) {
-					fprintf(stderr, "WARNING: One or more installed bundles that are not "
-							"available at version %d will be removed.\n",
-						version);
+					warn("One or more installed bundles that are not "
+					     "available at version %d will be removed.\n",
+					     version);
 				} else if (cmdline_option_picky && !cmdline_option_fix) {
-					fprintf(stderr, "WARNING: One or more installed bundles are not "
-							"available at version %d.\n",
-						version);
+					warn("One or more installed bundles are not "
+					     "available at version %d.\n",
+					     version);
 				}
 				ret = SWUPD_OK;
 			} else {
-				fprintf(stderr, "Unable to verify, one or more currently installed bundles "
-						"are not available at version %d. Use --force to override.\n",
-					version);
+				error("Unable to verify, one or more currently installed bundles "
+				      "are not available at version %d. Use --force to override.\n",
+				      version);
 				ret = SWUPD_INVALID_BUNDLE;
 				goto clean_and_exit;
 			}
@@ -771,7 +769,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	set_subscription_versions(official_manifest, NULL, &subs);
 	official_manifest->submanifests = recurse_manifest(official_manifest, subs, NULL, false, NULL);
 	if (!official_manifest->submanifests) {
-		fprintf(stderr, "Error: Cannot load MoM sub-manifests\n");
+		error("Cannot load MoM sub-manifests\n");
 		ret = SWUPD_RECURSE_MANIFEST;
 		goto clean_and_exit;
 	}
@@ -820,7 +818,7 @@ enum swupd_code verify_main(int argc, char **argv)
 		bool repair = true;
 
 		timelist_timer_start(global_times, "Add missing files");
-		fprintf(stderr, "Adding any missing files\n");
+		info("Adding any missing files\n");
 		add_missing_files(official_manifest, repair);
 		timelist_timer_stop(global_times);
 	}
@@ -834,7 +832,7 @@ enum swupd_code verify_main(int argc, char **argv)
 		bool repair = true;
 
 		timelist_timer_start(global_times, "Fixing modified files");
-		fprintf(stderr, "Fixing modified files\n");
+		info("Fixing modified files\n");
 		deal_with_hash_mismatches(official_manifest, repair);
 
 		/* removing files could be risky, so only do it if the
@@ -844,20 +842,20 @@ enum swupd_code verify_main(int argc, char **argv)
 		}
 		if (cmdline_option_picky) {
 			char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
-			fprintf(stderr, "--picky removing extra files under %s\n", start);
+			info("--picky removing extra files under %s\n", start);
 			ret = walk_tree(official_manifest, start, true, picky_whitelist, &counts);
 			free_string(&start);
 		}
 		timelist_timer_stop(global_times);
 	} else if (cmdline_option_picky) {
 		char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
-		fprintf(stderr, "Generating list of extra files under %s\n", start);
+		info("Generating list of extra files under %s\n", start);
 		ret = walk_tree(official_manifest, start, false, picky_whitelist, &counts);
 		free_string(&start);
 	} else {
 		bool repair = false;
 
-		fprintf(stderr, "Verifying files\n");
+		info("Verifying files\n");
 		add_missing_files(official_manifest, repair);
 		/* quick only checks for missing files, so it is done here */
 		if (!cmdline_option_quick) {
@@ -874,29 +872,29 @@ brick_the_system_and_clean_curl:
 	 */
 
 	/* report a summary of what we managed to do and not do */
-	fprintf(stderr, "Inspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
+	info("Inspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
 
 	if (counts.missing) {
-		fprintf(stderr, "  %i file%s %s missing\n", counts.missing, (counts.missing > 1 ? "s" : ""), (counts.missing > 1 ? "were" : "was"));
+		print("  %i file%s %s missing\n", counts.missing, (counts.missing > 1 ? "s" : ""), (counts.missing > 1 ? "were" : "was"));
 		if (cmdline_option_fix || cmdline_option_install) {
-			fprintf(stderr, "    %i of %i missing files were replaced\n", counts.replaced, counts.missing);
-			fprintf(stderr, "    %i of %i missing files were not replaced\n", counts.not_replaced, counts.missing);
+			info("    %i of %i missing files were replaced\n", counts.replaced, counts.missing);
+			info("    %i of %i missing files were not replaced\n", counts.not_replaced, counts.missing);
 		}
 	}
 
 	if (counts.mismatch) {
-		fprintf(stderr, "  %i file%s did not match\n", counts.mismatch, (counts.mismatch > 1 ? "s" : ""));
+		print("  %i file%s did not match\n", counts.mismatch, (counts.mismatch > 1 ? "s" : ""));
 		if (cmdline_option_fix) {
-			fprintf(stderr, "    %i of %i files were fixed\n", counts.fixed, counts.mismatch);
-			fprintf(stderr, "    %i of %i files were not fixed\n", counts.not_fixed, counts.mismatch);
+			info("    %i of %i files were fixed\n", counts.fixed, counts.mismatch);
+			info("    %i of %i files were not fixed\n", counts.not_fixed, counts.mismatch);
 		}
 	}
 
 	if (counts.extraneous) {
-		fprintf(stderr, "  %i file%s found which should be deleted\n", counts.extraneous, (counts.extraneous > 1 ? "s" : ""));
+		print("  %i file%s found which should be deleted\n", counts.extraneous, (counts.extraneous > 1 ? "s" : ""));
 		if (cmdline_option_fix) {
-			fprintf(stderr, "    %i of %i files were deleted\n", counts.deleted, counts.extraneous);
-			fprintf(stderr, "    %i of %i files were not deleted\n", counts.not_deleted, counts.extraneous);
+			info("    %i of %i files were deleted\n", counts.deleted, counts.extraneous);
+			info("    %i of %i files were not deleted\n", counts.not_deleted, counts.extraneous);
 		}
 	}
 
@@ -959,17 +957,17 @@ clean_and_exit:
 		  total_curl_sz);
 	if (ret == SWUPD_OK) {
 		if (cmdline_option_fix || cmdline_option_install) {
-			fprintf(stderr, "Fix successful\n");
+			print("Fix successful\n");
 		} else {
 			/* This is just a verification */
-			fprintf(stderr, "Verify successful\n");
+			print("Verify successful\n");
 		}
 	} else {
 		if (cmdline_option_fix || cmdline_option_install) {
-			fprintf(stderr, "Error: Fix did not fully succeed\n");
+			print("Fix did not fully succeed\n");
 		} else {
 			/* This is just a verification */
-			fprintf(stderr, "Error: Verify did not fully succeed\n");
+			print("Verify did not fully succeed\n");
 		}
 	}
 

@@ -79,7 +79,7 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Failed to retrieve 10 MoM manifest
+		Error: Failed to retrieve 10 MoM manifest
 		Warning: Could not determine which installed bundles are experimental
 		os-core
 		test-bundle1

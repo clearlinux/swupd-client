@@ -35,7 +35,7 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.
-		WARNING: mirror version (20) is behind upstream version (100)
+		Warning: mirror version (20) is behind upstream version (100)
 		Preparing to update from 10 to 20
 		Downloading packs...
 		Extracting test-bundle1 pack for version 20

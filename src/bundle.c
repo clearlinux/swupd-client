@@ -69,7 +69,7 @@ enum swupd_code list_installable_bundles()
 		file = list->data;
 		list = list->next;
 		name = get_printable_bundle_name(file->filename, file->is_experimental);
-		info("%s\n", name);
+		print("%s\n", name);
 		free_string(&name);
 	}
 
@@ -210,7 +210,7 @@ enum swupd_code show_included_bundles(char *bundle_name)
 
 	mom = load_mom(current_version, false, false, NULL);
 	if (!mom) {
-		info("Cannot load official manifest MoM for version %i\n", current_version);
+		error("Cannot load official manifest MoM for version %i\n", current_version);
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto out;
 	}
@@ -265,7 +265,7 @@ enum swupd_code show_included_bundles(char *bundle_name)
 			continue;
 		}
 
-		info("%s\n", included_bundle->component);
+		print("%s\n", included_bundle->component);
 	}
 
 	ret = SWUPD_OK;
@@ -295,7 +295,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 	struct list *reqd_by = NULL;
 
 	if (!server && !is_installed_bundle(bundle_name)) {
-		error("Bundle \"%s\" does not seem to be installed\n", bundle_name);
+		info("Bundle \"%s\" does not seem to be installed\n", bundle_name);
 		info("       try passing --all to check uninstalled bundles\n");
 		ret = SWUPD_BUNDLE_NOT_TRACKED;
 		goto out;
@@ -310,13 +310,13 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 
 	current_manifest = load_mom(version, server, false, NULL);
 	if (!current_manifest) {
-		info("Unable to download/verify %d Manifest.MoM\n", version);
+		error("Unable to download/verify %d Manifest.MoM\n", version);
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto out;
 	}
 
 	if (!search_bundle_in_manifest(current_manifest, bundle_name)) {
-		info("Bundle name %s is invalid, aborting dependency list\n", bundle_name);
+		error("Bundle name %s is invalid, aborting dependency list\n", bundle_name);
 		ret = SWUPD_INVALID_BUNDLE;
 		goto out;
 	}
@@ -324,7 +324,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 	if (server) {
 		ret = add_included_manifests(current_manifest, &subs);
 		if (ret) {
-			info("Unable to load server manifest");
+			error("Unable to load server manifest");
 			ret = SWUPD_COULDNT_LOAD_MANIFEST;
 			goto out;
 		}
@@ -335,7 +335,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 		/* now popout the one to be processed */
 		ret = unload_tracked_bundle(bundle_name, &subs);
 		if (ret != 0) {
-			info("Unable to untrack %s\n", bundle_name);
+			error("Unable to untrack %s\n", bundle_name);
 			goto out;
 		}
 	}
@@ -357,6 +357,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 
 	info(server ? "All installable and installed " : "Installed ");
 	info("bundles that have %s as a dependency:\n", bundle_name);
+	info("\n");
 	info("format:\n");
 	info(" # * is-required-by\n");
 	info(" #   |-- is-required-by\n");
@@ -368,7 +369,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 	while (iter) {
 		bundle = iter->data;
 		iter = iter->next;
-		info("%s", bundle);
+		print("%s", bundle);
 		free_string(&bundle);
 	}
 
@@ -380,7 +381,7 @@ out:
 	}
 
 	if (ret) {
-		error("Bundle list failed\n");
+		print("Bundle list failed\n");
 	}
 
 	if (reqd_by) {
@@ -509,7 +510,7 @@ enum swupd_code remove_bundles(char **bundles)
 
 	ret = swupd_init();
 	if (ret != 0) {
-		info("Failed updater initialization, exiting now.\n");
+		error("Failed updater initialization, exiting now.\n");
 		return ret;
 	}
 
@@ -565,14 +566,14 @@ enum swupd_code remove_bundles(char **bundles)
 
 		current_mom = load_mom(current_version, false, mix_exists, NULL);
 		if (!current_mom) {
-			info("Unable to download/verify %d Manifest.MoM\n", current_version);
+			error("Unable to download/verify %d Manifest.MoM\n", current_version);
 			ret = SWUPD_COULDNT_LOAD_MOM;
 			bad++;
 			goto out_free_curl;
 		}
 
 		if (!search_bundle_in_manifest(current_mom, bundle)) {
-			info("Bundle name is invalid, aborting removal\n");
+			error("Bundle name is invalid, aborting removal\n");
 			ret = SWUPD_INVALID_BUNDLE;
 			bad++;
 			goto out_free_mom;
@@ -663,9 +664,9 @@ enum swupd_code remove_bundles(char **bundles)
 	}
 
 	if (bad > 0) {
-		info("Failed to remove %i of %i bundles\n", bad, total);
+		print("Failed to remove %i of %i bundles\n", bad, total);
 	} else {
-		info("Successfully removed %i bundle%s\n", total, (total > 1 ? "s" : ""));
+		print("Successfully removed %i bundle%s\n", total, (total > 1 ? "s" : ""));
 	}
 
 	free_subscriptions(&subs);
@@ -714,7 +715,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 
 		manifest = load_manifest(file->last_change, file, mom, true, &manifest_err);
 		if (!manifest) {
-			info("Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
+			error("Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
 			ret |= add_sub_ERR;
 			goto out;
 		}
@@ -1051,12 +1052,12 @@ out:
 		bundles_failed = bundles_requested - bundles_installed - already_installed;
 	}
 	if (bundles_failed > 0) {
-		info("Failed to install %i of %i bundles\n", bundles_failed, bundles_requested - already_installed);
+		print("Failed to install %i of %i bundles\n", bundles_failed, bundles_requested - already_installed);
 	} else if (bundles_installed) {
-		info("Successfully installed %i bundle%s\n", bundles_installed, (bundles_installed > 1 ? "s" : ""));
+		print("Successfully installed %i bundle%s\n", bundles_installed, (bundles_installed > 1 ? "s" : ""));
 	}
 	if (already_installed) {
-		info("%i bundle%s already installed\n", already_installed, (already_installed > 1 ? "s were" : " was"));
+		print("%i bundle%s already installed\n", already_installed, (already_installed > 1 ? "s were" : " was"));
 	}
 
 	if (to_install_files) {
@@ -1090,7 +1091,7 @@ enum swupd_code install_bundles_frontend(char **bundles)
 	/* initialize swupd and get current version from OS */
 	ret = swupd_init();
 	if (ret != 0) {
-		info("Failed updater initialization, exiting now.\n");
+		error("Failed updater initialization, exiting now.\n");
 		return ret;
 	}
 
@@ -1105,7 +1106,7 @@ enum swupd_code install_bundles_frontend(char **bundles)
 
 	mom = load_mom(current_version, false, mix_exists, NULL);
 	if (!mom) {
-		info("Cannot load official manifest MoM for version %i\n", current_version);
+		error("Cannot load official manifest MoM for version %i\n", current_version);
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto clean_and_exit;
 	}
@@ -1186,7 +1187,7 @@ skip_mom:
 	errno = 0;
 	bundles = get_dir_files_sorted(path);
 	if (!bundles && errno) {
-		perror("couldn't open bundles directory");
+		error("couldn't open bundles directory");
 		free_string(&path);
 		return SWUPD_COULDNT_LIST_DIR;
 	}
@@ -1202,7 +1203,7 @@ skip_mom:
 		} else {
 			string_or_die(&name, basename((char *)item->data));
 		}
-		info("%s\n", name);
+		print("%s\n", name);
 		free_string(&name);
 		free(item->data);
 		item = item->next;

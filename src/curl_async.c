@@ -170,7 +170,7 @@ static void reevaluate_number_of_parallel_downloads(struct swupd_curl_parallel_h
 	// So stop downloading in parallel if the connection is bad
 	h->max_xfer = 1;
 
-	print("Curl - Reducing number of parallel downloads to %ld\n", h->max_xfer);
+	info("Curl - Reducing number of parallel downloads to %ld\n", h->max_xfer);
 }
 
 void *swupd_curl_parallel_download_start(size_t max_xfer)
@@ -426,7 +426,7 @@ static int process_download(struct swupd_curl_parallel_handle *h, struct multi_c
 	file->curl = curl;
 
 	if (file->retries > 0 && !h->resume_failed && lstat(file->file.path, &stat) == 0) {
-		print("Curl - Resuming download for '%s'\n", file->url);
+		info("Curl - Resuming download for '%s'\n", file->url);
 		curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
 		if (curl_ret != CURLE_OK) {
 			goto out_bad;
@@ -561,7 +561,7 @@ int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
 				// Retry was probably scheduled because of network problems, so
 				// reevaluate the number of parallel downloads
 				reevaluate_number_of_parallel_downloads(h, file->retries);
-				print("Curl - Starting download retry #%d for %s\n", file->retries, file->url);
+				info("Curl - Starting download retry #%d for %s\n", file->retries, file->url);
 				process_download(h, file);
 				retry = true;
 				continue;

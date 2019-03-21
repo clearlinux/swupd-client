@@ -25,13 +25,12 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Downloading packs...
-		zero pack downloads failed
-		Failed - Server-side error, cannot download necessary files
+		Error: zero pack downloads failed
 		Verifying files
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...
 		Error: Unable to download necessary files for this OS release
-		Error: Fix did not fully succeed
+		Fix did not fully succeed
 	EOM
 	)
 	assert_is_output "$expected_output"

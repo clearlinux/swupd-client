@@ -49,7 +49,7 @@ test_setup() {
 		Extracting test-bundle2 pack for version 100
 		Extracting test-bundle7 pack for version 100
 		Extracting test-bundle1 pack for version 100
-		Couldn.t use delta file .* no .from. file to apply was found
+		Warning: Couldn.t use delta file .* no .from. file to apply was found
 		Statistics for going from version 10 to version 100:
 		    changed bundles   : 1
 		    new bundles       : 6

@@ -66,7 +66,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 	err = strtoi_err(c, &manifest_enc_version);
 
 	if (manifest_enc_version <= 0 || err != 0) {
-		fprintf(stderr, "Error: Loaded incompatible manifest version\n");
+		error("Loaded incompatible manifest version\n");
 		goto err_close;
 	}
 
@@ -115,11 +115,11 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 				 * than about 6,000,000, but close to infinity
 				 * for systems with 64 bit size_t.
 				 */
-				fprintf(stderr, "Error: preposterous (%llu) number of files in %s Manifest, more than 4 million skipping\n",
-					filecount, component);
+				error("Preposterous (%llu) number of files in %s Manifest, more than 4 million skipping\n",
+				      filecount, component);
 				goto err_close;
 			} else if (errno != 0) {
-				fprintf(stderr, "Error: Loaded incompatible manifest filecount\n");
+				error("Loaded incompatible manifest filecount\n");
 				goto err_close;
 			}
 		}
@@ -127,11 +127,11 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			errno = 0;
 			contentsize = strtoull(c, NULL, 10);
 			if (contentsize > 2000000000000UL) {
-				fprintf(stderr, "Error: preposterous (%llu) size of files in %s Manifest, more than 2TB skipping\n",
-					contentsize, component);
+				error("Preposterous (%llu) size of files in %s Manifest, more than 2TB skipping\n",
+				      contentsize, component);
 				goto err_close;
 			} else if (errno != 0) {
-				fprintf(stderr, "Error: Loaded incompatible manifest contentsize\n");
+				error("Loaded incompatible manifest contentsize\n");
 				goto err_close;
 			}
 		}
@@ -262,7 +262,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 
 		err = strtoi_err(c, &file->last_change);
 		if (file->last_change <= 0 || err != 0) {
-			fprintf(stderr, "Error: Loaded incompatible manifest last change\n");
+			error("Loaded incompatible manifest last change\n");
 			free(file);
 			goto err;
 		}

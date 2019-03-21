@@ -27,6 +27,12 @@
 
 #define MANIFEST_LINE_MAXLEN (PATH_MAX * 2)
 
+// strncmp helper to be used with consts
+#define strlen_const(_const) sizeof(_const) - 1
+#define strncmp_const(_str, _const) strncmp(_str, _const, strlen_const(_const))
+
+#define MANIFEST_HEADER "MANIFEST\t"
+
 struct manifest *manifest_parse(const char *component, const char *filename, bool header_only)
 {
 	FILE *infile;
@@ -52,11 +58,11 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 		goto err_close;
 	}
 
-	if (strncmp(line, "MANIFEST\t", 9) != 0) {
+	if (strncmp_const(line, MANIFEST_HEADER) != 0) {
 		goto err_close;
 	}
 
-	c = &line[9];
+	c = line + strlen_const(MANIFEST_HEADER);
 	err = strtoi_err(c, &manifest_enc_version);
 
 	if (manifest_enc_version <= 0 || err != 0) {
@@ -65,7 +71,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 	}
 
 	line[0] = 0;
-	while (strcmp(line, "\n") != 0) {
+	while (strncmp_const(line, "\n") != 0) {
 		/* read the header */
 		line[0] = 0;
 		if (fgets(line, MANIFEST_LINE_MAXLEN, infile) == NULL) {
@@ -88,14 +94,14 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			goto err_close;
 		}
 
-		if (strncmp(line, "version:", 8) == 0) {
+		if (strncmp_const(line, "version:") == 0) {
 			err = strtoi_err(c, &manifest_hdr_version);
 			if (err != 0) {
 				error("Invalid manifest version on %s\n", filename);
 				goto err_close;
 			}
 		}
-		if (strncmp(line, "filecount:", 10) == 0) {
+		if (strncmp_const(line, "filecount:") == 0) {
 			errno = 0;
 			filecount = strtoull(c, NULL, 10);
 			if (filecount > 4000000) {
@@ -117,7 +123,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 				goto err_close;
 			}
 		}
-		if (strncmp(line, "contentsize:", 12) == 0) {
+		if (strncmp_const(line, "contentsize:") == 0) {
 			errno = 0;
 			contentsize = strtoull(c, NULL, 10);
 			if (contentsize > 2000000000000UL) {
@@ -130,7 +136,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			}
 		}
 
-		if (strncmp(line, "includes:", 9) == 0) {
+		if (strncmp_const(line, "includes:") == 0) {
 			includes = list_prepend_data(includes, strdup_or_die(c));
 		}
 	}

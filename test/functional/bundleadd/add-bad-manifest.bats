@@ -19,9 +19,9 @@ test_setup() {
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
-		Error: preposterous (9000000) number of files in test-bundle Manifest, more than 4 million skipping
+		Error: Preposterous (9000000) number of files in test-bundle Manifest, more than 4 million skipping
 		Warning: Removing corrupt Manifest.test-bundle artifacts and re-downloading...
-		Error: preposterous (9000000) number of files in test-bundle Manifest, more than 4 million skipping
+		Error: Preposterous (9000000) number of files in test-bundle Manifest, more than 4 million skipping
 		Error: Failed to load 10 test-bundle manifest
 		Error: Unable to download manifest test-bundle version 10, exiting now
 		Failed to install 1 of 1 bundles

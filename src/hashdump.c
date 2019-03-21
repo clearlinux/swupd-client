@@ -33,26 +33,29 @@
 /* outputs the hash of a file */
 
 static bool use_prefix = false;
+static int log_level = LOG_INFO;
 
 static struct option opts[] = {
 	{ "no-xattrs", 0, NULL, 'n' },
 	{ "path", 1, NULL, 'p' },
 	{ "help", 0, NULL, 'h' },
+	{ "quiet", no_argument, &log_level, LOG_ERROR },
+	{ "debug", no_argument, &log_level, LOG_DEBUG },
 	{ 0, 0, NULL, 0 }
 };
 
 static void usage(const char *name)
 {
-	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd %s [OPTION...] filename\n\n", basename((char *)name));
-	fprintf(stderr, "Help Options:\n");
-	fprintf(stderr, "   -h, --help              Show help options\n\n");
-	fprintf(stderr, "Application Options:\n");
-	fprintf(stderr, "   -n, --no-xattrs         Ignore extended attributes\n");
-	fprintf(stderr, "   -p, --path=[PATH...]    Use [PATH...] for leading path to filename\n");
-	fprintf(stderr, "\n");
-	fprintf(stderr, "The filename is the name of a file on the filesystem.\n");
-	fprintf(stderr, "\n");
+	print("Usage:\n");
+	print("   swupd %s [OPTION...] filename\n\n", basename((char *)name));
+	print("Help Options:\n");
+	print("   -h, --help              Show help options\n\n");
+	print("Application Options:\n");
+	print("   -n, --no-xattrs         Ignore extended attributes\n");
+	print("   -p, --path=[PATH...]    Use [PATH...] for leading path to filename\n");
+	print("\n");
+	print("The filename is the name of a file on the filesystem.\n");
+	print("\n");
 }
 
 enum swupd_code hashdump_main(int argc, char **argv)
@@ -71,13 +74,20 @@ enum swupd_code hashdump_main(int argc, char **argv)
 			break;
 		}
 
+		/* if an option that doesn't have a short option like --quiet or --debug
+		 * was selected getopt_long returns 0 */
+		if (c == 0) {
+			set_log_level(log_level);
+			continue;
+		}
+
 		switch (c) {
 		case 'n':
 			file.use_xattrs = false;
 			break;
 		case 'p':
 			if (!set_path_prefix(optarg)) {
-				fprintf(stderr, "Invalid --path/-p argument\n\n");
+				error("Invalid --path/-p argument\n\n");
 				return SWUPD_INVALID_OPTION;
 			}
 			use_prefix = true;
@@ -108,18 +118,18 @@ enum swupd_code hashdump_main(int argc, char **argv)
 		fullname = strdup_or_die(file.filename);
 	}
 
-	fprintf(stderr, "Calculating hash %s xattrs for: %s\n",
-		(file.use_xattrs ? "with" : "without"), fullname);
+	info("Calculating hash %s xattrs for: %s\n",
+	     (file.use_xattrs ? "with" : "without"), fullname);
 
 	populate_file_struct(&file, fullname);
 	ret = compute_hash(&file, fullname);
 	if (ret != 0) {
-		fprintf(stderr, "compute_hash() failed\n");
+		warn("compute_hash() failed\n");
 	} else {
-		printf("%s\n", file.hash);
+		print("%s\n", file.hash);
 		if (file.is_dir && is_directory_mounted(fullname)) {
-			fprintf(stderr, "!! dumped hash might not match a manifest "
-					"hash because a mount is active\n");
+			warn("!! dumped hash might not match a manifest "
+			     "hash because a mount is active\n");
 		}
 	}
 

@@ -189,9 +189,6 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			/* ignore this file for future iterative manifest feature */
 			free(file);
 			continue;
-		} else if (line[0] != '.') { /* unknown file type */
-			free(file);
-			goto err_close;
 		}
 
 		if (line[1] == 'd') {
@@ -203,9 +200,6 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			deleted++;
 		} else if (line[1] == 'e') {
 			file->is_experimental = 1;
-		} else if (line[1] != '.') { /* unknown modifier #1 */
-			free(file);
-			goto err_close;
 		}
 
 		if (line[2] == 'C') {
@@ -214,9 +208,6 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			file->is_state = 1;
 		} else if (line[2] == 'b') {
 			file->is_boot = 1;
-		} else if (line[2] != '.') { /* unknown modifier #2 */
-			free(file);
-			goto err_close;
 		}
 
 		if (line[3] == 'r') {
@@ -224,9 +215,6 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 		} else if (line[3] == 'm') {
 			file->is_mix = 1;
 			manifest->is_mix = 1;
-		} else if (line[3] != '.') { /* unknown modifier #3 */
-			free(file);
-			goto err_close;
 		}
 
 		c2 = strchr(c, '\t');

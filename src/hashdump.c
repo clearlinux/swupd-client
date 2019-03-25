@@ -77,7 +77,7 @@ enum swupd_code hashdump_main(int argc, char **argv)
 		/* if an option that doesn't have a short option like --quiet or --debug
 		 * was selected getopt_long returns 0 */
 		if (c == 0) {
-			set_log_level(log_level);
+			log_set_level(log_level);
 			continue;
 		}
 

@@ -32,11 +32,11 @@ void print_update_conf_info()
 
 static void print_help(void)
 {
-	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd info [OPTION...]\n\n");
+	print("Usage:\n");
+	print("   swupd info [OPTION...]\n\n");
 
 	global_print_help();
-	fprintf(stderr, "\n");
+	print("\n");
 }
 
 static const struct global_options opts = {

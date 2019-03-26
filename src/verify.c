@@ -955,12 +955,25 @@ clean_and_exit:
 		  counts.mismatch,
 		  counts.extraneous,
 		  total_curl_sz);
+
 	if (ret == SWUPD_OK) {
 		if (cmdline_option_fix || cmdline_option_install) {
 			info("Fix successful\n");
+
+			if (counts.not_fixed > 0 ||
+			    counts.not_replaced > 0 ||
+			    counts.not_deleted > 0) {
+				ret = SWUPD_NO;
+			}
 		} else {
 			/* This is just a verification */
 			info("Verify successful\n");
+
+			if (counts.mismatch > 0 ||
+			    counts.missing > 0 ||
+			    counts.extraneous > 0) {
+				ret = SWUPD_NO;
+			}
 		}
 	} else {
 		if (cmdline_option_fix || cmdline_option_install) {

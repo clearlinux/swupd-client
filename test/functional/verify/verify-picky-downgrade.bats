@@ -126,7 +126,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD verify --picky --manifest=10 --force $SWUPD_OPTS"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Warning: Bundle "test-bundle2" is invalid, skipping it...

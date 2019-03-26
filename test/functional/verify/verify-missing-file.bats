@@ -14,7 +14,7 @@ test_setup() {
 @test "VER002: Verify a system that is missing a file" {
 
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
-	assert_status_is 0
+	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Verifying files

@@ -41,9 +41,15 @@ void progress_finish_steps(char *, int status);
 void progress_set_step(unsigned int, char *);
 
 /*
+ * Increases the current step by one and assigns the provided description to it.
+ * Useful when you don't know the number of the current step.
+ */
+void progress_set_next_step(char *);
+
+/*
  * Gets the current step defined.
  */
-struct step *progress_get_step(void);
+struct step progress_get_step(void);
 
 /*
  * Marks the current step as completed (progress = 100%).

@@ -189,13 +189,16 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 	int ret;
 
 	if (cmdline_option_install) {
+		progress_set_next_step("download_packs");
 		get_all_files(official_manifest, subs);
 	}
 
+	progress_set_next_step("check_files_hash");
 	if (check_files_hash(official_manifest->files)) {
 		return 0;
 	}
 
+	progress_set_next_step("download_fullfiles");
 	ret = download_fullfiles(official_manifest->files, NULL);
 	if (ret) {
 		error("Unable to download necessary files for this OS release\n");
@@ -609,12 +612,38 @@ enum swupd_code verify_main(int argc, char **argv)
 	struct manifest *official_manifest = NULL;
 	int ret;
 	struct list *subs = NULL;
+	int steps_in_verify = 6;
+
+	/*
+	 * Steps for verify:
+	 *
+	 * 1) get_versions
+	 * 2) cleanup_download_dir
+	 * 3) load_manifests
+	 * 4) consolidate_files
+	 * 5) download_packs (applies only with --install)
+	 * 6) check_files_hash (applies only with --install or --fix)
+	 * 7) download_fullfiles (applies only with --install or --fix)
+	 * 8) add_missing_files
+	 * (Finishes here on --quick or --install)
+	 * 9) fix_files
+	 */
 
 	if (!parse_options(argc, argv)) {
 		ret = SWUPD_INVALID_OPTION;
 		print_help();
 		goto clean_args_and_exit;
 	}
+	/* calculate the number of steps in the process so we can report progress */
+	if (cmdline_option_install) {
+		steps_in_verify += 3;
+	} else if (cmdline_option_fix) {
+		steps_in_verify += 2;
+	}
+	if (cmdline_option_quick) {
+		steps_in_verify -= 1;
+	}
+	progress_init_steps("verify", steps_in_verify);
 
 	/* parse command line options */
 	assert(argc >= 0);
@@ -627,6 +656,8 @@ enum swupd_code verify_main(int argc, char **argv)
 	}
 
 	/* Get the current system version and the version to verify against */
+	timelist_timer_start(global_times, "Get versions");
+	progress_set_step(1, "get_versions");
 	int sys_version = get_current_version(path_prefix);
 	if (!version) {
 		if (sys_version < 0) {
@@ -646,6 +677,8 @@ enum swupd_code verify_main(int argc, char **argv)
 			goto clean_and_exit;
 		}
 	}
+	progress_complete_step();
+	timelist_timer_stop(global_times); // closing: Get versions
 
 	info("Verifying version %i\n", version);
 
@@ -662,14 +695,18 @@ enum swupd_code verify_main(int argc, char **argv)
 	 * FIXME: We need a command line option to override this in case the
 	 * certificate is hosed and the admin knows it and wants to recover.
 	 */
-
+	timelist_timer_start(global_times, "Clean up download directory");
+	progress_set_step(2, "cleanup_download_dir");
 	ret = rm_staging_dir_contents("download");
 	if (ret != 0) {
 		ret = SWUPD_COULDNT_REMOVE_FILE;
 		warn("Failed to remove prior downloads, carrying on anyway\n");
 	}
+	progress_complete_step();
+	timelist_timer_stop(global_times); // closing: Clean up download directory
 
-	timelist_timer_start(global_times, "Load and recurse Manifests");
+	timelist_timer_start(global_times, "Load manifests");
+	progress_set_step(3, "load_manifests");
 
 	/* Gather current manifests */
 	/* When the version we are verifying against does not match our system version
@@ -764,11 +801,17 @@ enum swupd_code verify_main(int argc, char **argv)
 		ret = SWUPD_RECURSE_MANIFEST;
 		goto clean_and_exit;
 	}
-	timelist_timer_stop(global_times);
+	progress_complete_step();
+	timelist_timer_stop(global_times); // closing: Load manifests
+
 	timelist_timer_start(global_times, "Consolidate files from bundles");
+	progress_set_step(4, "consolidate_files");
 	official_manifest->files = files_from_bundles(official_manifest->submanifests);
 	official_manifest->files = consolidate_files(official_manifest->files);
+	progress_complete_step();
 	timelist_timer_stop(global_times);
+
+	/* steps 5, 6 & 7 are executed within the get_required_files function */
 	timelist_timer_start(global_times, "Get required files");
 
 	/* get the initial number of files to be inspected */
@@ -809,6 +852,7 @@ enum swupd_code verify_main(int argc, char **argv)
 		bool repair = true;
 
 		timelist_timer_start(global_times, "Add missing files");
+		progress_set_next_step("add_missing_files");
 		info("Adding any missing files\n");
 		add_missing_files(official_manifest, repair);
 		timelist_timer_stop(global_times);
@@ -823,6 +867,7 @@ enum swupd_code verify_main(int argc, char **argv)
 		bool repair = true;
 
 		timelist_timer_start(global_times, "Fixing modified files");
+		progress_set_next_step("fix_files");
 		info("Fixing modified files\n");
 		deal_with_hash_mismatches(official_manifest, repair);
 
@@ -846,10 +891,12 @@ enum swupd_code verify_main(int argc, char **argv)
 	} else {
 		bool repair = false;
 
+		progress_set_next_step("add_missing_files");
 		info("Verifying files\n");
 		add_missing_files(official_manifest, repair);
 		/* quick only checks for missing files, so it is done here */
 		if (!cmdline_option_quick) {
+			progress_set_next_step("fix_files");
 			deal_with_hash_mismatches(official_manifest, repair);
 			remove_orphaned_files(official_manifest, repair);
 		}
@@ -985,5 +1032,6 @@ clean_args_and_exit:
 		picky_whitelist = NULL;
 	}
 
+	progress_finish_steps("verify", ret);
 	return ret;
 }

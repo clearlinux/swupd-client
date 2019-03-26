@@ -48,14 +48,12 @@ static void print_help(void)
 
 	print("Options:\n");
 	print("   --skip-diskspace-check  Do not check free disk space before adding bundle\n");
-	print("   -j, --json-output       Print all output as a JSON stream\n");
 	print("\n");
 }
 
 static const struct option prog_opts[] = {
 	{ "list", no_argument, 0, 'l' },
 	{ "skip-diskspace-check", no_argument, &skip_diskspace_check, 1 },
-	{ "json-output", no_argument, 0, 'j' },
 };
 
 static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
@@ -65,9 +63,6 @@ static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 		error("[-l, --list] option is deprecated, use\n"
 		      "bundle-list [-a|--all] sub-command instead.\n\n");
 		exit(EXIT_FAILURE);
-	case 'j':
-		set_json_format();
-		return true;
 	default:
 		return false;
 	}
@@ -104,13 +99,26 @@ enum swupd_code bundle_add_main(int argc, char **argv)
 	int ret;
 	const int steps_in_bundleadd = 7;
 
+	/*
+	 * Steps for bundle-add:
+	 *
+	 *  1) load_manifests
+	 *  2) consolidate_files
+	 *  3) check_disk_space_availability
+	 *  4) download_packs
+	 *  5) download_fullfiles
+	 *  6) install_files
+	 *  7) progress_set_step
+	 */
+
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-
 	progress_init_steps("bundle-add", steps_in_bundleadd);
+
 	ret = install_bundles_frontend(bundles);
+
 	progress_finish_steps("bundle-add", ret);
 	return ret;
 }

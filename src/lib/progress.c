@@ -69,14 +69,14 @@ void progress_set_step(unsigned int current_step, char *desc)
 	step.description = desc;
 }
 
-struct step *progress_get_step(void)
+void progress_set_next_step(char *desc)
 {
-	struct step *current_step = NULL;
+	progress_set_step((step.current) + 1, desc);
+}
 
-	if (step.total != 0 && step.description != NULL) {
-		*current_step = step;
-	}
-	return current_step;
+struct step progress_get_step(void)
+{
+	return step;
 }
 
 void progress_complete_step(void)

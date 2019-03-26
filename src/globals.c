@@ -721,6 +721,8 @@ void global_print_help(void)
 	print("   -W, --max-parallel-downloads=[n] Set the maximum number of parallel downloads\n");
 	print("   -r, --max-retries       Maximum number of retries for download failures\n");
 	print("   -d, --retry-delay       Initial delay between download retries, this will be doubled for each retry\n");
+	print("   --quiet		  Quiet output. Print only important information and errors\n");
+	print("   --debug		  Print extra information to help debugging problems\n");
 	print("\n");
 }
 
@@ -776,12 +778,6 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 	}
 
 	log_set_level(log_level);
-	//TODO: Remove this on a major release
-	if (log_level == LOG_ERROR) {
-		print("Experimental option --quiet. Not fully supported yet.\n");
-	} else if (log_level == LOG_DEBUG) {
-		print("Experimental option --debug. Not fully supported yet.\n");
-	}
 
 end:
 	free(optstring);

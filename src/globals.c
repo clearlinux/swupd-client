@@ -575,6 +575,7 @@ static const struct option global_opts[] = {
 	{ "", required_argument, 0, 'D' },
 	{ "max-retries", required_argument, 0, 'r' },
 	{ "retry-delay", required_argument, 0, 'd' },
+	{ "json-output", no_argument, 0, 'j' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -660,6 +661,9 @@ static bool global_parse_opt(int opt, char *optarg)
 			return false;
 		}
 		return true;
+	case 'j':
+		set_json_format();
+		return true;
 	default:
 		return false;
 	}
@@ -721,6 +725,7 @@ void global_print_help(void)
 	print("   -W, --max-parallel-downloads=[n] Set the maximum number of parallel downloads\n");
 	print("   -r, --max-retries       Maximum number of retries for download failures\n");
 	print("   -d, --retry-delay       Initial delay between download retries, this will be doubled for each retry\n");
+	print("   -j, --json-output       Print all output as a JSON stream\n");
 	print("   --quiet		  Quiet output. Print only important information and errors\n");
 	print("   --debug		  Print extra information to help debugging problems\n");
 	print("\n");

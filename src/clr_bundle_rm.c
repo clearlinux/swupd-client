@@ -78,10 +78,19 @@ static bool parse_options(int argc, char **argv)
 
 enum swupd_code bundle_remove_main(int argc, char **argv)
 {
+	int ret;
+	const int steps_in_bundleremove = 1;
+
+	/* there is no need to report in progress for bundle-remove at this time */
+
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
+	progress_init_steps("bundle-remove", steps_in_bundleremove);
 
-	return remove_bundles(bundles);
+	ret = remove_bundles(bundles);
+
+	progress_finish_steps("bundle-remove", ret);
+	return ret;
 }

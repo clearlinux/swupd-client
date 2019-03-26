@@ -114,11 +114,15 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code bundle_list_main(int argc, char **argv)
 {
 	int ret;
+	const int steps_in_bundlelist = 1;
+
+	/* there is no need to report in progress for bundle-list at this time */
 
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
+	progress_init_steps("bundle-list", steps_in_bundlelist);
 
 	ret = swupd_init();
 	/* if swupd fails to initialize, the only list command we can still attempt is
@@ -126,7 +130,7 @@ enum swupd_code bundle_list_main(int argc, char **argv)
 	 * bundles are experimental) */
 	if (ret != 0 && !cmdline_local) {
 		error("Failed updater initialization. Exiting now\n");
-		return ret;
+		goto finish;
 	}
 
 	if (cmdline_local) {
@@ -141,5 +145,7 @@ enum swupd_code bundle_list_main(int argc, char **argv)
 
 	swupd_deinit();
 
+finish:
+	progress_finish_steps("bundle-list", ret);
 	return ret;
 }

@@ -103,14 +103,19 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code check_update_main(int argc, char **argv)
 {
 	int ret;
+	const int steps_in_checkupdate = 1;
+
+	/* there is no need to report in progress for check-update at this time */
 
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
+	progress_init_steps("check-update", steps_in_checkupdate);
 
 	ret = check_update();
 	free_globals();
 
+	progress_finish_steps("check-update", ret);
 	return ret;
 }

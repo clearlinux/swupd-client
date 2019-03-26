@@ -762,7 +762,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 	/* step 1: check bundle args are valid if so populate subs struct */
 	timelist_timer_start(global_times, "Add bundles and recurse");
-	progress_set_step(1, "download_bundle_manifests");
+	progress_set_step(1, "load_manifests");
 	ret = add_subscriptions(bundles, subs, mom, false, 0);
 
 	/* print a message if any of the requested bundles is already installed */
@@ -891,7 +891,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	/* step 6: Install all bundle(s) files into the fs */
 	timelist_timer_start(global_times, "Installing bundle(s) files onto filesystem");
 	info("Installing bundle(s) files...\n");
-	progress_set_step(6, "installing_files");
+	progress_set_step(6, "install_files");
 
 	/* Do an initial check to
 	 * 1. make sure the file actually downloaded, if not continue on to the

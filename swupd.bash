@@ -36,37 +36,37 @@ _swupd()
 		opts="--help --url --contenturl --versionurl --port --path --format --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --json-output --debug --quiet"
 		break;;
 	    ("bundle-remove")
-		opts="--help --path --url --contenturl --versionurl --port --format --force --nosigcheck --ignore-time --statedir --certpath --debug --quiet "
+		opts="--help --path --url --contenturl --versionurl --port --format --force --nosigcheck --ignore-time --statedir --certpath --debug --quiet --json-output "
 		break;;
 	    ("bundle-list")
-		opts="--help --all --url --contenturl --versionurl --path --format --nosigcheck --ignore-time --statedir --certpath --deps --has-dep --debug --quiet "
+		opts="--help --all --url --contenturl --versionurl --path --format --nosigcheck --ignore-time --statedir --certpath --deps --has-dep --debug --quiet --json-output "
 		break;;
 	    ("hashdump")
 		opts="--help --no-xattrs --path --debug --quiet "
 		break;;
 	    ("update")
-		opts="--help --download --url --port --contenturl --versionurl --status --format --path --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --migrate --allow-mix-collisions --max-parallel-downloads --keepcache --debug --quiet "
+		opts="--help --download --url --port --contenturl --versionurl --status --format --path --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --migrate --allow-mix-collisions --max-parallel-downloads --keepcache --debug --quiet --json-output "
 		break;;
 	    ("verify")
-		opts="--help --manifest --path --url --port --contenturl --versionurl --fix --picky --picky-tree --picky-whitelist --install --format --quick --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --debug --quiet "
+		opts="--help --manifest --path --url --port --contenturl --versionurl --fix --picky --picky-tree --picky-whitelist --install --format --quick --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --debug --quiet --json-output "
 		break;;
 	    ("check-update")
-		opts="--help --url --versionurl --port --format --force --nosigcheck --path --statedir --debug --quiet "
+		opts="--help --url --versionurl --port --format --force --nosigcheck --path --statedir --debug --quiet --json-output "
 		break;;
 	    ("search")
 		opts="--help"
 		break;;
 	    ("search-file")
-		opts="--help --library --binary --top --csv --init --ignore-time --url --contenturl --versionurl --port --path --format --statedir --certpath --regexp --debug --quiet "
+		opts="--help --library --binary --top --csv --init --ignore-time --url --contenturl --versionurl --port --path --format --statedir --certpath --regexp --debug --quiet --json-output "
 		break;;
 	    ("info")
-		opts="--debug --quiet "
+		opts="--debug --quiet --json-output "
 		break;;
 	    ("clean")
-		opts="--all --dry-run --statedir --help --debug --quiet "
+		opts="--all --dry-run --statedir --help --debug --quiet --json-output "
 		break;;
 	    ("mirror")
-		opts="--help --set --unset --path --debug --quiet "
+		opts="--help --set --unset --path --debug --quiet --json-output "
 		break;;
 	esac
     done

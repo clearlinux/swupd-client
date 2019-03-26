@@ -875,7 +875,7 @@ brick_the_system_and_clean_curl:
 	info("Inspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
 
 	if (counts.missing) {
-		print("  %i file%s %s missing\n", counts.missing, (counts.missing > 1 ? "s" : ""), (counts.missing > 1 ? "were" : "was"));
+		info("  %i file%s %s missing\n", counts.missing, (counts.missing > 1 ? "s" : ""), (counts.missing > 1 ? "were" : "was"));
 		if (cmdline_option_fix || cmdline_option_install) {
 			info("    %i of %i missing files were replaced\n", counts.replaced, counts.missing);
 			info("    %i of %i missing files were not replaced\n", counts.not_replaced, counts.missing);
@@ -883,7 +883,7 @@ brick_the_system_and_clean_curl:
 	}
 
 	if (counts.mismatch) {
-		print("  %i file%s did not match\n", counts.mismatch, (counts.mismatch > 1 ? "s" : ""));
+		info("  %i file%s did not match\n", counts.mismatch, (counts.mismatch > 1 ? "s" : ""));
 		if (cmdline_option_fix) {
 			info("    %i of %i files were fixed\n", counts.fixed, counts.mismatch);
 			info("    %i of %i files were not fixed\n", counts.not_fixed, counts.mismatch);
@@ -891,7 +891,7 @@ brick_the_system_and_clean_curl:
 	}
 
 	if (counts.extraneous) {
-		print("  %i file%s found which should be deleted\n", counts.extraneous, (counts.extraneous > 1 ? "s" : ""));
+		info("  %i file%s found which should be deleted\n", counts.extraneous, (counts.extraneous > 1 ? "s" : ""));
 		if (cmdline_option_fix) {
 			info("    %i of %i files were deleted\n", counts.deleted, counts.extraneous);
 			info("    %i of %i files were not deleted\n", counts.not_deleted, counts.extraneous);
@@ -957,10 +957,10 @@ clean_and_exit:
 		  total_curl_sz);
 	if (ret == SWUPD_OK) {
 		if (cmdline_option_fix || cmdline_option_install) {
-			print("Fix successful\n");
+			info("Fix successful\n");
 		} else {
 			/* This is just a verification */
-			print("Verify successful\n");
+			info("Verify successful\n");
 		}
 	} else {
 		if (cmdline_option_fix || cmdline_option_install) {

@@ -98,7 +98,7 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 
 	if (fix) {
 		string_or_die(&temp, "%s%s", path_prefix, filename);
-		info(
+		print(
 		    is_dir ? "REMOVING DIR %s/\n" : "REMOVING %s\n",
 		    filename);
 		if (remove(temp)) {
@@ -107,7 +107,7 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 		}
 		free_string(&temp);
 	} else {
-		info("%s%s\n", filename, is_dir ? "/" : "");
+		print("%s%s\n", filename, is_dir ? "/" : "");
 		ret = false;
 	}
 

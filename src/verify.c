@@ -294,7 +294,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 			counts.missing++;
 			if (!repair || (repair && cmdline_option_install == false)) {
 				/* Log to stdout, so we can post-process */
-				info("\nMissing file: %s\n", fullname);
+				print("\nMissing file: %s\n", fullname);
 			}
 		} else {
 			free_string(&fullname);
@@ -321,7 +321,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 		}
 		if ((ret != 0) || hash_needs_work(file, local.hash)) {
 			counts.not_replaced++;
-			info("\n\tnot fixed\n");
+			print("\n\tnot fixed\n");
 
 			check_warn_freespace(file);
 
@@ -329,7 +329,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 			counts.replaced++;
 			file->do_not_update = 1;
 			if (cmdline_option_install == false) {
-				info("\n\tfixed\n");
+				print("\n\tfixed\n");
 			}
 		}
 	out:
@@ -360,7 +360,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	if (access(fullname, F_OK) == 0) {
 		counts.mismatch++;
 		/* Log to stdout, so we can post-process it */
-		info("\nHash mismatch for file: %s\n", fullname);
+		print("\nHash mismatch for file: %s\n", fullname);
 	}
 
 	/* if not repairing, we're done */
@@ -377,10 +377,10 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	/* at the end of all this, verify the hash again to judge success */
 	if (verify_file(file, fullname)) {
 		counts.fixed++;
-		info("\tfixed\n");
+		print("\tfixed\n");
 	} else {
 		counts.not_fixed++;
-		info("\tnot fixed\n");
+		print("\tnot fixed\n");
 	}
 end:
 	free_string(&fullname);
@@ -458,7 +458,7 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 		}
 
 		counts.extraneous++;
-		info("File that should be deleted: %s\n", fullname);
+		print("File that should be deleted: %s\n", fullname);
 
 		/* if not repairing, we're done */
 		if (!repair) {
@@ -474,7 +474,7 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 				warn("Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));
 				counts.not_deleted++;
 			} else {
-				info("\tdeleted\n");
+				print("\tdeleted\n");
 				counts.deleted++;
 			}
 		} else {
@@ -489,7 +489,7 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 					warn("Couldn't remove directory containing untracked files: %s\n", fullname);
 				}
 			} else {
-				info("\tdeleted\n");
+				print("\tdeleted\n");
 				counts.deleted++;
 			}
 		}

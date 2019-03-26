@@ -26,7 +26,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD verify --picky --picky-whitelist=/usr/foo $SWUPD_OPTS"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Generating list of extra files under .*/target-dir/usr

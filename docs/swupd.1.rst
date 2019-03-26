@@ -401,6 +401,10 @@ return value higher than ``1`` signals a failure.
 If the subcommand was ``autoupdate`` without options, then the program
 returns ``0`` if automatic updating is enabled.
 
+If the subcommand was ``verify``, then the program returns ``0`` if the system
+is consistent at the end of the process or ``1`` if there are invalid/missing
+files in the system.
+
 The non-zero return codes for other operations are listed here:
 
   - **2**: A required bundle was removed or was attempted to be removed

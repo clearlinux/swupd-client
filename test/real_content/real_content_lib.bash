@@ -2,6 +2,9 @@
 
 #TODO: Add test for crossing a format barrier
 
+# shellcheck disable=SC1090
+# SC1090: Can't follow non-constant source. Use a directive to specify location.
+# We already process that file, so it's fine to ignore
 SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_PATH/../functional/testlib.bash"
 
@@ -55,6 +58,9 @@ get_format_from_versions() {
 install_bundles() {
 	if [ -z "$BUNDLE_LIST" ]; then
 		run sudo sh -c "$SWUPD bundle-list --all $SWUPD_OPTS_SHORT"
+		# shellcheck disable=SC2154
+		# SC2154: output is referenced but not assigned.
+		# the output variable is being assigned and exported by bats
 		BUNDLE_LIST=$(echo "$output" | tr '\n' ' ')
 		num_pkgs=$(echo "$output" | wc -l)
 
@@ -89,14 +95,10 @@ check_version() {
 verify_system() {
 
 	run sudo sh -c "$SWUPD verify --picky $SWUPD_OPTS 2>/dev/null"
-	if [ -n "$output" ]; then
-		print "Verify found extra files in the system:"
-		print "$output"
-		return 1
-	fi
+	assert_status_is 0
 
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
-	assert_not_in_output "did not match"
+	assert_status_is 0
 
 	return
 }

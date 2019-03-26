@@ -53,6 +53,8 @@ static void usage(const char *name)
 	print("Application Options:\n");
 	print("   -n, --no-xattrs         Ignore extended attributes\n");
 	print("   -p, --path=[PATH...]    Use [PATH...] for leading path to filename\n");
+	print("   --quiet		  Quiet output. Print only important information and errors\n");
+	print("   --debug		  Print extra information to help debugging problems\n");
 	print("\n");
 	print("The filename is the name of a file on the filesystem.\n");
 	print("\n");

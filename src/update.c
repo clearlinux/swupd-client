@@ -76,7 +76,10 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 	int ret;
 	struct file *file;
 	struct list *iter;
+	struct step step;
 
+	step = progress_get_step();
+	progress_set_step(step.current, "download_fullfiles");
 	ret = download_fullfiles(updates, &nonpack);
 	if (ret) {
 		error("Could not download all files, aborting update\n");
@@ -124,6 +127,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 	sync();
 
 	/* rename to apply update */
+	progress_set_step((step.current) + 1, "update_files");
 	info("Applying update\n");
 	ret = rename_all_files_to_final(updates);
 	if (ret != 0) {
@@ -250,8 +254,9 @@ static enum swupd_code main_update()
 	/* start the timer used to report the total time to telemetry */
 	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
 
-	/* Preparation steps */
+	/* Step 1: Preparation steps */
 	timelist_timer_start(global_times, "Prepare for update");
+	progress_set_step(1, "prepare_for_update");
 	info("Update started.\n");
 
 	mix_exists = check_mix_exists();
@@ -259,10 +264,12 @@ static enum swupd_code main_update()
 	read_subscriptions(&current_subs);
 
 	handle_mirror_if_stale();
+	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Prepare for update
 
-	/* Step 1: get versions */
+	/* Step 2: get versions */
 	timelist_timer_start(global_times, "Get versions");
+	progress_set_step(2, "get_versions");
 version_check:
 	ret = check_versions(&current_version, &server_version, requested_version, path_prefix);
 	if (ret != SWUPD_OK) {
@@ -326,19 +333,23 @@ version_check:
 	}
 
 	info("Preparing to update from %i to %i\n", current_version, server_version);
+	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Get versions
 
-	/* Step 2: housekeeping */
+	/* Step 3: housekeeping */
 	timelist_timer_start(global_times, "Clean up download directory");
+	progress_set_step(3, "cleanup_download_dir");
 	if (rm_staging_dir_contents("download")) {
 		error("There was a problem cleaning download directory\n");
 		ret = SWUPD_COULDNT_REMOVE_FILE;
 		goto clean_curl;
 	}
+	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Clean up download directory
 
-	/* Step 3: setup manifests */
+	/* Step 4: setup manifests */
 	timelist_timer_start(global_times, "Load manifests");
+	progress_set_step(4, "load_manifests");
 	timelist_timer_start(global_times, "Load MoM manifests");
 	int manifest_err;
 
@@ -414,34 +425,47 @@ version_check:
 	/* prepare for an update process based on comparing two in memory manifests */
 	link_manifests(current_manifest, server_manifest);
 	timelist_timer_stop(global_times); // closing: Recurse and consolidate bundle manifests
+	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Load manifests
 
-	/* Step 4: check disk state before attempting update */
+	/* Step 5: check disk state before attempting update */
 	timelist_timer_start(global_times, "Run pre-update scripts");
+	progress_set_step(5, "run_preupdate_scripts");
 	run_preupdate_scripts(server_manifest);
+	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Run pre-update scripts
 
-	/* Step 5: get the packs and untar */
+	/* Step 6: get the packs and untar */
 	timelist_timer_start(global_times, "Download packs");
+	progress_set_step(6, "download_packs");
 	download_subscribed_packs(latest_subs, server_manifest, false);
 	timelist_timer_stop(global_times); // closing: Download packs
 
+	/* Step 7: apply deltas */
 	timelist_timer_start(global_times, "Apply deltas");
+	progress_set_step(7, "apply_deltas");
 	apply_deltas(current_manifest);
+	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Apply deltas
 
-	/* Step 6: some more housekeeping */
+	/* Step 8: some more housekeeping */
 	/* TODO: consider trying to do less sorting of manifests */
 	timelist_timer_start(global_times, "Create update list");
+	progress_set_step(8, "create_update_list");
 	updates = create_update_list(server_manifest);
 
 	print_statistics(current_version, server_version);
+	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Create update list
 
-	/* Step 7: apply the update */
+	/* Steps 9 & 10: downloading and applying updates */
 	/* need update list in filename order to insure directories are
 	 * created before their contents */
 	timelist_timer_start(global_times, "Update loop");
+	/* two steps are part of this stage, so only pass the
+	 * initial step number and we will update the description
+	 * from within the update_loop function */
+	progress_set_step(9, "");
 	updates = list_sort(updates, file_sort_filename);
 
 	ret = update_loop(updates, server_manifest);
@@ -459,8 +483,9 @@ version_check:
 	delete_motd();
 	timelist_timer_stop(global_times); // closing: Update loop
 
-	/* Run any scripts that are needed to complete update */
+	/* Step 11: Run any scripts that are needed to complete update */
 	timelist_timer_start(global_times, "Run post-update scripts");
+	progress_set_step(11, "run_postupdate_scripts");
 
 	/* Determine if another update is needed so the scripts block */
 	int new_current_version = get_current_version(path_prefix);
@@ -468,6 +493,7 @@ version_check:
 		re_update = true;
 	}
 	run_scripts(re_update);
+	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Run post-update scripts
 
 	/* Create the state file that will tell swupd it's on a mix on future runs */
@@ -685,16 +711,36 @@ static enum swupd_code print_versions()
 enum swupd_code update_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
+	const int steps_in_update = 11;
+
+	/*
+	 * Steps for update:
+	 *
+	 * 1) prepare_for_update
+	 * 2) get_versions
+	 * 3) cleanup_download_dir
+	 * 4) load_manifests
+	 * 5) run_preupdate_scripts
+	 * 6) download_packs
+	 * 7) apply_deltas
+	 * 8) create_update_list
+	 * 9) download_fullfiles
+	 * 10) update_files
+	 * 11) run_postupdate_scripts
+	 */
 
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
+	progress_init_steps("update", steps_in_update);
 
 	if (cmd_line_status) {
 		ret = print_versions();
 	} else {
 		ret = main_update();
 	}
+
+	progress_finish_steps("update", ret);
 	return ret;
 }

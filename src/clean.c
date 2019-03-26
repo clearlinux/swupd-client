@@ -379,16 +379,19 @@ static void clean_deinit(void)
 
 enum swupd_code clean_main(int argc, char **argv)
 {
+	int ret = SWUPD_OK;
+	const int steps_in_clean = 1;
+
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
+	progress_init_steps("clean", steps_in_clean);
 
-	int ret = SWUPD_OK;
 	ret = clean_init();
 	if (ret != 0) {
 		error("Failed swupd initialization, exiting now.\n");
-		return ret;
+		goto exit;
 	}
 
 	if (!options.all) {
@@ -418,6 +421,9 @@ enum swupd_code clean_main(int argc, char **argv)
 
 end:
 	clean_deinit();
+
+exit:
+	progress_finish_steps("clean", ret);
 	return ret;
 }
 

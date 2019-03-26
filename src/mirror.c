@@ -259,10 +259,15 @@ out:
 enum swupd_code mirror_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
+	const int steps_in_mirror = 1;
+
+	/* there is no need to report in progress for mirror at this time */
+
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
+	progress_init_steps("mirror", steps_in_mirror);
 
 	if (set != NULL) {
 		ret = set_mirror_url(set);
@@ -286,11 +291,15 @@ enum swupd_code mirror_main(int argc, char **argv)
 
 	/* init globals here after the new URL is configured */
 	if (!init_globals()) {
-		return SWUPD_INIT_GLOBALS_FAILED;
+		ret = SWUPD_INIT_GLOBALS_FAILED;
+		goto finish;
 	}
 
 	/* print new configuration */
 	print_update_conf_info();
 	free_globals();
+
+finish:
+	progress_finish_steps("mirror", ret);
 	return ret;
 }

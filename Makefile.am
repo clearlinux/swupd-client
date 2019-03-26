@@ -181,6 +181,7 @@ BATS = \
 	test/functional/bundlelist/list-has-dep-nested-not-installed.bats \
 	test/functional/bundlelist/list-has-dep-nested-server.bats \
 	test/functional/bundlelist/list-installed.bats \
+	test/functional/bundlelist/list-json.bats \
 	test/functional/bundlelist/list-no-deps.bats \
 	test/functional/bundlelist/list-no-disk-space.bats \
 	test/functional/bundlelist/list-none-has-deps.bats \
@@ -189,11 +190,13 @@ BATS = \
 	test/functional/bundleremove/remove-client-certificate.bats \
 	test/functional/bundleremove/remove-include.bats \
 	test/functional/bundleremove/remove-include-nested.bats \
+	test/functional/bundleremove/remove-json.bats \
 	test/functional/bundleremove/remove-no-disk-space.bats \
 	test/functional/bundleremove/remove-os-core.bats \
 	test/functional/bundleremove/remove-parse-args.bats \
 	test/functional/bundleremove/remove-with-dependency.bats \
 	test/functional/checkupdate/chk-update-client-certificate.bats \
+	test/functional/checkupdate/chk-update-json.bats \
 	test/functional/checkupdate/chk-update-new-version.bats \
 	test/functional/checkupdate/chk-update-no-server-content.bats \
 	test/functional/checkupdate/chk-update-no-target-content.bats \
@@ -202,10 +205,12 @@ BATS = \
 	test/functional/hashdump/hashdump-file-hash.bats \
 	test/functional/mirror/mirror-createdir.bats \
 	test/functional/mirror/mirror-createdir-negative.bats \
+	test/functional/mirror/mirror-json.bats \
 	test/functional/search/search-content-check-negative.bats \
 	test/functional/search/search-content-check-positive.bats \
 	test/functional/search/search-client-certificate.bats \
 	test/functional/search/search-experimental.bats \
+	test/functional/search/search-json.bats \
 	test/functional/search/search-no-disk-space.bats \
 	test/functional/search/search-sort.bats \
 	test/functional/update/update-boot-file.bats \
@@ -217,6 +222,7 @@ BATS = \
 	test/functional/update/update-include.bats \
 	test/functional/update/update-include-old-bundle.bats \
 	test/functional/update/update-include-old-bundle-with-tracked-file.bats \
+	test/functional/update/update-json.bats \
 	test/functional/update/update-manifest-delta.bats \
 	test/functional/update/update-minversion.bats \
 	test/functional/update/update-missing-os-core.bats \
@@ -272,6 +278,7 @@ BATS = \
 	test/functional/verify/verify-install-multiple.bats \
 	test/functional/verify/verify-install-no-fullfile-fallbacks.bats \
 	test/functional/verify/verify-install-no-zero-packs.bats \
+	test/functional/verify/verify-json.bats \
 	test/functional/verify/verify-latest-missing.bats \
 	test/functional/verify/verify-missing-file.bats \
 	test/functional/verify/verify-no-disk-space.bats \

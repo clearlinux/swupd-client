@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 /*
  * Assert and print error message if _exp is false.
  */

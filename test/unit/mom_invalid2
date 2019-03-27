@@ -1,0 +1,10 @@
+MANIFEST	1
+version:
+previous:	20
+minversion:	10
+filecount:	1
+timestamp:	123
+contentsize:	456
+XXXXXXXX:	XXXXXX
+
+M...	0000000000000000000000000000000000000000000000000000000000000001	10	m1

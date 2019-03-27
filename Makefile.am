@@ -278,7 +278,8 @@ BATS = \
 	test/functional/verify/verify-skip-scripts.bats
 
 UNIT_TESTS = \
-	test/unit/test_strings.test
+	test/unit/test_strings.test \
+	test/unit/test_manifest.test
 
 dist_check_SCRIPTS = $(BATS)
 # Must be run before all other tests
@@ -395,6 +396,6 @@ install-check:
 	test/installation/test.bats
 
 unit-check:
-	env TEST_SUITE_LOG=unit_tests.log TESTS=$(UNIT_TESTS) make -e check
+	env TEST_SUITE_LOG=unit_tests.log TESTS="$(UNIT_TESTS)" make -e check
 
 endif

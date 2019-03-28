@@ -33,40 +33,40 @@ _swupd()
 		opts="--help --enable --disable "
 		break;;
 	    ("bundle-add")
-		opts="--help --url --contenturl --versionurl --port --path --format --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --json-output"
+		opts="--help --url --contenturl --versionurl --port --path --format --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --json-output --debug --quiet"
 		break;;
 	    ("bundle-remove")
-		opts="--help --path --url --contenturl --versionurl --port --format --force --nosigcheck --ignore-time --statedir --certpath "
+		opts="--help --path --url --contenturl --versionurl --port --format --force --nosigcheck --ignore-time --statedir --certpath --debug --quiet "
 		break;;
 	    ("bundle-list")
-		opts="--help --all --url --contenturl --versionurl --path --format --nosigcheck --ignore-time --statedir --certpath --deps --has-dep "
+		opts="--help --all --url --contenturl --versionurl --path --format --nosigcheck --ignore-time --statedir --certpath --deps --has-dep --debug --quiet "
 		break;;
 	    ("hashdump")
-		opts="--help --no-xattrs --path "
+		opts="--help --no-xattrs --path --debug --quiet "
 		break;;
 	    ("update")
-		opts="--help --download --url --port --contenturl --versionurl --status --format --path --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --migrate --allow-mix-collisions --max-parallel-downloads --keepcache "
+		opts="--help --download --url --port --contenturl --versionurl --status --format --path --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --migrate --allow-mix-collisions --max-parallel-downloads --keepcache --debug --quiet "
 		break;;
 	    ("verify")
-		opts="--help --manifest --path --url --port --contenturl --versionurl --fix --picky --picky-tree --picky-whitelist --install --format --quick --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads "
+		opts="--help --manifest --path --url --port --contenturl --versionurl --fix --picky --picky-tree --picky-whitelist --install --format --quick --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --debug --quiet "
 		break;;
 	    ("check-update")
-		opts="--help --url --versionurl --port --format --force --nosigcheck --path --statedir "
+		opts="--help --url --versionurl --port --format --force --nosigcheck --path --statedir --debug --quiet "
 		break;;
 	    ("search")
 		opts="--help"
 		break;;
 	    ("search-file")
-		opts="--help --library --binary --scope --top --csv --display-files --init --ignore-time --url --contenturl --versionurl --port --path --format --statedir --certpath "
+		opts="--help --library --binary --scope --top --csv --display-files --init --ignore-time --url --contenturl --versionurl --port --path --format --statedir --certpath --debug --quiet "
 		break;;
 	    ("info")
-		opts=""
+		opts="--debug --quiet "
 		break;;
 	    ("clean")
-		opts="--all --dry-run --statedir --help "
+		opts="--all --dry-run --statedir --help --debug --quiet "
 		break;;
 	    ("mirror")
-		opts="--help --set --unset --path "
+		opts="--help --set --unset --path --debug --quiet "
 		break;;
 	esac
     done

@@ -36,6 +36,6 @@ test_teardown() {
 
 @test "USA004: Autocomplete has expected hashdump opts" {
 
-	grep -q  'opts="--help --no-xattrs --path "' "$SWUPD_DIR"/swupd.bash
+	grep -q  'opts="--help --no-xattrs --path --debug --quiet "' "$SWUPD_DIR"/swupd.bash
 
 }

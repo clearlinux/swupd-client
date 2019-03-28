@@ -454,7 +454,7 @@ static enum swupd_code download_all_manifests(struct manifest *mom, struct list 
 		progress_report(complete, total);
 		complete++;
 		if (!manifest) {
-			printf("\n"); //Progress bar
+			info("\n"); //Progress bar
 			error("Cannot load %s manifest for version %i\n",
 			      file->filename, file->last_change);
 			failed_count++;
@@ -481,22 +481,22 @@ static enum swupd_code download_all_manifests(struct manifest *mom, struct list 
 
 static void print_help(void)
 {
-	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "   swupd search [OPTION...] 'search_term'\n\n");
-	fprintf(stderr, "		'search_term': A substring of a binary, library or filename (default)\n");
-	fprintf(stderr, "		Return: Bundle name : filename matching search term\n\n");
+	print("Usage:\n");
+	print("   swupd search [OPTION...] 'search_term'\n\n");
+	print("		'search_term': A substring of a binary, library or filename (default)\n");
+	print("		Return: Bundle name : filename matching search term\n\n");
 
 	global_print_help();
 
-	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "   -l, --library           Search paths where libraries are located for a match\n");
-	fprintf(stderr, "   -b, --binary            Search paths where binaries are located for a match\n");
-	fprintf(stderr, "   -T, --top=[NUM]         Only display the top NUM results for each bundle\n");
-	fprintf(stderr, "   -m, --csv               Output all results in CSV format (machine-readable)\n");
-	fprintf(stderr, "   -i, --init              Download all manifests then return, no search done\n");
-	fprintf(stderr, "   -o, --order=[ORDER]     Sort the output. ORDER is one of the following values:\n");
-	fprintf(stderr, "                           'alpha' to order alphabetically (default)\n");
-	fprintf(stderr, "                           'size' to order by bundle size (smaller to larger)\n");
+	print("Options:\n");
+	print("   -l, --library           Search paths where libraries are located for a match\n");
+	print("   -b, --binary            Search paths where binaries are located for a match\n");
+	print("   -T, --top=[NUM]         Only display the top NUM results for each bundle\n");
+	print("   -m, --csv               Output all results in CSV format (machine-readable)\n");
+	print("   -i, --init              Download all manifests then return, no search done\n");
+	print("   -o, --order=[ORDER]     Sort the output. ORDER is one of the following values:\n");
+	print("                           'alpha' to order alphabetically (default)\n");
+	print("                           'size' to order by bundle size (smaller to larger)\n");
 }
 
 static const struct option prog_opts[] = {

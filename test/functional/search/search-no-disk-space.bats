@@ -34,7 +34,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
-		Failed to retrieve 10 MoM manifest
+		Error: Failed to retrieve 10 MoM manifest
 		Error: Cannot load official manifest MoM for version 10
 	EOM
 	)
@@ -62,7 +62,7 @@ test_setup() {
 		Downloading Clear Linux manifests \\(.* MB\\)
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle1.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
-		Failed to retrieve 10 test-bundle1 manifest
+		Error: Failed to retrieve 10 test-bundle1 manifest
 		Error: Cannot load test-bundle1 manifest for version 10
 		Warning: Failed to download 1 manifest - search results will be partial
 		Searching for 'test-bundle2'

@@ -30,7 +30,7 @@ global_teardown() {
 
 }
 
-@test "SRH012: User downloads all the manifests without actually searching for anything" {
+@test "SRH027: User downloads all the manifests without actually searching for anything" {
 
 	# when using the --init option with search, it should not
 	# really search for anything but the MoM and all manifests
@@ -190,7 +190,7 @@ global_teardown() {
 
 }
 
-@test "SRH010: Search for a library and binary" {
+@test "SRH029: Search for a library and binary" {
 
 	run sudo sh -c "$SWUPD search-file --library --binary $SWUPD_OPTS test-"
 
@@ -208,7 +208,7 @@ global_teardown() {
 
 }
 
-@test "SRH012: Search using regular expressions" {
+@test "SRH028: Search using regular expressions" {
 
 	run sudo sh -c "$SWUPD search-file --regexp $SWUPD_OPTS ^/usr/lib.*lib.*$"
 

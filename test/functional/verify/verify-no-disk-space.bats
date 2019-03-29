@@ -28,7 +28,7 @@ test_setup() {
 
 }
 
-@test "VER042: Verify a system with no disk space left (downloading the MoM)" {
+@test "VER048: Verify a system with no disk space left (downloading the MoM)" {
 
 	# When verifying a system and we run out of disk space while downloading the
 	# MoMs we should not retry the download since it will fail for sure

@@ -17,7 +17,10 @@ AM_CFLAGS = -fPIE -fPIC -g -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99 \
 	-Wundef \
 	-Wnested-externs \
 	-Wredundant-decls \
-	-fstack-protector-strong
+	-fstack-protector-strong \
+	-fno-strict-overflow \
+	-fno-delete-null-pointer-checks \
+	-fwrapv
 
 AM_LDFLAGS = -z noexecstack -z relro -z now \
 	-pie

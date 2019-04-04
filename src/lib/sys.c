@@ -221,3 +221,12 @@ bool file_is_executable(const char *filename)
 
 	return false;
 }
+
+void journal_log_error(const char *message)
+{
+	if (!message) {
+		return;
+	}
+
+	run_command_quiet("/usr/bin/systemd-cat", "--identifier=swupd", "--priority=err", "/bin/echo", message, NULL);
+}

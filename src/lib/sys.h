@@ -60,6 +60,11 @@ bool file_exits(const char *filename);
  */
 bool file_is_executable(const char *filename);
 
+/*
+ * Print error 'message' to system journal.
+ */
+void journal_log_error(const char *message);
+
 #ifdef __cplusplus
 }
 #endif

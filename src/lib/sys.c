@@ -78,7 +78,6 @@ int run_command_full(const char *stdout_file, const char *stderr_file, const cha
 
 	// Child
 	va_list ap;
-	char *short_cmd;
 	char **params;
 	int args_count = 0, i = 0;
 	char *arg;
@@ -96,13 +95,7 @@ int run_command_full(const char *stdout_file, const char *stderr_file, const cha
 		goto error_child;
 	}
 
-	// We need a copy because of basename
-	short_cmd = strdup(cmd);
-	if (!short_cmd) {
-		abort();
-	}
-
-	params[i++] = basename(short_cmd);
+	params[i++] = (char *)cmd;
 
 	va_start(ap, cmd);
 	while ((arg = va_arg(ap, char *)) != NULL) {
@@ -125,7 +118,6 @@ int run_command_full(const char *stdout_file, const char *stderr_file, const cha
 		error("run_command %s failed: %i (%s)\n", cmd, errno, strerror(errno));
 	}
 	free(params);
-	free(short_cmd);
 
 	exit(EXIT_FAILURE); // execve nevers return on success
 	return 0;

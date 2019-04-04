@@ -172,26 +172,6 @@ int add_included_manifests(struct manifest *mom, struct list **subs)
 	return ret;
 }
 
-static int re_exec_update(bool versions_match)
-{
-	if (!versions_match) {
-		error("Inconsistency between version files, exiting now.\n");
-		return 1;
-	}
-
-	if (!swupd_cmd) {
-		error("Unable to determine re-update command, exiting now.\n");
-		return 1;
-	}
-
-	/* Run the swupd_cmd saved from main */
-	if (system(swupd_cmd) != 0) {
-		return 1;
-	}
-
-	return 0;
-}
-
 static bool need_new_upstream(int server)
 {
 	if (!access(MIX_DIR "upstreamversion", R_OK)) {
@@ -567,11 +547,20 @@ clean_curl:
 	}
 
 	if (re_update && ret == 0) {
-		ret = re_exec_update(versions_match);
-	}
 
-	/* free swupd_cmd now that is no longer needed */
-	free_string(&swupd_cmd);
+		if (!versions_match) {
+			error("Inconsistency between version files, exiting now.\n");
+			return SWUPD_CURRENT_VERSION_UNKNOWN;
+		}
+
+		if (!swupd_argv) {
+			error("Unable to determine re-update command, exiting now.\n");
+			return SWUPD_INVALID_BINARY;
+		}
+
+		/* Run the swupd_argv saved from main */
+		return execv(swupd_argv[0], swupd_argv);
+	}
 
 	return ret;
 }

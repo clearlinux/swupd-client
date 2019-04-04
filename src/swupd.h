@@ -170,7 +170,7 @@ extern char *path_prefix;
 extern bool init_globals(void);
 extern void free_globals(void);
 extern void save_cmd(char **argv);
-extern char *swupd_cmd;
+extern char **swupd_argv;
 extern char *bundle_to_add;
 extern char *state_dir;
 extern int skip_diskspace_check;

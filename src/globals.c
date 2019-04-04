@@ -73,7 +73,7 @@ char *cert_path = NULL;
 int update_server_port = -1;
 static int max_parallel_downloads = -1;
 static int log_level = LOG_INFO;
-char *swupd_cmd = NULL;
+char **swupd_argv = NULL;
 
 /* If the MIX_BUNDLES_DIR has the valid-mix flag file we can run through
  * adding the mix data to the OS */
@@ -525,23 +525,7 @@ void free_globals(void)
 
 void save_cmd(char **argv)
 {
-	int size = 0;
-
-	/* Find size of total argv strings */
-	for (int i = 0; argv[i]; i++) {
-		/* +1 for space (" ") after flag that will be added later */
-		size += strlen(argv[i]) + 1;
-	}
-
-	/* +1 for null terminator */
-	swupd_cmd = malloc(size + 1);
-	ON_NULL_ABORT(swupd_cmd);
-
-	strcpy(swupd_cmd, "");
-	for (int i = 0; argv[i]; i++) {
-		strcat(swupd_cmd, argv[i]);
-		strcat(swupd_cmd, " ");
-	}
+	swupd_argv = argv;
 }
 
 size_t get_max_xfer(size_t default_max_xfer)

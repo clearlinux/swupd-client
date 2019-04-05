@@ -230,3 +230,19 @@ void journal_log_error(const char *message)
 
 	run_command_quiet("/usr/bin/systemd-cat", "--identifier=swupd", "--priority=err", "/bin/echo", message, NULL);
 }
+
+int systemctl_restart(const char *service)
+{
+	return systemctl_cmd("restart", service, NULL);
+}
+
+bool systemctl_active(void)
+{
+	/* In a container, "/usr/bin/systemctl" will return 1 with
+	 * "Failed to connect to bus: No such file or directory"
+	 * However /usr/bin/systemctl is-enabled ... will not fail, even when it
+	 * should. Check that systemctl is working before reporting the output
+	 * of is-enabled. */
+
+	return systemctl_cmd(NULL) == 0;
+}

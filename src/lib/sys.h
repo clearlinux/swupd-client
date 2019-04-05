@@ -7,6 +7,9 @@
 extern "C" {
 #endif
 
+/* Systemctl path in the system */
+#define SYSTEMCTL "/usr/bin/systemctl"
+
 /* Return the free available space in the partition mounted in path */
 long get_available_space(const char *path);
 
@@ -64,6 +67,20 @@ bool file_is_executable(const char *filename);
  * Print error 'message' to system journal.
  */
 void journal_log_error(const char *message);
+
+/*
+ * Restart a systemd service
+ */
+int systemctl_restart(const char *service);
+
+/*
+ * Check if systemd is active and running in the system.
+ * Necessary because not all commands returns correct error codes when running
+ * in a container
+ */
+bool systemctl_active(void);
+
+#define systemctl_cmd(...) run_command_quiet(SYSTEMCTL, __VA_ARGS__)
 
 #ifdef __cplusplus
 }

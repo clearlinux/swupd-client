@@ -87,26 +87,6 @@ static void policy_warn(void)
 	     "out of compliance with your IT policy\n\n");
 }
 
-static int system_command(const char *cmd)
-{
-	int ret;
-
-	ret = system(cmd);
-	if (ret == -1) {
-		/* it wasn't possible to create the shell process */
-		return SWUPD_SUBPROCESS_ERROR;
-	}
-
-	ret = WEXITSTATUS(ret);
-
-	if (ret == 126 || ret == 128) {
-		/* the command invoked cannot execute or was not found */
-		return SWUPD_SUBPROCESS_ERROR;
-	}
-
-	return ret;
-}
-
 enum swupd_code autoupdate_main(int argc, char **argv)
 {
 	if (!parse_options(argc, argv)) {
@@ -116,39 +96,38 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 		error("Can not enable and disable at the same time\n");
 		return SWUPD_INVALID_OPTION;
 	}
+	if (!systemctl_active()) {
+		error("Systemd is inactive - unable to proceed\n");
+		return SWUPD_SUBPROCESS_ERROR;
+	}
+
 	if (enable) {
 		int rc;
 		check_root();
 		info("Running systemctl to enable updates\n");
-		rc = system_command("/usr/bin/systemctl unmask --now swupd-update.service swupd-update.timer"
-				    " && /usr/bin/systemctl restart swupd-update.timer > /dev/null");
-		if (rc) {
+		rc = systemctl_cmd("unmask", "--now", "swupd-update.service", "swupd-update.timer", NULL);
+		if (rc != 0) {
 			return SWUPD_SUBPROCESS_ERROR;
 		}
+		rc = systemctl_restart("swupd-update.timer");
+		if (rc != 0) {
+			return SWUPD_SUBPROCESS_ERROR;
+		}
+
 		return SWUPD_OK;
 	} else if (disable) {
 		int rc;
 		check_root();
 		policy_warn();
 		info("Running systemctl to disable updates\n");
-		rc = system_command("/usr/bin/systemctl mask --now swupd-update.service swupd-update.timer > /dev/null");
+		rc = systemctl_cmd("mask", "--now", "swupd-update.service", "swupd-update.timer", NULL);
 		if (rc) {
 			return SWUPD_SUBPROCESS_ERROR;
 		}
 		return SWUPD_OK;
 	} else {
-		/* In a container, "/usr/bin/systemctl" will return 1 with
-		 * "Failed to connect to bus: No such file or directory"
-		 * However /usr/bin/systemctl is-enabled ... will not fail, even when it
-		 * should. Check that systemctl is working before reporting the output
-		 * of is-enabled. */
-		int rc = system_command("/usr/bin/systemctl > /dev/null 2>&1");
-		if (rc) {
-			error("Unable to determine autoupdate status\n");
-			return SWUPD_SUBPROCESS_ERROR;
-		}
-
-		rc = system_command("/usr/bin/systemctl is-enabled swupd-update.service > /dev/null");
+		int rc;
+		rc = systemctl_cmd("is-enabled", "swupd-update.service", NULL);
 		switch (rc) {
 		case SWUPD_OK:
 			print("Enabled\n");

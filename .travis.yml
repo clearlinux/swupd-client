@@ -72,7 +72,8 @@ before_script:
         - sudo find test/functional -exec chmod g-w {} \;
         - make &&
           sudo sh -c 'umask 0022 && make install' &&
-          sudo sh -c 'umask 0022 && make install-check'
+          sudo sh -c 'umask 0022 && make install-check' &&
+          sh -c 'make check-test-ids'
 
 after_failure:
         - cat test-suite.log

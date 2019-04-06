@@ -390,6 +390,9 @@ shellcheck-all:
 		shellcheck -s bash -x -e SC1008 /dev/stdin \
 		" \;
 
+check-test-ids:
+	test/functional/check_ids.bash
+
 release:
 	@git rev-parse v$(PACKAGE_VERSION) &> /dev/null; \
 	if [ "$$?" -eq 0 ]; then \

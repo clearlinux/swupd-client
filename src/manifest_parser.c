@@ -42,6 +42,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 	int err;
 	struct manifest *manifest;
 	struct list *includes = NULL;
+	struct list *optional = NULL;
 	unsigned long long filecount = 0;
 	unsigned long long contentsize = 0;
 
@@ -138,6 +139,8 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			}
 		} else if (strncmp_const(line, "includes:\t") == 0) {
 			includes = list_prepend_data(includes, strdup_or_die(c));
+		} else if (strncmp_const(line, "optional:\t") == 0) {
+			optional = list_prepend_data(optional, strdup_or_die(c));
 		}
 	}
 
@@ -145,6 +148,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 	manifest->filecount = filecount;
 	manifest->contentsize = contentsize;
 	manifest->includes = includes;
+	manifest->optional = optional;
 
 	if (header_only) {
 		fclose(infile);
@@ -291,6 +295,9 @@ void free_manifest(struct manifest *manifest)
 	}
 	if (manifest->includes) {
 		list_free_list_and_data(manifest->includes, free);
+	}
+	if (manifest->optional) {
+		list_free_list_and_data(manifest->optional, free);
 	}
 	free_string(&manifest->component);
 	free(manifest);

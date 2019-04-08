@@ -22,6 +22,7 @@ struct manifest {
 	uint64_t filecount;
 	uint64_t contentsize;
 	struct list *includes; /* list of strings with manifest names */
+	struct list *optional;
 	char *component;
 
 	// File list

@@ -848,7 +848,7 @@ struct list *filter_out_existing_files(struct list *files)
 		file = list->data;
 
 		filename = mk_full_filename(path_prefix, file->filename);
-		if (verify_file_lazy(filename)) {
+		if (verify_file(file, filename)) {
 			ret = list_free_item(list, NULL);
 		}
 		free_string(&filename);

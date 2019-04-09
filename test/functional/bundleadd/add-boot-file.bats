@@ -32,7 +32,7 @@ test_setup() {
 		.*...100%
 
 		Calling post-update helper scripts.
-		Warning: post-update helper script \($TEST_DIRNAME/testfs/target-dir//usr/bin/clr-boot-manager\) not found, it will be skipped
+		Warning: helper script \($TEST_DIRNAME/testfs/target-dir//usr/bin/clr-boot-manager\) not found, it will be skipped
 		Successfully installed 1 bundle
 	EOM
 	)

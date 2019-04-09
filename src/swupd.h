@@ -19,6 +19,7 @@
 #include "lib/strings.h"
 #include "lib/sys.h"
 #include "manifest.h"
+#include "scripts.h"
 #include "swupd_curl.h"
 #include "swupd_exit_codes.h"
 #include "timelist.h"
@@ -313,9 +314,6 @@ extern char *mk_full_filename(const char *prefix, const char *path);
 extern bool is_directory_mounted(const char *filename);
 extern bool is_under_mounted_directory(const char *filename);
 extern bool is_populated_dir(char *dirname);
-
-extern void run_scripts(bool block);
-extern void run_preupdate_scripts(struct manifest *manifest);
 
 /* filedesc.c */
 extern void dump_file_descriptor_leaks(void);

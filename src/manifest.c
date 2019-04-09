@@ -149,7 +149,7 @@ static int try_manifest_delta_download(int from, int to, char *component)
 	string_or_die(&manifest_delta, "%s/Manifest-%s-delta-from-%i-to-%i", state_dir, component, from, to);
 	string_or_die(&to_dir, "%s/%i", state_dir, to);
 
-	if (!file_exits(manifest_delta)) {
+	if (!file_exists(manifest_delta)) {
 		string_or_die(&url, "%s/%i/Manifest-%s-delta-from-%i", content_url, to, component, from);
 		ret = swupd_curl_get_file(url, manifest_delta);
 		free_string(&url);

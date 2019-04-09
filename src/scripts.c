@@ -186,7 +186,7 @@ void run_preupdate_scripts(struct manifest *manifest)
 		string_or_die(&script, "%s/%s", path_prefix, PRE_UPDATE);
 	}
 
-	if (!file_exits(script)) {
+	if (!file_exists(script)) {
 		goto end;
 	}
 

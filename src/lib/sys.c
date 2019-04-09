@@ -200,7 +200,7 @@ struct list *get_dir_files_sorted(char *path)
 	return list_sort(files, lex_sort);
 }
 
-bool file_exits(const char *filename)
+bool file_exists(const char *filename)
 {
 	struct stat sb;
 

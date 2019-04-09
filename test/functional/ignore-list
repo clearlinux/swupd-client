@@ -1,4 +1,4 @@
-Warning: post-update helper script .* not found, it will be skipped
+Warning: helper script .* not found, it will be skipped
 Update took .*
 Compile-time options:.*
 Compile-time configuration:

@@ -33,64 +33,69 @@
 #include "config.h"
 #include "swupd.h"
 
-static bool in_container(void)
-{
-	/* systemd-detect-virt -c does container detection only *
-         * The return code is zero if the system is in a container */
-	return !run_command("/usr/bin/systemd-detect-virt", "-c");
-}
+#define CLEAR_SERVICE_RESTART_SCRIPT "/usr/bin/clr-service-restart"
 
-static void run_script(char *scriptname, char *cmd)
-{
-	struct stat s;
-	__attribute__((unused)) int ret = 0;
-
-	/* make sure the script exists before attempting to execute it */
-	if (stat(scriptname, &s) == 0 && (S_ISREG(s.st_mode))) {
-		ret = system(cmd);
-	} else {
-		warn("post-update helper script (%s) not found, it will be skipped\n", scriptname);
-	}
-}
+// Run script if it exists. It's a macro instead of a functions to be able
+// to call another function with variable number of parameters
+#define run_script_if_exists(_scriptname, ...)                                                   \
+	do {                                                                                     \
+		if (!file_is_executable(_scriptname)) {                                          \
+			warn("helper script (%s) not found, it will be skipped\n", _scriptname); \
+			break;                                                                   \
+		}                                                                                \
+		run_command_full(NULL, NULL, _scriptname, __VA_ARGS__);                          \
+	} while (0)
 
 static void update_boot(void)
 {
-	char *boot_update_cmd = NULL;
 	char *scriptname;
 
 	/* Don't run clr-boot-manager update in a container on the rootfs */
-	if (strcmp("/", path_prefix) == 0 && in_container()) {
+	if (strcmp("/", path_prefix) == 0 && systemd_in_container()) {
 		return;
 	}
 
 	if (strcmp("/", path_prefix) == 0) {
-		string_or_die(&scriptname, "/usr/bin/clr-boot-manager");
-		string_or_die(&boot_update_cmd, "/usr/bin/clr-boot-manager update");
+		run_script_if_exists("/usr/bin/clr-boot-manager", "update", NULL);
 	} else {
 		string_or_die(&scriptname, "%s/usr/bin/clr-boot-manager", path_prefix);
-		string_or_die(&boot_update_cmd, "%s/usr/bin/clr-boot-manager update --path %s", path_prefix, path_prefix);
+		run_script_if_exists(scriptname, "update", "--path", path_prefix, NULL);
+		free_string(&scriptname);
+	}
+}
+
+void exec_post_update_script(bool reexec, bool block)
+{
+
+	char *params[5];
+	int i = 0;
+	bool has_path_prefix;
+
+	has_path_prefix = strcmp("/", path_prefix) != 0;
+
+	params[i++] = str_or_die("%s%s", has_path_prefix ? path_prefix : "",
+				 POST_UPDATE);
+
+	if (has_path_prefix) {
+		params[i++] = path_prefix;
 	}
 
-	run_script(scriptname, boot_update_cmd);
+	if (block) {
+		params[i++] = "--no-block";
+	}
 
-	free_string(&boot_update_cmd);
-	free_string(&scriptname);
+	if (reexec) {
+		params[i++] = "--reexec";
+	}
+
+	params[i++] = NULL;
+
+	run_command_params(params);
+	free(params[0]);
 }
 
 static void update_triggers(bool block)
 {
-	char *cmd = NULL;
-	char *scriptname;
-	char const *block_flag = NULL;
-	char const *reexec_flag = NULL;
-	__attribute__((unused)) int ret = 0;
-
-	if (!block) {
-		block_flag = "--no-block";
-	} else {
-		block_flag = "";
-	}
-
 	if (strlen(POST_UPDATE) == 0) {
 		/* fall back to systemd if path prefix is not the rootfs
 		 * and the POST_UPDATE trigger wasn't specified */
@@ -98,49 +103,37 @@ static void update_triggers(bool block)
 			return;
 		}
 
-		ret = system("/usr/bin/systemctl > /dev/null 2>&1");
-		if (ret != 0) {
+		if (!systemctl_active()) {
 			warn("systemctl not operable, "
 			     "unable to run systemd update triggers\n");
 			return;
 		}
+
 		/* These must block so that new update triggers are executed after */
 		if (need_systemd_reexec) {
-			ret = system("/usr/bin/systemctl daemon-reexec");
+			systemctl_daemon_reexec();
 		} else {
-			ret = system("/usr/bin/systemctl daemon-reload");
+			systemctl_daemon_reload();
 		}
 
 		/* Check for daemons that need to be restarted */
-		if (access("/usr/bin/clr-service-restart", F_OK | X_OK) == 0) {
-			ret = system("/usr/bin/clr-service-restart");
+		if (file_is_executable(CLEAR_SERVICE_RESTART_SCRIPT)) {
+			run_command(CLEAR_SERVICE_RESTART_SCRIPT, NULL);
 		}
 
-		string_or_die(&scriptname, "/usr/bin/systemctl");
-		string_or_die(&cmd, "/usr/bin/systemctl %s restart update-triggers.target", block_flag);
+		if (block) {
+			systemctl_restart("update-triggers.target");
+		} else {
+			systemctl_restart_noblock("update-triggers.target");
+		}
 	} else {
 		/* These must block so that new update triggers are executed after */
-		if (need_systemd_reexec) {
-			reexec_flag = "--reexec";
-		} else {
-			reexec_flag = "";
-		}
 
-		if (strcmp("/", path_prefix) == 0) {
-			string_or_die(&scriptname, "%s", POST_UPDATE);
-			string_or_die(&cmd, "%s %s %s", POST_UPDATE, reexec_flag, block_flag);
-		} else {
-			string_or_die(&scriptname, "%s%s", path_prefix, POST_UPDATE);
-			string_or_die(&cmd, "%s/%s %s %s %s", path_prefix, POST_UPDATE, path_prefix, reexec_flag, block_flag);
-		}
+		exec_post_update_script(need_systemd_reexec, block);
 	}
-	run_script(scriptname, cmd);
-
-	free_string(&scriptname);
-	free_string(&cmd);
 }
 
-void run_scripts(bool block)
+void scripts_run_post_update(bool block)
 {
 	if (no_scripts) {
 		warn("post-update helper scripts skipped due to "
@@ -165,16 +158,13 @@ void run_scripts(bool block)
 static void exec_pre_update_script(const char *script)
 {
 	if (strlen(PRE_UPDATE) == 0 || strcmp("/", path_prefix) == 0) {
-		run_command(script, NULL);
+		run_script_if_exists(script, NULL);
 	} else {
-		run_command(script, path_prefix, NULL);
+		run_script_if_exists(script, path_prefix, NULL);
 	}
 }
 
-/* Run any "mandatory" pre-update scripts needed. In this case, mandatory
- * means the script must run, but it is not yet fatal if the script does not
- * return success */
-void run_preupdate_scripts(struct manifest *manifest)
+void scripts_run_pre_update(struct manifest *manifest)
 {
 	struct list *iter = list_tail(manifest->files);
 	struct file *file;

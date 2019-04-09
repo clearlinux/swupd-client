@@ -411,7 +411,7 @@ version_check:
 	/* Step 5: check disk state before attempting update */
 	timelist_timer_start(global_times, "Run pre-update scripts");
 	progress_set_step(5, "run_preupdate_scripts");
-	run_preupdate_scripts(server_manifest);
+	scripts_run_pre_update(server_manifest);
 	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Run pre-update scripts
 
@@ -472,7 +472,7 @@ version_check:
 	if (on_new_format() && (requested_version == -1 || (requested_version > new_current_version))) {
 		re_update = true;
 	}
-	run_scripts(re_update);
+	scripts_run_post_update(re_update);
 	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Run post-update scripts
 

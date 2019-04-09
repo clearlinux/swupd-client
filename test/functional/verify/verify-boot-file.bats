@@ -47,7 +47,7 @@ test_setup() {
 		    1 of 1 files were fixed
 		    0 of 1 files were not fixed
 		Calling post-update helper scripts.
-		Warning: post-update helper script \\($TEST_DIRNAME/testfs/target-dir//usr/bin/clr-boot-manager\\) not found, it will be skipped
+		Warning: helper script \\($TEST_DIRNAME/testfs/target-dir//usr/bin/clr-boot-manager\\) not found, it will be skipped
 		Fix successful
 	EOM
 	)

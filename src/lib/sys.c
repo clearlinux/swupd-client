@@ -20,6 +20,7 @@
 #include "sys.h"
 #include "list.h"
 #include "log.h"
+#include "macros.h"
 #include "memory.h"
 #include "strings.h"
 
@@ -53,9 +54,11 @@ static int replace_fd(int fd, const char *fd_file)
 	return replaced_fd;
 }
 
-int run_command_full(const char *stdout_file, const char *stderr_file, const char *cmd, ...)
+int run_command_full_params(const char *stdout_file, const char *stderr_file, char **params)
 {
 	int pid, ret, child_ret;
+	const char *cmd = params[0];
+	;
 
 	pid = fork();
 	if (pid < 0) {
@@ -77,34 +80,6 @@ int run_command_full(const char *stdout_file, const char *stderr_file, const cha
 	}
 
 	// Child
-	va_list ap;
-	char **params;
-	int args_count = 0, i = 0;
-	char *arg;
-
-	va_start(ap, cmd);
-	while ((arg = va_arg(ap, char *)) != NULL) {
-		args_count++;
-	}
-	va_end(ap);
-
-	// Create params array with space for all parameters,
-	// command basename and NULL terminator
-	params = malloc(sizeof(char *) * (args_count + 2));
-	if (!params) {
-		goto error_child;
-	}
-
-	params[i++] = (char *)cmd;
-
-	va_start(ap, cmd);
-	while ((arg = va_arg(ap, char *)) != NULL) {
-		params[i++] = arg;
-	}
-	va_end(ap);
-
-	params[i] = NULL;
-
 	if (replace_fd(STDOUT_FILENO, stdout_file) < 0) {
 		goto error_child;
 	}
@@ -117,7 +92,6 @@ int run_command_full(const char *stdout_file, const char *stderr_file, const cha
 	if (ret < 0) {
 		error("run_command %s failed: %i (%s)\n", cmd, errno, strerror(errno));
 	}
-	free(params);
 
 	exit(EXIT_FAILURE); // execve nevers return on success
 	return 0;
@@ -125,6 +99,41 @@ int run_command_full(const char *stdout_file, const char *stderr_file, const cha
 error_child:
 	exit(255);
 	return 0;
+}
+
+int run_command_full(const char *stdout_file, const char *stderr_file, const char *cmd, ...)
+{
+	char **params;
+	int args_count = 0, i = 0;
+	va_list ap;
+	char *arg;
+	int ret = 0;
+
+	va_start(ap, cmd);
+	while ((arg = va_arg(ap, char *)) != NULL) {
+		args_count++;
+	}
+	va_end(ap);
+
+	// Create params array with space for all parameters,
+	// command basename and NULL terminator
+	params = malloc(sizeof(char *) * (args_count + 2));
+	ON_NULL_ABORT(params);
+
+	params[i++] = (char *)cmd;
+
+	va_start(ap, cmd);
+	while ((arg = va_arg(ap, char *)) != NULL) {
+		params[i++] = arg;
+	}
+	va_end(ap);
+
+	params[i] = NULL;
+
+	ret = run_command_full_params(stdout_file, stderr_file, params);
+
+	free(params);
+	return ret;
 }
 
 long get_available_space(const char *path)
@@ -236,6 +245,11 @@ int systemctl_restart(const char *service)
 	return systemctl_cmd("restart", service, NULL);
 }
 
+int systemctl_restart_noblock(const char *service)
+{
+	return systemctl_cmd("restart", service, NULL);
+}
+
 bool systemctl_active(void)
 {
 	/* In a container, "/usr/bin/systemctl" will return 1 with
@@ -245,4 +259,21 @@ bool systemctl_active(void)
 	 * of is-enabled. */
 
 	return systemctl_cmd(NULL) == 0;
+}
+
+int systemctl_daemon_reexec(void)
+{
+	return systemctl_cmd("daemon-reexec", NULL);
+}
+
+int systemctl_daemon_reload(void)
+{
+	return systemctl_cmd("daemon-reload", NULL);
+}
+
+bool systemd_in_container(void)
+{
+	/* systemd-detect-virt -c does container detection only *
+         * The return code is zero if the system is in a container */
+	return !run_command("/usr/bin/systemd-detect-virt", "-c");
 }

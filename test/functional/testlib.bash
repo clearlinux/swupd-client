@@ -853,7 +853,9 @@ add_to_manifest() { # swupd_function
 add_dependency_to_manifest() { # swupd_function
 
 	local partial=false
+	local flag=includes
 	[ "$1" = "-p" ] && { partial=true ; shift ; }
+	[ "$1" = "-o" ] && { flag=optional ; shift ; }
 	local manifest=$1
 	local dependency=$2
 	local path
@@ -864,13 +866,18 @@ add_dependency_to_manifest() { # swupd_function
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    add_dependency_to_manifest <manifest> <dependency>
+			    add_dependency_to_manifest [-p] [-o] <manifest> <dependency>
 
 			Options:
 			    -p    If set (partial), the dependency will be added to the manifest,
 			          but the manifest's tar won't be re-created, nor the hash in the
 			          MoM will be updated either. This is useful if more updates are
 			          to be done in the manifest to avoid extra processing
+			    -o    If set (optional), the dependency will be added to the manifest
+			          as an optional dependency.
+
+			    Note: if both options -p and -o are to be used, they must be specified in that order or
+			      one option will be ignored.
 			EOM
 		return
 	fi
@@ -895,7 +902,7 @@ add_dependency_to_manifest() { # swupd_function
 		update_manifest -p "$manifest" previous "$pre_version"
 	fi
 	update_manifest -p "$manifest" timestamp "$(date +"%s")"
-	sudo sed -i "/^contentsize:.*/a includes:\\t$dependency" "$manifest"
+	sudo sed -i "/^contentsize:.*/a $flag:\\t$dependency" "$manifest"
 	# If a manifest tar already exists for that manifest, renew the manifest tar
 	# unless specified otherwise
 	if [ "$partial" = false ]; then

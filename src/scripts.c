@@ -162,6 +162,15 @@ void run_scripts(bool block)
 	update_triggers(block);
 }
 
+static void exec_pre_update_script(const char *script)
+{
+	if (strlen(PRE_UPDATE) == 0 || strcmp("/", path_prefix) == 0) {
+		run_command(script, NULL);
+	} else {
+		run_command(script, path_prefix, NULL);
+	}
+}
+
 /* Run any "mandatory" pre-update scripts needed. In this case, mandatory
  * means the script must run, but it is not yet fatal if the script does not
  * return success */
@@ -169,25 +178,19 @@ void run_preupdate_scripts(struct manifest *manifest)
 {
 	struct list *iter = list_tail(manifest->files);
 	struct file *file;
-	struct stat sb;
 	char *script;
-	__attribute__((unused)) int ret = 0;
 
 	if (strlen(PRE_UPDATE) == 0) {
 		string_or_die(&script, "/usr/bin/clr_pre_update.sh");
 	} else {
-		if (strcmp("/", path_prefix) == 0) {
-			string_or_die(&script, PRE_UPDATE);
-		} else {
-			string_or_die(&script, "%s/%s %s", path_prefix, PRE_UPDATE, path_prefix);
-		}
+		string_or_die(&script, "%s/%s", path_prefix, PRE_UPDATE);
 	}
 
-	if (stat(script, &sb) == -1) {
-		free_string(&script);
-		return;
+	if (!file_exits(script)) {
+		goto end;
 	}
 
+	// Check script hash
 	while (iter != NULL) {
 		file = iter->data;
 		iter = iter->prev;
@@ -198,10 +201,12 @@ void run_preupdate_scripts(struct manifest *manifest)
 
 		/* Check that system file matches file in manifest */
 		if (verify_file(file, script)) {
-			ret = system(script);
+			debug("Running pre-update script: %s", script);
+			exec_pre_update_script(script);
 			break;
 		}
 	}
 
+end:
 	free_string(&script);
 }

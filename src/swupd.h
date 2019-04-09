@@ -182,6 +182,7 @@ extern char **swupd_argv;
 extern char *bundle_to_add;
 extern char *state_dir;
 extern int skip_diskspace_check;
+extern bool skip_optional_bundles;
 extern timelist *global_times;
 extern int max_retries;
 extern int retry_delay;

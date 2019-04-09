@@ -729,7 +729,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 			ret |= r; /* merge in recursive call results */
 		}
 
-		if (manifest->optional) {
+		if (!skip_optional_bundles && manifest->optional) {
 			int r = add_subscriptions(manifest->optional, subs, mom, find_all, recursion + 1);
 			if (r & add_sub_ERR) {
 				free_manifest(manifest);

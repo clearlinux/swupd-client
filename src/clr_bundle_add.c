@@ -47,12 +47,14 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
+	print("   -o, --skip-optional     Do not install optional bundles\n");
 	print("   --skip-diskspace-check  Do not check free disk space before adding bundle\n");
 	print("\n");
 }
 
 static const struct option prog_opts[] = {
 	{ "list", no_argument, 0, 'l' },
+	{ "skip-optional", no_argument, 0, 'o' },
 	{ "skip-diskspace-check", no_argument, &skip_diskspace_check, 1 },
 };
 
@@ -63,6 +65,9 @@ static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 		error("[-l, --list] option is deprecated, use\n"
 		      "bundle-list [-a|--all] sub-command instead.\n\n");
 		exit(EXIT_FAILURE);
+	case 'o':
+		skip_optional_bundles = true;
+		return true;
 	default:
 		return false;
 	}

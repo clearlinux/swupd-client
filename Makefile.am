@@ -207,6 +207,7 @@ BATS = \
 	test/functional/bundleremove/remove-include.bats \
 	test/functional/bundleremove/remove-json.bats \
 	test/functional/bundleremove/remove-no-disk-space.bats \
+	test/functional/bundleremove/remove-optional-bundles.bats \
 	test/functional/bundleremove/remove-os-core.bats \
 	test/functional/bundleremove/remove-parse-args.bats \
 	test/functional/bundleremove/remove-with-dependency.bats \

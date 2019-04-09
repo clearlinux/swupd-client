@@ -56,7 +56,7 @@ struct list *get_dir_files_sorted(char *path);
 /*
  * Checks if a file exists in the filesystem.
  */
-bool file_exits(const char *filename);
+bool file_exists(const char *filename);
 
 /*
  * Checks if a file exists in the filesystem and is executable.

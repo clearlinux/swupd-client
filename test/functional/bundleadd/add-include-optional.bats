@@ -27,8 +27,9 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Loading required manifests...
+		No packs need to be downloaded
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Installing bundle(s) files...
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
@@ -38,5 +39,36 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/bar/test-file2
 	assert_file_exists "$TARGETDIR"/baz/test-file3
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
+
+}
+
+@test "ADD052: Adding a bundle skipping its optional bundle" {
+
+	# An optional bundle is not required to be installed in the system while includes
+	# are. Swupd will install optional bundles on bundle-add unless specified otherwise
+	# by using the --skip--optional flag.
+
+	run sudo sh -c "$SWUPD bundle-add --skip-optional $SWUPD_OPTS test-bundle1"
+
+	assert_status_is 0
+	expected_output=$(cat <<-EOM
+		Loading required manifests...
+		No packs need to be downloaded
+		Starting download of remaining update content. This may take a while...
+		Installing bundle(s) files...
+		Calling post-update helper scripts.
+		Successfully installed 1 bundle
+	EOM
+	)
+	assert_is_output "$expected_output"
+	assert_file_exists "$TARGETDIR"/foo/test-file1
+	assert_file_exists "$TARGETDIR"/bar/test-file2
+	assert_file_not_exists "$TARGETDIR"/baz/test-file3
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
 
 }

@@ -20,6 +20,9 @@ long get_available_space(const char *path);
 /* run_command: runs a command with standard and error output (stdout and stderr) set */
 #define run_command(...) run_command_full(NULL, NULL, __VA_ARGS__)
 
+/* run_command_params: runs a command from params with standard and error output (stdout and stderr) set */
+#define run_command_params(_params) run_command_full_params(NULL, NULL, _params)
+
 /* run_command_full: Run command cmd with parameters informed in a NULL
  * terminated list of strings.
  *
@@ -37,6 +40,12 @@ long get_available_space(const char *path);
  * This will run "ls /tmp" and redirect output to stdout and stderr.
  */
 int run_command_full(const char *stdout_file, const char *stderr_file, const char *cmd, ...);
+
+/* run_command_full_params: Run command from a NULL terminated string array of
+ * parameters. First parameter of the list should be the full path to the
+ * command to be executed.
+ */
+int run_command_full_params(const char *stdout_file, const char *stderr_file, char **params);
 
 /* copy_all: Runs cp -a [src] [dst] using run_command_quiet */
 int copy_all(const char *src, const char *dst);
@@ -74,11 +83,20 @@ void journal_log_error(const char *message);
 int systemctl_restart(const char *service);
 
 /*
+ * Restart a systemd service without blocking
+ */
+int systemctl_restart_noblock(const char *service);
+
+/*
  * Check if systemd is active and running in the system.
  * Necessary because not all commands returns correct error codes when running
  * in a container
  */
 bool systemctl_active(void);
+
+int systemctl_daemon_reexec(void);
+int systemctl_daemon_reload(void);
+bool systemd_in_container(void);
 
 #define systemctl_cmd(...) run_command_quiet(SYSTEMCTL, __VA_ARGS__)
 

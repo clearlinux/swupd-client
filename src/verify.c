@@ -941,7 +941,7 @@ brick_the_system_and_clean_curl:
 		need_update_boot = true;
 		need_update_bootloader = true;
 		timelist_timer_start(global_times, "Run Scripts");
-		run_scripts(false);
+		scripts_run_post_update(false);
 		timelist_timer_stop(global_times);
 	}
 

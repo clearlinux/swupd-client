@@ -72,7 +72,7 @@ test_setup() {
 		\{ "type" : "info", "msg" : "    2 of 2 missing files were replaced " \},
 		\{ "type" : "info", "msg" : "    0 of 2 missing files were not replaced " \},
 		\{ "type" : "info", "msg" : "Calling post-update helper scripts. " \},
-		\{ "type" : "warning", "msg" : "post-update helper script \\(.*/usr/bin/clr-boot-manager\\) not found, it will be skipped " \},
+		\{ "type" : "warning", "msg" : "helper script \\(.*/usr/bin/clr-boot-manager\\) not found, it will be skipped " \},
 		\{ "type" : "info", "msg" : "Fix successful " \},
 		\{ "type" : "end", "section" : "verify", "status" : 0 \}
 		\]
@@ -159,7 +159,7 @@ test_setup() {
 		\{ "type" : "info", "msg" : "    3 of 3 files were deleted " \},
 		\{ "type" : "info", "msg" : "    0 of 3 files were not deleted " \},
 		\{ "type" : "info", "msg" : "Calling post-update helper scripts. " \},
-		\{ "type" : "warning", "msg" : "post-update helper script \\(.*/usr/bin/clr-boot-manager\\) not found, it will be skipped " \},
+		\{ "type" : "warning", "msg" : "helper script \\(.*/usr/bin/clr-boot-manager\\) not found, it will be skipped " \},
 		\{ "type" : "info", "msg" : "Fix successful " \},
 		\{ "type" : "end", "section" : "verify", "status" : 0 \}
 		\]

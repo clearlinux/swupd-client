@@ -12,6 +12,14 @@ extern "C" {
  */
 void string_or_die(char **strp, const char *fmt, ...);
 
+/*
+ * Return a new allocated string with the content printed from fmt and
+ * parameters using vasprintf. Abort on memory allocation errors.
+ *
+ * Similar to string_or_die(), but returns the string pointer.
+ */
+char *str_or_die(const char *fmt, ...);
+
 /* Return a duplicated copy of the string using strdup().
  * Abort if there's no memory to allocate the new string.
  */

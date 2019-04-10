@@ -7,6 +7,7 @@ load "../testlib"
 
 test_setup() {
 
+	skip "This test is unstable and should be improved. Skipping that for now"
 	create_test_environment -r "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /foo/test-file1,/bar/test-file2,/baz "$TEST_NAME"
 	create_bundle -n test-bundle2 -f /test-file3,/test-file4 "$TEST_NAME"

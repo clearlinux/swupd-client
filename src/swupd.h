@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "lib/archives.h"
 #include "lib/formatter_json.h"
 #include "lib/list.h"
 #include "lib/log.h"
@@ -18,7 +19,6 @@
 #include "lib/progress.h"
 #include "lib/strings.h"
 #include "lib/sys.h"
-#include "lib/archives.h"
 #include "manifest.h"
 #include "scripts.h"
 #include "swupd_curl.h"

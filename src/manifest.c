@@ -241,7 +241,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 	}
 
 untar:
-	ret = extract_to(filename, dir);
+	ret = archives_extract_to(filename, dir);
 	if (ret != 0) {
 		goto out;
 	} else {

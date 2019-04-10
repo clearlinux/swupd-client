@@ -86,6 +86,43 @@ static int copy_data(struct archive *ar, struct archive *aw)
 	return 0;
 }
 
+static int archive_from_filename(struct archive **a, const char *tarfile)
+{
+	int r = 0;
+
+	if (!a) {
+		return -EINVAL;
+	}
+
+	*a = archive_read_new();
+	if (!*a) {
+		return -ENOMEM;
+	}
+
+	r = archive_read_support_format_tar(*a);
+	if (_archive_check_err(*a, r)) {
+		goto error;
+	}
+
+	r = archive_read_support_filter_all(*a);
+	if (_archive_check_err(*a, r)) {
+		goto error;
+	}
+
+	r = archive_read_open_filename(*a, tarfile, 10240);
+	if (_archive_check_err(*a, r)) {
+		/* could not open archive for read */
+		goto error;
+	}
+
+	return 0;
+
+error:
+	archive_read_close(*a);
+	archive_read_free(*a);
+	return r;
+}
+
 int archives_extract_to(const char *tarfile, const char *outputdir)
 {
 	struct archive *a, *ext;
@@ -104,15 +141,9 @@ int archives_extract_to(const char *tarfile, const char *outputdir)
 	flags |= ARCHIVE_EXTRACT_SECURE_NODOTDOT;
 
 	/* set up read */
-	a = archive_read_new();
-	r = archive_read_support_format_tar(a);
-	if (_archive_check_err(a, r)) {
-		goto out_read;
-	}
-
-	r = archive_read_support_filter_all(a);
-	if (_archive_check_err(a, r)) {
-		goto out_read;
+	r = archive_from_filename(&a, tarfile);
+	if (r < 0) {
+		return r;
 	}
 
 	/* set up write */
@@ -124,12 +155,6 @@ int archives_extract_to(const char *tarfile, const char *outputdir)
 
 	r = archive_write_disk_set_standard_lookup(ext);
 	if (_archive_check_err(ext, r)) {
-		goto out;
-	}
-
-	r = archive_read_open_filename(a, tarfile, 10240);
-	if (_archive_check_err(a, r)) {
-		/* could not open archive for read */
 		goto out;
 	}
 
@@ -191,8 +216,37 @@ out:
 	 * error. If 'goto out' is called, we already have an error we are handling
 	 * so don't overwrite that returncode. */
 	archive_write_free(ext);
-out_read:
 	archive_read_close(a);
 	archive_read_free(a);
 	return r;
+}
+
+int archives_check_single_file_tarball(const char *tarfilename, const char *file)
+{
+	struct archive *a;
+	struct archive_entry *entry;
+	int r;
+	bool found = false;
+
+	/* set up read */
+	r = archive_from_filename(&a, tarfilename);
+	if (r < 0) {
+		return r;
+	}
+
+	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
+		if (!found && strcmp(archive_entry_pathname(entry), file) == 0) {
+			found = true;
+		} else {
+			found = false;
+			goto end;
+		}
+		archive_read_data_skip(a);
+	}
+
+end:
+	archive_read_close(a);
+	archive_read_free(a);
+
+	return found ? 0 : -ENOENT;
 }

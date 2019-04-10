@@ -11,6 +11,12 @@ extern "C" {
  */
 int archives_extract_to(const char *tarfile, const char *outputdir);
 
+/*
+ * Check if this tarball is valid and if it contains only one file with the
+ * specified name.
+ */
+int archives_check_single_file_tarball(const char *tarfilename, const char *file);
+
 #ifdef __cplusplus
 }
 #endif

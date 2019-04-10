@@ -906,58 +906,14 @@ int link_or_rename(const char *orig, const char *dest)
 	return 0;
 }
 
-/* list the tarfile content, and verify it contains only one line equal to the expected hash.
- * loop through all the content to detect the case where archive contains more than one file.
- */
-static int check_tarfile_content(struct file *file, const char *tarfilename)
+static int check_single_file_tarball(const char *tarfilename, struct file *file)
 {
 	int err;
-	char *tarcommand;
-	FILE *tar;
-	int count = 0;
+	char *filename;
 
-	string_or_die(&tarcommand, TAR_COMMAND " -tf %s/download/%s.tar 2> /dev/null", state_dir, file->hash);
-
-	err = access(tarfilename, R_OK);
-	if (err) {
-		goto free_tarcommand;
-	}
-
-	tar = popen(tarcommand, "r");
-	if (tar == NULL) {
-		err = -1;
-		goto free_tarcommand;
-	}
-
-	while (!feof(tar)) {
-		char *c;
-		char buffer[PATH_MAXLEN];
-
-		if (fgets(buffer, PATH_MAXLEN, tar) == NULL) {
-			if (count != 1) {
-				err = -1;
-			}
-			break;
-		}
-
-		c = strchr(buffer, '\n');
-		if (c) {
-			*c = 0;
-		}
-		if (c && (c != buffer) && (*(c - 1) == '/')) {
-			/* strip trailing '/' from directory tar */
-			*(c - 1) = 0;
-		}
-		if (strcmp(buffer, file->hash) != 0) {
-			err = -1;
-			break;
-		}
-		count++;
-	}
-
-	pclose(tar);
-free_tarcommand:
-	free_string(&tarcommand);
+	string_or_die(&filename, "%s%s", file->hash, file->is_dir ? "/" : "");
+	err = archives_check_single_file_tarball(tarfilename, filename);
+	free(filename);
 
 	return err;
 }
@@ -1004,7 +960,7 @@ int untar_full_download(void *data)
 	}
 	free_string(&tar_dotfile);
 
-	err = check_tarfile_content(file, tarfile);
+	err = check_single_file_tarball(tarfile, file);
 	if (err) {
 		goto exit;
 	}

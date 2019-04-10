@@ -58,7 +58,7 @@ static int finalize_pack_download(const char *module, int newversion, const char
 	int err;
 
 	info("\nExtracting %s pack for version %i\n", module, newversion);
-	err = extract_to(filename, state_dir);
+	err = archives_extract_to(filename, state_dir);
 
 	unlink(filename);
 

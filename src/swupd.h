@@ -18,6 +18,7 @@
 #include "lib/progress.h"
 #include "lib/strings.h"
 #include "lib/sys.h"
+#include "lib/archives.h"
 #include "manifest.h"
 #include "swupd_curl.h"
 #include "swupd_exit_codes.h"
@@ -212,8 +213,6 @@ extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct l
 
 extern int get_value_from_path(char **contents, const char *path, bool is_abs_path);
 extern int get_version_from_path(const char *abs_path);
-
-extern int extract_to(const char *tarfile, const char *outputdir);
 
 static inline int bsearch_file_helper(const void *A, const void *B)
 {

@@ -1012,7 +1012,7 @@ int untar_full_download(void *data)
 	/* modern tar will automatically determine the compression type used */
 	char *outputdir;
 	string_or_die(&outputdir, "%s/staged", state_dir);
-	err = extract_to(tarfile, outputdir);
+	err = archives_extract_to(tarfile, outputdir);
 	free_string(&outputdir);
 	if (err) {
 		warn("ignoring tar extract failure for fullfile %s.tar (ret %d)\n",

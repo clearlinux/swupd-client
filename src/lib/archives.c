@@ -22,10 +22,14 @@
 
 #include <archive.h>
 #include <archive_entry.h>
+#include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/errno.h>
 
-#include "swupd.h"
+#include "archives.h"
+#include "log.h"
+#include "strings.h"
 
 /* _archive_check_err(ar, ret)
  *
@@ -83,11 +87,7 @@ static int copy_data(struct archive *ar, struct archive *aw)
 	return 0;
 }
 
-/* extract_to(tarfile, outputdir)
- *
- * Extracts tar archive tarfile to outputdir. Refuses to extract any object
- * whose final location would be altered by a symlink on disk. */
-int extract_to(const char *tarfile, const char *outputdir)
+int archives_extract_to(const char *tarfile, const char *outputdir)
 {
 	struct archive *a, *ext;
 	struct archive_entry *entry;

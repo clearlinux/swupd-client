@@ -34,7 +34,8 @@ AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS)
 swupd_SOURCES = \
 	src/alias.c \
 	src/alias.h \
-	src/archives.c \
+	src/lib/archives.c \
+	src/lib/archives.h \
 	src/autoupdate.c \
 	src/binary_loader.c \
 	src/bundle.c \

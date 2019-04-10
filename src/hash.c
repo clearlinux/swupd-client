@@ -314,7 +314,7 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 
 			char *outputdir;
 			string_or_die(&outputdir, "%s/%i", state_dir, current->last_change);
-			ret = extract_to(filename, outputdir);
+			ret = archives_extract_to(filename, outputdir);
 			free_string(&outputdir);
 			free_string(&filename);
 

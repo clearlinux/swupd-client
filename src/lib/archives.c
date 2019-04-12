@@ -225,28 +225,48 @@ int archives_check_single_file_tarball(const char *tarfilename, const char *file
 {
 	struct archive *a;
 	struct archive_entry *entry;
-	int r;
-	bool found = false;
+	const char *file_entry;
+	size_t file_len;
+	int ret = 0;
 
-	/* set up read */
-	r = archive_from_filename(&a, tarfilename);
-	if (r < 0) {
-		return r;
+	// Read archive
+	ret = archive_from_filename(&a, tarfilename);
+	if (ret < 0) {
+		ret = -ENOENT;
+		return ret;
 	}
 
-	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
-		if (!found && strcmp(archive_entry_pathname(entry), file) == 0) {
-			found = true;
-		} else {
-			found = false;
-			goto end;
-		}
-		archive_read_data_skip(a);
+	// Read first file entry
+	ret = archive_read_next_header(a, &entry);
+	if (ret != ARCHIVE_OK) {
+		ret = -ENOENT;
+		goto error;
 	}
 
-end:
+	// Remove trailing '/'
+	file_entry = archive_entry_pathname(entry);
+	file_len = strlen(file_entry);
+	if (file_entry[file_len - 1] == '/') {
+		file_len--;
+	}
+
+	if (strncmp(file_entry, file, file_len) != 0) {
+		ret = -ENOENT;
+		goto error;
+	}
+
+	// Read next file. If exists, it's an error
+	ret = archive_read_next_header(a, &entry);
+	if (ret != ARCHIVE_EOF) { // More than one file in the tarball
+		ret = -ENOENT;
+		goto error;
+	}
+
+	ret = 0;
+
+error:
 	archive_read_close(a);
 	archive_read_free(a);
 
-	return found ? 0 : -ENOENT;
+	return ret;
 }

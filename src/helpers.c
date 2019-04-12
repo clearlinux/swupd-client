@@ -906,18 +906,6 @@ int link_or_rename(const char *orig, const char *dest)
 	return 0;
 }
 
-static int check_single_file_tarball(const char *tarfilename, struct file *file)
-{
-	int err;
-	char *filename;
-
-	string_or_die(&filename, "%s%s", file->hash, file->is_dir ? "/" : "");
-	err = archives_check_single_file_tarball(tarfilename, filename);
-	free(filename);
-
-	return err;
-}
-
 /* This function will break if the same HASH.tar full file is downloaded
  * multiple times in parallel. */
 int untar_full_download(void *data)
@@ -960,7 +948,7 @@ int untar_full_download(void *data)
 	}
 	free_string(&tar_dotfile);
 
-	err = check_single_file_tarball(tarfile, file);
+	err = archives_check_single_file_tarball(tarfile, file->hash);
 	if (err) {
 		goto exit;
 	}

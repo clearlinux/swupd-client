@@ -197,15 +197,15 @@ cert_path=
 # Makes sure --with-certpath receives an argument that is not "yes" or "no",
 # and uses the default path if only --enable-signature-verification is passed.
 AS_IF(
-  [test "$enable_signature_verification" = "yes" && test "$with_certpath" = "no"],
+  [test "x$enable_signature_verification" != "xno" && test "$with_certpath" = "no"],
   [AC_MSG_ERROR(['--with-certpath=no' or '--without-certpath' not supported. Specify a PATH.])],
-  [test "$enable_signature_verification" = "yes" && test "$with_certpath" = "yes"],
+  [test "x$enable_signature_verification" != "xno" && test "$with_certpath" = "yes"],
   [AC_MSG_ERROR(['--with-certpath=yes' or '--with-certpath' not supported. Specify a PATH.])],
-  [test "$enable_signature_verification" != "yes" && test -n "$with_certpath"],
+  [test "x$enable_signature_verification" = "xno" && test -n "$with_certpath"],
   [AC_MSG_WARN([--with-certpath=PATH requires --enable-signature-verification])],
-  [test "$enable_signature_verification" = "yes" && test -n "$with_certpath"],
+  [test "x$enable_signature_verification" != "xno" && test -n "$with_certpath"],
   [cert_path="$with_certpath"],
-  [test "$enable_signature_verification" = "yes"],
+  [test "x$enable_signature_verification" != "xno"],
   [cert_path="$default_cert_path"]
 )
 

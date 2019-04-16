@@ -36,8 +36,6 @@ extern "C" {
 #define CURRENT_OS_VERSION -1
 #define BUNDLE_NAME_MAXLEN 256
 
-#define UNUSED_PARAM __attribute__((__unused__))
-
 /* value used for configuring downloads */
 #define DELAY_MULTIPLIER 2
 #define MAX_DELAY 60

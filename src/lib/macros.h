@@ -7,4 +7,6 @@
 		abort();   \
 	}
 
+#define UNUSED_PARAM __attribute__((__unused__))
+
 #endif

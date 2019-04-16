@@ -572,7 +572,7 @@ enum swupd_code swupd_init(void)
 	}
 
 	/* If --nosigcheck, we do not attempt any signature checking */
-	if (sigcheck && !signature_init()) {
+	if (sigcheck && !signature_init(cert_path, NULL)) {
 		ret = SWUPD_SIGNATURE_VERIFICATION_FAILED;
 		signature_deinit();
 		goto out_close_lock;

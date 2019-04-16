@@ -10,9 +10,14 @@ extern "C" {
 /*
  * Initialize this module.
  *
- * @return true if no error
+ * @param cert_path the path to the certificate to be used to check signatures.
+ * @param crl       a certificate revocation list to be used to check if the
+ *                  certificate is revoked. If null, the certificate is
+ *                  considered valid.
+ *
+ * @return true if no error.
  */
-bool signature_init(void);
+bool signature_init(const char *certificate_path, const char *crl);
 
 /*
  * Terminate usage of this module, free resources.
@@ -24,7 +29,7 @@ void signature_deinit(void);
  * Download the corresponding signature file, and verify the data against the signature.
  * Delete the signature file if and only if the verification fails.
  *
- * @param data_url the URL from which the data came
+ * @param data_url      the URL from which the data came
  * @param data_filename the file containing the data
  *
  * @return true if no error

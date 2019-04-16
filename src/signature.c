@@ -44,18 +44,12 @@
 
 #ifdef SIGNATURES
 
-static char *CERTNAME;
-
-static int validate_certificate(void);
+static int validate_certificate(X509 *cert, const char *certificate_path, const char *crl);
 static int verify_callback(int, X509_STORE_CTX *);
-static bool get_pubkey();
+static X509 *get_cert_from_path(const char *certificate_path);
 
-FILE *fp_pubkey = NULL;
-X509 *cert = NULL;
-X509_STORE *store = NULL;
-STACK_OF(X509) *x509_stack = NULL;
-//TODO: static char *chain = NULL;
-static char *crl = NULL;
+static X509_STORE *store = NULL;
+static STACK_OF(X509) *x509_stack = NULL;
 
 /* This function must be called before trying to sign any file.
  * It loads string for errors, and ciphers are auto-loaded by OpenSSL now.
@@ -63,21 +57,26 @@ static char *crl = NULL;
  * be validated.
  *
  * returns: true if can initialize and validate certificates, otherwise false */
-bool signature_init(void)
+bool signature_init(const char *certificate_path, const char *crl)
 {
 	int ret = -1;
+	X509 *cert;
 
-	string_or_die(&CERTNAME, "%s", cert_path);
+	if (!certificate_path) {
+		error("Invalid swupd certificate - Empty");
+		return false;
+	}
 
 	ERR_load_crypto_strings();
 	ERR_load_PKCS7_strings();
 	EVP_add_digest(EVP_sha256());
 
-	if (!get_pubkey()) {
+	cert = get_cert_from_path(certificate_path);
+	if (!cert) {
 		goto fail;
 	}
 
-	ret = validate_certificate();
+	ret = validate_certificate(cert, certificate_path, crl);
 	if (ret) {
 		if (ret == X509_V_ERR_CERT_NOT_YET_VALID) {
 			BIO *b;
@@ -133,8 +132,6 @@ fail:
  * certificates and private keys. */
 void signature_deinit(void)
 {
-	//TODO: once implemented, must free chain
-	//TODO: once implemented, must free crl
 	if (store) {
 		X509_STORE_free(store);
 		store = NULL;
@@ -145,12 +142,6 @@ void signature_deinit(void)
 	}
 	ERR_free_strings();
 	EVP_cleanup();
-	if (fp_pubkey) {
-		fclose(fp_pubkey);
-	}
-	if (cert) {
-		cert = NULL;
-	}
 	CRYPTO_cleanup_all_ex_data();
 }
 
@@ -281,27 +272,30 @@ error:
 	return result;
 }
 
-/* Make sure the certificate exists and extract the public key from it.
- *
- * returns: true if it can get the public key, false otherwise */
-static bool get_pubkey(void)
+/* Returns a pointer to a parsed X509 certificate from file. */
+static X509 *get_cert_from_path(const char *certificate_path)
 {
-	fp_pubkey = fopen(CERTNAME, "re");
+	FILE *fp_pubkey = NULL;
+	X509 *cert = NULL;
+
+	fp_pubkey = fopen(certificate_path, "re");
 	if (!fp_pubkey) {
-		error("Failed fopen %s\n", CERTNAME);
+		error("Failed fopen %s\n", certificate_path);
 		goto error;
 	}
 
 	cert = PEM_read_X509(fp_pubkey, NULL, NULL, NULL);
+	fclose(fp_pubkey);
 	if (!cert) {
-		error("Failed PEM_read_X509() for %s\n", CERTNAME);
+		error("Failed PEM_read_X509() for %s\n", certificate_path);
 		goto error;
 	}
 
-	return true;
+	return cert;
+
 error:
 	ERR_print_errors_fp(stderr);
-	return false;
+	return NULL;
 }
 
 /* This function makes sure the certificate is still valid by not having any
@@ -311,50 +305,42 @@ error:
  * Certificate Authority (CA)
  *
  * returns: 0 if certificate is valid, X509 store error code otherwise */
-static int validate_certificate(void)
+static int validate_certificate(X509 *cert, const char *certificate_path, const char *crl)
 {
 	X509_LOOKUP *lookup = NULL;
 	X509_STORE_CTX *verify_ctx = NULL;
 
-	/* TODO: CRL and Chains are not required for the current setup, but we may
-	 * implement them in the future 
-	if (!crl) {
-		fprintf(stderr, "No certificate revocation list provided\n");
-	}
-	if (!chain) {
-		fprintf(stderr, "No certificate chain provided\n");
-	}
-	*/
+	//TODO: Implement a chain verification when required
 
 	/* create the cert store and set the verify callback */
 	if (!(store = X509_STORE_new())) {
-		error("Failed X509_STORE_new() for %s\n", CERTNAME);
+		error("Failed X509_STORE_new() for %s\n", certificate_path);
 		goto error;
 	}
 
 	X509_STORE_set_verify_cb_func(store, verify_callback);
 
 	if (X509_STORE_set_purpose(store, X509_PURPOSE_ANY) != 1) {
-		error("Failed X509_STORE_set_purpose() for %s\n", CERTNAME);
+		error("Failed X509_STORE_set_purpose() for %s\n", certificate_path);
 		goto error;
 	}
 
 	/* Add the certificates to be verified to the store */
 	if (!(lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file()))) {
-		error("Failed X509_STORE_add_lookup() for %s\n", CERTNAME);
+		error("Failed X509_STORE_add_lookup() for %s\n", certificate_path);
 		goto error;
 	}
 
 	/*  Load the our Root cert, which can be in either DER or PEM format */
-	if (!X509_load_cert_file(lookup, CERTNAME, X509_FILETYPE_PEM)) {
-		error("Failed X509_load_cert_file() for %s\n", CERTNAME);
+	if (!X509_load_cert_file(lookup, certificate_path, X509_FILETYPE_PEM)) {
+		error("Failed X509_load_cert_file() for %s\n", certificate_path);
 		goto error;
 	}
 
 	if (crl) {
 		if (!(lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file())) ||
 		    (X509_load_crl_file(lookup, crl, X509_FILETYPE_PEM) != 1)) {
-			error("Failed X509 crl init for %s\n", CERTNAME);
+			error("Failed X509 crl init for %s\n", certificate_path);
 			goto error;
 		}
 		/* set the flags of the store so that CLRs are consulted */
@@ -363,12 +349,12 @@ static int validate_certificate(void)
 
 	/* create a verification context and initialize it */
 	if (!(verify_ctx = X509_STORE_CTX_new())) {
-		error("Failed X509_STORE_CTX_new() for %s\n", CERTNAME);
+		error("Failed X509_STORE_CTX_new() for %s\n", certificate_path);
 		goto error;
 	}
 
 	if (X509_STORE_CTX_init(verify_ctx, store, cert, NULL) != 1) {
-		error("Failed X509_STORE_CTX_init() for %s\n", CERTNAME);
+		error("Failed X509_STORE_CTX_init() for %s\n", certificate_path);
 		goto error;
 	}
 	/* Specify which cert to validate in the verify context.
@@ -378,7 +364,7 @@ static int validate_certificate(void)
 
 	/* verify the certificate */
 	if (X509_verify_cert(verify_ctx) != 1) {
-		error("Failed X509_verify_cert() for %s\n", CERTNAME);
+		error("Failed X509_verify_cert() for %s\n", certificate_path);
 		goto error;
 	}
 
@@ -397,10 +383,10 @@ error:
 	return X509_STORE_CTX_get_error(verify_ctx);
 }
 
-int verify_callback(int ok, X509_STORE_CTX *stor)
+static int verify_callback(int ok, X509_STORE_CTX *stor)
 {
 	if (!ok) {
-		error("Certificate verification error: %s\n",
+		error("Certificate verification error - %s\n",
 		      X509_verify_cert_error_string(X509_STORE_CTX_get_error(stor)));
 	}
 	return ok;
@@ -453,7 +439,7 @@ out:
 }
 
 #else
-bool signature_init(void)
+bool signature_init(const char UNUSED_PARAM *certificate_path, const char UNUSED_PARAM *crl)
 {
 	return true;
 }

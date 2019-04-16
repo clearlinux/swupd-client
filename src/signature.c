@@ -39,8 +39,10 @@
 #include <openssl/x509v3.h>
 
 #include "config.h"
+#include "lib/log.h"
+#include "lib/macros.h"
+#include "lib/strings.h"
 #include "signature.h"
-#include "swupd.h"
 
 #ifdef SIGNATURES
 
@@ -147,10 +149,10 @@ void signature_deinit(void)
 
 /* Verifies that the file and the signature exists, and does a signature check
  * afterwards. If any error is to be considered a verify failure, then
- * ERRORS_FATAL should be set to true.
+ * print_errors should be set to true.
  *
  * returns: true if able to validate the signature, false otherwise */
-static bool verify_signature(const char *data_filename, const char *sig_filename, bool errors_fatal)
+bool signature_verify(const char *file, const char *sig_file, bool print_errors)
 {
 	int ret;
 	bool result = false;
@@ -171,24 +173,24 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 	BIO *verify_BIO = NULL;
 
 	/* get the signature */
-	sig_fd = open(sig_filename, O_RDONLY);
+	sig_fd = open(sig_file, O_RDONLY);
 	if (sig_fd == -1) {
-		string_or_die(&errorstr, "Failed open %s: %s\n", sig_filename, strerror(errno));
+		string_or_die(&errorstr, "Failed open %s: %s\n", sig_file, strerror(errno));
 		goto error;
 	}
 	if (fstat(sig_fd, &st) != 0) {
-		string_or_die(&errorstr, "Failed to stat %s file\n", sig_filename);
+		string_or_die(&errorstr, "Failed to stat %s file\n", sig_file);
 		goto error;
 	}
 	sig_len = st.st_size;
 	sig = mmap(NULL, sig_len, PROT_READ, MAP_PRIVATE, sig_fd, 0);
 	if (sig == MAP_FAILED) {
-		string_or_die(&errorstr, "Failed to mmap %s signature\n", sig_filename);
+		string_or_die(&errorstr, "Failed to mmap %s signature\n", sig_file);
 		goto error;
 	}
 	sig_BIO = BIO_new_mem_buf(sig, sig_len);
 	if (!sig_BIO) {
-		string_or_die(&errorstr, "Failed to read %s signature into BIO\n", sig_filename);
+		string_or_die(&errorstr, "Failed to read %s signature into BIO\n", sig_file);
 		goto error;
 	}
 
@@ -200,24 +202,25 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 	}
 
 	/* get the data to be verified */
-	data_fd = open(data_filename, O_RDONLY);
+
+	data_fd = open(file, O_RDONLY);
 	if (data_fd == -1) {
-		string_or_die(&errorstr, "Failed open %s\n", data_filename);
+		string_or_die(&errorstr, "Failed open %s\n", file);
 		goto error;
 	}
 	if (fstat(data_fd, &st) != 0) {
-		string_or_die(&errorstr, "Failed to stat %s\n", data_filename);
+		string_or_die(&errorstr, "Failed to stat %s\n", file);
 		goto error;
 	}
 	data_len = st.st_size;
 	data = mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
 	if (data == MAP_FAILED) {
-		string_or_die(&errorstr, "Failed to mmap %s\n", data_filename);
+		string_or_die(&errorstr, "Failed to mmap %s\n", file);
 		goto error;
 	}
 	data_BIO = BIO_new_mem_buf(data, data_len);
 	if (!data_BIO) {
-		string_or_die(&errorstr, "Failed to read %s into BIO\n", data_filename);
+		string_or_die(&errorstr, "Failed to read %s into BIO\n", file);
 		goto error;
 	}
 
@@ -237,8 +240,8 @@ static bool verify_signature(const char *data_filename, const char *sig_filename
 	}
 
 error:
-	if (!result && errors_fatal) {
-		fputs(errorstr, stderr);
+	if (!result && print_errors) {
+		error("Signature check error\n%s", errorstr);
 		ERR_print_errors_fp(stderr);
 	}
 
@@ -392,52 +395,6 @@ static int verify_callback(int ok, X509_STORE_CTX *stor)
 	return ok;
 }
 
-/* Verifies signature for the local file DATA_FILENAME first, and on failure
- * downloads the signature based on DATA_URL and tries to verify again.
- * Automatically manages the signature for mix content, performing local
- * verification only if the manifest is user created.
- *
- * returns: true if signature verification succeeded, false if verification
- * failed, or the signature download failed
- */
-bool signature_verify(const char *data_url, const char *data_filename, int version, bool mix_exists)
-{
-	char *local = NULL;
-	char *sig_url = NULL;
-	char *sig_filename = NULL;
-	int ret;
-	bool result;
-
-	string_or_die(&sig_url, "%s.sig", data_url);
-	string_or_die(&sig_filename, "%s.sig", data_filename);
-	string_or_die(&local, "%s/%i/Manifest.MoM.sig", MIX_STATE_DIR, version);
-
-	// Try verifying a local copy of the signature first
-	result = verify_signature(data_filename, sig_filename, false);
-	if (result) {
-		goto out;
-	}
-
-	// Else, download a fresh signature, and verify
-	if (mix_exists) {
-		ret = link(local, sig_filename);
-	} else {
-		ret = swupd_curl_get_file(sig_url, sig_filename);
-	}
-
-	if (ret == 0) {
-		result = verify_signature(data_filename, sig_filename, true);
-	} else {
-		// download failed
-		result = false;
-	}
-out:
-	free_string(&local);
-	free_string(&sig_filename);
-	free_string(&sig_url);
-	return result;
-}
-
 #else
 bool signature_init(const char UNUSED_PARAM *certificate_path, const char UNUSED_PARAM *crl)
 {
@@ -449,7 +406,7 @@ void signature_deinit(void)
 	return;
 }
 
-bool signature_verify(const char UNUSED_PARAM *data_url, const char UNUSED_PARAM *data_filename, int UNUSED_PARAM version, bool UNUSED_PARAM mix_exists)
+bool signature_verify(const char UNUSED_PARAM *file, const char UNUSED_PARAM *sig_file, bool UNUSED_PARAM print_errors)
 {
 	return true;
 }

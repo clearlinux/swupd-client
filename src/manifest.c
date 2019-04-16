@@ -297,6 +297,51 @@ static void remove_manifest_files(char *filename, int version, char *hash)
 	}
 }
 
+/* Verifies signature for the local file DATA_FILENAME first, and on failure
+ * downloads the signature based on DATA_URL and tries to verify again.
+ * Automatically manages the signature for mix content, performing local
+ * verification only if the manifest is user created.
+ *
+ * returns: true if signature verification succeeded, false if verification
+ * failed, or the signature download failed
+ */
+bool mom_signature_verify(const char *data_url, const char *data_filename, int version, bool mix_exists)
+{
+	char *local = NULL;
+	char *sig_url = NULL;
+	char *sig_filename = NULL;
+	int ret;
+	bool result;
+
+	string_or_die(&sig_url, "%s.sig", data_url);
+	string_or_die(&sig_filename, "%s.sig", data_filename);
+	string_or_die(&local, "%s/%i/Manifest.MoM.sig", MIX_STATE_DIR, version);
+
+	// Try verifying a local copy of the signature first
+	result = signature_verify(data_filename, sig_filename, false);
+	if (result) {
+		goto out;
+	}
+
+	// Else, download a fresh signature, and verify
+	if (mix_exists) {
+		ret = link(local, sig_filename);
+	} else {
+		ret = swupd_curl_get_file(sig_url, sig_filename);
+	}
+
+	if (ret == 0) {
+		result = signature_verify(data_filename, sig_filename, true);
+	} else {
+		// download failed
+		result = false;
+	}
+out:
+	free_string(&local);
+	free_string(&sig_filename);
+	free_string(&sig_url);
+	return result;
+}
 /* Loads the MoM (Manifest of Manifests) for VERSION.
  *
  * Implementation note: MoMs are not huge so deltas do not give much benefit,
@@ -353,7 +398,7 @@ retry_load:
 	} else {
 		/* Only when migrating , ignore the locally made signature check which is guaranteed to have been signed
 		 * by the user and does not come from any network source */
-		if (needs_sig_verification && !signature_verify(url, filename, version, mix_exists)) {
+		if (needs_sig_verification && !mom_signature_verify(url, filename, version, mix_exists)) {
 			/* cleanup and try one more time, statedir could have got corrupt/stale */
 			if (retried == false && !mix_exists) {
 				free_string(&filename);

@@ -25,16 +25,16 @@ bool signature_init(const char *certificate_path, const char *crl);
 void signature_deinit(void);
 
 /*
- * The given data file has already been downloaded from the given URL.
- * Download the corresponding signature file, and verify the data against the signature.
- * Delete the signature file if and only if the verification fails.
+ * Verify if file is signed.
  *
- * @param data_url      the URL from which the data came
- * @param data_filename the file containing the data
+ * @param file         path to file to be verified.
+ * @param sig_file     path to signature file.
+ * @param print_errors if false, errors aren't printed.
  *
- * @return true if no error
+ * @return true if the file is signed with certificate used signature_init()
+
  */
-bool signature_verify(const char *data_url, const char *data_filename, int version, bool mix_exists);
+bool signature_verify(const char *file, const char *sig_file, bool print_errors);
 
 #ifdef __cplusplus
 }

@@ -348,7 +348,7 @@ retry_load:
 	string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);
 
 	if (perform_sig_verify) {
-		invalid_sig = !download_and_verify_signature(url, filename, version, mix_exists);
+		invalid_sig = !signature_verify(url, filename, version, mix_exists);
 	}
 
 	/* Only when migrating , ignore the locally made signature check which is guaranteed to have been signed

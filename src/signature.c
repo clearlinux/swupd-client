@@ -433,10 +433,6 @@ bool signature_verify(const char *data_url, const char *data_filename, int versi
 	int ret;
 	bool result;
 
-	if (!sigcheck) {
-		return false;
-	}
-
 	string_or_die(&sig_url, "%s.sig", data_url);
 	string_or_die(&sig_filename, "%s.sig", data_filename);
 	string_or_die(&local, "%s/%i/Manifest.MoM.sig", MIX_STATE_DIR, version);

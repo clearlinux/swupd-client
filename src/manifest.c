@@ -316,8 +316,7 @@ struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err)
 	char *filename;
 	char *url;
 	bool retried = false;
-	bool perform_sig_verify = !(migrate && mix_exists);
-	bool invalid_sig = false;
+	bool needs_sig_verification = !(migrate && mix_exists);
 
 retry_load:
 	ret = retrieve_manifest(0, version, "MoM", mix_exists);
@@ -347,14 +346,14 @@ retry_load:
 	string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
 	string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);
 
-	if (perform_sig_verify) {
-		invalid_sig = !signature_verify(url, filename, version, mix_exists);
-	}
-
-	/* Only when migrating , ignore the locally made signature check which is guaranteed to have been signed
-	 * by the user and does not come from any network source */
-	if (invalid_sig) {
-		if (sigcheck) {
+	if (!sigcheck) {
+		warn("FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
+		     "  --nosigcheck, but system security may be compromised\n");
+		journal_log_error("swupd security notice: --nosigcheck used to bypass MoM signature verification failure");
+	} else {
+		/* Only when migrating , ignore the locally made signature check which is guaranteed to have been signed
+		 * by the user and does not come from any network source */
+		if (needs_sig_verification && !signature_verify(url, filename, version, mix_exists)) {
 			/* cleanup and try one more time, statedir could have got corrupt/stale */
 			if (retried == false && !mix_exists) {
 				free_string(&filename);
@@ -373,10 +372,8 @@ retry_load:
 			}
 			return NULL;
 		}
-		warn("FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
-		     "  --nosigcheck, but system security may be compromised\n");
-		journal_log_error("swupd security notice: --nosigcheck used to bypass MoM signature verification failure");
 	}
+
 	/* Make a copy of the Manifest for the completion code */
 	if (latest) {
 		char *momdir;

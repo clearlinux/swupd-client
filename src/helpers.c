@@ -511,7 +511,7 @@ void free_file_data(void *data)
 
 void swupd_deinit(void)
 {
-	terminate_signature();
+	signature_deinit();
 	swupd_curl_deinit();
 	free_globals();
 	v_lockfile();
@@ -572,9 +572,9 @@ enum swupd_code swupd_init(void)
 	}
 
 	/* If --nosigcheck, we do not attempt any signature checking */
-	if (sigcheck && !initialize_signature()) {
+	if (sigcheck && !signature_init()) {
 		ret = SWUPD_SIGNATURE_VERIFICATION_FAILED;
-		terminate_signature();
+		signature_deinit();
 		goto out_close_lock;
 	}
 

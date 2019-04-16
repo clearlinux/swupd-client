@@ -64,7 +64,7 @@ static char *crl = NULL;
  * be validated.
  *
  * returns: true if can initialize and validate certificates, otherwise false */
-bool initialize_signature(void)
+bool signature_init(void)
 {
 	int ret = -1;
 
@@ -132,7 +132,7 @@ fail:
 
 /* Delete the memory used for string errors as well as memory allocated for
  * certificates and private keys. */
-void terminate_signature(void)
+void signature_deinit(void)
 {
 	//TODO: once implemented, must free chain
 	//TODO: once implemented, must free crl
@@ -425,7 +425,7 @@ int verify_callback(int ok, X509_STORE_CTX *stor)
  * returns: true if signature verification succeeded, false if verification
  * failed, or the signature download failed
  */
-bool download_and_verify_signature(const char *data_url, const char *data_filename, int version, bool mix_exists)
+bool signature_verify(const char *data_url, const char *data_filename, int version, bool mix_exists)
 {
 	char *local = NULL;
 	char *sig_url = NULL;
@@ -468,17 +468,17 @@ out:
 }
 
 #else
-bool initialize_signature(void)
+bool signature_init(void)
 {
 	return true;
 }
 
-void terminate_signature(void)
+void signature_deinit(void)
 {
 	return;
 }
 
-bool download_and_verify_signature(const char UNUSED_PARAM *data_url, const char UNUSED_PARAM *data_filename, int UNUSED_PARAM version, bool UNUSED_PARAM mix_exists)
+bool signature_verify(const char UNUSED_PARAM *data_url, const char UNUSED_PARAM *data_filename, int UNUSED_PARAM version, bool UNUSED_PARAM mix_exists)
 {
 	return true;
 }

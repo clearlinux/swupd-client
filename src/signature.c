@@ -51,7 +51,6 @@ static int verify_callback(int, X509_STORE_CTX *);
 static bool get_pubkey();
 
 FILE *fp_pubkey = NULL;
-EVP_PKEY *pkey = NULL;
 X509 *cert = NULL;
 X509_STORE *store = NULL;
 STACK_OF(X509) *x509_stack = NULL;
@@ -145,10 +144,6 @@ void signature_deinit(void)
 		x509_stack = NULL;
 	}
 	ERR_free_strings();
-	if (pkey) {
-		EVP_PKEY_free(pkey);
-		pkey = NULL;
-	}
 	EVP_cleanup();
 	if (fp_pubkey) {
 		fclose(fp_pubkey);
@@ -303,12 +298,6 @@ static bool get_pubkey(void)
 		goto error;
 	}
 
-	pkey = X509_get_pubkey(cert);
-	if (!pkey) {
-		error("Failed X509_get_pubkey() for %s\n", CERTNAME);
-		X509_free(cert);
-		goto error;
-	}
 	return true;
 error:
 	ERR_print_errors_fp(stderr);

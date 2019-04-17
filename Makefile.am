@@ -94,6 +94,8 @@ swupd_SOURCES = \
 	src/swupd_curl_internal.h \
 	src/swupd_exit_codes.h \
 	src/swupd_internal.h \
+	src/swupd_progress.c \
+	src/swupd_progress.h \
 	src/telemetry.c \
 	src/timelist.c \
 	src/timelist.h \

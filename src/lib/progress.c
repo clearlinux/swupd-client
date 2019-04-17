@@ -87,7 +87,7 @@ void progress_complete_step(void)
 	}
 }
 
-void progress_report(unsigned int count, unsigned int max)
+void progress_report(double count, double max)
 {
 	static int last_percentage = -1;
 	static unsigned int last_step = 0;
@@ -96,7 +96,7 @@ void progress_report(unsigned int count, unsigned int max)
 	if (max != 0) {
 
 		/* Only print when the percentage changes, so a maximum of 100 times per run */
-		int percentage = (int)(100 * ((float)count / (float)max));
+		int percentage = (int)(100 * (count / max));
 		if (percentage != last_percentage || step.current != last_step) {
 			if (progress_function) {
 				progress_function(step.description, step.current, step.total, percentage);

@@ -59,7 +59,7 @@ void progress_complete_step(void);
 /*
  * It reports the partial progress of the step. Useful in long running steps.
  */
-void progress_report(unsigned int, unsigned int);
+void progress_report(double, double);
 
 #ifdef __cplusplus
 }

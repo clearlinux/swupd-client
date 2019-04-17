@@ -710,8 +710,8 @@ void global_print_help(void)
 	print("   -r, --max-retries       Maximum number of retries for download failures\n");
 	print("   -d, --retry-delay       Initial delay between download retries, this will be doubled for each retry\n");
 	print("   -j, --json-output       Print all output as a JSON stream\n");
-	print("   --quiet		  Quiet output. Print only important information and errors\n");
-	print("   --debug		  Print extra information to help debugging problems\n");
+	print("   --quiet                 Quiet output. Print only important information and errors\n");
+	print("   --debug                 Print extra information to help debugging problems\n");
 	print("\n");
 }
 

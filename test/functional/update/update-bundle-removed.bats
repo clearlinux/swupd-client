@@ -29,8 +29,8 @@ test_setup() {
 		Preparing to update from 10 to 20
 		Warning: Bundle "test-bundle1" is invalid, skipping it...
 		Warning: One or more installed bundles are no longer available at version 20.
-		Downloading packs...
-		Extracting os-core pack for version 20
+		Downloading packs for:
+		 - os-core
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 1
 		    new bundles       : 0

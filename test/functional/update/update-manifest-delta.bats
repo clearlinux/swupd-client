@@ -33,8 +33,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Downloading packs...
-		Extracting test-bundle1 pack for version 20
+		Downloading packs for:
+		 - test-bundle1
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 1
 		    new bundles       : 0
@@ -63,9 +63,9 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 30
-		Downloading packs...
-		Extracting test-bundle1 pack for version 20
-		Extracting test-bundle2 pack for version 30
+		Downloading packs for:
+		 - test-bundle1
+		 - test-bundle2
 		Statistics for going from version 10 to version 30:
 		    changed bundles   : 2
 		    new bundles       : 0

@@ -17,9 +17,9 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Verifying version 100
-		Downloading packs...
-		Extracting os-core pack for version 10
-		Extracting test-bundle pack for version 100
+		Downloading packs for:
+		 - os-core
+		 - test-bundle
 		Verifying files
 		Starting download of remaining update content. This may take a while...
 		Finishing download of update content...

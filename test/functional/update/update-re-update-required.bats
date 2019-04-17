@@ -18,8 +18,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Downloading packs...
-		Extracting os-core pack for version 20
+		Downloading packs for:
+		 - os-core
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 1
 		    new bundles       : 0
@@ -36,8 +36,8 @@ test_setup() {
 		Update successful. System updated from version 10 to version 20
 		Update started.
 		Preparing to update from 30 to 40
-		Downloading packs...
-		Extracting os-core pack for version 40
+		Downloading packs for:
+		 - os-core
 		Statistics for going from version 30 to version 40:
 		    changed bundles   : 1
 		    new bundles       : 0

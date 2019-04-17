@@ -41,15 +41,14 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 100
-		Downloading packs...
-		Extracting test-bundle3 pack for version 100
-		Extracting test-bundle4 pack for version 100
-		Extracting test-bundle6 pack for version 100
-		Extracting test-bundle5 pack for version 100
-		Extracting test-bundle2 pack for version 100
-		Extracting test-bundle7 pack for version 100
-		Extracting test-bundle1 pack for version 100
-		Warning: Couldn.t use delta file .* no .from. file to apply was found
+		Downloading packs for:
+		 - test-bundle3
+		 - test-bundle4
+		 - test-bundle6
+		 - test-bundle5
+		 - test-bundle2
+		 - test-bundle7
+		 - test-bundle1
 		Statistics for going from version 10 to version 100:
 		    changed bundles   : 1
 		    new bundles       : 6
@@ -63,11 +62,10 @@ test_setup() {
 		Applying update
 		Update was applied.
 		Calling post-update helper scripts.
-		2 files were not in a pack
 		Update successful. System updated from version 10 to version 100
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	# changed files
 	assert_file_exists "$TARGETDIR"/foo/testfile1
 	assert_file_exists "$TARGETDIR"/bar/testfile2

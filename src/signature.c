@@ -301,6 +301,76 @@ error:
 	return NULL;
 }
 
+/*
+ * Check if a x509 extension is critical
+ */
+static int is_x509_ext_critical(X509 *cert, int nid)
+{
+	X509_EXTENSION *ex;
+	ASN1_OBJECT *obj;
+	int n, i;
+
+	n = X509_get_ext_count(cert);
+	for (i = 0; i < n; i++) {
+		ex = X509_get_ext(cert, i);
+		if (!ex) {
+			continue;
+		}
+		obj = X509_EXTENSION_get_object(ex);
+		if (!obj) {
+			continue;
+		}
+		if (OBJ_obj2nid(obj) == nid && X509_EXTENSION_get_critical(ex)) {
+			debug("Certificate nid %d is critical\n", nid);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+/*
+ * Check if the certificate is revoked using OCSP.
+ * Current implementation aren't using OCSP to validate the certificate.
+ * If the OCSP server is set and the cert Key Usage is set as critical,
+ * stop swupd operation.
+ *
+ * TODO: Implement proper check of OCSP.
+ */
+static int validate_authority(X509 *cert)
+{
+	AUTHORITY_INFO_ACCESS *info;
+	int n, i;
+
+	// Check if Authority Information Access is critical
+	if (!is_x509_ext_critical(cert, NID_info_access)) {
+		return 0;
+	}
+
+	debug("Authority Information Access is critical. Checking certificate revocation method\n");
+
+	// Check if the OCSP URI is set
+	info = X509_get_ext_d2i(cert, NID_info_access, NULL, NULL);
+	if (!info) {
+		goto error;
+	}
+
+	n = sk_ACCESS_DESCRIPTION_num(info);
+	for (i = 0; i < n; i++) {
+		ACCESS_DESCRIPTION *ad = sk_ACCESS_DESCRIPTION_value(info, i);
+		if (OBJ_obj2nid(ad->method) == NID_ad_OCSP) {
+			error("OCSP uri found, but method not supported\n");
+			return -1;
+		}
+	}
+	AUTHORITY_INFO_ACCESS_free(info);
+
+error:
+	error("Supported Authority Information Access methods not found in the certificate.\n");
+
+	return -1;
+}
+
 /* This function makes sure the certificate is still valid by not having any
  * compromised certificates in the chain.
  * If there is no Certificate Revocation List (CRL) it may be that the private
@@ -372,6 +442,11 @@ static int validate_certificate(X509 *cert, const char *certificate_path, const 
 	}
 
 	X509_STORE_CTX_free(verify_ctx);
+
+	if (validate_authority(cert) < 0) {
+		error("Failed to validate certificate using 'Authority Information Access'\n");
+		return -1;
+	}
 
 	/* Certificate verified correctly */
 	return 0;

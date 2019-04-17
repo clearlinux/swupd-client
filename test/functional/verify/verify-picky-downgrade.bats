@@ -46,7 +46,6 @@ test_setup() {
 		Warning: One or more installed bundles that are not available at version 10 will be removed.
 		Verifying files
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Adding any missing files
 		Fixing modified files
 		Hash mismatch for file: .*/target-dir/usr/lib/os-release
@@ -91,7 +90,6 @@ test_setup() {
 		Warning: One or more installed bundles that are not available at version 10 will be removed.
 		Verifying files
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Adding any missing files
 		Fixing modified files
 		Hash mismatch for file: .*/target-dir/usr/lib/os-release

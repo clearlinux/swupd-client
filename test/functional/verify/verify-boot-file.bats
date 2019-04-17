@@ -37,7 +37,6 @@ test_setup() {
 		Verifying version 10
 		Verifying files
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Adding any missing files
 		Fixing modified files
 		Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile

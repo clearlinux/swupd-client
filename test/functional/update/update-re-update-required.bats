@@ -27,8 +27,7 @@ test_setup() {
 		    changed files     : 2
 		    new files         : 0
 		    deleted files     : 0
-		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
+		No extra files need to be downloaded
 		Staging file content
 		Applying update
 		Update was applied.
@@ -45,8 +44,7 @@ test_setup() {
 		    changed files     : 2
 		    new files         : 0
 		    deleted files     : 0
-		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
+		No extra files need to be downloaded
 		Staging file content
 		Applying update
 		Update was applied.

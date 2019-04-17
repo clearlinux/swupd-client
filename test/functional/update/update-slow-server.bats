@@ -39,13 +39,13 @@ test_teardown() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 100
-		Downloading packs...
+		Downloading packs for:
+		 - test-bundle
 		Error: Curl - File incompletely downloaded - '.*/100/pack-test-bundle-from-10.tar'
 		Curl - Starting download retry #1 for .*/100/pack-test-bundle-from-10.tar
 		Curl - Resuming download for '.*/100/pack-test-bundle-from-10.tar'
 		Error: Curl - Range command not supported by server, download resume disabled - '.*/100/pack-test-bundle-from-10.tar'
 		Curl - Starting download retry #2 for .*/100/pack-test-bundle-from-10.tar
-		Extracting test-bundle pack for version 100
 		Statistics for going from version 10 to version 100:
 		    changed bundles   : 1
 		    new bundles       : 0

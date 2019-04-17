@@ -11,7 +11,7 @@ test_setup() {
 
 }
 
-@test "ADD020: Adding multiple bundles, one uses fullfiles, one uses the zero pack" {
+@test "ADD020: Adding multiple bundles using packs" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle2"
 
@@ -21,11 +21,10 @@ test_setup() {
 	assert_file_exists "$TARGETDIR/usr/bin/10"
 	assert_file_exists "$TARGETDIR/media/lib/file2"
 	expected_output=$(cat <<-EOM
-		Downloading packs...
-		Extracting test-bundle1 pack for version 10
-		Extracting test-bundle2 pack for version 10
-		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
+		Downloading packs for:
+		 - test-bundle1
+		 - test-bundle2
+		No extra files need to be downloaded
 		Installing bundle(s) files...
 		Calling post-update helper scripts.
 		Successfully installed 2 bundles

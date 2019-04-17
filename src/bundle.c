@@ -869,6 +869,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		/* the progress would be completed within the
 		 * download_subscribed_packs function, since we
 		 * didn't run it, manually mark the step as completed */
+		info("No packs need to be downloaded\n");
 		progress_complete_step();
 	}
 	timelist_timer_stop(global_times); // closing: Download packs

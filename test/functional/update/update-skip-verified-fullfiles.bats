@@ -28,7 +28,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 100
-		Downloading packs...
+		Downloading packs for:
+		 - test-bundle
 		Statistics for going from version 10 to version 100:
 		    changed bundles   : 1
 		    new bundles       : 0

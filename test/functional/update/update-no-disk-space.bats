@@ -152,10 +152,14 @@ test_setup() {
 	run sudo sh -c "timeout 30 $SWUPD update $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
-	expected_output=$(cat <<-EOM
+	expected_output1=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 20
-		Downloading packs...
+		Downloading packs \(20.*\) for:
+	EOM
+	)
+	expected_output2=$(cat <<-EOM
+		 - test-bundle
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/pack-test-bundle-from-10.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Statistics for going from version 10 to version 20:
@@ -173,6 +177,7 @@ test_setup() {
 		Update failed.
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_regex_in_output "$expected_output1"
+	assert_in_output "$expected_output2"
 
 }

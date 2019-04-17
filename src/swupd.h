@@ -1,7 +1,6 @@
 #ifndef __INCLUDE_GUARD_SWUPD_H
 #define __INCLUDE_GUARD_SWUPD_H
 
-#include <curl/curl.h>
 #include <dirent.h>
 #include <getopt.h>
 #include <limits.h>
@@ -97,7 +96,7 @@ extern bool need_update_bootloader;
 extern bool need_systemd_reexec;
 extern bool keepcache;
 
-extern curl_off_t total_curl_sz;
+extern uint64_t total_curl_sz;
 
 struct update_stat {
 	uint64_t st_mode;

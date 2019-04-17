@@ -53,7 +53,7 @@
 
 static CURL *curl = NULL;
 
-curl_off_t total_curl_sz = 0;
+uint64_t total_curl_sz = 0;
 
 /* alternative CA Path */
 static char *capath = NULL;

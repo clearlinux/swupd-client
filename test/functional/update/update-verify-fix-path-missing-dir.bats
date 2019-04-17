@@ -32,7 +32,6 @@ test_setup() {
 		    new files         : 0
 		    deleted files     : 0
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Staging file content
 		Warning: Update target directory does not exist: .*/target-dir/usr/foo. Trying to fix it
 		Path /usr/foo is missing on the file system ... fixing

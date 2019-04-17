@@ -37,7 +37,6 @@ test_setup() {
 		    new files         : 0
 		    deleted files     : 0
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Error: File content hash mismatch for .* \\(bad server data\\?\\)
 	EOM
 	)

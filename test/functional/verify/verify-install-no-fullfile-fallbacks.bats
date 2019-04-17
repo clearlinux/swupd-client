@@ -30,7 +30,6 @@ test_setup() {
 		Error: zero pack downloads failed
 		Verifying files
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Error: Unable to download necessary files for this OS release
 		Fix did not fully succeed
 	EOM

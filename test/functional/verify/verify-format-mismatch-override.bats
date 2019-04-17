@@ -22,7 +22,6 @@ test_setup() {
 		Warning: the force or picky option is specified; ignoring version mismatch for verify --fix
 		Verifying files
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Adding any missing files
 		Missing file: .*/target-dir/usr/bin
 		.fixed

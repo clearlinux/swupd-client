@@ -170,7 +170,6 @@ test_setup() {
 		    new files         : 1
 		    deleted files     : 0
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$file_hash.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Could not download all files, aborting update

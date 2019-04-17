@@ -97,8 +97,8 @@ test_teardown() {
 		Update started.
 		Error: Curl - Communicating with server timed out - '.*/version/formatstaging/latest'
 		Preparing to update from 10 to 20
-		Downloading packs...
-		Extracting os-core pack for version 20
+		Downloading packs for:
+		 - os-core
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 1
 		    new bundles       : 0

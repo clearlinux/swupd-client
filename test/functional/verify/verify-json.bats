@@ -26,7 +26,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD verify --json-output --install -m 10 $SWUPD_OPTS"
 
 	assert_status_is 0
-	expected_output=$(cat <<-EOM
+	expected_output1=$(cat <<-EOM
 		\[
 		\{ "type" : "start", "section" : "verify" \},
 		\{ "type" : "progress", "currentStep" : 1, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "get_versions" \},
@@ -34,11 +34,13 @@ test_setup() {
 		\{ "type" : "progress", "currentStep" : 2, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "cleanup_download_dir" \},
 		\{ "type" : "progress", "currentStep" : 3, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "load_manifests" \},
 		\{ "type" : "progress", "currentStep" : 4, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "consolidate_files" \},
-		\{ "type" : "info", "msg" : "Downloading packs... " \},
-		.*
-		.*
-		.*
-		\{ "type" : "info", "msg" : " Extracting test-bundle1 pack for version 10 " \},
+		\{ "type" : "info", "msg" : "Downloading packs for: " \},
+		\{ "type" : "info", "msg" : " - os-core " \},
+		\{ "type" : "info", "msg" : " - test-bundle1 " \},
+	EOM
+	)
+	expected_output2=$(cat <<-EOM
+		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "download_packs" \},
 		\{ "type" : "info", "msg" : "Verifying files " \},
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 8, "stepCompletion" : 0, "stepDescription" : "check_files_hash" \},
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 8, "stepCompletion" : 5, "stepDescription" : "check_files_hash" \},
@@ -58,11 +60,8 @@ test_setup() {
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 8, "stepCompletion" : 88, "stepDescription" : "check_files_hash" \},
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 8, "stepCompletion" : 94, "stepDescription" : "check_files_hash" \},
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "check_files_hash" \},
-		\{ "type" : "info", "msg" : "Starting download of remaining update content. This may take a while... " \},
-		\{ "type" : "progress", "currentStep" : 7, "totalSteps" : 8, "stepCompletion" : 17, "stepDescription" : "download_fullfiles" \},
-		\{ "type" : "progress", "currentStep" : 7, "totalSteps" : 8, "stepCompletion" : 35, "stepDescription" : "download_fullfiles" \},
+		\{ "type" : "info", "msg" : "No extra files need to be downloaded " \},
 		\{ "type" : "progress", "currentStep" : 7, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "download_fullfiles" \},
-		\{ "type" : "info", "msg" : "Finishing download of update content... " \},
 		\{ "type" : "info", "msg" : "Adding any missing files " \},
 		\{ "type" : "progress", "currentStep" : 8, "totalSteps" : 8, "stepCompletion" : 17, "stepDescription" : "add_missing_files" \},
 		\{ "type" : "progress", "currentStep" : 8, "totalSteps" : 8, "stepCompletion" : 35, "stepDescription" : "add_missing_files" \},
@@ -78,9 +77,8 @@ test_setup() {
 		\]
 	EOM
 	)
-	
-	assert_regex_is_output "$expected_output"
-	assert_in_output "{ \"type\" : \"progress\", \"currentStep\" : 5, \"totalSteps\" : 8, \"stepCompletion\" : 50, \"stepDescription\" : \"download_packs\" },"
+	assert_regex_in_output "$expected_output1"
+	assert_regex_in_output "$expected_output2"
 
 }
 
@@ -89,7 +87,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD verify --json-output --fix --picky $SWUPD_OPTS"
 
 	assert_status_is 0
-	expected_output=$(cat <<-EOM
+	expected_output1=$(cat <<-EOM
 		\[
 		\{ "type" : "start", "section" : "verify" \},
 		\{ "type" : "progress", "currentStep" : 1, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "get_versions" \},
@@ -117,10 +115,10 @@ test_setup() {
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 8, "stepCompletion" : 94, "stepDescription" : "check_files_hash" \},
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "check_files_hash" \},
 		\{ "type" : "info", "msg" : "Starting download of remaining update content. This may take a while... " \},
-		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 8, "stepCompletion" : 17, "stepDescription" : "download_fullfiles" \},
-		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 8, "stepCompletion" : 35, "stepDescription" : "download_fullfiles" \},
+	EOM
+	)
+	expected_output2=$(cat <<-EOM
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "download_fullfiles" \},
-		\{ "type" : "info", "msg" : "Finishing download of update content... " \},
 		\{ "type" : "info", "msg" : "Adding any missing files " \},
 		\{ "type" : "info", "msg" : " Missing file: .*/baz " \},
 		\{ "type" : "info", "msg" : " 	fixed " \},
@@ -165,7 +163,8 @@ test_setup() {
 		\]
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_in_output "$expected_output1"
+	assert_regex_in_output "$expected_output2"
 
 }
 

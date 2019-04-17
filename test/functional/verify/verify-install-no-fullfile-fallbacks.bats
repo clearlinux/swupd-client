@@ -24,7 +24,9 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
-		Downloading packs...
+		Downloading packs for:
+		 - os-core
+		 - test-bundle
 		Error: zero pack downloads failed
 		Verifying files
 		Starting download of remaining update content. This may take a while...

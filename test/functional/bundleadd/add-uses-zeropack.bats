@@ -30,10 +30,9 @@ test_setup() {
 	# validate zero pack was downloaded
 	assert_file_exists "$STATEDIR"/pack-test-bundle1-from-0-to-10.tar
 	expected_output=$(cat <<-EOM
-		Downloading packs...
-		Extracting test-bundle1 pack for version 10
-		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
+		Downloading packs for:
+		 - test-bundle1
+		No extra files need to be downloaded
 		Installing bundle(s) files...
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle

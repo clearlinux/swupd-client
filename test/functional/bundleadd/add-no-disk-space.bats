@@ -108,7 +108,8 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
-		Downloading packs...
+		Downloading packs \\(.* Mb\\) for:
+		 - test-bundle
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/pack-test-bundle-from-0.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
 		Starting download of remaining update content. This may take a while...

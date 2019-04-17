@@ -25,9 +25,11 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 20 to 30
-		Downloading packs...
-		Extracting os-core pack for version 30
-		Extracting test-bundle3 pack for version 30
+		Downloading packs for:
+		 - test-bundle1
+		 - os-core
+		 - test-bundle2
+		 - test-bundle3
 		Statistics for going from version 20 to version 30:
 		    changed bundles   : 3
 		    new bundles       : 0

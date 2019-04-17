@@ -19,15 +19,17 @@ test_setup() {
 
 @test "UPD003: Updating a system where a file was deleted in the newer version" {
 
+	# NOTE: we don't create delta packs when a file is deleted in an update with the test library
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.
 		Preparing to update from 10 to 30
-		Downloading packs...
-		Extracting os-core pack for version 30
-		Extracting test-bundle2 pack for version 30
+		Downloading packs for:
+		 - os-core
+		 - test-bundle1
+		 - test-bundle2
 		Statistics for going from version 10 to version 30:
 		    changed bundles   : 3
 		    new bundles       : 0

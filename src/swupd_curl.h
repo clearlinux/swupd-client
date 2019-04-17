@@ -1,6 +1,7 @@
 #ifndef __SWUPD_CURL__
 #define __SWUPD_CURL__
 
+#include "swupd_progress.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -44,6 +45,11 @@ typedef bool (*swupd_curl_error_cb)(enum download_status status, void *data);
  * Callback called when 'data' is no longer needed, so user's can free it
  */
 typedef void (*swupd_curl_free_cb)(void *data);
+
+/*
+ * Callback called periodically by curl to report on download progress
+ */
+typedef int (*swupd_curl_progress_cb)(void *clientp, int64_t dltotal, int64_t dlnow, int64_t ultotal, int64_t ulnow);
 
 /*
  * Init the swupd curl.
@@ -103,6 +109,16 @@ void *swupd_curl_parallel_download_start(size_t max_xfer);
  * - free_cb():     Called when data is ready to be freed.
  */
 void swupd_curl_parallel_download_set_callbacks(void *handle, swupd_curl_success_cb success_cb, swupd_curl_error_cb error_cb, swupd_curl_free_cb free_cb);
+
+/*
+ * Set parallel downloads progress callback
+ *
+ *  - progress_cb(): Called periodically by curl while downloading/uploading files.
+ *                   The return value of the function is not really important, the
+ *                   function prints the download progress, so it will always return 0.
+ *  - data:          User data to be informed to progress_cb.
+ */
+void swupd_curl_parallel_download_set_progress_callbacks(void *handle, swupd_curl_progress_cb progress_cb, void *data);
 
 /*
  * Enqueue a file to be downloaded. If the number of current downloads is higher

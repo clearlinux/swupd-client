@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "swupd.h"

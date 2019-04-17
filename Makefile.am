@@ -294,6 +294,7 @@ BATS = \
 	test/functional/verify/verify-skip-scripts.bats
 
 UNIT_TESTS = \
+	test/unit/test_signature.test \
 	test/unit/test_strings.test \
 	test/unit/test_manifest.test
 

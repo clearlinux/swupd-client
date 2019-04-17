@@ -838,7 +838,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		free_string(&filepath);
 
 		/* Add 10% to bundle_size as a 'fudge factor' */
-		if (((bundle_size * 1.1) > fs_free && !skip_diskspace_check) || fs_free < 0) {
+		if (((bundle_size * 1.1) > fs_free) || fs_free < 0) {
 			ret = SWUPD_DISK_SPACE_ERROR;
 
 			if (fs_free > 0) {
@@ -884,9 +884,6 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		goto out;
 	}
 	timelist_timer_stop(global_times); // closing: Download missing files
-
-	mom->files = files_from_bundles(mom->submanifests);
-	mom->files = consolidate_files(mom->files);
 
 	/* step 6: Install all bundle(s) files into the fs */
 	timelist_timer_start(global_times, "Installing bundle(s) files onto filesystem");

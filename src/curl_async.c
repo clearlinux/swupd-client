@@ -86,13 +86,15 @@ struct swupd_curl_parallel_handle {
 	bool resume_failed;
 	int last_retry; /* keep the largest retry number so far */
 
-	CURLM *mcurl;			  /* Curl handle */
-	struct list *failed;		  /* List of failed downloads */
-	struct hashmap *curl_hashmap;     /* Hashmap mentioned above */
-	struct tp *thpool;		  /* Pointer to the threadpool */
-	swupd_curl_success_cb success_cb; /* Callback to success function */
-	swupd_curl_error_cb error_cb;     /* Callback to error function */
-	swupd_curl_free_cb free_cb;       /* Callback to free user data*/
+	CURLM *mcurl;			    /* Curl handle */
+	struct list *failed;		    /* List of failed downloads */
+	struct hashmap *curl_hashmap;       /* Hashmap mentioned above */
+	struct tp *thpool;		    /* Pointer to the threadpool */
+	swupd_curl_success_cb success_cb;   /* Callback to success function */
+	swupd_curl_error_cb error_cb;       /* Callback to error function */
+	swupd_curl_free_cb free_cb;	 /* Callback to free user data */
+	swupd_curl_progress_cb progress_cb; /* Callback to report download progress */
+	void *data;
 };
 
 /*
@@ -222,6 +224,20 @@ void swupd_curl_parallel_download_set_callbacks(void *handle, swupd_curl_success
 	h->success_cb = success_cb;
 	h->error_cb = error_cb;
 	h->free_cb = free_cb;
+}
+
+void swupd_curl_parallel_download_set_progress_callbacks(void *handle, swupd_curl_progress_cb progress_cb, void *data)
+{
+	struct swupd_curl_parallel_handle *h;
+
+	if (!handle) {
+		error("Curl - Invalid parallel download handle\n");
+		return;
+	}
+	h = handle;
+
+	h->progress_cb = progress_cb;
+	h->data = data;
 }
 
 // Try to process at most COUNT messages from the curl multi-stack.
@@ -424,6 +440,25 @@ static int process_download(struct swupd_curl_parallel_handle *h, struct multi_c
 		goto out_bad;
 	}
 	file->curl = curl;
+
+	if (h->progress_cb && h->data) {
+
+		curl_ret = curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, h->progress_cb);
+		if (curl_ret != CURLE_OK) {
+			goto out_bad;
+		}
+
+		/* switch on the progress meter */
+		curl_ret = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+		if (curl_ret != CURLE_OK) {
+			goto out_bad;
+		}
+
+		curl_ret = curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, h->data);
+		if (curl_ret != CURLE_OK) {
+			goto out_bad;
+		}
+	}
 
 	if (file->retries > 0 && !h->resume_failed && lstat(file->file.path, &stat) == 0) {
 		info("Curl - Resuming download for '%s'\n", file->url);

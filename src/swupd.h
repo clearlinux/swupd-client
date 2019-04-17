@@ -22,6 +22,7 @@
 #include "scripts.h"
 #include "swupd_curl.h"
 #include "swupd_exit_codes.h"
+#include "swupd_progress.h"
 #include "timelist.h"
 
 #ifdef __cplusplus

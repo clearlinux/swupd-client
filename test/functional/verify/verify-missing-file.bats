@@ -38,7 +38,6 @@ test_setup() {
 		Verifying version 10
 		Verifying files
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Adding any missing files
 		Missing file: .*/target-dir/foo/test-file1
 		.fixed

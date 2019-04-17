@@ -75,7 +75,6 @@ test_setup() {
 		Verifying version 20
 		Verifying files
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Adding any missing files
 		Missing file: .*/target-dir/baz
 		.fixed
@@ -128,7 +127,6 @@ test_setup() {
 		Verifying version 20
 		Verifying files
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Adding any missing files
 		Missing file: .*/target-dir/baz
 		.fixed
@@ -187,7 +185,6 @@ test_setup() {
 		Verifying version 20
 		Verifying files
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Adding any missing files
 		Missing file: .*/target-dir/baz
 		.fixed

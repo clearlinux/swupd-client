@@ -21,8 +21,7 @@ test_setup() {
 		 - os-core
 		 - test-bundle
 		Verifying files
-		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
+		No extra files need to be downloaded
 		Adding any missing files
 		Inspected 6 files
 		  1 file was missing

@@ -97,7 +97,6 @@ test_setup() {
 		Warning: the force or picky option is specified; ignoring version mismatch for verify --fix
 		Verifying files
 		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$fhash.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Unable to download necessary files for this OS release

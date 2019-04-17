@@ -31,8 +31,7 @@ test_setup() {
 		    changed files     : 0
 		    new files         : 1
 		    deleted files     : 1
-		Starting download of remaining update content. This may take a while...
-		Finishing download of update content...
+		No extra files need to be downloaded
 		Staging file content
 		Applying update
 		Update was applied.

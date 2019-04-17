@@ -406,7 +406,6 @@ bool set_path_prefix(char *path)
  * value is used (CERT_PATH). Note that only the first call to this function
  * sets the variable.
  */
-#ifdef SIGNATURES
 static void set_cert_path(char *path)
 {
 	// Early exit if the function was called previously.
@@ -427,12 +426,6 @@ static void set_cert_path(char *path)
 		}
 	}
 }
-#else
-static void set_cert_path(char UNUSED_PARAM *path)
-{
-	return;
-}
-#endif
 
 bool init_globals(void)
 {
@@ -496,9 +489,7 @@ bool init_globals(void)
 		}
 	}
 
-#ifdef SIGNATURES
 	set_cert_path(NULL);
-#endif
 
 	if (verbose_time) {
 		global_times = timelist_new();

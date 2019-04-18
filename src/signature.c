@@ -126,6 +126,7 @@ bool signature_init(const char *certificate_path, const char *crl)
 
 	return true;
 fail:
+	X509_free(cert);
 	error("Failed to verify certificate: %s\n", X509_verify_cert_error_string(ret));
 	return false;
 }
@@ -339,7 +340,7 @@ static int is_x509_ext_critical(X509 *cert, int nid)
  */
 static int validate_authority(X509 *cert)
 {
-	AUTHORITY_INFO_ACCESS *info;
+	AUTHORITY_INFO_ACCESS *info = NULL;
 	int n, i;
 
 	// Check if Authority Information Access is critical
@@ -360,12 +361,12 @@ static int validate_authority(X509 *cert)
 		ACCESS_DESCRIPTION *ad = sk_ACCESS_DESCRIPTION_value(info, i);
 		if (OBJ_obj2nid(ad->method) == NID_ad_OCSP) {
 			error("OCSP uri found, but method not supported\n");
-			return -1;
+			goto error;
 		}
 	}
-	AUTHORITY_INFO_ACCESS_free(info);
 
 error:
+	AUTHORITY_INFO_ACCESS_free(info);
 	error("Supported Authority Information Access methods not found in the certificate.\n");
 
 	return -1;

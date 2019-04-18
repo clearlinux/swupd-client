@@ -48,7 +48,7 @@ static void download_mix_file(struct file *file)
 	free_string(&filename);
 }
 
-static void download_file(void *download_handle, struct file *file)
+static void download_file(struct swupd_curl_parallel_handle *download_handle, struct file *file)
 {
 	char *url, *filename;
 
@@ -121,7 +121,7 @@ static double fullfile_query_total_download_size(struct list *files)
  */
 int download_fullfiles(struct list *files, int *num_downloads)
 {
-	void *download_handle;
+	struct swupd_curl_parallel_handle *download_handle;
 	struct list *iter;
 	struct list *need_download = NULL;
 	struct file *file;

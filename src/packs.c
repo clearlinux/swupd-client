@@ -113,7 +113,7 @@ static bool download_successful(void *data)
 	return finalize_pack_download(pack_data->module, pack_data->newversion, pack_data->filename) == 0;
 }
 
-static int download_pack(void *download_handle, int oldversion, int newversion, char *module, int is_mix)
+static int download_pack(struct swupd_curl_parallel_handle *download_handle, int oldversion, int newversion, char *module, int is_mix)
 {
 	char *url = NULL;
 	int err = -1;
@@ -208,7 +208,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	int err;
 	unsigned int list_length;
 	unsigned int complete = 0;
-	void *download_handle;
+	struct swupd_curl_parallel_handle *download_handle;
 	char *packs_size;
 
 	/* make a new list with only the bundles we actually need to download packs for */

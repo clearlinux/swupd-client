@@ -175,7 +175,7 @@ static void reevaluate_number_of_parallel_downloads(struct swupd_curl_parallel_h
 	info("Curl - Reducing number of parallel downloads to %ld\n", h->max_xfer);
 }
 
-void *swupd_curl_parallel_download_start(size_t max_xfer)
+struct swupd_curl_parallel_handle *swupd_curl_parallel_download_start(size_t max_xfer)
 {
 	struct swupd_curl_parallel_handle *h = calloc(1, sizeof(struct swupd_curl_parallel_handle));
 	ON_NULL_ABORT(h);
@@ -211,30 +211,24 @@ error:
 	return NULL;
 }
 
-void swupd_curl_parallel_download_set_callbacks(void *handle, swupd_curl_success_cb success_cb, swupd_curl_error_cb error_cb, swupd_curl_free_cb free_cb)
+void swupd_curl_parallel_download_set_callbacks(struct swupd_curl_parallel_handle *h, swupd_curl_success_cb success_cb, swupd_curl_error_cb error_cb, swupd_curl_free_cb free_cb)
 {
-	struct swupd_curl_parallel_handle *h;
-
-	if (!handle) {
+	if (!h) {
 		error("Curl - Invalid parallel download handle\n");
 		return;
 	}
-	h = handle;
 
 	h->success_cb = success_cb;
 	h->error_cb = error_cb;
 	h->free_cb = free_cb;
 }
 
-void swupd_curl_parallel_download_set_progress_callbacks(void *handle, swupd_curl_progress_cb progress_cb, void *data)
+void swupd_curl_parallel_download_set_progress_callbacks(struct swupd_curl_parallel_handle *h, swupd_curl_progress_cb progress_cb, void *data)
 {
-	struct swupd_curl_parallel_handle *h;
-
-	if (!handle) {
+	if (!h) {
 		error("Curl - Invalid parallel download handle\n");
 		return;
 	}
-	h = handle;
 
 	h->progress_cb = progress_cb;
 	h->data = data;
@@ -505,16 +499,14 @@ out_bad:
 	return -1;
 }
 
-int swupd_curl_parallel_download_enqueue(void *handle, const char *url, const char *filename, const char *hash, void *data)
+int swupd_curl_parallel_download_enqueue(struct swupd_curl_parallel_handle *h, const char *url, const char *filename, const char *hash, void *data)
 {
-	struct swupd_curl_parallel_handle *h;
 	struct multi_curl_file *file;
 
-	if (!handle) {
+	if (!h) {
 		error("Curl - Invalid parallel download handle\n");
 		return -1;
 	}
-	h = handle;
 
 	file = calloc(1, sizeof(struct multi_curl_file));
 	ON_NULL_ABORT(file);
@@ -539,21 +531,18 @@ int swupd_curl_parallel_download_enqueue(void *handle, const char *url, const ch
 	return process_download(h, file);
 }
 
-int swupd_curl_parallel_download_end(void *handle, int *num_downloads)
+int swupd_curl_parallel_download_end(struct swupd_curl_parallel_handle *h, int *num_downloads)
 {
-	struct swupd_curl_parallel_handle *h;
 	struct multi_curl_file *file;
 	int i, downloads = 0;
 	struct list *l;
 	bool retry = true;
 	int ret = 0;
 
-	if (!handle) {
+	if (!h) {
 		error("Curl - Invalid parallel download handle\n");
 		return -1;
 	}
-
-	h = handle;
 
 	while (poll_fewer_than(h, 0, 0) == 0 && retry) {
 		retry = false;

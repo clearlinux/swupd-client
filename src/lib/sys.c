@@ -277,3 +277,42 @@ bool systemd_in_container(void)
          * The return code is zero if the system is in a container */
 	return !run_command("/usr/bin/systemd-detect-virt", "-c");
 }
+
+char *sys_dirname(const char *path)
+{
+	char *tmp, *dir;
+
+	tmp = strdup_or_die(path);
+	dir = strdup_or_die(dirname(tmp));
+
+	free(tmp);
+	return dir;
+}
+
+char *sys_path_join(const char *prefix, const char *path)
+{
+	size_t len = 0;
+
+	if (!path) {
+		path = "";
+	}
+	if (!prefix) {
+		prefix = "";
+	}
+
+	if (prefix) {
+		len = strlen(prefix);
+	}
+
+	//Remove trailing '/' at the end of prefix
+	while (len && prefix[len - 1] == PATH_SEPARATOR) {
+		len--;
+	}
+
+	//Remove leading  '/' at the beginning of path
+	while (path[0] == PATH_SEPARATOR) {
+		path++;
+	}
+
+	return str_or_die("%.*s%c%s", len, prefix, PATH_SEPARATOR, path);
+}

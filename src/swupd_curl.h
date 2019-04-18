@@ -31,6 +31,11 @@ enum download_status {
 };
 
 /*
+ * Handle for swupd curl parallel functions.
+ */
+struct swupd_curl_parallel_handle;
+
+/*
  * Callback to be called when a download is successful.
  */
 typedef bool (*swupd_curl_success_cb)(void *data);
@@ -92,7 +97,7 @@ int swupd_curl_get_file_memory(const char *url, struct curl_file_data *file_data
  *
  * Note: This function is non-blocking.
  */
-void *swupd_curl_parallel_download_start(size_t max_xfer);
+struct swupd_curl_parallel_handle *swupd_curl_parallel_download_start(size_t max_xfer);
 
 /*
  * Set parallel downloads callbacks.
@@ -108,7 +113,7 @@ void *swupd_curl_parallel_download_start(size_t max_xfer);
  *                  to schedule a retry.
  * - free_cb():     Called when data is ready to be freed.
  */
-void swupd_curl_parallel_download_set_callbacks(void *handle, swupd_curl_success_cb success_cb, swupd_curl_error_cb error_cb, swupd_curl_free_cb free_cb);
+void swupd_curl_parallel_download_set_callbacks(struct swupd_curl_parallel_handle *handle, swupd_curl_success_cb success_cb, swupd_curl_error_cb error_cb, swupd_curl_free_cb free_cb);
 
 /*
  * Set parallel downloads progress callback
@@ -118,7 +123,7 @@ void swupd_curl_parallel_download_set_callbacks(void *handle, swupd_curl_success
  *                   function prints the download progress, so it will always return 0.
  *  - data:          User data to be informed to progress_cb.
  */
-void swupd_curl_parallel_download_set_progress_callbacks(void *handle, swupd_curl_progress_cb progress_cb, void *data);
+void swupd_curl_parallel_download_set_progress_callbacks(struct swupd_curl_parallel_handle *handle, swupd_curl_progress_cb progress_cb, void *data);
 
 /*
  * Enqueue a file to be downloaded. If the number of current downloads is higher
@@ -136,7 +141,7 @@ void swupd_curl_parallel_download_set_progress_callbacks(void *handle, swupd_cur
  *
  * Note: This function MAY be blocked.
  */
-int swupd_curl_parallel_download_enqueue(void *handle, const char *url, const char *filename, const char *hash, void *data);
+int swupd_curl_parallel_download_enqueue(struct swupd_curl_parallel_handle *handle, const char *url, const char *filename, const char *hash, void *data);
 
 /*
  * Finish all pending downloads and free memory allocated by parallel download
@@ -149,7 +154,7 @@ int swupd_curl_parallel_download_enqueue(void *handle, const char *url, const ch
  *
  * Note: This function MAY be blocked.
  */
-int swupd_curl_parallel_download_end(void *handle, int *num_downloads);
+int swupd_curl_parallel_download_end(struct swupd_curl_parallel_handle *handle, int *num_downloads);
 
 #ifdef __cplusplus
 }

@@ -56,3 +56,6 @@ test/**/*.log
 test/unit/test_*.test
 verifytime
 unit_tests.log
+html/
+xml/
+doc-coverage.info

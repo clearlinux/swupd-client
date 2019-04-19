@@ -16,7 +16,7 @@ Swupd code style is defined on .clang-format and checked with "make compliant". 
 
 ### Comments
 
-You are going to see different comment styles in swupd codebase. We are working on improving the quality of function comments on header files, so for new code, always comment all new exported (non static) functions you create in the header file. It's also well appreciated if you add comments to undocumented functions you have changed.
+You are going to see different comment styles in swupd codebase. We are working on improving the quality of function comments on header files, so for new code, always comment all new exported (non static) functions you create in the header file. We use doxygen to validate our header api comments, so use a Doxygen supported standard.
 
  - Use /* */ for multiline or single line header comments. It's ok to use // for comments in the code
  - If needed, use '' to highlight the variable name or a value
@@ -25,13 +25,13 @@ You are going to see different comment styles in swupd codebase. We are working 
 Some examples of good comments:
 
 ```c
-/*
- * Returns 1 if 'list' is longer than 'count'. Returns 0 otherwise
+/**
+ * @returns 1 if 'list' is longer than 'count' and 0 otherwise
  */
 extern int list_longer_than(struct list *list, int count);
 
 /*
- * Returns a duplicated copy of the string using strdup().
+ * Get a duplicated copy of the string using strdup().
  * Abort if there's no memory to allocate the new string.
  */
 char *strdup_or_die(const char *const str);

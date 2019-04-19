@@ -73,8 +73,10 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	char *rename_target = NULL;
 	char *rename_tmpdir = NULL;
 	char real_path[4096] = { 0 };
-	int ret;
 	struct stat s;
+	struct stat buf;
+	int err;
+	int ret;
 
 	tmp = strdup_or_die(file->filename);
 	tmp2 = strdup_or_die(file->filename);
@@ -89,22 +91,25 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 
 	string_or_die(&original, "%s/staged/%s", state_dir, file->hash);
 
+	/* make sure the directory where the file should be copied to exists
+	 * and is in deed a directory */
 	string_or_die(&targetpath, "%s%s", path_prefix, rel_dir);
 	ret = stat(targetpath, &s);
-
 	if ((ret == -1) && (errno == ENOENT)) {
 		if (MoM) {
 			warn("Update target directory does not exist: %s. Trying to fix it\n", targetpath);
 			verify_fix_path(dir, MoM);
 		} else {
-			warn("Update target directory does not exist: %s. Auto-fix disabled\n", targetpath);
+			debug("Update target directory does not exist: %s. Auto-fix disabled\n", targetpath);
 		}
-
 	} else if (!S_ISDIR(s.st_mode)) {
 		error("Update target exists but is NOT a directory: %s\n", targetpath);
 	}
+
 	if (!realpath(targetpath, real_path)) {
-		ret = -1;
+		/* if the target directory didn't exist and it failed to be fixed
+		 * it will end up here */
+		ret = SWUPD_COULDNT_CREATE_DIR;
 		goto out;
 	} else if (strcmp(path_prefix, targetpath) != 0 &&
 		   strcmp(targetpath, real_path) != 0) {
@@ -115,25 +120,27 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		 * doesn't keep the trailing '/' so check for that case
 		 * specifically.
 		 */
-		ret = -1;
+		ret = SWUPD_UNEXPECTED_CONDITION;
 		goto out;
 	}
 
+	/* remove a pre-existing .update file in the destination if it exists */
 	string_or_die(&target, "%s%s/.update.%s", path_prefix, rel_dir, base);
 	ret = swupd_rm(target);
 	if (ret < 0 && ret != -ENOENT) {
 		error("Failed to remove %s\n", target);
 	}
 
+	/* if the file already exists in the final destination, check to see
+	 * if it is of the same type */
 	string_or_die(&statfile, "%s%s", path_prefix, file->filename);
-
 	memset(&s, 0, sizeof(struct stat));
 	ret = lstat(statfile, &s);
 	if (ret == 0) {
 		if ((file->is_dir && !S_ISDIR(s.st_mode)) ||
 		    (file->is_link && !S_ISLNK(s.st_mode)) ||
 		    (file->is_file && !S_ISREG(s.st_mode))) {
-			//file type changed, move old out of the way for new
+			// file type changed, move old out of the way for new
 			ret = swupd_rm(statfile);
 			if (ret < 0) {
 				ret = SWUPD_COULDNT_REMOVE_FILE;
@@ -143,6 +150,9 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	}
 	free_string(&statfile);
 
+	/* copy the file/directory to its final destination, if it is a file
+	 * keep its name with a .update prefix for now like this .update.(file_name)
+	 * if it is a directory it will be renamed to its final name once copied */
 	if (file->is_dir || S_ISDIR(s.st_mode)) {
 		/* In the btrfs only scenario there was an implicit
 		 * "create_or_update_dir()" via un-tar-ing a directory.tar after
@@ -223,12 +233,8 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 			}
 		}
 
-		struct stat buf;
-		int err;
-
 		free_string(&file->staging);
 		string_or_die(&file->staging, "%s%s/.update.%s", path_prefix, rel_dir, base);
-
 		err = lstat(file->staging, &buf);
 		if (err != 0) {
 			free_string(&file->staging);

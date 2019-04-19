@@ -720,6 +720,7 @@ enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		ret = stat(target, &sb);
 		if (ret == 0) {
 			if (verify_file(file, target)) {
+				/* this subpart of the path does exist, nothing to be done */
 				continue;
 			}
 			info("Hash did not match for path : %s ... fixing\n", path);
@@ -728,25 +729,26 @@ enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		} else {
 			goto end;
 		}
+
 		/* In some circumstances (Docker using layers between updates/bundle adds,
-                 * corrupt staging content) we could have content which fails to stage.
+		 * corrupt staging content) we could have content which fails to stage.
 		 * In order to avoid this causing failure in verify_fix_path, remove the
 		 * staging content before proceeding. This also cleans up in case any prior
 		 * download failed in a partial state.
 		 */
 		unlink_all_staged_content(file);
 
+		/* download the fullfile for the missing path */
 		string_or_die(&tar_dotfile, "%s/download/.%s.tar", state_dir, file->hash);
-
 		string_or_die(&url, "%s/%i/files/%s.tar", content_url, file->last_change, file->hash);
 		ret = swupd_curl_get_file(url, tar_dotfile);
-
 		if (ret != 0) {
 			error("Failed to download file %s in verify_fix_path\n", file->filename);
 			ret = SWUPD_COULDNT_DOWNLOAD_FILE;
 			unlink(tar_dotfile);
 			goto end;
 		}
+
 		if (untar_full_download(file) != 0) {
 			error("Failed to untar file %s\n", file->filename);
 			ret = SWUPD_COULDNT_UNTAR_FILE;

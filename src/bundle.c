@@ -757,7 +757,6 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	struct list *iter;
 	struct list *to_install_bundles = NULL;
 	struct list *to_install_files = NULL;
-	struct manifest *full_mom = NULL;
 	bool invalid_bundle_provided = false;
 
 	/* step 1: get subscriptions for bundles to be installed */
@@ -806,8 +805,10 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		invalid_bundle_provided = true;
 	}
 
+	/* Set the version of the subscribed bundles to the one they last changed */
 	set_subscription_versions(mom, NULL, subs);
 
+	/* Load the manifest of all bundles to be installed */
 	to_install_bundles = recurse_manifest(mom, *subs, NULL, false, NULL);
 	if (!to_install_bundles) {
 		error("Cannot load to install bundles\n");
@@ -817,15 +818,16 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Add bundles and recurse
 
+	/* Step 2: Get a list with all files needed to be installed for the requested bundles */
 	timelist_timer_start(global_times, "Consolidate files from bundles");
 	progress_set_step(2, "consolidate_files");
 	to_install_files = files_from_bundles(to_install_bundles);
 	to_install_files = consolidate_files(to_install_files);
-	to_install_files = filter_out_existing_files(to_install_files);
+	to_install_files = filter_out_existing_files(to_install_files); // TODO: this function needs to replace files previously untracked
 	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Consolidate files from bundles
 
-	/* Step 3: Now that we know the bundle is valid, check if we have enough space */
+	/* Step 3: Check if we have enough space */
 	progress_set_step(3, "check_disk_space_availability");
 	if (!skip_diskspace_check) {
 		timelist_timer_start(global_times, "Check disk space availability");
@@ -861,9 +863,10 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 	/* step 4: download necessary packs */
 	timelist_timer_start(global_times, "Download packs");
+	progress_set_step(4, "download_packs");
+
 	(void)rm_staging_dir_contents("download");
 
-	progress_set_step(4, "download_packs");
 	if (list_longer_than(to_install_files, 10)) {
 		download_subscribed_packs(*subs, mom, true);
 	} else {
@@ -889,15 +892,12 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 	/* step 6: Install all bundle(s) files into the fs */
 	timelist_timer_start(global_times, "Installing bundle(s) files onto filesystem");
-	info("Installing bundle(s) files...\n");
 	progress_set_step(6, "install_files");
 
-	/* Do an initial check to
-	 * 1. make sure the file actually downloaded, if not continue on to the
-	 *    verify_fix_path below.
-	 * 2. verify the file hash
-	 * Do not install any files to the system until the hash has been
-	 * verified. The verify_fix_path also verifies the hashes. */
+	info("Installing bundle(s) files...\n");
+
+	/* This loop does an initial check to verify the hash of every downloaded file to install,
+	 * if the hash is wrong it is removed from staging area so it can be re-downloaded */
 	char *hashpath;
 	iter = list_head(to_install_files);
 	while (iter) {
@@ -907,14 +907,14 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		string_or_die(&hashpath, "%s/staged/%s", state_dir, file->hash);
 
 		if (access(hashpath, F_OK) < 0) {
-			/* fallback to verify_fix_path below, which will check the hash
-			 * itself */
+			/* the file does not exist in the staged directory, it will need
+			 * to be downloaded again */
 			free_string(&hashpath);
 			continue;
 		}
 
-		ret = verify_file(file, hashpath);
-		if (!ret) {
+		/* make sure the file is not corrupt */
+		if (!verify_file(file, hashpath)) {
 			warn("hash check failed for %s\n", file->filename);
 			info("         will attempt to download fullfile for %s\n", file->filename);
 			ret = swupd_rm(hashpath);
@@ -931,9 +931,19 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		free_string(&hashpath);
 	}
 
-	iter = list_head(to_install_files);
-	unsigned int list_length = list_len(to_install_files);
+	/*
+	 * NOTE: The following two loops are used to install the files in the target system:
+	 *  - the first loop stages the file
+	 *  - the second loop renames the files to their final name in the target system
+	 *
+	 * This process is done in two separate loops to reduce the chance of end up
+	 * with a corrupt system if for some reason the process is aborted during this stage
+	 */
+	unsigned int list_length = list_len(to_install_files) * 2; // we are using two loops so length is times 2
 	unsigned int complete = 0;
+
+	/* Copy files to their final destination */
+	iter = list_head(to_install_files);
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
@@ -946,11 +956,21 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		/* apply the heuristics for the file so the correct post-actions can
 		 * be completed */
 		apply_heuristics(file);
-		ret = do_staging(file, full_mom);
+
+		/* stage the file:
+		 *  - make sure the directory where the file will be copied to exists
+		 *  - if the file being staged already exists in the system make sure its
+		 *    type hasn't changed, if it has, remove it so it can be replaced
+		 *  - copy the file/directory to its final destination; if it is a file,
+		 *    keep its name with a .update prefix, if it is a directory, it will already
+		 *    be copied with its final name
+		 * Note: to avoid too much recursion, do not send the mom to do_staging so it
+		 *       doesn't try to fix failures, we will handle those below */
+		ret = do_staging(file, NULL);
 		if (ret) {
-			if (!full_mom) {
-				/* step 3: Add tracked bundles */
-				timelist_timer_start(global_times, "Add tracked bundles");
+			/* the file failed to be staged, for error recovery, bundle-add needs to
+			 * read all currently installed manifests and their files */
+			if (!mom->files) {
 				read_subscriptions(subs);
 				set_subscription_versions(mom, NULL, subs);
 				mom->submanifests = recurse_manifest(mom, *subs, NULL, false, NULL);
@@ -959,25 +979,24 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 					ret = SWUPD_RECURSE_MANIFEST;
 					goto out;
 				}
-
 				mom->files = files_from_bundles(mom->submanifests);
 				mom->files = consolidate_files(mom->files);
-				timelist_timer_stop(global_times); // closing: Add tracked bundles
-				full_mom = mom;
 			}
-			ret = verify_fix_path(file->filename, full_mom);
-		}
-		if (ret) {
-			/* verify_fix_path returns a swupd_code on error,
-			 * just propagate the error */
-			goto out;
+
+			/* now that we have all files from other bundles listed in the MoM,
+			 * try to fix the missing path */
+			ret = verify_fix_path(file->filename, mom);
+			if (ret) {
+				/* verify_fix_path returns a swupd_code on error,
+				 * just propagate the error */
+				goto out;
+			}
 		}
 
-		/* two loops are necessary, first to stage, then to rename. Total is
-		 * list_length * 2 */
-		progress_report(complete, list_length * 2);
+		progress_report(complete, list_length);
 	}
 
+	/* Rename the files to their final form */
 	iter = list_head(to_install_files);
 	while (iter) {
 		file = iter->data;
@@ -989,35 +1008,22 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		}
 
 		/* This was staged by verify_fix_path */
-		if (!file->staging) {
-			if (!full_mom) {
-				/* step 3: Add tracked bundles */
-				timelist_timer_start(global_times, "Add tracked bundles");
-				read_subscriptions(subs);
-				set_subscription_versions(mom, NULL, subs);
-				mom->submanifests = recurse_manifest(mom, *subs, NULL, false, NULL);
-				if (!mom->submanifests) {
-					error("Cannot load installed bundles\n");
-					ret = SWUPD_RECURSE_MANIFEST;
-					goto out;
-				}
-
-				mom->files = files_from_bundles(mom->submanifests);
-				mom->files = consolidate_files(mom->files);
-				timelist_timer_stop(global_times); // closing: Add tracked bundles
-				full_mom = mom;
-			}
-			file = search_file_in_manifest(full_mom, file->filename);
+		if (!file->staging && !file->is_dir) {
+			/* the current file struct doesn't have the name of the "staging" file
+			 * since it was staged by verify_fix_path, the staged file is in the
+			 * file struct in the MoM, so we need to load that one instead
+			 * so rename_staged_file_to_final works properly */
+			file = search_file_in_manifest(mom, file->filename);
 		}
 
 		rename_staged_file_to_final(file);
-		// This is the second half of this process
-		progress_report(complete, list_length * 2);
+
+		progress_report(complete, list_length);
 	}
-	progress_report(list_length * 2, list_length * 2); /* Force out 100% complete */
 	info("\n");
 	sync();
 	timelist_timer_stop(global_times); // closing: Installing bundle(s) files onto filesystem
+
 	/* step 7: Run any scripts that are needed to complete update */
 	timelist_timer_start(global_times, "Run Scripts");
 	progress_set_step(7, "run_scripts");
@@ -1094,6 +1100,7 @@ enum swupd_code install_bundles_frontend(char **bundles)
 		return ret;
 	}
 
+	timelist_timer_start(global_times, "Load MoM");
 	current_version = get_current_version(path_prefix);
 	if (current_version < 0) {
 		error("Unable to determine current OS version\n");
@@ -1109,6 +1116,7 @@ enum swupd_code install_bundles_frontend(char **bundles)
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto clean_and_exit;
 	}
+	timelist_timer_stop(global_times); // closing: Load MoM
 
 	timelist_timer_start(global_times, "Prepend bundles to list");
 	aliases = get_alias_definitions();
@@ -1123,8 +1131,8 @@ enum swupd_code install_bundles_frontend(char **bundles)
 		bundles_list = list_concat(alias_bundles, bundles_list);
 	}
 	list_free_list_and_data(aliases, free_alias_lookup);
-
 	timelist_timer_stop(global_times); // closing: Prepend bundles to list
+
 	timelist_timer_start(global_times, "Install bundles");
 	ret = install_bundles(bundles_list, &subs, mom);
 	timelist_timer_stop(global_times); // closing: Install bundles

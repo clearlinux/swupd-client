@@ -29,8 +29,6 @@
 #include "config.h"
 #include "swupd.h"
 
-/* Deep free on alias_lookup structs
- */
 void free_alias_lookup(void *lookup)
 {
 	struct alias_lookup *l = (struct alias_lookup *)lookup;
@@ -39,10 +37,6 @@ void free_alias_lookup(void *lookup)
 	free(l);
 }
 
-/* Get bundles for a given alias but if the alias is
- * not actually an alias, return a list with just the
- * bundle name
- */
 struct list *get_alias_bundles(struct list *alias_definitions, char *alias)
 {
 	struct list *bundles = NULL;
@@ -63,16 +57,6 @@ struct list *get_alias_bundles(struct list *alias_definitions, char *alias)
 	return bundles;
 }
 
-/* Parse an alias definition file for a list of bundles
- * it specifies
- *
- * Example file:
- * alias1	b1	b2
- * alias2	b3	b4
- *
- * If two files provide the same alias, the first one that
- * is parsed is the one that will be used.
- */
 static struct list *parse_alias_file(char *fullpath)
 {
 	FILE *afile = NULL;

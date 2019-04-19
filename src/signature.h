@@ -1,13 +1,18 @@
 #ifndef __SIGNATURE_H__
 #define __SIGNATURE_H__
 
+/**
+ * @file
+ * @brief Signature validation functions.
+ */
+
 #include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*
+/**
  * Initialize this module.
  *
  * @param cert_path the path to the certificate to be used to check signatures.
@@ -19,12 +24,12 @@ extern "C" {
  */
 bool signature_init(const char *certificate_path, const char *crl);
 
-/*
+/**
  * Terminate usage of this module, free resources.
  */
 void signature_deinit(void);
 
-/*
+/**
  * Verify if file is signed.
  *
  * @param file         path to file to be verified.

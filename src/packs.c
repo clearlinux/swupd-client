@@ -301,6 +301,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	}
 	info("\n");
 	list_free_list(need_download);
+	info("Finishing packs extraction...\n");
 
 	return swupd_curl_parallel_download_end(download_handle, NULL);
 }

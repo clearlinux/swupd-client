@@ -41,6 +41,7 @@ test_setup() {
 	)
 	expected_output2=$(cat <<-EOM
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 11, "stepCompletion" : 100, "stepDescription" : "download_packs" },
+		{ "type" : "info", "msg" : "Finishing packs extraction... " },
 		{ "type" : "progress", "currentStep" : 7, "totalSteps" : 11, "stepCompletion" : 100, "stepDescription" : "apply_deltas" },
 		{ "type" : "info", "msg" : "Statistics for going from version 10 to version 20:  " },
 		{ "type" : "info", "msg" : "    changed bundles   : 1 " },

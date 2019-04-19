@@ -24,6 +24,7 @@ test_setup() {
 		Downloading packs for:
 		 - os-core
 		 - test-bundle
+		Finishing packs extraction...
 		Statistics for going from version 10 to version 100:
 		    changed bundles   : 2
 		    new bundles       : 0

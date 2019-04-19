@@ -20,6 +20,7 @@ test_setup() {
 		Downloading packs for:
 		 - os-core
 		 - test-bundle
+		Finishing packs extraction...
 		Verifying files
 		No extra files need to be downloaded
 		Adding any missing files

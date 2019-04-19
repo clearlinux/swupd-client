@@ -21,9 +21,11 @@ test_setup() {
 	assert_file_exists "$TARGETDIR/usr/bin/10"
 	assert_file_exists "$TARGETDIR/media/lib/file2"
 	expected_output=$(cat <<-EOM
+		Loading required manifests...
 		Downloading packs for:
 		 - test-bundle1
 		 - test-bundle2
+		Finishing packs extraction...
 		No extra files need to be downloaded
 		Installing bundle(s) files...
 		Calling post-update helper scripts.

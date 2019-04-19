@@ -24,6 +24,7 @@ test_setup() {
 		Downloading packs for:
 		 - bundle1
 		 - os-core
+		Finishing packs extraction...
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 2
 		    new bundles       : 0

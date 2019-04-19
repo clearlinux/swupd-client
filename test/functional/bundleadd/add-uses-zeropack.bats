@@ -30,8 +30,10 @@ test_setup() {
 	# validate zero pack was downloaded
 	assert_file_exists "$STATEDIR"/pack-test-bundle1-from-0-to-10.tar
 	expected_output=$(cat <<-EOM
+		Loading required manifests...
 		Downloading packs for:
 		 - test-bundle1
+		Finishing packs extraction...
 		No extra files need to be downloaded
 		Installing bundle(s) files...
 		Calling post-update helper scripts.

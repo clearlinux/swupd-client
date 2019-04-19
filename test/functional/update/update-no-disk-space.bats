@@ -162,6 +162,7 @@ test_setup() {
 		 - test-bundle
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/pack-test-bundle-from-10.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
+		Finishing packs extraction...
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 1
 		    new bundles       : 0

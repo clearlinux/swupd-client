@@ -24,12 +24,13 @@
 
 #include "formatter_json.h"
 #include "log.h"
+#include "macros.h"
 #include "progress.h"
 #include "strings.h"
 
 static int json_format = 0;
 
-static void log_json(FILE *out UNUSED, const char *file UNUSED, int line UNUSED, const char *label, const char *format, va_list args_list)
+static void log_json(FILE *out UNUSED_PARAM, const char *file UNUSED_PARAM, int line UNUSED_PARAM, const char *label, const char *format, va_list args_list)
 {
 	json_message(label, format, args_list);
 }

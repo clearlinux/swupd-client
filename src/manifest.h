@@ -1,6 +1,13 @@
 #ifndef __MANIFEST__
 #define __MANIFEST__
 
+/**
+ * @file
+ * @brief Manifest parsing and processing.
+ *
+ * There are still several manifest functions on swupd.h that needs to me moved here.
+ */
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -26,22 +33,23 @@ struct manifest {
 	unsigned int is_mix : 1;
 };
 
-/*
- * Parse manifest located on disk under 'filename' and set it's name to 'component'.
- * If 'header_only', don't parse manifest files.
+/**
+ * @brief Parse manifest located on disk under 'filename' and set it's name to 'component'.
+ * @param header_only If set don't parse manifest files.
  *
- * Return the parsed manifest
+ * @returns The parsed manifest.
  */
 struct manifest *manifest_parse(const char *component, const char *filename, bool header_only);
 
-/*
- * Free manifest pointed by 'data'.
+/**
+ * @brief Free manifest pointed by @c data.
+ *
  * Just a wrapper on free_manifest() to help with casting.
  */
 void free_manifest_data(void *data);
 
-/*
- * Free manifest pointed by 'manifest'
+/**
+ * @brief Free manifest pointed by 'manifest'
  */
 void free_manifest(struct manifest *manifest);
 

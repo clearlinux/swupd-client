@@ -26,6 +26,7 @@ test_setup() {
 	expected_output1=$(cat <<-EOM
 		[
 		{ "type" : "start", "section" : "bundle-add" },
+		{ "type" : "info", "msg" : "Loading required manifests... " },
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "consolidate_files" },
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "check_disk_space_availability" },
@@ -35,6 +36,7 @@ test_setup() {
 	)
 	expected_output2=$(cat <<-EOM
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "download_packs" },
+		{ "type" : "info", "msg" : "Finishing packs extraction... " },
 		{ "type" : "info", "msg" : "No extra files need to be downloaded " },
 		{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "download_fullfiles" },
 		{ "type" : "info", "msg" : "Installing bundle(s) files... " },

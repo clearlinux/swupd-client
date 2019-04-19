@@ -31,6 +31,7 @@ test_setup() {
 		Warning: One or more installed bundles are no longer available at version 20.
 		Downloading packs for:
 		 - os-core
+		Finishing packs extraction...
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 1
 		    new bundles       : 0

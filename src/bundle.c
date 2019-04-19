@@ -760,7 +760,8 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	struct manifest *full_mom = NULL;
 	bool invalid_bundle_provided = false;
 
-	/* step 1: check bundle args are valid if so populate subs struct */
+	/* step 1: get subscriptions for bundles to be installed */
+	info("Loading required manifests...\n");
 	timelist_timer_start(global_times, "Add bundles and recurse");
 	progress_set_step(1, "load_manifests");
 	ret = add_subscriptions(bundles, subs, mom, false, 0);

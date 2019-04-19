@@ -35,6 +35,7 @@ test_setup() {
 		Preparing to update from 10 to 20
 		Downloading packs for:
 		 - test-bundle1
+		Finishing packs extraction...
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 1
 		    new bundles       : 0
@@ -65,6 +66,7 @@ test_setup() {
 		Downloading packs for:
 		 - test-bundle1
 		 - test-bundle2
+		Finishing packs extraction...
 		Statistics for going from version 10 to version 30:
 		    changed bundles   : 2
 		    new bundles       : 0

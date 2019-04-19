@@ -30,6 +30,7 @@ test_setup() {
 		 - os-core
 		 - test-bundle2
 		 - test-bundle3
+		Finishing packs extraction...
 		Statistics for going from version 20 to version 30:
 		    changed bundles   : 3
 		    new bundles       : 0

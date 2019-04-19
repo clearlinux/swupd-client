@@ -20,6 +20,7 @@ test_setup() {
 		Preparing to update from 10 to 20
 		Downloading packs for:
 		 - os-core
+		Finishing packs extraction...
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 1
 		    new bundles       : 0
@@ -37,6 +38,7 @@ test_setup() {
 		Preparing to update from 30 to 40
 		Downloading packs for:
 		 - os-core
+		Finishing packs extraction...
 		Statistics for going from version 30 to version 40:
 		    changed bundles   : 1
 		    new bundles       : 0

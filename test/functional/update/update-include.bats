@@ -49,6 +49,7 @@ test_setup() {
 		 - test-bundle2
 		 - test-bundle7
 		 - test-bundle1
+		Finishing packs extraction...
 		Statistics for going from version 10 to version 100:
 		    changed bundles   : 1
 		    new bundles       : 6

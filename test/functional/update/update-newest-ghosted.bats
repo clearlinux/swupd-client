@@ -21,6 +21,7 @@ test_setup() {
 		Preparing to update from 10 to 100
 		Downloading packs for:
 		 - os-core
+		Finishing packs extraction...
 		Statistics for going from version 10 to version 100:
 		    changed bundles   : 1
 		    new bundles       : 0

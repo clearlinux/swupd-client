@@ -38,6 +38,7 @@ test_setup() {
 		Preparing to update from 10 to 1000
 		Downloading packs for:
 		 - test-bundle1
+		Finishing packs extraction...
 		Statistics for going from version 10 to version 1000:
 		    changed bundles   : 1
 		    new bundles       : 0

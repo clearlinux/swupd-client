@@ -25,6 +25,7 @@ test_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Loading required manifests...
 		Warning: Bundle test-bundle1 is experimental
 		No packs need to be downloaded
 		Starting download of remaining update content. This may take a while...

@@ -99,6 +99,7 @@ test_teardown() {
 		Preparing to update from 10 to 20
 		Downloading packs for:
 		 - os-core
+		Finishing packs extraction...
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 1
 		    new bundles       : 0

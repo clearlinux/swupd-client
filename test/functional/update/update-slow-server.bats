@@ -42,6 +42,7 @@ test_teardown() {
 		Downloading packs for:
 		 - test-bundle
 		Error: Curl - File incompletely downloaded - '.*/100/pack-test-bundle-from-10.tar'
+		Finishing packs extraction...
 		Curl - Starting download retry #1 for .*/100/pack-test-bundle-from-10.tar
 		Curl - Resuming download for '.*/100/pack-test-bundle-from-10.tar'
 		Error: Curl - Range command not supported by server, download resume disabled - '.*/100/pack-test-bundle-from-10.tar'

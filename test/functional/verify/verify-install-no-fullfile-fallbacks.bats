@@ -27,6 +27,7 @@ test_setup() {
 		Downloading packs for:
 		 - os-core
 		 - test-bundle
+		Finishing packs extraction...
 		Error: zero pack downloads failed
 		Verifying files
 		Starting download of remaining update content. This may take a while...

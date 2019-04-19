@@ -23,6 +23,7 @@ test_setup() {
 		Preparing to update from 10 to 100
 		Downloading packs for:
 		 - test-bundle
+		Finishing packs extraction...
 		Warning: Couldn.t use delta file .*
 		Statistics for going from version 10 to version 100:
 		    changed bundles   : 1

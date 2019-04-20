@@ -755,8 +755,11 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	long fs_free = 0;
 	struct file *file;
 	struct list *iter;
+	struct list *installed_bundles = NULL;
+	struct list *installed_files = NULL;
 	struct list *to_install_bundles = NULL;
 	struct list *to_install_files = NULL;
+	struct list *current_subs = NULL;
 	bool invalid_bundle_provided = false;
 
 	/* step 1: get subscriptions for bundles to be installed */
@@ -815,15 +818,39 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		ret = SWUPD_RECURSE_MANIFEST;
 		goto out;
 	}
+
+	/* Load the manifest of all bundles already installed */
+	read_subscriptions(&current_subs);
+	set_subscription_versions(mom, NULL, &current_subs);
+	installed_bundles = recurse_manifest(mom, current_subs, NULL, false, NULL);
+	if (!installed_bundles) {
+		error("Cannot load installed bundles\n");
+		ret = SWUPD_RECURSE_MANIFEST;
+		goto out;
+	}
+	mom->submanifests = installed_bundles;
+
 	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Add bundles and recurse
 
 	/* Step 2: Get a list with all files needed to be installed for the requested bundles */
 	timelist_timer_start(global_times, "Consolidate files from bundles");
 	progress_set_step(2, "consolidate_files");
+
+	/* get all files already installed in the target system */
+	installed_files = files_from_bundles(installed_bundles);
+	installed_files = consolidate_files(installed_files);
+	mom->files = installed_files;
+	installed_files = filter_out_deleted_files(installed_files);
+
+	/* get all the files included in the bundles to be added */
 	to_install_files = files_from_bundles(to_install_bundles);
 	to_install_files = consolidate_files(to_install_files);
-	to_install_files = filter_out_existing_files(to_install_files); // TODO: this function needs to replace files previously untracked
+	to_install_files = filter_out_deleted_files(to_install_files);
+
+	/* from the list of files to be installed, remove those files already in the target system */
+	to_install_files = filter_out_existing_files(to_install_files, installed_files);
+
 	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Consolidate files from bundles
 
@@ -966,31 +993,9 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		 *    be copied with its final name
 		 * Note: to avoid too much recursion, do not send the mom to do_staging so it
 		 *       doesn't try to fix failures, we will handle those below */
-		ret = do_staging(file, NULL);
+		ret = do_staging(file, mom);
 		if (ret) {
-			/* the file failed to be staged, for error recovery, bundle-add needs to
-			 * read all currently installed manifests and their files */
-			if (!mom->files) {
-				read_subscriptions(subs);
-				set_subscription_versions(mom, NULL, subs);
-				mom->submanifests = recurse_manifest(mom, *subs, NULL, false, NULL);
-				if (!mom->submanifests) {
-					error("Cannot load installed bundles\n");
-					ret = SWUPD_RECURSE_MANIFEST;
-					goto out;
-				}
-				mom->files = files_from_bundles(mom->submanifests);
-				mom->files = consolidate_files(mom->files);
-			}
-
-			/* now that we have all files from other bundles listed in the MoM,
-			 * try to fix the missing path */
-			ret = verify_fix_path(file->filename, mom);
-			if (ret) {
-				/* verify_fix_path returns a swupd_code on error,
-				 * just propagate the error */
-				goto out;
-			}
+			goto out;
 		}
 
 		progress_report(complete, list_length);
@@ -1065,6 +1070,10 @@ out:
 		print("%i bundle%s already installed\n", already_installed, (already_installed > 1 ? "s were" : " was"));
 	}
 
+	/* cleanup */
+	if (current_subs) {
+		free_subscriptions(&current_subs);
+	}
 	if (to_install_files) {
 		list_free_list(to_install_files);
 	}

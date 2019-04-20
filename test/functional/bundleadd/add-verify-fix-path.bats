@@ -28,12 +28,13 @@ test_setup() {
 		No packs need to be downloaded
 		Starting download of remaining update content. This may take a while...
 		Installing bundle(s) files...
+		Warning: Update target directory does not exist: $TEST_DIRNAME/testfs/target-dir/foo/bar. Trying to fix it
 		Path /foo/bar is missing on the file system ... fixing
-		Path /foo/bar/test-file1 is missing on the file system ... fixing
 		Calling post-update helper scripts.
 		Successfully installed 1 bundle
 	EOM
 	)
 	assert_is_output "$expected_output"
+	assert_file_exists "$TARGETDIR"/foo/bar/test-file1
 
 }

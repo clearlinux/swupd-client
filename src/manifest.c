@@ -864,15 +864,52 @@ struct list *consolidate_files(struct list *files)
 }
 
 /*
- * Takes a list of files, and removes files from the list that exist on the filesystem.
- * This is used for cases like bundle-add where we don't want to re-add files that
- * already are on the system.
+ * Takes two lists of file structs and find what elements are common in both lists
+ *
+ * Returns a new list that contains only the files that were common between the lists
  */
-struct list *filter_out_existing_files(struct list *files)
+static struct list *list_common_files(struct list *list1, struct list *list2)
+{
+	struct list *l1 = NULL;
+	struct list *l2 = NULL;
+	struct list *combined = NULL;
+	struct list *common = NULL;
+	struct list *list;
+	struct file *file1;
+	struct file *file2;
+
+	l1 = list_clone(list1);
+	l2 = list_clone(list2);
+
+	combined = list_concat(l1, l2);
+	combined = list_sort(combined, file_sort_filename);
+
+	for (list = list_head(combined); list; list = list->next) {
+		if (list->next == NULL) {
+			break;
+		}
+		file1 = list->data;
+		file2 = list->next->data;
+		if (strcmp(file1->filename, file2->filename) == 0) {
+			common = list_prepend_data(common, file1);
+		}
+	}
+
+	list_free_list(combined);
+
+	return common;
+}
+
+/*
+ * Takes a list of files, and removes files that are marked as deleted or
+ * ghosted.
+ *
+ * Returns the filtered list.
+ */
+struct list *filter_out_deleted_files(struct list *files)
 {
 	struct list *list, *next, *ret;
 	struct file *file;
-	char *filename;
 
 	ret = files;
 
@@ -882,16 +919,53 @@ struct list *filter_out_existing_files(struct list *files)
 
 		file = list->data;
 
-		filename = mk_full_filename(path_prefix, file->filename);
-		if (verify_file_lazy(filename)) {
+		if (file->is_deleted) {
 			ret = list_free_item(list, NULL);
 		}
-		free_string(&filename);
 
 		list = next;
 	}
 
-	return ret;
+	return list_head(ret);
+}
+
+/*
+ * Takes a list of files, and removes files from the list that exist on the filesystem.
+ * This is used for cases like bundle-add where we don't want to re-add files that
+ * already are on the system.
+ */
+struct list *filter_out_existing_files(struct list *to_install_files, struct list *installed_files)
+{
+	struct list *common = NULL;
+	struct list *list;
+	struct file *file1;
+	struct file *file2;
+
+	/* get common files between both lists */
+	common = list_common_files(to_install_files, installed_files);
+
+	/* remove the common files from the to_install_files */
+	to_install_files = list_concat(to_install_files, common);
+	to_install_files = list_sort(to_install_files, file_sort_filename);
+	list = list_head(to_install_files);
+	while (list) {
+		if (list->next == NULL) {
+			break;
+		}
+		file1 = list->data;
+		file2 = list->next->data;
+		if (strcmp(file1->filename, file2->filename) == 0) { // maybe check also if the hash is the same????
+			/* this file is already in the system, remove both
+			 * from the list */
+			list = list_free_item(list->next, NULL); // returns a pointer to the previous item
+			list = list_free_item(list, NULL);
+			continue;
+		}
+
+		list = list->next;
+	}
+
+	return list;
 }
 
 void populate_file_struct(struct file *file, char *filename)

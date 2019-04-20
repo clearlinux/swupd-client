@@ -293,7 +293,8 @@ extern enum swupd_code compute_hash(struct file *file, char *filename) __attribu
 extern long get_manifest_list_contentsize(struct list *manifests);
 extern struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server, int *err);
 extern struct list *consolidate_files(struct list *files);
-extern struct list *filter_out_existing_files(struct list *files);
+extern struct list *filter_out_deleted_files(struct list *files);
+extern struct list *filter_out_existing_files(struct list *to_install_files, struct list *installed_files);
 
 extern void populate_file_struct(struct file *file, char *filename);
 extern bool verify_file(struct file *file, char *filename);

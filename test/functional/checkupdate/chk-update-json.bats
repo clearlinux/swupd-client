@@ -25,6 +25,7 @@ test_setup() {
 		[
 		{ "type" : "start", "section" : "check-update" },
 		{ "type" : "info", "msg" : "Current OS version: 10 " },
+		{ "type" : "info", "msg" : "Latest server version: 20 " },
 		{ "type" : "info", "msg" : "There is a new OS version available: 20 " },
 		{ "type" : "end", "section" : "check-update", "status" : 0 }
 		]

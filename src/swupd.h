@@ -407,6 +407,8 @@ struct global_options {
 void global_print_help(void);
 int global_parse_options(int argc, char **argv, const struct global_options *opts);
 
+enum swupd_code check_update();
+
 /* some disk sizes constants for the various features:
  *   ...consider adding build automation to catch at build time
  *      if the build's artifacts are larger than these thresholds */

@@ -9,6 +9,7 @@ load "../testlib"
 	assert_status_is 1
 	expected_output=$(cat <<-EOM
 		Current OS version: 10
+		Latest server version: 10
 		There are no updates available
 	EOM
 	)

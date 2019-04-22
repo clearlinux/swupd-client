@@ -35,6 +35,7 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Current OS version: 10
 		Latest server version: 100
+		There is a new OS version available: 100
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -51,6 +52,7 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Current OS version: 10
 		Latest server version: 100
+		There is a new OS version available: 100
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -67,6 +69,7 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Current OS version: 10
 		Latest server version: 100
+		There is a new OS version available: 100
 	EOM
 	)
 	assert_is_output "$expected_output"

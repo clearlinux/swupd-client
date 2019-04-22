@@ -225,13 +225,6 @@ static enum swupd_code main_update()
 	bool re_update = false;
 	bool versions_match = false;
 
-	ret = swupd_init(SWUPD_ALL);
-	if (ret != 0) {
-		/* being here means we already close log by a previously caught error */
-		error("Updater failed to initialize, exiting now.\n");
-		return ret;
-	}
-
 	/* start the timer used to report the total time to telemetry */
 	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
 
@@ -529,7 +522,6 @@ clean_curl:
 		clean_statedir(false, false);
 	}
 	free_subscriptions(&latest_subs);
-	swupd_deinit();
 
 	if (ret == 0) {
 		if (nonpack > 0) {
@@ -589,7 +581,7 @@ static void print_help(void)
 	print("Options:\n");
 	print("   -m, --manifest=M        Update to version M, also accepts 'latest' (default)\n");
 	print("   -d, --download          Download all content, but do not actually install the update\n");
-	print("   -s, --status            Show current OS version and latest version available on server\n");
+	print("   -s, --status            Show current OS version and latest version available on server. Equivalent to \"swupd check-update\"\n");
 	print("   -k, --keepcache         Do not delete the swupd state directory content after updating the system\n");
 	print("   -T, --migrate           Migrate to augmented upstream/mix content\n");
 	print("   -a, --allow-mix-collisions	Ignore and continue if custom user content conflicts with upstream provided content\n");
@@ -659,46 +651,6 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-/* return 0 if server_version is ahead of current_version,
- * 1 if the current_version is current or ahead
- * a code > 1 if one or more versions can't be found
- */
-static enum swupd_code print_versions()
-{
-	int current_version, server_version, ret = 0;
-
-	ret = swupd_init(SWUPD_NO_ROOT);
-	if (ret != 0) {
-		return ret;
-	}
-
-	ret = read_versions(&current_version, &server_version, path_prefix);
-	if (ret == SWUPD_OK) {
-		if (server_version <= current_version) {
-			ret = SWUPD_NO;
-		}
-	}
-	if (current_version > 0) {
-		info("Current OS version: %d\n", current_version);
-	}
-	if (server_version > 0) {
-		info("Latest server version: %d\n", server_version);
-	}
-
-	telemetry(ret ? TELEMETRY_WARN : TELEMETRY_INFO,
-		  "check",
-		  "result=%d\n"
-		  "version_current=%d\n"
-		  "version_server=%d\n"
-		  "bytes=%ld\n",
-		  ret,
-		  current_version,
-		  server_version,
-		  total_curl_sz);
-
-	return ret;
-}
-
 enum swupd_code update_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
@@ -726,11 +678,19 @@ enum swupd_code update_main(int argc, char **argv)
 	}
 	progress_init_steps("update", steps_in_update);
 
+	ret = swupd_init(SWUPD_ALL);
+	if (ret != 0) {
+		error("Updater failed to initialize, exiting now.\n");
+		return ret;
+	}
+
 	if (cmd_line_status) {
-		ret = print_versions();
+		ret = check_update();
 	} else {
 		ret = main_update();
 	}
+
+	swupd_deinit();
 
 	progress_finish_steps("update", ret);
 	return ret;

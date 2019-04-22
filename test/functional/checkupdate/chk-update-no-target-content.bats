@@ -15,6 +15,11 @@ test_setup() {
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
 
 	assert_status_is_not 0
-	assert_is_output "Error: Unable to determine current OS version"
+	expected_output=$(cat <<-EOM
+		Error: Unable to determine current OS version
+		Latest server version: 10
+	EOM
+	)
+	assert_is_output "$expected_output"
 
 }

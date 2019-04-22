@@ -20,6 +20,7 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Current OS version: 10
+		Latest server version: 100
 		There is a new OS version available: 100
 	EOM
 	)

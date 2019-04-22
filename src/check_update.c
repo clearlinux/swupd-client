@@ -41,26 +41,33 @@ static void print_help(void)
 	global_print_help();
 }
 
-/* Return 0 if there is an update available, nonzero if not */
-static enum swupd_code check_update()
+/* Return 0 if there is an update available, 1 if not and > 1 on errors. */
+enum swupd_code check_update()
 {
 	int current_version, server_version;
 	enum swupd_code ret;
 
 	ret = read_versions(&current_version, &server_version, path_prefix);
+
+	if (current_version > 0) {
+		info("Current OS version: %d\n", current_version);
+	}
+	if (server_version > 0) {
+		info("Latest server version: %d\n", server_version);
+	}
+
 	if (ret != SWUPD_OK) {
 		return ret;
-	} else {
-		print("Current OS version: %d\n", current_version);
-		if (current_version < server_version) {
-			print("There is a new OS version available: %d\n", server_version);
-			update_motd(server_version);
-			return SWUPD_OK; /* update available */
-		} else if (current_version >= server_version) {
-			print("There are no updates available\n");
-		}
-		return SWUPD_NO; /* No update available */
 	}
+
+	if (current_version < server_version) {
+		print("There is a new OS version available: %d\n", server_version);
+		update_motd(server_version);
+		return SWUPD_OK; /* update available */
+	} else if (current_version >= server_version) {
+		print("There are no updates available\n");
+	}
+	return SWUPD_NO; /* No update available */
 }
 
 static const struct global_options opts = {

@@ -27,6 +27,7 @@ test_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Current OS version: 10
+		Latest server version: 99990
 		There is a new OS version available: 99990
 	EOM
 	)

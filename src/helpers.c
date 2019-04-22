@@ -511,10 +511,10 @@ void free_file_data(void *data)
 
 void swupd_deinit(void)
 {
-	signature_deinit();
 	swupd_curl_deinit();
-	free_globals();
+	signature_deinit();
 	v_lockfile();
+	globals_deinit();
 	dump_file_descriptor_leaks();
 }
 
@@ -528,26 +528,11 @@ void swupd_deinit(void)
 *	- Initialize curl
 *	- Initialize signature checking
 */
-enum swupd_code swupd_init(void)
+enum swupd_code swupd_init(enum swupd_init_config config)
 {
-	int ret = SWUPD_OK;
+	enum swupd_code ret = SWUPD_OK;
 
-	check_root();
 	record_fds();
-
-	/* Check that our system time is reasonably valid before continuing,
-	 * or the certificate verification will fail with invalid time */
-	if (timecheck) {
-		if (!verify_time(path_prefix)) {
-			/* in the case we are doing an installation to an empty directory
-			 * using swupd verify --install, we won't have a valid versionstamp
-			 * in path_prefix, so try searching without the path_prefix */
-			if (!verify_time(NULL)) {
-				ret = SWUPD_BAD_TIME;
-				goto out_fds;
-			}
-		}
-	}
 
 	if (!init_globals()) {
 		ret = SWUPD_INIT_GLOBALS_FAILED;
@@ -556,26 +541,48 @@ enum swupd_code swupd_init(void)
 
 	get_mounted_directories();
 
-	if (create_required_dirs()) {
-		ret = SWUPD_COULDNT_CREATE_DIR;
-		goto out_fds;
+	if ((config & SWUPD_NO_ROOT) == 0) {
+		check_root();
+
+		/* Check that our system time is reasonably valid before continuing,
+		 * or the certificate verification will fail with invalid time */
+		if ((config & SWUPD_NO_TIMECHECK) == 0 && timecheck) {
+			if (!verify_time(path_prefix)) {
+				/* in the case we are doing an installation to an empty directory
+				 * using swupd verify --install, we won't have a valid versionstamp
+				 * in path_prefix, so try searching without the path_prefix */
+				if (!verify_time(NULL)) {
+					ret = SWUPD_BAD_TIME;
+					goto out_fds;
+				}
+			}
+		}
+
+		if (create_required_dirs()) {
+			ret = SWUPD_COULDNT_CREATE_DIR;
+			goto out_fds;
+		}
+
+		if (p_lockfile() < 0) {
+			ret = SWUPD_LOCK_FILE_FAILED;
+			goto out_fds;
+		}
+
+		if (sigcheck) {
+			/* If --nosigcheck, we do not attempt any signature checking */
+			if (!signature_init(cert_path, NULL)) {
+				ret = SWUPD_SIGNATURE_VERIFICATION_FAILED;
+				signature_deinit();
+				goto out_close_lock;
+			}
+		}
 	}
 
-	if (p_lockfile() < 0) {
-		ret = SWUPD_LOCK_FILE_FAILED;
-		goto out_fds;
-	}
-
-	if (swupd_curl_init() != 0) {
-		ret = SWUPD_CURL_INIT_FAILED;
-		goto out_close_lock;
-	}
-
-	/* If --nosigcheck, we do not attempt any signature checking */
-	if (sigcheck && !signature_init(cert_path, NULL)) {
-		ret = SWUPD_SIGNATURE_VERIFICATION_FAILED;
-		signature_deinit();
-		goto out_close_lock;
+	if ((config & SWUPD_NO_NETWORK) == 0) {
+		if (swupd_curl_init() != 0) {
+			ret = SWUPD_CURL_INIT_FAILED;
+			goto out_close_lock;
+		}
 	}
 
 	return ret;

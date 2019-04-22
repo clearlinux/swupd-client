@@ -354,33 +354,9 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 	return ret;
 }
 
-static int clean_init(void)
-{
-	int ret = 0;
-
-	check_root();
-
-	if (!init_globals()) {
-		return SWUPD_INIT_GLOBALS_FAILED;
-	}
-
-	if (p_lockfile() < 0) {
-		free_globals();
-		return SWUPD_LOCK_FILE_FAILED;
-	}
-
-	return ret;
-}
-
-static void clean_deinit(void)
-{
-	free_globals();
-	v_lockfile();
-}
-
 enum swupd_code clean_main(int argc, char **argv)
 {
-	int ret = SWUPD_OK;
+	enum swupd_code ret = SWUPD_OK;
 	const int steps_in_clean = 1;
 
 	if (!parse_options(argc, argv)) {
@@ -389,7 +365,7 @@ enum swupd_code clean_main(int argc, char **argv)
 	}
 	progress_init_steps("clean", steps_in_clean);
 
-	ret = clean_init();
+	ret = swupd_init(SWUPD_NO_NETWORK);
 	if (ret != 0) {
 		error("Failed swupd initialization, exiting now.\n");
 		goto exit;
@@ -421,7 +397,7 @@ enum swupd_code clean_main(int argc, char **argv)
 	}
 
 end:
-	clean_deinit();
+	swupd_deinit();
 
 exit:
 	progress_finish_steps("clean", ret);

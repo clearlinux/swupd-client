@@ -608,7 +608,7 @@ enum swupd_code search_main(int argc, char **argv)
 	}
 	progress_init_steps("search", steps_in_search);
 
-	ret = swupd_init();
+	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {
 		error("Failed swupd initialization, exiting now.\n");
 		goto exit;

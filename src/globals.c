@@ -498,7 +498,7 @@ bool init_globals(void)
 	return true;
 }
 
-void free_globals(void)
+void globals_deinit(void)
 {
 	/* freeing all globals and set ALL them to NULL (via free_string)
 	 * to avoid memory corruption on multiple calls

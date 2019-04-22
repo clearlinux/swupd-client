@@ -124,7 +124,7 @@ enum swupd_code bundle_list_main(int argc, char **argv)
 	}
 	progress_init_steps("bundle-list", steps_in_bundlelist);
 
-	ret = swupd_init();
+	ret = swupd_init(SWUPD_ALL);
 	/* if swupd fails to initialize, the only list command we can still attempt is
 	 * listing locally installed bundles (with the limitation of not showing what
 	 * bundles are experimental) */

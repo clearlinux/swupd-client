@@ -64,7 +64,7 @@ static bool parse_options(int argc, char **argv)
 
 enum swupd_code info_main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 {
-	int ret = SWUPD_OK;
+	enum swupd_code ret = SWUPD_OK;
 	const int steps_in_info = 1;
 
 	/* there is no need to report in progress for init at this time */
@@ -75,14 +75,14 @@ enum swupd_code info_main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 	}
 	progress_init_steps("info", steps_in_info);
 
-	if (!init_globals()) {
-		ret = SWUPD_INIT_GLOBALS_FAILED;
+	ret = swupd_init(SWUPD_NO_ROOT | SWUPD_NO_NETWORK);
+	if (ret != SWUPD_OK) {
 		goto finish;
 	}
 
 	print_update_conf_info();
 
-	free_globals();
+	swupd_deinit();
 
 finish:
 	progress_finish_steps("info", ret);

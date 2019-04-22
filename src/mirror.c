@@ -114,13 +114,6 @@ static int unset_mirror_url()
 		goto out;
 	}
 
-	/* we need to set the version and content URLs again if not they will
-	 * remain with the value from the mirror */
-	free_string(&version_url);
-	free_string(&content_url);
-	set_version_url(NULL);
-	set_content_url(NULL);
-
 out:
 	free_string(&content_path);
 	free_string(&version_path);
@@ -150,7 +143,6 @@ static enum swupd_code write_to_path(char *content, char *path)
 	} else if (!S_ISDIR(dirstat.st_mode)) {
 		error("%s: not a directory\n", dir);
 		ret = SWUPD_COULDNT_CREATE_DIR;
-		;
 		goto out;
 	}
 
@@ -185,7 +177,6 @@ static enum swupd_code set_mirror_url(char *url)
 	char *content_path;
 	char *version_path;
 	int ret = SWUPD_OK;
-	bool need_unset = false;
 	/* concatenate path_prefix and configuration paths if necessary
 	 * if path_prefix is NULL the second argument will be returned */
 	content_path = mk_full_filename(path_prefix, MIRROR_CONTENT_URL_PATH);
@@ -194,21 +185,16 @@ static enum swupd_code set_mirror_url(char *url)
 	/* write url to path_prefix/MIRROR_CONTENT_URL_PATH */
 	ret = write_to_path(url, content_path);
 	if (ret != SWUPD_OK) {
-		need_unset = true;
 		goto out;
 	}
 
 	/* write url to path_prefix/MIRROR_VERSION_URL_PATH */
 	ret = write_to_path(url, version_path);
 	if (ret != SWUPD_OK) {
-		need_unset = true;
 		goto out;
 	}
 
 out:
-	if (need_unset) {
-		unset_mirror_url();
-	}
 	free_string(&content_path);
 	free_string(&version_path);
 	return ret;
@@ -242,6 +228,10 @@ void handle_mirror_if_stale(void)
 		unset_mirror_url();
 		/* we need to re-set the cached_version to latest using the central version,
 		 * since at the moment the cached_version is the outdated mirror version */
+		free_string(&version_url);
+		free_string(&content_url);
+		set_version_url(NULL);
+		set_content_url(NULL);
 		get_latest_version(ret_str);
 		goto out;
 	}
@@ -259,6 +249,7 @@ out:
 enum swupd_code mirror_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
+	enum swupd_code init_ret;
 	const int steps_in_mirror = 1;
 
 	/* there is no need to report in progress for mirror at this time */
@@ -289,15 +280,16 @@ enum swupd_code mirror_main(int argc, char **argv)
 		}
 	}
 
-	/* init globals here after the new URL is configured */
-	if (!init_globals()) {
-		ret = SWUPD_INIT_GLOBALS_FAILED;
+	/* init swupd here after the new URL is configured */
+	init_ret = swupd_init(SWUPD_NO_NETWORK | SWUPD_NO_TIMECHECK);
+	if (init_ret != SWUPD_OK) {
+		ret = init_ret;
 		goto finish;
 	}
 
 	/* print new configuration */
 	print_update_conf_info();
-	free_globals();
+	swupd_deinit();
 
 finish:
 	progress_finish_steps("mirror", ret);

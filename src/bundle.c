@@ -508,7 +508,7 @@ enum swupd_code remove_bundles(char **bundles)
 	struct list *subs = NULL;
 	bool mix_exists;
 
-	ret = swupd_init();
+	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {
 		error("Failed updater initialization, exiting now.\n");
 		return ret;
@@ -1103,7 +1103,7 @@ enum swupd_code install_bundles_frontend(char **bundles)
 	bool mix_exists;
 
 	/* initialize swupd and get current version from OS */
-	ret = swupd_init();
+	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {
 		error("Failed updater initialization, exiting now.\n");
 		return ret;

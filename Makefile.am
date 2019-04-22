@@ -420,4 +420,12 @@ install-check:
 unit-check:
 	env TEST_SUITE_LOG=unit_tests.log TESTS="$(UNIT_TESTS)" make -e check
 
+docs-coverage:
+	doxygen docs/Doxyfile || die; \
+	python -m coverxygen --xml-dir xml/ --src-dir ./ --output doc-coverage.info --exclude ".*/src/.*" --include ".*/src/lib/.*" --format json || die; \
+	if [ "$$(cat doc-coverage.info | grep documented.*false | wc -l)" -gt "0" ]; then \
+		echo "Public functions or data added on headers but not documented on src/lib "; \
+		exit 1; \
+	fi
+
 endif

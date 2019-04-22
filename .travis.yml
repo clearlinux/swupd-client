@@ -23,7 +23,7 @@ jobs:
         include:
                 - stage: "Static Analysis"
                   name: "Static Analysis & Unit Tests"
-                  script: make compliant && make shellcheck && sudo sh -c 'umask 0022 && make unit-check'
+                  script: make compliant && make shellcheck && sudo sh -c 'umask 0022 && make unit-check' && make docs-coverage
                 - stage: test
                   name: "Functional Tests - update (group 1)"
                   script: env TESTS="$GROUP1" make -e check
@@ -62,6 +62,8 @@ install:
         - sudo apt-get install realpath
         - sudo apt-get install clang-format-6.0
         - sudo apt-get install shellcheck
+        - sudo apt-get install doxygen
+        - sudo pip install coverxygen
         - sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
         - git fetch origin master:refs/remotes/origin/master #Download origin/master for shelcheck
 

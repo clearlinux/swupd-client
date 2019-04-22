@@ -225,7 +225,7 @@ static enum swupd_code main_update()
 	bool re_update = false;
 	bool versions_match = false;
 
-	ret = swupd_init();
+	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {
 		/* being here means we already close log by a previously caught error */
 		error("Updater failed to initialize, exiting now.\n");
@@ -667,9 +667,10 @@ static enum swupd_code print_versions()
 {
 	int current_version, server_version, ret = 0;
 
-	check_root();
-	(void)init_globals();
-	swupd_curl_init();
+	ret = swupd_init(SWUPD_NO_ROOT);
+	if (ret != 0) {
+		return ret;
+	}
 
 	ret = read_versions(&current_version, &server_version, path_prefix);
 	if (ret == SWUPD_OK) {

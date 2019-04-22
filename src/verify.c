@@ -675,7 +675,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	}
 	progress_init_steps("verify", steps_in_verify);
 
-	ret = swupd_init();
+	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {
 		error("Failed verify initialization, exiting now.\n");
 		goto clean_args_and_exit;

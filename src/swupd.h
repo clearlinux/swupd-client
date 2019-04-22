@@ -79,6 +79,14 @@ struct sub {
 	int oldversion;
 };
 
+enum swupd_init_config {
+	SWUPD_ALL = 0,
+	SWUPD_NO_ROOT = 0b001,
+	SWUPD_NO_NETWORK = 0b010,
+	SWUPD_NO_TIMECHECK = 0b100,
+
+};
+
 struct header;
 
 extern bool allow_mix_collisions;
@@ -168,7 +176,7 @@ extern bool no_boot_update;
 extern char *format_string;
 extern char *path_prefix;
 extern bool init_globals(void);
-extern void free_globals(void);
+extern void globals_deinit(void);
 extern void save_cmd(char **argv);
 extern char **swupd_argv;
 extern char *bundle_to_add;
@@ -326,7 +334,7 @@ extern int swupd_rm(const char *path);
 extern int rm_bundle_file(const char *bundle);
 extern void print_manifest_files(struct manifest *m);
 extern void swupd_deinit(void);
-extern enum swupd_code swupd_init(void);
+enum swupd_code swupd_init(enum swupd_init_config config);
 void update_motd(int new_release);
 void delete_motd(void);
 extern int get_dirfd_path(const char *fullname);

@@ -45,20 +45,7 @@ static void print_help(void)
 static enum swupd_code check_update()
 {
 	int current_version, server_version;
-	int ret;
-
-	check_root();
-	/* Check that our system time is reasonably valid before continuing,
-	* or the certificate verification will fail with invalid time */
-	if (timecheck) {
-		if (!verify_time(path_prefix)) {
-			return SWUPD_BAD_TIME;
-		}
-	}
-	if (!init_globals()) {
-		return SWUPD_INIT_GLOBALS_FAILED;
-	}
-	swupd_curl_init();
+	enum swupd_code ret;
 
 	ret = read_versions(&current_version, &server_version, path_prefix);
 	if (ret != SWUPD_OK) {
@@ -113,8 +100,13 @@ enum swupd_code check_update_main(int argc, char **argv)
 	}
 	progress_init_steps("check-update", steps_in_checkupdate);
 
+	ret = swupd_init(SWUPD_NO_ROOT);
+	if (ret != 0) {
+		return ret;
+	}
+
 	ret = check_update();
-	free_globals();
+	swupd_deinit();
 
 	progress_finish_steps("check-update", ret);
 	return ret;

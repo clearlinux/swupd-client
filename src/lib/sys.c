@@ -247,7 +247,7 @@ int systemctl_restart(const char *service)
 
 int systemctl_restart_noblock(const char *service)
 {
-	return systemctl_cmd("restart", service, NULL);
+	return systemctl_cmd("restart", "--no-block", service, NULL);
 }
 
 bool systemctl_active(void)

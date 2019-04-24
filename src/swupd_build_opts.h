@@ -40,22 +40,10 @@
 #define OPT_COVERAGE "-COVERAGE"
 #endif
 
-#ifdef SWUPD_WITH_BSDTAR
-#define OPT_BSDTAR "+BSDTAR"
-#else
-#define OPT_BSDTAR "-BSDTAR"
-#endif
-
 #ifdef SWUPD_WITH_XATTRS
 #define OPT_XATTRS "+XATTRS"
 #else
 #define OPT_XATTRS "-XATTRS"
-#endif
-
-#ifdef SWUPD_TAR_SELINUX
-#define OPT_SELINUX "+TAR_SELINUX"
-#else
-#define OPT_SELINUX "-TAR_SELINUX"
 #endif
 
 #ifdef OS_IS_STATELESS
@@ -101,7 +89,7 @@
 #endif
 
 #define BUILD_OPTS \
-	OPT_BZIP2 " " OPT_SIGNATURES " " OPT_COVERAGE " " OPT_BSDTAR " " OPT_XATTRS " " OPT_SELINUX " " OPT_STATELESS
+	OPT_BZIP2 " " OPT_SIGNATURES " " OPT_COVERAGE " " OPT_XATTRS " " OPT_STATELESS
 
 #define BUILD_CONFIGURE                                          \
 	"mount point                  " MOUNT_POINT "\n"         \

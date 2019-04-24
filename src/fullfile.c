@@ -211,3 +211,11 @@ int download_fullfiles(struct list *files, int *num_downloads)
 
 	return swupd_curl_parallel_download_end(download_handle, num_downloads);
 }
+
+int download_single_fullfile(struct file *file)
+{
+	struct list list = { 0 };
+
+	list.data = file;
+	return download_fullfiles(&list, NULL);
+}

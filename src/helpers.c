@@ -38,7 +38,6 @@
 #include "config.h"
 #include "signature.h"
 #include "swupd.h"
-#include "swupd_build_variant.h"
 #include "verifytime.h"
 
 void check_root(void)

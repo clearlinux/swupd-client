@@ -336,61 +336,34 @@ static bool set_format_string(char *userinput)
  */
 bool set_path_prefix(char *path)
 {
+	char *tmp;
 	struct stat statbuf;
 	int ret;
 
-	if (path != NULL) {
-		int len;
-		char *tmp;
-		char real_path[PATH_MAX] = { 0 };
-
-		/* in case multiple -p options are passed */
-		free_string(&path_prefix);
-		string_or_die(&tmp, "%s", path);
-
-		/* ensure path_prefix is fully resolved and at least ends in '/',
-		 * and is a valid dir */
-		if (tmp[0] != '/') {
-			char *cwd;
-
-			cwd = get_current_dir_name();
-			if (cwd == NULL) {
-				error("Unable to get current directory name (%s)\n", strerror(errno));
-				free_string(&tmp);
-				return false;
-			}
-
-			free_string(&tmp);
-			string_or_die(&tmp, "%s/%s", cwd, path);
-			free_string(&cwd);
-		}
-
-		if (!realpath(tmp, real_path)) {
-			error("Bad path_prefix %s (%s), cannot continue.\n",
-			      path_prefix, strerror(errno));
-			free_string(&tmp);
-			return false;
-		}
-		free_string(&tmp);
-		string_or_die(&tmp, "%s/", real_path);
-
-		len = strlen(tmp);
-		if (!len || (tmp[len - 1] != '/')) {
-			char *tmp_old = tmp;
-			string_or_die(&tmp, "%s/", tmp_old);
-			free_string(&tmp_old);
-		}
-
-		path_prefix = tmp;
-
-	} else {
-		if (path_prefix) {
-			/* option passed on command line previously */
-			return true;
-		} else {
+	if (path == NULL) {
+		if (!path_prefix) {
 			string_or_die(&path_prefix, "/");
 		}
+
+		return true;
 	}
+
+	/* in case multiple -p options are passed */
+	free_string(&path_prefix);
+
+	path_prefix = realpath(path, NULL);
+	if (!path_prefix) {
+		error("Bad path_prefix %s (%s), cannot continue.\n",
+		      path_prefix, strerror(errno));
+		return false;
+	}
+
+	if (path_prefix[strlen(path_prefix)] != '/') {
+		tmp = path_prefix;
+		path_prefix = str_or_die("%s/", path_prefix);
+		free_string(&tmp);
+	}
+
 	ret = stat(path_prefix, &statbuf);
 	if (ret != 0 || !S_ISDIR(statbuf.st_mode)) {
 		error("Bad path_prefix %s (%s), cannot continue.\n",

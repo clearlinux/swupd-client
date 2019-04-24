@@ -33,7 +33,6 @@
 #include <unistd.h>
 
 #include "swupd.h"
-#include "swupd_build_variant.h"
 #include "xattrs.h"
 
 void hash_assign(const char *src, char *dst)

@@ -24,11 +24,6 @@ PKG_CHECK_MODULES([openssl], [libcrypto >= 1.0.1])
 PKG_CHECK_MODULES([libarchive], [libarchive])
 AC_CHECK_LIB([pthread], [pthread_create])
 
-
-# Program checks
-AC_CHECK_PROGS(TAR, tar)
-
-
 # Enable/disable options
 AC_ARG_ENABLE(
   [optimizations],
@@ -128,15 +123,6 @@ AS_IF(
 )
 AM_CONDITIONAL([COVERAGE], [test "$have_coverage" = "yes"])
 
-AC_ARG_ENABLE(
-  [bsdtar],
-  [AS_HELP_STRING([--enable-bsdtar], [Use alternative bsdtar command (uses tar by default)])]
-)
-AS_IF(
-  [test "x$enable_bsdtar" = "xyes"],
-  [AC_DEFINE(SWUPD_WITH_BSDTAR, 1, [Use bsdtar])]
-)
-
 dnl Enable extended attribute support
 XATTR="yes"
 AC_ARG_ENABLE(
@@ -147,22 +133,6 @@ AS_IF(
   [test "x$enable_xattr" = "xyes"],
   [AC_DEFINE(SWUPD_WITH_XATTRS, 1, [Use extended file attributes])],
   [XATTR=no]
-)
-
-TARSELINUX="yes"
-AC_ARG_ENABLE(
-  [tar-selinux],
-  [AS_HELP_STRING([--enable-tar-selinux], [give --selinux option to tar])]
-)
-AS_IF(
-  [test "x$enable_tar_selinux" = "xyes"],
-  [AC_DEFINE(SWUPD_TAR_SELINUX, 1, [give --selinux option to tar])
-    AS_IF(
-      [test "x$XATTR" = "xno"],
-      [echo "Must have --enable-xattr to have --enable-tar-selinux" >&2
-         AS_EXIT(1)]
-    )],
-  [TARSELINUX=no]
 )
 
 AC_ARG_ENABLE(
@@ -371,6 +341,5 @@ Configuration to build swupd-client:
   Use bzip compression:			${BZIP}
   Run Tests:				${TESTS}
   Use extended file attributes		${XATTR}
-  Use --selinux option for tar		${TARSELINUX}
   External modules support		${external_modules}
 ])

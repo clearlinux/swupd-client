@@ -34,219 +34,179 @@
 
 #include "config.h"
 #include "swupd.h"
-#include "swupd_build_variant.h"
+#include "xattrs.h"
 
-/* clean then recreate temporary folder for tar renames */
-static int create_staging_renamedir(char *rename_tmpdir)
+static char *file_full_path(const struct file *file)
 {
-	int ret;
+	return sys_path_join(path_prefix, file->filename);
+}
 
-	if (rm_rf(rename_tmpdir) != 0) {
-		/* Not fatal but pretty scary, likely to really fail at the
-		 * next command too. Pass for now as printing may just cause
-		 * confusion */
-		;
+static char *file_tmp_full_path(const struct file *file)
+{
+	char *rel_dir, *destination;
+
+	if (file->is_dir) {
+		return file_full_path(file);
 	}
 
-	ret = mkdir(rename_tmpdir, S_IRWXU);
-	if (ret == -1 && errno != EEXIST) {
-		ret = -errno;
-	} else {
-		ret = 0;
+	rel_dir = sys_dirname(file->filename);
+	destination = str_or_die("%s%s/.update.%s", path_prefix, rel_dir,
+				 basename(file->filename));
+	free(rel_dir);
+
+	return destination;
+}
+
+static char *file_staged_path(const struct file *file)
+{
+	return str_or_die("%s/staged/%s", state_dir, file->hash);
+}
+
+/**
+ * @brief Stage the file in the system.
+ *
+ * If it's a directory, copy it to final destination. If it's a file or symlink
+ * install it in the final directory, but with a temporary name.
+ */
+static int stage_file(struct file *file)
+{
+	char *staged, *destination;
+	int ret = 0;
+
+	//TODO: Stop saving the staging path
+	free(file->staging);
+	file->staging = destination = file_tmp_full_path(file);
+
+	// Remove any file in destination location
+	ret = rm_rf(destination);
+	if (ret != 0) {
+		ret = -1;
+		goto exit;
 	}
 
+	staged = file_staged_path(file);
+
+	// Copy file to destination
+	ret = copy_all(staged, destination);
+	free(staged);
+exit:
 	return ret;
 }
 
-/* Do the staging of new files into the filesystem */
-//TODO: "do_staging is currently not able to be run in parallel"
-/* Consider adding a remove_leftovers() that runs in verify/fix in order to
- * allow this function to mkdtemp create folders for parallel build */
+static int ensure_basedir_is_installed(const char *file, struct manifest *MoM)
+{
+	struct file *dir_file;
+	char *real_dir, *dir;
+	int err = 0;
+
+	dir = sys_dirname(file);
+	real_dir = sys_path_join(path_prefix, dir);
+	sys_remove_trailing_path_separators(real_dir);
+
+	// If there's any symlink in the path of this file
+	if (!sys_is_absolute_path(real_dir)) {
+		err = ensure_basedir_is_installed(dir, MoM);
+		if (err) {
+			goto exit;
+		}
+	}
+
+	if (!sys_is_directory(real_dir)) {
+		err = unlink(real_dir);
+		if (err && errno != ENOENT) {
+			err = -errno;
+			goto exit;
+		}
+
+		dir_file = search_file_in_manifest(MoM, dir);
+		if (!dir_file) {
+			err = -ENOENT;
+			goto exit;
+		}
+
+		err = download_single_fullfile(dir_file);
+		if (err != 0) {
+			error("Problem downloading file %s", dir_file->filename);
+			goto exit;
+		}
+		err = stage_file(dir_file);
+	}
+
+exit:
+	free(dir);
+	free(real_dir);
+	return err;
+}
+
+static int apply_dir_attributes(struct file *file)
+{
+	char *staged = NULL, *destination = NULL;
+	struct stat stat = { 0 };
+	int err = 0;
+
+	destination = file_tmp_full_path(file);
+	staged = file_staged_path(file);
+
+	if (lstat(staged, &stat) < 0) {
+		err = -errno;
+		goto exit;
+
+	}
+	// Change owner
+	err = chown(destination, stat.st_uid, stat.st_gid);
+	if (err) {
+		err = -errno;
+		goto exit;
+	}
+
+	// Change permissions
+	err = chmod(destination, stat.st_mode);
+	if (err) {
+		err = -errno;
+		goto exit;
+	}
+
+	// Copy extended permissions
+	xattrs_copy(staged, destination);
+
+exit:
+	free(staged);
+	free(destination);
+	return err;
+}
+
 enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 {
-	char *statfile = NULL, *tmp = NULL, *tmp2 = NULL;
-	char *dir, *base, *rel_dir;
-	char *tarcommand = NULL;
-	char *original = NULL;
-	char *target = NULL;
-	char *targetpath = NULL;
-	char *rename_target = NULL;
-	char *rename_tmpdir = NULL;
-	char real_path[4096] = { 0 };
-	int ret;
-	struct stat s;
+	int ret = 0;
+	char *full_path, *full_dir;
 
-	tmp = strdup_or_die(file->filename);
-	tmp2 = strdup_or_die(file->filename);
-
-	dir = dirname(tmp);
-	base = basename(tmp2);
-
-	rel_dir = dir;
-	if (*dir == '/') {
-		rel_dir = dir + 1;
+	// Make sure target directory exists and it's not a symlink
+	ret = ensure_basedir_is_installed(file->filename, MoM);
+	if (ret != 0) {
+		return ret;
 	}
 
-	string_or_die(&original, "%s/staged/%s", state_dir, file->hash);
+	full_path = file_full_path(file);
+	full_dir = sys_dirname(full_path);
 
-	string_or_die(&targetpath, "%s%s", path_prefix, rel_dir);
-	ret = stat(targetpath, &s);
-
-	if ((ret == -1) && (errno == ENOENT)) {
-		if (MoM) {
-			warn("Update target directory does not exist: %s. Trying to fix it\n", targetpath);
-			verify_fix_path(dir, MoM);
-		} else {
-			warn("Update target directory does not exist: %s. Auto-fix disabled\n", targetpath);
-		}
-
-	} else if (!S_ISDIR(s.st_mode)) {
-		error("Update target exists but is NOT a directory: %s\n", targetpath);
-	}
-	if (!realpath(targetpath, real_path)) {
+	if (!sys_is_absolute_path(full_dir)) {
+		error("File %s has not an absolute filename\n", file->filename);
+		error("Manifest shouldn't include a file relative path - Aborting stating\n");
 		ret = -1;
-		goto out;
-	} else if (strcmp(path_prefix, targetpath) != 0 &&
-		   strcmp(targetpath, real_path) != 0) {
-		/*
-		 * targetpath and real_path should always be equal but
-		 * in the case of the targetpath being the path_prefix
-		 * there is a trailing '/' in path_prefix but realpath
-		 * doesn't keep the trailing '/' so check for that case
-		 * specifically.
-		 */
-		ret = -1;
-		goto out;
+		goto exit;
 	}
 
-	string_or_die(&target, "%s%s/.update.%s", path_prefix, rel_dir, base);
-	ret = swupd_rm(target);
-	if (ret < 0 && ret != -ENOENT) {
-		error("Failed to remove %s\n", target);
+	if (file->is_dir && sys_is_directory(full_path)) {
+		ret = apply_dir_attributes(file);
+	} else {
+		ret = stage_file(file);
 	}
 
-	string_or_die(&statfile, "%s%s", path_prefix, file->filename);
+exit:
+	free(full_path);
+	free(full_dir);
 
-	memset(&s, 0, sizeof(struct stat));
-	ret = lstat(statfile, &s);
-	if (ret == 0) {
-		if ((file->is_dir && !S_ISDIR(s.st_mode)) ||
-		    (file->is_link && !S_ISLNK(s.st_mode)) ||
-		    (file->is_file && !S_ISREG(s.st_mode))) {
-			//file type changed, move old out of the way for new
-			ret = swupd_rm(statfile);
-			if (ret < 0) {
-				ret = SWUPD_COULDNT_REMOVE_FILE;
-				goto out;
-			}
-		}
-	}
-	free_string(&statfile);
-
-	if (file->is_dir || S_ISDIR(s.st_mode)) {
-		/* In the btrfs only scenario there was an implicit
-		 * "create_or_update_dir()" via un-tar-ing a directory.tar after
-		 * download and the untar happens in the staging subvolume which
-		 * then gets promoted to a "real" usable subvolume.  But for
-		 * a live rootfs the directory needs copied out of staged
-		 * and into the rootfs.  Tar is a way to copy with
-		 * attributes and it includes internal logic that does the
-		 * right thing to overlay a directory onto something
-		 * pre-existing: */
-		/* In order to avoid tar transforms with directories, rename
-		 * the directory before and after the tar command */
-		string_or_die(&rename_tmpdir, "%s/tmprenamedir", state_dir);
-		ret = create_staging_renamedir(rename_tmpdir);
-		if (ret) {
-			ret = SWUPD_COULDNT_CREATE_DIR;
-			goto out;
-		}
-		string_or_die(&rename_target, "%s/%s", rename_tmpdir, base);
-		if (rename(original, rename_target)) {
-			ret = SWUPD_COULDNT_RENAME_DIR;
-			goto out;
-		}
-		string_or_die(&tarcommand, TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -cf - './%s' 2> /dev/null | " TAR_COMMAND " -C '%s%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-			      rename_tmpdir, base, path_prefix, rel_dir);
-		ret = system(tarcommand);
-		if (ret == -1) {
-			ret = SWUPD_SUBPROCESS_ERROR;
-		}
-		if (WIFEXITED(ret)) {
-			ret = WEXITSTATUS(ret);
-		}
-		free_string(&tarcommand);
-		if (rename(rename_target, original)) {
-			ret = SWUPD_COULDNT_RENAME_DIR;
-			goto out;
-		}
-		if (ret) {
-			ret = SWUPD_COULDNT_RENAME_DIR;
-			goto out;
-		}
-	} else { /* (!file->is_dir && !S_ISDIR(stat.st_mode)) */
-		/* can't naively hard link(): Non-read-only files with same hash must remain
-		 * separate copies otherwise modifications to one instance of the file
-		 * propagate to all instances of the file perhaps causing subtle data corruption from
-		 * a user's perspective.  In practice the rootfs is stateless and owned by us.
-		 * Additionally cross-mount hardlinks fail and it's hard to know what an admin
-		 * might have for overlaid mounts.  The use of tar is a simple way to copy, but
-		 * inefficient.  So prefer hardlink and fall back if needed: */
-		ret = -1;
-		if (!file->is_config && !file->is_state && !file->use_xattrs) {
-			ret = link(original, target);
-		}
-		if (ret < 0) {
-			/* either the hardlink failed, or it was undesirable (config), do a tar-tar dance */
-			/* In order to avoid tar transforms, rename the file
-			 * before and after the tar command */
-			string_or_die(&rename_target, "%s/staged/.update.%s", state_dir, base);
-			ret = rename(original, rename_target);
-			if (ret) {
-				ret = SWUPD_COULDNT_RENAME_FILE;
-				goto out;
-			}
-			string_or_die(&tarcommand, TAR_COMMAND " -C '%s/staged' " TAR_PERM_ATTR_ARGS " -cf - '.update.%s' 2> /dev/null | " TAR_COMMAND " -C '%s%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-				      state_dir, base, path_prefix, rel_dir);
-			ret = system(tarcommand);
-			if (ret == -1) {
-				ret = SWUPD_SUBPROCESS_ERROR;
-			}
-			if (WIFEXITED(ret)) {
-				ret = WEXITSTATUS(ret);
-			}
-			free_string(&tarcommand);
-			ret = rename(rename_target, original);
-			if (ret) {
-				ret = SWUPD_COULDNT_RENAME_FILE;
-				goto out;
-			}
-		}
-
-		struct stat buf;
-		int err;
-
-		free_string(&file->staging);
-		string_or_die(&file->staging, "%s%s/.update.%s", path_prefix, rel_dir, base);
-
-		err = lstat(file->staging, &buf);
-		if (err != 0) {
-			free_string(&file->staging);
-			ret = SWUPD_COULDNT_CREATE_FILE;
-			goto out;
-		}
-	}
-
-out:
-	free_string(&target);
-	free_string(&targetpath);
-	free_string(&original);
-	free_string(&rename_target);
-	free_string(&rename_tmpdir);
-	free_string(&tmp);
-	free_string(&tmp2);
-
-	return ret;
+	return 0;
 }
 
 /* caller should not call this function for do_not_update marked files */

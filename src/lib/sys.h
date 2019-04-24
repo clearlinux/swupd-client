@@ -16,6 +16,7 @@ extern "C" {
  * @brief Systemctl path in the system.
  */
 #define SYSTEMCTL "/usr/bin/systemctl"
+#define PATH_SEPARATOR '/'
 
 /**
  * @brief Return the free available space in the partition mounted in path
@@ -136,6 +137,43 @@ int systemctl_daemon_reload(void);
  * @brief Check if systemd is running inside a container.
  */
 bool systemd_in_container(void);
+
+/**
+ * @brief Returns a pointer to a new allocated string with the dirname of the informed
+ * filename.
+ *
+ * Helper to POSIX dirname() function. Using dirname() is tricky because you
+ * can't use that with constants and you need to keep the original pointer to
+ * free later. Just a wrapper to make it easier to use.
+ */
+char *sys_dirname(const char *path);
+
+/**
+ * @brief Join 2 paths using the default path separator.
+ *
+ * Can be used to prepend a prefix to an path (eg: the global path_prefix to a
+ * file->filename or some other path prefix and path), insuring there is no
+ * duplicate '/' at the strings' junction and no trailing '/'.
+ * Also works to append a path at the end of URIs.
+ */
+char *sys_path_join(const char *prefix, const char *path);
+
+/**
+ * @brief Check if file exists and it's a directory.
+ */
+bool sys_is_directory(const char *filename);
+
+/**
+ * @brief Remove trailing '/' on string.
+ * @note String will be altered, so shouldn't be a constant.
+ */
+void sys_remove_trailing_path_separators(char *path);
+
+/**
+ * @brief Check if a path is an absolute path.
+ * @returns false if there's any symlink or ../, ./ in the path.
+ */
+bool sys_is_absolute_path(const char *path);
 
 /**
  * @brief Run a systemctl command with the informed parameters.

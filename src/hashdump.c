@@ -115,7 +115,7 @@ enum swupd_code hashdump_main(int argc, char **argv)
 	file.filename = strdup_or_die(argv[optind]);
 	// Accept relative paths if no path_prefix set on command line
 	if (use_prefix) {
-		fullname = mk_full_filename(path_prefix, file.filename);
+		fullname = sys_path_join(path_prefix, file.filename);
 	} else {
 		fullname = strdup_or_die(file.filename);
 	}

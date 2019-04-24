@@ -531,7 +531,7 @@ static bool is_installed_and_verified(struct file *file)
 		return false;
 	}
 
-	char *fullname = mk_full_filename(path_prefix, file->filename);
+	char *fullname = sys_path_join(path_prefix, file->filename);
 
 	if (verify_file(file, fullname)) {
 		free_string(&fullname);
@@ -882,7 +882,7 @@ struct list *filter_out_existing_files(struct list *files)
 
 		file = list->data;
 
-		filename = mk_full_filename(path_prefix, file->filename);
+		filename = sys_path_join(path_prefix, file->filename);
 		if (verify_file_lazy(filename)) {
 			ret = list_free_item(list, NULL);
 		}

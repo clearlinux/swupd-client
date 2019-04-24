@@ -307,7 +307,6 @@ extern struct file *search_bundle_in_manifest(struct manifest *manifest, const c
 extern struct file *search_file_in_manifest(struct manifest *manifest, const char *filename);
 
 extern char *mounted_dirs;
-extern char *mk_full_filename(const char *prefix, const char *path);
 extern bool is_directory_mounted(const char *filename);
 extern bool is_under_mounted_directory(const char *filename);
 extern bool is_populated_dir(char *dirname);

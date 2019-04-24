@@ -277,3 +277,80 @@ bool systemd_in_container(void)
          * The return code is zero if the system is in a container */
 	return !run_command("/usr/bin/systemd-detect-virt", "-c");
 }
+
+char *sys_dirname(const char *path)
+{
+	char *tmp, *dir;
+
+	tmp = strdup_or_die(path);
+	dir = strdup_or_die(dirname(tmp));
+
+	free(tmp);
+	return dir;
+}
+
+char *sys_path_join(const char *prefix, const char *path)
+{
+	size_t len = 0;
+
+	if (!path) {
+		path = "";
+	}
+	if (!prefix) {
+		prefix = "";
+	}
+
+	if (prefix) {
+		len = strlen(prefix);
+	}
+
+	//Remove trailing '/' at the end of prefix
+	while (len && prefix[len - 1] == PATH_SEPARATOR) {
+		len--;
+	}
+
+	//Remove leading  '/' at the beginning of path
+	while (path[0] == PATH_SEPARATOR) {
+		path++;
+	}
+
+	return str_or_die("%.*s%c%s", len, prefix, PATH_SEPARATOR, path);
+}
+
+void sys_remove_trailing_path_separators(char *path)
+{
+	int len;
+
+	if (!path) {
+		error("Invalid NULL path");
+		return;
+	}
+
+	len = strlen(path);
+	while (len > 1 && path[len - 1] == PATH_SEPARATOR) {
+		len--;
+	}
+	path[len] = 0;
+}
+
+bool sys_is_directory(const char *filename)
+{
+	struct stat sb;
+
+	return lstat(filename, &sb) == 0 && S_ISDIR(sb.st_mode);
+}
+
+bool sys_is_absolute_path(const char *path)
+{
+	char *real_path;
+	bool abs;
+
+	real_path = realpath(path, NULL);
+	if (!real_path) {
+		return false;
+	}
+
+	abs = strcmp(path, real_path) == 0;
+	free(real_path);
+	return abs;
+}

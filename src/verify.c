@@ -168,7 +168,7 @@ static int check_files_hash(struct list *files)
 			continue;
 		}
 
-		fullname = mk_full_filename(path_prefix, f->filename);
+		fullname = sys_path_join(path_prefix, f->filename);
 		valid = cmdline_option_quick ? verify_file_lazy(fullname) : verify_file(f, fullname);
 		free_string(&fullname);
 		if (valid) {
@@ -272,7 +272,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 			continue;
 		}
 
-		fullname = mk_full_filename(path_prefix, file->filename);
+		fullname = sys_path_join(path_prefix, file->filename);
 		memset(&local, 0, sizeof(struct file));
 		local.filename = file->filename;
 		populate_file_struct(&local, fullname);
@@ -345,7 +345,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	}
 
 	/* compare the hash and report mismatch */
-	fullname = mk_full_filename(path_prefix, file->filename);
+	fullname = sys_path_join(path_prefix, file->filename);
 	if (verify_file(file, fullname)) {
 		goto end;
 	}
@@ -435,7 +435,7 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 			continue;
 		}
 
-		fullname = mk_full_filename(path_prefix, file->filename);
+		fullname = sys_path_join(path_prefix, file->filename);
 
 		if (lstat(fullname, &sb) != 0) {
 			/* correctly, the file is not present */
@@ -877,14 +877,14 @@ enum swupd_code verify_main(int argc, char **argv)
 			remove_orphaned_files(official_manifest, repair);
 		}
 		if (cmdline_option_picky) {
-			char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
+			char *start = sys_path_join(path_prefix, cmdline_option_picky_tree);
 			info("--picky removing extra files under %s\n", start);
 			ret = walk_tree(official_manifest, start, true, picky_whitelist, &counts);
 			free_string(&start);
 		}
 		timelist_timer_stop(global_times);
 	} else if (cmdline_option_picky) {
-		char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
+		char *start = sys_path_join(path_prefix, cmdline_option_picky_tree);
 		info("Generating list of extra files under %s\n", start);
 		ret = walk_tree(official_manifest, start, false, picky_whitelist, &counts);
 		free_string(&start);

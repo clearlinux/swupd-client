@@ -397,7 +397,7 @@ out:
 
 static char *tracking_dir(void)
 {
-	return mk_full_filename(state_dir, "bundles");
+	return sys_path_join(state_dir, "bundles");
 }
 
 /*
@@ -408,7 +408,7 @@ static char *tracking_dir(void)
 static void remove_tracked(const char *bundle)
 {
 	char *destdir = tracking_dir();
-	char *tracking_file = mk_full_filename(destdir, bundle);
+	char *tracking_file = sys_path_join(destdir, bundle);
 	free_string(&destdir);
 	/* we don't care about failures here since any weird state in the tracking
 	 * dir MUST be handled gracefully */
@@ -441,7 +441,7 @@ static void track_installed(const char *bundle_name)
 		if (ret) {
 			goto out;
 		}
-		src = mk_full_filename(path_prefix, "/usr/share/clear/bundles");
+		src = sys_path_join(path_prefix, "/usr/share/clear/bundles");
 		/* at the point this function is called <bundle_name> is already
 		 * installed on the system and therefore has a tracking file under
 		 * /usr/share/clear/bundles. A simple cp -a of that directory will
@@ -452,7 +452,7 @@ static void track_installed(const char *bundle_name)
 			goto out;
 		}
 		/* remove uglies that live in the system tracking directory */
-		rmfile = mk_full_filename(dst, ".MoM");
+		rmfile = sys_path_join(dst, ".MoM");
 		(void)unlink(rmfile);
 		free_string(&rmfile);
 		/* set perms on the directory correctly */
@@ -462,7 +462,7 @@ static void track_installed(const char *bundle_name)
 		}
 	}
 
-	char *tracking_file = mk_full_filename(dst, bundle_name);
+	char *tracking_file = sys_path_join(dst, bundle_name);
 	int fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 	free_string(&tracking_file);
 	if (fd < 0) {
@@ -831,7 +831,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		char *filepath = NULL;
 
 		bundle_size = get_manifest_list_contentsize(to_install_bundles);
-		filepath = mk_full_filename(path_prefix, "/usr/");
+		filepath = sys_path_join(path_prefix, "/usr/");
 
 		/* Calculate free space on filepath */
 		fs_free = get_available_space(filepath);

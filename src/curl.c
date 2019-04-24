@@ -83,7 +83,7 @@ CURLcode swupd_curl_set_optional_client_cert(CURL *curl)
 	CURLcode curl_ret = CURLE_OK;
 	char *client_cert_path;
 
-	client_cert_path = mk_full_filename(path_prefix, SSL_CLIENT_CERT);
+	client_cert_path = sys_path_join(path_prefix, SSL_CLIENT_CERT);
 	if (access(client_cert_path, F_OK) == 0) {
 		curl_ret = curl_easy_setopt(curl, CURLOPT_SSLCERT, client_cert_path);
 		if (curl_ret != CURLE_OK) {

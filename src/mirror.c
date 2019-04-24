@@ -104,8 +104,8 @@ static int unset_mirror_url()
 	char *content_path;
 	char *version_path;
 	int ret = 0;
-	content_path = mk_full_filename(path_prefix, MIRROR_CONTENT_URL_PATH);
-	version_path = mk_full_filename(path_prefix, MIRROR_VERSION_URL_PATH);
+	content_path = sys_path_join(path_prefix, MIRROR_CONTENT_URL_PATH);
+	version_path = sys_path_join(path_prefix, MIRROR_VERSION_URL_PATH);
 
 	if ((ret = swupd_rm(content_path))) {
 		goto out;
@@ -188,8 +188,8 @@ static enum swupd_code set_mirror_url(char *url)
 	bool need_unset = false;
 	/* concatenate path_prefix and configuration paths if necessary
 	 * if path_prefix is NULL the second argument will be returned */
-	content_path = mk_full_filename(path_prefix, MIRROR_CONTENT_URL_PATH);
-	version_path = mk_full_filename(path_prefix, MIRROR_VERSION_URL_PATH);
+	content_path = sys_path_join(path_prefix, MIRROR_CONTENT_URL_PATH);
+	version_path = sys_path_join(path_prefix, MIRROR_VERSION_URL_PATH);
 
 	/* write url to path_prefix/MIRROR_CONTENT_URL_PATH */
 	ret = write_to_path(url, content_path);
@@ -219,7 +219,7 @@ void handle_mirror_if_stale(void)
 	char *ret_str = NULL;
 	char *fullpath = NULL;
 
-	fullpath = mk_full_filename(path_prefix, DEFAULT_VERSION_URL_PATH);
+	fullpath = sys_path_join(path_prefix, DEFAULT_VERSION_URL_PATH);
 	int ret = get_value_from_path(&ret_str, fullpath, true);
 	if (ret != 0 || ret_str == NULL) {
 		/* no versionurl file here, might not exist under --path argument */

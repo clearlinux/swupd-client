@@ -213,7 +213,7 @@ bool file_exists(const char *filename)
 {
 	struct stat sb;
 
-	if (stat(filename, &sb) == 0) {
+	if (lstat(filename, &sb) == 0) {
 		return true;
 	}
 

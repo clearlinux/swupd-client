@@ -332,7 +332,7 @@ static bool set_format_string(char *userinput)
 /* Initializes the path_prefix global variable. If the path parameter is not
  * NULL, path_prefix will be set to its value.
  * Otherwise, the default value of '/'
- * is used. Note that the given path must exist.
+ * is used.
  */
 bool set_path_prefix(char *path)
 {
@@ -351,11 +351,16 @@ bool set_path_prefix(char *path)
 	/* in case multiple -p options are passed */
 	free_string(&path_prefix);
 
+	if (!file_exists(path)) {
+		if (mkdir_p(path) != 0) {
+			error("failed to create %s\n", path);
+			return false;
+		}
+	}
+
 	path_prefix = realpath(path, NULL);
 	if (!path_prefix) {
-		error("Bad path_prefix %s (%s), cannot continue.\n",
-		      path_prefix, strerror(errno));
-		return false;
+		return true;
 	}
 
 	if (path_prefix[strlen(path_prefix)] != '/') {
@@ -364,10 +369,9 @@ bool set_path_prefix(char *path)
 		free_string(&tmp);
 	}
 
-	ret = stat(path_prefix, &statbuf);
-	if (ret != 0 || !S_ISDIR(statbuf.st_mode)) {
-		error("Bad path_prefix %s (%s), cannot continue.\n",
-		      path_prefix, strerror(errno));
+	ret = lstat(path_prefix, &statbuf);
+	if (ret == 0 && !S_ISDIR(statbuf.st_mode)) {
+		error("Bad path_prefix - %s is not a directory\n", path_prefix);
 		return false;
 	}
 

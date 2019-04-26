@@ -126,7 +126,7 @@ static int ensure_basedir_is_installed(const char *file, struct manifest *MoM)
 
 		err = download_single_fullfile(dir_file);
 		if (err != 0) {
-			error("Problem downloading file %s", dir_file->filename);
+			error("Problem downloading file %s\n", dir_file->filename);
 			goto exit;
 		}
 		err = stage_file(dir_file);

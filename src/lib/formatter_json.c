@@ -45,24 +45,24 @@ void set_json_format(void)
 void json_start(const char *op)
 {
 	if (json_format) {
-		fprintf(stderr, "[\n{ \"type\" : \"start\", \"section\" : \"%s\" },\n", op);
-		fflush(stderr);
+		fprintf(stdout, "[\n{ \"type\" : \"start\", \"section\" : \"%s\" },\n", op);
+		fflush(stdout);
 	}
 }
 
 void json_end(const char *op, int status)
 {
 	if (json_format) {
-		fprintf(stderr, "{ \"type\" : \"end\", \"section\" : \"%s\", \"status\" : %d }\n]\n", op, status);
-		fflush(stderr);
+		fprintf(stdout, "{ \"type\" : \"end\", \"section\" : \"%s\", \"status\" : %d }\n]\n", op, status);
+		fflush(stdout);
 	}
 }
 
 void json_status(int status)
 {
 	if (json_format) {
-		fprintf(stderr, "{ \"type\" : \"status\", \"status\" : %d },\n", status);
-		fflush(stderr);
+		fprintf(stdout, "{ \"type\" : \"status\", \"status\" : %d },\n", status);
+		fflush(stdout);
 	}
 }
 
@@ -95,8 +95,8 @@ void json_message(const char *msg_type, const char *msg, va_list args_list)
 
 	/* add the JSON format and print immediately */
 	if (strcmp(full_msg, " ") != 0) {
-		fprintf(stderr, "{ \"type\" : \"%s\", \"msg\" : \"%s\" },\n", type ? type : "info", full_msg);
-		fflush(stderr);
+		fprintf(stdout, "{ \"type\" : \"%s\", \"msg\" : \"%s\" },\n", type ? type : "info", full_msg);
+		fflush(stdout);
 	}
 
 	free_string(&full_msg);
@@ -107,7 +107,7 @@ void json_message(const char *msg_type, const char *msg, va_list args_list)
 
 void json_progress(char *step_description, unsigned int current_step, unsigned int total_steps, int percentage)
 {
-	fprintf(stderr, "{ \"type\" : \"progress\", "
+	fprintf(stdout, "{ \"type\" : \"progress\", "
 			"\"currentStep\" : %d, "
 			"\"totalSteps\" : %d, "
 			"\"stepCompletion\" : %d, "

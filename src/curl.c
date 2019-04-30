@@ -725,6 +725,9 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_
 		goto exit;
 	}
 
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, PACKAGE "/" VERSION);
+	// No error checking needed, this is not critical information
+
 	if (update_server_port > 0) {
 		curl_ret = curl_easy_setopt(curl, CURLOPT_PORT, update_server_port);
 		if (curl_ret != CURLE_OK) {

@@ -26,8 +26,8 @@ The updates are fetched from a central software update server. If a
 valid update is found on the server, it can be downloaded and applied.
 
 The ``swupd`` tool can also install and remove bundles, check for
-updates without applying them, and perform system-level verification of
-the system software.
+updates without applying them, perform system-level verification of
+the system software, and install an OS.
 
 A *version url* server provides version information. This server
 notifies the program of available updates.
@@ -222,6 +222,30 @@ SUBCOMMANDS
         Optionally set the top-level directory for the swupd-managed system.
         If not specified this will default to '/'
 
+``os-install``
+
+    Perform system software installation in the specified location. Install
+    all files into {path} as specified by the `swupd os-install {path}` option.
+    Useful to generate a new system root.
+
+    - `-V, --version`
+
+        Install OS version V.
+
+    - `-x, --force`
+
+        Attempt to proceed even if non-critical errors found.
+
+    - `-B, --bundles=[BUNDLES]`
+
+        Include the (comma separated) list of bundles with the base OS install.
+
+        Examples:
+
+        - ``--bundles xterm,vi``
+
+            Installs bundles os-core and vi, along with os-core (installed by default).
+
 ``search {string}``
 
     Search for matching paths in manifest data. The specified {string}
@@ -352,11 +376,12 @@ SUBCOMMANDS
 
             Matches nothing, because paths are never empty.
 
-    - `-i, --install`
+    - `-i, --install (deprecated)`
 
         Install all files into {path} as specified by the `--path={path}`
         option. Useful to generate a new system root, or verify side
-        by side.
+        by side. This option has been deprecated, please consider using
+        "swupd os-install" instead.
 
     - `-q, --quick`
 

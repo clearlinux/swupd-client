@@ -69,6 +69,32 @@ static const struct option prog_opts[] = {
 	{ "bundles", required_argument, 0, 'B' },
 };
 
+/* setter functions */
+void verify_set_option_force(bool opt)
+{
+	cmdline_option_force = opt;
+}
+
+void verify_set_option_install(bool opt)
+{
+	cmdline_option_install = opt;
+}
+
+void verify_set_option_quick(bool opt)
+{
+	cmdline_option_quick = opt;
+}
+
+void verify_set_option_bundles(struct list *bundles)
+{
+	cmdline_bundles = bundles;
+}
+
+void verify_set_option_version(int ver)
+{
+	version = ver;
+}
+
 static void print_help(void)
 {
 	print("Usage:\n");
@@ -85,7 +111,7 @@ static void print_help(void)
 	print("   -Y, --picky             List (without --fix) or remove (with --fix) files which should not exist\n");
 	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
 	print("   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
-	print("   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory\n");
+	print("   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory. NOTE: This option has been deprecated, please consider using \"swupd os-install\" instead.\n");
 	print("   -q, --quick             Don't compare hashes, only fix missing files\n");
 	print("   -B, --bundles=[BUNDLES] Ensure BUNDLES are installed correctly. Example: --bundles=os-core,vi\n");
 	print("\n");
@@ -517,6 +543,9 @@ static bool parse_opt(int opt, char *optarg)
 		cmdline_option_force = true;
 		return true;
 	case 'i':
+		/* TODO(castulo): remove the deprecated command by end of July 2019 */
+		fprintf(stderr, "\nWarning: The --install option has been deprecated and will be removed soon.\n");
+		fprintf(stderr, "Please consider using \"swupd os-install\" instead.\n\n");
 		cmdline_option_install = true;
 		cmdline_option_quick = true;
 		return true;
@@ -613,6 +642,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	int ret;
 	struct list *subs = NULL;
 	int steps_in_verify = 6;
+	bool use_latest = false;
 
 	/*
 	 * Steps for verify:
@@ -645,10 +675,6 @@ enum swupd_code verify_main(int argc, char **argv)
 	}
 	progress_init_steps("verify", steps_in_verify);
 
-	/* parse command line options */
-	assert(argc >= 0);
-	assert(argv != NULL);
-
 	ret = swupd_init();
 	if (ret != 0) {
 		error("Failed verify initialization, exiting now.\n");
@@ -670,6 +696,7 @@ enum swupd_code verify_main(int argc, char **argv)
 
 	/* If "latest" was chosen, get latest version */
 	if (version == -1) {
+		use_latest = true;
 		version = get_latest_version(NULL);
 		if (version < 0) {
 			error("Unable to get latest version for install\n");
@@ -680,7 +707,11 @@ enum swupd_code verify_main(int argc, char **argv)
 	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Get versions
 
-	info("Verifying version %i\n", version);
+	if (cmdline_option_install) {
+		info("Installing OS version %i%s\n", version, use_latest ? " (latest)" : "");
+	} else {
+		info("Verifying version %i\n", version);
+	}
 
 	if (cmdline_bundles) {
 		while (cmdline_bundles) {
@@ -782,9 +813,14 @@ enum swupd_code verify_main(int argc, char **argv)
 				}
 				ret = SWUPD_OK;
 			} else {
-				error("Unable to verify, one or more currently installed bundles "
-				      "are not available at version %d. Use --force to override.\n",
-				      version);
+				if (cmdline_option_install) {
+					error("One or more of the provided bundles are not available at version %d\n", version);
+					info("Please make sure the name of the provided bundles are correct, or use --force to override\n")
+				} else {
+					error("Unable to verify. One or more currently installed bundles "
+					      "are not available at version %d. Use --force to override\n",
+					      version);
+				}
 				ret = SWUPD_INVALID_BUNDLE;
 				goto clean_and_exit;
 			}
@@ -853,7 +889,11 @@ enum swupd_code verify_main(int argc, char **argv)
 
 		timelist_timer_start(global_times, "Add missing files");
 		progress_set_next_step("add_missing_files");
-		info("Adding any missing files\n");
+		if (cmdline_option_install) {
+			info("Installing base OS and selected bundles\n");
+		} else {
+			info("Adding any missing files\n");
+		}
 		add_missing_files(official_manifest, repair);
 		timelist_timer_stop(global_times);
 	}
@@ -915,8 +955,8 @@ brick_the_system_and_clean_curl:
 	if (counts.missing) {
 		info("  %i file%s %s missing\n", counts.missing, (counts.missing > 1 ? "s" : ""), (counts.missing > 1 ? "were" : "was"));
 		if (cmdline_option_fix || cmdline_option_install) {
-			info("    %i of %i missing files were replaced\n", counts.replaced, counts.missing);
-			info("    %i of %i missing files were not replaced\n", counts.not_replaced, counts.missing);
+			info("    %i of %i missing files were %s\n", counts.replaced, counts.missing, cmdline_option_install ? "installed" : "replaced");
+			info("    %i of %i missing files were not %s\n", counts.not_replaced, counts.missing, cmdline_option_install ? "installed" : "replaced");
 		}
 	}
 
@@ -995,7 +1035,13 @@ clean_and_exit:
 		  total_curl_sz);
 
 	if (ret == SWUPD_OK) {
-		if (cmdline_option_fix || cmdline_option_install) {
+		if (cmdline_option_install) {
+			info("Installation successful\n");
+
+			if (counts.not_replaced > 0) {
+				ret = SWUPD_NO;
+			}
+		} else if (cmdline_option_fix) {
 			info("Fix successful\n");
 
 			if (counts.not_fixed > 0 ||
@@ -1014,8 +1060,10 @@ clean_and_exit:
 			}
 		}
 	} else {
-		if (cmdline_option_fix || cmdline_option_install) {
+		if (cmdline_option_fix) {
 			print("Fix did not fully succeed\n");
+		} else if (cmdline_option_install) {
+			print("Installation failed\n");
 		} else {
 			/* This is just a verification */
 			print("Verify did not fully succeed\n");

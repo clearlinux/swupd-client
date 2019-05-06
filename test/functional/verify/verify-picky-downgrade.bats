@@ -21,7 +21,7 @@ test_setup() {
 		Verifying version 10
 		Warning: the force or picky option is specified; ignoring version mismatch for verify --fix
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
-		Error: Unable to verify, one or more currently installed bundles are not available at version 10. Use --force to override.
+		Error: Unable to verify. One or more currently installed bundles are not available at version 10. Use --force to override
 		Fix did not fully succeed
 	EOM
 	)

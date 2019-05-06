@@ -79,6 +79,7 @@ swupd_SOURCES = \
 	src/manifest.h \
 	src/manifest_parser.c \
 	src/mirror.c \
+	src/os_install.c \
 	src/packs.c \
 	src/scripts.c \
 	src/search.c \
@@ -213,6 +214,14 @@ BATS = \
 	test/functional/mirror/mirror-createdir.bats \
 	test/functional/mirror/mirror-createdir-negative.bats \
 	test/functional/mirror/mirror-json.bats \
+	test/functional/os-install/install-bad.bats \
+	test/functional/os-install/install-basics.bats \
+	test/functional/os-install/install-json.bats \
+	test/functional/os-install/install-latest-missing.bats \
+	test/functional/os-install/install-multiple.bats \
+	test/functional/os-install/install-no-fullfile-fallback.bats \
+	test/functional/os-install/install-no-packs.bats \
+	test/functional/os-install/install-version.bats \
 	test/functional/search/search-content-check-negative.bats \
 	test/functional/search/search-content-check-positive.bats \
 	test/functional/search/search-client-certificate.bats \
@@ -278,15 +287,7 @@ BATS = \
 	test/functional/verify/verify-format-mismatch-override.bats \
 	test/functional/verify/verify-ghosted.bats \
 	test/functional/verify/verify-good.bats \
-	test/functional/verify/verify-install-bad.bats \
-	test/functional/verify/verify-install.bats \
-	test/functional/verify/verify-install-directory.bats \
-	test/functional/verify/verify-install-latest-directory.bats \
-	test/functional/verify/verify-install-multiple.bats \
-	test/functional/verify/verify-install-no-fullfile-fallbacks.bats \
-	test/functional/verify/verify-install-no-zero-packs.bats \
 	test/functional/verify/verify-json.bats \
-	test/functional/verify/verify-latest-missing.bats \
 	test/functional/verify/verify-missing-file.bats \
 	test/functional/verify/verify-no-disk-space.bats \
 	test/functional/verify/verify-picky.bats \

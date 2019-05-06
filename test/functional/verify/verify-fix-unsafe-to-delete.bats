@@ -15,7 +15,7 @@ test_setup() {
 
 }
 
-@test "VER042: Verify fixes a system with extra files that are unsafe to delete" {
+@test "VER037: Verify fixes a system with extra files that are unsafe to delete" {
 
 	# when running verify --fix and there are extra files, but the extra
 	# files are found not safe to be deleted, they should be skipped and

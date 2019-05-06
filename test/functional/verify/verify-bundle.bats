@@ -15,7 +15,7 @@ test_setup() {
 
 }
 
-@test "VER045: Verify bundle ignores not specified missing bundle" {
+@test "VER040: Verify bundle ignores not specified missing bundle" {
 
 	run sudo sh -c "$SWUPD verify --fix $SWUPD_OPTS --bundles test-bundle2"
 	assert_status_is 0
@@ -42,7 +42,7 @@ test_setup() {
 
 }
 
-@test "VER046: Verify bundle installs bundle if not installed" {
+@test "VER041: Verify bundle installs bundle if not installed" {
 
 	create_bundle -n test-bundle3 -f /baz/test-file3 "$TEST_NAME"
 	run sudo sh -c "$SWUPD verify --fix $SWUPD_OPTS --bundles test-bundle3"
@@ -75,7 +75,7 @@ test_setup() {
 
 }
 
-@test "VER047: Verify bundle installs multiple bundles if not installed" {
+@test "VER042: Verify bundle installs multiple bundles if not installed" {
 
 	run sudo sh -c "$SWUPD verify --fix $SWUPD_OPTS --bundles test-bundle1,test-bundle2"
 	assert_status_is 0

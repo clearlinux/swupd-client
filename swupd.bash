@@ -27,13 +27,13 @@ _swupd()
     for ((i=COMP_CWORD-1;i>=0;i--))
     do case "${COMP_WORDS[$i]}" in
 	    ("$1")
-		opts="--help --version autoupdate bundle-add bundle-remove bundle-list hashdump update verify check-update search search-file info clean mirror"
+		opts="--help --version autoupdate bundle-add bundle-remove bundle-list hashdump update verify check-update search search-file info clean mirror os-install "
 	    break;;
 	    ("autoupdate")
 		opts="--help --enable --disable "
 		break;;
 	    ("bundle-add")
-		opts="--help --url --contenturl --versionurl --port --path --format --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --json-output --debug --quiet"
+		opts="--help --url --contenturl --versionurl --port --path --format --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --json-output --debug --quiet "
 		break;;
 	    ("bundle-remove")
 		opts="--help --path --url --contenturl --versionurl --port --format --force --nosigcheck --ignore-time --statedir --certpath --debug --quiet --json-output "
@@ -67,6 +67,9 @@ _swupd()
 		break;;
 	    ("mirror")
 		opts="--help --set --unset --path --debug --quiet --json-output "
+		break;;
+	    ("os-install")
+		opts="--help --version --path --url --port --contenturl --versionurl --format --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --debug --quiet --json-output "
 		break;;
 	esac
     done

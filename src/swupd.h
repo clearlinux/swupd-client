@@ -356,6 +356,13 @@ extern int add_subscriptions(struct list *bundles, struct list **subs, struct ma
 enum swupd_code list_local_bundles();
 extern int link_or_rename(const char *orig, const char *dest);
 
+/* verify.c */
+extern void verify_set_option_force(bool opt);
+extern void verify_set_option_install(bool opt);
+extern void verify_set_option_quick(bool opt);
+extern void verify_set_option_bundles(struct list *bundles);
+extern void verify_set_option_version(int ver);
+
 /* telemetry.c */
 typedef enum telem_prio_t {
 	TELEMETRY_DEBG = 1,

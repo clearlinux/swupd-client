@@ -28,7 +28,7 @@ test_setup() {
 
 }
 
-@test "VER048: Verify a system with no disk space left (downloading the MoM)" {
+@test "VER024: Verify a system with no disk space left (downloading the MoM)" {
 
 	# When verifying a system and we run out of disk space while downloading the
 	# MoMs we should not retry the download since it will fail for sure
@@ -52,7 +52,7 @@ test_setup() {
 
 }
 
-@test "VER043: Verify a system with no disk space left (downloading the bundle manifest)" {
+@test "VER038: Verify a system with no disk space left (downloading the bundle manifest)" {
 
 	# When verifying a system and we run out of disk space while downloading the
 	# bundle manifest we should not retry the download since it will fail for sure
@@ -82,7 +82,7 @@ test_setup() {
 
 }
 
-@test "VER044: Verify a system with no disk space left (downloading the bundle files)" {
+@test "VER039: Verify a system with no disk space left (downloading the bundle files)" {
 
 	# When verifying a system and we run out of disk space while downloading the
 	# bundle manifest we should not retry the download since it will fail for sure

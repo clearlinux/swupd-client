@@ -48,7 +48,7 @@ static unsigned long int get_versionstamp(char *path_prefix)
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
 		if (errno == ENOENT) {
-			error("%s does not exist!\n", filename);
+			warn("%s does not exist!\n", filename);
 		} else {
 			error("Failed to open %s\n", filename);
 		}

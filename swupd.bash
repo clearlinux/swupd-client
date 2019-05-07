@@ -86,7 +86,7 @@ _swupd()
 		fi
 		if [ -n "$MoM" ]
 		then
-		    opts+="$( sed '1,/^$/d; s/^.*\t/ /' "$MoM" | LC_ALL=C sort )"
+		    opts+="$( sed '1,/^$/d; s/^.*\t/ /; /.*\.I\..*/d' "$MoM" | LC_ALL=C sort )"
 		fi ;;
 	    ("bundle-remove")
 		opts+=" $(unset CDPATH; test -d /usr/share/clear/bundles && \

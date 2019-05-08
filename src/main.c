@@ -83,7 +83,7 @@ static void print_help(const char *name)
 static void copyright_header(void)
 {
 	print(PACKAGE " " VERSION "\n");
-	print("   Copyright (C) 2012-2018 Intel Corporation\n");
+	print("   Copyright (C) 2012-2019 Intel Corporation\n");
 	print("\n");
 }
 

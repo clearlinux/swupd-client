@@ -81,6 +81,7 @@ swupd_SOURCES = \
 	src/mirror.c \
 	src/os_install.c \
 	src/packs.c \
+	src/repair.c \
 	src/scripts.c \
 	src/search.c \
 	src/signature.c \
@@ -222,6 +223,28 @@ BATS = \
 	test/functional/os-install/install-no-fullfile-fallback.bats \
 	test/functional/os-install/install-no-packs.bats \
 	test/functional/os-install/install-version.bats \
+	test/functional/repair/repair-add-missing-include.bats \
+	test/functional/repair/repair-add-missing-include-old.bats \
+	test/functional/repair/repair-basics.bats \
+	test/functional/repair/repair-boot-file.bats \
+	test/functional/repair/repair-boot-file-deleted.bats \
+	test/functional/repair/repair-boot-skip.bats \
+	test/functional/repair/repair-bundle.bats \
+	test/functional/repair/repair-directory-tree-deleted.bats \
+	test/functional/repair/repair-empty-dir-deleted.bats \
+	test/functional/repair/repair-format-mismatch.bats \
+	test/functional/repair/repair-format-mismatch-overdrive.bats \
+	test/functional/repair/repair-ghosted.bats \
+	test/functional/repair/repair-json.bats \
+	test/functional/repair/repair-missing-file.bats \
+	test/functional/repair/repair-no-disk-space.bats \
+	test/functional/repair/repair-picky-downgrade.bats \
+	test/functional/repair/repair-picky-ghosted.bats \
+	test/functional/repair/repair-picky-ghosted-missing.bats \
+	test/functional/repair/repair-skip-scripts.bats \
+	test/functional/repair/repair-unsafe-to-delete.bats \
+	test/functional/repair/repair-version-mismatch.bats \
+	test/functional/repair/repair-version-mismatch-overdrive.bats \
 	test/functional/search/search-content-check-negative.bats \
 	test/functional/search/search-content-check-positive.bats \
 	test/functional/search/search-client-certificate.bats \
@@ -270,32 +293,16 @@ BATS = \
 	test/functional/usability/usa-completion-basic.bats \
 	test/functional/usability/usa-download-retries.bats \
 	test/functional/usability/usa-external-modules.bats \
-	test/functional/verify/verify-add-missing-include.bats \
-	test/functional/verify/verify-add-missing-include-old.bats \
 	test/functional/verify/verify-boot-file.bats \
-	test/functional/verify/verify-boot-file-deleted.bats \
-	test/functional/verify/verify-boot-skip.bats \
-	test/functional/verify/verify-bundle.bats \
 	test/functional/verify/verify-client-certificate.bats \
 	test/functional/verify/verify-directory-tree-deleted.bats \
-	test/functional/verify/verify-empty-dir-deleted.bats \
 	test/functional/verify/verify-fix.bats \
-	test/functional/verify/verify-fix-unsafe-to-delete.bats \
-	test/functional/verify/verify-fix-version-mismatch.bats \
-	test/functional/verify/verify-fix-version-mismatch-override.bats \
-	test/functional/verify/verify-format-mismatch.bats \
-	test/functional/verify/verify-format-mismatch-override.bats \
-	test/functional/verify/verify-ghosted.bats \
 	test/functional/verify/verify-good.bats \
 	test/functional/verify/verify-json.bats \
 	test/functional/verify/verify-missing-file.bats \
-	test/functional/verify/verify-no-disk-space.bats \
 	test/functional/verify/verify-picky.bats \
 	test/functional/verify/verify-picky-downgrade.bats \
-	test/functional/verify/verify-picky-ghosted.bats \
-	test/functional/verify/verify-picky-ghosted-missing.bats \
-	test/functional/verify/verify-picky-whitelist.bats \
-	test/functional/verify/verify-skip-scripts.bats
+	test/functional/verify/verify-picky-whitelist.bats
 
 UNIT_TESTS = \
 	test/unit/test_signature.test \

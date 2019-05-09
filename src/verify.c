@@ -50,7 +50,6 @@ static struct list *cmdline_bundles = NULL;
 
 /* picky_whitelist points to picky_whitelist_buffer if and only if regcomp() was called for it */
 static regex_t *picky_whitelist;
-static regex_t picky_whitelist_buffer;
 
 static int version = 0;
 
@@ -95,6 +94,26 @@ void verify_set_option_version(int ver)
 	version = ver;
 }
 
+void verify_set_option_fix(bool opt)
+{
+	cmdline_option_fix = opt;
+}
+
+void verify_set_option_picky(bool opt)
+{
+	cmdline_option_picky = opt;
+}
+
+void verify_set_picky_whitelist(regex_t *whitelist)
+{
+	picky_whitelist = whitelist;
+}
+
+void verify_set_picky_tree(const char *picky_tree)
+{
+	cmdline_option_picky_tree = picky_tree;
+}
+
 static void print_help(void)
 {
 	print("Usage:\n");
@@ -104,9 +123,10 @@ static void print_help(void)
 
 	global_print_help();
 
+	// TODO(castulo): remove the deprecated options by end of July 2019
 	print("Options:\n");
 	print("   -m, --manifest=M        Verify against manifest version M\n");
-	print("   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files)\n");
+	print("   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files). NOTE: This option has been deprecated, please consider using \"swupd repair\" instead.\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -Y, --picky             List (without --fix) or remove (with --fix) files which should not exist\n");
 	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
@@ -115,30 +135,6 @@ static void print_help(void)
 	print("   -q, --quick             Don't compare hashes, only fix missing files\n");
 	print("   -B, --bundles=[BUNDLES] Ensure BUNDLES are installed correctly. Example: --bundles=os-core,vi\n");
 	print("\n");
-}
-
-static bool compile_whitelist()
-{
-	int errcode;
-	char *full_regex = NULL;
-	bool success = false;
-
-	/* Enforce matching the entire path. */
-	string_or_die(&full_regex, "^(%s)$", cmdline_option_picky_whitelist);
-
-	assert(!picky_whitelist);
-	errcode = regcomp(&picky_whitelist_buffer, full_regex, REG_NOSUB | REG_EXTENDED);
-	picky_whitelist = &picky_whitelist_buffer;
-	if (errcode) {
-		error("Problem processing --picky-whitelist=%s\n", cmdline_option_picky_whitelist);
-		print_regexp_error(errcode, picky_whitelist);
-		goto done;
-	}
-	success = true;
-
-done:
-	free_string(&full_regex);
-	return success;
 }
 
 static bool hash_needs_work(struct file *file, char *hash)
@@ -537,6 +533,9 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'f':
+		/* TODO(castulo): remove the deprecated command by end of July 2019 */
+		fprintf(stderr, "\nWarning: The --fix option has been deprecated and will be removed soon.\n");
+		fprintf(stderr, "Please consider using \"swupd repair\" instead.\n\n");
 		cmdline_option_fix = true;
 		return true;
 	case 'x':
@@ -622,8 +621,14 @@ static bool parse_options(int argc, char **argv)
 		error("-m latest only supported with --install\n");
 		return false;
 	}
-	if (!compile_whitelist()) {
-		return false;
+
+	/* if repair --picky-withelist is calling verify then picky_whitelist
+	 * already has a compiled regex */
+	if (!picky_whitelist) {
+		picky_whitelist = compile_whitelist(cmdline_option_picky_whitelist);
+		if (!picky_whitelist) {
+			return false;
+		}
 	}
 
 	return true;
@@ -787,9 +792,9 @@ enum swupd_code verify_main(int argc, char **argv)
 	if (cmdline_option_fix && !is_current_version(version)) {
 		if (cmdline_option_picky || cmdline_option_force) {
 			warn("the force or picky option is specified; "
-			     "ignoring version mismatch for verify --fix\n");
+			     "ignoring version mismatch for repair\n");
 		} else {
-			error("Fixing to a different version requires "
+			error("Repairing to a different version requires "
 			      "--force or --picky\n");
 			ret = SWUPD_INVALID_OPTION;
 			goto clean_and_exit;
@@ -908,7 +913,7 @@ enum swupd_code verify_main(int argc, char **argv)
 
 		timelist_timer_start(global_times, "Fixing modified files");
 		progress_set_next_step("fix_files");
-		info("Fixing modified files\n");
+		info("Repairing modified files\n");
 		deal_with_hash_mismatches(official_manifest, repair);
 
 		/* removing files could be risky, so only do it if the
@@ -963,8 +968,8 @@ brick_the_system_and_clean_curl:
 	if (counts.mismatch) {
 		info("  %i file%s did not match\n", counts.mismatch, (counts.mismatch > 1 ? "s" : ""));
 		if (cmdline_option_fix) {
-			info("    %i of %i files were fixed\n", counts.fixed, counts.mismatch);
-			info("    %i of %i files were not fixed\n", counts.not_fixed, counts.mismatch);
+			info("    %i of %i files were repaired\n", counts.fixed, counts.mismatch);
+			info("    %i of %i files were not repaired\n", counts.not_fixed, counts.mismatch);
 		}
 	}
 
@@ -1042,7 +1047,7 @@ clean_and_exit:
 				ret = SWUPD_NO;
 			}
 		} else if (cmdline_option_fix) {
-			info("Fix successful\n");
+			info("Repair successful\n");
 
 			if (counts.not_fixed > 0 ||
 			    counts.not_replaced > 0 ||
@@ -1061,7 +1066,7 @@ clean_and_exit:
 		}
 	} else {
 		if (cmdline_option_fix) {
-			print("Fix did not fully succeed\n");
+			print("Repair did not fully succeed\n");
 		} else if (cmdline_option_install) {
 			print("Installation failed\n");
 		} else {

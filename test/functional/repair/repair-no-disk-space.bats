@@ -28,7 +28,7 @@ test_setup() {
 
 }
 
-@test "VER024: Verify a system with no disk space left (downloading the MoM)" {
+@test "REP022: Repair a system with no disk space left (downloading the MoM)" {
 
 	# When verifying a system and we run out of disk space while downloading the
 	# MoMs we should not retry the download since it will fail for sure
@@ -36,7 +36,7 @@ test_setup() {
 	# fill up all the space in the disk
 	sudo dd if=/dev/zero of="$TEST_NAME"/testfs/dummy >& /dev/null || print "Using all space left in disk"
 
-	run sudo sh -c "timeout 30 $SWUPD verify --fix --force --manifest=20 $SWUPD_OPTS"
+	run sudo sh -c "timeout 30 $SWUPD repair --force --manifest=20 $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
@@ -45,14 +45,14 @@ test_setup() {
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Failed to retrieve 20 MoM manifest
 		Error: Unable to download/verify 20 Manifest.MoM
-		Fix did not fully succeed
+		Repair did not fully succeed
 	EOM
 	)
 	assert_is_output "$expected_output"
 
 }
 
-@test "VER038: Verify a system with no disk space left (downloading the bundle manifest)" {
+@test "REP023: Repair a system with no disk space left (downloading the bundle manifest)" {
 
 	# When verifying a system and we run out of disk space while downloading the
 	# bundle manifest we should not retry the download since it will fail for sure
@@ -65,42 +65,42 @@ test_setup() {
 	sudo mv "$big_manifest" "$WEBDIR"/20/Manifest.test-bundle
 	sudo mv "$big_manifest".tar "$WEBDIR"/20/Manifest.test-bundle.tar
 
-	run sudo sh -c "timeout 30 $SWUPD verify --fix --force --manifest=20 $SWUPD_OPTS"
+	run sudo sh -c "timeout 30 $SWUPD repair --force --manifest=20 $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Verifying version 20
-		Warning: the force or picky option is specified; ignoring version mismatch for verify --fix
+		Warning: the force or picky option is specified; ignoring version mismatch for repair
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Failed to retrieve 20 test-bundle manifest
 		Error: Unable to download manifest test-bundle version 20, exiting now
-		Fix did not fully succeed
+		Repair did not fully succeed
 	EOM
 	)
 	assert_is_output "$expected_output"
 
 }
 
-@test "VER039: Verify a system with no disk space left (downloading the bundle files)" {
+@test "REP024: Repair a system with no disk space left (downloading the bundle files)" {
 
 	# When verifying a system and we run out of disk space while downloading the
 	# bundle manifest we should not retry the download since it will fail for sure
 
 	fhash=$(get_hash_from_manifest "$WEBDIR"/20/Manifest.test-bundle /test-file)
 
-	run sudo sh -c "timeout 30 $SWUPD verify --fix --force --manifest=20 $SWUPD_OPTS"
+	run sudo sh -c "timeout 30 $SWUPD repair --force --manifest=20 $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
 		Verifying version 20
-		Warning: the force or picky option is specified; ignoring version mismatch for verify --fix
+		Warning: the force or picky option is specified; ignoring version mismatch for repair
 		Verifying files
 		Starting download of remaining update content. This may take a while...
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$fhash.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Unable to download necessary files for this OS release
-		Fix did not fully succeed
+		Repair did not fully succeed
 	EOM
 	)
 	assert_is_output "$expected_output"

@@ -1,5 +1,8 @@
 #!/usr/bin/env bats
 
+# Author: Castulo Martinez
+# Email: castulo.martinez@intel.com
+
 load "../testlib"
 
 test_setup() {
@@ -15,25 +18,32 @@ test_setup() {
 
 }
 
+@test "REP009: Repair a system that has a file that should be deleted" {
 
-@test "VER006: Verify a system that has a file that should be deleted" {
-
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
-	assert_status_is "$SWUPD_NO"
+	run sudo sh -c "$SWUPD repair $SWUPD_OPTS"
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Verifying files
+		Adding any missing files
+		Repairing modified files
 		File that should be deleted: .*/target-dir/testdir1/testdir2/testfile
+		.deleted
 		File that should be deleted: .*/target-dir/testdir1/testdir2
+		.deleted
 		File that should be deleted: .*/target-dir/testdir1
+		.deleted
 		Inspected 4 files
 		  3 files found which should be deleted
-		Verify successful
+		    3 of 3 files were deleted
+		    0 of 3 files were not deleted
+		Calling post-update helper scripts.
+		Repair successful
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_dir_exists "$TARGETDIR"/testdir1
-	assert_dir_exists "$TARGETDIR"/testdir1/testdir2
-	assert_file_exists "$TARGETDIR"/testdir1/testdir2/testfile
+	assert_dir_not_exists "$TARGETDIR"/testdir1
+	assert_dir_not_exists "$TARGETDIR"/testdir1/testdir2
+	assert_file_not_exists "$TARGETDIR"/testdir1/testdir2/testfile
 
 }

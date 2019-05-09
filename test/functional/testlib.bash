@@ -2998,6 +2998,7 @@ get_next_available_id() { # swupd_function
 		info) group=INF;;
 		clean) group=CLN;;
 		os-install) group=INS;;
+		repair) group=REP;;
 		*) group=UNKNOWN;;
 	esac
 	id=$(printf "$group%03d\\n" $id)

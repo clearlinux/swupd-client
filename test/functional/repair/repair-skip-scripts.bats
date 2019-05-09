@@ -1,5 +1,8 @@
 #!/usr/bin/env bats
 
+# Author: Castulo Martinez
+# Email: castulo.martinez@intel.com
+
 load "../testlib"
 
 test_setup() {
@@ -12,19 +15,20 @@ test_setup() {
 
 }
 
-@test "VER017: Verify can skip running the post-update scripts and boot update tool" {
+@test "REP030: Repair can skip running the post-update scripts and boot update tool" {
 
-	run sudo sh -c "$SWUPD verify --fix --no-scripts $SWUPD_OPTS"
-	assert_status_is 0
+	run sudo sh -c "$SWUPD repair --no-scripts $SWUPD_OPTS"
+
+	assert_status_is "$SWUPD_OK"
 	# check for the warning
 	expected_output=$(cat <<-EOM
 		Verifying version 20
 		Verifying files
 		Adding any missing files
-		Fixing modified files
+		Repairing modified files
 		Inspected 7 files
 		Warning: post-update helper scripts skipped due to --no-scripts argument
-		Fix successful
+		Repair successful
 	EOM
 	)
 	assert_is_output "$expected_output"

@@ -1,5 +1,8 @@
 #!/usr/bin/env bats
 
+# Author: Castulo Martinez
+# Email: castulo.martinez@intel.com
+
 load "../testlib"
 
 test_setup() {
@@ -11,21 +14,29 @@ test_setup() {
 
 }
 
-@test "VER002: Verify a system that is missing a file" {
+@test "REP021: Repair a system that is missing a file" {
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
-	assert_status_is "$SWUPD_NO"
+	run sudo sh -c "$SWUPD repair $SWUPD_OPTS"
+
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Verifying files
+		Starting download of remaining update content. This may take a while...
+		Adding any missing files
 		Missing file: .*/target-dir/foo/test-file1
+		.fixed
+		Repairing modified files
 		Inspected 7 files
 		  1 file was missing
-		Verify successful
+		    1 of 1 missing files were replaced
+		    0 of 1 missing files were not replaced
+		Calling post-update helper scripts.
+		Repair successful
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/foo/test-file1
+	assert_file_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/bar/test-file2
 
 }

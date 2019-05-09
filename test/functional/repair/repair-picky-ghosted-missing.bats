@@ -1,5 +1,8 @@
 #!/usr/bin/env bats
 
+# Author: Castulo Martinez
+# Email: castulo.martinez@intel.com
+
 load "../testlib"
 
 test_setup() {
@@ -12,15 +15,16 @@ test_setup() {
 
 }
 
-@test "VER026: Verify ghosted files are not added during --picky" {
+@test "REP029: When repairing ghosted files are not added during --picky" {
 
-	run sudo sh -c "$SWUPD verify --fix --picky $SWUPD_OPTS"
-	assert_status_is 0
+	run sudo sh -c "$SWUPD repair --picky $SWUPD_OPTS"
+
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Verifying files
 		Adding any missing files
-		Fixing modified files
+		Repairing modified files
 		--picky removing extra files under .*/target-dir/usr
 		REMOVING /usr/share/defaults/swupd/versionurl
 		REMOVING /usr/share/defaults/swupd/contenturl
@@ -29,7 +33,7 @@ test_setup() {
 		    2 of 2 files were deleted
 		    0 of 2 files were not deleted
 		Calling post-update helper scripts.
-		Fix successful
+		Repair successful
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

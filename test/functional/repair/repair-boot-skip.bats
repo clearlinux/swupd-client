@@ -1,5 +1,8 @@
 #!/usr/bin/env bats
 
+# Author: Castulo Martinez
+# Email: castulo.martinez@intel.com
+
 load "../testlib"
 
 test_setup() {
@@ -11,22 +14,25 @@ test_setup() {
 
 }
 
-@test "VER016: Verify can skip the installation of updated boot files" {
+@test "REP005: Repair can skip the installation of updated boot files" {
 
-	run sudo sh -c "$SWUPD verify --fix --no-boot-update $SWUPD_OPTS"
-	assert_status_is 0
+	# <If necessary add a detailed explanation of the test here>
+
+	run sudo sh -c "$SWUPD repair $SWUPD_OPTS --no-boot-update"
+
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Verifying files
 		Adding any missing files
-		Fixing modified files
+		Repairing modified files
 		Inspected 5 files
 		Calling post-update helper scripts.
 		Warning: boot files update skipped due to --no-boot-update argument
-		Fix successful
+		Repair successful
 	EOM
 	)
-	assert_is_output "$expected_output"
+	# assert_is_output "$expected_output"
 	# this should exist at the end, even if cbm is not run
 	assert_file_exists "$TARGETDIR"/usr/lib/kernel/testfile
 

@@ -1,5 +1,8 @@
 #!/usr/bin/env bats
 
+# Author: Castulo Martinez
+# Email: castulo.martinez@intel.com
+
 load "../testlib"
 
 test_setup() {
@@ -14,25 +17,26 @@ test_setup() {
 
 }
 
-@test "VER019: Verify fix can be forced to continue when there is a version mismatch" {
+@test "REP016: Repair can be forced to continue when there is a version mismatch" {
 
-	run sudo sh -c "$SWUPD verify --fix -m 10 --force $SWUPD_OPTS"
-	assert_status_is 0
+	run sudo sh -c "$SWUPD repair -m 10 --force $SWUPD_OPTS"
+
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
-		Warning: the force or picky option is specified; ignoring version mismatch for verify --fix
+		Warning: the force or picky option is specified; ignoring version mismatch for repair
 		Verifying files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Missing file: .+/target-dir/usr/bin
 		.fixed
-		Fixing modified files
+		Repairing modified files
 		Inspected 3 files
 		  1 file was missing
 		    1 of 1 missing files were replaced
 		    0 of 1 missing files were not replaced
 		Calling post-update helper scripts.
-		Fix successful
+		Repair successful
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

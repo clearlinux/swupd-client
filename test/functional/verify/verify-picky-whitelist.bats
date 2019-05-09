@@ -19,7 +19,7 @@ test_setup() {
 
 }
 
-@test "VER036: Verify directories in the whitelist are skipped during --picky" {
+@test "VER003: Verify directories in the whitelist are skipped during --picky" {
 
 	# --picky should find those files in /usr that are not in any manifest
 	# but it should skip those insde directories that are in the whitelist

@@ -1,5 +1,8 @@
 #!/usr/bin/env bats
 
+# Author: Castulo Martinez
+# Email: castulo.martinez@intel.com
+
 load "../testlib"
 
 test_setup() {
@@ -13,10 +16,13 @@ test_setup() {
 
 }
 
-@test "VER011: Verify fixes a system that has a missing dependency" {
+@test "REP001: Repairs a system that has a missing dependency" {
 
-	run sudo sh -c "$SWUPD verify --fix $SWUPD_OPTS"
-	assert_status_is 0
+	# <If necessary add a detailed explanation of the test here>
+
+	run sudo sh -c "$SWUPD repair $SWUPD_OPTS"
+
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Verifying files
@@ -28,13 +34,13 @@ test_setup() {
 		.fixed
 		Missing file: .*/target-dir/usr/share/clear/bundles/test-bundle2
 		.fixed
-		Fixing modified files
+		Repairing modified files
 		Inspected 8 files
 		  3 files were missing
 		    3 of 3 missing files were replaced
 		    0 of 3 missing files were not replaced
 		Calling post-update helper scripts.
-		Fix successful
+		Repair successful
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

@@ -246,6 +246,69 @@ SUBCOMMANDS
 
             Installs bundles os-core and vi, along with os-core (installed by default).
 
+``repair``
+
+    Correct any issues found. This will overwrite incorrect file content,
+    add missing files and do additional corrections, permissions, etc.
+
+    - `-m, --manifest`
+
+        Repair against manifest version M.
+
+    - `-Y, --picky`
+
+        Remove files which should not exist. Only files listed in the
+        manifests should exist.
+
+    - `-X, --picky-tree=[PATH]`
+
+        Selects the sub-tree where --picky looks for extra files. To be
+        specified as absolute path. The default is `/usr`.
+
+    - `-w, --picky-whitelist=[RE]`
+
+        Any path matching the POSIX extended regular expression is
+        ignored by --picky. The given expression is always wrapped
+        in ``^(`` and ``)$`` and thus has to match the entire path.
+        Matched directories get skipped completely.
+
+        The default is to ignore ``/usr/lib/kernel``,
+        ``/usr/lib/modules``, ``/usr/src`` and ``/usr/local``.
+
+        Examples:
+
+        - ``/var|/etc/machine-id``
+
+            Ignores ``/var`` or ``/etc/machine-id``, regardless of
+            whether they are directories or something else. In the
+            usual case that ``/var`` is a directory, also everything
+            inside it is ignored because the directory gets skipped
+            while scanning the directory tree.
+
+        - empty string or ``^$``
+
+            Matches nothing, because paths are never empty.
+
+    - `-q, --quick`
+
+        Omit checking hash values. Instead only corrects missing files
+        and directories and/or symlinks.
+
+    - `-x, --force`
+
+        Attempt to proceed even if non-critical errors found.
+
+    - `-B, --bundles=[BUNDLES]`
+
+        Only verify and repair the (comma separated) list of bundles if
+        installed incorrectly.
+
+        Examples:
+
+        - ``--bundles os-core,vi``
+
+            Only runs the repair operation on the os-core and vi bundles.
+
 ``search {string}``
 
     Search for matching paths in manifest data. The specified {string}
@@ -336,16 +399,17 @@ SUBCOMMANDS
 
         Verify against manifest version M.
 
-    - `-f, --fix`
+    - `-f, --fix (deprecated)`
 
         Correct any issues found. This will overwrite incorrect file
         content, add missing files and do additional corrections, permissions
-        etc.
+        etc.  This option has been deprecated, please consider using
+        "swupd repair" instead.
 
     - `-Y, --picky`
 
-        List (without --fix) or remove (with --fix) files which should
-        not exist. Only files listed in the manifests should exist.
+        List files which should not exist. Only files listed in the
+        manifests should exist.
 
     - `-X, --picky-tree=[PATH]`
 
@@ -385,7 +449,7 @@ SUBCOMMANDS
 
     - `-q, --quick`
 
-        Omit checking hash values. Instead only corrects missing files
+        Omit checking hash values. Instead only looks for missing files
         and directories and/or symlinks.
 
     - `-x, --force`

@@ -17,7 +17,7 @@ test_setup() {
 
 }
 
-@test "VER035: Verify a system that has extra files in /usr" {
+@test "VER005: Verify a system that has extra files in /usr" {
 
 	# --picky should find those files in /usr that are not in any manifest
 	# but it should not delete them (unless --fix is also used)

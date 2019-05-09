@@ -48,6 +48,7 @@ static struct subcmd commands[] = {
 	{ "clean", "Clean cached files", clean_main },
 	{ "mirror", "Configure mirror url for swupd content", mirror_main },
 	{ "os-install", "Install Clear Linux OS to a blank partition or directory", install_main },
+	{ "repair", "Repair local issues relative to server manifest (will not modify ignored files)", repair_main },
 #ifdef EXTERNAL_MODULES_SUPPORT
 	{ "search", "Searches for the best bundle to install a binary or library", binary_loader_main },
 #endif

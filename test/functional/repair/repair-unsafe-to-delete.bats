@@ -15,23 +15,23 @@ test_setup() {
 
 }
 
-@test "VER037: Verify fixes a system with extra files that are unsafe to delete" {
+@test "REP014: Repair a system with extra files that are unsafe to delete" {
 
-	# when running verify --fix and there are extra files, but the extra
+	# when running repair and there are extra files, but the extra
 	# files are found not safe to be deleted, they should be skipped and
 	# users should not be notified about these
 
-	run sudo sh -c "$SWUPD verify --fix $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD repair $SWUPD_OPTS"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Verifying version 20
 		Verifying files
 		Adding any missing files
-		Fixing modified files
+		Repairing modified files
 		Inspected 9 files
 		Calling post-update helper scripts.
-		Fix successful
+		Repair successful
 	EOM
 	)
 	assert_is_output "$expected_output"

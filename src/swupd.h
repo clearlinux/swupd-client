@@ -362,6 +362,13 @@ extern void verify_set_option_install(bool opt);
 extern void verify_set_option_quick(bool opt);
 extern void verify_set_option_bundles(struct list *bundles);
 extern void verify_set_option_version(int ver);
+extern void verify_set_option_fix(bool opt);
+extern void verify_set_option_picky(bool opt);
+extern void verify_set_picky_whitelist(regex_t *whitelist);
+extern void verify_set_picky_tree(const char *picky_tree);
+
+/* repair.c */
+extern regex_t *compile_whitelist(const char *whitelist_pattern);
 
 /* telemetry.c */
 typedef enum telem_prio_t {

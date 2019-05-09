@@ -99,7 +99,9 @@ _swupd()
 	esac
     fi
 
-    COMPREPLY=("$(compgen -W "${opts}" -- "${2}")");
+    # Ignore SC2207 because that's the standard way to fill COMPREPLY
+    # shellcheck disable=SC2207
+    COMPREPLY=($(compgen -W "${opts}" -- "${2}"));
     return 0
 }
 if [ "${BASH_VERSINFO[0]}" -gt 4 ] || { [ "${BASH_VERSINFO[0]}" -eq 4 ] && [ "${BASH_VERSINFO[1]}" -ge 4 ]; }

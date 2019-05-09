@@ -374,7 +374,6 @@ compliant:
 	fi; \
 	exit 1
 
-# Ignore SC2207 because that's the standard way to fill COMPREPLY
 # Ignore SC1008 because scripts are using an unsupported shebang
 shellcheck:
 	for i in $$(git diff --name-only origin/master HEAD | \grep -E "\.bats|\.bash"); do \
@@ -385,7 +384,7 @@ shellcheck:
 	done
 
 shellcheck-all:
-	shellcheck -e SC2207 swupd.bash
+	shellcheck swupd.bash
 	find -name "*.bats" -exec sh -c "\
 		echo checking {}; \
 		sed 's/^@.*/func() {/' {} | \

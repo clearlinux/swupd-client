@@ -12,9 +12,9 @@ test_setup() {
 
 }
 
-@test "VER011: Verify can show files that would be removed if not available in a previous version" {
+@test "DIA011: Diagnose can show files that would be removed if not available in a previous version" {
 
-	run sudo sh -c "$SWUPD verify --picky --manifest=10 --force $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD diagnose --picky --manifest=10 --force $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
@@ -30,7 +30,7 @@ test_setup() {
 		/usr/foo/
 		Inspected 19 files
 		  6 files found which should be deleted
-		Verify successful
+		Diagnose successful
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

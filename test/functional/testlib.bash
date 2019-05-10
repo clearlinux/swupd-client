@@ -2986,7 +2986,7 @@ get_next_available_id() { # swupd_function
 		bundleadd) group=ADD;;
 		bundleremove) group=REM;;
 		bundlelist) group=LST;;
-		verify) group=VER;;
+		diagnose) group=DIA;;
 		update) group=UPD;;
 		checkupdate) group=CHK;;
 		search) group=SRH;;

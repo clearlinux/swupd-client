@@ -34,6 +34,7 @@ struct subcmd {
 	enum swupd_code (*mainfunc)(int, char **);
 };
 
+/* TODO(castulo): remove the deprecated verify command by end of July 2019 */
 static struct subcmd commands[] = {
 	{ "autoupdate", "Enable/disable automatic system updates", autoupdate_main },
 	{ "bundle-add", "Install a new bundle", bundle_add_main },
@@ -41,7 +42,8 @@ static struct subcmd commands[] = {
 	{ "bundle-list", "List installed bundles", bundle_list_main },
 	{ "hashdump", "Dump the HMAC hash of a file", hashdump_main },
 	{ "update", "Update to latest OS version", update_main },
-	{ "verify", "Verify content for OS version", verify_main },
+	{ "verify", "Verify content for OS version. NOTE: this command has been deprecated. Please use \"swupd diagnose\" instead.", verify_main },
+	{ "diagnose", "Verify content for OS version", verify_main },
 	{ "check-update", "Check if a new OS version is available", check_update_main },
 	{ "search-file", "Command to search files in Clear Linux bundles", search_main },
 	{ "info", "Show the version and the update URLs", info_main },
@@ -99,8 +101,16 @@ static int subcmd_index(char *arg)
 {
 	struct subcmd *entry = commands;
 	int i = 0;
-	size_t input_len = strlen(arg);
+	size_t input_len;
 	size_t cmd_len;
+
+	/* TODO(castulo): remove the deprecated command by end of July 2019 */
+	if (strcmp(arg, "verify") == 0) {
+		arg = "diagnose";
+		fprintf(stderr, "\nWarning: The verify command has been deprecated and will be removed soon.\n");
+		fprintf(stderr, "Please consider using \"swupd diagnose\" instead.\n\n");
+	}
+	input_len = strlen(arg);
 
 	while (entry->name != NULL) {
 		cmd_len = strlen(entry->name);

@@ -24,14 +24,14 @@ test_setup() {
 
 }
 
-@test "VER012: Verify shows modified files, new files and deleted files" {
+@test "DIA012: Diagnose shows modified files, new files and deleted files" {
 
 	# verify should show tracked files with a hash mismatch,
 	# it should also show tracked files that were marked to be removed,
 	# and it should show files that were added to bundles.
 	# verify should not show any of these changes in untracked files
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
@@ -46,7 +46,7 @@ test_setup() {
 		  2 files were missing
 		  2 files did not match
 		  1 file found which should be deleted
-		Verify successful
+		Diagnose successful
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

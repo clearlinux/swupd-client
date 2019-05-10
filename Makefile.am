@@ -211,6 +211,16 @@ BATS = \
 	test/functional/checkupdate/chk-update-no-target-content.bats \
 	test/functional/checkupdate/chk-update-slow-server.bats \
 	test/functional/checkupdate/chk-update-version-match.bats \
+	test/functional/diagnose/diagnose-basics.bats \
+	test/functional/diagnose/diagnose-boot-file.bats \
+	test/functional/diagnose/diagnose-client-certificate.bats \
+	test/functional/diagnose/diagnose-directory-tree-deleted.bats \
+	test/functional/diagnose/diagnose-good.bats \
+	test/functional/diagnose/diagnose-json.bats \
+	test/functional/diagnose/diagnose-missing-file.bats \
+	test/functional/diagnose/diagnose-picky.bats \
+	test/functional/diagnose/diagnose-picky-downgrade.bats \
+	test/functional/diagnose/diagnose-picky-whitelist.bats \
 	test/functional/hashdump/hashdump-file-hash.bats \
 	test/functional/mirror/mirror-createdir.bats \
 	test/functional/mirror/mirror-createdir-negative.bats \
@@ -292,17 +302,7 @@ BATS = \
 	test/functional/update/update-with-slightly-old-mirror.bats \
 	test/functional/usability/usa-completion-basic.bats \
 	test/functional/usability/usa-download-retries.bats \
-	test/functional/usability/usa-external-modules.bats \
-	test/functional/verify/verify-boot-file.bats \
-	test/functional/verify/verify-client-certificate.bats \
-	test/functional/verify/verify-directory-tree-deleted.bats \
-	test/functional/verify/verify-fix.bats \
-	test/functional/verify/verify-good.bats \
-	test/functional/verify/verify-json.bats \
-	test/functional/verify/verify-missing-file.bats \
-	test/functional/verify/verify-picky.bats \
-	test/functional/verify/verify-picky-downgrade.bats \
-	test/functional/verify/verify-picky-whitelist.bats
+	test/functional/usability/usa-external-modules.bats
 
 UNIT_TESTS = \
 	test/unit/test_signature.test \

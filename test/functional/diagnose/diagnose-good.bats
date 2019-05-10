@@ -11,16 +11,16 @@ test_setup() {
 
 }
 
-@test "VER001: Verify installed content on a system that is fine" {
+@test "DIA001: Diagnose installed content on a system that is fine" {
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Verifying version 10
 		Verifying files
 		Inspected 11 files
-		Verify successful
+		Diagnose successful
 	EOM
 	)
 	assert_is_output "$expected_output"

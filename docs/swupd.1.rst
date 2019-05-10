@@ -26,7 +26,7 @@ The updates are fetched from a central software update server. If a
 valid update is found on the server, it can be downloaded and applied.
 
 The ``swupd`` tool can also install and remove bundles, check for
-updates without applying them, perform system-level verification of
+updates without applying them, perform system-level diagnose of
 the system software, and install an OS.
 
 A *version url* server provides version information. This server
@@ -183,6 +183,75 @@ SUBCOMMANDS
 
     Checks whether an update is available and prints out the information
     if so. Does not download update content.
+
+``diagnose``
+
+    Perform system software installation verification. The program will
+    obtain all the manifests needed from version url and content url to
+    establish whether the system software is correctly installed and not
+    overwritten, modified, missing or otherwise incorrect (permissions, etc.).
+
+    After obtaining the proper resources, all files that are under
+    control of the software update program are verified according to the
+    manifest data
+
+    - `-m, --manifest`
+
+        Diagnose against manifest version M.
+
+    - `-Y, --picky`
+
+        List files which should not exist. Only files listed in the
+        manifests should exist.
+
+    - `-X, --picky-tree=[PATH]`
+
+        Selects the sub-tree where --picky looks for extra files. To be
+        specified as absolute path. The default is `/usr`.
+
+    - `-w, --picky-whitelist=[RE]`
+
+        Any path matching the POSIX extended regular expression is
+        ignored by --picky. The given expression is always wrapped
+        in ``^(`` and ``)$`` and thus has to match the entire path.
+        Matched directories get skipped completely.
+
+        The default is to ignore ``/usr/lib/kernel``,
+        ``/usr/lib/modules``, ``/usr/src`` and ``/usr/local``.
+
+        Examples:
+
+        - ``/var|/etc/machine-id``
+
+            Ignores ``/var`` or ``/etc/machine-id``, regardless of
+            whether they are directories or something else. In the
+            usual case that ``/var`` is a directory, also everything
+            inside it is ignored because the directory gets skipped
+            while scanning the directory tree.
+
+        - empty string or ``^$``
+
+            Matches nothing, because paths are never empty.
+
+    - `-q, --quick`
+
+        Omit checking hash values. Instead only looks for missing files
+        and directories and/or symlinks.
+
+    - `-x, --force`
+
+        Attempt to proceed even if non-critical errors found.
+
+    - `-B, --bundles=[BUNDLES]`
+
+        Only verify the (comma separated) list of bundles are installed
+        correctly.
+
+        Examples:
+
+        - ``--bundles os-core,vi``
+
+            Only runs the verify operation on the os-core and vi bundles.
 
 ``hashdump {path}``
 
@@ -384,7 +453,7 @@ SUBCOMMANDS
         Do not delete the swupd state directory content after updating the
         system.
 
-``verify``
+``verify (deprecated)``
 
     Perform system software installation verification. The program will
     obtain all the manifests needed from version url and content url to
@@ -393,7 +462,10 @@ SUBCOMMANDS
 
     After obtaining the proper resources, all files that are under
     control of the software update program are verified according to the
-    manifest data
+    manifest data.
+
+    NOTE: This command has been deprecated, please consider using "swupd diagnose"
+    instead.
 
     - `-m, --manifest`
 
@@ -466,7 +538,6 @@ SUBCOMMANDS
         - ``--bundles os-core,vi``
 
             Only runs the verify operation on the os-core and vi bundles.
-
 
 EXIT STATUS
 ===========

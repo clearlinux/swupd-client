@@ -16,9 +16,9 @@ test_setup() {
 }
 
 
-@test "VER006: Verify a system that has a file that should be deleted" {
+@test "DIA006: Diagnose a system that has a file that should be deleted" {
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
@@ -28,7 +28,7 @@ test_setup() {
 		File that should be deleted: .*/target-dir/testdir1
 		Inspected 4 files
 		  3 files found which should be deleted
-		Verify successful
+		Diagnose successful
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

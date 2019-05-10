@@ -11,9 +11,9 @@ test_setup() {
 
 }
 
-@test "VER004: Verify a system that has a corrupt boot file" {
+@test "DIA004: Diagnose a system that has a corrupt boot file" {
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
@@ -21,7 +21,7 @@ test_setup() {
 		Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile
 		Inspected 7 files
 		  1 file did not match
-		Verify successful
+		Diagnose successful
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

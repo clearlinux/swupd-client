@@ -12,17 +12,19 @@ test_setup() {
 	sudo touch "$TARGETDIR"/usr/file1
 	sudo mkdir -p "$TARGETDIR"/usr/foo/bar
 	sudo touch "$TARGETDIR"/usr/foo/bar/file2
-	# create extra file outside of /usr (should be ignored by picky)
-	sudo touch "$TARGETDIR"/file3
+	sudo touch "$TARGETDIR"/usr/foo/bar/file3
+	sudo mkdir -p "$TARGETDIR"/usr/bat/baz
+	sudo touch "$TARGETDIR"/usr/bat/baz/file4
+	sudo touch "$TARGETDIR"/usr/bat/baz/file5
 
 }
 
-@test "VER005: Verify a system that has extra files in /usr" {
+@test "DIA003: Diagnose directories in the whitelist are skipped during --picky" {
 
 	# --picky should find those files in /usr that are not in any manifest
-	# but it should not delete them (unless --fix is also used)
+	# but it should skip those insde directories that are in the whitelist
 
-	run sudo sh -c "$SWUPD verify --picky $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD diagnose --picky --picky-whitelist=/usr/foo $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
@@ -30,13 +32,14 @@ test_setup() {
 		Generating list of extra files under .*/target-dir/usr
 		/usr/share/defaults/swupd/versionurl
 		/usr/share/defaults/swupd/contenturl
-		/usr/foo/bar/file2
-		/usr/foo/bar/
-		/usr/foo/
 		/usr/file1
-		Inspected 17 files
-		  6 files found which should be deleted
-		Verify successful
+		/usr/bat/baz/file5
+		/usr/bat/baz/file4
+		/usr/bat/baz/
+		/usr/bat/
+		Inspected 18 files
+		  7 files found which should be deleted
+		Diagnose successful
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

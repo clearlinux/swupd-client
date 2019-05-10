@@ -16,9 +16,9 @@ test_setup() {
 
 }
 
-@test "VER010: Verify a system using machine readable output" {
+@test "DIA010: Diagnose a system using machine readable output" {
 
-	run sudo sh -c "$SWUPD verify --json-output $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD diagnose --json-output $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
@@ -54,7 +54,7 @@ test_setup() {
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 6, "stepCompletion" : 100, "stepDescription" : "fix_files" \},
 		\{ "type" : "info", "msg" : "Inspected 17 files " \},
 		\{ "type" : "info", "msg" : "  2 files were missing " \},
-		\{ "type" : "info", "msg" : "Verify successful " \},
+		\{ "type" : "info", "msg" : "Diagnose successful " \},
 		\{ "type" : "end", "section" : "verify", "status" : 1 \}
 		\]
 	EOM

@@ -20,8 +20,8 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Verifying version 40
-		Error: Mismatching formats detected when verifying 40 (expected: 1; actual: 2)
-		Latest supported version to verify: 20
+		Error: Mismatching formats detected when diagnosing 40 (expected: 1; actual: 2)
+		Latest supported version to diagnose: 20
 		Repair did not fully succeed
 	EOM
 	)

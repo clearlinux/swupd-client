@@ -117,7 +117,7 @@ void verify_set_picky_tree(const char *picky_tree)
 static void print_help(void)
 {
 	print("Usage:\n");
-	print("   swupd verify [OPTION...]\n\n");
+	print("   swupd diagnose [OPTION...]\n\n");
 
 	//TODO: Add documentation explaining this command
 
@@ -682,7 +682,7 @@ enum swupd_code verify_main(int argc, char **argv)
 
 	ret = swupd_init();
 	if (ret != 0) {
-		error("Failed verify initialization, exiting now.\n");
+		error("Failed diagnose initialization, exiting now.\n");
 		goto clean_args_and_exit;
 	}
 
@@ -771,14 +771,14 @@ enum swupd_code verify_main(int argc, char **argv)
 	if (!is_compatible_format(official_manifest->manifest_version)) {
 		if (cmdline_option_force) {
 			warn("the force option is specified; ignoring"
-			     " format mismatch for verify\n");
+			     " format mismatch for diagnose\n");
 		} else {
-			error("Mismatching formats detected when verifying %d"
+			error("Mismatching formats detected when diagnosing %d"
 			      " (expected: %s; actual: %d)\n",
 			      version, format_string, official_manifest->manifest_version);
 			int latest = get_latest_version(NULL);
 			if (latest > 0) {
-				info("Latest supported version to verify: %d\n", latest);
+				info("Latest supported version to diagnose: %d\n", latest);
 			}
 			ret = SWUPD_COULDNT_LOAD_MANIFEST;
 			goto clean_and_exit;
@@ -1056,7 +1056,7 @@ clean_and_exit:
 			}
 		} else {
 			/* This is just a verification */
-			info("Verify successful\n");
+			info("Diagnose successful\n");
 
 			if (counts.mismatch > 0 ||
 			    counts.missing > 0 ||
@@ -1071,7 +1071,7 @@ clean_and_exit:
 			print("Installation failed\n");
 		} else {
 			/* This is just a verification */
-			print("Verify did not fully succeed\n");
+			print("Diagnose did not fully succeed\n");
 		}
 	}
 

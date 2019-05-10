@@ -27,7 +27,8 @@ _swupd()
     for ((i=COMP_CWORD-1;i>=0;i--))
     do case "${COMP_WORDS[$i]}" in
 	    ("$1")
-		opts="--help --version autoupdate bundle-add bundle-remove bundle-list hashdump update verify check-update search search-file info clean mirror os-install repair "
+	    #  TODO(castulo): remove the deprecated verify command by end of July 2019
+		opts="--help --version autoupdate bundle-add bundle-remove bundle-list hashdump update diagnose check-update search search-file info clean mirror os-install repair verify "
 	    break;;
 	    ("autoupdate")
 		opts="--help --enable --disable "
@@ -49,6 +50,9 @@ _swupd()
 		break;;
 	    ("verify")
 		opts="--help --manifest --path --url --port --contenturl --versionurl --fix --picky --picky-tree --picky-whitelist --install --format --quick --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --debug --quiet --json-output "
+		break;;
+	    ("diagnose")
+		opts="--help --manifest --path --url --port --contenturl --versionurl --picky --picky-tree --picky-whitelist --format --quick --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --debug --quiet --json-output "
 		break;;
 	    ("check-update")
 		opts="--help --url --versionurl --port --format --force --nosigcheck --path --statedir --debug --quiet --json-output "

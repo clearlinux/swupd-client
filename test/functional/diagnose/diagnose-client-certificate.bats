@@ -66,19 +66,19 @@ global_teardown() {
 	destroy_test_environment "$TEST_NAME"
 }
 
-@test "VER007: Verify installed content on a system over HTTPS with a valid client certificate" {
+@test "DIA007: Diagnose installed content on a system over HTTPS with a valid client certificate" {
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
 
 	assert_status_is 0
 }
 
-@test "VER008: Try verifying installed content on a system over HTTPS with no client certificate" {
+@test "DIA008: Try diagnosing installed content on a system over HTTPS with no client certificate" {
 
 	# remove client certificate
 	sudo rm "$CLIENT_CERT"
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --debug"
+	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS --debug"
 	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 
 	expected_output=$(cat <<-EOM
@@ -88,12 +88,12 @@ global_teardown() {
 	assert_regex_in_output "$expected_output"
 }
 
-@test "VER009: Try verifying installed content on a system over HTTPS with an invalid client certificate" {
+@test "DIA009: Try diagnosing installed content on a system over HTTPS with an invalid client certificate" {
 
 	# make client certificate invalid
 	sudo sh -c "echo foo > $CLIENT_CERT"
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --debug"
+	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS --debug"
 	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 
 	expected_output=$(cat <<-EOM

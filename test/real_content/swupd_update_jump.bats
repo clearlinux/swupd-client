@@ -6,7 +6,7 @@ load "real_content_lib"
 @test "RC003: Update from 2 distant versions" {
 	# shellcheck disable=SC2153
 	print "Install minimal system with oldest version (${VERSION[0]})"
-	run sudo sh -c "$SWUPD verify --install $SWUPD_OPTS -m ${VERSION[0]} -F $FORMAT"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS -V ${VERSION[0]} -F $FORMAT"
 	assert_status_is 0
 	check_version "${VERSION[0]}"
 

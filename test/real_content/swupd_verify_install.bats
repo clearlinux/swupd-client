@@ -18,7 +18,7 @@ load "real_content_lib"
 
 	# shellcheck disable=SC2153
 	print "Install complete system with newest version (${VERSION[$i]})"
-	run sudo sh -c "$SWUPD verify --install $SWUPD_OPTS -m ${VERSION[$i]} -F $FORMAT"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS -V ${VERSION[$i]} -F $FORMAT"
 	assert_status_is 0
 	check_version "${VERSION[$i]}"
 	verify_system

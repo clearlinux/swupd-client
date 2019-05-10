@@ -11,9 +11,9 @@ test_setup() {
 
 }
 
-@test "VER002: Verify a system that is missing a file" {
+@test "DIA002: Diagnose a system that is missing a file" {
 
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Verifying version 10
@@ -21,7 +21,7 @@ test_setup() {
 		Missing file: .*/target-dir/foo/test-file1
 		Inspected 7 files
 		  1 file was missing
-		Verify successful
+		Diagnose successful
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

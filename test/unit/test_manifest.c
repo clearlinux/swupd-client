@@ -46,7 +46,7 @@ static void test_manifest_parse()
 	check(manifest == NULL);
 
 	// Check if parser can parse the manifest header even if files are invalid
-	manifest = manifest_parse("test", "test/unit/mom1", true);
+	manifest = manifest_parse("test", "test/unit/data/mom1", true);
 	check(manifest != NULL);
 	check(manifest->manifest_version == 1);
 	check(manifest->version == 30);
@@ -56,11 +56,11 @@ static void test_manifest_parse()
 
 	
 	// Manifest parser should fail on incorrect file list
-	manifest = manifest_parse("test", "test/unit/mom1", false);
+	manifest = manifest_parse("test", "test/unit/data/mom1", false);
 	check(manifest == NULL);
 
 	// Check if parser can parse all different flags supported for the file list
-	manifest = manifest_parse("test", "test/unit/mom2", false);
+	manifest = manifest_parse("test", "test/unit/data/mom2", false);
 	check(manifest != NULL);
 	check(list_len(manifest->files) == 14);
 	check(list_len(manifest->manifests) == 1);
@@ -85,11 +85,11 @@ static void test_manifest_parse()
 	free_manifest(manifest);
 
 	// Missing MANIFEST keyword on header
-	manifest = manifest_parse("test", "test/unit/mom_invalid1", false);
+	manifest = manifest_parse("test", "test/unit/data/mom_invalid1", false);
 	check(manifest == NULL);
 
 	// Invalid header format
-	manifest = manifest_parse("test", "test/unit/mom_invalid2", false);
+	manifest = manifest_parse("test", "test/unit/data/mom_invalid2", false);
 	check(manifest == NULL);
 }
 

@@ -261,6 +261,7 @@ enum swupd_code mirror_main(int argc, char **argv)
 	progress_init_steps("mirror", steps_in_mirror);
 
 	if (set != NULL) {
+		check_root();
 		ret = set_mirror_url(set);
 		if (ret != SWUPD_OK) {
 			warn("Unable to set mirror url\n");
@@ -268,6 +269,7 @@ enum swupd_code mirror_main(int argc, char **argv)
 			print("Set upstream mirror to %s\n", set);
 		}
 	} else if (unset) {
+		check_root();
 		ret = unset_mirror_url();
 		if (ret == -ENOENT) {
 			info("No mirror url configuration to remove\n");
@@ -281,7 +283,7 @@ enum swupd_code mirror_main(int argc, char **argv)
 	}
 
 	/* init swupd here after the new URL is configured */
-	init_ret = swupd_init(SWUPD_NO_NETWORK | SWUPD_NO_TIMECHECK);
+	init_ret = swupd_init(SWUPD_NO_NETWORK | SWUPD_NO_TIMECHECK | SWUPD_NO_ROOT);
 	if (init_ret != SWUPD_OK) {
 		ret = init_ret;
 		goto finish;

@@ -177,49 +177,47 @@ static int set_default_value_from_path(char **global, const char *path)
 	return ret;
 }
 
-static int set_url(char **global, char *url, const char *path)
-{
-	int ret = 0;
-
-	if (url) {
-		free_string(global);
-		string_or_die(global, "%s", url);
-	} else {
-		if (*global) {
-			/* option passed on command line previously */
-			return ret;
-		} else {
-			/* no option passed; use the default value */
-			ret = set_default_value_from_path(global, path);
-			return ret;
-		}
-	}
-
-	return ret;
-}
-
 /* Initializes the content_url global variable. If the url parameter is not
  * NULL, content_url will be set to its value. Otherwise, the value is read
  * from the 'contenturl' configuration file.
  */
 int set_content_url(char *url)
 {
+	int ret = 0;
+
 	if (content_url) {
 		/* Only set once; we assume the first successful set is the best choice */
 		return 0;
 	}
 
-	/* check for mirror configuration first */
-	if (set_url(&content_url, url, MIRROR_CONTENT_URL_PATH) == 0) {
-		content_url_is_local = strncmp(content_url, "file://", 7) == 0;
-		return 0;
+	if (url) {
+		content_url = strdup_or_die(url);
+		goto end;
 	}
 
-	int ret = set_url(&content_url, url, DEFAULT_CONTENT_URL_PATH);
+	// Content URL not set. Use default values
+	// Look for mirror inside path_prefix
+	ret = get_value_from_path(&content_url, MIRROR_CONTENT_URL_PATH, false);
 	if (ret == 0) {
-		content_url_is_local = strncmp(content_url, "file://", 7) == 0;
+		goto end;
 	}
 
+	// Look for config file in /usr/share inside path_prefix
+	ret = get_value_from_path(&content_url, DEFAULT_CONTENT_URL_PATH, false);
+	if (ret == 0) {
+		goto end;
+	}
+
+	// Look for config file in /usr/share
+	ret = get_value_from_path(&content_url, DEFAULT_CONTENT_URL_PATH, true);
+	if (ret == 0) {
+		goto end;
+	}
+
+	return -1;
+
+end:
+	content_url_is_local = strncmp(content_url, "file://", 7) == 0;
 	return ret;
 }
 
@@ -229,17 +227,38 @@ int set_content_url(char *url)
  */
 int set_version_url(char *url)
 {
+	int ret = 0;
+
 	if (version_url) {
 		/* Only set once; we assume the first successful set is the best choice */
 		return 0;
 	}
 
-	/* check for mirror configuration first */
-	if (set_url(&version_url, url, MIRROR_VERSION_URL_PATH) == 0) {
+	if (url) {
+		version_url = strdup_or_die(url);
 		return 0;
 	}
 
-	return set_url(&version_url, url, DEFAULT_VERSION_URL_PATH);
+	// version URL not set. Use default values
+	// Look for mirror inside path_prefix
+	ret = get_value_from_path(&version_url, MIRROR_VERSION_URL_PATH, false);
+	if (ret == 0) {
+		return 0;
+	}
+
+	// Look for config file in /usr/share inside path_prefix
+	ret = get_value_from_path(&version_url, DEFAULT_VERSION_URL_PATH, false);
+	if (ret == 0) {
+		return 0;
+	}
+
+	// Look for config file in /usr/share
+	ret = get_value_from_path(&version_url, DEFAULT_VERSION_URL_PATH, true);
+	if (ret == 0) {
+		return 0;
+	}
+
+	return -1;
 }
 
 static bool is_valid_integer_format(char *str)

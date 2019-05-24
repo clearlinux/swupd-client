@@ -36,24 +36,24 @@ struct subcmd {
 
 /* TODO(castulo): remove the deprecated verify command by end of July 2019 */
 static struct subcmd commands[] = {
+	{ "info", "Show the version and the update URLs", info_main },
 	{ "autoupdate", "Enable/disable automatic system updates", autoupdate_main },
+	{ "check-update", "Check if a new OS version is available", check_update_main },
+	{ "update", "Update to latest OS version", update_main },
 	{ "bundle-add", "Install a new bundle", bundle_add_main },
 	{ "bundle-remove", "Uninstall a bundle", bundle_remove_main },
 	{ "bundle-list", "List installed bundles", bundle_list_main },
-	{ "hashdump", "Dump the HMAC hash of a file", hashdump_main },
-	{ "update", "Update to latest OS version", update_main },
-	{ "verify", "Verify content for OS version. NOTE: this command has been deprecated. Please use \"swupd diagnose\" instead.", verify_main },
-	{ "diagnose", "Verify content for OS version", verify_main },
-	{ "check-update", "Check if a new OS version is available", check_update_main },
-	{ "search-file", "Command to search files in Clear Linux bundles", search_main },
-	{ "info", "Show the version and the update URLs", info_main },
-	{ "clean", "Clean cached files", clean_main },
-	{ "mirror", "Configure mirror url for swupd content", mirror_main },
-	{ "os-install", "Install Clear Linux OS to a blank partition or directory", install_main },
-	{ "repair", "Repair local issues relative to server manifest (will not modify ignored files)", repair_main },
 #ifdef EXTERNAL_MODULES_SUPPORT
 	{ "search", "Searches for the best bundle to install a binary or library", binary_loader_main },
 #endif
+	{ "search-file", "Command to search files in Clear Linux bundles", search_main },
+	{ "diagnose", "Verify content for OS version", verify_main },
+	{ "repair", "Repair local issues relative to server manifest (will not modify ignored files)", repair_main },
+	{ "os-install", "Install Clear Linux OS to a blank partition or directory", install_main },
+	{ "mirror", "Configure mirror url for swupd content", mirror_main },
+	{ "clean", "Clean cached files", clean_main },
+	{ "hashdump", "Dump the HMAC hash of a file", hashdump_main },
+	{ "verify", "NOTE: this command has been deprecated, please use \"swupd diagnose\" instead", verify_main },
 	{ 0 }
 };
 

@@ -163,20 +163,6 @@ int get_version_from_path(const char *abs_path)
 	return -1;
 }
 
-static int set_default_value_from_path(char **global, const char *path)
-{
-	int ret = -1;
-	char *ret_str = NULL;
-
-	ret = get_value_from_path(&ret_str, path, false);
-	if (ret == 0 && ret_str) {
-		string_or_die(global, "%s", ret_str);
-		free_string(&ret_str);
-	}
-
-	return ret;
-}
-
 /* Initializes the content_url global variable. If the url parameter is not
  * NULL, content_url will be set to its value. Otherwise, the value is read
  * from the 'contenturl' configuration file.
@@ -323,8 +309,7 @@ static bool set_format_string(char *userinput)
 	if (userinput) {
 		// allow "staging" as a format string
 		if ((strcmp(userinput, "staging") == 0)) {
-			free_string(&format_string);
-			string_or_die(&format_string, "%s", userinput);
+			format_string = strdup_or_die(userinput);
 			return true;
 		}
 
@@ -332,15 +317,22 @@ static bool set_format_string(char *userinput)
 		if (!is_valid_integer_format(userinput)) {
 			return false;
 		}
-		free_string(&format_string);
-		string_or_die(&format_string, "%s", userinput);
+		format_string = strdup_or_die(userinput);
 	} else {
 		/* no option passed; use the default value */
-		ret = set_default_value_from_path(&format_string, DEFAULT_FORMAT_PATH);
+		ret = get_value_from_path(&format_string, DEFAULT_FORMAT_PATH, false);
+
+		// Fallback to system format ID
+		if (ret < 0) {
+			ret = get_value_from_path(&format_string, DEFAULT_FORMAT_PATH, true);
+		}
+
 		if (ret < 0) {
 			return false;
 		}
+
 		if (!is_valid_integer_format(format_string)) {
+			free_string(&format_string);
 			return false;
 		}
 	}

@@ -14,7 +14,7 @@ test_setup() {
 
 @test "DIA011: Diagnose can show files that would be removed if not available in a previous version" {
 
-	run sudo sh -c "$SWUPD diagnose --picky --manifest=10 --force $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD diagnose --picky --version=10 --force $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM

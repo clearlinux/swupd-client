@@ -17,7 +17,7 @@ test_setup() {
 
 @test "REP025: Repair using an older version won't remove an installed bundle that was not available then" {
 
-	run sudo sh -c "$SWUPD repair --picky --manifest=10 $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD repair --picky --version=10 $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
@@ -39,7 +39,7 @@ test_setup() {
 
 @test "REP026: Repair can be forced to remove installed bundles that were not available in a previous version" {
 
-	run sudo sh -c "$SWUPD repair --picky --manifest=10 --force $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD repair --picky --version=10 --force $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -83,7 +83,7 @@ test_setup() {
 
 @test "REP027: Repair can remove files in a specified location that were not available in a previous version" {
 
-	run sudo sh -c "$SWUPD repair --picky --picky-tree=/bar --manifest=10 --force $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD repair --picky --picky-tree=/bar --version=10 --force $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM

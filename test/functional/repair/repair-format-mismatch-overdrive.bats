@@ -17,7 +17,7 @@ test_setup() {
 @test "REP018: Repair can be forced to continue when there is a format mismatch" {
 
 	# the -x option bypasses the fatal error
-	run sudo sh -c "$SWUPD repair --format=1 --manifest=40 --force $SWUPD_OPTS_NO_FMT"
+	run sudo sh -c "$SWUPD repair --format=1 --version=40 --force $SWUPD_OPTS_NO_FMT"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM

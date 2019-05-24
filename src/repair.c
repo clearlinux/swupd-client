@@ -40,6 +40,7 @@ static regex_t picky_whitelist_buffer;
 
 static const struct option prog_opts[] = {
 	{ "force", no_argument, 0, 'x' },
+	{ "version", required_argument, 0, 'V' },
 	{ "manifest", required_argument, 0, 'm' },
 	{ "picky", no_argument, 0, 'Y' },
 	{ "picky-tree", required_argument, 0, 'X' },
@@ -56,13 +57,14 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
-	print("   -m, --manifest=M        Repair against manifest version M\n");
+	print("   -V, --version=V         Compare against version V to repair\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -q, --quick             Don't compare hashes, only fix missing files\n");
 	print("   -B, --bundles=[BUNDLES] Ensure BUNDLES are installed correctly. Example: --bundles=os-core,vi\n");
 	print("   -Y, --picky             Remove files which should not exist\n");
 	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
 	print("   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
+	print("   -m, --manifest=V        NOTE: this flag has been deprecated. Please use -V instead\n");
 	print("\n");
 }
 
@@ -72,6 +74,7 @@ static bool parse_opt(int opt, char *optarg)
 
 	switch (opt) {
 	case 'm':
+	case 'V':
 		err = strtoi_err(optarg, &cmdline_option_version);
 		if (err < 0 || cmdline_option_version < 0) {
 			error("Invalid --manifest argument: %s\n\n", optarg);

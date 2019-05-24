@@ -61,13 +61,17 @@ test_setup() {
 		{ "type" : "info", "msg" : "Update was applied. " },
 		{ "type" : "info", "msg" : "Calling post-update helper scripts. " },
 		{ "type" : "progress", "currentStep" : 11, "totalSteps" : 11, "stepCompletion" : 100, "stepDescription" : "run_postupdate_scripts" },
-		{ "type" : "info", "msg" : "Update took 0.0 seconds, 0 MB transferred " },
-		{ "type" : "info", "msg" : "Update successful. System updated from version 10 to version 20 " },
-		{ "type" : "end", "section" : "update", "status" : 0 }
-		]
+	EOM
+	)
+	expected_output3=$(cat <<-EOM
+		\{ "type" : "info", "msg" : "Update took ... seconds, 0 MB transferred " \},
+		\{ "type" : "info", "msg" : "Update successful. System updated from version 10 to version 20 " \},
+		\{ "type" : "end", "section" : "update", "status" : 0 \}
+		\]
 	EOM
 	)
 	assert_in_output "$expected_output1"
 	assert_in_output "$expected_output2"
+	assert_regex_in_output "$expected_output3"
 
 }

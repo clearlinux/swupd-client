@@ -75,6 +75,16 @@ static int max_parallel_downloads = -1;
 static int log_level = LOG_INFO;
 char **swupd_argv = NULL;
 
+static void remove_trailing_slash(char *url)
+{
+	int len = strlen(url);
+
+	while (len > 0 && url[len - 1] == '/') {
+		len--;
+		url[len] = 0;
+	}
+}
+
 /* If the MIX_BUNDLES_DIR has the valid-mix flag file we can run through
  * adding the mix data to the OS */
 bool check_mix_exists(void)
@@ -204,6 +214,7 @@ int set_content_url(char *url)
 
 end:
 	content_url_is_local = strncmp(content_url, "file://", 7) == 0;
+	remove_trailing_slash(content_url);
 	return ret;
 }
 
@@ -222,29 +233,34 @@ int set_version_url(char *url)
 
 	if (url) {
 		version_url = strdup_or_die(url);
-		return 0;
+		goto end;
 	}
 
 	// version URL not set. Use default values
 	// Look for mirror inside path_prefix
 	ret = get_value_from_path(&version_url, MIRROR_VERSION_URL_PATH, false);
 	if (ret == 0) {
-		return 0;
+		goto end;
 	}
 
 	// Look for config file in /usr/share inside path_prefix
 	ret = get_value_from_path(&version_url, DEFAULT_VERSION_URL_PATH, false);
 	if (ret == 0) {
-		return 0;
+		goto end;
 	}
 
 	// Look for config file in /usr/share
 	ret = get_value_from_path(&version_url, DEFAULT_VERSION_URL_PATH, true);
 	if (ret == 0) {
-		return 0;
+		goto end;
 	}
 
 	return -1;
+
+end:
+	remove_trailing_slash(version_url);
+
+	return 0;
 }
 
 static bool is_valid_integer_format(char *str)

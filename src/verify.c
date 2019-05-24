@@ -60,6 +60,7 @@ static const struct option prog_opts[] = {
 	{ "fix", no_argument, 0, 'f' },
 	{ "force", no_argument, 0, 'x' },
 	{ "install", no_argument, 0, 'i' },
+	{ "version", required_argument, 0, 'V' },
 	{ "manifest", required_argument, 0, 'm' },
 	{ "picky", no_argument, 0, 'Y' },
 	{ "picky-tree", required_argument, 0, 'X' },
@@ -123,9 +124,9 @@ static void print_help(void)
 
 	global_print_help();
 
-	// TODO(castulo): remove the deprecated options by end of July 2019
+	// TODO(castulo): remove the deprecated options by end of November 2019
 	print("Options:\n");
-	print("   -m, --manifest=M        Verify against manifest version M\n");
+	print("   -V, --version=V         Verify against manifest version V\n");
 	print("   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files). NOTE: This option has been deprecated, please consider using \"swupd repair\" instead.\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -Y, --picky             List (without --fix) or remove (with --fix) files which should not exist\n");
@@ -134,6 +135,7 @@ static void print_help(void)
 	print("   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory. NOTE: This option has been deprecated, please consider using \"swupd os-install\" instead.\n");
 	print("   -q, --quick             Don't compare hashes, only fix missing files\n");
 	print("   -B, --bundles=[BUNDLES] Ensure BUNDLES are installed correctly. Example: --bundles=os-core,vi\n");
+	print("   -m, --manifest=V        NOTE: this flag has been deprecated. Please use -V instead\n");
 	print("\n");
 }
 
@@ -521,6 +523,7 @@ static bool parse_opt(int opt, char *optarg)
 
 	switch (opt) {
 	case 'm':
+	case 'V':
 		if (strcmp("latest", optarg) == 0) {
 			version = -1;
 			return true;

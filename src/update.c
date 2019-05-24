@@ -562,6 +562,7 @@ static bool cmd_line_status = false;
 
 static const struct option prog_opts[] = {
 	{ "download", no_argument, 0, 'd' },
+	{ "version", required_argument, 0, 'V' },
 	{ "manifest", required_argument, 0, 'm' },
 	{ "status", no_argument, 0, 's' },
 	{ "keepcache", no_argument, 0, 'k' },
@@ -578,13 +579,15 @@ static void print_help(void)
 
 	global_print_help();
 
+	// TODO(castulo): remove the deprecated options by end of November 2019
 	print("Options:\n");
-	print("   -m, --manifest=M        Update to version M, also accepts 'latest' (default)\n");
+	print("   -V, --version=V         Update to version V, also accepts 'latest' (default)\n");
 	print("   -d, --download          Download all content, but do not actually install the update\n");
 	print("   -s, --status            Show current OS version and latest version available on server. Equivalent to \"swupd check-update\"\n");
 	print("   -k, --keepcache         Do not delete the swupd state directory content after updating the system\n");
 	print("   -T, --migrate           Migrate to augmented upstream/mix content\n");
 	print("   -a, --allow-mix-collisions	Ignore and continue if custom user content conflicts with upstream provided content\n");
+	print("   -m, --manifest=V        NOTE: this flag has been deprecated. Please use -V instead\n");
 	print("\n");
 }
 
@@ -594,6 +597,7 @@ static bool parse_opt(int opt, char *optarg)
 
 	switch (opt) {
 	case 'm':
+	case 'V':
 		if (strcmp("latest", optarg) == 0) {
 			requested_version = -1;
 			return true;

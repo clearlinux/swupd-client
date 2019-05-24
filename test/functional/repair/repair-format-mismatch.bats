@@ -15,7 +15,7 @@ test_setup() {
 
 @test "REP017: Repair enforces the use of the correct format" {
 
-	run sudo sh -c "$SWUPD repair --format=1 --manifest=40 $SWUPD_OPTS_NO_FMT"
+	run sudo sh -c "$SWUPD repair --format=1 --version=40 $SWUPD_OPTS_NO_FMT"
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM

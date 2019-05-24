@@ -36,7 +36,7 @@ test_setup() {
 	# fill up all the space in the disk
 	sudo dd if=/dev/zero of="$TEST_NAME"/testfs/dummy >& /dev/null || print "Using all space left in disk"
 
-	run sudo sh -c "timeout 30 $SWUPD repair --force --manifest=20 $SWUPD_OPTS"
+	run sudo sh -c "timeout 30 $SWUPD repair --force --version=20 $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
@@ -65,7 +65,7 @@ test_setup() {
 	sudo mv "$big_manifest" "$WEBDIR"/20/Manifest.test-bundle
 	sudo mv "$big_manifest".tar "$WEBDIR"/20/Manifest.test-bundle.tar
 
-	run sudo sh -c "timeout 30 $SWUPD repair --force --manifest=20 $SWUPD_OPTS"
+	run sudo sh -c "timeout 30 $SWUPD repair --force --version=20 $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
@@ -89,7 +89,7 @@ test_setup() {
 
 	fhash=$(get_hash_from_manifest "$WEBDIR"/20/Manifest.test-bundle /test-file)
 
-	run sudo sh -c "timeout 30 $SWUPD repair --force --manifest=20 $SWUPD_OPTS"
+	run sudo sh -c "timeout 30 $SWUPD repair --force --version=20 $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM

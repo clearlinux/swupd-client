@@ -227,6 +227,7 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 	if (ret) {
 		error("Unable to download necessary files for this OS release\n");
 	}
+	info("\n");
 
 	return ret;
 }

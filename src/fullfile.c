@@ -206,7 +206,6 @@ int download_fullfiles(struct list *files, int *num_downloads)
 			progress_report(complete, list_length);
 		}
 	}
-	info("\n");
 	list_free_list(need_download);
 
 	return swupd_curl_parallel_download_end(download_handle, num_downloads);

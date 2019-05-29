@@ -231,6 +231,7 @@ int swupd_curl_init(void)
 	if (ret != 0) {
 		error("Failed to connect to update server: %s\n", version_url);
 		info("Possible solutions for this problem are:\n"
+		     "\tCheck if your network connection is working\n"
 		     "\tFix the system clock\n"
 		     "\tRun 'swupd info' to check if the urls are correct\n"
 		     "\tCheck if the server SSL certificate is trusted by your system ('clrtrust generate' may help)\n");

@@ -82,6 +82,7 @@ swupd_SOURCES = \
 	src/os_install.c \
 	src/packs.c \
 	src/repair.c \
+	src/scripts.h \
 	src/scripts.c \
 	src/search.c \
 	src/signature.c \

@@ -21,13 +21,14 @@ test_setup() {
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		Verifying version 10
+		Diagnosing version 10
 		Verifying files
 		File that should be deleted: .*/target-dir/testdir1/testdir2/testfile
 		File that should be deleted: .*/target-dir/testdir1/testdir2
 		File that should be deleted: .*/target-dir/testdir1
 		Inspected 4 files
 		  3 files found which should be deleted
+		Use "swupd repair" to correct the problems in the system
 		Diagnose successful
 	EOM
 	)

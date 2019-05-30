@@ -25,7 +25,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Verifying version 100
+		Diagnosing version 100
 		Verifying files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files

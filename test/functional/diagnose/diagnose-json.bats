@@ -25,7 +25,7 @@ test_setup() {
 		\[
 		\{ "type" : "start", "section" : "verify" \},
 		\{ "type" : "progress", "currentStep" : 1, "totalSteps" : 6, "stepCompletion" : 100, "stepDescription" : "get_versions" \},
-		\{ "type" : "info", "msg" : "Verifying version 10 " \},
+		\{ "type" : "info", "msg" : "Diagnosing version 10 " \},
 		\{ "type" : "progress", "currentStep" : 2, "totalSteps" : 6, "stepCompletion" : 100, "stepDescription" : "cleanup_download_dir" \},
 		\{ "type" : "progress", "currentStep" : 3, "totalSteps" : 6, "stepCompletion" : 100, "stepDescription" : "load_manifests" \},
 		\{ "type" : "progress", "currentStep" : 4, "totalSteps" : 6, "stepCompletion" : 100, "stepDescription" : "consolidate_files" \},
@@ -54,6 +54,7 @@ test_setup() {
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 6, "stepCompletion" : 100, "stepDescription" : "fix_files" \},
 		\{ "type" : "info", "msg" : "Inspected 17 files " \},
 		\{ "type" : "info", "msg" : "  2 files were missing " \},
+		\{ "type" : "info", "msg" : "Use 'swupd repair' to correct the problems in the system " \},
 		\{ "type" : "info", "msg" : "Diagnose successful " \},
 		\{ "type" : "end", "section" : "verify", "status" : 1 \}
 		\]

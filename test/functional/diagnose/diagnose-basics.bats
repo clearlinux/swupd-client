@@ -35,7 +35,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		Verifying version 20
+		Diagnosing version 20
 		Verifying files
 		Missing file: .*/target-dir/baz
 		Missing file: .*/target-dir/baz/file_3
@@ -46,6 +46,7 @@ test_setup() {
 		  2 files were missing
 		  2 files did not match
 		  1 file found which should be deleted
+		Use "swupd repair" to correct the problems in the system
 		Diagnose successful
 	EOM
 	)

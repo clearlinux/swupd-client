@@ -64,7 +64,6 @@ static void print_help(void)
 	print("   -Y, --picky             Remove files which should not exist\n");
 	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
 	print("   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
-	print("   -m, --manifest=V        NOTE: this flag has been deprecated. Please use -V instead\n");
 	print("\n");
 }
 

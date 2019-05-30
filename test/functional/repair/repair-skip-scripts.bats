@@ -22,7 +22,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	# check for the warning
 	expected_output=$(cat <<-EOM
-		Verifying version 20
+		Diagnosing version 20
 		Verifying files
 		Adding any missing files
 		Repairing modified files

@@ -19,7 +19,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD repair -m 10 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_INVALID_OPTION"
 	expected_output=$(cat <<-EOM
-		Verifying version 10
+		Diagnosing version 10
 		Error: Repairing to a different version requires --force or --picky
 		Repair did not fully succeed
 	EOM

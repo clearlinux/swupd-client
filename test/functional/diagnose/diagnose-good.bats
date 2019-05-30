@@ -17,7 +17,7 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Verifying version 10
+		Diagnosing version 10
 		Verifying files
 		Inspected 11 files
 		Diagnose successful

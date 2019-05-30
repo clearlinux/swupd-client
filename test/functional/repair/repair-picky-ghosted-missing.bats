@@ -21,7 +21,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Verifying version 10
+		Diagnosing version 10
 		Verifying files
 		Adding any missing files
 		Repairing modified files

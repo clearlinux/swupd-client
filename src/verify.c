@@ -39,6 +39,7 @@
 
 static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src";
 
+static bool cmdline_command_verify = false;
 static bool cmdline_option_force = false;
 static bool cmdline_option_fix = false;
 static bool cmdline_option_picky = false;
@@ -70,6 +71,12 @@ static const struct option prog_opts[] = {
 };
 
 /* setter functions */
+void verify_set_command_verify(bool opt)
+{
+	/* indicates if the superseded "swupd verify" command was used */
+	cmdline_command_verify = opt;
+}
+
 void verify_set_option_force(bool opt)
 {
 	cmdline_option_force = opt;
@@ -118,24 +125,29 @@ void verify_set_picky_tree(const char *picky_tree)
 static void print_help(void)
 {
 	print("Usage:\n");
-	print("   swupd diagnose [OPTION...]\n\n");
+	if (cmdline_command_verify) {
+		print("   swupd verify [OPTION...]\n\n");
+	} else {
+		print("   swupd diagnose [OPTION...]\n\n");
+	}
 
 	//TODO: Add documentation explaining this command
 
 	global_print_help();
 
-	// TODO(castulo): remove the deprecated options by end of November 2019
 	print("Options:\n");
 	print("   -V, --version=V         Verify against manifest version V\n");
-	print("   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files). NOTE: This option has been deprecated, please consider using \"swupd repair\" instead.\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -Y, --picky             List (without --fix) or remove (with --fix) files which should not exist\n");
 	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
 	print("   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
-	print("   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory. NOTE: This option has been deprecated, please consider using \"swupd os-install\" instead.\n");
 	print("   -q, --quick             Don't compare hashes, only fix missing files\n");
 	print("   -B, --bundles=[BUNDLES] Ensure BUNDLES are installed correctly. Example: --bundles=os-core,vi\n");
-	print("   -m, --manifest=V        NOTE: this flag has been deprecated. Please use -V instead\n");
+	if (cmdline_command_verify) {
+		print("   -m, --manifest=V        This option has been superseded. Please consider using the -V option instead\n");
+		print("   -f, --fix               This option has been superseded, please consider using \"swupd repair\" instead\n");
+		print("   -i, --install           This option has been superseded, please consider using \"swupd os-install\" instead\n");
+	}
 	print("\n");
 }
 
@@ -537,18 +549,16 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'f':
-		/* TODO(castulo): remove the deprecated command by end of July 2019 */
-		fprintf(stderr, "\nWarning: The --fix option has been deprecated and will be removed soon.\n");
-		fprintf(stderr, "Please consider using \"swupd repair\" instead.\n\n");
+		fprintf(stderr, "\nWarning: The --fix option has been superseded\n");
+		fprintf(stderr, "Please consider using \"swupd repair\" instead\n\n");
 		cmdline_option_fix = true;
 		return true;
 	case 'x':
 		cmdline_option_force = true;
 		return true;
 	case 'i':
-		/* TODO(castulo): remove the deprecated command by end of July 2019 */
-		fprintf(stderr, "\nWarning: The --install option has been deprecated and will be removed soon.\n");
-		fprintf(stderr, "Please consider using \"swupd os-install\" instead.\n\n");
+		fprintf(stderr, "\nWarning: The --install option has been superseded\n");
+		fprintf(stderr, "Please consider using \"swupd os-install\" instead\n\n");
 		cmdline_option_install = true;
 		cmdline_option_quick = true;
 		return true;
@@ -719,7 +729,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	if (cmdline_option_install) {
 		info("Installing OS version %i%s\n", version, use_latest ? " (latest)" : "");
 	} else {
-		info("Verifying version %i\n", version);
+		info("%s version %i\n", cmdline_command_verify ? "Verifying" : "Diagnosing", version);
 	}
 
 	if (cmdline_bundles) {
@@ -777,12 +787,13 @@ enum swupd_code verify_main(int argc, char **argv)
 			warn("the force option is specified; ignoring"
 			     " format mismatch for diagnose\n");
 		} else {
-			error("Mismatching formats detected when diagnosing %d"
+			error("Mismatching formats detected when %s %d"
 			      " (expected: %s; actual: %d)\n",
+			      cmdline_command_verify ? "verifying" : "diagnosing",
 			      version, format_string, official_manifest->manifest_version);
 			int latest = get_latest_version(NULL);
 			if (latest > 0) {
-				info("Latest supported version to diagnose: %d\n", latest);
+				info("Latest supported version to %s: %d\n", cmdline_command_verify ? "verify" : "diagnose", latest);
 			}
 			ret = SWUPD_COULDNT_LOAD_MANIFEST;
 			goto clean_and_exit;
@@ -865,6 +876,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	/* when fixing or installing we need input files. */
 	if (cmdline_option_fix || cmdline_option_install) {
 		ret = get_required_files(official_manifest, subs);
+		info("\n");
 		if (ret != 0) {
 			ret = SWUPD_COULDNT_DOWNLOAD_FILE;
 			goto clean_and_exit;
@@ -1043,6 +1055,11 @@ clean_and_exit:
 		  counts.extraneous,
 		  total_curl_sz);
 
+	/* suggestion to fix problems */
+	if (!cmdline_option_install && !cmdline_option_fix && (counts.mismatch > 0 || counts.missing > 0 || counts.extraneous > 0)) {
+		info("Use \"swupd repair%s\" to correct the problems in the system\n", counts.picky_extraneous > 0 ? " --picky" : "");
+	}
+
 	if (ret == SWUPD_OK) {
 		if (cmdline_option_install) {
 			info("Installation successful\n");
@@ -1060,7 +1077,7 @@ clean_and_exit:
 			}
 		} else {
 			/* This is just a verification */
-			info("Diagnose successful\n");
+			info("%s successful\n", cmdline_command_verify ? "Verify" : "Diagnose");
 
 			if (counts.mismatch > 0 ||
 			    counts.missing > 0 ||
@@ -1075,7 +1092,7 @@ clean_and_exit:
 			print("Installation failed\n");
 		} else {
 			/* This is just a verification */
-			print("Diagnose did not fully succeed\n");
+			print("%s did not fully succeed\n", cmdline_command_verify ? "Verify" : "Diagnose");
 		}
 	}
 

@@ -579,7 +579,8 @@ static void print_help(void)
 
 	global_print_help();
 
-	// TODO(castulo): remove the deprecated options by end of November 2019
+	// TODO(castulo): remove the superseded -m option from the help menu by end of November 2019,
+	// so it is not visible but the option must remain available in the back so we don't break users
 	print("Options:\n");
 	print("   -V, --version=V         Update to version V, also accepts 'latest' (default)\n");
 	print("   -d, --download          Download all content, but do not actually install the update\n");
@@ -587,7 +588,7 @@ static void print_help(void)
 	print("   -k, --keepcache         Do not delete the swupd state directory content after updating the system\n");
 	print("   -T, --migrate           Migrate to augmented upstream/mix content\n");
 	print("   -a, --allow-mix-collisions	Ignore and continue if custom user content conflicts with upstream provided content\n");
-	print("   -m, --manifest=V        NOTE: this flag has been deprecated. Please use -V instead\n");
+	print("   -m, --manifest=V        NOTE: this flag has been superseded. Please use -V instead\n");
 	print("\n");
 }
 

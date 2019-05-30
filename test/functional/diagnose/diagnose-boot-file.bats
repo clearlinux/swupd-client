@@ -16,11 +16,12 @@ test_setup() {
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		Verifying version 10
+		Diagnosing version 10
 		Verifying files
 		Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile
 		Inspected 7 files
 		  1 file did not match
+		Use "swupd repair" to correct the problems in the system
 		Diagnose successful
 	EOM
 	)

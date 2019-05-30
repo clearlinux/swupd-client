@@ -21,7 +21,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Verifying version 40
+		Diagnosing version 40
 		Warning: the force option is specified; ignoring format mismatch for diagnose
 		Warning: the force or picky option is specified; ignoring version mismatch for repair
 		Verifying files

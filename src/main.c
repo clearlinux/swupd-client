@@ -34,7 +34,8 @@ struct subcmd {
 	enum swupd_code (*mainfunc)(int, char **);
 };
 
-/* TODO(castulo): remove the deprecated verify command by end of July 2019 */
+// TODO(castulo): remove the superseded command from the help menu by end of November 2019,
+// so it is not visible but the command must remain available in the back so we don't break users
 static struct subcmd commands[] = {
 	{ "info", "Show the version and the update URLs", info_main },
 	{ "autoupdate", "Enable/disable automatic system updates", autoupdate_main },
@@ -53,7 +54,7 @@ static struct subcmd commands[] = {
 	{ "mirror", "Configure mirror url for swupd content", mirror_main },
 	{ "clean", "Clean cached files", clean_main },
 	{ "hashdump", "Dump the HMAC hash of a file", hashdump_main },
-	{ "verify", "NOTE: this command has been deprecated, please use \"swupd diagnose\" instead", verify_main },
+	{ "verify", "NOTE: this command has been superseded, please use \"swupd diagnose\" instead", verify_main },
 	{ 0 }
 };
 
@@ -104,11 +105,11 @@ static int subcmd_index(char *arg)
 	size_t input_len;
 	size_t cmd_len;
 
-	/* TODO(castulo): remove the deprecated command by end of July 2019 */
 	if (strcmp(arg, "verify") == 0) {
+		verify_set_command_verify(true); // set to true so we know the "verify" command was used
 		arg = "diagnose";
-		fprintf(stderr, "\nWarning: The verify command has been deprecated and will be removed soon.\n");
-		fprintf(stderr, "Please consider using \"swupd diagnose\" instead.\n\n");
+		fprintf(stderr, "\nWarning: The verify command has been superseded\n");
+		fprintf(stderr, "Please consider using \"swupd diagnose\" instead\n\n");
 	}
 	input_len = strlen(arg);
 

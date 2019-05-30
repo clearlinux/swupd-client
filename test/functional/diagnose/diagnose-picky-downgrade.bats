@@ -18,7 +18,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		Verifying version 10
+		Diagnosing version 10
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
 		Warning: One or more installed bundles are not available at version 10.
 		Generating list of extra files under .*/target-dir/usr
@@ -30,6 +30,7 @@ test_setup() {
 		/usr/foo/
 		Inspected 19 files
 		  6 files found which should be deleted
+		Use "swupd repair --picky" to correct the problems in the system
 		Diagnose successful
 	EOM
 	)

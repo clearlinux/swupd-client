@@ -40,7 +40,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Verifying version 20
+		Diagnosing version 20
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.MoM.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Failed to retrieve 20 MoM manifest
@@ -69,7 +69,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
-		Verifying version 20
+		Diagnosing version 20
 		Warning: the force or picky option is specified; ignoring version mismatch for repair
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
@@ -93,7 +93,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
-		Verifying version 20
+		Diagnosing version 20
 		Warning: the force or picky option is specified; ignoring version mismatch for repair
 		Verifying files
 		Starting download of remaining update content. This may take a while...

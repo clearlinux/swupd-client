@@ -162,6 +162,7 @@ struct file_counts {
 	int extraneous;
 	int deleted;
 	int not_deleted;
+	int picky_extraneous;
 };
 
 extern bool verify_esp_only;
@@ -365,6 +366,7 @@ enum swupd_code list_local_bundles();
 extern int link_or_rename(const char *orig, const char *dest);
 
 /* verify.c */
+extern void verify_set_command_verify(bool opt);
 extern void verify_set_option_force(bool opt);
 extern void verify_set_option_install(bool opt);
 extern void verify_set_option_quick(bool opt);

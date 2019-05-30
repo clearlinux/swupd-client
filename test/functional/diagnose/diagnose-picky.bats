@@ -26,7 +26,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		Verifying version 10
+		Diagnosing version 10
 		Generating list of extra files under .*/target-dir/usr
 		/usr/share/defaults/swupd/versionurl
 		/usr/share/defaults/swupd/contenturl
@@ -36,6 +36,7 @@ test_setup() {
 		/usr/file1
 		Inspected 17 files
 		  6 files found which should be deleted
+		Use "swupd repair --picky" to correct the problems in the system
 		Diagnose successful
 	EOM
 	)

@@ -124,11 +124,15 @@ enum swupd_code bundle_list_main(int argc, char **argv)
 	}
 	progress_init_steps("bundle-list", steps_in_bundlelist);
 
-	ret = swupd_init(SWUPD_ALL);
+	if (cmdline_local && !is_root()) {
+		ret = swupd_init(SWUPD_NO_ROOT);
+	} else {
+		ret = swupd_init(SWUPD_ALL);
+	}
 	/* if swupd fails to initialize, the only list command we can still attempt is
 	 * listing locally installed bundles (with the limitation of not showing what
 	 * bundles are experimental) */
-	if (ret != 0 && !cmdline_local) {
+	if (ret != 0) {
 		error("Failed updater initialization. Exiting now\n");
 		goto finish;
 	}

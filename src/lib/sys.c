@@ -316,3 +316,8 @@ char *sys_path_join(const char *prefix, const char *path)
 
 	return str_or_die("%.*s%c%s", len, prefix, PATH_SEPARATOR, path);
 }
+
+bool is_root(void)
+{
+	return getuid() == 0;
+}

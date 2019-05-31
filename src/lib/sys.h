@@ -163,6 +163,10 @@ char *sys_dirname(const char *path);
 char *sys_path_join(const char *prefix, const char *path);
 
 /**
+ * @brief Check if current user is root.
+ */
+bool is_root(void);
+/**
  * @brief Run a systemctl command with the informed parameters.
  */
 #define systemctl_cmd(...) run_command_quiet(SYSTEMCTL, __VA_ARGS__)

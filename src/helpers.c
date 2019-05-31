@@ -43,7 +43,7 @@
 
 void check_root(void)
 {
-	if (getuid() != 0) {
+	if (!is_root()) {
 		error("This program must be run as root..aborting.\n\n");
 		exit(EXIT_FAILURE);
 	}

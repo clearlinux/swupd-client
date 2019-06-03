@@ -77,6 +77,18 @@ int file_sort_filename_reverse(const void *a, const void *b)
 	return -ret;
 }
 
+int file_sort_hash(const void *a, const void *b)
+{
+	struct file *A, *B;
+	int ret;
+	A = (struct file *)a;
+	B = (struct file *)b;
+
+	ret = strcmp(A->hash, B->hash);
+
+	return ret;
+}
+
 static struct manifest *manifest_from_file(int version, char *component, bool header_only, bool is_mix)
 {
 	char *filename;

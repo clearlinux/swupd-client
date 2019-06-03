@@ -79,8 +79,8 @@ static bool download_successful(void *data)
 
 static double fullfile_query_total_download_size(struct list *files)
 {
-	double size = 0;
-	double total_size = 0;
+	long size = 0;
+	long total_size = 0;
 	struct file *file = NULL;
 	struct list *list = NULL;
 	char *url = NULL;
@@ -105,12 +105,12 @@ static double fullfile_query_total_download_size(struct list *files)
 		}
 
 		count++;
-		debug("File: %s (%.2lf Mb)\n", url, size / 1000000);
+		debug("File: %s (%.2lf Mb)\n", url, (double)size / 1000000);
 		free_string(&url);
 	}
 
 	debug("Number of files to download: %d\n", count);
-	debug("Total size of files to be downloaded: %.2lf Mb\n", total_size / 1000000);
+	debug("Total size of files to be downloaded: %.2lf Mb\n", (double)total_size / 1000000);
 	return total_size;
 }
 
@@ -126,7 +126,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	struct list *need_download = NULL;
 	struct file *file;
 	struct stat stat;
-	struct download_progress download_progress = { 0, 0, 0 };
+	struct download_progress download_progress = { 0, 0 };
 	unsigned int complete = 0;
 	unsigned int list_length;
 	const unsigned int MAX_FILES = 1000;
@@ -175,6 +175,25 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	 * to report progress */
 	list_length = list_len(need_download);
 	if (list_length < MAX_FILES) {
+		/* remove tar duplicates from the list first */
+		need_download = list_sort(need_download, file_sort_hash);
+		for (iter = list_head(need_download); iter; iter = iter->next) {
+			if (iter->next == NULL) {
+				break;
+			}
+			struct file *file1, *file2;
+			file1 = iter->data;
+			file2 = iter->next->data;
+
+			/* different directories may need the same tar, in those cases it needs
+			 * to be downloaded only once, the tar for each file is downloaded from
+			 * <last_change>/files/<hash>.tar */
+			if (strcmp(file1->hash, file2->hash) == 0 && (file1->last_change == file2->last_change)) {
+				iter = list_free_item(iter, NULL);
+			}
+		}
+		need_download = list_head(iter);
+
 		download_progress.total_download_size = fullfile_query_total_download_size(need_download);
 		if (download_progress.total_download_size > 0) {
 			/* enable the progress callback */
@@ -200,7 +219,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 		}
 
 		/* fall back for progress reporting when the download size
-		* could not be determined */
+		 * could not be determined */
 		if (download_progress.total_download_size == 0) {
 			complete++;
 			progress_report(complete, list_length);

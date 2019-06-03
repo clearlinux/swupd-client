@@ -14,10 +14,17 @@ extern "C" {
 
 #include <curl/curl.h>
 
+/* struct to hold information about the overall download progress (including many files) */
 struct download_progress {
-	double total_download_size; /* total number of bytes to download */
-	double current;		    /* number of bytes that has been already downloaded */
-	double dlprev;		    /* previous download read provided by curl */
+	long total_download_size; /* total number of bytes to download */
+	long downloaded;	  /* total of bytes downloaded so far */
+};
+
+/* struct to hold information about one file download progress */
+struct file_progress {
+	long file_size;
+	long downloaded;
+	struct download_progress *overall_progress;
 };
 
 /**

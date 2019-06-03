@@ -22,28 +22,33 @@
 
 int swupd_progress_callback(void *clientp, int64_t dltotal, int64_t dlnow, int64_t UNUSED_PARAM ultotal, int64_t UNUSED_PARAM ulnow)
 {
-	struct download_progress *download_progress;
-	double increment;
 
-	download_progress = clientp;
+	struct file_progress *progress = clientp;
+	long increment;
 
-	if (download_progress->total_download_size == 0) {
+	if (progress->overall_progress->total_download_size == 0 || dltotal == 0 || (long)dlnow == progress->downloaded) {
+		/* nothing new has been downloaded since the last time the
+		 * periodic callback was called, just return */
+		return 0;
+	}
+
+	if (progress->downloaded > (long)dlnow) {
+		/* if this happened,there was probably an error with the download
+		 * and it had to be started over, wait till we get back to where we were */
 		return 0;
 	}
 
 	/* calculate the downloaded data size since the last
 	 * time the function was called */
-	if (dlnow < download_progress->dlprev) {
-		/* new file */
-		download_progress->dlprev = 0;
-	}
-	increment = dlnow - download_progress->dlprev;
-	download_progress->dlprev = dlnow;
-	download_progress->current += increment;
+	increment = (long)dlnow - progress->downloaded;
+	progress->downloaded = (long)dlnow;
+
+	/* pass the increment to a common sum */
+	progress->overall_progress->downloaded += increment;
 
 	/* if more data has been downloaded, report progress */
-	if (dltotal && increment > 0) {
-		progress_report(download_progress->current, download_progress->total_download_size);
+	if (increment > 0) {
+		progress_report((double)progress->overall_progress->downloaded, (double)progress->overall_progress->total_download_size);
 	}
 
 	return 0;

@@ -106,6 +106,9 @@ void progress_report(double count, double max)
 					/* if not in a tty add new lines so every percentage
 					 * is in its own line */
 					info("\n");
+				} else if (percentage == 100) {
+					/* add a line break once we reach 100% */
+					info("\n");
 				}
 			}
 			fflush(stdout);

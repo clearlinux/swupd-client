@@ -37,7 +37,6 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 5, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "download_packs" },
 		{ "type" : "info", "msg" : "Finishing packs extraction... " },
 		{ "type" : "info", "msg" : "Verifying files " },
-		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 8, "stepCompletion" : 0, "stepDescription" : "check_files_hash" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 8, "stepCompletion" : 50, "stepDescription" : "check_files_hash" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "check_files_hash" },
 		{ "type" : "info", "msg" : "No extra files need to be downloaded " },

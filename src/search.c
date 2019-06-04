@@ -451,7 +451,6 @@ static enum swupd_code download_all_manifests(struct manifest *mom, struct list 
 
 		/* Do download */
 		manifest = load_manifest(file->last_change, file, mom, true, &manifest_err);
-		progress_report(complete, total);
 		complete++;
 		if (!manifest) {
 			info("\n"); //Progress bar
@@ -468,9 +467,8 @@ static enum swupd_code download_all_manifests(struct manifest *mom, struct list 
 		}
 
 		*manifest_list = list_prepend_data(*manifest_list, manifest);
+		progress_report(complete, total);
 	}
-	progress_report(total, total);
-	info("\n");
 
 	if (ret) {
 		warn("Failed to download %i manifest%s - search results will be partial\n", failed_count, (failed_count > 1 ? "s" : ""));

@@ -1025,7 +1025,6 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 		progress_report(complete, list_length);
 	}
-	info("\n");
 	sync();
 	timelist_timer_stop(global_times); // closing: Installing bundle(s) files onto filesystem
 

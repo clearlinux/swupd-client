@@ -30,7 +30,7 @@ test_setup() {
 		 - test-bundle2
 		 - test-bundle3
 		Finishing packs extraction...
-		Verifying files
+		Checking for corrupt files
 		No extra files need to be downloaded
 		Installing base OS and selected bundles
 		Inspected 8 files

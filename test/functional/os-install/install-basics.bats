@@ -25,7 +25,7 @@ test_setup() {
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
-		Verifying files
+		Checking for corrupt files
 		No extra files need to be downloaded
 		Installing base OS and selected bundles
 		Inspected 2 files
@@ -55,7 +55,7 @@ test_setup() {
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
-		Verifying files
+		Checking for corrupt files
 		No extra files need to be downloaded
 		Installing base OS and selected bundles
 		Inspected 2 files

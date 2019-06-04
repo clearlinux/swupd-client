@@ -36,11 +36,13 @@ test_setup() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 20
-		Verifying files
+		Checking for missing files
 		Missing file: .*/target-dir/baz
 		Missing file: .*/target-dir/baz/file_3
+		Checking for corrupt files
 		Hash mismatch for file: .*/target-dir/foo/file_1
 		Hash mismatch for file: .*/target-dir/usr/lib/os-release
+		Checking for extraneous files
 		File that should be deleted: .*/target-dir/bar/file_2
 		Inspected 18 files
 		  2 files were missing

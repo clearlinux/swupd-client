@@ -190,7 +190,7 @@ static int check_files_hash(struct list *files)
 	unsigned int total = list_len(files);
 	int ret = 1;
 
-	info("Verifying files\n");
+	info("Checking for corrupt files\n");
 	iter = list_head(files);
 	while (iter) {
 		struct file *f = iter->data;
@@ -438,6 +438,8 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 {
 	int ret;
 	struct list *iter;
+	unsigned int list_length = list_len(official_manifest->files);
+	unsigned int complete = 0;
 
 	official_manifest->files = list_sort(official_manifest->files, file_sort_filename_reverse);
 
@@ -451,11 +453,12 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 
 		file = iter->data;
 		iter = iter->next;
+		complete++;
 
 		/* Do not remove files that have not been deleted, are config files, or
 		 * are marked as ghosted */
 		if (!file->is_deleted || file->is_config || file->is_ghosted) {
-			continue;
+			goto progress;
 		}
 
 		/* Note: boot files marked as deleted should not be deleted by
@@ -463,7 +466,7 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 		 * (currently /usr/bin/clr-boot-manager).
 		 */
 		if (ignore(file)) {
-			continue;
+			goto progress;
 		}
 
 		fullname = mk_full_filename(path_prefix, file->filename);
@@ -521,6 +524,8 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 		close(fd);
 	out:
 		free_string(&fullname);
+	progress:
+		progress_report(complete, list_length);
 	}
 }
 
@@ -654,7 +659,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	struct manifest *official_manifest = NULL;
 	int ret;
 	struct list *subs = NULL;
-	int steps_in_verify = 6;
+	int steps_in_verify = 7;
 	bool use_latest = false;
 
 	/*
@@ -670,6 +675,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	 * 8) add_missing_files
 	 * (Finishes here on --quick or --install)
 	 * 9) fix_files
+	 * 10) remove_extraneous_files
 	 */
 
 	if (!parse_options(argc, argv)) {
@@ -684,7 +690,7 @@ enum swupd_code verify_main(int argc, char **argv)
 		steps_in_verify += 2;
 	}
 	if (cmdline_option_quick) {
-		steps_in_verify -= 1;
+		steps_in_verify -= 2;
 	}
 	progress_init_steps("verify", steps_in_verify);
 
@@ -922,12 +928,14 @@ enum swupd_code verify_main(int argc, char **argv)
 
 		timelist_timer_start(global_times, "Fixing modified files");
 		progress_set_next_step("fix_files");
-		info("Repairing modified files\n");
+		info("Repairing corrupt files\n");
 		deal_with_hash_mismatches(official_manifest, repair);
 
 		/* removing files could be risky, so only do it if the
 		 * prior phases had no problems */
 		if ((counts.not_fixed == 0) && (counts.not_replaced == 0)) {
+			progress_set_next_step("remove_extraneous_files");
+			info("Removing extraneous files\n");
 			remove_orphaned_files(official_manifest, repair);
 		}
 		if (cmdline_option_picky) {
@@ -946,12 +954,15 @@ enum swupd_code verify_main(int argc, char **argv)
 		bool repair = false;
 
 		progress_set_next_step("add_missing_files");
-		info("Verifying files\n");
+		info("Checking for missing files\n");
 		add_missing_files(official_manifest, repair);
 		/* quick only checks for missing files, so it is done here */
 		if (!cmdline_option_quick) {
 			progress_set_next_step("fix_files");
+			info("Checking for corrupt files\n");
 			deal_with_hash_mismatches(official_manifest, repair);
+			progress_set_next_step("remove_extraneous_files");
+			info("Checking for extraneous files\n");
 			remove_orphaned_files(official_manifest, repair);
 		}
 	}

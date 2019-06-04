@@ -29,10 +29,8 @@ test_setup() {
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Missing file: .*/target-dir/test-file2
-		.fixed
-		Missing file: .*/target-dir/usr/share/clear/bundles/test-bundle2
-		.fixed
+		.* Missing file: .*/target-dir/test-file2 -> fixed
+		.* Missing file: .*/target-dir/usr/share/clear/bundles/test-bundle2 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 6 files

@@ -39,18 +39,13 @@ test_setup() {
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Missing file: .*/target-dir/baz
-		.fixed
-		Missing file: .*/target-dir/baz/file_3
-		.fixed
+		.* Missing file: .*/target-dir/baz -> fixed
+		.* Missing file: .*/target-dir/baz/file_3 -> fixed
 		Repairing corrupt files
-		Hash mismatch for file: .*/target-dir/foo/file_1
-		.fixed
-		Hash mismatch for file: .*/target-dir/usr/lib/os-release
-		.fixed
+		.* Hash mismatch for file: .*/target-dir/foo/file_1 -> fixed
+		.* Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
 		Removing extraneous files
-		File that should be deleted: .*/target-dir/bar/file_2
-		.deleted
+		.* File that should be deleted: .*/target-dir/bar/file_2 -> deleted
 		Inspected 18 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
@@ -92,18 +87,13 @@ test_setup() {
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Missing file: .*/target-dir/baz
-		.fixed
-		Missing file: .*/target-dir/baz/file_3
-		.fixed
+		.* Missing file: .*/target-dir/baz -> fixed
+		.* Missing file: .*/target-dir/baz/file_3 -> fixed
 		Repairing corrupt files
-		Hash mismatch for file: .*/target-dir/foo/file_1
-		.fixed
-		Hash mismatch for file: .*/target-dir/usr/lib/os-release
-		.fixed
+		.* Hash mismatch for file: .*/target-dir/foo/file_1 -> fixed
+		.* Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
 		Removing extraneous files
-		File that should be deleted: .*/target-dir/bar/file_2
-		.deleted
+		.* File that should be deleted: .*/target-dir/bar/file_2 -> deleted
 		--picky removing extra files under .*/target-dir/usr
 		REMOVING /usr/untracked_file3
 		REMOVING /usr/share/defaults/swupd/versionurl
@@ -151,18 +141,13 @@ test_setup() {
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Missing file: .*/target-dir/baz
-		.fixed
-		Missing file: .*/target-dir/baz/file_3
-		.fixed
+		.* Missing file: .*/target-dir/baz -> fixed
+		.* Missing file: .*/target-dir/baz/file_3 -> fixed
 		Repairing corrupt files
-		Hash mismatch for file: .*/target-dir/foo/file_1
-		.fixed
-		Hash mismatch for file: .*/target-dir/usr/lib/os-release
-		.fixed
+		.* Hash mismatch for file: .*/target-dir/foo/file_1 -> fixed
+		.* Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
 		Removing extraneous files
-		File that should be deleted: .*/target-dir/bar/file_2
-		.deleted
+		.* File that should be deleted: .*/target-dir/bar/file_2 -> deleted
 		--picky removing extra files under .*/target-dir/bat
 		REMOVING /bat/untracked_file1
 		REMOVING DIR /bat/

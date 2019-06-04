@@ -51,8 +51,7 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
-		Hash mismatch for file: .*/target-dir/usr/lib/os-release
-		.fixed
+		.* Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
 		Removing extraneous files
 		--picky removing extra files under .*/target-dir/usr
 		REMOVING /usr/share/defaults/swupd/versionurl
@@ -96,8 +95,7 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
-		Hash mismatch for file: .*/target-dir/usr/lib/os-release
-		.fixed
+		.* Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
 		Removing extraneous files
 		--picky removing extra files under .*/target-dir/bar
 		REMOVING /bar/file_5

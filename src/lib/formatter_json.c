@@ -81,14 +81,15 @@ void json_message(const char *msg_type, const char *msg, va_list args_list)
 		abort();
 	}
 
+	/* sanitize characters in the string */
 	for (unsigned int i = 0; full_msg[i]; i++) {
 		/* if the message has double quotes replace them with single quotes
-		* since double quotes have to be escaped in JSON */
+		 * since double quotes have to be escaped in JSON */
 		if (full_msg[i] == '"') {
 			full_msg[i] = '\'';
 		}
-		/* replace all '\n' from the message with spaces */
-		if (full_msg[i] == '\n') {
+		/* replace all '\n' and '\r' from the message with spaces */
+		if (full_msg[i] == '\n' || full_msg[i] == '\r') {
 			full_msg[i] = ' ';
 		}
 	}

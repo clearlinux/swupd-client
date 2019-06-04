@@ -27,13 +27,10 @@ test_setup() {
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Missing file: .*/target-dir/usr/bin
-		.fixed
+		.* Missing file: .*/target-dir/usr/bin -> fixed
 		Repairing corrupt files
-		Hash mismatch for file: .*/target-dir/usr/lib/os-release
-		.fixed
-		Hash mismatch for file: .*/target-dir/usr/share/defaults/swupd/format
-		.fixed
+		.* Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
+		.* Hash mismatch for file: .*/target-dir/usr/share/defaults/swupd/format -> fixed
 		Removing extraneous files
 		Inspected 12 files
 		  1 file was missing

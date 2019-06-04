@@ -27,8 +27,7 @@ test_setup() {
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Missing file: .*/target-dir/bar/test-file2
-		.fixed
+		.* Missing file: .*/target-dir/bar/test-file2 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 3 files
@@ -57,12 +56,9 @@ test_setup() {
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Missing file: .*/target-dir/baz
-		.fixed
-		Missing file: .*/target-dir/baz/test-file3
-		.fixed
-		Missing file: .*/target-dir/usr/share/clear/bundles/test-bundle3
-		.fixed
+		.* Missing file: .*/target-dir/baz -> fixed
+		.* Missing file: .*/target-dir/baz/test-file3 -> fixed
+		.* Missing file: .*/target-dir/usr/share/clear/bundles/test-bundle3 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 3 files
@@ -90,10 +86,8 @@ test_setup() {
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Missing file: .*/target-dir/bar/test-file2
-		.fixed
-		Missing file: .*/target-dir/foo/test-file1
-		.fixed
+		.* Missing file: .*/target-dir/bar/test-file2 -> fixed
+		.* Missing file: .*/target-dir/foo/test-file1 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 6 files

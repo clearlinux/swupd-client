@@ -36,18 +36,19 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 20
-		Verifying files
+		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Missing file: .*/target-dir/baz
 		.fixed
 		Missing file: .*/target-dir/baz/file_3
 		.fixed
-		Repairing modified files
+		Repairing corrupt files
 		Hash mismatch for file: .*/target-dir/foo/file_1
 		.fixed
 		Hash mismatch for file: .*/target-dir/usr/lib/os-release
 		.fixed
+		Removing extraneous files
 		File that should be deleted: .*/target-dir/bar/file_2
 		.deleted
 		Inspected 18 files
@@ -88,18 +89,19 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 20
-		Verifying files
+		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Missing file: .*/target-dir/baz
 		.fixed
 		Missing file: .*/target-dir/baz/file_3
 		.fixed
-		Repairing modified files
+		Repairing corrupt files
 		Hash mismatch for file: .*/target-dir/foo/file_1
 		.fixed
 		Hash mismatch for file: .*/target-dir/usr/lib/os-release
 		.fixed
+		Removing extraneous files
 		File that should be deleted: .*/target-dir/bar/file_2
 		.deleted
 		--picky removing extra files under .*/target-dir/usr
@@ -146,18 +148,19 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 20
-		Verifying files
+		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Missing file: .*/target-dir/baz
 		.fixed
 		Missing file: .*/target-dir/baz/file_3
 		.fixed
-		Repairing modified files
+		Repairing corrupt files
 		Hash mismatch for file: .*/target-dir/foo/file_1
 		.fixed
 		Hash mismatch for file: .*/target-dir/usr/lib/os-release
 		.fixed
+		Removing extraneous files
 		File that should be deleted: .*/target-dir/bar/file_2
 		.deleted
 		--picky removing extra files under .*/target-dir/bat

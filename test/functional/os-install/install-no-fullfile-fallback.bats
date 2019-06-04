@@ -28,7 +28,7 @@ test_setup() {
 		 - os-core
 		Finishing packs extraction...
 		Error: zero pack downloads failed
-		Verifying files
+		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Error: Unable to download necessary files for this OS release
 		Installation failed

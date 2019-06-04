@@ -23,16 +23,17 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Verifying files
+		Checking for corrupt files
 		Adding any missing files
-		Repairing modified files
+		Repairing corrupt files
+		Removing extraneous files
 		Inspected 5 files
 		Calling post-update helper scripts.
 		Warning: boot files update skipped due to --no-boot-update argument
 		Repair successful
 	EOM
 	)
-	# assert_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	# this should exist at the end, even if cbm is not run
 	assert_file_exists "$TARGETDIR"/usr/lib/kernel/testfile
 

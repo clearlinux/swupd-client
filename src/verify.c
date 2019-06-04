@@ -197,11 +197,10 @@ static int check_files_hash(struct list *files)
 		char *fullname;
 		bool valid;
 
-		progress_report(complete, total);
 		complete++;
 		iter = iter->next;
 		if (f->is_deleted || f->do_not_update) {
-			continue;
+			goto progress;
 		}
 
 		fullname = mk_full_filename(path_prefix, f->filename);
@@ -212,9 +211,9 @@ static int check_files_hash(struct list *files)
 		} else {
 			ret = 0;
 		}
+	progress:
+		progress_report(complete, total);
 	}
-	progress_report(total, total);
-	info("\n");
 
 	return ret;
 }
@@ -239,7 +238,6 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 	if (ret) {
 		error("Unable to download necessary files for this OS release\n");
 	}
-	info("\n");
 
 	return ret;
 }
@@ -306,7 +304,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 
 		if ((file->is_deleted) ||
 		    (file->do_not_update)) {
-			continue;
+			goto progress;
 		}
 
 		fullname = mk_full_filename(path_prefix, file->filename);
@@ -316,8 +314,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 		ret = compute_hash_lazy(&local, fullname);
 		if (ret != 0) {
 			counts.not_replaced++;
-			free_string(&fullname);
-			continue;
+			goto out;
 		}
 
 		/* compare the hash and report mismatch */
@@ -328,8 +325,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 				print("\nMissing file: %s\n", fullname);
 			}
 		} else {
-			free_string(&fullname);
-			continue;
+			goto out;
 		}
 
 		/* if not repairing, we're done */
@@ -365,10 +361,9 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 		}
 	out:
 		free_string(&fullname);
+	progress:
 		progress_report(complete, list_length);
 	}
-	progress_report(list_length, list_length);
-	info("\n");
 }
 
 static void check_and_fix_one(struct file *file, struct manifest *official_manifest, bool repair)
@@ -437,7 +432,6 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 		check_and_fix_one(file, official_manifest, repair);
 		progress_report(complete, list_length);
 	}
-	info("\n"); /* Finish update progress message */
 }
 
 static void remove_orphaned_files(struct manifest *official_manifest, bool repair)
@@ -876,7 +870,6 @@ enum swupd_code verify_main(int argc, char **argv)
 	/* when fixing or installing we need input files. */
 	if (cmdline_option_fix || cmdline_option_install) {
 		ret = get_required_files(official_manifest, subs);
-		info("\n");
 		if (ret != 0) {
 			ret = SWUPD_COULDNT_DOWNLOAD_FILE;
 			goto clean_and_exit;

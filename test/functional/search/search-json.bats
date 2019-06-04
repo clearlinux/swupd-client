@@ -27,7 +27,6 @@ test_setup() {
 		[
 		{ "type" : "start", "section" : "search" },
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 3, "stepCompletion" : 100, "stepDescription" : "get_versions" },
-		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 3, "stepCompletion" : 0, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 3, "stepCompletion" : 50, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 3, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
 		{ "type" : "info", "msg" : "Searching for 'file_1' " },

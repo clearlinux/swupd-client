@@ -17,8 +17,10 @@ test_setup() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Verifying files
+		Checking for missing files
 		Missing file: .*/target-dir/foo/test-file1
+		Checking for corrupt files
+		Checking for extraneous files
 		Inspected 7 files
 		  1 file was missing
 		Use "swupd repair" to correct the problems in the system

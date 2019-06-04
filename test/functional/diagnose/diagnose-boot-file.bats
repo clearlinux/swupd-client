@@ -17,8 +17,10 @@ test_setup() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Verifying files
+		Checking for missing files
+		Checking for corrupt files
 		Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile
+		Checking for extraneous files
 		Inspected 7 files
 		  1 file did not match
 		Use "swupd repair" to correct the problems in the system

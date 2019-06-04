@@ -23,9 +23,10 @@ test_setup() {
 	# check for the warning
 	expected_output=$(cat <<-EOM
 		Diagnosing version 20
-		Verifying files
+		Checking for corrupt files
 		Adding any missing files
-		Repairing modified files
+		Repairing corrupt files
+		Removing extraneous files
 		Inspected 7 files
 		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Repair successful

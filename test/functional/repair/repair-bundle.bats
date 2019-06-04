@@ -24,12 +24,13 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Verifying files
+		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Missing file: .*/target-dir/bar/test-file2
 		.fixed
-		Repairing modified files
+		Repairing corrupt files
+		Removing extraneous files
 		Inspected 3 files
 		  1 file was missing
 		    1 of 1 missing files were replaced
@@ -53,7 +54,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Verifying files
+		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Missing file: .*/target-dir/baz
@@ -62,7 +63,8 @@ test_setup() {
 		.fixed
 		Missing file: .*/target-dir/usr/share/clear/bundles/test-bundle3
 		.fixed
-		Repairing modified files
+		Repairing corrupt files
+		Removing extraneous files
 		Inspected 3 files
 		  3 files were missing
 		    3 of 3 missing files were replaced
@@ -85,14 +87,15 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Verifying files
+		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Missing file: .*/target-dir/bar/test-file2
 		.fixed
 		Missing file: .*/target-dir/foo/test-file1
 		.fixed
-		Repairing modified files
+		Repairing corrupt files
+		Removing extraneous files
 		Inspected 6 files
 		  2 files were missing
 		    2 of 2 missing files were replaced

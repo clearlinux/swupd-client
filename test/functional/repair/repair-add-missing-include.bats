@@ -25,7 +25,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Verifying files
+		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Missing file: .*/target-dir/bar
@@ -34,7 +34,8 @@ test_setup() {
 		.fixed
 		Missing file: .*/target-dir/usr/share/clear/bundles/test-bundle2
 		.fixed
-		Repairing modified files
+		Repairing corrupt files
+		Removing extraneous files
 		Inspected 8 files
 		  3 files were missing
 		    3 of 3 missing files were replaced

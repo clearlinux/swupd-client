@@ -22,7 +22,9 @@ test_setup() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Verifying files
+		Checking for missing files
+		Checking for corrupt files
+		Checking for extraneous files
 		File that should be deleted: .*/target-dir/testdir1/testdir2/testfile
 		File that should be deleted: .*/target-dir/testdir1/testdir2
 		File that should be deleted: .*/target-dir/testdir1

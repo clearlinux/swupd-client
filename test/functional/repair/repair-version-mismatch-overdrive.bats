@@ -28,8 +28,7 @@ test_setup() {
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Missing file: .+/target-dir/usr/bin
-		.fixed
+		.* Missing file: .+/target-dir/usr/bin -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 3 files

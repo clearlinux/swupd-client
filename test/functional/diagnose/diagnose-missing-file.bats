@@ -18,7 +18,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
 		Checking for missing files
-		Missing file: .*/target-dir/foo/test-file1
+		.* Missing file: .*/target-dir/foo/test-file1
 		Checking for corrupt files
 		Checking for extraneous files
 		Inspected 7 files

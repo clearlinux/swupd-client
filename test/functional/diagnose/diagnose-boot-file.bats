@@ -19,7 +19,7 @@ test_setup() {
 		Diagnosing version 10
 		Checking for missing files
 		Checking for corrupt files
-		Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile
+		.* Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile
 		Checking for extraneous files
 		Inspected 7 files
 		  1 file did not match

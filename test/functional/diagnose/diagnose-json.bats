@@ -29,14 +29,14 @@ test_setup() {
 		\{ "type" : "progress", "currentStep" : 2, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "cleanup_download_dir" \},
 		\{ "type" : "progress", "currentStep" : 3, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "load_manifests" \},
 		\{ "type" : "progress", "currentStep" : 4, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "consolidate_files" \},
-		\{ "type" : "info", "msg" : "Checking for missing files " \},
+		\{ "type" : "info", "msg" : " Checking for missing files " \},
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 5, "stepDescription" : "add_missing_files" \},
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 11, "stepDescription" : "add_missing_files" \},
-		\{ "type" : "info", "msg" : " Missing file: .*/baz " \},
+		\{ "type" : "info", "msg" : "  -> Missing file: .*/baz " \},
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 17, "stepDescription" : "add_missing_files" \},
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 23, "stepDescription" : "add_missing_files" \},
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 29, "stepDescription" : "add_missing_files" \},
-		\{ "type" : "info", "msg" : " Missing file: .*/foo/test-file1 " \},
+		\{ "type" : "info", "msg" : "  -> Missing file: .*/foo/test-file1 " \},
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 35, "stepDescription" : "add_missing_files" \},
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 41, "stepDescription" : "add_missing_files" \},
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 47, "stepDescription" : "add_missing_files" \},
@@ -49,7 +49,7 @@ test_setup() {
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 88, "stepDescription" : "add_missing_files" \},
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 94, "stepDescription" : "add_missing_files" \},
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "add_missing_files" \},
-		\{ "type" : "info", "msg" : "Checking for corrupt files " \},
+		\{ "type" : "info", "msg" : " Checking for corrupt files " \},
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 5, "stepDescription" : "fix_files" \},
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 11, "stepDescription" : "fix_files" \},
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 17, "stepDescription" : "fix_files" \},
@@ -67,7 +67,7 @@ test_setup() {
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 88, "stepDescription" : "fix_files" \},
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 94, "stepDescription" : "fix_files" \},
 		\{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "fix_files" \},
-		\{ "type" : "info", "msg" : "Checking for extraneous files " \},
+		\{ "type" : "info", "msg" : " Checking for extraneous files " \},
 		\{ "type" : "progress", "currentStep" : 7, "totalSteps" : 7, "stepCompletion" : 5, "stepDescription" : "remove_extraneous_files" \},
 		\{ "type" : "progress", "currentStep" : 7, "totalSteps" : 7, "stepCompletion" : 11, "stepDescription" : "remove_extraneous_files" \},
 		\{ "type" : "progress", "currentStep" : 7, "totalSteps" : 7, "stepCompletion" : 17, "stepDescription" : "remove_extraneous_files" \},
@@ -85,14 +85,14 @@ test_setup() {
 		\{ "type" : "progress", "currentStep" : 7, "totalSteps" : 7, "stepCompletion" : 88, "stepDescription" : "remove_extraneous_files" \},
 		\{ "type" : "progress", "currentStep" : 7, "totalSteps" : 7, "stepCompletion" : 94, "stepDescription" : "remove_extraneous_files" \},
 		\{ "type" : "progress", "currentStep" : 7, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "remove_extraneous_files" \},
-		\{ "type" : "info", "msg" : "Inspected 17 files " \},
+		\{ "type" : "info", "msg" : " Inspected 17 files " \},
 		\{ "type" : "info", "msg" : "  2 files were missing " \},
 		\{ "type" : "info", "msg" : "Use 'swupd repair' to correct the problems in the system " \},
-		\{ "type" : "info", "msg" : "Diagnose successful " \},
+		\{ "type" : "info", "msg" : " Diagnose successful " \},
 		\{ "type" : "end", "section" : "verify", "status" : 1 \}
 		\]
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_in_output "$expected_output"
 
 }

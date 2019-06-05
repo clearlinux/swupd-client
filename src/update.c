@@ -551,8 +551,19 @@ clean_curl:
 			return SWUPD_INVALID_BINARY;
 		}
 
+		/* we need to resolve the whole path to swupd first, proc/self/exe
+		 * is a symbolic link to the executable that is running the current process */
+		char swupd_binary[LINE_MAX];
+		int path_length;
+		path_length = readlink("/proc/self/exe", swupd_binary, sizeof(swupd_binary));
+		if (path_length <= 0 || path_length >= LINE_MAX) {
+			error("Could not determine the swupd path\n");
+			return -1;
+		}
+		swupd_binary[path_length] = '\0';
+
 		/* Run the swupd_argv saved from main */
-		return execv(swupd_argv[0], swupd_argv);
+		return execv(swupd_binary, swupd_argv);
 	}
 
 	return ret;

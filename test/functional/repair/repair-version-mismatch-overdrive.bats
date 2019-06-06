@@ -23,14 +23,14 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Verifying version 10
+		Diagnosing version 10
 		Warning: the force or picky option is specified; ignoring version mismatch for repair
-		Verifying files
+		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Missing file: .+/target-dir/usr/bin
-		.fixed
-		Repairing modified files
+		.* Missing file: .+/target-dir/usr/bin -> fixed
+		Repairing corrupt files
+		Removing extraneous files
 		Inspected 3 files
 		  1 file was missing
 		    1 of 1 missing files were replaced

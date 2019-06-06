@@ -23,16 +23,14 @@ test_setup() {
 	run sudo sh -c "$SWUPD repair $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Verifying version 10
-		Verifying files
+		Diagnosing version 10
+		Checking for corrupt files
 		Adding any missing files
-		Repairing modified files
-		File that should be deleted: .*/target-dir/testdir1/testdir2/testfile
-		.deleted
-		File that should be deleted: .*/target-dir/testdir1/testdir2
-		.deleted
-		File that should be deleted: .*/target-dir/testdir1
-		.deleted
+		Repairing corrupt files
+		Removing extraneous files
+		.* File that should be deleted: .*/target-dir/testdir1/testdir2/testfile -> deleted
+		.* File that should be deleted: .*/target-dir/testdir1/testdir2 -> deleted
+		.* File that should be deleted: .*/target-dir/testdir1 -> deleted
 		Inspected 4 files
 		  3 files found which should be deleted
 		    3 of 3 files were deleted

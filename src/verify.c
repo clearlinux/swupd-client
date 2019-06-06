@@ -39,6 +39,7 @@
 
 static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src";
 
+static bool cmdline_command_verify = false;
 static bool cmdline_option_force = false;
 static bool cmdline_option_fix = false;
 static bool cmdline_option_picky = false;
@@ -70,6 +71,12 @@ static const struct option prog_opts[] = {
 };
 
 /* setter functions */
+void verify_set_command_verify(bool opt)
+{
+	/* indicates if the superseded "swupd verify" command was used */
+	cmdline_command_verify = opt;
+}
+
 void verify_set_option_force(bool opt)
 {
 	cmdline_option_force = opt;
@@ -118,24 +125,29 @@ void verify_set_picky_tree(const char *picky_tree)
 static void print_help(void)
 {
 	print("Usage:\n");
-	print("   swupd diagnose [OPTION...]\n\n");
+	if (cmdline_command_verify) {
+		print("   swupd verify [OPTION...]\n\n");
+	} else {
+		print("   swupd diagnose [OPTION...]\n\n");
+	}
 
 	//TODO: Add documentation explaining this command
 
 	global_print_help();
 
-	// TODO(castulo): remove the deprecated options by end of November 2019
 	print("Options:\n");
 	print("   -V, --version=V         Verify against manifest version V\n");
-	print("   -f, --fix               Fix local issues relative to server manifest (will not modify ignored files). NOTE: This option has been deprecated, please consider using \"swupd repair\" instead.\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -Y, --picky             List (without --fix) or remove (with --fix) files which should not exist\n");
 	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
 	print("   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
-	print("   -i, --install           Similar to \"--fix\" but optimized for install all files to empty directory. NOTE: This option has been deprecated, please consider using \"swupd os-install\" instead.\n");
 	print("   -q, --quick             Don't compare hashes, only fix missing files\n");
 	print("   -B, --bundles=[BUNDLES] Ensure BUNDLES are installed correctly. Example: --bundles=os-core,vi\n");
-	print("   -m, --manifest=V        NOTE: this flag has been deprecated. Please use -V instead\n");
+	if (cmdline_command_verify) {
+		print("   -m, --manifest=V        This option has been superseded. Please consider using the -V option instead\n");
+		print("   -f, --fix               This option has been superseded, please consider using \"swupd repair\" instead\n");
+		print("   -i, --install           This option has been superseded, please consider using \"swupd os-install\" instead\n");
+	}
 	print("\n");
 }
 
@@ -178,18 +190,17 @@ static int check_files_hash(struct list *files)
 	unsigned int total = list_len(files);
 	int ret = 1;
 
-	info("Verifying files\n");
+	info("Checking for corrupt files\n");
 	iter = list_head(files);
 	while (iter) {
 		struct file *f = iter->data;
 		char *fullname;
 		bool valid;
 
-		progress_report(complete, total);
 		complete++;
 		iter = iter->next;
 		if (f->is_deleted || f->do_not_update) {
-			continue;
+			goto progress;
 		}
 
 		fullname = mk_full_filename(path_prefix, f->filename);
@@ -200,9 +211,9 @@ static int check_files_hash(struct list *files)
 		} else {
 			ret = 0;
 		}
+	progress:
+		progress_report(complete, total);
 	}
-	progress_report(total, total);
-	info("\n");
 
 	return ret;
 }
@@ -214,20 +225,22 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 
 	if (cmdline_option_install) {
 		progress_set_next_step("download_packs");
+		print("\n");
 		get_all_files(official_manifest, subs);
 	}
 
 	progress_set_next_step("check_files_hash");
+	print("\n");
 	if (check_files_hash(official_manifest->files)) {
 		return 0;
 	}
 
 	progress_set_next_step("download_fullfiles");
+	print("\n");
 	ret = download_fullfiles(official_manifest->files, NULL);
 	if (ret) {
 		error("Unable to download necessary files for this OS release\n");
 	}
-	info("\n");
 
 	return ret;
 }
@@ -294,7 +307,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 
 		if ((file->is_deleted) ||
 		    (file->do_not_update)) {
-			continue;
+			goto progress;
 		}
 
 		fullname = mk_full_filename(path_prefix, file->filename);
@@ -304,8 +317,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 		ret = compute_hash_lazy(&local, fullname);
 		if (ret != 0) {
 			counts.not_replaced++;
-			free_string(&fullname);
-			continue;
+			goto out;
 		}
 
 		/* compare the hash and report mismatch */
@@ -313,11 +325,10 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 			counts.missing++;
 			if (!repair || (repair && cmdline_option_install == false)) {
 				/* Log to stdout, so we can post-process */
-				print("\nMissing file: %s\n", fullname);
+				print("\r -> Missing file: %s%s", fullname, repair ? "" : "\n");
 			}
 		} else {
-			free_string(&fullname);
-			continue;
+			goto out;
 		}
 
 		/* if not repairing, we're done */
@@ -340,7 +351,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 		}
 		if ((ret != 0) || hash_needs_work(file, local.hash)) {
 			counts.not_replaced++;
-			print("\n\tnot fixed\n");
+			print(" -> not fixed\n");
 
 			check_warn_freespace(file);
 
@@ -348,15 +359,14 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 			counts.replaced++;
 			file->do_not_update = 1;
 			if (cmdline_option_install == false) {
-				print("\n\tfixed\n");
+				print(" -> fixed\n");
 			}
 		}
 	out:
 		free_string(&fullname);
+	progress:
 		progress_report(complete, list_length);
 	}
-	progress_report(list_length, list_length);
-	info("\n");
 }
 
 static void check_and_fix_one(struct file *file, struct manifest *official_manifest, bool repair)
@@ -379,7 +389,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	if (access(fullname, F_OK) == 0) {
 		counts.mismatch++;
 		/* Log to stdout, so we can post-process it */
-		print("\nHash mismatch for file: %s\n", fullname);
+		print("\r -> Hash mismatch for file: %s%s", fullname, repair ? "" : "\n");
 	}
 
 	/* if not repairing, we're done */
@@ -396,10 +406,10 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	/* at the end of all this, verify the hash again to judge success */
 	if (verify_file(file, fullname)) {
 		counts.fixed++;
-		print("\tfixed\n");
+		print(" -> fixed\n");
 	} else {
 		counts.not_fixed++;
-		print("\tnot fixed\n");
+		print(" -> not fixed\n");
 	}
 end:
 	free_string(&fullname);
@@ -425,13 +435,14 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 		check_and_fix_one(file, official_manifest, repair);
 		progress_report(complete, list_length);
 	}
-	info("\n"); /* Finish update progress message */
 }
 
 static void remove_orphaned_files(struct manifest *official_manifest, bool repair)
 {
 	int ret;
 	struct list *iter;
+	unsigned int list_length = list_len(official_manifest->files);
+	unsigned int complete = 0;
 
 	official_manifest->files = list_sort(official_manifest->files, file_sort_filename_reverse);
 
@@ -445,11 +456,12 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 
 		file = iter->data;
 		iter = iter->next;
+		complete++;
 
 		/* Do not remove files that have not been deleted, are config files, or
 		 * are marked as ghosted */
 		if (!file->is_deleted || file->is_config || file->is_ghosted) {
-			continue;
+			goto progress;
 		}
 
 		/* Note: boot files marked as deleted should not be deleted by
@@ -457,7 +469,7 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 		 * (currently /usr/bin/clr-boot-manager).
 		 */
 		if (ignore(file)) {
-			continue;
+			goto progress;
 		}
 
 		fullname = mk_full_filename(path_prefix, file->filename);
@@ -477,7 +489,7 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 		}
 
 		counts.extraneous++;
-		print("File that should be deleted: %s\n", fullname);
+		print("\r -> File that should be deleted: %s%s", fullname, repair ? "" : "\n");
 
 		/* if not repairing, we're done */
 		if (!repair) {
@@ -490,10 +502,10 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 		if (!S_ISDIR(sb.st_mode)) {
 			ret = unlinkat(fd, base, 0);
 			if (ret && errno != ENOENT) {
-				warn("Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));
+				warn(" -> Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));
 				counts.not_deleted++;
 			} else {
-				print("\tdeleted\n");
+				print(" -> deleted\n");
 				counts.deleted++;
 			}
 		} else {
@@ -501,20 +513,22 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 			if (ret) {
 				counts.not_deleted++;
 				if (errno != ENOTEMPTY) {
-					warn("Failed to remove empty folder %s (%i: %s)\n",
+					warn(" -> Failed to remove empty folder %s (%i: %s)\n",
 					     fullname, errno, strerror(errno));
 				} else {
 					//FIXME: Add force removal option?
-					warn("Couldn't remove directory containing untracked files: %s\n", fullname);
+					warn(" -> Couldn't remove directory containing untracked files: %s\n", fullname);
 				}
 			} else {
-				print("\tdeleted\n");
+				print(" -> deleted\n");
 				counts.deleted++;
 			}
 		}
 		close(fd);
 	out:
 		free_string(&fullname);
+	progress:
+		progress_report(complete, list_length);
 	}
 }
 
@@ -537,18 +551,16 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'f':
-		/* TODO(castulo): remove the deprecated command by end of July 2019 */
-		fprintf(stderr, "\nWarning: The --fix option has been deprecated and will be removed soon.\n");
-		fprintf(stderr, "Please consider using \"swupd repair\" instead.\n\n");
+		fprintf(stderr, "\nWarning: The --fix option has been superseded\n");
+		fprintf(stderr, "Please consider using \"swupd repair\" instead\n\n");
 		cmdline_option_fix = true;
 		return true;
 	case 'x':
 		cmdline_option_force = true;
 		return true;
 	case 'i':
-		/* TODO(castulo): remove the deprecated command by end of July 2019 */
-		fprintf(stderr, "\nWarning: The --install option has been deprecated and will be removed soon.\n");
-		fprintf(stderr, "Please consider using \"swupd os-install\" instead.\n\n");
+		fprintf(stderr, "\nWarning: The --install option has been superseded\n");
+		fprintf(stderr, "Please consider using \"swupd os-install\" instead\n\n");
 		cmdline_option_install = true;
 		cmdline_option_quick = true;
 		return true;
@@ -650,7 +662,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	struct manifest *official_manifest = NULL;
 	int ret;
 	struct list *subs = NULL;
-	int steps_in_verify = 6;
+	int steps_in_verify = 7;
 	bool use_latest = false;
 
 	/*
@@ -666,6 +678,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	 * 8) add_missing_files
 	 * (Finishes here on --quick or --install)
 	 * 9) fix_files
+	 * 10) remove_extraneous_files
 	 */
 
 	if (!parse_options(argc, argv)) {
@@ -680,7 +693,7 @@ enum swupd_code verify_main(int argc, char **argv)
 		steps_in_verify += 2;
 	}
 	if (cmdline_option_quick) {
-		steps_in_verify -= 1;
+		steps_in_verify -= 2;
 	}
 	progress_init_steps("verify", steps_in_verify);
 
@@ -719,7 +732,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	if (cmdline_option_install) {
 		info("Installing OS version %i%s\n", version, use_latest ? " (latest)" : "");
 	} else {
-		info("Verifying version %i\n", version);
+		info("%s version %i\n", cmdline_command_verify ? "Verifying" : "Diagnosing", version);
 	}
 
 	if (cmdline_bundles) {
@@ -777,12 +790,13 @@ enum swupd_code verify_main(int argc, char **argv)
 			warn("the force option is specified; ignoring"
 			     " format mismatch for diagnose\n");
 		} else {
-			error("Mismatching formats detected when diagnosing %d"
+			error("Mismatching formats detected when %s %d"
 			      " (expected: %s; actual: %d)\n",
+			      cmdline_command_verify ? "verifying" : "diagnosing",
 			      version, format_string, official_manifest->manifest_version);
 			int latest = get_latest_version(NULL);
 			if (latest > 0) {
-				info("Latest supported version to diagnose: %d\n", latest);
+				info("Latest supported version to %s: %d\n", cmdline_command_verify ? "verify" : "diagnose", latest);
 			}
 			ret = SWUPD_COULDNT_LOAD_MANIFEST;
 			goto clean_and_exit;
@@ -899,9 +913,9 @@ enum swupd_code verify_main(int argc, char **argv)
 		timelist_timer_start(global_times, "Add missing files");
 		progress_set_next_step("add_missing_files");
 		if (cmdline_option_install) {
-			info("Installing base OS and selected bundles\n");
+			info("\nInstalling base OS and selected bundles\n");
 		} else {
-			info("Adding any missing files\n");
+			info("\nAdding any missing files\n");
 		}
 		add_missing_files(official_manifest, repair);
 		timelist_timer_stop(global_times);
@@ -917,36 +931,41 @@ enum swupd_code verify_main(int argc, char **argv)
 
 		timelist_timer_start(global_times, "Fixing modified files");
 		progress_set_next_step("fix_files");
-		info("Repairing modified files\n");
+		info("\nRepairing corrupt files\n");
 		deal_with_hash_mismatches(official_manifest, repair);
 
 		/* removing files could be risky, so only do it if the
 		 * prior phases had no problems */
 		if ((counts.not_fixed == 0) && (counts.not_replaced == 0)) {
+			progress_set_next_step("remove_extraneous_files");
+			info("\nRemoving extraneous files\n");
 			remove_orphaned_files(official_manifest, repair);
 		}
 		if (cmdline_option_picky) {
 			char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
-			info("--picky removing extra files under %s\n", start);
+			info("\n--picky removing extra files under %s\n", start);
 			ret = walk_tree(official_manifest, start, true, picky_whitelist, &counts);
 			free_string(&start);
 		}
 		timelist_timer_stop(global_times);
 	} else if (cmdline_option_picky) {
 		char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
-		info("Generating list of extra files under %s\n", start);
+		info("\nGenerating list of extra files under %s\n", start);
 		ret = walk_tree(official_manifest, start, false, picky_whitelist, &counts);
 		free_string(&start);
 	} else {
 		bool repair = false;
 
 		progress_set_next_step("add_missing_files");
-		info("Verifying files\n");
+		info("\nChecking for missing files\n");
 		add_missing_files(official_manifest, repair);
 		/* quick only checks for missing files, so it is done here */
 		if (!cmdline_option_quick) {
 			progress_set_next_step("fix_files");
+			info("\nChecking for corrupt files\n");
 			deal_with_hash_mismatches(official_manifest, repair);
+			progress_set_next_step("remove_extraneous_files");
+			info("\nChecking for extraneous files\n");
 			remove_orphaned_files(official_manifest, repair);
 		}
 	}
@@ -959,7 +978,7 @@ brick_the_system_and_clean_curl:
 	 */
 
 	/* report a summary of what we managed to do and not do */
-	info("Inspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
+	info("\nInspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
 
 	if (counts.missing) {
 		info("  %i file%s %s missing\n", counts.missing, (counts.missing > 1 ? "s" : ""), (counts.missing > 1 ? "were" : "was"));
@@ -1043,15 +1062,20 @@ clean_and_exit:
 		  counts.extraneous,
 		  total_curl_sz);
 
+	/* suggestion to fix problems */
+	if (!cmdline_option_install && !cmdline_option_fix && (counts.mismatch > 0 || counts.missing > 0 || counts.extraneous > 0)) {
+		info("Use \"swupd repair%s\" to correct the problems in the system\n", counts.picky_extraneous > 0 ? " --picky" : "");
+	}
+
 	if (ret == SWUPD_OK) {
 		if (cmdline_option_install) {
-			info("Installation successful\n");
+			info("\nInstallation successful\n");
 
 			if (counts.not_replaced > 0) {
 				ret = SWUPD_NO;
 			}
 		} else if (cmdline_option_fix) {
-			info("Repair successful\n");
+			info("\nRepair successful\n");
 
 			if (counts.not_fixed > 0 ||
 			    counts.not_replaced > 0 ||
@@ -1060,7 +1084,7 @@ clean_and_exit:
 			}
 		} else {
 			/* This is just a verification */
-			info("Diagnose successful\n");
+			info("\n%s successful\n", cmdline_command_verify ? "Verify" : "Diagnose");
 
 			if (counts.mismatch > 0 ||
 			    counts.missing > 0 ||
@@ -1070,12 +1094,12 @@ clean_and_exit:
 		}
 	} else {
 		if (cmdline_option_fix) {
-			print("Repair did not fully succeed\n");
+			print("\nRepair did not fully succeed\n");
 		} else if (cmdline_option_install) {
-			print("Installation failed\n");
+			print("\nInstallation failed\n");
 		} else {
 			/* This is just a verification */
-			print("Diagnose did not fully succeed\n");
+			print("\n%s did not fully succeed\n", cmdline_command_verify ? "Verify" : "Diagnose");
 		}
 	}
 

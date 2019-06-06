@@ -21,7 +21,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
-		Verifying version 10
+		Diagnosing version 10
 		Warning: the force or picky option is specified; ignoring version mismatch for repair
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
 		Error: Unable to verify. One or more currently installed bundles are not available at version 10. Use --force to override
@@ -43,16 +43,16 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Verifying version 10
+		Diagnosing version 10
 		Warning: the force or picky option is specified; ignoring version mismatch for repair
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
 		Warning: One or more installed bundles that are not available at version 10 will be removed.
-		Verifying files
+		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Repairing modified files
-		Hash mismatch for file: .*/target-dir/usr/lib/os-release
-		.fixed
+		Repairing corrupt files
+		.* Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
+		Removing extraneous files
 		--picky removing extra files under .*/target-dir/usr
 		REMOVING /usr/share/defaults/swupd/versionurl
 		REMOVING /usr/share/defaults/swupd/contenturl
@@ -87,16 +87,16 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Verifying version 10
+		Diagnosing version 10
 		Warning: the force or picky option is specified; ignoring version mismatch for repair
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
 		Warning: One or more installed bundles that are not available at version 10 will be removed.
-		Verifying files
+		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Repairing modified files
-		Hash mismatch for file: .*/target-dir/usr/lib/os-release
-		.fixed
+		Repairing corrupt files
+		.* Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
+		Removing extraneous files
 		--picky removing extra files under .*/target-dir/bar
 		REMOVING /bar/file_5
 		REMOVING /bar/file_4

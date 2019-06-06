@@ -25,15 +25,14 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Verifying version 100
-		Verifying files
+		Diagnosing version 100
+		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Missing file: .*/target-dir/test-file2
-		.fixed
-		Missing file: .*/target-dir/usr/share/clear/bundles/test-bundle2
-		.fixed
-		Repairing modified files
+		.* Missing file: .*/target-dir/test-file2 -> fixed
+		.* Missing file: .*/target-dir/usr/share/clear/bundles/test-bundle2 -> fixed
+		Repairing corrupt files
+		Removing extraneous files
 		Inspected 6 files
 		  2 files were missing
 		    2 of 2 missing files were replaced

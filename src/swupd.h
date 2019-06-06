@@ -162,6 +162,7 @@ struct file_counts {
 	int extraneous;
 	int deleted;
 	int not_deleted;
+	int picky_extraneous;
 };
 
 extern bool verify_esp_only;
@@ -211,6 +212,7 @@ extern void apply_heuristics(struct file *file);
 
 extern int file_sort_filename(const void *a, const void *b);
 extern int file_sort_filename_reverse(const void *a, const void *b);
+extern int file_sort_hash(const void *a, const void *b);
 extern struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err);
 extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err);
 extern struct manifest *load_manifest_full(int version, bool mix);
@@ -365,6 +367,7 @@ enum swupd_code list_local_bundles();
 extern int link_or_rename(const char *orig, const char *dest);
 
 /* verify.c */
+extern void verify_set_command_verify(bool opt);
 extern void verify_set_option_force(bool opt);
 extern void verify_set_option_install(bool opt);
 extern void verify_set_option_quick(bool opt);

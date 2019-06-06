@@ -158,6 +158,7 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 			/* Account for these files not in the manifest as inspected also */
 			counts->checked++;
 			counts->extraneous++;
+			counts->picky_extraneous++;
 			/* Logic to avoid printing out all the files in a
 			 * directory when the directory itself is not present */
 			if (skip_dir) {

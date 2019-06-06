@@ -35,17 +35,20 @@ test_setup() {
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		Verifying version 20
-		Verifying files
-		Missing file: .*/target-dir/baz
-		Missing file: .*/target-dir/baz/file_3
-		Hash mismatch for file: .*/target-dir/foo/file_1
-		Hash mismatch for file: .*/target-dir/usr/lib/os-release
-		File that should be deleted: .*/target-dir/bar/file_2
+		Diagnosing version 20
+		Checking for missing files
+		.* Missing file: .*/target-dir/baz
+		.* Missing file: .*/target-dir/baz/file_3
+		Checking for corrupt files
+		.* Hash mismatch for file: .*/target-dir/foo/file_1
+		.* Hash mismatch for file: .*/target-dir/usr/lib/os-release
+		Checking for extraneous files
+		.* File that should be deleted: .*/target-dir/bar/file_2
 		Inspected 18 files
 		  2 files were missing
 		  2 files did not match
 		  1 file found which should be deleted
+		Use "swupd repair" to correct the problems in the system
 		Diagnose successful
 	EOM
 	)

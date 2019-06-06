@@ -551,8 +551,19 @@ clean_curl:
 			return SWUPD_INVALID_BINARY;
 		}
 
+		/* we need to resolve the whole path to swupd first, proc/self/exe
+		 * is a symbolic link to the executable that is running the current process */
+		char swupd_binary[LINE_MAX];
+		int path_length;
+		path_length = readlink("/proc/self/exe", swupd_binary, sizeof(swupd_binary));
+		if (path_length <= 0 || path_length >= LINE_MAX) {
+			error("Could not determine the swupd path\n");
+			return -1;
+		}
+		swupd_binary[path_length] = '\0';
+
 		/* Run the swupd_argv saved from main */
-		return execv(swupd_argv[0], swupd_argv);
+		return execv(swupd_binary, swupd_argv);
 	}
 
 	return ret;
@@ -579,7 +590,8 @@ static void print_help(void)
 
 	global_print_help();
 
-	// TODO(castulo): remove the deprecated options by end of November 2019
+	// TODO(castulo): remove the superseded -m option from the help menu by end of November 2019,
+	// so it is not visible but the option must remain available in the back so we don't break users
 	print("Options:\n");
 	print("   -V, --version=V         Update to version V, also accepts 'latest' (default)\n");
 	print("   -d, --download          Download all content, but do not actually install the update\n");
@@ -587,7 +599,7 @@ static void print_help(void)
 	print("   -k, --keepcache         Do not delete the swupd state directory content after updating the system\n");
 	print("   -T, --migrate           Migrate to augmented upstream/mix content\n");
 	print("   -a, --allow-mix-collisions	Ignore and continue if custom user content conflicts with upstream provided content\n");
-	print("   -m, --manifest=V        NOTE: this flag has been deprecated. Please use -V instead\n");
+	print("   -m, --manifest=V        NOTE: this flag has been superseded. Please use -V instead\n");
 	print("\n");
 }
 

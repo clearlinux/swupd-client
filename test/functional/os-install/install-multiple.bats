@@ -37,7 +37,7 @@ test_setup() {
 		  8 files were missing
 		    8 of 8 missing files were installed
 		    0 of 8 missing files were not installed
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Installation successful
 	EOM
 	)

@@ -35,7 +35,7 @@ test_setup() {
 		Staging file content
 		Applying update
 		Update was applied.
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		1 files were not in a pack
 		Update successful. System updated from version 10 to version 100
 	EOM

@@ -415,7 +415,7 @@ version_check:
 	download_subscribed_packs(latest_subs, server_manifest, false);
 	timelist_timer_stop(global_times); // closing: Download packs
 
-	/* Step 7: apply deltas */
+	/* Step	 7: apply deltas */
 	timelist_timer_start(global_times, "Apply deltas");
 	progress_set_step(7, "apply_deltas");
 	apply_deltas(current_manifest);

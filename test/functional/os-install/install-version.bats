@@ -37,7 +37,7 @@ test_setup() {
 		  3 files were missing
 		    3 of 3 missing files were installed
 		    0 of 3 missing files were not installed
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Installation successful
 	EOM
 	)
@@ -67,7 +67,7 @@ test_setup() {
 		  3 files were missing
 		    3 of 3 missing files were installed
 		    0 of 3 missing files were not installed
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Installation successful
 	EOM
 	)
@@ -97,7 +97,7 @@ test_setup() {
 		  2 files were missing
 		    2 of 2 missing files were installed
 		    0 of 2 missing files were not installed
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Installation successful
 	EOM
 	)

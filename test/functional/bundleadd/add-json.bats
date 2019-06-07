@@ -64,7 +64,7 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 91, "stepDescription" : "install_files" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 95, "stepDescription" : "install_files" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "install_files" },
-		{ "type" : "info", "msg" : "Calling post-update helper scripts. " },
+		{ "type" : "info", "msg" : "Calling post-update helper scripts " },
 		{ "type" : "progress", "currentStep" : 7, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "run_scripts" },
 		{ "type" : "info", "msg" : "Successfully installed 1 bundle " },
 		{ "type" : "end", "section" : "bundle-add", "status" : 0 }

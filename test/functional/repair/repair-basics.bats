@@ -56,7 +56,7 @@ test_setup() {
 		  1 file found which should be deleted
 		    1 of 1 files were deleted
 		    0 of 1 files were not deleted
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Repair successful
 	EOM
 	)
@@ -108,7 +108,7 @@ test_setup() {
 		  4 files found which should be deleted
 		    4 of 4 files were deleted
 		    0 of 4 files were not deleted
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Repair successful
 	EOM
 	)
@@ -161,7 +161,7 @@ test_setup() {
 		  3 files found which should be deleted
 		    3 of 3 files were deleted
 		    0 of 3 files were not deleted
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Repair successful
 	EOM
 	)

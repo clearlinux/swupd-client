@@ -39,7 +39,7 @@ test_setup() {
 		  2 files did not match
 		    2 of 2 files were repaired
 		    0 of 2 files were not repaired
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Repair successful
 	EOM
 	)

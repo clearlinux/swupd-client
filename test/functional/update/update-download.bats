@@ -29,7 +29,7 @@ test_setup() {
 		    new files         : 1
 		    deleted files     : 0
 		No extra files need to be downloaded
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 	EOM
 	)
 	assert_is_output "$expected_output"

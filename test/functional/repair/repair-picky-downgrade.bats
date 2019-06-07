@@ -46,7 +46,7 @@ test_setup() {
 		Diagnosing version 10
 		Warning: the force or picky option is specified; ignoring version mismatch for repair
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
-		Warning: One or more installed bundles that are not available at version 10 will be removed.
+		Warning: One or more installed bundles that are not available at version 10 will be removed
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
@@ -67,7 +67,7 @@ test_setup() {
 		  6 files found which should be deleted
 		    6 of 6 files were deleted
 		    0 of 6 files were not deleted
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Repair successful
 	EOM
 	)
@@ -90,7 +90,7 @@ test_setup() {
 		Diagnosing version 10
 		Warning: the force or picky option is specified; ignoring version mismatch for repair
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
-		Warning: One or more installed bundles that are not available at version 10 will be removed.
+		Warning: One or more installed bundles that are not available at version 10 will be removed
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
@@ -108,7 +108,7 @@ test_setup() {
 		  3 files found which should be deleted
 		    3 of 3 files were deleted
 		    0 of 3 files were not deleted
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Repair successful
 	EOM
 	)

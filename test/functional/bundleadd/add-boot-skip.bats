@@ -21,7 +21,7 @@ test_setup() {
 		No packs need to be downloaded
 		Starting download of remaining update content. This may take a while...
 		Installing bundle(s) files...
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Warning: boot files update skipped due to --no-boot-update argument
 		Successfully installed 1 bundle
 	EOM

@@ -699,7 +699,7 @@ enum swupd_code verify_main(int argc, char **argv)
 
 	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {
-		error("Failed diagnose initialization, exiting now.\n");
+		error("Failed diagnose initialization, exiting now\n");
 		goto clean_args_and_exit;
 	}
 
@@ -827,11 +827,11 @@ enum swupd_code verify_main(int argc, char **argv)
 			if (cmdline_option_force) {
 				if (cmdline_option_picky && cmdline_option_fix) {
 					warn("One or more installed bundles that are not "
-					     "available at version %d will be removed.\n",
+					     "available at version %d will be removed\n",
 					     version);
 				} else if (cmdline_option_picky && !cmdline_option_fix) {
 					warn("One or more installed bundles are not "
-					     "available at version %d.\n",
+					     "available at version %d\n",
 					     version);
 				}
 				ret = SWUPD_OK;
@@ -1009,6 +1009,7 @@ brick_the_system_and_clean_curl:
 		need_update_boot = true;
 		need_update_bootloader = true;
 		timelist_timer_start(global_times, "Run Scripts");
+		info("\n");
 		scripts_run_post_update(false);
 		timelist_timer_stop(global_times);
 	}
@@ -1064,7 +1065,7 @@ clean_and_exit:
 
 	/* suggestion to fix problems */
 	if (!cmdline_option_install && !cmdline_option_fix && (counts.mismatch > 0 || counts.missing > 0 || counts.extraneous > 0)) {
-		info("Use \"swupd repair%s\" to correct the problems in the system\n", counts.picky_extraneous > 0 ? " --picky" : "");
+		info("\nUse \"swupd repair%s\" to correct the problems in the system\n", counts.picky_extraneous > 0 ? " --picky" : "");
 	}
 
 	if (ret == SWUPD_OK) {

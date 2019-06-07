@@ -121,7 +121,7 @@ test_setup() {
 		\{ "type" : "info", "msg" : "  3 files found which should be deleted " \},
 		\{ "type" : "info", "msg" : "    3 of 3 files were deleted " \},
 		\{ "type" : "info", "msg" : "    0 of 3 files were not deleted " \},
-		\{ "type" : "info", "msg" : "Calling post-update helper scripts. " \},
+		\{ "type" : "info", "msg" : "Calling post-update helper scripts " \},
 		\{ "type" : "warning", "msg" : "helper script \\(.*/usr/bin/clr-boot-manager\\) not found, it will be skipped " \},
 		\{ "type" : "info", "msg" : " Repair successful " \},
 		\{ "type" : "end", "section" : "verify", "status" : 0 \}

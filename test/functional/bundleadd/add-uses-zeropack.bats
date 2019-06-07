@@ -36,7 +36,7 @@ test_setup() {
 		Finishing packs extraction...
 		No extra files need to be downloaded
 		Installing bundle(s) files...
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Successfully installed 1 bundle
 	EOM
 	)

@@ -59,7 +59,7 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 10, "totalSteps" : 11, "stepCompletion" : 66, "stepDescription" : "update_files" },
 		{ "type" : "progress", "currentStep" : 10, "totalSteps" : 11, "stepCompletion" : 100, "stepDescription" : "update_files" },
 		{ "type" : "info", "msg" : "Update was applied. " },
-		{ "type" : "info", "msg" : "Calling post-update helper scripts. " },
+		{ "type" : "info", "msg" : "Calling post-update helper scripts " },
 		{ "type" : "progress", "currentStep" : 11, "totalSteps" : 11, "stepCompletion" : 100, "stepDescription" : "run_postupdate_scripts" },
 	EOM
 	)

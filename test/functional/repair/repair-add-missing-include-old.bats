@@ -37,7 +37,7 @@ test_setup() {
 		  2 files were missing
 		    2 of 2 missing files were replaced
 		    0 of 2 missing files were not replaced
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Repair successful
 	EOM
 	)

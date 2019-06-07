@@ -30,7 +30,7 @@ test_setup() {
 		Installing bundle(s) files...
 		Warning: Update target directory does not exist: $TEST_DIRNAME/testfs/target-dir/foo/bar. Trying to fix it
 		Path /foo/bar is missing on the file system ... fixing
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Successfully installed 1 bundle
 	EOM
 	)

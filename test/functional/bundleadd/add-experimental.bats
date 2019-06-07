@@ -30,7 +30,7 @@ test_teardown() {
 		No packs need to be downloaded
 		Starting download of remaining update content. This may take a while...
 		Installing bundle(s) files...
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Successfully installed 1 bundle
 	EOM
 	)

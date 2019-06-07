@@ -141,7 +141,7 @@ void scripts_run_post_update(bool block)
 		return;
 	}
 
-	info("Calling post-update helper scripts.\n");
+	info("Calling post-update helper scripts\n");
 
 	if (need_update_boot || need_update_bootloader) {
 		if (no_boot_update) {

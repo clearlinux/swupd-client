@@ -20,7 +20,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
-		Warning: One or more installed bundles are not available at version 10.
+		Warning: One or more installed bundles are not available at version 10
 		Generating list of extra files under .*/target-dir/usr
 		/usr/share/defaults/swupd/versionurl
 		/usr/share/defaults/swupd/contenturl

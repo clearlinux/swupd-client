@@ -32,7 +32,7 @@ test_setup() {
 		Staging file content
 		Applying update
 		Update was applied.
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Update successful. System updated from version 10 to version 20
 		Update started.
 		Preparing to update from 30 to 40
@@ -50,7 +50,7 @@ test_setup() {
 		Staging file content
 		Applying update
 		Update was applied.
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Update successful. System updated from version 30 to version 40
 	EOM
 	)

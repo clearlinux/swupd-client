@@ -37,7 +37,7 @@ test_setup() {
 		Staging file content
 		Applying update
 		Update was applied.
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Update successful. System updated from version 10 to version 20
 		Error: Inconsistency between version files, exiting now.
 	EOM

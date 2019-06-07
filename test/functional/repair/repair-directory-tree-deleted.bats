@@ -35,7 +35,7 @@ test_setup() {
 		  3 files found which should be deleted
 		    3 of 3 files were deleted
 		    0 of 3 files were not deleted
-		Calling post-update helper scripts.
+		Calling post-update helper scripts
 		Repair successful
 	EOM
 	)

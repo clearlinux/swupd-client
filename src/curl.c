@@ -262,6 +262,7 @@ double swupd_curl_query_content_size(char *url)
 {
 	CURLcode curl_ret;
 	double content_size;
+	long response = 0;
 
 	if (!curl) {
 		error("Curl hasn't been initialized\n");
@@ -310,6 +311,25 @@ double swupd_curl_query_content_size(char *url)
 
 	curl_ret = curl_easy_perform(curl);
 	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
+	/* if the file doesn't exist in the remote server, the server will respond
+	 * with its "404 Not Found" page, which has a size itself (162 bytes for
+	 * NGINX which is the default content server used by clear). So if the file is
+	 * not found we need to return a size of 0 instead, otherwise the download size
+	 * calculation will be wrong */
+	curl_ret = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+	/* only acceptable responses at this point are 0, 200 and 404 */
+	if (response == 404) {
+		/* file not found, size zero */
+		return 0;
+	} else if (response != 200 && response != 0) {
+		/* some other error happened with the request, this may cause the
+		 * download size to be wrong, so just return an error */
 		return -1;
 	}
 

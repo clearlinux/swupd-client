@@ -97,6 +97,13 @@ void progress_report(double count, double max)
 
 		/* Only print when the percentage changes, so a maximum of 100 times per run */
 		int percentage = (int)(100 * (count / max));
+
+		/* we should never have a percentage bigger than 100% */
+		if (percentage > 100) {
+			debug("Progress percentage overflow %d%% (Count: %ld, Max: %ld)\n", percentage, (long)count, (long)max);
+			return;
+		}
+
 		if (percentage != last_percentage || step.current != last_step) {
 			if (progress_function) {
 				progress_function(step.description, step.current, step.total, percentage);

@@ -164,3 +164,18 @@ char *str_tolower(const char *str)
 
 	return str_lower;
 }
+
+bool strtobool(const char *str)
+{
+	char *str_lower;
+	bool ret = false;
+
+	str_lower = str_tolower(str);
+	if (strcmp(str_lower, "true") == 0) {
+		ret = true;
+	}
+
+	/* return false for everything else */
+	free_string(&str_lower);
+	return ret;
+}

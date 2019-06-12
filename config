@@ -1,0 +1,314 @@
+# #####################
+# Config file for swupd
+# #####################
+
+[GLOBAL]
+
+#
+# Global options
+#
+
+# Use PATH to define the root directory for swupd commands (eg: a chroot or
+# btrfs subvol) (string value)
+#path=<PATH>
+
+# RFC-3986 encoded url for version string and content file
+# downloads (string value)
+# This option defines both; contenturl and versionurl
+#url=<URL>
+
+# Port number to connect to at the url for version string and content file
+# downloads (integer value)
+#port=<PORT #>
+
+# RFC-3986 encoded url for content file downloads (string value)
+#contenturl=<URL>
+
+# RFC-3986 encoded url for version file downloads (string value)
+#versionurl=<URL>
+
+# The format suffix for version file downloads
+# Possible values:
+# staging - used for testing purposes (string value)
+# 1,2,3...                            (integer value)
+#format=<FORMAT>
+
+# Specify alternate swupd state directory (string value)
+#statedir=<PATH>
+
+# Specify alternate path to swupd certificates (string value)
+#certpath=<PATH>
+
+# Set the maximum number of parallel downloads (integer value)
+#max_parallel_downloads=<# OF DOWNLOADS>
+
+# Maximum number of retries for download failures (integer value)
+#max_retries=<# OF RETRIES>
+
+# Initial delay between download retries, this will be doubled for each
+# retry (integer value)
+#retry_delay=<DELAY>
+
+# Print all output as a JSON stream (boolean value)
+#json_output=<true/false>
+
+# Ignore system/certificate time when validating signature (boolean value)
+#ignore_time=<true/false>
+
+# Show verbose time output for swupd operations (boolean value)
+#time=<true/false>
+
+# Do not attempt to enforce certificate or signature checking (boolean value)
+#nosigcheck=<true/false>
+
+# Do not install boot files to the boot partition (containers) (boolean value)
+#no_boot_update=<true/false>
+
+# Do not run the post-update scripts and boot update tool (boolean value)
+#no_scripts=<true/false>
+
+# Allow updates over insecure connections
+#allow_insecure_http=<true/false>
+
+# Quiet output. Print only important information and errors (boolean value)
+#quiet=<true/false>
+
+# Print extra information to help debugging problems (boolean value)
+#debug=<true/false>
+
+
+
+#
+# The sections below contain the options that apply specifically to
+# the commands referred to by the [<command>] sections.
+#
+# Note that some commands don't have local options, but even in those cases
+# global options can be specified to only apply to that command if set up
+# within the [<command>] section.
+#
+# Example: you could enable machine readable output (JSON) for every command
+# except for the "info" command by setting it like this
+# [GLOBAL]
+# json_output=true
+# [info]
+# json_output=false
+#
+
+
+[info]
+
+#
+# Options for the "swupd info" command
+#
+
+
+[autoupdate]
+
+#
+# Options for the "swupd autoupdate" command
+#
+
+
+[check-update]
+
+#
+# Options for the "swupd check-update" command
+#
+
+
+[update]
+
+#
+# Options for the "swupd update" command
+#
+
+# Update to the specified version
+# Possible values:
+# ..., 29890, 29900, 29910, ...                     (integer value)
+# latest - used to refer to the most recent version (string value)
+#version=<VERSION>
+
+# Ignore and continue if custom user content conflicts with upstream provided
+# content (boolean value)
+#allow_mix_collisions=<true/false>
+
+# Download all content, but do not actually install the update (boolean value)
+#download=<true/false>
+
+# Show current OS version and latest version available on server, eEquivalent
+# to "swupd check-update" (boolean value)
+#status=<true/false>
+
+# Do not delete the swupd state directory content after updating the
+# system (boolean value)
+#keepcache=<true/false>
+
+# Migrate to augmented upstream/mix content (boolean value)
+#migrate=<true/false>
+
+
+[bundle-add]
+
+#
+# Options for the "swupd bundle-add" command
+#
+
+# Do not check free disk space before adding bundle (boolean value)
+#skip_diskspace_check=<true/false>
+
+
+[bundle-remove]
+
+#
+# Options for the "swupd bundle-remove" command
+#
+
+
+[bundle-list]
+
+#
+# Options for the "swupd bundle-list" command
+#
+
+# List all available bundles for the current version of Clear
+# Linux (boolean value)
+#all=<true/false>
+
+# List bundles included by BUNDLE (string value)
+#deps=[BUNDLE]
+
+# List dependency tree of all bundles which have BUNDLE as a
+# dependency (string value)
+#has_dep=[BUNDLE]
+
+
+[search-file]
+
+#
+# Options for the "swupd search-file" command
+#
+
+# Search paths where libraries are located for a match (boolean value)
+#library=<true/false>
+
+# Search paths where binaries are located for a match (boolean value)
+#binary=<true/false>
+
+# Only display the top NUM results for each bundle (integer value)
+#top=[NUM]
+
+# Output all results in CSV format (machine-readable) (boolean value)
+#csv=<true/false>
+
+# Download all manifests then return, no search done (boolean value)
+#init=<true/false>
+
+# Sort the output. ORDER is one of the following values: (string value)
+# - 'alpha' to order alphabetically (default)
+# - 'size' to order by bundle size (smaller to larger)
+#order=[ORDER]
+
+
+[diagnose]
+
+#
+# Options for the "swupd diagnose" command
+#
+
+# Diagnose the system against manifest version V (integer value)
+#version=V
+
+# Attempt to proceed even if non-critical errors found (boolean value)
+#force=<true/false>
+
+# List files which should not exist (boolean value)
+#picky=<true/false>
+
+# Selects the sub-tree where --picky looks for extra files (string value)
+# Default: /usr (string value)
+#picky-tree=[PATH]
+
+# Any path completely matching the POSIX extended regular expression is ignored
+# by --picky, matched directories get skipped (string value)
+# Example: /var|/etc/machine-id
+# Default: /usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src
+#picky-whitelist=[RE]
+
+# Diagnose if BUNDLES are installed correctly (string value)
+# Example: --bundles=os-core,vi
+#bundles=[BUNDLES]
+
+
+[repair]
+
+#
+# Options for the "swupd repair" command
+#
+
+# Compare against version V to determine what needs to be
+# repaired (integer value)
+#version=V
+
+# Attempt to proceed even if non-critical errors found (boolean value)
+#force=<true/false>
+
+# Don't fix corrupt files, only fix missing files (boolean value)
+#quick=<true/false>
+
+# Repair BUNDLES that are not installed correctly (string value)
+# Example: --bundles=os-core,vi
+#bundles=[BUNDLES]
+
+# Remove files which should not exist (boolean value)
+#picky=<true/false>
+
+# Selects the sub-tree where --picky looks for extra files (string value)
+# Default: /usr
+#picky-tree=[PATH]
+
+# Any path completely matching the POSIX extended regular expression is ignored
+# by --picky, matched directories get skipped (string value)
+# Example: /var|/etc/machine-id
+# Default: /usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src
+#picky-whitelist=[RE]
+
+
+[os-install]
+
+#
+# Options for the "swupd os-install" command
+#
+
+# Attempt to proceed even if non-critical errors found (boolean value)
+#force=<true/false>
+
+# Include the specified BUNDLES in the OS installation (string value)
+# Example: --bundles=os-core,vi
+#bundles=[BUNDLES]
+
+# If the version to install is not the latest, it can be specified with this
+# option (string value)
+#version=V
+
+
+[mirror]
+
+#
+# Options for the "swupd mirror" command
+#
+
+
+[clean]
+
+#
+# Options for the "swupd clean" command
+#
+
+
+[hashdump]
+
+#
+# Options for the "swupd hashdump" command
+#
+
+

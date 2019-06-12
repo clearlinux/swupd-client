@@ -43,7 +43,7 @@ static bool cmdline_command_verify = false;
 static bool cmdline_option_force = false;
 static bool cmdline_option_fix = false;
 static bool cmdline_option_picky = false;
-static const char *cmdline_option_picky_tree = "/usr";
+static char *cmdline_option_picky_tree = NULL;
 static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
 static bool cmdline_option_install = false;
 static bool cmdline_option_quick = false;
@@ -117,8 +117,9 @@ void verify_set_picky_whitelist(regex_t *whitelist)
 	picky_whitelist = whitelist;
 }
 
-void verify_set_picky_tree(const char *picky_tree)
+void verify_set_picky_tree(char *picky_tree)
 {
+	free_string(&cmdline_option_picky_tree);
 	cmdline_option_picky_tree = picky_tree;
 }
 
@@ -575,10 +576,11 @@ static bool parse_opt(int opt, char *optarg)
 			error("--picky-tree must be an absolute path, for example /usr\n\n");
 			return false;
 		}
-		cmdline_option_picky_tree = optarg;
+		free_string(&cmdline_option_picky_tree);
+		cmdline_option_picky_tree = strdup_or_die(optarg);
 		return true;
 	case 'w':
-		cmdline_option_picky_whitelist = optarg;
+		cmdline_option_picky_whitelist = strdup_or_die(optarg);
 		return true;
 	case 'B': {
 		char *arg_copy = strdup_or_die(optarg);
@@ -657,7 +659,7 @@ static bool parse_options(int argc, char **argv)
  * found to not match the manifest.  This is notably different from update,
  * which attempts to atomically (or nearly atomically) activate a set of
  * pre-computed and validated staged changes as a group. */
-enum swupd_code verify_main(int argc, char **argv)
+enum swupd_code verify_main(void)
 {
 	struct manifest *official_manifest = NULL;
 	int ret;
@@ -681,11 +683,6 @@ enum swupd_code verify_main(int argc, char **argv)
 	 * 10) remove_extraneous_files
 	 */
 
-	if (!parse_options(argc, argv)) {
-		ret = SWUPD_INVALID_OPTION;
-		print_help();
-		goto clean_args_and_exit;
-	}
 	/* calculate the number of steps in the process so we can report progress */
 	if (cmdline_option_install) {
 		steps_in_verify += 3;
@@ -1115,5 +1112,23 @@ clean_args_and_exit:
 	}
 
 	progress_finish_steps("verify", ret);
+	return ret;
+}
+
+enum swupd_code diagnose_main(int argc, char **argv)
+{
+	int ret = SWUPD_OK;
+
+	string_or_die(&cmdline_option_picky_tree, "/usr");
+
+	if (!parse_options(argc, argv)) {
+		print_help();
+		return SWUPD_INVALID_OPTION;
+	}
+
+	/* diagnose */
+	ret = verify_main();
+
+	free_string(&cmdline_option_picky_tree);
 	return ret;
 }

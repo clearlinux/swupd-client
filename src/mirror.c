@@ -236,8 +236,8 @@ void handle_mirror_if_stale(void)
 		 * since at the moment the cached_version is the outdated mirror version */
 		free_string(&version_url);
 		free_string(&content_url);
-		set_version_url(NULL);
-		set_content_url(NULL);
+		set_default_version_url();
+		set_default_content_url();
 		get_latest_version(ret_str);
 		goto out;
 	}

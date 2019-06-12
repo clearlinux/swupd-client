@@ -70,7 +70,7 @@ install:
 # Ubuntu's default umask is 0002, but this break's swupd hash calculations.
 before_script:
         - autoreconf --verbose --warnings=none --install --force
-        - ./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --with-fallback-capaths=$TRAVIS_BUILD_DIR/swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system
+        - ./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --with-fallback-capaths=$TRAVIS_BUILD_DIR/swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path=./testconfig
         - sudo find test/functional -exec chmod g-w {} \;
         - make &&
           sudo sh -c 'umask 0022 && make install' &&

@@ -1,6 +1,6 @@
 SUFFIXES= .rst
 
-EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash
+EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash config
 
 AM_CFLAGS = -fPIE -fPIC -g -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99 \
 	-O$(OPTIMIZE) \
@@ -36,6 +36,8 @@ swupd_SOURCES = \
 	src/alias.h \
 	src/lib/archives.c \
 	src/lib/archives.h \
+	src/lib/config_parser.c \
+	src/lib/config_parser.h \
 	src/autoupdate.c \
 	src/binary_loader.c \
 	src/bundle.c \
@@ -44,6 +46,8 @@ swupd_SOURCES = \
 	src/clr_bundle_add.c \
 	src/clr_bundle_ls.c \
 	src/clr_bundle_rm.c \
+	src/config_loader.c \
+	src/config_loader.h \
 	src/curl.c \
 	src/curl_async.c \
 	src/delta.c \
@@ -302,6 +306,7 @@ BATS = \
 	test/functional/update/update-with-old-mirror.bats \
 	test/functional/update/update-with-slightly-old-mirror.bats \
 	test/functional/usability/usa-completion-basic.bats \
+	test/functional/usability/usa-config-file.bats \
 	test/functional/usability/usa-download-retries.bats \
 	test/functional/usability/usa-external-modules.bats
 

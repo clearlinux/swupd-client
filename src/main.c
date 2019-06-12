@@ -48,13 +48,13 @@ static struct subcmd commands[] = {
 	{ "search", "Searches for the best bundle to install a binary or library", binary_loader_main },
 #endif
 	{ "search-file", "Command to search files in Clear Linux bundles", search_main },
-	{ "diagnose", "Verify content for OS version", verify_main },
+	{ "diagnose", "Verify content for OS version", diagnose_main },
 	{ "repair", "Repair local issues relative to server manifest (will not modify ignored files)", repair_main },
 	{ "os-install", "Install Clear Linux OS to a blank partition or directory", install_main },
 	{ "mirror", "Configure mirror url for swupd content", mirror_main },
 	{ "clean", "Clean cached files", clean_main },
 	{ "hashdump", "Dump the HMAC hash of a file", hashdump_main },
-	{ "verify", "NOTE: this command has been superseded, please use \"swupd diagnose\" instead", verify_main },
+	{ "verify", "NOTE: this command has been superseded, please use \"swupd diagnose\" instead", diagnose_main },
 	{ 0 }
 };
 

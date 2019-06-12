@@ -10,7 +10,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "config_loader.h"
 #include "lib/archives.h"
+#include "lib/config_parser.h"
 #include "lib/formatter_json.h"
 #include "lib/list.h"
 #include "lib/log.h"
@@ -195,8 +197,10 @@ extern char *cert_path;
 extern int update_server_port;
 extern char *default_format_path;
 extern bool set_path_prefix(char *path);
-extern int set_content_url(char *url);
-extern int set_version_url(char *url);
+extern void set_content_url(char *url);
+extern void set_version_url(char *url);
+extern int set_default_content_url(void);
+extern int set_default_version_url(void);
 
 extern void check_root(void);
 
@@ -369,6 +373,7 @@ enum swupd_code list_local_bundles();
 extern int link_or_rename(const char *orig, const char *dest);
 
 /* verify.c */
+extern enum swupd_code verify_main(void);
 extern void verify_set_command_verify(bool opt);
 extern void verify_set_option_force(bool opt);
 extern void verify_set_option_install(bool opt);
@@ -378,7 +383,7 @@ extern void verify_set_option_version(int ver);
 extern void verify_set_option_fix(bool opt);
 extern void verify_set_option_picky(bool opt);
 extern void verify_set_picky_whitelist(regex_t *whitelist);
-extern void verify_set_picky_tree(const char *picky_tree);
+extern void verify_set_picky_tree(char *picky_tree);
 
 /* repair.c */
 extern regex_t *compile_whitelist(const char *whitelist_pattern);
@@ -418,6 +423,10 @@ struct global_options {
 
 void global_print_help(void);
 int global_parse_options(int argc, char **argv, const struct global_options *opts);
+extern void global_set_opt_from_config(bool state);
+
+extern void config_loader_init(char *, const struct option *, parse_opt_fn_t, parse_opt_fn_t, long_opt_default_fn_t);
+extern bool config_loader_set_opt(char *section, char *key, char *value);
 
 enum swupd_code check_update();
 

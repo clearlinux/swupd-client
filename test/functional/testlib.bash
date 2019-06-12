@@ -10,6 +10,8 @@ export THEME_DIRNAME
 export FUNC_DIR
 export SWUPD_DIR="$FUNC_DIR/../.."
 export SWUPD="$SWUPD_DIR/swupd"
+export SWUPD_CONFIG_DIR="$SWUPD_DIR"/testconfig
+export SWUPD_CONFIG_FILE="$SWUPD_CONFIG_DIR"/config
 
 # Exit codes
 export SWUPD_OK=0
@@ -1640,6 +1642,49 @@ destroy_test_fs() { # swupd_function
 	rm "$fsfile"
 
 }
+
+create_config_file() { # swupd_function
+
+	if [ -e "$SWUPD_CONFIG_FILE" ]; then
+		destroy_config_file
+	fi
+
+	mkdir -p "$SWUPD_CONFIG_DIR"
+	touch "$SWUPD_CONFIG_FILE"
+
+}
+
+destroy_config_file() { # swupd_function
+
+	rm -rf "$SWUPD_CONFIG_DIR"
+
+}
+
+add_option_to_config_file() { # swupd_function
+
+	local option=$1
+	local value=$2
+	local section=$3
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    add_option_to_config_file <option> <value> <section_name>
+			EOM
+		return
+	fi
+
+	validate_param "$option"
+	validate_param "$value"
+
+	if [ -n "$section" ]; then
+		echo "[$section]" >> "$SWUPD_CONFIG_FILE"
+	fi
+	echo "$option"="$value" >> "$SWUPD_CONFIG_FILE"
+
+}
+
 
 # creates a mirror of whatever is in web-dir
 # Parameters:

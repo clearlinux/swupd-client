@@ -6,6 +6,7 @@
  * @brief Format the output to print using JSON format.
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
@@ -13,9 +14,9 @@ extern "C" {
 #endif
 
 /**
- * @brief Enables the JSON formatter
+ * @brief Enables/Disables the JSON formatter
  */
-void set_json_format(void);
+void set_json_format(bool on);
 
 /**
  * @brief Generates the initial message of a JSON stream

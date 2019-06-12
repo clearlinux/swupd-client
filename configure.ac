@@ -222,6 +222,15 @@ AS_IF(
 )
 
 AC_ARG_WITH(
+  [config-file-path],
+  [AS_HELP_STRING([--with-config-file-path=PATHS], [List of directories to look for the configuration file])],
+  [config_file_path=${withval}],
+  [config_file_path="/etc/swupd:/run/swupd:/usr/share/defaults/swupd"]
+)
+AC_SUBST(CONFIG_FILE_PATH, [${config_file_path}])
+AC_DEFINE_UNQUOTED([CONFIG_FILE_PATH], ["${config_file_path}"], [List of directories to look for the configuration file])
+
+AC_ARG_WITH(
   [system-alias-path],
   [AS_HELP_STRING([--with-system-alias-path=PATH], [Default system alias path])],
   [system_alias_path=${withval}],
@@ -368,6 +377,7 @@ Configuration to build swupd-client:
   Format Identifier:			${FORMATID}
   Signature verification:		${SIGVERIFICATION}
   Update certificate path:		${cert_path}
+  Configuration file path(s):		${config_file_path}
   Use bzip compression:			${BZIP}
   Run Tests:				${TESTS}
   Use extended file attributes		${XATTR}

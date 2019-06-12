@@ -148,7 +148,7 @@ enum swupd_code install_main(int argc, char **argv)
 	verify_set_option_version(cmdline_option_version);
 
 	/* install */
-	ret = verify_main(0, NULL);
+	ret = verify_main();
 
 	return ret;
 }

@@ -76,6 +76,16 @@ static int max_parallel_downloads = -1;
 static int log_level = LOG_INFO;
 char **swupd_argv = NULL;
 
+/* flag required to identify options being set by a config file
+ * and options being set by a flag in a command, the latter should
+ * have higher precedence */
+static bool from_config = false;
+
+void global_set_opt_from_config(bool state)
+{
+	from_config = state;
+}
+
 static void remove_trailing_slash(char *url)
 {
 	int len = strlen(url);
@@ -174,25 +184,12 @@ int get_version_from_path(const char *abs_path)
 	return -1;
 }
 
-/* Initializes the content_url global variable. If the url parameter is not
- * NULL, content_url will be set to its value. Otherwise, the value is read
- * from the 'contenturl' configuration file.
- */
-int set_content_url(char *url)
+/* Initializes the content_url global variable with the default value,
+ * the value is read from the 'contenturl' configuration file */
+int set_default_content_url(void)
 {
-	int ret = 0;
+	int ret;
 
-	if (content_url) {
-		/* Only set once; we assume the first successful set is the best choice */
-		return 0;
-	}
-
-	if (url) {
-		content_url = strdup_or_die(url);
-		goto end;
-	}
-
-	// Content URL not set. Use default values
 	// Look for mirror inside path_prefix
 	ret = get_value_from_path(&content_url, MIRROR_CONTENT_URL_PATH, false);
 	if (ret == 0) {
@@ -212,32 +209,40 @@ int set_content_url(char *url)
 	}
 
 	return -1;
-
 end:
-	content_url_is_local = strncmp(content_url, "file://", 7) == 0;
 	remove_trailing_slash(content_url);
-	return ret;
+	content_url_is_local = strncmp(content_url, "file://", 7) == 0;
+	return 0;
 }
 
-/* Initializes the version_url global variable. If the url parameter is not
- * NULL, version_url will be set to its value. Otherwise, the value is read
- * from the 'versionurl' configuration file.
- */
-int set_version_url(char *url)
+/* Sets the content_url global variable */
+void set_content_url(char *url)
 {
-	int ret = 0;
+	static bool set_by_config = false;
 
-	if (version_url) {
-		/* Only set once; we assume the first successful set is the best choice */
-		return 0;
+	/* normally we want to only set this once; we assume the first successful
+	 * set is the best choice, except when the first set was done by a config
+	 * file, that can be overwritten by other values set from command line */
+	if (content_url && !set_by_config) {
+		return;
 	}
 
-	if (url) {
-		version_url = strdup_or_die(url);
-		goto end;
-	}
+	free_string(&content_url);
+	content_url = strdup_or_die(url);
+	remove_trailing_slash(content_url);
+	content_url_is_local = strncmp(content_url, "file://", 7) == 0;
 
-	// version URL not set. Use default values
+	/* if this option is being set by an option in a configuration file,
+	 * set the local flag */
+	set_by_config = from_config ? true : false;
+}
+
+/* Initializes the version_url global variable with the default value,
+ * the value is read from the 'versionurl' configuration file */
+int set_default_version_url(void)
+{
+	int ret;
+
 	// Look for mirror inside path_prefix
 	ret = get_value_from_path(&version_url, MIRROR_VERSION_URL_PATH, false);
 	if (ret == 0) {
@@ -257,11 +262,30 @@ int set_version_url(char *url)
 	}
 
 	return -1;
-
 end:
 	remove_trailing_slash(version_url);
-
 	return 0;
+}
+
+/* Sets the version_url global variable */
+void set_version_url(char *url)
+{
+	static bool set_by_config = false;
+
+	/* normally we want to only set this once; we assume the first successful
+	 * set is the best choice, except when the first set was done by a config
+	 * file, that can be overwritten by other values set from command line */
+	if (version_url && !set_by_config) {
+		return;
+	}
+
+	free_string(&version_url);
+	version_url = strdup_or_die(url);
+	remove_trailing_slash(version_url);
+
+	/* if this option is being set by an option in a configuration file,
+	 * set the local flag */
+	set_by_config = from_config ? true : false;
 }
 
 static bool is_valid_integer_format(char *str)
@@ -284,7 +308,9 @@ static bool is_valid_integer_format(char *str)
  */
 static bool set_state_dir(char *path)
 {
-	if (path) {
+	bool use_default = path ? false : true;
+
+	if (!use_default) {
 		if (path[0] != '/') {
 			error("state dir must be a full path starting with '/', not '%c'\n", path[0]);
 			return false;
@@ -301,6 +327,7 @@ static bool set_state_dir(char *path)
 		free_string(&state_dir);
 		string_or_die(&state_dir, "%s", path);
 	} else {
+		/* initializing */
 		if (state_dir) {
 			return true;
 		}
@@ -318,12 +345,20 @@ static bool set_state_dir(char *path)
 static bool set_format_string(char *userinput)
 {
 	int ret;
+	bool use_default = userinput ? false : true;
+	static bool set_by_config = false;
 
 	if (format_string) {
-		return true;
+		if (!set_by_config || use_default) {
+			return true;
+		} else {
+			/* the value was originally set using a config file, but it is now being
+			 * specified as a command flag */
+			free_string(&format_string);
+		}
 	}
 
-	if (userinput) {
+	if (!use_default) {
 		// allow "staging" as a format string
 		if ((strcmp(userinput, "staging") == 0)) {
 			format_string = strdup_or_die(userinput);
@@ -354,6 +389,10 @@ static bool set_format_string(char *userinput)
 		}
 	}
 
+	/* if this option is being set by an option in a configuration file,
+	 * set the local flag */
+	set_by_config = from_config ? true : false;
+
 	return true;
 }
 
@@ -366,8 +405,9 @@ bool set_path_prefix(char *path)
 {
 	struct stat statbuf;
 	int ret;
+	bool use_default = path ? false : true;
 
-	if (path != NULL) {
+	if (!use_default) {
 		int len;
 		char *tmp;
 		char real_path[PATH_MAX] = { 0 };
@@ -412,6 +452,7 @@ bool set_path_prefix(char *path)
 		path_prefix = tmp;
 
 	} else {
+		/* initializing */
 		if (path_prefix) {
 			/* option passed on command line previously */
 			return true;
@@ -436,14 +477,23 @@ bool set_path_prefix(char *path)
  */
 static void set_cert_path(char *path)
 {
+	bool use_default = path ? false : true;
+	static bool set_by_config = false;
+
 	// Early exit if the function was called previously.
 	if (cert_path) {
-		return;
+		if (!set_by_config || use_default) {
+			return;
+		} else {
+			/* the value was originally set using a config file, but it is now being
+			 * specified as a command flag */
+			free_string(&cert_path);
+		}
 	}
 
 	/* Cmd line has priority, otherwise check if we're on a mix so the correct
 	 * cert is used and user does not have to call swupd with -C all the time */
-	if (path) {
+	if (!use_default) {
 		string_or_die(&cert_path, "%s", path);
 	} else {
 		if (system_on_mix()) {
@@ -453,6 +503,10 @@ static void set_cert_path(char *path)
 			string_or_die(&cert_path, "%s", CERT_PATH);
 		}
 	}
+
+	/* if this option is being set by an option in a configuration file,
+	 * set the local flag */
+	set_by_config = from_config ? true : false;
 }
 
 bool init_globals(void)
@@ -487,33 +541,35 @@ bool init_globals(void)
 #endif
 	}
 
-	/* Calling with NULL means use the default config file value */
-	if (set_version_url(NULL)) {
+	if (!version_url) {
+		if (set_default_version_url()) {
 #ifdef VERSIONURL
-		/* Fallback to configure time version_url if other sources fail */
-		ret = set_version_url(VERSIONURL);
+			/* Fallback to configure time version_url if other sources fail */
+			ret = set_version_url(VERSIONURL);
 #else
-		/* We have no choice but to fail */
-		ret = -1;
+			/* We have no choice but to fail */
+			ret = -1;
 #endif
-		if (ret) {
-			error("\nDefault version URL not found. Use the -v option instead.\n");
-			exit(EXIT_FAILURE);
+			if (ret) {
+				error("\nDefault version URL not found. Use the -v option instead.\n");
+				exit(EXIT_FAILURE);
+			}
 		}
 	}
 
-	/* Calling set_() with NULL means load the default config file value */
-	if (set_content_url(NULL)) {
+	if (!content_url) {
+		if (set_default_content_url()) {
 #ifdef CONTENTURL
-		/* Fallback to configure time content_url if other sources fail */
-		ret = set_content_url(CONTENTURL);
+			/* Fallback to configure time content_url if other sources fail */
+			ret = set_content_url(CONTENTURL);
 #else
-		/* We have no choice but to fail */
-		ret = -1;
+			/* We have no choice but to fail */
+			ret = -1;
 #endif
-		if (ret) {
-			error("\nDefault content URL not found. Use the -c option instead.\n");
-			exit(EXIT_FAILURE);
+			if (ret) {
+				error("\nDefault content URL not found. Use the -c option instead.\n");
+				exit(EXIT_FAILURE);
+			}
 		}
 	}
 
@@ -627,19 +683,39 @@ static bool global_parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'n':
-		sigcheck = false;
+		if (optarg != NULL) {
+			sigcheck = strtobool(optarg);
+		} else {
+			sigcheck = false;
+		}
 		return true;
 	case 'I':
-		timecheck = false;
+		if (optarg != NULL) {
+			timecheck = strtobool(optarg);
+		} else {
+			timecheck = false;
+		}
 		return true;
 	case 't':
-		verbose_time = true;
+		if (optarg != NULL) {
+			verbose_time = strtobool(optarg);
+		} else {
+			verbose_time = true;
+		}
 		return true;
 	case 'N':
-		no_scripts = true;
+		if (optarg != NULL) {
+			no_scripts = strtobool(optarg);
+		} else {
+			no_scripts = true;
+		}
 		return true;
 	case 'b':
-		no_boot_update = true;
+		if (optarg != NULL) {
+			no_boot_update = strtobool(optarg);
+		} else {
+			no_boot_update = true;
+		}
 		return true;
 	case 'C':
 		set_cert_path(optarg);
@@ -666,13 +742,33 @@ static bool global_parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'j':
-		set_json_format();
+		if (optarg != NULL) {
+			set_json_format(strtobool(optarg));
+		} else {
+			set_json_format(true);
+		}
 		return true;
 	default:
 		return false;
 	}
 
 	return false;
+}
+
+static bool global_long_opt_default(const char *long_opt)
+{
+
+	if (strcmp(long_opt, "quiet") == 0) {
+		log_level = LOG_INFO;
+	} else if (strcmp(long_opt, "debug") == 0) {
+		log_level = LOG_INFO;
+	} else if (strcmp(long_opt, "allow-insecure-http") == 0) {
+		allow_insecure_http = 0;
+	} else {
+		return false;
+	}
+
+	return true;
 }
 
 static bool global_parse_deprecated(int opt, char *optarg)
@@ -742,6 +838,7 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 	int num_global_opts, opt;
 	char *optstring;
 	int ret = 0;
+	bool config_found = false;
 
 	if (!opts) {
 		return -EINVAL;
@@ -761,6 +858,37 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 	optstring = generate_optstring(opts_array,
 				       num_global_opts + opts->longopts_len);
 
+	// load configuration values from the config file first
+	config_loader_init(argv[0], opts_array, global_parse_opt, opts->parse_opt, global_long_opt_default);
+	if (CONFIG_FILE_PATH) {
+		struct stat st;
+		char *ctx = NULL;
+		char *config_file = NULL;
+		char *str = strdup_or_die(CONFIG_FILE_PATH);
+		for (char *tok = strtok_r(str, ":", &ctx); tok; tok = strtok_r(NULL, ":", &ctx)) {
+			if (stat(tok, &st)) {
+				continue;
+			}
+			if ((st.st_mode & S_IFMT) != S_IFDIR) {
+				continue;
+			}
+			debug("Looking for config file in path %s\n", tok);
+			string_or_die(&config_file, "%s/config", tok);
+			config_found = config_parse(config_file, config_loader_set_opt);
+			free_string(&config_file);
+			if (config_found) {
+				debug("Using configuration file %s\n", tok);
+				break;
+			}
+		}
+		free_string(&str);
+	}
+	if (!config_found) {
+		debug("Configuration file not found in %s\n", CONFIG_FILE_PATH);
+		debug("No configuration file will be used\n\n");
+	}
+
+	// parse and load flags from command line
 	while ((opt = getopt_long(argc, argv, optstring, opts_array, NULL)) != -1) {
 		if (opt == 'h') {
 			opts->print_help();

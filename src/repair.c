@@ -24,6 +24,7 @@
 #include "swupd.h"
 #include "swupd_internal.h"
 
+static const char picky_tree_default[] = "/usr";
 static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src";
 
 static bool cmdline_option_force = false;
@@ -31,7 +32,7 @@ static bool cmdline_option_picky = false;
 static bool cmdline_option_quick = false;
 static int cmdline_option_version = 0;
 static struct list *cmdline_bundles = NULL;
-static const char *cmdline_option_picky_tree = "/usr";
+static char *cmdline_option_picky_tree = NULL;
 static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
 
 /* picky_whitelist points to picky_whitelist_buffer if and only if regcomp() was called for it */
@@ -94,10 +95,11 @@ static bool parse_opt(int opt, char *optarg)
 			error("--picky-tree must be an absolute path, for example /usr\n\n");
 			return false;
 		}
-		cmdline_option_picky_tree = optarg;
+		free_string(&cmdline_option_picky_tree);
+		cmdline_option_picky_tree = strdup_or_die(optarg);
 		return true;
 	case 'w':
-		cmdline_option_picky_whitelist = optarg;
+		cmdline_option_picky_whitelist = strdup_or_die(optarg);
 		return true;
 	case 'B': {
 		char *arg_copy = strdup_or_die(optarg);
@@ -175,6 +177,8 @@ enum swupd_code repair_main(int argc, char **argv)
 {
 	int ret;
 
+	string_or_die(&cmdline_option_picky_tree, "%s", picky_tree_default);
+
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
@@ -192,7 +196,8 @@ enum swupd_code repair_main(int argc, char **argv)
 	verify_set_picky_tree(cmdline_option_picky_tree);
 
 	/* run verify --fix */
-	ret = verify_main(0, NULL);
+	ret = verify_main();
 
+	free_string(&cmdline_option_picky_tree);
 	return ret;
 }

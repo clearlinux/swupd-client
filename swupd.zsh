@@ -94,7 +94,7 @@ local -a global_opts; global_opts=(
   + options
   '(help status -p --path)'{-p,--path=}'[Use \[PATH...\] as the path to verify (eg\: a chroot or btrfs subvol)]:path:_path_files -/'
   '(help status -u --url)'{-u,--url=}'[RFC-3986 encoded url for version string and content file downloads]:url:_urls'
-  '(help status -P --port)'{-P,--port=}'[Port number to connect to at the url for version string and content file downloads]:port:()'
+  '(help status -P --port)'{-P,--port=}'[Port number to connect to at the url for version string and content file downloads]:port:_ports'
   '(help status -c --contenturl)'{-c,--contenturl=}'[RFC-3986 encoded url for content file downloads]:url:_urls'
   '(help status -v --versionurl)'{-v,--versionurl=}'[RFC-3986 encoded url for version file downloads]:url:_urls'
   '(help status -F --format)'{-F,--format=}'[\[staging,1,2,etc.\]\:the format suffix for version file downloads]:format:()'

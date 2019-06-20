@@ -31,7 +31,7 @@ local installed # cache for installed bundles
     elif [ -r /var/lib/swupd/version ] && [ -r /var/lib/swupd/"$(cat /var/lib/swupd/version)"/Manifest.MoM ]; then
       MoM=/var/lib/swupd/"$(cat /var/lib/swupd/version)"/Manifest.MoM
     fi
-    if [ -n $"MoM" ]; then
+    if [ -n "$MoM" ]; then
       bundles="$(sed '1,/^$/d; s/^.*\t/ /; /.*\.I\..*/d' "$MoM" | LC_ALL=C sort )"
       bundles='('"$(sed 's/\n/ /g' <<< $bundles)"')'
     fi

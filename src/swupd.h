@@ -89,6 +89,7 @@ enum swupd_init_config {
 
 struct header;
 
+extern bool allow_insecure_http;
 extern bool allow_mix_collisions;
 extern bool verbose_time;
 extern bool migrate;
@@ -349,6 +350,7 @@ extern bool is_current_version(int version);
 extern bool on_new_format(void);
 extern char *get_printable_bundle_name(const char *bundle_name, bool is_experimental);
 extern void print_regexp_error(int errcode, regex_t *regexp);
+extern bool is_url_allowed(char *url);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);

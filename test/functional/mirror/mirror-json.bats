@@ -17,12 +17,14 @@ test_setup() {
 	# command is created as a JSON stream that can be read and parsed by other
 	# applications interested into knowing real time status of the command
 
-	run sudo sh -c "$SWUPD mirror --json-output -s http://example.com/swupd-file $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD mirror --json-output -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		[
 		{ "type" : "start", "section" : "mirror" },
+		{ "type" : "warning", "msg" : "This is an insecure connection " },
+		{ "type" : "info", "msg" : "The --allow-insecure-http flag was used, be aware that this poses a threat to the system  " },
 		{ "type" : "info", "msg" : "Set upstream mirror to http://example.com/swupd-file " },
 		{ "type" : "info", "msg" : "Installed version: 10 " },
 		{ "type" : "info", "msg" : "Version URL:       http://example.com/swupd-file " },

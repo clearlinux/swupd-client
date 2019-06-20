@@ -23,7 +23,7 @@ _swupd()
     # $1 is the command being completed, $2 is the current word being expanded
     local opts IFS=$' \t\n'
     local -i i installed
-    local global="--help --url --contenturl --versionurl --port --path --format --nosigcheck --ignore-time --statedir --certpath  --time --no-scripts --no-boot-update --max-parallel-downloads --max-retries --retry-delay --json-output --debug --quiet "
+    local global="--help --url --contenturl --versionurl --port --path --format --nosigcheck --ignore-time --statedir --certpath  --time --no-scripts --no-boot-update --max-parallel-downloads --max-retries --retry-delay --json-output  --allow-insecure-http --debug --quiet "
     COMPREPLY=()
     for ((i=COMP_CWORD-1;i>=0;i--))
     do case "${COMP_WORDS[$i]}" in

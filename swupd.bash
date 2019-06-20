@@ -23,6 +23,7 @@ _swupd()
     # $1 is the command being completed, $2 is the current word being expanded
     local opts IFS=$' \t\n'
     local -i i installed
+    local global="--help --url --contenturl --versionurl --port --path --format --nosigcheck --ignore-time --statedir --certpath  --time --no-scripts --no-boot-update --max-parallel-downloads --max-retries --retry-delay --json-output --debug --quiet "
     COMPREPLY=()
     for ((i=COMP_CWORD-1;i>=0;i--))
     do case "${COMP_WORDS[$i]}" in
@@ -30,53 +31,53 @@ _swupd()
 	    #  TODO(castulo): remove the deprecated verify command by end of July 2019
 		opts="--help --version autoupdate bundle-add bundle-remove bundle-list hashdump update diagnose check-update search search-file info clean mirror os-install repair verify "
 	    break;;
+	    ("info")
+		opts="$global "
+		break;;
 	    ("autoupdate")
 		opts="--help --enable --disable "
 		break;;
+	    ("check-update")
+		opts="$global "
+		break;;
+		("update")
+		opts="$global --download --status --force --migrate --allow-mix-collisions --keepcache "
+		break;;
 	    ("bundle-add")
-		opts="--help --url --contenturl --versionurl --port --path --format --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --json-output --debug --quiet "
+		opts="$global --skip-diskspace-check "
 		break;;
 	    ("bundle-remove")
-		opts="--help --path --url --contenturl --versionurl --port --format --force --nosigcheck --ignore-time --statedir --certpath --debug --quiet --json-output "
+		opts="$global "
 		break;;
 	    ("bundle-list")
-		opts="--help --all --url --contenturl --versionurl --path --format --nosigcheck --ignore-time --statedir --certpath --deps --has-dep --debug --quiet --json-output "
+		opts="$global --all --deps --has-dep "
+		break;;
+		("search")
+		opts="--help --all --quiet --verbose "
+		break;;
+		("search-file")
+		opts="$global --library --binary --top --csv --init --order "
+		break;;
+		("diagnose")
+		opts="$global --version --picky --picky-tree --picky-whitelist --quick --force --bundles "
+		break;;
+		("repair")
+		opts="$global --version --picky --picky-tree --picky-whitelist --quick --force --bundles "
+		break;;
+		("os-install")
+		opts="$global --version --force --bundles "
+		break;;
+		("mirror")
+		opts="$global --set --unset "
+		break;;
+	    ("clean")
+		opts="$global --all --dry-run "
 		break;;
 	    ("hashdump")
 		opts="--help --no-xattrs --path --debug --quiet "
 		break;;
-	    ("update")
-		opts="--help --download --url --port --contenturl --versionurl --status --format --path --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --migrate --allow-mix-collisions --max-parallel-downloads --keepcache --debug --quiet --json-output "
-		break;;
 	    ("verify")
-		opts="--help --manifest --path --url --port --contenturl --versionurl --fix --picky --picky-tree --picky-whitelist --install --format --quick --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --debug --quiet --json-output "
-		break;;
-	    ("diagnose")
-		opts="--help --manifest --path --url --port --contenturl --versionurl --picky --picky-tree --picky-whitelist --format --quick --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --debug --quiet --json-output "
-		break;;
-	    ("check-update")
-		opts="--help --url --versionurl --port --format --force --nosigcheck --path --statedir --debug --quiet --json-output "
-		break;;
-	    ("search")
-		opts="--help"
-		break;;
-	    ("search-file")
-		opts="--help --library --binary --top --csv --init --ignore-time --url --contenturl --versionurl --port --path --format --statedir --certpath --regexp --debug --quiet --json-output "
-		break;;
-	    ("info")
-		opts="--debug --quiet --json-output "
-		break;;
-	    ("clean")
-		opts="--all --dry-run --statedir --help --debug --quiet --json-output "
-		break;;
-	    ("mirror")
-		opts="--help --set --unset --path --debug --quiet --json-output "
-		break;;
-	    ("os-install")
-		opts="--help --version --path --url --port --contenturl --versionurl --format --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --debug --quiet --json-output "
-		break;;
-	    ("repair")
-		opts="--help --manifest --path --url --port --contenturl --versionurl --picky --picky-tree --picky-whitelist --format --quick --force --nosigcheck --ignore-time --statedir --certpath --time --no-scripts --no-boot-update --max-parallel-downloads --debug --quiet --json-output "
+		opts="$global --version --manifest --fix --picky --picky-tree --picky-whitelist --install --quick --force --install "
 		break;;
 	esac
     done

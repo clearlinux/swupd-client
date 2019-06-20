@@ -33,10 +33,12 @@ test_teardown() {
 
 @test "UPD025: Updating a system using a slow server" {
 
-	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD update --allow-insecure-http $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Warning: This is an insecure connection
+		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Update started.
 		Preparing to update from 10 to 100
 		Downloading packs for:

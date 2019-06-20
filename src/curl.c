@@ -200,6 +200,11 @@ int swupd_curl_init(void)
 		return -1;
 	}
 
+	/* enforce the use of https */
+	if (!is_url_allowed(NULL)) {
+		return -1;
+	}
+
 	ret = check_connection(NULL);
 	if (ret == 0) {
 		return 0;

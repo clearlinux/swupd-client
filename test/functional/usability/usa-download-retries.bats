@@ -22,10 +22,12 @@ test_setup() {
 	# Users should be able to configure the retry of a failed download using
 	# two options --max-retries and --retry-delay
 
-	run sudo sh -c "$SWUPD bundle-add --max-retries 4 --retry-delay 0 $SWUPD_OPTS test-bundle"
+	run sudo sh -c "$SWUPD bundle-add --max-retries 4 --retry-delay 0 --allow-insecure-http $SWUPD_OPTS test-bundle"
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
+		Warning: This is an insecure connection
+		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Error: Curl - Download failed: response (204) -  'http://localhost:$port/10/Manifest.MoM.tar'
 		Retry #1 downloading from http://localhost:$port/10/Manifest.MoM.tar
 		Error: Curl - Download failed: response (204) -  'http://localhost:$port/10/Manifest.MoM.tar'
@@ -49,10 +51,12 @@ test_setup() {
 	# Users should be able to turn off download retries entirely by setting the
 	# value to 0
 
-	run sudo sh -c "$SWUPD bundle-add --max-retries 0 $SWUPD_OPTS test-bundle"
+	run sudo sh -c "$SWUPD bundle-add --max-retries 0 --allow-insecure-http $SWUPD_OPTS test-bundle"
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
+		Warning: This is an insecure connection
+		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Error: Curl - Download failed: response (204) -  'http://localhost:$port/10/Manifest.MoM.tar'
 		Download retries is disabled
 		Error: Failed to retrieve 10 MoM manifest
@@ -67,10 +71,12 @@ test_setup() {
 
 	# All failed downloads by default are atttempted 3 times
 
-	run sudo sh -c "$SWUPD bundle-add --retry-delay 1 $SWUPD_OPTS test-bundle"
+	run sudo sh -c "$SWUPD bundle-add --retry-delay 1 --allow-insecure-http $SWUPD_OPTS test-bundle"
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
+		Warning: This is an insecure connection
+		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Error: Curl - Download failed: response (204) -  'http://localhost:$port/10/Manifest.MoM.tar'
 		Waiting 1 seconds before retrying the download
 		Retry #1 downloading from http://localhost:$port/10/Manifest.MoM.tar

@@ -29,10 +29,12 @@ global_teardown() {
 
 @test "MIR001: Setting a mirror when /etc/swupd doesn't exist" {
 
-	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file $SWUPD_OPTS_MIRROR"
+	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS_MIRROR"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Warning: This is an insecure connection
+		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Set upstream mirror to http://example.com/swupd-file
 		Installed version: 10
 		Version URL:       http://example.com/swupd-file
@@ -49,10 +51,12 @@ global_teardown() {
 
 	sudo mkdir -p "$TARGETDIR"/etc/swupd
 
-	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file $SWUPD_OPTS_MIRROR"
+	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS_MIRROR"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Warning: This is an insecure connection
+		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Set upstream mirror to http://example.com/swupd-file
 		Installed version: 10
 		Version URL:       http://example.com/swupd-file
@@ -70,10 +74,12 @@ global_teardown() {
 	sudo mkdir "$TARGETDIR"/foo
 	sudo ln -s "$(realpath "$TARGETDIR"/foo)" "$TARGETDIR"/etc/swupd
 
-	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file $SWUPD_OPTS_MIRROR"
+	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS_MIRROR"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Warning: This is an insecure connection
+		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Set upstream mirror to http://example.com/swupd-file
 		Installed version: 10
 		Version URL:       http://example.com/swupd-file

@@ -46,10 +46,12 @@ test_teardown() {
 	# if the upstream server is unresponsive the update should fail after 2 minute
 	# timeout with a useful message
 
-	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD update --allow-insecure-http $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 	expected_output=$(cat <<-EOM
+		Warning: This is an insecure connection
+		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Error: Curl - Communicating with server timed out
 		Error: Updater failed to initialize, exiting now.
 	EOM
@@ -68,10 +70,12 @@ test_teardown() {
 	write_to_protected_file "$TARGETDIR"/etc/swupd/mirror_versionurl http://localhost:"$port"/
 	write_to_protected_file "$TARGETDIR"/etc/swupd/mirror_contenturl http://localhost:"$port"/
 
-	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD update --allow-insecure-http $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_CURL_INIT_FAILED"
 	expected_output=$(cat <<-EOM
+		Warning: This is an insecure connection
+		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Error: Curl - Communicating with server timed out
 		Error: Updater failed to initialize, exiting now.
 	EOM

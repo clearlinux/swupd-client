@@ -1015,3 +1015,31 @@ void print_regexp_error(int errcode, regex_t *regexp)
 
 	    free(error_buffer);
 }
+
+bool is_url_allowed(char *url)
+{
+	bool insecure = false;
+
+	if (url) {
+		if (strncmp(url, "http://", 7) == 0) {
+			insecure = true;
+		}
+	} else {
+		if (strncmp(version_url, "http://", 7) == 0 || strncmp(content_url, "http://", 7) == 0) {
+			insecure = true;
+		}
+	}
+
+	if (insecure) {
+		if (allow_insecure_http) {
+			warn("This is an insecure connection\n");
+			info("The --allow-insecure-http flag was used, be aware that this poses a threat to the system\n\n");
+		} else {
+			error("This is an insecure connection\n");
+			info("Use the --allow-insecure-http flag to proceed\n");
+			return false;
+		}
+	}
+
+	return true;
+}

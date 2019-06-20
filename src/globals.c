@@ -33,6 +33,7 @@
 #include "config.h"
 #include "lib/log.h"
 #include "swupd.h"
+bool allow_insecure_http = false;
 bool allow_mix_collisions = false;
 bool migrate = false;
 bool sigcheck = true;
@@ -578,6 +579,7 @@ static const struct option global_opts[] = {
 	{ "max-retries", required_argument, 0, 'r' },
 	{ "retry-delay", required_argument, 0, 'd' },
 	{ "json-output", no_argument, 0, 'j' },
+	{ "allow-insecure-http", no_argument, 0, 'E' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -666,6 +668,9 @@ static bool global_parse_opt(int opt, char *optarg)
 	case 'j':
 		set_json_format();
 		return true;
+	case 'E':
+		allow_insecure_http = true;
+		return true;
 	default:
 		return false;
 	}
@@ -728,6 +733,7 @@ void global_print_help(void)
 	print("   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
 	print("   -b, --no-boot-update    Do not install boot files to the boot partition (containers)\n");
 	print("   -j, --json-output       Print all output as a JSON stream\n");
+	print("   -E, --allow-insecure-http Allow updates over insecure connections\n");
 	print("   --quiet                 Quiet output. Print only important information and errors\n");
 	print("   --debug                 Print extra information to help debugging problems\n");
 	print("\n");

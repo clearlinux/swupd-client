@@ -106,10 +106,12 @@ test_setup() {
 	start_web_server -r
 	set_upstream_server "$TEST_NAME" http://localhost:"$(get_web_server_port "$TEST_NAME")"/"$TEST_NAME"/web-dir
 
-	run sudo sh -c "timeout 30 $SWUPD bundle-add --skip-diskspace-check $SWUPD_OPTS test-bundle"
+	run sudo sh -c "timeout 30 $SWUPD bundle-add --skip-diskspace-check --allow-insecure-http $SWUPD_OPTS test-bundle"
 
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
+		Warning: This is an insecure connection
+		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Loading required manifests...
 		Downloading packs \\(.* Mb\\) for:
 		 - test-bundle

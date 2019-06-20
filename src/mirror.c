@@ -177,6 +177,12 @@ static enum swupd_code set_mirror_url(char *url)
 	char *content_path;
 	char *version_path;
 	int ret = SWUPD_OK;
+
+	/* enforce the use of https */
+	if (!is_url_allowed(url)) {
+		return SWUPD_INVALID_OPTION;
+	}
+
 	/* concatenate path_prefix and configuration paths if necessary
 	 * if path_prefix is NULL the second argument will be returned */
 	content_path = mk_full_filename(path_prefix, MIRROR_CONTENT_URL_PATH);

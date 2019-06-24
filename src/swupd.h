@@ -399,7 +399,7 @@ extern bool check_mix_exists(void);
 extern void check_mix_versions(int *current_version, int *server_version, char *path_prefix);
 extern int read_mix_version_file(char *filename, char *path_prefix);
 
-extern void print_update_conf_info(void);
+extern enum swupd_code print_update_conf_info(void);
 
 extern void handle_mirror_if_stale(void);
 

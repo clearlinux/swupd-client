@@ -29,17 +29,17 @@
 
 static void print_help(void)
 {
+	print("Remove cached content used for updates from state directory\n\n");
+	print("Usage:\n");
+	print("   swupd clean [OPTION...]\n\n");
+
+	global_print_help();
+
 	print(
-	    "Usage:\n"
-	    "   swupd clean [OPTION...]\n\n"
-	    "\n"
-	    "Remove cached content used for updates from state directory.\n"
-	    "\n"
 	    "Options:\n"
 	    "   --all                   Remove all the content including recent metadata\n"
 	    "   --dry-run               Just print files that would be removed\n"
 	    "\n");
-	global_print_help();
 }
 
 static struct {

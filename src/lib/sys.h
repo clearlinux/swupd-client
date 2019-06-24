@@ -166,6 +166,12 @@ char *sys_path_join(const char *prefix, const char *path);
  * @brief Check if current user is root.
  */
 bool is_root(void);
+
+/**
+ * @brief Check if the path is a directory
+ */
+bool is_dir(const char *path);
+
 /**
  * @brief Run a systemctl command with the informed parameters.
  */

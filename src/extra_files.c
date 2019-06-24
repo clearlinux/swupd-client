@@ -120,6 +120,12 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 	/* Walk the tree, */
 	int rc;
 	int ret;
+
+	/* first make sure the path where we'll start looking actually exists */
+	if (!is_dir(start)) {
+		return SWUPD_COULDNT_LIST_DIR;
+	}
+
 	path_prefix_len = strlen(path_prefix);
 	path_whitelist = whitelist;
 	rc = nftw(start, &record_filename, 0, FTW_ACTIONRETVAL | FTW_PHYS | FTW_MOUNT);

@@ -321,3 +321,17 @@ bool is_root(void)
 {
 	return getuid() == 0;
 }
+
+bool is_dir(const char *path)
+{
+	struct stat st;
+
+	if (stat(path, &st)) {
+		return false;
+	}
+	if ((st.st_mode & S_IFMT) != S_IFDIR) {
+		return false;
+	}
+
+	return true;
+}

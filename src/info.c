@@ -22,12 +22,22 @@
 
 #include "swupd.h"
 
-void print_update_conf_info()
+enum swupd_code print_update_conf_info()
 {
+	enum swupd_code ret = SWUPD_OK;
+
 	int current_version = get_current_version(path_prefix);
-	info("Installed version: %d\n", current_version);
+	if (current_version < 0) {
+		error("Unable to determine current OS version\n");
+		info("Installed version: unknown\n");
+		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
+	} else {
+		info("Installed version: %d\n", current_version);
+	}
 	info("Version URL:       %s\n", version_url);
 	info("Content URL:       %s\n", content_url);
+
+	return ret;
 }
 
 static void print_help(void)
@@ -80,7 +90,7 @@ enum swupd_code info_main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 		goto finish;
 	}
 
-	print_update_conf_info();
+	ret = print_update_conf_info();
 
 	swupd_deinit();
 

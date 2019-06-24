@@ -711,22 +711,22 @@ void global_print_help(void)
 {
 	print("Global Options:\n");
 	print("   -h, --help              Show help options\n");
-	print("   -p, --path=[PATH...]    Use [PATH...] as the path to verify (eg: a chroot or btrfs subvol)\n");
+	print("   -p, --path=[PATH]       Use [PATH] as the path to verify (eg: a chroot or btrfs subvol)\n");
 	print("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
 	print("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
 	print("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");
 	print("   -v, --versionurl=[URL]  RFC-3986 encoded url for version file downloads\n");
 	print("   -F, --format=[staging,1,2,etc.]  the format suffix for version file downloads\n");
+	print("   -S, --statedir=[PATH]   Specify alternate swupd state directory\n");
+	print("   -C, --certpath=[PATH]   Specify alternate path to swupd certificates\n");
+	print("   -W, --max-parallel-downloads=[n] Set the maximum number of parallel downloads\n");
+	print("   -r, --max-retries=[n]   Maximum number of retries for download failures\n");
+	print("   -d, --retry-delay=[n]   Initial delay in seconds between download retries, this will be doubled for each retry\n");
 	print("   -n, --nosigcheck        Do not attempt to enforce certificate or signature checking\n");
 	print("   -I, --ignore-time       Ignore system/certificate time when validating signature\n");
-	print("   -S, --statedir          Specify alternate swupd state directory\n");
-	print("   -C, --certpath          Specify alternate path to swupd certificates\n");
 	print("   -t, --time              Show verbose time output for swupd operations\n");
 	print("   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
 	print("   -b, --no-boot-update    Do not install boot files to the boot partition (containers)\n");
-	print("   -W, --max-parallel-downloads=[n] Set the maximum number of parallel downloads\n");
-	print("   -r, --max-retries       Maximum number of retries for download failures\n");
-	print("   -d, --retry-delay       Initial delay between download retries, this will be doubled for each retry\n");
 	print("   -j, --json-output       Print all output as a JSON stream\n");
 	print("   --quiet                 Quiet output. Print only important information and errors\n");
 	print("   --debug                 Print extra information to help debugging problems\n");

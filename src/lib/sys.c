@@ -58,7 +58,6 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 {
 	int pid, ret, child_ret;
 	const char *cmd = params[0];
-	;
 
 	pid = fork();
 	if (pid < 0) {

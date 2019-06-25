@@ -58,6 +58,7 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 {
 	int pid, ret, child_ret;
 	const char *cmd = params[0];
+	int null_fd;
 
 	pid = fork();
 	if (pid < 0) {
@@ -79,6 +80,13 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 	}
 
 	// Child
+
+	/* replace the stdin with /dev/null. the underlying commands should never be
+	 * run interactively. */
+	null_fd = open("/dev/null", O_RDONLY);
+	dup2(null_fd, 0);
+	close(null_fd);
+
 	if (replace_fd(STDOUT_FILENO, stdout_file) < 0) {
 		goto error_child;
 	}

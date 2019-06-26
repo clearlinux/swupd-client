@@ -267,6 +267,11 @@ BATS = \
 	test/functional/search/search-json.bats \
 	test/functional/search/search-no-disk-space.bats \
 	test/functional/search/search-sort.bats \
+	test/functional/signature/corrupted-certificate.bats \
+	test/functional/signature/invalid-certificate.bats \
+	test/functional/signature/permission-incorrect.bats \
+	test/functional/signature/corrupted-signature.bats \
+	test/functional/signature/no-signature.bats \
 	test/functional/update/update-boot-file.bats \
 	test/functional/update/update-boot-skip.bats \
 	test/functional/update/update-bundle-removed.bats \
@@ -309,6 +314,7 @@ BATS = \
 	test/functional/usability/usa-config-file.bats \
 	test/functional/usability/usa-download-retries.bats \
 	test/functional/usability/usa-external-modules.bats
+
 
 UNIT_TESTS = \
 	test/unit/test_signature.test \

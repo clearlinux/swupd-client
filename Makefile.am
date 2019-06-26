@@ -267,11 +267,12 @@ BATS = \
 	test/functional/search/search-json.bats \
 	test/functional/search/search-no-disk-space.bats \
 	test/functional/search/search-sort.bats \
+	test/functional/signature/cert-chain.bats \
 	test/functional/signature/corrupted-certificate.bats \
-	test/functional/signature/invalid-certificate.bats \
-	test/functional/signature/permission-incorrect.bats \
 	test/functional/signature/corrupted-signature.bats \
+	test/functional/signature/invalid-certificate.bats \
 	test/functional/signature/no-signature.bats \
+	test/functional/signature/permission-incorrect.bats \
 	test/functional/update/update-boot-file.bats \
 	test/functional/update/update-boot-skip.bats \
 	test/functional/update/update-bundle-removed.bats \

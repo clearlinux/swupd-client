@@ -17,7 +17,7 @@ env:
                 - GROUP1="$UPDATE_SUBGROUP1"
                 - GROUP2="$UPDATE_SUBGROUP2 $(find test/functional/{checkupdate,hashdump,mirror,usability} -name *.bats -printf '%p ')"
                 - GROUP3="$(find test/functional/{diagnose,search,os-install,repair} -name *.bats -printf '%p ')"
-                - GROUP4="$(find test/functional/{bundleadd,bundleremove,bundlelist} -name *.bats -printf '%p ')"
+                - GROUP4="$(find test/functional/{bundleadd,bundleremove,bundlelist,signature} -name *.bats -printf '%p ')"
 
 jobs:
         include:
@@ -34,7 +34,7 @@ jobs:
                   name: "Functional Tests - diagnose, os-install, repair, search"
                   script: env TESTS="$GROUP3" make -e check
                 - stage: test
-                  name: "Functional Tests - bundle-add, bundle-remove, bundle-list"
+                  name: "Functional Tests - bundle-add, bundle-remove, bundle-list, signature"
                   script: env TESTS="$GROUP4" make -e check
 
 # Pre-install missing build dependencies:

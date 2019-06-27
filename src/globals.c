@@ -748,9 +748,6 @@ static bool global_parse_opt(int opt, char *optarg)
 			set_json_format(true);
 		}
 		return true;
-	case 'E':
-		allow_insecure_http = true;
-		return true;
 	default:
 		return false;
 	}

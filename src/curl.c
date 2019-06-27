@@ -200,8 +200,9 @@ int swupd_curl_init(void)
 		return -1;
 	}
 
-	/* enforce the use of https */
-	if (!is_url_allowed(NULL)) {
+	/* enforce the use of https or file */
+	if (!is_url_allowed(version_url) ||
+	    (strcmp(content_url, version_url) != 0 && !is_url_allowed(content_url))) {
 		return -1;
 	}
 

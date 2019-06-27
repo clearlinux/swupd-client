@@ -89,7 +89,7 @@ enum swupd_init_config {
 
 struct header;
 
-extern bool allow_insecure_http;
+extern int allow_insecure_http;
 extern bool allow_mix_collisions;
 extern bool verbose_time;
 extern bool migrate;

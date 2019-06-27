@@ -412,6 +412,7 @@ set_env_variables() { # swupd_function
 	export SWUPD_OPTS_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -F staging -I"
 	export SWUPD_OPTS_MIRROR="-p $testfs_path/target-dir"
 	export SWUPD_OPTS_NO_FMT="-S $testfs_path/state -p $testfs_path/target-dir -C $FUNC_DIR/Swupd_Root.pem -I"
+	export SWUPD_OPTS_NO_FMT_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -I"
 	export SWUPD_OPTS_NO_PATH="-S $testfs_path/state -F staging -C $FUNC_DIR/Swupd_Root.pem -I"
 
 	export CLIENT_CERT_DIR="$testfs_path/target-dir/etc/swupd"

@@ -2556,9 +2556,12 @@ update_bundle() { # swupd_function
 		if [[ "$fname" = *":"* ]]; then
 			new_file="${fname#*:}"
 			validate_item "$new_file"
-			sudo rsync -aq "$new_file" "$version_path"/files/"$(basename "$new_file")"
-			sudo rsync -aq "$new_file".tar "$version_path"/files/"$(basename "$new_file")".tar
-			new_file="$version_path"/files/"$(basename "$new_file")"
+			new_fhash=$(sudo "$SWUPD" hashdump --quiet "$new_file")
+			sudo rsync -aq "$new_file" "$version_path"/files/"$new_fhash"
+			if [ ! -e "$version_path"/files/"$new_fhash".tar ]; then
+				create_tar "$version_path"/files/"$new_fhash"
+			fi
+			new_file="$version_path"/files/"$new_fhash"
 			fname="${fname%:*}"
 		else
 			new_file=$(create_file "$version_path"/files)

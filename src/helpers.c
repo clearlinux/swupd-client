@@ -518,6 +518,16 @@ void swupd_deinit(void)
 	dump_file_descriptor_leaks();
 }
 
+void remove_trailing_slash(char *url)
+{
+	int len = strlen(url);
+
+	while (len > 0 && url[len - 1] == '/') {
+		len--;
+		url[len] = 0;
+	}
+}
+
 /* this function is intended to encapsulate the basic swupd
 * initializations for the majority of commands, that is:
 * 	- Make sure root is the user running the code
@@ -579,7 +589,7 @@ enum swupd_code swupd_init(enum swupd_init_config config)
 	}
 
 	if ((config & SWUPD_NO_NETWORK) == 0) {
-		if (swupd_curl_init() != 0) {
+		if (swupd_curl_init(version_url) != 0) {
 			ret = SWUPD_CURL_INIT_FAILED;
 			goto out_close_lock;
 		}

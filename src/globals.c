@@ -86,16 +86,6 @@ void global_set_opt_from_config(bool state)
 	from_config = state;
 }
 
-static void remove_trailing_slash(char *url)
-{
-	int len = strlen(url);
-
-	while (len > 0 && url[len - 1] == '/') {
-		len--;
-		url[len] = 0;
-	}
-}
-
 /* If the MIX_BUNDLES_DIR has the valid-mix flag file we can run through
  * adding the mix data to the OS */
 bool check_mix_exists(void)

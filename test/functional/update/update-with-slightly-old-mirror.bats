@@ -35,6 +35,7 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.
+		Checking mirror status
 		Warning: mirror version (20) is behind upstream version (100)
 		Preparing to update from 10 to 20
 		Downloading packs for:

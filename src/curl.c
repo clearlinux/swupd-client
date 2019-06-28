@@ -123,13 +123,18 @@ exit:
 	return curl_ret;
 }
 
-static int check_connection(const char *test_capath)
+int check_connection(const char *test_capath, char *url)
 {
 	CURLcode curl_ret;
 	long response = 0;
 
-	debug("Curl - check_connection url: %s\n", version_url);
-	curl_ret = swupd_curl_set_basic_options(curl, version_url, false);
+	if (!url) {
+		debug("Please provide the url to use to test the connection\n");
+		return -1;
+	}
+
+	debug("Curl - check_connection url: %s\n", url);
+	curl_ret = swupd_curl_set_basic_options(curl, url, false);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
@@ -150,6 +155,9 @@ static int check_connection(const char *test_capath)
 
 	switch (curl_ret) {
 	case CURLE_OK:
+		/* Note: when using http and the user is behind a proxy, we may get
+		 * a valid response here from the proxy even if the http server is
+		 * down, allow it to continue for now, it will fail further in the process */
 		return 0;
 	case CURLE_SSL_CACERT:
 		debug("Curl - Unable to verify server SSL certificate\n");
@@ -173,7 +181,7 @@ static int check_connection(const char *test_capath)
 	}
 }
 
-int swupd_curl_init(void)
+int swupd_curl_init(char *url)
 {
 	CURLcode curl_ret;
 	char *str;
@@ -203,15 +211,17 @@ int swupd_curl_init(void)
 	/* enforce the use of https or file */
 	if (!is_url_allowed(version_url) ||
 	    (strcmp(content_url, version_url) != 0 && !is_url_allowed(content_url))) {
+		swupd_curl_deinit();
 		return -1;
 	}
 
-	ret = check_connection(NULL);
+	ret = check_connection(NULL, url);
 	if (ret == 0) {
 		return 0;
 	} else if (ret == -CURLE_OPERATION_TIMEDOUT) {
 		error("Curl - Communicating with server timed out\n");
-		return -1;
+		ret = -1;
+		goto exit;
 	}
 
 	if (FALLBACK_CAPATHS[0]) {
@@ -225,7 +235,7 @@ int swupd_curl_init(void)
 			}
 
 			debug("Curl - Trying fallback CA path %s\n", tok);
-			ret = check_connection(tok);
+			ret = check_connection(tok, url);
 			if (ret == 0) {
 				capath = strdup_or_die(tok);
 				break;
@@ -234,13 +244,16 @@ int swupd_curl_init(void)
 		free_string(&str);
 	}
 
+exit:
 	if (ret != 0) {
+		/* curl failed to initialize */
 		error("Failed to connect to update server: %s\n", version_url);
 		info("Possible solutions for this problem are:\n"
 		     "\tCheck if your network connection is working\n"
 		     "\tFix the system clock\n"
 		     "\tRun 'swupd info' to check if the urls are correct\n"
 		     "\tCheck if the server SSL certificate is trusted by your system ('clrtrust generate' may help)\n");
+		swupd_curl_deinit();
 	}
 
 	return ret;

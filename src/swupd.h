@@ -356,6 +356,7 @@ extern bool on_new_format(void);
 extern char *get_printable_bundle_name(const char *bundle_name, bool is_experimental);
 extern void print_regexp_error(int errcode, regex_t *regexp);
 extern bool is_url_allowed(char *url);
+extern void remove_trailing_slash(char *url);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);

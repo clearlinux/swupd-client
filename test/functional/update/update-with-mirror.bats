@@ -33,6 +33,7 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.
+		Checking mirror status
 		Preparing to update from 10 to 20
 		Downloading packs for:
 		 - test-bundle1

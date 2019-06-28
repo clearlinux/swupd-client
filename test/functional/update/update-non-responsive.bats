@@ -53,10 +53,16 @@ test_teardown() {
 		Warning: This is an insecure connection
 		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Error: Curl - Communicating with server timed out
+		Error: Failed to connect to update server: http://localhost:$port
+		Possible solutions for this problem are:
+		.Check if your network connection is working
+		.Fix the system clock
+		.Run 'swupd info' to check if the urls are correct
+		.Check if the server SSL certificate is trusted by your system \('clrtrust generate' may help\)
 		Error: Updater failed to initialize, exiting now.
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_regex_is_output "$expected_output"
 	assert_file_not_exists "$TARGETDIR"/test_file1
 
 }
@@ -77,10 +83,16 @@ test_teardown() {
 		Warning: This is an insecure connection
 		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Error: Curl - Communicating with server timed out
+		Error: Failed to connect to update server: http://localhost:$port
+		Possible solutions for this problem are:
+		.Check if your network connection is working
+		.Fix the system clock
+		.Run 'swupd info' to check if the urls are correct
+		.Check if the server SSL certificate is trusted by your system \('clrtrust generate' may help\)
 		Error: Updater failed to initialize, exiting now.
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_regex_is_output "$expected_output"
 	assert_file_not_exists "$TARGETDIR"/test_file1
 
 }
@@ -99,7 +111,10 @@ test_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.
-		Error: Curl - Communicating with server timed out - '.*/version/formatstaging/latest'
+		Checking mirror status
+		Error: Curl - Communicating with server timed out - 'http://localhost:$port//version/formatstaging/latest'
+		Warning: Upstream server http://localhost:$port/ not responding, cannot determine upstream version
+		Warning: Unable to determine if the mirror is up to date
 		Preparing to update from 10 to 20
 		Downloading packs for:
 		 - os-core

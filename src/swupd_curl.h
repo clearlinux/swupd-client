@@ -64,9 +64,21 @@ typedef int (*swupd_curl_progress_cb)(void *clientp, int64_t dltotal, int64_t dl
 /**
  * @brief Init the swupd curl.
  *
+ * @param url The url to use to test server connectivity
+ *
  * @note Must be called before any curl operation.
  */
-int swupd_curl_init(void);
+int swupd_curl_init(char *url);
+
+/**
+ * @brief Test a connection with a server.
+ *
+ * @param url The url to use to test server connectivity
+ * @param test_capath path for the certificate
+ *
+ * @returns 0 if the server is responding
+ */
+int check_connection(const char *test_capath, char *url);
 
 /**
  * @brief Close curl and release all memory allocated by swupd_curl_init().

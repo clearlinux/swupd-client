@@ -274,7 +274,6 @@ BATS = \
 	test/functional/signature/key-rotation.bats \
 	test/functional/signature/no-signature.bats \
 	test/functional/signature/permission-incorrect.bats \
-	test/functional/signature/key-rotation.bats \
 	test/functional/update/update-boot-file.bats \
 	test/functional/update/update-boot-skip.bats \
 	test/functional/update/update-bundle-removed.bats \

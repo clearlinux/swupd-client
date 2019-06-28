@@ -114,6 +114,13 @@ static int unset_mirror_url()
 		goto out;
 	}
 
+	/* we need to also unset the mirror urls from the cache and set it to
+	 * the central version */
+	free_string(&version_url);
+	free_string(&content_url);
+	set_default_version_url();
+	set_default_content_url();
+	get_latest_version("");
 out:
 	free_string(&content_path);
 	free_string(&version_path);
@@ -215,10 +222,33 @@ out:
 	return ret;
 }
 
+static bool mirror_is_set(void)
+{
+	bool mirror_set;
+	char *version_path;
+	char *content_path;
+
+	version_path = mk_full_filename(path_prefix, MIRROR_VERSION_URL_PATH);
+	content_path = mk_full_filename(path_prefix, MIRROR_CONTENT_URL_PATH);
+	mirror_set = file_exists(version_path) && file_exists(content_path);
+
+	free_string(&version_path);
+	free_string(&content_path);
+
+	return mirror_set;
+}
+
 void handle_mirror_if_stale(void)
 {
 	char *ret_str = NULL;
 	char *fullpath = NULL;
+
+	/* make sure there is a mirror set up first */
+	if (!mirror_is_set()) {
+		return;
+	}
+
+	info("Checking mirror status\n");
 
 	fullpath = mk_full_filename(path_prefix, DEFAULT_VERSION_URL_PATH);
 	int ret = get_value_from_path(&ret_str, fullpath, true);
@@ -226,35 +256,51 @@ void handle_mirror_if_stale(void)
 		/* no versionurl file here, might not exist under --path argument */
 		goto out;
 	}
+
+	/* before trying to get the latest version let's make sure the central version is up */
+	if (!content_url_is_local && !check_connection(NULL, ret_str) != 0) {
+		warn("Upstream server %s not responding, cannot determine upstream version\n", ret_str);
+		warn("Unable to determine if the mirror is up to date\n");
+		goto out;
+	}
+
 	int central_version = get_latest_version(ret_str);
 	int mirror_version = get_latest_version("");
 
-	/* note that negative mirror_version and negative central_version are handled
-	 * correctly, as the difference will be great for a mirror_version of -1
-	 * (it will resolve to central_version + 1 and the diff will be very large).
-	 * When the upstream central_version is an error -1 version the mirror version
-	 * will be used due to the diff being negative. */
-	int diff = central_version - mirror_version;
-	if (diff > MIRROR_STALE_UNSET || mirror_version == -1) {
-		warn("removing stale mirror configuration. "
-		     "Mirror version (%d) is too far behind upstream version (%d)\n",
-		     mirror_version,
-		     central_version);
-		unset_mirror_url();
-		/* we need to re-set the cached_version to latest using the central version,
-		 * since at the moment the cached_version is the outdated mirror version */
-		free_string(&version_url);
-		free_string(&content_url);
-		set_default_version_url();
-		set_default_content_url();
-		get_latest_version(ret_str);
+	/* if the latest version could not be retrieved from the central server we cannot
+	 * check if mirror is stale, this would be very odd since we already check connection
+	 * with the server earlier */
+	if (central_version < 0) {
+		warn("Upstream server %s not responding, cannot determine upstream version\n", ret_str);
+		warn("Unable to determine if the mirror is up to date\n");
 		goto out;
 	}
-	if (diff > MIRROR_STALE_WARN) {
-		warn("mirror version (%d) is behind upstream version (%d)\n",
+
+	/* if the mirror_version has an error or it's outdated and central_version works,
+	 * we should unset the mirror*/
+	int diff = central_version - mirror_version;
+	if (mirror_version > 0 && diff <= MIRROR_STALE_UNSET) {
+		if (diff > MIRROR_STALE_WARN) {
+			warn("mirror version (%d) is behind upstream version (%d)\n",
+			     mirror_version,
+			     central_version);
+		}
+		/* no need to unset */
+		goto out;
+	}
+
+	/* if we've made it this far we need to unset */
+	if (mirror_version < 0) {
+		warn("the mirror version could not be determined\n");
+	} else {
+		warn("the mirror version (%d) is too far behind upstream version (%d)\n",
 		     mirror_version,
 		     central_version);
 	}
+
+	info("Removing mirror configuration\n");
+	unset_mirror_url();
+
 out:
 	free_string(&fullpath);
 	free_string(&ret_str);

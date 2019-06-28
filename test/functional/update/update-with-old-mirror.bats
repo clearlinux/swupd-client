@@ -34,7 +34,9 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started.
-		Warning: removing stale mirror configuration. Mirror version (20) is too far behind upstream version (1000)
+		Checking mirror status
+		Warning: the mirror version (20) is too far behind upstream version (1000)
+		Removing mirror configuration
 		Preparing to update from 10 to 1000
 		Downloading packs for:
 		 - test-bundle1

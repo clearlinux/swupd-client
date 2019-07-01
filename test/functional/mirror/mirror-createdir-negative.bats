@@ -32,7 +32,7 @@ global_teardown() {
 	sudo rm -rf "$TARGETDIR"/etc/swupd
 	sudo touch "$TARGETDIR"/etc/swupd
 
-	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS_MIRROR"
+	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS"
 
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
@@ -55,7 +55,7 @@ global_teardown() {
 	sudo touch "$TARGETDIR"/foo
 	sudo ln -s "$(realpath "$TARGETDIR"/foo)" "$TARGETDIR"/etc/swupd
 
-	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS_MIRROR"
+	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS"
 
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM

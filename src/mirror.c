@@ -200,6 +200,15 @@ static enum swupd_code set_mirror_url(char *url)
 		goto out;
 	}
 
+	/* if mirror is http, warn user about needing to set
+	 * allow_insecure_http=true in order for auto-update to continue working */
+	if (strncmp(url, "http://", 7) == 0) {
+		warn("The mirror was set up using HTTP. In order for autoupdate "
+		     "to continue working you will need to set allow_insecure_http=true "
+		     "in the swupd configuration file. Alternatively you can set the "
+		     "mirror using HTTPS (recommended)\n\n");
+	}
+
 out:
 	free_string(&content_path);
 	free_string(&version_path);

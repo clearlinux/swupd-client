@@ -36,8 +36,6 @@ global_teardown() {
 
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
-		Warning: This is an insecure connection
-		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		.*/etc/swupd: not a directory
 		Warning: Unable to set mirror url
 		Installed version: 10
@@ -59,8 +57,6 @@ global_teardown() {
 
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
-		Warning: This is an insecure connection
-		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		.*/etc/swupd: not a directory
 		Warning: Unable to set mirror url
 		Installed version: 10

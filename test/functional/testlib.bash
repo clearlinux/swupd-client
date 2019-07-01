@@ -249,9 +249,22 @@ validate_param() {
 validate_number() {
 
 	local param=$1
-	if ! [[ $param =~ ^[0-9]+([.][0-9]+)?$ ]] ; then
+	if ! [[ $param =~ ^[0-9]+([.][0-9]+)?$ ]]; then
 		terminate "Bad parameter provided, expecting a number"
 	fi
+
+}
+
+wait_for_deletion() {
+
+	local param=$1
+	local timeout=5  # arbitrary timeout
+	local wait_milisecs=0
+
+	until [ $((wait_milisecs / 1000)) -eq "$timeout" ] || [ ! -e "$param" ]; do
+		sleep 0.1
+		wait_milisecs=$((wait_milisecs + 100))
+	done
 
 }
 
@@ -1658,6 +1671,10 @@ create_config_file() { # swupd_function
 destroy_config_file() { # swupd_function
 
 	rm -rf "$SWUPD_CONFIG_DIR"
+	# we need to make sure the config file is deleted before
+	# another test is run so it does not interfere with it since
+	# the config file is common and shared by all commands
+	wait_for_deletion "$SWUPD_CONFIG_DIR"
 
 }
 

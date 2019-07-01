@@ -29,21 +29,19 @@ global_teardown() {
 
 @test "MIR001: Setting a mirror when /etc/swupd doesn't exist" {
 
-	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD mirror -s https://example.com/swupd-file $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Warning: This is an insecure connection
-		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
-		Set upstream mirror to http://example.com/swupd-file
+		Set upstream mirror to https://example.com/swupd-file
 		Installed version: 10
-		Version URL:       http://example.com/swupd-file
-		Content URL:       http://example.com/swupd-file
+		Version URL:       https://example.com/swupd-file
+		Content URL:       https://example.com/swupd-file
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
-	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
 
 }
 
@@ -51,21 +49,19 @@ global_teardown() {
 
 	sudo mkdir -p "$TARGETDIR"/etc/swupd
 
-	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD mirror -s https://example.com/swupd-file $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Warning: This is an insecure connection
-		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
-		Set upstream mirror to http://example.com/swupd-file
+		Set upstream mirror to https://example.com/swupd-file
 		Installed version: 10
-		Version URL:       http://example.com/swupd-file
-		Content URL:       http://example.com/swupd-file
+		Version URL:       https://example.com/swupd-file
+		Content URL:       https://example.com/swupd-file
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
-	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
 
 }
 
@@ -74,22 +70,20 @@ global_teardown() {
 	sudo mkdir "$TARGETDIR"/foo
 	sudo ln -s "$(realpath "$TARGETDIR"/foo)" "$TARGETDIR"/etc/swupd
 
-	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD mirror -s https://example.com/swupd-file $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Warning: This is an insecure connection
-		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
-		Set upstream mirror to http://example.com/swupd-file
+		Set upstream mirror to https://example.com/swupd-file
 		Installed version: 10
-		Version URL:       http://example.com/swupd-file
-		Content URL:       http://example.com/swupd-file
+		Version URL:       https://example.com/swupd-file
+		Content URL:       https://example.com/swupd-file
 	EOM
 	)
 	assert_is_output "$expected_output"
   
   	! [[ -L "$TARGETDIR/etc/swupd" ]]
-	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
-	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
 
 }

@@ -12,7 +12,7 @@ test_setup() {
 
 }
 
-@test "SIG009: Swupd bundle-add without a MoM signature" {
+@test "SIG009: Check if state dir permissions are correct after execution" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 

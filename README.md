@@ -17,3 +17,7 @@ For other questions, contact us in Clear Linux mailing list (dev@lists.clearlinu
 
 Swupd client is open for contributions, so we are more than willing to review your patches!
 For more information take a look on the [how to contribute guide](docs/how_to_contribute.md)
+
+## Reporting Security Concerns
+
+If you have discovered potential security vulnerability in Swupd, please visit https://01.org/security for best practices on reporting security issues and to report your concern.

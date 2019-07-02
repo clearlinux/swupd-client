@@ -38,7 +38,6 @@ local installed # cache for installed bundles
     _alternative "$bundles" && ret=0
   }
 
-# FIXME: the number of available completion is not correct
 (( $+functions[_swupd_bundle_rm] )) ||
   _swupd_bundle_rm () {
     local bundles i
@@ -47,7 +46,7 @@ local installed # cache for installed bundles
                      find /usr/share/clear/bundles/ -maxdepth 1 -type f ! -name os-core -printf '%f ')"
     fi
     bundles=$installed
-    for i in $words; do
+    for i in ${words:0:-1}; do
         bundles=${bundles/$i}
     done
     _alternative \
@@ -77,7 +76,7 @@ local installed # cache for installed bundles
                      find /usr/share/clear/bundles/ -maxdepth 1 -type f ! -name os-core -printf '%f ')"
     fi
     bundles=$installed
-    for i in $words; do
+    for i in ${words:0:-1}; do
       bundles=${bundles/$i}
     done
     _alternative \

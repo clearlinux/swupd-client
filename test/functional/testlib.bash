@@ -870,7 +870,7 @@ add_dependency_to_manifest() { # swupd_function
 	local partial=false
 	local flag=includes
 	[ "$1" = "-p" ] && { partial=true ; shift ; }
-	[ "$1" = "-o" ] && { flag=optional ; shift ; }
+	[ "$1" = "-o" ] && { flag="also-add"; shift ; }
 	local manifest=$1
 	local dependency=$2
 	local path
@@ -889,7 +889,7 @@ add_dependency_to_manifest() { # swupd_function
 			          MoM will be updated either. This is useful if more updates are
 			          to be done in the manifest to avoid extra processing
 			    -o    If set (optional), the dependency will be added to the manifest
-			          as an optional dependency.
+			          as an optional dependency (also-add flag).
 
 			    Note: if both options -p and -o are to be used, they must be specified in that order or
 			      one option will be ignored.

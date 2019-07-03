@@ -139,7 +139,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			}
 		} else if (strncmp_const(line, "includes:\t") == 0) {
 			includes = list_prepend_data(includes, strdup_or_die(c));
-		} else if (strncmp_const(line, "optional:\t") == 0) {
+		} else if (strncmp_const(line, "also-add:\t") == 0) {
 			optional = list_prepend_data(optional, strdup_or_die(c));
 		}
 	}

@@ -164,6 +164,7 @@ TESTS = $(dist_check_SCRIPTS) $(UNIT_TESTS)
 
 BATS = \
 	test/functional/bundleadd/add-alias-basic.bats \
+	test/functional/bundleadd/add-also-add-flag.bats \
 	test/functional/bundleadd/add-bad-hash-state.bats \
 	test/functional/bundleadd/add-bad-hash.bats \
 	test/functional/bundleadd/add-bad-manifest.bats \
@@ -175,7 +176,6 @@ BATS = \
 	test/functional/bundleadd/add-experimental.bats \
 	test/functional/bundleadd/add-fall-back-to-fullfile.bats \
 	test/functional/bundleadd/add-include.bats \
-	test/functional/bundleadd/add-include-optional.bats \
 	test/functional/bundleadd/add-install-time.bats \
 	test/functional/bundleadd/add-json.bats \
 	test/functional/bundleadd/add-multiple.bats \

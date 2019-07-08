@@ -15,9 +15,11 @@ env:
                 - UPDATE_SUBGROUP1="$(find test/functional/update -name *.bats | head -n $UPDATE_SUBGROUP1_TOTAL | tr '\n' ' ')"
                 - UPDATE_SUBGROUP2="$(find test/functional/update -name *.bats | tail -n $UPDATE_SUBGROUP2_TOTAL | tr '\n' ' ')"
                 - GROUP1="$UPDATE_SUBGROUP1"
-                - GROUP2="$UPDATE_SUBGROUP2 $(find test/functional/{checkupdate,hashdump,mirror,usability} -name *.bats -printf '%p ')"
+                - GROUP2="$UPDATE_SUBGROUP2 $(find test/functional/{checkupdate,hashdump,mirror,usability} -name *.bats \( ! -name usa-config-file.bats \) -printf '%p ')"
                 - GROUP3="$(find test/functional/{diagnose,search,os-install,repair} -name *.bats -printf '%p ')"
                 - GROUP4="$(find test/functional/{bundleadd,bundleremove,bundlelist,signature} -name *.bats -printf '%p ')"
+                # The config file cannot be isolated to a test environment, so tests related to it have to run separate
+                - CONFIG_FILE_TESTS="$(find test/functional/usability -name usa-config-file.bats -printf '%p ')"
 
 jobs:
         include:
@@ -29,7 +31,7 @@ jobs:
                   script: env TESTS="$GROUP1" make -e check
                 - stage: test
                   name: "Functional Tests - update (group 2), checkupdate, hashdump, mirror, usability"
-                  script: env TESTS="$GROUP2" make -e check
+                  script: env TESTS="$GROUP2" make -e check && env TESTS="$CONFIG_FILE_TESTS" make -e check
                 - stage: test
                   name: "Functional Tests - diagnose, os-install, repair, search"
                   script: env TESTS="$GROUP3" make -e check

@@ -82,7 +82,7 @@ global_teardown() {
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS --allow-insecure-http -u http://cdn.download.clearlinux.org/update"
 
 	# Error is because server doesn't respond to this manifest, but connection was created
-	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
+	assert_status_is_not "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Warning: This is an insecure connection
 		The --allow-insecure-http flag was used, be aware that this poses a threat to the system

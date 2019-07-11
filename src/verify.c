@@ -700,6 +700,12 @@ enum swupd_code verify_main(void)
 		goto clean_args_and_exit;
 	}
 
+	/* Unless we are installing a new bundle we shoudn't include optional
+	* bundles to the bundle list. */
+	if (!cmdline_option_install) {
+		skip_optional_bundles = true;
+	}
+
 	/* Get the current system version and the version to verify against */
 	timelist_timer_start(global_times, "Get versions");
 	progress_set_step(1, "get_versions");

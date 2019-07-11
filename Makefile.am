@@ -218,6 +218,7 @@ BATS = \
 	test/functional/checkupdate/chk-update-no-target-content.bats \
 	test/functional/checkupdate/chk-update-slow-server.bats \
 	test/functional/checkupdate/chk-update-version-match.bats \
+	test/functional/diagnose/diagnose-also-add.bats \
 	test/functional/diagnose/diagnose-basics.bats \
 	test/functional/diagnose/diagnose-boot-file.bats \
 	test/functional/diagnose/diagnose-client-certificate.bats \
@@ -232,6 +233,7 @@ BATS = \
 	test/functional/mirror/mirror-createdir-negative.bats \
 	test/functional/mirror/mirror-createdir.bats \
 	test/functional/mirror/mirror-json.bats \
+	test/functional/os-install/install-also-add.bats \
 	test/functional/os-install/install-bad.bats \
 	test/functional/os-install/install-basics.bats \
 	test/functional/os-install/install-json.bats \
@@ -252,6 +254,7 @@ BATS = \
 	test/functional/repair/repair-format-mismatch-overdrive.bats \
 	test/functional/repair/repair-format-mismatch.bats \
 	test/functional/repair/repair-ghosted.bats \
+	test/functional/repair/repair-ignore-also-add.bats \
 	test/functional/repair/repair-json.bats \
 	test/functional/repair/repair-missing-file.bats \
 	test/functional/repair/repair-no-disk-space.bats \
@@ -282,6 +285,7 @@ BATS = \
 	test/functional/update/update-client-certificate.bats \
 	test/functional/update/update-download.bats \
 	test/functional/update/update-fail-to-get-mom.bats \
+	test/functional/update/update-ignore-also-add.bats \
 	test/functional/update/update-include-old-bundle-with-tracked-file.bats \
 	test/functional/update/update-include-old-bundle.bats \
 	test/functional/update/update-include.bats \

@@ -689,6 +689,9 @@ enum swupd_code update_main(int argc, char **argv)
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
+
+	/* Update should always ignore optional bundles */
+	skip_optional_bundles = true;
 	progress_init_steps("update", steps_in_update);
 
 	ret = swupd_init(SWUPD_ALL);

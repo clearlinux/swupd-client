@@ -25,7 +25,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		No packs need to be downloaded
@@ -53,7 +53,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD bundle-add --skip-optional $SWUPD_OPTS test-bundle1"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		No packs need to be downloaded

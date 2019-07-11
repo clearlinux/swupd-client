@@ -412,6 +412,7 @@ shellcheck:
 
 shellcheck-all:
 	shellcheck swupd.bash
+	shellcheck scripts/flag_validator.bash
 	find -name "*.bats" -exec sh -c "\
 		echo checking {}; \
 		sed 's/^@.*/func() {/' {} | \
@@ -421,6 +422,9 @@ shellcheck-all:
 
 check-test-ids:
 	test/functional/check_ids.bash
+
+check-flags:
+	scripts/flag_validator.bash
 
 release:
 	@git rev-parse v$(PACKAGE_VERSION) &> /dev/null; \

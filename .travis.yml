@@ -25,7 +25,7 @@ jobs:
         include:
                 - stage: "Static Analysis"
                   name: "Static Analysis & Unit Tests"
-                  script: make compliant && make shellcheck && sudo sh -c 'umask 0022 && make unit-check' && make docs-coverage
+                  script: make compliant && make shellcheck && make check-flags && sudo sh -c 'umask 0022 && make unit-check' && make docs-coverage
                 - stage: test
                   name: "Functional Tests - update (group 1)"
                   script: env TESTS="$GROUP1" make -e check

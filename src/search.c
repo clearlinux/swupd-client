@@ -488,7 +488,7 @@ static void print_help(void)
 
 	print("Options:\n");
 	print("   -l, --library           Search paths where libraries are located for a match\n");
-	print("   -b, --binary            Search paths where binaries are located for a match\n");
+	print("   -B, --binary            Search paths where binaries are located for a match\n");
 	print("   -T, --top=[NUM]         Only display the top NUM results for each bundle\n");
 	print("   -m, --csv               Output all results in CSV format (machine-readable)\n");
 	print("   -i, --init              Download all manifests then return, no search done\n");
@@ -498,7 +498,7 @@ static void print_help(void)
 }
 
 static const struct option prog_opts[] = {
-	{ "binary", no_argument, 0, 'b' },
+	{ "binary", no_argument, 0, 'B' },
 	{ "csv", no_argument, 0, 'm' },
 	{ "init", no_argument, 0, 'i' },
 	{ "library", no_argument, 0, 'l' },
@@ -538,7 +538,7 @@ static bool parse_opt(int opt, char *optarg)
 	case 'i':
 		init = true;
 		return true;
-	case 'b':
+	case 'B':
 		search_type |= SEARCH_TYPE_BIN;
 		return true;
 	default:

@@ -125,6 +125,10 @@ used to modify the core behavior and resources that swupd uses.
 
    Set the maximum number of parallel downloads
 
+- ``--no-progress``
+
+   Don't print progress report on commands that informs the percentage left in current operation.
+
 SUBCOMMANDS
 ===========
 

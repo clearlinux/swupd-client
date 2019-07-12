@@ -33,7 +33,7 @@ static int sign(const char *private_key, const char *public_key, const char *fil
 	ret = run_command("/usr/bin/openssl", "smime", "-sign",
 			   "-binary", "-in", file, "-signer", public_key,
 			   "-inkey", private_key, "-outform", "DER", "-out",
-			   file_sig);
+			   file_sig, NULL);
 
 	if (ret != 0) {
 		print_error("Sign failed");

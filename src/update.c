@@ -38,7 +38,7 @@
 #include "swupd.h"
 
 static int requested_version = -1;
-static bool download_only;
+static int download_only = 0;
 
 int nonpack;
 
@@ -87,7 +87,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 		return ret;
 	}
 
-	if (download_only) {
+	if (download_only == 1) {
 		return 0;
 	}
 
@@ -443,7 +443,7 @@ version_check:
 	updates = list_sort(updates, file_sort_filename);
 
 	ret = update_loop(updates, server_manifest);
-	if (ret == 0 && !download_only) {
+	if (ret == 0 && download_only == 0) {
 		/* Failure to write the version file in the state directory
 		 * should not affect exit status. */
 		(void)update_device_latest_version(server_version);
@@ -527,7 +527,7 @@ clean_curl:
 		if (nonpack > 0) {
 			info("%i files were not in a pack\n", nonpack);
 		}
-		if (!download_only) {
+		if (download_only == 0) {
 			if (current_version < server_version) {
 				print("Update successful. System updated from version %d to version %d\n",
 				      current_version, server_version);
@@ -572,7 +572,7 @@ clean_curl:
 static bool cmd_line_status = false;
 
 static const struct option prog_opts[] = {
-	{ "download", no_argument, 0, 'd' },
+	{ "download", no_argument, &download_only, 1 },
 	{ "version", required_argument, 0, 'V' },
 	{ "manifest", required_argument, 0, 'm' },
 	{ "status", no_argument, 0, 's' },
@@ -594,12 +594,12 @@ static void print_help(void)
 	// so it is not visible but the option must remain available in the back so we don't break users
 	print("Options:\n");
 	print("   -V, --version=V         Update to version V, also accepts 'latest' (default)\n");
-	print("   -d, --download          Download all content, but do not actually install the update\n");
 	print("   -s, --status            Show current OS version and latest version available on server. Equivalent to \"swupd check-update\"\n");
 	print("   -k, --keepcache         Do not delete the swupd state directory content after updating the system\n");
 	print("   -T, --migrate           Migrate to augmented upstream/mix content\n");
 	print("   -a, --allow-mix-collisions	Ignore and continue if custom user content conflicts with upstream provided content\n");
 	print("   -m, --manifest=V        NOTE: this flag has been superseded. Please use -V instead\n");
+	print("   --download              Download all content, but do not actually install the update\n");
 	print("\n");
 }
 
@@ -623,9 +623,6 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case 'a':
 		allow_mix_collisions = true;
-		return true;
-	case 'd':
-		download_only = true;
 		return true;
 	case 's':
 		cmd_line_status = true;

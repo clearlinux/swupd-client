@@ -44,13 +44,13 @@ static void print_help(void)
 
 	print("Options:\n");
 	print("   -s, --set               set mirror url\n");
-	print("   -u, --unset             unset mirror url\n");
+	print("   -U, --unset             unset mirror url\n");
 	print("\n");
 }
 
 static const struct option prog_opts[] = {
 	{ "set", required_argument, 0, 's' },
-	{ "unset", no_argument, 0, 'u' },
+	{ "unset", no_argument, 0, 'U' },
 };
 
 static bool parse_opt(int opt, char *optarg)
@@ -63,7 +63,7 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		set = optarg;
 		return true;
-	case 'u':
+	case 'U':
 		if (set != NULL) {
 			error("cannot set and unset at the same time\n");
 			return false;

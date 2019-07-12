@@ -28,6 +28,8 @@
 #include "config.h"
 #include "swupd.h"
 
+#define DEPS_FLAG 1000
+
 static bool cmdline_option_all = false;
 static char *cmdline_option_has_dep = NULL;
 static char *cmdline_option_deps = NULL;
@@ -54,14 +56,14 @@ static void print_help(void)
 
 	print("Options:\n");
 	print("   -a, --all               List all available bundles for the current version of Clear Linux\n");
-	print("   -d, --deps=[BUNDLE]     List bundles included by BUNDLE\n");
 	print("   -D, --has-dep=[BUNDLE]  List dependency tree of all bundles which have BUNDLE as a dependency\n");
+	print("   --deps=[BUNDLE]         List bundles included by BUNDLE\n");
 	print("\n");
 }
 
 static const struct option prog_opts[] = {
 	{ "all", no_argument, 0, 'a' },
-	{ "deps", required_argument, 0, 'd' },
+	{ "deps", required_argument, 0, DEPS_FLAG },
 	{ "has-dep", required_argument, 0, 'D' },
 };
 
@@ -77,7 +79,7 @@ static bool parse_opt(int opt, char *optarg)
 		atexit(free_has_dep);
 		cmdline_local = false;
 		return true;
-	case 'd':
+	case DEPS_FLAG:
 		string_or_die(&cmdline_option_deps, "%s", optarg);
 		atexit(free_deps);
 		cmdline_local = false;

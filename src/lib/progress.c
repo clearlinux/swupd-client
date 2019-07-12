@@ -26,6 +26,7 @@
 #include "log.h"
 #include "progress.h"
 
+static bool no_progress_report = false;
 static struct step step;
 static progress_fn_t progress_function = NULL;
 static start_fn_t start_function = NULL;
@@ -92,6 +93,10 @@ void progress_report(double count, double max)
 	static int last_percentage = -1;
 	static unsigned int last_step = 0;
 
+	if (no_progress_report) {
+		return;
+	}
+
 	/* make sure we don't have a division by zero */
 	if (max != 0) {
 
@@ -123,4 +128,9 @@ void progress_report(double count, double max)
 			last_step = step.current;
 		}
 	}
+}
+
+void progress_disable(bool disable)
+{
+	no_progress_report = disable;
 }

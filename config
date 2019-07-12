@@ -76,6 +76,9 @@
 # Print extra information to help debugging problems (boolean value)
 #debug=<true/false>
 
+# Don't report progress (boolean value)
+#no_progress=<true/false>
+
 
 
 #

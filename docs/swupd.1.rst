@@ -168,7 +168,7 @@ SUBCOMMANDS
         are available. It will return 0 with succeeded and a different value
         of 0 with failed.
 
-    - `-d, --deps={bundle}`
+    - `--deps={bundle}`
 
         Lists all bundle dependencies of the passed bundle, including
         recursively included bundles.
@@ -281,7 +281,7 @@ SUBCOMMANDS
         <path>/etc/swupd/mirror_contenturl and
         <path>/etc/swupd/mirror_versionurl
 
-    - `-u, --unset`
+    - `-U, --unset`
 
         Remove the content and version URL configuration by removing
         <path>/etc/swupd
@@ -378,7 +378,7 @@ SUBCOMMANDS
 
             Only runs the repair operation on the os-core and vi bundles.
 
-``search {string}``
+``search-file {string}``
 
     Search for matching paths in manifest data. The specified {string}
     is matched in any part of the path listed in manifests, and all
@@ -396,7 +396,7 @@ SUBCOMMANDS
 
         Restrict search to designated dynamic shared library paths.
 
-    - `-b, --binary`
+    - `-B, --binary`
 
         Restrict search to designated program binary paths.
 
@@ -433,7 +433,7 @@ SUBCOMMANDS
         available on the version url server, and what version number is
         available.
 
-    - `-d, --download`
+    - `--download`
 
         Do not perform an update, instead download all resources needed
         to perform the update, and exit.

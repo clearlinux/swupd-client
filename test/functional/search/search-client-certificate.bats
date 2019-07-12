@@ -22,7 +22,7 @@ global_setup() {
 	sudo mkdir -p "$CLIENT_CERT_DIR"
 
 	# create client/server certificates
-	generate_certificate "$client_key" "$client_pub"
+	generate_certificate "$client_key" $client_pub
 	generate_certificate "$server_key" "$server_pub"
 
 	# add server pub key to trust store

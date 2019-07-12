@@ -63,4 +63,5 @@ test_teardown() {
 	assert_status_is 0
 	assert_in_output "Fake search invoked successfully with these arguments: arg1 arg2 arg3"
 
+
 }

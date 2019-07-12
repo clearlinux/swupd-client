@@ -33,6 +33,9 @@
 #include "config.h"
 #include "lib/log.h"
 #include "swupd.h"
+
+#define NO_PROGRESS 1000
+
 int allow_insecure_http = 0;
 bool allow_mix_collisions = false;
 bool migrate = false;
@@ -612,6 +615,7 @@ static const struct option global_opts[] = {
 	{ "max-parallel-downloads", required_argument, 0, 'W' },
 	{ "no-boot-update", no_argument, 0, 'b' },
 	{ "no-scripts", no_argument, 0, 'N' },
+	{ "no-progress", no_argument, 0, NO_PROGRESS },
 	{ "nosigcheck", no_argument, 0, 'n' },
 	{ "path", required_argument, 0, 'p' },
 	{ "port", required_argument, 0, 'P' },
@@ -739,6 +743,15 @@ static bool global_parse_opt(int opt, char *optarg)
 			set_json_format(true);
 		}
 		return true;
+
+	case NO_PROGRESS:
+		if (optarg != NULL) {
+			progress_disable(strtobool(optarg));
+		} else {
+			progress_disable(true);
+		}
+
+		return true;
 	default:
 		return false;
 	}
@@ -820,6 +833,7 @@ void global_print_help(void)
 	print("   --allow-insecure-http   Allow updates over insecure connections\n");
 	print("   --quiet                 Quiet output. Print only important information and errors\n");
 	print("   --debug                 Print extra information to help debugging problems\n");
+	print("   --no-progress           Don't print progress report\n");
 	print("\n");
 }
 

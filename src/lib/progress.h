@@ -87,6 +87,11 @@ void progress_complete_step(void);
  */
 void progress_report(double, double);
 
+/**
+ * @brief Disable progress report.
+ */
+void progress_disable(bool);
+
 #ifdef __cplusplus
 }
 #endif

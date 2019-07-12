@@ -3,4 +3,4 @@ Description=Update Software content
 
 [Service]
 Type=oneshot
-ExecStart=@prefix@/bin/swupd update
+ExecStart=@prefix@/bin/swupd update --no-progress

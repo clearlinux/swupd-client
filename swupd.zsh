@@ -157,7 +157,7 @@ if [[ -n "$state" ]]; then
         update)
           local -a updates; updates=(
             $global_opts
-            '(help status -d --download )'{-d,--download}'[Download all content, but do not actually install the update]'
+            '(help status -d --download )--download[Download all content, but do not actually install the update]'
             '(help status -k --keepcache)'{-k,--keepcache}'[Do not delete the swupd state directory content after updating the system]'
             '(help status -T --migrate)'{-T,--migrate}'[Migrate to augmented upstream/mix content]'
             '(help status -a --allow-mix-collisions)'{-a,--allow-mix-collisions}'[Ignore and continue if custom user content conflicts with upstream provided content]'
@@ -188,7 +188,7 @@ if [[ -n "$state" ]]; then
             $global_opts
             + '(list)'
             '(help)'{-a,--all}'[List all available bundles for the current version of Clear Linux]'
-            '(help)'{-d,--deps=}'[List bundles included by BUNDLE]:deps:()'
+            '(help)--deps=[List bundles included by BUNDLE]:deps:()'
             '(help)'{-D,--has-dep=}'[List dependency tree of all bundles which have BUNDLE as a dependency]:has-dep:()'
           )
           _arguments $lsbundle && ret=0
@@ -246,7 +246,7 @@ if [[ -n "$state" ]]; then
             $global_opts
             + '(mirror)'
             '(help)'{-s,--set}'[set mirror url]:mirro:_urls'
-            '(help)'{-u,--unset}'[unset mirror url]'
+            '(help)'{-U,--unset}'[unset mirror url]'
           )
           _arguments $mirrors && ret=0
           ;;

@@ -27,8 +27,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Installing OS version 10 (latest)
 		Downloading packs for:
-		 - test-bundle2
 		 - test-bundle3
+		 - test-bundle2
 		 - test-bundle1
 		 - os-core
 		Finishing packs extraction...

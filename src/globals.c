@@ -539,12 +539,9 @@ bool init_globals(void)
 		if (set_default_version_url()) {
 #ifdef VERSIONURL
 			/* Fallback to configure time version_url if other sources fail */
-			ret = set_version_url(VERSIONURL);
-#else
-			/* We have no choice but to fail */
-			ret = -1;
+			set_version_url(VERSIONURL);
 #endif
-			if (ret) {
+			if (!version_url) {
 				error("\nDefault version URL not found. Use the -v option instead.\n");
 				exit(EXIT_FAILURE);
 			}
@@ -555,12 +552,9 @@ bool init_globals(void)
 		if (set_default_content_url()) {
 #ifdef CONTENTURL
 			/* Fallback to configure time content_url if other sources fail */
-			ret = set_content_url(CONTENTURL);
-#else
-			/* We have no choice but to fail */
-			ret = -1;
+			set_content_url(CONTENTURL);
 #endif
-			if (ret) {
+			if (!content_url) {
 				error("\nDefault content URL not found. Use the -c option instead.\n");
 				exit(EXIT_FAILURE);
 			}

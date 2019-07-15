@@ -157,7 +157,7 @@ if [[ -n "$state" ]]; then
         update)
           local -a updates; updates=(
             $global_opts
-            '(help status -d --download )--download[Download all content, but do not actually install the update]'
+            '(help status --download )--download[Download all content, but do not actually install the update]'
             '(help status -k --keepcache)'{-k,--keepcache}'[Do not delete the swupd state directory content after updating the system]'
             '(help status -T --migrate)'{-T,--migrate}'[Migrate to augmented upstream/mix content]'
             '(help status -a --allow-mix-collisions)'{-a,--allow-mix-collisions}'[Ignore and continue if custom user content conflicts with upstream provided content]'
@@ -208,7 +208,7 @@ if [[ -n "$state" ]]; then
           local -a searchfiles; searchfiles=(
             $global_opts
             '(help -l --library)'{-l,--library=}'[Search paths where libraries are located for a match]:library:_path_files -/'
-            '(help -b --binary)'{-b,--binary=}'[Search paths where binaries are located for a match]:binary:_path_files -/'
+            '(help -B --binary)'{-B,--binary=}'[Search paths where binaries are located for a match]:binary:_path_files -/'
             '(help -T --top)'{-T,--top=}'[Only display the top NUM results for each bundle]:top:()'
             '(help -m --csv)'{-m,--csv}'[Output all results in CSV format (machine-readable)]'
             '(help -o --order)'{-o,--order=}'[Sort the output]:order:((alpha\:"Order alphabetically\(default\)"

@@ -31,6 +31,7 @@ static const struct option prog_opts[] = {
 	{ "force", no_argument, 0, 'x' },
 	{ "bundles", required_argument, 0, 'B' },
 	{ "version", required_argument, 0, 'V' },
+	{ "manifest", required_argument, 0, 'm' },
 };
 
 static void print_help(void)
@@ -54,6 +55,7 @@ static bool parse_opt(int opt, char *optarg)
 	int err;
 
 	switch (opt) {
+	case 'm':
 	case 'V':
 		/* even though the default version is "latest", allow users to
 		 * specify it as an option */

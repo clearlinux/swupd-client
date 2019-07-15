@@ -625,8 +625,6 @@ static const struct option global_opts[] = {
 	{ "versionurl", required_argument, 0, 'v' },
 	{ "quiet", no_argument, &log_level, LOG_ERROR },
 	{ "debug", no_argument, &log_level, LOG_DEBUG },
-	//TODO: -D option is deprecated. Remove that on a Major release
-	{ "", required_argument, 0, 'D' },
 	{ "max-retries", required_argument, 0, 'r' },
 	{ "retry-delay", required_argument, 0, 'd' },
 	{ "json-output", no_argument, 0, 'j' },
@@ -775,19 +773,6 @@ static bool global_long_opt_default(const char *long_opt)
 	return true;
 }
 
-static bool global_parse_deprecated(int opt, char *optarg)
-{
-	switch (opt) {
-	case 'D':
-		warn("Deprecated option -D was renamed. Prefer using -W or --max-parallel-downloads.\n\n");
-		return global_parse_opt('W', optarg);
-	default:
-		return false;
-	}
-
-	return false;
-}
-
 /* Generate the optstring required by getopt_long, based on options array */
 static char *generate_optstring(struct option *opts, int num_opts)
 {
@@ -908,11 +893,6 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 
 		// Try to parse global options
 		if (global_parse_opt(opt, optarg)) {
-			continue;
-		}
-
-		// Try to parse deprecated global options
-		if (global_parse_deprecated(opt, optarg)) {
 			continue;
 		}
 

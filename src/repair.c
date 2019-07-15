@@ -149,8 +149,6 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-/* TODO(castulo): this function should be made static once "verify --fix" is
- * officially deprecated by end of July 2019 */
 regex_t *compile_whitelist(const char *whitelist_pattern)
 {
 	int errcode;

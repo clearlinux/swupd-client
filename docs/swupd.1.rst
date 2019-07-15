@@ -457,7 +457,7 @@ SUBCOMMANDS
         Do not delete the swupd state directory content after updating the
         system.
 
-``verify (deprecated)``
+``verify``
 
     Perform system software installation verification. The program will
     obtain all the manifests needed from version url and content url to
@@ -468,18 +468,18 @@ SUBCOMMANDS
     control of the software update program are verified according to the
     manifest data.
 
-    NOTE: This command has been deprecated, please consider using "swupd diagnose"
+    NOTE: This command has been superseded, please consider using "swupd diagnose"
     instead.
 
     - `-m, --manifest`
 
         Verify against manifest version M.
 
-    - `-f, --fix (deprecated)`
+    - `-f, --fix`
 
         Correct any issues found. This will overwrite incorrect file
         content, add missing files and do additional corrections, permissions
-        etc.  This option has been deprecated, please consider using
+        etc.  This option has been superseded, please consider using
         "swupd repair" instead.
 
     - `-Y, --picky`
@@ -516,11 +516,11 @@ SUBCOMMANDS
 
             Matches nothing, because paths are never empty.
 
-    - `-i, --install (deprecated)`
+    - `-i, --install`
 
         Install all files into {path} as specified by the `--path={path}`
         option. Useful to generate a new system root, or verify side
-        by side. This option has been deprecated, please consider using
+        by side. This option has been superseded, please consider using
         "swupd os-install" instead.
 
     - `-q, --quick`

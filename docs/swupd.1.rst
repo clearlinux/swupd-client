@@ -382,6 +382,14 @@ SUBCOMMANDS
 
             Only runs the repair operation on the os-core and vi bundles.
 
+``search``
+
+    Swupd search functionality is provided by swupd-search binary available
+    on os-core-search bundle.
+    For more information run:
+
+    $ swupd search --help
+
 ``search-file {string}``
 
     Search for matching paths in manifest data. The specified {string}

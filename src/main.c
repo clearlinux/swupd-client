@@ -34,6 +34,19 @@ struct subcmd {
 	enum swupd_code (*mainfunc)(int, char **);
 };
 
+static enum swupd_code external_search_main(int argc, char **argv)
+{
+	int ret;
+
+	ret = binary_loader_main(argc, argv);
+	if (ret == SWUPD_INVALID_BINARY) {
+		print("Swupd search depends on a binary available on os-core-search bundle\n");
+		print("Run 'swupd bundle-add os-core-search' to install it\n");
+	}
+
+	return ret;
+}
+
 // TODO(castulo): remove the superseded command from the help menu by end of November 2019,
 // so it is not visible but the command must remain available in the back so we don't break users
 static struct subcmd commands[] = {
@@ -45,7 +58,7 @@ static struct subcmd commands[] = {
 	{ "bundle-remove", "Uninstall a bundle", bundle_remove_main },
 	{ "bundle-list", "List installed bundles", bundle_list_main },
 #ifdef EXTERNAL_MODULES_SUPPORT
-	{ "search", "Searches for the best bundle to install a binary or library", binary_loader_main },
+	{ "search", "Searches for the best bundle to install a binary or library (depends on os-core-search bundle)", external_search_main },
 #endif
 	{ "search-file", "Command to search files in Clear Linux bundles", search_main },
 	{ "diagnose", "Verify content for OS version", diagnose_main },

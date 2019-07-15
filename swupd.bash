@@ -28,7 +28,6 @@ _swupd()
     for ((i=COMP_CWORD-1;i>=0;i--))
     do case "${COMP_WORDS[$i]}" in
 	    ("$1")
-	    #  TODO(castulo): remove the deprecated verify command by end of July 2019
 		opts="--help --version autoupdate bundle-add bundle-remove bundle-list hashdump update diagnose check-update search search-file info clean mirror os-install repair verify "
 	    break;;
 	    ("info")

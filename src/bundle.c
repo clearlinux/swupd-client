@@ -701,15 +701,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 			continue;
 		}
 
-		/*
-		 * If we're recursing a tree of includes, we need to cut out early
-		 * if the bundle we're looking at is already subscribed...
-		 * Because if it is, we'll visit it soon anyway at the top level.
-		 *
-		 * We can't do this for the toplevel of the recursion because
-		 * that is how we initiallly fill in the include tree.
-		 */
-		if (component_subscribed(*subs, bundle) && recursion > 0) {
+		if (!find_all && is_installed_bundle(bundle)) {
 			continue;
 		}
 
@@ -718,6 +710,25 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 			error("Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
 			ret |= add_sub_ERR;
 			goto out;
+		}
+
+		/*
+		 * If we're recursing a tree of includes, we need to cut out early
+		 * if the bundle we're looking at is already subscribed...
+		 * Because if it is, we'll visit it soon anyway at the top level.
+		 *
+		 * We can't do this for the toplevel of the recursion because
+		 * that is how we initiallly fill in the include tree.
+		 */
+		if (component_subscribed(*subs, bundle)) {
+			if (recursion > 0) {
+				free_manifest(manifest);
+				continue;
+			}
+		} else {
+			// Just add it to a list if it doesn't exist
+			create_and_append_subscription(subs, bundle);
+			ret |= add_sub_NEW; /* We have added at least one */
 		}
 
 		if (manifest->includes) {
@@ -739,16 +750,6 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 		}
 
 		free_manifest(manifest);
-
-		if (!find_all && is_installed_bundle(bundle)) {
-			continue;
-		}
-
-		if (component_subscribed(*subs, bundle)) {
-			continue;
-		}
-		create_and_append_subscription(subs, bundle);
-		ret |= add_sub_NEW; /* We have added at least one */
 	}
 out:
 	return ret;

@@ -42,12 +42,12 @@ test_setup() {
 		Update started.
 		Preparing to update from 10 to 100
 		Downloading packs for:
-		 - test-bundle3
-		 - test-bundle4
 		 - test-bundle6
 		 - test-bundle5
-		 - test-bundle2
+		 - test-bundle4
 		 - test-bundle7
+		 - test-bundle2
+		 - test-bundle3
 		 - test-bundle1
 		Finishing packs extraction...
 		Statistics for going from version 10 to version 100:

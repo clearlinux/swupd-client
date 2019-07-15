@@ -53,7 +53,6 @@ static void print_help(void)
 }
 
 static const struct option prog_opts[] = {
-	{ "list", no_argument, 0, 'l' },
 	{ "skip-optional", no_argument, &skip_optional_bundles, 1 },
 	{ "skip-diskspace-check", no_argument, &skip_diskspace_check, 1 },
 };
@@ -61,10 +60,6 @@ static const struct option prog_opts[] = {
 static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 {
 	switch (opt) {
-	case 'l':
-		error("[-l, --list] option is deprecated, use\n"
-		      "bundle-list [-a|--all] sub-command instead.\n\n");
-		exit(EXIT_FAILURE);
 	default:
 		return false;
 	}

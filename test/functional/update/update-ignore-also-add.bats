@@ -22,7 +22,7 @@ test_setup() {
 
 }
 
-@test "UPD057: Update a system where nested dependencies are added in the newer version" {
+@test "UPD057: Update a system where also-add dependencies are added in the newer version" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 

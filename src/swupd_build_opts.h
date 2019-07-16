@@ -114,6 +114,7 @@
 	"content URL                  " OPT_C_URL "\n"           \
 	"version URL                  " OPT_V_URL "\n"           \
 	"format ID                    " OPT_FORMAT "\n"          \
+	"build number                 " BUILD_NUMBER "\n"        \
 	"pre-update hook              " OPT_PRE "\n"             \
 	"post-update hook             " OPT_POST "\n"
 

@@ -231,6 +231,15 @@ AC_SUBST(CONFIG_FILE_PATH, [${config_file_path}])
 AC_DEFINE_UNQUOTED([CONFIG_FILE_PATH], ["${config_file_path}"], [List of directories to look for the configuration file])
 
 AC_ARG_WITH(
+  [build-number],
+  [AS_HELP_STRING([--with-build-number=BUILD_NUMBER], [Build version information for this release])],
+  [build_number=${withval}],
+  [build_number=""]
+)
+AC_SUBST(BUILD_NUMBER, [${build_number}])
+AC_DEFINE_UNQUOTED([BUILD_NUMBER], ["${build_number}"], [Build version information for this release])
+
+AC_ARG_WITH(
   [system-alias-path],
   [AS_HELP_STRING([--with-system-alias-path=PATH], [Default system alias path])],
   [system_alias_path=${withval}],

@@ -109,6 +109,7 @@
 	"bundles directory            " BUNDLES_DIR "\n"         \
 	"certificate path             " CERT_PATH "\n"           \
 	"fallback certificate path    " FALLBACK_CAPATHS "\n"    \
+	"config file path             " CONFIG_FILE_PATH "\n"    \
 	"systemd unitdir              " OPT_SYSTEMD_UNITDIR "\n" \
 	"content URL                  " OPT_C_URL "\n"           \
 	"version URL                  " OPT_V_URL "\n"           \

@@ -83,6 +83,8 @@ char *str_tolower(const char *str);
 /**
  * Converts a string to a boolean. If the string is "true" then it is converted
  * to a boolean true. Everything else is converted to a boolean false.
+
+ * @note Comparission to "true" is canse insensitive.
  */
 bool strtobool(const char *str);
 

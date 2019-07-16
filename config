@@ -79,6 +79,8 @@
 # Don't report progress (boolean value)
 #no_progress=<true/false>
 
+# Wait for the post-update scripts to complete (boolean value)
+#wait_for_scripts=<true/false>
 
 
 #

@@ -35,6 +35,7 @@
 #include "swupd.h"
 
 #define NO_PROGRESS 1000
+#define WAIT_FOR_SCRIPTS 1001
 
 int allow_insecure_http = 0;
 bool allow_mix_collisions = false;
@@ -63,6 +64,7 @@ bool keepcache = false;
 timelist *global_times = NULL;
 int max_retries = 3;
 int retry_delay = 10;
+bool wait_for_scripts = false;
 
 /* NOTE: Today the content and version server urls are the same in
  * all cases.  It is highly likely these will eventually differ, eg:
@@ -623,6 +625,7 @@ static const struct option global_opts[] = {
 	{ "retry-delay", required_argument, 0, 'd' },
 	{ "json-output", no_argument, 0, 'j' },
 	{ "allow-insecure-http", no_argument, &allow_insecure_http, 1 },
+	{ "wait-for-scripts", no_argument, 0, WAIT_FOR_SCRIPTS },
 	{ 0, 0, 0, 0 }
 };
 
@@ -735,14 +738,19 @@ static bool global_parse_opt(int opt, char *optarg)
 			set_json_format(true);
 		}
 		return true;
-
 	case NO_PROGRESS:
 		if (optarg != NULL) {
 			progress_disable(strtobool(optarg));
 		} else {
 			progress_disable(true);
 		}
-
+		return true;
+	case WAIT_FOR_SCRIPTS:
+		if (optarg != NULL) {
+			wait_for_scripts = strtobool(optarg);
+		} else {
+			wait_for_scripts = true;
+		}
 		return true;
 	default:
 		return false;
@@ -813,6 +821,7 @@ void global_print_help(void)
 	print("   --quiet                 Quiet output. Print only important information and errors\n");
 	print("   --debug                 Print extra information to help debugging problems\n");
 	print("   --no-progress           Don't print progress report\n");
+	print("   --wait-for-scripts      Wait for the post-update scripts to complete\n");
 	print("\n");
 }
 

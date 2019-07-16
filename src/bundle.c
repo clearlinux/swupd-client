@@ -1042,7 +1042,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	/* step 7: Run any scripts that are needed to complete update */
 	timelist_timer_start(global_times, "Run Scripts");
 	progress_set_step(7, "run_scripts");
-	scripts_run_post_update(false);
+	scripts_run_post_update(wait_for_scripts);
 	timelist_timer_stop(global_times); // closing: Run Scripts
 	progress_complete_step();
 

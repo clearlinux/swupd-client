@@ -107,6 +107,7 @@ local -a global_opts; global_opts=(
   '(help status -W --max-parallel-downloads)'{-W,--max-parallel-downloads=}'[Set the maximum number of parallel downloads]:downloadThreads:()'
   '(help status -r --max-retries)'{-r,--max-retries=}'[Maximum number of retries for download failures]:maxRetries:()'
   '(help status -d --retry-delay)'{-d,--retry-delay}'[Initial delay between download retries, this will be doubled for each retry]:retryDelay:()'
+  '(help status --wait-for-scripts )--wait-for-scripts[Wait for the post-update scripts to complete]'
 )
 
 _arguments -C \

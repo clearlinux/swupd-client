@@ -1013,7 +1013,7 @@ brick_the_system_and_clean_curl:
 		need_update_bootloader = true;
 		timelist_timer_start(global_times, "Run Scripts");
 		info("\n");
-		scripts_run_post_update(false);
+		scripts_run_post_update(wait_for_scripts);
 		timelist_timer_stop(global_times);
 	}
 

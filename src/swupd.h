@@ -177,6 +177,7 @@ extern bool ignore_state;
 extern bool ignore_orphans;
 extern bool no_scripts;
 extern bool no_boot_update;
+extern bool wait_for_scripts;
 extern char *format_string;
 extern char *path_prefix;
 extern bool init_globals(void);

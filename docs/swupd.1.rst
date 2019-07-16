@@ -129,6 +129,10 @@ used to modify the core behavior and resources that swupd uses.
 
    Don't print progress report on commands that informs the percentage left in current operation.
 
+- ``--wait-for-scripts``
+
+   Wait for the post-update scripts to complete
+
 SUBCOMMANDS
 ===========
 

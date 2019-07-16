@@ -466,7 +466,7 @@ version_check:
 	if (on_new_format() && (requested_version == -1 || (requested_version > new_current_version))) {
 		re_update = true;
 	}
-	scripts_run_post_update(re_update);
+	scripts_run_post_update(re_update || wait_for_scripts);
 	progress_complete_step();
 	timelist_timer_stop(global_times); // closing: Run post-update scripts
 

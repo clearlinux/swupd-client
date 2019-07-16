@@ -70,6 +70,7 @@ bool config_parse(const char *filename, load_config_fn_t load_config_fn)
 			*(line_ptr - 1) = '\0';
 			free_string(&section);
 			section = strdup_or_die(line + 1);
+			continue;
 		}
 
 		/* check the line to see if it is a key/value pair */

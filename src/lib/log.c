@@ -38,6 +38,14 @@ static void log_internal(FILE *out, const char *file, int line, const char *labe
 	struct tm *timeinfo;
 	int printed;
 
+	/* if the message starts with '\n' add a line break before the message */
+	while (strncmp(format, "\n", 1) == 0 || strncmp(format, "\r", 1) == 0) {
+		if (out == stdout || out == stderr) {
+			fprintf(out, "%c", format[0]);
+		}
+		format++;
+	}
+
 	// In debug mode, print more information
 	if (cur_log_level == LOG_DEBUG) {
 		time_t currtime;
@@ -55,6 +63,7 @@ static void log_internal(FILE *out, const char *file, int line, const char *labe
 		fprintf(out, "%s: ", label);
 	}
 	vfprintf(out, format, args_list);
+	fflush(out);
 }
 
 void log_set_level(int log_level)

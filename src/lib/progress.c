@@ -113,7 +113,7 @@ void progress_report(double count, double max)
 			if (progress_function) {
 				progress_function(step.description, step.current, step.total, percentage);
 			} else {
-				info("\r\t...%d%%", percentage);
+				info("\t...%d%%", percentage);
 				if (!isatty(fileno(stdout))) {
 					/* if not in a tty add new lines so every percentage
 					 * is in its own line */
@@ -121,6 +121,8 @@ void progress_report(double count, double max)
 				} else if (percentage == 100) {
 					/* add a line break once we reach 100% */
 					info("\n");
+				} else {
+					info("\r");
 				}
 			}
 			fflush(stdout);

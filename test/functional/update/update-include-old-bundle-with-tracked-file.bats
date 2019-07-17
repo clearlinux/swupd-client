@@ -23,7 +23,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 20 to 30
 		Downloading packs for:
 		 - test-bundle1
@@ -41,9 +41,9 @@ test_setup() {
 		No extra files need to be downloaded
 		Staging file content
 		Applying update
-		Update was applied.
+		Update was applied
 		Calling post-update helper scripts
-		Update successful. System updated from version 20 to version 30
+		Update successful - System updated from version 20 to version 30
 	EOM
 	)
 	assert_is_output "$expected_output"

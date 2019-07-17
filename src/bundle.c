@@ -510,7 +510,7 @@ enum swupd_code remove_bundles(char **bundles)
 
 	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {
-		error("Failed updater initialization, exiting now.\n");
+		error("Failed updater initialization, exiting now\n");
 		return ret;
 	}
 
@@ -883,15 +883,15 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 			ret = SWUPD_DISK_SPACE_ERROR;
 
 			if (fs_free > 0) {
-				error("Bundle too large by %ldM.\n", (bundle_size - fs_free) / 1000 / 1000);
+				error("Bundle too large by %ldM\n", (bundle_size - fs_free) / 1000 / 1000);
 			} else {
-				error("Unable to determine free space on filesystem.\n");
+				error("Unable to determine free space on filesystem\n");
 			}
 
 			info("NOTE: currently, swupd only checks /usr/ "
-			     "(or the passed-in path with /usr/ appended) for available space.\n");
+			     "(or the passed-in path with /usr/ appended) for available space\n");
 			info("To skip this error and install anyways, "
-			     "add the --skip-diskspace-check flag to your command.\n");
+			     "add the --skip-diskspace-check flag to your command\n");
 
 			goto out;
 		}
@@ -923,7 +923,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	if (ret) {
 		/* make sure the return code is positive */
 		ret = abs(ret);
-		error("Could not download some files from bundles, aborting bundle installation.\n");
+		error("Could not download some files from bundles, aborting bundle installation\n");
 		goto out;
 	}
 	timelist_timer_stop(global_times); // closing: Download missing files
@@ -1115,7 +1115,7 @@ enum swupd_code install_bundles_frontend(char **bundles)
 	/* initialize swupd and get current version from OS */
 	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {
-		error("Failed updater initialization, exiting now.\n");
+		error("Failed updater initialization, exiting now\n");
 		return ret;
 	}
 

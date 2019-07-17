@@ -16,7 +16,7 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 10 to 100
 		Downloading packs for:
 		 - os-core

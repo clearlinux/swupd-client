@@ -44,7 +44,7 @@
 void check_root(void)
 {
 	if (!is_root()) {
-		error("This program must be run as root..aborting.\n\n");
+		error("This program must be run as root..aborting\n\n");
 		exit(EXIT_FAILURE);
 	}
 }
@@ -149,7 +149,7 @@ static int ensure_root_owned_dir(const char *dirname)
 	if ((ret != -1) || (errno != ENOENT)) {
 		error(
 		    "Error \"%s\" not owned by root, is not a directory, "
-		    "or has the wrong permissions.\n"
+		    "or has the wrong permissions\n"
 		    "However it couldn't be deleted. stat gives error '%s'\n",
 		    dirname, strerror(errno));
 		exit(100);

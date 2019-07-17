@@ -19,7 +19,7 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 10 to 100
 		Downloading packs for:
 		 - test-bundle
@@ -37,10 +37,10 @@ test_setup() {
 		Warning: Update target directory does not exist: .*/target-dir/usr/foo. Trying to fix it
 		Path /usr/foo is missing on the file system ... fixing
 		Applying update
-		Update was applied.
+		Update was applied
 		Calling post-update helper scripts
 		1 files were not in a pack
-		Update successful. System updated from version 10 to version 100
+		Update successful - System updated from version 10 to version 100
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

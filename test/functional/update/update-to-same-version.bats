@@ -18,9 +18,9 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Requested version (10) is not newer than system version (10)
-		Update complete. System already up-to-date at version 10
+		Update complete - System already up-to-date at version 10
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -35,9 +35,9 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Requested version (20) is not newer than system version (20)
-		Update complete. System already up-to-date at version 20
+		Update complete - System already up-to-date at version 20
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -52,9 +52,9 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Version on server (20) is not newer than system version (20)
-		Update complete. System already up-to-date at version 20
+		Update complete - System already up-to-date at version 20
 	EOM
 	)
 	assert_is_output "$expected_output"

@@ -56,7 +56,7 @@ static void usage(const char *name)
 	print("   --quiet		  Quiet output. Print only important information and errors\n");
 	print("   --debug		  Print extra information to help debugging problems\n");
 	print("\n");
-	print("The filename is the name of a file on the filesystem.\n");
+	print("The filename is the name of a file on the filesystem\n");
 	print("\n");
 }
 

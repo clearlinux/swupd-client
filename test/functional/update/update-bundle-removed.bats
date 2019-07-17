@@ -25,10 +25,10 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 10 to 20
 		Warning: Bundle "test-bundle1" is invalid, skipping it...
-		Warning: One or more installed bundles are no longer available at version 20.
+		Warning: One or more installed bundles are no longer available at version 20
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
@@ -42,9 +42,9 @@ test_setup() {
 		No extra files need to be downloaded
 		Staging file content
 		Applying update
-		Update was applied.
+		Update was applied
 		Calling post-update helper scripts
-		Update successful. System updated from version 10 to version 20
+		Update successful - System updated from version 10 to version 20
 	EOM
 	)
 	assert_is_output "$expected_output"

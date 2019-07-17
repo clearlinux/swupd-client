@@ -59,7 +59,7 @@ test_teardown() {
 		.Fix the system clock
 		.Run 'swupd info' to check if the urls are correct
 		.Check if the server SSL certificate is trusted by your system \('clrtrust generate' may help\)
-		Error: Updater failed to initialize, exiting now.
+		Error: Updater failed to initialize, exiting now
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -89,7 +89,7 @@ test_teardown() {
 		.Fix the system clock
 		.Run 'swupd info' to check if the urls are correct
 		.Check if the server SSL certificate is trusted by your system \('clrtrust generate' may help\)
-		Error: Updater failed to initialize, exiting now.
+		Error: Updater failed to initialize, exiting now
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -110,7 +110,7 @@ test_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Checking mirror status
 		Error: Curl - Communicating with server timed out - 'http://localhost:$port//version/formatstaging/latest'
 		Warning: Upstream server http://localhost:$port/ not responding, cannot determine upstream version
@@ -129,9 +129,9 @@ test_teardown() {
 		No extra files need to be downloaded
 		Staging file content
 		Applying update
-		Update was applied.
+		Update was applied
 		Calling post-update helper scripts
-		Update successful. System updated from version 10 to version 20
+		Update successful - System updated from version 10 to version 20
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

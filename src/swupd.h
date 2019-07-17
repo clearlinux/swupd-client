@@ -167,7 +167,6 @@ struct file_counts {
 };
 
 extern bool verify_esp_only;
-extern bool have_manifest_diskspace;
 extern bool have_network;
 extern bool verify_bundles_only;
 extern bool ignore_config;

@@ -54,7 +54,6 @@ bool need_update_boot = false;
 bool need_update_bootloader = false;
 bool need_systemd_reexec = false;
 bool update_complete = false;
-bool ignore_orphans = true;
 char *format_string = NULL;
 char *path_prefix = NULL; /* must always end in '/' */
 char *mounted_dirs = NULL;

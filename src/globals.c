@@ -329,63 +329,53 @@ static bool set_state_dir(char *path)
 	return true;
 }
 
-/* Initializes the format_string global variable. If the userinput parameter is
- * not NULL, format_string will be set to its value, but only if it is a
- * positive integer or the special value "staging". Otherwise, the value is
- * read from the 'format' configuration file.
- */
-static bool set_format_string(char *userinput)
+static bool set_format_string(char *format)
 {
-	int ret;
-	bool use_default = userinput ? false : true;
-	static bool set_by_config = false;
+	// allow "staging" as a format string
+	// or any positive integer
+	if (strcmp(format, "staging") != 0 &&
+	    !is_valid_integer_format(format)) {
+		error("Invalid format '%s'\n", format);
+		return false;
+	}
 
 	if (format_string) {
-		if (!set_by_config || use_default) {
-			return true;
-		} else {
-			/* the value was originally set using a config file, but it is now being
-			 * specified as a command flag */
-			free_string(&format_string);
-		}
+		free_string(&format_string);
 	}
 
-	if (!use_default) {
-		// allow "staging" as a format string
-		if ((strcmp(userinput, "staging") == 0)) {
-			format_string = strdup_or_die(userinput);
-			return true;
-		}
-
-		// otherwise, expect a positive integer
-		if (!is_valid_integer_format(userinput)) {
-			return false;
-		}
-		format_string = strdup_or_die(userinput);
-	} else {
-		/* no option passed; use the default value */
-		ret = get_value_from_path(&format_string, DEFAULT_FORMAT_PATH, false);
-
-		// Fallback to system format ID
-		if (ret < 0) {
-			ret = get_value_from_path(&format_string, DEFAULT_FORMAT_PATH, true);
-		}
-
-		if (ret < 0) {
-			return false;
-		}
-
-		if (!is_valid_integer_format(format_string)) {
-			free_string(&format_string);
-			return false;
-		}
-	}
-
-	/* if this option is being set by an option in a configuration file,
-	 * set the local flag */
-	set_by_config = from_config ? true : false;
-
+	format_string = strdup_or_die(format);
 	return true;
+}
+
+static bool set_default_format_string()
+{
+	int ret;
+	char *new_format_string;
+	bool result = false;
+
+	/* no option passed; use the default value */
+	ret = get_value_from_path(&new_format_string, DEFAULT_FORMAT_PATH, false);
+	if (ret == 0) {
+		goto found;
+	}
+
+	// Fallback to system format ID
+	ret = get_value_from_path(&new_format_string, DEFAULT_FORMAT_PATH, true);
+	if (ret == 0) {
+		goto found;
+	}
+
+#ifdef FORMATID
+	/* Fallback to configure time format_string if other sources fail */
+	return set_format_string(FORMATID);
+#endif
+
+	return false;
+
+found:
+	result = set_format_string(new_format_string);
+	free_string(&new_format_string);
+	return result;
 }
 
 /* Initializes the path_prefix global variable. If the path parameter is not
@@ -516,21 +506,9 @@ bool init_globals(void)
 		return false;
 	}
 
-	/* Set defaults with following order of preference:
-	1. Runtime flags
-	2. State dir configuration files
-	3. Configure time settings
-
-	Calling with NULL means use the default config file value
-*/
-	if (!set_format_string(NULL)) {
-#ifdef FORMATID
-		/* Fallback to configure time format_string if other sources fail */
-		set_format_string(FORMATID);
-#else
+	if (!format_string && !set_default_format_string()) {
 		error("Unable to determine format id. Use the -F option instead.\n");
-		exit(EXIT_FAILURE);
-#endif
+		return false;
 	}
 
 	if (!version_url && !set_default_version_url()) {

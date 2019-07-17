@@ -30,7 +30,7 @@
 
 #define CONFIG_LINE_MAXLEN (PATH_MAX * 2)
 
-bool config_parse(const char *filename, load_config_fn_t load_config_fn)
+bool config_parse(const char *filename, parse_config_fn_t parse_config_fn, void *data)
 {
 	FILE *config_file;
 	char line[CONFIG_LINE_MAXLEN];
@@ -98,7 +98,7 @@ bool config_parse(const char *filename, load_config_fn_t load_config_fn)
 		}
 
 		/* load the configuration value read in the application */
-		if (!load_config_fn(section, key, value)) {
+		if (!parse_config_fn(section, key, value, data)) {
 			warn("Unrecognized option '%s=%s' from section [%s] in the configuration file\n", key, value, section);
 		}
 	}

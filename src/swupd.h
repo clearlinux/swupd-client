@@ -422,9 +422,6 @@ struct global_options {
 void global_print_help(void);
 int global_parse_options(int argc, char **argv, const struct global_options *opts);
 
-extern void config_loader_init(char *, const struct option *, parse_opt_fn_t, parse_opt_fn_t);
-extern bool config_loader_set_opt(char *section, char *key, char *value);
-
 enum swupd_code check_update();
 
 /* some disk sizes constants for the various features:

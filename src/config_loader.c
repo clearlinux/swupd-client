@@ -24,40 +24,31 @@
 #define is_from_global_section(_section) (strcmp(_section, "global") == 0)
 #define is_from_command_section(_section, _command) (strcmp(_section, _command) == 0)
 
-static struct config_loader_data {
-	char *command;
-	const struct option *available_opts;
-	parse_opt_fn_t parse_global_opt;
-	parse_opt_fn_t parse_command_opt;
-} cl = { NULL, NULL, NULL, NULL };
-
-void config_loader_init(char *command, const struct option *options, parse_opt_fn_t global_parse, parse_opt_fn_t command_parse)
+bool config_loader_set_opt(char *section, char *opt, char *value, void *data)
 {
-	cl.command = command;
-	cl.available_opts = options;
-	cl.parse_global_opt = global_parse;
-	cl.parse_command_opt = command_parse;
-}
-
-bool config_loader_set_opt(char *section, char *opt, char *value)
-{
+	struct config_loader_data *cl = data;
 	const struct option *options;
 	char *lvalue = NULL;
 	char *lsection = NULL;
 	char *flag = NULL;
 	bool ret = false;
 
+	if (!data) {
+		error("Invalid parameter to config_loader_set_opt()\n");
+		return false;
+	}
+
 	/* make sure the config loader has been initialized */
-	if (!cl.command || !cl.available_opts || !cl.parse_global_opt) {
+	if (!cl->command || !cl->available_opts || !cl->parse_global_opt) {
 		error("Configuration loader not initialized\n");
 		return false;
 	}
-	options = cl.available_opts;
+	options = cl->available_opts;
 
 	/* options within a section are by default considered to be global */
 	if (section) {
 		lsection = str_tolower(section);
-		if (!is_from_global_section(lsection) && !is_from_command_section(lsection, cl.command)) {
+		if (!is_from_global_section(lsection) && !is_from_command_section(lsection, cl->command)) {
 			/* values being parsed are from a command not currently
 			 * running, we are not interested in these */
 			ret = true;
@@ -74,7 +65,7 @@ bool config_loader_set_opt(char *section, char *opt, char *value)
 			lvalue = str_tolower(value);
 			/* if it was not a long option try looking at the global short
 			 * options first... */
-			ret = cl.parse_global_opt(options->val, value);
+			ret = cl->parse_global_opt(options->val, value);
 			if (ret) {
 				/* global option set */
 				break;
@@ -94,8 +85,8 @@ bool config_loader_set_opt(char *section, char *opt, char *value)
 			}
 
 			/* not all commands support local options */
-			if (cl.parse_command_opt) {
-				ret = cl.parse_command_opt(options->val, value);
+			if (cl->parse_command_opt) {
+				ret = cl->parse_command_opt(options->val, value);
 			}
 
 			break;

@@ -668,7 +668,7 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 				       num_global_opts + opts->longopts_len);
 
 	// load configuration values from the config file first
-	config_loader_init(argv[0], opts_array, global_parse_opt, opts->parse_opt);
+	struct config_loader_data loader_data = { argv[0], opts_array, global_parse_opt, opts->parse_opt };
 	if (CONFIG_FILE_PATH) {
 		struct stat st;
 		char *ctx = NULL;
@@ -683,7 +683,7 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 			}
 			debug("Looking for config file in path %s\n", tok);
 			string_or_die(&config_file, "%s/config", tok);
-			config_found = config_parse(config_file, config_loader_set_opt);
+			config_found = config_parse(config_file, config_loader_set_opt, &loader_data);
 			free_string(&config_file);
 			if (config_found) {
 				debug("Using configuration file %s\n", tok);

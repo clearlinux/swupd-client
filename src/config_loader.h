@@ -17,11 +17,6 @@ extern "C" {
  */
 typedef bool (*parse_opt_fn_t)(int opt, char *optarg);
 
-/**
- * @brief Type of function that sets default values for long options
- */
-typedef bool (*long_opt_default_fn_t)(const char *long_opt);
-
 #ifdef __cplusplus
 }
 #endif

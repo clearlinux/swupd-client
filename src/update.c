@@ -37,8 +37,10 @@
 #include "signature.h"
 #include "swupd.h"
 
+#define FLAG_DOWNLOAD_ONLY 2000
+
 static int requested_version = -1;
-static int download_only = 0;
+static bool download_only = false;
 
 int nonpack;
 
@@ -87,7 +89,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 		return ret;
 	}
 
-	if (download_only == 1) {
+	if (download_only) {
 		return 0;
 	}
 
@@ -443,7 +445,7 @@ version_check:
 	updates = list_sort(updates, file_sort_filename);
 
 	ret = update_loop(updates, server_manifest);
-	if (ret == 0 && download_only == 0) {
+	if (ret == 0 && !download_only) {
 		/* Failure to write the version file in the state directory
 		 * should not affect exit status. */
 		(void)update_device_latest_version(server_version);
@@ -527,7 +529,7 @@ clean_curl:
 		if (nonpack > 0) {
 			info("%i files were not in a pack\n", nonpack);
 		}
-		if (download_only == 0) {
+		if (!download_only) {
 			if (current_version < server_version) {
 				print("Update successful - System updated from version %d to version %d\n",
 				      current_version, server_version);
@@ -572,7 +574,7 @@ clean_curl:
 static bool cmd_line_status = false;
 
 static const struct option prog_opts[] = {
-	{ "download", no_argument, &download_only, 1 },
+	{ "download", no_argument, 0, FLAG_DOWNLOAD_ONLY },
 	{ "version", required_argument, 0, 'V' },
 	{ "manifest", required_argument, 0, 'm' },
 	{ "status", no_argument, 0, 's' },
@@ -633,6 +635,9 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case 'k':
 		keepcache = true;
+		return true;
+	case FLAG_DOWNLOAD_ONLY:
+		download_only = true;
 		return true;
 	default:
 		return false;

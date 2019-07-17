@@ -29,16 +29,14 @@ static struct config_loader_data {
 	const struct option *available_opts;
 	parse_opt_fn_t parse_global_opt;
 	parse_opt_fn_t parse_command_opt;
-	long_opt_default_fn_t longopt_default_global;
-} cl = { NULL, NULL, NULL, NULL, NULL };
+} cl = { NULL, NULL, NULL, NULL };
 
-void config_loader_init(char *command, const struct option *options, parse_opt_fn_t global_parse, parse_opt_fn_t command_parse, long_opt_default_fn_t global_defaults)
+void config_loader_init(char *command, const struct option *options, parse_opt_fn_t global_parse, parse_opt_fn_t command_parse)
 {
 	cl.command = command;
 	cl.available_opts = options;
 	cl.parse_global_opt = global_parse;
 	cl.parse_command_opt = command_parse;
-	cl.longopt_default_global = global_defaults;
 }
 
 bool config_loader_set_opt(char *section, char *opt, char *value)
@@ -50,7 +48,7 @@ bool config_loader_set_opt(char *section, char *opt, char *value)
 	bool ret = false;
 
 	/* make sure the config loader has been initialized */
-	if (!cl.command || !cl.available_opts || !cl.parse_global_opt || !cl.longopt_default_global) {
+	if (!cl.command || !cl.available_opts || !cl.parse_global_opt) {
 		error("Configuration loader not initialized\n");
 		return false;
 	}
@@ -74,24 +72,6 @@ bool config_loader_set_opt(char *section, char *opt, char *value)
 	while (options->name != NULL) {
 		if (strcmp(flag, options->name) == 0) {
 			lvalue = str_tolower(value);
-
-			/* some options don't have short options, only long, if this is the
-			 * case we need to assign the value directly to the variable pointed
-			 * by flag */
-			if (options->flag && options->has_arg == 0) {
-				if (strcmp(lvalue, "true") == 0) {
-					/* only set if flag=true */
-					*(options->flag) = options->val;
-				} else {
-					/* return to default value, this only makes sense for
-					 * global variable */
-					cl.longopt_default_global(options->name);
-				}
-				/* long option set */
-				ret = true;
-				break;
-			}
-
 			/* if it was not a long option try looking at the global short
 			 * options first... */
 			ret = cl.parse_global_opt(options->val, value);

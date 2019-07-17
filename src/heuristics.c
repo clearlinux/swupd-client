@@ -138,7 +138,7 @@ bool ignore(struct file *file)
 	    (file->is_state) ||
 	    is_state(file->filename) || // ideally we trust the manifest but short term reapply check here
 	    (file->is_boot && file->is_deleted) ||
-	    (ignore_orphans && file->is_orphan) ||
+	    (file->is_orphan) ||
 	    (file->is_ghosted)) {
 		update_skip++;
 		file->do_not_update = 1;

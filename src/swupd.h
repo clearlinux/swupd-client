@@ -169,9 +169,6 @@ struct file_counts {
 extern bool verify_esp_only;
 extern bool have_network;
 extern bool verify_bundles_only;
-extern bool ignore_config;
-extern bool ignore_state;
-extern bool ignore_orphans;
 extern bool no_scripts;
 extern bool no_boot_update;
 extern bool wait_for_scripts;

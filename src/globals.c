@@ -38,8 +38,11 @@
  * so they don't interfere with each other */
 #define FLAG_NO_PROGRESS 1000
 #define FLAG_WAIT_FOR_SCRIPTS 1001
+#define FLAG_QUIET 1002
+#define FLAG_DEBUG 1003
+#define FLAG_ALLOW_INSECURE_HTTP 1004
 
-int allow_insecure_http = 0;
+bool allow_insecure_http = false;
 bool allow_mix_collisions = false;
 bool migrate = false;
 bool sigcheck = true;
@@ -59,8 +62,8 @@ char *path_prefix = NULL; /* must always end in '/' */
 char *mounted_dirs = NULL;
 char *bundle_to_add = NULL;
 char *state_dir = NULL;
-int skip_diskspace_check = 0;
-int skip_optional_bundles = 0;
+bool skip_diskspace_check = false;
+bool skip_optional_bundles = false;
 bool keepcache = false;
 timelist *global_times = NULL;
 int max_retries = 3;
@@ -80,6 +83,8 @@ char *cert_path = NULL;
 int update_server_port = -1;
 static int max_parallel_downloads = -1;
 static int log_level = LOG_INFO;
+static bool quiet = false;
+static bool debug = false;
 char **swupd_argv = NULL;
 
 /* Sets the content_url global variable */
@@ -434,12 +439,12 @@ static const struct option global_opts[] = {
 	{ "time", no_argument, 0, 't' },
 	{ "url", required_argument, 0, 'u' },
 	{ "versionurl", required_argument, 0, 'v' },
-	{ "quiet", no_argument, &log_level, LOG_ERROR },
-	{ "debug", no_argument, &log_level, LOG_DEBUG },
+	{ "quiet", no_argument, 0, FLAG_QUIET },
+	{ "debug", no_argument, 0, FLAG_DEBUG },
 	{ "max-retries", required_argument, 0, 'r' },
 	{ "retry-delay", required_argument, 0, 'd' },
 	{ "json-output", no_argument, 0, 'j' },
-	{ "allow-insecure-http", no_argument, &allow_insecure_http, 1 },
+	{ "allow-insecure-http", no_argument, 0, FLAG_ALLOW_INSECURE_HTTP },
 	{ "wait-for-scripts", no_argument, 0, FLAG_WAIT_FOR_SCRIPTS },
 	{ 0, 0, 0, 0 }
 };
@@ -567,27 +572,20 @@ static bool global_parse_opt(int opt, char *optarg)
 			wait_for_scripts = true;
 		}
 		return true;
+	case FLAG_QUIET:
+		quiet = optarg ? strtobool(optarg) : true;
+		return true;
+	case FLAG_DEBUG:
+		debug = optarg ? strtobool(optarg) : true;
+		return true;
+	case FLAG_ALLOW_INSECURE_HTTP:
+		allow_insecure_http = optarg ? strtobool(optarg) : true;
+		return true;
 	default:
 		return false;
 	}
 
 	return false;
-}
-
-static bool global_long_opt_default(const char *long_opt)
-{
-
-	if (strcmp(long_opt, "quiet") == 0) {
-		log_level = LOG_INFO;
-	} else if (strcmp(long_opt, "debug") == 0) {
-		log_level = LOG_INFO;
-	} else if (strcmp(long_opt, "allow-insecure-http") == 0) {
-		allow_insecure_http = 0;
-	} else {
-		return false;
-	}
-
-	return true;
 }
 
 /* Generate the optstring required by getopt_long, based on options array */
@@ -603,6 +601,9 @@ static char *generate_optstring(struct option *opts, int num_opts)
 			if (opts->has_arg) {
 				optstring[i++] = ':';
 			}
+		}
+		if (opts->flag) {
+			error("Flag should be NULL for optarg %s\n", opts->name);
 		}
 		opts++;
 	}
@@ -667,7 +668,7 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 				       num_global_opts + opts->longopts_len);
 
 	// load configuration values from the config file first
-	config_loader_init(argv[0], opts_array, global_parse_opt, opts->parse_opt, global_long_opt_default);
+	config_loader_init(argv[0], opts_array, global_parse_opt, opts->parse_opt);
 	if (CONFIG_FILE_PATH) {
 		struct stat st;
 		char *ctx = NULL;
@@ -718,6 +719,11 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 		goto end;
 	}
 
+	if (debug) {
+		log_level = LOG_DEBUG;
+	} else if (quiet) {
+		log_level = LOG_ERROR;
+	}
 	log_set_level(log_level);
 
 end:

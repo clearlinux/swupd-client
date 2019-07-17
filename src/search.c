@@ -35,6 +35,8 @@
 #include "config.h"
 #include "swupd.h"
 
+#define FLAG_REGEXP 2000
+
 /*
  * TODO:
  * - Support exact match
@@ -65,7 +67,7 @@ static bool init = false;
 static enum search_type search_type = SEARCH_TYPE_ALL;
 static int num_results = INT_MAX;
 static int sort = SORT_TYPE_ALPHA_BUNDLES_ONLY;
-static int regexp = 0;
+static bool regexp = false;
 static regex_t regexp_comp;
 
 // Context
@@ -504,7 +506,7 @@ static const struct option prog_opts[] = {
 	{ "library", no_argument, 0, 'l' },
 	{ "order", required_argument, 0, 'o' },
 	{ "top", required_argument, 0, 'T' },
-	{ "regexp", no_argument, &regexp, 1 },
+	{ "regexp", no_argument, 0, FLAG_REGEXP },
 };
 
 static bool parse_opt(int opt, char *optarg)
@@ -540,6 +542,9 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case 'B':
 		search_type |= SEARCH_TYPE_BIN;
+		return true;
+	case FLAG_REGEXP:
+		regexp = true;
 		return true;
 	default:
 		return false;

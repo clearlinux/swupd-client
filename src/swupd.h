@@ -91,7 +91,7 @@ enum swupd_init_config {
 
 struct header;
 
-extern int allow_insecure_http;
+extern bool allow_insecure_http;
 extern bool allow_mix_collisions;
 extern bool migrate;
 extern bool sigcheck;
@@ -180,8 +180,8 @@ extern void save_cmd(char **argv);
 extern char **swupd_argv;
 extern char *bundle_to_add;
 extern char *state_dir;
-extern int skip_diskspace_check;
-extern int skip_optional_bundles;
+extern bool skip_diskspace_check;
+extern bool skip_optional_bundles;
 extern timelist *global_times;
 extern int max_retries;
 extern int retry_delay;
@@ -422,7 +422,7 @@ struct global_options {
 void global_print_help(void);
 int global_parse_options(int argc, char **argv, const struct global_options *opts);
 
-extern void config_loader_init(char *, const struct option *, parse_opt_fn_t, parse_opt_fn_t, long_opt_default_fn_t);
+extern void config_loader_init(char *, const struct option *, parse_opt_fn_t, parse_opt_fn_t);
 extern bool config_loader_set_opt(char *section, char *key, char *value);
 
 enum swupd_code check_update();

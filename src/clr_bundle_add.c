@@ -35,6 +35,9 @@
 #define MODE_RW_O (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 #define VERIFY_NOPICKY 0
 
+#define FLAG_SKIP_OPTIONAL 2000
+#define FLAG_SKIP_DISKSPACE_CHECK 2001
+
 static char **bundles;
 
 static void print_help(void)
@@ -53,13 +56,19 @@ static void print_help(void)
 }
 
 static const struct option prog_opts[] = {
-	{ "skip-optional", no_argument, &skip_optional_bundles, 1 },
-	{ "skip-diskspace-check", no_argument, &skip_diskspace_check, 1 },
+	{ "skip-optional", no_argument, 0, FLAG_SKIP_OPTIONAL },
+	{ "skip-diskspace-check", no_argument, 0, FLAG_SKIP_DISKSPACE_CHECK },
 };
 
 static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 {
 	switch (opt) {
+	case FLAG_SKIP_OPTIONAL:
+		skip_optional_bundles = true;
+		return true;
+	case FLAG_SKIP_DISKSPACE_CHECK:
+		skip_diskspace_check = true;
+		return true;
 	default:
 		return false;
 	}

@@ -149,7 +149,7 @@ int get_current_version(char *path_prefix)
 	char buff[LINE_MAX];
 	int v = -1;
 
-	if (! get_osrelease_value(path_prefix, "VERSION_ID", buff)) {
+	if (!get_osrelease_value(path_prefix, "VERSION_ID", buff)) {
 		return -1;
 	}
 	if (strtoi_err(buff, &v) != 0) {
@@ -167,7 +167,7 @@ int get_current_version(char *path_prefix)
    - dist: Buffer to store distribution string.
  */
 
-bool get_distribution_string(char *path_prefix, char* dist)
+bool get_distribution_string(char *path_prefix, char *dist)
 {
 	char variant[LINE_MAX];
 	char prettyname[LINE_MAX];
@@ -175,7 +175,7 @@ bool get_distribution_string(char *path_prefix, char* dist)
 	variant[0] = 0x00;
 	prettyname[0] = 0x00;
 
-	if (! get_osrelease_value(path_prefix, "PRETTY_NAME", prettyname)) {
+	if (!get_osrelease_value(path_prefix, "PRETTY_NAME", prettyname)) {
 		return false;
 	}
 	get_osrelease_value(path_prefix, "VARIANT_ID", variant);

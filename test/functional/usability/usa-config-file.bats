@@ -154,7 +154,7 @@ global_teardown() {
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		Generating list of extra files under $TEST_DIRNAME/testfs/target-dir/usr
+		Checking for extra files under $TEST_DIRNAME/testfs/target-dir/usr
 	EOM
 	)
 	assert_in_output "$expected_output"
@@ -189,7 +189,7 @@ global_teardown() {
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS --picky-tree /usr/lib"
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		Generating list of extra files under $TEST_DIRNAME/testfs/target-dir/usr/lib
+		Checking for extra files under $TEST_DIRNAME/testfs/target-dir/usr/lib
 	EOM
 	)
 	assert_in_output "$expected_output"
@@ -249,7 +249,10 @@ global_teardown() {
 		Warning: Invalid key/value pair in the configuration file (key='', value='true')
 		Warning: Invalid key/value pair in the configuration file ('picky-tree=/some/path=/usr')
 		Diagnosing version 10
-		Generating list of extra files under $TEST_DIRNAME/testfs/target-dir/usr
+		Checking for missing files
+		Checking for corrupt files
+		Checking for extraneous files
+		Checking for extra files under $TEST_DIRNAME/testfs/target-dir/usr
 	EOM
 	)
 	assert_in_output "$expected_output"

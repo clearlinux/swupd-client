@@ -51,15 +51,15 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
-		.* Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
 		Removing extraneous files
-		--picky removing extra files under .*/target-dir/usr
-		REMOVING /usr/share/defaults/swupd/versionurl
-		REMOVING /usr/share/defaults/swupd/contenturl
-		REMOVING /usr/share/clear/bundles/test-bundle2
-		REMOVING /usr/foo/file_3
-		REMOVING /usr/foo/file_2
-		REMOVING DIR /usr/foo/
+		Removing extra files under .*/target-dir/usr
+		 -> Extra file: /usr/share/defaults/swupd/versionurl -> deleted
+		 -> Extra file: /usr/share/defaults/swupd/contenturl -> deleted
+		 -> Extra file: /usr/share/clear/bundles/test-bundle2 -> deleted
+		 -> Extra file: /usr/foo/file_3 -> deleted
+		 -> Extra file: /usr/foo/file_2 -> deleted
+		 -> Extra file: /usr/foo/ -> deleted
 		Inspected 19 files
 		  1 file did not match
 		    1 of 1 files were repaired
@@ -95,12 +95,12 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
-		.* Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
 		Removing extraneous files
-		--picky removing extra files under .*/target-dir/bar
-		REMOVING /bar/file_5
-		REMOVING /bar/file_4
-		REMOVING DIR /bar/
+		Removing extra files under .*/target-dir/bar
+		 -> Extra file: /bar/file_5 -> deleted
+		 -> Extra file: /bar/file_4 -> deleted
+		 -> Extra file: /bar/ -> deleted
 		Inspected 16 files
 		  1 file did not match
 		    1 of 1 files were repaired

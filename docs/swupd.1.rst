@@ -209,7 +209,7 @@ SUBCOMMANDS
 
     - `-Y, --picky`
 
-        List files which should not exist. Only files listed in the
+        Also list files which should not exist. Only files listed in the
         manifests should exist.
 
     - `-X, --picky-tree=[PATH]`
@@ -334,7 +334,7 @@ SUBCOMMANDS
 
     - `-Y, --picky`
 
-        Remove files which should not exist. Only files listed in the
+        Also remove files which should not exist. Only files listed in the
         manifests should exist.
 
     - `-X, --picky-tree=[PATH]`
@@ -496,8 +496,9 @@ SUBCOMMANDS
 
     - `-Y, --picky`
 
-        List files which should not exist. Only files listed in the
-        manifests should exist.
+        Also List files which should not exist. Only files listed in the
+        manifests should exist. If the flag is used along with --fix, it
+        removes these files.
 
     - `-X, --picky-tree=[PATH]`
 

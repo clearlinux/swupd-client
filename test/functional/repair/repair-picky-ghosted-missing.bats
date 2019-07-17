@@ -26,9 +26,9 @@ test_setup() {
 		Adding any missing files
 		Repairing corrupt files
 		Removing extraneous files
-		--picky removing extra files under .*/target-dir/usr
-		REMOVING /usr/share/defaults/swupd/versionurl
-		REMOVING /usr/share/defaults/swupd/contenturl
+		Removing extra files under .*/target-dir/usr
+		 -> Extra file: /usr/share/defaults/swupd/versionurl -> deleted
+		 -> Extra file: /usr/share/defaults/swupd/contenturl -> deleted
 		Inspected 15 files
 		  2 files found which should be deleted
 		    2 of 2 files were deleted

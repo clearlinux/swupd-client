@@ -452,43 +452,23 @@ bool set_path_prefix(char *path)
 	return true;
 }
 
-/* Initializes the cert_path global variable. If the path parameter is not
- * NULL, cert_path will be set to its value. Otherwise, the default build-time
- * value is used (CERT_PATH). Note that only the first call to this function
- * sets the variable.
- */
 static void set_cert_path(char *path)
 {
-	bool use_default = path ? false : true;
-	static bool set_by_config = false;
-
-	// Early exit if the function was called previously.
 	if (cert_path) {
-		if (!set_by_config || use_default) {
-			return;
-		} else {
-			/* the value was originally set using a config file, but it is now being
-			 * specified as a command flag */
-			free_string(&cert_path);
-		}
+		free_string(&cert_path);
 	}
 
-	/* Cmd line has priority, otherwise check if we're on a mix so the correct
-	 * cert is used and user does not have to call swupd with -C all the time */
-	if (!use_default) {
-		string_or_die(&cert_path, "%s", path);
+	cert_path = strdup_or_die(path);
+}
+
+static void set_default_cert_path()
+{
+	if (system_on_mix()) {
+		set_cert_path(MIX_CERT);
 	} else {
-		if (system_on_mix()) {
-			string_or_die(&cert_path, "%s", MIX_CERT);
-		} else {
-			// CERT_PATH is guaranteed to be valid at this point.
-			string_or_die(&cert_path, "%s", CERT_PATH);
-		}
+		// CERT_PATH is guaranteed to be valid at this point.
+		set_cert_path(CERT_PATH);
 	}
-
-	/* if this option is being set by an option in a configuration file,
-	 * set the local flag */
-	set_by_config = from_config ? true : false;
 }
 
 bool init_globals(void)
@@ -521,7 +501,9 @@ bool init_globals(void)
 		return false;
 	}
 
-	set_cert_path(NULL);
+	if (!cert_path) {
+		set_default_cert_path();
+	}
 
 	if (verbose_time) {
 		global_times = timelist_new();

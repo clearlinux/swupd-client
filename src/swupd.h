@@ -93,11 +93,9 @@ struct header;
 
 extern int allow_insecure_http;
 extern bool allow_mix_collisions;
-extern bool verbose_time;
 extern bool migrate;
 extern bool sigcheck;
 extern bool timecheck;
-extern int verbose;
 extern int update_count;
 extern int update_skip;
 extern bool update_complete;

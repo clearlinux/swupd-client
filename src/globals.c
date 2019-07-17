@@ -71,7 +71,7 @@ bool wait_for_scripts = false;
  * swupd-version.01.org and swupd-files.01.org as this enables
  * different quality of server and control of the servers
  */
-bool verbose_time = false;
+static bool verbose_time = false;
 bool have_manifest_diskspace = false; /* assume no until checked */
 char *version_url = NULL;
 char *content_url = NULL;

@@ -180,108 +180,104 @@ int get_version_from_path(const char *abs_path)
 	return -1;
 }
 
-/* Initializes the content_url global variable with the default value,
- * the value is read from the 'contenturl' configuration file */
-int set_default_content_url(void)
-{
-	int ret;
-
-	// Look for mirror inside path_prefix
-	ret = get_value_from_path(&content_url, MIRROR_CONTENT_URL_PATH, false);
-	if (ret == 0) {
-		goto end;
-	}
-
-	// Look for config file in /usr/share inside path_prefix
-	ret = get_value_from_path(&content_url, DEFAULT_CONTENT_URL_PATH, false);
-	if (ret == 0) {
-		goto end;
-	}
-
-	// Look for config file in /usr/share
-	ret = get_value_from_path(&content_url, DEFAULT_CONTENT_URL_PATH, true);
-	if (ret == 0) {
-		goto end;
-	}
-
-	return -1;
-end:
-	remove_trailing_slash(content_url);
-	content_url_is_local = strncmp(content_url, "file://", 7) == 0;
-	return 0;
-}
-
 /* Sets the content_url global variable */
-void set_content_url(char *url)
+static void set_content_url(char *url)
 {
-	static bool set_by_config = false;
-
-	/* normally we want to only set this once; we assume the first successful
-	 * set is the best choice, except when the first set was done by a config
-	 * file, that can be overwritten by other values set from command line */
-	if (content_url && !set_by_config) {
-		return;
+	if (content_url) {
+		free_string(&content_url);
 	}
 
-	free_string(&content_url);
 	content_url = strdup_or_die(url);
 	remove_trailing_slash(content_url);
 	content_url_is_local = strncmp(content_url, "file://", 7) == 0;
+}
 
-	/* if this option is being set by an option in a configuration file,
-	 * set the local flag */
-	set_by_config = from_config ? true : false;
+/* Initializes the content_url global variable with the default value,
+ * the value is read from the 'contenturl' configuration file */
+bool set_default_content_url(void)
+{
+	int ret;
+	char *new_content_url = NULL;
+
+	ret = get_value_from_path(&new_content_url, MIRROR_CONTENT_URL_PATH, false);
+	if (ret == 0) {
+		goto found;
+	}
+
+	// Look for config file in /usr/share inside path_prefix
+	ret = get_value_from_path(&new_content_url, DEFAULT_CONTENT_URL_PATH, false);
+	if (ret == 0) {
+		goto found;
+	}
+
+	// Look for config file in /usr/share
+	ret = get_value_from_path(&new_content_url, DEFAULT_CONTENT_URL_PATH, true);
+	if (ret == 0) {
+		goto found;
+	}
+
+#ifdef CONTENTURL
+	/* Fallback to configure time content_url if other sources fail */
+	set_content_url(CONTENTURL);
+	return true;
+#endif
+
+	return false;
+
+found:
+	set_content_url(new_content_url);
+	free_string(&new_content_url);
+	return true;
+}
+
+/* Sets the version_url global variable */
+static void set_version_url(char *url)
+{
+	if (version_url) {
+		free_string(&version_url);
+	}
+
+	version_url = strdup_or_die(url);
+	remove_trailing_slash(version_url);
 }
 
 /* Initializes the version_url global variable with the default value,
  * the value is read from the 'versionurl' configuration file */
-int set_default_version_url(void)
+bool set_default_version_url(void)
 {
 	int ret;
+	char *new_version_url = NULL;
 
 	// Look for mirror inside path_prefix
-	ret = get_value_from_path(&version_url, MIRROR_VERSION_URL_PATH, false);
+	ret = get_value_from_path(&new_version_url, MIRROR_VERSION_URL_PATH, false);
 	if (ret == 0) {
-		goto end;
+		goto found;
 	}
 
 	// Look for config file in /usr/share inside path_prefix
-	ret = get_value_from_path(&version_url, DEFAULT_VERSION_URL_PATH, false);
+	ret = get_value_from_path(&new_version_url, DEFAULT_VERSION_URL_PATH, false);
 	if (ret == 0) {
-		goto end;
+		goto found;
 	}
 
 	// Look for config file in /usr/share
-	ret = get_value_from_path(&version_url, DEFAULT_VERSION_URL_PATH, true);
+	ret = get_value_from_path(&new_version_url, DEFAULT_VERSION_URL_PATH, true);
 	if (ret == 0) {
-		goto end;
+		goto found;
 	}
 
-	return -1;
-end:
-	remove_trailing_slash(version_url);
-	return 0;
-}
+#ifdef VERSIONURL
+	/* Fallback to configure time version_url if other sources fail */
+	set_version_url(VERSIONURL);
+	return true;
+#endif
 
-/* Sets the version_url global variable */
-void set_version_url(char *url)
-{
-	static bool set_by_config = false;
+	return false;
 
-	/* normally we want to only set this once; we assume the first successful
-	 * set is the best choice, except when the first set was done by a config
-	 * file, that can be overwritten by other values set from command line */
-	if (version_url && !set_by_config) {
-		return;
-	}
-
-	free_string(&version_url);
-	version_url = strdup_or_die(url);
-	remove_trailing_slash(version_url);
-
-	/* if this option is being set by an option in a configuration file,
-	 * set the local flag */
-	set_by_config = from_config ? true : false;
+found:
+	set_version_url(new_version_url);
+	free_string(&new_version_url);
+	return true;
 }
 
 static bool is_valid_integer_format(char *str)
@@ -537,30 +533,14 @@ bool init_globals(void)
 #endif
 	}
 
-	if (!version_url) {
-		if (set_default_version_url()) {
-#ifdef VERSIONURL
-			/* Fallback to configure time version_url if other sources fail */
-			set_version_url(VERSIONURL);
-#endif
-			if (!version_url) {
-				error("\nDefault version URL not found. Use the -v option instead.\n");
-				exit(EXIT_FAILURE);
-			}
-		}
+	if (!version_url && !set_default_version_url()) {
+		error("Default version URL not found. Use the -v option instead.\n");
+		return false;
 	}
 
-	if (!content_url) {
-		if (set_default_content_url()) {
-#ifdef CONTENTURL
-			/* Fallback to configure time content_url if other sources fail */
-			set_content_url(CONTENTURL);
-#endif
-			if (!content_url) {
-				error("\nDefault content URL not found. Use the -c option instead.\n");
-				exit(EXIT_FAILURE);
-			}
-		}
+	if (!content_url && !set_default_content_url()) {
+		error("Default content URL not found. Use the -c option instead.\n");
+		return false;
 	}
 
 	set_cert_path(NULL);

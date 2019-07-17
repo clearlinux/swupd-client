@@ -56,14 +56,6 @@ bool config_loader_set_opt(char *section, char *opt, char *value)
 	}
 	options = cl.available_opts;
 
-	/* replace all '_' used in config options with '-' used in flags */
-	flag = strdup_or_die(opt);
-	for (unsigned int i = 0; flag[i]; i++) {
-		if (flag[i] == '_') {
-			flag[i] = '-';
-		}
-	}
-
 	/* options within a section are by default considered to be global */
 	if (section) {
 		lsection = str_tolower(section);
@@ -74,6 +66,9 @@ bool config_loader_set_opt(char *section, char *opt, char *value)
 			goto exit;
 		}
 	}
+
+	/* replace all '_' used in config options with '-' used in flags */
+	flag = str_subchar(opt, '_', '-');
 
 	/* search the option from within the available options */
 	while (options->name != NULL) {

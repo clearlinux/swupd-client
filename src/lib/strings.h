@@ -88,6 +88,15 @@ char *str_tolower(const char *str);
  */
 bool strtobool(const char *str);
 
+/**
+ * Returns a copy of str with all chars c1 replaced with c2.
+ *
+ * @param str The original string.
+ * @param c1 Character to look for.
+ * @param c2 The character to replace c1 to.
+ */
+char *str_subchar(const char *str, char c1, char c2);
+
 #ifdef __cplusplus
 }
 #endif

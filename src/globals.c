@@ -74,7 +74,6 @@ bool wait_for_scripts = false;
  * different quality of server and control of the servers
  */
 static bool verbose_time = false;
-bool have_manifest_diskspace = false; /* assume no until checked */
 char *version_url = NULL;
 char *content_url = NULL;
 bool content_url_is_local = false;

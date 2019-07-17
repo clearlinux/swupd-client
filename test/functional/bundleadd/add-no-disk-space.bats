@@ -83,9 +83,9 @@ test_setup() {
 	assert_status_is "$SWUPD_DISK_SPACE_ERROR"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
-		Error: Bundle too large by 11M.
-		NOTE: currently, swupd only checks /usr/ (or the passed-in path with /usr/ appended) for available space.
-		To skip this error and install anyways, add the --skip-diskspace-check flag to your command.
+		Error: Bundle too large by 11M
+		NOTE: currently, swupd only checks /usr/ (or the passed-in path with /usr/ appended) for available space
+		To skip this error and install anyways, add the --skip-diskspace-check flag to your command
 		Failed to install 1 of 1 bundles
 	EOM
 	)
@@ -141,7 +141,7 @@ test_setup() {
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error: Could not download some files from bundles, aborting bundle installation.
+		Error: Could not download some files from bundles, aborting bundle installation
 		Failed to install 1 of 1 bundles
 	EOM
 	)

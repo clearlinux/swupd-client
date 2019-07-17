@@ -566,7 +566,7 @@ static bool parse_options(int argc, char **argv)
 
 	/* Arbitrary upper limit to ensure we aren't getting handed garbage */
 	if (strlen(search_string) > PATH_MAX) {
-		error("Search string is too long.\n");
+		error("Search string is too long\n");
 		return false;
 	}
 
@@ -608,7 +608,7 @@ enum swupd_code search_main(int argc, char **argv)
 
 	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {
-		error("Failed swupd initialization, exiting now.\n");
+		error("Failed swupd initialization, exiting now\n");
 		goto exit;
 	}
 

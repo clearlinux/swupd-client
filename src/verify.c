@@ -272,12 +272,12 @@ static void check_warn_freespace(const struct file *file)
 	string_or_die(&original, "%s/staged/%s", state_dir, file->hash);
 	fs_free = get_available_space(path_prefix);
 	if (fs_free < 0 || stat(original, &st) != 0) {
-		warn("Unable to determine free space on filesystem.\n");
+		warn("Unable to determine free space on filesystem\n");
 		goto out;
 	}
 
 	if (fs_free < st.st_size * 1.1) {
-		warn("File to install (%s) too large by %ldK.\n",
+		warn("File to install (%s) too large by %ldK\n",
 		     file->filename, (st.st_size - fs_free) / 1000);
 		/* set flag to skip checking space on the second failure, assume we're still out of space */
 		no_freespace_flag = true;

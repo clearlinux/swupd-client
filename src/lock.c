@@ -80,7 +80,7 @@ int p_lockfile(void)
 		if ((errno == EAGAIN) || (errno == EACCES)) {
 			ret = -EAGAIN;
 		}
-		error("cannot acquire lock file. Another swupd process is already running (possibly auto-update).\n");
+		error("Cannot acquire lock file, another swupd process is already running (possibly auto-update)\n");
 		close(lock_fd);
 		return ret;
 	} else {

@@ -295,7 +295,7 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			char *filename;
 			char *url;
 
-			warn("Downloading missing manifest for bundle %s version %d.\n",
+			warn("Downloading missing manifest for bundle %s version %d\n",
 			     current->filename, current->last_change);
 
 			string_or_die(&filename, "%s/%i/Manifest.%s", state_dir,
@@ -324,7 +324,7 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 		}
 
 		if (!verify_file(bundle, local)) {
-			warn("hash check failed for Manifest.%s for version %i. Deleting it.\n",
+			warn("hash check failed for Manifest.%s for version %i. Deleting it\n",
 			     current->filename, manifest->version);
 			unlink(local);
 			ret = 1;

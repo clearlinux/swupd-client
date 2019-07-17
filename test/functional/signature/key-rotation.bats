@@ -51,7 +51,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 20 to 30
 		Downloading packs for:
 		 - os-core
@@ -66,9 +66,9 @@ test_setup() {
 		No extra files need to be downloaded
 		Staging file content
 		Applying update
-		Update was applied.
+		Update was applied
 		Calling post-update helper scripts
-		Update successful. System updated from version 20 to version 30
+		Update successful - System updated from version 20 to version 30
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -78,7 +78,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 40 to 50
 		Downloading packs for:
 		 - os-core
@@ -93,9 +93,9 @@ test_setup() {
 		No extra files need to be downloaded
 		Staging file content
 		Applying update
-		Update was applied.
+		Update was applied
 		Calling post-update helper scripts
-		Update successful. System updated from version 40 to version 50
+		Update successful - System updated from version 40 to version 50
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -112,7 +112,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD update -V 30 $SWUPD_OPTS_NO_FMT"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 20 to 30
 		Downloading packs for:
 		 - os-core
@@ -127,9 +127,9 @@ test_setup() {
 		No extra files need to be downloaded
 		Staging file content
 		Applying update
-		Update was applied.
+		Update was applied
 		Calling post-update helper scripts
-		Update successful. System updated from version 20 to version 30
+		Update successful - System updated from version 20 to version 30
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -139,7 +139,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 40 to 50
 		Error: Certificate verification error - self signed certificate
 		Error: Signature check error

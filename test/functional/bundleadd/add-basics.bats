@@ -241,7 +241,7 @@ global_teardown() {
 		Warning: Bundle "test-bundle3" is already installed, skipping it...
 		No packs need to be downloaded
 		Starting download of remaining update content. This may take a while...
-		Error: Could not download some files from bundles, aborting bundle installation.
+		Error: Could not download some files from bundles, aborting bundle installation
 		Failed to install 3 of 3 bundles
 		1 bundle was already installed
 	EOM

@@ -82,36 +82,48 @@ out:
 	return ret;
 }
 
-int get_current_version(char *path_prefix)
+/**
+   Finds associated value string of the key in os-release file.
+   Returns true for success, false otherwise.
+
+   - path_prefix
+   - key: 	Key in os-release file to read.
+   - buff:	Buffer to store associated value.
+ */
+bool get_osrelease_value(char *path_prefix, char *key, char *buff)
 {
 	char line[LINE_MAX];
-	FILE *file;
-	int v = -1;
-	int err;
-	char *buildstamp;
-	char *src, *dest;
+	FILE *file = NULL;
+	char *releasefile = NULL;
+	char *src = NULL, *dest = NULL;
+	char *keystr = NULL;
+	int keystrlen = 0;
+	bool keyfound = false;
 
-	string_or_die(&buildstamp, "%s/usr/lib/os-release", path_prefix);
-	file = fopen(buildstamp, "rm");
+	string_or_die(&releasefile, "%s/usr/lib/os-release", path_prefix);
+	file = fopen(releasefile, "rm");
 	if (!file) {
-		free_string(&buildstamp);
-		string_or_die(&buildstamp, "%s/etc/os-release", path_prefix);
-		file = fopen(buildstamp, "rm");
+		free_string(&releasefile);
+		string_or_die(&releasefile, "%s/etc/os-release", path_prefix);
+		file = fopen(releasefile, "rm");
 		if (!file) {
-			free_string(&buildstamp);
-			return v;
+			free_string(&releasefile);
+			return false;
 		}
 	}
 
+	string_or_die(&keystr, "%s=", key);
+	keystrlen = strlen(keystr);
 	while (!feof(file)) {
-		line[0] = 0;
+		line[0] = 0x00;
 		if (fgets(line, LINE_MAX, file) == NULL) {
 			break;
 		}
-		if (strncmp(line, "VERSION_ID=", 11) == 0) {
-			src = &line[11];
+		if (strncmp(line, keystr, keystrlen) == 0) {
+			keyfound = true;
+			src = &line[keystrlen];
 			/* Drop quotes and newline in value */
-			dest = src;
+			dest = buff;
 			while (*src) {
 				if (*src == '\'' || *src == '"' || *src == '\n') {
 					++src;
@@ -122,18 +134,45 @@ int get_current_version(char *path_prefix)
 				}
 			}
 			*dest = 0;
-
-			err = strtoi_err(&line[11], &v);
-			if (err != 0) {
-				v = -1;
-			}
 			break;
 		}
 	}
 
-	free_string(&buildstamp);
+	free_string(&releasefile);
+	free_string(&keystr);
 	fclose(file);
+	return keyfound;
+}
+
+int get_current_version(char *path_prefix)
+{
+	char buff[LINE_MAX];
+	int v = -1;
+
+	if (!get_osrelease_value(path_prefix, "VERSION_ID", buff)) {
+		return -1;
+	}
+	if (strtoi_err(buff, &v) != 0) {
+		return -1;
+	}
+
 	return v;
+}
+
+/**
+   Get distribution string from the os-release file.
+   Returns true for success, false otherwise.
+
+   - path_prefix: Prefix path for the os-release file.
+   - dist: Buffer to store distribution string.
+ */
+
+bool get_distribution_string(char *path_prefix, char *dist)
+{
+	if (!get_osrelease_value(path_prefix, "PRETTY_NAME", dist)) {
+		return false;
+	}
+	return true;
 }
 
 enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix)

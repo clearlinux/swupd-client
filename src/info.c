@@ -25,13 +25,16 @@
 enum swupd_code print_update_conf_info()
 {
 	enum swupd_code ret = SWUPD_OK;
-
+	char dist_string[LINE_MAX];
 	int current_version = get_current_version(path_prefix);
-	if (current_version < 0) {
+	bool dist_string_found = get_distribution_string(path_prefix, dist_string);
+
+	if (current_version < 0 || !dist_string_found) {
 		error("Unable to determine current OS version\n");
 		info("Installed version: unknown\n");
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 	} else {
+		info("Distribution:      %s\n", dist_string);
 		info("Installed version: %d\n", current_version);
 	}
 	info("Version URL:       %s\n", version_url);

@@ -52,7 +52,7 @@ enum swupd_code list_installable_bundles()
 	int current_version;
 	bool mix_exists;
 
-	current_version = get_current_version(path_prefix);
+	current_version = get_current_version(globals.path_prefix);
 	if (current_version < 0) {
 		error("Unable to determine current OS version\n");
 		return SWUPD_CURRENT_VERSION_UNKNOWN;
@@ -122,7 +122,7 @@ bool is_installed_bundle(const char *bundle_name)
 	char *filename = NULL;
 	bool ret = true;
 
-	string_or_die(&filename, "%s/%s/%s", path_prefix, BUNDLES_DIR, bundle_name);
+	string_or_die(&filename, "%s/%s/%s", globals.path_prefix, BUNDLES_DIR, bundle_name);
 
 	if (stat(filename, &statb) == -1) {
 		ret = false;
@@ -201,7 +201,7 @@ enum swupd_code show_included_bundles(char *bundle_name)
 	struct list *deps = NULL;
 	struct manifest *mom = NULL;
 
-	current_version = get_current_version(path_prefix);
+	current_version = get_current_version(globals.path_prefix);
 	if (current_version < 0) {
 		error("Unable to determine current OS version\n");
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
@@ -301,7 +301,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 		goto out;
 	}
 
-	version = get_current_version(path_prefix);
+	version = get_current_version(globals.path_prefix);
 	if (version < 0) {
 		error("Unable to determine current OS version\n");
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
@@ -397,7 +397,7 @@ out:
 
 static char *tracking_dir(void)
 {
-	return mk_full_filename(state_dir, "bundles");
+	return mk_full_filename(globals.state_dir, "bundles");
 }
 
 /*
@@ -441,12 +441,12 @@ static void track_installed(const char *bundle_name)
 		if (ret) {
 			goto out;
 		}
-		src = mk_full_filename(path_prefix, "/usr/share/clear/bundles");
+		src = mk_full_filename(globals.path_prefix, "/usr/share/clear/bundles");
 		/* at the point this function is called <bundle_name> is already
 		 * installed on the system and therefore has a tracking file under
 		 * /usr/share/clear/bundles. A simple cp -a of that directory will
 		 * accurately track that bundle as manually installed. */
-		ret = copy_all(src, state_dir);
+		ret = copy_all(src, globals.state_dir);
 		free_string(&src);
 		if (ret) {
 			goto out;
@@ -514,7 +514,7 @@ enum swupd_code remove_bundles(char **bundles)
 		return ret;
 	}
 
-	current_version = get_current_version(path_prefix);
+	current_version = get_current_version(globals.path_prefix);
 	if (current_version < 0) {
 		error("Unable to determine current OS version\n");
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
@@ -740,7 +740,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 			ret |= r; /* merge in recursive call results */
 		}
 
-		if (!skip_optional_bundles && manifest->optional) {
+		if (!globals.skip_optional_bundles && manifest->optional) {
 			int r = add_subscriptions(manifest->optional, subs, mom, find_all, recursion + 1);
 			if (r & add_sub_ERR) {
 				free_manifest(manifest);
@@ -775,7 +775,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 	/* step 1: get subscriptions for bundles to be installed */
 	info("Loading required manifests...\n");
-	timelist_timer_start(global_times, "Add bundles and recurse");
+	timelist_timer_start(globals.global_times, "Add bundles and recurse");
 	progress_set_step(1, "load_manifests");
 	ret = add_subscriptions(bundles, subs, mom, false, 0);
 
@@ -842,10 +842,10 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	mom->submanifests = installed_bundles;
 
 	progress_complete_step();
-	timelist_timer_stop(global_times); // closing: Add bundles and recurse
+	timelist_timer_stop(globals.global_times); // closing: Add bundles and recurse
 
 	/* Step 2: Get a list with all files needed to be installed for the requested bundles */
-	timelist_timer_start(global_times, "Consolidate files from bundles");
+	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
 	progress_set_step(2, "consolidate_files");
 
 	/* get all files already installed in the target system */
@@ -863,16 +863,16 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	to_install_files = filter_out_existing_files(to_install_files, installed_files);
 
 	progress_complete_step();
-	timelist_timer_stop(global_times); // closing: Consolidate files from bundles
+	timelist_timer_stop(globals.global_times); // closing: Consolidate files from bundles
 
 	/* Step 3: Check if we have enough space */
 	progress_set_step(3, "check_disk_space_availability");
-	if (!skip_diskspace_check) {
-		timelist_timer_start(global_times, "Check disk space availability");
+	if (!globals.skip_diskspace_check) {
+		timelist_timer_start(globals.global_times, "Check disk space availability");
 		char *filepath = NULL;
 
 		bundle_size = get_manifest_list_contentsize(to_install_bundles);
-		filepath = mk_full_filename(path_prefix, "/usr/");
+		filepath = mk_full_filename(globals.path_prefix, "/usr/");
 
 		/* Calculate free space on filepath */
 		fs_free = get_available_space(filepath);
@@ -895,12 +895,12 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 			goto out;
 		}
-		timelist_timer_stop(global_times); // closing: Check disk space availability
+		timelist_timer_stop(globals.global_times); // closing: Check disk space availability
 	}
 	progress_complete_step();
 
 	/* step 4: download necessary packs */
-	timelist_timer_start(global_times, "Download packs");
+	timelist_timer_start(globals.global_times, "Download packs");
 	progress_set_step(4, "download_packs");
 
 	(void)rm_staging_dir_contents("download");
@@ -914,10 +914,10 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		info("No packs need to be downloaded\n");
 		progress_complete_step();
 	}
-	timelist_timer_stop(global_times); // closing: Download packs
+	timelist_timer_stop(globals.global_times); // closing: Download packs
 
 	/* step 5: Download missing files */
-	timelist_timer_start(global_times, "Download missing files");
+	timelist_timer_start(globals.global_times, "Download missing files");
 	progress_set_step(5, "download_fullfiles");
 	ret = download_fullfiles(to_install_files, NULL);
 	if (ret) {
@@ -926,10 +926,10 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		error("Could not download some files from bundles, aborting bundle installation\n");
 		goto out;
 	}
-	timelist_timer_stop(global_times); // closing: Download missing files
+	timelist_timer_stop(globals.global_times); // closing: Download missing files
 
 	/* step 6: Install all bundle(s) files into the fs */
-	timelist_timer_start(global_times, "Installing bundle(s) files onto filesystem");
+	timelist_timer_start(globals.global_times, "Installing bundle(s) files onto filesystem");
 	progress_set_step(6, "install_files");
 
 	info("Installing bundle(s) files...\n");
@@ -942,7 +942,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		file = iter->data;
 		iter = iter->next;
 
-		string_or_die(&hashpath, "%s/staged/%s", state_dir, file->hash);
+		string_or_die(&hashpath, "%s/staged/%s", globals.state_dir, file->hash);
 
 		if (access(hashpath, F_OK) < 0) {
 			/* the file does not exist in the staged directory, it will need
@@ -1037,13 +1037,13 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		progress_report(complete, list_length);
 	}
 	sync();
-	timelist_timer_stop(global_times); // closing: Installing bundle(s) files onto filesystem
+	timelist_timer_stop(globals.global_times); // closing: Installing bundle(s) files onto filesystem
 
 	/* step 7: Run any scripts that are needed to complete update */
-	timelist_timer_start(global_times, "Run Scripts");
+	timelist_timer_start(globals.global_times, "Run Scripts");
 	progress_set_step(7, "run_scripts");
-	scripts_run_post_update(wait_for_scripts);
-	timelist_timer_stop(global_times); // closing: Run Scripts
+	scripts_run_post_update(globals.wait_for_scripts);
+	timelist_timer_stop(globals.global_times); // closing: Run Scripts
 	progress_complete_step();
 
 	ret = SWUPD_OK;
@@ -1119,8 +1119,8 @@ enum swupd_code install_bundles_frontend(char **bundles)
 		return ret;
 	}
 
-	timelist_timer_start(global_times, "Load MoM");
-	current_version = get_current_version(path_prefix);
+	timelist_timer_start(globals.global_times, "Load MoM");
+	current_version = get_current_version(globals.path_prefix);
 	if (current_version < 0) {
 		error("Unable to determine current OS version\n");
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
@@ -1135,9 +1135,9 @@ enum swupd_code install_bundles_frontend(char **bundles)
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto clean_and_exit;
 	}
-	timelist_timer_stop(global_times); // closing: Load MoM
+	timelist_timer_stop(globals.global_times); // closing: Load MoM
 
-	timelist_timer_start(global_times, "Prepend bundles to list");
+	timelist_timer_start(globals.global_times, "Prepend bundles to list");
 	aliases = get_alias_definitions();
 	for (; *bundles; ++bundles) {
 		struct list *alias_bundles = get_alias_bundles(aliases, *bundles);
@@ -1150,13 +1150,13 @@ enum swupd_code install_bundles_frontend(char **bundles)
 		bundles_list = list_concat(alias_bundles, bundles_list);
 	}
 	list_free_list_and_data(aliases, free_alias_lookup);
-	timelist_timer_stop(global_times); // closing: Prepend bundles to list
+	timelist_timer_stop(globals.global_times); // closing: Prepend bundles to list
 
-	timelist_timer_start(global_times, "Install bundles");
+	timelist_timer_start(globals.global_times, "Install bundles");
 	ret = install_bundles(bundles_list, &subs, mom);
-	timelist_timer_stop(global_times); // closing: Install bundles
+	timelist_timer_stop(globals.global_times); // closing: Install bundles
 
-	timelist_print_stats(global_times);
+	timelist_print_stats(globals.global_times);
 
 	free_manifest(mom);
 clean_and_exit:
@@ -1196,7 +1196,7 @@ enum swupd_code list_local_bundles()
 	int current_version;
 	bool mix_exists;
 
-	current_version = get_current_version(path_prefix);
+	current_version = get_current_version(globals.path_prefix);
 	if (current_version < 0) {
 		goto skip_mom;
 	}
@@ -1208,7 +1208,7 @@ enum swupd_code list_local_bundles()
 	}
 
 skip_mom:
-	string_or_die(&path, "%s/%s", path_prefix, BUNDLES_DIR);
+	string_or_die(&path, "%s/%s", globals.path_prefix, BUNDLES_DIR);
 
 	errno = 0;
 	bundles = get_dir_files_sorted(path);

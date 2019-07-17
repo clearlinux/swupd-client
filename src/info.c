@@ -26,8 +26,8 @@ enum swupd_code print_update_conf_info()
 {
 	enum swupd_code ret = SWUPD_OK;
 	char dist_string[LINE_MAX];
-	int current_version = get_current_version(path_prefix);
-	bool dist_string_found = get_distribution_string(path_prefix, dist_string);
+	int current_version = get_current_version(globals.path_prefix);
+	bool dist_string_found = get_distribution_string(globals.path_prefix, dist_string);
 
 	// Set distribution string 'unknown' when not found.
 	info("Distribution:      %s\n", dist_string_found ? dist_string : "unknown");
@@ -39,8 +39,8 @@ enum swupd_code print_update_conf_info()
 	} else {
 		info("Installed version: %d\n", current_version);
 	}
-	info("Version URL:       %s\n", version_url);
-	info("Content URL:       %s\n", content_url);
+	info("Version URL:       %s\n", globals.version_url);
+	info("Content URL:       %s\n", globals.content_url);
 
 	return ret;
 }

@@ -61,7 +61,7 @@ int p_lockfile(void)
 	};
 	char *lockfile;
 
-	string_or_die(&lockfile, "%s/swupd_lock", state_dir);
+	string_or_die(&lockfile, "%s/swupd_lock", globals.state_dir);
 
 	/* open lock file */
 	lock_fd = open(lockfile, O_RDWR | O_CREAT | O_CLOEXEC, 0600);

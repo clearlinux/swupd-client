@@ -104,8 +104,8 @@ static int unset_mirror_url()
 	char *content_path;
 	char *version_path;
 	int ret = 0;
-	content_path = mk_full_filename(path_prefix, MIRROR_CONTENT_URL_PATH);
-	version_path = mk_full_filename(path_prefix, MIRROR_VERSION_URL_PATH);
+	content_path = mk_full_filename(globals.path_prefix, MIRROR_CONTENT_URL_PATH);
+	version_path = mk_full_filename(globals.path_prefix, MIRROR_VERSION_URL_PATH);
 
 	if ((ret = swupd_rm(content_path))) {
 		goto out;
@@ -116,8 +116,8 @@ static int unset_mirror_url()
 
 	/* we need to also unset the mirror urls from the cache and set it to
 	 * the central version */
-	free_string(&version_url);
-	free_string(&content_url);
+	free_string(&globals.version_url);
+	free_string(&globals.content_url);
 	set_default_version_url();
 	set_default_content_url();
 	get_latest_version("");
@@ -192,8 +192,8 @@ static enum swupd_code set_mirror_url(char *url)
 
 	/* concatenate path_prefix and configuration paths if necessary
 	 * if path_prefix is NULL the second argument will be returned */
-	content_path = mk_full_filename(path_prefix, MIRROR_CONTENT_URL_PATH);
-	version_path = mk_full_filename(path_prefix, MIRROR_VERSION_URL_PATH);
+	content_path = mk_full_filename(globals.path_prefix, MIRROR_CONTENT_URL_PATH);
+	version_path = mk_full_filename(globals.path_prefix, MIRROR_VERSION_URL_PATH);
 
 	/* write url to path_prefix/MIRROR_CONTENT_URL_PATH */
 	ret = write_to_path(url, content_path);
@@ -228,8 +228,8 @@ static bool mirror_is_set(void)
 	char *version_path;
 	char *content_path;
 
-	version_path = mk_full_filename(path_prefix, MIRROR_VERSION_URL_PATH);
-	content_path = mk_full_filename(path_prefix, MIRROR_CONTENT_URL_PATH);
+	version_path = mk_full_filename(globals.path_prefix, MIRROR_VERSION_URL_PATH);
+	content_path = mk_full_filename(globals.path_prefix, MIRROR_CONTENT_URL_PATH);
 	mirror_set = file_exists(version_path) && file_exists(content_path);
 
 	free_string(&version_path);
@@ -250,7 +250,7 @@ void handle_mirror_if_stale(void)
 
 	info("Checking mirror status\n");
 
-	fullpath = mk_full_filename(path_prefix, DEFAULT_VERSION_URL_PATH);
+	fullpath = mk_full_filename(globals.path_prefix, DEFAULT_VERSION_URL_PATH);
 	int ret = get_value_from_path(&ret_str, fullpath, true);
 	if (ret != 0 || ret_str == NULL) {
 		/* no versionurl file here, might not exist under --path argument */
@@ -258,7 +258,7 @@ void handle_mirror_if_stale(void)
 	}
 
 	/* before trying to get the latest version let's make sure the central version is up */
-	if (!content_url_is_local && !check_connection(NULL, ret_str) != 0) {
+	if (!globals.content_url_is_local && !check_connection(NULL, ret_str) != 0) {
 		warn("Upstream server %s not responding, cannot determine upstream version\n", ret_str);
 		warn("Unable to determine if the mirror is up to date\n");
 		goto out;

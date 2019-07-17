@@ -108,14 +108,14 @@ enum swupd_code hashdump_main(int argc, char **argv)
 		return SWUPD_INVALID_OPTION;
 	}
 
-	if (!path_prefix) {
+	if (!globals.path_prefix) {
 		set_default_path_prefix();
 	}
 
 	file.filename = strdup_or_die(argv[optind]);
 	// Accept relative paths if no path_prefix set on command line
 	if (use_prefix) {
-		fullname = mk_full_filename(path_prefix, file.filename);
+		fullname = mk_full_filename(globals.path_prefix, file.filename);
 	} else {
 		fullname = strdup_or_die(file.filename);
 	}

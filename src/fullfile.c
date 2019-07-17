@@ -35,7 +35,7 @@ static void download_mix_file(struct file *file)
 	char *url, *filename;
 
 	string_or_die(&url, "%s/%i/files/%s.tar", MIX_STATE_DIR, file->last_change, file->hash);
-	string_or_die(&filename, "%s/download/.%s.tar", state_dir, file->hash);
+	string_or_die(&filename, "%s/download/.%s.tar", globals.state_dir, file->hash);
 
 	/* Mix content is local, so don't queue files up for curl downloads */
 	if (link_or_rename(url, filename) == 0) {
@@ -52,8 +52,8 @@ static void download_file(struct swupd_curl_parallel_handle *download_handle, st
 {
 	char *url, *filename;
 
-	string_or_die(&filename, "%s/download/.%s.tar", state_dir, file->hash);
-	string_or_die(&url, "%s/%i/files/%s.tar", content_url, file->last_change, file->hash);
+	string_or_die(&filename, "%s/download/.%s.tar", globals.state_dir, file->hash);
+	string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
 	swupd_curl_parallel_download_enqueue(download_handle, url, filename, file->hash, file);
 	free_string(&url);
 	free_string(&filename);
@@ -72,7 +72,7 @@ static bool download_successful(void *data)
 
 	if (untar_full_download(data) != 0) {
 		warn("Error for %s tarfile extraction, (check free space for %s?)\n",
-		     ((struct file *)data)->hash, state_dir);
+		     ((struct file *)data)->hash, globals.state_dir);
 	}
 	return true;
 }
@@ -94,7 +94,7 @@ static double fullfile_query_total_download_size(struct list *files)
 			continue;
 		}
 
-		string_or_die(&url, "%s/%i/files/%s.tar", content_url, file->last_change, file->hash);
+		string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
 		size = swupd_curl_query_content_size(url);
 		if (size != -1) {
 			total_size += size;
@@ -145,7 +145,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 			continue;
 		}
 
-		string_or_die(&targetfile, "%s/staged/%s", state_dir, file->hash);
+		string_or_die(&targetfile, "%s/staged/%s", globals.state_dir, file->hash);
 		if (lstat(targetfile, &stat) != 0 || !verify_file(file, targetfile)) {
 			need_download = list_append_data(need_download, file);
 		}

@@ -262,7 +262,7 @@ static bool is_manifest_delta(const char UNUSED_PARAM *dir, const struct dirent 
 static char *read_mom_contents(int version)
 {
 	char *mom_path = NULL;
-	string_or_die(&mom_path, "%s/%d/Manifest.MoM", state_dir, version);
+	string_or_die(&mom_path, "%s/%d/Manifest.MoM", globals.state_dir, version);
 	FILE *f = fopen(mom_path, "r");
 	free_string(&mom_path);
 	if (!f) {
@@ -315,7 +315,7 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 	 * ensures that a regular 'clean' won't make 'search' redownload files. */
 	char *mom_contents = NULL;
 	if (!all) {
-		int current_version = get_current_version(path_prefix);
+		int current_version = get_current_version(globals.path_prefix);
 		if (current_version < 0) {
 			warn("Unable to determine current OS version\n");
 		} else {
@@ -345,7 +345,7 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 		}
 
 		char *version_dir;
-		string_or_die(&version_dir, "%s/%s", state_dir, name);
+		string_or_die(&version_dir, "%s/%s", globals.state_dir, name);
 
 		/* This is not precise: it may keep Manifest files that we don't use, and
 		 * also will keep the previous version. If that extra precision is
@@ -430,7 +430,7 @@ enum swupd_code clean_statedir(bool dry_run, bool all)
 {
 
 	char *staged_dir = NULL;
-	string_or_die(&staged_dir, "%s/staged", state_dir);
+	string_or_die(&staged_dir, "%s/staged", globals.state_dir);
 	int ret = remove_if(staged_dir, dry_run, is_fullfile);
 	free_string(&staged_dir);
 	if (ret != 0) {
@@ -438,18 +438,18 @@ enum swupd_code clean_statedir(bool dry_run, bool all)
 	}
 
 	/* Pack presence indicator files. */
-	ret = remove_if(state_dir, dry_run, is_pack_indicator);
+	ret = remove_if(globals.state_dir, dry_run, is_pack_indicator);
 	if (ret != 0) {
 		return ret;
 	}
 
 	/* Manifest delta files. */
-	ret = remove_if(state_dir, dry_run, is_manifest_delta);
+	ret = remove_if(globals.state_dir, dry_run, is_manifest_delta);
 	if (ret != 0) {
 		return ret;
 	}
 
 	/* NOTE: do not clean the state_dir/bundles directory */
 
-	return clean_staged_manifests(state_dir, dry_run, all);
+	return clean_staged_manifests(globals.state_dir, dry_run, all);
 }

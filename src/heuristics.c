@@ -102,11 +102,11 @@ static void boot_file_heuristics(struct file *file)
 
 	if (strncmp(file->filename, "/usr/lib/kernel/", 16) == 0) {
 		file->is_boot = 1;
-		need_update_boot = true;
+		globals.need_update_boot = true;
 	}
 
 	if (strcmp(file->filename, "/usr/lib/systemd/systemd") == 0) {
-		need_systemd_reexec = true;
+		globals.need_systemd_reexec = true;
 	}
 
 	if ((strncmp(file->filename, "/usr/lib/gummiboot", 18) == 0) ||
@@ -114,7 +114,7 @@ static void boot_file_heuristics(struct file *file)
 	    (strncmp(file->filename, "/usr/bin/bootctl", 16) == 0) ||
 	    (strncmp(file->filename, "/usr/lib/systemd/boot", 21) == 0)) {
 		file->is_boot = 1;
-		need_update_bootloader = true;
+		globals.need_update_bootloader = true;
 	}
 }
 
@@ -140,7 +140,7 @@ bool ignore(struct file *file)
 	    (file->is_boot && file->is_deleted) ||
 	    (file->is_orphan) ||
 	    (file->is_ghosted)) {
-		update_skip++;
+		globals.update_skip++;
 		file->do_not_update = 1;
 		return true;
 	}

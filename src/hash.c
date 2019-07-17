@@ -275,10 +275,10 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			continue;
 		}
 
-		string_or_die(&cached, "%s/%i/Manifest.%s.%s", state_dir,
+		string_or_die(&cached, "%s/%i/Manifest.%s.%s", globals.state_dir,
 			      current->last_change, current->filename, bundle->hash);
 
-		string_or_die(&local, "%s/%i/Manifest.%s", state_dir,
+		string_or_die(&local, "%s/%i/Manifest.%s", globals.state_dir,
 			      current->last_change, current->filename);
 
 		/* *NOTE* If the file is changed after being hardlinked, the hash will be different,
@@ -298,9 +298,9 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			warn("Downloading missing manifest for bundle %s version %d\n",
 			     current->filename, current->last_change);
 
-			string_or_die(&filename, "%s/%i/Manifest.%s", state_dir,
+			string_or_die(&filename, "%s/%i/Manifest.%s", globals.state_dir,
 				      current->last_change, current->filename);
-			string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url,
+			string_or_die(&url, "%s/%i/Manifest.%s.tar", globals.content_url,
 				      current->last_change, current->filename);
 			ret = swupd_curl_get_file(url, filename);
 			free_string(&url);
@@ -313,7 +313,7 @@ int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
 			}
 
 			char *outputdir;
-			string_or_die(&outputdir, "%s/%i", state_dir, current->last_change);
+			string_or_die(&outputdir, "%s/%i", globals.state_dir, current->last_change);
 			ret = archives_extract_to(filename, outputdir);
 			free_string(&outputdir);
 			free_string(&filename);

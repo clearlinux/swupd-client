@@ -64,7 +64,7 @@ int rm_staging_dir_contents(const char *rel_path)
 	char *abs_path;
 	int ret = 0;
 
-	string_or_die(&abs_path, "%s/%s", state_dir, rel_path);
+	string_or_die(&abs_path, "%s/%s", globals.state_dir, rel_path);
 
 	dir = opendir(abs_path);
 	if (dir == NULL) {
@@ -110,15 +110,15 @@ static void unlink_all_staged_content(struct file *file)
 	char *filename;
 
 	/* downloaded tar file */
-	string_or_die(&filename, "%s/download/%s.tar", state_dir, file->hash);
+	string_or_die(&filename, "%s/download/%s.tar", globals.state_dir, file->hash);
 	unlink(filename);
 	free_string(&filename);
-	string_or_die(&filename, "%s/download/.%s.tar", state_dir, file->hash);
+	string_or_die(&filename, "%s/download/.%s.tar", globals.state_dir, file->hash);
 	unlink(filename);
 	free_string(&filename);
 
 	/* downloaded and un-tar'd file */
-	string_or_die(&filename, "%s/staged/%s", state_dir, file->hash);
+	string_or_die(&filename, "%s/staged/%s", globals.state_dir, file->hash);
 	(void)remove(filename);
 	free_string(&filename);
 }
@@ -185,16 +185,16 @@ static int create_required_dirs(void)
 	const char *state_dirs[] = { "delta", "staged", "download", "telemetry" };
 
 	// check for existence
-	if (ensure_root_owned_dir(state_dir)) {
+	if (ensure_root_owned_dir(globals.state_dir)) {
 		//state dir doesn't exist
-		if (mkdir_p(state_dir) != 0 || chmod(state_dir, S_IRWXU) != 0) {
-			error("failed to create %s\n", state_dir);
+		if (mkdir_p(globals.state_dir) != 0 || chmod(globals.state_dir, S_IRWXU) != 0) {
+			error("failed to create %s\n", globals.state_dir);
 			return -1;
 		}
 	}
 
 	for (i = 0; i < STATE_DIR_COUNT; i++) {
-		string_or_die(&dir, "%s/%s", state_dir, state_dirs[i]);
+		string_or_die(&dir, "%s/%s", globals.state_dir, state_dirs[i]);
 		ret = ensure_root_owned_dir(dir);
 		if (ret) {
 			ret = mkdir(dir, S_IRWXU);
@@ -207,12 +207,12 @@ static int create_required_dirs(void)
 	}
 	/* Do a final check to make sure that the top level dir wasn't
 	 * tampered with whilst we were creating the dirs */
-	return ensure_root_owned_dir(state_dir);
+	return ensure_root_owned_dir(globals.state_dir);
 }
 
 /**
  * store a colon separated list of current mountpoint into
- * variable mounted_dirs, this function do not return a value.
+ * variable globals.mounted_dirs, this function do not return a value.
  *
  * e.g: :/proc:/mnt/acct:
  */
@@ -253,11 +253,11 @@ static void get_mounted_directories(void)
 					break;
 				}
 
-				if (mounted_dirs == NULL) {
-					string_or_die(&mounted_dirs, "%s", ":");
+				if (globals.mounted_dirs == NULL) {
+					string_or_die(&globals.mounted_dirs, "%s", ":");
 				}
-				tmp = mounted_dirs;
-				string_or_die(&mounted_dirs, "%s%s:", tmp, mnt);
+				tmp = globals.mounted_dirs;
+				string_or_die(&globals.mounted_dirs, "%s%s:", tmp, mnt);
 				free_string(&tmp);
 				break;
 			}
@@ -306,15 +306,15 @@ bool is_directory_mounted(const char *filename)
 	bool ret = false;
 	char *tmp;
 
-	if (mounted_dirs == NULL) {
+	if (globals.mounted_dirs == NULL) {
 		return false;
 	}
 
-	tmp = mk_full_filename(path_prefix, filename);
+	tmp = mk_full_filename(globals.path_prefix, filename);
 	string_or_die(&fname, ":%s:", tmp);
 	free_string(&tmp);
 
-	if (strstr(mounted_dirs, fname)) {
+	if (strstr(globals.mounted_dirs, fname)) {
 		ret = true;
 	}
 
@@ -334,17 +334,17 @@ bool is_under_mounted_directory(const char *filename)
 	char *fname;
 	char *tmp;
 
-	if (mounted_dirs == NULL) {
+	if (globals.mounted_dirs == NULL) {
 		return false;
 	}
 
-	dir = strdup_or_die(mounted_dirs);
+	dir = strdup_or_die(globals.mounted_dirs);
 
 	token = strtok(dir + 1, ":");
 	while (token != NULL) {
 		string_or_die(&mountpoint, "%s/", token);
 
-		tmp = mk_full_filename(path_prefix, filename);
+		tmp = mk_full_filename(globals.path_prefix, filename);
 		string_or_die(&fname, ":%s:", tmp);
 		free_string(&tmp);
 
@@ -468,7 +468,7 @@ int rm_bundle_file(const char *bundle)
 	int ret = 0;
 	struct stat statb;
 
-	string_or_die(&filename, "%s/%s/%s", path_prefix, BUNDLES_DIR, bundle);
+	string_or_die(&filename, "%s/%s/%s", globals.path_prefix, BUNDLES_DIR, bundle);
 
 	if (stat(filename, &statb) == -1) {
 		goto out;
@@ -544,7 +544,7 @@ enum swupd_code swupd_init(enum swupd_init_config config)
 
 	record_fds();
 
-	if (!init_globals()) {
+	if (!globals_init()) {
 		ret = SWUPD_INIT_GLOBALS_FAILED;
 		goto out_fds;
 	}
@@ -556,8 +556,8 @@ enum swupd_code swupd_init(enum swupd_init_config config)
 
 		/* Check that our system time is reasonably valid before continuing,
 		 * or the certificate verification will fail with invalid time */
-		if ((config & SWUPD_NO_TIMECHECK) == 0 && timecheck) {
-			if (!verify_time(path_prefix)) {
+		if ((config & SWUPD_NO_TIMECHECK) == 0 && globals.timecheck) {
+			if (!verify_time(globals.path_prefix)) {
 				/* in the case we are doing an installation to an empty directory
 				 * using swupd verify --install, we won't have a valid versionstamp
 				 * in path_prefix, so try searching without the path_prefix */
@@ -578,9 +578,9 @@ enum swupd_code swupd_init(enum swupd_init_config config)
 			goto out_fds;
 		}
 
-		if (sigcheck) {
+		if (globals.sigcheck) {
 			/* If --nosigcheck, we do not attempt any signature checking */
-			if (!signature_init(cert_path, NULL)) {
+			if (!signature_init(globals.cert_path, NULL)) {
 				ret = SWUPD_SIGNATURE_VERIFICATION_FAILED;
 				signature_deinit();
 				goto out_close_lock;
@@ -589,7 +589,7 @@ enum swupd_code swupd_init(enum swupd_init_config config)
 	}
 
 	if ((config & SWUPD_NO_NETWORK) == 0) {
-		if (swupd_curl_init(version_url) != 0) {
+		if (swupd_curl_init(globals.version_url) != 0) {
 			ret = SWUPD_CURL_INIT_FAILED;
 			goto out_close_lock;
 		}
@@ -710,14 +710,14 @@ enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		free_string(&tar_dotfile);
 		free_string(&url);
 
-		target = mk_full_filename(path_prefix, path);
+		target = mk_full_filename(globals.path_prefix, path);
 
 		/* Search for the file in the manifest, to get the hash for the file */
 		file = search_file_in_manifest(target_MoM, path);
 		if (file == NULL) {
 			error("Path %s not found in any of the subscribed manifests"
 			      "in verify_fix_path for path_prefix %s\n",
-			      path, path_prefix);
+			      path, globals.path_prefix);
 			ret = SWUPD_PATH_NOT_IN_MANIFEST;
 			goto end;
 		}
@@ -750,8 +750,8 @@ enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		unlink_all_staged_content(file);
 
 		/* download the fullfile for the missing path */
-		string_or_die(&tar_dotfile, "%s/download/.%s.tar", state_dir, file->hash);
-		string_or_die(&url, "%s/%i/files/%s.tar", content_url, file->last_change, file->hash);
+		string_or_die(&tar_dotfile, "%s/download/.%s.tar", globals.state_dir, file->hash);
+		string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
 		ret = swupd_curl_get_file(url, tar_dotfile);
 		if (ret != 0) {
 			error("Failed to download file %s in verify_fix_path\n", file->filename);
@@ -815,8 +815,8 @@ bool version_files_consistent(void)
 	int state_v = -1;
 	char *state_v_path;
 
-	string_or_die(&state_v_path, "%s/version", state_dir);
-	os_release_v = get_current_version(path_prefix);
+	string_or_die(&state_v_path, "%s/version", globals.state_dir);
+	os_release_v = get_current_version(globals.path_prefix);
 	state_v = get_version_from_path(state_v_path);
 	free_string(&state_v_path);
 
@@ -849,17 +849,17 @@ bool string_in_list(char *string_to_check, struct list *list_to_check)
  * never appears in a manifest, it is skipped. */
 bool is_compatible_format(int format_num)
 {
-	if (strcmp(format_string, "staging") == 0) {
+	if (strcmp(globals.format_string, "staging") == 0) {
 		return true;
 	}
 
 	char *format_manifest = NULL;
 	string_or_die(&format_manifest, "%d", format_num);
 
-	size_t len = strlen(format_string);
+	size_t len = strlen(globals.format_string);
 
 	bool ret;
-	if (strncmp(format_string, format_manifest, len) == 0) {
+	if (strncmp(globals.format_string, format_manifest, len) == 0) {
 		ret = true;
 	} else {
 		ret = false;
@@ -876,7 +876,7 @@ bool is_current_version(int version)
 		return false;
 	}
 
-	return (version == get_current_version(path_prefix));
+	return (version == get_current_version(globals.path_prefix));
 }
 
 /* Check if the format at default_format_path has changed from the beginning
@@ -930,9 +930,9 @@ int untar_full_download(void *data)
 	struct stat stat;
 	int err;
 
-	string_or_die(&tar_dotfile, "%s/download/.%s.tar", state_dir, file->hash);
-	string_or_die(&tarfile, "%s/download/%s.tar", state_dir, file->hash);
-	string_or_die(&targetfile, "%s/staged/%s", state_dir, file->hash);
+	string_or_die(&tar_dotfile, "%s/download/.%s.tar", globals.state_dir, file->hash);
+	string_or_die(&tarfile, "%s/download/%s.tar", globals.state_dir, file->hash);
+	string_or_die(&targetfile, "%s/staged/%s", globals.state_dir, file->hash);
 
 	/* If valid target file already exists, we're done.
 	 * NOTE: this should NEVER happen given the checking that happens
@@ -968,7 +968,7 @@ int untar_full_download(void *data)
 
 	/* modern tar will automatically determine the compression type used */
 	char *outputdir;
-	string_or_die(&outputdir, "%s/staged", state_dir);
+	string_or_die(&outputdir, "%s/staged", globals.state_dir);
 	err = archives_extract_to(tarfile, outputdir);
 	free_string(&outputdir);
 	if (err) {
@@ -1029,7 +1029,7 @@ void print_regexp_error(int errcode, regex_t *regexp)
 bool is_url_allowed(char *url)
 {
 	if (strncasecmp(url, "http://", 7) == 0) {
-		if (allow_insecure_http) {
+		if (globals.allow_insecure_http) {
 			warn("This is an insecure connection\n");
 			info("The --allow-insecure-http flag was used, be aware that this poses a threat to the system\n\n");
 		} else {
@@ -1077,7 +1077,7 @@ int get_value_from_path(char **contents, const char *path, bool is_abs_path)
 	if (is_abs_path) {
 		string_or_die(&rel_path, path);
 	} else {
-		string_or_die(&rel_path, "%s%s", path_prefix, path);
+		string_or_die(&rel_path, "%s%s", globals.path_prefix, path);
 	}
 
 	file = fopen(rel_path, "r");
@@ -1124,7 +1124,7 @@ bool check_mix_exists(void)
 {
 	char *fullpath;
 	bool ret;
-	string_or_die(&fullpath, "%s%s/.valid-mix", path_prefix, MIX_DIR);
+	string_or_die(&fullpath, "%s%s/.valid-mix", globals.path_prefix, MIX_DIR);
 	ret = access(fullpath, F_OK) == 0;
 	free_string(&fullpath);
 	return ret;

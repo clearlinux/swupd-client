@@ -64,10 +64,10 @@ static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 {
 	switch (opt) {
 	case FLAG_SKIP_OPTIONAL:
-		skip_optional_bundles = true;
+		globals.skip_optional_bundles = true;
 		return true;
 	case FLAG_SKIP_DISKSPACE_CHECK:
-		skip_diskspace_check = true;
+		globals.skip_diskspace_check = true;
 		return true;
 	default:
 		return false;

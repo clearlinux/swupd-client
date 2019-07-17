@@ -110,12 +110,12 @@ static bool parse_options(int argc, char **argv)
 
 	/* users need to specify a PATH for the installation as mandatory argument
 	 * either explicitly or using the --path global argument */
-	if ((argc == optind) && (path_prefix == NULL)) {
+	if ((argc == optind) && (globals.path_prefix == NULL)) {
 		error("the path where the OS will be installed needs to be specified\n\n");
 		return false;
 	} else if (argc > optind) {
 		path = *(argv + optind);
-		if (path_prefix) {
+		if (globals.path_prefix) {
 			error("cannot specify a PATH and use the --path option at the same time\n\n");
 			return false;
 		}

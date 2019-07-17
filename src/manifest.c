@@ -96,7 +96,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 	struct manifest *manifest;
 
 	if (!is_mix) {
-		basedir = state_dir;
+		basedir = globals.state_dir;
 	} else {
 		basedir = MIX_STATE_DIR;
 	}
@@ -156,13 +156,13 @@ static int try_manifest_delta_download(int from, int to, char *component)
 		return -1;
 	}
 
-	string_or_die(&from_manifest, "%s/%i/Manifest.%s", state_dir, from, component);
-	string_or_die(&to_manifest, "%s/%i/Manifest.%s", state_dir, to, component);
-	string_or_die(&manifest_delta, "%s/Manifest-%s-delta-from-%i-to-%i", state_dir, component, from, to);
-	string_or_die(&to_dir, "%s/%i", state_dir, to);
+	string_or_die(&from_manifest, "%s/%i/Manifest.%s", globals.state_dir, from, component);
+	string_or_die(&to_manifest, "%s/%i/Manifest.%s", globals.state_dir, to, component);
+	string_or_die(&manifest_delta, "%s/Manifest-%s-delta-from-%i-to-%i", globals.state_dir, component, from, to);
+	string_or_die(&to_dir, "%s/%i", globals.state_dir, to);
 
 	if (!file_exists(manifest_delta)) {
-		string_or_die(&url, "%s/%i/Manifest-%s-delta-from-%i", content_url, to, component, from);
+		string_or_die(&url, "%s/%i/Manifest-%s-delta-from-%i", globals.content_url, to, component, from);
 		ret = swupd_curl_get_file(url, manifest_delta);
 		free_string(&url);
 		if (ret != 0) {
@@ -205,13 +205,13 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 	struct stat sb;
 
 	if (!is_mix) {
-		basedir = state_dir;
+		basedir = globals.state_dir;
 	} else {
 		basedir = MIX_STATE_DIR;
 	}
 
 	/* Check for fullfile only, we will not be keeping the .tar around */
-	string_or_die(&filename, "%s/%i/Manifest.%s", state_dir, version, component);
+	string_or_die(&filename, "%s/%i/Manifest.%s", globals.state_dir, version, component);
 	if (stat(filename, &sb) == 0) {
 		ret = 0;
 		goto out;
@@ -223,7 +223,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 		goto out;
 	}
 
-	string_or_die(&dir, "%s/%i", state_dir, version);
+	string_or_die(&dir, "%s/%i", globals.state_dir, version);
 	ret = mkdir(dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if ((ret != 0) && (errno != EEXIST)) {
 		goto out;
@@ -231,7 +231,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 
 	/* If it's mix content just hardlink instead of curl download */
 	if (is_mix) {
-		string_or_die(&filename, "%s/%i/Manifest.%s.tar", state_dir, version, component);
+		string_or_die(&filename, "%s/%i/Manifest.%s.tar", globals.state_dir, version, component);
 		string_or_die(&url, "%s/%i/Manifest.%s.tar", basedir, version, component);
 		ret = link_or_rename(url, filename);
 		/* If rename fails, we try again below with curl to the contenurl */
@@ -243,8 +243,8 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 	}
 
 	/* Either we're not on mix or it failed, try curl-ing the file if link didn't work */
-	string_or_die(&filename, "%s/%i/Manifest.%s.tar", state_dir, version, component);
-	string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url, version, component);
+	string_or_die(&filename, "%s/%i/Manifest.%s.tar", globals.state_dir, version, component);
+	string_or_die(&url, "%s/%i/Manifest.%s.tar", globals.content_url, version, component);
 
 	ret = swupd_curl_get_file(url, filename);
 	if (ret) {
@@ -293,17 +293,17 @@ static void remove_manifest_files(char *filename, int version, char *hash)
 	char *file;
 
 	warn("Removing corrupt Manifest.%s artifacts and re-downloading...\n", filename);
-	string_or_die(&file, "%s/%i/Manifest.%s", state_dir, version, filename);
+	string_or_die(&file, "%s/%i/Manifest.%s", globals.state_dir, version, filename);
 	unlink(file);
 	free_string(&file);
-	string_or_die(&file, "%s/%i/Manifest.%s.tar", state_dir, version, filename);
+	string_or_die(&file, "%s/%i/Manifest.%s.tar", globals.state_dir, version, filename);
 	unlink(file);
 	free_string(&file);
-	string_or_die(&file, "%s/%i/Manifest.%s.sig", state_dir, version, filename);
+	string_or_die(&file, "%s/%i/Manifest.%s.sig", globals.state_dir, version, filename);
 	unlink(file);
 	free_string(&file);
 	if (hash != NULL) {
-		string_or_die(&file, "%s/%i/Manifest.%s.%s", state_dir, version, filename, hash);
+		string_or_die(&file, "%s/%i/Manifest.%s.%s", globals.state_dir, version, filename, hash);
 		unlink(file);
 		free_string(&file);
 	}
@@ -373,7 +373,7 @@ struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err)
 	char *filename;
 	char *url;
 	bool retried = false;
-	bool needs_sig_verification = !(migrate && mix_exists);
+	bool needs_sig_verification = !(globals.migrate && mix_exists);
 
 retry_load:
 	ret = retrieve_manifest(0, version, "MoM", mix_exists);
@@ -400,10 +400,10 @@ retry_load:
 		return NULL;
 	}
 
-	string_or_die(&filename, "%s/%i/Manifest.MoM", state_dir, version);
-	string_or_die(&url, "%s/%i/Manifest.MoM", content_url, version);
+	string_or_die(&filename, "%s/%i/Manifest.MoM", globals.state_dir, version);
+	string_or_die(&url, "%s/%i/Manifest.MoM", globals.content_url, version);
 
-	if (!sigcheck) {
+	if (!globals.sigcheck) {
 		warn("FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to\n"
 		     "  --nosigcheck, but system security may be compromised\n");
 		journal_log_error("swupd security notice: --nosigcheck used to bypass MoM signature verification failure");
@@ -436,7 +436,7 @@ retry_load:
 		char *momdir;
 		char *momfile;
 
-		string_or_die(&momdir, "%s/var/tmp/swupd", path_prefix);
+		string_or_die(&momdir, "%s/var/tmp/swupd", globals.path_prefix);
 		string_or_die(&momfile, "%s/Manifest.MoM", momdir);
 		swupd_rm(momfile);
 		mkdir_p(momdir);
@@ -543,7 +543,7 @@ static bool is_installed_and_verified(struct file *file)
 		return false;
 	}
 
-	char *fullname = mk_full_filename(path_prefix, file->filename);
+	char *fullname = mk_full_filename(globals.path_prefix, file->filename);
 
 	if (verify_file(file, fullname)) {
 		free_string(&fullname);
@@ -561,8 +561,8 @@ struct list *create_update_list(struct manifest *server)
 	struct list *output = NULL;
 	struct list *list;
 
-	update_count = 0;
-	update_skip = 0;
+	globals.update_count = 0;
+	globals.update_skip = 0;
 	list = list_head(server->files);
 	while (list) {
 		struct file *file;
@@ -604,7 +604,7 @@ struct list *create_update_list(struct manifest *server)
 			continue;
 		}
 	}
-	update_count = list_len(output) - update_skip;
+	globals.update_count = list_len(output) - globals.update_skip;
 
 	return output;
 }
@@ -1037,7 +1037,7 @@ void remove_files_in_manifest_from_fs(struct manifest *m)
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
-		string_or_die(&fullfile, "%s/%s", path_prefix, file->filename);
+		string_or_die(&fullfile, "%s/%s", globals.path_prefix, file->filename);
 		if (swupd_rm(fullfile) == -1) {
 			/* if a -1 is returned it means there was an issue deleting the
 			 * file or directory, in that case decrease the counter of deleted

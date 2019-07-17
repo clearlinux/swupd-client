@@ -89,11 +89,11 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		rel_dir = dir + 1;
 	}
 
-	string_or_die(&original, "%s/staged/%s", state_dir, file->hash);
+	string_or_die(&original, "%s/staged/%s", globals.state_dir, file->hash);
 
 	/* make sure the directory where the file should be copied to exists
 	 * and is in deed a directory */
-	string_or_die(&targetpath, "%s%s", path_prefix, rel_dir);
+	string_or_die(&targetpath, "%s%s", globals.path_prefix, rel_dir);
 	ret = stat(targetpath, &s);
 	if ((ret == -1) && (errno == ENOENT)) {
 		if (MoM) {
@@ -111,7 +111,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		 * it will end up here */
 		ret = SWUPD_COULDNT_CREATE_DIR;
 		goto out;
-	} else if (strcmp(path_prefix, targetpath) != 0 &&
+	} else if (strcmp(globals.path_prefix, targetpath) != 0 &&
 		   strcmp(targetpath, real_path) != 0) {
 		/*
 		 * targetpath and real_path should always be equal but
@@ -125,7 +125,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	}
 
 	/* remove a pre-existing .update file in the destination if it exists */
-	string_or_die(&target, "%s%s/.update.%s", path_prefix, rel_dir, base);
+	string_or_die(&target, "%s%s/.update.%s", globals.path_prefix, rel_dir, base);
 	ret = swupd_rm(target);
 	if (ret < 0 && ret != -ENOENT) {
 		error("Failed to remove %s\n", target);
@@ -133,7 +133,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 
 	/* if the file already exists in the final destination, check to see
 	 * if it is of the same type */
-	string_or_die(&statfile, "%s%s", path_prefix, file->filename);
+	string_or_die(&statfile, "%s%s", globals.path_prefix, file->filename);
 	memset(&s, 0, sizeof(struct stat));
 	ret = lstat(statfile, &s);
 	if (ret == 0) {
@@ -165,7 +165,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		 * pre-existing: */
 		/* In order to avoid tar transforms with directories, rename
 		 * the directory before and after the tar command */
-		string_or_die(&rename_tmpdir, "%s/tmprenamedir", state_dir);
+		string_or_die(&rename_tmpdir, "%s/tmprenamedir", globals.state_dir);
 		ret = create_staging_renamedir(rename_tmpdir);
 		if (ret) {
 			ret = SWUPD_COULDNT_CREATE_DIR;
@@ -177,7 +177,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 			goto out;
 		}
 		string_or_die(&tarcommand, TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -cf - './%s' 2> /dev/null | " TAR_COMMAND " -C '%s%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-			      rename_tmpdir, base, path_prefix, rel_dir);
+			      rename_tmpdir, base, globals.path_prefix, rel_dir);
 		ret = system(tarcommand);
 		if (ret == -1) {
 			ret = SWUPD_SUBPROCESS_ERROR;
@@ -210,14 +210,14 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 			/* either the hardlink failed, or it was undesirable (config), do a tar-tar dance */
 			/* In order to avoid tar transforms, rename the file
 			 * before and after the tar command */
-			string_or_die(&rename_target, "%s/staged/.update.%s", state_dir, base);
+			string_or_die(&rename_target, "%s/staged/.update.%s", globals.state_dir, base);
 			ret = rename(original, rename_target);
 			if (ret) {
 				ret = SWUPD_COULDNT_RENAME_FILE;
 				goto out;
 			}
 			string_or_die(&tarcommand, TAR_COMMAND " -C '%s/staged' " TAR_PERM_ATTR_ARGS " -cf - '.update.%s' 2> /dev/null | " TAR_COMMAND " -C '%s%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-				      state_dir, base, path_prefix, rel_dir);
+				      globals.state_dir, base, globals.path_prefix, rel_dir);
 			ret = system(tarcommand);
 			if (ret == -1) {
 				ret = SWUPD_SUBPROCESS_ERROR;
@@ -234,7 +234,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		}
 
 		free_string(&file->staging);
-		string_or_die(&file->staging, "%s%s/.update.%s", path_prefix, rel_dir, base);
+		string_or_die(&file->staging, "%s%s/.update.%s", globals.path_prefix, rel_dir, base);
 		err = lstat(file->staging, &buf);
 		if (err != 0) {
 			free_string(&file->staging);
@@ -261,7 +261,7 @@ int rename_staged_file_to_final(struct file *file)
 	int ret;
 	char *target;
 
-	string_or_die(&target, "%s%s", path_prefix, file->filename);
+	string_or_die(&target, "%s%s", globals.path_prefix, file->filename);
 
 	if (!file->staging && !file->is_deleted && !file->is_dir) {
 		free_string(&target);
@@ -294,7 +294,7 @@ int rename_staged_file_to_final(struct file *file)
 			char *lostnfound;
 			char *base;
 
-			string_or_die(&lostnfound, "%slost+found", path_prefix);
+			string_or_die(&lostnfound, "%slost+found", globals.path_prefix);
 			ret = mkdir(lostnfound, S_IRWXU);
 			if ((ret != 0) && (errno != EEXIST)) {
 				free_string(&lostnfound);
@@ -304,7 +304,7 @@ int rename_staged_file_to_final(struct file *file)
 			free_string(&lostnfound);
 
 			base = basename(file->filename);
-			string_or_die(&lostnfound, "%slost+found/%s", path_prefix, base);
+			string_or_die(&lostnfound, "%slost+found/%s", globals.path_prefix, base);
 			/* this will fail if the directory was not already emptied */
 			ret = rename(target, lostnfound);
 			if (ret < 0 && errno != ENOTEMPTY && errno != EEXIST) {
@@ -357,5 +357,5 @@ int rename_all_files_to_final(struct list *updates)
 		progress_report(complete, list_length);
 	}
 
-	return update_count - update_good - update_errs - (update_skip - skip);
+	return globals.update_count - update_good - update_errs - (globals.update_skip - skip);
 }

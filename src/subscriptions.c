@@ -79,7 +79,7 @@ void read_subscriptions(struct list **subs)
 	DIR *dir;
 	struct dirent *ent;
 
-	string_or_die(&path, "%s/%s", path_prefix, BUNDLES_DIR);
+	string_or_die(&path, "%s/%s", globals.path_prefix, BUNDLES_DIR);
 
 	dir = opendir(path);
 	if (dir) {

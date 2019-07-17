@@ -44,33 +44,13 @@
 
 #define optarg_to_bool(_optarg) (_optarg ? strtobool(_optarg) : true)
 
-bool allow_insecure_http = false;
-bool allow_mix_collisions = false;
-bool migrate = false;
-bool sigcheck = true;
-bool timecheck = true;
-bool no_scripts = false;
-bool no_boot_update = false;
-bool verify_esp_only;
-bool verify_bundles_only = false;
-int update_count = 0;
-int update_skip = 0;
-bool need_update_boot = false;
-bool need_update_bootloader = false;
-bool need_systemd_reexec = false;
-bool update_complete = false;
-char *format_string = NULL;
-char *path_prefix = NULL; /* must always end in '/' */
-char *mounted_dirs = NULL;
-char *bundle_to_add = NULL;
-char *state_dir = NULL;
-bool skip_diskspace_check = false;
-bool skip_optional_bundles = false;
-bool keepcache = false;
-timelist *global_times = NULL;
-int max_retries = 3;
-int retry_delay = 10;
-bool wait_for_scripts = false;
+struct globals globals = {
+	.sigcheck = true,
+	.timecheck = true,
+	.max_retries = DEFAULT_MAX_RETRIES,
+	.retry_delay = DEFAULT_RETRY_DELAY,
+	.update_server_port = -1,
+};
 
 /* NOTE: Today the content and version server urls are the same in
  * all cases.  It is highly likely these will eventually differ, eg:
@@ -78,27 +58,21 @@ bool wait_for_scripts = false;
  * different quality of server and control of the servers
  */
 static bool verbose_time = false;
-char *version_url = NULL;
-char *content_url = NULL;
-bool content_url_is_local = false;
-char *cert_path = NULL;
-int update_server_port = -1;
 static int max_parallel_downloads = -1;
 static int log_level = LOG_INFO;
 static bool quiet = false;
 static bool debug = false;
-char **swupd_argv = NULL;
 
 /* Sets the content_url global variable */
 static void set_content_url(char *url)
 {
-	if (content_url) {
-		free_string(&content_url);
+	if (globals.content_url) {
+		free_string(&globals.content_url);
 	}
 
-	content_url = strdup_or_die(url);
-	remove_trailing_slash(content_url);
-	content_url_is_local = strncmp(content_url, "file://", 7) == 0;
+	globals.content_url = strdup_or_die(url);
+	remove_trailing_slash(globals.content_url);
+	globals.content_url_is_local = strncmp(globals.content_url, "file://", 7) == 0;
 }
 
 /* Initializes the content_url global variable with the default value,
@@ -142,12 +116,12 @@ found:
 /* Sets the version_url global variable */
 static void set_version_url(char *url)
 {
-	if (version_url) {
-		free_string(&version_url);
+	if (globals.version_url) {
+		free_string(&globals.version_url);
 	}
 
-	version_url = strdup_or_die(url);
-	remove_trailing_slash(version_url);
+	globals.version_url = strdup_or_die(url);
+	remove_trailing_slash(globals.version_url);
 }
 
 /* Initializes the version_url global variable with the default value,
@@ -227,15 +201,15 @@ static bool set_state_dir(char *path)
 		return false;
 	}
 
-	free_string(&state_dir);
-	string_or_die(&state_dir, "%s", path);
+	free_string(&globals.state_dir);
+	string_or_die(&globals.state_dir, "%s", path);
 
 	return true;
 }
 
 static void set_default_state_dir()
 {
-	string_or_die(&state_dir, "%s", STATE_DIR);
+	string_or_die(&globals.state_dir, "%s", STATE_DIR);
 }
 
 static bool set_format_string(char *format)
@@ -248,11 +222,11 @@ static bool set_format_string(char *format)
 		return false;
 	}
 
-	if (format_string) {
-		free_string(&format_string);
+	if (globals.format_string) {
+		free_string(&globals.format_string);
 	}
 
-	format_string = strdup_or_die(format);
+	globals.format_string = strdup_or_die(format);
 	return true;
 }
 
@@ -322,30 +296,30 @@ bool set_path_prefix(char *path)
 		free(tmp);
 	}
 
-	free(path_prefix);
-	path_prefix = new_path;
+	free(globals.path_prefix);
+	globals.path_prefix = new_path;
 	return true;
 
 error:
 	error("Bad path_prefix %s (%s), cannot continue\n",
-	      path_prefix, strerror(errno));
+	      globals.path_prefix, strerror(errno));
 	free(new_path);
 	return false;
 }
 
 void set_default_path_prefix()
 {
-	free(path_prefix);
-	path_prefix = strdup_or_die("/");
+	free(globals.path_prefix);
+	globals.path_prefix = strdup_or_die("/");
 }
 
 static void set_cert_path(char *path)
 {
-	if (cert_path) {
-		free_string(&cert_path);
+	if (globals.cert_path) {
+		free_string(&globals.cert_path);
 	}
 
-	cert_path = strdup_or_die(path);
+	globals.cert_path = strdup_or_die(path);
 }
 
 static void set_default_cert_path()
@@ -358,37 +332,37 @@ static void set_default_cert_path()
 	}
 }
 
-bool init_globals(void)
+bool globals_init(void)
 {
-	if (!state_dir) {
+	if (!globals.state_dir) {
 		set_default_state_dir();
 	}
 
-	if (!path_prefix) {
+	if (!globals.path_prefix) {
 		set_default_path_prefix();
 	}
 
-	if (!format_string && !set_default_format_string()) {
+	if (!globals.format_string && !set_default_format_string()) {
 		error("Unable to determine format id. Use the -F option instead\n");
 		return false;
 	}
 
-	if (!version_url && !set_default_version_url()) {
+	if (!globals.version_url && !set_default_version_url()) {
 		error("Default version URL not found. Use the -v option instead\n");
 		return false;
 	}
 
-	if (!content_url && !set_default_content_url()) {
+	if (!globals.content_url && !set_default_content_url()) {
 		error("Default content URL not found. Use the -c option instead\n");
 		return false;
 	}
 
-	if (!cert_path) {
+	if (!globals.cert_path) {
 		set_default_cert_path();
 	}
 
 	if (verbose_time) {
-		global_times = timelist_new();
+		globals.global_times = timelist_new();
 	}
 
 	return true;
@@ -399,20 +373,19 @@ void globals_deinit(void)
 	/* freeing all globals and set ALL them to NULL (via free_string)
 	 * to avoid memory corruption on multiple calls
 	 * to swupd_init() */
-	free_string(&content_url);
-	free_string(&version_url);
-	free_string(&path_prefix);
-	free_string(&format_string);
-	free_string(&mounted_dirs);
-	free_string(&state_dir);
-	free_string(&bundle_to_add);
-	timelist_free(global_times);
-	global_times = NULL;
+	free_string(&globals.content_url);
+	free_string(&globals.version_url);
+	free_string(&globals.path_prefix);
+	free_string(&globals.format_string);
+	free_string(&globals.mounted_dirs);
+	free_string(&globals.state_dir);
+	timelist_free(globals.global_times);
+	globals.global_times = NULL;
 }
 
 void save_cmd(char **argv)
 {
-	swupd_argv = argv;
+	globals.swupd_argv = argv;
 }
 
 size_t get_max_xfer(size_t default_max_xfer)
@@ -470,8 +443,8 @@ static bool global_parse_opt(int opt, char *optarg)
 		set_content_url(optarg);
 		return true;
 	case 'P':
-		err = strtoi_err(optarg, &update_server_port);
-		if (err < 0 || update_server_port < 0) {
+		err = strtoi_err(optarg, &globals.update_server_port);
+		if (err < 0 || globals.update_server_port < 0) {
 			error("Invalid --port argument: %s\n\n", optarg);
 			return false;
 		}
@@ -495,19 +468,19 @@ static bool global_parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'n':
-		sigcheck = !optarg_to_bool(optarg);
+		globals.sigcheck = !optarg_to_bool(optarg);
 		return true;
 	case 'I':
-		timecheck = !optarg_to_bool(optarg);
+		globals.timecheck = !optarg_to_bool(optarg);
 		return true;
 	case 't':
 		verbose_time = optarg_to_bool(optarg);
 		return true;
 	case 'N':
-		no_scripts = optarg_to_bool(optarg);
+		globals.no_scripts = optarg_to_bool(optarg);
 		return true;
 	case 'b':
-		no_boot_update = optarg_to_bool(optarg);
+		globals.no_boot_update = optarg_to_bool(optarg);
 		return true;
 	case 'C':
 		set_cert_path(optarg);
@@ -520,15 +493,15 @@ static bool global_parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'r':
-		err = strtoi_err(optarg, &max_retries);
-		if (err < 0 || max_retries < 0) {
+		err = strtoi_err(optarg, &globals.max_retries);
+		if (err < 0 || globals.max_retries < 0) {
 			error("Invalid --max-retries argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;
 	case 'd':
-		err = strtoi_err(optarg, &retry_delay);
-		if (err < 0 || retry_delay < 0 || retry_delay > 60) {
+		err = strtoi_err(optarg, &globals.retry_delay);
+		if (err < 0 || globals.retry_delay < 0 || globals.retry_delay > 60) {
 			error("Invalid --retry-delay argument: %s (should be between 0 - %d seconds)\n\n", optarg, MAX_DELAY);
 			return false;
 		}
@@ -540,7 +513,7 @@ static bool global_parse_opt(int opt, char *optarg)
 		progress_disable(optarg_to_bool(optarg));
 		return true;
 	case FLAG_WAIT_FOR_SCRIPTS:
-		wait_for_scripts = optarg_to_bool(optarg);
+		globals.wait_for_scripts = optarg_to_bool(optarg);
 		return true;
 	case FLAG_QUIET:
 		quiet = optarg_to_bool(optarg);
@@ -549,7 +522,7 @@ static bool global_parse_opt(int opt, char *optarg)
 		debug = optarg_to_bool(optarg);
 		return true;
 	case FLAG_ALLOW_INSECURE_HTTP:
-		allow_insecure_http = optarg_to_bool(optarg);
+		globals.allow_insecure_http = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;

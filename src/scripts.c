@@ -51,15 +51,15 @@ static void update_boot(void)
 	char *scriptname;
 
 	/* Don't run clr-boot-manager update in a container on the rootfs */
-	if (strcmp("/", path_prefix) == 0 && systemd_in_container()) {
+	if (strcmp("/", globals.path_prefix) == 0 && systemd_in_container()) {
 		return;
 	}
 
-	if (strcmp("/", path_prefix) == 0) {
+	if (strcmp("/", globals.path_prefix) == 0) {
 		run_script_if_exists("/usr/bin/clr-boot-manager", "update", NULL);
 	} else {
-		string_or_die(&scriptname, "%s/usr/bin/clr-boot-manager", path_prefix);
-		run_script_if_exists(scriptname, "update", "--path", path_prefix, NULL);
+		string_or_die(&scriptname, "%s/usr/bin/clr-boot-manager", globals.path_prefix);
+		run_script_if_exists(scriptname, "update", "--path", globals.path_prefix, NULL);
 		free_string(&scriptname);
 	}
 }
@@ -71,13 +71,13 @@ void exec_post_update_script(bool reexec, bool block)
 	int i = 0;
 	bool has_path_prefix;
 
-	has_path_prefix = strcmp("/", path_prefix) != 0;
+	has_path_prefix = strcmp("/", globals.path_prefix) != 0;
 
-	params[i++] = str_or_die("%s%s", has_path_prefix ? path_prefix : "",
+	params[i++] = str_or_die("%s%s", has_path_prefix ? globals.path_prefix : "",
 				 POST_UPDATE);
 
 	if (has_path_prefix) {
-		params[i++] = path_prefix;
+		params[i++] = globals.path_prefix;
 	}
 
 	if (block) {
@@ -99,7 +99,7 @@ static void update_triggers(bool block)
 	if (strlen(POST_UPDATE) == 0) {
 		/* fall back to systemd if path prefix is not the rootfs
 		 * and the POST_UPDATE trigger wasn't specified */
-		if (strcmp("/", path_prefix) != 0) {
+		if (strcmp("/", globals.path_prefix) != 0) {
 			return;
 		}
 
@@ -110,7 +110,7 @@ static void update_triggers(bool block)
 		}
 
 		/* These must block so that new update triggers are executed after */
-		if (need_systemd_reexec) {
+		if (globals.need_systemd_reexec) {
 			systemctl_daemon_reexec();
 		} else {
 			systemctl_daemon_reload();
@@ -129,13 +129,13 @@ static void update_triggers(bool block)
 	} else {
 		/* These must block so that new update triggers are executed after */
 
-		exec_post_update_script(need_systemd_reexec, block);
+		exec_post_update_script(globals.need_systemd_reexec, block);
 	}
 }
 
 void scripts_run_post_update(bool block)
 {
-	if (no_scripts) {
+	if (globals.no_scripts) {
 		warn("post-update helper scripts skipped due to "
 		     "--no-scripts argument\n");
 		return;
@@ -143,8 +143,8 @@ void scripts_run_post_update(bool block)
 
 	info("Calling post-update helper scripts\n");
 
-	if (need_update_boot || need_update_bootloader) {
-		if (no_boot_update) {
+	if (globals.need_update_boot || globals.need_update_bootloader) {
+		if (globals.no_boot_update) {
 			warn("boot files update skipped due to "
 			     "--no-boot-update argument\n");
 		} else {
@@ -157,10 +157,10 @@ void scripts_run_post_update(bool block)
 
 static void exec_pre_update_script(const char *script)
 {
-	if (strlen(PRE_UPDATE) == 0 || strcmp("/", path_prefix) == 0) {
+	if (strlen(PRE_UPDATE) == 0 || strcmp("/", globals.path_prefix) == 0) {
 		run_script_if_exists(script, NULL);
 	} else {
-		run_script_if_exists(script, path_prefix, NULL);
+		run_script_if_exists(script, globals.path_prefix, NULL);
 	}
 }
 
@@ -173,7 +173,7 @@ void scripts_run_pre_update(struct manifest *manifest)
 	if (strlen(PRE_UPDATE) == 0) {
 		string_or_die(&script, "/usr/bin/clr_pre_update.sh");
 	} else {
-		string_or_die(&script, "%s/%s", path_prefix, PRE_UPDATE);
+		string_or_die(&script, "%s/%s", globals.path_prefix, PRE_UPDATE);
 	}
 
 	if (!file_exists(script)) {

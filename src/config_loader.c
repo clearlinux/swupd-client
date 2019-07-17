@@ -47,8 +47,6 @@ bool config_loader_set_opt(char *section, char *opt, char *value)
 	char *lvalue = NULL;
 	char *lsection = NULL;
 	char *flag = NULL;
-	size_t opt_len;
-	size_t flag_len;
 	bool ret = false;
 
 	/* make sure the config loader has been initialized */
@@ -60,7 +58,6 @@ bool config_loader_set_opt(char *section, char *opt, char *value)
 
 	/* replace all '_' used in config options with '-' used in flags */
 	flag = strdup_or_die(opt);
-	flag_len = strlen(flag);
 	for (unsigned int i = 0; flag[i]; i++) {
 		if (flag[i] == '_') {
 			flag[i] = '-';
@@ -80,8 +77,7 @@ bool config_loader_set_opt(char *section, char *opt, char *value)
 
 	/* search the option from within the available options */
 	while (options->name != NULL) {
-		opt_len = strlen(options->name);
-		if (flag_len == opt_len && strcmp(flag, options->name) == 0) {
+		if (strcmp(flag, options->name) == 0) {
 			lvalue = str_tolower(value);
 
 			/* some options don't have short options, only long, if this is the

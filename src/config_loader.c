@@ -58,11 +58,6 @@ bool config_loader_set_opt(char *section, char *opt, char *value)
 	}
 	options = cl.available_opts;
 
-	/* set flag to indicate we are loading from a configuration file,
-	 * this is useful so we can overwrite these values when a conflicting
-	 * flag is provided as command argument */
-	global_set_opt_from_config(true);
-
 	/* replace all '_' used in config options with '-' used in flags */
 	flag = strdup_or_die(opt);
 	flag_len = strlen(flag);
@@ -138,7 +133,6 @@ bool config_loader_set_opt(char *section, char *opt, char *value)
 	}
 
 exit:
-	global_set_opt_from_config(false);
 	free_string(&lvalue);
 	free_string(&lsection);
 	free_string(&flag);

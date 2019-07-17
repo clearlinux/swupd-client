@@ -82,16 +82,6 @@ static int max_parallel_downloads = -1;
 static int log_level = LOG_INFO;
 char **swupd_argv = NULL;
 
-/* flag required to identify options being set by a config file
- * and options being set by a flag in a command, the latter should
- * have higher precedence */
-static bool from_config = false;
-
-void global_set_opt_from_config(bool state)
-{
-	from_config = state;
-}
-
 /* If the MIX_BUNDLES_DIR has the valid-mix flag file we can run through
  * adding the mix data to the OS */
 bool check_mix_exists(void)

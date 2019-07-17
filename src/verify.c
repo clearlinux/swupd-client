@@ -139,7 +139,11 @@ static void print_help(void)
 	print("Options:\n");
 	print("   -V, --version=V         Verify against manifest version V\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
-	print("   -Y, --picky             List (without --fix) or remove (with --fix) files which should not exist\n");
+	if (cmdline_command_verify) {
+		print("   -Y, --picky             List (without --fix) or remove (with --fix) files which should not exist\n");
+	} else {
+		print("   -Y, --picky             List files which should not exist\n");
+	}
 	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
 	print("   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
 	print("   -q, --quick             Don't compare hashes, only fix missing files\n");

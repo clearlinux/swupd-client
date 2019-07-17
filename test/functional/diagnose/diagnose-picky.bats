@@ -27,13 +27,16 @@ test_setup() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Generating list of extra files under .*/target-dir/usr
-		/usr/share/defaults/swupd/versionurl
-		/usr/share/defaults/swupd/contenturl
-		/usr/foo/bar/file2
-		/usr/foo/bar/
-		/usr/foo/
-		/usr/file1
+		Checking for missing files
+		Checking for corrupt files
+		Checking for extraneous files
+		Checking for extra files under .*/target-dir/usr
+		 -> Extra file: /usr/share/defaults/swupd/versionurl
+		 -> Extra file: /usr/share/defaults/swupd/contenturl
+		 -> Extra file: /usr/foo/bar/file2
+		 -> Extra file: /usr/foo/bar/
+		 -> Extra file: /usr/foo/
+		 -> Extra file: /usr/file1
 		Inspected 17 files
 		  6 files found which should be deleted
 		Use "swupd repair --picky" to correct the problems in the system

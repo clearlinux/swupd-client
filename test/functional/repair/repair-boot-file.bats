@@ -27,7 +27,7 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
-		.* Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile -> fixed
+		 -> Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile -> fixed
 		Removing extraneous files
 		Inspected 7 files
 		  1 file did not match

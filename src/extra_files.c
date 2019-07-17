@@ -98,16 +98,16 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 
 	if (fix) {
 		string_or_die(&temp, "%s%s", path_prefix, filename);
-		print(
-		    is_dir ? "REMOVING DIR %s/\n" : "REMOVING %s\n",
-		    filename);
+		print(" -> Extra file: %s%s", filename, is_dir ? "/" : "");
 		if (remove(temp)) {
-			error("Removing %s failed: %s\n", temp, strerror(errno));
+			warn(" -> Failed to remove %s (%i: %s)\n", temp, errno, strerror(errno));
 			ret = false;
+		} else {
+			print(" -> deleted\n");
 		}
 		free_string(&temp);
 	} else {
-		print("%s%s\n", filename, is_dir ? "/" : "");
+		print(" -> Extra file: %s%s\n", filename, is_dir ? "/" : "");
 		ret = false;
 	}
 

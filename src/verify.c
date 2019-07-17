@@ -140,9 +140,9 @@ static void print_help(void)
 	print("   -V, --version=V         Verify against manifest version V\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	if (cmdline_command_verify) {
-		print("   -Y, --picky             List (without --fix) or remove (with --fix) files which should not exist\n");
+		print("   -Y, --picky             Also list (without --fix) or remove (with --fix) files which should not exist\n");
 	} else {
-		print("   -Y, --picky             List files which should not exist\n");
+		print("   -Y, --picky             Also list files which should not exist\n");
 	}
 	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
 	print("   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
@@ -330,7 +330,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 			counts.missing++;
 			if (!repair || (repair && cmdline_option_install == false)) {
 				/* Log to stdout, so we can post-process */
-				print("\r -> Missing file: %s%s", fullname, repair ? "" : "\n");
+				print(" -> Missing file: %s%s", fullname, repair ? "" : "\n");
 			}
 		} else {
 			goto out;
@@ -394,7 +394,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	if (access(fullname, F_OK) == 0) {
 		counts.mismatch++;
 		/* Log to stdout, so we can post-process it */
-		print("\r -> Hash mismatch for file: %s%s", fullname, repair ? "" : "\n");
+		print(" -> Hash mismatch for file: %s%s", fullname, repair ? "" : "\n");
 	}
 
 	/* if not repairing, we're done */
@@ -494,7 +494,7 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 		}
 
 		counts.extraneous++;
-		print("\r -> File that should be deleted: %s%s", fullname, repair ? "" : "\n");
+		print(" -> File that should be deleted: %s%s", fullname, repair ? "" : "\n");
 
 		/* if not repairing, we're done */
 		if (!repair) {
@@ -948,32 +948,40 @@ enum swupd_code verify_main(void)
 			info("\nRemoving extraneous files\n");
 			remove_orphaned_files(official_manifest, repair);
 		}
+
 		if (cmdline_option_picky) {
 			char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
-			info("\n--picky removing extra files under %s\n", start);
+			info("\nRemoving extra files under %s\n", start);
 			ret = walk_tree(official_manifest, start, true, picky_whitelist, &counts);
 			free_string(&start);
 		}
 		timelist_timer_stop(global_times);
-	} else if (cmdline_option_picky) {
-		char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
-		info("\nGenerating list of extra files under %s\n", start);
-		ret = walk_tree(official_manifest, start, false, picky_whitelist, &counts);
-		free_string(&start);
+
 	} else {
 		bool repair = false;
 
 		progress_set_next_step("add_missing_files");
 		info("\nChecking for missing files\n");
 		add_missing_files(official_manifest, repair);
+
 		/* quick only checks for missing files, so it is done here */
-		if (!cmdline_option_quick) {
-			progress_set_next_step("fix_files");
-			info("\nChecking for corrupt files\n");
-			deal_with_hash_mismatches(official_manifest, repair);
-			progress_set_next_step("remove_extraneous_files");
-			info("\nChecking for extraneous files\n");
-			remove_orphaned_files(official_manifest, repair);
+		if (cmdline_option_quick) {
+			goto brick_the_system_and_clean_curl;
+		}
+
+		progress_set_next_step("fix_files");
+		info("\nChecking for corrupt files\n");
+		deal_with_hash_mismatches(official_manifest, repair);
+
+		progress_set_next_step("remove_extraneous_files");
+		info("\nChecking for extraneous files\n");
+		remove_orphaned_files(official_manifest, repair);
+
+		if (cmdline_option_picky) {
+			char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
+			info("\nChecking for extra files under %s\n", start);
+			ret = walk_tree(official_manifest, start, false, picky_whitelist, &counts);
+			free_string(&start);
 		}
 	}
 

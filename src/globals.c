@@ -203,33 +203,33 @@ static bool is_valid_integer_format(char *str)
  */
 static bool set_state_dir(char *path)
 {
-	bool use_default = path ? false : true;
-
-	if (!use_default) {
-		if (path[0] != '/') {
-			error("state dir must be a full path starting with '/', not '%c'\n", path[0]);
-			return false;
-		}
-
-		/* Prevent some disasters: since the state dir can be destroyed and
-		 * reconstructed, make sure we never set those by accident and nuke the
-		 * system. */
-		if (!strcmp(path, "/") || !strcmp(path, "/var") || !strcmp(path, "/usr")) {
-			error("Refusing to use '%s' as a state dir because it might be erased first\n", path);
-			return false;
-		}
-
-		free_string(&state_dir);
-		string_or_die(&state_dir, "%s", path);
-	} else {
-		/* initializing */
-		if (state_dir) {
-			return true;
-		}
-		string_or_die(&state_dir, "%s", STATE_DIR);
+	if (!path) {
+		error("Statedir shouldn't be NULL\n");
+		return false;
 	}
 
+	if (path[0] != '/') {
+		error("State dir must be a full path starting with '/', not '%c'\n", path[0]);
+		return false;
+	}
+
+	/* Prevent some disasters: since the state dir can be destroyed and
+	 * reconstructed, make sure we never set those by accident and nuke the
+	 * system. */
+	if (!strcmp(path, "/") || !strcmp(path, "/var") || !strcmp(path, "/usr")) {
+		error("Refusing to use '%s' as a state dir because it might be erased first\n", path);
+		return false;
+	}
+
+	free_string(&state_dir);
+	string_or_die(&state_dir, "%s", path);
+
 	return true;
+}
+
+static void set_default_state_dir()
+{
+	string_or_die(&state_dir, "%s", STATE_DIR);
 }
 
 static bool set_format_string(char *format)
@@ -354,11 +354,8 @@ static void set_default_cert_path()
 
 bool init_globals(void)
 {
-	int ret;
-
-	ret = set_state_dir(NULL);
-	if (!ret) {
-		return false;
+	if (!state_dir) {
+		set_default_state_dir();
 	}
 
 	if (!path_prefix) {

@@ -51,6 +51,7 @@ swupd_SOURCES = \
 	src/filedesc.c \
 	src/fullfile.c \
 	src/globals.c \
+	src/globals.h \
 	src/hash.c \
 	src/hashdump.c \
 	src/helpers.c \

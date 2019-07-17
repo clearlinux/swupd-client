@@ -97,7 +97,7 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 	bool ret = true;
 
 	if (fix) {
-		string_or_die(&temp, "%s%s", path_prefix, filename);
+		string_or_die(&temp, "%s%s", globals.path_prefix, filename);
 		print(" -> Extra file: %s%s", filename, is_dir ? "/" : "");
 		if (remove(temp)) {
 			warn(" -> Failed to remove %s (%i: %s)\n", temp, errno, strerror(errno));
@@ -126,7 +126,7 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 		return SWUPD_COULDNT_LIST_DIR;
 	}
 
-	path_prefix_len = strlen(path_prefix);
+	path_prefix_len = strlen(globals.path_prefix);
 	path_whitelist = whitelist;
 	rc = nftw(start, &record_filename, 0, FTW_ACTIONRETVAL | FTW_PHYS | FTW_MOUNT);
 	const char *skip_dir = NULL; /* Skip files below this in printout */

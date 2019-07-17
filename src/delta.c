@@ -115,7 +115,7 @@ static bool check_delta_filename(const char *delta_name, char *from, char *to)
 void apply_deltas(struct manifest *current_manifest)
 {
 	char *delta_dir;
-	string_or_die(&delta_dir, "%s/delta", state_dir);
+	string_or_die(&delta_dir, "%s/delta", globals.state_dir);
 
 	DIR *dir = opendir(delta_dir);
 	if (!dir) {
@@ -142,7 +142,7 @@ void apply_deltas(struct manifest *current_manifest)
 			goto next;
 		}
 
-		string_or_die(&to_staged, "%s/staged/%s", state_dir, to);
+		string_or_die(&to_staged, "%s/staged/%s", globals.state_dir, to);
 
 		/* If 'to' file already exists, no need to apply delta. */
 		struct stat stat;
@@ -166,7 +166,7 @@ void apply_deltas(struct manifest *current_manifest)
 			/* Verify the actual file in the disk matches our expectations. */
 			char hash[SWUPD_HASH_LEN];
 			char *filename;
-			string_or_die(&filename, "%s/%s", path_prefix, file->filename);
+			string_or_die(&filename, "%s/%s", globals.path_prefix, file->filename);
 
 			if (!compute_hash_from_file(filename, hash) || !hash_equal(file->hash, hash)) {
 				free_string(&filename);

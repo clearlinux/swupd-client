@@ -215,7 +215,7 @@ static int check_files_hash(struct list *files)
 			goto progress;
 		}
 
-		fullname = mk_full_filename(path_prefix, f->filename);
+		fullname = mk_full_filename(globals.path_prefix, f->filename);
 		valid = cmdline_option_quick ? verify_file_lazy(fullname) : verify_file(f, fullname);
 		free_string(&fullname);
 		if (valid) {
@@ -280,8 +280,8 @@ static void check_warn_freespace(const struct file *file)
 		goto out;
 	}
 
-	string_or_die(&original, "%s/staged/%s", state_dir, file->hash);
-	fs_free = get_available_space(path_prefix);
+	string_or_die(&original, "%s/staged/%s", globals.state_dir, file->hash);
+	fs_free = get_available_space(globals.path_prefix);
 	if (fs_free < 0 || stat(original, &st) != 0) {
 		warn("Unable to determine free space on filesystem\n");
 		goto out;
@@ -322,7 +322,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 			goto progress;
 		}
 
-		fullname = mk_full_filename(path_prefix, file->filename);
+		fullname = mk_full_filename(globals.path_prefix, file->filename);
 		memset(&local, 0, sizeof(struct file));
 		local.filename = file->filename;
 		populate_file_struct(&local, fullname);
@@ -392,7 +392,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	}
 
 	/* compare the hash and report mismatch */
-	fullname = mk_full_filename(path_prefix, file->filename);
+	fullname = mk_full_filename(globals.path_prefix, file->filename);
 	if (verify_file(file, fullname)) {
 		goto end;
 	}
@@ -488,7 +488,7 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 			goto progress;
 		}
 
-		fullname = mk_full_filename(path_prefix, file->filename);
+		fullname = mk_full_filename(globals.path_prefix, file->filename);
 
 		if (lstat(fullname, &sb) != 0) {
 			/* correctly, the file is not present */
@@ -698,7 +698,7 @@ static bool parse_options(int argc, char **argv)
 			error("--install option requires -m version option\n");
 			return false;
 		}
-		if (path_prefix == NULL) {
+		if (globals.path_prefix == NULL) {
 			error("--install option requires --path option\n");
 			return false;
 		}
@@ -727,7 +727,7 @@ static enum swupd_code deal_with_extra_files(struct manifest *manifest, bool fix
 {
 	enum swupd_code ret;
 
-	char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
+	char *start = mk_full_filename(globals.path_prefix, cmdline_option_picky_tree);
 	info("\n%s extra files under %s\n", fix ? "Removing" : "Checking for", start);
 	ret = walk_tree(manifest, start, fix, picky_whitelist, &counts);
 	free_string(&start);
@@ -794,13 +794,13 @@ enum swupd_code verify_main(void)
 	/* Unless we are installing a new bundle we shoudn't include optional
 	* bundles to the bundle list */
 	if (!cmdline_option_install) {
-		skip_optional_bundles = true;
+		globals.skip_optional_bundles = true;
 	}
 
 	/* Get the current system version and the version to verify against */
-	timelist_timer_start(global_times, "Get versions");
+	timelist_timer_start(globals.global_times, "Get versions");
 	progress_set_step(1, "get_versions");
-	int sys_version = get_current_version(path_prefix);
+	int sys_version = get_current_version(globals.path_prefix);
 	if (!version) {
 		if (sys_version < 0) {
 			error("Unable to determine current OS version\n");
@@ -821,7 +821,7 @@ enum swupd_code verify_main(void)
 		}
 	}
 	progress_complete_step();
-	timelist_timer_stop(global_times); // closing: Get versions
+	timelist_timer_stop(globals.global_times); // closing: Get versions
 
 	if (cmdline_option_install) {
 		info("Installing OS version %i%s\n", version, use_latest ? " (latest)" : "");
@@ -842,7 +842,7 @@ enum swupd_code verify_main(void)
 	 * FIXME: We need a command line option to override this in case the
 	 * certificate is hosed and the admin knows it and wants to recover.
 	 */
-	timelist_timer_start(global_times, "Clean up download directory");
+	timelist_timer_start(globals.global_times, "Clean up download directory");
 	progress_set_step(2, "cleanup_download_dir");
 	ret = rm_staging_dir_contents("download");
 	if (ret != 0) {
@@ -850,9 +850,9 @@ enum swupd_code verify_main(void)
 		warn("Failed to remove prior downloads, carrying on anyway\n");
 	}
 	progress_complete_step();
-	timelist_timer_stop(global_times); // closing: Clean up download directory
+	timelist_timer_stop(globals.global_times); // closing: Clean up download directory
 
-	timelist_timer_start(global_times, "Load manifests");
+	timelist_timer_start(globals.global_times, "Load manifests");
 	progress_set_step(3, "load_manifests");
 
 	/* Gather current manifests */
@@ -887,7 +887,7 @@ enum swupd_code verify_main(void)
 			error("Mismatching formats detected when %s %d"
 			      " (expected: %s; actual: %d)\n",
 			      cmdline_command_verify ? "verifying" : "diagnosing",
-			      version, format_string, official_manifest->manifest_version);
+			      version, globals.format_string, official_manifest->manifest_version);
 			int latest = get_latest_version(NULL);
 			if (latest > 0) {
 				info("Latest supported version to %s: %d\n",
@@ -958,14 +958,14 @@ enum swupd_code verify_main(void)
 		goto clean_and_exit;
 	}
 	progress_complete_step();
-	timelist_timer_stop(global_times); // closing: Load manifests
+	timelist_timer_stop(globals.global_times); // closing: Load manifests
 
-	timelist_timer_start(global_times, "Consolidate files from bundles");
+	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
 	progress_set_step(4, "consolidate_files");
 	official_manifest->files = files_from_bundles(official_manifest->submanifests);
 	official_manifest->files = consolidate_files(official_manifest->files);
 	progress_complete_step();
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(globals.global_times);
 
 	if (cmdline_extra_files_only) {
 		/* user wants to deal only with the extra files, so skip everything else */
@@ -973,7 +973,7 @@ enum swupd_code verify_main(void)
 	}
 
 	/* steps 5, 6 & 7 are executed within the get_required_files function */
-	timelist_timer_start(global_times, "Get required files");
+	timelist_timer_start(globals.global_times, "Get required files");
 
 	/* get the initial number of files to be inspected */
 	counts.checked = list_len(official_manifest->files);
@@ -986,7 +986,7 @@ enum swupd_code verify_main(void)
 			goto clean_and_exit;
 		}
 	}
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(globals.global_times);
 
 	/* preparation work complete. */
 
@@ -1009,7 +1009,7 @@ enum swupd_code verify_main(void)
 	 * is already there. It's also the most safe operation, adding files rarely
 	 * has unintended side effect. So lets do the safest thing first.
 	 */
-	timelist_timer_start(global_times, "Add missing files");
+	timelist_timer_start(globals.global_times, "Add missing files");
 	progress_set_next_step("add_missing_files");
 	if (cmdline_option_install) {
 		info("\nInstalling base OS and selected bundles\n");
@@ -1019,7 +1019,7 @@ enum swupd_code verify_main(void)
 		info("\nChecking for missing files\n");
 	}
 	add_missing_files(official_manifest, cmdline_option_fix || cmdline_option_install);
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(globals.global_times);
 
 	if (cmdline_option_quick) {
 		/* quick only replaces missing files, so it is done here */
@@ -1027,28 +1027,28 @@ enum swupd_code verify_main(void)
 	}
 
 	/* repair corrupt files */
-	timelist_timer_start(global_times, "Fixing modified files");
+	timelist_timer_start(globals.global_times, "Fixing modified files");
 	progress_set_next_step("fix_files");
 	deal_with_hash_mismatches(official_manifest, cmdline_option_fix);
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(globals.global_times);
 
 	/* remove orphaned files, removing files could be
 	 * risky, so only do it if the prior phases had no problems */
-	timelist_timer_start(global_times, "Removing orphaned files");
+	timelist_timer_start(globals.global_times, "Removing orphaned files");
 	if ((counts.not_fixed == 0) && (counts.not_replaced == 0)) {
 		progress_set_next_step("remove_extraneous_files");
 		remove_orphaned_files(official_manifest, cmdline_option_fix);
 	}
-	timelist_timer_stop(global_times);
+	timelist_timer_stop(globals.global_times);
 
 	/* remove extra files */
 extra_files:
 	if (cmdline_option_picky || cmdline_extra_files_only) {
-		timelist_timer_start(global_times, "Removing extra files");
+		timelist_timer_start(globals.global_times, "Removing extra files");
 		progress_set_next_step("remove_extra_files");
 		deal_with_extra_files(official_manifest, cmdline_option_fix);
 		progress_complete_step();
-		timelist_timer_stop(global_times);
+		timelist_timer_stop(globals.global_times);
 	}
 
 brick_the_system_and_clean_curl:
@@ -1087,12 +1087,12 @@ brick_the_system_and_clean_curl:
 
 	if (cmdline_option_fix || cmdline_option_install) {
 		// always run in a fix or install case
-		need_update_boot = true;
-		need_update_bootloader = true;
-		timelist_timer_start(global_times, "Run Scripts");
+		globals.need_update_boot = true;
+		globals.need_update_bootloader = true;
+		timelist_timer_start(globals.global_times, "Run Scripts");
 		info("\n");
-		scripts_run_post_update(wait_for_scripts);
-		timelist_timer_stop(global_times);
+		scripts_run_post_update(globals.wait_for_scripts);
+		timelist_timer_stop(globals.global_times);
 	}
 
 	sync();
@@ -1185,7 +1185,7 @@ clean_and_exit:
 		}
 	}
 
-	timelist_print_stats(global_times);
+	timelist_print_stats(globals.global_times);
 	free_subscriptions(&subs);
 	swupd_deinit();
 

@@ -40,7 +40,7 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 	char *newname;
 	int fd;
 
-	string_or_die(&filename, "%s/%d.%s.%d.XXXXXX", state_dir,
+	string_or_die(&filename, "%s/%d.%s.%d.XXXXXX", globals.state_dir,
 		      RECORD_VERSION, class, level);
 
 	fd = mkstemp(filename);
@@ -64,7 +64,7 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 		return;
 	}
 
-	string_or_die(&newname, "%s/telemetry/%s", state_dir, filename_n);
+	string_or_die(&newname, "%s/telemetry/%s", globals.state_dir, filename_n);
 
 	rename(filename, newname);
 	free_string(&filename);

@@ -83,7 +83,7 @@ CURLcode swupd_curl_set_optional_client_cert(CURL *curl)
 	CURLcode curl_ret = CURLE_OK;
 	char *client_cert_path;
 
-	client_cert_path = mk_full_filename(path_prefix, SSL_CLIENT_CERT);
+	client_cert_path = mk_full_filename(globals.path_prefix, SSL_CLIENT_CERT);
 	if (access(client_cert_path, F_OK) == 0) {
 		curl_ret = curl_easy_setopt(curl, CURLOPT_SSLCERT, client_cert_path);
 		if (curl_ret != CURLE_OK) {
@@ -209,8 +209,9 @@ int swupd_curl_init(char *url)
 	}
 
 	/* enforce the use of https or file */
-	if (!is_url_allowed(version_url) ||
-	    (strcmp(content_url, version_url) != 0 && !is_url_allowed(content_url))) {
+	if (!is_url_allowed(globals.version_url) ||
+	    (strcmp(globals.content_url, globals.version_url) != 0 &&
+	     !is_url_allowed(globals.content_url))) {
 		swupd_curl_deinit();
 		return -1;
 	}
@@ -247,7 +248,7 @@ int swupd_curl_init(char *url)
 exit:
 	if (ret != 0) {
 		/* curl failed to initialize */
-		error("Failed to connect to update server: %s\n", version_url);
+		error("Failed to connect to update server: %s\n", globals.version_url);
 		info("Possible solutions for this problem are:\n"
 		     "\tCheck if your network connection is working\n"
 		     "\tFix the system clock\n"
@@ -476,7 +477,7 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_WRITE_ERROR:
 			error("Curl - Error downloading to local file - '%s'\n", url);
-			error("Curl - Check free space for %s?\n", state_dir);
+			error("Curl - Check free space for %s?\n", globals.state_dir);
 			return DOWNLOAD_STATUS_WRITE_ERROR;
 		case CURLE_OPERATION_TIMEDOUT:
 			error("Curl - Communicating with server timed out - '%s'\n", url);
@@ -606,7 +607,7 @@ exit:
 static enum retry_strategy determine_strategy(int status)
 {
 	/* we don't need to retry if the content URL is local */
-	if (content_url_is_local) {
+	if (globals.content_url_is_local) {
 		return DONT_RETRY;
 	}
 
@@ -630,7 +631,7 @@ static int retry_download_loop(const char *url, char *filename, struct curl_file
 {
 
 	int current_retry = 0;
-	int sleep_time = retry_delay;
+	int sleep_time = globals.retry_delay;
 	int strategy;
 	int ret;
 
@@ -662,8 +663,8 @@ static int retry_download_loop(const char *url, char *filename, struct curl_file
 		if (strategy == RETRY_NOW) {
 			sleep_time = 0;
 		}
-		if (max_retries) {
-			if (current_retry <= max_retries) {
+		if (globals.max_retries) {
+			if (current_retry <= globals.max_retries) {
 				if (sleep_time) {
 					info("Waiting %d seconds before retrying the download\n", sleep_time);
 				}
@@ -768,8 +769,8 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_
 	curl_easy_setopt(curl, CURLOPT_USERAGENT, PACKAGE "/" VERSION);
 	// No error checking needed, this is not critical information
 
-	if (update_server_port > 0) {
-		curl_ret = curl_easy_setopt(curl, CURLOPT_PORT, update_server_port);
+	if (globals.update_server_port > 0) {
+		curl_ret = curl_easy_setopt(curl, CURLOPT_PORT, globals.update_server_port);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}

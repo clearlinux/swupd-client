@@ -156,11 +156,11 @@ struct list *get_alias_definitions(void)
 	struct list *user_alias_files = NULL;
 
 	/* get sorted system and user filenames */
-	string_or_die(&path, "%s/%s", path_prefix, SYSTEM_ALIAS_PATH);
+	string_or_die(&path, "%s/%s", globals.path_prefix, SYSTEM_ALIAS_PATH);
 	system_alias_files = get_dir_files_sorted(path);
 	free(path);
 
-	string_or_die(&path, "%s/%s", path_prefix, USER_ALIAS_PATH);
+	string_or_die(&path, "%s/%s", globals.path_prefix, USER_ALIAS_PATH);
 	user_alias_files = get_dir_files_sorted(path);
 	free(path);
 

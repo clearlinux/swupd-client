@@ -401,12 +401,12 @@ static double query_total_download_size(struct list *list)
 		file = list->data;
 		list = list->next;
 
-		string_or_die(&untard_file, "%s/%i/Manifest.%s", state_dir, file->last_change,
+		string_or_die(&untard_file, "%s/%i/Manifest.%s", globals.state_dir, file->last_change,
 			      file->filename);
 
 		if (access(untard_file, F_OK) == -1) {
 			/* Does not exist client-side. Must download */
-			string_or_die(&url, "%s/%i/Manifest.%s.tar", content_url,
+			string_or_die(&url, "%s/%i/Manifest.%s.tar", globals.content_url,
 				      file->last_change, file->filename);
 
 			ret = swupd_curl_query_content_size(url);
@@ -618,7 +618,7 @@ enum swupd_code search_main(int argc, char **argv)
 	}
 
 	progress_set_step(1, "get_versions");
-	current_version = get_current_version(path_prefix);
+	current_version = get_current_version(globals.path_prefix);
 	if (current_version < 0) {
 		error("Unable to determine current OS version\n");
 		return SWUPD_CURRENT_VERSION_UNKNOWN;

@@ -58,7 +58,7 @@ static int finalize_pack_download(const char *module, int newversion, const char
 	int err;
 
 	debug("\nExtracting %s pack for version %i\n", module, newversion);
-	err = archives_extract_to(filename, state_dir);
+	err = archives_extract_to(filename, globals.state_dir);
 
 	unlink(filename);
 
@@ -119,7 +119,7 @@ static int download_pack(struct swupd_curl_parallel_handle *download_handle, int
 	int err = -1;
 	char *filename;
 
-	string_or_die(&filename, "%s/pack-%s-from-%i-to-%i.tar", state_dir, module, oldversion, newversion);
+	string_or_die(&filename, "%s/pack-%s-from-%i-to-%i.tar", globals.state_dir, module, oldversion, newversion);
 
 	if (is_mix) {
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", MIX_STATE_DIR, newversion, module, oldversion);
@@ -137,7 +137,7 @@ static int download_pack(struct swupd_curl_parallel_handle *download_handle, int
 	} else {
 		struct pack_data *pack_data;
 
-		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, newversion, module, oldversion);
+		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", globals.content_url, newversion, module, oldversion);
 
 		pack_data = calloc(1, sizeof(struct pack_data));
 		ON_NULL_ABORT(pack_data);
@@ -176,7 +176,7 @@ static double packs_query_total_download_size(struct list *subs, struct manifest
 			continue;
 		}
 
-		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", content_url, sub->version, sub->component, sub->oldversion);
+		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", globals.content_url, sub->version, sub->component, sub->oldversion);
 		size = swupd_curl_query_content_size(url);
 		if (size != -1) {
 			total_size += size;
@@ -235,7 +235,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 		}
 
 		/* make sure the file is not already in the client system */
-		string_or_die(&targetfile, "%s/pack-%s-from-%i-to-%i.tar", state_dir, sub->component, sub->oldversion, sub->version);
+		string_or_die(&targetfile, "%s/pack-%s-from-%i-to-%i.tar", globals.state_dir, sub->component, sub->oldversion, sub->version);
 		if (lstat(targetfile, &stat) != 0 || stat.st_size != 0) {
 			need_download = list_append_data(need_download, sub);
 		}

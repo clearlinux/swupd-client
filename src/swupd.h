@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "config_loader.h"
+#include "globals.h"
 #include "lib/archives.h"
 #include "lib/config_parser.h"
 #include "lib/formatter_json.h"
@@ -91,19 +92,6 @@ enum swupd_init_config {
 
 struct header;
 
-extern bool allow_insecure_http;
-extern bool allow_mix_collisions;
-extern bool migrate;
-extern bool sigcheck;
-extern bool timecheck;
-extern int update_count;
-extern int update_skip;
-extern bool update_complete;
-extern bool need_update_boot;
-extern bool need_update_bootloader;
-extern bool need_systemd_reexec;
-extern bool keepcache;
-
 extern uint64_t total_curl_sz;
 
 struct update_stat {
@@ -165,37 +153,6 @@ struct file_counts {
 	int not_deleted;
 	int picky_extraneous;
 };
-
-extern bool verify_esp_only;
-extern bool have_network;
-extern bool verify_bundles_only;
-extern bool no_scripts;
-extern bool no_boot_update;
-extern bool wait_for_scripts;
-extern char *format_string;
-extern char *path_prefix;
-extern bool init_globals(void);
-extern void globals_deinit(void);
-extern void save_cmd(char **argv);
-extern char **swupd_argv;
-extern char *bundle_to_add;
-extern char *state_dir;
-extern bool skip_diskspace_check;
-extern bool skip_optional_bundles;
-extern timelist *global_times;
-extern int max_retries;
-extern int retry_delay;
-
-extern char *version_url;
-extern char *content_url;
-extern bool content_url_is_local;
-extern char *cert_path;
-extern int update_server_port;
-extern char *default_format_path;
-extern bool set_path_prefix(char *path);
-extern bool set_default_content_url(void);
-extern bool set_default_version_url(void);
-extern void set_default_path_prefix(void);
 
 extern void check_root(void);
 
@@ -286,8 +243,6 @@ extern int rename_staged_file_to_final(struct file *file);
 
 extern int update_device_latest_version(int version);
 
-extern size_t get_max_xfer(size_t default_max_xfer);
-
 extern void free_subscriptions(struct list **subs);
 extern void read_subscriptions(struct list **subs);
 extern bool component_subscribed(struct list *subs, char *component);
@@ -318,7 +273,6 @@ void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2);
 extern struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bundlename);
 extern struct file *search_file_in_manifest(struct manifest *manifest, const char *filename);
 
-extern char *mounted_dirs;
 extern char *mk_full_filename(const char *prefix, const char *path);
 extern bool is_directory_mounted(const char *filename);
 extern bool is_under_mounted_directory(const char *filename);
@@ -412,15 +366,6 @@ extern enum swupd_code clean_statedir(bool all, bool dry_run);
 
 /* Parameter parsing in global.c */
 extern struct global_const global;
-struct global_options {
-	const struct option *longopts;
-	const int longopts_len;
-	bool (*parse_opt)(int opt, char *optarg);
-	void (*print_help)(void);
-};
-
-void global_print_help(void);
-int global_parse_options(int argc, char **argv, const struct global_options *opts);
 
 enum swupd_code check_update();
 

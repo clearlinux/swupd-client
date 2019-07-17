@@ -59,10 +59,10 @@ int get_latest_version(char *v_url)
 	}
 
 	if (v_url == NULL || strcmp(v_url, "") == 0) {
-		v_url = version_url;
+		v_url = globals.version_url;
 	}
 
-	string_or_die(&url, "%s/version/format%s/latest", v_url, format_string);
+	string_or_die(&url, "%s/version/format%s/latest", v_url, globals.format_string);
 
 	ret = swupd_curl_get_file_memory(url, &tmp_version);
 	if (ret) {
@@ -233,7 +233,7 @@ void check_mix_versions(int *current_version, int *server_version, char *path_pr
 {
 	*current_version = read_mix_version_file("/usr/share/clear/version", path_prefix);
 	char *format_file;
-	string_or_die(&format_file, MIX_STATE_DIR "version/format%s/latest", format_string);
+	string_or_die(&format_file, MIX_STATE_DIR "version/format%s/latest", globals.format_string);
 	*server_version = read_mix_version_file(format_file, path_prefix);
 	free_string(&format_file);
 }
@@ -243,7 +243,7 @@ int update_device_latest_version(int version)
 	FILE *file = NULL;
 	char *path = NULL;
 
-	string_or_die(&path, "%s/version", state_dir);
+	string_or_die(&path, "%s/version", globals.state_dir);
 	file = fopen(path, "w");
 	if (!file) {
 		free_string(&path);

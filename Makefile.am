@@ -34,10 +34,6 @@ AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS)
 swupd_SOURCES = \
 	src/alias.c \
 	src/alias.h \
-	src/lib/archives.c \
-	src/lib/archives.h \
-	src/lib/config_parser.c \
-	src/lib/config_parser.h \
 	src/autoupdate.c \
 	src/binary_loader.c \
 	src/bundle.c \
@@ -60,6 +56,10 @@ swupd_SOURCES = \
 	src/helpers.c \
 	src/heuristics.c \
 	src/info.c \
+	src/lib/archives.c \
+	src/lib/archives.h \
+	src/lib/config_parser.c \
+	src/lib/config_parser.h \
 	src/lib/formatter_json.c \
 	src/lib/formatter_json.h \
 	src/lib/hashmap.c \
@@ -86,8 +86,8 @@ swupd_SOURCES = \
 	src/os_install.c \
 	src/packs.c \
 	src/repair.c \
-	src/scripts.h \
 	src/scripts.c \
+	src/scripts.h \
 	src/search.c \
 	src/signature.c \
 	src/signature.h \

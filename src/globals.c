@@ -302,7 +302,7 @@ static bool set_state_dir(char *path)
 		 * reconstructed, make sure we never set those by accident and nuke the
 		 * system. */
 		if (!strcmp(path, "/") || !strcmp(path, "/var") || !strcmp(path, "/usr")) {
-			error("Refusing to use '%s' as a state dir because it might be erased first.\n", path);
+			error("Refusing to use '%s' as a state dir because it might be erased first\n", path);
 			return false;
 		}
 
@@ -406,7 +406,7 @@ bool set_path_prefix(char *path)
 		}
 
 		if (!realpath(tmp, real_path)) {
-			error("Bad path_prefix %s (%s), cannot continue.\n",
+			error("Bad path_prefix %s (%s), cannot continue\n",
 			      path_prefix, strerror(errno));
 			free_string(&tmp);
 			return false;
@@ -434,7 +434,7 @@ bool set_path_prefix(char *path)
 	}
 	ret = stat(path_prefix, &statbuf);
 	if (ret != 0 || !S_ISDIR(statbuf.st_mode)) {
-		error("Bad path_prefix %s (%s), cannot continue.\n",
+		error("Bad path_prefix %s (%s), cannot continue\n",
 		      path_prefix, strerror(errno));
 		return false;
 	}
@@ -477,17 +477,17 @@ bool init_globals(void)
 	}
 
 	if (!format_string && !set_default_format_string()) {
-		error("Unable to determine format id. Use the -F option instead.\n");
+		error("Unable to determine format id. Use the -F option instead\n");
 		return false;
 	}
 
 	if (!version_url && !set_default_version_url()) {
-		error("Default version URL not found. Use the -v option instead.\n");
+		error("Default version URL not found. Use the -v option instead\n");
 		return false;
 	}
 
 	if (!content_url && !set_default_content_url()) {
-		error("Default content URL not found. Use the -c option instead.\n");
+		error("Default content URL not found. Use the -c option instead\n");
 		return false;
 	}
 

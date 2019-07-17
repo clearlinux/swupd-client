@@ -15,7 +15,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 10 to 100
 		Downloading packs for:
 		 - os-core
@@ -30,9 +30,9 @@ test_setup() {
 		No extra files need to be downloaded
 		Staging file content
 		Applying update
-		Update was applied.
+		Update was applied
 		Calling post-update helper scripts
-		Update successful. System updated from version 10 to version 100
+		Update successful - System updated from version 10 to version 100
 	EOM
 	)
 	assert_is_output "$expected_output"

@@ -19,7 +19,7 @@ test_setup() {
 	assert_status_is 0
 
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 10 to 20
 		Downloading packs for:
 		 - bundle1
@@ -34,9 +34,9 @@ test_setup() {
 		    deleted files     : 0
 		Staging file content
 		Applying update
-		Update was applied.
+		Update was applied
 		Calling post-update helper scripts
-		Update successful. System updated from version 10 to version 20
+		Update successful - System updated from version 10 to version 20
 	EOM
 	)
 	assert_in_output "$expected_output"

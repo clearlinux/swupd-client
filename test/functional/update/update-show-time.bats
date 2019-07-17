@@ -51,7 +51,7 @@ test_setup() {
 	.* ms: |-- Create update list
 	.* ms: |-- Update loop
 	.* ms: |-- Run post-update scripts
-	Update successful. System updated from version 10 to version 20
+	Update successful - System updated from version 10 to version 20
 	EOM
 	)
 	assert_regex_in_output "$expected_output"

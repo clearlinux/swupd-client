@@ -18,10 +18,10 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 10 to 20
 		Error: Failed to retrieve 10 MoM manifest
-		Update failed.
+		Update failed
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -37,10 +37,10 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 10 to 20
 		Error: Failed to retrieve 20 MoM manifest
-		Update failed.
+		Update failed
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

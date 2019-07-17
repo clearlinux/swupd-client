@@ -193,7 +193,7 @@ static enum swupd_code check_versions(int *current_version, int *server_version,
 		return ret;
 	}
 	if (*current_version == 0) {
-		error("Update from version 0 not supported yet.\n");
+		error("Update from version 0 not supported yet\n");
 		return SWUPD_INVALID_OPTION;
 	}
 	if (requested_version != -1) {
@@ -231,7 +231,7 @@ static enum swupd_code main_update()
 	/* Step 1: Preparation steps */
 	timelist_timer_start(global_times, "Prepare for update");
 	progress_set_step(1, "prepare_for_update");
-	info("Update started.\n");
+	info("Update started\n");
 
 	mix_exists = check_mix_exists();
 
@@ -373,7 +373,7 @@ version_check:
 	if (ret) {
 		if (ret == -add_sub_BADNAME) {
 			/* this means a bundle(s) was removed in a future version */
-			warn("One or more installed bundles are no longer available at version %d.\n",
+			warn("One or more installed bundles are no longer available at version %d\n",
 			     server_version);
 		} else {
 			ret = SWUPD_RECURSE_MANIFEST;
@@ -447,7 +447,7 @@ version_check:
 		/* Failure to write the version file in the state directory
 		 * should not affect exit status. */
 		(void)update_device_latest_version(server_version);
-		info("Update was applied.\n");
+		info("Update was applied\n");
 	} else if (ret != 0) {
 		// Ensure a positive exit status for the main program.
 		ret = abs(ret);
@@ -529,25 +529,25 @@ clean_curl:
 		}
 		if (download_only == 0) {
 			if (current_version < server_version) {
-				print("Update successful. System updated from version %d to version %d\n",
+				print("Update successful - System updated from version %d to version %d\n",
 				      current_version, server_version);
 			} else {
-				print("Update complete. System already up-to-date at version %d\n", current_version);
+				print("Update complete - System already up-to-date at version %d\n", current_version);
 			}
 		}
 	} else {
-		print("Update failed.\n");
+		print("Update failed\n");
 	}
 
 	if (re_update && ret == 0) {
 
 		if (!versions_match) {
-			error("Inconsistency between version files, exiting now.\n");
+			error("Inconsistency between version files, exiting now\n");
 			return SWUPD_CURRENT_VERSION_UNKNOWN;
 		}
 
 		if (!swupd_argv) {
-			error("Unable to determine re-update command, exiting now.\n");
+			error("Unable to determine re-update command, exiting now\n");
 			return SWUPD_INVALID_BINARY;
 		}
 
@@ -696,7 +696,7 @@ enum swupd_code update_main(int argc, char **argv)
 
 	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {
-		error("Updater failed to initialize, exiting now.\n");
+		error("Updater failed to initialize, exiting now\n");
 		return ret;
 	}
 

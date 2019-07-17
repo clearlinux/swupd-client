@@ -367,7 +367,7 @@ enum swupd_code clean_main(int argc, char **argv)
 
 	ret = swupd_init(SWUPD_NO_NETWORK);
 	if (ret != 0) {
-		error("Failed swupd initialization, exiting now.\n");
+		error("Failed swupd initialization, exiting now\n");
 		goto exit;
 	}
 
@@ -391,9 +391,9 @@ enum swupd_code clean_main(int argc, char **argv)
 	ret = clean_statedir(options.dry_run, options.all);
 	/* TODO: Also print the bytes removed, need to take into account the hardlinks. */
 	if (options.dry_run) {
-		print("Would remove %d files.\n", stats.files_removed);
+		print("Would remove %d files\n", stats.files_removed);
 	} else {
-		print("%d files removed.\n", stats.files_removed);
+		print("%d files removed\n", stats.files_removed);
 	}
 
 end:

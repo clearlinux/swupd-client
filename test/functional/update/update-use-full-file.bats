@@ -19,7 +19,7 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 10 to 100
 		Downloading packs for:
 		 - os-core
@@ -34,10 +34,10 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Staging file content
 		Applying update
-		Update was applied.
+		Update was applied
 		Calling post-update helper scripts
 		1 files were not in a pack
-		Update successful. System updated from version 10 to version 100
+		Update successful - System updated from version 10 to version 100
 	EOM
 	)
 	assert_is_output "$expected_output"

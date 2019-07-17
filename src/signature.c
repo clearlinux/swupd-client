@@ -367,7 +367,7 @@ static int validate_authority(X509 *cert)
 
 error:
 	AUTHORITY_INFO_ACCESS_free(info);
-	error("Supported Authority Information Access methods not found in the certificate.\n");
+	error("Supported Authority Information Access methods not found in the certificate\n");
 
 	return -1;
 }

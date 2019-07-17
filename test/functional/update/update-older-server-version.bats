@@ -16,9 +16,9 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Version on server (10) is not newer than system version (20)
-		Update complete. System already up-to-date at version 20
+		Update complete - System already up-to-date at version 20
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -33,9 +33,9 @@ test_setup() {
 
 	assert_status_is "$SWUPD_SERVER_CONNECTION_ERROR"
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Error: Unable to determine the server version
-		Update failed.
+		Update failed
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -50,10 +50,10 @@ test_setup() {
 
 	assert_status_is "$SWUPD_CURRENT_VERSION_UNKNOWN"
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Error: Unable to determine current OS version
 		Warning: Unable to determine current OS version
-		Update failed.
+		Update failed
 	EOM
 	)
 	assert_is_output "$expected_output"

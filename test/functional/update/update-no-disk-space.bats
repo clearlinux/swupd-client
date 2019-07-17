@@ -38,12 +38,12 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 10 to 20
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Failed to retrieve 10 MoM manifest
-		Update failed.
+		Update failed
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -68,12 +68,12 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 10 to 20
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.MoM.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Failed to retrieve 20 MoM manifest
-		Update failed.
+		Update failed
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -98,13 +98,13 @@ test_setup() {
 
 	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 10 to 20
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Failed to retrieve 10 test-bundle manifest
 		Error: Cannot load current MoM sub-manifests, exiting
-		Update failed.
+		Update failed
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -129,13 +129,13 @@ test_setup() {
 
 	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 10 to 20
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Failed to retrieve 20 test-bundle manifest
 		Error: Unable to download manifest test-bundle version 20, exiting now
-		Update failed.
+		Update failed
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -153,7 +153,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output1=$(cat <<-EOM
-		Update started.
+		Update started
 		Preparing to update from 10 to 20
 		Downloading packs \(20.*\) for:
 	EOM
@@ -174,7 +174,7 @@ test_setup() {
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$file_hash.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Could not download all files, aborting update
-		Update failed.
+		Update failed
 	EOM
 	)
 	assert_regex_in_output "$expected_output1"

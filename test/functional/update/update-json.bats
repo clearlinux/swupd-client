@@ -28,7 +28,7 @@ test_setup() {
 	expected_output1=$(cat <<-EOM
 		[
 		{ "type" : "start", "section" : "update" },
-		{ "type" : "info", "msg" : "Update started. " },
+		{ "type" : "info", "msg" : "Update started " },
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 11, "stepCompletion" : 100, "stepDescription" : "prepare_for_update" },
 		{ "type" : "info", "msg" : "Preparing to update from 10 to 20 " },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 11, "stepCompletion" : 100, "stepDescription" : "get_versions" },
@@ -58,14 +58,14 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 10, "totalSteps" : 11, "stepCompletion" : 33, "stepDescription" : "update_files" },
 		{ "type" : "progress", "currentStep" : 10, "totalSteps" : 11, "stepCompletion" : 66, "stepDescription" : "update_files" },
 		{ "type" : "progress", "currentStep" : 10, "totalSteps" : 11, "stepCompletion" : 100, "stepDescription" : "update_files" },
-		{ "type" : "info", "msg" : "Update was applied. " },
+		{ "type" : "info", "msg" : "Update was applied " },
 		{ "type" : "info", "msg" : "Calling post-update helper scripts " },
 		{ "type" : "progress", "currentStep" : 11, "totalSteps" : 11, "stepCompletion" : 100, "stepDescription" : "run_postupdate_scripts" },
 	EOM
 	)
 	expected_output3=$(cat <<-EOM
 		\{ "type" : "info", "msg" : "Update took ... seconds, 0 MB transferred " \},
-		\{ "type" : "info", "msg" : "Update successful. System updated from version 10 to version 20 " \},
+		\{ "type" : "info", "msg" : "Update successful - System updated from version 10 to version 20 " \},
 		\{ "type" : "end", "section" : "update", "status" : 0 \}
 		\]
 	EOM

@@ -179,3 +179,15 @@ bool strtobool(const char *str)
 	free_string(&str_lower);
 	return ret;
 }
+
+char *str_subchar(const char *str, char c1, char c2)
+{
+	char *new = strdup_or_die(str);
+	for (unsigned int i = 0; new[i]; i++) {
+		if (new[i] == c1) {
+			new[i] = c2;
+		}
+	}
+
+	return new;
+}

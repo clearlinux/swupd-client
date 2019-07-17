@@ -289,70 +289,48 @@ found:
 bool set_path_prefix(char *path)
 {
 	struct stat statbuf;
-	int ret;
-	bool use_default = path ? false : true;
+	int ret, len;
+	char *new_path;
 
-	if (!use_default) {
-		int len;
-		char *tmp;
-		char real_path[PATH_MAX] = { 0 };
-
-		/* in case multiple -p options are passed */
-		free_string(&path_prefix);
-		string_or_die(&tmp, "%s", path);
-
-		/* ensure path_prefix is fully resolved and at least ends in '/',
-		 * and is a valid dir */
-		if (tmp[0] != '/') {
-			char *cwd;
-
-			cwd = get_current_dir_name();
-			if (cwd == NULL) {
-				error("Unable to get current directory name (%s)\n", strerror(errno));
-				free_string(&tmp);
-				return false;
-			}
-
-			free_string(&tmp);
-			string_or_die(&tmp, "%s/%s", cwd, path);
-			free_string(&cwd);
-		}
-
-		if (!realpath(tmp, real_path)) {
-			error("Bad path_prefix %s (%s), cannot continue\n",
-			      path_prefix, strerror(errno));
-			free_string(&tmp);
-			return false;
-		}
-		free_string(&tmp);
-		string_or_die(&tmp, "%s/", real_path);
-
-		len = strlen(tmp);
-		if (!len || (tmp[len - 1] != '/')) {
-			char *tmp_old = tmp;
-			string_or_die(&tmp, "%s/", tmp_old);
-			free_string(&tmp_old);
-		}
-
-		path_prefix = tmp;
-
-	} else {
-		/* initializing */
-		if (path_prefix) {
-			/* option passed on command line previously */
-			return true;
-		} else {
-			string_or_die(&path_prefix, "/");
-		}
-	}
-	ret = stat(path_prefix, &statbuf);
-	if (ret != 0 || !S_ISDIR(statbuf.st_mode)) {
-		error("Bad path_prefix %s (%s), cannot continue\n",
-		      path_prefix, strerror(errno));
+	if (!path) {
+		error("Path prefix shouldn't be NULL\n");
 		return false;
 	}
 
+	new_path = realpath(path, new_path);
+	if (!new_path) {
+		goto error;
+	}
+
+	ret = stat(new_path, &statbuf);
+	if (ret != 0 || !S_ISDIR(statbuf.st_mode)) {
+		goto error;
+	}
+
+	len = strlen(new_path);
+	if (!len || (new_path[len - 1] != '/')) {
+		char *tmp;
+
+		tmp = new_path;
+		new_path = str_or_die("%s/", new_path);
+		free(tmp);
+	}
+
+	free(path_prefix);
+	path_prefix = new_path;
 	return true;
+
+error:
+	error("Bad path_prefix %s (%s), cannot continue\n",
+	      path_prefix, strerror(errno));
+	free(new_path);
+	return false;
+}
+
+void set_default_path_prefix()
+{
+	free(path_prefix);
+	path_prefix = strdup_or_die("/");
 }
 
 static void set_cert_path(char *path)
@@ -383,10 +361,8 @@ bool init_globals(void)
 		return false;
 	}
 
-	ret = set_path_prefix(NULL);
-	/* a valid path prefix must be set to continue */
-	if (!ret) {
-		return false;
+	if (!path_prefix) {
+		set_default_path_prefix();
 	}
 
 	if (!format_string && !set_default_format_string()) {

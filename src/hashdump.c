@@ -108,8 +108,8 @@ enum swupd_code hashdump_main(int argc, char **argv)
 		return SWUPD_INVALID_OPTION;
 	}
 
-	if (!set_path_prefix(NULL)) {
-		return SWUPD_INIT_GLOBALS_FAILED;
+	if (!path_prefix) {
+		set_default_path_prefix();
 	}
 
 	file.filename = strdup_or_die(argv[optind]);

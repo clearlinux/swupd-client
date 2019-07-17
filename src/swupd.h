@@ -199,10 +199,8 @@ extern char *cert_path;
 extern int update_server_port;
 extern char *default_format_path;
 extern bool set_path_prefix(char *path);
-extern void set_content_url(char *url);
-extern void set_version_url(char *url);
-extern int set_default_content_url(void);
-extern int set_default_version_url(void);
+extern bool set_default_content_url(void);
+extern bool set_default_version_url(void);
 
 extern void check_root(void);
 

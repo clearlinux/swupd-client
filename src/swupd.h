@@ -198,6 +198,7 @@ extern char *default_format_path;
 extern bool set_path_prefix(char *path);
 extern bool set_default_content_url(void);
 extern bool set_default_version_url(void);
+extern void set_default_path_prefix(void);
 
 extern void check_root(void);
 

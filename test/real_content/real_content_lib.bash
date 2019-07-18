@@ -75,8 +75,12 @@ install_bundles() {
 	fi
 
 	print "Install bundles: $BUNDLE_LIST"
+	# shellcheck disable=SC2086
+	# Disabling because I want to split spaces here
+	CUR_VER=$("$SWUPD" info $SWUPD_OPTS | grep "Installed version"|cut -d ':' -f 2)
+	BUNDLE_LIST="${BUNDLE_LIST// /,}"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS -B $BUNDLE_LIST -V $CUR_VER"
 
-	run sudo sh -c "$SWUPD bundle-add --skip-diskspace-check $SWUPD_OPTS $BUNDLE_LIST"
 	assert_status_is 0
 	verify_system
 }

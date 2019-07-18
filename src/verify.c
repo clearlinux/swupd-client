@@ -37,6 +37,8 @@
 #include "signature.h"
 #include "swupd.h"
 
+#define FLAG_EXTRA_FILES_ONLY 2000
+
 static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src";
 
 static bool cmdline_command_verify = false;
@@ -48,6 +50,7 @@ static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
 static bool cmdline_option_install = false;
 static bool cmdline_option_quick = false;
 static struct list *cmdline_bundles = NULL;
+static bool cmdline_extra_files_only = false;
 
 /* picky_whitelist points to picky_whitelist_buffer if and only if regcomp() was called for it */
 static regex_t *picky_whitelist;
@@ -68,6 +71,7 @@ static const struct option prog_opts[] = {
 	{ "picky-whitelist", required_argument, 0, 'w' },
 	{ "quick", no_argument, 0, 'q' },
 	{ "bundles", required_argument, 0, 'B' },
+	{ "extra-files-only", no_argument, 0, FLAG_EXTRA_FILES_ONLY },
 };
 
 /* setter functions */
@@ -123,6 +127,11 @@ void verify_set_picky_tree(char *picky_tree)
 	cmdline_option_picky_tree = picky_tree;
 }
 
+void verify_set_extra_files_only(bool opt)
+{
+	cmdline_extra_files_only = opt;
+}
+
 static void print_help(void)
 {
 	print("Usage:\n");
@@ -132,27 +141,25 @@ static void print_help(void)
 		print("   swupd diagnose [OPTION...]\n\n");
 	}
 
-	//TODO: Add documentation explaining this command
-
 	global_print_help();
 
 	print("Options:\n");
-	print("   -V, --version=V         Verify against manifest version V\n");
+	print("   -V, --version=[VER]     Verify against manifest version VER\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
-	if (cmdline_command_verify) {
-		print("   -Y, --picky             Also list (without --fix) or remove (with --fix) files which should not exist\n");
-	} else {
-		print("   -Y, --picky             Also list files which should not exist\n");
-	}
-	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
-	print("   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
-	print("   -q, --quick             Don't compare hashes, only fix missing files\n");
+	print("   -q, --quick             Don't check for corrupt files, only fix missing files\n");
 	print("   -B, --bundles=[BUNDLES] Ensure BUNDLES are installed correctly. Example: --bundles=os-core,vi\n");
 	if (cmdline_command_verify) {
 		print("   -m, --manifest=V        This option has been superseded. Please consider using the -V option instead\n");
 		print("   -f, --fix               This option has been superseded, please consider using \"swupd repair\" instead\n");
 		print("   -i, --install           This option has been superseded, please consider using \"swupd os-install\" instead\n");
+		print("   -Y, --picky             Also list (without --fix) or remove (with --fix) files which should not exist\n");
+	} else {
+		print("   -Y, --picky             Also list files which should not exist\n");
 	}
+	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky and --extra-files-only look for extra files. Default: /usr\n");
+	print("   -w, --picky-whitelist=[RE] Directories that match the regex get skipped. Example: /var|/etc/machine-id\n");
+	print("                           Default: %s\n", picky_whitelist_default);
+	print("   --extra-files-only      Like --picky, but it only performs this task\n");
 	print("\n");
 }
 
@@ -426,6 +433,8 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 	int complete = 0;
 	int list_length;
 
+	info("\n%s corrupt files\n", repair ? "Repairing" : "Checking for");
+
 	/* for each expected and present file which hash-mismatches vs
 	 * the manifest, replace the file */
 	iter = list_head(official_manifest->files);
@@ -448,6 +457,8 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 	struct list *iter;
 	unsigned int list_length = list_len(official_manifest->files);
 	unsigned int complete = 0;
+
+	info("\n%s extraneous files\n", repair ? "Removing" : "Checking for");
 
 	official_manifest->files = list_sort(official_manifest->files, file_sort_filename_reverse);
 
@@ -551,29 +562,69 @@ static bool parse_opt(int opt, char *optarg)
 
 		err = strtoi_err(optarg, &version);
 		if (err < 0 || version < 0) {
-			error("Invalid --manifest argument: %s\n\n", optarg);
+			error("Invalid --%s argument: %s\n\n", opt == 'V' ? "version" : "manifest", optarg);
 			return false;
 		}
 		return true;
 	case 'f':
-		fprintf(stderr, "\nWarning: The --fix option has been superseded\n");
-		fprintf(stderr, "Please consider using \"swupd repair\" instead\n\n");
+		warn("\nThe --fix option has been superseded\n")
+		    info("Please consider using \"swupd repair\" instead\n\n");
 		cmdline_option_fix = true;
+		/* mutually exclusive flags */
+		if (cmdline_option_install) {
+			error("You cannot use --fix and --install together\n\n");
+			return false;
+		}
 		return true;
 	case 'x':
 		cmdline_option_force = true;
 		return true;
 	case 'i':
-		fprintf(stderr, "\nWarning: The --install option has been superseded\n");
-		fprintf(stderr, "Please consider using \"swupd os-install\" instead\n\n");
+		warn("\nThe --install option has been superseded\n");
+		info("Please consider using \"swupd os-install\" instead\n\n");
 		cmdline_option_install = true;
 		cmdline_option_quick = true;
+		/* mutually exclusive flags */
+		if (cmdline_option_fix) {
+			error("You cannot use --install and --fix together\n\n");
+			return false;
+		}
+		if (cmdline_option_picky) {
+			error("You cannot use --install and --picky together\n\n");
+			return false;
+		}
+		if (cmdline_extra_files_only) {
+			error("You cannot use --install and --extra-files-only together\n\n");
+			return false;
+		}
 		return true;
 	case 'q':
 		cmdline_option_quick = true;
+		/* mutually exclusive flags */
+		if (cmdline_option_picky) {
+			error("You cannot use --quick and --picky together\n\n");
+			return false;
+		}
+		if (cmdline_extra_files_only) {
+			error("You cannot use --quick and --extra-files-only together\n\n");
+			return false;
+		}
 		return true;
 	case 'Y':
 		cmdline_option_picky = true;
+		/* mutually exclusive flags */
+		if (cmdline_option_install) {
+			error("You cannot use --picky and --install together\n\n");
+			return false;
+		}
+		if (cmdline_option_quick) {
+			error("You cannot use --picky and --quick together\n\n");
+			return false;
+		}
+		if (cmdline_extra_files_only) {
+			error("You cannot use --picky and --extra-files-only together\n\n");
+			return false;
+		}
 		return true;
 	case 'X':
 		if (optarg[0] != '/') {
@@ -600,6 +651,22 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	}
+	case FLAG_EXTRA_FILES_ONLY:
+		cmdline_extra_files_only = true;
+		/* mutually exclusive flags */
+		if (cmdline_option_install) {
+			error("You cannot use --extra-files-only and --install together\n\n");
+			return false;
+		}
+		if (cmdline_option_quick) {
+			error("You cannot use --extra-files-only and --quick together\n\n");
+			return false;
+		}
+		if (cmdline_option_picky) {
+			error("You cannot use --extra-files-only and --picky together\n\n");
+			return false;
+		}
+		return true;
 	default:
 		return false;
 	}
@@ -656,6 +723,18 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
+static enum swupd_code deal_with_extra_files(struct manifest *manifest, bool fix)
+{
+	enum swupd_code ret;
+
+	char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
+	info("\n%s extra files under %s\n", fix ? "Removing" : "Checking for", start);
+	ret = walk_tree(manifest, start, fix, picky_whitelist, &counts);
+	free_string(&start);
+
+	return ret;
+}
+
 /* This function does a simple verification of files listed in the
  * subscribed bundle manifests.  If the optional "fix" or "install" parameter
  * is specified, the disk will be modified at each point during the
@@ -678,13 +757,15 @@ enum swupd_code verify_main(void)
 	 * 2) cleanup_download_dir
 	 * 3) load_manifests
 	 * 4) consolidate_files
+	 *    (Jumps to 11 if --extra-files-only)
 	 * 5) download_packs (applies only with --install)
 	 * 6) check_files_hash (applies only with --install or --fix)
 	 * 7) download_fullfiles (applies only with --install or --fix)
 	 * 8) add_missing_files
-	 * (Finishes here on --quick or --install)
+	 *    (Finishes here on --quick or --install)
 	 * 9) fix_files
 	 * 10) remove_extraneous_files
+	 * 11) remove_extra_files (applies only with --picky or --extra-files-only)
 	 */
 
 	/* calculate the number of steps in the process so we can report progress */
@@ -693,8 +774,14 @@ enum swupd_code verify_main(void)
 	} else if (cmdline_option_fix) {
 		steps_in_verify += 2;
 	}
+	if (cmdline_option_picky || cmdline_extra_files_only) {
+		steps_in_verify += 1;
+	}
 	if (cmdline_option_quick) {
-		steps_in_verify -= 2;
+		steps_in_verify -= (cmdline_option_picky || cmdline_extra_files_only) ? 3 : 2;
+	}
+	if (cmdline_extra_files_only) {
+		steps_in_verify = 5;
 	}
 	progress_init_steps("verify", steps_in_verify);
 
@@ -705,7 +792,7 @@ enum swupd_code verify_main(void)
 	}
 
 	/* Unless we are installing a new bundle we shoudn't include optional
-	* bundles to the bundle list. */
+	* bundles to the bundle list */
 	if (!cmdline_option_install) {
 		skip_optional_bundles = true;
 	}
@@ -794,7 +881,7 @@ enum swupd_code verify_main(void)
 
 	if (!is_compatible_format(official_manifest->manifest_version)) {
 		if (cmdline_option_force) {
-			warn("the force option is specified; ignoring"
+			warn("The --force option is specified; ignoring"
 			     " format mismatch for diagnose\n");
 		} else {
 			error("Mismatching formats detected when %s %d"
@@ -803,7 +890,8 @@ enum swupd_code verify_main(void)
 			      version, format_string, official_manifest->manifest_version);
 			int latest = get_latest_version(NULL);
 			if (latest > 0) {
-				info("Latest supported version to %s: %d\n", cmdline_command_verify ? "verify" : "diagnose", latest);
+				info("Latest supported version to %s: %d\n",
+				     cmdline_command_verify ? "verify" : "diagnose", latest);
 			}
 			ret = SWUPD_COULDNT_LOAD_MANIFEST;
 			goto clean_and_exit;
@@ -813,11 +901,13 @@ enum swupd_code verify_main(void)
 	/* If --fix was specified but --force and --picky are not present, check
 	 * that the user is only fixing to their current version. If they are
 	 * fixing to a different version, print an error message that they need to
-	 * specify --force or --picky. */
+	 * specify --force or --picky */
 	if (cmdline_option_fix && !is_current_version(version)) {
-		if (cmdline_option_picky || cmdline_option_force) {
-			warn("the force or picky option is specified; "
-			     "ignoring version mismatch for repair\n");
+		// TODO(castulo): we should evaluate if --force should be used for --picky too
+		if (cmdline_option_force || cmdline_option_picky) {
+			warn("The --%s option is specified; ignoring version mismatch "
+			     "for repair\n",
+			     cmdline_option_fix ? "force" : "picky");
 		} else {
 			error("Repairing to a different version requires "
 			      "--force or --picky\n");
@@ -877,13 +967,18 @@ enum swupd_code verify_main(void)
 	progress_complete_step();
 	timelist_timer_stop(global_times);
 
+	if (cmdline_extra_files_only) {
+		/* user wants to deal only with the extra files, so skip everything else */
+		goto extra_files;
+	}
+
 	/* steps 5, 6 & 7 are executed within the get_required_files function */
 	timelist_timer_start(global_times, "Get required files");
 
 	/* get the initial number of files to be inspected */
 	counts.checked = list_len(official_manifest->files);
 
-	/* when fixing or installing we need input files. */
+	/* when fixing or installing we need input files */
 	if (cmdline_option_fix || cmdline_option_install) {
 		ret = get_required_files(official_manifest, subs);
 		if (ret != 0) {
@@ -908,81 +1003,52 @@ enum swupd_code verify_main(void)
 	 *   *** THE SHOW MUST GO ON ***
 	 */
 
-	if (cmdline_option_fix || cmdline_option_install) {
-		/*
-		 * Next put the files in place that are missing completely.
-		 * This is to avoid updating a symlink to a library before the new full file
-		 * is already there. It's also the most safe operation, adding files rarely
-		 * has unintended side effect. So lets do the safest thing first.
-		 */
-		bool repair = true;
-
-		timelist_timer_start(global_times, "Add missing files");
-		progress_set_next_step("add_missing_files");
-		if (cmdline_option_install) {
-			info("\nInstalling base OS and selected bundles\n");
-		} else {
-			info("\nAdding any missing files\n");
-		}
-		add_missing_files(official_manifest, repair);
-		timelist_timer_stop(global_times);
+	/*
+	 * Next put the files in place that are missing completely.
+	 * This is to avoid updating a symlink to a library before the new full file
+	 * is already there. It's also the most safe operation, adding files rarely
+	 * has unintended side effect. So lets do the safest thing first.
+	 */
+	timelist_timer_start(global_times, "Add missing files");
+	progress_set_next_step("add_missing_files");
+	if (cmdline_option_install) {
+		info("\nInstalling base OS and selected bundles\n");
+	} else if (cmdline_option_fix) {
+		info("\nAdding any missing files\n");
+	} else {
+		info("\nChecking for missing files\n");
 	}
+	add_missing_files(official_manifest, cmdline_option_fix || cmdline_option_install);
+	timelist_timer_stop(global_times);
 
 	if (cmdline_option_quick) {
 		/* quick only replaces missing files, so it is done here */
 		goto brick_the_system_and_clean_curl;
 	}
 
-	if (cmdline_option_fix) {
-		bool repair = true;
+	/* repair corrupt files */
+	timelist_timer_start(global_times, "Fixing modified files");
+	progress_set_next_step("fix_files");
+	deal_with_hash_mismatches(official_manifest, cmdline_option_fix);
+	timelist_timer_stop(global_times);
 
-		timelist_timer_start(global_times, "Fixing modified files");
-		progress_set_next_step("fix_files");
-		info("\nRepairing corrupt files\n");
-		deal_with_hash_mismatches(official_manifest, repair);
-
-		/* removing files could be risky, so only do it if the
-		 * prior phases had no problems */
-		if ((counts.not_fixed == 0) && (counts.not_replaced == 0)) {
-			progress_set_next_step("remove_extraneous_files");
-			info("\nRemoving extraneous files\n");
-			remove_orphaned_files(official_manifest, repair);
-		}
-
-		if (cmdline_option_picky) {
-			char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
-			info("\nRemoving extra files under %s\n", start);
-			ret = walk_tree(official_manifest, start, true, picky_whitelist, &counts);
-			free_string(&start);
-		}
-		timelist_timer_stop(global_times);
-
-	} else {
-		bool repair = false;
-
-		progress_set_next_step("add_missing_files");
-		info("\nChecking for missing files\n");
-		add_missing_files(official_manifest, repair);
-
-		/* quick only checks for missing files, so it is done here */
-		if (cmdline_option_quick) {
-			goto brick_the_system_and_clean_curl;
-		}
-
-		progress_set_next_step("fix_files");
-		info("\nChecking for corrupt files\n");
-		deal_with_hash_mismatches(official_manifest, repair);
-
+	/* remove orphaned files, removing files could be
+	 * risky, so only do it if the prior phases had no problems */
+	timelist_timer_start(global_times, "Removing orphaned files");
+	if ((counts.not_fixed == 0) && (counts.not_replaced == 0)) {
 		progress_set_next_step("remove_extraneous_files");
-		info("\nChecking for extraneous files\n");
-		remove_orphaned_files(official_manifest, repair);
+		remove_orphaned_files(official_manifest, cmdline_option_fix);
+	}
+	timelist_timer_stop(global_times);
 
-		if (cmdline_option_picky) {
-			char *start = mk_full_filename(path_prefix, cmdline_option_picky_tree);
-			info("\nChecking for extra files under %s\n", start);
-			ret = walk_tree(official_manifest, start, false, picky_whitelist, &counts);
-			free_string(&start);
-		}
+	/* remove extra files */
+extra_files:
+	if (cmdline_option_picky || cmdline_extra_files_only) {
+		timelist_timer_start(global_times, "Removing extra files");
+		progress_set_next_step("remove_extra_files");
+		deal_with_extra_files(official_manifest, cmdline_option_fix);
+		progress_complete_step();
+		timelist_timer_stop(global_times);
 	}
 
 brick_the_system_and_clean_curl:

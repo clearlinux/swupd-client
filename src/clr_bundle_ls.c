@@ -28,7 +28,7 @@
 #include "config.h"
 #include "swupd.h"
 
-#define DEPS_FLAG 1000
+#define FLAG_DEPS 2000
 
 static bool cmdline_option_all = false;
 static char *cmdline_option_has_dep = NULL;
@@ -63,7 +63,7 @@ static void print_help(void)
 
 static const struct option prog_opts[] = {
 	{ "all", no_argument, 0, 'a' },
-	{ "deps", required_argument, 0, DEPS_FLAG },
+	{ "deps", required_argument, 0, FLAG_DEPS },
 	{ "has-dep", required_argument, 0, 'D' },
 };
 
@@ -79,7 +79,7 @@ static bool parse_opt(int opt, char *optarg)
 		atexit(free_has_dep);
 		cmdline_local = false;
 		return true;
-	case DEPS_FLAG:
+	case FLAG_DEPS:
 		string_or_die(&cmdline_option_deps, "%s", optarg);
 		atexit(free_deps);
 		cmdline_local = false;

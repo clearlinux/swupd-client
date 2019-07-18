@@ -232,6 +232,7 @@ if [[ -n "$state" ]]; then
             '(help -Y --picky)'{-Y,--picky}'[List files which should not exist]'
             '(help -w --picky-whitelist)'{-w,--picky-whitelist=}'[Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example\: /var|/etc/machine-id. Default\: /usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src]:picky-whitelist:_path_files -/'
             '(help -X --picky-tree)'{-X,--picky-tree=}'[Selects the sub-tree where --picky looks for extra files. Default\: /usr]:picky-tree:_path_files -/'
+            '(help)--extra-files-only[List files which should not exist]'
           )
           _arguments $diagnoses && ret=0
           ;;

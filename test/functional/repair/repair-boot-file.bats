@@ -27,18 +27,18 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
-		 -> Hash mismatch for file: .*/target-dir/usr/lib/kernel/testfile -> fixed
+		 -> Hash mismatch for file: $TEST_DIRNAME/testfs/target-dir/usr/lib/kernel/testfile -> fixed
 		Removing extraneous files
 		Inspected 7 files
 		  1 file did not match
 		    1 of 1 files were repaired
 		    0 of 1 files were not repaired
 		Calling post-update helper scripts
-		Warning: helper script \\($TEST_DIRNAME/testfs/target-dir//usr/bin/clr-boot-manager\\) not found, it will be skipped
+		Warning: helper script ($TEST_DIRNAME/testfs/target-dir//usr/bin/clr-boot-manager) not found, it will be skipped
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/usr/lib/kernel/testfile
 
 }

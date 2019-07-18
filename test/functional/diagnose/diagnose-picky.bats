@@ -48,3 +48,29 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/usr/foo/bar/file2
 
 }
+
+@test "DIA015: Diagnose only for extra files in a system that has extra files in /usr" {
+
+	# the --extra-files-only can be used to find those extra files and nothing else
+
+	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS --extra-files-only"
+
+	assert_status_is "$SWUPD_NO"
+	expected_output=$(cat <<-EOM
+		Diagnosing version 10
+		Checking for extra files under .*/target-dir/usr
+		 -> Extra file: /usr/share/defaults/swupd/versionurl
+		 -> Extra file: /usr/share/defaults/swupd/contenturl
+		 -> Extra file: /usr/foo/bar/file2
+		 -> Extra file: /usr/foo/bar/
+		 -> Extra file: /usr/foo/
+		 -> Extra file: /usr/file1
+		Inspected 6 files
+		  6 files found which should be deleted
+		Use "swupd repair --picky" to correct the problems in the system
+		Diagnose successful
+	EOM
+	)
+	assert_regex_is_output "$expected_output"
+
+}

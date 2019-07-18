@@ -203,9 +203,9 @@ SUBCOMMANDS
     control of the software update program are verified according to the
     manifest data
 
-    - `-m, --manifest`
+    - `-V, --version=[VER]`
 
-        Diagnose against manifest version M.
+        Diagnose against manifest version VER.
 
     - `-Y, --picky`
 
@@ -214,8 +214,8 @@ SUBCOMMANDS
 
     - `-X, --picky-tree=[PATH]`
 
-        Selects the sub-tree where --picky looks for extra files. To be
-        specified as absolute path. The default is `/usr`.
+        Selects the sub-tree where --picky and --extra-files-only looks for extra files.
+        To be specified as absolute path. The default is `/usr`.
 
     - `-w, --picky-whitelist=[RE]`
 
@@ -260,6 +260,11 @@ SUBCOMMANDS
         - ``--bundles os-core,vi``
 
             Only runs the verify operation on the os-core and vi bundles.
+
+    - `--extra-files-only`
+
+      Like --picky, but it only looks for extra files. It omits checking
+      hash values, and for missing files, directories and/or symlinks.
 
 ``hashdump {path}``
 
@@ -328,9 +333,9 @@ SUBCOMMANDS
     Correct any issues found. This will overwrite incorrect file content,
     add missing files and do additional corrections, permissions, etc.
 
-    - `-m, --manifest`
+    - `-V, --version=[VER]`
 
-        Repair against manifest version M.
+        Repair against manifest version VER.
 
     - `-Y, --picky`
 
@@ -339,8 +344,8 @@ SUBCOMMANDS
 
     - `-X, --picky-tree=[PATH]`
 
-        Selects the sub-tree where --picky looks for extra files. To be
-        specified as absolute path. The default is `/usr`.
+        Selects the sub-tree where --picky and --extra-files-only looks for extra files.
+        To be specified as absolute path. The default is `/usr`.
 
     - `-w, --picky-whitelist=[RE]`
 
@@ -385,6 +390,11 @@ SUBCOMMANDS
         - ``--bundles os-core,vi``
 
             Only runs the repair operation on the os-core and vi bundles.
+
+    - `--extra-files-only`
+
+      Like --picky, but it only removes extra files. It omits checking
+      hash values, and for missing files, directories and/or symlinks.
 
 ``search``
 

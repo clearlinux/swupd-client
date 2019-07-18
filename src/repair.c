@@ -24,6 +24,8 @@
 #include "swupd.h"
 #include "swupd_internal.h"
 
+#define FLAG_EXTRA_FILES_ONLY 2000
+
 static const char picky_tree_default[] = "/usr";
 static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src";
 
@@ -34,6 +36,7 @@ static int cmdline_option_version = 0;
 static struct list *cmdline_bundles = NULL;
 static char *cmdline_option_picky_tree = NULL;
 static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
+static bool cmdline_extra_files_only = false;
 
 /* picky_whitelist points to picky_whitelist_buffer if and only if regcomp() was called for it */
 static regex_t *picky_whitelist;
@@ -48,6 +51,7 @@ static const struct option prog_opts[] = {
 	{ "picky-whitelist", required_argument, 0, 'w' },
 	{ "quick", no_argument, 0, 'q' },
 	{ "bundles", required_argument, 0, 'B' },
+	{ "extra-files-only", no_argument, 0, FLAG_EXTRA_FILES_ONLY },
 };
 
 static void print_help(void)
@@ -58,13 +62,15 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
-	print("   -V, --version=V         Compare against version V to repair\n");
+	print("   -V, --version=[VER]     Compare against version VER to repair\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -q, --quick             Don't compare hashes, only fix missing files\n");
 	print("   -B, --bundles=[BUNDLES] Ensure BUNDLES are installed correctly. Example: --bundles=os-core,vi\n");
 	print("   -Y, --picky             Also remove files which should not exist\n");
-	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky looks for extra files. Default: /usr\n");
-	print("   -w, --picky-whitelist=[RE] Any path completely matching the POSIX extended regular expression is ignored by --picky. Matched directories get skipped. Example: /var|/etc/machine-id. Default: %s\n", picky_whitelist_default);
+	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky and --extra-files-only  looks for extra files. Default: /usr\n");
+	print("   -w, --picky-whitelist=[RE] Directories that match the regex get skipped. Example: /var|/etc/machine-id\n");
+	print("                           Default: %s\n", picky_whitelist_default);
+	print("   --extra-files-only      Like --picky, but it only performs this task\n");
 	print("\n");
 }
 
@@ -77,7 +83,7 @@ static bool parse_opt(int opt, char *optarg)
 	case 'V':
 		err = strtoi_err(optarg, &cmdline_option_version);
 		if (err < 0 || cmdline_option_version < 0) {
-			error("Invalid --manifest argument: %s\n\n", optarg);
+			error("Invalid --%s argument: %s\n\n", opt == 'V' ? "version" : "manifest", optarg);
 			return false;
 		}
 		return true;
@@ -86,9 +92,27 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case 'q':
 		cmdline_option_quick = true;
+		/* mutually exclusive flags */
+		if (cmdline_option_picky) {
+			error("You cannot use --quick and --picky together\n\n");
+			return false;
+		}
+		if (cmdline_extra_files_only) {
+			error("You cannot use --quick and --extra-files-only together\n\n");
+			return false;
+		}
 		return true;
 	case 'Y':
 		cmdline_option_picky = true;
+		/* mutually exclusive flags */
+		if (cmdline_option_quick) {
+			error("You cannot use --picky and --quick together\n\n");
+			return false;
+		}
+		if (cmdline_extra_files_only) {
+			error("You cannot use --picky and --extra-files-only together\n\n");
+			return false;
+		}
 		return true;
 	case 'X':
 		if (optarg[0] != '/') {
@@ -115,6 +139,18 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	}
+	case FLAG_EXTRA_FILES_ONLY:
+		cmdline_extra_files_only = true;
+		/* mutually exclusive flags */
+		if (cmdline_option_quick) {
+			error("You cannot use --extra-files-only and --quick together\n\n");
+			return false;
+		}
+		if (cmdline_option_picky) {
+			error("You cannot use --extra-files-only and --picky together\n\n");
+			return false;
+		}
+		return true;
 	default:
 		return false;
 	}
@@ -192,6 +228,7 @@ enum swupd_code repair_main(int argc, char **argv)
 	verify_set_option_version(cmdline_option_version);
 	verify_set_picky_whitelist(picky_whitelist);
 	verify_set_picky_tree(cmdline_option_picky_tree);
+	verify_set_extra_files_only(cmdline_extra_files_only);
 
 	/* run verify --fix */
 	ret = verify_main();

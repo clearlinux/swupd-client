@@ -148,7 +148,7 @@ test_setup() {
 		return 1
 	fi
 
-	ROOT_DIR="${BASE_DIR}${TEST_NAME}"
+	ROOT_DIR="${BASE_DIR}/${TEST_NAME}"
 	sudo rm -rf "$ROOT_DIR"
 	sudo mkdir -p "$ROOT_DIR"
 

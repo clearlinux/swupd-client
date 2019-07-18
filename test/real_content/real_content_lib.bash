@@ -56,6 +56,9 @@ get_format_from_versions() {
 }
 
 install_bundles() {
+	local CMD=os-install
+	[ "$1" = "-r" ] && { CMD=repair; shift ; }
+
 	if [ -z "$BUNDLE_LIST" ]; then
 		run sudo sh -c "$SWUPD bundle-list --all $SWUPD_OPTS_SHORT"
 		# shellcheck disable=SC2154
@@ -79,7 +82,7 @@ install_bundles() {
 	# Disabling because I want to split spaces here
 	CUR_VER=$("$SWUPD" info $SWUPD_OPTS | grep "Installed version"|cut -d ':' -f 2)
 	BUNDLE_LIST="${BUNDLE_LIST// /,}"
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS -B $BUNDLE_LIST -V $CUR_VER"
+	run sudo sh -c "$SWUPD $CMD $SWUPD_OPTS -B $BUNDLE_LIST -V $CUR_VER"
 
 	assert_status_is 0
 	verify_system

@@ -78,32 +78,29 @@ bool config_parse(const char *filename, load_config_fn_t load_config_fn)
 		if (!line_ptr) {
 			/* this is probably a blank line or something unrecognized,
 			 * ignore the line */
-			goto free_data;
+			continue;
 		}
 
 		*line_ptr = '\0';
-		key = strdup_or_die(line);
-		value = strdup_or_die(line_ptr + 1);
+		key = line;
+		value = line_ptr + 1;
 
 		/* make sure we don't have empty key or value pairs */
 		if (key[0] == '\0' || value[0] == '\0') {
 			warn("Invalid key/value pair in the configuration file (key='%s', value='%s')\n", key, value);
-			goto free_data;
+			continue;
 		}
 		/* make sure we don't have more than one '=' per line */
 		line_ptr = strchr(value, '=');
 		if (line_ptr) {
 			warn("Invalid key/value pair in the configuration file ('%s=%s')\n", key, value);
-			goto free_data;
+			continue;
 		}
 
 		/* load the configuration value read in the application */
 		if (!load_config_fn(section, key, value)) {
 			warn("Unrecognized option '%s=%s' from section [%s] in the configuration file\n", key, value, section);
 		}
-	free_data:
-		free_string(&key);
-		free_string(&value);
 	}
 
 	/* we made it this far, config file parsed correctly */

@@ -70,7 +70,7 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 20
-		Warning: the force or picky option is specified; ignoring version mismatch for repair
+		Warning: The --force option is specified; ignoring version mismatch for repair
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Failed to retrieve 20 test-bundle manifest
@@ -94,7 +94,7 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 20
-		Warning: the force or picky option is specified; ignoring version mismatch for repair
+		Warning: The --force option is specified; ignoring version mismatch for repair
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$fhash.tar'

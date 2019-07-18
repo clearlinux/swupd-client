@@ -223,12 +223,14 @@ BATS = \
 	test/functional/diagnose/diagnose-boot-file.bats \
 	test/functional/diagnose/diagnose-client-certificate.bats \
 	test/functional/diagnose/diagnose-directory-tree-deleted.bats \
+	test/functional/diagnose/diagnose-flags.bats \
 	test/functional/diagnose/diagnose-good.bats \
 	test/functional/diagnose/diagnose-json.bats \
 	test/functional/diagnose/diagnose-missing-file.bats \
 	test/functional/diagnose/diagnose-picky-downgrade.bats \
 	test/functional/diagnose/diagnose-picky-whitelist.bats \
 	test/functional/diagnose/diagnose-picky.bats \
+	test/functional/diagnose/diagnose-verify-flags.bats \
 	test/functional/hashdump/hashdump-file-hash.bats \
 	test/functional/mirror/mirror-createdir-negative.bats \
 	test/functional/mirror/mirror-createdir.bats \
@@ -251,6 +253,7 @@ BATS = \
 	test/functional/repair/repair-bundle.bats \
 	test/functional/repair/repair-directory-tree-deleted.bats \
 	test/functional/repair/repair-empty-dir-deleted.bats \
+	test/functional/repair/repair-flags.bats \
 	test/functional/repair/repair-format-mismatch-overdrive.bats \
 	test/functional/repair/repair-format-mismatch.bats \
 	test/functional/repair/repair-ghosted.bats \
@@ -258,6 +261,7 @@ BATS = \
 	test/functional/repair/repair-json.bats \
 	test/functional/repair/repair-missing-file.bats \
 	test/functional/repair/repair-no-disk-space.bats \
+	test/functional/repair/repair-picky.bats \
 	test/functional/repair/repair-picky-downgrade.bats \
 	test/functional/repair/repair-picky-ghosted-missing.bats \
 	test/functional/repair/repair-picky-ghosted.bats \

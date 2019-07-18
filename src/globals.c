@@ -34,8 +34,10 @@
 #include "lib/log.h"
 #include "swupd.h"
 
-#define NO_PROGRESS 1000
-#define WAIT_FOR_SCRIPTS 1001
+/* These defines have to be different from the local options
+ * so they don't interfere with each other */
+#define FLAG_NO_PROGRESS 1000
+#define FLAG_WAIT_FOR_SCRIPTS 1001
 
 int allow_insecure_http = 0;
 bool allow_mix_collisions = false;
@@ -541,7 +543,7 @@ static const struct option global_opts[] = {
 	{ "max-parallel-downloads", required_argument, 0, 'W' },
 	{ "no-boot-update", no_argument, 0, 'b' },
 	{ "no-scripts", no_argument, 0, 'N' },
-	{ "no-progress", no_argument, 0, NO_PROGRESS },
+	{ "no-progress", no_argument, 0, FLAG_NO_PROGRESS },
 	{ "nosigcheck", no_argument, 0, 'n' },
 	{ "path", required_argument, 0, 'p' },
 	{ "port", required_argument, 0, 'P' },
@@ -555,7 +557,7 @@ static const struct option global_opts[] = {
 	{ "retry-delay", required_argument, 0, 'd' },
 	{ "json-output", no_argument, 0, 'j' },
 	{ "allow-insecure-http", no_argument, &allow_insecure_http, 1 },
-	{ "wait-for-scripts", no_argument, 0, WAIT_FOR_SCRIPTS },
+	{ "wait-for-scripts", no_argument, 0, FLAG_WAIT_FOR_SCRIPTS },
 	{ 0, 0, 0, 0 }
 };
 
@@ -668,14 +670,14 @@ static bool global_parse_opt(int opt, char *optarg)
 			set_json_format(true);
 		}
 		return true;
-	case NO_PROGRESS:
+	case FLAG_NO_PROGRESS:
 		if (optarg != NULL) {
 			progress_disable(strtobool(optarg));
 		} else {
 			progress_disable(true);
 		}
 		return true;
-	case WAIT_FOR_SCRIPTS:
+	case FLAG_WAIT_FOR_SCRIPTS:
 		if (optarg != NULL) {
 			wait_for_scripts = strtobool(optarg);
 		} else {

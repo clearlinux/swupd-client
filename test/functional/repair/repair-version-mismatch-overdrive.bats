@@ -24,11 +24,11 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Warning: the force or picky option is specified; ignoring version mismatch for repair
+		Warning: The --force option is specified; ignoring version mismatch for repair
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		.* Missing file: .+/target-dir/usr/bin -> fixed
+		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/usr/bin -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 3 files
@@ -39,6 +39,6 @@ test_setup() {
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

@@ -22,15 +22,15 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 40
-		Warning: the force option is specified; ignoring format mismatch for diagnose
-		Warning: the force or picky option is specified; ignoring version mismatch for repair
+		Warning: The --force option is specified; ignoring format mismatch for diagnose
+		Warning: The --force option is specified; ignoring version mismatch for repair
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		.* Missing file: .*/target-dir/usr/bin -> fixed
+		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/usr/bin -> fixed
 		Repairing corrupt files
-		.* Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
-		.* Hash mismatch for file: .*/target-dir/usr/share/defaults/swupd/format -> fixed
+		 -> Hash mismatch for file: $TEST_DIRNAME/testfs/target-dir/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $TEST_DIRNAME/testfs/target-dir/usr/share/defaults/swupd/format -> fixed
 		Removing extraneous files
 		Inspected 12 files
 		  1 file was missing
@@ -43,6 +43,6 @@ test_setup() {
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

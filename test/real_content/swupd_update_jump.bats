@@ -10,11 +10,6 @@ load "real_content_lib"
 	assert_status_is 0
 	check_version "${VERSION[0]}"
 
-	print "Install one package"
-	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS os-core-update -F $FORMAT"
-	assert_status_is 0
-	verify_system
-
 	install_bundles
 
 	version=${VERSION[${#VERSION[@]} -1]}

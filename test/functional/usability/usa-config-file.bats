@@ -7,6 +7,13 @@ load "../testlib"
 
 global_setup() {
 
+	# Skip this test for local development because it needs an special config
+	# flag. To run this test locally, configure swupd with
+	# --with-config-file-path=./testconfig and run: TRAVIS=true make check
+	if [ -z "${TRAVIS}" ]; then
+		return
+	fi
+
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle -f /file_1 "$TEST_NAME"
 
@@ -14,6 +21,9 @@ global_setup() {
 
 test_setup() {
 
+	if [ -z "$TRAVIS" ]; then
+		skip "This test is intended to run only in Travis (use TRAVIS=true to run it anyway)..."
+	fi
 	create_config_file
 
 }

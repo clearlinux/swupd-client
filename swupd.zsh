@@ -91,23 +91,24 @@ local -a global_opts; global_opts=(
   '(help)--debug[Print extra information to help debugging problems]'
   '(help -j --json-output)'{-j,--json-output}'[Print all output as a JSON stream]'
   + options
-  '(help status -p --path)'{-p,--path=}'[Use \[PATH...\] as the path to verify (eg\: a chroot or btrfs subvol)]:path:_path_files -/'
+  '(help status -p --path)'{-p,--path=}'[Use \[PATH\] as the path to verify (eg\: a chroot or btrfs subvol)]:path:_path_files -/'
   '(help status -u --url)'{-u,--url=}'[RFC-3986 encoded url for version string and content file downloads]:url:_urls'
   '(help status -P --port)'{-P,--port=}'[Port number to connect to at the url for version string and content file downloads]:port:_ports'
   '(help status -c --contenturl)'{-c,--contenturl=}'[RFC-3986 encoded url for content file downloads]:url:_urls'
   '(help status -v --versionurl)'{-v,--versionurl=}'[RFC-3986 encoded url for version file downloads]:url:_urls'
   '(help status -F --format)'{-F,--format=}'[\[staging,1,2,etc.\]\:the format suffix for version file downloads]:format:()'
-  '(help status -n --nosigcheck)'{-n,--nosigcheck}'[Do not attempt to enforce certificate or signature checking]'
-  '(help status -I --ignore-time)'{-I,--ignore-time}'[Ignore system/certificate time when validating signature]'
   '(help status -S --statedir)'{-S,--statedir=}'[Specify alternate swupd state directory]:statedir:_path_files -/'
   '(help status -C --certpath)'{-C,--certpath=}'[Specify alternate path to swupd certificates]:certpath:_path_files -/'
-  '(help status -t --time)'{-t,--time}'[Show verbose time output for swupd operations]'
-  '(help status -N --no-scripts)'{-N,--no-scripts}'[Do not run the post-update scripts and boot update tool]'
-  '(help status -b --no-boot-update)'{-b,--no-boot-update}'[Do not install boot files to the boot partition (containers)]'
   '(help status -W --max-parallel-downloads)'{-W,--max-parallel-downloads=}'[Set the maximum number of parallel downloads]:downloadThreads:()'
   '(help status -r --max-retries)'{-r,--max-retries=}'[Maximum number of retries for download failures]:maxRetries:()'
   '(help status -d --retry-delay)'{-d,--retry-delay}'[Initial delay between download retries, this will be doubled for each retry]:retryDelay:()'
-  '(help status --wait-for-scripts )--wait-for-scripts[Wait for the post-update scripts to complete]'
+  '(help status -n --nosigcheck)'{-n,--nosigcheck}'[Do not attempt to enforce certificate or signature checking]'
+  '(help status -I --ignore-time)'{-I,--ignore-time}'[Ignore system/certificate time when validating signature]'
+  '(help status -t --time)'{-t,--time}'[Show verbose time output for swupd operations]'
+  '(help status -N --no-scripts)'{-N,--no-scripts}'[Do not run the post-update scripts and boot update tool]'
+  '(help status -b --no-boot-update)'{-b,--no-boot-update}'[Do not install boot files to the boot partition (containers)]'
+  '(help status)--no-progress[Don`t print progress report]'
+  '(help status)--wait-for-scripts[Wait for the post-update scripts to complete]'
 )
 
 _arguments -C \
@@ -158,7 +159,7 @@ if [[ -n "$state" ]]; then
         update)
           local -a updates; updates=(
             $global_opts
-            '(help status --download )--download[Download all content, but do not actually install the update]'
+            '(help status)--download[Download all content, but do not actually install the update]'
             '(help status -k --keepcache)'{-k,--keepcache}'[Do not delete the swupd state directory content after updating the system]'
             '(help status -T --migrate)'{-T,--migrate}'[Migrate to augmented upstream/mix content]'
             '(help status -a --allow-mix-collisions)'{-a,--allow-mix-collisions}'[Ignore and continue if custom user content conflicts with upstream provided content]'
@@ -172,6 +173,7 @@ if [[ -n "$state" ]]; then
         bundle-add)
           local -a addbundle; addbundle=(
             $global_opts
+            '(help)--skip-optional[Do not install optional bundles (also-add falg in Manifests)]'
             '(help)--skip-diskspace-check[Do not check free disk space before adding bundle]'
             '*:bundle-add:_swupd_bundle_add'
           )

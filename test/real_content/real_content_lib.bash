@@ -152,8 +152,7 @@ test_setup() {
 	sudo rm -rf "$ROOT_DIR"
 	sudo mkdir -p "$ROOT_DIR"
 
-	# TODO: use -S ${ROOT_DIR}/var/lib/swupd/ when #665 gets fixed
-	SWUPD_OPTS_SHORT="-u ${URL} -p ${ROOT_DIR} -S ${ROOT_DIR}/swupd/"
+	SWUPD_OPTS_SHORT="-u ${URL} -p ${ROOT_DIR} -S ${ROOT_DIR}/var/lib/swupd/"
 	SWUPD_OPTS="$SWUPD_OPTS_SHORT --no-scripts -t"
 }
 

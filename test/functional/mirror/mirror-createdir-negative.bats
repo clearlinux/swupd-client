@@ -38,6 +38,7 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		.*/etc/swupd: not a directory
 		Warning: Unable to set mirror url
+		Distribution:      Clear Linux Software for Intel Architecture
 		Installed version: 10
 		Version URL:       file://.*/web-dir
 		Content URL:       file://.*/web-dir
@@ -59,6 +60,7 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		.*/etc/swupd: not a directory
 		Warning: Unable to set mirror url
+		Distribution:      Clear Linux Software for Intel Architecture
 		Installed version: 10
 		Version URL:       file://.*/web-dir
 		Content URL:       file://.*/web-dir

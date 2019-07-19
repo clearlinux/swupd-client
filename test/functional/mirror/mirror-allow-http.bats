@@ -54,6 +54,7 @@ global_teardown() {
 		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Warning: The mirror was set up using HTTP. In order for autoupdate to continue working you will need to set allow_insecure_http=true in the swupd configuration file. Alternatively you can set the mirror using HTTPS (recommended)
 		Set upstream mirror to http://example.com/swupd-file
+		Distribution:      Clear Linux Software for Intel Architecture
 		Installed version: 10
 		Version URL:       http://example.com/swupd-file
 		Content URL:       http://example.com/swupd-file

@@ -496,7 +496,6 @@ static bool global_parse_opt(int opt, char *optarg)
 		return true;
 	case 'n':
 		sigcheck = !optarg_to_bool(optarg);
-		printf("!!! sig %d\n", false);
 		return true;
 	case 'I':
 		timecheck = !optarg_to_bool(optarg);

@@ -42,6 +42,8 @@
 #define FLAG_DEBUG 1003
 #define FLAG_ALLOW_INSECURE_HTTP 1004
 
+#define optarg_to_bool(_optarg) (_optarg ? strtobool(_optarg) : true)
+
 bool allow_insecure_http = false;
 bool allow_mix_collisions = false;
 bool migrate = false;
@@ -493,39 +495,20 @@ static bool global_parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'n':
-		if (optarg != NULL) {
-			sigcheck = strtobool(optarg);
-		} else {
-			sigcheck = false;
-		}
+		sigcheck = !optarg_to_bool(optarg);
+		printf("!!! sig %d\n", false);
 		return true;
 	case 'I':
-		if (optarg != NULL) {
-			timecheck = strtobool(optarg);
-		} else {
-			timecheck = false;
-		}
+		timecheck = !optarg_to_bool(optarg);
 		return true;
 	case 't':
-		if (optarg != NULL) {
-			verbose_time = strtobool(optarg);
-		} else {
-			verbose_time = true;
-		}
+		verbose_time = optarg_to_bool(optarg);
 		return true;
 	case 'N':
-		if (optarg != NULL) {
-			no_scripts = strtobool(optarg);
-		} else {
-			no_scripts = true;
-		}
+		no_scripts = optarg_to_bool(optarg);
 		return true;
 	case 'b':
-		if (optarg != NULL) {
-			no_boot_update = strtobool(optarg);
-		} else {
-			no_boot_update = true;
-		}
+		no_boot_update = optarg_to_bool(optarg);
 		return true;
 	case 'C':
 		set_cert_path(optarg);
@@ -552,34 +535,22 @@ static bool global_parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'j':
-		if (optarg != NULL) {
-			set_json_format(strtobool(optarg));
-		} else {
-			set_json_format(true);
-		}
+		set_json_format(optarg_to_bool(optarg));
 		return true;
 	case FLAG_NO_PROGRESS:
-		if (optarg != NULL) {
-			progress_disable(strtobool(optarg));
-		} else {
-			progress_disable(true);
-		}
+		progress_disable(optarg_to_bool(optarg));
 		return true;
 	case FLAG_WAIT_FOR_SCRIPTS:
-		if (optarg != NULL) {
-			wait_for_scripts = strtobool(optarg);
-		} else {
-			wait_for_scripts = true;
-		}
+		wait_for_scripts = optarg_to_bool(optarg);
 		return true;
 	case FLAG_QUIET:
-		quiet = optarg ? strtobool(optarg) : true;
+		quiet = optarg_to_bool(optarg);
 		return true;
 	case FLAG_DEBUG:
-		debug = optarg ? strtobool(optarg) : true;
+		debug = optarg_to_bool(optarg);
 		return true;
 	case FLAG_ALLOW_INSECURE_HTTP:
-		allow_insecure_http = optarg ? strtobool(optarg) : true;
+		allow_insecure_http = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;

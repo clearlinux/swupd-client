@@ -170,7 +170,7 @@ global_teardown() {
 	run sudo sh -c "$SWUPD info $SWUPD_OPTS -v http://anotherurl.com"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Distribution:      Clear Linux Software for Intel Architecture
+		Distribution:      Swupd Test Distro
 		Installed version: 10
 		Version URL:       http://anotherurl.com
 		Content URL:       http://someurl.com
@@ -206,7 +206,7 @@ global_teardown() {
 	run sudo sh -c "$SWUPD info $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Distribution:      Clear Linux Software for Intel Architecture
+		Distribution:      Swupd Test Distro
 		Installed version: 10
 		Version URL:       file://$TEST_DIRNAME/web-dir
 		Content URL:       file://$TEST_DIRNAME/web-dir
@@ -227,7 +227,7 @@ global_teardown() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Warning: Unrecognized option 'invalid_option=true' from section [global] in the configuration file
-		Distribution:      Clear Linux Software for Intel Architecture
+		Distribution:      Swupd Test Distro
 		Installed version: 10
 		Version URL:       file://$TEST_DIRNAME/web-dir
 		Content URL:       file://$TEST_DIRNAME/web-dir

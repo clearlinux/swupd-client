@@ -1360,11 +1360,11 @@ create_version() { # swupd_function
 	write_to_protected_file "$env_name"/web-dir/"$version"/format "$format"
 	# create a new os-release file per version
 	{
-		printf 'NAME="Clear Linux Software for Intel Architecture"\n'
+		printf 'NAME="Swupd Test Distro"\n'
 		printf 'VERSION=1\n'
 		printf 'ID=clear-linux-os\n'
 		printf 'VERSION_ID=%s\n' "$version"
-		printf 'PRETTY_NAME="Clear Linux Software for Intel Architecture"\n'
+		printf 'PRETTY_NAME="Swupd Test Distro"\n'
 		printf 'ANSI_COLOR="1;35"\n'
 		printf 'HOME_URL="https://clearlinux.org"\n'
 		printf 'SUPPORT_URL="https://clearlinux.org"\n'

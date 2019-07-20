@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-@test "REP035: Repair conflicting flags" {
+@test "REP008: Repair conflicting flags" {
 
 	# Some flags are mutually exclusive
 

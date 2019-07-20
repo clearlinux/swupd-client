@@ -17,7 +17,7 @@ test_setup() {
 
 }
 
-@test "REP033: Repair a system that has extra files in /usr" {
+@test "REP006: Repair a system that has extra files in /usr" {
 
 	# --picky should find those files in /usr that are not in any manifest
 	# and delete them along with the other normal repairs
@@ -52,7 +52,7 @@ test_setup() {
 
 }
 
-@test "REP034: Repair removes only extra files in a system that has extra files in /usr" {
+@test "REP007: Repair removes only extra files in a system that has extra files in /usr" {
 
 	# the --extra-files-only can be used to remove those extra files and nothing else
 

@@ -15,19 +15,21 @@ test_setup() {
 
 }
 
-@test "REP006: Reapir bundle ignores not specified missing bundle" {
+@test "VER001: Verify bundle ignores not specified missing bundle" {
 
-	# <If necessary add a detailed explanation of the test here>
-
-	run sudo sh -c "$SWUPD repair $SWUPD_OPTS --bundles test-bundle2"
+	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --fix --bundles test-bundle2"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Diagnosing version 10
+		Warning: The verify command has been superseded
+		Please consider using "swupd diagnose" instead
+		Warning: The --fix option has been superseded
+		Please consider using "swupd repair" instead
+		Verifying version 10
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		.* Missing file: .*/target-dir/bar/test-file2 -> fixed
+		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/bar/test-file2 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 3 files
@@ -38,27 +40,31 @@ test_setup() {
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/core
 	assert_file_not_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/bar/test-file2
 
 }
 
-@test "REP007: Repair bundle installs bundle if not installed" {
+@test "VER002: Verify bundle installs bundle if not installed" {
 
 	create_bundle -n test-bundle3 -f /baz/test-file3 "$TEST_NAME"
 
-	run sudo sh -c "$SWUPD repair $SWUPD_OPTS --bundles test-bundle3"
+	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --fix --bundles test-bundle3"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Diagnosing version 10
+		Warning: The verify command has been superseded
+		Please consider using "swupd diagnose" instead
+		Warning: The --fix option has been superseded
+		Please consider using "swupd repair" instead
+		Verifying version 10
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		.* Missing file: .*/target-dir/baz -> fixed
-		.* Missing file: .*/target-dir/baz/test-file3 -> fixed
-		.* Missing file: .*/target-dir/usr/share/clear/bundles/test-bundle3 -> fixed
+		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/baz -> fixed
+		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/baz/test-file3 -> fixed
+		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/usr/share/clear/bundles/test-bundle3 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 3 files
@@ -69,7 +75,7 @@ test_setup() {
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/core
 	assert_file_not_exists "$TARGETDIR"/foo/test-file1
 	assert_file_not_exists "$TARGETDIR"/bar/test-file2
@@ -77,17 +83,21 @@ test_setup() {
 
 }
 
-@test "REP008: Repair bundle installs multiple bundles if not installed" {
+@test "VER003: Verify bundle installs multiple bundles if not installed" {
 
-	run sudo sh -c "$SWUPD repair $SWUPD_OPTS --bundles test-bundle1,test-bundle2"
+	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --fix --bundles test-bundle1,test-bundle2"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Diagnosing version 10
+		Warning: The verify command has been superseded
+		Please consider using "swupd diagnose" instead
+		Warning: The --fix option has been superseded
+		Please consider using "swupd repair" instead
+		Verifying version 10
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		.* Missing file: .*/target-dir/bar/test-file2 -> fixed
-		.* Missing file: .*/target-dir/foo/test-file1 -> fixed
+		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/bar/test-file2 -> fixed
+		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/foo/test-file1 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 6 files
@@ -98,7 +108,7 @@ test_setup() {
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/core
 	assert_file_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/bar/test-file2

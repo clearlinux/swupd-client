@@ -251,7 +251,6 @@ BATS = \
 	test/functional/repair/repair-boot-file-deleted.bats \
 	test/functional/repair/repair-boot-file.bats \
 	test/functional/repair/repair-boot-skip.bats \
-	test/functional/repair/repair-bundle.bats \
 	test/functional/repair/repair-directory-tree-deleted.bats \
 	test/functional/repair/repair-empty-dir-deleted.bats \
 	test/functional/repair/repair-flags.bats \
@@ -326,7 +325,8 @@ BATS = \
 	test/functional/usability/usa-completion-basic.bats \
 	test/functional/usability/usa-config-file.bats \
 	test/functional/usability/usa-download-retries.bats \
-	test/functional/usability/usa-external-modules.bats
+	test/functional/usability/usa-external-modules.bats \
+	test/functional/verify-legacy/verify-bundle.bats
 
 
 UNIT_TESTS = \

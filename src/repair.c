@@ -33,7 +33,6 @@ static bool cmdline_option_force = false;
 static bool cmdline_option_picky = false;
 static bool cmdline_option_quick = false;
 static int cmdline_option_version = 0;
-static struct list *cmdline_bundles = NULL;
 static char *cmdline_option_picky_tree = NULL;
 static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
 static bool cmdline_extra_files_only = false;
@@ -50,7 +49,6 @@ static const struct option prog_opts[] = {
 	{ "picky-tree", required_argument, 0, 'X' },
 	{ "picky-whitelist", required_argument, 0, 'w' },
 	{ "quick", no_argument, 0, 'q' },
-	{ "bundles", required_argument, 0, 'B' },
 	{ "extra-files-only", no_argument, 0, FLAG_EXTRA_FILES_ONLY },
 };
 
@@ -65,7 +63,6 @@ static void print_help(void)
 	print("   -V, --version=[VER]     Compare against version VER to repair\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -q, --quick             Don't compare hashes, only fix missing files\n");
-	print("   -B, --bundles=[BUNDLES] Ensure BUNDLES are installed correctly. Example: --bundles=os-core,vi\n");
 	print("   -Y, --picky             Also remove files which should not exist\n");
 	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky and --extra-files-only  looks for extra files. Default: /usr\n");
 	print("   -w, --picky-whitelist=[RE] Directories that match the regex get skipped. Example: /var|/etc/machine-id\n");
@@ -125,20 +122,6 @@ static bool parse_opt(int opt, char *optarg)
 	case 'w':
 		cmdline_option_picky_whitelist = strdup_or_die(optarg);
 		return true;
-	case 'B': {
-		char *arg_copy = strdup_or_die(optarg);
-		char *token = strtok(arg_copy, ",");
-		while (token) {
-			cmdline_bundles = list_prepend_data(cmdline_bundles, strdup_or_die(token));
-			token = strtok(NULL, ",");
-		}
-		free(arg_copy);
-		if (!cmdline_bundles) {
-			error("Missing --bundle argument\n\n");
-			return false;
-		}
-		return true;
-	}
 	case FLAG_EXTRA_FILES_ONLY:
 		cmdline_extra_files_only = true;
 		/* mutually exclusive flags */
@@ -224,7 +207,6 @@ enum swupd_code repair_main(int argc, char **argv)
 	verify_set_option_force(cmdline_option_force);
 	verify_set_option_quick(cmdline_option_quick);
 	verify_set_option_picky(cmdline_option_picky);
-	verify_set_option_bundles(cmdline_bundles);
 	verify_set_option_version(cmdline_option_version);
 	verify_set_picky_whitelist(picky_whitelist);
 	verify_set_picky_tree(cmdline_option_picky_tree);

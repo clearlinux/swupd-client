@@ -29,30 +29,17 @@ export VERSION # Array of last available versions. First item is the oldest
 export ROOT_DIR # Root directory of the installation
 
 # get_format: Echos the format of the version in $1
-# TODO: This is not the best way to handle that. we should have in swupd
-# codebase the information about the supported format of this swupd.
 get_format() {
 	v="$1"
 	curl -f "${URL}/${v}/format" 2>/dev/null
 	return 0
 }
 
-# get_format_from_versions: Echos the first format available in a version from
-# a list of versions
-get_format_from_versions() {
-	formats=("$@")
-	i="${#formats[@]}"
-	i=$((i-1))
-	while [ "$i" -ge 0 ]; do
-		format=$(get_format "${formats[$i]}")
-		if [ -z "$format" ]; then # if version isn't published, discard
-			continue
-		else
-			echo "$format"
-			break
-		fi
-		i=$((i-1))
-	done
+# get_current_format(): Get last available format released
+get_current_format() {
+	last_version=$(curl -f "${URL}/version/latest_version" 2>/dev/null)
+	get_format "$last_version"
+	return 0
 }
 
 install_bundles() {
@@ -132,7 +119,7 @@ test_setup() {
 	fi
 
 	# Get the last format
-	FORMAT=$(get_format_from_versions "${version_list[@]}")
+	FORMAT=$(get_current_format)
 	export FORMAT
 
 	# Fill a list of last available versions (up to ${MAX_VERSIONS})

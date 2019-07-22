@@ -152,6 +152,11 @@ test_setup() {
 }
 
 test_teardown() {
+	if [ "$DEBUG_TEST" = true ]; then
+		local msg="warning: debug_test is set to true, the test environment will be preserved"
+		print "$msg\\n" 2>/dev/null || echo "$msg"
+		return
+	fi
 	sudo rm -rf "$TEST_NAME"
 }
 

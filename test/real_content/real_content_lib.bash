@@ -70,6 +70,7 @@ install_bundles() {
 	CUR_VER=$("$SWUPD" info $SWUPD_OPTS | grep "Installed version"|cut -d ':' -f 2)
 	BUNDLE_LIST="${BUNDLE_LIST// /,}"
 	run sudo sh -c "$SWUPD $CMD $SWUPD_OPTS -B $BUNDLE_LIST -V $CUR_VER"
+	print "Instalation completed"
 
 	assert_status_is 0
 	verify_system

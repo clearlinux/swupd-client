@@ -33,7 +33,7 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Set upstream mirror to https://example.com/swupd-file
+		Mirror url set
 		Distribution:      Swupd Test Distro
 		Installed version: 10
 		Version URL:       https://example.com/swupd-file
@@ -54,7 +54,7 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Set upstream mirror to https://example.com/swupd-file
+		Mirror url set
 		Distribution:      Swupd Test Distro
 		Installed version: 10
 		Version URL:       https://example.com/swupd-file
@@ -76,7 +76,7 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		Set upstream mirror to https://example.com/swupd-file
+		Mirror url set
 		Distribution:      Swupd Test Distro
 		Installed version: 10
 		Version URL:       https://example.com/swupd-file

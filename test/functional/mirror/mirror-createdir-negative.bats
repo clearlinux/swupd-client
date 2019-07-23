@@ -37,11 +37,7 @@ global_teardown() {
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
 		.*/etc/swupd: not a directory
-		Warning: Unable to set mirror url
-		Distribution:      Swupd Test Distro
-		Installed version: 10
-		Version URL:       file://.*/web-dir
-		Content URL:       file://.*/web-dir
+		Error: Unable to set mirror url
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -59,11 +55,7 @@ global_teardown() {
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
 		.*/etc/swupd: not a directory
-		Warning: Unable to set mirror url
-		Distribution:      Swupd Test Distro
-		Installed version: 10
-		Version URL:       file://.*/web-dir
-		Content URL:       file://.*/web-dir
+		Error: Unable to set mirror url
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

@@ -114,6 +114,7 @@ static int unset_mirror_url()
 		goto out;
 	}
 
+out:
 	/* we need to also unset the mirror urls from the cache and set it to
 	 * the central version */
 	free_string(&globals.version_url);
@@ -121,7 +122,6 @@ static int unset_mirror_url()
 	set_default_version_url();
 	set_default_content_url();
 	get_latest_version("");
-out:
 	free_string(&content_path);
 	free_string(&version_path);
 	return ret;

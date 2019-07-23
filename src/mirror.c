@@ -30,8 +30,9 @@
 
 #include "swupd.h"
 
-static char *set = NULL;
+static bool set = false;
 static bool unset = false;
+const char *set_url = NULL;
 
 static void print_help(void)
 {
@@ -43,17 +44,17 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
-	print("   -s, --set               set mirror url\n");
+	print("   -s, --set [URL]         set mirror url\n");
 	print("   -U, --unset             unset mirror url\n");
 	print("\n");
 }
 
 static const struct option prog_opts[] = {
-	{ "set", required_argument, 0, 's' },
+	{ "set", no_argument, 0, 's' },
 	{ "unset", no_argument, 0, 'U' },
 };
 
-static bool parse_opt(int opt, char *optarg)
+static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 {
 	switch (opt) {
 	case 's':
@@ -61,10 +62,10 @@ static bool parse_opt(int opt, char *optarg)
 			error("cannot set and unset at the same time\n");
 			return false;
 		}
-		set = optarg;
+		set = true;
 		return true;
 	case 'U':
-		if (set != NULL) {
+		if (set) {
 			error("cannot set and unset at the same time\n");
 			return false;
 		}
@@ -91,30 +92,38 @@ static bool parse_options(int argc, char **argv)
 		return false;
 	}
 
-	if (argc > ind) {
-		error("unexpected arguments\n\n");
+	if (!set && (globals.content_url || globals.version_url)) {
+		error("Version or content url can only be used with --set\n");
 		return false;
 	}
 
-	return true;
+	if (argc <= ind) {
+		// Check if URLs are set
+		if (set && !globals.content_url && !globals.version_url) {
+			error("Option '--set' requires an argument\n");
+			return false;
+		}
+		return true;
+	} else if (set && argc == ind + 1) {
+		set_url = argv[ind];
+		return true;
+	}
+
+	error("Unexpected arguments\n\n");
+	return false;
 }
 
 static int unset_mirror_url()
 {
 	char *content_path;
 	char *version_path;
-	int ret = 0;
+	int ret1 = 0, ret2 = 0;
 	content_path = mk_full_filename(globals.path_prefix, MIRROR_CONTENT_URL_PATH);
 	version_path = mk_full_filename(globals.path_prefix, MIRROR_VERSION_URL_PATH);
 
-	if ((ret = swupd_rm(content_path))) {
-		goto out;
-	}
-	if ((ret = swupd_rm(version_path))) {
-		goto out;
-	}
+	ret1 = swupd_rm(content_path);
+	ret2 = swupd_rm(version_path);
 
-out:
 	/* we need to also unset the mirror urls from the cache and set it to
 	 * the central version */
 	free_string(&globals.version_url);
@@ -123,10 +132,20 @@ out:
 	set_default_content_url();
 	free_string(&content_path);
 	free_string(&version_path);
-	return ret;
+
+	// No errors
+	if ((ret1 == -ENOENT && !ret2) ||
+	    (ret2 == -ENOENT && !ret1)) {
+		return 0;
+	}
+
+	if (ret1) {
+		return ret1;
+	}
+	return ret2;
 }
 
-static enum swupd_code write_to_path(char *content, char *path)
+static enum swupd_code write_to_path(const char *content, const char *path)
 {
 	char *dir, *tmp = NULL;
 	struct stat dirstat;
@@ -178,11 +197,10 @@ out:
 	return ret;
 }
 
-static enum swupd_code set_mirror_url(char *url)
+static enum swupd_code set_new_url(const char *url, const char *url_path)
 {
-	char *content_path;
-	char *version_path;
-	int ret = SWUPD_OK;
+	int ret;
+	char *path;
 
 	/* enforce the use of https */
 	if (!is_url_allowed(url)) {
@@ -191,34 +209,48 @@ static enum swupd_code set_mirror_url(char *url)
 
 	/* concatenate path_prefix and configuration paths if necessary
 	 * if path_prefix is NULL the second argument will be returned */
-	content_path = mk_full_filename(globals.path_prefix, MIRROR_CONTENT_URL_PATH);
-	version_path = mk_full_filename(globals.path_prefix, MIRROR_VERSION_URL_PATH);
-
-	/* write url to path_prefix/MIRROR_CONTENT_URL_PATH */
-	ret = write_to_path(url, content_path);
-	if (ret != SWUPD_OK) {
-		goto out;
-	}
+	path = mk_full_filename(globals.path_prefix, url_path);
 
 	/* write url to path_prefix/MIRROR_VERSION_URL_PATH */
-	ret = write_to_path(url, version_path);
-	if (ret != SWUPD_OK) {
-		goto out;
+	ret = write_to_path(url, path);
+	free(path);
+
+	return ret;
+}
+
+static enum swupd_code set_mirror_url(const char *url_new)
+{
+	int ret;
+	const char *content_url_new = globals.content_url;
+	const char *version_url_new = globals.version_url;
+
+	if (url_new) {
+		content_url_new = url_new;
+		version_url_new = url_new;
 	}
 
-	/* if mirror is http, warn user about needing to set
-	 * allow_insecure_http=true in order for auto-update to continue working */
-	if (is_url_insecure(url)) {
+	if (version_url_new) {
+		ret = set_new_url(version_url_new, MIRROR_VERSION_URL_PATH);
+		if (ret != SWUPD_OK) {
+			return ret;
+		}
+	}
+
+	if (content_url_new) {
+		ret = set_new_url(content_url_new, MIRROR_CONTENT_URL_PATH);
+		if (ret != SWUPD_OK) {
+			return ret;
+		}
+	}
+
+	if (is_url_insecure(content_url_new) || is_url_insecure(version_url_new)) {
 		warn("The mirror was set up using HTTP. In order for autoupdate "
 		     "to continue working you will need to set allow_insecure_http=true "
 		     "in the swupd configuration file. Alternatively you can set the "
 		     "mirror using HTTPS (recommended)\n\n");
 	}
 
-out:
-	free_string(&content_path);
-	free_string(&version_path);
-	return ret;
+	return SWUPD_OK;
 }
 
 static bool mirror_is_set(void)
@@ -321,13 +353,14 @@ enum swupd_code mirror_main(int argc, char **argv)
 	}
 	progress_init_steps("mirror", steps_in_mirror);
 
-	if (set != NULL) {
+	if (set) {
 		check_root();
-		ret = set_mirror_url(set);
+		ret = set_mirror_url(set_url);
 		if (ret != SWUPD_OK) {
-			warn("Unable to set mirror url\n");
+			error("Unable to set mirror url\n");
+			goto finish;
 		} else {
-			print("Set upstream mirror to %s\n", set);
+			print("Mirror url set\n");
 		}
 	} else if (unset) {
 		check_root();
@@ -337,7 +370,7 @@ enum swupd_code mirror_main(int argc, char **argv)
 			ret = SWUPD_OK;
 		} else if (ret != 0) {
 			ret = SWUPD_COULDNT_REMOVE_FILE;
-			warn("Unable to remove mirror configuration\n");
+			error("Unable to remove mirror configuration\n");
 		} else { /* ret == 0 */
 			print("Mirror url configuration removed\n");
 		}

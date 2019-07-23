@@ -209,9 +209,7 @@ int swupd_curl_init(char *url)
 	}
 
 	/* enforce the use of https or file */
-	if (!is_url_allowed(globals.version_url) ||
-	    (strcmp(globals.content_url, globals.version_url) != 0 &&
-	     !is_url_allowed(globals.content_url))) {
+	if (!is_url_allowed(globals.version_url) || !is_url_allowed(globals.content_url)) {
 		swupd_curl_deinit();
 		return -1;
 	}

@@ -1026,15 +1026,32 @@ void print_regexp_error(int errcode, regex_t *regexp)
 	    free(error_buffer);
 }
 
-bool is_url_allowed(char *url)
+bool is_url_insecure(const char *url)
 {
-	if (strncasecmp(url, "http://", 7) == 0) {
+	if (url && strncasecmp(url, "http://", 7) == 0) {
+		return true;
+	}
+
+	return false;
+}
+
+bool is_url_allowed(const char *url)
+{
+	static bool print_warning = true;
+
+	if (is_url_insecure(url)) {
 		if (globals.allow_insecure_http) {
-			warn("This is an insecure connection\n");
-			info("The --allow-insecure-http flag was used, be aware that this poses a threat to the system\n\n");
+			if (print_warning) {
+				warn("This is an insecure connection\n");
+				info("The --allow-insecure-http flag was used, be aware that this poses a threat to the system\n\n");
+				print_warning = false;
+			}
 		} else {
-			error("This is an insecure connection\n");
-			info("Use the --allow-insecure-http flag to proceed\n");
+			if (print_warning) {
+				error("This is an insecure connection\n");
+				info("Use the --allow-insecure-http flag to proceed\n");
+				print_warning = false;
+			}
 			return false;
 		}
 	}

@@ -27,6 +27,9 @@
 
 #include "swupd.h"
 
+#define FLAG_ALL 2000
+#define FLAG_DRY_RUN 2001
+
 static void print_help(void)
 {
 	print("Remove cached content used for updates from state directory\n\n");
@@ -55,14 +58,29 @@ static struct timespec now;
 
 static const struct option prog_opts[] = {
 	{ "help", no_argument, 0, 'h' },
-	{ "all", no_argument, &options.all, 1 },
-	{ "dry-run", no_argument, &options.dry_run, 1 },
+	{ "all", no_argument, 0, FLAG_ALL },
+	{ "dry-run", no_argument, 0, FLAG_DRY_RUN },
 };
+
+static bool parse_opt(int opt, char *optarg UNUSED_PARAM)
+{
+	switch (opt) {
+	case FLAG_ALL:
+		options.all = true;
+		return true;
+	case FLAG_DRY_RUN:
+		options.dry_run = true;
+		return true;
+	default:
+		return false;
+	}
+	return false;
+}
 
 static const struct global_options opts = {
 	prog_opts,
 	sizeof(prog_opts) / sizeof(struct option),
-	NULL,
+	parse_opt,
 	print_help,
 };
 

@@ -121,7 +121,6 @@ out:
 	free_string(&globals.content_url);
 	set_default_version_url();
 	set_default_content_url();
-	get_latest_version("");
 	free_string(&content_path);
 	free_string(&version_path);
 	return ret;
@@ -300,6 +299,7 @@ void handle_mirror_if_stale(void)
 
 	info("Removing mirror configuration\n");
 	unset_mirror_url();
+	get_latest_version("");
 
 out:
 	free_string(&fullpath);

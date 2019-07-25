@@ -89,27 +89,9 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case 'q':
 		cmdline_option_quick = true;
-		/* mutually exclusive flags */
-		if (cmdline_option_picky) {
-			error("You cannot use --quick and --picky together\n\n");
-			return false;
-		}
-		if (cmdline_extra_files_only) {
-			error("You cannot use --quick and --extra-files-only together\n\n");
-			return false;
-		}
 		return true;
 	case 'Y':
 		cmdline_option_picky = true;
-		/* mutually exclusive flags */
-		if (cmdline_option_quick) {
-			error("You cannot use --picky and --quick together\n\n");
-			return false;
-		}
-		if (cmdline_extra_files_only) {
-			error("You cannot use --picky and --extra-files-only together\n\n");
-			return false;
-		}
 		return true;
 	case 'X':
 		if (optarg[0] != '/') {
@@ -124,15 +106,6 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case FLAG_EXTRA_FILES_ONLY:
 		cmdline_extra_files_only = true;
-		/* mutually exclusive flags */
-		if (cmdline_option_quick) {
-			error("You cannot use --extra-files-only and --quick together\n\n");
-			return false;
-		}
-		if (cmdline_option_picky) {
-			error("You cannot use --extra-files-only and --picky together\n\n");
-			return false;
-		}
 		return true;
 	default:
 		return false;
@@ -158,6 +131,24 @@ static bool parse_options(int argc, char **argv)
 	if (argc > ind) {
 		error("unexpected arguments\n\n");
 		return false;
+	}
+
+	/* flag restrictions */
+	if (cmdline_option_quick) {
+		if (cmdline_option_picky) {
+			error("--quick and --picky options are mutually exclusive\n");
+			return false;
+		}
+		if (cmdline_extra_files_only) {
+			error("--quick and --extra-files-only options are mutually exclusive\n");
+			return false;
+		}
+	}
+	if (cmdline_extra_files_only) {
+		if (cmdline_option_picky) {
+			error("--extra-files-only and --picky options are mutually exclusive\n");
+			return false;
+		}
 	}
 
 	picky_whitelist = compile_whitelist(cmdline_option_picky_whitelist);
@@ -197,6 +188,7 @@ enum swupd_code repair_main(int argc, char **argv)
 	string_or_die(&cmdline_option_picky_tree, "%s", picky_tree_default);
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}

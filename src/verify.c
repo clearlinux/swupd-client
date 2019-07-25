@@ -41,6 +41,7 @@
 
 static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src";
 
+static bool warning_printed = false;
 static bool cmdline_command_verify = false;
 static bool cmdline_option_force = false;
 static bool cmdline_option_fix = false;
@@ -567,8 +568,9 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'f':
-		warn("\nThe --fix option has been superseded\n")
-		    info("Please consider using \"swupd repair\" instead\n\n");
+		warn("\nThe --fix option has been superseded\n");
+		info("Please consider using \"swupd repair\" instead\n\n");
+		warning_printed = true;
 		cmdline_option_fix = true;
 		return true;
 	case 'x':
@@ -577,6 +579,7 @@ static bool parse_opt(int opt, char *optarg)
 	case 'i':
 		warn("\nThe --install option has been superseded\n");
 		info("Please consider using \"swupd os-install\" instead\n\n");
+		warning_printed = true;
 		cmdline_option_install = true;
 		cmdline_option_quick = true;
 		return true;
@@ -643,6 +646,12 @@ static bool parse_options(int argc, char **argv)
 	if (argc > ind) {
 		error("unexpected arguments\n\n");
 		return false;
+	}
+
+	/* warning for "verify" command */
+	if (cmdline_command_verify && !warning_printed) {
+		warn("\nThe \"swupd verify\" command has been superseded\n");
+		info("Please consider using \"swupd diagnose\" instead\n\n");
 	}
 
 	/* flag restrictions for "verify" */

@@ -147,8 +147,8 @@ static void print_help(void)
 	print("   -V, --version=[VER]     Verify against manifest version VER\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -q, --quick             Don't check for corrupt files, only fix missing files\n");
-	print("   -B, --bundles=[BUNDLES] Ensure BUNDLES are installed correctly. Example: --bundles=os-core,vi\n");
 	if (cmdline_command_verify) {
+		print("   -B, --bundles=[BUNDLES] Forces swupd to only consider the specified BUNDLES for verify. Example: --bundles=os-core,vi\n");
 		print("   -m, --manifest=V        This option has been superseded. Please consider using the -V option instead\n");
 		print("   -f, --fix               This option has been superseded, please consider using \"swupd repair\" instead\n");
 		print("   -i, --install           This option has been superseded, please consider using \"swupd os-install\" instead\n");
@@ -638,6 +638,10 @@ static bool parse_opt(int opt, char *optarg)
 		cmdline_option_picky_whitelist = strdup_or_die(optarg);
 		return true;
 	case 'B': {
+		/* This option should only be available to verify for backward compatibility */
+		if (!cmdline_command_verify) {
+			return false;
+		}
 		char *arg_copy = strdup_or_die(optarg);
 		char *token = strtok(arg_copy, ",");
 		while (token) {

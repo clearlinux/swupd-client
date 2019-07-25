@@ -250,17 +250,6 @@ SUBCOMMANDS
 
         Attempt to proceed even if non-critical errors found.
 
-    - `-B, --bundles=[BUNDLES]`
-
-        Only verify the (comma separated) list of bundles are installed
-        correctly.
-
-        Examples:
-
-        - ``--bundles os-core,vi``
-
-            Only runs the verify operation on the os-core and vi bundles.
-
     - `--extra-files-only`
 
       Like --picky, but it only looks for extra files. It omits checking

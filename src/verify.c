@@ -49,7 +49,7 @@ static char *cmdline_option_picky_tree = NULL;
 static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
 static bool cmdline_option_install = false;
 static bool cmdline_option_quick = false;
-static struct list *cmdline_bundles = NULL;
+static struct list *cmdline_option_bundles = NULL;
 static bool cmdline_extra_files_only = false;
 
 /* picky_whitelist points to picky_whitelist_buffer if and only if regcomp() was called for it */
@@ -98,7 +98,7 @@ void verify_set_option_quick(bool opt)
 
 void verify_set_option_bundles(struct list *bundles)
 {
-	cmdline_bundles = bundles;
+	cmdline_option_bundles = bundles;
 }
 
 void verify_set_option_version(int ver)
@@ -570,11 +570,6 @@ static bool parse_opt(int opt, char *optarg)
 		warn("\nThe --fix option has been superseded\n")
 		    info("Please consider using \"swupd repair\" instead\n\n");
 		cmdline_option_fix = true;
-		/* mutually exclusive flags */
-		if (cmdline_option_install) {
-			error("You cannot use --fix and --install together\n\n");
-			return false;
-		}
 		return true;
 	case 'x':
 		cmdline_option_force = true;
@@ -584,47 +579,12 @@ static bool parse_opt(int opt, char *optarg)
 		info("Please consider using \"swupd os-install\" instead\n\n");
 		cmdline_option_install = true;
 		cmdline_option_quick = true;
-		/* mutually exclusive flags */
-		if (cmdline_option_fix) {
-			error("You cannot use --install and --fix together\n\n");
-			return false;
-		}
-		if (cmdline_option_picky) {
-			error("You cannot use --install and --picky together\n\n");
-			return false;
-		}
-		if (cmdline_extra_files_only) {
-			error("You cannot use --install and --extra-files-only together\n\n");
-			return false;
-		}
 		return true;
 	case 'q':
 		cmdline_option_quick = true;
-		/* mutually exclusive flags */
-		if (cmdline_option_picky) {
-			error("You cannot use --quick and --picky together\n\n");
-			return false;
-		}
-		if (cmdline_extra_files_only) {
-			error("You cannot use --quick and --extra-files-only together\n\n");
-			return false;
-		}
 		return true;
 	case 'Y':
 		cmdline_option_picky = true;
-		/* mutually exclusive flags */
-		if (cmdline_option_install) {
-			error("You cannot use --picky and --install together\n\n");
-			return false;
-		}
-		if (cmdline_option_quick) {
-			error("You cannot use --picky and --quick together\n\n");
-			return false;
-		}
-		if (cmdline_extra_files_only) {
-			error("You cannot use --picky and --extra-files-only together\n\n");
-			return false;
-		}
 		return true;
 	case 'X':
 		if (optarg[0] != '/') {
@@ -640,16 +600,17 @@ static bool parse_opt(int opt, char *optarg)
 	case 'B': {
 		/* This option should only be available to verify for backward compatibility */
 		if (!cmdline_command_verify) {
+			print("diagnose: invalid option -- 'B'\n");
 			return false;
 		}
 		char *arg_copy = strdup_or_die(optarg);
 		char *token = strtok(arg_copy, ",");
 		while (token) {
-			cmdline_bundles = list_prepend_data(cmdline_bundles, strdup_or_die(token));
+			cmdline_option_bundles = list_prepend_data(cmdline_option_bundles, strdup_or_die(token));
 			token = strtok(NULL, ",");
 		}
 		free(arg_copy);
-		if (!cmdline_bundles) {
+		if (!cmdline_option_bundles) {
 			error("Missing --bundle argument\n\n");
 			return false;
 		}
@@ -657,19 +618,6 @@ static bool parse_opt(int opt, char *optarg)
 	}
 	case FLAG_EXTRA_FILES_ONLY:
 		cmdline_extra_files_only = true;
-		/* mutually exclusive flags */
-		if (cmdline_option_install) {
-			error("You cannot use --extra-files-only and --install together\n\n");
-			return false;
-		}
-		if (cmdline_option_quick) {
-			error("You cannot use --extra-files-only and --quick together\n\n");
-			return false;
-		}
-		if (cmdline_option_picky) {
-			error("You cannot use --extra-files-only and --picky together\n\n");
-			return false;
-		}
 		return true;
 	default:
 		return false;
@@ -697,31 +645,75 @@ static bool parse_options(int argc, char **argv)
 		return false;
 	}
 
-	if (cmdline_option_install) {
-		if (version == 0) {
-			error("--install option requires -m version option\n");
+	/* flag restrictions for "verify" */
+	if (cmdline_command_verify) {
+
+		/* flag restrictions for "verify --install" */
+		if (cmdline_option_install) {
+			if (version == 0) {
+				error("--install option requires the --manifest option\n");
+				return false;
+			}
+			if (globals.path_prefix == NULL) {
+				error("--install option requires the --path option\n");
+				return false;
+			}
+			if (cmdline_option_fix) {
+				error("--install and --fix options are mutually exclusive\n");
+				return false;
+			}
+			if (cmdline_option_picky) {
+				error("--install and --picky options are mutually exclusive\n");
+				return false;
+			}
+			if (cmdline_extra_files_only) {
+				error("--install and --extra-files-only options are mutually exclusive\n");
+				return false;
+			}
+		} else {
+			if (version == -1) {
+				error("'--manifest latest' only supported with the --install option\n");
+				return false;
+			}
+		}
+
+		if (cmdline_option_bundles) {
+			if (!cmdline_option_fix) {
+				error("--bundles option require the --fix option\n");
+				return false;
+			}
+		}
+
+	} else {
+
+		/* flag restrictions for "diagnose" */
+		if (version == -1) {
+			error("'latest' not supported for --version\n");
 			return false;
 		}
-		if (globals.path_prefix == NULL) {
-			error("--install option requires --path option\n");
-			return false;
-		}
-		if (cmdline_option_fix) {
-			error("--install and --fix options are mutually exclusive\n");
-			return false;
-		}
-	} else if (version == -1) {
-		error("-m latest only supported with --install\n");
-		return false;
 	}
 
-	/* if repair --picky-withelist is calling verify then picky_whitelist
-	 * already has a compiled regex */
-	if (!picky_whitelist) {
-		picky_whitelist = compile_whitelist(cmdline_option_picky_whitelist);
-		if (!picky_whitelist) {
+	/* flag restrictions for both, "verify" and "diagnose" */
+	if (cmdline_option_quick) {
+		if (cmdline_option_picky) {
+			error("--quick and --picky options are mutually exclusive\n");
 			return false;
 		}
+		if (cmdline_extra_files_only) {
+			error("--quick and --extra-files-only options are mutually exclusive\n");
+			return false;
+		}
+	}
+	if (cmdline_extra_files_only) {
+		if (cmdline_option_picky) {
+			error("--extra-files-only and --picky options are mutually exclusive\n");
+			return false;
+		}
+	}
+
+	picky_whitelist = compile_whitelist(cmdline_option_picky_whitelist);
+	if (!picky_whitelist) {
+		return false;
 	}
 
 	return true;
@@ -833,10 +825,10 @@ enum swupd_code verify_main(void)
 		info("%s version %i\n", cmdline_command_verify ? "Verifying" : "Diagnosing", version);
 	}
 
-	if (cmdline_bundles) {
-		while (cmdline_bundles) {
-			create_and_append_subscription(&subs, cmdline_bundles->data);
-			cmdline_bundles = list_free_item(cmdline_bundles, free);
+	if (cmdline_option_bundles) {
+		while (cmdline_option_bundles) {
+			create_and_append_subscription(&subs, cmdline_option_bundles->data);
+			cmdline_option_bundles = list_free_item(cmdline_option_bundles, free);
 		}
 	} else {
 		read_subscriptions(&subs);
@@ -1210,6 +1202,7 @@ enum swupd_code diagnose_main(int argc, char **argv)
 	string_or_die(&cmdline_option_picky_tree, "/usr");
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}

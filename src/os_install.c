@@ -39,14 +39,12 @@ static void print_help(void)
 	print("Usage:\n");
 	print("   swupd os-install [OPTION...] PATH\n\n");
 
-	//TODO: Add documentation explaining this command
-
 	global_print_help();
 
 	print("Options:\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -B, --bundles=[BUNDLES] Include the specified BUNDLES in the OS installation. Example: --bundles=os-core,vi\n");
-	print("   -V, --version=V         If the version to install is not the latest, it can be specified with this option\n");
+	print("   -V, --version=[VER]     If the version to install is not the latest, it can be specified with this option\n");
 	print("\n");
 }
 
@@ -126,6 +124,8 @@ static bool parse_options(int argc, char **argv)
 		}
 	}
 
+	/* currently there are no flag restrictions for "os-install" */
+
 	return true;
 }
 
@@ -138,6 +138,7 @@ enum swupd_code install_main(int argc, char **argv)
 	cmdline_bundles = list_prepend_data(cmdline_bundles, strdup_or_die("os-core"));
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}

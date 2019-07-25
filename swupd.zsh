@@ -101,7 +101,7 @@ local -a installed all_bundles
 #           swupd hashdump [-p|--path=FOO] BAR
 (( $+functions[_swupd_hashdump] )) ||
   _swupd_hashdump () {
-    local -a words=(${words[2,-1]}) dumppath dummy
+    local -a words=(${words[2,-1]}) dumppath
     # Anonymous function to get the path
     () {
       zparseopts -E -a dumppath 'p:' '-path:' '-path\=:'
@@ -149,7 +149,7 @@ local -a global_opts; global_opts=(
 # Level-1 completion for sub-command and options to swupd
 _arguments -C \
            '(-)'{-h,--help}'[Show help options]' \
-           '(-)'{-v,--version}'[Output version information and exit]:version:->ops' \
+           '(-)'{-v,--version}'[Output version information and exit]' \
            ':swupd subcommand:->subcmd' \
            '*:: :->args' \
   && ret=0

@@ -121,8 +121,6 @@ static int subcmd_index(char *arg)
 	if (strcmp(arg, "verify") == 0) {
 		verify_set_command_verify(true); // set to true so we know the "verify" command was used
 		arg = "diagnose";
-		fprintf(stderr, "\nWarning: The verify command has been superseded\n");
-		fprintf(stderr, "Please consider using \"swupd diagnose\" instead\n\n");
 	}
 	input_len = strlen(arg);
 

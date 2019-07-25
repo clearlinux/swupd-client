@@ -21,8 +21,6 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Warning: The verify command has been superseded
-		Please consider using "swupd diagnose" instead
 		Warning: The --fix option has been superseded
 		Please consider using "swupd repair" instead
 		Verifying version 10
@@ -54,8 +52,6 @@ test_setup() {
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --fix --bundles test-bundle3"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Warning: The verify command has been superseded
-		Please consider using "swupd diagnose" instead
 		Warning: The --fix option has been superseded
 		Please consider using "swupd repair" instead
 		Verifying version 10
@@ -88,8 +84,6 @@ test_setup() {
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --fix --bundles test-bundle1,test-bundle2"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Warning: The verify command has been superseded
-		Please consider using "swupd diagnose" instead
 		Warning: The --fix option has been superseded
 		Please consider using "swupd repair" instead
 		Verifying version 10

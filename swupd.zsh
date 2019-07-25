@@ -317,7 +317,7 @@ if [[ -n "$state" ]]; then
           local -a hashdumps; hashdumps=(
             '(-)'{-h,--help}'[Show help options]'
             '(-h --help -n --no-xattrs)'{-n,--no-xattrs}'[Ignore extended attributes]'
-            '(-h --help -p --path)'{-p,--path}'[Use \[PATH...\] for leading path to filename]:dumppath: _path_files -/'
+            '(-h --help -p --path)'{-p,--path=}'[Use \[PATH...\] for leading path to filename]:dumppath: _path_files -/'
             '(-h --help --debug)--quiet[Quiet output. Print only important information and errors]'
             '(-h --help --quiet)--debug[Print extra information to help debugging problems]'
             ':hashdump: _swupd_hashdump'

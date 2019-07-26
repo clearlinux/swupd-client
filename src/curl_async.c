@@ -534,6 +534,7 @@ int swupd_curl_parallel_download_enqueue(struct swupd_curl_parallel_handle *h, c
 	unlink(file->file.path);
 
 	progress = calloc(1, sizeof(struct file_progress));
+	ON_NULL_ABORT(progress);
 	progress->overall_progress = h->data;
 	file->progress = progress;
 

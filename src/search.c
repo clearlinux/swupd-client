@@ -489,8 +489,8 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
-	print("   -l, --library           Search paths where libraries are located for a match\n");
-	print("   -B, --binary            Search paths where binaries are located for a match\n");
+	print("   -l, --library           Search for a match of the given file in the directories where libraries are located\n");
+	print("   -B, --binary            Search for a match of the given file in the directories where binaries are located\n");
 	print("   -T, --top=[NUM]         Only display the top NUM results for each bundle\n");
 	print("   -m, --csv               Output all results in CSV format (machine-readable)\n");
 	print("   -i, --init              Download all manifests then return, no search done\n");

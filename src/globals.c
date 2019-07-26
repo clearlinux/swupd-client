@@ -584,13 +584,48 @@ void global_print_help(void)
 	print("\n");
 }
 
+void load_flags_in_config(char *command, struct option *opts_array, const struct global_options *opts)
+{
+#ifdef CONFIG_FILE_PATH
+	bool config_found = false;
+	// load configuration values from the config file
+	struct config_loader_data loader_data = { command, opts_array, global_parse_opt, opts->parse_opt };
+	struct stat st;
+	char *ctx = NULL;
+	char *config_file = NULL;
+	char *str = strdup_or_die(CONFIG_FILE_PATH);
+
+	for (char *tok = strtok_r(str, ":", &ctx); tok; tok = strtok_r(NULL, ":", &ctx)) {
+		if (stat(tok, &st)) {
+			continue;
+		}
+		if ((st.st_mode & S_IFMT) != S_IFDIR) {
+			continue;
+		}
+		debug("Looking for config file in path %s\n", tok);
+		string_or_die(&config_file, "%s/config", tok);
+		config_found = config_parse(config_file, config_loader_set_opt, &loader_data);
+		free_string(&config_file);
+		if (config_found) {
+			debug("Using configuration file %s\n", tok);
+			break;
+		}
+	}
+
+	free_string(&str);
+	if (!config_found) {
+		debug("Configuration file not found in %s\n", CONFIG_FILE_PATH);
+		debug("No configuration file will be used\n\n");
+	}
+#endif
+}
+
 int global_parse_options(int argc, char **argv, const struct global_options *opts)
 {
 	struct option *opts_array;
 	int num_global_opts, opt;
 	char *optstring;
 	int ret = 0;
-	bool config_found = false;
 
 	if (!opts) {
 		return -EINVAL;
@@ -610,35 +645,7 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 	optstring = generate_optstring(opts_array,
 				       num_global_opts + opts->longopts_len);
 
-	// load configuration values from the config file first
-	struct config_loader_data loader_data = { argv[0], opts_array, global_parse_opt, opts->parse_opt };
-	if (CONFIG_FILE_PATH) {
-		struct stat st;
-		char *ctx = NULL;
-		char *config_file = NULL;
-		char *str = strdup_or_die(CONFIG_FILE_PATH);
-		for (char *tok = strtok_r(str, ":", &ctx); tok; tok = strtok_r(NULL, ":", &ctx)) {
-			if (stat(tok, &st)) {
-				continue;
-			}
-			if ((st.st_mode & S_IFMT) != S_IFDIR) {
-				continue;
-			}
-			debug("Looking for config file in path %s\n", tok);
-			string_or_die(&config_file, "%s/config", tok);
-			config_found = config_parse(config_file, config_loader_set_opt, &loader_data);
-			free_string(&config_file);
-			if (config_found) {
-				debug("Using configuration file %s\n", tok);
-				break;
-			}
-		}
-		free_string(&str);
-	}
-	if (!config_found) {
-		debug("Configuration file not found in %s\n", CONFIG_FILE_PATH);
-		debug("No configuration file will be used\n\n");
-	}
+	load_flags_in_config(argv[0], opts_array, opts);
 
 	// parse and load flags from command line
 	while ((opt = getopt_long(argc, argv, optstring, opts_array, NULL)) != -1) {

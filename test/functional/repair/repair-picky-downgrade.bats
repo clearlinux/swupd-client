@@ -51,15 +51,15 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
-		 -> Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $PATH_PREFIX/usr/lib/os-release -> fixed
 		Removing extraneous files
-		Removing extra files under .*/target-dir/usr
-		 -> Extra file: /usr/share/defaults/swupd/versionurl -> deleted
-		 -> Extra file: /usr/share/defaults/swupd/contenturl -> deleted
-		 -> Extra file: /usr/share/clear/bundles/test-bundle2 -> deleted
-		 -> Extra file: /usr/foo/file_3 -> deleted
-		 -> Extra file: /usr/foo/file_2 -> deleted
-		 -> Extra file: /usr/foo/ -> deleted
+		Removing extra files under $PATH_PREFIX/usr
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/contenturl -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/share/clear/bundles/test-bundle2 -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/foo/file_3 -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/foo/file_2 -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/foo/ -> deleted
 		Inspected 19 files
 		  1 file did not match
 		    1 of 1 files were repaired
@@ -71,7 +71,7 @@ test_setup() {
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_not_exists "$TARGETDIR"/usr/foo/file_2
 	assert_file_not_exists "$TARGETDIR"/usr/foo/file_3
 	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
@@ -95,12 +95,12 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
-		 -> Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $PATH_PREFIX/usr/lib/os-release -> fixed
 		Removing extraneous files
-		Removing extra files under .*/target-dir/bar
-		 -> Extra file: /bar/file_5 -> deleted
-		 -> Extra file: /bar/file_4 -> deleted
-		 -> Extra file: /bar/ -> deleted
+		Removing extra files under $PATH_PREFIX/bar
+		 -> Extra file: $PATH_PREFIX/bar/file_5 -> deleted
+		 -> Extra file: $PATH_PREFIX/bar/file_4 -> deleted
+		 -> Extra file: $PATH_PREFIX/bar/ -> deleted
 		Inspected 16 files
 		  1 file did not match
 		    1 of 1 files were repaired
@@ -112,7 +112,7 @@ test_setup() {
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_not_exists "$TARGETDIR"/bar/file_4
 	assert_file_not_exists "$TARGETDIR"/bar/file_5
 	# these files should still exist in the target system since we specified /bar

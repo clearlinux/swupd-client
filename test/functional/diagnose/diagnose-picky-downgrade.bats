@@ -23,15 +23,15 @@ test_setup() {
 		Warning: One or more installed bundles are not available at version 10
 		Checking for missing files
 		Checking for corrupt files
-		 -> Hash mismatch for file: .*/target-dir/usr/lib/os-release
+		 -> Hash mismatch for file: $PATH_PREFIX/usr/lib/os-release
 		Checking for extraneous files
-		Checking for extra files under .*/target-dir/usr
-		 -> Extra file: /usr/share/defaults/swupd/versionurl
-		 -> Extra file: /usr/share/defaults/swupd/contenturl
-		 -> Extra file: /usr/share/clear/bundles/test-bundle2
-		 -> Extra file: /usr/foo/file_3
-		 -> Extra file: /usr/foo/file_2
-		 -> Extra file: /usr/foo/
+		Checking for extra files under $PATH_PREFIX/usr
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/contenturl
+		 -> Extra file: $PATH_PREFIX/usr/share/clear/bundles/test-bundle2
+		 -> Extra file: $PATH_PREFIX/usr/foo/file_3
+		 -> Extra file: $PATH_PREFIX/usr/foo/file_2
+		 -> Extra file: $PATH_PREFIX/usr/foo/
 		Inspected 19 files
 		  1 file did not match
 		  6 files found which should be deleted
@@ -39,7 +39,7 @@ test_setup() {
 		Diagnose successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/usr/foo/file_2
 	assert_file_exists "$TARGETDIR"/usr/foo/file_3
 	assert_file_exists "$TARGETDIR"/bar/file_4

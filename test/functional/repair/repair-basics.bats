@@ -39,13 +39,13 @@ test_setup() {
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		.* Missing file: .*/target-dir/baz -> fixed
-		.* Missing file: .*/target-dir/baz/file_3 -> fixed
+		 -> Missing file: $PATH_PREFIX/baz -> fixed
+		 -> Missing file: $PATH_PREFIX/baz/file_3 -> fixed
 		Repairing corrupt files
-		.* Hash mismatch for file: .*/target-dir/foo/file_1 -> fixed
-		.* Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $PATH_PREFIX/foo/file_1 -> fixed
+		 -> Hash mismatch for file: $PATH_PREFIX/usr/lib/os-release -> fixed
 		Removing extraneous files
-		.* File that should be deleted: .*/target-dir/bar/file_2 -> deleted
+		 -> File that should be deleted: $PATH_PREFIX/bar/file_2 -> deleted
 		Inspected 18 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
@@ -60,7 +60,7 @@ test_setup() {
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	# tracked files
 	assert_file_exists "$TARGETDIR"/foo/file_1
 	assert_file_not_exists "$TARGETDIR"/bar/file_2
@@ -87,17 +87,17 @@ test_setup() {
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: .*/target-dir/baz -> fixed
-		 -> Missing file: .*/target-dir/baz/file_3 -> fixed
+		 -> Missing file: $PATH_PREFIX/baz -> fixed
+		 -> Missing file: $PATH_PREFIX/baz/file_3 -> fixed
 		Repairing corrupt files
-		 -> Hash mismatch for file: .*/target-dir/foo/file_1 -> fixed
-		 -> Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $PATH_PREFIX/foo/file_1 -> fixed
+		 -> Hash mismatch for file: $PATH_PREFIX/usr/lib/os-release -> fixed
 		Removing extraneous files
-		 -> File that should be deleted: .*/target-dir/bar/file_2 -> deleted
-		Removing extra files under .*/target-dir/usr
-		 -> Extra file: /usr/untracked_file3 -> deleted
-		 -> Extra file: /usr/share/defaults/swupd/versionurl -> deleted
-		 -> Extra file: /usr/share/defaults/swupd/contenturl -> deleted
+		 -> File that should be deleted: $PATH_PREFIX/bar/file_2 -> deleted
+		Removing extra files under $PATH_PREFIX/usr
+		 -> Extra file: $PATH_PREFIX/usr/untracked_file3 -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/contenturl -> deleted
 		Inspected 21 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
@@ -112,7 +112,7 @@ test_setup() {
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	# tracked files
 	assert_file_exists "$TARGETDIR"/foo/file_1
 	assert_file_not_exists "$TARGETDIR"/bar/file_2
@@ -141,16 +141,16 @@ test_setup() {
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: .*/target-dir/baz -> fixed
-		 -> Missing file: .*/target-dir/baz/file_3 -> fixed
+		 -> Missing file: $PATH_PREFIX/baz -> fixed
+		 -> Missing file: $PATH_PREFIX/baz/file_3 -> fixed
 		Repairing corrupt files
-		 -> Hash mismatch for file: .*/target-dir/foo/file_1 -> fixed
-		 -> Hash mismatch for file: .*/target-dir/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $PATH_PREFIX/foo/file_1 -> fixed
+		 -> Hash mismatch for file: $PATH_PREFIX/usr/lib/os-release -> fixed
 		Removing extraneous files
-		 -> File that should be deleted: .*/target-dir/bar/file_2 -> deleted
-		Removing extra files under .*/target-dir/bat
-		 -> Extra file: /bat/untracked_file1 -> deleted
-		 -> Extra file: /bat/ -> deleted
+		 -> File that should be deleted: $PATH_PREFIX/bar/file_2 -> deleted
+		Removing extra files under $PATH_PREFIX/bat
+		 -> Extra file: $PATH_PREFIX/bat/untracked_file1 -> deleted
+		 -> Extra file: $PATH_PREFIX/bat/ -> deleted
 		Inspected 20 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
@@ -165,7 +165,7 @@ test_setup() {
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	# tracked files
 	assert_file_exists "$TARGETDIR"/foo/file_1
 	assert_file_not_exists "$TARGETDIR"/bar/file_2

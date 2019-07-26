@@ -26,9 +26,9 @@ test_setup() {
 		Adding any missing files
 		Repairing corrupt files
 		Removing extraneous files
-		Removing extra files under .*/target-dir/usr
-		 -> Extra file: /usr/share/defaults/swupd/versionurl -> deleted
-		 -> Extra file: /usr/share/defaults/swupd/contenturl -> deleted
+		Removing extra files under $PATH_PREFIX/usr
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/contenturl -> deleted
 		Inspected 15 files
 		  2 files found which should be deleted
 		    2 of 2 files were deleted
@@ -37,7 +37,7 @@ test_setup() {
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	# this should not exist at the end, despite being marked in the Manifest as
 	# "ghosted". In this case ghosted files should be ignored.
 	assert_file_not_exists "$TARGETDIR"/usr/foo

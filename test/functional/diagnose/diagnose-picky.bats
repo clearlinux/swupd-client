@@ -30,20 +30,20 @@ test_setup() {
 		Checking for missing files
 		Checking for corrupt files
 		Checking for extraneous files
-		Checking for extra files under .*/target-dir/usr
-		 -> Extra file: /usr/share/defaults/swupd/versionurl
-		 -> Extra file: /usr/share/defaults/swupd/contenturl
-		 -> Extra file: /usr/foo/bar/file2
-		 -> Extra file: /usr/foo/bar/
-		 -> Extra file: /usr/foo/
-		 -> Extra file: /usr/file1
+		Checking for extra files under $PATH_PREFIX/usr
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/contenturl
+		 -> Extra file: $PATH_PREFIX/usr/foo/bar/file2
+		 -> Extra file: $PATH_PREFIX/usr/foo/bar/
+		 -> Extra file: $PATH_PREFIX/usr/foo/
+		 -> Extra file: $PATH_PREFIX/usr/file1
 		Inspected 17 files
 		  6 files found which should be deleted
 		Use "swupd repair --picky" to correct the problems in the system
 		Diagnose successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/usr/file1
 	assert_file_exists "$TARGETDIR"/usr/foo/bar/file2
 
@@ -58,19 +58,19 @@ test_setup() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Checking for extra files under .*/target-dir/usr
-		 -> Extra file: /usr/share/defaults/swupd/versionurl
-		 -> Extra file: /usr/share/defaults/swupd/contenturl
-		 -> Extra file: /usr/foo/bar/file2
-		 -> Extra file: /usr/foo/bar/
-		 -> Extra file: /usr/foo/
-		 -> Extra file: /usr/file1
+		Checking for extra files under $PATH_PREFIX/usr
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/contenturl
+		 -> Extra file: $PATH_PREFIX/usr/foo/bar/file2
+		 -> Extra file: $PATH_PREFIX/usr/foo/bar/
+		 -> Extra file: $PATH_PREFIX/usr/foo/
+		 -> Extra file: $PATH_PREFIX/usr/file1
 		Inspected 6 files
 		  6 files found which should be deleted
 		Use "swupd repair --picky" to correct the problems in the system
 		Diagnose successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

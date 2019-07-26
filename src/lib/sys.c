@@ -84,7 +84,13 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 	/* replace the stdin with /dev/null. the underlying commands should never be
 	 * run interactively. */
 	null_fd = open("/dev/null", O_RDONLY);
-	dup2(null_fd, 0);
+	if (null_fd < 0) {
+		goto error_child;
+	}
+	if (dup2(null_fd, 0) < 0) {
+		close(null_fd);
+		goto error_child;
+	}
 	close(null_fd);
 
 	if (replace_fd(STDOUT_FILENO, stdout_file) < 0) {

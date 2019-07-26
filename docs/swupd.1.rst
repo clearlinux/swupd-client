@@ -155,6 +155,11 @@ used to modify the core behavior and resources that swupd uses.
    secure https connections by default. This option forces swupd
    to allow updates over insecure http connections.
 
+   Important note: although it is not recommended, if an http server is
+   set up as the upstream server, the `allow_insecure_http=true` option will
+   need to be setup in the swupd configuration file for the autoupdate command
+   to continue to work.
+
 - ``--no-progress``
 
    Don't print progress report on commands that informs the percentage left in current operation.
@@ -604,6 +609,34 @@ SUBCOMMANDS
 
         Like --picky, but it only removes extra files. It omits checking
         hash values, and for missing files, directories and/or symlinks.
+
+
+FILES
+=====
+
+/usr/share/defaults/swupd
+
+    Sometimes a set of flags is always used for one, or many swupd commands. The
+    ``swupd configuration file`` provides a convenient way of persistently define
+    these flags so they don't need to be specified every time a command is run.
+
+    The configuration file is an INI type of file that consists of sections, each led
+    by a [section] header, followed by key/value entries separated by a '=' character.
+    Note that there should be no whitespace between key=value. The configuration
+    file may include comments, prefixed by either the '#' or the ';' characters.
+
+    There can be one section for each swupd command (e.g. [bundle-add], [update], etc.)
+    and one for global options (e.g. [GLOBAL]). Global options can be specified in the
+    either in the GLOBAL section, in a command section, or in both. Global options
+    specified in the command section have higher precedence than those specified in the
+    GLOBAL section, so it is possible to define a GLOBAL option that will apply to all
+    swupd command except for that one overwritten in the command section.
+
+    A sample swupd configuration file can be found at this location (this file should not
+    be modified):
+    /usr/share/defaults/swupd
+
+    To use it, copy it to /etc/swupd where swupd reads the configuration from.
 
 
 EXIT STATUS

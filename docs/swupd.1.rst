@@ -535,8 +535,8 @@ SUBCOMMANDS
 
     - `-B, --bundles=[BUNDLES]`
 
-        Only verify the (comma separated) list of bundles are installed
-        correctly.
+        Forces swupd to only consider the (comma separated) list of BUNDLES for
+        verify.
 
         Examples:
 

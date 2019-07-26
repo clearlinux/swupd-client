@@ -96,20 +96,20 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 	char *temp;
 	bool ret = true;
 
+	temp = sys_path_join(globals.path_prefix, filename);
 	if (fix) {
-		string_or_die(&temp, "%s%s", globals.path_prefix, filename);
-		print(" -> Extra file: %s%s", filename, is_dir ? "/" : "");
+		print(" -> Extra file: %s%s", temp, is_dir ? "/" : "");
 		if (remove(temp)) {
-			warn(" -> Failed to remove %s (%i: %s)\n", temp, errno, strerror(errno));
+			print(" -> not deleted (%s)\n", strerror(errno));
 			ret = false;
 		} else {
 			print(" -> deleted\n");
 		}
-		free_string(&temp);
 	} else {
-		print(" -> Extra file: %s%s\n", filename, is_dir ? "/" : "");
+		print(" -> Extra file: %s%s\n", temp, is_dir ? "/" : "");
 		ret = false;
 	}
+	free_string(&temp);
 
 	return ret;
 }

@@ -31,13 +31,13 @@ test_setup() {
 		Adding any missing files
 		Repairing corrupt files
 		Removing extraneous files
-		Removing extra files under .*/target-dir/usr
-		 -> Extra file: /usr/share/defaults/swupd/versionurl -> deleted
-		 -> Extra file: /usr/share/defaults/swupd/contenturl -> deleted
-		 -> Extra file: /usr/foo/bar/file2 -> deleted
-		 -> Extra file: /usr/foo/bar/ -> deleted
-		 -> Extra file: /usr/foo/ -> deleted
-		 -> Extra file: /usr/file1 -> deleted
+		Removing extra files under $PATH_PREFIX/usr
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/contenturl -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/foo/bar/file2 -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/foo/bar/ -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/foo/ -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/file1 -> deleted
 		Inspected 17 files
 		  6 files found which should be deleted
 		    6 of 6 files were deleted
@@ -46,7 +46,7 @@ test_setup() {
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_not_exists "$TARGETDIR"/usr/file1
 	assert_file_not_exists "$TARGETDIR"/usr/foo/bar/file2
 
@@ -61,13 +61,13 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Removing extra files under .*/target-dir/usr
-		 -> Extra file: /usr/share/defaults/swupd/versionurl -> deleted
-		 -> Extra file: /usr/share/defaults/swupd/contenturl -> deleted
-		 -> Extra file: /usr/foo/bar/file2 -> deleted
-		 -> Extra file: /usr/foo/bar/ -> deleted
-		 -> Extra file: /usr/foo/ -> deleted
-		 -> Extra file: /usr/file1 -> deleted
+		Removing extra files under $PATH_PREFIX/usr
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/contenturl -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/foo/bar/file2 -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/foo/bar/ -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/foo/ -> deleted
+		 -> Extra file: $PATH_PREFIX/usr/file1 -> deleted
 		Inspected 6 files
 		  6 files found which should be deleted
 		    6 of 6 files were deleted
@@ -76,7 +76,7 @@ test_setup() {
 		Repair successful
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_not_exists "$TARGETDIR"/usr/file1
 	assert_file_not_exists "$TARGETDIR"/usr/foo/bar/file2
 

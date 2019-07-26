@@ -418,6 +418,7 @@ set_env_variables() { # swupd_function
 	export WEBDIR="$env_name"/web-dir
 	export TARGETDIR="$env_name"/testfs/target-dir
 	export STATEDIR="$env_name"/testfs/state
+	export PATH_PREFIX="$TEST_DIRNAME"/testfs/target-dir
 
 	# different options for swupd
 	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $FUNC_DIR/Swupd_Root.pem -I"

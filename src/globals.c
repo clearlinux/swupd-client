@@ -559,7 +559,7 @@ void global_print_help(void)
 {
 	print("Global Options:\n");
 	print("   -h, --help              Show help options\n");
-	print("   -p, --path=[PATH]       Use [PATH] as the path to verify (eg: a chroot or btrfs subvol)\n");
+	print("   -p, --path=[PATH]       Use [PATH] to set the top-level directory for the swupd-managed system\n");
 	print("   -u, --url=[URL]         RFC-3986 encoded url for version string and content file downloads\n");
 	print("   -P, --port=[port #]     Port number to connect to at the url for version string and content file downloads\n");
 	print("   -c, --contenturl=[URL]  RFC-3986 encoded url for content file downloads\n");

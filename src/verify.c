@@ -51,7 +51,7 @@ static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
 static bool cmdline_option_install = false;
 static bool cmdline_option_quick = false;
 static struct list *cmdline_option_bundles = NULL;
-static bool cmdline_extra_files_only = false;
+static bool cmdline_option_extra_files_only = false;
 
 /* picky_whitelist points to picky_whitelist_buffer if and only if regcomp() was called for it */
 static regex_t *picky_whitelist;
@@ -130,7 +130,7 @@ void verify_set_picky_tree(char *picky_tree)
 
 void verify_set_extra_files_only(bool opt)
 {
-	cmdline_extra_files_only = opt;
+	cmdline_option_extra_files_only = opt;
 }
 
 static void print_help(void)
@@ -145,12 +145,12 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
-	print("   -V, --version=[VER]     Verify against manifest version VER\n");
+	print("   -V, --version=[VER]     %s against manifest version VER\n", cmdline_command_verify ? "Verify" : "Diagnose");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -q, --quick             Don't check for corrupt files, only fix missing files\n");
 	if (cmdline_command_verify) {
 		print("   -B, --bundles=[BUNDLES] Forces swupd to only consider the specified BUNDLES for verify. Example: --bundles=os-core,vi\n");
-		print("   -m, --manifest=V        This option has been superseded. Please consider using the -V option instead\n");
+		print("   -m, --manifest=[VER]    This option has been superseded. Please consider using the -V option instead\n");
 		print("   -f, --fix               This option has been superseded, please consider using \"swupd repair\" instead\n");
 		print("   -i, --install           This option has been superseded, please consider using \"swupd os-install\" instead\n");
 		print("   -Y, --picky             Also list (without --fix) or remove (with --fix) files which should not exist\n");
@@ -620,7 +620,7 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	}
 	case FLAG_EXTRA_FILES_ONLY:
-		cmdline_extra_files_only = true;
+		cmdline_option_extra_files_only = true;
 		return true;
 	default:
 		return false;
@@ -675,7 +675,7 @@ static bool parse_options(int argc, char **argv)
 				error("--install and --picky options are mutually exclusive\n");
 				return false;
 			}
-			if (cmdline_extra_files_only) {
+			if (cmdline_option_extra_files_only) {
 				error("--install and --extra-files-only options are mutually exclusive\n");
 				return false;
 			}
@@ -690,6 +690,15 @@ static bool parse_options(int argc, char **argv)
 			if (!cmdline_option_fix) {
 				error("--bundles option require the --fix option\n");
 				return false;
+			} else {
+				warn("Using the --bundles option may have some undesired side effects\n");
+				if (!cmdline_option_extra_files_only) {
+					info(" - verify will remove files marked as deleted in --bundles, this can corrupt other bundles not listed in --bundles\n");
+				}
+				if (cmdline_option_picky || cmdline_option_extra_files_only) {
+					info(" - verify will remove all files in %s that are not part of --bundles unless listed in the --picky-whitelist\n", cmdline_option_picky_tree);
+				}
+				info("\n");
 			}
 		}
 
@@ -708,12 +717,12 @@ static bool parse_options(int argc, char **argv)
 			error("--quick and --picky options are mutually exclusive\n");
 			return false;
 		}
-		if (cmdline_extra_files_only) {
+		if (cmdline_option_extra_files_only) {
 			error("--quick and --extra-files-only options are mutually exclusive\n");
 			return false;
 		}
 	}
-	if (cmdline_extra_files_only) {
+	if (cmdline_option_extra_files_only) {
 		if (cmdline_option_picky) {
 			error("--extra-files-only and --picky options are mutually exclusive\n");
 			return false;
@@ -779,13 +788,13 @@ enum swupd_code verify_main(void)
 	} else if (cmdline_option_fix) {
 		steps_in_verify += 2;
 	}
-	if (cmdline_option_picky || cmdline_extra_files_only) {
+	if (cmdline_option_picky || cmdline_option_extra_files_only) {
 		steps_in_verify += 1;
 	}
 	if (cmdline_option_quick) {
-		steps_in_verify -= (cmdline_option_picky || cmdline_extra_files_only) ? 3 : 2;
+		steps_in_verify -= (cmdline_option_picky || cmdline_option_extra_files_only) ? 3 : 2;
 	}
-	if (cmdline_extra_files_only) {
+	if (cmdline_option_extra_files_only) {
 		steps_in_verify = 5;
 	}
 	progress_init_steps("verify", steps_in_verify);
@@ -972,7 +981,7 @@ enum swupd_code verify_main(void)
 	progress_complete_step();
 	timelist_timer_stop(globals.global_times);
 
-	if (cmdline_extra_files_only) {
+	if (cmdline_option_extra_files_only) {
 		/* user wants to deal only with the extra files, so skip everything else */
 		goto extra_files;
 	}
@@ -1048,7 +1057,7 @@ enum swupd_code verify_main(void)
 
 	/* remove extra files */
 extra_files:
-	if (cmdline_option_picky || cmdline_extra_files_only) {
+	if (cmdline_option_picky || cmdline_option_extra_files_only) {
 		timelist_timer_start(globals.global_times, "Removing extra files");
 		progress_set_next_step("remove_extra_files");
 		deal_with_extra_files(official_manifest, cmdline_option_fix);

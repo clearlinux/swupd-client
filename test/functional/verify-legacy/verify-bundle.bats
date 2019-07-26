@@ -23,6 +23,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Warning: The --fix option has been superseded
 		Please consider using "swupd repair" instead
+		Warning: Using the --bundles option may have some undesired side effects
+		 - verify will remove files marked as deleted in --bundles, this can corrupt other bundles not listed in --bundles
 		Verifying version 10
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
@@ -54,6 +56,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Warning: The --fix option has been superseded
 		Please consider using "swupd repair" instead
+		Warning: Using the --bundles option may have some undesired side effects
+		 - verify will remove files marked as deleted in --bundles, this can corrupt other bundles not listed in --bundles
 		Verifying version 10
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
@@ -86,6 +90,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Warning: The --fix option has been superseded
 		Please consider using "swupd repair" instead
+		Warning: Using the --bundles option may have some undesired side effects
+		 - verify will remove files marked as deleted in --bundles, this can corrupt other bundles not listed in --bundles
 		Verifying version 10
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
@@ -106,5 +112,45 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/core
 	assert_file_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/bar/test-file2
+
+}
+
+@test "VER004: Verify bundle warns users about possible undesired side effects when using --bundles" {
+
+	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --fix --bundles test-bundle1"
+	assert_status_is "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		Warning: Using the --bundles option may have some undesired side effects
+		 - verify will remove files marked as deleted in --bundles, this can corrupt other bundles not listed in --bundles
+	EOM
+	)
+	assert_in_output "$expected_output"
+
+}
+
+@test "VER005: Verify bundle warns users about possible undesired side effects when using --bundles + --extra-files-only" {
+
+	# with --extra-files-only
+	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --fix --extra-files-only --bundles test-bundle1"
+	expected_output=$(cat <<-EOM
+		Warning: Using the --bundles option may have some undesired side effects
+		 - verify will remove all files in /usr that are not part of --bundles unless listed in the --picky-whitelist
+	EOM
+	)
+	assert_in_output "$expected_output"
+
+}
+
+@test "VER006: Verify bundle warns users about possible undesired side effects when using --bundles + --picky" {
+
+	# with --picky
+	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --fix --picky --bundles test-bundle1"
+	expected_output=$(cat <<-EOM
+		Warning: Using the --bundles option may have some undesired side effects
+		 - verify will remove files marked as deleted in --bundles, this can corrupt other bundles not listed in --bundles
+		 - verify will remove all files in /usr that are not part of --bundles unless listed in the --picky-whitelist
+	EOM
+	)
+	assert_in_output "$expected_output"
 
 }

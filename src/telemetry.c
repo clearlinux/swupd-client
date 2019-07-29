@@ -38,7 +38,7 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 	char *filename;
 	char *filename_n;
 	char *newname;
-	int fd;
+	int fd, ret;
 
 	string_or_die(&filename, "%s/%d.%s.%d.XXXXXX", globals.state_dir,
 		      RECORD_VERSION, class, level);
@@ -46,7 +46,7 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 	fd = mkstemp(filename);
 	if (fd < 0) {
 		free_string(&filename);
-		return;
+		goto error;
 	}
 
 	dprintf(fd, "PACKAGE_NAME=%s\nPACKAGE_VERSION=%s\n",
@@ -61,12 +61,19 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 	filename_n = basename(filename);
 	if (!filename_n) {
 		free_string(&filename);
-		return;
+		goto error;
 	}
 
 	string_or_die(&newname, "%s/telemetry/%s", globals.state_dir, filename_n);
 
-	rename(filename, newname);
+	ret = rename(filename, newname);
 	free_string(&filename);
 	free_string(&newname);
+	if (ret < 0) {
+		goto error;
+	}
+
+	return;
+error:
+	error("Failed to create error report for %s\n", filename);
 }

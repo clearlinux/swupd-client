@@ -225,7 +225,7 @@ static bool is_hashed_manifest(const char UNUSED_PARAM *dir, const struct dirent
 		return false;
 	}
 
-	int i;
+	int counter = 0;
 	int start = sizeof("Manifest.");
 	const char *ename = entry->d_name + start;
 
@@ -236,15 +236,12 @@ static bool is_hashed_manifest(const char UNUSED_PARAM *dir, const struct dirent
 	 * in the file name. Expect 1 '.' because we are starting after the prefix
 	 * 'Manifest.'
 	 */
-	for (i = 0; ename[i]; ename[i] == '.' ? i++ : *ename++) {
-		/* this for loop is counting the occurrances of '.' by incrementing a
-		 * counter (i) when the character is encountered. The 'i' variable is
-		 * used as an index into the string as well. The pointer to the string
-		 * is advanced when a '.' is not encountered, so the index into the
-		 * original string is num_dots + num_not_dots.
-		 */
+	for (ename = entry->d_name + start; *ename; ename++) {
+		if (*ename == '.') {
+			counter++;
+		}
 	}
-	if (i != 1) {
+	if (counter != 1) {
 		return false;
 	}
 

@@ -277,7 +277,7 @@ bool set_path_prefix(char *path)
 		return false;
 	}
 
-	new_path = realpath(path, new_path);
+	new_path = realpath(path, NULL);
 	if (!new_path) {
 		goto error;
 	}

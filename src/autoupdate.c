@@ -126,19 +126,20 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 		}
 		return SWUPD_OK;
 	} else {
-		int rc;
-		rc = systemctl_cmd("is-enabled", "swupd-update.service", NULL);
-		switch (rc) {
-		case SWUPD_OK:
+		int rc1, rc2;
+		const int STATUS_UNKNOWN = 4;
+		rc1 = systemctl_cmd("is-enabled", "swupd-update.service", NULL);
+		rc2 = systemctl_cmd("is-active", "swupd-update.timer", NULL);
+		if (rc1 == SWUPD_OK && rc2 == SWUPD_OK) {
 			print("Enabled\n");
-			break;
-		case SWUPD_NO:
-			print("Disabled\n");
-			break;
-		default:
-			rc = SWUPD_SUBPROCESS_ERROR;
+			return SWUPD_OK;
+		} else if (rc1 >= STATUS_UNKNOWN || rc2 >= STATUS_UNKNOWN) {
+			/* systemctl returns 1,2, or 3 when program dead or not running */
 			error("Unable to determine autoupdate status\n");
+			return SWUPD_SUBPROCESS_ERROR;
+		} else {
+			print("Disabled\n");
+			return SWUPD_NO;
 		}
-		return (rc);
 	}
 }

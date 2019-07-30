@@ -172,6 +172,13 @@ int swupd_curl_parallel_download_enqueue(struct swupd_curl_parallel_handle *hand
  */
 int swupd_curl_parallel_download_end(struct swupd_curl_parallel_handle *handle, int *num_downloads);
 
+/**
+ * @brief Finish pending tasks for concluded downloads and drop all other pending downloads and clear the download handle.
+ *
+ *  @param handle         Handle created with swupd_curl_parallel_download_start().
+ * @note This function MAY be blocked.
+ */
+void swupd_curl_parallel_download_cancel(struct swupd_curl_parallel_handle *h);
 #ifdef __cplusplus
 }
 #endif

@@ -51,23 +51,32 @@ int nonpack;
  * the files they both include */
 static int check_manifests_uniqueness(int clrver, int mixver)
 {
-	struct manifest *clear = load_manifest_full(clrver, false);
-	struct manifest *mixer = load_manifest_full(mixver, true);
+	int ret = 0;
+	struct manifest *clear = NULL;
+	struct manifest *mixer = NULL;
+	struct file **clearfull = NULL;
+	struct file **mixerfull = NULL;
+
+	mixer = load_manifest_full(mixver, true);
+	clear = load_manifest_full(clrver, false);
 	if (!clear || !mixer) {
 		error("Could not load full manifests\n");
-		return -1;
+		ret = -1;
+		goto error;
 	}
 
-	struct file **clearfull = manifest_files_to_array(clear);
-	struct file **mixerfull = manifest_files_to_array(mixer);
+	clearfull = manifest_files_to_array(clear);
+	mixerfull = manifest_files_to_array(mixer);
 
 	if (clearfull == NULL || mixerfull == NULL) {
 		error("Could not convert full manifest to array\n");
-		return -1;
+		ret = -1;
+		goto error;
 	}
 
-	int ret = enforce_compliant_manifest(mixerfull, clearfull, mixer->filecount, clear->filecount);
+	ret = enforce_compliant_manifest(mixerfull, clearfull, mixer->filecount, clear->filecount);
 
+error:
 	free_manifest_array(clearfull);
 	free_manifest_array(mixerfull);
 	free_manifest(clear);

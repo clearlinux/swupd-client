@@ -513,6 +513,7 @@ static enum download_status swupd_curl_get_file_full(const char *url, char *file
 	CURLcode curl_ret;
 	enum download_status status;
 	struct curl_file local = { 0 };
+	void *local_ptr = &local;
 
 restart_download:
 	curl_easy_reset(curl);
@@ -535,7 +536,7 @@ restart_download:
 			curl_ret = swupd_download_file_create(&local);
 		}
 
-		curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void *)&local);
+		curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void *)local_ptr);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}

@@ -426,13 +426,10 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 		total_curl_sz += curl_sz;
 	}
 
-	if (curl_ret == CURLE_OK || curl_ret == CURLE_HTTP_RETURNED_ERROR ||
-	    curl_ret == CURLE_RECV_ERROR) {
+	if (curl_ret == CURLE_OK || curl_ret == CURLE_HTTP_RETURNED_ERROR) {
 		long response = 0;
-		if (curl_ret == CURLE_OK || curl_ret == CURLE_HTTP_RETURNED_ERROR) {
-			if (curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &response) != CURLE_OK) {
-				response = -1; // Force error
-			}
+		if (curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &response) != CURLE_OK) {
+			response = -1; // Force error
 		}
 		debug("Curl - process_curl_error_codes: curl_ret = %d, response = %d\n", curl_ret, response);
 		/* curl command succeeded, download might've failed, let our caller handle */

@@ -12,7 +12,10 @@
 		abort();   \
 	}
 
-/** @brief Set parameter as unused . */
+/** @brief Set parameter as unused. */
 #define UNUSED_PARAM __attribute__((__unused__))
+
+/** @brief Return the max between 2 values. */
+#define MAX(_a, _b) ((_a) > (_b) ? (_a) : (_b))
 
 #endif

@@ -762,8 +762,11 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_
 		goto exit;
 	}
 
-	curl_easy_setopt(curl, CURLOPT_USERAGENT, PACKAGE "/" VERSION);
-	// No error checking needed, this is not critical information
+	curl_ret = curl_easy_setopt(curl, CURLOPT_USERAGENT, PACKAGE "/" VERSION);
+	if (curl_ret != CURLE_OK && curl_ret != CURLE_UNKNOWN_OPTION) {
+		debug("Curl - User agent not set");
+		// Don't abort operation because this isn't a critical information
+	}
 
 	if (globals.update_server_port > 0) {
 		curl_ret = curl_easy_setopt(curl, CURLOPT_PORT, globals.update_server_port);

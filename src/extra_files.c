@@ -155,11 +155,12 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 			found->in_manifest = true;
 		}
 	}
+
+	int skip_len = 0; /* Length of directory name we are skipping
+			   * could have used strlen(skip_dir), but speed! */
 	/* list files/directories which are extra.
 	 * This is reverse so that files are removed before their parent dirs */
 	for (int i = nF - 1; i >= 0; i--) {
-		int skip_len; /* Length of directory name we are skipping
-			       * could have used strlen(skip_dir), but speed! */
 		if (!F[i].in_manifest) {
 			/* Account for these files not in the manifest as inspected also */
 			counts->checked++;

@@ -502,6 +502,30 @@ out_bad:
 	return -1;
 }
 
+static void swupd_curl_parallel_download_clear(struct swupd_curl_parallel_handle *h, int *num_downloads)
+{
+	struct multi_curl_file *file;
+	int i, downloads = 0;
+	struct list *l;
+
+	curl_multi_cleanup(h->mcurl);
+	tp_complete(h->thpool);
+	list_free_list(h->failed);
+
+	HASHMAP_FOREACH(h->curl_hashmap, i, l, file)
+	{
+		downloads++;
+		free_curl_file(h, file);
+	}
+	hashmap_free(h->curl_hashmap);
+
+	free(h);
+
+	if (num_downloads) {
+		*num_downloads = downloads;
+	}
+}
+
 int swupd_curl_parallel_download_enqueue(struct swupd_curl_parallel_handle *h, const char *url, const char *filename, const char *hash, void *data)
 {
 	struct multi_curl_file *file;
@@ -544,7 +568,7 @@ int swupd_curl_parallel_download_enqueue(struct swupd_curl_parallel_handle *h, c
 int swupd_curl_parallel_download_end(struct swupd_curl_parallel_handle *h, int *num_downloads)
 {
 	struct multi_curl_file *file;
-	int i, downloads = 0;
+	int i;
 	struct list *l;
 	bool retry = true;
 	int ret = 0;
@@ -613,21 +637,15 @@ int swupd_curl_parallel_download_end(struct swupd_curl_parallel_handle *h, int *
 		ret = -SWUPD_COULDNT_DOWNLOAD_FILE;
 	}
 
-	curl_multi_cleanup(h->mcurl);
-	tp_complete(h->thpool);
-	list_free_list(h->failed);
-
-	HASHMAP_FOREACH(h->curl_hashmap, i, l, file)
-	{
-		downloads++;
-		free_curl_file(h, file);
-	}
-	hashmap_free(h->curl_hashmap);
-
-	free(h);
-
-	if (num_downloads) {
-		*num_downloads = downloads;
-	}
+	swupd_curl_parallel_download_clear(h, num_downloads);
 	return ret;
+}
+
+void swupd_curl_parallel_download_cancel(struct swupd_curl_parallel_handle *h)
+{
+	if (!h) {
+		return;
+	}
+
+	swupd_curl_parallel_download_clear(h, NULL);
 }

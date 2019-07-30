@@ -291,12 +291,9 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 			complete++;
 			progress_report(complete, list_length);
 		}
-		if (err < 0) {
-			if (required) { /* Probably need printf("\n") here */
-				return err;
-			} else {
-				continue;
-			}
+		if (err < 0 && required) {
+			swupd_curl_parallel_download_cancel(download_handle);
+			return err;
 		}
 	}
 	list_free_list(need_download);

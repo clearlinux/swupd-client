@@ -86,7 +86,7 @@ static void hmac_sha256_for_data(char *hash,
 		return;
 	}
 
-	digest_str_len = (digest_len * 2) + 1;
+	digest_str_len = MAX((digest_len * 2) + 1, SWUPD_HASH_LEN);
 	digest_str = calloc(digest_str_len, sizeof(char));
 	ON_NULL_ABORT(digest_str);
 

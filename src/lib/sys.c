@@ -288,7 +288,7 @@ bool systemd_in_container(void)
 {
 	/* systemd-detect-virt -c does container detection only *
          * The return code is zero if the system is in a container */
-	return !run_command("/usr/bin/systemd-detect-virt", "-c");
+	return !run_command("/usr/bin/systemd-detect-virt", "-c", NULL);
 }
 
 char *sys_dirname(const char *path)

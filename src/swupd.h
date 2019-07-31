@@ -326,6 +326,7 @@ extern int link_or_rename(const char *orig, const char *dest);
 
 /* verify.c */
 extern enum swupd_code verify_main(void);
+extern void verify_set_option_download(bool opt);
 extern void verify_set_command_verify(bool opt);
 extern void verify_set_option_force(bool opt);
 extern void verify_set_option_install(bool opt);

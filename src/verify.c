@@ -42,6 +42,7 @@
 static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src";
 
 static bool warning_printed = false;
+static bool cmdline_option_download = false;
 static bool cmdline_command_verify = false;
 static bool cmdline_option_force = false;
 static bool cmdline_option_fix = false;
@@ -80,6 +81,11 @@ void verify_set_command_verify(bool opt)
 {
 	/* indicates if the superseded "swupd verify" command was used */
 	cmdline_command_verify = opt;
+}
+
+void verify_set_option_download(bool opt)
+{
+	cmdline_option_download = opt;
 }
 
 void verify_set_option_force(bool opt)
@@ -775,6 +781,7 @@ enum swupd_code verify_main(void)
 	 * 5) download_packs (applies only with --install)
 	 * 6) check_files_hash (applies only with --install or --fix)
 	 * 7) download_fullfiles (applies only with --install or --fix)
+	 *    (Finishes here on --download)
 	 * 8) add_missing_files
 	 *    (Finishes here on --quick or --install)
 	 * 9) fix_files
@@ -999,6 +1006,12 @@ enum swupd_code verify_main(void)
 			goto clean_and_exit;
 		}
 	}
+
+	/* content is not installed when download flag is set */
+	if (cmdline_option_download) {
+		goto clean_and_exit;
+	}
+
 	timelist_timer_stop(globals.global_times);
 
 	/* preparation work complete. */
@@ -1163,7 +1176,9 @@ clean_and_exit:
 	}
 
 	if (ret == SWUPD_OK) {
-		if (cmdline_option_install) {
+		if (cmdline_option_download) {
+			info("\nInstallation files downloaded\n");
+		} else if (cmdline_option_install) {
 			info("\nInstallation successful\n");
 
 			if (counts.not_replaced > 0) {
@@ -1190,6 +1205,8 @@ clean_and_exit:
 	} else {
 		if (cmdline_option_fix) {
 			print("\nRepair did not fully succeed\n");
+		} else if (cmdline_option_download) {
+			print("\nInstallation file downloads failed\n");
 		} else if (cmdline_option_install) {
 			print("\nInstallation failed\n");
 		} else {

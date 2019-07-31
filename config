@@ -301,6 +301,9 @@
 # option (string value)
 #version=V
 
+# Download all content, but do not actually install it (boolean value)
+#download=<true/false>
+
 
 [mirror]
 

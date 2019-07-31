@@ -22,6 +22,9 @@
 #include "swupd.h"
 #include "swupd_internal.h"
 
+#define FLAG_DOWNLOAD_ONLY 2000
+
+static bool cmdline_option_download = false;
 static bool cmdline_option_force = false;
 static struct list *cmdline_bundles = NULL;
 static char *path;
@@ -32,6 +35,7 @@ static const struct option prog_opts[] = {
 	{ "bundles", required_argument, 0, 'B' },
 	{ "version", required_argument, 0, 'V' },
 	{ "manifest", required_argument, 0, 'm' },
+	{ "download", no_argument, 0, FLAG_DOWNLOAD_ONLY },
 };
 
 static void print_help(void)
@@ -45,6 +49,7 @@ static void print_help(void)
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -B, --bundles=[BUNDLES] Include the specified BUNDLES in the OS installation. Example: --bundles=os-core,vi\n");
 	print("   -V, --version=[VER]     If the version to install is not the latest, it can be specified with this option\n");
+	print("   --download              Download all content, but do not actually install it\n");
 	print("\n");
 }
 
@@ -85,6 +90,9 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	}
+	case FLAG_DOWNLOAD_ONLY:
+		cmdline_option_download = true;
+		return true;
 	default:
 		return false;
 	}
@@ -146,6 +154,7 @@ enum swupd_code install_main(int argc, char **argv)
 	/* set options needed for the install in the verify command */
 	verify_set_option_quick(true);
 	verify_set_option_install(true);
+	verify_set_option_download(cmdline_option_download);
 	verify_set_option_force(cmdline_option_force);
 	verify_set_option_bundles(cmdline_bundles);
 	verify_set_option_version(cmdline_option_version);

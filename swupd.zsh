@@ -291,6 +291,7 @@ if [[ -n "$state" ]]; then
             '(help -x --force)'{-x,--force}'[Attempt to proceed even if non-critical errors found]'
             '(help -B --bundles)'{-B,--bundles=}'[Include the specified BUNDLES in the OS installation. Example: --bundles=os-core,vi]:diagnose: _swupd_all_bundles'
             '(help -V --version)'{-V,--version=}'[If the version to install is not the latest, it can be specified with this option]:version:()'
+            '(help status)--download[Download all content, but do not actually install it]'
           )
           _arguments $osinstall && ret=0
           ;;

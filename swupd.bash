@@ -64,7 +64,7 @@ _swupd()
 		opts="$global --version --picky --picky-tree --picky-whitelist --quick --force --extra-files-only "
 		break;;
 		("os-install")
-		opts="$global --version --force --bundles "
+		opts="$global --version --force --bundles --download "
 		break;;
 		("mirror")
 		opts="$global --set --unset "

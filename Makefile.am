@@ -239,6 +239,7 @@ BATS = \
 	test/functional/os-install/install-also-add.bats \
 	test/functional/os-install/install-bad.bats \
 	test/functional/os-install/install-basics.bats \
+	test/functional/os-install/install-download.bats \
 	test/functional/os-install/install-json.bats \
 	test/functional/os-install/install-latest-missing.bats \
 	test/functional/os-install/install-multiple.bats \

@@ -356,6 +356,11 @@ SUBCOMMANDS
 
             Installs bundles os-core and vi, along with os-core (installed by default).
 
+    - `--download`
+
+        Do not perform an os-install, instead download all resources needed
+        to perform the os-install, and exit.
+
 ``repair``
 
     Correct any issues found. This will overwrite incorrect file content,

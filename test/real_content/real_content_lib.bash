@@ -44,7 +44,8 @@ get_current_format() {
 
 install_bundles() {
 	local CMD=os-install
-	[ "$1" = "-r" ] && { CMD=repair; shift ; }
+    # TODO: Replace verify --fix with repair as soon as the feature is implemented
+	[ "$1" = "-r" ] && { CMD="verify --fix"; shift ; }
 
 	if [ -z "$BUNDLE_LIST" ]; then
 		run sudo sh -c "$SWUPD bundle-list --all $SWUPD_OPTS_SHORT"

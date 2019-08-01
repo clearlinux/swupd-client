@@ -289,7 +289,7 @@ void handle_mirror_if_stale(void)
 	}
 
 	/* before trying to get the latest version let's make sure the central version is up */
-	if (!globals.content_url_is_local && !check_connection(NULL, ret_str) != 0) {
+	if (!globals.content_url_is_local && check_connection(NULL, ret_str) != 0) {
 		warn("Upstream server %s not responding, cannot determine upstream version\n", ret_str);
 		warn("Unable to determine if the mirror is up to date\n");
 		goto out;

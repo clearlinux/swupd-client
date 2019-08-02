@@ -6,6 +6,7 @@ TEST_NAME=${TEST_FILENAME%.bats}
 THEME_DIRNAME="$BATS_TEST_DIRNAME"
 
 export TEST_NAME
+export TEST_NAME_SHORT
 export THEME_DIRNAME
 export FUNC_DIR
 export SWUPD_DIR="$FUNC_DIR/../.."
@@ -3136,6 +3137,7 @@ setup() {
 	print "$sep"
 	# a global environment will always use number 1, so check for that
 	# environment first
+	TEST_NAME_SHORT="$TEST_NAME"
 	if [ -d "$TEST_NAME"_1 ]; then
 		# if a global environment is found we want to continue using that
 		# as our test environment for the rest of the tests, if not continue
@@ -3261,8 +3263,8 @@ use_ignore_list() {
 		# - <functional_tests_directory>/<test_theme_directory>/<test_name>.ignore-list
 		# - <functional_tests_directory>/<test_theme_directory>/ignore-list
 		# - <functional_tests_directory>/ignore-list
-		if [ -f "$THEME_DIRNAME"/"$TEST_NAME".ignore-list ]; then
-			ignore_list="$THEME_DIRNAME"/"$TEST_NAME".ignore-list
+		if [ -f "$THEME_DIRNAME"/"$TEST_NAME_SHORT".ignore-list ]; then
+			ignore_list="$THEME_DIRNAME"/"$TEST_NAME_SHORT".ignore-list
 		elif [ -f "$THEME_DIRNAME"/ignore-list ]; then
 			ignore_list="$THEME_DIRNAME"/ignore-list
 		elif [ -f "$FUNC_DIR"/ignore-list ]; then

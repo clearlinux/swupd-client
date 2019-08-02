@@ -158,6 +158,8 @@ test_teardown() {
 		print "$msg\\n" 2>/dev/null || echo "$msg"
 		return
 	fi
-	sudo rm -rf "$TEST_NAME"
+
+	ROOT_DIR="${BASE_DIR}/${TEST_NAME}"
+	sudo rm -rf "$ROOT_DIR"
 }
 

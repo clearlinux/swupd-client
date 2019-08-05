@@ -232,7 +232,7 @@ validate_path() {
 validate_item() {
 
 	local vfile=$1
-	if [ -z "$vfile" ] || [ ! -e "$vfile" ]; then
+	if sudo sh -c "[ -z $vfile ] || [ ! -e $vfile ]"; then
 		terminate "Please provide a valid file"
 	fi
 

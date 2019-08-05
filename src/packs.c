@@ -187,12 +187,12 @@ static double packs_query_total_download_size(struct list *subs, struct manifest
 		}
 
 		count++;
-		debug("Pack: %s (%.2lf Mb)\n", url, (double)size / 1000000);
+		debug("Pack: %s (%.2lf MB)\n", url, (double)size / 1000000);
 		free_string(&url);
 	}
 
 	debug("Number of packs to download: %d\n", count);
-	debug("Total size of packs to be downloaded: %.2lf Mb\n", (double)total_size / 1000000);
+	debug("Total size of packs to be downloaded: %.2lf MB\n", (double)total_size / 1000000);
 	return total_size;
 }
 
@@ -263,8 +263,8 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 		download_progress.total_download_size = 0;
 	}
 
-	/* show the packs size only if > 1 Mb */
-	string_or_die(&packs_size, "(%.2lf Mb) ", (double)download_progress.total_download_size / 1000000);
+	/* show the packs size only if > 1 MB */
+	string_or_die(&packs_size, "(%.2lf MB) ", (double)download_progress.total_download_size / 1000000);
 	info("Downloading packs %sfor:\n", ((double)download_progress.total_download_size / 1000000) > 1 ? packs_size : "");
 	free_string(&packs_size);
 	for (iter = list_head(need_download); iter; iter = iter->next) {

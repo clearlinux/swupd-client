@@ -22,7 +22,7 @@ test_setup() {
 	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Warning: The --force option is specified; ignoring version mismatch for repair
+		Warning: The --picky option is specified; ignoring version mismatch for repair
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
 		Error: Unable to verify. One or more currently installed bundles are not available at version 10. Use --force to override
 		Repair did not fully succeed

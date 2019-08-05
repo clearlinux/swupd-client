@@ -920,7 +920,7 @@ enum swupd_code verify_main(void)
 		if (cmdline_option_force || cmdline_option_picky) {
 			warn("The --%s option is specified; ignoring version mismatch "
 			     "for repair\n",
-			     cmdline_option_fix ? "force" : "picky");
+			     cmdline_option_force ? "force" : "picky");
 		} else {
 			error("Repairing to a different version requires "
 			      "--force or --picky\n");

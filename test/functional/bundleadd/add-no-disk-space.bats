@@ -113,7 +113,7 @@ test_setup() {
 		Warning: This is an insecure connection
 		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Loading required manifests...
-		Downloading packs \\(.* Mb\\) for:
+		Downloading packs \\(.* MB\\) for:
 		 - test-bundle
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/pack-test-bundle-from-0.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?

@@ -105,12 +105,12 @@ static double fullfile_query_total_download_size(struct list *files)
 		}
 
 		count++;
-		debug("File: %s (%.2lf Mb)\n", url, (double)size / 1000000);
+		debug("File: %s (%.2lf MB)\n", url, (double)size / 1000000);
 		free_string(&url);
 	}
 
 	debug("Number of files to download: %d\n", count);
-	debug("Total size of files to be downloaded: %.2lf Mb\n", (double)total_size / 1000000);
+	debug("Total size of files to be downloaded: %.2lf MB\n", (double)total_size / 1000000);
 	return total_size;
 }
 

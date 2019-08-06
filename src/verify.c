@@ -860,7 +860,6 @@ enum swupd_code verify_main(void)
 	progress_set_step(2, "cleanup_download_dir");
 	ret = rm_staging_dir_contents("download");
 	if (ret != 0) {
-		ret = SWUPD_COULDNT_REMOVE_FILE;
 		warn("Failed to remove prior downloads, carrying on anyway\n");
 	}
 	progress_complete_step();

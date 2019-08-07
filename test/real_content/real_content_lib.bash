@@ -93,9 +93,6 @@ verify_system() {
 	run sudo sh -c "$SWUPD diagnose --picky $SWUPD_OPTS 2>/dev/null"
 	assert_status_is 0
 
-	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
-	assert_status_is 0
-
 	return
 }
 

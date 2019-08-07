@@ -592,7 +592,7 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-enum swupd_code search_main(int argc, char **argv)
+enum swupd_code search_file_main(int argc, char **argv)
 {
 
 	int ret = SWUPD_OK, search_ret = SWUPD_OK;

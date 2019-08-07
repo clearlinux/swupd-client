@@ -60,7 +60,7 @@ static struct subcmd commands[] = {
 #ifdef EXTERNAL_MODULES_SUPPORT
 	{ "search", "Searches for the best bundle to install a binary or library (depends on os-core-search bundle)", external_search_main },
 #endif
-	{ "search-file", "Command to search files in Clear Linux bundles", search_main },
+	{ "search-file", "Command to search files in Clear Linux bundles", search_file_main },
 	{ "diagnose", "Verify content for OS version", diagnose_main },
 	{ "repair", "Repair local issues relative to server manifest (will not modify ignored files)", repair_main },
 	{ "os-install", "Install Clear Linux OS to a blank partition or directory", install_main },

@@ -89,7 +89,7 @@ swupd_SOURCES = \
 	src/repair.c \
 	src/scripts.c \
 	src/scripts.h \
-	src/search.c \
+	src/search-file.c \
 	src/signature.c \
 	src/signature.h \
 	src/staging.c \

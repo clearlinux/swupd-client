@@ -38,10 +38,12 @@
 #include "swupd.h"
 
 #define FLAG_DOWNLOAD_ONLY 2000
+#define FLAG_UPDATE_SEARCH_FILE_INDEX 2001
 
 static bool allow_mix_collisions = false;
 static int requested_version = -1;
 static bool download_only = false;
+static bool update_search_file_index = false;
 static bool keepcache = false;
 
 int nonpack;
@@ -480,6 +482,12 @@ version_check:
 		re_update = true;
 	}
 	scripts_run_post_update(re_update || globals.wait_for_scripts);
+
+	/* Downloadng search-file index */
+	if (update_search_file_index) {
+		download_all_manifests(server_manifest, NULL);
+	}
+
 	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Run post-update scripts
 
@@ -586,6 +594,7 @@ static bool cmd_line_status = false;
 
 static const struct option prog_opts[] = {
 	{ "download", no_argument, 0, FLAG_DOWNLOAD_ONLY },
+	{ "update-search-file-index", no_argument, 0, FLAG_UPDATE_SEARCH_FILE_INDEX },
 	{ "version", required_argument, 0, 'V' },
 	{ "manifest", required_argument, 0, 'm' },
 	{ "status", no_argument, 0, 's' },
@@ -613,6 +622,7 @@ static void print_help(void)
 	print("   -a, --allow-mix-collisions	Ignore and continue if custom user content conflicts with upstream provided content\n");
 	print("   -m, --manifest=V        NOTE: this flag has been superseded. Please use -V instead\n");
 	print("   --download              Download all content, but do not actually install the update\n");
+	print("   --update-search-file-index Update the index used by search-file to speed up searches (Don't enable this if you have download or space restrictions)\n");
 	print("\n");
 }
 
@@ -649,6 +659,9 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case FLAG_DOWNLOAD_ONLY:
 		download_only = optarg_to_bool(optarg);
+		return true;
+	case FLAG_UPDATE_SEARCH_FILE_INDEX:
+		update_search_file_index = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;

@@ -431,7 +431,7 @@ static double query_total_download_size(struct list *list)
 /* download_manifests()
  * Download all manifests and return a list of manifest headers.
  */
-static enum swupd_code download_all_manifests(struct manifest *mom, struct list **manifest_list)
+enum swupd_code download_all_manifests(struct manifest *mom, struct list **manifest_list)
 {
 	struct manifest *manifest = NULL;
 	struct list *list;
@@ -470,7 +470,11 @@ static enum swupd_code download_all_manifests(struct manifest *mom, struct list 
 			}
 		}
 
-		*manifest_list = list_prepend_data(*manifest_list, manifest);
+		if (manifest_list) {
+			*manifest_list = list_prepend_data(*manifest_list, manifest);
+		} else {
+			free_manifest(manifest);
+		}
 		progress_report(complete, total);
 	}
 

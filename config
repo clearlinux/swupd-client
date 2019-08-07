@@ -151,6 +151,8 @@
 # Migrate to augmented upstream/mix content (boolean value)
 #migrate=<true/false>
 
+# Update the index used by search-file to speed up searches (boolean value)
+#update_search_file_index=<true/false>
 
 [bundle-add]
 

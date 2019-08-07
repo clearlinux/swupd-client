@@ -519,6 +519,11 @@ SUBCOMMANDS
         Do not delete the swupd state directory content after updating the
         system.
 
+    - `--update-search-file-index`
+
+        Update the index used by search-file to speed up searches. Don't
+        enable this if you have download or space restrictions.
+
 ``verify``
 
     Perform system software installation verification. The program will

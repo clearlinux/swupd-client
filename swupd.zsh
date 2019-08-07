@@ -197,6 +197,7 @@ if [[ -n "$state" ]]; then
           local -a updates; updates=(
             $global_opts
             '(help status)--download[Download all content, but do not actually install the update]'
+            '(help status)--update-search-file-index[Update the index used by search-file to speed up searches]'
             '(help status -k --keepcache)'{-k,--keepcache}'[Do not delete the swupd state directory content after updating the system]'
             '(help status -T --migrate)'{-T,--migrate}'[Migrate to augmented upstream/mix content]'
             '(help status -a --allow-mix-collisions)'{-a,--allow-mix-collisions}'[Ignore and continue if custom user content conflicts with upstream provided content]'

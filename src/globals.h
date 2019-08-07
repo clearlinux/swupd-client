@@ -16,6 +16,8 @@
 extern "C" {
 #endif
 
+#define optarg_to_bool(_optarg) (_optarg ? strtobool(_optarg) : true)
+
 /*
  * Global variables
  */

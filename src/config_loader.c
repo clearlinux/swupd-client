@@ -71,20 +71,8 @@ bool config_loader_set_opt(char *section, char *opt, char *value, void *data)
 				break;
 			}
 
-			/* now try with the local short options... */
-
-			/* boolean options with a value of "false" only make sense in the
-			 * global section, if we find one of these in a command section we
-			 * can skip it. We don't have a way to know if the value is a boolean
-			 * or not, if the value is the "false" string, we will treat it as a
-			 * boolean false and will skip this option */
-			if (strcmp(lvalue, "false") == 0) {
-				/* we don't need to set anything for this */
-				ret = true;
-				break;
-			}
-
-			/* not all commands support local options */
+			/* now try with the local short options...
+			 * not all commands support local options */
 			if (cl->parse_command_opt) {
 				ret = cl->parse_command_opt(options->val, value);
 			}

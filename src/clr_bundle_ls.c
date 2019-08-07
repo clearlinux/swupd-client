@@ -71,8 +71,8 @@ static bool parse_opt(int opt, char *optarg)
 {
 	switch (opt) {
 	case 'a':
-		cmdline_option_all = true;
-		cmdline_local = false;
+		cmdline_option_all = optarg_to_bool(optarg);
+		cmdline_local = !cmdline_option_all;
 		return true;
 	case 'D':
 		string_or_die(&cmdline_option_has_dep, "%s", optarg);

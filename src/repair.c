@@ -85,13 +85,13 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'x':
-		cmdline_option_force = true;
+		cmdline_option_force = optarg_to_bool(optarg);
 		return true;
 	case 'q':
-		cmdline_option_quick = true;
+		cmdline_option_quick = optarg_to_bool(optarg);
 		return true;
 	case 'Y':
-		cmdline_option_picky = true;
+		cmdline_option_picky = optarg_to_bool(optarg);
 		return true;
 	case 'X':
 		if (optarg[0] != '/') {
@@ -105,7 +105,7 @@ static bool parse_opt(int opt, char *optarg)
 		cmdline_option_picky_whitelist = strdup_or_die(optarg);
 		return true;
 	case FLAG_EXTRA_FILES_ONLY:
-		cmdline_extra_files_only = true;
+		cmdline_extra_files_only = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;

@@ -72,7 +72,7 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'x':
-		cmdline_option_force = true;
+		cmdline_option_force = optarg_to_bool(optarg);
 		return true;
 	case 'B': {
 		char *arg_copy = strdup_or_die(optarg);
@@ -91,7 +91,7 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	}
 	case FLAG_DOWNLOAD_ONLY:
-		cmdline_option_download = true;
+		cmdline_option_download = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;

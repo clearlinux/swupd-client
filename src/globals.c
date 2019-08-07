@@ -268,7 +268,7 @@ bool set_path_prefix(char *path)
 {
 	struct stat statbuf;
 	int ret, len;
-	char *new_path;
+	char *new_path = NULL;
 
 	if (!path) {
 		error("Path prefix shouldn't be NULL\n");

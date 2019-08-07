@@ -225,7 +225,7 @@ AC_ARG_WITH(
   [config-file-path],
   [AS_HELP_STRING([--with-config-file-path=PATHS], [List of directories to look for the configuration file])],
   [config_file_path=${withval}],
-  [config_file_path="/etc/swupd:/run/swupd:/usr/share/defaults/swupd"]
+  [config_file_path="/usr/share/defaults/swupd:/run/swupd:/etc/swupd"]
 )
 AC_SUBST(CONFIG_FILE_PATH, [${config_file_path}])
 AC_DEFINE_UNQUOTED([CONFIG_FILE_PATH], ["${config_file_path}"], [List of directories to look for the configuration file])

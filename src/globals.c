@@ -277,13 +277,20 @@ bool set_path_prefix(char *path)
 		return false;
 	}
 
-	new_path = realpath(path, NULL);
-	if (!new_path) {
+	ret = stat(path, &statbuf);
+	// If path doesn't exit tries to create it
+	if (ret < 0 && errno == ENOENT) {
+		if (mkdir_p(path) < 0) {
+			goto error;
+		}
+		ret = stat(path, &statbuf);
+	}
+	if (ret < 0 || !S_ISDIR(statbuf.st_mode)) {
 		goto error;
 	}
 
-	ret = stat(new_path, &statbuf);
-	if (ret != 0 || !S_ISDIR(statbuf.st_mode)) {
+	new_path = realpath(path, NULL);
+	if (!new_path) {
 		goto error;
 	}
 

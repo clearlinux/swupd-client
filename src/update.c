@@ -635,20 +635,20 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'a':
-		allow_mix_collisions = true;
+		allow_mix_collisions = optarg_to_bool(optarg);
 		return true;
 	case 's':
-		cmd_line_status = true;
+		cmd_line_status = optarg_to_bool(optarg);
 		return true;
 	case 'T':
-		globals.migrate = true;
+		globals.migrate = optarg_to_bool(optarg);
 		error("Attempting to migrate to your mix content...\n\n");
 		return true;
 	case 'k':
-		keepcache = true;
+		keepcache = optarg_to_bool(optarg);
 		return true;
 	case FLAG_DOWNLOAD_ONLY:
-		download_only = true;
+		download_only = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;

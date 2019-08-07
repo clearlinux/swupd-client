@@ -65,6 +65,8 @@ static char *search_string = NULL;
 static bool csv_format = false;
 static bool init = false;
 static enum search_type search_type = SEARCH_TYPE_ALL;
+static bool cmdline_option_library = false;
+static bool cmdline_option_binary = false;
 static int num_results = INT_MAX;
 static int sort = SORT_TYPE_ALPHA_BUNDLES_ONLY;
 static bool regexp = false;
@@ -532,16 +534,16 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'm':
-		csv_format = true;
+		csv_format = optarg_to_bool(optarg);
 		return true;
 	case 'l':
-		search_type |= SEARCH_TYPE_LIB;
+		cmdline_option_library = optarg_to_bool(optarg);
 		return true;
 	case 'i':
-		init = true;
+		init = optarg_to_bool(optarg);
 		return true;
 	case 'B':
-		search_type |= SEARCH_TYPE_BIN;
+		cmdline_option_binary = optarg_to_bool(optarg);
 		return true;
 	case FLAG_REGEXP:
 		regexp = true;
@@ -565,6 +567,13 @@ static bool parse_options(int argc, char **argv)
 
 	if (optind < 0) {
 		return false;
+	}
+
+	if (cmdline_option_library) {
+		search_type |= SEARCH_TYPE_LIB;
+	}
+	if (cmdline_option_binary) {
+		search_type |= SEARCH_TYPE_BIN;
 	}
 
 	search_string = optind < argc ? argv[optind] : "";

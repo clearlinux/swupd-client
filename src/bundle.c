@@ -732,21 +732,13 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 		}
 
 		if (manifest->includes) {
-			int r = add_subscriptions(manifest->includes, subs, mom, find_all, recursion + 1);
-			if (r & add_sub_ERR) {
-				free_manifest(manifest);
-				goto out;
-			}
-			ret |= r; /* merge in recursive call results */
+			/* merge in recursive call results */
+			ret |= add_subscriptions(manifest->includes, subs, mom, find_all, recursion + 1);
 		}
 
 		if (!globals.skip_optional_bundles && manifest->optional) {
-			int r = add_subscriptions(manifest->optional, subs, mom, find_all, recursion + 1);
-			if (r & add_sub_ERR) {
-				free_manifest(manifest);
-				goto out;
-			}
-			ret |= r; /* merge in recursive call results */
+			/* merge in recursive call results */
+			ret |= add_subscriptions(manifest->optional, subs, mom, find_all, recursion + 1);
 		}
 
 		free_manifest(manifest);

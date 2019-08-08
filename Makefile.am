@@ -252,6 +252,7 @@ BATS = \
 	test/functional/repair/repair-boot-file-deleted.bats \
 	test/functional/repair/repair-boot-file.bats \
 	test/functional/repair/repair-boot-skip.bats \
+	test/functional/repair/repair-deleted-include-manifest.bats \
 	test/functional/repair/repair-directory-tree-deleted.bats \
 	test/functional/repair/repair-empty-dir-deleted.bats \
 	test/functional/repair/repair-flags.bats \
@@ -288,6 +289,7 @@ BATS = \
 	test/functional/update/update-boot-skip.bats \
 	test/functional/update/update-bundle-removed.bats \
 	test/functional/update/update-client-certificate.bats \
+	test/functional/update/update-deleted-include-manifest.bats \
 	test/functional/update/update-download.bats \
 	test/functional/update/update-fail-to-get-mom.bats \
 	test/functional/update/update-ignore-also-add.bats \

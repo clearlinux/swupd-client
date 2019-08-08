@@ -205,9 +205,43 @@ static bool set_state_dir(char *path)
 	return true;
 }
 
+/* Sets the state_dir_cache global variable. If the path parameter is not
+ * NULL, state_dir_cache will be set to its value.
+ */
+bool set_state_dir_cache(char *path)
+{
+	if (!path) {
+		error("Statedir-cache shouldn't be set to NULL\n");
+		return false;
+	}
+
+	if (path[0] != '/') {
+		error("Statedir-cache must be a full path starting with '/', not '%c'\n", path[0]);
+		return false;
+	}
+
+	/* Prevent some disasters: since the statedir-cache can be destroyed and
+	 * reconstructed, make sure we never set those by accident and nuke the
+	 * system. */
+	if (!strcmp(path, "/") || !strcmp(path, "/var") || !strcmp(path, "/usr")) {
+		error("Refusing to use '%s' as a statedir-cache because it might be erased first\n", path);
+		return false;
+	}
+
+	free_string(&globals.state_dir_cache);
+	string_or_die(&globals.state_dir_cache, "%s", path);
+
+	return true;
+}
+
 static void set_default_state_dir()
 {
 	string_or_die(&globals.state_dir, "%s", STATE_DIR);
+}
+
+static void set_default_state_dir_cache()
+{
+	globals.state_dir_cache = NULL;
 }
 
 static bool set_format_string(char *format)
@@ -365,6 +399,10 @@ bool globals_init(void)
 		set_default_state_dir();
 	}
 
+	if (!globals.state_dir_cache) {
+		set_default_state_dir_cache();
+	}
+
 	if (!globals.path_prefix) {
 		set_default_path_prefix();
 	}
@@ -411,6 +449,7 @@ void globals_deinit(void)
 	free_string(&globals.format_string);
 	free_string(&globals.mounted_dirs);
 	free_string(&globals.state_dir);
+	free_string(&globals.state_dir_cache);
 	timelist_free(globals.global_times);
 	globals.global_times = NULL;
 }

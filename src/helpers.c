@@ -912,6 +912,30 @@ int link_or_rename(const char *orig, const char *dest)
 	return 0;
 }
 
+/* Try to create a link to a file. If it fails, copy it.
+ * Return 0 on success or an error code on errors.*/
+int link_or_copy(const char *orig, const char *dest)
+{
+	/* Try doing a copy if hardlink fails */
+	if (link(orig, dest) != 0) {
+		return copy(orig, dest);
+	}
+
+	return 0;
+}
+
+/* Try to create a link to a file. If it fails, copy it with cp -a.
+ * Return 0 on success or an error code on errors.*/
+int link_or_copy_all(const char *orig, const char *dest)
+{
+	/* Try doing a copy if hardlink fails */
+	if (link(orig, dest) != 0) {
+		return copy_all(orig, dest);
+	}
+
+	return 0;
+}
+
 /* This function will break if the same HASH.tar full file is downloaded
  * multiple times in parallel. */
 int untar_full_download(void *data)

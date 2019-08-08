@@ -213,6 +213,7 @@ BATS = \
 	test/functional/bundleremove/remove-parse-args.bats \
 	test/functional/bundleremove/remove-with-dependency.bats \
 	test/functional/checkupdate/chk-update-client-certificate.bats \
+	test/functional/checkupdate/chk-update-format-bump.bats \
 	test/functional/checkupdate/chk-update-json.bats \
 	test/functional/checkupdate/chk-update-new-version.bats \
 	test/functional/checkupdate/chk-update-no-server-content.bats \

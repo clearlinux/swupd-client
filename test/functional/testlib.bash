@@ -1356,6 +1356,7 @@ create_version() { # swupd_function
 	sudo mkdir -p "$env_name"/web-dir/"$version"/{files,delta}
 	sudo mkdir -p "$env_name"/web-dir/version/format"$format"
 	write_to_protected_file "$env_name"/web-dir/version/format"$format"/latest "$version"
+	write_to_protected_file "$env_name"/web-dir/version/latest_version "$version"
 	if [ "$format" = staging ]; then
 		format=1
 	fi

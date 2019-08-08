@@ -161,7 +161,8 @@ extern int main_verify(int current_version);
 extern enum swupd_code walk_tree(struct manifest *, const char *, bool, const regex_t *, struct file_counts *);
 
 extern int get_latest_version(char *v_url);
-extern enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix);
+extern int get_absolute_latest_version(void);
+extern enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix, bool absolute);
 extern int get_current_version(char *path_prefix);
 extern bool get_distribution_string(char *path_prefix, char *dist);
 

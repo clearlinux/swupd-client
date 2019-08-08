@@ -203,7 +203,7 @@ static enum swupd_code check_versions(int *current_version, int *server_version,
 {
 	int ret;
 
-	ret = read_versions(current_version, server_version, path_prefix);
+	ret = read_versions(current_version, server_version, path_prefix, false);
 	if (ret != SWUPD_OK) {
 		return ret;
 	}

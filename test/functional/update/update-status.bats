@@ -5,7 +5,7 @@ load "../testlib"
 global_setup() {
 
 	create_test_environment -e "$TEST_NAME"
-	set_latest_version "$TEST_NAME" 100
+	create_version "$TEST_NAME" 100
 
 }
 

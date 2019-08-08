@@ -116,6 +116,7 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code bundle_list_main(int argc, char **argv)
 {
 	int ret;
+	int init_option = SWUPD_ALL;
 	const int steps_in_bundlelist = 1;
 
 	/* there is no need to report in progress for bundle-list at this time */
@@ -126,8 +127,12 @@ enum swupd_code bundle_list_main(int argc, char **argv)
 	}
 	progress_init_steps("bundle-list", steps_in_bundlelist);
 
-	if (cmdline_local && !is_root()) {
-		ret = swupd_init(SWUPD_NO_ROOT);
+	if (cmdline_local) {
+		init_option |= SWUPD_NO_NETWORK;
+		if (!is_root()) {
+			init_option |= SWUPD_NO_ROOT;
+		}
+		ret = swupd_init(init_option);
 	} else {
 		ret = swupd_init(SWUPD_ALL);
 	}

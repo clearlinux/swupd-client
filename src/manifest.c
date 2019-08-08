@@ -199,6 +199,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 {
 	char *url = NULL;
 	char *filename;
+	char *filename_cache = NULL;
 	char *dir = NULL;
 	char *basedir;
 	int ret = 0;
@@ -216,18 +217,27 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 		ret = 0;
 		goto out;
 	}
-	free_string(&filename);
-
-	if (try_manifest_delta_download(previous_version, version, component) == 0) {
-		ret = 0;
-		goto out;
-	}
 
 	string_or_die(&dir, "%s/%i", globals.state_dir, version);
 	ret = mkdir(dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if ((ret != 0) && (errno != EEXIST)) {
 		goto out;
 	}
+
+	/* Check statedir-cache */
+	if (globals.state_dir_cache != NULL) {
+		string_or_die(&filename_cache, "%s/%i/Manifest.%s", globals.state_dir_cache, version, component);
+		if (link_or_copy(filename_cache, filename) == 0) {
+			ret = 0;
+			goto out;
+		}
+	}
+
+	if (try_manifest_delta_download(previous_version, version, component) == 0) {
+		ret = 0;
+		goto out;
+	}
+	free_string(&filename);
 
 	/* If it's mix content just hardlink instead of curl download */
 	if (is_mix) {
@@ -265,6 +275,7 @@ untar:
 out:
 	free_string(&dir);
 	free_string(&filename);
+	free_string(&filename_cache);
 	free_string(&url);
 	return ret;
 }
@@ -322,6 +333,7 @@ bool mom_signature_verify(const char *data_url, const char *data_filename, int v
 	char *local = NULL;
 	char *sig_url = NULL;
 	char *sig_filename = NULL;
+	char *sig_filename_cache = NULL;
 	int ret;
 	bool result;
 
@@ -333,6 +345,17 @@ bool mom_signature_verify(const char *data_url, const char *data_filename, int v
 	result = signature_verify(data_filename, sig_filename, false);
 	if (result) {
 		goto out;
+	}
+
+	// Check statedir-cache
+	if (globals.state_dir_cache != NULL) {
+		string_or_die(&sig_filename_cache, "%s/%i/Manifest.MoM.sig", globals.state_dir_cache, version);
+		if (link_or_copy(sig_filename_cache, sig_filename) == 0) {
+			result = signature_verify(data_filename, sig_filename, false);
+			if (result) {
+				goto out;
+			}
+		}
 	}
 
 	// Else, download a fresh signature, and verify
@@ -352,6 +375,7 @@ out:
 	free_string(&local);
 	free_string(&sig_filename);
 	free_string(&sig_url);
+	free_string(&sig_filename_cache);
 	return result;
 }
 /* Loads the MoM (Manifest of Manifests) for VERSION.

@@ -196,13 +196,40 @@ static double packs_query_total_download_size(struct list *subs, struct manifest
 	return total_size;
 }
 
+static int get_cached_packs(struct sub *sub)
+{
+	char *targetfile;
+	char *targetfile_cache;
+	struct stat stat;
+	int ret = 0;
+
+	/* Check the statedir and statedir-cache for the expected pack. When the
+	 * pack exists in the statedir-cache, it is copied to the statedir. */
+	string_or_die(&targetfile, "%s/pack-%s-from-%i-to-%i.tar", globals.state_dir, sub->component, sub->oldversion, sub->version);
+	if (lstat(targetfile, &stat) != 0 || stat.st_size != 0) {
+		ret = 1;
+
+		if (globals.state_dir_cache != NULL) {
+			string_or_die(&targetfile_cache, "%s/pack-%s-from-%i-to-%i.tar", globals.state_dir_cache, sub->component, sub->oldversion, sub->version);
+			if (lstat(targetfile_cache, &stat) == 0 && stat.st_size == 0) {
+				if (link_or_copy(targetfile_cache, targetfile) == 0) {
+					ret = 0;
+				}
+			}
+			free_string(&targetfile_cache);
+		}
+	}
+	free_string(&targetfile);
+
+	return ret;
+}
+
 /* pull in packs for base and any subscription */
 int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required)
 {
 	struct list *iter;
 	struct list *need_download = NULL;
 	struct sub *sub = NULL;
-	struct stat stat;
 	struct file *bundle = NULL;
 	struct download_progress download_progress = { 0, 0 };
 	int err;
@@ -213,7 +240,6 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 
 	/* make a new list with only the bundles we actually need to download packs for */
 	for (iter = list_head(subs); iter; iter = iter->next) {
-		char *targetfile;
 		sub = iter->data;
 
 		if (!is_installed_bundle(sub->component)) {
@@ -235,12 +261,9 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 		}
 
 		/* make sure the file is not already in the client system */
-		string_or_die(&targetfile, "%s/pack-%s-from-%i-to-%i.tar", globals.state_dir, sub->component, sub->oldversion, sub->version);
-		if (lstat(targetfile, &stat) != 0 || stat.st_size != 0) {
+		if (get_cached_packs(sub) != 0) {
 			need_download = list_append_data(need_download, sub);
 		}
-
-		free_string(&targetfile);
 	}
 
 	if (!need_download) {

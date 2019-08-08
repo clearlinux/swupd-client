@@ -47,6 +47,7 @@ static bool cmdline_command_verify = false;
 static bool cmdline_option_force = false;
 static bool cmdline_option_fix = false;
 static bool cmdline_option_picky = false;
+static char *cmdline_option_statedir_cache = NULL;
 static char *cmdline_option_picky_tree = NULL;
 static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
 static bool cmdline_option_install = false;
@@ -111,6 +112,12 @@ void verify_set_option_bundles(struct list *bundles)
 void verify_set_option_version(int ver)
 {
 	version = ver;
+}
+
+void verify_set_option_statedir_cache(char *path)
+{
+	free_string(&cmdline_option_statedir_cache);
+	cmdline_option_statedir_cache = path;
 }
 
 void verify_set_option_fix(bool opt)
@@ -805,6 +812,14 @@ enum swupd_code verify_main(void)
 		steps_in_verify = 5;
 	}
 	progress_init_steps("verify", steps_in_verify);
+
+	if (cmdline_option_statedir_cache != NULL) {
+		ret = set_state_dir_cache(cmdline_option_statedir_cache);
+		if (ret != true) {
+			error("Failed to set statedir-cache\n");
+			goto clean_args_and_exit;
+		}
+	}
 
 	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {

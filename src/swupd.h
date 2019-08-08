@@ -308,6 +308,8 @@ extern void print_regexp_error(int errcode, regex_t *regexp);
 extern bool is_url_allowed(const char *url);
 extern bool is_url_insecure(const char *url);
 extern void remove_trailing_slash(char *url);
+extern int link_or_copy(const char *orig, const char *dest);
+extern int link_or_copy_all(const char *orig, const char *dest);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);
@@ -331,6 +333,7 @@ extern void verify_set_option_download(bool opt);
 extern void verify_set_command_verify(bool opt);
 extern void verify_set_option_force(bool opt);
 extern void verify_set_option_install(bool opt);
+extern void verify_set_option_statedir_cache(char *opt);
 extern void verify_set_option_quick(bool opt);
 extern void verify_set_option_bundles(struct list *bundles);
 extern void verify_set_option_version(int ver);

@@ -356,6 +356,10 @@ SUBCOMMANDS
 
             Installs bundles os-core and vi, along with os-core (installed by default).
 
+    - `-s, --statedir-cache=[PATH]`
+
+        After checking for content in the statedir, check the statedir-cache before downloading it over the network.
+
     - `--download`
 
         Do not perform an os-install, instead download all resources needed

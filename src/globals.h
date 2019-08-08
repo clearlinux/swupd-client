@@ -40,6 +40,7 @@ extern struct globals {
 	char *mounted_dirs;
 	char *path_prefix;
 	char *state_dir;
+	char *state_dir_cache;
 	char *version_url;
 	int max_retries;
 	int retry_delay;
@@ -78,6 +79,7 @@ void save_cmd(char **argv);
 
 bool set_path_prefix(char *path);
 bool set_default_urls(void);
+bool set_state_dir_cache(char *path);
 void set_default_path_prefix(void);
 
 #ifdef __cplusplus

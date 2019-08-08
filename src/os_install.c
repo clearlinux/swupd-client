@@ -29,12 +29,14 @@ static bool cmdline_option_force = false;
 static struct list *cmdline_bundles = NULL;
 static char *path;
 static int cmdline_option_version = -1;
+static char *cmdline_option_statedir_cache = NULL;
 
 static const struct option prog_opts[] = {
 	{ "force", no_argument, 0, 'x' },
 	{ "bundles", required_argument, 0, 'B' },
 	{ "version", required_argument, 0, 'V' },
 	{ "manifest", required_argument, 0, 'm' },
+	{ "statedir-cache", required_argument, 0, 's' },
 	{ "download", no_argument, 0, FLAG_DOWNLOAD_ONLY },
 };
 
@@ -46,10 +48,11 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
-	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
-	print("   -B, --bundles=[BUNDLES] Include the specified BUNDLES in the OS installation. Example: --bundles=os-core,vi\n");
-	print("   -V, --version=[VER]     If the version to install is not the latest, it can be specified with this option\n");
-	print("   --download              Download all content, but do not actually install it\n");
+	print("   -x, --force                 Attempt to proceed even if non-critical errors found\n");
+	print("   -B, --bundles=[BUNDLES]     Include the specified BUNDLES in the OS installation. Example: --bundles=os-core,vi\n");
+	print("   -V, --version=[VER]         If the version to install is not the latest, it can be specified with this option\n");
+	print("   -s, --statedir-cache=[PATH] After checking for content in the statedir, check the statedir-cache before downloading it over the network\n");
+	print("   --download                  Download all content, but do not actually install it\n");
 	print("\n");
 }
 
@@ -73,6 +76,9 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case 'x':
 		cmdline_option_force = optarg_to_bool(optarg);
+		return true;
+	case 's':
+		cmdline_option_statedir_cache = strdup_or_die(optarg);
 		return true;
 	case 'B': {
 		char *arg_copy = strdup_or_die(optarg);
@@ -154,6 +160,7 @@ enum swupd_code install_main(int argc, char **argv)
 	/* set options needed for the install in the verify command */
 	verify_set_option_quick(true);
 	verify_set_option_install(true);
+	verify_set_option_statedir_cache(cmdline_option_statedir_cache);
 	verify_set_option_download(cmdline_option_download);
 	verify_set_option_force(cmdline_option_force);
 	verify_set_option_bundles(cmdline_bundles);

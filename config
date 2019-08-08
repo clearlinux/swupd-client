@@ -306,6 +306,10 @@
 # option (string value)
 #version=V
 
+# After checking for content in the statedir, check the statedir-cache before
+# downloading it over the network
+#statedir-cache=[PATH]
+
 # Download all content, but do not actually install it (boolean value)
 #download=<true/false>
 

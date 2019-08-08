@@ -109,6 +109,34 @@ static double fullfile_query_total_download_size(struct list *files)
 	return total_size;
 }
 
+static int get_cached_fullfile(struct file *file)
+{
+	char *targetfile;
+	char *targetfile_cache;
+	struct stat stat;
+	int ret = 0;
+
+	/* Check the statedir and statedir-cache for the expected fullfile. When the
+	 * fullfile exists in the statedir-cache, it is copied to the statedir. */
+	string_or_die(&targetfile, "%s/staged/%s", globals.state_dir, file->hash);
+	if (lstat(targetfile, &stat) != 0 || !verify_file(file, targetfile)) {
+		ret = 1;
+
+		if (globals.state_dir_cache != NULL) {
+			string_or_die(&targetfile_cache, "%s/staged/%s", globals.state_dir_cache, file->hash);
+			if (lstat(targetfile_cache, &stat) == 0 && verify_file(file, targetfile_cache)) {
+				if (link_or_copy_all(targetfile_cache, targetfile) == 0) {
+					ret = 0;
+				}
+			}
+			free_string(&targetfile_cache);
+		}
+	}
+	free_string(&targetfile);
+
+	return ret;
+}
+
 /*
  * Download fullfiles from the list of files.
  *
@@ -120,7 +148,6 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	struct list *iter;
 	struct list *need_download = NULL;
 	struct file *file;
-	struct stat stat;
 	struct download_progress download_progress = { 0, 0 };
 	unsigned int complete = 0;
 	unsigned int list_length;
@@ -133,19 +160,16 @@ int download_fullfiles(struct list *files, int *num_downloads)
 
 	/* make a new list with only the files we actually need to download */
 	for (iter = list_head(files); iter; iter = iter->next) {
-		char *targetfile;
 		file = iter->data;
 
 		if (file->is_deleted || file->do_not_update) {
 			continue;
 		}
 
-		string_or_die(&targetfile, "%s/staged/%s", globals.state_dir, file->hash);
-		if (lstat(targetfile, &stat) != 0 || !verify_file(file, targetfile)) {
+		/* download the fullfile when it is missing from the statedir and statedir-cache */
+		if (get_cached_fullfile(file) != 0) {
 			need_download = list_append_data(need_download, file);
 		}
-
-		free_string(&targetfile);
 	}
 
 	if (!need_download) {

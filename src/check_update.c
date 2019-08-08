@@ -47,7 +47,7 @@ enum swupd_code check_update()
 	int current_version, server_version;
 	enum swupd_code ret;
 
-	ret = read_versions(&current_version, &server_version, globals.path_prefix);
+	ret = read_versions(&current_version, &server_version, globals.path_prefix, true);
 
 	if (current_version > 0) {
 		info("Current OS version: %d\n", current_version);

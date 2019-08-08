@@ -31,6 +31,33 @@
 #include "config.h"
 #include "swupd.h"
 
+static int get_version_from_url(char *url)
+{
+#define MAX_VERSION_STR_SIZE 11
+
+	int ret;
+	int err;
+	char version_str[MAX_VERSION_STR_SIZE];
+	struct curl_file_data tmp_version = {
+		MAX_VERSION_STR_SIZE, 0,
+		version_str
+	};
+
+	ret = swupd_curl_get_file_memory(url, &tmp_version);
+	if (ret) {
+		goto out;
+	} else {
+		tmp_version.data[tmp_version.len] = '\0';
+		err = strtoi_err(tmp_version.data, &ret);
+		if (err != 0) {
+			ret = -1;
+		}
+	}
+
+out:
+	return ret;
+}
+
 /* this function attempts to download the latest server version string file from
  * the preferred server to a memory buffer, returning either a negative integer
  * error code or >= 0 representing the server version
@@ -41,17 +68,8 @@
  * the global version_url is used and the cached version is ignored. */
 int get_latest_version(char *v_url)
 {
-#define MAX_VERSION_CHARS 10
-#define MAX_VERSION_STR_SIZE 11
-
 	char *url = NULL;
 	int ret = 0;
-	int err;
-	char version_str[MAX_VERSION_STR_SIZE];
-	struct curl_file_data tmp_version = {
-		MAX_VERSION_STR_SIZE, 0,
-		version_str
-	};
 	static int cached_version = -1;
 
 	if (cached_version > 0 && v_url == NULL) {
@@ -63,22 +81,24 @@ int get_latest_version(char *v_url)
 	}
 
 	string_or_die(&url, "%s/version/format%s/latest", v_url, globals.format_string);
-
-	ret = swupd_curl_get_file_memory(url, &tmp_version);
-	if (ret) {
-		goto out;
-	} else {
-		tmp_version.data[tmp_version.len] = '\0';
-		err = strtoi_err(tmp_version.data, &ret);
-
-		if (err != 0) {
-			ret = -1;
-		}
-	}
-
-out:
+	ret = get_version_from_url(url);
 	free_string(&url);
 	cached_version = ret;
+
+	return ret;
+}
+
+/* gets the latest version of the update content regardless of what format we
+ * are currently in */
+int version_get_absolute_latest(void)
+{
+	char *url = NULL;
+	int ret;
+
+	string_or_die(&url, "%s/version/latest_version", globals.version_url);
+	ret = get_version_from_url(url);
+	free_string(&url);
+
 	return ret;
 }
 
@@ -175,10 +195,14 @@ bool get_distribution_string(char *path_prefix, char *dist)
 	return true;
 }
 
-enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix)
+enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix, bool absolute)
 {
 	*current_version = get_current_version(path_prefix);
-	*server_version = get_latest_version(NULL);
+	if (absolute) {
+		*server_version = version_get_absolute_latest();
+	} else {
+		*server_version = get_latest_version(NULL);
+	}
 
 	if (*current_version < 0) {
 		error("Unable to determine current OS version\n");

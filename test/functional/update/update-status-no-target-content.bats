@@ -5,7 +5,7 @@ load "../testlib"
 test_setup() {
 
 	create_test_environment -e "$TEST_NAME"
-	set_latest_version "$TEST_NAME" 100
+	create_version "$TEST_NAME" 100
 	sudo rm -f "$TARGETDIR"/usr/lib/os-release
 
 }

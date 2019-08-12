@@ -246,6 +246,8 @@ BATS = \
 	test/functional/os-install/install-multiple.bats \
 	test/functional/os-install/install-no-fullfile-fallback.bats \
 	test/functional/os-install/install-no-packs.bats \
+	test/functional/os-install/install-statedir-cache.bats \
+	test/functional/os-install/install-statedir-cache-offline.bats \
 	test/functional/os-install/install-version.bats \
 	test/functional/repair/repair-add-missing-include-old.bats \
 	test/functional/repair/repair-add-missing-include.bats \

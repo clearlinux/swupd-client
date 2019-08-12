@@ -40,11 +40,11 @@ global_teardown() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Downloading Clear Linux manifests \\(.* MB\\)
+		Downloading all Clear Linux manifests
 		Successfully retrieved manifests. Exiting
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 

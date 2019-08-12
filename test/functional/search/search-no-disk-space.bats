@@ -59,7 +59,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
-		Downloading Clear Linux manifests \\(.* MB\\)
+		Downloading all Clear Linux manifests
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle1.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
 		Error: Failed to retrieve 10 test-bundle1 manifest

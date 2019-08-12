@@ -34,11 +34,11 @@ test_setup() {
 		Applying update
 		Update was applied
 		Calling post-update helper scripts
-		Downloading Clear Linux manifests (.*)
+		Downloading all Clear Linux manifests
 		Update successful - System updated from version 10 to version 100
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$STATEDIR"/10/Manifest.test-bundle1
 }
 

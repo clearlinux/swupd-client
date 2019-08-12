@@ -391,13 +391,11 @@ error:
 	return ret < 0 ? ret : found;
 }
 
-static double query_total_download_size(struct list *list)
+static bool need_to_download_manifests(struct list *list)
 {
-	double ret;
-	double size_sum = 0;
 	struct file *file = NULL;
 	char *untard_file = NULL;
-	char *url = NULL;
+	int ret;
 
 	while (list) {
 		file = list->data;
@@ -405,27 +403,15 @@ static double query_total_download_size(struct list *list)
 
 		string_or_die(&untard_file, "%s/%i/Manifest.%s", globals.state_dir, file->last_change,
 			      file->filename);
-
-		if (access(untard_file, F_OK) == -1) {
-			/* Does not exist client-side. Must download */
-			string_or_die(&url, "%s/%i/Manifest.%s.tar", globals.content_url,
-				      file->last_change, file->filename);
-
-			ret = swupd_curl_query_content_size(url);
-			free_string(&url);
-			if (ret != -1) {
-				/* Convert file size from bytes to MB */
-				ret = ret / 1000000;
-				size_sum += ret;
-			} else {
-				free_string(&untard_file);
-				return ret;
-			}
-		}
+		ret = access(untard_file, F_OK);
 		free_string(&untard_file);
+
+		if (ret == -1) {
+			return true;
+		}
 	}
 
-	return size_sum;
+	return false;
 }
 
 /* download_manifests()
@@ -437,15 +423,11 @@ enum swupd_code download_all_manifests(struct manifest *mom, struct list **manif
 	struct list *list;
 	int ret = 0;
 	int failed_count = 0;
-	double size;
 	unsigned int complete = 0;
 	unsigned int total;
 
-	size = query_total_download_size(mom->manifests);
-	if (size < 0) {
-		info("Downloading manifests. Expect a delay, up to 100MB may be downloaded\n");
-	} else if (size > 0) {
-		info("Downloading Clear Linux manifests (%.2f MB)\n", size);
+	if (need_to_download_manifests(mom->manifests)) {
+		info("Downloading all Clear Linux manifests\n");
 	}
 
 	total = list_len(mom->manifests);

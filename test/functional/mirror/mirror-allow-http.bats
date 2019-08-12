@@ -69,7 +69,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS -u http://cdn.download.clearlinux.org/update"
 
-	assert_status_is "$SWUPD_CURL_INIT_FAILED"
+	assert_status_is "$SWUPD_INIT_GLOBALS_FAILED"
 	expected_output=$(cat <<-EOM
 		Error: This is an insecure connection
 		Use the --allow-insecure-http flag to proceed

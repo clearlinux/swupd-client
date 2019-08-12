@@ -25,6 +25,6 @@ test_setup() {
 		Installation failed
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_in_output "$expected_output"
 
 }

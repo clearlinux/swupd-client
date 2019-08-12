@@ -337,7 +337,6 @@ static void set_default_cert_path()
 	}
 }
 
-
 bool set_default_urls()
 {
 	/* we need to also unset the mirror urls from the cache and set it to

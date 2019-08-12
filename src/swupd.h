@@ -85,7 +85,6 @@ struct sub {
 enum swupd_init_config {
 	SWUPD_ALL = 0,
 	SWUPD_NO_ROOT = 0b001,
-	SWUPD_NO_NETWORK = 0b010,
 	SWUPD_NO_TIMECHECK = 0b100,
 
 };

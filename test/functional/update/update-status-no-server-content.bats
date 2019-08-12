@@ -19,5 +19,5 @@ test_setup() {
 		Current OS version: 10
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_in_output "$expected_output"
 }

@@ -90,7 +90,7 @@ enum swupd_code info_main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 	}
 	progress_init_steps("info", steps_in_info);
 
-	ret = swupd_init(SWUPD_NO_ROOT | SWUPD_NO_NETWORK);
+	ret = swupd_init(SWUPD_NO_ROOT);
 	if (ret != SWUPD_OK) {
 		goto finish;
 	}

@@ -26,7 +26,6 @@ export SWUPD_COULDNT_CREATE_FILE=7  # couldn't create a file
 export SWUPD_RECURSE_MANIFEST=8  # error while recursing a manifest
 export SWUPD_LOCK_FILE_FAILED=9  # cannot get the lock
 export SWUPD_COULDNT_RENAME_FILE=10  # couldn't rename a file
-export SWUPD_CURL_INIT_FAILED=11  # cannot initialize curl agent
 export SWUPD_INIT_GLOBALS_FAILED=12  # cannot initialize globals
 export SWUPD_BUNDLE_NOT_TRACKED=13  # bundle is not tracked on the system
 export SWUPD_COULDNT_LOAD_MANIFEST=14  # cannot load manifest into memory

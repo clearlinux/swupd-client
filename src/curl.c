@@ -116,7 +116,7 @@ exit:
 	return curl_ret;
 }
 
-static int check_connection_capath(const char *test_capath, char *url)
+static int check_connection_capath(const char *test_capath, const char *url)
 {
 	CURLcode curl_ret;
 	long response = 0;
@@ -125,6 +125,8 @@ static int check_connection_capath(const char *test_capath, char *url)
 		debug("Please provide the url to use to test the connection\n");
 		return -1;
 	}
+
+	curl_easy_reset(curl);
 
 	debug("Curl - check_connection url: %s\n", url);
 	curl_ret = swupd_curl_set_basic_options(curl, url, false);
@@ -176,10 +178,14 @@ static int check_connection_capath(const char *test_capath, char *url)
 
 int check_connection(char *url)
 {
+	if (!curl) {
+		return swupd_curl_init(url) ? 0 : -1;
+	}
+
 	return check_connection_capath(NULL, url);
 }
 
-int swupd_curl_init(char *url)
+static bool perform_curl_init(const char *url)
 {
 	CURLcode curl_ret;
 	char *str;
@@ -187,28 +193,24 @@ int swupd_curl_init(char *url)
 	char *ctx = NULL;
 	int ret;
 	struct stat st;
-
-	if (curl) {
-		warn("Curl has already been initialized\n");
-		return 0;
-	}
+	debug("Initializing swupd curl library\n");
 
 	curl_ret = curl_global_init(CURL_GLOBAL_ALL);
 	if (curl_ret != CURLE_OK) {
 		error("Curl - Failed to initialize environment\n");
-		return -1;
+		return false;
 	}
 
 	curl = curl_easy_init();
 	if (curl == NULL) {
 		error("Curl - Failed to initialize session\n");
 		curl_global_cleanup();
-		return -1;
+		return false;
 	}
 
 	ret = check_connection_capath(NULL, url);
 	if (ret == 0) {
-		return 0;
+		return true;
 	} else if (ret == -CURLE_OPERATION_TIMEDOUT) {
 		error("Curl - Communicating with server timed out\n");
 		ret = -1;
@@ -238,19 +240,32 @@ int swupd_curl_init(char *url)
 exit:
 	if (ret != 0) {
 		/* curl failed to initialize */
-		error("Failed to connect to update server: %s\n", globals.version_url);
+		error("Failed to connect to update server: %s\n", url);
 		info("Possible solutions for this problem are:\n"
 		     "\tCheck if your network connection is working\n"
 		     "\tFix the system clock\n"
 		     "\tRun 'swupd info' to check if the urls are correct\n"
 		     "\tCheck if the server SSL certificate is trusted by your system ('clrtrust generate' may help)\n");
-		swupd_curl_deinit();
+		swupd_curl_cleanup();
+		return false;
 	}
 
-	return ret;
+	return true;
 }
 
-void swupd_curl_deinit(void)
+bool swupd_curl_init(const char *url)
+{
+	static bool initialized = false;
+
+	if (initialized) {
+		return curl != NULL;
+	}
+
+	initialized = true;
+	return perform_curl_init(url);
+}
+
+void swupd_curl_cleanup(void)
 {
 	if (!curl) {
 		return;
@@ -274,8 +289,7 @@ double swupd_curl_query_content_size(char *url)
 	double content_size;
 	long response = 0;
 
-	if (!curl) {
-		error("Curl hasn't been initialized\n");
+	if (!swupd_curl_init(url)) {
 		return -1;
 	}
 
@@ -435,13 +449,13 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 		switch (curl_ret) {
 		case CURLE_COULDNT_RESOLVE_PROXY:
 			error("Curl - Could not resolve proxy\n");
-			return DOWNLOAD_STATUS_ERROR;
+			return DOWNLOAD_STATUS_SERVER_UNREACHABLE;
 		case CURLE_COULDNT_RESOLVE_HOST:
 			error("Curl - Could not resolve host - '%s'\n", url);
-			return DOWNLOAD_STATUS_ERROR;
+			return DOWNLOAD_STATUS_SERVER_UNREACHABLE;
 		case CURLE_COULDNT_CONNECT:
 			error("Curl - Could not connect to host or proxy - '%s'\n", url);
-			return DOWNLOAD_STATUS_ERROR;
+			return DOWNLOAD_STATUS_SERVER_UNREACHABLE;
 		case CURLE_FILE_COULDNT_READ_FILE:
 			return DOWNLOAD_STATUS_NOT_FOUND;
 		case CURLE_PARTIAL_FILE:
@@ -580,6 +594,7 @@ enum retry_strategy determine_strategy(int status)
 	case DOWNLOAD_STATUS_FORBIDDEN:
 	case DOWNLOAD_STATUS_NOT_FOUND:
 	case DOWNLOAD_STATUS_WRITE_ERROR:
+	case DOWNLOAD_STATUS_SERVER_UNREACHABLE:
 		return DONT_RETRY;
 	case DOWNLOAD_STATUS_RANGE_ERROR:
 	case DOWNLOAD_STATUS_PARTIAL_FILE:
@@ -600,9 +615,8 @@ static int retry_download_loop(const char *url, char *filename, struct curl_file
 	int strategy;
 	int ret;
 
-	if (!curl) {
-		error("Curl hasn't been initialized\n");
-		return -1;
+	if (!swupd_curl_init(url)) {
+		return -ECOMM;
 	}
 
 	for (;;) {

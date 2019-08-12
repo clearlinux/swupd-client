@@ -68,6 +68,15 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle);
  */
 enum retry_strategy determine_strategy(int status);
 
+/**
+ * @brief Init the swupd curl.
+ *
+ * @param url The url to use to test server connectivity
+ *
+ * @note Must be called before any curl operation.
+ */
+bool swupd_curl_init(const char *url);
+
 #ifdef __cplusplus
 }
 #endif

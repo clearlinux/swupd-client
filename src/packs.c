@@ -252,6 +252,10 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 
 	/* we need to download some files, so set up curl */
 	download_handle = swupd_curl_parallel_download_start(get_max_xfer(MAX_XFER));
+	if (!download_handle) {
+		list_free_list(need_download);
+		return -1;
+	}
 	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, download_error, download_free_data);
 
 	/* get size of the packs to download */

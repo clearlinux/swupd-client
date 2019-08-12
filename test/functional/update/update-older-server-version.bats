@@ -33,12 +33,11 @@ test_setup() {
 
 	assert_status_is "$SWUPD_SERVER_CONNECTION_ERROR"
 	expected_output=$(cat <<-EOM
-		Update started
 		Error: Unable to determine the server version
 		Update failed
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_in_output "$expected_output"
 
 }
 

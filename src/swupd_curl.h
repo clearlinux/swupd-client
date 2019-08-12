@@ -33,6 +33,7 @@ enum download_status {
 	DOWNLOAD_STATUS_RANGE_ERROR,
 	DOWNLOAD_STATUS_WRITE_ERROR,
 	DOWNLOAD_STATUS_ERROR,
+	DOWNLOAD_STATUS_SERVER_UNREACHABLE,
 };
 
 /**
@@ -62,15 +63,6 @@ typedef void (*swupd_curl_free_cb)(void *data);
 typedef int (*swupd_curl_progress_cb)(void *clientp, int64_t dltotal, int64_t dlnow, int64_t ultotal, int64_t ulnow);
 
 /**
- * @brief Init the swupd curl.
- *
- * @param url The url to use to test server connectivity
- *
- * @note Must be called before any curl operation.
- */
-int swupd_curl_init(char *url);
-
-/**
  * @brief Test a connection with a server.
  *
  * @param url The url to use to test server connectivity
@@ -80,9 +72,9 @@ int swupd_curl_init(char *url);
 int check_connection(char *url);
 
 /**
- * @brief Close curl and release all memory allocated by swupd_curl_init().
+ * @brief Clean any curl initialization data, if needed.
  */
-void swupd_curl_deinit(void);
+void swupd_curl_cleanup(void);
 
 /**
  * @brief Query the file content size of 'url' without downloading the full file.

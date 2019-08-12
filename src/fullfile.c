@@ -162,6 +162,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 		/* If we hit this point, the network is accessible but we were
 		 * unable to download the needed files. This is a terminal error
 		 * and we need good logging */
+		list_free_list(need_download);
 		return -SWUPD_COULDNT_DOWNLOAD_FILE;
 	}
 

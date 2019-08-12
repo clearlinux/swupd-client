@@ -511,7 +511,7 @@ void free_file_data(void *data)
 
 void swupd_deinit(void)
 {
-	swupd_curl_deinit();
+	swupd_curl_cleanup();
 	signature_deinit();
 	v_lockfile();
 	globals_deinit();
@@ -585,13 +585,6 @@ enum swupd_code swupd_init(enum swupd_init_config config)
 				signature_deinit();
 				goto out_close_lock;
 			}
-		}
-	}
-
-	if ((config & SWUPD_NO_NETWORK) == 0) {
-		if (swupd_curl_init(globals.version_url) != 0) {
-			ret = SWUPD_CURL_INIT_FAILED;
-			goto out_close_lock;
 		}
 	}
 

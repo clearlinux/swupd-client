@@ -48,18 +48,20 @@ test_teardown() {
 
 	run sudo sh -c "$SWUPD update --allow-insecure-http $SWUPD_OPTS"
 
-	assert_status_is "$SWUPD_CURL_INIT_FAILED"
+	assert_status_is "$SWUPD_SERVER_CONNECTION_ERROR"
 	expected_output=$(cat <<-EOM
 		Warning: This is an insecure connection
 		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
+		Update started
 		Error: Curl - Communicating with server timed out
-		Error: Failed to connect to update server: http://localhost:$port
+		Error: Failed to connect to update server: http://localhost:$port/.*
 		Possible solutions for this problem are:
 		.Check if your network connection is working
 		.Fix the system clock
 		.Run 'swupd info' to check if the urls are correct
 		.Check if the server SSL certificate is trusted by your system \('clrtrust generate' may help\)
-		Error: Updater failed to initialize, exiting now
+		Error: Unable to determine the server version
+		Update failed
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -78,18 +80,23 @@ test_teardown() {
 
 	run sudo sh -c "$SWUPD update --allow-insecure-http $SWUPD_OPTS"
 
-	assert_status_is "$SWUPD_CURL_INIT_FAILED"
+	assert_status_is "$SWUPD_SERVER_CONNECTION_ERROR"
 	expected_output=$(cat <<-EOM
 		Warning: This is an insecure connection
 		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
+		Update started
+		Checking mirror status
 		Error: Curl - Communicating with server timed out
-		Error: Failed to connect to update server: http://localhost:$port
+		Error: Failed to connect to update server: http://localhost:$port/.*
 		Possible solutions for this problem are:
 		.Check if your network connection is working
 		.Fix the system clock
 		.Run 'swupd info' to check if the urls are correct
 		.Check if the server SSL certificate is trusted by your system \('clrtrust generate' may help\)
-		Error: Updater failed to initialize, exiting now
+		Warning: Upstream server http://localhost:$port/ not responding, cannot determine upstream version
+		Warning: Unable to determine if the mirror is up to date
+		Error: Unable to determine the server version
+		Update failed
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

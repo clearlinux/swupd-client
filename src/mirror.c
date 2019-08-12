@@ -275,6 +275,8 @@ int handle_mirror_if_stale(void)
 	}
 
 	info("Checking mirror status\n");
+	// Force curl to be initialized with mirror url
+	get_latest_version("");
 
 	fullpath = mk_full_filename(globals.path_prefix, DEFAULT_VERSION_URL_PATH);
 	ret = get_value_from_path(&ret_str, fullpath, true);
@@ -377,7 +379,7 @@ enum swupd_code mirror_main(int argc, char **argv)
 	}
 
 	/* init swupd here after the new URL is configured */
-	init_ret = swupd_init(SWUPD_NO_NETWORK | SWUPD_NO_TIMECHECK | SWUPD_NO_ROOT);
+	init_ret = swupd_init(SWUPD_NO_TIMECHECK | SWUPD_NO_ROOT);
 	if (init_ret != SWUPD_OK) {
 		ret = init_ret;
 		goto finish;

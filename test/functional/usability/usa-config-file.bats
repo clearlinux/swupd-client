@@ -165,15 +165,15 @@ global_teardown() {
 
 	# flags used with a command take precedence over options in the config file
 
-	add_option_to_config_file url http://someurl.com global
+	add_option_to_config_file url https://someurl.com global
 
-	run sudo sh -c "$SWUPD info $SWUPD_OPTS -v http://anotherurl.com"
+	run sudo sh -c "$SWUPD info $SWUPD_OPTS -v https://anotherurl.com"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Distribution:      Swupd Test Distro
 		Installed version: 10
-		Version URL:       http://anotherurl.com
-		Content URL:       http://someurl.com
+		Version URL:       https://anotherurl.com
+		Content URL:       https://someurl.com
 	EOM
 	)
 	assert_is_output "$expected_output"

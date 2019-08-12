@@ -85,6 +85,6 @@ global_teardown() {
 		test-bundle1
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_in_output "$expected_output"
 
 }

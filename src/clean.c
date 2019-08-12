@@ -380,7 +380,7 @@ enum swupd_code clean_main(int argc, char **argv)
 	}
 	progress_init_steps("clean", steps_in_clean);
 
-	ret = swupd_init(SWUPD_NO_NETWORK);
+	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {
 		error("Failed swupd initialization, exiting now\n");
 		goto exit;

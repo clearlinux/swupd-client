@@ -176,7 +176,7 @@ bool is_populated_dir(char *dirname)
 	return false;
 }
 
-static int create_required_dirs(void)
+static int create_state_dirs(const char *state_dir_path)
 {
 	int ret = 0;
 	unsigned int i;
@@ -185,16 +185,16 @@ static int create_required_dirs(void)
 	const char *state_dirs[] = { "delta", "staged", "download", "telemetry" };
 
 	// check for existence
-	if (ensure_root_owned_dir(globals.state_dir)) {
+	if (ensure_root_owned_dir(state_dir_path)) {
 		//state dir doesn't exist
-		if (mkdir_p(globals.state_dir) != 0 || chmod(globals.state_dir, S_IRWXU) != 0) {
-			error("failed to create %s\n", globals.state_dir);
+		if (mkdir_p(state_dir_path) != 0 || chmod(state_dir_path, S_IRWXU) != 0) {
+			error("failed to create %s\n", state_dir_path);
 			return -1;
 		}
 	}
 
 	for (i = 0; i < STATE_DIR_COUNT; i++) {
-		string_or_die(&dir, "%s/%s", globals.state_dir, state_dirs[i]);
+		string_or_die(&dir, "%s/%s", state_dir_path, state_dirs[i]);
 		ret = ensure_root_owned_dir(dir);
 		if (ret) {
 			ret = mkdir(dir, S_IRWXU);
@@ -207,7 +207,7 @@ static int create_required_dirs(void)
 	}
 	/* Do a final check to make sure that the top level dir wasn't
 	 * tampered with whilst we were creating the dirs */
-	return ensure_root_owned_dir(globals.state_dir);
+	return ensure_root_owned_dir(state_dir_path);
 }
 
 /**
@@ -568,9 +568,16 @@ enum swupd_code swupd_init(enum swupd_init_config config)
 			}
 		}
 
-		if (create_required_dirs()) {
+		if (create_state_dirs(globals.state_dir)) {
 			ret = SWUPD_COULDNT_CREATE_DIR;
 			goto out_fds;
+		}
+
+		if (globals.state_dir_cache != NULL) {
+			if (create_state_dirs(globals.state_dir_cache)) {
+				ret = SWUPD_COULDNT_CREATE_DIR;
+				goto out_fds;
+			}
 		}
 
 		if (p_lockfile() < 0) {

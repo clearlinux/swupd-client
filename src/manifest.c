@@ -298,25 +298,35 @@ static void set_untracked_manifest_files(struct manifest *manifest)
 }
 
 /* Removes the extracted Manifest.<bundle> and accompanying tar file, cache file, and
- * the signature file */
+ * the signature file from the statedir and statedir-cache */
 static void remove_manifest_files(char *filename, int version, char *hash)
 {
 	char *file;
+	char *state_dirs[] = { globals.state_dir, globals.state_dir_cache };
+	int num_state_dirs = sizeof(state_dirs) / sizeof(state_dirs[0]);
+	int i;
 
 	warn("Removing corrupt Manifest.%s artifacts and re-downloading...\n", filename);
-	string_or_die(&file, "%s/%i/Manifest.%s", globals.state_dir, version, filename);
-	unlink(file);
-	free_string(&file);
-	string_or_die(&file, "%s/%i/Manifest.%s.tar", globals.state_dir, version, filename);
-	unlink(file);
-	free_string(&file);
-	string_or_die(&file, "%s/%i/Manifest.%s.sig", globals.state_dir, version, filename);
-	unlink(file);
-	free_string(&file);
-	if (hash != NULL) {
-		string_or_die(&file, "%s/%i/Manifest.%s.%s", globals.state_dir, version, filename, hash);
+
+	for (i = 0; i < num_state_dirs; i++) {
+		if (state_dirs[i] == NULL) {
+			continue;
+		}
+
+		string_or_die(&file, "%s/%i/Manifest.%s", state_dirs[i], version, filename);
 		unlink(file);
 		free_string(&file);
+		string_or_die(&file, "%s/%i/Manifest.%s.tar", state_dirs[i], version, filename);
+		unlink(file);
+		free_string(&file);
+		string_or_die(&file, "%s/%i/Manifest.%s.sig", state_dirs[i], version, filename);
+		unlink(file);
+		free_string(&file);
+		if (hash != NULL) {
+			string_or_die(&file, "%s/%i/Manifest.%s.%s", state_dirs[i], version, filename, hash);
+			unlink(file);
+			free_string(&file);
+		}
 	}
 }
 

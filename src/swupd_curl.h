@@ -74,11 +74,10 @@ int swupd_curl_init(char *url);
  * @brief Test a connection with a server.
  *
  * @param url The url to use to test server connectivity
- * @param test_capath path for the certificate
  *
  * @returns 0 if the server is responding
  */
-int check_connection(const char *test_capath, char *url);
+int check_connection(char *url);
 
 /**
  * @brief Close curl and release all memory allocated by swupd_curl_init().

@@ -116,7 +116,7 @@ exit:
 	return curl_ret;
 }
 
-int check_connection(const char *test_capath, char *url)
+static int check_connection_capath(const char *test_capath, char *url)
 {
 	CURLcode curl_ret;
 	long response = 0;
@@ -174,6 +174,11 @@ int check_connection(const char *test_capath, char *url)
 	}
 }
 
+int check_connection(char *url)
+{
+	return check_connection_capath(NULL, url);
+}
+
 int swupd_curl_init(char *url)
 {
 	CURLcode curl_ret;
@@ -207,7 +212,7 @@ int swupd_curl_init(char *url)
 		return -1;
 	}
 
-	ret = check_connection(NULL, url);
+	ret = check_connection_capath(NULL, url);
 	if (ret == 0) {
 		return 0;
 	} else if (ret == -CURLE_OPERATION_TIMEDOUT) {
@@ -227,7 +232,7 @@ int swupd_curl_init(char *url)
 			}
 
 			debug("Curl - Trying fallback CA path %s\n", tok);
-			ret = check_connection(tok, url);
+			ret = check_connection_capath(tok, url);
 			if (ret == 0) {
 				capath = strdup_or_die(tok);
 				break;

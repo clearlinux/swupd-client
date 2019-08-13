@@ -58,13 +58,6 @@ uint64_t total_curl_sz = 0;
 /* alternative CA Path */
 static char *capath = NULL;
 
-/* values for retry strategies */
-enum retry_strategy {
-	DONT_RETRY = 0,
-	RETRY_NOW,
-	RETRY_WITH_DELAY
-};
-
 /* Pretty print curl return status */
 static void swupd_curl_strerror(CURLcode curl_ret)
 {
@@ -589,18 +582,7 @@ exit:
 	return status;
 }
 
-/*
- * Determines what strategy to use based on the return code:
- * - do not retry: if the fault indicates that the failure isn't transient or
- *                 is unlikely to be successful if repeated (i.e. disk full)
- * - retry immediately: if the specific fault reported is unusual or rare, it
- *                      might have been caused by unusual circumstances, the
- *                      same failure is unlikely to be repeated (e.g. corrupt
- *                      network package)
- * - retry after a delay: if the fault is caused by a transient fault (like
- *                        network connectivity)
- */
-static enum retry_strategy determine_strategy(int status)
+enum retry_strategy determine_strategy(int status)
 {
 	/* we don't need to retry if the content URL is local */
 	if (globals.content_url_is_local) {

@@ -286,7 +286,10 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, in
 			tp_task_schedule(h->thpool, (void *)success_callback_wrapper, (void *)file);
 		} else {
 			//Check if user can handle errors
-			if (!h->error_cb || h->error_cb(file->status, file->data)) {
+			bool error_handled = h->error_cb && h->error_cb(file->status, file->data);
+			enum retry_strategy strategy = determine_strategy(file->status);
+
+			if (error_handled || strategy == DONT_RETRY) {
 				// Don't retry download if error was handled
 				file->retries = globals.max_retries;
 				file->cb_retval = true;

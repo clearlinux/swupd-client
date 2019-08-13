@@ -59,11 +59,6 @@ static void download_file(struct swupd_curl_parallel_handle *download_handle, st
 	free_string(&filename);
 }
 
-static bool download_error(enum download_status status, UNUSED_PARAM void *data)
-{
-	return status == DOWNLOAD_STATUS_NOT_FOUND;
-}
-
 static bool download_successful(void *data)
 {
 	if (!data) {
@@ -162,7 +157,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 
 	/* we need to download some files, so set up curl */
 	download_handle = swupd_curl_parallel_download_start(get_max_xfer(MAX_XFER));
-	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, download_error, NULL);
+	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, NULL, NULL);
 	if (!download_handle) {
 		/* If we hit this point, the network is accessible but we were
 		 * unable to download the needed files. This is a terminal error

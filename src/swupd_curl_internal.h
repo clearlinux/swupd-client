@@ -21,6 +21,13 @@ struct curl_file {
 	FILE *fh;   /* file written into during downloading */
 };
 
+/* values for retry strategies */
+enum retry_strategy {
+	DONT_RETRY = 0,
+	RETRY_NOW,
+	RETRY_WITH_DELAY
+};
+
 /**
  * @brief Create a file in disk to start the download.
  */
@@ -46,6 +53,20 @@ extern CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool f
  * fill 'err' with an error code and return the status of this download.
  */
 enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle);
+
+/**
+ * @brief Determines what strategy to use based on the return code:
+ *
+ * - do not retry: if the fault indicates that the failure isn't transient or
+ *                 is unlikely to be successful if repeated (i.e. disk full)
+ * - retry immediately: if the specific fault reported is unusual or rare, it
+ *                      might have been caused by unusual circumstances, the
+ *                      same failure is unlikely to be repeated (e.g. corrupt
+ *                      network package)
+ * - retry after a delay: if the fault is caused by a transient fault (like
+ *                        network connectivity)
+ */
+enum retry_strategy determine_strategy(int status);
 
 #ifdef __cplusplus
 }

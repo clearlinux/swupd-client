@@ -195,14 +195,10 @@ bool get_distribution_string(char *path_prefix, char *dist)
 	return true;
 }
 
-enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix, bool absolute)
+enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix)
 {
 	*current_version = get_current_version(path_prefix);
-	if (absolute) {
-		*server_version = version_get_absolute_latest();
-	} else {
-		*server_version = get_latest_version(NULL);
-	}
+	*server_version = get_latest_version(NULL);
 
 	if (*current_version < 0) {
 		error("Unable to determine current OS version\n");

@@ -45,9 +45,19 @@ static void print_help(void)
 enum swupd_code check_update()
 {
 	int current_version, server_version;
-	enum swupd_code ret;
+	enum swupd_code ret = SWUPD_OK;
 
-	ret = read_versions(&current_version, &server_version, globals.path_prefix, true);
+	current_version = get_current_version(globals.path_prefix);
+	server_version = version_get_absolute_latest();
+
+	if (current_version < 0) {
+		error("Unable to determine current OS version\n");
+		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
+	}
+	if (server_version < 0) {
+		error("Unable to determine the server version\n");
+		ret = SWUPD_SERVER_CONNECTION_ERROR;
+	}
 
 	if (current_version > 0) {
 		info("Current OS version: %d\n", current_version);

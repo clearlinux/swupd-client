@@ -162,7 +162,7 @@ extern enum swupd_code walk_tree(struct manifest *, const char *, bool, const re
 
 extern int get_latest_version(char *v_url);
 extern int get_absolute_latest_version(void);
-extern enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix, bool absolute);
+extern enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix);
 extern int get_current_version(char *path_prefix);
 extern bool get_distribution_string(char *path_prefix, char *dist);
 
@@ -181,6 +181,7 @@ extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct l
 
 extern int get_value_from_path(char **contents, const char *path, bool is_abs_path);
 extern int get_version_from_path(const char *abs_path);
+extern int version_get_absolute_latest(void);
 
 static inline int bsearch_file_helper(const void *A, const void *B)
 {

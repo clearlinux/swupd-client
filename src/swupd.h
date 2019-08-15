@@ -364,7 +364,7 @@ extern int read_mix_version_file(char *filename, char *path_prefix);
 
 extern enum swupd_code print_update_conf_info(void);
 
-extern void handle_mirror_if_stale(void);
+extern int handle_mirror_if_stale(void);
 
 extern enum swupd_code clean_statedir(bool all, bool dry_run);
 enum swupd_code download_all_manifests(struct manifest *mom, struct list **manifest_list);

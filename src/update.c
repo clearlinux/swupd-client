@@ -269,7 +269,10 @@ static enum swupd_code main_update()
 
 	read_subscriptions(&current_subs);
 
-	handle_mirror_if_stale();
+	if (handle_mirror_if_stale() < 0) {
+		ret = SWUPD_SERVER_CONNECTION_ERROR;
+		goto clean_curl;
+	}
 	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Prepare for update
 

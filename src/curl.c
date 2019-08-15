@@ -206,12 +206,6 @@ int swupd_curl_init(char *url)
 		return -1;
 	}
 
-	/* enforce the use of https or file */
-	if (!is_url_allowed(globals.version_url) || !is_url_allowed(globals.content_url)) {
-		swupd_curl_deinit();
-		return -1;
-	}
-
 	ret = check_connection_capath(NULL, url);
 	if (ret == 0) {
 		return 0;

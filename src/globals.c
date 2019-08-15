@@ -75,7 +75,7 @@ static void set_content_url(char *url)
 
 /* Initializes the content_url global variable with the default value,
  * the value is read from the 'contenturl' configuration file */
-bool set_default_content_url(void)
+static bool set_default_content_url(void)
 {
 	int ret;
 	char *new_content_url = NULL;
@@ -124,7 +124,7 @@ static void set_version_url(char *url)
 
 /* Initializes the version_url global variable with the default value,
  * the value is read from the 'versionurl' configuration file */
-bool set_default_version_url(void)
+static bool set_default_version_url(void)
 {
 	int ret;
 	char *new_version_url = NULL;
@@ -337,6 +337,29 @@ static void set_default_cert_path()
 	}
 }
 
+
+bool set_default_urls()
+{
+	/* we need to also unset the mirror urls from the cache and set it to
+	 * the central version */
+	free_string(&globals.version_url);
+	free_string(&globals.content_url);
+	if (!set_default_version_url()) {
+		return false;
+	}
+
+	if (!set_default_content_url()) {
+		return false;
+	}
+
+	/* enforce the use of https or file */
+	if (!is_url_allowed(globals.version_url) || !is_url_allowed(globals.content_url)) {
+		return false;
+	}
+
+	return true;
+}
+
 bool globals_init(void)
 {
 	if (!globals.state_dir) {
@@ -359,6 +382,11 @@ bool globals_init(void)
 
 	if (!globals.content_url && !set_default_content_url()) {
 		error("Default content URL not found. Use the -c option instead\n");
+		return false;
+	}
+
+	/* enforce the use of https or file */
+	if (!is_url_allowed(globals.version_url) || !is_url_allowed(globals.content_url)) {
 		return false;
 	}
 

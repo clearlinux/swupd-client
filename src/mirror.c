@@ -124,12 +124,6 @@ static int unset_mirror_url()
 	ret1 = swupd_rm(content_path);
 	ret2 = swupd_rm(version_path);
 
-	/* we need to also unset the mirror urls from the cache and set it to
-	 * the central version */
-	free_string(&globals.version_url);
-	free_string(&globals.content_url);
-	set_default_version_url();
-	set_default_content_url();
 	free_string(&content_path);
 	free_string(&version_path);
 
@@ -269,20 +263,21 @@ static bool mirror_is_set(void)
 	return mirror_set;
 }
 
-void handle_mirror_if_stale(void)
+int handle_mirror_if_stale(void)
 {
+	int ret = 0;
 	char *ret_str = NULL;
 	char *fullpath = NULL;
 
 	/* make sure there is a mirror set up first */
 	if (!mirror_is_set()) {
-		return;
+		return 0;
 	}
 
 	info("Checking mirror status\n");
 
 	fullpath = mk_full_filename(globals.path_prefix, DEFAULT_VERSION_URL_PATH);
-	int ret = get_value_from_path(&ret_str, fullpath, true);
+	ret = get_value_from_path(&ret_str, fullpath, true);
 	if (ret != 0 || ret_str == NULL) {
 		/* no versionurl file here, might not exist under --path argument */
 		goto out;
@@ -331,11 +326,16 @@ void handle_mirror_if_stale(void)
 
 	info("Removing mirror configuration\n");
 	unset_mirror_url();
+	if (!set_default_urls()) {
+		ret = -1;
+		goto out;
+	}
 	get_latest_version("");
 
 out:
 	free_string(&fullpath);
 	free_string(&ret_str);
+	return ret;
 }
 
 /* return 0 if update available, non-zero if not */

@@ -77,8 +77,7 @@ size_t get_max_xfer(size_t default_max_xfer);
 void save_cmd(char **argv);
 
 bool set_path_prefix(char *path);
-bool set_default_content_url(void);
-bool set_default_version_url(void);
+bool set_default_urls(void);
 void set_default_path_prefix(void);
 
 #ifdef __cplusplus

@@ -45,8 +45,23 @@ static int requested_version = -1;
 static bool download_only = false;
 static bool update_search_file_index = false;
 static bool keepcache = false;
+static char swupd_binary[LINE_MAX] = { 0 };
 
 int nonpack;
+
+static void save_swupd_binary_path()
+{
+	/* we need to resolve the whole path to swupd first, proc/self/exe
+		 * is a symbolic link to the executable that is running the current process */
+	int path_length;
+	path_length = readlink("/proc/self/exe", swupd_binary, sizeof(swupd_binary));
+	if (path_length <= 0 || path_length >= LINE_MAX) {
+		// On errors fallback to default location
+		strncpy(swupd_binary, "/usr/bin/swupd", sizeof(swupd_binary));
+	} else {
+		swupd_binary[path_length] = '\0';
+	}
+}
 
 /* This loads the upstream Clear Manifest.Full and local
  * Manifest.full, and then checks that there are no conflicts between
@@ -242,6 +257,8 @@ static enum swupd_code main_update()
 
 	/* start the timer used to report the total time to telemetry */
 	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
+
+	save_swupd_binary_path();
 
 	/* Step 1: Preparation steps */
 	timelist_timer_start(globals.global_times, "Prepare for update");
@@ -571,17 +588,6 @@ clean_curl:
 			error("Unable to determine re-update command, exiting now\n");
 			return SWUPD_INVALID_BINARY;
 		}
-
-		/* we need to resolve the whole path to swupd first, proc/self/exe
-		 * is a symbolic link to the executable that is running the current process */
-		char swupd_binary[LINE_MAX];
-		int path_length;
-		path_length = readlink("/proc/self/exe", swupd_binary, sizeof(swupd_binary));
-		if (path_length <= 0 || path_length >= LINE_MAX) {
-			error("Could not determine the swupd path\n");
-			return -1;
-		}
-		swupd_binary[path_length] = '\0';
 
 		/* Run the swupd_argv saved from main */
 		return execv(swupd_binary, globals.swupd_argv);

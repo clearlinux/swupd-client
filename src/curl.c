@@ -281,6 +281,11 @@ double swupd_curl_query_content_size(char *url)
 
 	curl_easy_reset(curl);
 
+	curl_ret = swupd_curl_set_basic_options(curl, url, true);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
 	/* Set buffer for error string */
 	curl_ret = curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
 	if (curl_ret != CURLE_OK) {
@@ -298,23 +303,6 @@ double swupd_curl_query_content_size(char *url)
 	}
 
 	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, dummy_write_cb);
-	if (curl_ret != CURLE_OK) {
-		return -1;
-	}
-
-	curl_ret = curl_easy_setopt(curl, CURLOPT_URL, url);
-	if (curl_ret != CURLE_OK) {
-		return -1;
-	}
-
-	if (capath) {
-		curl_ret = curl_easy_setopt(curl, CURLOPT_CAPATH, capath);
-		if (curl_ret != CURLE_OK) {
-			return -1;
-		}
-	}
-
-	curl_ret = swupd_curl_set_optional_client_cert(curl);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}

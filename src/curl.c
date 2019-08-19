@@ -757,10 +757,11 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_
 		goto exit;
 	}
 
-	curl_ret = curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1);
-	if (curl_ret != CURLE_OK && curl_ret != CURLE_UNKNOWN_OPTION) {
-		goto exit;
-	}
+	//TODO: Introduce code back on bug is fixed on curl
+	//curl_ret = curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1);
+	//if (curl_ret != CURLE_OK && curl_ret != CURLE_UNKNOWN_OPTION) {
+	//	goto exit;
+	//}
 
 	curl_ret = curl_easy_setopt(curl, CURLOPT_USERAGENT, PACKAGE "/" VERSION);
 	if (curl_ret != CURLE_OK && curl_ret != CURLE_UNKNOWN_OPTION) {

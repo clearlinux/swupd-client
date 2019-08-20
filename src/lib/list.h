@@ -120,4 +120,10 @@ void *list_search(struct list *list, const void *item, comparison_fn_t compariso
  */
 int list_strcmp(const void *a, const void *b);
 
+/**
+ * @brief removes duplicated elements from a list
+ *
+ */
+struct list *list_deduplicate(struct list *list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
+
 #endif

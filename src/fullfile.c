@@ -30,6 +30,26 @@
 //FIXME #562
 #define MAX_XFER 15
 
+static int compare_fullfile(const void *a, const void *b)
+{
+	struct file *file1 = (struct file *)a;
+	struct file *file2 = (struct file *)b;
+	int comp;
+
+	comp = strcmp(file1->hash, file2->hash);
+	if (comp != 0) {
+		return comp;
+	}
+
+	/* they have the same hash, now let's check the version */
+	if (file1->last_change == file2->last_change) {
+		/* we have a match */
+		return 0;
+	}
+
+	return -1;
+}
+
 static void download_mix_file(struct file *file)
 {
 	char *url, *filename;
@@ -197,22 +217,11 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	if (list_length < MAX_FILES) {
 		/* remove tar duplicates from the list first */
 		need_download = list_sort(need_download, file_sort_hash);
-		for (iter = list_head(need_download); iter; iter = iter->next) {
-			if (iter->next == NULL) {
-				break;
-			}
-			struct file *file1, *file2;
-			file1 = iter->data;
-			file2 = iter->next->data;
 
-			/* different directories may need the same tar, in those cases it needs
-			 * to be downloaded only once, the tar for each file is downloaded from
-			 * <last_change>/files/<hash>.tar */
-			if (strcmp(file1->hash, file2->hash) == 0 && (file1->last_change == file2->last_change)) {
-				iter = list_free_item(iter, NULL);
-			}
-		}
-		need_download = list_head(iter);
+		/* different directories may need the same tar, in those cases it needs
+		 * to be downloaded only once, the tar for each file is downloaded from
+		 * <last_change>/files/<hash>.tar */
+		need_download = list_deduplicate(need_download, compare_fullfile, NULL);
 
 		download_progress.total_download_size = fullfile_query_total_download_size(need_download);
 		if (download_progress.total_download_size > 0) {

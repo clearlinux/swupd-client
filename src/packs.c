@@ -284,6 +284,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 		bundle = search_bundle_in_manifest(mom, sub->component);
 		if (!bundle) {
 			debug("The manifest for bundle %s was not found in the MoM", sub->component);
+			swupd_curl_parallel_download_cancel(download_handle);
 			return -SWUPD_INVALID_BUNDLE;
 		}
 

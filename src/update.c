@@ -193,14 +193,12 @@ int add_included_manifests(struct manifest *mom, struct list **subs)
 	/* Pass the current version here, not the new, otherwise we will never
 	 * hit the Manifest delta path. */
 	ret = add_subscriptions(subbed, subs, mom, true, 0);
-	if (ret & (add_sub_ERR | add_sub_BADNAME)) {
-		ret = -ret;
-	} else {
-		ret = 0;
-	}
 	list_free_list(subbed);
+	if (ret & (add_sub_ERR | add_sub_BADNAME)) {
+		return ret;
+	}
 
-	return ret;
+	return 0;
 }
 
 static bool need_new_upstream(int server)
@@ -424,7 +422,7 @@ version_check:
 	timelist_timer_start(globals.global_times, "Add included bundle manifests");
 	ret = add_included_manifests(server_manifest, &latest_subs);
 	if (ret) {
-		if (ret == -add_sub_BADNAME) {
+		if (ret & add_sub_BADNAME) {
 			/* this means a bundle(s) was removed in a future version */
 			warn("One or more installed bundles are no longer available at version %d\n",
 			     server_version);

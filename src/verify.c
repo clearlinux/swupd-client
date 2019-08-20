@@ -963,7 +963,7 @@ enum swupd_code verify_main(void)
 	/* if one or more of the installed bundles were not found in the manifest,
 	 * continue only if --force was used since the bundles could be removed */
 	if (ret) {
-		if (ret == -add_sub_BADNAME) {
+		if (ret & add_sub_BADNAME) {
 			if (cmdline_option_force) {
 				if (cmdline_option_picky && cmdline_option_fix) {
 					warn("One or more installed bundles that are not "

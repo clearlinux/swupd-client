@@ -1,6 +1,6 @@
 SUFFIXES= .rst
 
-EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash config
+EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash swupd.zsh config
 
 AM_CFLAGS = -fPIE -fPIC -g -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99 \
 	-O$(OPTIMIZE) \

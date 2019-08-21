@@ -104,9 +104,9 @@ void verify_set_option_quick(bool opt)
 	cmdline_option_quick = opt;
 }
 
-void verify_set_option_bundles(struct list *bundles)
+void verify_set_option_bundles(struct list *opt_bundles)
 {
-	cmdline_option_bundles = bundles;
+	cmdline_option_bundles = opt_bundles;
 }
 
 void verify_set_option_version(int ver)
@@ -161,8 +161,8 @@ static void print_help(void)
 	print("   -V, --version=[VER]     %s against manifest version VER\n", cmdline_command_verify ? "Verify" : "Diagnose");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -q, --quick             Don't check for corrupt files, only fix missing files\n");
+	print("   -B, --bundles=[BUNDLES] Forces swupd to only %s the specified BUNDLES. Example: --bundles=os-core,vi\n", cmdline_command_verify ? "verify" : "diagnose");
 	if (cmdline_command_verify) {
-		print("   -B, --bundles=[BUNDLES] Forces swupd to only consider the specified BUNDLES for verify. Example: --bundles=os-core,vi\n");
 		print("   -m, --manifest=[VER]    This option has been superseded. Please consider using the -V option instead\n");
 		print("   -f, --fix               This option has been superseded, please consider using \"swupd repair\" instead\n");
 		print("   -i, --install           This option has been superseded, please consider using \"swupd os-install\" instead\n");
@@ -621,25 +621,17 @@ static bool parse_opt(int opt, char *optarg)
 	case 'w':
 		cmdline_option_picky_whitelist = strdup_or_die(optarg);
 		return true;
-	case 'B': {
-		/* This option should only be available to verify for backward compatibility */
-		if (!cmdline_command_verify) {
-			print("diagnose: invalid option -- 'B'\n");
-			return false;
-		}
-		char *arg_copy = strdup_or_die(optarg);
-		char *token = strtok(arg_copy, ",");
-		while (token) {
-			cmdline_option_bundles = list_prepend_data(cmdline_option_bundles, strdup_or_die(token));
-			token = strtok(NULL, ",");
-		}
-		free(arg_copy);
+	case 'B':
+		/* if we are parsing a list from the command line we don't want to append it to
+		 * a possible existing list parsed from a config file, we want to replace it, so
+		 * we need to delete the existing list first */
+		list_free_list(cmdline_option_bundles);
+		cmdline_option_bundles = string_split(",", optarg);
 		if (!cmdline_option_bundles) {
-			error("Missing --bundle argument\n\n");
+			error("Missing required --bundles argument\n\n");
 			return false;
 		}
 		return true;
-	}
 	case FLAG_EXTRA_FILES_ONLY:
 		cmdline_option_extra_files_only = optarg_to_bool(optarg);
 		return true;
@@ -708,19 +700,11 @@ static bool parse_options(int argc, char **argv)
 		}
 
 		if (cmdline_option_bundles) {
-			if (!cmdline_option_fix) {
-				error("--bundles option require the --fix option\n");
-				return false;
-			} else {
-				warn("Using the --bundles option may have some undesired side effects\n");
-				if (!cmdline_option_extra_files_only) {
-					info(" - verify will remove files marked as deleted in --bundles, this can corrupt other bundles not listed in --bundles\n");
-				}
-				if (cmdline_option_picky || cmdline_option_extra_files_only) {
-					info(" - verify will remove all files in %s that are not part of --bundles unless listed in the --picky-whitelist\n", cmdline_option_picky_tree);
-				}
-				info("\n");
+			if (cmdline_option_picky || cmdline_option_extra_files_only) {
+				warn("Using the --bundles option with --%s may have some undesired side effects\n", cmdline_option_picky ? "picky" : "extra-files-only");
+				info("verify will remove all files in %s that are not part of --bundles unless listed in the --picky-whitelist\n", cmdline_option_picky_tree);
 			}
+			info("\n");
 		}
 
 	} else {
@@ -729,6 +713,16 @@ static bool parse_options(int argc, char **argv)
 		if (version == -1) {
 			error("'latest' not supported for --version\n");
 			return false;
+		}
+		if (cmdline_option_bundles) {
+			if (cmdline_option_picky) {
+				error("--bundles and --picky options are mutually exclusive\n");
+				return false;
+			}
+			if (cmdline_option_extra_files_only) {
+				error("--bundles and --extra-files-only options are mutually exclusive\n");
+				return false;
+			}
 		}
 	}
 

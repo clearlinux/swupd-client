@@ -303,6 +303,17 @@ SUBCOMMANDS
         Like --picky, but it only looks for extra files. It omits checking
         hash values, and for missing files, directories and/or symlinks.
 
+    - `--bundles`
+
+      Forces swupd to only diagnose the (comma separated) list of bundles
+      provided.
+
+      Examples:
+
+        - ``--bundles os-core,vi``
+
+            Diagnoses only bundles os-core and vi.
+
 ``hashdump {path}``
 
     Calculates and print the Manifest hash for a specific file on disk.

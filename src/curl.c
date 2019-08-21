@@ -167,7 +167,7 @@ static int check_connection_capath(const char *test_capath, const char *url)
 		if (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response) != CURLE_OK) {
 			response = 0;
 		}
-		debug("Curl - process_curl_error_codes: curl_ret = %d, response = %d\n", curl_ret, response);
+		debug("Curl - process_curl_error_codes: curl_ret = %d, response = %ld\n", curl_ret, response);
 		return -1;
 	default:
 		debug("Curl - Download error - (%d) %s\n", curl_ret,
@@ -425,7 +425,7 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 		if (curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &response) != CURLE_OK) {
 			response = -1; // Force error
 		}
-		debug("Curl - process_curl_error_codes: curl_ret = %d, response = %d\n", curl_ret, response);
+		debug("Curl - process_curl_error_codes: curl_ret = %d, response = %ld\n", curl_ret, response);
 		/* curl command succeeded, download might've failed, let our caller handle */
 		switch (response) {
 		case 206:

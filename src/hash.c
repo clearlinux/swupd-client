@@ -179,6 +179,7 @@ enum swupd_code compute_hash(struct file *file, char *filename)
 		ret = readlink(filename, link, PATH_MAXLEN - 1);
 
 		if (ret >= 0) {
+			link[ret] = '\0';
 			hmac_compute_key(filename, &file->stat, key, &key_len, file->use_xattrs);
 			hmac_sha256_for_string(file->hash,
 					       (const unsigned char *)key,

@@ -581,6 +581,10 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'f':
+		if (!cmdline_command_verify) {
+			info("diagnose: unrecognized option '--fix'\n");
+			return false;
+		}
 		warn("\nThe --fix option has been superseded\n");
 		info("Please consider using \"swupd repair\" instead\n\n");
 		warning_printed = true;
@@ -590,6 +594,10 @@ static bool parse_opt(int opt, char *optarg)
 		cmdline_option_force = optarg_to_bool(optarg);
 		return true;
 	case 'i':
+		if (!cmdline_command_verify) {
+			info("diagnose: unrecognized option '--install'\n");
+			return false;
+		}
 		warn("\nThe --install option has been superseded\n");
 		info("Please consider using \"swupd os-install\" instead\n\n");
 		warning_printed = true;

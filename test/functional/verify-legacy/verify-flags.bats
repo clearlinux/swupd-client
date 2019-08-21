@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-@test "DIA017: Verify conflicting flags" {
+@test "VER006: Verify conflicting flags" {
 
 	# Some flags are mutually exclusive
 
@@ -72,10 +72,5 @@ load "../testlib"
 	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --manifest=latest"
 	assert_status_is "$SWUPD_INVALID_OPTION"
 	assert_in_output "Error: '--manifest latest' only supported with the --install option"
-
-	# --bundles without --fix
-	run sudo sh -c "$SWUPD verify $SWUPD_OPTS --bundles os-core"
-	assert_status_is "$SWUPD_INVALID_OPTION"
-	assert_in_output "Error: --bundles option require the --fix option"
 
 }

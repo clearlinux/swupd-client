@@ -223,6 +223,7 @@ BATS = \
 	test/functional/diagnose/diagnose-also-add.bats \
 	test/functional/diagnose/diagnose-basics.bats \
 	test/functional/diagnose/diagnose-boot-file.bats \
+	test/functional/diagnose/diagnose-bundles.bats \
 	test/functional/diagnose/diagnose-client-certificate.bats \
 	test/functional/diagnose/diagnose-directory-tree-deleted.bats \
 	test/functional/diagnose/diagnose-flags.bats \
@@ -232,7 +233,6 @@ BATS = \
 	test/functional/diagnose/diagnose-picky-downgrade.bats \
 	test/functional/diagnose/diagnose-picky-whitelist.bats \
 	test/functional/diagnose/diagnose-picky.bats \
-	test/functional/diagnose/diagnose-verify-flags.bats \
 	test/functional/hashdump/hashdump-file-hash.bats \
 	test/functional/mirror/mirror-createdir-negative.bats \
 	test/functional/mirror/mirror-createdir.bats \
@@ -255,6 +255,7 @@ BATS = \
 	test/functional/repair/repair-boot-file-deleted.bats \
 	test/functional/repair/repair-boot-file.bats \
 	test/functional/repair/repair-boot-skip.bats \
+	test/functional/repair/repair-bundles.bats \
 	test/functional/repair/repair-deleted-include-manifest.bats \
 	test/functional/repair/repair-directory-tree-deleted.bats \
 	test/functional/repair/repair-empty-dir-deleted.bats \
@@ -333,7 +334,8 @@ BATS = \
 	test/functional/usability/usa-config-file.bats \
 	test/functional/usability/usa-download-retries.bats \
 	test/functional/usability/usa-external-modules.bats \
-	test/functional/verify-legacy/verify-bundle.bats
+	test/functional/verify-legacy/verify-bundle.bats \
+	test/functional/verify-legacy/verify-flags.bats
 
 
 UNIT_TESTS = \

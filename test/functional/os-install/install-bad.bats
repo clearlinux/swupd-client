@@ -23,7 +23,7 @@ test_setup() {
 	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
 		Installing OS version 10 (latest)
-		Warning: Bundle "bad-name" is invalid, skipping it...
+		Warning: Bundle "bad-name" is invalid or no longer available
 		Error: One or more of the provided bundles are not available at version 10
 		Please make sure the name of the provided bundles are correct, or use --force to override
 		Installation failed
@@ -43,7 +43,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Installing OS version 10 (latest)
-		Warning: Bundle "bad-name" is invalid, skipping it...
+		Warning: Bundle "bad-name" is invalid or no longer available
 		Downloading packs for:
 		 - os-core
 		 - test-bundle

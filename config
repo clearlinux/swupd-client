@@ -236,20 +236,20 @@
 
 # Selects the sub-tree where --picky looks for extra files (string value)
 # Default: /usr (string value)
-#picky-tree=[PATH]
+#picky_tree=[PATH]
 
 # Any path completely matching the POSIX extended regular expression is ignored
 # by --picky, matched directories get skipped (string value)
 # Example: /var|/etc/machine-id
 # Default: /usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src
-#picky-whitelist=[RE]
+#picky_whitelist=[RE]
 
 # Diagnose if BUNDLES are installed correctly (string value)
 # Example: --bundles=os-core,vi
 #bundles=[BUNDLES]
 
 # Like --picky, but it only searches for extra files
-#extra-files-only=<true/false>
+#extra_files_only=<true/false>
 
 
 [repair]
@@ -277,16 +277,16 @@
 
 # Selects the sub-tree where --picky looks for extra files (string value)
 # Default: /usr
-#picky-tree=[PATH]
+#picky_tree=[PATH]
 
 # Any path completely matching the POSIX extended regular expression is ignored
 # by --picky, matched directories get skipped (string value)
 # Example: /var|/etc/machine-id
 # Default: /usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src
-#picky-whitelist=[RE]
+#picky_whitelist=[RE]
 
 # Like --picky, but it only removes extra files
-#extra-files-only=<true/false>
+#extra_files_only=<true/false>
 
 
 [os-install]
@@ -308,7 +308,7 @@
 
 # After checking for content in the statedir, check the statedir-cache before
 # downloading it over the network
-#statedir-cache=[PATH]
+#statedir_cache=[PATH]
 
 # Download all content, but do not actually install it (boolean value)
 #download=<true/false>

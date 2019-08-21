@@ -234,12 +234,12 @@ bool set_state_dir_cache(char *path)
 	return true;
 }
 
-static void set_default_state_dir()
+static void set_default_state_dir(void)
 {
 	string_or_die(&globals.state_dir, "%s", STATE_DIR);
 }
 
-static void set_default_state_dir_cache()
+static void set_default_state_dir_cache(void)
 {
 	globals.state_dir_cache = NULL;
 }

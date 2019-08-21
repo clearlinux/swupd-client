@@ -285,6 +285,7 @@ if [[ -n "$state" ]]; then
             '(help -w --picky-whitelist)'{-w,--picky-whitelist=}'[Directories that match the regex get skipped. Example: /var|/etc/machine-id. Default: /usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src]:picky-whitelist:()'
             '(help -X --picky-tree)'{-X,--picky-tree=}'[Selects the sub-tree where --picky and --extra-files-only looks for extra files. Default\: /usr]:picky-tree: _path_files -/'
             '(help)--extra-files-only[Only remove files which should not exist]'
+            '(help -B --bundles)'{-B,--bundles=}'[Forces swupd to only repair the specified BUNDLES. Example: --bundles=os-core,vi]:bundles:()'
           )
           _arguments $repair && ret=0
           ;;

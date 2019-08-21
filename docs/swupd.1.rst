@@ -437,6 +437,17 @@ SUBCOMMANDS
         Like --picky, but it only removes extra files. It omits checking
         hash values, and for missing files, directories and/or symlinks.
 
+    - `--bundles`
+
+      Forces swupd to only repair the (comma separated) list of bundles
+      provided.
+
+      Examples:
+
+        - ``--bundles os-core,vi``
+
+            Repairs only bundles os-core and vi.
+
 ``search``
 
     Swupd search functionality is provided by swupd-search binary available

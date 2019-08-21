@@ -35,7 +35,8 @@ static bool cmdline_option_quick = false;
 static int cmdline_option_version = 0;
 static char *cmdline_option_picky_tree = NULL;
 static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
-static bool cmdline_extra_files_only = false;
+static bool cmdline_option_extra_files_only = false;
+static struct list *cmdline_bundles = NULL;
 
 /* picky_whitelist points to picky_whitelist_buffer if and only if regcomp() was called for it */
 static regex_t *picky_whitelist;
@@ -50,6 +51,7 @@ static const struct option prog_opts[] = {
 	{ "picky-whitelist", required_argument, 0, 'w' },
 	{ "quick", no_argument, 0, 'q' },
 	{ "extra-files-only", no_argument, 0, FLAG_EXTRA_FILES_ONLY },
+	{ "bundles", required_argument, 0, 'B' },
 };
 
 static void print_help(void)
@@ -63,6 +65,7 @@ static void print_help(void)
 	print("   -V, --version=[VER]     Compare against version VER to repair\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -q, --quick             Don't compare hashes, only fix missing files\n");
+	print("   -B, --bundles=[BUNDLES] Forces swupd to only repair the specified BUNDLES. Example: --bundles=os-core,vi\n");
 	print("   -Y, --picky             Also remove files which should not exist\n");
 	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky and --extra-files-only  looks for extra files. Default: /usr\n");
 	print("   -w, --picky-whitelist=[RE] Directories that match the regex get skipped. Example: /var|/etc/machine-id\n");
@@ -105,7 +108,19 @@ static bool parse_opt(int opt, char *optarg)
 		cmdline_option_picky_whitelist = strdup_or_die(optarg);
 		return true;
 	case FLAG_EXTRA_FILES_ONLY:
-		cmdline_extra_files_only = optarg_to_bool(optarg);
+		cmdline_option_extra_files_only = optarg_to_bool(optarg);
+		return true;
+	case 'B':
+		/* if we are parsing a list from the command line we don't want to append it to
+		 * a possible existing list parsed from a config file, we want to replace it, so
+		 * we need to delete the existing list first */
+		list_free_list(cmdline_bundles);
+		cmdline_bundles = NULL;
+		cmdline_bundles = string_split(",", optarg);
+		if (!cmdline_bundles) {
+			error("Missing required --bundles argument\n\n");
+			return false;
+		}
 		return true;
 	default:
 		return false;
@@ -139,14 +154,25 @@ static bool parse_options(int argc, char **argv)
 			error("--quick and --picky options are mutually exclusive\n");
 			return false;
 		}
-		if (cmdline_extra_files_only) {
+		if (cmdline_option_extra_files_only) {
 			error("--quick and --extra-files-only options are mutually exclusive\n");
 			return false;
 		}
 	}
-	if (cmdline_extra_files_only) {
+	if (cmdline_option_extra_files_only) {
 		if (cmdline_option_picky) {
 			error("--extra-files-only and --picky options are mutually exclusive\n");
+			return false;
+		}
+	}
+
+	if (cmdline_bundles) {
+		if (cmdline_option_picky) {
+			error("--bundles and --picky options are mutually exclusive\n");
+			return false;
+		}
+		if (cmdline_option_extra_files_only) {
+			error("--bundles and --extra-files-only options are mutually exclusive\n");
 			return false;
 		}
 	}
@@ -202,7 +228,8 @@ enum swupd_code repair_main(int argc, char **argv)
 	verify_set_option_version(cmdline_option_version);
 	verify_set_picky_whitelist(picky_whitelist);
 	verify_set_picky_tree(cmdline_option_picky_tree);
-	verify_set_extra_files_only(cmdline_extra_files_only);
+	verify_set_extra_files_only(cmdline_option_extra_files_only);
+	verify_set_option_bundles(cmdline_bundles);
 
 	/* run verify --fix */
 	ret = verify_main();

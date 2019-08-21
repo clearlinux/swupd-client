@@ -111,6 +111,19 @@ error:
 	return NULL;
 }
 
+struct list *string_split(const char *separator, const char *string_to_split)
+{
+	struct list *split = NULL;
+	char *string_copy = strdup_or_die(string_to_split);
+	char *token = strtok(string_copy, separator);
+	while (token) {
+		split = list_prepend_data(split, strdup_or_die(token));
+		token = strtok(NULL, separator);
+	}
+	free(string_copy);
+	return split;
+}
+
 int strtoi_err_endptr(const char *str, char **endptr, int *value)
 {
 	long num;

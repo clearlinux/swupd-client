@@ -43,6 +43,11 @@ void free_string(char **s);
 char *string_join(const char *separator, struct list *string);
 
 /**
+ * Split a string by separator.
+ */
+struct list *string_split(const char *separator, const char *string_to_split);
+
+/**
  * Safely convert string to integer avoiding overflows
  *
  * The strtol function is commonly used to convert a string to a number and

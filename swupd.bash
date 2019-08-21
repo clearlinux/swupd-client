@@ -58,7 +58,7 @@ _swupd()
 		opts="$global --library --binary --top --csv --init --order "
 		break;;
 		("diagnose")
-		opts="$global --version --picky --picky-tree --picky-whitelist --quick --force --extra-files-only "
+		opts="$global --version --picky --picky-tree --picky-whitelist --quick --force --extra-files-only --bundles "
 		break;;
 		("repair")
 		opts="$global --version --picky --picky-tree --picky-whitelist --quick --force --extra-files-only "

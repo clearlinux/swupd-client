@@ -337,7 +337,7 @@ extern void verify_set_option_force(bool opt);
 extern void verify_set_option_install(bool opt);
 extern void verify_set_option_statedir_cache(char *opt);
 extern void verify_set_option_quick(bool opt);
-extern void verify_set_option_bundles(struct list *bundles);
+extern void verify_set_option_bundles(struct list *opt_bundles);
 extern void verify_set_option_version(int ver);
 extern void verify_set_option_fix(bool opt);
 extern void verify_set_option_picky(bool opt);

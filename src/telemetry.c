@@ -22,6 +22,7 @@
  */
 
 #define _GNU_SOURCE
+#include <fcntl.h>
 #include <libgen.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -43,7 +44,7 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 	string_or_die(&filename, "%s/%d.%s.%d.XXXXXX", globals.state_dir,
 		      RECORD_VERSION, class, level);
 
-	fd = mkstemp(filename);
+	fd = mkostemp(filename, O_CREAT | O_RDONLY);
 	if (fd < 0) {
 		free_string(&filename);
 		goto error;

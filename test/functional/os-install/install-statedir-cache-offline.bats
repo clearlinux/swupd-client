@@ -29,7 +29,7 @@ test_setup() {
 	# The statedir-cache should be used to successfully perform the install
 	# without an internet connection.	
 
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --url=badurl --statedir-cache $statedir_cache_path -V 10"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --url=https://localhost --statedir-cache $statedir_cache_path -V 10"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -57,12 +57,12 @@ test_setup() {
 	# Swupd should attempt to download the missing manifest and fail.
 
 	sudo rm "$statedir_cache_path"/10/Manifest.os-core
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --url=badurl --statedir-cache $statedir_cache_path -V 10"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --url=https://localhost --statedir-cache $statedir_cache_path -V 10"
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Installing OS version 10
-		Error: Failed to connect to update server: badurl/10/Manifest.os-core.tar
+		Error: Failed to connect to update server: https://localhost/10/Manifest.os-core.tar
 		Possible solutions for this problem are:
 		.Check if your network connection is working
 		.Fix the system clock
@@ -84,12 +84,12 @@ test_setup() {
 	# Swupd should attempt to download the signature and fail.
 
 	sudo rm "$statedir_cache_path"/10/Manifest.MoM.sig
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --url=badurl --statedir-cache $statedir_cache_path -V 10"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --url=https://localhost --statedir-cache $statedir_cache_path -V 10"
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Installing OS version 10
-		Error: Failed to connect to update server: badurl/10/Manifest.MoM.sig
+		Error: Failed to connect to update server: https://localhost/10/Manifest.MoM.sig
 		Possible solutions for this problem are:
 		.Check if your network connection is working
 		.Fix the system clock
@@ -112,14 +112,14 @@ test_setup() {
 	# Swupd should attempt to download the fullfiles and fail.
 
 	sudo rm -r "$statedir_cache_path"/staged
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --url=badurl --statedir-cache $statedir_cache_path -V 10"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --url=https://localhost --statedir-cache $statedir_cache_path -V 10"
 
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
 		Installing OS version 10
 		No packs need to be downloaded
 		Checking for corrupt files
-		Error: Failed to connect to update server: badurl
+		Error: Failed to connect to update server: https://localhost
 		Possible solutions for this problem are:
 		.Check if your network connection is working
 		.Fix the system clock
@@ -141,12 +141,12 @@ test_setup() {
 	# Swupd should fail to download the pack, but continue successfully.
 
 	sudo rm "$statedir_cache_path"/pack-os-core-from-0-to-10.tar
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --url=badurl --statedir-cache $statedir_cache_path -V 10"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --url=https://localhost --statedir-cache $statedir_cache_path -V 10"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Installing OS version 10
-		Error: Failed to connect to update server: badurl
+		Error: Failed to connect to update server: https://localhost
 		Possible solutions for this problem are:
 		.Check if your network connection is working
 		.Fix the system clock

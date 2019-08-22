@@ -41,6 +41,22 @@ void signature_deinit(void);
  */
 bool signature_verify(const char *file, const char *sig_file, bool print_errors);
 
+/**
+ * Verify signature of a file in memory.
+ *
+ * Works like signature_verify(), but instead of pointing to file names
+ * in disk, the content of the files should be in memory.
+ *
+ * @param data         Data to be verified
+ * @param data_len     Length of data in bytes
+ * @param sig          Data to be verified
+ * @param sig_len      Length of data in bytes
+ * @param print_errors if false, errors aren't printed.
+ *
+ * @return true if the file is signed with certificate used signature_init()
+ */
+bool signature_verify_data(const unsigned char *data, size_t data_len, const unsigned char *sig_data, size_t sig_data_len, bool print_errors);
+
 #ifdef __cplusplus
 }
 #endif

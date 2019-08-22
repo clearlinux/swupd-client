@@ -148,50 +148,21 @@ void signature_deinit(void)
 	CRYPTO_cleanup_all_ex_data();
 }
 
-/* Verifies that the file and the signature exists, and does a signature check
- * afterwards. If any error is to be considered a verify failure, then
- * print_errors should be set to true.
- *
- * returns: true if able to validate the signature, false otherwise */
-bool signature_verify(const char *file, const char *sig_file, bool print_errors)
+bool signature_verify_data(const unsigned char *data, size_t data_len, const unsigned char *sig_data, size_t sig_data_len, bool print_errors)
+
 {
-	int ret;
 	bool result = false;
-	struct stat st;
-	char *errorstr = NULL;
+	int ret;
 
-	int data_fd = -1;
-	size_t data_len;
-	unsigned char *data = NULL;
-	BIO *data_BIO = NULL;
-
-	int sig_fd = -1;
-	size_t sig_len;
-	unsigned char *sig = NULL;
 	BIO *sig_BIO = NULL;
-
-	PKCS7 *p7 = NULL;
+	BIO *data_BIO = NULL;
 	BIO *verify_BIO = NULL;
+	char *errorstr = NULL;
+	PKCS7 *p7 = NULL;
 
-	/* get the signature */
-	sig_fd = open(sig_file, O_RDONLY);
-	if (sig_fd == -1) {
-		string_or_die(&errorstr, "Failed open %s: %s\n", sig_file, strerror(errno));
-		goto error;
-	}
-	if (fstat(sig_fd, &st) != 0) {
-		string_or_die(&errorstr, "Failed to stat %s file\n", sig_file);
-		goto error;
-	}
-	sig_len = st.st_size;
-	sig = mmap(NULL, sig_len, PROT_READ, MAP_PRIVATE, sig_fd, 0);
-	if (sig == MAP_FAILED) {
-		string_or_die(&errorstr, "Failed to mmap %s signature\n", sig_file);
-		goto error;
-	}
-	sig_BIO = BIO_new_mem_buf(sig, sig_len);
+	sig_BIO = BIO_new_mem_buf(sig_data, sig_data_len);
 	if (!sig_BIO) {
-		string_or_die(&errorstr, "Failed to read %s signature into BIO\n", sig_file);
+		string_or_die(&errorstr, "Unable to load signature data into BIO\n");
 		goto error;
 	}
 
@@ -202,26 +173,9 @@ bool signature_verify(const char *file, const char *sig_file, bool print_errors)
 		goto error;
 	}
 
-	/* get the data to be verified */
-
-	data_fd = open(file, O_RDONLY);
-	if (data_fd == -1) {
-		string_or_die(&errorstr, "Failed open %s\n", file);
-		goto error;
-	}
-	if (fstat(data_fd, &st) != 0) {
-		string_or_die(&errorstr, "Failed to stat %s\n", file);
-		goto error;
-	}
-	data_len = st.st_size;
-	data = mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
-	if (data == MAP_FAILED) {
-		string_or_die(&errorstr, "Failed to mmap %s\n", file);
-		goto error;
-	}
 	data_BIO = BIO_new_mem_buf(data, data_len);
 	if (!data_BIO) {
-		string_or_die(&errorstr, "Failed to read %s into BIO\n", file);
+		string_or_die(&errorstr, "Unable to load data into BIO\n");
 		goto error;
 	}
 
@@ -239,6 +193,86 @@ bool signature_verify(const char *file, const char *sig_file, bool print_errors)
 	} else {
 		string_or_die(&errorstr, "Signature check failed!\n");
 	}
+
+error:
+
+	if (!result && print_errors) {
+		error("Signature check error\n%s", errorstr);
+		ERR_print_errors_fp(stderr);
+	}
+
+	free_string(&errorstr);
+
+	if (sig_BIO) {
+		BIO_free(sig_BIO);
+	}
+	if (data_BIO) {
+		BIO_free(data_BIO);
+	}
+	if (verify_BIO) {
+		BIO_free(verify_BIO);
+	}
+	if (p7) {
+		PKCS7_free(p7);
+	}
+
+	return result;
+}
+
+/* Verifies that the file and the signature exists, and does a signature check
+ * afterwards. If any error is to be considered a verify failure, then
+ * print_errors should be set to true.
+ *
+ * returns: true if able to validate the signature, false otherwise */
+bool signature_verify(const char *file, const char *sig_file, bool print_errors)
+{
+	struct stat st;
+	char *errorstr = NULL;
+	bool result = false;
+
+	int data_fd = -1;
+	size_t data_len;
+	unsigned char *data = NULL;
+
+	int sig_fd = -1;
+	size_t sig_len;
+	unsigned char *sig = NULL;
+
+	/* get the signature */
+	sig_fd = open(sig_file, O_RDONLY);
+	if (sig_fd == -1) {
+		string_or_die(&errorstr, "Failed open %s: %s\n", sig_file, strerror(errno));
+		goto error;
+	}
+	if (fstat(sig_fd, &st) != 0) {
+		string_or_die(&errorstr, "Failed to stat %s file\n", sig_file);
+		goto error;
+	}
+	sig_len = st.st_size;
+	sig = mmap(NULL, sig_len, PROT_READ, MAP_PRIVATE, sig_fd, 0);
+	if (sig == MAP_FAILED) {
+		string_or_die(&errorstr, "Failed to mmap %s signature\n", sig_file);
+		goto error;
+	}
+	/* get the data to be verified */
+
+	data_fd = open(file, O_RDONLY);
+	if (data_fd == -1) {
+		string_or_die(&errorstr, "Failed open %s\n", file);
+		goto error;
+	}
+	if (fstat(data_fd, &st) != 0) {
+		string_or_die(&errorstr, "Failed to stat %s\n", file);
+		goto error;
+	}
+	data_len = st.st_size;
+	data = mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
+	if (data == MAP_FAILED) {
+		string_or_die(&errorstr, "Failed to mmap %s\n", file);
+		goto error;
+	}
+
+	result = signature_verify_data(data, data_len, sig, sig_len, print_errors);
 
 error:
 	if (!result && print_errors) {
@@ -260,19 +294,6 @@ error:
 	if (data_fd >= 0) {
 		close(data_fd);
 	}
-	if (sig_BIO) {
-		BIO_free(sig_BIO);
-	}
-	if (data_BIO) {
-		BIO_free(data_BIO);
-	}
-	if (verify_BIO) {
-		BIO_free(verify_BIO);
-	}
-	if (p7) {
-		PKCS7_free(p7);
-	}
-
 	return result;
 }
 

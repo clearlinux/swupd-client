@@ -1229,6 +1229,30 @@ sign_manifest() { # swupd_function
     -outform DER -out "$(dirname "$manifest")"/Manifest.MoM.sig
 }
 
+# Signs the version file with a PEM key and generates the signature in the same location
+# Parameters:
+# - FILE: the path for version file to be signed
+sign_version() { # swupd_function
+
+	local version_file=$1
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    sign_version <version_file>
+			EOM
+		return
+	fi
+	validate_item "$version_file"
+
+	sudo openssl smime -sign -binary -in "$version_file" \
+		-signer "$FUNC_DIR"/Swupd_Root.pem \
+		-inkey "$FUNC_DIR"/private.pem \
+		-outform DER -out "$version_file".sig
+
+}
+
 # Retrieves the hash value of a file or directory in a manifest
 # Parameters:
 # - MANIFEST: the manifest in which it will be looked at
@@ -1296,6 +1320,7 @@ set_latest_version() { # swupd_function
 	validate_path "$env_name"
 
 	write_to_protected_file "$env_name"/web-dir/version/formatstaging/latest "$new_version"
+	sign_version "$env_name"/web-dir/version/formatstaging/latest
 
 }
 
@@ -1355,7 +1380,9 @@ create_version() { # swupd_function
 	sudo mkdir -p "$env_name"/web-dir/"$version"/{files,delta}
 	sudo mkdir -p "$env_name"/web-dir/version/format"$format"
 	write_to_protected_file "$env_name"/web-dir/version/format"$format"/latest "$version"
+	sign_version "$env_name"/web-dir/version/format"$format"/latest
 	write_to_protected_file "$env_name"/web-dir/version/latest_version "$version"
+	sign_version "$env_name"/web-dir/version/latest_version
 	if [ "$format" = staging ]; then
 		format=1
 	fi

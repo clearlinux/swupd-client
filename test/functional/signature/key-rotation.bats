@@ -43,6 +43,10 @@ test_setup() {
 
 @test "SIG017: Key rotation" {
 
+        sudo openssl smime -sign -binary -in "$WEBDIR"/version/latest_version -signer "$TEST_NAME/new_root.pem" -inkey "$TEST_NAME/new_root.key" -out "$WEBDIR"/version/latest_version.sig -outform DER
+
+        sudo openssl smime -sign -binary -in "$WEBDIR"/version/format2/latest -signer "$TEST_NAME/new_root.pem" -inkey "$TEST_NAME/new_root.key" -out "$WEBDIR"/version/format2/latest.sig -outform DER
+
 	run sudo sh -c "$SWUPD update -V 20 $SWUPD_OPTS_NO_FMT"
 	assert_status_is "$SWUPD_OK"
 

@@ -584,14 +584,14 @@ enum swupd_code swupd_init(enum swupd_init_config config)
 			ret = SWUPD_LOCK_FILE_FAILED;
 			goto out_fds;
 		}
+	}
 
-		if (globals.sigcheck) {
-			/* If --nosigcheck, we do not attempt any signature checking */
-			if (!signature_init(globals.cert_path, NULL)) {
-				ret = SWUPD_SIGNATURE_VERIFICATION_FAILED;
-				signature_deinit();
-				goto out_close_lock;
-			}
+	if (globals.sigcheck) {
+		/* If --nosigcheck, we do not attempt any signature checking */
+		if (!signature_init(globals.cert_path, NULL)) {
+			ret = SWUPD_SIGNATURE_VERIFICATION_FAILED;
+			signature_deinit();
+			goto out_close_lock;
 		}
 	}
 

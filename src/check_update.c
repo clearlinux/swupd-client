@@ -54,7 +54,11 @@ enum swupd_code check_update()
 		error("Unable to determine current OS version\n");
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
-	if (server_version < 0) {
+
+	if (server_version == -SWUPD_SIGNATURE_VERIFICATION_FAILED) {
+		ret = SWUPD_SIGNATURE_VERIFICATION_FAILED;
+		error("Unable to determine the server version as signature verification failed\n");
+	} else if (server_version < 0) {
 		error("Unable to determine the server version\n");
 		ret = SWUPD_SERVER_CONNECTION_ERROR;
 	}

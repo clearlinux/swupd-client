@@ -297,8 +297,14 @@ int handle_mirror_if_stale(void)
 
 	/* if the latest version could not be retrieved from the central server we cannot
 	 * check if mirror is stale, this would be very odd since we already check connection
-	 * with the server earlier */
-	if (central_version < 0) {
+	 * with the server earlier. Another possible explanation for this if the signature
+	 * for central_version dont verify
+	 */
+	if (central_version == -SWUPD_SIGNATURE_VERIFICATION_FAILED) {
+		warn("Cannot determine upstream version since signature verification for path: %s failed\n", ret_str);
+		warn("Unable to determine if the mirror is up to date\n");
+		goto out;
+	} else if (central_version < 0) {
 		warn("Upstream server %s not responding, cannot determine upstream version\n", ret_str);
 		warn("Unable to determine if the mirror is up to date\n");
 		goto out;

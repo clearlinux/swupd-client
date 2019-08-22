@@ -29,32 +29,110 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "signature.h"
 #include "swupd.h"
+
+static int get_sig_inmemory(char *url, struct curl_file_data *tmp_version_sig)
+{
+	int ret = -1;
+	char *sig_fname;
+	string_or_die(&sig_fname, "%s.sig", url);
+	ret = swupd_curl_query_content_size(sig_fname);
+	if (ret <= 0) {
+		error("Failed to retrieve size for signature file: %s\n", sig_fname);
+		ret = -SWUPD_SIGNATURE_VERIFICATION_FAILED;
+		goto exit;
+	}
+
+	tmp_version_sig->capacity = ret;
+
+	tmp_version_sig->data = (char *)malloc(ret * sizeof(char));
+	ON_NULL_ABORT(tmp_version_sig->data);
+
+	ret = swupd_curl_get_file_memory(sig_fname, tmp_version_sig);
+	if (ret != 0) {
+		error("Failed to fetch signature file in memory: %s\n", sig_fname);
+		free_string(&tmp_version_sig->data);
+		tmp_version_sig->data = NULL;
+		ret = -SWUPD_SIGNATURE_VERIFICATION_FAILED;
+		goto exit;
+	}
+
+exit:
+	free_string(&sig_fname);
+	return ret;
+}
+
+static bool verify_signature(char *url, struct curl_file_data *tmp_version)
+{
+	int ret;
+
+	/* struct for version signature */
+	struct curl_file_data tmp_version_sig = {
+		0, 0,
+		NULL
+	};
+
+	ret = get_sig_inmemory(url, &tmp_version_sig);
+
+	if (ret < 0) {
+		goto out;
+	}
+
+	ret = signature_verify_data((const unsigned char *)tmp_version->data,
+				    tmp_version->len,
+				    (const unsigned char *)tmp_version_sig.data,
+				    tmp_version_sig.len, true)
+		  ? 0
+		  : -SWUPD_SIGNATURE_VERIFICATION_FAILED;
+	free_string(&tmp_version_sig.data);
+
+out:
+	return (ret == 0) ? true : false;
+}
 
 static int get_version_from_url(char *url)
 {
 #define MAX_VERSION_STR_SIZE 11
 
-	int ret;
-	int err;
+	int ret = 0;
+	int err = 0;
 	char version_str[MAX_VERSION_STR_SIZE];
+	bool sig_verified = false;
+
+	/* struct for version data */
 	struct curl_file_data tmp_version = {
 		MAX_VERSION_STR_SIZE, 0,
 		version_str
 	};
 
+	/* Getting version */
 	ret = swupd_curl_get_file_memory(url, &tmp_version);
 	if (ret) {
-		goto out;
+		return ret;
 	} else {
 		tmp_version.data[tmp_version.len] = '\0';
 		err = strtoi_err(tmp_version.data, &ret);
 		if (err != 0) {
-			ret = -1;
+			return -1;
 		}
 	}
 
-out:
+	/* Sig check */
+	if (globals.sigcheck) {
+		sig_verified = verify_signature(url, &tmp_version);
+	} else {
+		warn("FAILED TO VERIFY SIGNATURE OF %s. Operation proceeding due to \n"
+		     " --nosigcheck, but system security may be compromised\n",
+		     url);
+		journal_log_error("swupd security notice:  --nosigcheck used to bypass version signature");
+	}
+
+	if (globals.sigcheck && !sig_verified) {
+		error("Signature Verification failed for URL: %s\n", url);
+		return -SWUPD_SIGNATURE_VERIFICATION_FAILED;
+	}
+
 	return ret;
 }
 
@@ -204,7 +282,10 @@ enum swupd_code read_versions(int *current_version, int *server_version, char *p
 		error("Unable to determine current OS version\n");
 		return SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
-	if (*server_version < 0) {
+	if (*server_version == -SWUPD_SIGNATURE_VERIFICATION_FAILED) {
+		error("Unable to determine the server version as signature verification failed\n");
+		return SWUPD_SIGNATURE_VERIFICATION_FAILED;
+	} else if (*server_version < 0) {
 		error("Unable to determine the server version\n");
 		return SWUPD_SERVER_CONNECTION_ERROR;
 	}

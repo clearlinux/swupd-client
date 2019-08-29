@@ -50,6 +50,7 @@
 #define SWUPD_CURL_LOW_SPEED_LIMIT 1
 #define SWUPD_CURL_CONNECT_TIMEOUT 30
 #define SWUPD_CURL_RCV_TIMEOUT 120
+#define SWUPD_CURL_INIT_CONNECT_TIMEOUT 1
 
 static CURL *curl = NULL;
 
@@ -118,7 +119,7 @@ exit:
 
 static int check_connection_capath(const char *test_capath, const char *url)
 {
-	CURLcode curl_ret;
+	CURLcode curl_ret, ret;
 	long response = 0;
 
 	if (!url) {
@@ -130,6 +131,13 @@ static int check_connection_capath(const char *test_capath, const char *url)
 
 	debug("Curl - check_connection url: %s\n", url);
 	curl_ret = swupd_curl_set_basic_options(curl, url, false);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
+	/* to test the connection we don't want to wait a long time before timing out,
+	 * so fail fast */
+	curl_ret = curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, SWUPD_CURL_INIT_CONNECT_TIMEOUT);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
@@ -146,9 +154,15 @@ static int check_connection_capath(const char *test_capath, const char *url)
 		}
 	}
 
-	curl_ret = curl_easy_perform(curl);
+	ret = curl_easy_perform(curl);
 
-	switch (curl_ret) {
+	/* return timeout to default value */
+	curl_ret = curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, SWUPD_CURL_CONNECT_TIMEOUT);
+	if (curl_ret != CURLE_OK) {
+		return -1;
+	}
+
+	switch (ret) {
 	case CURLE_OK:
 		/* Note: when using http and the user is behind a proxy, we may get
 		 * a valid response here from the proxy even if the http server is

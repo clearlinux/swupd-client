@@ -236,6 +236,16 @@ if [[ -n "$state" ]]; then
           )
           _arguments $lsbundle && ret=0
           ;;
+        bundle-info)
+          local -a infobundle; infobundle=(
+            $global_opts
+            '(help -V --version)'{-V,--version=}'[Show the bundle info for the specified version V, also accepts "latest" and "current" (default)]:version:()'
+            '(help)--dependencies[Show the bundle dependencies]'
+            '(help)--files[Show the files installed by this bundle]'
+            '*:bundle-info: _swupd_all_bundles -f'
+          )
+          _arguments $infobundle && ret=0
+          ;;
         search)
           local -a searches; searches=(
             '(help -v -vv --verbose -q --quiet)'{-v,-vv,--verbose}'[verbose mode]'

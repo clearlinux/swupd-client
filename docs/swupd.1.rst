@@ -223,7 +223,7 @@ SUBCOMMANDS
     List all installed software bundles in the local system. Bundles available
     can be listed with the `--all` option.
 
-    -  `-a, --all`
+    - `-a, --all`
 
         Lists all available software bundles, either installed or not, that
         are available. It will return 0 with succeeded and a different value
@@ -240,6 +240,23 @@ SUBCOMMANDS
         dependency. Combine with `--all` to report all bundles including those
         not installed on the system. Combine with `--verbose` to show a tree of
         these bundles.
+
+``bundle-info``
+
+    Display detailed information about a bundle.
+
+    - `--dependencies`
+
+       Show the bundle dependencies.
+
+    - `--files`
+
+        Show the files installed by this bundle.
+
+    - `-V, --version`
+
+        Show the bundle info for the specified version V, also accepts 'latest'.
+        It defaults to the current version if no version is specified.
 
 ``check-update``
 

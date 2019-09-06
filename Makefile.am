@@ -37,6 +37,7 @@ swupd_SOURCES = \
 	src/autoupdate.c \
 	src/binary_loader.c \
 	src/bundle.c \
+	src/bundle_info.c \
 	src/check_update.c \
 	src/clean.c \
 	src/clr_bundle_add.c \
@@ -187,6 +188,9 @@ BATS = \
 	test/functional/bundleadd/add-uses-fullfile.bats \
 	test/functional/bundleadd/add-uses-zeropack.bats \
 	test/functional/bundleadd/add-verify-fix-path.bats \
+	test/functional/bundleinfo/bundle-info-basic.bats \
+	test/functional/bundleinfo/bundle-info-files.bats \
+	test/functional/bundleinfo/bundle-info-includes.bats \
 	test/functional/bundlelist/list-all.bats \
 	test/functional/bundlelist/list-client-certificate.bats \
 	test/functional/bundlelist/list-deps-flat.bats \

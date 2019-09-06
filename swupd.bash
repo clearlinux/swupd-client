@@ -51,6 +51,9 @@ _swupd()
 	    ("bundle-list")
 		opts="$global --all --deps --has-dep "
 		break;;
+		("bundle-info")
+		opts="$global --dependencies --files --version "
+		break;;
 		("search")
 		opts="--help --all --quiet --verbose "
 		break;;

@@ -57,6 +57,7 @@ static struct subcmd commands[] = {
 	{ "bundle-add", "Install a new bundle", bundle_add_main },
 	{ "bundle-remove", "Uninstall a bundle", bundle_remove_main },
 	{ "bundle-list", "List installed bundles", bundle_list_main },
+	{ "bundle-info", "Display information about a bundle", bundle_info_main },
 #ifdef EXTERNAL_MODULES_SUPPORT
 	{ "search", "Searches for the best bundle to install a binary or library (depends on os-core-search bundle)", external_search_main },
 #endif

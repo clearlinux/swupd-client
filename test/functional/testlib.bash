@@ -3130,7 +3130,8 @@ generate_test() { # swupd_function
 		printf '\t# <If necessary add a detailed explanation of the test here>\n\n'
 		# shellcheck disable=SC2016
 		printf '\trun sudo sh -c "$SWUPD <swupd_command> $SWUPD_OPTS <command_options>"\n\n'
-		printf '\t# assert_status_is 0\n'
+		# shellcheck disable=SC2016
+		printf '\t# assert_status_is "$SWUPD_OK"\n'
 		# shellcheck disable=SC2016
 		printf '\t# expected_output=$(cat <<-EOM\n'
 		printf '\t# \t<expected output>\n'
@@ -3172,6 +3173,7 @@ get_next_available_id() { # swupd_function
 		bundleadd) group=ADD;;
 		bundleremove) group=REM;;
 		bundlelist) group=LST;;
+		bundleinfo) group=BIN;;
 		diagnose) group=DIA;;
 		update) group=UPD;;
 		checkupdate) group=CHK;;

@@ -663,7 +663,7 @@ static bool parse_opt(int opt, char *optarg)
 
 		err = strtoi_err(optarg, &requested_version);
 		if (err < 0 || requested_version < 0) {
-			error("Invalid --manifest argument: %s\n\n", optarg);
+			error("Invalid --version argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;

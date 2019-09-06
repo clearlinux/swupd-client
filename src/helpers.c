@@ -1081,3 +1081,36 @@ int remove_files_from_fs(struct list *files)
 
 	return deleted;
 }
+
+void print_pattern(const char *pattern, int times)
+{
+	while (times > 0) {
+		info("%s", pattern);
+		times--;
+	}
+	info("\n");
+}
+
+void prettify_size(long size_in_bytes, char **pretty_size)
+{
+	double size;
+
+	/* find the best way to show the provided size */
+	size = (double)size_in_bytes;
+	if (size < 1000) {
+		string_or_die(pretty_size, "%.2lf Bytes", size);
+		return;
+	}
+	size = size / 1000;
+	if (size < 1000) {
+		string_or_die(pretty_size, "%.2lf KB", size);
+		return;
+	}
+	size = size / 1000;
+	if (size < 1000) {
+		string_or_die(pretty_size, "%.2lf MB", size);
+		return;
+	}
+	size = size / 1000;
+	string_or_die(pretty_size, "%.2lf GB", size);
+}

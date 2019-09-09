@@ -200,6 +200,7 @@ enum swupd_code show_included_bundles(char *bundle_name)
 	struct list *subs = NULL;
 	struct list *deps = NULL;
 	struct manifest *mom = NULL;
+	struct manifest_download manifest_download = { 0, 0 };
 
 	current_version = get_current_version(globals.path_prefix);
 	if (current_version < 0) {
@@ -218,7 +219,9 @@ enum swupd_code show_included_bundles(char *bundle_name)
 	// add_subscriptions takes a list, so construct one with only bundle_name
 	struct list *bundles = NULL;
 	bundles = list_prepend_data(bundles, bundle_name);
-	ret = add_subscriptions(bundles, &subs, mom, true, 0);
+	manifest_download.total_count = list_len(bundles);
+
+	ret = add_subscriptions(bundles, &subs, mom, true, 0, &manifest_download);
 	list_free_list(bundles);
 	if (ret != add_sub_NEW) {
 		// something went wrong or there were no includes, print a message and exit
@@ -680,7 +683,8 @@ enum swupd_code remove_bundles(char **bundles)
    2 new subscriptions
    4 bad name given
 */
-int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion)
+int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion,
+		      struct manifest_download *manifest_download)
 {
 	char *bundle;
 	int manifest_err;
@@ -705,7 +709,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 			continue;
 		}
 
-		manifest = load_manifest(file->last_change, file, mom, true, &manifest_err);
+		manifest = load_manifest(file->last_change, file, mom, true, &manifest_err, manifest_download);
 		if (!manifest) {
 			error("Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
 			ret |= add_sub_ERR;
@@ -733,12 +737,12 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 
 		if (manifest->includes) {
 			/* merge in recursive call results */
-			ret |= add_subscriptions(manifest->includes, subs, mom, find_all, recursion + 1);
+			ret |= add_subscriptions(manifest->includes, subs, mom, find_all, recursion + 1, manifest_download);
 		}
 
 		if (!globals.skip_optional_bundles && manifest->optional) {
 			/* merge in recursive call results */
-			ret |= add_subscriptions(manifest->optional, subs, mom, find_all, recursion + 1);
+			ret |= add_subscriptions(manifest->optional, subs, mom, find_all, recursion + 1, manifest_download);
 		}
 
 		free_manifest(manifest);
@@ -769,7 +773,9 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	info("Loading required manifests...\n");
 	timelist_timer_start(globals.global_times, "Add bundles and recurse");
 	progress_set_step(1, "load_manifests");
-	ret = add_subscriptions(bundles, subs, mom, false, 0);
+	struct manifest_download manifest_download = { 0, 0 };
+	manifest_download.total_count = list_len(bundles);
+	ret = add_subscriptions(bundles, subs, mom, false, 0, &manifest_download);
 
 	/* print a message if any of the requested bundles is already installed */
 	iter = list_head(bundles);

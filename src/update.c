@@ -190,9 +190,12 @@ int add_included_manifests(struct manifest *mom, struct list **subs)
 		iter = iter->next;
 	}
 
+	struct manifest_download manifest_download = { 0, 0 };
+	manifest_download.total_count = list_len(subbed);
+
 	/* Pass the current version here, not the new, otherwise we will never
 	 * hit the Manifest delta path. */
-	ret = add_subscriptions(subbed, subs, mom, true, 0);
+	ret = add_subscriptions(subbed, subs, mom, true, 0, &manifest_download);
 	if (ret & (add_sub_ERR | add_sub_BADNAME)) {
 		ret = -ret;
 	} else {

@@ -195,7 +195,8 @@ out:
 }
 
 /* TODO: This should deal with nested manifests better */
-static int retrieve_manifest(int previous_version, int version, char *component, bool is_mix)
+static int retrieve_manifest(int previous_version, int version, char *component, bool is_mix,
+			     struct manifest_download *manifest_download)
 {
 	char *url = NULL;
 	char *filename;
@@ -260,6 +261,15 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 	if (ret) {
 		unlink(filename);
 		goto out;
+	} else {
+		if (manifest_download) {
+			if (manifest_download->current_count == 0) {
+				// info("\nDownload missing manifests\n");
+			}
+			manifest_download->current_count++;
+			progress_report(manifest_download->current_count,
+					manifest_download->total_count);
+		}
 	}
 
 untar:
@@ -410,7 +420,7 @@ struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err)
 	bool needs_sig_verification = !(globals.migrate && mix_exists);
 
 retry_load:
-	ret = retrieve_manifest(0, version, "MoM", mix_exists);
+	ret = retrieve_manifest(0, version, "MoM", mix_exists, NULL);
 	if (ret != 0) {
 		error("Failed to retrieve %d MoM manifest\n", version);
 		if (err) {
@@ -492,7 +502,8 @@ retry_load:
  * Note that if the manifest fails to download, or if the manifest fails to be
  * loaded into memory, this function will return NULL.
  */
-struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err)
+struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err,
+			       struct manifest_download *manifest_download)
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
@@ -501,7 +512,7 @@ struct manifest *load_manifest(int version, struct file *file, struct manifest *
 
 retry_load:
 	prev_version = file->peer ? file->peer->last_change : 0;
-	ret = retrieve_manifest(prev_version, version, file->filename, file->is_mix);
+	ret = retrieve_manifest(prev_version, version, file->filename, file->is_mix, manifest_download);
 	if (ret != 0) {
 		error("Failed to retrieve %d %s manifest\n", version, file->filename);
 		if (err) {
@@ -552,7 +563,7 @@ struct manifest *load_manifest_full(int version, bool mix)
 	struct manifest *manifest = NULL;
 	int ret = 0;
 
-	ret = retrieve_manifest(0, version, "full", mix);
+	ret = retrieve_manifest(0, version, "full", mix, NULL);
 	if (ret != 0) {
 		error("Failed to retrieve %d Manifest.full\n", version);
 		return NULL;
@@ -792,7 +803,7 @@ struct list *recurse_manifest(struct manifest *manifest, struct list *subs, cons
 			continue;
 		}
 
-		sub = load_manifest(file->last_change, file, manifest, false, err);
+		sub = load_manifest(file->last_change, file, manifest, false, err, NULL);
 		if (!sub) {
 			list_free_list_and_data(bundles, free_manifest_data);
 			return NULL;

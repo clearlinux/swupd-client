@@ -289,7 +289,7 @@ static int search_in_manifest(struct manifest *mom, struct file *manifest_file, 
 		return -ENOENT;
 	}
 
-	m = load_manifest(manifest_file->last_change, manifest_file, mom, false, NULL);
+	m = load_manifest(manifest_file->last_change, manifest_file, mom, false, NULL, NULL);
 	if (!m) {
 		return -ENOENT;
 	}
@@ -425,6 +425,7 @@ enum swupd_code download_all_manifests(struct manifest *mom, struct list **manif
 	int failed_count = 0;
 	unsigned int complete = 0;
 	unsigned int total;
+	struct manifest_download manifest_download = { 0, 0 };
 
 	if (need_to_download_manifests(mom->manifests)) {
 		info("Downloading all Clear Linux manifests\n");
@@ -436,7 +437,8 @@ enum swupd_code download_all_manifests(struct manifest *mom, struct list **manif
 		int manifest_err;
 
 		/* Do download */
-		manifest = load_manifest(file->last_change, file, mom, true, &manifest_err);
+		manifest = load_manifest(file->last_change, file, mom, true, &manifest_err,
+					 &manifest_download);
 		complete++;
 		if (!manifest) {
 			info("\n"); //Progress bar

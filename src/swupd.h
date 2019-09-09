@@ -153,6 +153,11 @@ struct file_counts {
 	int picky_extraneous;
 };
 
+struct manifest_download {
+	long current_count;
+	long total_count;
+};
+
 extern void check_root(void);
 
 extern int add_included_manifests(struct manifest *mom, struct list **subs);
@@ -172,7 +177,7 @@ extern int file_sort_filename(const void *a, const void *b);
 extern int file_sort_filename_reverse(const void *a, const void *b);
 extern int file_sort_hash(const void *a, const void *b);
 extern struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err);
-extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err);
+extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err, struct manifest_download *manifest_download);
 extern struct manifest *load_manifest_full(int version, bool mix);
 extern struct list *create_update_list(struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
@@ -323,7 +328,7 @@ extern enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 extern enum swupd_code show_included_bundles(char *bundle_name);
 extern enum swupd_code list_installable_bundles();
 extern enum swupd_code install_bundles_frontend(char **bundles);
-extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
+extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion, struct manifest_download *manifest_download);
 enum swupd_code list_local_bundles();
 extern int link_or_rename(const char *orig, const char *dest);
 

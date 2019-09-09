@@ -19,6 +19,7 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Installing OS version 10 (latest)
+		Download missing manifests ...
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...

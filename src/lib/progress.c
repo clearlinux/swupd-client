@@ -20,6 +20,7 @@
 #define _GNU_SOURCE
 
 #include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "log.h"
@@ -124,6 +125,40 @@ void progress_report(double count, double max)
 			last_percentage = percentage;
 			last_step = step.current;
 		}
+	}
+}
+
+int progress_spinner_callback()
+{
+	static int index = -1;
+	static time_t begin = 0;
+	const char spinner[4] = { '|', '/', '-', '\\' };
+
+	if (time(NULL) > begin) {
+		begin = time(NULL);
+		index = (index + 1) % 4;
+		info("\r");
+		info("[%c]", spinner[index]);
+		fflush(stdout);
+	}
+
+	return 0;
+}
+
+void progress_set_spinner(bool status_flag)
+{
+	if (log_get_level() == LOG_DEBUG || !isatty(fileno(stdout))) {
+		return;
+	}
+
+	if (status_flag) {
+		if (progress_function) {
+			progress_report(-1, 100);
+			return;
+		}
+		set_progress_callback(progress_spinner_callback);
+	} else {
+		set_progress_callback(NULL);
 	}
 }
 

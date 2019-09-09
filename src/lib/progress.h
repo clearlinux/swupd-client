@@ -25,6 +25,17 @@ struct step {
 };
 
 /**
+ * @brief progress callback callback type
+ * @see progress.c
+ */
+typedef int (*progress_callback_fn_t)(void);
+
+/**
+ * @brief This function is used to set the callback on the curl for single file download
+ */
+extern void set_progress_callback(progress_callback_fn_t progress_cb);
+
+/**
  * @brief Progress format callback.
  * @see progress_set_format().
  */

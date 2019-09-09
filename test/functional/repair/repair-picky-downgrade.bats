@@ -23,6 +23,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
 		Warning: The --picky option is specified; ignoring version mismatch for repair
+		Download missing manifests ...
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
 		Error: Unable to verify. One or more currently installed bundles are not available at version 10. Use --force to override
 		Repair did not fully succeed
@@ -45,6 +46,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
 		Warning: The --force option is specified; ignoring version mismatch for repair
+		Download missing manifests ...
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
 		Warning: One or more installed bundles that are not available at version 10 will be removed
 		Checking for corrupt files
@@ -89,6 +91,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
 		Warning: The --force option is specified; ignoring version mismatch for repair
+		Download missing manifests ...
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
 		Warning: One or more installed bundles that are not available at version 10 will be removed
 		Checking for corrupt files

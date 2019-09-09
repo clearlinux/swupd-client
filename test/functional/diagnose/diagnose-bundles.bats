@@ -33,6 +33,7 @@ test_setup() {
 		Limiting diagnose to the following bundles:
 		 - test-bundle1
 		 - test-bundle2
+		Download missing manifests ...
 		Checking for missing files
 		 -> Missing file: $PATH_PREFIX/common
 		 -> Missing file: $PATH_PREFIX/foo/test-file1
@@ -61,6 +62,7 @@ test_setup() {
 		Warning: Bundle "bad-name" is invalid or no longer available
 		Limiting diagnose to the following bundles:
 		 - test-bundle1
+		Download missing manifests ...
 		Error: One or more of the provided bundles are not available at version 10
 		Please make sure the name of the provided bundles are correct, or use --force to override
 		Diagnose did not fully succeed
@@ -76,6 +78,7 @@ test_setup() {
 		Warning: Bundle "bad-name" is invalid or no longer available
 		Limiting diagnose to the following bundles:
 		 - test-bundle1
+		Download missing manifests ...
 		Checking for missing files
 		 -> Missing file: $PATH_PREFIX/common
 		 -> Missing file: $PATH_PREFIX/foo/test-file1
@@ -107,6 +110,7 @@ test_setup() {
 		Limiting diagnose to the following bundles:
 		 - test-bundle1
 		 - test-bundle3
+		Download missing manifests ...
 		Checking for missing files
 		Checking for corrupt files
 		Checking for extraneous files
@@ -153,6 +157,7 @@ test_setup() {
 		Warning: Bundle "test-bundle4" is not installed, skipping it...
 		Limiting diagnose to the following bundles:
 		 - test-bundle1
+		Download missing manifests ...
 		Checking for missing files
 		Checking for corrupt files
 		Checking for extraneous files

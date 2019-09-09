@@ -27,6 +27,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Installing OS version 30 (latest)
+		Download missing manifests ...
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
@@ -57,6 +58,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Installing OS version 30 (latest)
+		Download missing manifests ...
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
@@ -87,6 +89,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Installing OS version 20
+		Download missing manifests ...
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...

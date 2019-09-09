@@ -25,6 +25,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
 		Warning: The --force option is specified; ignoring version mismatch for repair
+		Download missing manifests ...
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files

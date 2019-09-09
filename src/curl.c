@@ -58,10 +58,17 @@ uint64_t total_curl_sz = 0;
 /* alternative CA Path */
 static char *capath = NULL;
 
+static progress_callback_fn_t progress_callback = NULL;
+
 /* Pretty print curl return status */
 static void swupd_curl_strerror(CURLcode curl_ret)
 {
 	error("Curl - Download error - (%d) %s\n", curl_ret, curl_easy_strerror(curl_ret));
+}
+
+void set_progress_callback(progress_callback_fn_t progress_cb)
+{
+	progress_callback = progress_cb;
 }
 
 /*
@@ -779,6 +786,15 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_
 	if (fail_on_error) {
 		/* Avoid downloading HTML files for error responses if the HTTP code is >= 400 */
 		curl_ret = curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+		if (curl_ret != CURLE_OK) {
+			goto exit;
+		}
+	}
+
+	if (progress_callback) {
+		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+		curl_ret = curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION,
+					    progress_callback);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}

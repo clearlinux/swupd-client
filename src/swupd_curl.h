@@ -63,6 +63,11 @@ typedef void (*swupd_curl_free_cb)(void *data);
 typedef int (*swupd_curl_progress_cb)(void *clientp, int64_t dltotal, int64_t dlnow, int64_t ultotal, int64_t ulnow);
 
 /**
+ * @brief function to turn on/off the spinner
+ */
+void progress_set_spinner(bool status_flag);
+
+/**
  * @brief Test a connection with a server.
  *
  * @param url The url to use to test server connectivity

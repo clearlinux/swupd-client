@@ -19,6 +19,7 @@ test_setup() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
+		Download missing manifests ...
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
 		Warning: One or more installed bundles are not available at version 10
 		Checking for missing files

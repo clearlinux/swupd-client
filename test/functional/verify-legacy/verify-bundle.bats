@@ -26,6 +26,7 @@ test_setup() {
 		Verifying version 10
 		Limiting verify to the following bundles:
 		 - test-bundle2
+		Download missing manifests ...
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
@@ -59,6 +60,7 @@ test_setup() {
 		Verifying version 10
 		Limiting verify to the following bundles:
 		 - test-bundle3
+		Download missing manifests ...
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
@@ -94,6 +96,7 @@ test_setup() {
 		Limiting verify to the following bundles:
 		 - test-bundle1
 		 - test-bundle2
+		Download missing manifests ...
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files

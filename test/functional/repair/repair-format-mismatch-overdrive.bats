@@ -24,6 +24,7 @@ test_setup() {
 		Diagnosing version 40
 		Warning: The --force option is specified; ignoring format mismatch for diagnose
 		Warning: The --force option is specified; ignoring version mismatch for repair
+		Download missing manifests ...
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files

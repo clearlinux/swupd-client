@@ -70,7 +70,7 @@ test_setup() {
 @test "SIG012: MoM signed with self-signed cert, but using root to validate" {
 
 	# replace sig file to one signed with intermediate_self_signed.pem
-	sudo sh -c "cp "$WEBDIR"/10/Manifest.MoM.sig_self_signed "$WEBDIR"/10/Manifest.MoM.sig"
+	sudo sh -c 'cp "$WEBDIR"/10/Manifest.MoM.sig_self_signed "$WEBDIR"/10/Manifest.MoM.sig'
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS_NO_CERT -C $TEST_NAME/root.pem test-bundle"
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
@@ -87,7 +87,7 @@ test_setup() {
 @test "SIG013: MoM signed with self_signed and using correct cert to validate" {
 
 	# replace sig file to one signed with intermediate_self_signed.pem
-	sudo sh -c "cp "$WEBDIR"/10/Manifest.MoM.sig_self_signed "$WEBDIR"/10/Manifest.MoM.sig"
+	sudo sh -c 'cp "$WEBDIR"/10/Manifest.MoM.sig_self_signed "$WEBDIR"/10/Manifest.MoM.sig'
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS_NO_CERT -C $TEST_NAME/intermediate_self_signed.pem test-bundle"
 
 	assert_status_is "$SWUPD_OK"
@@ -144,7 +144,7 @@ test_setup() {
 @test "SIG016: MoM is signed with self signed certificate and trust store is used" {
 
 	# replace signature with self signed certificate
-	sudo sh -c "cp "$WEBDIR"/10/Manifest.MoM.sig_self_signed "$WEBDIR"/10/Manifest.MoM.sig"
+	sudo sh -c 'cp "$WEBDIR"/10/Manifest.MoM.sig_self_signed "$WEBDIR"/10/Manifest.MoM.sig'
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS_NO_CERT -C $TEST_NAME/trust.pem test-bundle"
 
 	assert_status_is "$SWUPD_OK"

@@ -41,6 +41,7 @@ test_teardown() {
 		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Update started
 		Preparing to update from 10 to 100
+		Download missing manifests
 		Downloading packs for:
 		 - test-bundle
 		Error: Curl - File incompletely downloaded - '.*/100/pack-test-bundle-from-10.tar'

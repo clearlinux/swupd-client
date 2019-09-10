@@ -123,6 +123,7 @@ test_teardown() {
 		Warning: Upstream server http://localhost:$port/ not responding, cannot determine upstream version
 		Warning: Unable to determine if the mirror is up to date
 		Preparing to update from 10 to 20
+		Download missing manifests
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...

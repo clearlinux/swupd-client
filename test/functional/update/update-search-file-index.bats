@@ -36,6 +36,7 @@ test_setup() {
 		Update was applied
 		Calling post-update helper scripts
 		Downloading all Clear Linux manifests
+		Download missing manifests
 		Update successful - System updated from version 10 to version 100
 	EOM
 	)

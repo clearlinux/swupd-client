@@ -9,7 +9,7 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle -f /test-file "$TEST_NAME"
-    write_to_protected_file $TEST_NAME/cert "invalid"
+	write_to_protected_file "$TEST_NAME"/cert "invalid"
 
 }
 

@@ -5,11 +5,11 @@
 Swupd contains multiple subcommands that install files in the system, including but not limited to update, bundle-add, verify. Before installing any file to the system root swupd needs to check the downloaded file integrity.
 
 Swupd uses a chain of files to validate the content and attributes of any file to be installed. A simplified description of the process to install a file F, that belongs to bundle B in version V of Clear Linux is:
-Download (if needed) the MoM (Manifest of Manifests) of version V of Clear Linux and its correspondent signature
-Check if MoM signature was signed with swupd root certificate installed on the system.
-Download (if needed) the Manifest of bundle B and calculate its hash. Check if the listed hash for bundle B in MoM is correct.
-Download (if needed) file F and calculate its hash. Check if the listed hash for file F in bundle B Manifest is correct.
-Install the file.
+ - Download (if needed) the MoM (Manifest of Manifests) of version V of Clear Linux and its correspondent signature
+ - Check if MoM signature was signed with swupd root certificate installed on the system.
+ - Download (if needed) the Manifest of bundle B and calculate its hash. Check if the listed hash for bundle B in MoM is correct.
+ - Download (if needed) file F and calculate its hash. Check if the listed hash for file F in bundle B Manifest is correct.
+ - Install the file.
 
 The hash used for that operation is a SHA256 of the content and attributes of the file in question (F or Manifest of bundle B). Swupd hashdump command can be used to calculate the hash for debugging purposes.
 

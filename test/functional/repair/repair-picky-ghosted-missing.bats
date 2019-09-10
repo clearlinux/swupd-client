@@ -22,6 +22,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
+		Download missing manifests
 		Checking for corrupt files
 		Adding any missing files
 		Repairing corrupt files

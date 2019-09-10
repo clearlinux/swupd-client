@@ -29,6 +29,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Preparing to update from 10 to 100
+		Download missing manifests
 		Error: Failed to retrieve 10 test-bundle2 manifest
 		Error: Unable to download manifest test-bundle2 version 10, exiting now
 		Update failed

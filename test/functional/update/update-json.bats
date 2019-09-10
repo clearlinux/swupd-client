@@ -33,6 +33,8 @@ test_setup() {
 		{ "type" : "info", "msg" : "Preparing to update from 10 to 20 " },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 11, "stepCompletion" : 100, "stepDescription" : "get_versions" },
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 11, "stepCompletion" : 100, "stepDescription" : "cleanup_download_dir" },
+		{ "type" : "info", "msg" : " Download missing manifests " },
+		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 11, "stepCompletion" : 50, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 11, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 5, "totalSteps" : 11, "stepCompletion" : 100, "stepDescription" : "run_preupdate_scripts" },
 		{ "type" : "info", "msg" : "Downloading packs for: " },

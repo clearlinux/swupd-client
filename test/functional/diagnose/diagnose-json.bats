@@ -27,6 +27,8 @@ test_setup() {
 		\{ "type" : "progress", "currentStep" : 1, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "get_versions" \},
 		\{ "type" : "info", "msg" : "Diagnosing version 10 " \},
 		\{ "type" : "progress", "currentStep" : 2, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "cleanup_download_dir" \},
+		\{ "type" : "info", "msg" : " Download missing manifests " \},
+		\{ "type" : "progress", "currentStep" : 3, "totalSteps" : 7, "stepCompletion" : 50, "stepDescription" : "load_manifests" \},
 		\{ "type" : "progress", "currentStep" : 3, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "load_manifests" \},
 		\{ "type" : "progress", "currentStep" : 4, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "consolidate_files" \},
 		\{ "type" : "info", "msg" : " Checking for missing files " \},

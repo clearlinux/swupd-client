@@ -19,6 +19,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --deps test-bundle1"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Download missing manifests
 		Bundles included by test-bundle1:
 		test-bundle2
 		test-bundle3

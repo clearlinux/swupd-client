@@ -24,6 +24,7 @@ test_setup() {
 		Diagnosing version 10
 		Warning: The --picky option is specified; ignoring version mismatch for repair
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
+		Download missing manifests
 		Error: Unable to verify. One or more currently installed bundles are not available at version 10. Use --force to override
 		Repair did not fully succeed
 	EOM
@@ -46,6 +47,7 @@ test_setup() {
 		Diagnosing version 10
 		Warning: The --force option is specified; ignoring version mismatch for repair
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
+		Download missing manifests
 		Warning: One or more installed bundles that are not available at version 10 will be removed
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
@@ -90,6 +92,7 @@ test_setup() {
 		Diagnosing version 10
 		Warning: The --force option is specified; ignoring version mismatch for repair
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
+		Download missing manifests
 		Warning: One or more installed bundles that are not available at version 10 will be removed
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...

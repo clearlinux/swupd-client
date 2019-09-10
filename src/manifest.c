@@ -264,7 +264,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 	} else {
 		if (manifest_download) {
 			if (manifest_download->current_count == 0) {
-				// info("\nDownload missing manifests\n");
+				info("\nDownload missing manifests\n");
 			}
 			manifest_download->current_count++;
 			progress_report(manifest_download->current_count,

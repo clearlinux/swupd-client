@@ -22,6 +22,7 @@ test_setup() {
 	assert_file_exists "$TARGETDIR/media/lib/file2"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
+		Download missing manifests
 		Downloading packs for:
 		 - test-bundle1
 		 - test-bundle2

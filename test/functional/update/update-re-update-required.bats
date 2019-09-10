@@ -18,6 +18,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Preparing to update from 10 to 20
+		Download missing manifests
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
@@ -36,6 +37,7 @@ test_setup() {
 		Update successful - System updated from version 10 to version 20
 		Update started
 		Preparing to update from 30 to 40
+		Download missing manifests
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...

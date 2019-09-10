@@ -20,6 +20,7 @@ test_setup() {
 	assert_status_is_not 0
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
+		Download missing manifests
 		Error: Preposterous (9000000) number of files in test-bundle Manifest, more than 4 million skipping
 		Warning: Removing corrupt Manifest.test-bundle artifacts and re-downloading...
 		Error: Preposterous (9000000) number of files in test-bundle Manifest, more than 4 million skipping

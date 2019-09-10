@@ -26,6 +26,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Preparing to update from 10 to 30
+		Download missing manifests
 		Downloading packs for:
 		 - os-core
 		 - test-bundle1

@@ -40,6 +40,7 @@ global_teardown() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Downloading all Clear Linux manifests
+		Download missing manifests
 		Searching for 'fake-file'
 		Search term not found
 	EOM

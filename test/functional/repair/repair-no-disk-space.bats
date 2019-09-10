@@ -95,6 +95,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Diagnosing version 20
 		Warning: The --force option is specified; ignoring version mismatch for repair
+		Download missing manifests
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$fhash.tar'

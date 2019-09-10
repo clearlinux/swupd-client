@@ -46,6 +46,7 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Downloading all Clear Linux manifests
+		Download missing manifests
 		Searching for 'test-bundle1'
 	EOM
 	)

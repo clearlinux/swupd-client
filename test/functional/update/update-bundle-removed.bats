@@ -28,6 +28,7 @@ test_setup() {
 		Update started
 		Preparing to update from 10 to 20
 		Warning: Bundle "test-bundle1" is invalid, skipping it...
+		Download missing manifests
 		Warning: One or more installed bundles are no longer available at version 20
 		Downloading packs for:
 		 - os-core

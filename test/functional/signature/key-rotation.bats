@@ -53,6 +53,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Preparing to update from 20 to 30
+		Download missing manifests
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
@@ -80,6 +81,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Preparing to update from 40 to 50
+		Download missing manifests
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
@@ -114,6 +116,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Preparing to update from 20 to 30
+		Download missing manifests
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...

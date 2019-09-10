@@ -41,6 +41,7 @@ global_teardown() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Downloading all Clear Linux manifests
+		Download missing manifests
 		Successfully retrieved manifests. Exiting
 	EOM
 	)

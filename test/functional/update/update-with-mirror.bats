@@ -35,6 +35,7 @@ test_setup() {
 		Update started
 		Checking mirror status
 		Preparing to update from 10 to 20
+		Download missing manifests
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...

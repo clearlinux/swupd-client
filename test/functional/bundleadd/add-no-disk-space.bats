@@ -83,6 +83,7 @@ test_setup() {
 	assert_status_is "$SWUPD_DISK_SPACE_ERROR"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
+		Download missing manifests
 		Error: Bundle too large by 11M
 		NOTE: currently, swupd only checks /usr/ (or the passed-in path with /usr/ appended) for available space
 		To skip this error and install anyways, add the --skip-diskspace-check flag to your command
@@ -113,6 +114,7 @@ test_setup() {
 		Warning: This is an insecure connection
 		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Loading required manifests...
+		Download missing manifests
 		Downloading packs \\(.* MB\\) for:
 		 - test-bundle
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/pack-test-bundle-from-0.tar'

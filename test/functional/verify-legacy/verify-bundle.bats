@@ -26,6 +26,7 @@ test_setup() {
 		Warning: Using the --bundles option may have some undesired side effects
 		 - verify will remove files marked as deleted in --bundles, this can corrupt other bundles not listed in --bundles
 		Verifying version 10
+		Download missing manifests
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
@@ -59,6 +60,7 @@ test_setup() {
 		Warning: Using the --bundles option may have some undesired side effects
 		 - verify will remove files marked as deleted in --bundles, this can corrupt other bundles not listed in --bundles
 		Verifying version 10
+		Download missing manifests
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
@@ -93,6 +95,7 @@ test_setup() {
 		Warning: Using the --bundles option may have some undesired side effects
 		 - verify will remove files marked as deleted in --bundles, this can corrupt other bundles not listed in --bundles
 		Verifying version 10
+		Download missing manifests
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files

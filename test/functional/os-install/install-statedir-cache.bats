@@ -65,6 +65,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Installing OS version 10 (latest)
+		Download missing manifests
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
@@ -128,6 +129,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Installing OS version 10 (latest)
 		Warning: Removing corrupt Manifest.os-core artifacts and re-downloading...
+		Download missing manifests
 		No packs need to be downloaded
 		Checking for corrupt files
 		No extra files need to be downloaded

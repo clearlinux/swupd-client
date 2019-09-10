@@ -33,6 +33,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
+		Download missing manifests
 		Downloading packs for:
 		 - test-bundle4
 		 - test-bundle3
@@ -66,6 +67,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
+		Download missing manifests
 		No packs need to be downloaded
 		Starting download of remaining update content. This may take a while...
 		Installing bundle(s) files...

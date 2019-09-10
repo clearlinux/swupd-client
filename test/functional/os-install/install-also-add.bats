@@ -26,6 +26,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Installing OS version 10 (latest)
+		Download missing manifests
 		Downloading packs for:
 		 - test-bundle3
 		 - test-bundle2

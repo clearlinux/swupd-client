@@ -46,6 +46,7 @@ test_setup() {
 	assert_file_exists "$STATEDIR"/staged/"$removed_file"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
+		Download missing manifests
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...
@@ -84,6 +85,7 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/file12
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
+		Download missing manifests
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...

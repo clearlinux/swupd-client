@@ -38,6 +38,7 @@ test_setup() {
 		Checking mirror status
 		Warning: mirror version (20) is behind upstream version (100)
 		Preparing to update from 10 to 20
+		Download missing manifests
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...

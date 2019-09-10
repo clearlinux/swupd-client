@@ -31,6 +31,7 @@ test_setup() {
 	assert_file_exists "$STATEDIR"/pack-test-bundle1-from-0-to-10.tar
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
+		Download missing manifests
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...

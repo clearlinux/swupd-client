@@ -23,6 +23,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Preparing to update from 10 to 100
+		Download missing manifests
 		Downloading packs for:
 		 - test-bundle2
 		 - test-bundle1

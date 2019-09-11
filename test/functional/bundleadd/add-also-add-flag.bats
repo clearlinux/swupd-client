@@ -43,6 +43,7 @@ test_setup() {
 		Installing bundle(s) files...
 		Calling post-update helper scripts
 		Successfully installed 1 bundle
+		3 bundles were installed as dependencies
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -71,6 +72,7 @@ test_setup() {
 		Installing bundle(s) files...
 		Calling post-update helper scripts
 		Successfully installed 1 bundle
+		1 bundle was installed as dependency
 	EOM
 	)
 	assert_is_output "$expected_output"

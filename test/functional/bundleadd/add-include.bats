@@ -20,7 +20,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle3"
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_OK"
 	assert_file_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/bar/test-file2
 	assert_file_exists "$STATEDIR"/bundles/test-bundle1
@@ -33,6 +33,7 @@ test_setup() {
 		Installing bundle(s) files...
 		Calling post-update helper scripts
 		Successfully installed 1 bundle
+		1 bundle was installed as dependency
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -43,7 +44,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_OK"
 	assert_file_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/bar/test-file2
 	assert_file_exists "$STATEDIR"/bundles/test-bundle1
@@ -57,6 +58,76 @@ test_setup() {
 		Installing bundle(s) files...
 		Calling post-update helper scripts
 		Successfully installed 1 bundle
+		1 bundle was installed as dependency
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
+@test "ADD053: Adding two bundles, one of them includes the other one as dependency" {
+
+	# when adding two bundles, and one is a dependency of the other one
+	# swupd should still count/identify the bundles correctly, it should only
+	# count the bundle as dependency if it was not directly added by the user
+	# regardless of the order of the bundles requested
+
+	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
+	assert_file_not_exists "$TARGETDIR"/foo/test-file1
+	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$STATEDIR"/bundles/test-bundle2
+	assert_file_not_exists "$TARGETDIR"/bar/test-file2
+
+	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle2 test-bundle1"
+
+	assert_status_is "$SWUPD_OK"
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$STATEDIR"/bundles/test-bundle1
+	assert_file_exists "$TARGETDIR"/foo/test-file1
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$STATEDIR"/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/bar/test-file2
+
+	expected_output=$(cat <<-EOM
+		Loading required manifests...
+		No packs need to be downloaded
+		Starting download of remaining update content. This may take a while...
+		Installing bundle(s) files...
+		Calling post-update helper scripts
+		Successfully installed 2 bundles
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+	remove_bundle -L "$TEST_NAME"/web-dir/10/Manifest.test-bundle1
+	remove_bundle -L "$TEST_NAME"/web-dir/10/Manifest.test-bundle2
+	clean_state_dir "$TEST_NAME"
+
+	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
+	assert_file_not_exists "$TARGETDIR"/foo/test-file1
+	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$STATEDIR"/bundles/test-bundle2
+	assert_file_not_exists "$TARGETDIR"/bar/test-file2
+
+	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle2"
+
+	assert_status_is "$SWUPD_OK"
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$STATEDIR"/bundles/test-bundle1
+	assert_file_exists "$TARGETDIR"/foo/test-file1
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$STATEDIR"/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/bar/test-file2
+
+	expected_output=$(cat <<-EOM
+		Loading required manifests...
+		No packs need to be downloaded
+		Starting download of remaining update content. This may take a while...
+		Installing bundle(s) files...
+		Calling post-update helper scripts
+		Successfully installed 2 bundles
 	EOM
 	)
 	assert_is_output "$expected_output"

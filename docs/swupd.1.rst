@@ -145,6 +145,10 @@ used to modify the core behavior and resources that swupd uses.
 
    Print only important information and errors.
 
+- ``--verbose``
+
+   Enable verbosity for commands.
+
 - ``--debug``
 
    Print extra information to help debugging problems.

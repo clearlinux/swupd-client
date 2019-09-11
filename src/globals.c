@@ -41,6 +41,7 @@
 #define FLAG_QUIET 1002
 #define FLAG_DEBUG 1003
 #define FLAG_ALLOW_INSECURE_HTTP 1004
+#define FLAG_VERBOSE 1005
 
 struct globals globals = {
 	.sigcheck = true,
@@ -60,6 +61,7 @@ static int max_parallel_downloads = -1;
 static int log_level = LOG_INFO;
 static bool quiet = false;
 static bool debug = false;
+static bool verbose = false;
 
 /* Sets the content_url global variable */
 static void set_content_url(char *url)
@@ -492,6 +494,7 @@ static const struct option global_opts[] = {
 	{ "json-output", no_argument, 0, 'j' },
 	{ "allow-insecure-http", no_argument, 0, FLAG_ALLOW_INSECURE_HTTP },
 	{ "wait-for-scripts", no_argument, 0, FLAG_WAIT_FOR_SCRIPTS },
+	{ "verbose", no_argument, 0, FLAG_VERBOSE },
 	{ 0, 0, 0, 0 }
 };
 
@@ -595,6 +598,9 @@ static bool global_parse_opt(int opt, char *optarg)
 	case FLAG_ALLOW_INSECURE_HTTP:
 		globals.allow_insecure_http = optarg_to_bool(optarg);
 		return true;
+	case FLAG_VERBOSE:
+		verbose = true;
+		return true;
 	default:
 		return false;
 	}
@@ -649,6 +655,7 @@ void global_print_help(void)
 	print("   -j, --json-output       Print all output as a JSON stream\n");
 	print("   --allow-insecure-http   Allow updates over insecure connections\n");
 	print("   --quiet                 Quiet output. Print only important information and errors\n");
+	print("   --verbose               Enable verbosity for commands\n");
 	print("   --debug                 Print extra information to help debugging problems\n");
 	print("   --no-progress           Don't print progress report\n");
 	print("   --wait-for-scripts      Wait for the post-update scripts to complete\n");
@@ -742,6 +749,8 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 		log_level = LOG_DEBUG;
 	} else if (quiet) {
 		log_level = LOG_ERROR;
+	} else if (verbose) {
+		log_level = LOG_INFO_VERBOSE;
 	}
 	log_set_level(log_level);
 

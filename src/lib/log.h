@@ -20,8 +20,10 @@ extern "C" {
 #define LOG_WARN 4
 /** @brief Only show messages printed info(), warn(), error() and print(). */
 #define LOG_INFO 6
+/** @brief Only show messages printed info_verbose(), info(), warn(), error() and print(). */
+#define LOG_INFO_VERBOSE 8
 /** @brief Print all messages. */
-#define LOG_DEBUG 8
+#define LOG_DEBUG 10
 
 /**
  * @brief Log callback functions.
@@ -33,6 +35,11 @@ typedef void (*log_fn_t)(FILE *out, const char *file, int line, const char *labe
  * @brief Set the log function to use. Replaces the default (printf).
  */
 void log_set_function(log_fn_t log_fn);
+
+/**
+ * @brief Get the current log level.
+ */
+int log_get_level(void);
 
 /**
  * @brief Set the minimum priority log to be printed by log functions.
@@ -53,6 +60,8 @@ void log_full(int log_level, FILE *out, const char *file, int line, const char *
 #define warn(_fmt, ...) log_full(LOG_WARN, stderr, __FILE__, __LINE__, "Warning", _fmt, ##__VA_ARGS__);
 /** @brief Print messages using LOG_INFO level. */
 #define info(_fmt, ...) log_full(LOG_INFO, stdout, __FILE__, __LINE__, NULL, _fmt, ##__VA_ARGS__);
+/** @brief Print messages using LOG_INFO_VERBOSE level. */
+#define info_verbose(_fmt, ...) log_full(LOG_INFO_VERBOSE, stdout, __FILE__, __LINE__, NULL, _fmt, ##__VA_ARGS__);
 /** @brief Print messages using LOG_DEBUG level. */
 #define debug(_fmt, ...) log_full(LOG_DEBUG, stdout, __FILE__, __LINE__, "Debug", _fmt, ##__VA_ARGS__);
 

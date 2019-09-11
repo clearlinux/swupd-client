@@ -46,6 +46,8 @@ enum swupd_code check_update()
 {
 	int current_version, server_version;
 	enum swupd_code ret = SWUPD_OK;
+	int server_format = -1;
+	int current_format = -1;
 
 	current_version = get_current_version(globals.path_prefix);
 	server_version = version_get_absolute_latest();
@@ -63,11 +65,32 @@ enum swupd_code check_update()
 		ret = SWUPD_SERVER_CONNECTION_ERROR;
 	}
 
-	if (current_version > 0) {
-		info("Current OS version: %d\n", current_version);
+	if (log_get_level() >= LOG_INFO_VERBOSE) {
+		/* Retrieve latest_format */
+		/* Sending latest server_version to get the latest format */
+		server_format = get_server_format(server_version);
+		/* Retrieve current format */
+		current_format = get_current_format();
 	}
+
+	if (current_version > 0) {
+		info("Current OS version: %d", current_version);
+		if (current_format > 0) {
+			info_verbose(" (format %d)", current_format);
+		} else {
+			info_verbose(" (format unknown)");
+		}
+		info("\n");
+	}
+
 	if (server_version > 0) {
-		info("Latest server version: %d\n", server_version);
+		info("Latest server version: %d", server_version);
+		if (server_format > 0) {
+			info_verbose(" (format %d)", server_format);
+		} else {
+			info_verbose(" (format unknown)");
+		}
+		info("\n");
 	}
 
 	if (ret != SWUPD_OK) {

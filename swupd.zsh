@@ -123,6 +123,7 @@ local -a global_opts; global_opts=(
   '(-)'{-h,--help}'[Show help options]'
   + '(msg)'
   '(help)--quiet[Quiet output. Print only important information and errors]'
+  '(help)--verbose[Enables verbosity on some of the commands]'
   '(help)--debug[Print extra information to help debugging problems]'
   '(help -j --json-output)'{-j,--json-output}'[Print all output as a JSON stream]'
   + options

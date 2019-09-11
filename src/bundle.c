@@ -753,6 +753,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	int bundles_failed = 0;
 	int already_installed = 0;
 	int bundles_installed = 0;
+	int dependencies_installed = 0;
 	int bundles_requested = list_len(bundles);
 	long bundle_size = 0;
 	long fs_free = 0;
@@ -1048,9 +1049,13 @@ out:
 		struct manifest *to_install_manifest;
 		to_install_manifest = iter->data;
 		iter = iter->next;
-		if (string_in_list(to_install_manifest->component, bundles)) {
-			bundles_installed++;
-			track_installed(to_install_manifest->component);
+		if (is_installed_bundle(to_install_manifest->component)) {
+			if (string_in_list(to_install_manifest->component, bundles)) {
+				bundles_installed++;
+				track_installed(to_install_manifest->component);
+			} else {
+				dependencies_installed++;
+			}
 		}
 	}
 
@@ -1063,12 +1068,16 @@ out:
 	} else {
 		bundles_failed = bundles_requested - bundles_installed - already_installed;
 	}
+
 	if (bundles_failed > 0) {
 		print("Failed to install %i of %i bundles\n", bundles_failed, bundles_requested - already_installed);
-	} else if (bundles_installed) {
+	} else if (bundles_installed > 0) {
 		print("Successfully installed %i bundle%s\n", bundles_installed, (bundles_installed > 1 ? "s" : ""));
 	}
-	if (already_installed) {
+	if (dependencies_installed > 0) {
+		print("%i bundle%s\n", dependencies_installed, (dependencies_installed > 1 ? "s were installed as dependencies" : " was installed as dependency"));
+	}
+	if (already_installed > 0) {
 		print("%i bundle%s already installed\n", already_installed, (already_installed > 1 ? "s were" : " was"));
 	}
 

@@ -18,14 +18,20 @@
  */
 
 #define _GNU_SOURCE
-#include <stdio.h>
-
+#include "lib/log.h"
 #include "swupd.h"
 
 enum swupd_code print_update_conf_info()
 {
 	enum swupd_code ret = SWUPD_OK;
 	char dist_string[LINE_MAX];
+	int current_format = -1;
+
+	if (log_get_level() >= LOG_INFO_VERBOSE) {
+		/* Retrieve current format */
+		current_format = get_current_format();
+	}
+
 	int current_version = get_current_version(globals.path_prefix);
 	bool dist_string_found = get_distribution_string(globals.path_prefix, dist_string);
 
@@ -37,7 +43,13 @@ enum swupd_code print_update_conf_info()
 		info("Installed version: unknown\n");
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 	} else {
-		info("Installed version: %d\n", current_version);
+		info("Installed version: %d", current_version);
+		if (current_format > 0) {
+			info_verbose(" (format %d)", current_format);
+		} else {
+			info_verbose(" (format unknown)");
+		}
+		info("\n");
 	}
 	info("Version URL:       %s\n", globals.version_url);
 	info("Content URL:       %s\n", globals.content_url);
@@ -51,7 +63,6 @@ static void print_help(void)
 	print("   swupd info [OPTION...]\n\n");
 
 	global_print_help();
-	print("\n");
 }
 
 static const struct global_options opts = {

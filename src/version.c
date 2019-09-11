@@ -32,6 +32,59 @@
 #include "signature.h"
 #include "swupd.h"
 
+#define MAX_VERSION_STR_SIZE 11
+
+int get_server_format(int server_version)
+{
+	if (server_version < 0) {
+		return -1;
+	}
+
+	int ret, err = -1;
+	char *url;
+
+	char format_string[MAX_VERSION_STR_SIZE];
+	struct curl_file_data format = {
+		MAX_VERSION_STR_SIZE, 0,
+		format_string
+	};
+
+	string_or_die(&url, "%s/%d/format", globals.version_url, server_version);
+	ret = swupd_curl_get_file_memory(url, &format);
+	free_string(&url);
+
+	if (ret) {
+		return -1;
+	}
+
+	format.data[format.len] = '\0';
+	err = strtoi_err(format.data, &ret);
+	if (err != 0) {
+		return -1;
+	}
+
+	return ret;
+}
+
+int get_current_format(void)
+{
+	char *temp_format_buffer = NULL;
+	int ret, err = -1;
+	ret = get_value_from_path(&temp_format_buffer, DEFAULT_FORMAT_PATH, false);
+	if (!temp_format_buffer || ret != 0) {
+		goto out;
+	}
+
+	err = strtoi_err(temp_format_buffer, &ret);
+	if (err != 0) {
+		goto out;
+	}
+
+out:
+	free_string(&temp_format_buffer);
+	return ret;
+}
+
 static int get_sig_inmemory(char *url, struct curl_file_data *tmp_version_sig)
 {
 	int ret = -1;
@@ -93,7 +146,6 @@ out:
 
 static int get_version_from_url(char *url)
 {
-#define MAX_VERSION_STR_SIZE 11
 
 	int ret = 0;
 	int err = 0;

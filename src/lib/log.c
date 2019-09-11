@@ -102,6 +102,11 @@ static void log_internal(FILE *out, const char *file, int line, const char *labe
 	}
 }
 
+int log_get_level(void)
+{
+	return cur_log_level;
+}
+
 void log_set_level(int log_level)
 {
 	cur_log_level = log_level;

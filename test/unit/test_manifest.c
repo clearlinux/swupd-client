@@ -37,16 +37,30 @@ static void validate_file(struct list *files, const char *filename, int version,
 	exit(EXIT_FAILURE);
 }
 
+struct manifest *manifest_parse_test(const char *component, const char *dir, const char *filename, bool header_only)
+{
+	struct manifest *m;
+	char *full_path;
+
+	full_path = sys_path_join(dir, filename);
+	m = manifest_parse(component, full_path, header_only);
+	free(full_path);
+
+	return m;
+}
+
 static void test_manifest_parse()
 {
 	struct manifest *manifest;
+	char *dir;
 
+	dir = sys_dirname(__FILE__);
 	// parsing a missing file should fail
-	manifest = manifest_parse("test", "test/unit/missing", false);
+	manifest = manifest_parse_test("test", dir, "test/unit/missing", false);
 	check(manifest == NULL);
 
 	// Check if parser can parse the manifest header even if files are invalid
-	manifest = manifest_parse("test", "test/unit/data/mom1", true);
+	manifest = manifest_parse_test("test", dir, "data/mom1", true);
 	check(manifest != NULL);
 	check(manifest->manifest_version == 1);
 	check(manifest->version == 30);
@@ -56,11 +70,11 @@ static void test_manifest_parse()
 
 	
 	// Manifest parser should fail on incorrect file list
-	manifest = manifest_parse("test", "test/unit/data/mom1", false);
+	manifest = manifest_parse_test("test", dir, "data/mom1", false);
 	check(manifest == NULL);
 
 	// Check if parser can parse all different flags supported for the file list
-	manifest = manifest_parse("test", "test/unit/data/mom2", false);
+	manifest = manifest_parse_test("test", dir, "data/mom2", false);
 	check(manifest != NULL);
 	check(list_len(manifest->files) == 14);
 	check(list_len(manifest->manifests) == 1);
@@ -85,12 +99,14 @@ static void test_manifest_parse()
 	free_manifest(manifest);
 
 	// Missing MANIFEST keyword on header
-	manifest = manifest_parse("test", "test/unit/data/mom_invalid1", false);
+	manifest = manifest_parse_test("test", dir, "data/mom_invalid1", false);
 	check(manifest == NULL);
 
 	// Invalid header format
-	manifest = manifest_parse("test", "test/unit/data/mom_invalid2", false);
+	manifest = manifest_parse_test("test", dir, "data/mom_invalid2", false);
 	check(manifest == NULL);
+
+	free(dir);
 }
 
 int main() {

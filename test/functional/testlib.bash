@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
 FUNC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TEST_ROOT_DIR="$(pwd)"
 TEST_FILENAME=$(basename "$BATS_TEST_FILENAME")
 TEST_NAME=${TEST_FILENAME%.bats}
 THEME_DIRNAME="$BATS_TEST_DIRNAME"
@@ -10,9 +11,21 @@ export TEST_NAME_SHORT
 export THEME_DIRNAME
 export FUNC_DIR
 export SWUPD_DIR="$FUNC_DIR/../.."
-export SWUPD="$SWUPD_DIR/swupd"
 export SWUPD_CONFIG_DIR="$SWUPD_DIR"/testconfig
 export SWUPD_CONFIG_FILE="$SWUPD_CONFIG_DIR"/config
+
+# detect where the swupd binary is
+if [ -e "$SWUPD" ]; then
+	# nothing to be done, variable already set up
+        export SWUPD
+elif [ -e "$SWUPD_DIR"/swupd ]; then
+	# using the path relative to the test dir
+	export SWUPD="$SWUPD_DIR"/swupd
+elif [ -e "$(pwd)"/swupd ]; then
+	# using the current path
+	SWUPD="$(pwd)"/swupd
+	export SWUPD
+fi
 
 # Exit codes
 export SWUPD_OK=0
@@ -421,12 +434,12 @@ set_env_variables() { # swupd_function
 	export PATH_PREFIX="$TEST_DIRNAME"/testfs/target-dir
 
 	# different options for swupd
-	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $FUNC_DIR/Swupd_Root.pem -I"
+	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $TEST_ROOT_DIR/Swupd_Root.pem -I"
 	export SWUPD_OPTS_KEEPCACHE="$SWUPD_OPTS --keepcache"
 	export SWUPD_OPTS_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -F staging -I"
-	export SWUPD_OPTS_NO_FMT="-S $testfs_path/state -p $testfs_path/target-dir -C $FUNC_DIR/Swupd_Root.pem -I"
+	export SWUPD_OPTS_NO_FMT="-S $testfs_path/state -p $testfs_path/target-dir -C $TEST_ROOT_DIR/Swupd_Root.pem -I"
 	export SWUPD_OPTS_NO_FMT_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -I"
-	export SWUPD_OPTS_NO_PATH="-S $testfs_path/state -F staging -C $FUNC_DIR/Swupd_Root.pem -I"
+	export SWUPD_OPTS_NO_PATH="-S $testfs_path/state -F staging -C $TEST_ROOT_DIR/Swupd_Root.pem -I"
 
 	export CLIENT_CERT_DIR="$testfs_path/target-dir/etc/swupd"
 	export CLIENT_CERT="$CLIENT_CERT_DIR/client.pem"
@@ -1224,8 +1237,8 @@ sign_manifest() { # swupd_function
 	validate_item "$manifest"
 
 	sudo openssl smime -sign -binary -in "$manifest" \
-    -signer "$FUNC_DIR"/Swupd_Root.pem \
-    -inkey "$FUNC_DIR"/private.pem \
+    -signer "$TEST_ROOT_DIR"/Swupd_Root.pem \
+    -inkey "$TEST_ROOT_DIR"/private.pem \
     -outform DER -out "$(dirname "$manifest")"/Manifest.MoM.sig
 }
 
@@ -1247,8 +1260,8 @@ sign_version() { # swupd_function
 	validate_item "$version_file"
 
 	sudo openssl smime -sign -binary -in "$version_file" \
-		-signer "$FUNC_DIR"/Swupd_Root.pem \
-		-inkey "$FUNC_DIR"/private.pem \
+		-signer "$TEST_ROOT_DIR"/Swupd_Root.pem \
+		-inkey "$TEST_ROOT_DIR"/private.pem \
 		-outform DER -out "$version_file".sig
 
 }

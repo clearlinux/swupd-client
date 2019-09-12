@@ -50,8 +50,8 @@ test-driver
 test-suite.log
 test/*.gcno
 test/documentation/manpages/test.log
-test/functional/Swupd_Root.pem
-test/functional/private.pem
+Swupd_Root.pem
+private.pem
 test/**/*.log
 test/unit/test_*.test
 verifytime

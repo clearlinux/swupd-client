@@ -12,8 +12,8 @@ test_teardown() {
 
 @test "Generate certificate for signing Manifest.MoM" {
 
-  run sudo sh -c "rm -rf "$FUNC_DIR"/private.pem "$FUNC_DIR"/Swupd_Root.pem"
-  generate_certificate "$FUNC_DIR"/private.pem "$FUNC_DIR"/Swupd_Root.pem "$FUNC_DIR"/certattributes.cnf
+  run sudo sh -c "rm -rf "$TEST_ROOT_DIR"/private.pem "$TEST_ROOT_DIR"/Swupd_Root.pem"
+  generate_certificate "$TEST_ROOT_DIR"/private.pem "$TEST_ROOT_DIR"/Swupd_Root.pem "$FUNC_DIR"/certattributes.cnf
 
 }
 

@@ -382,7 +382,7 @@ coverage-clean:
 endif
 
 distclean-local:
-	rm -rf aclocal.m4 ar-lib autom4te.cache config.guess config.h.in config.h.in~ config.sub configure depcomp install-sh ltmain.sh m4 Makefile.in missing compile $(MANPAGES)
+	rm -rf aclocal.m4 ar-lib autom4te.cache config.guess config.h.in config.h.in~ config.sub configure depcomp install-sh ltmain.sh m4 Makefile.in missing compile Swupd_Root.pem private.pem $(MANPAGES)
 
 install-exec-hook:
 	perl $(top_srcdir)/scripts/findstatic.pl */*.o | grep -v Checking ||:

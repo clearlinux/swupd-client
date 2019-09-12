@@ -12,7 +12,7 @@ test_setup() {
 	export SWUPD_OPTS_EXTRA="$SWUPD_OPTS_NO_FMT_NO_CERT -C $TARGETDIR$CERT_PATH"
 
 	create_version -r "$TEST_NAME" 20 10
-	update_bundle "$TEST_NAME" os-core --add "$CERT_PATH":"$FUNC_DIR"/Swupd_Root.pem
+	update_bundle "$TEST_NAME" os-core --add "$CERT_PATH":"$TEST_ROOT_DIR"/Swupd_Root.pem
 	bump_format "$TEST_NAME"
 
 	# Rotate the key inside the content. We need to sign release 30 using old root key and sign the release 40 and 50 using the new key. And include the new key in releases 30, 40 and 50.

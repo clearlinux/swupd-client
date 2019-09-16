@@ -2,10 +2,10 @@
 
 load "../testlib"
 
-server_pub="$PWD/$TEST_NAME"_1/server-pub.pem
-server_key="$PWD/$TEST_NAME"_1/server-key.pem
-client_pub="$PWD/$TEST_NAME"_1/client-pub.pem
-client_key="$PWD/$TEST_NAME"_1/client-key.pem
+server_pub="$PWD/$TEST_NAME"/server-pub.pem
+server_key="$PWD/$TEST_NAME"/server-key.pem
+client_pub="$PWD/$TEST_NAME"/client-pub.pem
+client_key="$PWD/$TEST_NAME"/client-key.pem
 
 global_setup() {
 

@@ -1659,6 +1659,9 @@ destroy_test_environment() { # swupd_function
 	local env_name=$1
 	validate_param "$env_name"
 	debug_msg "Destroying environment $env_name"
+	if [ -z "$KEEP_ENV" ]; then
+		KEEP_ENV=false
+	fi
 	debug_msg "The KEEP_ENV environment variable is set to $KEEP_ENV"
 	if [ "$force" = true ]; then
 		debug_msg "The --force option was used"
@@ -3234,8 +3237,8 @@ setup() {
 		# if a global environment exists at this point it means
 		# it was a leftover from a previous execution, remove it
 		if [ -d "$TEST_NAME" ]; then
-			print "\\nAn old test environment was found for this test: $TEST_NAME"
-			print "Deleting it..."
+			debug_msg "\\nAn old test environment was found for this test: $TEST_NAME"
+			debug_msg "Deleting it..."
 			destroy_test_environment --force "$TEST_NAME"
 		fi
 
@@ -3285,15 +3288,29 @@ setup() {
 
 teardown() {
 
-	if [ "$DEBUG_TEST" = true ] && [ "$global_env" = true ] && [ -d "$TEST_NAME" ]; then
-		print "Saving a copy of the state dir in $TEST_NAME/state_$BATS_TEST_NUMBER"
-		sudo cp -r "$TEST_NAME"/testfs/state "$TEST_NAME"/state_"$BATS_TEST_NUMBER"
+	local index
+	# if the user wants to preserve the output and we are using an global environment
+	# we need to copy the state of the environment before starting the next test or
+	# the state will be overrriden
+	if [ "$KEEP_ENV" = true ] && [ -e "$TEST_NAME"/.global_env ] && [ -d "$TEST_NAME" ]; then
+		print "Saving a copy of the state dir in $TEST_NAME/state_${BATS_TEST_DESCRIPTION%:*}"
+		sudo cp -r "$TEST_NAME"/testfs/state "$TEST_NAME"/state_"${BATS_TEST_DESCRIPTION%:*}"
 	fi
+
+	debug_msg "\\nRunning test_teardown..."
 	test_teardown
+	debug_msg "Finished running test_teardown\\n"
+
 	# if the last test just ran, run the global teardown
-	if [ "$BATS_TEST_NUMBER" -eq "${#BATS_TEST_NAMES[@]}" ]; then
+	index=$(( ${#BATS_TEST_NAMES[*]} - 1 ))
+	if [ "$BATS_TEST_NAME" = "${BATS_TEST_NAMES[$index]}" ]; then
+
+		debug_msg "\\nRunning global teardown..."
 		global_teardown
+		debug_msg "Global teardown finished\\n"
+
 	fi
+
 	print "Test teardown complete."
 
 }

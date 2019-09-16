@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-@test "Verify conflicting flags" {
+@test "DIA017: Verify conflicting flags" {
 
 	# Some flags are mutually exclusive
 

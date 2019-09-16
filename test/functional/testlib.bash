@@ -1639,20 +1639,30 @@ create_test_environment() { # swupd_function
 # - ENVIRONMENT_NAME: the name of the test environment to be deleted
 destroy_test_environment() { # swupd_function
 
-	local env_name=$1
+	local force=false
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    destroy_test_environment <environment_name>
+			    destroy_test_environment [--force] <environment_name>
+
+			Options:
+			    --force    If set, the environment will be destroyed even if KEEP_ENV=true
 
 			Note: if you want your test environment to be preserved for debugging
-			      purposes, set DEBUG_TEST=true before running your test.
+			      purposes, set KEEP_ENV=true before running your test.
 			EOM
 		return
 	fi
+	[ "$1" = "--force" ] && { force=true ; shift ; }
+	local env_name=$1
 	validate_param "$env_name"
+	debug_msg "Destroying environment $env_name"
+	debug_msg "The KEEP_ENV environment variable is se to $KEEP_ENV"
+	if [ "$force" = true ]; then
+		debug_msg "The --force option was used"
+	fi
 
 	destroy_web_server
 	destroy_trusted_cacert
@@ -1665,8 +1675,8 @@ destroy_test_environment() { # swupd_function
 		return 1
 	fi
 
-	if [ "$DEBUG_TEST" = true ]; then
-		local msg="Warning: DEBUG_TEST is set to true, the test environment will be preserved"
+	if [ "$KEEP_ENV" = true ] && [ "$force" = false ]; then
+		local msg="Warning: KEEP_ENV is set to true, the test environment will be preserved"
 		print "$msg\\n" 2>/dev/null || echo "$msg"
 		return
 	fi
@@ -1675,7 +1685,7 @@ destroy_test_environment() { # swupd_function
 	# make sure the directory does look like a test environment
 	for var in "testfs" "web-dir"; do
 		if [ ! -d "$env_name"/"$var" ]; then
-			echo "The name provided doesn't seem to be a valid test environment"
+			echo "The name provided \"$env_name\" doesn't seem to be a valid test environment"
 			return 1
 		fi
 	done
@@ -1686,6 +1696,11 @@ destroy_test_environment() { # swupd_function
 	fi
 
 	sudo rm -rf "$env_name"
+	if [ ! -e "$env_name" ]; then
+		debug_msg "Environment $env_name deleted successfully"
+	else
+		debug_msg "The environment $env_name failed to be deleted"
+	fi
 
 }
 

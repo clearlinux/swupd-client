@@ -109,6 +109,7 @@ generate_certificate() { # swupd_function
 	validate_param "$key_path"
 	validate_param "$cert_path"
 
+	debug_msg "Generating test certificate"
 	# generate self-signed public and private key
 	if [ -z "$config" ]; then
 		sudo openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 \
@@ -121,6 +122,10 @@ generate_certificate() { # swupd_function
 			-subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost" \
 			-config "$config"
 	fi
+
+	debug_msg "Generated private key: $key_path"
+	debug_msg "Generated public key: $cert_path"
+	debug_msg "Keys generated succssfully"
 
 }
 
@@ -1577,6 +1582,8 @@ create_test_environment() { # swupd_function
 	validate_param "$env_name"
 	validate_number "$size"
 
+	debug_msg "Creating test environment: $env_name"
+
 	# clean test environment when test interrupted
 	trap 'destroy_test_environment $TEST_NAME' INT
 
@@ -1596,12 +1603,14 @@ create_test_environment() { # swupd_function
 		print "Created: $(create_test_fs "$env_name" "$size") ($size MB)"
 		sudo touch "$env_name"/.testfs
 	else
+		debug_msg "No size restrictions were selected for the environment, using a common directory as FS"
 		sudo mkdir -p "$env_name"/testfs
 	fi
 	targetdir="$env_name"/testfs/target-dir
 	statedir="$env_name"/testfs/state
 
 	# target-dir files & dirs
+	debug_msg "Creating target-dir files and diretories"
 	path=$(dirname "$(realpath "$env_name")")
 	sudo mkdir -p "$targetdir"/usr/lib
 	sudo cp "$env_name"/web-dir/"$version"/os-release "$targetdir"/usr/lib/os-release
@@ -1613,6 +1622,7 @@ create_test_environment() { # swupd_function
 	sudo mkdir -p "$targetdir"/etc/swupd
 
 	# state files & dirs
+	debug_msg "Creating a state dir"
 	sudo mkdir -p "$statedir"/{staged,download,delta,telemetry}
 	sudo chmod -R 0700 "$statedir"
 
@@ -1622,15 +1632,20 @@ create_test_environment() { # swupd_function
 	# every environment needs to have at least the os-core bundle so this should be
 	# added by default to every test environment unless specified otherwise
 	if [ "$empty" = false ]; then
+		debug_msg "Adding bundle os-core to the test environment"
 		if [ "$release_files" = true ]; then
+			debug_msg "Including the release files in bundle os-core"
 			create_bundle -L -n os-core -v "$version" -d /usr/share/clear/bundles -f /core,/usr/lib/os-release:"$OS_RELEASE",/usr/share/defaults/swupd/format:"$FORMAT" "$env_name"
 		else
 			create_bundle -L -n os-core -v "$version" -f /core "$env_name"
 		fi
 	else
+		debug_msg "The -e flag was specified, the os-core bundle was not included in the environment"
 		create_tar "$env_name"/web-dir/"$version"/Manifest.MoM
 		sign_manifest "$env_name"/web-dir/"$version"/Manifest.MoM
 	fi
+
+	debug_msg "Test environment \"$env_name\" created successfully"
 
 }
 
@@ -2196,6 +2211,7 @@ create_bundle() { # swupd_function
 
 	# set default values
 	bundle_name=${bundle_name:-$(generate_random_name test-bundle-)}
+	debug_msg "Creating bundle: $bundle_name"
 	# if no version was provided create the bundle in the earliest version by defaulti
 	# shellcheck disable=SC2010
 	# SC2010: Don't use ls | grep. Use a glob.
@@ -2214,6 +2230,7 @@ create_bundle() { # swupd_function
 	state_path="$env_name"/testfs/state
 
 	# 1) create the initial manifest
+	debug_msg "Creating the initial manifest for the bundle"
 	manifest=$(create_manifest "$version_path" "$bundle_name")
 	if [ "$DEBUG" == true ]; then
 		echo "Manifest -> $manifest"
@@ -2226,11 +2243,11 @@ create_bundle() { # swupd_function
 	# Every bundle has to have at least one directory,
 	# hashes in directories vary depending on owner and permissions,
 	# so one directory hash can be reused many times
+	debug_msg "Creating the mandatory directory included in every bundle"
 	bundle_dir=$(create_dir "$files_path")
-	if [ "$DEBUG" == true ]; then
-		echo "Directory -> $bundle_dir"
-	fi
+	debug_msg "Directory -> $bundle_dir"
 	# Create a zero pack for the bundle and add the directory to it
+	debug_msg "Creating a zero pack for the bundle and adding the directory to it"
 	sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_dir")"
 	for val in "${dir_list[@]}"; do
 		add_dirs
@@ -2296,9 +2313,7 @@ create_bundle() { # swupd_function
 		else
 			bundle_file=$(create_file "$files_path")
 		fi
-		if [ "$DEBUG" == true ]; then
-			echo "file -> $bundle_file"
-		fi
+		debug_msg "file -> $bundle_file"
 		add_to_manifest -p "$manifest" "$bundle_file" "$val"
 		# Add the file to the zero pack of the bundle
 		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_file")"
@@ -2341,10 +2356,8 @@ create_bundle() { # swupd_function
 		# add the symlink to zero pack and manifest
 		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
 		add_to_manifest -s "$manifest" "$bundle_link" "$val"
-		if [ "$DEBUG" == true ]; then
-			echo "link -> $bundle_link"
-			echo "file pointed to -> $pfile"
-		fi
+		debug_msg "link -> $bundle_link"
+		debug_msg "file pointed to -> $pfile"
 		if [ "$local_bundle" = true ]; then
 			sudo mkdir -p "$target_path$(dirname "$val")"
 			# if local_bundle is enabled copy the link to target-dir but also
@@ -2375,9 +2388,7 @@ create_bundle() { # swupd_function
 		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
 		add_to_manifest -s "$manifest" "$bundle_link" "$val"
 		# Add the file pointed by the link to the zero pack of the bundle
-		if [ "$DEBUG" == true ]; then
-			echo "dangling link -> $bundle_link"
-		fi
+		debug_msg "dangling link -> $bundle_link"
 		if [ "$local_bundle" = true ]; then
 			sudo mkdir -p "$target_path$(dirname "$val")"
 			# if local_bundle is enabled since we cannot copy a bad link create a new one
@@ -2387,6 +2398,7 @@ create_bundle() { # swupd_function
 	done
 
 	# 7) Add the bundle to the MoM (do not use -p option so the MoM's tar is created and signed)
+	debug_msg "Adding bundle to the MoM"
 	if [ "$experimental" = true ]; then
 		add_to_manifest -e "$version_path"/Manifest.MoM "$manifest" "$bundle_name"
 	else
@@ -2394,11 +2406,13 @@ create_bundle() { # swupd_function
 	fi
 
 	# 8) Create/renew manifest tars
+	debug_msg "Creating the manifest tar"
 	sudo rm -f "$manifest".tar
 	create_tar "$manifest"
 
 	# 9) Create the subscription to the bundle if the local_bundle flag is enabled
 	if [ "$local_bundle" = true ]; then
+		debug_msg "Creating tracking file for bundle so it show as installed"
 		sudo touch "$target_path"/usr/share/clear/bundles/"$bundle_name"
 	fi
 
@@ -2407,6 +2421,8 @@ create_bundle() { # swupd_function
 		sudo mkdir -p "$state_path"/bundles
 		sudo touch "$state_path"/bundles/"$bundle_name"
 	fi
+
+	debug_msg "Bundle \"$bundle_name\" created successfully"
 
 }
 

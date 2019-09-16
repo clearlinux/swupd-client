@@ -7,7 +7,7 @@ TEST_NAME=${TEST_FILENAME%.bats}
 THEME_DIRNAME="$BATS_TEST_DIRNAME"
 
 export TEST_NAME
-export TEST_NAME_SHORT
+export TEST_NAME_SHORT="$TEST_NAME"
 export THEME_DIRNAME
 export FUNC_DIR
 export SWUPD_DIR="$FUNC_DIR/../.."
@@ -1659,7 +1659,7 @@ destroy_test_environment() { # swupd_function
 	local env_name=$1
 	validate_param "$env_name"
 	debug_msg "Destroying environment $env_name"
-	debug_msg "The KEEP_ENV environment variable is se to $KEEP_ENV"
+	debug_msg "The KEEP_ENV environment variable is set to $KEEP_ENV"
 	if [ "$force" = true ]; then
 		debug_msg "The --force option was used"
 	fi
@@ -3219,55 +3219,66 @@ list_tests() { # swupd_function
 # tests since all tests require at least the creation of a  test environment
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-global_setup_used=true
-global_env=false
-
 setup() {
 
-	print "\\n$sep"
+	print "\\n\\n\\n$sep"
 	print "$alt_sep"
-	print "$sep"
-	# a global environment will always use number 1, so check for that
-	# environment first
-	TEST_NAME_SHORT="$TEST_NAME"
-	if [ -d "$TEST_NAME"_1 ]; then
-		# if a global environment is found we want to continue using that
-		# as our test environment for the rest of the tests, if not continue
-		# numbering the envs according to the test number
-		if [ -e "$TEST_NAME"_1/.global_env ]; then
-			TEST_NAME="$TEST_NAME"_1
-			global_env=true
-		else
-			TEST_NAME="$TEST_NAME"_"$BATS_TEST_NUMBER"
+	print "$sep\\n"
+
+	debug_msg "Test file: $TEST_NAME.bats"
+	debug_msg "BATS test number: $BATS_TEST_NUMBER"
+
+	# run the global_setup only once
+	if [ "$BATS_TEST_NAME" = "${BATS_TEST_NAMES[0]}" ]; then
+
+		# if a global environment exists at this point it means
+		# it was a leftover from a previous execution, remove it
+		if [ -d "$TEST_NAME" ]; then
+			print "\\nAn old test environment was found for this test: $TEST_NAME"
+			print "Deleting it..."
+			destroy_test_environment --force "$TEST_NAME"
 		fi
-	else
-		TEST_NAME="$TEST_NAME"_"$BATS_TEST_NUMBER"
-	fi
-	# if a test environment already exists for the current test,
-	# remove it regardless of the value of DEBUG_TEST, this is
-	# important to avoid corrupt test data
-	if [[ ( -d "$TEST_NAME" && "$global_env" = false )  ||
-	( -d "$TEST_NAME" && "$global_env" = true && "$BATS_TEST_NUMBER" -eq 1 ) ]]; then
-		print "\\nAn old test environment was found for this test: $TEST_NAME"
-		print "Deleting it..."
-		DEBUG_TEST=false destroy_test_environment "$TEST_NAME"
-	fi
-	# only the first time setup runs, run the global_setup
-	if [ "$BATS_TEST_NUMBER" -eq 1 ]; then
+
+		debug_msg "\\nRunning global setup..."
 		global_setup
-		# if the test environment was created in the global_setup, set the
-		# swupd environment variables accordingly
-		if [ "$global_setup_used" = true ] && [ -d "$TEST_NAME" ]; then
+		debug_msg "Global setup finished\\n"
+
+		# check if we created a test environment in the global_setup
+		if [ -d "$TEST_NAME" ]; then
 			sudo touch "$TEST_NAME"/.global_env
-			print "Global test environment created $TEST_NAME"
+			print "Global test environment created: $TEST_NAME"
+		fi
+
+	fi
+
+	if [ -e "$TEST_NAME"/.global_env ]; then
+		debug_msg "\\nSetting environment variables for the current test..."
+		set_env_variables "$TEST_NAME"
+	else
+		# individual environments will be used for each test,
+		# we need to name the env differently for each test
+		if ! [[ $BATS_TEST_DESCRIPTION =~ ^[a-zA-Z]{3}[0-9]{3}":"* ]]; then
+			terminate "Bad test, missing test ID: \"$BATS_TEST_DESCRIPTION\""
+		fi
+		TEST_NAME="$TEST_NAME"_"${BATS_TEST_DESCRIPTION%:*}"
+
+		# if a local environment exists at this point it is a
+		# leftover from a previous execution, remove it
+		if [ -d "$TEST_NAME" ]; then
+			debug_msg "\\nAn old test environment was found for this test: $TEST_NAME"
+			debug_msg "Deleting it..."
+			destroy_test_environment --force "$TEST_NAME"
 		fi
 	fi
-	# if the environment was created in the global_setup, set
-	# environment variables again so they are available for every test
-	if [ -d "$TEST_NAME" ]; then
-		set_env_variables "$TEST_NAME"
-	fi
+
+	debug_msg "\\nTEST_NAME: $TEST_NAME"
+	debug_msg "Test path: $(pwd)/$TEST_NAME"
+
+	# now run the test setup
+	debug_msg "\\nRunning test_setup..."
 	test_setup
+	debug_msg "Finished running test_setup\\n"
+
 	print "Test setup complete. Starting test execution..."
 
 }

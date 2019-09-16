@@ -214,6 +214,37 @@ print() { # swupd_function
 
 }
 
+# sometimes it is useful to have extra information to debug
+# a test but you don't want to print all this extra info normally,
+# all messages printed with debug_msg will only be shown when the
+# user sets the environment variable DEBUG_TEST=true
+debug_msg() { #swupd_function
+
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Prints a debug message from a test, the message will be displayed only
+			when running the test using the bats -t flag and when the env variable
+			DEBUG_TEST is set to true.
+
+			Usage:
+			    debug_msg <msg>
+			EOM
+		return
+	fi
+
+	local msg=$1
+	if [ "$DEBUG_TEST" = true ]; then
+		if [[ $msg == '\n'* ]]; then
+			print ""
+		fi
+		print "(${FUNCNAME[1]}:${BASH_LINENO[0]}) DEBUG: ${msg/'\n'}"
+		if [[ $msg == *'\n' ]]; then
+			print ""
+		fi
+	fi
+
+}
+
 terminate() {
 
 	# since the library could be sourced and run from an interactive shell
@@ -427,11 +458,17 @@ set_env_variables() { # swupd_function
 	path=$(dirname "$(realpath "$env_name")")
 	testfs_path="$path"/"$env_name"/testfs
 
+	debug_msg "Exporting environment variables for $env_name"
 	export TEST_DIRNAME="$path"/"$env_name"
+	debug_msg "TEST_DIRNAME: $TEST_DIRNAME"
 	export WEBDIR="$env_name"/web-dir
+	debug_msg "WEBDIR: $WEBDIR"
 	export TARGETDIR="$env_name"/testfs/target-dir
+	debug_msg "TARGETDIR: $TARGETDIR"
 	export STATEDIR="$env_name"/testfs/state
+	debug_msg "STATEDIR: $STATEDIR"
 	export PATH_PREFIX="$TEST_DIRNAME"/testfs/target-dir
+	debug_msg "PATH_PREFIX: $PATH_PREFIX"
 
 	# different options for swupd
 	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $TEST_ROOT_DIR/Swupd_Root.pem -I"
@@ -3237,21 +3274,22 @@ teardown() {
 
 global_setup() {
 
-	# no global_setup was used by the user
-	global_setup_used=false
+	# if global_setup is not defined it will default to this one
+	debug_msg "No global setup was defined"
 
 }
 
 global_teardown() {
 
-	# dummy value in case function is not defined
-	return
+	# if global_teardown is not defined it will default to this one
+	debug_msg "No global teardown was defined"
 
 }
 
 # Default test_setup
 test_setup() {
 
+	debug_msg "No test_setup was defined, using the default one..."
 	create_test_environment "$TEST_NAME"
 
 }
@@ -3259,6 +3297,7 @@ test_setup() {
 # Default test_teardown
 test_teardown() {
 
+	debug_msg "No test_teardown was defined, using the default one..."
 	destroy_test_environment "$TEST_NAME"
 
 }
@@ -3310,6 +3349,7 @@ use_ignore_list() {
 		elif [ -f "$FUNC_DIR"/ignore-list ]; then
 			ignore_list="$FUNC_DIR"/ignore-list
 		fi
+		debug_msg "Filtering output using ignore file $ignore_list"
 		while IFS= read -r line; do
 			# if the pattern from the file has a "/" escape it first so it does
 			# not confuses the sed command
@@ -3317,6 +3357,7 @@ use_ignore_list() {
 			filtered_output=$(echo "$filtered_output" | sed -E "/^$line$/d")
 		done < "$ignore_list"
 	else
+		debug_msg "The use of ignore lists is disabled"
 		filtered_output="$output"
 	fi
 	echo "$filtered_output"

@@ -3,7 +3,7 @@
 load "real_content_lib"
 
 # Test update in delta pack range
-@test "RC001: Incremental Updates" {
+@test "RCT001: Incremental Updates" {
 	# shellcheck disable=SC2153
 	print "Install minimal system with oldest version (${VERSION[0]})"
 

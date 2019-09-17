@@ -37,12 +37,12 @@ swupd_SOURCES = \
 	src/autoupdate.c \
 	src/binary_loader.c \
 	src/bundle.c \
+	src/bundle_add.c \
 	src/bundle_info.c \
+	src/bundle_list.c \
+	src/bundle_remove.c \
 	src/check_update.c \
 	src/clean.c \
-	src/clr_bundle_add.c \
-	src/clr_bundle_ls.c \
-	src/clr_bundle_rm.c \
 	src/config_loader.c \
 	src/config_loader.h \
 	src/curl.c \
@@ -92,7 +92,7 @@ swupd_SOURCES = \
 	src/repair.c \
 	src/scripts.c \
 	src/scripts.h \
-	src/search-file.c \
+	src/search_file.c \
 	src/signature.c \
 	src/signature.h \
 	src/staging.c \

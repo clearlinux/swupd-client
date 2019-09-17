@@ -240,6 +240,23 @@ static enum swupd_code check_versions(int *current_version, int *server_version,
 	return SWUPD_OK;
 }
 
+/* Make a copy of the Manifest for the completion code */
+static void save_manifest(int version)
+{
+	char *momdir, *momfile, *original;
+
+	string_or_die(&momdir, "%s/var/tmp/swupd", globals.path_prefix);
+	string_or_die(&momfile, "%s/Manifest.MoM", momdir);
+	string_or_die(&original, "%s/%i/Manifest.MoM", globals.state_dir, version);
+	swupd_rm(momfile);
+	mkdir_p(momdir);
+
+	copy(original, momfile);
+	free_string(&momdir);
+	free_string(&momfile);
+	free_string(&original);
+}
+
 static enum swupd_code main_update()
 {
 	int current_version = -1, server_version = -1;
@@ -364,9 +381,9 @@ version_check:
 
 	/* get the from/to MoM manifests */
 	if (system_on_mix()) {
-		current_manifest = load_mom(current_version, false, mix_exists, &manifest_err);
+		current_manifest = load_mom(current_version, mix_exists, &manifest_err);
 	} else {
-		current_manifest = load_mom(current_version, false, false, &manifest_err);
+		current_manifest = load_mom(current_version, false, &manifest_err);
 	}
 	if (!current_manifest) {
 		/* TODO: possibly remove this as not getting a "from" manifest is not fatal
@@ -375,11 +392,12 @@ version_check:
 		goto clean_exit;
 	}
 
-	server_manifest = load_mom(server_version, true, mix_exists, &manifest_err);
+	server_manifest = load_mom(server_version, mix_exists, &manifest_err);
 	if (!server_manifest) {
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto clean_exit;
 	}
+	save_manifest(server_version);
 	timelist_timer_stop(globals.global_times); // closing: Load MoM manifests
 
 	timelist_timer_start(globals.global_times, "Recurse and consolidate bundle manifests");

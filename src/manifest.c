@@ -400,7 +400,7 @@ out:
  * loaded into memory, this function will return NULL. If err is passed, it is set
  * with the error code.
  */
-struct manifest *load_mom(int version, bool latest, bool mix_exists, int *err)
+struct manifest *load_mom(int version, bool mix_exists, int *err)
 {
 	struct manifest *manifest = NULL;
 	int ret = 0;
@@ -465,20 +465,6 @@ retry_load:
 		}
 	}
 
-	/* Make a copy of the Manifest for the completion code */
-	if (latest) {
-		char *momdir;
-		char *momfile;
-
-		string_or_die(&momdir, "%s/var/tmp/swupd", globals.path_prefix);
-		string_or_die(&momfile, "%s/Manifest.MoM", momdir);
-		swupd_rm(momfile);
-		mkdir_p(momdir);
-
-		copy(filename, momfile);
-		free_string(&momdir);
-		free_string(&momfile);
-	}
 	free_string(&filename);
 	free_string(&url);
 	return manifest;

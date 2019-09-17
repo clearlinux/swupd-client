@@ -316,6 +316,7 @@ extern void prettify_size(long size_in_bytes, char **pretty_size);
 struct list *free_list_file(struct list *item);
 struct list *free_bundle(struct list *item);
 extern void create_and_append_subscription(struct list **subs, const char *component);
+extern char *get_tracking_dir(void);
 
 /* bundle.c */
 extern bool is_installed_bundle(const char *bundle_name);
@@ -323,7 +324,6 @@ extern enum swupd_code remove_bundles(struct list *bundles);
 extern enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server);
 extern enum swupd_code show_included_bundles(char *bundle_name);
 extern enum swupd_code list_installable_bundles();
-extern enum swupd_code install_bundles_frontend(char **bundles);
 extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
 enum swupd_code list_local_bundles();
 extern int link_or_rename(const char *orig, const char *dest);

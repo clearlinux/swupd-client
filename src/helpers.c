@@ -1114,3 +1114,7 @@ void prettify_size(long size_in_bytes, char **pretty_size)
 	size = size / 1000;
 	string_or_die(pretty_size, "%.2lf GB", size);
 }
+char *get_tracking_dir(void)
+{
+	return mk_full_filename(globals.state_dir, "bundles");
+}

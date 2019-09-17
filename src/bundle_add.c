@@ -203,7 +203,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 			track_installed(bundle);
 		}
 		/* warn the user if the bundle to be installed is experimental */
-		file = search_bundle_in_manifest(mom, bundle);
+		file = mom_search_bundle(mom, bundle);
 		if (file && file->is_experimental) {
 			warn("Bundle %s is experimental\n", bundle);
 		}
@@ -507,7 +507,7 @@ out:
 		list_free_list(to_install_files);
 	}
 	if (to_install_bundles) {
-		list_free_list_and_data(to_install_bundles, free_manifest_data);
+		list_free_list_and_data(to_install_bundles, manifest_free_data);
 	}
 	/* if one or more of the requested bundles was invalid, and
 	 * there is no other error return SWUPD_INVALID_BUNDLE */
@@ -577,7 +577,7 @@ enum swupd_code install_bundles_frontend(char **bundles)
 
 	timelist_print_stats(globals.global_times);
 
-	free_manifest(mom);
+	manifest_free(mom);
 clean_and_exit:
 	bundles_list_str = string_join(", ", bundles_list);
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,

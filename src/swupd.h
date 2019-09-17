@@ -270,7 +270,9 @@ extern bool verify_file_lazy(char *filename);
 extern int verify_bundle_hash(struct manifest *manifest, struct file *bundle);
 extern int rm_staging_dir_contents(const char *rel_path);
 void free_file_data(void *data);
-extern struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bundlename);
+void remove_files_in_manifest_from_fs(struct manifest *m);
+void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2);
+extern struct file *mom_search_bundle(struct manifest *mom, const char *bundlename);
 extern struct file *search_file_in_manifest(struct manifest *manifest, const char *filename);
 
 extern char *mk_full_filename(const char *prefix, const char *path);
@@ -361,7 +363,7 @@ extern void telemetry(telem_prio_t level, const char *class, const char *fmt, ..
 
 extern struct file **manifest_files_to_array(struct manifest *manifest);
 extern int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize, int size);
-extern void free_manifest_array(struct file **array);
+extern void manifest_free_array(struct file **array);
 
 extern bool system_on_mix(void);
 extern bool check_mix_exists(void);

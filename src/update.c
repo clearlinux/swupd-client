@@ -94,10 +94,10 @@ static int check_manifests_uniqueness(int clrver, int mixver)
 	ret = enforce_compliant_manifest(mixerfull, clearfull, mixer->filecount, clear->filecount);
 
 error:
-	free_manifest_array(clearfull);
-	free_manifest_array(mixerfull);
-	free_manifest(clear);
-	free_manifest(mixer);
+	manifest_free_array(clearfull);
+	manifest_free_array(mixerfull);
+	manifest_free(clear);
+	manifest_free(mixer);
 
 	return ret;
 }
@@ -537,8 +537,8 @@ version_check:
 
 clean_exit:
 	list_free_list(updates);
-	free_manifest(current_manifest);
-	free_manifest(server_manifest);
+	manifest_free(current_manifest);
+	manifest_free(server_manifest);
 
 clean_curl:
 	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_stop);

@@ -45,14 +45,14 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 /**
  * @brief Free manifest pointed by @c data.
  *
- * Just a wrapper on free_manifest() to help with casting.
+ * Just a wrapper on manifest_free() to help with casting.
  */
-void free_manifest_data(void *data);
+void manifest_free_data(void *data);
 
 /**
  * @brief Free manifest pointed by 'manifest'
  */
-void free_manifest(struct manifest *manifest);
+void manifest_free(struct manifest *manifest);
 
 #ifdef __cplusplus
 }

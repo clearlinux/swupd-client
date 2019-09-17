@@ -66,7 +66,7 @@ static void test_manifest_parse()
 	check(manifest->version == 30);
 	check(manifest->filecount == 123);
 	check(manifest->contentsize == 789);
-	free_manifest(manifest);
+	manifest_free(manifest);
 
 	
 	// Manifest parser should fail on incorrect file list
@@ -96,7 +96,7 @@ static void test_manifest_parse()
 	validate_file(manifest->files, "f13", 30, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
 	validate_file(manifest->files, "f14", 30, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-	free_manifest(manifest);
+	manifest_free(manifest);
 
 	// Missing MANIFEST keyword on header
 	manifest = manifest_parse_test("test", dir, "data/mom_invalid1", false);

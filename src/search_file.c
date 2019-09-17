@@ -339,7 +339,7 @@ static int search_in_manifest(struct manifest *mom, struct file *manifest_file, 
 	}
 
 	list_free_list(files);
-	free_manifest(m);
+	manifest_free(m);
 
 	return count;
 }
@@ -455,7 +455,7 @@ enum swupd_code download_all_manifests(struct manifest *mom, struct list **manif
 		if (manifest_list) {
 			*manifest_list = list_prepend_data(*manifest_list, manifest);
 		} else {
-			free_manifest(manifest);
+			manifest_free(manifest);
 		}
 		progress_report(complete, total);
 	}
@@ -651,9 +651,9 @@ enum swupd_code search_file_main(int argc, char **argv)
 	}
 
 clean_exit:
-	free_manifest(mom);
+	manifest_free(mom);
 	list_free_list_and_data(bundle_size_cache, bundle_size_free);
-	list_free_list_and_data(manifest_header_cache, free_manifest_data);
+	list_free_list_and_data(manifest_header_cache, manifest_free_data);
 
 	swupd_deinit();
 

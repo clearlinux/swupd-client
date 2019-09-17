@@ -984,7 +984,7 @@ enum swupd_code verify_main(void)
 		for (iter = list_head(cmdline_option_bundles); iter; iter = iter->next) {
 			/* let's validate the bundle names provided by the user first */
 			struct file *file;
-			file = search_bundle_in_manifest(official_manifest, iter->data);
+			file = mom_search_bundle(official_manifest, iter->data);
 			if (!file) {
 				/* bundle is invalid or no longer available, nothing to do with
 				 * this one for now */
@@ -1101,7 +1101,7 @@ enum swupd_code verify_main(void)
 		/* at this point we no longer need the data regarding bundles
 		 * not specified by the user with the --bundles flag, we can free it */
 		list_free_list(all_files);
-		list_free_list_and_data(all_submanifests, free_manifest_data);
+		list_free_list_and_data(all_submanifests, manifest_free_data);
 	}
 	progress_complete_step();
 	timelist_timer_stop(globals.global_times);
@@ -1265,7 +1265,7 @@ clean_and_exit:
 	/* if the --bundles flag was used the official_manifest contains
 	 * bundles_files and bundles_submanifests, so they will be freed
 	 * along with the official_manifest */
-	free_manifest(official_manifest);
+	manifest_free(official_manifest);
 
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
 		  "verify",

@@ -312,7 +312,7 @@ enum swupd_code bundle_info(char *bundle)
 	}
 
 	/* validate the bundle provided and get its manifest */
-	file = search_bundle_in_manifest(mom, bundle);
+	file = mom_search_bundle(mom, bundle);
 	if (!file) {
 		error("Bundle \"%s\" is invalid\n", bundle);
 		ret = SWUPD_INVALID_BUNDLE;
@@ -336,7 +336,7 @@ enum swupd_code bundle_info(char *bundle)
 		}
 
 		/* get the latest version of the bundle manifest */
-		file = search_bundle_in_manifest(latest_mom, bundle);
+		file = mom_search_bundle(latest_mom, bundle);
 		if (file) {
 			latest_manifest = load_manifest(file->last_change, file, latest_mom, false, NULL);
 			if (!latest_manifest) {
@@ -426,10 +426,10 @@ enum swupd_code bundle_info(char *bundle)
 
 clean:
 	free_subscriptions(&subs);
-	free_manifest(latest_manifest);
-	free_manifest(latest_mom);
-	free_manifest(manifest);
-	free_manifest(mom);
+	manifest_free(latest_manifest);
+	manifest_free(latest_mom);
+	manifest_free(manifest);
+	manifest_free(mom);
 
 	return ret;
 }

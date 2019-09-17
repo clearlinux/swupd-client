@@ -111,7 +111,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 
 	if (manifest->version != version) {
 		error("Loaded incompatible manifest header version for %s: %d != %d\n", component, manifest->version, version);
-		free_manifest(manifest);
+		manifest_free(manifest);
 
 		return NULL;
 	}
@@ -448,7 +448,7 @@ retry_load:
 			if (retried == false && !mix_exists) {
 				free_string(&filename);
 				free_string(&url);
-				free_manifest(manifest);
+				manifest_free(manifest);
 				remove_manifest_files("MoM", version, NULL);
 				retried = true;
 				goto retry_load;
@@ -456,7 +456,7 @@ retry_load:
 			error("FAILED TO VERIFY SIGNATURE OF Manifest.MoM version %d!!!\n", version);
 			free_string(&filename);
 			free_string(&url);
-			free_manifest(manifest);
+			manifest_free(manifest);
 			if (err) {
 				*err = SWUPD_SIGNATURE_VERIFICATION_FAILED;
 			}
@@ -776,7 +776,7 @@ struct list *recurse_manifest(struct manifest *manifest, struct list *subs, cons
 
 		sub = load_manifest(file->last_change, file, manifest, false, err);
 		if (!sub) {
-			list_free_list_and_data(bundles, free_manifest_data);
+			list_free_list_and_data(bundles, manifest_free_data);
 			return NULL;
 		}
 		if (sub != NULL) {
@@ -1128,21 +1128,14 @@ void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2)
 	bmanifest->files = preserver;
 }
 
-struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bundlename)
+int file_bundlename_strcmp(const void *a, const void *b)
 {
-	struct list *iter = NULL;
-	struct file *file;
+	return strcmp(((struct file *)a)->filename, (const char *)b);
+}
 
-	iter = list_head(manifest->manifests);
-	while (iter) {
-		file = iter->data;
-		iter = iter->next;
-		if (strcmp(file->filename, bundlename) == 0) {
-			return file;
-		}
-	}
-
-	return NULL;
+struct file *mom_search_bundle(struct manifest *mom, const char *bundlename)
+{
+	return list_search(mom->manifests, bundlename, file_bundlename_strcmp);
 }
 
 /* This performs a linear search through the files list. */
@@ -1191,7 +1184,7 @@ struct file **manifest_files_to_array(struct manifest *manifest)
 	return array;
 }
 
-void free_manifest_array(struct file **array)
+void manifest_free_array(struct file **array)
 {
 	free(array);
 }

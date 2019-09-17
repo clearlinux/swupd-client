@@ -266,19 +266,19 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 	return manifest;
 
 err_close:
-	free_manifest(manifest);
+	manifest_free(manifest);
 	fclose(infile);
 	return NULL;
 }
 
-void free_manifest_data(void *data)
+void manifest_free_data(void *data)
 {
 	struct manifest *manifest = (struct manifest *)data;
 
-	free_manifest(manifest);
+	manifest_free(manifest);
 }
 
-void free_manifest(struct manifest *manifest)
+void manifest_free(struct manifest *manifest)
 {
 	if (!manifest) {
 		return;
@@ -289,7 +289,7 @@ void free_manifest(struct manifest *manifest)
 	}
 	if (manifest->submanifests) {
 		list_free_list(manifest->files);
-		list_free_list_and_data(manifest->submanifests, free_manifest_data);
+		list_free_list_and_data(manifest->submanifests, manifest_free_data);
 	} else {
 		list_free_list_and_data(manifest->files, free_file_data);
 	}

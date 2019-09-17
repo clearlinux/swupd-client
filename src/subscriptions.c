@@ -149,13 +149,13 @@ void set_subscription_versions(struct manifest *latest, struct manifest *current
 		sub = list->data;
 		list = list->next;
 
-		file = search_bundle_in_manifest(latest, sub->component);
+		file = mom_search_bundle(latest, sub->component);
 		if (file) {
 			sub->version = file->last_change;
 		}
 
 		if (current) {
-			file = search_bundle_in_manifest(current, sub->component);
+			file = mom_search_bundle(current, sub->component);
 			if (file) {
 				sub->oldversion = file->last_change;
 			}
@@ -196,7 +196,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 		bundle = iter->data;
 		iter = iter->next;
 
-		file = search_bundle_in_manifest(mom, bundle);
+		file = mom_search_bundle(mom, bundle);
 		if (!file) {
 			warn("Bundle \"%s\" is invalid, skipping it...\n", bundle);
 			ret |= add_sub_BADNAME; /* Use this to get non-zero exit code */
@@ -224,7 +224,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 		 */
 		if (component_subscribed(*subs, bundle)) {
 			if (recursion > 0) {
-				free_manifest(manifest);
+				manifest_free(manifest);
 				continue;
 			}
 		} else {
@@ -243,7 +243,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 			ret |= add_subscriptions(manifest->optional, subs, mom, find_all, recursion + 1);
 		}
 
-		free_manifest(manifest);
+		manifest_free(manifest);
 	}
 out:
 	return ret;

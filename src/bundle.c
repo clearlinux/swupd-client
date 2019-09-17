@@ -80,7 +80,7 @@ enum swupd_code list_installable_bundles()
 		free_string(&name);
 	}
 
-	free_manifest(MoM);
+	manifest_free(MoM);
 	return 0;
 }
 
@@ -304,11 +304,11 @@ enum swupd_code show_included_bundles(char *bundle_name)
 
 out:
 	if (mom) {
-		free_manifest(mom);
+		manifest_free(mom);
 	}
 
 	if (deps) {
-		list_free_list_and_data(deps, free_manifest_data);
+		list_free_list_and_data(deps, manifest_free_data);
 	}
 
 	if (subs) {
@@ -348,8 +348,8 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 		goto out;
 	}
 
-	if (!search_bundle_in_manifest(current_manifest, bundle_name)) {
-		error("Bundle \"%s\" is invalid, aborting dependency list\n", bundle_name);
+	if (!mom_search_bundle(current_manifest, bundle_name)) {
+		error("Bundle name %s is invalid, aborting dependency list\n", bundle_name);
 		ret = SWUPD_INVALID_BUNDLE;
 		goto out;
 	}
@@ -391,7 +391,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 
 out:
 	if (current_manifest) {
-		free_manifest(current_manifest);
+		manifest_free(current_manifest);
 	}
 
 	if (ret) {
@@ -535,7 +535,7 @@ enum swupd_code remove_bundles(struct list *bundles)
 			continue;
 		}
 
-		if (!search_bundle_in_manifest(current_mom, bundle)) {
+		if (!mom_search_bundle(current_mom, bundle)) {
 			warn("\nBundle \"%s\" is invalid, skipping it...\n", bundle);
 			ret_code = SWUPD_INVALID_BUNDLE;
 			bad++;
@@ -622,15 +622,15 @@ enum swupd_code remove_bundles(struct list *bundles)
 	}
 
 	list_free_list(files_to_remove);
-	list_free_list_and_data(bundles_to_remove, free_manifest_data);
-	free_manifest(current_mom);
+	list_free_list_and_data(bundles_to_remove, manifest_free_data);
+	manifest_free(current_mom);
 	free_subscriptions(&subs);
 	swupd_deinit();
 
 	return ret_code;
 
 out_subs:
-	free_manifest(current_mom);
+	manifest_free(current_mom);
 	free_subscriptions(&subs);
 out_deinit:
 	bundles_list_str = string_join(", ", bundles);
@@ -693,7 +693,7 @@ skip_mom:
 
 	while (item) {
 		if (MoM) {
-			bundle_manifest = search_bundle_in_manifest(MoM, basename((char *)item->data));
+			bundle_manifest = mom_search_bundle(MoM, basename((char *)item->data));
 		}
 		if (bundle_manifest) {
 			name = get_printable_bundle_name(bundle_manifest->filename, bundle_manifest->is_experimental);
@@ -709,7 +709,7 @@ skip_mom:
 	list_free_list(bundles);
 
 	free_string(&path);
-	free_manifest(MoM);
+	manifest_free(MoM);
 
 	return SWUPD_OK;
 }

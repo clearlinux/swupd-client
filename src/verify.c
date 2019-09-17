@@ -903,9 +903,9 @@ enum swupd_code verify_main(void)
 	 * disable checks for mixer state so the user can easily switch back to their
 	 * normal update stream */
 	if (version != sys_version) {
-		official_manifest = load_mom(version, false, false, NULL);
+		official_manifest = load_mom(version, false, NULL);
 	} else {
-		official_manifest = load_mom(version, false, system_on_mix(), NULL);
+		official_manifest = load_mom(version, system_on_mix(), NULL);
 	}
 
 	if (!official_manifest) {

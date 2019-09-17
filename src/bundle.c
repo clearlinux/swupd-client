@@ -59,7 +59,7 @@ enum swupd_code list_installable_bundles()
 	}
 
 	mix_exists = (check_mix_exists() & system_on_mix());
-	MoM = load_mom(current_version, false, mix_exists, NULL);
+	MoM = load_mom(current_version, mix_exists, NULL);
 	if (!MoM) {
 		return SWUPD_COULDNT_LOAD_MOM;
 	}
@@ -92,7 +92,7 @@ static int load_bundle_manifest(const char *bundle_name, struct list *subs, int 
 
 	*submanifest = NULL;
 
-	mom = load_mom(version, false, false, NULL);
+	mom = load_mom(version, false, NULL);
 	if (!mom) {
 		return SWUPD_COULDNT_LOAD_MOM;
 	}
@@ -208,7 +208,7 @@ enum swupd_code show_included_bundles(char *bundle_name)
 		goto out;
 	}
 
-	mom = load_mom(current_version, false, false, NULL);
+	mom = load_mom(current_version, false, NULL);
 	if (!mom) {
 		error("Cannot load official manifest MoM for version %i\n", current_version);
 		ret = SWUPD_COULDNT_LOAD_MOM;
@@ -308,7 +308,7 @@ enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 		goto out;
 	}
 
-	current_manifest = load_mom(version, server, false, NULL);
+	current_manifest = load_mom(version, false, NULL);
 	if (!current_manifest) {
 		error("Unable to download/verify %d Manifest.MoM\n", version);
 		ret = SWUPD_COULDNT_LOAD_MOM;
@@ -564,7 +564,7 @@ enum swupd_code remove_bundles(char **bundles)
 			info("Removing bundle: %s\n", bundle);
 		}
 
-		current_mom = load_mom(current_version, false, mix_exists, NULL);
+		current_mom = load_mom(current_version, mix_exists, NULL);
 		if (!current_mom) {
 			error("Unable to download/verify %d Manifest.MoM\n", current_version);
 			ret = SWUPD_COULDNT_LOAD_MOM;
@@ -1130,7 +1130,7 @@ enum swupd_code install_bundles_frontend(char **bundles)
 
 	mix_exists = (check_mix_exists() & system_on_mix());
 
-	mom = load_mom(current_version, false, mix_exists, NULL);
+	mom = load_mom(current_version, mix_exists, NULL);
 	if (!mom) {
 		error("Cannot load official manifest MoM for version %i\n", current_version);
 		ret = SWUPD_COULDNT_LOAD_MOM;
@@ -1203,7 +1203,7 @@ enum swupd_code list_local_bundles()
 	}
 
 	mix_exists = (check_mix_exists() & system_on_mix());
-	MoM = load_mom(current_version, false, mix_exists, NULL);
+	MoM = load_mom(current_version, mix_exists, NULL);
 	if (!MoM) {
 		warn("Could not determine which installed bundles are experimental\n");
 	}

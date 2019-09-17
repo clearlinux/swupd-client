@@ -176,3 +176,75 @@ void create_and_append_subscription(struct list **subs, const char *component)
 	sub->oldversion = 0;
 	*subs = list_prepend_data(*subs, sub);
 }
+
+/* bitmapped return
+   1 error happened
+   2 new subscriptions
+   4 bad name given
+*/
+int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion)
+{
+	char *bundle;
+	int manifest_err;
+	int ret = 0;
+	struct file *file;
+	struct list *iter;
+	struct manifest *manifest;
+
+	iter = list_head(bundles);
+	while (iter) {
+		bundle = iter->data;
+		iter = iter->next;
+
+		file = search_bundle_in_manifest(mom, bundle);
+		if (!file) {
+			warn("Bundle \"%s\" is invalid, skipping it...\n", bundle);
+			ret |= add_sub_BADNAME; /* Use this to get non-zero exit code */
+			continue;
+		}
+
+		if (!find_all && is_installed_bundle(bundle)) {
+			continue;
+		}
+
+		manifest = load_manifest(file->last_change, file, mom, true, &manifest_err);
+		if (!manifest) {
+			error("Unable to download manifest %s version %d, exiting now\n", bundle, file->last_change);
+			ret |= add_sub_ERR;
+			goto out;
+		}
+
+		/*
+		 * If we're recursing a tree of includes, we need to cut out early
+		 * if the bundle we're looking at is already subscribed...
+		 * Because if it is, we'll visit it soon anyway at the top level.
+		 *
+		 * We can't do this for the toplevel of the recursion because
+		 * that is how we initiallly fill in the include tree.
+		 */
+		if (component_subscribed(*subs, bundle)) {
+			if (recursion > 0) {
+				free_manifest(manifest);
+				continue;
+			}
+		} else {
+			// Just add it to a list if it doesn't exist
+			create_and_append_subscription(subs, bundle);
+			ret |= add_sub_NEW; /* We have added at least one */
+		}
+
+		if (manifest->includes) {
+			/* merge in recursive call results */
+			ret |= add_subscriptions(manifest->includes, subs, mom, find_all, recursion + 1);
+		}
+
+		if (!globals.skip_optional_bundles && manifest->optional) {
+			/* merge in recursive call results */
+			ret |= add_subscriptions(manifest->optional, subs, mom, find_all, recursion + 1);
+		}
+
+		free_manifest(manifest);
+	}
+out:
+	return ret;
+}

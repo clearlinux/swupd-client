@@ -175,7 +175,6 @@ extern int file_sort_hash(const void *a, const void *b);
 extern struct manifest *load_mom(int version, bool mix_exists, int *err);
 extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err);
 extern struct manifest *load_manifest_full(int version, bool mix);
-extern struct list *create_update_list(struct manifest *server);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
 extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2, bool server);
 
@@ -240,7 +239,7 @@ extern void apply_deltas(struct manifest *current_manifest);
 extern int untar_full_download(void *data);
 
 extern enum swupd_code do_staging(struct file *file, struct manifest *manifest);
-extern int rename_all_files_to_final(struct list *updates);
+extern enum swupd_code staging_install_all_files(struct list *files, struct manifest *mom);
 extern int rename_staged_file_to_final(struct file *file);
 
 extern int update_device_latest_version(int version);

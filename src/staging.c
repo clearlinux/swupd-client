@@ -328,7 +328,7 @@ int rename_staged_file_to_final(struct file *file)
 	return ret;
 }
 
-int rename_all_files_to_final(struct list *updates)
+static int rename_all_files_to_final(struct list *updates)
 {
 	int ret, update_errs = 0, update_good = 0, skip = 0;
 	struct list *list;
@@ -360,4 +360,66 @@ int rename_all_files_to_final(struct list *updates)
 	}
 
 	return globals.update_count - update_good - update_errs - (globals.update_skip - skip);
+}
+
+enum swupd_code staging_install_all_files(struct list *files, struct manifest *mom)
+{
+	struct list *iter;
+	struct file *file;
+	int ret = 0;
+
+	/*********** rootfs critical section starts ***************************
+NOTE: the next loop calls do_staging() which can remove files, starting a critical section
+which ends after rename_all_files_to_final() succeeds
+	 */
+
+	/* from here onward we're doing real update work modifying "the disk" */
+
+	/* starting at list_head in the filename alpha-sorted updates list
+	 * means node directories are added before leaf files */
+	info("Staging file content\n");
+	iter = list_head(files);
+	while (iter) {
+		file = iter->data;
+		iter = iter->next;
+
+		if (file->do_not_update || file->is_deleted) {
+			continue;
+		}
+
+		/* for each file: fdatasync to persist changed content over reboot, or maybe a global sync */
+		/* for each file: check hash value; on mismatch delete and queue full download */
+		/* todo: hash check */
+
+		ret = do_staging(file, mom);
+		if (ret != 0) {
+			error("File staging failed: %s\n", file->filename);
+			return ret;
+		}
+	}
+
+	/* check policy, and if policy says, "ask", ask the user at this point */
+	/* check for reboot need - if needed, wait for reboot */
+
+	/* sync */
+	sync();
+
+	/* rename to apply update */
+	info("Applying update\n");
+	ret = rename_all_files_to_final(files);
+	if (ret != 0) {
+		ret = SWUPD_COULDNT_RENAME_FILE;
+		return ret;
+	}
+
+	/* TODO: do we need to optimize directory-permission-only changes (directories
+	 *       are now sent as tar's so permissions are handled correctly, even
+	 *       if less than efficiently)? */
+
+	sync();
+
+	/* NOTE: critical section starts when update_loop() calls do_staging() */
+	/*********** critical section ends *************************************/
+
+	return 0;
 }

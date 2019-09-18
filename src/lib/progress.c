@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "formatter_json.h"
 #include "log.h"
 #include "progress.h"
 

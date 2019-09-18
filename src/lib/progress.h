@@ -6,6 +6,8 @@
  * @brief Swupd progress bar.
  */
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

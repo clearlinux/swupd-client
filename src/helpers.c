@@ -782,6 +782,16 @@ end:
 	return ret;
 }
 
+struct list *consolidate_files_from_bundles(struct list *bundles)
+{
+	/* bundles is a pointer to a list of manifests */
+	struct list *files = NULL;
+
+	files = files_from_bundles(bundles);
+	files = consolidate_files(files);
+	return files;
+}
+
 struct list *files_from_bundles(struct list *bundles)
 {
 	struct list *files = NULL;

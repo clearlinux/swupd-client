@@ -105,8 +105,6 @@ error:
 static int update_loop(struct list *updates, struct manifest *server_manifest)
 {
 	int ret;
-	struct file *file;
-	struct list *iter;
 	struct step step;
 
 	step = progress_get_step();
@@ -121,61 +119,9 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 		return 0;
 	}
 
-	/*********** rootfs critical section starts ***************************
-         NOTE: the next loop calls do_staging() which can remove files, starting a critical section
-	       which ends after rename_all_files_to_final() succeeds
-	 */
-
-	/* from here onward we're doing real update work modifying "the disk" */
-
-	/* starting at list_head in the filename alpha-sorted updates list
-	 * means node directories are added before leaf files */
-	info("Staging file content\n");
-	iter = list_head(updates);
-	while (iter) {
-		file = iter->data;
-		iter = iter->next;
-
-		if (file->do_not_update || file->is_deleted) {
-			continue;
-		}
-
-		/* for each file: fdatasync to persist changed content over reboot, or maybe a global sync */
-		/* for each file: check hash value; on mismatch delete and queue full download */
-		/* todo: hash check */
-
-		ret = do_staging(file, server_manifest);
-		if (ret != 0) {
-			error("File staging failed: %s\n", file->filename);
-			return ret;
-		}
-	}
-
-	/* check policy, and if policy says, "ask", ask the user at this point */
-	/* check for reboot need - if needed, wait for reboot */
-
-	/* sync */
-	sync();
-
-	/* rename to apply update */
 	progress_set_step((step.current) + 1, "update_files");
-	info("Applying update\n");
-	ret = rename_all_files_to_final(updates);
-	if (ret != 0) {
-		ret = SWUPD_COULDNT_RENAME_FILE;
-		return ret;
-	}
 
-	/* TODO: do we need to optimize directory-permission-only changes (directories
-	 *       are now sent as tar's so permissions are handled correctly, even
-	 *       if less than efficiently)? */
-
-	sync();
-
-	/* NOTE: critical section starts when update_loop() calls do_staging() */
-	/*********** critical section ends *************************************/
-
-	return ret;
+	return staging_install_all_files(updates, server_manifest);
 }
 
 int add_included_manifests(struct manifest *mom, struct list **subs)
@@ -253,6 +199,81 @@ static void save_manifest(int version)
 	free_string(&momdir);
 	free_string(&momfile);
 	free_string(&original);
+}
+
+/* Checks to see if the given file is installed under the path_prefix. */
+static bool is_installed_and_verified(struct file *file)
+{
+	/* Not safe to perform the hash check if there was a type change
+	 * involving symlinks. */
+	if (file->is_link != file->peer->is_link) {
+		return false;
+	}
+
+	char *fullname = mk_full_filename(globals.path_prefix, file->filename);
+
+	if (verify_file(file, fullname)) {
+		free_string(&fullname);
+		return true;
+	}
+	free_string(&fullname);
+	return false;
+}
+
+/* Find files which need updated based on differences in last_change.
+   Should let further do_not_update policy be handled in the caller, but for
+   now some hacky exclusions are done here. */
+static struct list *create_update_list(struct manifest *server)
+{
+	struct list *output = NULL;
+	struct list *list;
+
+	globals.update_count = 0;
+	globals.update_skip = 0;
+	list = list_head(server->files);
+	while (list) {
+		struct file *file;
+		file = list->data;
+		list = list->next;
+
+		/* Look for potential short circuit, if something has the same
+		 * flags and the same hash, then conclude they are the same. */
+		if (file->peer &&
+		    file->is_deleted == file->peer->is_deleted &&
+		    file->is_file == file->peer->is_file &&
+		    file->is_dir == file->peer->is_dir &&
+		    file->is_link == file->peer->is_link &&
+		    hash_equal(file->hash, file->peer->hash)) {
+			if (file->last_change == file->peer->last_change) {
+				/* Nothing to do; the file did not change */
+				continue;
+			}
+			/* When file and its peer have matching hashes
+			 * but different versions, this indicates a
+			 * minversion bump was performed server-side.
+			 * Skip updating them if installed with the
+			 * correct hash. */
+			if (is_installed_and_verified(file)) {
+				continue;
+			}
+		}
+
+		/* Note: at this stage, "untracked" files are always "new"
+		 * files, so they will not have a peer. */
+		if (!file->peer ||
+		    (file->peer && file->last_change > file->peer->last_change)) {
+			/* check and if needed mark as do_not_update */
+			(void)ignore(file);
+			/* check if we need to run scripts/update the bootloader/etc */
+			apply_heuristics(file);
+
+			output = list_prepend_data(output, file);
+			continue;
+		}
+	}
+	globals.update_count = list_len(output) - globals.update_skip;
+
+	return output;
 }
 
 static enum swupd_code main_update()

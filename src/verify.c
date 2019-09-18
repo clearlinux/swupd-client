@@ -1084,12 +1084,10 @@ enum swupd_code verify_main(void)
 
 	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
 	progress_set_step(4, "consolidate_files");
-	all_files = files_from_bundles(all_submanifests);
-	all_files = consolidate_files(all_files);
+	all_files = consolidate_files_from_bundles(all_submanifests);
 	official_manifest->files = all_files;
 	if (cmdline_option_bundles) {
-		bundles_files = files_from_bundles(bundles_submanifests);
-		bundles_files = consolidate_files(bundles_files);
+		bundles_files = consolidate_files_from_bundles(bundles_submanifests);
 		/* we need to make sure the files from the selected bundles
 		 * are compared against the full list of consolidated files
 		 * from all bundles so we don't end up deleting a file that

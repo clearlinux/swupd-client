@@ -624,8 +624,7 @@ enum swupd_code remove_bundles(char **bundles)
 			goto out_free_mom;
 		}
 
-		current_mom->files = files_from_bundles(current_mom->submanifests);
-		current_mom->files = consolidate_files(current_mom->files);
+		current_mom->files = consolidate_files_from_bundles(current_mom->submanifests);
 
 		/* Now that we have the consolidated list of all files, load bundle to be removed submanifest */
 		ret = load_bundle_manifest(bundle, subs, current_version, &bundle_manifest);
@@ -842,14 +841,12 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	progress_set_step(2, "consolidate_files");
 
 	/* get all files already installed in the target system */
-	installed_files = files_from_bundles(installed_bundles);
-	installed_files = consolidate_files(installed_files);
+	installed_files = consolidate_files_from_bundles(installed_bundles);
 	mom->files = installed_files;
 	installed_files = filter_out_deleted_files(installed_files);
 
 	/* get all the files included in the bundles to be added */
-	to_install_files = files_from_bundles(to_install_bundles);
-	to_install_files = consolidate_files(to_install_files);
+	to_install_files = consolidate_files_from_bundles(to_install_bundles);
 	to_install_files = filter_out_deleted_files(to_install_files);
 
 	/* from the list of files to be installed, remove those files already in the target system */

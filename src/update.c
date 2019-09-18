@@ -411,8 +411,7 @@ version_check:
 	}
 
 	/* consolidate the current collective manifests down into one in memory */
-	current_manifest->files = files_from_bundles(current_manifest->submanifests);
-	current_manifest->files = consolidate_files(current_manifest->files);
+	current_manifest->files = consolidate_files_from_bundles(current_manifest->submanifests);
 	latest_subs = list_clone(current_subs);
 	set_subscription_versions(server_manifest, current_manifest, &latest_subs);
 	link_submanifests(current_manifest, server_manifest, current_subs, latest_subs, false);
@@ -442,8 +441,7 @@ version_check:
 	}
 
 	/* consolidate the new collective manifests down into one in memory */
-	server_manifest->files = files_from_bundles(server_manifest->submanifests);
-	server_manifest->files = consolidate_files(server_manifest->files);
+	server_manifest->files = consolidate_files_from_bundles(server_manifest->submanifests);
 	set_subscription_versions(server_manifest, current_manifest, &latest_subs);
 	link_submanifests(current_manifest, server_manifest, current_subs, latest_subs, true);
 

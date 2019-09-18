@@ -299,6 +299,7 @@ void update_motd(int new_release);
 void delete_motd(void);
 extern int get_dirfd_path(const char *fullname);
 extern enum swupd_code verify_fix_path(char *targetpath, struct manifest *manifest);
+extern struct list *consolidate_files_from_bundles(struct list *bundles);
 extern struct list *files_from_bundles(struct list *bundles);
 extern bool version_files_consistent(void);
 extern bool string_in_list(char *string_to_check, struct list *list_to_check);

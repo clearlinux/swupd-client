@@ -338,3 +338,46 @@ struct list *list_deduplicate(struct list *list, comparison_fn_t comparison_fn, 
 
 	return list;
 }
+
+struct list *list_filter_common_elements(struct list *list1, struct list *list2, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn)
+{
+	struct list *iter1, *iter2 = NULL;
+	struct list *preserver = NULL;
+	void *item1, *item2 = NULL;
+	int comp;
+
+	preserver = iter1 = list_head(list1);
+	iter2 = list_head(list2);
+
+	while (iter1 && iter2) {
+
+		item1 = iter1->data;
+		item2 = iter2->data;
+
+		/* if the criteria has not been met, there is nothing to be done,
+		 * just move the pointers to the next elements appropriately */
+		comp = comparison_fn(item1, item2);
+		if (comp < 0) {
+			iter1 = iter1->next;
+			continue;
+		} else if (comp > 0) {
+			iter2 = iter2->next;
+			continue;
+		}
+
+		/* the condition was met */
+
+		/* preserver was pointing to the first element of
+		 * the list, if we are removing it, redirect it so it
+		 * points to the new first element of the list */
+		if (preserver == iter1) {
+			preserver = iter1->next;
+		}
+		iter1 = list_free_item(iter1, list_free_data_fn);
+		/* the iter1 pointer was already moved by list_free_item
+		 * so only move iter2 to the next element in the list */
+		iter2 = iter2->next;
+	}
+
+	return preserver;
+}

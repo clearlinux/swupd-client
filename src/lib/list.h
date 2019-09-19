@@ -21,7 +21,11 @@ struct list {
 	struct list *next;
 };
 
-/** @brief Callback to compare two datas in a list. */
+/**
+ * @brief Callback to compare two datas in a list.
+ * The comparison_fn should behave similar to strcmp(), returning 0 if
+ * it is a match, and "< 0" or "> 0" if it is not.
+ */
 typedef int (*comparison_fn_t)(const void *a, const void *b);
 
 /** @brief Callback to free data used in list. */
@@ -125,5 +129,14 @@ int list_strcmp(const void *a, const void *b);
  *
  */
 struct list *list_deduplicate(struct list *list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
+
+/**
+ * @brief Filters any element from list1 that happens to be in list2 as long as it meets the criteria
+ *
+ * Function requirements:
+ * - list1 and list2 are sorted
+ * - the comparison_fn should behave similar to strcmp(), returning 0 if it's a match, and "< 0" or "> 0" if it's not
+ */
+struct list *list_filter_common_elements(struct list *list1, struct list *list2, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
 
 #endif

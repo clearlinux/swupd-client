@@ -770,6 +770,30 @@ static enum swupd_code deal_with_extra_files(struct manifest *manifest, bool fix
 	return ret;
 }
 
+static int find_unsafe_to_delete(const void *a, const void *b)
+{
+	struct file *A, *B;
+	int ret;
+
+	A = (struct file *)a;
+	B = (struct file *)b;
+
+	ret = strcmp(A->filename, B->filename);
+	if (ret) {
+		return ret;
+	}
+
+	if (A->is_deleted && !B->is_deleted) {
+		/* we found a match*/
+		return 0;
+	}
+
+	/* both elements in the lists are the same
+	 * but not ones we are interested in, move
+	 * either list to the next element */
+	return -1;
+}
+
 /* This function does a simple verification of files listed in the
  * subscribed bundle manifests.  If the optional "fix" or "install" parameter
  * is specified, the disk will be modified at each point during the
@@ -781,9 +805,17 @@ enum swupd_code verify_main(void)
 {
 	struct manifest *official_manifest = NULL;
 	int ret;
-	struct list *subs = NULL;
+	struct list *all_subs = NULL;
+	struct list *bundles_subs = NULL;
+	struct list *selected_subs = NULL;
+	struct list *all_submanifests = NULL;
+	struct list *bundles_submanifests = NULL;
+	struct list *all_files = NULL;
+	struct list *bundles_files = NULL;
+	struct list *iter;
 	int steps_in_verify = 7;
 	bool use_latest = false;
+	bool invalid_bundle = false;
 
 	/*
 	 * Steps for verify:
@@ -873,15 +905,6 @@ enum swupd_code verify_main(void)
 		info("%s version %i\n", cmdline_command_verify ? "Verifying" : "Diagnosing", version);
 	}
 
-	if (cmdline_option_bundles) {
-		while (cmdline_option_bundles) {
-			create_and_append_subscription(&subs, cmdline_option_bundles->data);
-			cmdline_option_bundles = list_free_item(cmdline_option_bundles, free);
-		}
-	} else {
-		read_subscriptions(&subs);
-	}
-
 	/*
 	 * FIXME: We need a command line option to override this in case the
 	 * certificate is hosed and the admin knows it and wants to recover.
@@ -959,28 +982,79 @@ enum swupd_code verify_main(void)
 		}
 	}
 
-	ret = add_included_manifests(official_manifest, &subs);
+	/* get the list of subscribed (installed) bundles */
+	read_subscriptions(&all_subs);
+	selected_subs = all_subs;
+	if (cmdline_option_bundles) {
+		info("\n");
+		for (iter = list_head(cmdline_option_bundles); iter; iter = iter->next) {
+			/* let's validate the bundle names provided by the user first */
+			struct file *file;
+			file = search_bundle_in_manifest(official_manifest, iter->data);
+			if (!file) {
+				/* bundle is invalid or no longer available, nothing to do with
+				 * this one for now */
+				invalid_bundle = true;
+				warn("Bundle \"%s\" is invalid or no longer available\n\n", iter->data);
+				continue;
+			}
+			if (!component_subscribed(all_subs, iter->data)) {
+				/* the requested bundle is not installed, there are two use cases
+				 * where we allow users to specify a bundle that is not installed:
+				 * - when using "verify --fix --bundles" (legacy way to install a bundle)
+				 * - when using "os-install --bundles" or "verify --install --bundles"
+				 * In these cases we need to make sure the subscriptions in bundles_subs
+				 * are also in the all_subs list or they will just be ignored */
+				if ((cmdline_command_verify && cmdline_option_fix) || (cmdline_option_install)) {
+					create_and_append_subscription(&all_subs, iter->data);
+				} else {
+					warn("Bundle \"%s\" is not installed, skipping it...\n\n", iter->data);
+					continue;
+				}
+			}
+			create_and_append_subscription(&bundles_subs, iter->data);
+		}
+		selected_subs = bundles_subs;
+		/* the user should have specified at least one valid bundle, otherwise finish */
+		if (!bundles_subs) {
+			info("No valid bundles were specified, nothing to be done\n");
+			goto clean_and_exit;
+		}
+	}
+
+	if (cmdline_option_bundles && !cmdline_option_install) {
+		info("Limiting %s to the following bundles:\n", cmdline_command_verify ? "verify" : "diagnose", version);
+		for (iter = list_head(bundles_subs); iter; iter = iter->next) {
+			struct sub *sub = iter->data;
+			info(" - %s\n", sub->component);
+		}
+	}
+
+	ret = add_included_manifests(official_manifest, &all_subs);
+	if (cmdline_option_bundles && !(ret & add_sub_ERR)) {
+		ret = add_included_manifests(official_manifest, &bundles_subs);
+	}
 	/* if one or more of the installed bundles were not found in the manifest,
 	 * continue only if --force was used since the bundles could be removed */
-	if (ret) {
-		if (ret & add_sub_BADNAME) {
+	if (ret || invalid_bundle) {
+		if ((ret & add_sub_BADNAME) || invalid_bundle) {
 			if (cmdline_option_force) {
 				if (cmdline_option_picky && cmdline_option_fix) {
-					warn("One or more installed bundles that are not "
+					warn("\nOne or more installed bundles that are not "
 					     "available at version %d will be removed\n",
 					     version);
 				} else if (cmdline_option_picky && !cmdline_option_fix) {
-					warn("One or more installed bundles are not "
+					warn("\nOne or more installed bundles are not "
 					     "available at version %d\n",
 					     version);
 				}
 				ret = SWUPD_OK;
 			} else {
-				if (cmdline_option_install) {
-					error("One or more of the provided bundles are not available at version %d\n", version);
+				if (cmdline_option_install || cmdline_option_bundles) {
+					error("\nOne or more of the provided bundles are not available at version %d\n", version);
 					info("Please make sure the name of the provided bundles are correct, or use --force to override\n")
 				} else {
-					error("Unable to verify. One or more currently installed bundles "
+					error("\nUnable to verify. One or more currently installed bundles "
 					      "are not available at version %d. Use --force to override\n",
 					      version);
 				}
@@ -993,20 +1067,47 @@ enum swupd_code verify_main(void)
 		}
 	}
 
-	set_subscription_versions(official_manifest, NULL, &subs);
-	official_manifest->submanifests = recurse_manifest(official_manifest, subs, NULL, false, NULL);
-	if (!official_manifest->submanifests) {
+	set_subscription_versions(official_manifest, NULL, &all_subs);
+	set_subscription_versions(official_manifest, NULL, &bundles_subs);
+	all_submanifests = recurse_manifest(official_manifest, all_subs, NULL, false, NULL);
+	if (!all_submanifests) {
 		error("Cannot load MoM sub-manifests\n");
 		ret = SWUPD_RECURSE_MANIFEST;
 		goto clean_and_exit;
+	}
+	official_manifest->submanifests = all_submanifests;
+	if (cmdline_option_bundles) {
+		bundles_submanifests = recurse_manifest(official_manifest, bundles_subs, NULL, false, NULL);
+		if (!bundles_submanifests) {
+			error("Cannot load MoM sub-manifests\n");
+			ret = SWUPD_RECURSE_MANIFEST;
+			goto clean_and_exit;
+		}
+		official_manifest->submanifests = bundles_submanifests;
 	}
 	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Load manifests
 
 	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
 	progress_set_step(4, "consolidate_files");
-	official_manifest->files = files_from_bundles(official_manifest->submanifests);
-	official_manifest->files = consolidate_files(official_manifest->files);
+	all_files = files_from_bundles(all_submanifests);
+	all_files = consolidate_files(all_files);
+	official_manifest->files = all_files;
+	if (cmdline_option_bundles) {
+		bundles_files = files_from_bundles(bundles_submanifests);
+		bundles_files = consolidate_files(bundles_files);
+		/* we need to make sure the files from the selected bundles
+		 * are compared against the full list of consolidated files
+		 * from all bundles so we don't end up deleting a file that
+		 * is needed by another bundle */
+		bundles_files = list_filter_common_elements(bundles_files, all_files, find_unsafe_to_delete, NULL);
+		official_manifest->files = bundles_files;
+
+		/* at this point we no longer need the data regarding bundles
+		 * not specified by the user with the --bundles flag, we can free it */
+		list_free_list(all_files);
+		list_free_list_and_data(all_submanifests, free_manifest_data);
+	}
 	progress_complete_step();
 	timelist_timer_stop(globals.global_times);
 
@@ -1023,7 +1124,7 @@ enum swupd_code verify_main(void)
 
 	/* when fixing or installing we need input files */
 	if (cmdline_option_fix || cmdline_option_install) {
-		ret = get_required_files(official_manifest, subs);
+		ret = get_required_files(official_manifest, selected_subs);
 		if (ret != 0) {
 			ret = SWUPD_COULDNT_DOWNLOAD_FILE;
 			goto clean_and_exit;
@@ -1164,7 +1265,13 @@ brick_the_system_and_clean_curl:
 	/* this concludes the critical section, after this point it's clean up time, the disk content is finished and final */
 
 clean_and_exit:
+	free_subscriptions(&all_subs);
+	free_subscriptions(&bundles_subs);
+	/* if the --bundles flag was used the official_manifest contains
+	 * bundles_files and bundles_submanifests, so they will be freed
+	 * along with the official_manifest */
 	free_manifest(official_manifest);
+
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
 		  "verify",
 		  "fix=%d\nret=%d\n"
@@ -1239,7 +1346,7 @@ clean_and_exit:
 	}
 
 	timelist_print_stats(globals.global_times);
-	free_subscriptions(&subs);
+
 	swupd_deinit();
 
 clean_args_and_exit:
@@ -1247,6 +1354,7 @@ clean_args_and_exit:
 		regfree(picky_whitelist);
 		picky_whitelist = NULL;
 	}
+	list_free_list_and_data(cmdline_option_bundles, free);
 
 	progress_finish_steps("verify", ret);
 	return ret;

@@ -989,7 +989,7 @@ enum swupd_code verify_main(void)
 				/* bundle is invalid or no longer available, nothing to do with
 				 * this one for now */
 				invalid_bundle = true;
-				warn("Bundle \"%s\" is invalid or no longer available\n\n", iter->data);
+				warn("Bundle \"%s\" is invalid or no longer available\n\n", (char *)iter->data);
 				continue;
 			}
 			if (!component_subscribed(all_subs, iter->data)) {
@@ -1002,7 +1002,7 @@ enum swupd_code verify_main(void)
 				if ((cmdline_command_verify && cmdline_option_fix) || (cmdline_option_install)) {
 					create_and_append_subscription(&all_subs, iter->data);
 				} else {
-					warn("Bundle \"%s\" is not installed, skipping it...\n\n", iter->data);
+					warn("Bundle \"%s\" is not installed, skipping it...\n\n", (char *)iter->data);
 					continue;
 				}
 			}
@@ -1017,7 +1017,7 @@ enum swupd_code verify_main(void)
 	}
 
 	if (cmdline_option_bundles && !cmdline_option_install) {
-		info("Limiting %s to the following bundles:\n", cmdline_command_verify ? "verify" : "diagnose", version);
+		info("Limiting %s to the following bundles:\n", cmdline_command_verify ? "verify" : "diagnose");
 		for (iter = list_head(bundles_subs); iter; iter = iter->next) {
 			struct sub *sub = iter->data;
 			info(" - %s\n", sub->component);

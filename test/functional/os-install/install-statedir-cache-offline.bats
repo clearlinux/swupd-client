@@ -34,7 +34,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Installing OS version 10
-		Download missing manifests ...
+		Download missing manifests...
 		No packs need to be downloaded
 		Checking for corrupt files
 		No extra files need to be downloaded
@@ -63,7 +63,7 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Installing OS version 10
-		Download missing manifests ...
+		Download missing manifests...
 		Error: Failed to connect to update server: https://localhost/10/Manifest.os-core.tar
 		Possible solutions for this problem are:
 		.Check if your network connection is working
@@ -119,7 +119,7 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
 		Installing OS version 10
-		Download missing manifests ...
+		Download missing manifests...
 		No packs need to be downloaded
 		Checking for corrupt files
 		Error: Failed to connect to update server: https://localhost
@@ -149,7 +149,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Installing OS version 10
-		Download missing manifests ...
+		Download missing manifests...
 		Error: Failed to connect to update server: https://localhost
 		Possible solutions for this problem are:
 		.Check if your network connection is working

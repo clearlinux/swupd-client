@@ -42,12 +42,7 @@ static int compare_fullfile(const void *a, const void *b)
 	}
 
 	/* they have the same hash, now let's check the version */
-	if (file1->last_change == file2->last_change) {
-		/* we have a match */
-		return 0;
-	}
-
-	return -1;
+	return file1->last_change - file2->last_change;
 }
 
 static void download_mix_file(struct file *file)

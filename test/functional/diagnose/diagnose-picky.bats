@@ -27,7 +27,7 @@ test_setup() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Download missing manifests ...
+		Download missing manifests...
 		Checking for missing files
 		Checking for corrupt files
 		Checking for extraneous files
@@ -59,7 +59,7 @@ test_setup() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Download missing manifests ...
+		Download missing manifests...
 		Checking for extra files under $PATH_PREFIX/usr
 		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl
 		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/contenturl

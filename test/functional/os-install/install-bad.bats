@@ -24,7 +24,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Installing OS version 10 (latest)
 		Warning: Bundle "bad-name" is invalid or no longer available
-		Download missing manifests ...
+		Download missing manifests...
 		Error: One or more of the provided bundles are not available at version 10
 		Please make sure the name of the provided bundles are correct, or use --force to override
 		Installation failed
@@ -45,7 +45,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Installing OS version 10 (latest)
 		Warning: Bundle "bad-name" is invalid or no longer available
-		Download missing manifests ...
+		Download missing manifests...
 		Downloading packs for:
 		 - os-core
 		 - test-bundle

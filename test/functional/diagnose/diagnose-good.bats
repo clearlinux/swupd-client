@@ -18,7 +18,7 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
-		Download missing manifests ...
+		Download missing manifests...
 		Checking for missing files
 		Checking for corrupt files
 		Checking for extraneous files

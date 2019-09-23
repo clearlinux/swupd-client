@@ -128,7 +128,7 @@ void progress_report(double count, double max)
 	}
 }
 
-int progress_spinner_callback()
+static int progress_spinner_callback(void)
 {
 	static int index = -1;
 	static time_t begin = 0;

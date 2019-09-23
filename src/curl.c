@@ -792,7 +792,11 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_
 	}
 
 	if (progress_callback) {
-		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+		curl_ret = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+		if (curl_ret != CURLE_OK) {
+			goto exit;
+		}
+
 		curl_ret = curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION,
 					    progress_callback);
 		if (curl_ret != CURLE_OK) {

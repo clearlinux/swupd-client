@@ -23,8 +23,10 @@ struct list {
 
 /**
  * @brief Callback to compare two datas in a list.
- * The comparison_fn should behave similar to strcmp(), returning 0 if
- * it is a match, and "< 0" or "> 0" if it is not.
+ * The comparison function should return 0 if a is equal to b,
+ * any number "< 0" if a is lower than b and any number "> 0" if
+ * a is bigger than b.
+ * This behavior is similar to strcmp() and other standard compare functions.
  */
 typedef int (*comparison_fn_t)(const void *a, const void *b);
 

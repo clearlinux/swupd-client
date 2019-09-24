@@ -27,6 +27,7 @@ test_setup() {
 		[
 		{ "type" : "start", "section" : "search" },
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 3, "stepCompletion" : 100, "stepDescription" : "get_versions" },
+		{ "type" : "info", "msg" : "Downloading all Clear Linux manifests " },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 3, "stepCompletion" : 50, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 3, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
 		{ "type" : "info", "msg" : "Searching for 'file_1'" },

@@ -33,6 +33,9 @@ typedef int (*comparison_fn_t)(const void *a, const void *b);
 /** @brief Callback to free data used in list. */
 typedef void (*list_free_data_fn_t)(void *data);
 
+/** @brief Callback to filter a data in a list. */
+typedef bool (*filter_fn_t)(const void *a);
+
 /**
  * Creates a new list item, store data, and inserts item in list (which can
  * be NULL). Returns created link, or NULL if failure. Created link can be

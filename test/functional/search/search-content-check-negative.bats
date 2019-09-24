@@ -54,6 +54,7 @@ global_teardown() {
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
+		Downloading all Clear Linux manifests
 		Searching for '/usr/lib64/test-lib100'
 		Search term not found
 	EOM
@@ -68,6 +69,7 @@ global_teardown() {
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
+		Downloading all Clear Linux manifests
 		Searching for 'libtest-nohit'
 		Search term not found
 	EOM

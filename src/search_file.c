@@ -56,7 +56,7 @@ enum search_type {
 };
 
 struct bundle_size {
-	char *bundle_name;
+	const char *bundle_name;
 	long size;
 };
 
@@ -74,7 +74,7 @@ static regex_t regexp_comp;
 
 // Context
 static struct list *bundle_size_cache = NULL;
-static struct list *manifest_header_cache = NULL;
+static struct list *manifest_list = NULL;
 
 static int bundle_cmp(const void *bundle, const void *bundle_name)
 {
@@ -85,10 +85,10 @@ static int bundle_cmp(const void *bundle, const void *bundle_name)
 
 static int manifest_name_cmp(const void *a, const void *b)
 {
-	const struct file *fa = a;
-	const struct file *fb = b;
+	const struct manifest *ma = a;
+	const struct manifest *mb = b;
 
-	return strcmp(fa->filename, fb->filename);
+	return strcmp(ma->component, mb->component);
 }
 
 static int manifest_str_cmp(const void *manifest, const void *manifest_name)
@@ -110,7 +110,7 @@ static int process_full_include_list(struct manifest *m, struct list **include_l
 			continue;
 		}
 
-		sub = list_search(manifest_header_cache, bundle_name, manifest_str_cmp);
+		sub = list_search(manifest_list, bundle_name, manifest_str_cmp);
 		if (!sub) {
 			return -1;
 		}
@@ -132,7 +132,7 @@ static long compute_bundle_size(const char *bundle_name)
 	long size;
 	bool is_installed;
 
-	m = list_search(manifest_header_cache, bundle_name, manifest_str_cmp);
+	m = list_search(manifest_list, bundle_name, manifest_str_cmp);
 	if (!m) {
 		return -1;
 	}
@@ -159,30 +159,29 @@ static long compute_bundle_size(const char *bundle_name)
 
 static long get_bundle_size(const char *bundle)
 {
-	struct bundle_size *b = list_search(bundle_size_cache, bundle, bundle_cmp);
+	struct bundle_size *b;
+
+	b = list_search(bundle_size_cache, bundle, bundle_cmp);
 	if (b) {
 		return b->size;
 	}
-	return compute_bundle_size(bundle);
-}
 
-static void bundle_size_free(void *data)
-{
-	struct bundle_size *b = data;
-	ON_NULL_ABORT(b);
+	b = calloc(1, sizeof(struct bundle_size));
+	b->bundle_name = bundle;
+	b->size = compute_bundle_size(bundle);
+	bundle_size_cache = list_prepend_data(bundle_size_cache, b);
 
-	free(b->bundle_name);
-	free(b);
+	return b->size;
 }
 
 static int manifest_size_cmp(const void *a, const void *b)
 {
 	long sa, sb;
-	const struct file *ma = a;
-	const struct file *mb = b;
+	const struct manifest *ma = a;
+	const struct manifest *mb = b;
 
-	sa = get_bundle_size(ma->filename);
-	sb = get_bundle_size(mb->filename);
+	sa = get_bundle_size(ma->component);
+	sb = get_bundle_size(mb->component);
 
 	// smaller before larger
 	if (sa < sb) {
@@ -207,22 +206,26 @@ static const char *bin_paths[] = {
 	NULL
 };
 
-static void print_bundle(struct file *b)
+static void print_bundle(struct manifest *mom, struct manifest *m)
 {
 	char *name;
 	bool installed;
+	struct file *bundle_file;
+	bool is_experimental;
 
 	if (csv_format) {
 		return;
 	}
 
-	installed = is_installed_bundle(b->filename);
+	bundle_file = mom_search_bundle(mom, m->component);
+	is_experimental = bundle_file ? bundle_file->is_experimental : false;
+	installed = is_installed_bundle(m->component);
 
-	name = get_printable_bundle_name(b->filename, b->is_experimental);
+	name = get_printable_bundle_name(m->component, is_experimental);
 	print("\nBundle %s %s", name, installed ? "[installed] " : "");
 	free_string(&name);
 
-	print("(%li MB%s)", get_bundle_size(b->filename) / 1000 / 1000,
+	print("(%li MB%s)", get_bundle_size(m->component) / 1000 / 1000,
 	      installed ? " on system" : " to install");
 	print("\n");
 }
@@ -276,25 +279,13 @@ static bool file_matches(const char *filename, const char *search_term)
 	return regexec(&regexp_comp, filename, 0, NULL, 0) == 0;
 }
 
-static int search_in_manifest(struct manifest *mom, struct file *manifest_file, const char *search_term)
+static int search_in_manifest(struct manifest *mom, struct manifest *manifest, const char *search_term)
 {
 	struct list *l;
 	int count = 0;
-	struct manifest *m;
 	struct list *files = NULL;
 
-	// If manifest was not downloaded in download_all_manifests, skip this
-	// to avoid trying to download it again
-	if (!list_search(manifest_header_cache, manifest_file->filename, manifest_str_cmp)) {
-		return -ENOENT;
-	}
-
-	m = load_manifest(manifest_file->last_change, manifest_file, mom, false, NULL);
-	if (!m) {
-		return -ENOENT;
-	}
-
-	for (l = m->files; l; l = l->next) {
+	for (l = manifest->files; l; l = l->next) {
 		struct file *file = l->data;
 
 		if (!file->is_file && !file->is_link) {
@@ -311,7 +302,7 @@ static int search_in_manifest(struct manifest *mom, struct file *manifest_file, 
 
 		if (file_matches(file->filename, search_term)) {
 			if (count == 0) {
-				print_bundle(manifest_file);
+				print_bundle(mom, manifest);
 			}
 			count++;
 
@@ -322,7 +313,7 @@ static int search_in_manifest(struct manifest *mom, struct file *manifest_file, 
 				if (count > num_results) {
 					break;
 				}
-				print_result(m->component, file->filename);
+				print_result(manifest->component, file->filename);
 			}
 		}
 	}
@@ -334,12 +325,11 @@ static int search_in_manifest(struct manifest *mom, struct file *manifest_file, 
 			if (count > num_results) {
 				break;
 			}
-			print_result(m->component, l->data);
+			print_result(manifest->component, l->data);
 		}
 	}
 
 	list_free_list(files);
-	manifest_free(m);
 
 	return count;
 }
@@ -353,9 +343,14 @@ static int do_search(struct manifest *mom, const char *search_term)
 	int regexp_err;
 
 	if (sort == SORT_TYPE_ALPHA_BUNDLES_ONLY || sort == SORT_TYPE_ALPHA) {
-		mom->manifests = list_sort(mom->manifests, manifest_name_cmp);
+		manifest_list = list_sort(manifest_list, manifest_name_cmp);
 	} else if (sort == SORT_TYPE_SIZE) {
-		mom->manifests = list_sort(mom->manifests, manifest_size_cmp);
+		// pre process the bundle size of all bundles for sorting
+		for (l = manifest_list; l; l = l->next) {
+			struct manifest *m = l->data;
+			get_bundle_size(m->component);
+		}
+		manifest_list = list_sort(manifest_list, manifest_size_cmp);
 	}
 
 	if (regexp) {
@@ -371,9 +366,9 @@ static int do_search(struct manifest *mom, const char *search_term)
 		info("File results may be truncated\n");
 	}
 
-	for (l = mom->manifests; l; l = l->next) {
-		struct file *file = l->data;
-		err = search_in_manifest(mom, file, search_term);
+	for (l = manifest_list; l; l = l->next) {
+		struct manifest *manifest = l->data;
+		err = search_in_manifest(mom, manifest, search_term);
 
 		// Save error, but don't abort
 		if (err < 0) {
@@ -389,82 +384,6 @@ static int do_search(struct manifest *mom, const char *search_term)
 
 error:
 	return ret < 0 ? ret : found;
-}
-
-static bool need_to_download_manifests(struct list *list)
-{
-	struct file *file = NULL;
-	char *untard_file = NULL;
-	int ret;
-
-	while (list) {
-		file = list->data;
-		list = list->next;
-
-		string_or_die(&untard_file, "%s/%i/Manifest.%s", globals.state_dir, file->last_change,
-			      file->filename);
-		ret = access(untard_file, F_OK);
-		free_string(&untard_file);
-
-		if (ret == -1) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-/* download_manifests()
- * Download all manifests and return a list of manifest headers.
- */
-enum swupd_code download_all_manifests(struct manifest *mom, struct list **manifest_list)
-{
-	struct manifest *manifest = NULL;
-	struct list *list;
-	int ret = 0;
-	int failed_count = 0;
-	unsigned int complete = 0;
-	unsigned int total;
-
-	if (need_to_download_manifests(mom->manifests)) {
-		info("Downloading all Clear Linux manifests\n");
-	}
-
-	total = list_len(mom->manifests);
-	for (list = mom->manifests; list; list = list->next) {
-		struct file *file = list->data;
-		int manifest_err;
-
-		/* Do download */
-		manifest = load_manifest(file->last_change, file, mom, true, &manifest_err);
-		complete++;
-		if (!manifest) {
-			info("\n"); //Progress bar
-			error("Cannot load %s manifest for version %i\n",
-			      file->filename, file->last_change);
-			failed_count++;
-			ret = SWUPD_RECURSE_MANIFEST;
-
-			/* if the manifest failed to download because there is
-			 * no disk space, stop trying to download. */
-			if (manifest_err == -EIO) {
-				break;
-			}
-		}
-
-		if (manifest_list) {
-			*manifest_list = list_prepend_data(*manifest_list, manifest);
-		} else {
-			manifest_free(manifest);
-		}
-		progress_report(complete, total);
-	}
-
-	if (ret) {
-		warn("Failed to download %i manifest%s - search results will be partial\n", failed_count, (failed_count > 1 ? "s" : ""));
-	}
-
-	return ret;
 }
 
 static void print_help(void)
@@ -581,7 +500,8 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code search_file_main(int argc, char **argv)
 {
 
-	int ret = SWUPD_OK, search_ret = SWUPD_OK;
+	int ret = SWUPD_OK;
+	int err = 0;
 	struct manifest *mom = NULL;
 	int current_version;
 	int steps_in_search = 3;
@@ -620,40 +540,47 @@ enum swupd_code search_file_main(int argc, char **argv)
 	}
 	progress_complete_step();
 
-	progress_set_step(2, "load_manifests"); // will be closed within download_all_manifests
+	progress_set_step(2, "load_manifests");
 	mom = load_mom(current_version, false, NULL);
 	if (!mom) {
 		error("Cannot load official manifest MoM for version %i\n", current_version);
 		return SWUPD_COULDNT_LOAD_MOM;
 	}
 
-	ret = download_all_manifests(mom, &manifest_header_cache);
-	if (ret != 0 && ret != SWUPD_RECURSE_MANIFEST) {
-		error("Failed to download manifests\n");
+	info("Downloading all Clear Linux manifests\n");
+	err = mom_get_manifests_list(mom, &manifest_list, NULL);
+	if (init) {
+		if (err != 0) {
+			error("Failed to download manifests\n");
+			ret = SWUPD_RECURSE_MANIFEST;
+		} else {
+			info("Successfully retrieved manifests. Exiting\n");
+			ret = SWUPD_OK;
+		}
 		goto clean_exit;
 	}
 
-	if (init) {
-		info("Successfully retrieved manifests. Exiting\n");
-		ret = SWUPD_OK;
-		goto clean_exit;
+	if (err) {
+		int failed_count = list_len(mom->manifests) - list_len(manifest_list);
+		warn("Failed to download %i manifest%s - search results will be partial\n", failed_count, (failed_count > 1 ? "s" : ""));
+		ret = SWUPD_RECURSE_MANIFEST;
 	}
 
 	progress_set_step(3, "search_term");
 	info("Searching for '%s'\n", search_string);
-	search_ret = do_search(mom, search_string);
+	err = do_search(mom, search_string);
 	progress_complete_step();
 
 	// Keep any ret error code if search is successful
-	if (ret == SWUPD_OK && search_ret == 0) {
+	if (ret == SWUPD_OK && err == 0) {
 		info("Search term not found\n");
 		ret = SWUPD_NO;
 	}
 
 clean_exit:
 	manifest_free(mom);
-	list_free_list_and_data(bundle_size_cache, bundle_size_free);
-	list_free_list_and_data(manifest_header_cache, manifest_free_data);
+	list_free_list_and_data(manifest_list, manifest_free_data);
+	list_free_list_and_data(bundle_size_cache, free);
 
 	swupd_deinit();
 

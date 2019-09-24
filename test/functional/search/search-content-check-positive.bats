@@ -57,12 +57,13 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Downloading all Clear Linux manifests
 		Searching for 'test-bundle1'
 		Bundle test-bundle1 \\(0 MB to install\\)
 		./usr/share/clear/bundles/test-bundle1
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_in_output "$expected_output"
 
 }
 
@@ -72,12 +73,13 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Downloading all Clear Linux manifests
 		Searching for 'test-file2'
 		Bundle test-bundle2 \\(0 MB to install\\)
 		./bar/test-file2
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_in_output "$expected_output"
 
 }
 
@@ -141,7 +143,7 @@ global_teardown() {
 		./bar/test-file3
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_in_output "$expected_output"
 
 }
 
@@ -156,7 +158,7 @@ global_teardown() {
 		./usr/bin/test-bin
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_in_output "$expected_output"
 
 }
 
@@ -171,7 +173,7 @@ global_teardown() {
 		./usr/lib/test-lib32
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_in_output "$expected_output"
 
 }
 
@@ -186,7 +188,7 @@ global_teardown() {
 		./usr/lib64/test-lib64
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_in_output "$expected_output"
 
 }
 

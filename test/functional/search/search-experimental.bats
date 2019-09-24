@@ -63,6 +63,7 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Downloading all Clear Linux manifests
 		Searching for 'test-bundle2'
 		Bundle test-bundle2 \\(experimental\\) \\[installed\\] \\(0 MB on system\\)
 		./usr/share/clear/bundles/test-bundle2

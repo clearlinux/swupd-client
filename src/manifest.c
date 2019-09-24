@@ -1172,3 +1172,51 @@ long get_manifest_list_contentsize(struct list *manifests)
 
 	return total_size;
 }
+
+static struct manifest *load_manifest_file(struct manifest *mom, struct file *file, int *err)
+{
+	if (!file) {
+		if (err) {
+			*err = -EINVAL;
+		}
+		return NULL;
+	}
+	return load_manifest(file->last_change, file, mom, false, err);
+}
+
+int mom_get_manifests_list(struct manifest *mom, struct list **manifest_list, filter_fn_t filter_fn)
+{
+	struct manifest *manifest = NULL;
+	struct list *list;
+	unsigned int complete = 0;
+	unsigned int total;
+	int err = 0, last_error = 0;
+
+	total = list_len(mom->manifests);
+	for (list = mom->manifests; list; list = list->next) {
+		struct file *file = list->data;
+
+		if (filter_fn && !filter_fn(file->filename)) {
+			continue;
+		}
+
+		manifest = load_manifest_file(mom, file, &err);
+		complete++;
+		if (!manifest) {
+			info("\n"); //Progress bar
+			error("Cannot load %s manifest for version %i\n",
+			      file->filename, file->last_change);
+			last_error = err;
+		} else {
+			if (manifest_list) {
+				*manifest_list = list_prepend_data(*manifest_list, manifest);
+			} else {
+				manifest_free(manifest);
+			}
+		}
+		progress_report(complete, total);
+	}
+	progress_report(total, total);
+
+	return last_error;
+}

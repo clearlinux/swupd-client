@@ -91,6 +91,7 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Downloading all Clear Linux manifests
 		Searching for ''
 		Bundle alfa-charly .*
 		./usr/share/clear/bundles/alfa-charly

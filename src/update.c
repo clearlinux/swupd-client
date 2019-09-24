@@ -538,9 +538,10 @@ version_check:
 	}
 	scripts_run_post_update(re_update || globals.wait_for_scripts);
 
-	/* Downloadng search-file index */
+	/* Downloading all manifests to be used as search-file index */
 	if (update_search_file_index) {
-		download_all_manifests(server_manifest, NULL);
+		info("Downloading all Clear Linux manifests\n");
+		mom_get_manifests_list(server_manifest, NULL, NULL);
 	}
 
 	progress_complete_step();

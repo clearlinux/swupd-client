@@ -324,15 +324,17 @@ struct list *list_deduplicate(struct list *list, comparison_fn_t comparison_fn, 
 	struct list *iter = NULL;
 	void *item1, *item2;
 
-	list = list_head(list);
+	iter = list_head(list);
 
-	for (iter = list; iter && iter->next; iter = iter->next) {
+	while (iter && iter->next) {
 
 		item1 = iter->data;
 		item2 = iter->next->data;
 
 		if (comparison_fn(item1, item2) == 0) {
 			list_free_item(iter->next, list_free_data_fn);
+		} else {
+			iter = iter->next;
 		}
 	}
 

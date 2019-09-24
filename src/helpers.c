@@ -1180,3 +1180,34 @@ bool check_mix_exists(void)
 	free_string(&fullpath);
 	return ret;
 }
+
+/* Iterate the file list and remove from the file system each file/directory */
+int remove_files_from_fs(struct list *files)
+{
+	struct list *iter = NULL;
+	struct file *file = NULL;
+	char *fullfile = NULL;
+	int total = list_len(files);
+	int deleted = total;
+	int count = 0;
+
+	iter = list_head(files);
+	while (iter) {
+		file = iter->data;
+		iter = iter->next;
+		string_or_die(&fullfile, "%s/%s", globals.path_prefix, file->filename);
+		if (swupd_rm(fullfile) == -1) {
+			/* if a -1 is returned it means there was an issue deleting the
+			 * file or directory, in that case decrease the counter of deleted
+			 * files.
+			 * Note: If a file didn't exist it will still be counted as deleted,
+			 * this is a limitation */
+			deleted--;
+		}
+		free_string(&fullfile);
+		count++;
+		progress_report(count, total);
+	}
+
+	return deleted;
+}

@@ -313,6 +313,7 @@ extern bool is_url_insecure(const char *url);
 extern void remove_trailing_slash(char *url);
 extern int link_or_copy(const char *orig, const char *dest);
 extern int link_or_copy_all(const char *orig, const char *dest);
+extern int remove_files_from_fs(struct list *files);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);

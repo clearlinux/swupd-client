@@ -305,9 +305,11 @@ bool list_longer_than(struct list *list, int count)
 
 void *list_search(struct list *list, const void *item, comparison_fn_t comparison_fn)
 {
-	for (; list; list = list->next) {
-		if (comparison_fn(list->data, item) == 0) {
-			return list->data;
+	struct list *heystack = list_head(list);
+
+	for (; heystack; heystack = heystack->next) {
+		if (comparison_fn(heystack->data, item) == 0) {
+			return heystack->data;
 		}
 	}
 

@@ -147,26 +147,22 @@ static int progress_spinner_callback(void)
 
 static void progress_spinner_print_end(void)
 {
-	info("\r[*]\n");
+	info("\r   \r");
 	fflush(stdout);
 }
 
 void progress_set_spinner(bool status_flag)
 {
-	if (log_get_level() == LOG_DEBUG || !isatty(fileno(stdout))) {
-		return;
-	}
-
 	if (status_flag) {
 		if (progress_function) {
 			progress_report(-1, 100);
-		} else {
+		} else if (isatty(fileno(stdout)) && !(log_get_level() == LOG_DEBUG)) {
 			set_progress_callback(progress_spinner_callback);
 		}
 	} else {
 		if (progress_function) {
 			progress_report(100, 100);
-		} else {
+		} else if (isatty(fileno(stdout)) && !(log_get_level() == LOG_DEBUG)) {
 			progress_spinner_print_end();
 			set_progress_callback(NULL);
 		}

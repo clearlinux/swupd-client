@@ -28,6 +28,7 @@ test_setup() {
 		{ "type" : "info", "msg" : "Diagnosing version 10 " },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "cleanup_download_dir" },
 		{ "type" : "info", "msg" : "Downloading missing manifests... " },
+		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 10, "stepCompletion" : -1, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "consolidate_files" },
 		{ "type" : "info", "msg" : "Checking for corrupt files " },

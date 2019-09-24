@@ -23,7 +23,7 @@ test_setup() {
 	# check for the warning
 	expected_output=$(cat <<-EOM
 		Diagnosing version 20
-		Download missing manifests...
+		Downloading missing manifests...
 		Checking for corrupt files
 		Adding any missing files
 		Repairing corrupt files

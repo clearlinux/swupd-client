@@ -1024,7 +1024,7 @@ enum swupd_code verify_main(void)
 		}
 	}
 
-	info("Download missing manifests...\n");
+	info("Downloading missing manifests...\n");
 	progress_set_spinner(true);
 	ret = add_included_manifests(official_manifest, &all_subs);
 	if (cmdline_option_bundles && !(ret & add_sub_ERR)) {

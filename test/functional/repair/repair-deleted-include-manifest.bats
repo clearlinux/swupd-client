@@ -28,7 +28,7 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 100
-		Download missing manifests...
+		Downloading missing manifests...
 		Error: Failed to retrieve 10 test-bundle2 manifest
 		Error: Unable to download manifest test-bundle2 version 10, exiting now
 		Repair did not fully succeed

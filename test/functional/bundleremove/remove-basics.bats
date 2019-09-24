@@ -55,12 +55,13 @@ global_teardown() {
 	assert_file_exists "$TARGETDIR"/bat/common
 	assert_file_exists "$STATEDIR"/bundles/test-bundle2
 	expected_output=$(cat <<-EOM
+		Removing bundle: test-bundle1
 		Deleting bundle files...
 		Total deleted files: 6
 		Successfully removed 1 bundle
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -84,15 +85,13 @@ global_teardown() {
 	assert_file_not_exists "$STATEDIR"/bundles/test-bundle2
 	expected_output=$(cat <<-EOM
 		Removing bundle: test-bundle1
-		Deleting bundle files...
-		Total deleted files: 6
 		Removing bundle: test-bundle2
 		Deleting bundle files...
-		Total deleted files: 4
+		Total deleted files: 9
 		Successfully removed 2 bundles
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -106,7 +105,9 @@ global_teardown() {
 
 	assert_status_is "$SWUPD_BUNDLE_NOT_TRACKED"
 	expected_output=$(cat <<-EOM
+
 		Warning: Bundle "test-bundle3" is not installed, skipping it...
+
 		Failed to remove 1 of 1 bundles
 	EOM
 	)
@@ -118,9 +119,11 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS fake-bundle"
 
-	assert_status_is "$SWUPD_BUNDLE_NOT_TRACKED"
+	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
-		Warning: Bundle "fake-bundle" is not installed, skipping it...
+
+		Warning: Bundle "fake-bundle" is invalid, skipping it...
+
 		Failed to remove 1 of 1 bundles
 	EOM
 	)
@@ -134,8 +137,11 @@ global_teardown() {
 
 	assert_status_is "$SWUPD_BUNDLE_NOT_TRACKED"
 	expected_output=$(cat <<-EOM
-		Warning: Bundle "fake-bundle" is not installed, skipping it...
+
+		Warning: Bundle "fake-bundle" is invalid, skipping it...
+
 		Warning: Bundle "test-bundle3" is not installed, skipping it...
+
 		Failed to remove 2 of 2 bundles
 	EOM
 	)
@@ -170,7 +176,7 @@ global_teardown() {
 		Failed to remove 1 of 2 bundles
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -178,7 +184,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS fake-bundle test-bundle1"
 
-	assert_status_is "$SWUPD_BUNDLE_NOT_TRACKED"
+	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 	assert_file_not_exists "$TARGETDIR"/test-file1
 	assert_file_not_exists "$TARGETDIR"/bar/test-file2
@@ -190,13 +196,13 @@ global_teardown() {
 	assert_file_exists "$TARGETDIR"/bat/test-file4
 	assert_file_exists "$TARGETDIR"/bat/common
 	expected_output=$(cat <<-EOM
-		Warning: Bundle "fake-bundle" is not installed, skipping it...
+		Warning: Bundle "fake-bundle" is invalid, skipping it...
 		Removing bundle: test-bundle1
 		Deleting bundle files...
 		Total deleted files: 6
 		Failed to remove 1 of 2 bundles
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 
 }

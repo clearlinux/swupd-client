@@ -56,7 +56,7 @@ static void print_help(void)
 
 	print("Options:\n");
 	print("   -a, --all               List all available bundles for the current version of Clear Linux\n");
-	print("   -D, --has-dep=[BUNDLE]  List dependency tree of all bundles which have BUNDLE as a dependency\n");
+	print("   -D, --has-dep=[BUNDLE]  List all bundles which have BUNDLE as a dependency\n");
 	print("   --deps=[BUNDLE]         List bundles included by BUNDLE\n");
 	print("\n");
 }

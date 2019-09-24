@@ -213,6 +213,10 @@ SUBCOMMANDS
     bundle(s) on the system, a tree will be displayed to indicate which bundles
     are blocking removal.
 
+    -  `-x, --force`
+
+        Removes a bundle along with all the bundles that depend on it.
+
 ``bundle-list``
 
     List all installed software bundles in the local system. Bundles available
@@ -231,9 +235,10 @@ SUBCOMMANDS
 
     - `-D, --has-dep={bundle}`
 
-        Displays a tree of all bundles which include the passed bundle as a
+        Displays a list of all bundles which include the passed bundle as a
         dependency. Combine with `--all` to report all bundles including those
-        not installed on the system.
+        not installed on the system. Combine with `--verbose` to show a tree of
+        these bundles.
 
 ``check-update``
 

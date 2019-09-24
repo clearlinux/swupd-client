@@ -21,13 +21,9 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		All installable and installed bundles that have test-bundle1 as a dependency:
-		format:
-		 # * is-required-by
-		 #   |-- is-required-by
-		 # * is-also-required-by
-		 # ...
-		  * test-bundle2
-		    |-- test-bundle3
+		 - test-bundle2
+		 - test-bundle3
+		Bundle 'test-bundle1' is required by 2 bundles
 	EOM
 	)
 	assert_is_output "$expected_output"

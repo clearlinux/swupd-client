@@ -10,7 +10,7 @@ load "../testlib"
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
 	assert_file_exists "$TARGETDIR"/core
 	expected_output=$(cat <<-EOM
-		Warning: Bundle "os-core" not allowed to be removed
+		Warning: Bundle "os-core" not allowed to be removed, skipping it...
 		Failed to remove 1 of 1 bundles
 	EOM
 	)

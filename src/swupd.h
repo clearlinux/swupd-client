@@ -271,8 +271,6 @@ extern bool verify_file_lazy(char *filename);
 extern int verify_bundle_hash(struct manifest *manifest, struct file *bundle);
 extern int rm_staging_dir_contents(const char *rel_path);
 void free_file_data(void *data);
-void remove_files_in_manifest_from_fs(struct manifest *m);
-void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2);
 extern struct file *search_bundle_in_manifest(struct manifest *manifest, const char *bundlename);
 extern struct file *search_file_in_manifest(struct manifest *manifest, const char *filename);
 
@@ -322,7 +320,7 @@ extern void create_and_append_subscription(struct list **subs, const char *compo
 
 /* bundle.c */
 extern bool is_installed_bundle(const char *bundle_name);
-extern enum swupd_code remove_bundles(char **bundles);
+extern enum swupd_code remove_bundles(struct list *bundles);
 extern enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server);
 extern enum swupd_code show_included_bundles(char *bundle_name);
 extern enum swupd_code list_installable_bundles();
@@ -349,6 +347,9 @@ extern void verify_set_extra_files_only(bool opt);
 
 /* repair.c */
 extern regex_t *compile_whitelist(const char *whitelist_pattern);
+
+/* bundle-remove */
+extern void remove_set_option_force(bool opt);
 
 /* telemetry.c */
 typedef enum telem_prio_t {

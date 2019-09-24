@@ -29,6 +29,7 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TARGETDIR"/file_2
 	expected_output=$(cat <<-EOM
+		Removing bundle: test-bundle1
 		Deleting bundle files...
 		Total deleted files: 2
 		Successfully removed 1 bundle

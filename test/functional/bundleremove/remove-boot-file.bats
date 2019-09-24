@@ -21,6 +21,7 @@ test_setup() {
 	assert_dir_exists "$TARGETDIR"/usr/lib
 	assert_dir_exists "$TARGETDIR"/usr/
 	expected_output=$(cat <<-EOM
+		Removing bundle: test-bundle
 		Deleting bundle files...
 		Total deleted files: 3
 		Successfully removed 1 bundle

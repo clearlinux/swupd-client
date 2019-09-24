@@ -37,6 +37,7 @@
 #define VERIFY_PICKY 1
 
 static char **bundles;
+static bool cmdline_option_force = false;
 
 static void print_help(void)
 {
@@ -48,13 +49,30 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
+	print("   -x, --force             Removes a bundle along with all the bundles that depend on it\n");
 	print("\n");
 }
 
+static const struct option prog_opts[] = {
+	{ "force", no_argument, 0, 'x' },
+};
+
+static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
+{
+	switch (opt) {
+	case 'x':
+		cmdline_option_force = optarg_to_bool(optarg);
+		return true;
+	default:
+		return false;
+	}
+	return false;
+}
+
 static const struct global_options opts = {
-	NULL,
-	0,
-	NULL,
+	prog_opts,
+	sizeof(prog_opts) / sizeof(struct option),
+	parse_opt,
 	print_help,
 };
 
@@ -78,6 +96,7 @@ static bool parse_options(int argc, char **argv)
 
 enum swupd_code bundle_remove_main(int argc, char **argv)
 {
+	struct list *bundles_list = NULL;
 	int ret;
 	const int steps_in_bundleremove = 1;
 
@@ -89,7 +108,17 @@ enum swupd_code bundle_remove_main(int argc, char **argv)
 	}
 	progress_init_steps("bundle-remove", steps_in_bundleremove);
 
-	ret = remove_bundles(bundles);
+	remove_set_option_force(cmdline_option_force);
+
+	/* move the bundles provided in the command line into a
+	 * list so it is easier to handle them */
+	for (; *bundles; ++bundles) {
+		char *bundle = *bundles;
+		bundles_list = list_append_data(bundles_list, bundle);
+	}
+	bundles_list = list_head(bundles_list);
+	ret = remove_bundles(bundles_list);
+	list_free_list(bundles_list);
 
 	progress_finish_steps("bundle-remove", ret);
 	return ret;

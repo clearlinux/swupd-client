@@ -46,7 +46,7 @@ _swupd()
 		opts="$global --skip-diskspace-check "
 		break;;
 	    ("bundle-remove")
-		opts="$global "
+		opts="$global --force "
 		break;;
 	    ("bundle-list")
 		opts="$global --all --deps --has-dep "

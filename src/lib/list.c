@@ -381,9 +381,6 @@ struct list *list_filter_common_elements(struct list *list1, struct list *list2,
 			preserver = iter1->next;
 		}
 		iter1 = list_free_item(iter1, list_free_data_fn);
-		/* the iter1 pointer was already moved by list_free_item
-		 * so only move iter2 to the next element in the list */
-		iter2 = iter2->next;
 	}
 
 	return preserver;

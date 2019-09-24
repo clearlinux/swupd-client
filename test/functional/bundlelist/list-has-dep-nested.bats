@@ -21,6 +21,22 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Installed bundles that have test-bundle1 as a dependency:
+		 - test-bundle2
+		 - test-bundle3
+		Bundle 'test-bundle1' is required by 2 bundles
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
+@test "LST020: List installed bundles that have a given bundle as dependency (with nested deps) in a tree view" {
+
+	run sudo sh -c "$SWUPD bundle-list --verbose $SWUPD_OPTS --has-dep test-bundle1"
+
+	assert_status_is 0
+	expected_output=$(cat <<-EOM
+		Installed bundles that have test-bundle1 as a dependency:
 		format:
 		 # * is-required-by
 		 #   |-- is-required-by
@@ -28,6 +44,7 @@ test_setup() {
 		 # ...
 		  * test-bundle2
 		    |-- test-bundle3
+		Bundle 'test-bundle1' is required by 2 bundles
 	EOM
 	)
 	assert_is_output "$expected_output"

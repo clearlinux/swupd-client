@@ -28,6 +28,7 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Removing bundle: test-bundle3
 		Deleting bundle files...
 		Total deleted files: 3
 		Successfully removed 1 bundle

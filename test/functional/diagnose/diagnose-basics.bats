@@ -36,7 +36,7 @@ test_setup() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		Diagnosing version 20
-		Download missing manifests...
+		Downloading missing manifests...
 		Checking for missing files
 		.* Missing file: .*/target-dir/baz
 		.* Missing file: .*/target-dir/baz/file_3

@@ -27,7 +27,7 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "get_versions" },
 		{ "type" : "info", "msg" : "Installing OS version 10 (latest) " },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "cleanup_download_dir" },
-		{ "type" : "info", "msg" : "Download missing manifests... " },
+		{ "type" : "info", "msg" : "Downloading missing manifests... " },
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "consolidate_files" },
 		{ "type" : "info", "msg" : "Downloading packs for: " },

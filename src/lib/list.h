@@ -129,6 +129,9 @@ int list_strcmp(const void *a, const void *b);
 /**
  * @brief removes duplicated elements from a list
  *
+ * Function requirements:
+ * - the list has to be sorted
+ * - the comparison_fn should behave similar to strcmp(), returning 0 if it's a match, and "< 0" or "> 0" if it's not
  */
 struct list *list_deduplicate(struct list *list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
 
@@ -140,5 +143,24 @@ struct list *list_deduplicate(struct list *list, comparison_fn_t comparison_fn, 
  * - the comparison_fn should behave similar to strcmp(), returning 0 if it's a match, and "< 0" or "> 0" if it's not
  */
 struct list *list_filter_common_elements(struct list *list1, struct list *list2, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
+
+/**
+ * @brief sorts and removes all duplicates from a list of strings
+ */
+struct list *list_str_deduplicate(struct list *list);
+
+/**
+ * @brief removes the first occurrence of an item, it returns a pointer to the data removed from the list as long as the
+ * data was not freed, it returns NULL if the data was freed or nothing was removed (item not found)
+ *
+ * Function requirements:
+ * - the comparison_fn should behave similar to strcmp(), returning 0 if it's a match, and "< 0" or "> 0" if it's not
+ */
+void *list_remove(void *item_to_remove, struct list **list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
+
+/**
+ * @brief moves all occurrences of the specified item if found from list1 to list2
+ */
+void list_move_item(void *item_to_move, struct list **list1, struct list **list2, comparison_fn_t comparison_fn);
 
 #endif

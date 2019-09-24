@@ -388,3 +388,55 @@ struct list *list_filter_common_elements(struct list *list1, struct list *list2,
 
 	return preserver;
 }
+
+struct list *list_str_deduplicate(struct list *list)
+{
+	list = list_sort(list, list_strcmp);
+	return list_deduplicate(list, list_strcmp, free);
+}
+
+void *list_remove(void *item_to_remove, struct list **list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn)
+{
+	struct list *iter = NULL;
+	void *item = NULL;
+	int comp;
+
+	*list = iter = list_head(*list);
+
+	for (; iter; iter = iter->next) {
+
+		item = iter->data;
+
+		comp = comparison_fn(item, item_to_remove);
+		if (comp == 0) {
+			if (*list == iter) {
+				/* "*list" should always point to the head of the list,
+				 * if that is the element being removed, we need to
+				 * point to the new head */
+				*list = list_free_item(iter, list_free_data_fn);
+			} else {
+				list_free_item(iter, list_free_data_fn);
+			}
+			/* if the data was freed, return NULL, otherwise return the element
+			 * removed from the list */
+			if (list_free_data_fn) {
+				return NULL;
+			}
+			return item;
+		}
+	}
+
+	/* item not found */
+	return NULL;
+}
+
+void list_move_item(void *item_to_move, struct list **list1, struct list **list2, comparison_fn_t comparison_fn)
+{
+	void *item;
+
+	item = list_remove(item_to_move, list1, comparison_fn, NULL);
+	while (item) {
+		*list2 = list_prepend_data(*list2, item);
+		item = list_remove(item_to_move, list1, comparison_fn, NULL);
+	}
+}

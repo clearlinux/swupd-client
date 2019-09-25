@@ -944,22 +944,17 @@ int untar_full_download(void *data)
 	/* If valid target file already exists, we're done.
 	 * NOTE: this should NEVER happen given the checking that happens
 	 *       ahead of queueing a download.  But... */
-	if (lstat(targetfile, &stat) == 0) {
-		if (verify_file(file, targetfile)) {
-			unlink(tar_dotfile);
-			unlink(tarfile);
-			free_string(&tar_dotfile);
-			free_string(&tarfile);
-			free_string(&targetfile);
-			return 0;
-		} else {
-			unlink(tarfile);
-			unlink(targetfile);
-		}
-	} else if (lstat(tarfile, &stat) == 0) {
-		/* remove tar file from possible past failure */
+	if (verify_file(file, targetfile)) {
+		unlink(tar_dotfile);
 		unlink(tarfile);
+		free_string(&tar_dotfile);
+		free_string(&tarfile);
+		free_string(&targetfile);
+		return 0;
 	}
+
+	unlink(tarfile);
+	unlink(targetfile);
 
 	err = rename(tar_dotfile, tarfile);
 	if (err) {

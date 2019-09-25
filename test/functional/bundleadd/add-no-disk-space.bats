@@ -59,13 +59,12 @@ test_setup() {
 
 	run sudo sh -c "timeout 30 $SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
-	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
+	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Failed to retrieve 10 test-bundle manifest
-		Error: Unable to download manifest test-bundle version 10, exiting now
 		Failed to install 1 of 1 bundles
 	EOM
 	)

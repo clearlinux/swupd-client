@@ -39,8 +39,7 @@ test_setup() {
 		    new files         : 4
 		    deleted files     : 0
 		No extra files need to be downloaded
-		Staging file content
-		Applying update
+		Installing files...
 		Update was applied
 		Calling post-update helper scripts
 		Update successful - System updated from version 20 to version 30

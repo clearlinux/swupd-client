@@ -813,7 +813,7 @@ struct list *consolidate_files(struct list *files)
 		}
 	}
 
-	return list;
+	return list_head(list);
 }
 
 /*
@@ -1219,4 +1219,53 @@ int mom_get_manifests_list(struct manifest *mom, struct list **manifest_list, fi
 	progress_report(total, total);
 
 	return last_error;
+}
+
+int manifest_bundlename_strcmp(const void *a, const void *b)
+{
+	return strcmp(((struct manifest *)a)->component, (const char *)b);
+}
+
+int recurse_dependencies(struct manifest *mom, const char *bundle, struct list **manifests, filter_fn_t filter_fn)
+{
+	int err = 0;
+	struct manifest *manifest;
+	struct list *iter;
+
+	if (filter_fn && !filter_fn(bundle)) {
+		return 0;
+	}
+
+	if (list_search(*manifests, bundle, manifest_bundlename_strcmp)) {
+		return 0;
+	}
+
+	manifest = load_manifest_file(mom, mom_search_bundle(mom, bundle), &err);
+	if (!manifest) {
+		return err;
+	}
+
+	*manifests = list_prepend_data(*manifests, manifest);
+
+	for (iter = manifest->includes; iter; iter = iter->next) {
+		const char *b = iter->data;
+		err = recurse_dependencies(mom, b, manifests, filter_fn);
+		if (err) {
+			return err;
+		}
+	}
+
+	if (globals.skip_optional_bundles) {
+		return 0;
+	}
+
+	for (iter = manifest->optional; iter; iter = iter->next) {
+		const char *b = iter->data;
+		err = recurse_dependencies(mom, b, manifests, filter_fn);
+		if (err) {
+			return err;
+		}
+	}
+
+	return 0;
 }

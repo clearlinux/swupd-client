@@ -18,6 +18,7 @@ test_setup() {
 	hash=$(sudo "$SWUPD" hashdump --quiet "$TARGETDIR"/usr/bin/bar)
 	sudo cp "$TARGETDIR"/usr/bin/bar "$WEBDIR"/10/files/"$hash"
 	create_bundle -L -n test-bundle1 -f /usr/bin/bar:"$WEBDIR"/10/files/"$hash" "$TEST_NAME"
+	create_tar "$WEBDIR"/10/files/"$hash"
 
 	# create another bundle that includes two files:
 	# - /usr/bin/foo: not tracked but already existing in the target system (should be replaced)

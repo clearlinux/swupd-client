@@ -67,6 +67,36 @@ void manifest_free(struct manifest *manifest);
  */
 int mom_get_manifests_list(struct manifest *mom, struct list **manifest_list, filter_fn_t filter_fn);
 
+/**
+ * @brief Create a list of manifests based on bundle and bundle dependencies.
+ *
+ * Explore bundle and its dependencies, optional and includes, recursively
+ * adding all unique occurrences to @c manifests list. Filter is used to check
+ * if a bundle should be explored or not.
+ *
+ * @param mom The Manifest of Manifest that @c bundle is in.
+ * @param bundle The bundle name to explore
+ * @param a pointer to a list that will be used to store unique bundle
+ *        occurrences.
+ * @param filter_fn a filter to apply to bundle names. If filter_fn() returns
+ *        false the bundle will be skipped.
+ * @return 0 on success or a negative error code on errors.
+ *
+ * @note If filter_fn(b) == false, where b is bundle or any of its dependencies,
+ *       the bundle will not be added to the list and its dependencies aren't
+ *       going to be explored.
+ * @note if bundle is already in the list of manifests it won't be explored.
+ *
+ * @example
+ *      struct list *manifest_list = NULL;
+ *      err = recurse_dependencies(mom, "my_bundle", &manifest_list,
+ *                                 is_installed_bundle);
+ * This code will add to manifest_list my_bundle and all its direct and indirect
+ * dependencies that are installed in the system. Note that if my_bundle isn't
+ * installed the list will remain empty.
+ */
+int recurse_dependencies(struct manifest *mom, const char *bundle, struct list **manifests, filter_fn_t filter_fn);
+
 #ifdef __cplusplus
 }
 #endif

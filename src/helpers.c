@@ -462,33 +462,6 @@ int swupd_rm(const char *filename)
 	return ret;
 }
 
-int rm_bundle_file(const char *bundle)
-{
-	char *filename = NULL;
-	int ret = 0;
-	struct stat statb;
-
-	string_or_die(&filename, "%s/%s/%s", globals.path_prefix, BUNDLES_DIR, bundle);
-
-	if (stat(filename, &statb) == -1) {
-		goto out;
-	}
-
-	if (S_ISREG(statb.st_mode)) {
-		if (unlink(filename) != 0) {
-			ret = -1;
-			goto out;
-		}
-	} else {
-		ret = -1;
-		goto out;
-	}
-
-out:
-	free_string(&filename);
-	return ret;
-}
-
 void free_file_data(void *data)
 {
 	struct file *file = (struct file *)data;

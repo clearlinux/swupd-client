@@ -289,7 +289,6 @@ void v_lockfile(void);
 
 /* helpers.c */
 extern int swupd_rm(const char *path);
-extern int rm_bundle_file(const char *bundle);
 extern void print_manifest_files(struct manifest *m);
 extern void swupd_deinit(void);
 enum swupd_code swupd_init(enum swupd_init_config config);

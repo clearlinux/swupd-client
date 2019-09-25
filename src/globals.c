@@ -311,20 +311,23 @@ bool set_path_prefix(char *path)
 		return false;
 	}
 
-	ret = stat(path, &statbuf);
-	// If path doesn't exit tries to create it
-	if (ret < 0 && errno == ENOENT) {
+	new_path = realpath(path, NULL);
+	if (!new_path) {
+		// If path doesn't exit tries to create it
 		if (mkdir_p(path) < 0) {
 			goto error;
 		}
-		ret = stat(path, &statbuf);
+		new_path = realpath(path, NULL);
 	}
-	if (ret < 0 || !S_ISDIR(statbuf.st_mode)) {
+	if (!new_path) {
 		goto error;
 	}
 
-	new_path = realpath(path, NULL);
-	if (!new_path) {
+	ret = stat(new_path, &statbuf);
+	if (ret < 0 && errno == ENOENT) {
+		goto error;
+	}
+	if (!S_ISDIR(statbuf.st_mode)) {
 		goto error;
 	}
 

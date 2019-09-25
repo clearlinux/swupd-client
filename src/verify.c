@@ -252,6 +252,7 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 	if (cmdline_option_install) {
 		progress_set_next_step("download_packs");
 		print("\n");
+		progress_report_indeterminate();
 		get_all_files(official_manifest, subs);
 	}
 
@@ -263,6 +264,7 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 
 	progress_set_next_step("download_fullfiles");
 	print("\n");
+	progress_report_indeterminate();
 	ret = download_fullfiles(official_manifest->files, NULL);
 	if (ret) {
 		error("Unable to download necessary files for this OS release\n");

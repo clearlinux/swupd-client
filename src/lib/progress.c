@@ -169,6 +169,13 @@ void progress_set_spinner(bool status_flag)
 	}
 }
 
+void progress_report_indeterminate()
+{
+	if (progress_function) {
+		progress_report(-1, 100);
+	}
+}
+
 void progress_disable(bool disable)
 {
 	no_progress_report = disable;

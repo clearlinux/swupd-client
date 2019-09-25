@@ -31,6 +31,7 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 8, "stepCompletion" : -1, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "consolidate_files" },
+		{ "type" : "progress", "currentStep" : 5, "totalSteps" : 8, "stepCompletion" : -1, "stepDescription" : "download_packs" },
 		{ "type" : "info", "msg" : "Downloading packs for: " },
 		{ "type" : "info", "msg" : " - os-core " },
 	EOM
@@ -41,6 +42,7 @@ test_setup() {
 		{ "type" : "info", "msg" : "Checking for corrupt files " },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 8, "stepCompletion" : 50, "stepDescription" : "check_files_hash" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "check_files_hash" },
+		{ "type" : "progress", "currentStep" : 7, "totalSteps" : 8, "stepCompletion" : -1, "stepDescription" : "download_fullfiles" },
 		{ "type" : "info", "msg" : "No extra files need to be downloaded " },
 		{ "type" : "progress", "currentStep" : 7, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "download_fullfiles" },
 		{ "type" : "info", "msg" : " Installing base OS and selected bundles " },

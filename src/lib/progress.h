@@ -96,6 +96,13 @@ struct step progress_get_step(void);
 void progress_complete_step(void);
 
 /**
+ * @brief Marks the current step as indeterminate (progress = -1%).
+ *
+ * This is useful in cases json-output needs to create a custom slider
+ */
+void progress_report_indeterminate(void);
+
+/**
  * @brief It reports the partial progress of the step. Useful in long running steps.
  */
 void progress_report(double, double);

@@ -49,6 +49,7 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 5, "totalSteps" : 10, "stepCompletion" : 88, "stepDescription" : "check_files_hash" },
 		{ "type" : "progress", "currentStep" : 5, "totalSteps" : 10, "stepCompletion" : 94, "stepDescription" : "check_files_hash" },
 		{ "type" : "progress", "currentStep" : 5, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "check_files_hash" },
+		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 10, "stepCompletion" : -1, "stepDescription" : "download_fullfiles" },
 		{ "type" : "info", "msg" : "Starting download of remaining update content. This may take a while... " },
 	EOM
 	)

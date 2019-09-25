@@ -32,8 +32,7 @@ test_setup() {
 		    new files         : 0
 		    deleted files     : 0
 		Starting download of remaining update content. This may take a while...
-		Staging file content
-		Applying update
+		Installing files...
 		Update was applied
 		Calling post-update helper scripts
 		1 files were not in a pack

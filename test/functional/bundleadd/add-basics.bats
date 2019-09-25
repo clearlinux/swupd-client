@@ -46,7 +46,7 @@ global_teardown() {
 		Loading required manifests...
 		No packs need to be downloaded
 		Starting download of remaining update content. This may take a while...
-		Installing bundle(s) files...
+		Installing files...
 		Calling post-update helper scripts
 		Successfully installed 1 bundle
 	EOM
@@ -65,7 +65,7 @@ global_teardown() {
 		Loading required manifests...
 		No packs need to be downloaded
 		Starting download of remaining update content. This may take a while...
-		Installing bundle(s) files...
+		Installing files...
 		Calling post-update helper scripts
 		Successfully installed 2 bundles
 	EOM
@@ -91,7 +91,7 @@ global_teardown() {
 		1 bundle was already installed
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -105,7 +105,7 @@ global_teardown() {
 		Failed to install 1 of 1 bundles
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -115,12 +115,12 @@ global_teardown() {
 	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
-		Warning: Bundle "fake-bundle2" is invalid, skipping it...
 		Warning: Bundle "fake-bundle1" is invalid, skipping it...
+		Warning: Bundle "fake-bundle2" is invalid, skipping it...
 		Failed to install 2 of 2 bundles
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -130,12 +130,12 @@ global_teardown() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
-		Warning: Bundle "test-bundle4" is already installed, skipping it...
 		Warning: Bundle "test-bundle3" is already installed, skipping it...
+		Warning: Bundle "test-bundle4" is already installed, skipping it...
 		2 bundles were already installed
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -151,7 +151,7 @@ global_teardown() {
 		1 bundle was already installed
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 
@@ -168,7 +168,7 @@ global_teardown() {
 		Warning: Bundle "test-bundle3" is already installed, skipping it...
 		No packs need to be downloaded
 		Starting download of remaining update content. This may take a while...
-		Installing bundle(s) files...
+		Installing files...
 		Calling post-update helper scripts
 		Successfully installed 1 bundle
 		1 bundle was already installed
@@ -191,7 +191,7 @@ global_teardown() {
 		Warning: Bundle "fake-bundle" is invalid, skipping it...
 		No packs need to be downloaded
 		Starting download of remaining update content. This may take a while...
-		Installing bundle(s) files...
+		Installing files...
 		Calling post-update helper scripts
 		Failed to install 1 of 2 bundles
 	EOM
@@ -212,7 +212,7 @@ global_teardown() {
 		Warning: Bundle "test-bundle3" is already installed, skipping it...
 		No packs need to be downloaded
 		Starting download of remaining update content. This may take a while...
-		Installing bundle(s) files...
+		Installing files...
 		Calling post-update helper scripts
 		Failed to install 1 of 2 bundles
 		1 bundle was already installed

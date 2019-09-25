@@ -377,7 +377,7 @@ which ends after rename_all_files_to_final() succeeds
 
 	/* starting at list_head in the filename alpha-sorted updates list
 	 * means node directories are added before leaf files */
-	info("Staging file content\n");
+	info("Installing files...\n");
 	iter = list_head(files);
 	while (iter) {
 		file = iter->data;
@@ -405,7 +405,6 @@ which ends after rename_all_files_to_final() succeeds
 	sync();
 
 	/* rename to apply update */
-	info("Applying update\n");
 	ret = rename_all_files_to_final(files);
 	if (ret != 0) {
 		ret = SWUPD_COULDNT_RENAME_FILE;

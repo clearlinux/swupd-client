@@ -32,8 +32,7 @@ test_setup() {
 		    changed files     : 4
 		    new files         : 0
 		    deleted files     : 0
-		Staging file content
-		Applying update
+		Installing files...
 		Update was applied
 		Calling post-update helper scripts
 		Update successful - System updated from version 10 to version 20

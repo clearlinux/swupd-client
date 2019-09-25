@@ -329,3 +329,27 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 
 	return swupd_curl_parallel_download_end(download_handle, NULL);
 }
+
+int download_zero_packs(struct list *bundles, struct manifest *mom)
+{
+	struct list *subs = NULL, *iter;
+	int ret;
+
+	for (iter = bundles; iter; iter = iter->next) {
+		struct manifest *m = iter->data;
+		struct sub *sub;
+
+		sub = calloc(1, sizeof(struct sub));
+		ON_NULL_ABORT(sub);
+		sub->component = m->component;
+		sub->version = m->version;
+
+		subs = list_prepend_data(subs, sub);
+	}
+
+	ret = download_subscribed_packs(subs, mom, false);
+
+	list_free_list_and_data(subs, free);
+
+	return ret;
+}

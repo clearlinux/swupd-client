@@ -28,8 +28,7 @@ test_setup() {
 		    new files         : 4
 		    deleted files     : 0
 		No extra files need to be downloaded
-		Staging file content
-		Applying update
+		Installing files...
 		Update was applied
 		Calling post-update helper scripts
 		Warning: helper script ($TEST_DIRNAME/testfs/target-dir//usr/bin/clr-boot-manager) not found, it will be skipped

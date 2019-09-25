@@ -165,159 +165,189 @@ out:
 	free_string(&dst);
 }
 
-static enum swupd_code install_bundles(struct list *bundles, struct list **subs, struct manifest *mom)
+static int check_disk_space_availability(struct list *to_install_bundles)
 {
-	int ret;
-	int bundles_failed = 0;
+	char *filepath = NULL;
+	long fs_free = 0;
+	long bundle_size = 0;
+
+	if (globals.skip_diskspace_check) {
+		return 0;
+	}
+
+	timelist_timer_start(globals.global_times, "Check disk space availability");
+	bundle_size = get_manifest_list_contentsize(to_install_bundles);
+	filepath = mk_full_filename(globals.path_prefix, "/usr/");
+
+	/* Calculate free space on filepath */
+	fs_free = get_available_space(filepath);
+	free_string(&filepath);
+	timelist_timer_stop(globals.global_times); // closing: Check disk space availability
+
+	/* Add 10% to bundle_size as a 'fudge factor' */
+	if (((bundle_size * 1.1) > fs_free) || fs_free < 0) {
+		if (fs_free > 0) {
+			error("Bundle too large by %ldM\n", (bundle_size - fs_free) / 1000 / 1000);
+		} else {
+			error("Unable to determine free space on filesystem\n");
+		}
+
+		info("NOTE: currently, swupd only checks /usr/ "
+		     "(or the passed-in path with /usr/ appended) for available space\n");
+		info("To skip this error and install anyways, "
+		     "add the --skip-diskspace-check flag to your command\n");
+
+		return -1;
+	}
+
+	return 0;
+}
+
+void print_summary(int bundles_requested, int already_installed, int bundles_installed, int dependencies_installed)
+{
+	/* print totals */
+	int bundles_failed = bundles_requested - bundles_installed - already_installed;
+	if (bundles_failed > 0) {
+		print("Failed to install %i of %i bundles\n", bundles_failed, bundles_requested - already_installed);
+	} else if (bundles_installed > 0) {
+		print("Successfully installed %i bundle%s\n", bundles_installed, (bundles_installed > 1 ? "s" : ""));
+	}
+	if (dependencies_installed > 0) {
+		print("%i bundle%s\n", dependencies_installed, (dependencies_installed > 1 ? "s were installed as dependencies" : " was installed as dependency"));
+	}
+	if (already_installed > 0) {
+		print("%i bundle%s already installed\n", already_installed, (already_installed > 1 ? "s were" : " was"));
+	}
+}
+
+static bool is_not_installed_bundle(const void *bundle)
+{
+	return !is_installed_bundle(bundle);
+}
+
+static bool is_installed_bundle_data(const void *bundle)
+{
+	return is_installed_bundle(bundle);
+}
+
+static int compute_bundle_dependecies(struct manifest *mom, struct list *bundles, struct list **to_install_bundles, int *already_installed, int *invalid_bundles)
+{
+	struct list *iter;
+	int err;
+
+	/* print a message if any of the requested bundles is already installed
+	   or is invalid.
+	 */
+	for (iter = bundles; iter; iter = iter->next) {
+		struct file *file;
+		char *bundle = iter->data;
+
+		if (is_installed_bundle(bundle)) {
+			warn("Bundle \"%s\" is already installed, skipping it...\n", bundle);
+			(*already_installed)++;
+			/* track as installed since the user tried to install */
+			track_installed(bundle);
+			continue;
+		}
+
+		file = mom_search_bundle(mom, bundle);
+		if (!file) {
+			warn("Bundle \"%s\" is invalid, skipping it...\n", bundle);
+			(*invalid_bundles)++;
+
+			continue;
+		}
+
+		/* warn the user if the bundle to be installed is experimental */
+		if (file->is_experimental) {
+			warn("Bundle %s is experimental\n", bundle);
+		}
+
+		err = recurse_dependencies(mom, bundle, to_install_bundles, is_not_installed_bundle);
+		if (err) {
+			return err;
+		}
+	}
+
+	return 0;
+}
+
+static enum swupd_code install_bundles(struct list *bundles, struct manifest *mom)
+{
+	enum swupd_code ret = SWUPD_OK;
+	int err = 0;
 	int already_installed = 0;
 	int bundles_installed = 0;
 	int dependencies_installed = 0;
-	int bundles_requested = list_len(bundles);
-	long bundle_size = 0;
-	long fs_free = 0;
-	struct file *file;
+
+	int bundles_requested;
 	struct list *iter;
-	struct list *installed_bundles = NULL;
 	struct list *installed_files = NULL;
-	struct list *to_install_bundles = NULL;
 	struct list *to_install_files = NULL;
-	struct list *current_subs = NULL;
-	bool invalid_bundle_provided = false;
+	int invalid_bundles = 0;
+	struct list *installed_bundles = NULL;
+	struct list *to_install_bundles = NULL;
 
 	/* step 1: get subscriptions for bundles to be installed */
 	info("Loading required manifests...\n");
 	timelist_timer_start(globals.global_times, "Add bundles and recurse");
 	progress_set_step(1, "load_manifests");
-	ret = add_subscriptions(bundles, subs, mom, false, 0);
 
-	/* print a message if any of the requested bundles is already installed */
-	iter = list_head(bundles);
-	while (iter) {
-		char *bundle;
-		bundle = iter->data;
-		iter = iter->next;
-		if (is_installed_bundle(bundle)) {
-			warn("Bundle \"%s\" is already installed, skipping it...\n", bundle);
-			already_installed++;
-			/* track as installed since the user tried to install */
-			track_installed(bundle);
-		}
-		/* warn the user if the bundle to be installed is experimental */
-		file = mom_search_bundle(mom, bundle);
-		if (file && file->is_experimental) {
-			warn("Bundle %s is experimental\n", bundle);
-		}
-	}
-
-	/* Use a bitwise AND with the add_sub_NEW mask to determine if at least
-	 * one new bundle was subscribed */
-	if (!(ret & add_sub_NEW)) {
-		/* something went wrong, nothing will be installed */
-		if (ret & add_sub_ERR) {
-			ret = SWUPD_COULDNT_LOAD_MANIFEST;
-		} else if (ret & add_sub_BADNAME) {
-			ret = SWUPD_INVALID_BUNDLE;
-		} else {
-			/* this means the user tried to add a bundle that
-			 * was already installed, nothing to do here */
-			ret = SWUPD_OK;
-		}
+	err = mom_get_manifests_list(mom, &installed_bundles, is_installed_bundle_data);
+	if (err) {
+		ret = SWUPD_COULDNT_LOAD_MANIFEST;
 		goto out;
 	}
-	/* If at least one of the provided bundles was invalid set this flag
-	 * so we can check it before exiting the program */
-	if (ret & add_sub_BADNAME) {
-		invalid_bundle_provided = true;
+
+	// check for errors
+	err = compute_bundle_dependecies(mom, bundles, &to_install_bundles, &already_installed, &invalid_bundles);
+	if (err) {
+		ret = SWUPD_RECURSE_MANIFEST;
+		goto out;
 	}
-
-	/* Set the version of the subscribed bundles to the one they last changed */
-	set_subscription_versions(mom, NULL, subs);
-
-	/* Load the manifest of all bundles to be installed */
-	to_install_bundles = recurse_manifest(mom, *subs, NULL, false, NULL);
 	if (!to_install_bundles) {
-		error("Cannot load to install bundles\n");
-		ret = SWUPD_RECURSE_MANIFEST;
 		goto out;
 	}
-
-	/* Load the manifest of all bundles already installed */
-	read_subscriptions(&current_subs);
-	set_subscription_versions(mom, NULL, &current_subs);
-	installed_bundles = recurse_manifest(mom, current_subs, NULL, false, NULL);
-	if (!installed_bundles) {
-		error("Cannot load installed bundles\n");
-		ret = SWUPD_RECURSE_MANIFEST;
-		goto out;
-	}
-	mom->submanifests = installed_bundles;
-
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Add bundles and recurse
 
 	/* Step 2: Get a list with all files needed to be installed for the requested bundles */
 	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
 	progress_set_step(2, "consolidate_files");
 
-	/* get all files already installed in the target system */
 	installed_files = files_from_bundles(installed_bundles);
-	installed_files = consolidate_files(installed_files);
-	mom->files = installed_files;
 	installed_files = filter_out_deleted_files(installed_files);
+	installed_files = consolidate_files(installed_files);
 
-	/* get all the files included in the bundles to be added */
 	to_install_files = files_from_bundles(to_install_bundles);
-	to_install_files = consolidate_files(to_install_files);
 	to_install_files = filter_out_deleted_files(to_install_files);
-
-	/* from the list of files to be installed, remove those files already in the target system */
-	to_install_files = filter_out_existing_files(to_install_files, installed_files);
+	to_install_files = consolidate_files(to_install_files);
 
 	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Consolidate files from bundles
 
-	/* Step 3: Check if we have enough space */
-	progress_set_step(3, "check_disk_space_availability");
-	if (!globals.skip_diskspace_check) {
-		timelist_timer_start(globals.global_times, "Check disk space availability");
-		char *filepath = NULL;
-
-		bundle_size = get_manifest_list_contentsize(to_install_bundles);
-		filepath = mk_full_filename(globals.path_prefix, "/usr/");
-
-		/* Calculate free space on filepath */
-		fs_free = get_available_space(filepath);
-		free_string(&filepath);
-
-		/* Add 10% to bundle_size as a 'fudge factor' */
-		if (((bundle_size * 1.1) > fs_free) || fs_free < 0) {
-			ret = SWUPD_DISK_SPACE_ERROR;
-
-			if (fs_free > 0) {
-				error("Bundle too large by %ldM\n", (bundle_size - fs_free) / 1000 / 1000);
-			} else {
-				error("Unable to determine free space on filesystem\n");
-			}
-
-			info("NOTE: currently, swupd only checks /usr/ "
-			     "(or the passed-in path with /usr/ appended) for available space\n");
-			info("To skip this error and install anyways, "
-			     "add the --skip-diskspace-check flag to your command\n");
-
-			goto out;
-		}
-		timelist_timer_stop(globals.global_times); // closing: Check disk space availability
+	if (!to_install_files) {
+		goto out;
 	}
+
+	///* Step 3: Check if we have enough space */
+	progress_set_step(3, "check_disk_space_availability");
+	err = check_disk_space_availability(to_install_bundles);
 	progress_complete_step();
+	if (err) {
+		ret = SWUPD_DISK_SPACE_ERROR;
+		goto out;
+	}
 
 	/* step 4: download necessary packs */
 	timelist_timer_start(globals.global_times, "Download packs");
 	progress_set_step(4, "download_packs");
 
-	(void)rm_staging_dir_contents("download");
+	if (rm_staging_dir_contents("download") < 0) {
+		debug("rm_staging_dir_contents failed - resuming operation");
+	}
 
-	if (list_longer_than(to_install_files, 10)) {
-		download_subscribed_packs(*subs, mom, true);
+	if (list_longer_than(to_install_files, 10 * list_len(to_install_bundles))) {
+		download_zero_packs(to_install_bundles, mom);
 	} else {
 		/* the progress would be completed within the
 		 * download_subscribed_packs function, since we
@@ -330,125 +360,39 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	/* step 5: Download missing files */
 	timelist_timer_start(globals.global_times, "Download missing files");
 	progress_set_step(5, "download_fullfiles");
-	ret = download_fullfiles(to_install_files, NULL);
-	if (ret) {
+	err = download_fullfiles(to_install_files, NULL);
+	timelist_timer_stop(globals.global_times); // closing: Download missing files
+	if (err) {
 		/* make sure the return code is positive */
-		ret = abs(ret);
 		error("Could not download some files from bundles, aborting bundle installation\n");
+		ret = SWUPD_COULDNT_DOWNLOAD_FILE;
 		goto out;
 	}
-	timelist_timer_stop(globals.global_times); // closing: Download missing files
 
 	/* step 6: Install all bundle(s) files into the fs */
 	timelist_timer_start(globals.global_times, "Installing bundle(s) files onto filesystem");
 	progress_set_step(6, "install_files");
 
-	info("Installing bundle(s) files...\n");
-
-	/* This loop does an initial check to verify the hash of every downloaded file to install,
-	 * if the hash is wrong it is removed from staging area so it can be re-downloaded */
-	char *hashpath;
-	iter = list_head(to_install_files);
-	while (iter) {
-		file = iter->data;
-		iter = iter->next;
-
-		string_or_die(&hashpath, "%s/staged/%s", globals.state_dir, file->hash);
-
-		if (access(hashpath, F_OK) < 0) {
-			/* the file does not exist in the staged directory, it will need
-			 * to be downloaded again */
-			free_string(&hashpath);
-			continue;
-		}
-
-		/* make sure the file is not corrupt */
-		if (!verify_file(file, hashpath)) {
-			warn("hash check failed for %s\n", file->filename);
-			info("         will attempt to download fullfile for %s\n", file->filename);
-			ret = sys_rm(hashpath);
-			if (ret != -ENOENT) {
-				error("could not remove bad file %s\n", hashpath);
-				ret = SWUPD_COULDNT_REMOVE_FILE;
-				free_string(&hashpath);
-				goto out;
-			}
-			// successfully removed, continue and check the next file
-			free_string(&hashpath);
-			continue;
-		}
-		free_string(&hashpath);
-	}
-
-	/*
-	 * NOTE: The following two loops are used to install the files in the target system:
-	 *  - the first loop stages the file
-	 *  - the second loop renames the files to their final name in the target system
-	 *
-	 * This process is done in two separate loops to reduce the chance of end up
-	 * with a corrupt system if for some reason the process is aborted during this stage
-	 */
-	unsigned int list_length = list_len(to_install_files) * 2; // we are using two loops so length is times 2
-	unsigned int complete = 0;
-
-	/* Copy files to their final destination */
-	iter = list_head(to_install_files);
-	while (iter) {
-		file = iter->data;
-		iter = iter->next;
-		complete++;
-
-		if (file->is_deleted || file->do_not_update || ignore(file)) {
-			continue;
-		}
-
-		/* apply the heuristics for the file so the correct post-actions can
-		 * be completed */
+	// Apply heuristics to all files
+	timelist_timer_start(globals.global_times, "Appling heuristics");
+	for (iter = to_install_files; iter; iter = iter->next) {
+		struct file *file = iter->data;
+		(void)ignore(file);
 		apply_heuristics(file);
-
-		/* stage the file:
-		 *  - make sure the directory where the file will be copied to exists
-		 *  - if the file being staged already exists in the system make sure its
-		 *    type hasn't changed, if it has, remove it so it can be replaced
-		 *  - copy the file/directory to its final destination; if it is a file,
-		 *    keep its name with a .update prefix, if it is a directory, it will already
-		 *    be copied with its final name
-		 * Note: to avoid too much recursion, do not send the mom to do_staging so it
-		 *       doesn't try to fix failures, we will handle those below */
-		ret = do_staging(file, mom);
-		if (ret) {
-			goto out;
-		}
-
-		progress_report(complete, list_length);
 	}
+	timelist_timer_stop(globals.global_times); // closing: Appling heuristics
 
-	/* Rename the files to their final form */
-	iter = list_head(to_install_files);
-	while (iter) {
-		file = iter->data;
-		iter = iter->next;
-		complete++;
-
-		if (file->is_deleted || file->do_not_update || ignore(file)) {
-			continue;
-		}
-
-		/* This was staged by verify_fix_path */
-		if (!file->staging && !file->is_dir) {
-			/* the current file struct doesn't have the name of the "staging" file
-			 * since it was staged by verify_fix_path, the staged file is in the
-			 * file struct in the MoM, so we need to load that one instead
-			 * so rename_staged_file_to_final works properly */
-			file = search_file_in_manifest(mom, file->filename);
-		}
-
-		rename_staged_file_to_final(file);
-
-		progress_report(complete, list_length);
+	//TODO: Improve staging functions so we won't need this hack
+	globals.update_count = list_len(to_install_files);
+	globals.update_skip = 0;
+	mom->files = installed_files;
+	ret = staging_install_all_files(to_install_files, mom);
+	mom->files = NULL;
+	if (ret) {
+		error("Failed to install required files");
+		goto out;
 	}
-	sync();
-	timelist_timer_stop(globals.global_times); // closing: Installing bundle(s) files onto filesystem
+	timelist_timer_stop(globals.global_times); // closing: Installing bundles
 
 	/* step 7: Run any scripts that are needed to complete update */
 	timelist_timer_start(globals.global_times, "Run Scripts");
@@ -477,57 +421,56 @@ out:
 		}
 	}
 
-	/* print totals */
-	if (ret && bundles_installed != 0) {
-		/* if this point is reached with a nonzero return code and bundles_installed=0 it means that
-		* while trying to install the bundles some error occurred which caused the whole installation
-		* process to be aborted, so none of the bundles got installed. */
-		bundles_failed = bundles_requested - already_installed;
-	} else {
-		bundles_failed = bundles_requested - bundles_installed - already_installed;
-	}
+	bundles_requested = list_len(bundles);
+	print_summary(bundles_requested, already_installed, bundles_installed, dependencies_installed);
 
-	if (bundles_failed > 0) {
-		print("Failed to install %i of %i bundles\n", bundles_failed, bundles_requested - already_installed);
-	} else if (bundles_installed > 0) {
-		print("Successfully installed %i bundle%s\n", bundles_installed, (bundles_installed > 1 ? "s" : ""));
-	}
-	if (dependencies_installed > 0) {
-		print("%i bundle%s\n", dependencies_installed, (dependencies_installed > 1 ? "s were installed as dependencies" : " was installed as dependency"));
-	}
-	if (already_installed > 0) {
-		print("%i bundle%s already installed\n", already_installed, (already_installed > 1 ? "s were" : " was"));
-	}
-
-	/* cleanup */
-	if (current_subs) {
-		free_subscriptions(&current_subs);
-	}
-	if (to_install_files) {
-		list_free_list(to_install_files);
-	}
-	if (to_install_bundles) {
-		list_free_list_and_data(to_install_bundles, manifest_free_data);
-	}
 	/* if one or more of the requested bundles was invalid, and
 	 * there is no other error return SWUPD_INVALID_BUNDLE */
-	if (invalid_bundle_provided && !ret) {
+	if (invalid_bundles > 0 && ret == SWUPD_OK) {
 		ret = SWUPD_INVALID_BUNDLE;
 	}
+
+	list_free_list(installed_files);
+	list_free_list(to_install_files);
+	list_free_list_and_data(to_install_bundles, manifest_free_data);
+	list_free_list_and_data(installed_bundles, manifest_free_data);
+
 	return ret;
+}
+
+static struct list *generate_bundles_to_install(char **bundles)
+{
+	struct list *aliases = NULL;
+	struct list *bundles_list = NULL;
+
+	aliases = get_alias_definitions();
+	for (; *bundles; ++bundles) {
+		struct list *alias_bundles = get_alias_bundles(aliases, *bundles);
+		char *alias_list_str = string_join(", ", alias_bundles);
+
+		if (strcmp(*bundles, alias_list_str) != 0) {
+			info("Alias %s will install bundle(s): %s\n", *bundles, alias_list_str);
+		}
+		free_string(&alias_list_str);
+		bundles_list = list_concat(alias_bundles, bundles_list);
+	}
+
+	list_free_list_and_data(aliases, free_alias_lookup);
+	bundles_list = list_sort(bundles_list, list_strcmp);
+	bundles_list = list_deduplicate(bundles_list, list_strcmp, free);
+
+	return bundles_list;
 }
 
 /* Bundle install one ore more bundles passed in bundles
  * param as a null terminated array of strings
  */
-enum swupd_code install_bundles_frontend(char **bundles)
+enum swupd_code main_bundle_add()
 {
 	int ret = 0;
 	int current_version;
-	struct list *aliases = NULL;
 	struct list *bundles_list = NULL;
 	struct manifest *mom;
-	struct list *subs = NULL;
 	char *bundles_list_str = NULL;
 	bool mix_exists;
 
@@ -557,22 +500,11 @@ enum swupd_code install_bundles_frontend(char **bundles)
 	timelist_timer_stop(globals.global_times); // closing: Load MoM
 
 	timelist_timer_start(globals.global_times, "Prepend bundles to list");
-	aliases = get_alias_definitions();
-	for (; *bundles; ++bundles) {
-		struct list *alias_bundles = get_alias_bundles(aliases, *bundles);
-		char *alias_list_str = string_join(", ", alias_bundles);
-
-		if (strcmp(*bundles, alias_list_str) != 0) {
-			info("Alias %s will install bundle(s): %s\n", *bundles, alias_list_str);
-		}
-		free_string(&alias_list_str);
-		bundles_list = list_concat(alias_bundles, bundles_list);
-	}
-	list_free_list_and_data(aliases, free_alias_lookup);
+	bundles_list = generate_bundles_to_install(bundles);
 	timelist_timer_stop(globals.global_times); // closing: Prepend bundles to list
 
 	timelist_timer_start(globals.global_times, "Install bundles");
-	ret = install_bundles(bundles_list, &subs, mom);
+	ret = install_bundles(bundles_list, mom);
 	timelist_timer_stop(globals.global_times); // closing: Install bundles
 
 	timelist_print_stats(globals.global_times);
@@ -593,7 +525,6 @@ clean_and_exit:
 
 	list_free_list_and_data(bundles_list, free);
 	free_string(&bundles_list_str);
-	free_subscriptions(&subs);
 	swupd_deinit();
 
 	return ret;
@@ -622,7 +553,7 @@ enum swupd_code bundle_add_main(int argc, char **argv)
 	}
 	progress_init_steps("bundle-add", steps_in_bundleadd);
 
-	ret = install_bundles_frontend(bundles);
+	ret = main_bundle_add();
 
 	progress_finish_steps(ret);
 	return ret;

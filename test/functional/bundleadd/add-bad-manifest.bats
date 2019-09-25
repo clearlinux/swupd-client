@@ -11,7 +11,10 @@ test_setup() {
 	sudo sed -i "s/filecount:.*/filecount:\\t9000000/" "$manifest"
 	sudo rm "$TEST_NAME"/web-dir/10/Manifest.test-bundle.tar
 	create_tar "$TEST_NAME"/web-dir/10/Manifest.test-bundle
+
+	create_tar "$TEST_NAME"/web-dir/10/Manifest.test-bundle
 	update_hashes_in_mom "$TEST_NAME"/web-dir/10/Manifest.MoM
+
 }
 
 @test "ADD016: Try adding a bundle with invalid number of files in manifest" {
@@ -24,7 +27,6 @@ test_setup() {
 		Warning: Removing corrupt Manifest.test-bundle artifacts and re-downloading...
 		Error: Preposterous (9000000) number of files in test-bundle Manifest, more than 4 million skipping
 		Error: Failed to load 10 test-bundle manifest
-		Error: Unable to download manifest test-bundle version 10, exiting now
 		Failed to install 1 of 1 bundles
 	EOM
 	)

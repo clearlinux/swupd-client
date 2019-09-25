@@ -93,6 +93,7 @@ int rm_staging_dir_contents(const char *rel_path)
 
 		ret = remove(filename);
 		if (ret != 0) {
+			debug("Failed to remove file %s\n", filename);
 			free_string(&filename);
 			break;
 		}

@@ -346,6 +346,26 @@ struct list *list_deduplicate(struct list *list, comparison_fn_t comparison_fn, 
 	return list;
 }
 
+struct list *list_filter_elements(struct list *list, filter_fn_t filter_fn, list_free_data_fn_t list_free_data_fn)
+{
+	struct list *iter, *next;
+
+	iter = list = list_head(list);
+	while (iter) {
+		next = iter->next;
+		if (!filter_fn(iter->data)) {
+			list_free_item(iter, list_free_data_fn);
+			if (iter == list) {
+				list = next;
+			}
+		}
+
+		iter = next;
+	}
+
+	return list;
+}
+
 struct list *list_filter_common_elements(struct list *list1, struct list *list2, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn)
 {
 	struct list *iter1, *iter2 = NULL;

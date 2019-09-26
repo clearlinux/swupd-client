@@ -131,6 +131,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Installing OS version 10 (latest)
 		Downloading missing manifests...
+		Warning: hash check failed for Manifest.os-core for version 10. Deleting it
 		Warning: Removing corrupt Manifest.os-core artifacts and re-downloading...
 		No packs need to be downloaded
 		Checking for corrupt files

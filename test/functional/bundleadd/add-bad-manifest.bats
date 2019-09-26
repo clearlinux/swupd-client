@@ -11,7 +11,7 @@ test_setup() {
 	sudo sed -i "s/filecount:.*/filecount:\\t9000000/" "$manifest"
 	sudo rm "$TEST_NAME"/web-dir/10/Manifest.test-bundle.tar
 	create_tar "$TEST_NAME"/web-dir/10/Manifest.test-bundle
-
+	update_hashes_in_mom "$TEST_NAME"/web-dir/10/Manifest.MoM
 }
 
 @test "ADD016: Try adding a bundle with invalid number of files in manifest" {

@@ -496,10 +496,7 @@ retry_load:
 		return NULL;
 	}
 
-	if (!header_only) {
-		ret = verify_bundle_hash(mom, file);
-	}
-
+	ret = verify_bundle_hash(mom, file);
 	if (ret != 0) {
 		if (retried == false) {
 			remove_manifest_files(file->filename, version, file->hash);

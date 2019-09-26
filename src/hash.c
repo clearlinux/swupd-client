@@ -207,7 +207,8 @@ enum swupd_code compute_hash(struct file *file, char *filename)
 	}
 	blob = mmap(NULL, file->stat.st_size, PROT_READ, MAP_PRIVATE, fileno(fl), 0);
 	if (blob == MAP_FAILED && file->stat.st_size != 0) {
-		abort();
+		fclose(fl);
+		return SWUPD_COMPUTE_HASH_ERROR;
 	}
 
 	hmac_compute_key(filename, &file->stat, key, &key_len, file->use_xattrs);

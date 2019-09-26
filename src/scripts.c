@@ -39,7 +39,7 @@
 // to call another function with variable number of parameters
 #define run_script_if_exists(_scriptname, ...)                                                   \
 	do {                                                                                     \
-		if (!file_is_executable(_scriptname)) {                                          \
+		if (!sys_filelink_is_executable(_scriptname)) {                                  \
 			warn("helper script (%s) not found, it will be skipped\n", _scriptname); \
 			break;                                                                   \
 		}                                                                                \
@@ -117,7 +117,7 @@ static void update_triggers(bool block)
 		}
 
 		/* Check for daemons that need to be restarted */
-		if (file_is_executable(CLEAR_SERVICE_RESTART_SCRIPT)) {
+		if (sys_filelink_is_executable(CLEAR_SERVICE_RESTART_SCRIPT)) {
 			run_command(CLEAR_SERVICE_RESTART_SCRIPT, NULL);
 		}
 
@@ -176,7 +176,7 @@ void scripts_run_pre_update(struct manifest *manifest)
 		string_or_die(&script, "%s/%s", globals.path_prefix, PRE_UPDATE);
 	}
 
-	if (!file_exists(script)) {
+	if (!sys_file_exists(script)) {
 		goto end;
 	}
 

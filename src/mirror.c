@@ -255,7 +255,7 @@ static bool mirror_is_set(void)
 
 	version_path = mk_full_filename(globals.path_prefix, MIRROR_VERSION_URL_PATH);
 	content_path = mk_full_filename(globals.path_prefix, MIRROR_CONTENT_URL_PATH);
-	mirror_set = file_exists(version_path) && file_exists(content_path);
+	mirror_set = sys_filelink_exists(version_path) && sys_filelink_exists(content_path);
 
 	free_string(&version_path);
 	free_string(&content_path);

@@ -97,12 +97,19 @@ struct list *get_dir_files_sorted(char *path);
 /**
  * @brief Checks if a file exists in the filesystem.
  */
-bool file_exists(const char *filename);
+bool sys_file_exists(const char *filename);
+
+/**
+ * @brief Checks if a file exists in the filesystem following symlinks
+ */
+bool sys_filelink_exists(const char *filename);
 
 /**
  * @brief Checks if a file exists in the filesystem and is executable.
+ * Follows symlinks
  */
-bool file_is_executable(const char *filename);
+bool sys_filelink_is_executable(const char *filename);
+
 /**
  * @brief Checks if a file is a hardlink to another file
  */
@@ -170,11 +177,6 @@ char *sys_path_join(const char *prefix, const char *path);
  * @brief Check if current user is root.
  */
 bool is_root(void);
-
-/**
- * @brief Check if the path is a directory
- */
-bool is_dir(const char *path);
 
 /**
  * @brief Run a systemctl command with the informed parameters.

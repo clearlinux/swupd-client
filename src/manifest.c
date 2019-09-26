@@ -161,7 +161,7 @@ static int try_manifest_delta_download(int from, int to, char *component)
 	string_or_die(&manifest_delta, "%s/Manifest-%s-delta-from-%i-to-%i", globals.state_dir, component, from, to);
 	string_or_die(&to_dir, "%s/%i", globals.state_dir, to);
 
-	if (!file_exists(manifest_delta)) {
+	if (!sys_file_exists(manifest_delta)) {
 		string_or_die(&url, "%s/%i/Manifest-%s-delta-from-%i", globals.content_url, to, component, from);
 		ret = swupd_curl_get_file(url, manifest_delta);
 		free_string(&url);
@@ -212,7 +212,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 
 	/* Check for fullfile only, we will not be keeping the .tar around */
 	string_or_die(&filename, "%s/%i/Manifest.%s", globals.state_dir, version, component);
-	if (file_exists(filename)) {
+	if (sys_file_exists(filename)) {
 		ret = 0;
 		goto out;
 	}

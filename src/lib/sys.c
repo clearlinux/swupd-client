@@ -222,7 +222,18 @@ struct list *get_dir_files_sorted(char *path)
 	return list_sort(files, lex_sort);
 }
 
-bool file_exists(const char *filename)
+bool sys_file_exists(const char *filename)
+{
+	struct stat sb;
+
+	if (lstat(filename, &sb) == 0) {
+		return true;
+	}
+
+	return false;
+}
+
+bool sys_filelink_exists(const char *filename)
 {
 	struct stat sb;
 
@@ -233,7 +244,7 @@ bool file_exists(const char *filename)
 	return false;
 }
 
-bool file_is_executable(const char *filename)
+bool sys_filelink_is_executable(const char *filename)
 {
 	struct stat sb;
 

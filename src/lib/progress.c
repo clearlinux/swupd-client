@@ -64,7 +64,7 @@ void progress_set_step(unsigned int current_step, char *desc)
 		} else {
 			debug("The current step (%d) has to be greater than 0 and smaller than the total steps (%d)\n", current_step, step.total);
 		}
-		abort();
+		return;
 	}
 	step.current = current_step;
 	step.description = desc;

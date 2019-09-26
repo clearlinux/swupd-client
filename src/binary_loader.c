@@ -66,7 +66,7 @@ enum swupd_code binary_loader_main(int argc, char **argv)
 	string_or_die(&binary_name, "swupd-%s", command);
 	string_or_die(&full_binary_path, "/usr/bin/%s", binary_name);
 
-	if (!file_is_executable(full_binary_path)) {
+	if (!sys_filelink_is_executable(full_binary_path)) {
 		error("Binary %s doesn't exist in your system\n", full_binary_path);
 		ret = SWUPD_INVALID_BINARY;
 		goto end;

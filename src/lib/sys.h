@@ -179,6 +179,26 @@ char *sys_path_join(const char *prefix, const char *path);
 bool is_root(void);
 
 /**
+ * @brief Remove file or directory.
+ *
+ * If filename is a directory, removes all files and directories recursively.
+ *
+ * @return 0 on success, -ENOENT if file isn't present in the system and any
+ * negative value on errors
+ */
+int sys_rm_recursive(const char *filename);
+
+/**
+ * @brief Remove a file or an empty directory.
+ *
+ * If directory isn't empty, function will fail.
+ *
+ * @return 0 on success, -ENOENT if file isn't present in the system and any
+ * negative value on errors
+ */
+int sys_rm(const char *filename);
+
+/**
  * @brief Run a systemctl command with the informed parameters.
  */
 #define systemctl_cmd(...) run_command_quiet(SYSTEMCTL, __VA_ARGS__)

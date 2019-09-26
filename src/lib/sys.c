@@ -366,3 +366,86 @@ bool is_dir(const char *path)
 
 	return true;
 }
+
+static int sys_rm_file(const char *path)
+{
+	if (unlink(path) != 0) {
+		return -errno;
+	}
+
+	return 0;
+}
+
+static int sys_rmdir(const char *path)
+{
+	if (rmdir(path) != 0) {
+		return -errno;
+	}
+
+	return 0;
+}
+
+static int sys_rm_dir_recursive(const char *path)
+{
+	DIR *dir;
+	struct dirent *entry;
+	char *filename = NULL;
+	int ret = 0;
+
+	dir = opendir(path);
+	if (dir == NULL) {
+		ret = -errno;
+		goto exit;
+	}
+
+	while (true) {
+		errno = 0;
+		entry = readdir(dir);
+		if (!entry) {
+			break;
+		}
+
+		if (!strcmp(entry->d_name, ".") ||
+		    !strcmp(entry->d_name, "..")) {
+			continue;
+		}
+
+		free_string(&filename);
+		string_or_die(&filename, "%s/%s", path, entry->d_name);
+
+		ret = sys_rm_recursive(filename);
+		if (ret) {
+			goto exit;
+		}
+	}
+
+	/* Delete directory once it's empty */
+	ret = sys_rmdir(path);
+
+exit:
+	closedir(dir);
+	free_string(&filename);
+	return ret;
+}
+
+int sys_rm_recursive(const char *filename)
+{
+	int ret;
+	ret = sys_rm_file(filename);
+	if (ret == 0 || ret == -ENOENT) {
+		return ret;
+	}
+
+	return sys_rm_dir_recursive(filename);
+}
+
+int sys_rm(const char *filename)
+{
+	int ret;
+	ret = sys_rm_file(filename);
+	if (ret == 0 || ret == -ENOENT) {
+		return ret;
+	}
+
+	return sys_rmdir(filename);
+}

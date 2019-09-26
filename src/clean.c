@@ -146,7 +146,7 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 		if (dry_run) {
 			info("%s\n", file);
 		} else {
-			ret = swupd_rm(file);
+			ret = sys_rm(file);
 			if (ret != 0) {
 				warn("couldn't remove file %s: %s\n", file, strerror(errno));
 			}

@@ -143,7 +143,7 @@ static int ensure_root_owned_dir(const char *dirname)
 	/* Oops, not owned by root or
 	 * not a directory or wrong perms
 	 */
-	swupd_rm(dirname);
+	sys_rm_recursive(dirname);
 	errno = 0;
 	ret = stat(dirname, &sb);
 	if ((ret != -1) || (errno != ENOENT)) {
@@ -363,102 +363,6 @@ bool is_under_mounted_directory(const char *filename)
 
 	free_string(&dir);
 
-	return ret;
-}
-
-static int swupd_rm_file(const char *path)
-{
-	int err = unlink(path);
-	if (err) {
-		if (errno == ENOENT) {
-			return 0;
-		} else {
-			return -1;
-		}
-	}
-	return 0;
-}
-
-static int swupd_rm_dir(const char *path)
-{
-	DIR *dir;
-	struct dirent *entry;
-	char *filename = NULL;
-	int ret = 0;
-	int err;
-
-	dir = opendir(path);
-	if (dir == NULL) {
-		if (errno == ENOENT) {
-			ret = 0;
-			goto exit;
-		} else {
-			ret = -1;
-			goto exit;
-		}
-	}
-
-	while (true) {
-		errno = 0;
-		entry = readdir(dir);
-		if (!entry) {
-			if (!errno) {
-				ret = errno;
-			}
-			break;
-		}
-
-		if (!strcmp(entry->d_name, ".") ||
-		    !strcmp(entry->d_name, "..")) {
-			continue;
-		}
-
-		free_string(&filename);
-		string_or_die(&filename, "%s/%s", path, entry->d_name);
-
-		err = swupd_rm(filename);
-		if (err) {
-			ret = -1;
-			goto exit;
-		}
-	}
-
-	/* Delete directory once it's empty */
-	err = rmdir(path);
-	if (err) {
-		if (errno == ENOENT) {
-		} else {
-			ret = -1;
-			goto exit;
-		}
-	}
-
-exit:
-	closedir(dir);
-	free_string(&filename);
-	return ret;
-}
-
-int swupd_rm(const char *filename)
-{
-	struct stat stat;
-	int ret;
-
-	ret = lstat(filename, &stat);
-	if (ret) {
-		if (errno == ENOENT) {
-			// Quiet, no real failure here
-			return -ENOENT;
-		} else {
-			return -1;
-		}
-	}
-
-	if (S_ISDIR(stat.st_mode)) {
-		ret = swupd_rm_dir(filename);
-	} else {
-		ret = swupd_rm_file(filename);
-	}
 	return ret;
 }
 
@@ -1164,7 +1068,7 @@ int remove_files_from_fs(struct list *files)
 		file = iter->data;
 		iter = iter->next;
 		string_or_die(&fullfile, "%s/%s", globals.path_prefix, file->filename);
-		if (swupd_rm(fullfile) == -1) {
+		if (sys_rm_recursive(fullfile) == -1) {
 			/* if a -1 is returned it means there was an issue deleting the
 			 * file or directory, in that case decrease the counter of deleted
 			 * files.

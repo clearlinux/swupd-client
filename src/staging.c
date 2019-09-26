@@ -126,9 +126,11 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 
 	/* remove a pre-existing .update file in the destination if it exists */
 	string_or_die(&target, "%s%s/.update.%s", globals.path_prefix, rel_dir, base);
-	ret = swupd_rm(target);
-	if (ret < 0 && ret != -ENOENT) {
+	ret = sys_rm_recursive(target);
+	if (ret != 0 && ret != -ENOENT) {
+		ret = SWUPD_COULDNT_REMOVE_FILE;
 		error("Failed to remove %s\n", target);
+		goto out;
 	}
 
 	/* if the file already exists in the final destination, check to see
@@ -141,8 +143,8 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		    (file->is_link && !S_ISLNK(s.st_mode)) ||
 		    (file->is_file && !S_ISREG(s.st_mode))) {
 			// file type changed, move old out of the way for new
-			ret = swupd_rm(statfile);
-			if (ret < 0) {
+			ret = sys_rm_recursive(statfile);
+			if (ret != 0 && ret != -ENOENT) {
 				ret = SWUPD_COULDNT_REMOVE_FILE;
 				goto out;
 			}
@@ -271,7 +273,7 @@ int rename_staged_file_to_final(struct file *file)
 	/* Delete files if they are not ghosted and will be garbage collected by
 	 * another process */
 	if (file->is_deleted && !file->is_ghosted) {
-		ret = swupd_rm(target);
+		ret = sys_rm_recursive(target);
 
 		/* don't count missing ones as errors...
 		 * if somebody already deleted them for us then all is well */

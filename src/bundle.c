@@ -422,7 +422,7 @@ static void remove_tracked(const char *bundle)
 	free_string(&destdir);
 	/* we don't care about failures here since any weird state in the tracking
 	 * dir MUST be handled gracefully */
-	swupd_rm(tracking_file);
+	sys_rm(tracking_file);
 	free_string(&tracking_file);
 }
 
@@ -989,8 +989,8 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		if (!verify_file(file, hashpath)) {
 			warn("hash check failed for %s\n", file->filename);
 			info("         will attempt to download fullfile for %s\n", file->filename);
-			ret = swupd_rm(hashpath);
-			if (ret) {
+			ret = sys_rm(hashpath);
+			if (ret != -ENOENT) {
 				error("could not remove bad file %s\n", hashpath);
 				ret = SWUPD_COULDNT_REMOVE_FILE;
 				free_string(&hashpath);

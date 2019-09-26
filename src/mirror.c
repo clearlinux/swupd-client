@@ -121,8 +121,8 @@ static int unset_mirror_url()
 	content_path = mk_full_filename(globals.path_prefix, MIRROR_CONTENT_URL_PATH);
 	version_path = mk_full_filename(globals.path_prefix, MIRROR_VERSION_URL_PATH);
 
-	ret1 = swupd_rm(content_path);
-	ret2 = swupd_rm(version_path);
+	ret1 = sys_rm(content_path);
+	ret2 = sys_rm(version_path);
 
 	free_string(&content_path);
 	free_string(&version_path);

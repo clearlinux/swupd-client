@@ -193,7 +193,7 @@ void apply_deltas(struct manifest *current_manifest)
 	next:
 		/* Always remove delta files. Once applied the full staged file will be
 		 * available, so no need to keep the delta around. */
-		swupd_rm(delta_file);
+		sys_rm(delta_file);
 		free_string(&delta_file);
 		free_string(&to_staged);
 	}

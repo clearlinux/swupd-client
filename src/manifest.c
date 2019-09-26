@@ -203,7 +203,6 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 	char *dir = NULL;
 	char *basedir;
 	int ret = 0;
-	struct stat sb;
 
 	if (!is_mix) {
 		basedir = globals.state_dir;
@@ -213,7 +212,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 
 	/* Check for fullfile only, we will not be keeping the .tar around */
 	string_or_die(&filename, "%s/%i/Manifest.%s", globals.state_dir, version, component);
-	if (stat(filename, &sb) == 0) {
+	if (file_exists(filename)) {
 		ret = 0;
 		goto out;
 	}

@@ -121,17 +121,16 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 	int rc;
 	int ret;
 
-	/* first make sure the path where we'll start looking actually exists */
-	if (!is_dir(start)) {
-		return SWUPD_COULDNT_LIST_DIR;
-	}
-
 	path_prefix_len = strlen(globals.path_prefix);
 	path_whitelist = whitelist;
 	rc = nftw(start, &record_filename, 0, FTW_ACTIONRETVAL | FTW_PHYS | FTW_MOUNT);
 	const char *skip_dir = NULL; /* Skip files below this in printout */
 	if (rc) {
-		rc = SWUPD_OUT_OF_MEMORY_ERROR;
+		if (errno == ENOENT) {
+			rc = SWUPD_COULDNT_LIST_DIR;
+		} else {
+			rc = SWUPD_OUT_OF_MEMORY_ERROR;
+		}
 		goto tidy; /* Already printed out of memory */
 	}
 	qsort(F, nF, sizeof(*F), &qsort_helper);

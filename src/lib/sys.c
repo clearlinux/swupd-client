@@ -244,6 +244,13 @@ bool file_is_executable(const char *filename)
 	return false;
 }
 
+bool sys_file_is_hardlink(const char *file1, const char *file2)
+{
+	struct stat sb, sb2;
+
+	return lstat(file1, &sb) == 0 && lstat(file2, &sb2) == 0 && sb.st_ino == sb2.st_ino;
+}
+
 void journal_log_error(const char *message)
 {
 	if (!message) {

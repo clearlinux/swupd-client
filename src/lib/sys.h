@@ -103,6 +103,10 @@ bool file_exists(const char *filename);
  * @brief Checks if a file exists in the filesystem and is executable.
  */
 bool file_is_executable(const char *filename);
+/**
+ * @brief Checks if a file is a hardlink to another file
+ */
+bool sys_file_is_hardlink(const char *file1, const char *file2);
 
 /**
  * @brief Print error 'message' to system journal.

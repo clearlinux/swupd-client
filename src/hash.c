@@ -256,88 +256,54 @@ bool verify_file_lazy(char *filename)
 	return !hash_is_zeros(local.hash);
 }
 
+static int file_name_cmp(const void *a, const void *b)
+{
+	const struct file *fa = a;
+	const struct file *fb = b;
+
+	return strcmp(fa->filename, fb->filename);
+}
+
 /* Compares the hash for BUNDLE with that listed in the Manifest.MoM.  If the
  * hash check fails, we should assume the bundle manifest is incorrect and
  * discard it. A retry should then force redownloading of the bundle manifest.
  */
-int verify_bundle_hash(struct manifest *manifest, struct file *bundle)
+int verify_bundle_hash(struct manifest *mom, struct file *bundle)
 {
-	struct list *iter = list_head(manifest->manifests);
 	struct file *current;
 	char *local = NULL, *cached;
 	int ret = 0;
 
-	while (iter) {
-		struct stat sb, sb2;
-
-		current = iter->data;
-		iter = iter->next;
-
-		if (strcmp(current->filename, bundle->filename) != 0) {
-			continue;
-		}
-
-		string_or_die(&cached, "%s/%i/Manifest.%s.%s", globals.state_dir,
-			      current->last_change, current->filename, bundle->hash);
-
-		string_or_die(&local, "%s/%i/Manifest.%s", globals.state_dir,
-			      current->last_change, current->filename);
-
-		/* *NOTE* If the file is changed after being hardlinked, the hash will be different,
-		 * but the inode will not change making swupd skip hash check thinking they still match */
-		if (stat(local, &sb) == 0 && stat(cached, &sb2) == 0 && sb.st_ino == sb2.st_ino) {
-			free_string(&cached);
-			break;
-		} else {
-			unlink(cached);
-		}
-
-		if (stat(local, &sb) != 0) {
-			/* missing bundle manifest - attempt to download it */
-			char *filename;
-			char *url;
-
-			warn("Downloading missing manifest for bundle %s version %d\n",
-			     current->filename, current->last_change);
-
-			string_or_die(&filename, "%s/%i/Manifest.%s", globals.state_dir,
-				      current->last_change, current->filename);
-			string_or_die(&url, "%s/%i/Manifest.%s.tar", globals.content_url,
-				      current->last_change, current->filename);
-			ret = swupd_curl_get_file(url, filename);
-			free_string(&url);
-
-			if (ret != 0) {
-				error("download of %s failed\n", filename);
-				unlink(filename);
-				free_string(&filename);
-				break;
-			}
-
-			char *outputdir;
-			string_or_die(&outputdir, "%s/%i", globals.state_dir, current->last_change);
-			ret = archives_extract_to(filename, outputdir);
-			free_string(&outputdir);
-			free_string(&filename);
-
-			if (ret != 0) {
-				break;
-			}
-		}
-
-		if (!verify_file(bundle, local)) {
-			warn("hash check failed for Manifest.%s for version %i. Deleting it\n",
-			     current->filename, manifest->version);
-			unlink(local);
-			ret = 1;
-		}
-		if (link(local, cached) != 0) {
-			unlink(cached);
-		}
-		free_string(&cached);
-		break;
+	current = list_search(list_head(mom->manifests), bundle, file_name_cmp);
+	if (!current) {
+		return -1;
 	}
 
+	string_or_die(&cached, "%s/%i/Manifest.%s.%s", globals.state_dir,
+		      current->last_change, current->filename, bundle->hash);
+
+	string_or_die(&local, "%s/%i/Manifest.%s", globals.state_dir,
+		      current->last_change, current->filename);
+
+	/* *NOTE* If the file is changed after being hardlinked, the hash will be different,
+	 * but the inode will not change making swupd skip hash check thinking they still match */
+	if (sys_file_is_hardlink(local, cached)) {
+		goto out;
+	}
+
+	unlink(cached);
+	if (!verify_file(bundle, local)) {
+		warn("hash check failed for Manifest.%s for version %i. Deleting it\n", current->filename, mom->version);
+		unlink(local);
+		ret = -1;
+	} else {
+		if (link(local, cached) < 0) {
+			debug("Failed to link cache %s manifest", local);
+		}
+	}
+
+out:
+	free_string(&cached);
 	free_string(&local);
 	return ret;
 }

@@ -26,20 +26,20 @@ test_setup() {
 	expected_output1=$(cat <<-EOM
 		[
 		{ "type" : "start", "section" : "bundle-add" },
-		{ "type" : "info", "msg" : "Loading required manifests... " },
+		{ "type" : "info", "msg" : "Loading required manifests..." },
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "consolidate_files" },
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "check_disk_space_availability" },
-		{ "type" : "info", "msg" : "Downloading packs for: " },
-		{ "type" : "info", "msg" : " - test-bundle " },
+		{ "type" : "info", "msg" : "Downloading packs for:" },
+		{ "type" : "info", "msg" : " - test-bundle" },
 	EOM
 	)
 	expected_output2=$(cat <<-EOM
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "download_packs" },
-		{ "type" : "info", "msg" : "Finishing packs extraction... " },
-		{ "type" : "info", "msg" : "No extra files need to be downloaded " },
+		{ "type" : "info", "msg" : "Finishing packs extraction..." },
+		{ "type" : "info", "msg" : "No extra files need to be downloaded" },
 		{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "download_fullfiles" },
-		{ "type" : "info", "msg" : "Installing bundle(s) files... " },
+		{ "type" : "info", "msg" : "Installing bundle(s) files..." },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 4, "stepDescription" : "install_files" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 8, "stepDescription" : "install_files" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 12, "stepDescription" : "install_files" },
@@ -64,9 +64,9 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 91, "stepDescription" : "install_files" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 95, "stepDescription" : "install_files" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "install_files" },
-		{ "type" : "info", "msg" : "Calling post-update helper scripts " },
+		{ "type" : "info", "msg" : "Calling post-update helper scripts" },
 		{ "type" : "progress", "currentStep" : 7, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "run_scripts" },
-		{ "type" : "info", "msg" : "Successfully installed 1 bundle " },
+		{ "type" : "info", "msg" : "Successfully installed 1 bundle" },
 		{ "type" : "end", "section" : "bundle-add", "status" : 0 }
 		]
 	EOM

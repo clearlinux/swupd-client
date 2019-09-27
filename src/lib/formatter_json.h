@@ -29,11 +29,6 @@ void json_start(const char *);
 void json_end(const char *, int);
 
 /**
- * @brief Reports the status of an operation into the JSON stream
- */
-void json_status(int);
-
-/**
  * @brief Converts the provided message to a JSON stream
  */
 void json_message(const char *, const char *, va_list);

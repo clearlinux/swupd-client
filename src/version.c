@@ -171,18 +171,18 @@ static int get_version_from_url(char *url)
 	}
 
 	/* Sig check */
+	//TODO: enforce sigcheck on format bump
 	if (globals.sigcheck) {
 		sig_verified = verify_signature(url, &tmp_version);
 	} else {
-		warn("FAILED TO VERIFY SIGNATURE OF %s. Operation proceeding due to \n"
-		     " --nosigcheck, but system security may be compromised\n",
-		     url);
+		debug("FAILED TO VERIFY SIGNATURE OF %s. Operation proceeding due to \n"
+		      " --nosigcheck, but system security may be compromised\n",
+		      url);
 		journal_log_error("swupd security notice:  --nosigcheck used to bypass version signature");
 	}
 
 	if (globals.sigcheck && !sig_verified) {
-		error("Signature Verification failed for URL: %s\n", url);
-		return -SWUPD_SIGNATURE_VERIFICATION_FAILED;
+		debug("Signature Verification failed for URL: %s\n", url);
 	}
 
 	return ret;

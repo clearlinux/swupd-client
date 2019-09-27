@@ -28,7 +28,6 @@
 #include "progress.h"
 #include "strings.h"
 
-static int json_format = 0;
 static bool json_stream_active = false;
 
 static void log_json(FILE *out UNUSED_PARAM, const char *file UNUSED_PARAM, int line UNUSED_PARAM, const char *label, const char *format, va_list args_list)
@@ -39,11 +38,9 @@ static void log_json(FILE *out UNUSED_PARAM, const char *file UNUSED_PARAM, int 
 void set_json_format(bool on)
 {
 	if (on) {
-		json_format = 1;
 		log_set_function(log_json);
 		progress_set_format(json_progress, json_start, json_end);
 	} else {
-		json_format = 0;
 		log_set_function(NULL);
 		progress_set_format(NULL, NULL, NULL);
 	}
@@ -51,20 +48,16 @@ void set_json_format(bool on)
 
 void json_start(const char *op)
 {
-	if (json_format) {
-		fprintf(stdout, "[\n{ \"type\" : \"start\", \"section\" : \"%s\" },\n", op);
-		fflush(stdout);
-		json_stream_active = true;
-	}
+	fprintf(stdout, "[\n{ \"type\" : \"start\", \"section\" : \"%s\" },\n", op);
+	fflush(stdout);
+	json_stream_active = true;
 }
 
 void json_end(const char *op, int status)
 {
-	if (json_format) {
-		fprintf(stdout, "{ \"type\" : \"end\", \"section\" : \"%s\", \"status\" : %d }\n]\n", op, status);
-		fflush(stdout);
-		json_stream_active = false;
-	}
+	fprintf(stdout, "{ \"type\" : \"end\", \"section\" : \"%s\", \"status\" : %d }\n]\n", op, status);
+	fflush(stdout);
+	json_stream_active = false;
 }
 
 void json_message(const char *msg_type, const char *msg, va_list args_list)

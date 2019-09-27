@@ -768,7 +768,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	/* step 1: get subscriptions for bundles to be installed */
 	info("Loading required manifests...\n");
 	timelist_timer_start(globals.global_times, "Add bundles and recurse");
-	progress_set_step(1, "load_manifests");
+	progress_set_next_step("load_manifests");
 	ret = add_subscriptions(bundles, subs, mom, false, 0);
 
 	/* print a message if any of the requested bundles is already installed */
@@ -838,7 +838,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 	/* Step 2: Get a list with all files needed to be installed for the requested bundles */
 	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
-	progress_set_step(2, "consolidate_files");
+	progress_set_next_step("consolidate_files");
 
 	/* get all files already installed in the target system */
 	installed_files = consolidate_files_from_bundles(installed_bundles);
@@ -856,7 +856,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 	timelist_timer_stop(globals.global_times); // closing: Consolidate files from bundles
 
 	/* Step 3: Check if we have enough space */
-	progress_set_step(3, "check_disk_space_availability");
+	progress_set_next_step("check_disk_space_availability");
 	if (!globals.skip_diskspace_check) {
 		timelist_timer_start(globals.global_times, "Check disk space availability");
 		char *filepath = NULL;
@@ -891,7 +891,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 	/* step 4: download necessary packs */
 	timelist_timer_start(globals.global_times, "Download packs");
-	progress_set_step(4, "download_packs");
+	progress_set_next_step("download_packs");
 
 	(void)rm_staging_dir_contents("download");
 
@@ -902,13 +902,13 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 		 * download_subscribed_packs function, since we
 		 * didn't run it, manually mark the step as completed */
 		info("No packs need to be downloaded\n");
-		progress_complete_step();
 	}
+	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Download packs
 
 	/* step 5: Download missing files */
 	timelist_timer_start(globals.global_times, "Download missing files");
-	progress_set_step(5, "download_fullfiles");
+	progress_set_next_step("download_fullfiles");
 	ret = download_fullfiles(to_install_files, NULL);
 	if (ret) {
 		/* make sure the return code is positive */
@@ -920,7 +920,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 	/* step 6: Install all bundle(s) files into the fs */
 	timelist_timer_start(globals.global_times, "Installing bundle(s) files onto filesystem");
-	progress_set_step(6, "install_files");
+	progress_set_next_step("install_files");
 
 	info("Installing bundle(s) files...\n");
 
@@ -1031,7 +1031,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct list **subs,
 
 	/* step 7: Run any scripts that are needed to complete update */
 	timelist_timer_start(globals.global_times, "Run Scripts");
-	progress_set_step(7, "run_scripts");
+	progress_set_next_step("run_scripts");
 	scripts_run_post_update(globals.wait_for_scripts);
 	timelist_timer_stop(globals.global_times); // closing: Run Scripts
 	progress_complete_step();

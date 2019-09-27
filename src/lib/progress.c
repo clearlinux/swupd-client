@@ -56,7 +56,7 @@ void progress_finish_steps(char *steps_description, int status)
 	}
 }
 
-void progress_set_step(unsigned int current_step, char *desc)
+static void progress_set_step(unsigned int current_step, char *desc)
 {
 	if (current_step == 0 || step.total == 0 || current_step > step.total) {
 		if (step.total == 0) {

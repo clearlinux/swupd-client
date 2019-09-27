@@ -269,7 +269,6 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	if (!need_download) {
 		/* no packs needs to be downloaded */
 		info("No packs need to be downloaded\n");
-		progress_complete_step();
 		return 0;
 	}
 

@@ -252,7 +252,6 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 	if (cmdline_option_install) {
 		progress_set_next_step("download_packs");
 		print("\n");
-		progress_report_indeterminate();
 		get_all_files(official_manifest, subs);
 		progress_complete_step();
 	}
@@ -260,16 +259,18 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 	progress_set_next_step("check_files_hash");
 	print("\n");
 	if (check_files_hash(official_manifest->files)) {
+		progress_set_next_step("");
+		progress_complete_step();
 		return 0;
 	}
 
 	progress_set_next_step("download_fullfiles");
 	print("\n");
-	progress_report_indeterminate();
 	ret = download_fullfiles(official_manifest->files, NULL);
 	if (ret) {
 		error("Unable to download necessary files for this OS release\n");
 	}
+	progress_complete_step();
 
 	return ret;
 }
@@ -835,9 +836,9 @@ enum swupd_code verify_main(void)
 
 	/* calculate the number of steps in the process so we can report progress */
 	if (cmdline_option_install) {
-		steps_in_verify += 3;
+		steps_in_verify += 5;
 	} else if (cmdline_option_fix) {
-		steps_in_verify += 2;
+		steps_in_verify += 3;
 	}
 	if (cmdline_option_picky || cmdline_option_extra_files_only) {
 		steps_in_verify += 1;
@@ -1090,6 +1091,7 @@ enum swupd_code verify_main(void)
 
 	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
 	progress_set_next_step("consolidate_files");
+	progress_report_indeterminate();
 	all_files = consolidate_files_from_bundles(all_submanifests);
 	official_manifest->files = all_files;
 	if (cmdline_option_bundles) {
@@ -1238,8 +1240,12 @@ brick_the_system_and_clean_curl:
 		globals.need_update_boot = true;
 		globals.need_update_bootloader = true;
 		timelist_timer_start(globals.global_times, "Run Scripts");
+		progress_set_next_step("run_postupdate_scripts");
+		progress_report_indeterminate();
 		info("\n");
 		scripts_run_post_update(globals.wait_for_scripts);
+		progress_complete_step();
+		progress_report(1, 1);
 		timelist_timer_stop(globals.global_times);
 	}
 

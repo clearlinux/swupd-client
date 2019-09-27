@@ -103,7 +103,7 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code bundle_add_main(int argc, char **argv)
 {
 	int ret;
-	const int steps_in_bundleadd = 7;
+	const int steps_in_bundleadd = 8;
 
 	/*
 	 * Steps for bundle-add:

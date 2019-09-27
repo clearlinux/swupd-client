@@ -93,7 +93,8 @@ void progress_complete_step(void);
 /**
  * @brief Marks the current step as indeterminate (progress = -1%).
  *
- * This is useful in cases json-output needs to create a custom slider
+ * This is useful in cases json-output needs to scraped to create a
+ * custom slider
  */
 void progress_report_indeterminate(void);
 

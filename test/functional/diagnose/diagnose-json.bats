@@ -30,6 +30,7 @@ test_setup() {
 		\{ "type" : "info", "msg" : "Downloading missing manifests... " \},
 		\{ "type" : "progress", "currentStep" : 3, "totalSteps" : 7, "stepCompletion" : -1, "stepDescription" : "load_manifests" \},
 		\{ "type" : "progress", "currentStep" : 3, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "load_manifests" \},
+		\{ "type" : "progress", "currentStep" : 4, "totalSteps" : 7, "stepCompletion" : -1, "stepDescription" : "consolidate_files" \},
 		\{ "type" : "progress", "currentStep" : 4, "totalSteps" : 7, "stepCompletion" : 100, "stepDescription" : "consolidate_files" \},
 		\{ "type" : "info", "msg" : " Checking for missing files " \},
 		\{ "type" : "progress", "currentStep" : 5, "totalSteps" : 7, "stepCompletion" : 5, "stepDescription" : "add_missing_files" \},

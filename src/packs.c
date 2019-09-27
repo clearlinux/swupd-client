@@ -269,6 +269,9 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	if (!need_download) {
 		/* no packs needs to be downloaded */
 		info("No packs need to be downloaded\n");
+		progress_complete_step();
+		progress_set_next_step("pack_extraction");
+		progress_complete_step();
 		return 0;
 	}
 
@@ -324,7 +327,13 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 		}
 	}
 	list_free_list(need_download);
-	info("Finishing packs extraction...\n");
 
-	return swupd_curl_parallel_download_end(download_handle, NULL);
+	progress_set_next_step("pack_extraction");
+	info("Finishing packs extraction...\n");
+	progress_report_indeterminate();
+
+	err = swupd_curl_parallel_download_end(download_handle, NULL);
+	progress_report(1, 1);
+	progress_complete_step();
+	return err;
 }

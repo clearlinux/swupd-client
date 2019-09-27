@@ -714,7 +714,7 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code update_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
-	const int steps_in_update = 11;
+	const int steps_in_update = 12;
 
 	/*
 	 * Steps for update:

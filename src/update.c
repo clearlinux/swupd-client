@@ -105,10 +105,8 @@ error:
 static int update_loop(struct list *updates, struct manifest *server_manifest)
 {
 	int ret;
-	struct step step;
 
-	step = progress_get_step();
-	progress_set_step(step.current, "download_fullfiles");
+	progress_set_next_step("download_fullfiles");
 	ret = download_fullfiles(updates, &nonpack);
 	if (ret) {
 		error("Could not download all files, aborting update\n");
@@ -119,7 +117,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 		return 0;
 	}
 
-	progress_set_step((step.current) + 1, "update_files");
+	progress_set_next_step("update_files");
 
 	return staging_install_all_files(updates, server_manifest);
 }
@@ -298,7 +296,7 @@ static enum swupd_code main_update()
 
 	/* Step 1: Preparation steps */
 	timelist_timer_start(globals.global_times, "Prepare for update");
-	progress_set_step(1, "prepare_for_update");
+	progress_set_next_step("prepare_for_update");
 	info("Update started\n");
 
 	mix_exists = check_mix_exists();
@@ -314,7 +312,7 @@ static enum swupd_code main_update()
 
 	/* Step 2: get versions */
 	timelist_timer_start(globals.global_times, "Get versions");
-	progress_set_step(2, "get_versions");
+	progress_set_next_step("get_versions");
 version_check:
 	ret = check_versions(&current_version, &server_version, requested_version, globals.path_prefix);
 	if (ret != SWUPD_OK) {
@@ -383,7 +381,7 @@ version_check:
 
 	/* Step 3: housekeeping */
 	timelist_timer_start(globals.global_times, "Clean up download directory");
-	progress_set_step(3, "cleanup_download_dir");
+	progress_set_next_step("cleanup_download_dir");
 	if (rm_staging_dir_contents("download")) {
 		error("There was a problem cleaning download directory\n");
 		ret = SWUPD_COULDNT_REMOVE_FILE;
@@ -394,7 +392,7 @@ version_check:
 
 	/* Step 4: setup manifests */
 	timelist_timer_start(globals.global_times, "Load manifests");
-	progress_set_step(4, "load_manifests");
+	progress_set_next_step("load_manifests");
 	timelist_timer_start(globals.global_times, "Load MoM manifests");
 	int manifest_err;
 
@@ -474,20 +472,20 @@ version_check:
 
 	/* Step 5: check disk state before attempting update */
 	timelist_timer_start(globals.global_times, "Run pre-update scripts");
-	progress_set_step(5, "run_preupdate_scripts");
+	progress_set_next_step("run_preupdate_scripts");
 	scripts_run_pre_update(server_manifest);
 	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Run pre-update scripts
 
 	/* Step 6: get the packs and untar */
 	timelist_timer_start(globals.global_times, "Download packs");
-	progress_set_step(6, "download_packs");
+	progress_set_next_step("download_packs");
 	download_subscribed_packs(latest_subs, server_manifest, false);
 	timelist_timer_stop(globals.global_times); // closing: Download packs
 
 	/* Step	 7: apply deltas */
 	timelist_timer_start(globals.global_times, "Apply deltas");
-	progress_set_step(7, "apply_deltas");
+	progress_set_next_step("apply_deltas");
 	apply_deltas(current_manifest);
 	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Apply deltas
@@ -495,7 +493,7 @@ version_check:
 	/* Step 8: some more housekeeping */
 	/* TODO: consider trying to do less sorting of manifests */
 	timelist_timer_start(globals.global_times, "Create update list");
-	progress_set_step(8, "create_update_list");
+	progress_set_next_step("create_update_list");
 	updates = create_update_list(server_manifest);
 
 	print_statistics(current_version, server_version);
@@ -506,10 +504,6 @@ version_check:
 	/* need update list in filename order to insure directories are
 	 * created before their contents */
 	timelist_timer_start(globals.global_times, "Update loop");
-	/* two steps are part of this stage, so only pass the
-	 * initial step number and we will update the description
-	 * from within the update_loop function */
-	progress_set_step(9, "");
 	updates = list_sort(updates, file_sort_filename);
 
 	ret = update_loop(updates, server_manifest);
@@ -529,7 +523,7 @@ version_check:
 
 	/* Step 11: Run any scripts that are needed to complete update */
 	timelist_timer_start(globals.global_times, "Run post-update scripts");
-	progress_set_step(11, "run_postupdate_scripts");
+	progress_set_next_step("run_postupdate_scripts");
 
 	/* Determine if another update is needed so the scripts block */
 	int new_current_version = get_current_version(globals.path_prefix);

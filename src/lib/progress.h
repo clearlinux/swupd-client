@@ -76,11 +76,6 @@ void progress_init_steps(const char *title, int steps_in_process);
 void progress_finish_steps(int status);
 
 /**
- * @brief Sets a step of the process to be tracked/reported.
- */
-void progress_set_step(unsigned int current_step, const char *desc);
-
-/**
  * @brief Increases the current step by one and assigns the provided description to it.
  *
  * Useful when you don't know the number of the current step.

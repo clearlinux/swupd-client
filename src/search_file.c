@@ -533,7 +533,7 @@ enum swupd_code search_file_main(int argc, char **argv)
 		goto exit;
 	}
 
-	progress_set_step(1, "get_versions");
+	progress_set_next_step("get_versions");
 	current_version = get_current_version(globals.path_prefix);
 	if (current_version < 0) {
 		error("Unable to determine current OS version\n");
@@ -541,7 +541,7 @@ enum swupd_code search_file_main(int argc, char **argv)
 	}
 	progress_complete_step();
 
-	progress_set_step(2, "load_manifests");
+	progress_set_next_step("load_manifests");
 	mom = load_mom(current_version, false, NULL);
 	if (!mom) {
 		error("Cannot load official manifest MoM for version %i\n", current_version);
@@ -567,7 +567,7 @@ enum swupd_code search_file_main(int argc, char **argv)
 		ret = SWUPD_RECURSE_MANIFEST;
 	}
 
-	progress_set_step(3, "search_term");
+	progress_set_next_step("search_term");
 	info("Searching for '%s'\n", search_string);
 	err = do_search(mom, search_string);
 	progress_complete_step();

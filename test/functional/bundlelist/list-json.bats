@@ -24,8 +24,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		[
 		{ "type" : "start", "section" : "bundle-list" },
-		{ "type" : "info", "msg" : "os-core " },
-		{ "type" : "info", "msg" : "test-bundle " },
+		{ "type" : "info", "msg" : "os-core" },
+		{ "type" : "info", "msg" : "test-bundle" },
 		{ "type" : "end", "section" : "bundle-list", "status" : 0 }
 		]
 	EOM

@@ -35,6 +35,28 @@ static void log_json(FILE *out UNUSED_PARAM, const char *file UNUSED_PARAM, int 
 	json_message(label, format, args_list);
 }
 
+static void json_sanitize_string(char *full_msg)
+{
+	int i;
+
+	/* sanitize characters in the string */
+	for (i = 0; full_msg[i]; i++) {
+		/* if the message has double quotes replace them with single quotes
+		 * since double quotes have to be escaped in JSON */
+		if (full_msg[i] == '"') {
+			full_msg[i] = '\'';
+		}
+		/* replace all '\n' and '\r' from the message with spaces */
+		if (full_msg[i] == '\n' || full_msg[i] == '\r') {
+			full_msg[i] = ' ';
+		}
+	}
+
+	for (i = i - 1; i >= 0 && full_msg[i] == ' '; i--) {
+		full_msg[i] = '\0';
+	}
+}
+
 void set_json_format(bool on)
 {
 	if (on) {
@@ -57,7 +79,6 @@ void json_end(const char *op, int status)
 {
 	fprintf(stdout, "{ \"type\" : \"end\", \"section\" : \"%s\", \"status\" : %d }\n]\n", op, status);
 	fflush(stdout);
-	json_stream_active = false;
 }
 
 void json_message(const char *msg_type, const char *msg, va_list args_list)
@@ -77,21 +98,10 @@ void json_message(const char *msg_type, const char *msg, va_list args_list)
 
 	if (json_stream_active) {
 
-		/* sanitize characters in the string */
-		for (unsigned int i = 0; full_msg[i]; i++) {
-			/* if the message has double quotes replace them with single quotes
-			 * since double quotes have to be escaped in JSON */
-			if (full_msg[i] == '"') {
-				full_msg[i] = '\'';
-			}
-			/* replace all '\n' and '\r' from the message with spaces */
-			if (full_msg[i] == '\n' || full_msg[i] == '\r') {
-				full_msg[i] = ' ';
-			}
-		}
+		json_sanitize_string(full_msg);
 
 		/* add the JSON format and print immediately */
-		if (strcmp(full_msg, " ") != 0) {
+		if (strcmp(full_msg, "") != 0) {
 			fprintf(stdout, "{ \"type\" : \"%s\", \"msg\" : \"%s\" },\n", type ? type : "info", full_msg);
 			fflush(stdout);
 		}

@@ -291,7 +291,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 	/* step 1: get subscriptions for bundles to be installed */
 	info("Loading required manifests...\n");
 	timelist_timer_start(globals.global_times, "Add bundles and recurse");
-	progress_set_step(1, "load_manifests");
+	progress_set_next_step("load_manifests");
 
 	err = mom_get_manifests_list(mom, &installed_bundles, is_installed_bundle_data);
 	if (err) {
@@ -312,7 +312,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 
 	/* Step 2: Get a list with all files needed to be installed for the requested bundles */
 	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
-	progress_set_step(2, "consolidate_files");
+	progress_set_next_step("consolidate_files");
 
 	installed_files = files_from_bundles(installed_bundles);
 	installed_files = filter_out_deleted_files(installed_files);
@@ -330,7 +330,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 	}
 
 	///* Step 3: Check if we have enough space */
-	progress_set_step(3, "check_disk_space_availability");
+	progress_set_next_step("check_disk_space_availability");
 	err = check_disk_space_availability(to_install_bundles);
 	progress_complete_step();
 	if (err) {
@@ -340,7 +340,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 
 	/* step 4: download necessary packs */
 	timelist_timer_start(globals.global_times, "Download packs");
-	progress_set_step(4, "download_packs");
+	progress_set_next_step("download_packs");
 
 	if (rm_staging_dir_contents("download") < 0) {
 		debug("rm_staging_dir_contents failed - resuming operation");
@@ -359,7 +359,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 
 	/* step 5: Download missing files */
 	timelist_timer_start(globals.global_times, "Download missing files");
-	progress_set_step(5, "download_fullfiles");
+	progress_set_next_step("download_fullfiles");
 	err = download_fullfiles(to_install_files, NULL);
 	timelist_timer_stop(globals.global_times); // closing: Download missing files
 	if (err) {
@@ -371,7 +371,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 
 	/* step 6: Install all bundle(s) files into the fs */
 	timelist_timer_start(globals.global_times, "Installing bundle(s) files onto filesystem");
-	progress_set_step(6, "install_files");
+	progress_set_next_step("install_files");
 
 	// Apply heuristics to all files
 	timelist_timer_start(globals.global_times, "Appling heuristics");
@@ -396,7 +396,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 
 	/* step 7: Run any scripts that are needed to complete update */
 	timelist_timer_start(globals.global_times, "Run Scripts");
-	progress_set_step(7, "run_scripts");
+	progress_set_next_step("run_scripts");
 	scripts_run_post_update(globals.wait_for_scripts);
 	timelist_timer_stop(globals.global_times); // closing: Run Scripts
 	progress_complete_step();
@@ -544,7 +544,7 @@ enum swupd_code bundle_add_main(int argc, char **argv)
 	 *  4) download_packs
 	 *  5) download_fullfiles
 	 *  6) install_files
-	 *  7) progress_set_step
+	 *  7) progress_set_next_step
 	 */
 
 	if (!parse_options(argc, argv)) {

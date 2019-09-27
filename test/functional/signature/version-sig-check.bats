@@ -7,6 +7,8 @@ load "../testlib"
 
 test_setup() {
 
+	#TODO: Remove on FB 30
+	skip "Skipping until FB 30 - feature disabled"
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /file_1 "$TEST_NAME"
 	create_version -p "$TEST_NAME" 20 10

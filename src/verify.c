@@ -869,7 +869,7 @@ enum swupd_code verify_main(void)
 
 	/* Get the current system version and the version to verify against */
 	timelist_timer_start(globals.global_times, "Get versions");
-	progress_set_step(1, "get_versions");
+	progress_set_next_step("get_versions");
 	int sys_version = get_current_version(globals.path_prefix);
 	if (!version) {
 		if (sys_version < 0) {
@@ -904,7 +904,7 @@ enum swupd_code verify_main(void)
 	 * certificate is hosed and the admin knows it and wants to recover.
 	 */
 	timelist_timer_start(globals.global_times, "Clean up download directory");
-	progress_set_step(2, "cleanup_download_dir");
+	progress_set_next_step("cleanup_download_dir");
 	ret = rm_staging_dir_contents("download");
 	if (ret != 0) {
 		warn("Failed to remove prior downloads, carrying on anyway\n");
@@ -913,7 +913,7 @@ enum swupd_code verify_main(void)
 	timelist_timer_stop(globals.global_times); // closing: Clean up download directory
 
 	timelist_timer_start(globals.global_times, "Load manifests");
-	progress_set_step(3, "load_manifests");
+	progress_set_next_step("load_manifests");
 
 	/* Gather current manifests */
 	/* When the version we are verifying against does not match our system version
@@ -1086,7 +1086,7 @@ enum swupd_code verify_main(void)
 	timelist_timer_stop(globals.global_times); // closing: Load manifests
 
 	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
-	progress_set_step(4, "consolidate_files");
+	progress_set_next_step("consolidate_files");
 	all_files = consolidate_files_from_bundles(all_submanifests);
 	official_manifest->files = all_files;
 	if (cmdline_option_bundles) {

@@ -152,6 +152,6 @@ enum swupd_code bundle_list_main(int argc, char **argv)
 	swupd_deinit();
 
 finish:
-	progress_finish_steps("bundle-list", ret);
+	progress_finish_steps(ret);
 	return ret;
 }

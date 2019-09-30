@@ -1351,7 +1351,7 @@ clean_args_and_exit:
 	}
 	list_free_list_and_data(cmdline_option_bundles, free);
 
-	progress_finish_steps("verify", ret);
+	progress_finish_steps(ret);
 	return ret;
 }
 

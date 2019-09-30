@@ -36,7 +36,7 @@ void json_message(const char *, const char *, va_list);
 /**
  * @brief Prints the progress of a given step into the JSON stream
  */
-void json_progress(char *, unsigned int, unsigned int, int);
+void json_progress(const char *, unsigned int, unsigned int, int);
 
 #ifdef __cplusplus
 }

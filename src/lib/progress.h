@@ -16,12 +16,14 @@ extern "C" {
  * @brief Saves a step to report progress to.
  */
 struct step {
+	/** @brief Steps title */
+	const char *title;
 	/** @brief Current step. */
 	unsigned int current;
 	/** @brief Total step. */
 	unsigned int total;
-	/** @brief Step description . */
-	char *description;
+	/** @brief Current step description. */
+	const char *description;
 };
 
 /**
@@ -39,7 +41,7 @@ extern void set_progress_callback(progress_callback_fn_t progress_cb);
  * @brief Progress format callback.
  * @see progress_set_format().
  */
-typedef void (*progress_fn_t)(char *step_description, unsigned int current_step, unsigned int total_steps, int percentage);
+typedef void (*progress_fn_t)(const char *step_description, unsigned int current_step, unsigned int total_steps, int percentage);
 
 /**
  * @brief Callback to print start header in progress reporting.
@@ -64,26 +66,26 @@ void progress_set_format(progress_fn_t, start_fn_t, end_fn_t);
  * this function should be used first so progress in steps is reported
  * correctly.
  */
-void progress_init_steps(char *, int);
+void progress_init_steps(const char *title, int steps_in_process);
 
 /**
  * @brief Finishes the reporting of a process (as defined above). If the
  * format used, needs a special closing statement, this function will
  * print it.
  */
-void progress_finish_steps(char *, int status);
+void progress_finish_steps(int status);
 
 /**
  * @brief Sets a step of the process to be tracked/reported.
  */
-void progress_set_step(unsigned int, char *);
+void progress_set_step(unsigned int current_step, const char *desc);
 
 /**
  * @brief Increases the current step by one and assigns the provided description to it.
  *
  * Useful when you don't know the number of the current step.
  */
-void progress_set_next_step(char *);
+void progress_set_next_step(const char *desc);
 
 /**
  * @brief Gets the current step defined.

@@ -125,6 +125,6 @@ enum swupd_code bundle_add_main(int argc, char **argv)
 
 	ret = install_bundles_frontend(bundles);
 
-	progress_finish_steps("bundle-add", ret);
+	progress_finish_steps(ret);
 	return ret;
 }

@@ -396,6 +396,6 @@ enum swupd_code mirror_main(int argc, char **argv)
 	swupd_deinit();
 
 finish:
-	progress_finish_steps("mirror", ret);
+	progress_finish_steps(ret);
 	return ret;
 }

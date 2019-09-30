@@ -539,7 +539,6 @@ enum swupd_code search_file_main(int argc, char **argv)
 		error("Unable to determine current OS version\n");
 		return SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
-	progress_complete_step();
 
 	progress_set_next_step("load_manifests");
 	mom = load_mom(current_version, false, NULL);
@@ -570,7 +569,6 @@ enum swupd_code search_file_main(int argc, char **argv)
 	progress_set_next_step("search_term");
 	info("Searching for '%s'\n", search_string);
 	err = do_search(mom, search_string);
-	progress_complete_step();
 
 	// Keep any ret error code if search is successful
 	if (ret == SWUPD_OK && err == 0) {

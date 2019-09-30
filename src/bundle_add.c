@@ -322,7 +322,6 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 	to_install_files = filter_out_deleted_files(to_install_files);
 	to_install_files = consolidate_files(to_install_files);
 
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Consolidate files from bundles
 
 	if (!to_install_files) {
@@ -332,7 +331,6 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 	///* Step 3: Check if we have enough space */
 	progress_set_next_step("check_disk_space_availability");
 	err = check_disk_space_availability(to_install_bundles);
-	progress_complete_step();
 	if (err) {
 		ret = SWUPD_DISK_SPACE_ERROR;
 		goto out;
@@ -353,7 +351,6 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 		 * download_subscribed_packs function, since we
 		 * didn't run it, manually mark the step as completed */
 		info("No packs need to be downloaded\n");
-		progress_complete_step();
 	}
 	timelist_timer_stop(globals.global_times); // closing: Download packs
 
@@ -399,7 +396,6 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 	progress_set_next_step("run_scripts");
 	scripts_run_post_update(globals.wait_for_scripts);
 	timelist_timer_stop(globals.global_times); // closing: Run Scripts
-	progress_complete_step();
 
 	ret = SWUPD_OK;
 

@@ -24,17 +24,39 @@
 #include <unistd.h>
 
 #include "log.h"
+#include "macros.h"
 #include "progress.h"
 
+static void default_progress_function(const char *step_description, unsigned int current_step, unsigned int total_steps, int percentage);
 static bool no_progress_report = false;
 static struct step step;
-static progress_fn_t progress_function = NULL;
+static progress_fn_t progress_function = default_progress_function;
 static start_fn_t start_function = NULL;
 static end_fn_t end_function = NULL;
 
+static void default_progress_function(const char UNUSED_PARAM *step_description, unsigned int UNUSED_PARAM current_step, unsigned int UNUSED_PARAM total_steps, int percentage)
+{
+	if (percentage < 0 || percentage > 100) {
+		return;
+	}
+
+	if (isatty(fileno(stdout))) {
+		info("\t...%d%%%s", percentage, percentage != 100 ? "\r" : "\n");
+	} else {
+		/* if printing to a file print every percentage
+		 * in its own line */
+		info("\t...%d%%\n", percentage);
+	}
+	fflush(stdout);
+}
+
 void progress_set_format(progress_fn_t progress_fn, start_fn_t start_fn, end_fn_t end_fn)
 {
-	progress_function = progress_fn;
+	if (!progress_fn) {
+		progress_function = default_progress_function;
+	} else {
+		progress_function = progress_fn;
+	}
 	start_function = start_fn;
 	end_function = end_fn;
 }
@@ -84,48 +106,32 @@ struct step progress_get_step(void)
 void progress_complete_step(void)
 {
 	/* this kind of report only make sense if using a format other than standard */
-	if (progress_function) {
-		progress_report(1, 1);
-	}
+	progress_report(1, 1);
 }
 
 void progress_report(double count, double max)
 {
 	static int last_percentage = -1;
 	static unsigned int last_step = 0;
+	int percentage;
 
-	if (no_progress_report) {
+	if (no_progress_report || !progress_function || max <= 0) {
 		return;
 	}
 
-	/* make sure we don't have a division by zero */
-	if (max != 0) {
+	/* Only print when the percentage changes, so a maximum of 100 times per run */
+	percentage = (int)(100 * (count / max));
 
-		/* Only print when the percentage changes, so a maximum of 100 times per run */
-		int percentage = (int)(100 * (count / max));
+	/* we should never have a percentage bigger than 100% */
+	if (percentage > 100) {
+		debug("Progress percentage overflow %d%% (Count: %ld, Max: %ld)\n", percentage, (long)count, (long)max);
+		return;
+	}
 
-		/* we should never have a percentage bigger than 100% */
-		if (percentage > 100) {
-			debug("Progress percentage overflow %d%% (Count: %ld, Max: %ld)\n", percentage, (long)count, (long)max);
-			return;
-		}
-
-		if (percentage != last_percentage || step.current != last_step) {
-			if (progress_function) {
-				progress_function(step.description, step.current, step.total, percentage);
-			} else {
-				if (isatty(fileno(stdout))) {
-					info("\t...%d%%%s", percentage, percentage != 100 ? "\r" : "\n");
-				} else {
-					/* if printing to a file print every percentage
-					 * in its own line */
-					info("\t...%d%%\n", percentage);
-				}
-			}
-			fflush(stdout);
-			last_percentage = percentage;
-			last_step = step.current;
-		}
+	if (percentage != last_percentage || step.current != last_step) {
+		progress_function(step.description, step.current, step.total, percentage);
+		last_percentage = percentage;
+		last_step = step.current;
 	}
 }
 
@@ -155,15 +161,15 @@ static void progress_spinner_print_end(void)
 void progress_set_spinner(bool status_flag)
 {
 	if (status_flag) {
-		if (progress_function) {
-			progress_report(-1, 100);
-		} else if (isatty(fileno(stdout)) && !(log_get_level() == LOG_DEBUG)) {
+		progress_report(-1, 100);
+
+		if (isatty(fileno(stdout)) && !(log_get_level() == LOG_DEBUG)) {
 			set_progress_callback(progress_spinner_callback);
 		}
 	} else {
-		if (progress_function) {
-			progress_report(100, 100);
-		} else if (isatty(fileno(stdout)) && !(log_get_level() == LOG_DEBUG)) {
+		progress_report(100, 100);
+
+		if (isatty(fileno(stdout)) && !(log_get_level() == LOG_DEBUG)) {
 			progress_spinner_print_end();
 			set_progress_callback(NULL);
 		}

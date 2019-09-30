@@ -50,6 +50,11 @@ static void default_progress_function(const char UNUSED_PARAM *step_description,
 	fflush(stdout);
 }
 
+static void progress_complete_step(void)
+{
+	progress_report(1, 1);
+}
+
 void progress_set_format(progress_fn_t progress_fn, start_fn_t start_fn, end_fn_t end_fn)
 {
 	if (!progress_fn) {
@@ -95,18 +100,15 @@ static void progress_set_step(unsigned int current_step, const char *desc)
 
 void progress_set_next_step(const char *desc)
 {
+	if (step.current > 0) {
+		progress_complete_step();
+	}
 	progress_set_step((step.current) + 1, desc);
 }
 
 struct step progress_get_step(void)
 {
 	return step;
-}
-
-void progress_complete_step(void)
-{
-	/* this kind of report only make sense if using a format other than standard */
-	progress_report(1, 1);
 }
 
 void progress_report(double count, double max)

@@ -41,6 +41,16 @@ static void print_help(void)
 	global_print_help();
 }
 
+static void print_format(int format)
+{
+	if (format > 0) {
+		info_verbose(" (format %d)", format);
+	} else {
+		info_verbose(" (format unknown)");
+	}
+	info("\n");
+}
+
 /* Return 0 if there is an update available, 1 if not and > 1 on errors. */
 enum swupd_code check_update()
 {
@@ -48,6 +58,7 @@ enum swupd_code check_update()
 	enum swupd_code ret = SWUPD_OK;
 	int server_format = -1;
 	int current_format = -1;
+	int latest_version_in_format = -1, format_in_format = -1, tmp_format = -1;
 
 	current_version = get_current_version(globals.path_prefix);
 	server_version = version_get_absolute_latest();
@@ -71,26 +82,36 @@ enum swupd_code check_update()
 		server_format = get_server_format(server_version);
 		/* Retrieve current format */
 		current_format = get_current_format();
+		latest_version_in_format = get_latest_version(NULL);
+		if (latest_version_in_format == -SWUPD_SIGNATURE_VERIFICATION_FAILED) {
+			ret = SWUPD_SIGNATURE_VERIFICATION_FAILED;
+			error("Unable to determine the latest version in format as signature verification failed\n");
+		} else if (latest_version_in_format < 0) {
+			error("Unable to determine the latest version in format\n");
+			ret = SWUPD_SERVER_CONNECTION_ERROR;
+		} else {
+			format_in_format = get_server_format(latest_version_in_format);
+		}
 	}
 
 	if (current_version > 0) {
 		info("Current OS version: %d", current_version);
-		if (current_format > 0) {
-			info_verbose(" (format %d)", current_format);
-		} else {
-			info_verbose(" (format unknown)");
-		}
-		info("\n");
+		print_format(current_format);
 	}
 
 	if (server_version > 0) {
 		info("Latest server version: %d", server_version);
-		if (server_format > 0) {
-			info_verbose(" (format %d)", server_format);
+		print_format(server_format);
+	}
+
+	if (latest_version_in_format > 0) {
+		info_verbose("Latest version in format %s: %d", globals.format_string, latest_version_in_format);
+		if (strtoi_err(globals.format_string, &tmp_format) != 0 ||
+		    tmp_format != format_in_format) {
+			print_format(format_in_format);
 		} else {
-			info_verbose(" (format unknown)");
+			info("\n");
 		}
-		info("\n");
 	}
 
 	if (ret != SWUPD_OK) {

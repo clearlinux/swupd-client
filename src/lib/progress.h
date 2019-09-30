@@ -88,11 +88,6 @@ void progress_set_next_step(const char *desc);
 struct step progress_get_step(void);
 
 /**
- * @brief Marks the current step as completed (progress = 100%).
- */
-void progress_complete_step(void);
-
-/**
  * @brief It reports the partial progress of the step. Useful in long running steps.
  */
 void progress_report(double, double);

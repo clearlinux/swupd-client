@@ -890,7 +890,6 @@ enum swupd_code verify_main(void)
 			goto clean_and_exit;
 		}
 	}
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Get versions
 
 	if (cmdline_option_install) {
@@ -909,7 +908,6 @@ enum swupd_code verify_main(void)
 	if (ret != 0) {
 		warn("Failed to remove prior downloads, carrying on anyway\n");
 	}
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Clean up download directory
 
 	timelist_timer_start(globals.global_times, "Load manifests");
@@ -1082,7 +1080,6 @@ enum swupd_code verify_main(void)
 		}
 		official_manifest->submanifests = bundles_submanifests;
 	}
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Load manifests
 
 	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
@@ -1103,7 +1100,6 @@ enum swupd_code verify_main(void)
 		list_free_list(all_files);
 		list_free_list_and_data(all_submanifests, manifest_free_data);
 	}
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times);
 
 	if (cmdline_option_extra_files_only) {
@@ -1192,7 +1188,6 @@ extra_files:
 		timelist_timer_start(globals.global_times, "Removing extra files");
 		progress_set_next_step("remove_extra_files");
 		deal_with_extra_files(official_manifest, cmdline_option_fix);
-		progress_complete_step();
 		timelist_timer_stop(globals.global_times);
 	}
 

@@ -190,7 +190,6 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	if (!need_download) {
 		/* no file needs to be downloaded */
 		info("No extra files need to be downloaded\n");
-		progress_complete_step();
 		return 0;
 	}
 

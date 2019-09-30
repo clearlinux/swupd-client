@@ -307,7 +307,6 @@ static enum swupd_code main_update()
 		ret = SWUPD_SERVER_CONNECTION_ERROR;
 		goto clean_curl;
 	}
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Prepare for update
 
 	/* Step 2: get versions */
@@ -376,7 +375,6 @@ version_check:
 	}
 
 	info("Preparing to update from %i to %i\n", current_version, server_version);
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Get versions
 
 	/* Step 3: housekeeping */
@@ -387,7 +385,6 @@ version_check:
 		ret = SWUPD_COULDNT_REMOVE_FILE;
 		goto clean_curl;
 	}
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Clean up download directory
 
 	/* Step 4: setup manifests */
@@ -467,14 +464,12 @@ version_check:
 	/* prepare for an update process based on comparing two in memory manifests */
 	link_manifests(current_manifest, server_manifest);
 	timelist_timer_stop(globals.global_times); // closing: Recurse and consolidate bundle manifests
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Load manifests
 
 	/* Step 5: check disk state before attempting update */
 	timelist_timer_start(globals.global_times, "Run pre-update scripts");
 	progress_set_next_step("run_preupdate_scripts");
 	scripts_run_pre_update(server_manifest);
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Run pre-update scripts
 
 	/* Step 6: get the packs and untar */
@@ -487,7 +482,6 @@ version_check:
 	timelist_timer_start(globals.global_times, "Apply deltas");
 	progress_set_next_step("apply_deltas");
 	apply_deltas(current_manifest);
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Apply deltas
 
 	/* Step 8: some more housekeeping */
@@ -497,7 +491,6 @@ version_check:
 	updates = create_update_list(server_manifest);
 
 	print_statistics(current_version, server_version);
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Create update list
 
 	/* Steps 9 & 10: downloading and applying updates */
@@ -538,7 +531,6 @@ version_check:
 		mom_get_manifests_list(server_manifest, NULL, NULL);
 	}
 
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Run post-update scripts
 
 	/* Create the state file that will tell swupd it's on a mix on future runs */

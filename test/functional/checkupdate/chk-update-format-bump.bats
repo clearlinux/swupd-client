@@ -34,15 +34,16 @@ test_setup() {
 @test "CHK011: Check if the check-update returns format no with --verbose" {
 
 	# check if verbose options holds
-	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS --verbose"
+	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS --verbose -F 1"
 
-	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Current OS version: 10 (format 1)
 		Latest server version: 40 (format 2)
+		Latest version in format 1: 20
 		There is a new OS version available: 40
 	EOM
 	)
 	assert_is_output "$expected_output"
+	assert_status_is "$SWUPD_OK"
 
 }

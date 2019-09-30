@@ -284,7 +284,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	/* get size of the packs to download */
 	download_progress.total_download_size = packs_query_total_download_size(need_download, mom);
 	if (download_progress.total_download_size > 0) {
-		swupd_curl_parallel_download_set_progress_callbacks(download_handle, swupd_progress_callback, &download_progress);
+		swupd_curl_parallel_download_set_progress_callback(download_handle, swupd_progress_callback, &download_progress);
 	} else {
 		debug("Couldn't get the size of the packs to download, using number of packs instead\n");
 		download_progress.total_download_size = 0;

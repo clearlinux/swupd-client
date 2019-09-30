@@ -247,7 +247,7 @@ void swupd_curl_parallel_download_set_callbacks(struct swupd_curl_parallel_handl
 	h->free_cb = free_cb;
 }
 
-void swupd_curl_parallel_download_set_progress_callbacks(struct swupd_curl_parallel_handle *h, swupd_curl_progress_cb progress_cb, void *data)
+void swupd_curl_parallel_download_set_progress_callback(struct swupd_curl_parallel_handle *h, swupd_curl_progress_cb progress_cb, void *data)
 {
 	if (!h) {
 		error("Curl - Invalid parallel download handle\n");

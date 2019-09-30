@@ -221,7 +221,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 		download_progress.total_download_size = fullfile_query_total_download_size(need_download);
 		if (download_progress.total_download_size > 0) {
 			/* enable the progress callback */
-			swupd_curl_parallel_download_set_progress_callbacks(download_handle, swupd_progress_callback, &download_progress);
+			swupd_curl_parallel_download_set_progress_callback(download_handle, swupd_progress_callback, &download_progress);
 		} else {
 			debug("Couldn't get the size of the files to download, using number of files instead\n");
 			download_progress.total_download_size = 0;

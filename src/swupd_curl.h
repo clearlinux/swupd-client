@@ -136,7 +136,7 @@ void swupd_curl_parallel_download_set_callbacks(struct swupd_curl_parallel_handl
  *                    function prints the download progress, so it will always return 0.
  * @param data        User data to be informed to progress_cb.
  */
-void swupd_curl_parallel_download_set_progress_callbacks(struct swupd_curl_parallel_handle *handle, swupd_curl_progress_cb progress_cb, void *data);
+void swupd_curl_parallel_download_set_progress_callback(struct swupd_curl_parallel_handle *handle, swupd_curl_progress_cb progress_cb, void *data);
 
 /**
  * @brief Enqueue a file to be downloaded. If the number of current downloads is higher

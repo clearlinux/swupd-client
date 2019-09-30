@@ -415,7 +415,7 @@ end:
 	swupd_deinit();
 
 exit:
-	progress_finish_steps("clean", ret);
+	progress_finish_steps(ret);
 	return ret;
 }
 

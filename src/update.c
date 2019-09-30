@@ -760,6 +760,6 @@ enum swupd_code update_main(int argc, char **argv)
 
 	swupd_deinit();
 
-	progress_finish_steps("update", ret);
+	progress_finish_steps(ret);
 	return ret;
 }

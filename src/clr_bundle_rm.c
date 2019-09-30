@@ -120,6 +120,6 @@ enum swupd_code bundle_remove_main(int argc, char **argv)
 	ret = remove_bundles(bundles_list);
 	list_free_list(bundles_list);
 
-	progress_finish_steps("bundle-remove", ret);
+	progress_finish_steps(ret);
 	return ret;
 }

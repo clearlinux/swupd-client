@@ -111,6 +111,6 @@ enum swupd_code info_main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 	swupd_deinit();
 
 finish:
-	progress_finish_steps("info", ret);
+	progress_finish_steps(ret);
 	return ret;
 }

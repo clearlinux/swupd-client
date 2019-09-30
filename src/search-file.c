@@ -658,6 +658,6 @@ clean_exit:
 	swupd_deinit();
 
 exit:
-	progress_finish_steps("search", ret);
+	progress_finish_steps(ret);
 	return ret;
 }

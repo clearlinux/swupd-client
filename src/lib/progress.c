@@ -39,24 +39,25 @@ void progress_set_format(progress_fn_t progress_fn, start_fn_t start_fn, end_fn_
 	end_function = end_fn;
 }
 
-void progress_init_steps(char *steps_description, int steps_in_process)
+void progress_init_steps(const char *steps_description, int steps_in_process)
 {
 	step.total = steps_in_process;
 	step.current = 0;
 	step.description = "";
+	step.title = steps_description;
 	if (start_function) {
 		start_function(steps_description);
 	}
 }
 
-void progress_finish_steps(char *steps_description, int status)
+void progress_finish_steps(int status)
 {
 	if (end_function) {
-		end_function(steps_description, status);
+		end_function(step.title, status);
 	}
 }
 
-void progress_set_step(unsigned int current_step, char *desc)
+void progress_set_step(unsigned int current_step, const char *desc)
 {
 	if (current_step == 0 || step.total == 0 || current_step > step.total) {
 		if (step.total == 0) {
@@ -70,7 +71,7 @@ void progress_set_step(unsigned int current_step, char *desc)
 	step.description = desc;
 }
 
-void progress_set_next_step(char *desc)
+void progress_set_next_step(const char *desc)
 {
 	progress_set_step((step.current) + 1, desc);
 }

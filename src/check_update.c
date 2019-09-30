@@ -152,6 +152,6 @@ enum swupd_code check_update_main(int argc, char **argv)
 	ret = check_update();
 	swupd_deinit();
 
-	progress_finish_steps("check-update", ret);
+	progress_finish_steps(ret);
 	return ret;
 }

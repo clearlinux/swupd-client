@@ -22,7 +22,7 @@ test_setup() {
 	sudo rm "$TEST_NAME"/temp/staged/"$removed_file"
 	sudo rm "$WEBDIR"/10/pack-test-bundle1-from-0.tar
 	sudo tar -C "$TEST_NAME"/temp -cf "$WEBDIR"/10/pack-test-bundle1-from-0.tar staged
-	# -----------------------	
+	# -----------------------
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 
@@ -64,7 +64,7 @@ test_setup() {
 	# ----- extra setup -----
 	# remove the original zero pack
 	sudo rm "$WEBDIR"/10/pack-test-bundle1-from-0.tar
-	# -----------------------	
+	# -----------------------
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 

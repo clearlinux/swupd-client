@@ -68,7 +68,6 @@ static void test_manifest_parse()
 	check(manifest->contentsize == 789);
 	manifest_free(manifest);
 
-	
 	// Manifest parser should fail on incorrect file list
 	manifest = manifest_parse_test("test", dir, "data/mom1", false);
 	check(manifest == NULL);

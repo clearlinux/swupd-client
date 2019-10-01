@@ -156,7 +156,7 @@ global_teardown() {
 @test "REM006: Try removing multiple bundles, one valid, one not installed" {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle3 test-bundle1"
-	
+
 	assert_status_is "$SWUPD_BUNDLE_NOT_TRACKED"
 	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 	assert_file_not_exists "$TARGETDIR"/test-file1

@@ -14,7 +14,7 @@ test_setup() {
 
 @test "INS015: Download os-install content without installing" {
 
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH --download $TARGETDIR" 
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH --download $TARGETDIR"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM

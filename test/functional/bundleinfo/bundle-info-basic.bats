@@ -48,7 +48,7 @@ global_teardown() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		_______________________________
-		 Info for bundle: test-bundle1 
+		 Info for bundle: test-bundle1
 		_______________________________
 		Status: Installed
 		There is an update for bundle test-bundle1:
@@ -75,7 +75,7 @@ global_teardown() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		_______________________________
-		 Info for bundle: test-bundle2 
+		 Info for bundle: test-bundle2
 		_______________________________
 		Status: Not installed \(experimental\)
 		Latest available version: 10
@@ -97,7 +97,7 @@ global_teardown() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		_______________________________
-		 Info for bundle: test-bundle1 
+		 Info for bundle: test-bundle1
 		_______________________________
 		Status: Installed
 		There is an update for bundle test-bundle1:
@@ -121,7 +121,7 @@ global_teardown() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		_______________________________
-		 Info for bundle: test-bundle1 
+		 Info for bundle: test-bundle1
 		_______________________________
 		Status: Installed
 		Bundle test-bundle1 is up to date:

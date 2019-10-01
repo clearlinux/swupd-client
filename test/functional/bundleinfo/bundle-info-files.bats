@@ -48,7 +48,7 @@ global_teardown() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		_______________________________
-		 Info for bundle: test-bundle1 
+		 Info for bundle: test-bundle1
 		_______________________________
 		Status: Not installed
 		Latest available version: 20
@@ -77,7 +77,7 @@ global_teardown() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		_______________________________
-		 Info for bundle: test-bundle1 
+		 Info for bundle: test-bundle1
 		_______________________________
 		Status: Not installed
 		Latest available version: 20
@@ -111,7 +111,7 @@ global_teardown() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		_______________________________
-		 Info for bundle: test-bundle1 
+		 Info for bundle: test-bundle1
 		_______________________________
 		Status: Not installed
 		Latest available version: 20

@@ -14,7 +14,7 @@ test_setup() {
 }
 
 @test "ADD017: Try adding a bundle with a bad hash in the state directory" {
- 
+
 	# since one of the files needed to install the bundle is already in the state/staged
 	# directory, in theory this one should be used instead of downloading it again...
 	# however since the hash of this file is wrong it should be deleted and re-downloaded

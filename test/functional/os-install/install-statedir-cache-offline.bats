@@ -27,7 +27,7 @@ test_setup() {
 @test "INS021: Install with populated statedir-cache and no network" {
 
 	# The statedir-cache should be used to successfully perform the install
-	# without an internet connection.	
+	# without an internet connection.
 
 	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --url=https://localhost --statedir-cache $statedir_cache_path -V 10"
 
@@ -50,7 +50,7 @@ test_setup() {
 	assert_regex_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
 	assert_file_exists "$TARGETDIR"/core
-	
+
 }
 
 @test "INS022: Install with missing manifest in statedir-cache and no network" {
@@ -78,7 +78,7 @@ test_setup() {
 	assert_regex_is_output "$expected_output"
 	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
 	assert_file_not_exists "$TARGETDIR"/core
-	
+
 }
 
 @test "INS023: Install with missing MoM signature in statedir-cache with no network" {
@@ -106,7 +106,7 @@ test_setup() {
 	assert_regex_is_output "$expected_output"
 	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
 	assert_file_not_exists "$TARGETDIR"/core
-	
+
 }
 
 @test "INS024: Install with missing fullfiles in statedir-cache with no network" {

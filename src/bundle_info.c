@@ -372,7 +372,7 @@ enum swupd_code bundle_info(char *bundle)
 	const int HEADER = 19;
 	int bundle_length = strlen(bundle);
 	print_pattern("_", HEADER + bundle_length);
-	info(" Info for bundle: %s \n", bundle);
+	info(" Info for bundle: %s\n", bundle);
 	print_pattern("_", HEADER + bundle_length);
 
 	/* status info */

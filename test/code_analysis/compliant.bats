@@ -3,6 +3,17 @@
 # Author: Otavio Pontes
 # Email: otavio.pontes@intel.com
 
+check_sort_makefile()
+{
+	start_str="$1"
+	export LC_COLLATE=en_US.UTF-8
+	START=$(\grep "$start_str" Makefile.am --line-number -m 1|  cut -f1 -d:)
+	START=$((START + 1))
+	END=$(tail +"$START"  Makefile.am | \grep -e '^$' --line-number -m 1 |  cut -f1 -d:)
+	END=$((END - 1))
+	tail -n +$START Makefile.am | head -n $END | sort -c
+}
+
 @test "ANL003: Compliant code style check" {
 	run git diff --quiet --exit-code src
 	# shellcheck disable=SC2154
@@ -40,4 +51,7 @@
 		return 1
 	fi
 
+	check_sort_makefile swupd_SOURCES
+	check_sort_makefile "BATS ="
+	check_sort_makefile "UNIT_TESTS ="
 }

@@ -395,31 +395,7 @@ install-exec-hook:
 	perl $(top_srcdir)/scripts/findstatic.pl */*.o | grep -v Checking ||:
 
 compliant:
-	@git diff --quiet --exit-code src; ret=$$?; \
-	if [ $$ret -eq 1 ]; then \
-		echo "Error: can only check code style when src/ are clean."; \
-		echo "Stash or commit your changes and try again."; \
-		exit $$ret; \
-	elif [ $$ret -gt 1 ]; then \
-		exit $$ret; \
-	fi; \
-	clang-format -i -style=file src/*.[ch] src/lib/*.[ch] ; ret=$$?; \
-	if [ $$ret -ne 0 ]; then \
-		exit $$ret; \
-	fi; \
-	git diff --quiet --exit-code src; ret=$$?; \
-	if [ $$ret -eq 1 ]; then \
-		echo "Code style issues found. Run 'git diff' to view issues."; \
-	fi; \
-	OUT=$$(git grep if\ \(.*\)$$ -- '*.c'); ret2=$$?; \
-	if [ $$ret2 -eq 0 ]; then \
-		echo "Missing brackets in single line if:"; \
-		echo "$$OUT"; \
-	elif [ $$ret -eq 0 ]; then \
-		echo "No code style issues found."; \
-		exit 0; \
-	fi; \
-	exit 1
+	test/code_analysis/compliant.bats
 
 # Ignore SC1008 because scripts are using an unsupported shebang
 shellcheck:

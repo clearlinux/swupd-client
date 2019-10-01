@@ -1233,6 +1233,7 @@ bump_format() { # swupd_function
 	sudo cp -r "$new_version_path" "$middle_version_path"
 
 	# Update +10 format and versions
+	sudo sh -c "echo $format > $middle_version_path/format"
 	update_manifest -p "$mom" format "$format"
 	update_manifest -p "$mom" version "$middle_version"
 	update_manifest -p "$mom" previous "$version"

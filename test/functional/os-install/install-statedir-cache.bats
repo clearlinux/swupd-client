@@ -50,7 +50,7 @@ test_setup() {
 	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
 	assert_file_exists "$TARGETDIR"/core
-	
+
 }
 
 @test "INS018: Install with no update content in the statedir-cache and valid network" {
@@ -84,7 +84,7 @@ test_setup() {
 	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
 	assert_file_exists "$TARGETDIR"/core
-	
+
 }
 
 @test "INS019: Install with missing fullfiles in statedir-cache and valid network" {
@@ -116,7 +116,7 @@ test_setup() {
 	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
 	assert_file_exists "$TARGETDIR"/core
-	
+
 }
 
 @test "INS020: Install with corrupt manifest in statedir-cache and valid network" {
@@ -148,5 +148,5 @@ test_setup() {
 	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
 	assert_file_exists "$TARGETDIR"/core
-	
+
 }

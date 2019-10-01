@@ -62,7 +62,7 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/test-file4
 	assert_file_exists "$TARGETDIR"/test-file5
 	assert_file_exists "$TARGETDIR"/common
-	
+
 	# When removing a bundle that is required by other bundles, if the --force
 	# option is used, it should be allowed, the specified bundle should be deleted
 	# and all bundles that require it should be deleted too

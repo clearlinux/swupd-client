@@ -11,7 +11,7 @@ To use the test library you just need to source it in your shell
 ```bash
 $ source testlib.bash
 ```
- or load it in your test script.  
+ or load it in your test script.
 ```bash
 load "testlib"
 ```
@@ -32,12 +32,12 @@ $ mkdir <some_test_theme>
 $ cd <some_test_theme>
 ```
 
-3. Create the new test script.  
+3. Create the new test script.
 ```bash
 $ generate_test <test_name>
 ```
 
-A new test script will be generated in the current directory.  
+A new test script will be generated in the current directory.
 ```bash
 #!/usr/bin/env bats
 
@@ -167,15 +167,15 @@ example:
 <br/>
 
 ### Running Tests
-To run a specific test script locally:  
+To run a specific test script locally:
 ```bash
 $ bats <theme_directory>/<test_script>.bats
-```  
+```
 
-To run all tests from a theme locally:  
+To run all tests from a theme locally:
 ```bash
 $ bats <theme_directory>
-```  
+```
 
 To run all tests locally:
 ```bash
@@ -189,7 +189,7 @@ $ cd swupd-client/
 $ make check
 ```
 
-To include tests to be run in the CI system:  
+To include tests to be run in the CI system:
 In order for the CI system to run a new test the test needs to be added to the
 BATS variable in the Makefile.am file
 ```bash
@@ -198,7 +198,7 @@ BATS = \
         test/functional/bundleadd_v2/add-directory.bats \
         test/functional/bundleadd_v2/add-existing.bats \
         ...
-```  
+```
 <br/>
 
 ### Debugging Tests
@@ -307,8 +307,8 @@ is useful for tests that need a pre-installed bundle as prerequisite
 
 Sometimes it is useful to create a bundle using an existing file in your system
 instead of letting the helper functions create a random file for you. This can be
-achieved by using the ':' character and specifying the file you want to use.  
-For example:  
+achieved by using the ':' character and specifying the file you want to use.
+For example:
 ```bash
 $ create_bundle -L -n test-bundle -f /foo/bar/test-file:"$WEBDIR"/10/files/"$hashed_name" my_env
 ```
@@ -412,59 +412,59 @@ can be run to update the manifest hashes in the MoM
 The following assertions are included in the test library. These should be used to
 perform the test validations.
 
-*assert_status_is*  
-passes if the exit status matches the provided one, fails otherwise  
-Example:  
+*assert_status_is*
+passes if the exit status matches the provided one, fails otherwise
+Example:
 ```bash
 run <some_command>
 assert_status_is 0
 ```
 
-*assert_status_is_not*  
-passes if the exit status does not match the provided one, fails otherwise  
-Example:  
+*assert_status_is_not*
+passes if the exit status does not match the provided one, fails otherwise
+Example:
 ```bash
 run <some_command>
 assert_status_is_not 0
 ```
 
-*assert_dir_exists*  
-passes if the provided directory exists, fails otherwise  
-Example:  
+*assert_dir_exists*
+passes if the provided directory exists, fails otherwise
+Example:
 ```bash
 run <some_command>
 assert_dir_exists /some/directory
 ```
 
-*assert_dir_not_exists*  
-passes if the provided directory does not exist, fails otherwise  
-Example:  
+*assert_dir_not_exists*
+passes if the provided directory does not exist, fails otherwise
+Example:
 ```bash
 run <some_command>
 assert_dir_not_exists /some/directory
 ```
 
-*assert_file_exists*  
-passes if the provided file exists, fails otherwise  
-Example:  
+*assert_file_exists*
+passes if the provided file exists, fails otherwise
+Example:
 ```bash
 run <some_command>
 assert_file_exists /some/file
 ```
 
-*assert_file_not_exists*  
-passes if the provided file does not exist, fails otherwise  
-Example:  
+*assert_file_not_exists*
+passes if the provided file does not exist, fails otherwise
+Example:
 ```bash
 run <some_command>
 assert_file_not_exists /some/file
 ```
 
-*assert_is_output*  
-passes if the provided text matches the whole command output, fails otherwise  
+*assert_is_output*
+passes if the provided text matches the whole command output, fails otherwise
 **NOTE:** dots and blank lines are removed by default from the output before comparing it to the expected output,
-if you want to disable this behavior use the assertion with the *--identical* option   
-Examples:  
+if you want to disable this behavior use the assertion with the *--identical* option
+Examples:
 ```bash
 # one line strings
 run <some_command>
@@ -486,7 +486,7 @@ expected_output=$(cat <<-EOM
   Some text that has dots
   ..
   and some empty lines
-  
+
   and you want those to be included when
   comparing the output
 EOM
@@ -494,17 +494,17 @@ EOM
 assert_is_output --identical "$expected_output"
 ```
 
-*assert_is_not_output*  
-passes if the provided text does not match the whole command output, fails otherwise  
-Examples:  
+*assert_is_not_output*
+passes if the provided text does not match the whole command output, fails otherwise
+Examples:
 ```bash
 run <some_command>
 assert_is_not_output "This should not be the command output"
 ```
 
-*assert_in_output*  
-passes if the provided text is included in the command output (partial match), fails otherwise  
-Examples:  
+*assert_in_output*
+passes if the provided text is included in the command output (partial match), fails otherwise
+Examples:
 ```bash
 run <other_command>
 expected_output=$(cat <<-EOM
@@ -516,21 +516,21 @@ EOM
 assert_in_output "$expected_output"
 ```
 
-*assert_not_in_output*  
-passes if the provided text is not included in the command output (partial match), fails otherwise  
-Examples:  
+*assert_not_in_output*
+passes if the provided text is not included in the command output (partial match), fails otherwise
+Examples:
 ```bash
 run <some_command>
 assert_not_in_output "Error"
 ```
 
-*assert_regex_is_output*  
+*assert_regex_is_output*
 similar to assert_is_output but this assertion receives a regular expression, passes
-if the provided regular expression matches the whole command output, fails otherwise  
-Examples:  
+if the provided regular expression matches the whole command output, fails otherwise
+Examples:
 ```bash
 # remember to skip characters that are part of the expected
-# output that match special regex characters like .*?()[] 
+# output that match special regex characters like .*?()[]
 run <some_command>
 expected_output=$(cat <<-EOM
   Some expected text that can have
@@ -541,60 +541,60 @@ EOM
 assert_regex_is_output "$expected_output"
 ```
 
-*assert_regex_is_not_output*  
+*assert_regex_is_not_output*
 similar to assert_is_not_output but this assertion receives a regular expression, passes
-if the provided regular expression does not match the command output, fails otherwise  
-Examples:  
+if the provided regular expression does not match the command output, fails otherwise
+Examples:
 ```bash
 run <some_command>
 assert_regex_is_not_output "Error .?"
 ```
 
-*assert_regex_in_output*  
+*assert_regex_in_output*
 similar to assert_in_output but this assertion receives a regular expression, passes
-if the provided regular expression is part of the command output (partial match), fails otherwise  
-Examples:  
+if the provided regular expression is part of the command output (partial match), fails otherwise
+Examples:
 ```bash
 run <some_command>
 assert_regex_in_output "This is part .* of the output"
 ```
 
-*assert_regex_not_in_output*  
+*assert_regex_not_in_output*
 similar to assert_not_in_output but this assertion receives a regular expression, passes
-if the provided regular expression is not part of the command output (partial match), fails otherwise  
-Examples:  
+if the provided regular expression is not part of the command output (partial match), fails otherwise
+Examples:
 ```bash
 run <some_command>
 assert_regex_not_in_output "Error."
 ```
 
-*assert_equal*  
-passes if the two values provided are equal, fails otherwise  
-Example:  
+*assert_equal*
+passes if the two values provided are equal, fails otherwise
+Example:
 ```bash
 run <some_command>
 assert_equal "some_value" "$my_variable"
 ```
 
-*assert_not_equal*  
-passes if the two values provided are not equal, fails otherwise  
-Example:  
+*assert_not_equal*
+passes if the two values provided are not equal, fails otherwise
+Example:
 ```bash
 run <some_command>
 assert_not_equal "$variable1" "$variable2"
 ```
 
-*assert_files_equal*  
-passes if the two files provided are equal, fails otherwise  
-Example:  
+*assert_files_equal*
+passes if the two files provided are equal, fails otherwise
+Example:
 ```bash
 run <some_command>
 assert_files_equal foo/bar foo/baz
 ```
 
-*assert_files_not_equal*  
-passes if the two files provided are not equal, fails otherwise  
-Example:  
+*assert_files_not_equal*
+passes if the two files provided are not equal, fails otherwise
+Example:
 ```bash
 run <some_command>
 assert_files_not_equal foo/bar foo/baz
@@ -603,9 +603,9 @@ assert_files_not_equal foo/bar foo/baz
 ### Ignore lists
 When using assertions that compare the command output to an expected output (for example
 assert_is_output, assert_in_output, etc.), blank lines and lines containing only
-dots are removed by default before comparing outputs.  
+dots are removed by default before comparing outputs.
 Besides removing empty lines and lines with dots from the output, it is also possible to
-use an *ignore list* to remove other patterns that are not important for a test when using these assertions.  
+use an *ignore list* to remove other patterns that are not important for a test when using these assertions.
 
 There are three different ignore list files that can be used (but only one can be used at a time):
 - <functional_tests_directory>/<test_theme_directory>/<test_name>.ignore-list: this file is intended
@@ -616,8 +616,8 @@ be used as an ignore-list for a group of test cases that are similar (the same t
 used as a fallback for all tests.
 
 To disable the use of ignore lists you can use the *--identical* option with every assertion
-that checks a command output.  
-Example:  
+that checks a command output.
+Example:
 ```bash
 assert_is_output --identical "$expected_output"
 assert_regex_not_in_output --identical "$some_other_output"

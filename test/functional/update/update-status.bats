@@ -21,7 +21,7 @@ test_teardown() {
 
 }
 
-global_teardown() { 
+global_teardown() {
 
 	destroy_test_environment "$TEST_NAME"
 

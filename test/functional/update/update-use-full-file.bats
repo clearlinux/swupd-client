@@ -10,7 +10,7 @@ test_setup() {
 	# remove packs so full file is used
 	sudo rm -rf "$WEBDIR"/100/pack-*
 	sudo rm -f "$WEBDIR"/100/delta/*
-	
+
 }
 
 @test "UPD006: Update falls back to using full files if no packs are available" {

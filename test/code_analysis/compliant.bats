@@ -32,4 +32,12 @@
 		echo "$output"
 		return 1
 	fi
+
+	run grep -r '[[:blank:]]$' test/ -l --include \*.bats --include \*.c
+	if [ "$status" -eq 0 ]; then
+		echo "Trailing whitespaces in files:"
+		echo "$output"
+		return 1
+	fi
+
 }

@@ -117,7 +117,8 @@ used to modify the core behavior and resources that swupd uses.
 
 - ``-C, --certpath``
 
-   Specify alternate path to swupd certificates.
+   Specify alternate path to swupd certificate store (pem file).
+   Default is /usr/share/clear/update-ca/Swupd_Root.pem
 
 - ``-t, --time``
 

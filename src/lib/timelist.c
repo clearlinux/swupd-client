@@ -23,8 +23,10 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "log.h"
+#include "macros.h"
 #include "memory.h"
-#include "swupd.h"
+#include "strings.h"
 #include "timelist.h"
 
 struct time {

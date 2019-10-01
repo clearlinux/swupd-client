@@ -10,7 +10,7 @@
  * swupd, as well as functions to handle them.
  */
 
-#include "timelist.h"
+#include "lib/timelist.h"
 
 #ifdef __cplusplus
 extern "C" {

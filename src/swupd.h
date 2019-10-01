@@ -21,12 +21,12 @@
 #include "lib/progress.h"
 #include "lib/strings.h"
 #include "lib/sys.h"
+#include "lib/timelist.h"
 #include "manifest.h"
 #include "scripts.h"
 #include "swupd_curl.h"
 #include "swupd_exit_codes.h"
 #include "swupd_progress.h"
-#include "timelist.h"
 
 #ifdef __cplusplus
 extern "C" {

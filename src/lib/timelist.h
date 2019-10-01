@@ -12,6 +12,9 @@
 extern "C" {
 #endif
 
+/**
+ * @brief A timelist object
+ */
 typedef TAILQ_HEAD(timelist, time) timelist;
 
 /**

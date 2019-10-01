@@ -78,6 +78,8 @@ swupd_SOURCES = \
 	src/lib/sys.h \
 	src/lib/thread_pool.c \
 	src/lib/thread_pool.h \
+	src/lib/timelist.c \
+	src/lib/timelist.h \
 	src/lock.c \
 	src/main.c \
 	src/manifest.c \
@@ -105,8 +107,6 @@ swupd_SOURCES = \
 	src/swupd_progress.c \
 	src/swupd_progress.h \
 	src/telemetry.c \
-	src/timelist.c \
-	src/timelist.h \
 	src/update.c \
 	src/verify.c \
 	src/verifytime.c \

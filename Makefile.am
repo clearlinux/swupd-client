@@ -45,8 +45,8 @@ swupd_SOURCES = \
 	src/clean.c \
 	src/config_loader.c \
 	src/config_loader.h \
-	src/curl.c \
 	src/curl_async.c \
+	src/curl.c \
 	src/delta.c \
 	src/extra_files.c \
 	src/filedesc.c \
@@ -98,12 +98,12 @@ swupd_SOURCES = \
 	src/staging.c \
 	src/stats.c \
 	src/subscriptions.c \
-	src/swupd.h \
 	src/swupd_build_opts.h \
 	src/swupd_build_variant.h \
 	src/swupd_curl.h \
 	src/swupd_curl_internal.h \
 	src/swupd_exit_codes.h \
+	src/swupd.h \
 	src/swupd_internal.h \
 	src/swupd_progress.c \
 	src/swupd_progress.h \
@@ -167,8 +167,8 @@ TESTS = $(dist_check_SCRIPTS) $(UNIT_TESTS)
 BATS = \
 	test/functional/bundleadd/add-alias-basic.bats \
 	test/functional/bundleadd/add-also-add-flag.bats \
-	test/functional/bundleadd/add-bad-hash-state.bats \
 	test/functional/bundleadd/add-bad-hash.bats \
+	test/functional/bundleadd/add-bad-hash-state.bats \
 	test/functional/bundleadd/add-bad-manifest.bats \
 	test/functional/bundleadd/add-basics.bats \
 	test/functional/bundleadd/add-boot-file.bats \
@@ -197,9 +197,9 @@ BATS = \
 	test/functional/bundlelist/list-deps-invalid-bundle.bats \
 	test/functional/bundlelist/list-deps-nested.bats \
 	test/functional/bundlelist/list-experimental.bats \
+	test/functional/bundlelist/list-has-dep-nested.bats \
 	test/functional/bundlelist/list-has-dep-nested-not-installed.bats \
 	test/functional/bundlelist/list-has-dep-nested-server.bats \
-	test/functional/bundlelist/list-has-dep-nested.bats \
 	test/functional/bundlelist/list-installed.bats \
 	test/functional/bundlelist/list-json.bats \
 	test/functional/bundlelist/list-no-deps.bats \
@@ -208,8 +208,8 @@ BATS = \
 	test/functional/bundleremove/remove-basics.bats \
 	test/functional/bundleremove/remove-boot-file.bats \
 	test/functional/bundleremove/remove-client-certificate.bats \
-	test/functional/bundleremove/remove-include-nested.bats \
 	test/functional/bundleremove/remove-include.bats \
+	test/functional/bundleremove/remove-include-nested.bats \
 	test/functional/bundleremove/remove-json.bats \
 	test/functional/bundleremove/remove-no-disk-space.bats \
 	test/functional/bundleremove/remove-optional-bundles.bats \
@@ -234,12 +234,12 @@ BATS = \
 	test/functional/diagnose/diagnose-good.bats \
 	test/functional/diagnose/diagnose-json.bats \
 	test/functional/diagnose/diagnose-missing-file.bats \
+	test/functional/diagnose/diagnose-picky.bats \
 	test/functional/diagnose/diagnose-picky-downgrade.bats \
 	test/functional/diagnose/diagnose-picky-whitelist.bats \
-	test/functional/diagnose/diagnose-picky.bats \
 	test/functional/hashdump/hashdump-file-hash.bats \
-	test/functional/mirror/mirror-createdir-negative.bats \
 	test/functional/mirror/mirror-createdir.bats \
+	test/functional/mirror/mirror-createdir-negative.bats \
 	test/functional/mirror/mirror-json.bats \
 	test/functional/os-install/install-also-add.bats \
 	test/functional/os-install/install-bad.bats \
@@ -253,19 +253,19 @@ BATS = \
 	test/functional/os-install/install-statedir-cache.bats \
 	test/functional/os-install/install-statedir-cache-offline.bats \
 	test/functional/os-install/install-version.bats \
-	test/functional/repair/repair-add-missing-include-old.bats \
 	test/functional/repair/repair-add-missing-include.bats \
+	test/functional/repair/repair-add-missing-include-old.bats \
 	test/functional/repair/repair-basics.bats \
-	test/functional/repair/repair-boot-file-deleted.bats \
 	test/functional/repair/repair-boot-file.bats \
+	test/functional/repair/repair-boot-file-deleted.bats \
 	test/functional/repair/repair-boot-skip.bats \
 	test/functional/repair/repair-bundles.bats \
 	test/functional/repair/repair-deleted-include-manifest.bats \
 	test/functional/repair/repair-directory-tree-deleted.bats \
 	test/functional/repair/repair-empty-dir-deleted.bats \
 	test/functional/repair/repair-flags.bats \
-	test/functional/repair/repair-format-mismatch-overdrive.bats \
 	test/functional/repair/repair-format-mismatch.bats \
+	test/functional/repair/repair-format-mismatch-overdrive.bats \
 	test/functional/repair/repair-ghosted.bats \
 	test/functional/repair/repair-ignore-also-add.bats \
 	test/functional/repair/repair-json.bats \
@@ -273,12 +273,12 @@ BATS = \
 	test/functional/repair/repair-no-disk-space.bats \
 	test/functional/repair/repair-picky.bats \
 	test/functional/repair/repair-picky-downgrade.bats \
-	test/functional/repair/repair-picky-ghosted-missing.bats \
 	test/functional/repair/repair-picky-ghosted.bats \
+	test/functional/repair/repair-picky-ghosted-missing.bats \
 	test/functional/repair/repair-skip-scripts.bats \
 	test/functional/repair/repair-unsafe-to-delete.bats \
-	test/functional/repair/repair-version-mismatch-overdrive.bats \
 	test/functional/repair/repair-version-mismatch.bats \
+	test/functional/repair/repair-version-mismatch-overdrive.bats \
 	test/functional/search/search-client-certificate.bats \
 	test/functional/search/search-content-check-negative.bats \
 	test/functional/search/search-content-check-positive.bats \
@@ -302,9 +302,9 @@ BATS = \
 	test/functional/update/update-download.bats \
 	test/functional/update/update-fail-to-get-mom.bats \
 	test/functional/update/update-ignore-also-add.bats \
-	test/functional/update/update-include-old-bundle-with-tracked-file.bats \
-	test/functional/update/update-include-old-bundle.bats \
 	test/functional/update/update-include.bats \
+	test/functional/update/update-include-old-bundle.bats \
+	test/functional/update/update-include-old-bundle-with-tracked-file.bats \
 	test/functional/update/update-json.bats \
 	test/functional/update/update-manifest-delta.bats \
 	test/functional/update/update-minversion.bats \
@@ -315,17 +315,17 @@ BATS = \
 	test/functional/update/update-no-disk-space.bats \
 	test/functional/update/update-non-responsive.bats \
 	test/functional/update/update-older-server-version.bats \
+	test/functional/update/update-rename.bats \
+	test/functional/update/update-rename-ghosted.bats \
 	test/functional/update/update-re-update-bad-os-release.bats \
 	test/functional/update/update-re-update-required.bats \
-	test/functional/update/update-rename-ghosted.bats \
-	test/functional/update/update-rename.bats \
 	test/functional/update/update-show-time.bats \
 	test/functional/update/update-skip-scripts.bats \
 	test/functional/update/update-slow-server.bats \
 	test/functional/update/update-statedir-bad-hash.bats \
+	test/functional/update/update-status.bats \
 	test/functional/update/update-status-no-server-content.bats \
 	test/functional/update/update-status-no-target-content.bats \
-	test/functional/update/update-status.bats \
 	test/functional/update/update-use-full-file.bats \
 	test/functional/update/update-use-pack.bats \
 	test/functional/update/update-verify-fix-path-hash-mismatch.bats \
@@ -343,10 +343,10 @@ BATS = \
 
 
 UNIT_TESTS = \
-	test/unit/test_signature.test \
-	test/unit/test_strings.test \
 	test/unit/test_list.test \
-	test/unit/test_manifest.test
+	test/unit/test_manifest.test \
+	test/unit/test_signature.test \
+	test/unit/test_strings.test
 
 EXTRA_DIST += test/unit/test_helper.h test/unit/data test/functional
 

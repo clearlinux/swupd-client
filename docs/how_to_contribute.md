@@ -1,8 +1,20 @@
 # How to contribute
 
+## Clear Linux OS - Software Contribution Guide
+
+Clear Linux OS is composed of many different open source software projects and welcomes all contributors to improve the project.
+
+Before contributing, please review and abide by the [Code of Conduct](https://01.org/blogs/2018/intel-covenant-code).
+
+Ensure any contributions align with Clear Linux philosophies on [stateless](https://clearlinux.org/features/stateless) and [security](https://docs.01.org/clearlinux/latest/guides/clear/security.html).
+
+More information on general Clear Linux OS constribution guidelines on [distribution guide](https://github.com/clearlinux/distribution/blob/master/contributing.md)
+
+## Swupd
+
 Swupd is open for code contributions. Nevertheless, if you are planning to propose a new feature, it's suggested that you file an issue first so we can discuss the feature idea and the proposed implementation. This way we can avoid future conflicts with other planned features.
 
-When your code is ready, open a pull request to have your patches reviewed. Patches are only going to be merged after being reviewed and approved by at least 2 maintainers (with some exceptions for trivial patches), all functional tests passes and enough tests are added to test the proposed functionality or bug fix.
+When your code is ready, open a pull request to have your patches reviewed. Patches are only going to be merged after being reviewed and approved by at least 2 maintainers (with some exceptions for trivial patches), all functional tests passes and enough tests are added to test the proposed functionality or bug fix. Make sure your [git user.name](https://help.github.com/en/articles/setting-your-username-in-git) and [git user.email](https://help.github.com/en/articles/setting-your-commit-email-address-in-git) are set correctly.
 
 You should also add tests to the feature or bug fix you are proposing. That's how we ensure we won't have software regressions or we won't break any functionality in the future. For more information about function tests, take a look at the [functional test documentation](test/functional/README.md).
 

@@ -300,7 +300,7 @@ int handle_mirror_if_stale(void)
 	 * with the server earlier. Another possible explanation for this if the signature
 	 * for central_version dont verify
 	 */
-	if (central_version == -SWUPD_SIGNATURE_VERIFICATION_FAILED) {
+	if (central_version == -SWUPD_ERROR_SIGNATURE_VERIFICATION) {
 		warn("Cannot determine upstream version since signature verification for path: %s failed\n", ret_str);
 		warn("Unable to determine if the mirror is up to date\n");
 		goto out;

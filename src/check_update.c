@@ -68,7 +68,7 @@ enum swupd_code check_update()
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
 
-	if (server_version == -SWUPD_SIGNATURE_VERIFICATION_FAILED) {
+	if (server_version == -SWUPD_ERROR_SIGNATURE_VERIFICATION) {
 		ret = SWUPD_SIGNATURE_VERIFICATION_FAILED;
 		error("Unable to determine the server version as signature verification failed\n");
 	} else if (server_version < 0) {
@@ -83,7 +83,7 @@ enum swupd_code check_update()
 		/* Retrieve current format */
 		current_format = get_current_format();
 		latest_version_in_format = get_latest_version(NULL);
-		if (latest_version_in_format == -SWUPD_SIGNATURE_VERIFICATION_FAILED) {
+		if (latest_version_in_format == -SWUPD_ERROR_SIGNATURE_VERIFICATION) {
 			ret = SWUPD_SIGNATURE_VERIFICATION_FAILED;
 			error("Unable to determine the latest version in format as signature verification failed\n");
 		} else if (latest_version_in_format < 0) {

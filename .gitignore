@@ -47,6 +47,7 @@ swupd
 swupd-client*tar.gz
 tap-driver.sh
 test-driver
+.state
 test-suite.log
 test/*.gcno
 test/documentation/manpages/test.log

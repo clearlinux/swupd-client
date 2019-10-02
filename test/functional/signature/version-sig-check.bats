@@ -7,8 +7,6 @@ load "../testlib"
 
 test_setup() {
 
-	#TODO: Remove on FB 30
-	skip "Skipping until FB 30 - feature disabled"
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /file_1 "$TEST_NAME"
 	create_version -p "$TEST_NAME" 20 10
@@ -18,6 +16,8 @@ test_setup() {
 
 @test "SIG019: Verify signature for absolute latest version with swupd check-update" {
 
+	#TODO: Remove on FB 30
+	skip "Skipping until FB 30 - feature disabled"
 	# absolute latest version get checked during check-update
 	sudo sh -c "mv $WEBDIR/version/latest_version.sig $WEBDIR/version/latest_version_bad_name.sig"
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"

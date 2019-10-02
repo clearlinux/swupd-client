@@ -50,4 +50,14 @@ enum swupd_code {
 
 };
 
+/*
+ * Swupd specific errno codes.
+ * Functions that return int for error in swupd should always use a negative
+ * number for errors, ideally from errno table. If there's no standard errno
+ * code that is similar to what you are trying to return, add the constant
+ * here and use it. Don't use values from enum swupd_code because they will
+ * clash with errno codes.
+ */
+#define SWUPD_ERROR_SIGNATURE_VERIFICATION 126
+
 #endif

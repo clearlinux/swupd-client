@@ -143,10 +143,8 @@ static int ensure_root_owned_dir(const char *dirname)
 	/* Oops, not owned by root or
 	 * not a directory or wrong perms
 	 */
-	sys_rm_recursive(dirname);
-	errno = 0;
-	ret = stat(dirname, &sb);
-	if ((ret != -1) || (errno != ENOENT)) {
+	ret = sys_rm_recursive(dirname);
+	if (ret != 0 && ret != -ENOENT) {
 		error(
 		    "Error \"%s\" not owned by root, is not a directory, "
 		    "or has the wrong permissions\n"

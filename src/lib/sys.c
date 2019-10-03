@@ -17,6 +17,7 @@
  *
  */
 
+#define _GNU_SOURCE
 #include "sys.h"
 #include "list.h"
 #include "log.h"
@@ -51,6 +52,7 @@ static int replace_fd(int fd, const char *fd_file)
 
 	replaced_fd = dup2(new_fd, fd);
 	close(new_fd);
+
 	return replaced_fd;
 }
 
@@ -59,6 +61,12 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 	int pid, ret, child_ret;
 	const char *cmd = params[0];
 	int null_fd;
+	int pipe_fds[2];
+
+	if (pipe2(pipe_fds, O_CLOEXEC) < 0) {
+		error("run_command %s failed to create pipe: \n", cmd);
+		return -1;
+	};
 
 	pid = fork();
 	if (pid < 0) {
@@ -68,6 +76,16 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 
 	// Main
 	if (pid > 0) {
+#define MAX_BUFFER_SIZE 1024
+		close(pipe_fds[1]);
+		char buf[MAX_BUFFER_SIZE], *result;
+
+		FILE *fstreamp = fdopen(pipe_fds[0], "r");
+
+		while ((result = fgets(buf, MAX_BUFFER_SIZE, fstreamp)) != NULL) {
+			info("External command: %s", result);
+		}
+
 		while ((ret = waitpid(pid, &child_ret, 0)) < 0) {
 			if (errno != EINTR) {
 				error("run_command %s failed: %i (%s)\n",
@@ -75,11 +93,13 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 				return -errno;
 			}
 		}
+		fclose(fstreamp);
 
 		return WEXITSTATUS(child_ret);
 	}
 
 	// Child
+	close(pipe_fds[0]);
 
 	/* replace the stdin with /dev/null. the underlying commands should never be
 	 * run interactively. */
@@ -93,11 +113,23 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 	}
 	close(null_fd);
 
-	if (replace_fd(STDOUT_FILENO, stdout_file) < 0) {
+	/* we replace_fd to file only stdout,stderr point to a file passed to it
+	 * otherwise it means we need to read it from pipe before printing to
+	 * STDOUT, STDERR
+	 */
+	if (!stdout_file) {
+		if (dup2(pipe_fds[1], STDOUT_FILENO) < 0) {
+			goto error_child;
+		}
+	} else if (replace_fd(STDOUT_FILENO, stdout_file) < 0) {
 		goto error_child;
 	}
 
-	if (replace_fd(STDERR_FILENO, stderr_file) < 0) {
+	if (!stderr_file) {
+		if (dup2(pipe_fds[1], STDERR_FILENO) < 0) {
+			goto error_child;
+		}
+	} else if (replace_fd(STDERR_FILENO, stderr_file) < 0) {
 		goto error_child;
 	}
 

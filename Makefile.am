@@ -396,6 +396,8 @@ install-exec-hook:
 
 compliant:
 	test/code_analysis/compliant.bats
+	test/functional/check_ids.bash
+	scripts/flag_validator.bash
 
 # Ignore SC1008 because scripts are using an unsupported shebang
 shellcheck:
@@ -403,12 +405,6 @@ shellcheck:
 
 shellcheck-all:
 	test/code_analysis/shellcheck-all.bats
-
-check-test-ids:
-	test/functional/check_ids.bash
-
-check-flags:
-	scripts/flag_validator.bash
 
 release:
 	@git rev-parse v$(PACKAGE_VERSION) &> /dev/null; \

@@ -62,10 +62,10 @@ global_teardown() {
 		Bundle size:
 		 - Size of bundle: .* KB
 		 - Maximum amount of disk size the bundle will take if installed \(includes dependencies\): .* KB
-		Directly included bundles \(2\):
+		Direct dependencies \(2\):
 		 - test-bundle2
 		 - test-bundle3 \(optional\)
-		Indirectly included bundles \(1\):
+		Indirect dependencies \(1\):
 		 - test-bundle4
 	EOM
 	)
@@ -90,11 +90,11 @@ global_teardown() {
 		Bundle size:
 		 - Size of bundle: .* KB
 		 - Maximum amount of disk size the bundle will take if installed \(includes dependencies\): .* KB
-		Directly included bundles \(3\):
+		Direct dependencies \(3\):
 		 - test-bundle2
 		 - test-bundle5
 		 - test-bundle3 \(optional\)
-		Indirectly included bundles \(1\):
+		Indirect dependencies \(1\):
 		 - test-bundle4
 	EOM
 	)

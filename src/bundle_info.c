@@ -34,19 +34,6 @@ static int cmdline_option_version = 0;
 
 static char *bundle;
 
-struct bundle_info {
-	struct manifest *manifest;
-	struct list *direct_includes;
-	struct list *indirect_includes;
-	struct list *includes_manifests;
-	struct list *files;
-	bool is_installed;
-	bool is_experimental;
-	int version_latest_available;
-	long size_total;
-	long size_required;
-};
-
 static void print_help(void)
 {
 	print("Usage:\n");

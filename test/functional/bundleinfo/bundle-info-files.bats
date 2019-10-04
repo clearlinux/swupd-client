@@ -84,7 +84,7 @@ global_teardown() {
 		Bundle size:
 		 - Size of bundle: .* KB
 		 - Maximum amount of disk size the bundle will take if installed \(includes dependencies\): .* KB
-		Directly included bundles \(1\):
+		Direct dependencies \(1\):
 		 - test-bundle2
 		Files in bundle \(includes dependencies\):
 		 - /bar
@@ -118,7 +118,7 @@ global_teardown() {
 		Bundle size:
 		 - Size of bundle: .* KB
 		 - Maximum amount of disk size the bundle will take if installed \(includes dependencies\): .* KB
-		Directly included bundles \(1\):
+		Direct dependencies \(1\):
 		 - test-bundle2
 		Files in bundle \(includes dependencies\):
 		 - /bar

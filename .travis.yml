@@ -12,7 +12,7 @@ env:
                 - UPDATE_TOTAL="$(find test/functional/update -name *.bats | wc -l)"
                 - UPDATE_SUBGROUP1_TOTAL=17
                 - UPDATE_SUBGROUP2_TOTAL="$((UPDATE_TOTAL - UPDATE_SUBGROUP1_TOTAL))"
-                - UPDATE_SUBGROUP1="$(find test/functional/update -name *.bats | head -n $UPDATE_SUBGROUP1_TOTAL | tr '\n' ' ')"
+                - UPDATE_SUBGROUP1="$(find test/functional/{autoupdate,update} -name *.bats | head -n $UPDATE_SUBGROUP1_TOTAL | tr '\n' ' ')"
                 - UPDATE_SUBGROUP2="$(find test/functional/update -name *.bats | tail -n $UPDATE_SUBGROUP2_TOTAL | tr '\n' ' ')"
                 - GROUP1="$UPDATE_SUBGROUP1 $(find test/functional/{bundleinfo,verify-legacy} -name *.bats -printf '%p ')"
                 - GROUP2="$UPDATE_SUBGROUP2 $(find test/functional/{checkupdate,hashdump,mirror,usability} -name *.bats \( ! -name usa-config-file.bats \) -printf '%p ')"

@@ -29,56 +29,76 @@
 
 #include "swupd.h"
 
-static void print_help(const char *name)
+static void print_help(void)
 {
 	print("Usage:\n");
-	print("   swupd %s [options]\n\n", basename((char *)name));
-	print("Help Options:\n");
-	print("   -h, --help              Show help options\n");
+	print("   swupd autoupdate [OPTION...]\n\n");
+
+	global_print_help();
+
+	print("Options:\n");
 	print("       --enable            enable autoupdates\n");
 	print("       --disable           disable autoupdates\n");
 	print("\n");
 }
 
-static int enable;
-static int disable;
+#define FLAG_ENABLE 2000
+#define FLAG_DISABLE 2001
+static bool cmdline_option_enable;
+static bool cmdline_option_disable;
 
 static const struct option prog_opts[] = {
 	{ "help", no_argument, 0, 'h' },
-	{ "enable", no_argument, &enable, 1 },
-	{ "disable", no_argument, &disable, 1 },
-	{ 0, 0, 0, 0 }
+	{ "enable", no_argument, 0, FLAG_ENABLE },
+	{ "disable", no_argument, 0, FLAG_DISABLE },
+};
+
+static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
+{
+	switch (opt) {
+	case 'h':
+		print_help();
+		exit(EXIT_SUCCESS);
+	case FLAG_ENABLE:
+		if (cmdline_option_disable) {
+			error("Can not enable and disable at the same time\n");
+			return false;
+		}
+		cmdline_option_enable = true;
+		return true;
+	case FLAG_DISABLE:
+		if (cmdline_option_enable) {
+			error("Can not enable and disable at the same time\n");
+			return false;
+		}
+		cmdline_option_disable = true;
+		return true;
+	default:
+		return false;
+	}
+	return false;
+}
+
+static const struct global_options opts = {
+	prog_opts,
+	sizeof(prog_opts) / sizeof(struct option),
+	parse_opt,
+	print_help,
 };
 
 static bool parse_options(int argc, char **argv)
 {
-	int opt;
+	int ind = global_parse_options(argc, argv, &opts);
 
-	while ((opt = getopt_long(argc, argv, "h", prog_opts, NULL)) != -1) {
-		switch (opt) {
-		case '?':
-			print_help(argv[0]);
-			exit(SWUPD_INVALID_OPTION);
-		case 'h':
-			print_help(argv[0]);
-			exit(EXIT_SUCCESS);
-		case 0: /* getopt_long has set the flag */
-			break;
-		default:
-			error("unrecognized option\n\n");
-			goto err;
-		}
+	if (ind < 0) {
+		return false;
 	}
 
-	if (argc > optind) {
+	if (argc > ind) {
 		error("unexpected arguments\n\n");
-		goto err;
+		return false;
 	}
-
 	return true;
-err:
-	print_help(argv[0]);
-	return false;
 }
 
 static void policy_warn(void)
@@ -89,38 +109,49 @@ static void policy_warn(void)
 
 enum swupd_code autoupdate_main(int argc, char **argv)
 {
+	
 	if (!parse_options(argc, argv)) {
+		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	if (enable && disable) {
-		error("Can not enable and disable at the same time\n");
-		return SWUPD_INVALID_OPTION;
-	}
+
 	if (!systemctl_active()) {
 		error("Systemd is inactive - unable to proceed\n");
 		return SWUPD_SUBPROCESS_ERROR;
 	}
 
-	if (enable) {
+	if (cmdline_option_enable) {
 		int rc;
 		check_root();
 		info("Running systemctl to enable updates\n");
-		rc = systemctl_cmd("unmask", "--now", "swupd-update.service", "swupd-update.timer", NULL);
+		rc = systemctl_cmd_path(globals.path_prefix,
+					"unmask", "--now", "swupd-update.service", "swupd-update.timer", NULL);
 		if (rc != 0) {
 			return SWUPD_SUBPROCESS_ERROR;
 		}
-		rc = systemctl_restart("swupd-update.timer");
+
+		/* If globals.path_prefix is given and we have succeeded so far,
+		 * make sense to return SWUPD_OK at this point. In that case, 
+		 * a swupd timer restart cannot be done as there is no
+		 * system daemon to communicate for rootfs.
+		 */
+		if (globals.path_prefix) {
+			return SWUPD_OK;
+		}
+
+		rc = systemctl_cmd_path(globals.path_prefix, "restart", "swupd-update.timer", NULL);
 		if (rc != 0) {
 			return SWUPD_SUBPROCESS_ERROR;
 		}
 
 		return SWUPD_OK;
-	} else if (disable) {
+	} else if (cmdline_option_disable) {
 		int rc;
 		check_root();
 		policy_warn();
 		info("Running systemctl to disable updates\n");
-		rc = systemctl_cmd("mask", "--now", "swupd-update.service", "swupd-update.timer", NULL);
+		rc = systemctl_cmd_path(globals.path_prefix,
+					"mask", "--now", "swupd-update.service", "swupd-update.timer", NULL);
 		if (rc) {
 			return SWUPD_SUBPROCESS_ERROR;
 		}
@@ -128,8 +159,8 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 	} else {
 		int rc1, rc2;
 		const int STATUS_UNKNOWN = 4;
-		rc1 = systemctl_cmd("is-enabled", "swupd-update.service", NULL);
-		rc2 = systemctl_cmd("is-active", "swupd-update.timer", NULL);
+		rc1 = systemctl_cmd_path(globals.path_prefix, "is-enabled", "swupd-update.service", NULL);
+		rc2 = systemctl_cmd_path(globals.path_prefix, "is-active", "swupd-update.timer", NULL);
 		if (rc1 == SWUPD_OK && rc2 == SWUPD_OK) {
 			print("Enabled\n");
 			return SWUPD_OK;

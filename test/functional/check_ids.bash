@@ -5,7 +5,7 @@ FUNC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=/dev/null
 source "$FUNC_DIR"/testlib.bash
 
-declare -A groups=( ["bundleadd"]="ADD" ["bundlelist"]="LST" ["bundleremove"]="REM" \
+declare -A groups=( ["autoupdate"]="AUP" ["bundleadd"]="ADD" ["bundlelist"]="LST" ["bundleremove"]="REM" \
 	["checkupdate"]="CHK" ["hashdump"]="HSD" ["mirror"]="MIR" ["search"]="SRH" \
 	["update"]="UPD" ["usability"]="USA" ["verify"]="VER" )
 

@@ -203,6 +203,12 @@ int sys_rm(const char *filename);
  */
 #define systemctl_cmd(...) run_command_quiet(SYSTEMCTL, __VA_ARGS__)
 
+/**
+ * @brief Run a systemctl command with the informed parameters in a path
+ */
+#define systemctl_cmd_path(path, ...) \
+	path ? run_command_quiet(SYSTEMCTL, "--root", path, __VA_ARGS__) : run_command_quiet(SYSTEMCTL, __VA_ARGS__)
+
 #ifdef __cplusplus
 }
 #endif

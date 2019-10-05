@@ -14,7 +14,7 @@ env:
                 - UPDATE_SUBGROUP2_TOTAL="$((UPDATE_TOTAL - UPDATE_SUBGROUP1_TOTAL))"
                 - UPDATE_SUBGROUP1="$(find test/functional/update -name *.bats | head -n $UPDATE_SUBGROUP1_TOTAL | tr '\n' ' ')"
                 - UPDATE_SUBGROUP2="$(find test/functional/update -name *.bats | tail -n $UPDATE_SUBGROUP2_TOTAL | tr '\n' ' ')"
-                - GROUP1="$UPDATE_SUBGROUP1 $(find test/functional/{bundleinfo,verify-legacy} -name *.bats -printf '%p ')"
+                - GROUP1="$UPDATE_SUBGROUP1 $(find test/functional/{autoupdate,bundleinfo,verify-legacy} -name *.bats -printf '%p ')"
                 - GROUP2="$UPDATE_SUBGROUP2 $(find test/functional/{checkupdate,hashdump,mirror,usability} -name *.bats \( ! -name usa-config-file.bats \) -printf '%p ')"
                 - GROUP3="$(find test/functional/{diagnose,search,os-install,repair} -name *.bats -printf '%p ')"
                 - GROUP4="$(find test/functional/{bundleadd,bundleremove,bundlelist,signature} -name *.bats -printf '%p ')"
@@ -27,7 +27,7 @@ jobs:
                   name: "Static Analysis & Unit Tests"
                   script: make compliant && make shellcheck && sudo sh -c 'umask 0022 && make unit-check' && make docs-coverage
                 - stage: test
-                  name: "Functional Tests - update (group 1), bundle-info, verify-legacy"
+                  name: "Functional Tests - update (group 1), autoupdate, bundle-info, verify-legacy"
                   script: env TESTS="$GROUP1" make -e check
                 - stage: test
                   name: "Functional Tests - update (group 2), checkupdate, hashdump, mirror, usability"
@@ -51,6 +51,7 @@ install:
         - sudo apt-get install doxygen
         - sudo apt-get install check
         - sudo pip install coverxygen
+        - sudo ln -s /bin/systemctl /usr/bin/systemctl
 
         # build bsdiff
         - wget https://github.com/clearlinux/bsdiff/releases/download/v1.0.2/bsdiff-1.0.2.tar.xz

@@ -185,6 +185,7 @@ if [[ -n "$state" ]]; then
 		      ;;
         autoupdate)
           local -a autoupdates; autoupdates=(
+	    $global_opts
             '(-)--enable[enable autoupdates]'
             '(-)--disable[disable autoupdates]'
             '(-)'{-h,--help}'[Show help options]'

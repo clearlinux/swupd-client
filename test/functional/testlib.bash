@@ -3171,6 +3171,7 @@ get_next_available_id() { # swupd_function
 	id=$((id+1))
 	test_dir=$(basename "$(realpath "$test_dir")")
 	case "$test_dir" in
+		autoupdate) group=AUT;;
 		bundleadd) group=ADD;;
 		bundleremove) group=REM;;
 		bundlelist) group=LST;;
@@ -3184,7 +3185,6 @@ get_next_available_id() { # swupd_function
 		completion) group=USA;;
 		usability) group=USA;;
 		signature) group=SIG;;
-		autoupdate) group=AUT;;
 		info) group=INF;;
 		clean) group=CLN;;
 		os-install) group=INS;;

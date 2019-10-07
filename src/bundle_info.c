@@ -171,7 +171,7 @@ static void print_bundle_files(struct list *files)
 		print("%s\n", file->filename);
 	}
 
-	info("\nTotal files: %d\n", count);
+	info("\nTotal files: %ld\n", count);
 }
 
 static void print_bundle_size(struct manifest *manifest, long size, bool bundle_installed)

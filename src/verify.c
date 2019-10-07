@@ -504,14 +504,10 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 
 		fullname = mk_full_filename(globals.path_prefix, file->filename);
 
-		if (lstat(fullname, &sb) != 0) {
-			/* correctly, the file is not present */
-			goto out;
-		}
-
 		fd = get_dirfd_path(fullname);
 		if (fd < 0) {
-			if (fd == -1) {
+			/* if the file is not present or is a symlink, skip it */
+			if (fd != -ENOENT && fd != -EPERM) {
 				counts.extraneous++;
 				counts.not_deleted++;
 			}
@@ -528,7 +524,11 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 		}
 
 		base = basename(fullname);
-
+		if (lstat(fullname, &sb) != 0) {
+			close(fd);
+			counts.not_deleted++;
+			goto out;
+		}
 		if (!S_ISDIR(sb.st_mode)) {
 			ret = unlinkat(fd, base, 0);
 			if (ret && errno != ENOENT) {

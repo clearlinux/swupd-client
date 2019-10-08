@@ -28,7 +28,7 @@ struct manifest {
 	char *component;
 
 	// File list
-	struct list *files;     /* struct file for files */
+	struct list *files;	/* struct file for files */
 	struct list *manifests; /* struct file for possible manifests */
 
 	// Helper data

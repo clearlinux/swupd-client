@@ -62,12 +62,14 @@ install:
         - pushd libarchive-3.3.1 && autoreconf -fi && ./configure --prefix=/usr && make -j48 && sudo make install && popd
         - sudo apt-get install python3-docutils
         - sudo apt-get install realpath
-        - sudo apt-get install clang-format-6.0
         - sudo apt-get install shellcheck
         - sudo apt-get install doxygen
         - sudo pip install coverxygen
         - sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
         - git fetch origin master:refs/remotes/origin/master #Download origin/master for shelcheck
+        - sudo add-apt-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main"
+        - sudo apt-get update
+        - sudo apt-get install -y --allow-unauthenticated clang-format-9
 
 # Ubuntu's default umask is 0002, but this break's swupd hash calculations.
 before_script:

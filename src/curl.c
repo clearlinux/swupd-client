@@ -58,7 +58,9 @@ uint64_t total_curl_sz = 0;
 /* alternative CA Path */
 static char *capath = NULL;
 
-static progress_callback_fn_t progress_callback = NULL;
+/* Progress callback and data */
+static swupd_curl_progress_cb progress_cb = NULL;
+static void *progress_cb_data = NULL;
 
 /* Pretty print curl return status */
 static void swupd_curl_strerror(CURLcode curl_ret)
@@ -66,9 +68,10 @@ static void swupd_curl_strerror(CURLcode curl_ret)
 	error("Curl - Download error - (%d) %s\n", curl_ret, curl_easy_strerror(curl_ret));
 }
 
-void set_progress_callback(progress_callback_fn_t progress_cb)
+void swupd_curl_download_set_progress_callback(swupd_curl_progress_cb user_progress_cb, void *data)
 {
-	progress_callback = progress_cb;
+	progress_cb = user_progress_cb;
+	progress_cb_data = data;
 }
 
 /*
@@ -791,14 +794,19 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_
 		}
 	}
 
-	if (progress_callback) {
+	if (progress_cb) {
 		curl_ret = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
 
 		curl_ret = curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION,
-					    progress_callback);
+					    progress_cb);
+		if (curl_ret != CURLE_OK) {
+			goto exit;
+		}
+
+		curl_ret = curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, progress_cb_data);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}

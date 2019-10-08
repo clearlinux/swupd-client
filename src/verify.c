@@ -1023,12 +1023,10 @@ enum swupd_code verify_main(void)
 	}
 
 	info("Downloading missing manifests...\n");
-	progress_set_spinner(true);
 	ret = add_included_manifests(official_manifest, &all_subs);
 	if (cmdline_option_bundles && !(ret & add_sub_ERR)) {
 		ret = add_included_manifests(official_manifest, &bundles_subs);
 	}
-	progress_set_spinner(false);
 	/* if one or more of the installed bundles were not found in the manifest,
 	 * continue only if --force was used since the bundles could be removed */
 	if (ret || invalid_bundle) {

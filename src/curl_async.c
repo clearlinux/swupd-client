@@ -88,11 +88,11 @@ struct swupd_curl_parallel_handle {
 
 	CURLM *mcurl;			    /* Curl handle */
 	struct list *failed;		    /* List of failed downloads */
-	struct hashmap *curl_hashmap;       /* Hashmap mentioned above */
+	struct hashmap *curl_hashmap;	    /* Hashmap mentioned above */
 	struct tp *thpool;		    /* Pointer to the threadpool */
 	swupd_curl_success_cb success_cb;   /* Callback to success function */
-	swupd_curl_error_cb error_cb;       /* Callback to error function */
-	swupd_curl_free_cb free_cb;	 /* Callback to free user data */
+	swupd_curl_error_cb error_cb;	    /* Callback to error function */
+	swupd_curl_free_cb free_cb;	    /* Callback to free user data */
 	swupd_curl_progress_cb progress_cb; /* Callback to report download progress */
 	void *data;
 };
@@ -102,7 +102,7 @@ struct swupd_curl_parallel_handle {
  */
 struct multi_curl_file {
 	struct curl_file file;		/* Curl file information */
-	enum download_status status;    /* status of last download try */
+	enum download_status status;	/* status of last download try */
 	char retries;			/* Number of retried performed so far */
 	CURL *curl;			/* curl handle if downloading */
 	char *url;			/* The url to be downloaded from */
@@ -110,7 +110,7 @@ struct multi_curl_file {
 	const char *hash;		/* Unique identifier of this file. */
 	swupd_curl_success_cb callback; /* Holds original success callback to be wrapped */
 
-	void *data;     /* user's data */
+	void *data;	/* user's data */
 	bool cb_retval; /* return value from callback */
 	struct file_progress *progress;
 };

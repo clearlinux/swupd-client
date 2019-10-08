@@ -137,7 +137,7 @@ void progress_report(double count, double max)
 	}
 }
 
-static int progress_spinner_callback(void)
+static int progress_spinner_callback(void UNUSED_PARAM *clientp, int64_t UNUSED_PARAM dltotal, int64_t UNUSED_PARAM  dlnow, int64_t UNUSED_PARAM ultotal, int64_t UNUSED_PARAM ulnow)
 {
 	static int index = -1;
 	static time_t begin = 0;
@@ -166,14 +166,14 @@ void progress_set_spinner(bool status_flag)
 		progress_report(-1, 100);
 
 		if (isatty(fileno(stdout)) && !(log_get_level() == LOG_DEBUG)) {
-			set_progress_callback(progress_spinner_callback);
+			swupd_curl_download_set_progress_callback(progress_spinner_callback, NULL);
 		}
 	} else {
 		progress_report(100, 100);
 
 		if (isatty(fileno(stdout)) && !(log_get_level() == LOG_DEBUG)) {
 			progress_spinner_print_end();
-			set_progress_callback(NULL);
+			swupd_curl_download_set_progress_callback(NULL, NULL);
 		}
 	}
 }

@@ -62,7 +62,7 @@ install:
         - pushd libarchive-3.3.1 && autoreconf -fi && ./configure --prefix=/usr && make -j48 && sudo make install && popd
         - sudo apt-get install python3-docutils
         - sudo apt-get install realpath
-        - sudo apt-get install clang-format-6.0
+        - sudo apt-get install clang-format-9.0
         - sudo apt-get install shellcheck
         - sudo apt-get install doxygen
         - sudo pip install coverxygen

@@ -14,13 +14,13 @@ test_setup() {
 
 @test "SRH027: Search for a file using machine readable output" {
 
-	sudo sh -c "$SWUPD search-file --init $SWUPD_OPTS"
+	sudo sh -c "$SWUPD search-file --init $SWUPD_OPTS_PROGRESS"
 
 	# the --json-output flag can be used so all the output of the search
 	# command is created as a JSON stream that can be read and parsed by other
 	# applications interested into knowing real time status of the command
 
-	run sudo sh -c "$SWUPD search-file --json-output $SWUPD_OPTS file_1"
+	run sudo sh -c "$SWUPD search-file --json-output $SWUPD_OPTS_PROGRESS file_1"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM

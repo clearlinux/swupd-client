@@ -18,7 +18,7 @@ test_setup() {
 	# command is created as a JSON stream that can be read and parsed by other
 	# applications interested into knowing real time status of the command
 
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS --json-output"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_PROGRESS --json-output"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output1=$(cat <<-EOM

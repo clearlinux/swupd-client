@@ -18,7 +18,7 @@ test_setup() {
 
 @test "REP020: Repair a system using machine readable output" {
 
-	run sudo sh -c "$SWUPD repair --json-output --picky $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD repair --json-output --picky $SWUPD_OPTS_PROGRESS"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output1=$(cat <<-EOM

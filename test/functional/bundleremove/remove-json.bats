@@ -18,7 +18,7 @@ test_setup() {
 	# command is created as a JSON stream that can be read and parsed by other
 	# applications interested into knowing real time status of the command
 
-	run sudo sh -c "$SWUPD bundle-remove --json-output $SWUPD_OPTS test-bundle"
+	run sudo sh -c "$SWUPD bundle-remove --json-output $SWUPD_OPTS_PROGRESS test-bundle"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM

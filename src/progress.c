@@ -56,8 +56,7 @@ int progress_spinner_callback(void *clientp, int64_t UNUSED_PARAM dltotal, int64
 
 	if (time(NULL) > data->begin) {
 		data->begin = time(NULL);
-		info("\r");
-		info("[%c]", spinner[data->index]);
+		info(" [%c]\r", spinner[data->index]);
 		data->index = (data->index + 1) % 4;
 		fflush(stdout);
 	}
@@ -72,12 +71,6 @@ static void progress_spinner_end(void)
 	}
 
 	swupd_curl_download_set_progress_callback(NULL, NULL);
-
-	// Clear spinner if it has printed at least once
-	if (spinner_data.begin) {
-		info("\r   \n");
-		fflush(stdout);
-	}
 }
 
 static void progress_spinner_start(void)
@@ -123,11 +116,14 @@ static void default_progress_function(const char UNUSED_PARAM *step_description,
 
 	// Print progress bar
 	if (isatty(fileno(stdout))) {
-		info("\t...%d%%%s", percentage, percentage != 100 ? "\r" : "\n");
+		info(" [%3d%%]\r", percentage);
+		if (percentage == 100) {
+			info("\n\n");
+		}
 	} else {
 		/* if printing to a file print every percentage
 		 * in its own line */
-		info("\t...%d%%\n", percentage);
+		info(" [%3d%%]\n", percentage);
 	}
 
 	fflush(stdout);

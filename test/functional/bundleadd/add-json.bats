@@ -20,7 +20,7 @@ test_setup() {
 	# applications interested into knowing real time status of the command
 	# (for example installer so it can provide the user a status of the install process)
 
-	run sudo sh -c "$SWUPD bundle-add --json-output $SWUPD_OPTS test-bundle"
+	run sudo sh -c "$SWUPD bundle-add --json-output $SWUPD_OPTS_PROGRESS test-bundle"
 
 	assert_status_is 0
 	expected_output1=$(cat <<-EOM

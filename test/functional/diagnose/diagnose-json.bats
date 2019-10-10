@@ -18,7 +18,7 @@ test_setup() {
 
 @test "DIA010: Diagnose a system using machine readable output" {
 
-	run sudo sh -c "$SWUPD diagnose --json-output $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD diagnose --json-output $SWUPD_OPTS_PROGRESS"
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM

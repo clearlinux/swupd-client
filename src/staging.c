@@ -356,7 +356,7 @@ static int rename_all_files_to_final(struct list *updates)
 		}
 
 	progress:
-		progress_report(complete, list_length);
+		progress_report(list_length + complete, list_length * 2);
 	}
 
 	return globals.update_count - update_good - update_errs - (globals.update_skip - skip);
@@ -367,6 +367,8 @@ enum swupd_code staging_install_all_files(struct list *files, struct manifest *m
 	struct list *iter;
 	struct file *file;
 	int ret = 0;
+	int complete = 0;
+	unsigned int list_length = list_len(files);
 
 	/*********** rootfs critical section starts ***************************
 NOTE: the next loop calls do_staging() which can remove files, starting a critical section
@@ -383,6 +385,7 @@ which ends after rename_all_files_to_final() succeeds
 		file = iter->data;
 		iter = iter->next;
 
+		progress_report(complete++, list_length * 2);
 		if (file->do_not_update || file->is_deleted) {
 			continue;
 		}
@@ -397,6 +400,7 @@ which ends after rename_all_files_to_final() succeeds
 			return ret;
 		}
 	}
+	progress_report(complete, list_length * 2);
 
 	/* check policy, and if policy says, "ask", ask the user at this point */
 	/* check for reboot need - if needed, wait for reboot */

@@ -63,6 +63,17 @@ static bool quiet = false;
 static bool debug = false;
 static bool verbose = false;
 
+static void set_json_format(bool on)
+{
+	if (on) {
+		log_set_function(log_json);
+		progress_set_format(json_progress, json_start, json_end);
+	} else {
+		log_set_function(NULL);
+		progress_set_format(NULL, NULL, NULL);
+	}
+}
+
 /* Sets the content_url global variable */
 static void set_content_url(char *url)
 {

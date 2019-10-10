@@ -159,6 +159,7 @@ static int get_cached_fullfile(struct file *file)
  */
 int download_fullfiles(struct list *files, int *num_downloads)
 {
+	int ret = 0;
 	struct swupd_curl_parallel_handle *download_handle;
 	struct list *iter;
 	struct list *need_download = NULL;
@@ -168,14 +169,19 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	unsigned int list_length;
 	const unsigned int MAX_FILES = 1000;
 
+	progress_next_step("validate_fullfiles", PROGRESS_BAR);
 	if (!files) {
 		/* nothing needs to be downloaded */
-		return SWUPD_OK;
+		progress_next_step("download_fullfiles", PROGRESS_BAR);
+		goto out;
 	}
 
+	files = list_head(files);
+	list_length = list_len(files);
 	/* make a new list with only the files we actually need to download */
-	for (iter = list_head(files); iter; iter = iter->next) {
+	for (iter = files; iter; iter = iter->next) {
 		file = iter->data;
+		progress_report(complete++, list_length);
 
 		if (file->is_deleted || file->do_not_update) {
 			continue;
@@ -187,10 +193,11 @@ int download_fullfiles(struct list *files, int *num_downloads)
 		}
 	}
 
+	progress_next_step("download_fullfiles", PROGRESS_BAR);
 	if (!need_download) {
 		/* no file needs to be downloaded */
 		info("No extra files need to be downloaded\n");
-		return 0;
+		goto out;
 	}
 
 	/* we need to download some files, so set up curl */
@@ -201,13 +208,15 @@ int download_fullfiles(struct list *files, int *num_downloads)
 		 * unable to download the needed files. This is a terminal error
 		 * and we need good logging */
 		list_free_list(need_download);
-		return -SWUPD_COULDNT_DOWNLOAD_FILE;
+		ret = -SWUPD_COULDNT_DOWNLOAD_FILE;
+		goto out;
 	}
 
 	/* getting the size of many files can be very expensive, so if
 	 * the files are not too many, get their size, otherwise just use their count
 	 * to report progress */
 	list_length = list_len(need_download);
+	complete = 0;
 	if (list_length < MAX_FILES) {
 		/* remove tar duplicates from the list first */
 		need_download = list_sort(need_download, file_sort_hash);
@@ -250,5 +259,10 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	}
 	list_free_list(need_download);
 
+	progress_next_step("extract_fullfiles", PROGRESS_UNDEFINED);
 	return swupd_curl_parallel_download_end(download_handle, num_downloads);
+
+out:
+	progress_next_step("extract_fullfiles", PROGRESS_UNDEFINED);
+	return ret;
 }

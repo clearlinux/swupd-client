@@ -98,15 +98,14 @@ enum swupd_code bundle_remove_main(int argc, char **argv)
 {
 	struct list *bundles_list = NULL;
 	int ret;
-	const int steps_in_bundleremove = 1;
-
-	/* there is no need to report in progress for bundle-remove at this time */
+	const int steps_in_bundleremove = 2;
 
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
 	progress_init_steps("bundle-remove", steps_in_bundleremove);
+	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 
 	remove_set_option_force(cmdline_option_force);
 

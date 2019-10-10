@@ -26,15 +26,16 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		[
 		{ "type" : "start", "section" : "search" },
-		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 3, "stepCompletion" : 100, "stepDescription" : "get_versions" },
+		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 2, "stepCompletion" : 0, "stepDescription" : "load_manifests" },
 		{ "type" : "info", "msg" : "Downloading all Clear Linux manifests" },
-		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 3, "stepCompletion" : 50, "stepDescription" : "load_manifests" },
-		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 3, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
+		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 2, "stepCompletion" : 50, "stepDescription" : "load_manifests" },
+		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 2, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
+		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 2, "stepCompletion" : -1, "stepDescription" : "search_term" },
 		{ "type" : "info", "msg" : "Searching for 'file_1'" },
 		{ "type" : "info", "msg" : " Bundle test-bundle" },
 		{ "type" : "info", "msg" : "(0 MB to install)" },
 		{ "type" : "info", "msg" : "	/file_1" },
-		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 3, "stepCompletion" : 100, "stepDescription" : "search_term" },
+		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 2, "stepCompletion" : 100, "stepDescription" : "search_term" },
 		{ "type" : "end", "section" : "search", "status" : 0 }
 		]
 	EOM

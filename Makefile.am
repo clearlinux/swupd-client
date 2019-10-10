@@ -71,8 +71,6 @@ swupd_SOURCES = \
 	src/lib/log.c \
 	src/lib/log.h \
 	src/lib/macros.h \
-	src/lib/progress.c \
-	src/lib/progress.h \
 	src/lib/strings.c \
 	src/lib/strings.h \
 	src/lib/sys.c \
@@ -89,6 +87,8 @@ swupd_SOURCES = \
 	src/mirror.c \
 	src/os_install.c \
 	src/packs.c \
+	src/progress.c \
+	src/progress.h \
 	src/repair.c \
 	src/scripts.c \
 	src/scripts.h \

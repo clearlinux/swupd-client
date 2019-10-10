@@ -24,10 +24,13 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		[
 		{ "type" : "start", "section" : "bundle-remove" },
+		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 2, "stepCompletion" : -1, "stepDescription" : "load_manifests" },
 		{ "type" : "info", "msg" : " Removing bundle: test-bundle" },
 		{ "type" : "info", "msg" : " Deleting bundle files..." },
-		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 1, "stepCompletion" : 50, "stepDescription" : "remove_files" },
-		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 1, "stepCompletion" : 100, "stepDescription" : "remove_files" },
+		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 2, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
+		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 2, "stepCompletion" : 0, "stepDescription" : "remove_files" },
+		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 2, "stepCompletion" : 50, "stepDescription" : "remove_files" },
+		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 2, "stepCompletion" : 100, "stepDescription" : "remove_files" },
 		{ "type" : "info", "msg" : "Total deleted files: 2" },
 		{ "type" : "info", "msg" : " Successfully removed 1 bundle" },
 		{ "type" : "end", "section" : "bundle-remove", "status" : 0 }

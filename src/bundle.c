@@ -609,7 +609,7 @@ enum swupd_code remove_bundles(struct list *bundles)
 
 		if (list_len(files_to_remove) > 0) {
 			info("\nDeleting bundle files...\n");
-			progress_set_next_step("remove_files");
+			progress_next_step("remove_files", PROGRESS_BAR);
 			int deleted = remove_files_from_fs(files_to_remove);
 			info("Total deleted files: %i\n", deleted);
 		}

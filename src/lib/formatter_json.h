@@ -14,11 +14,6 @@ extern "C" {
 #endif
 
 /**
- * @brief Enables/Disables the JSON formatter
- */
-void set_json_format(bool on);
-
-/**
  * @brief Generates the initial message of a JSON stream
  */
 void json_start(const char *);
@@ -29,9 +24,9 @@ void json_start(const char *);
 void json_end(const char *, int);
 
 /**
- * @brief Converts the provided message to a JSON stream
+ * @brief Log message using Json format
  */
-void json_message(const char *, const char *, va_list);
+void log_json(FILE *out, const char *file, int line, const char *label, const char *format, va_list args_list);
 
 /**
  * @brief Prints the progress of a given step into the JSON stream

@@ -250,18 +250,16 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 	int ret;
 
 	if (cmdline_option_install) {
-		progress_set_next_step("download_packs");
 		print("\n");
 		get_all_files(official_manifest, subs);
 	}
 
-	progress_set_next_step("check_files_hash");
+	progress_next_step("check_files_hash", PROGRESS_BAR);
 	print("\n");
 	if (check_files_hash(official_manifest->files)) {
 		return 0;
 	}
 
-	progress_set_next_step("download_fullfiles");
 	print("\n");
 	ret = download_fullfiles(official_manifest->files, NULL);
 	if (ret) {
@@ -807,45 +805,8 @@ enum swupd_code verify_main(void)
 	struct list *all_files = NULL;
 	struct list *bundles_files = NULL;
 	struct list *iter;
-	int steps_in_verify = 7;
 	bool use_latest = false;
 	bool invalid_bundle = false;
-
-	/*
-	 * Steps for verify:
-	 *
-	 * 1) get_versions
-	 * 2) cleanup_download_dir
-	 * 3) load_manifests
-	 * 4) consolidate_files
-	 *    (Jumps to 11 if --extra-files-only)
-	 * 5) download_packs (applies only with --install)
-	 * 6) check_files_hash (applies only with --install or --fix)
-	 * 7) download_fullfiles (applies only with --install or --fix)
-	 *    (Finishes here on --download)
-	 * 8) add_missing_files
-	 *    (Finishes here on --quick or --install)
-	 * 9) fix_files
-	 * 10) remove_extraneous_files
-	 * 11) remove_extra_files (applies only with --picky or --extra-files-only)
-	 */
-
-	/* calculate the number of steps in the process so we can report progress */
-	if (cmdline_option_install) {
-		steps_in_verify += 3;
-	} else if (cmdline_option_fix) {
-		steps_in_verify += 2;
-	}
-	if (cmdline_option_picky || cmdline_option_extra_files_only) {
-		steps_in_verify += 1;
-	}
-	if (cmdline_option_quick) {
-		steps_in_verify -= (cmdline_option_picky || cmdline_option_extra_files_only) ? 3 : 2;
-	}
-	if (cmdline_option_extra_files_only) {
-		steps_in_verify = 5;
-	}
-	progress_init_steps("verify", steps_in_verify);
 
 	if (cmdline_option_statedir_cache != NULL) {
 		ret = set_state_dir_cache(cmdline_option_statedir_cache);
@@ -869,7 +830,7 @@ enum swupd_code verify_main(void)
 
 	/* Get the current system version and the version to verify against */
 	timelist_timer_start(globals.global_times, "Get versions");
-	progress_set_next_step("get_versions");
+	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	int sys_version = get_current_version(globals.path_prefix);
 	if (!version) {
 		if (sys_version < 0) {
@@ -903,7 +864,6 @@ enum swupd_code verify_main(void)
 	 * certificate is hosed and the admin knows it and wants to recover.
 	 */
 	timelist_timer_start(globals.global_times, "Clean up download directory");
-	progress_set_next_step("cleanup_download_dir");
 	ret = rm_staging_dir_contents("download");
 	if (ret != 0) {
 		warn("Failed to remove prior downloads, carrying on anyway\n");
@@ -911,7 +871,6 @@ enum swupd_code verify_main(void)
 	timelist_timer_stop(globals.global_times); // closing: Clean up download directory
 
 	timelist_timer_start(globals.global_times, "Load manifests");
-	progress_set_next_step("load_manifests");
 
 	/* Gather current manifests */
 	/* When the version we are verifying against does not match our system version
@@ -1081,7 +1040,6 @@ enum swupd_code verify_main(void)
 	timelist_timer_stop(globals.global_times); // closing: Load manifests
 
 	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
-	progress_set_next_step("consolidate_files");
 	all_files = consolidate_files_from_bundles(all_submanifests);
 	official_manifest->files = all_files;
 	if (cmdline_option_bundles) {
@@ -1149,7 +1107,7 @@ enum swupd_code verify_main(void)
 	 * has unintended side effect. So lets do the safest thing first.
 	 */
 	timelist_timer_start(globals.global_times, "Add missing files");
-	progress_set_next_step("add_missing_files");
+	progress_next_step("add_missing_files", PROGRESS_BAR);
 	if (cmdline_option_install) {
 		info("\nInstalling base OS and selected bundles\n");
 	} else if (cmdline_option_fix) {
@@ -1167,7 +1125,7 @@ enum swupd_code verify_main(void)
 
 	/* repair corrupt files */
 	timelist_timer_start(globals.global_times, "Fixing modified files");
-	progress_set_next_step("fix_files");
+	progress_next_step("fix_files", PROGRESS_BAR);
 	deal_with_hash_mismatches(official_manifest, cmdline_option_fix);
 	timelist_timer_stop(globals.global_times);
 
@@ -1175,7 +1133,7 @@ enum swupd_code verify_main(void)
 	 * risky, so only do it if the prior phases had no problems */
 	timelist_timer_start(globals.global_times, "Removing orphaned files");
 	if ((counts.not_fixed == 0) && (counts.not_replaced == 0)) {
-		progress_set_next_step("remove_extraneous_files");
+		progress_next_step("remove_extraneous_files", PROGRESS_BAR);
 		remove_orphaned_files(official_manifest, cmdline_option_fix);
 	}
 	timelist_timer_stop(globals.global_times);
@@ -1184,7 +1142,7 @@ enum swupd_code verify_main(void)
 extra_files:
 	if (cmdline_option_picky || cmdline_option_extra_files_only) {
 		timelist_timer_start(globals.global_times, "Removing extra files");
-		progress_set_next_step("remove_extra_files");
+		progress_next_step("remove_extra_files", PROGRESS_BAR);
 		deal_with_extra_files(official_manifest, cmdline_option_fix);
 		timelist_timer_stop(globals.global_times);
 	}
@@ -1224,6 +1182,7 @@ brick_the_system_and_clean_curl:
 	}
 
 	if (cmdline_option_fix || cmdline_option_install) {
+		progress_next_step("run_postupdate_scripts", PROGRESS_UNDEFINED);
 		// always run in a fix or install case
 		globals.need_update_boot = true;
 		globals.need_update_bootloader = true;
@@ -1352,6 +1311,7 @@ enum swupd_code diagnose_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
 
+	const int steps_in_diagnose = 4;
 	string_or_die(&cmdline_option_picky_tree, "/usr");
 
 	if (!parse_options(argc, argv)) {
@@ -1361,6 +1321,7 @@ enum swupd_code diagnose_main(int argc, char **argv)
 	}
 
 	/* diagnose */
+	progress_init_steps("diagnose", steps_in_diagnose);
 	ret = verify_main();
 
 	free_string(&cmdline_option_picky_tree);

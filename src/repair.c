@@ -210,6 +210,7 @@ done:
 enum swupd_code repair_main(int argc, char **argv)
 {
 	int ret;
+	const int steps_in_repair = 9;
 
 	string_or_die(&cmdline_option_picky_tree, "%s", picky_tree_default);
 
@@ -232,6 +233,7 @@ enum swupd_code repair_main(int argc, char **argv)
 	verify_set_option_bundles(cmdline_bundles);
 
 	/* run verify --fix */
+	progress_init_steps("repair", steps_in_repair);
 	ret = verify_main();
 
 	free_string(&cmdline_option_picky_tree);

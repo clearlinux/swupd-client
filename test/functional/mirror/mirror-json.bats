@@ -17,7 +17,7 @@ test_setup() {
 	# command is created as a JSON stream that can be read and parsed by other
 	# applications interested into knowing real time status of the command
 
-	run sudo sh -c "$SWUPD mirror --json-output -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD mirror --json-output -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS_PROGRESS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM

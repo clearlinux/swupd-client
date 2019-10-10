@@ -476,12 +476,13 @@ set_env_variables() { # swupd_function
 	debug_msg "PATH_PREFIX: $PATH_PREFIX"
 
 	# different options for swupd
-	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $TEST_ROOT_DIR/Swupd_Root.pem -I"
+	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $TEST_ROOT_DIR/Swupd_Root.pem -I --no-progress"
+	export SWUPD_OPTS_PROGRESS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $TEST_ROOT_DIR/Swupd_Root.pem -I"
 	export SWUPD_OPTS_KEEPCACHE="$SWUPD_OPTS --keepcache"
-	export SWUPD_OPTS_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -F staging -I"
-	export SWUPD_OPTS_NO_FMT="-S $testfs_path/state -p $testfs_path/target-dir -C $TEST_ROOT_DIR/Swupd_Root.pem -I"
-	export SWUPD_OPTS_NO_FMT_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -I"
-	export SWUPD_OPTS_NO_PATH="-S $testfs_path/state -F staging -C $TEST_ROOT_DIR/Swupd_Root.pem -I"
+	export SWUPD_OPTS_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -F staging -I --no-progress"
+	export SWUPD_OPTS_NO_FMT="-S $testfs_path/state -p $testfs_path/target-dir -C $TEST_ROOT_DIR/Swupd_Root.pem -I --no-progress"
+	export SWUPD_OPTS_NO_FMT_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -I --no-progress"
+	export SWUPD_OPTS_NO_PATH="-S $testfs_path/state -F staging -C $TEST_ROOT_DIR/Swupd_Root.pem -I --no-progress"
 
 	export CLIENT_CERT_DIR="$testfs_path/target-dir/etc/swupd"
 	export CLIENT_CERT="$CLIENT_CERT_DIR/client.pem"

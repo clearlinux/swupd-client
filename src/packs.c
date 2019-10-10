@@ -227,6 +227,7 @@ static int get_cached_packs(struct sub *sub)
 /* pull in packs for base and any subscription */
 int download_subscribed_packs(struct list *subs, struct manifest *mom, bool required)
 {
+	int ret = 0;
 	struct list *iter;
 	struct list *need_download = NULL;
 	struct sub *sub = NULL;
@@ -269,14 +270,15 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	if (!need_download) {
 		/* no packs needs to be downloaded */
 		info("No packs need to be downloaded\n");
-		return 0;
+		goto out;
 	}
 
 	/* we need to download some files, so set up curl */
 	download_handle = swupd_curl_parallel_download_start(get_max_xfer(MAX_XFER));
 	if (!download_handle) {
 		list_free_list(need_download);
-		return -1;
+		ret = -1;
+		goto out;
 	}
 	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, download_error, download_free_data);
 
@@ -307,7 +309,9 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 		if (!bundle) {
 			debug("The manifest for bundle %s was not found in the MoM", sub->component);
 			swupd_curl_parallel_download_cancel(download_handle);
-			return -SWUPD_INVALID_BUNDLE;
+
+			ret = -SWUPD_INVALID_BUNDLE;
+			goto out;
 		}
 
 		err = download_pack(download_handle, sub->oldversion, sub->version, sub->component, bundle->is_mix);
@@ -320,13 +324,19 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 		}
 		if (err < 0 && required) {
 			swupd_curl_parallel_download_cancel(download_handle);
-			return err;
+			ret = err;
+			goto out;
 		}
 	}
 	list_free_list(need_download);
 	info("Finishing packs extraction...\n");
 
+	progress_next_step("extract_packs", PROGRESS_UNDEFINED);
 	return swupd_curl_parallel_download_end(download_handle, NULL);
+
+out:
+	progress_next_step("extract_packs", PROGRESS_UNDEFINED);
+	return ret;
 }
 
 int download_zero_packs(struct list *bundles, struct manifest *mom)

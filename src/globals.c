@@ -598,7 +598,7 @@ static bool global_parse_opt(int opt, char *optarg)
 		set_json_format(optarg_to_bool(optarg));
 		return true;
 	case FLAG_NO_PROGRESS:
-		progress_disable(optarg_to_bool(optarg));
+		progress_set_enabled(!optarg_to_bool(optarg));
 		return true;
 	case FLAG_WAIT_FOR_SCRIPTS:
 		globals.wait_for_scripts = optarg_to_bool(optarg);

@@ -106,7 +106,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 {
 	int ret;
 
-	progress_set_next_step("download_fullfiles");
+	progress_next_step("download_fullfiles", PROGRESS_BAR);
 	ret = download_fullfiles(updates, &nonpack);
 	if (ret) {
 		error("Could not download all files, aborting update\n");
@@ -117,7 +117,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 		return 0;
 	}
 
-	progress_set_next_step("update_files");
+	progress_next_step("update_files", PROGRESS_BAR);
 
 	return staging_install_all_files(updates, server_manifest);
 }
@@ -294,9 +294,9 @@ static enum swupd_code main_update()
 
 	save_swupd_binary_path();
 
-	/* Step 1: Preparation steps */
+	/* Preparation steps */
 	timelist_timer_start(globals.global_times, "Prepare for update");
-	progress_set_next_step("prepare_for_update");
+	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	info("Update started\n");
 
 	mix_exists = check_mix_exists();
@@ -309,9 +309,8 @@ static enum swupd_code main_update()
 	}
 	timelist_timer_stop(globals.global_times); // closing: Prepare for update
 
-	/* Step 2: get versions */
+	/* get versions */
 	timelist_timer_start(globals.global_times, "Get versions");
-	progress_set_next_step("get_versions");
 version_check:
 	ret = check_versions(&current_version, &server_version, requested_version, globals.path_prefix);
 	if (ret != SWUPD_OK) {
@@ -377,9 +376,8 @@ version_check:
 	info("Preparing to update from %i to %i\n", current_version, server_version);
 	timelist_timer_stop(globals.global_times); // closing: Get versions
 
-	/* Step 3: housekeeping */
+	/* housekeeping */
 	timelist_timer_start(globals.global_times, "Clean up download directory");
-	progress_set_next_step("cleanup_download_dir");
 	if (rm_staging_dir_contents("download")) {
 		error("There was a problem cleaning download directory\n");
 		ret = SWUPD_COULDNT_REMOVE_FILE;
@@ -387,9 +385,8 @@ version_check:
 	}
 	timelist_timer_stop(globals.global_times); // closing: Clean up download directory
 
-	/* Step 4: setup manifests */
+	/* setup manifests */
 	timelist_timer_start(globals.global_times, "Load manifests");
-	progress_set_next_step("load_manifests");
 	timelist_timer_start(globals.global_times, "Load MoM manifests");
 	int manifest_err;
 
@@ -466,34 +463,33 @@ version_check:
 	timelist_timer_stop(globals.global_times); // closing: Recurse and consolidate bundle manifests
 	timelist_timer_stop(globals.global_times); // closing: Load manifests
 
-	/* Step 5: check disk state before attempting update */
+	/* check disk state before attempting update */
 	timelist_timer_start(globals.global_times, "Run pre-update scripts");
-	progress_set_next_step("run_preupdate_scripts");
+	progress_next_step("run_preupdate_scripts", PROGRESS_UNDEFINED);
 	scripts_run_pre_update(server_manifest);
 	timelist_timer_stop(globals.global_times); // closing: Run pre-update scripts
 
-	/* Step 6: get the packs and untar */
+	/* get the packs and untar */
 	timelist_timer_start(globals.global_times, "Download packs");
-	progress_set_next_step("download_packs");
+	progress_next_step("download_packs", PROGRESS_BAR);
 	download_subscribed_packs(latest_subs, server_manifest, false);
 	timelist_timer_stop(globals.global_times); // closing: Download packs
 
-	/* Step	 7: apply deltas */
+	/* apply deltas */
+	progress_next_step("prepare_for_update", PROGRESS_UNDEFINED);
 	timelist_timer_start(globals.global_times, "Apply deltas");
-	progress_set_next_step("apply_deltas");
 	apply_deltas(current_manifest);
 	timelist_timer_stop(globals.global_times); // closing: Apply deltas
 
-	/* Step 8: some more housekeeping */
+	/* some more housekeeping */
 	/* TODO: consider trying to do less sorting of manifests */
 	timelist_timer_start(globals.global_times, "Create update list");
-	progress_set_next_step("create_update_list");
 	updates = create_update_list(server_manifest);
 
 	print_statistics(current_version, server_version);
 	timelist_timer_stop(globals.global_times); // closing: Create update list
 
-	/* Steps 9 & 10: downloading and applying updates */
+	/* downloading and applying updates */
 	/* need update list in filename order to insure directories are
 	 * created before their contents */
 	timelist_timer_start(globals.global_times, "Update loop");
@@ -514,9 +510,9 @@ version_check:
 	delete_motd();
 	timelist_timer_stop(globals.global_times); // closing: Update loop
 
-	/* Step 11: Run any scripts that are needed to complete update */
+	/* Run any scripts that are needed to complete update */
 	timelist_timer_start(globals.global_times, "Run post-update scripts");
-	progress_set_next_step("run_postupdate_scripts");
+	progress_next_step("run_postupdate_scripts", PROGRESS_UNDEFINED);
 
 	/* Determine if another update is needed so the scripts block */
 	int new_current_version = get_current_version(globals.path_prefix);
@@ -527,6 +523,7 @@ version_check:
 
 	/* Downloading all manifests to be used as search-file index */
 	if (update_search_file_index) {
+		progress_next_step("update_search_index", PROGRESS_BAR);
 		info("Downloading all Clear Linux manifests\n");
 		mom_get_manifests_list(server_manifest, NULL, NULL);
 	}
@@ -727,27 +724,16 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code update_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
-	const int steps_in_update = 11;
-
-	/*
-	 * Steps for update:
-	 *
-	 * 1) prepare_for_update
-	 * 2) get_versions
-	 * 3) cleanup_download_dir
-	 * 4) load_manifests
-	 * 5) run_preupdate_scripts
-	 * 6) download_packs
-	 * 7) apply_deltas
-	 * 8) create_update_list
-	 * 9) download_fullfiles
-	 * 10) update_files
-	 * 11) run_postupdate_scripts
-	 */
+	/* 7 steps + 2 extras for pack and fullfile */;
+	int steps_in_update = 9;
 
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
+	}
+
+	if (update_search_file_index) {
+		steps_in_update++;
 	}
 
 	/* Update should always ignore optional bundles */

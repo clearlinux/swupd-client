@@ -159,6 +159,7 @@ static int get_cached_fullfile(struct file *file)
  */
 int download_fullfiles(struct list *files, int *num_downloads)
 {
+	int ret = 0;
 	struct swupd_curl_parallel_handle *download_handle;
 	struct list *iter;
 	struct list *need_download = NULL;
@@ -170,7 +171,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 
 	if (!files) {
 		/* nothing needs to be downloaded */
-		return SWUPD_OK;
+		goto out;
 	}
 
 	/* make a new list with only the files we actually need to download */
@@ -190,7 +191,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	if (!need_download) {
 		/* no file needs to be downloaded */
 		info("No extra files need to be downloaded\n");
-		return 0;
+		goto out;
 	}
 
 	/* we need to download some files, so set up curl */
@@ -201,7 +202,8 @@ int download_fullfiles(struct list *files, int *num_downloads)
 		 * unable to download the needed files. This is a terminal error
 		 * and we need good logging */
 		list_free_list(need_download);
-		return -SWUPD_COULDNT_DOWNLOAD_FILE;
+		ret = -SWUPD_COULDNT_DOWNLOAD_FILE;
+		goto out;
 	}
 
 	/* getting the size of many files can be very expensive, so if
@@ -250,5 +252,10 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	}
 	list_free_list(need_download);
 
+	progress_next_step("extract_fullfiles", PROGRESS_UNDEFINED);
 	return swupd_curl_parallel_download_end(download_handle, num_downloads);
+
+out:
+	progress_next_step("extract_fullfiles", PROGRESS_UNDEFINED);
+	return ret;
 }

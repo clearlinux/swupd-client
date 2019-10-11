@@ -250,7 +250,6 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 	int ret;
 
 	if (cmdline_option_install) {
-		progress_next_step("download_packs", PROGRESS_BAR);
 		print("\n");
 		get_all_files(official_manifest, subs);
 	}
@@ -261,7 +260,6 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 		return 0;
 	}
 
-	progress_next_step("download_fullfiles", PROGRESS_BAR);
 	print("\n");
 	ret = download_fullfiles(official_manifest->files, NULL);
 	if (ret) {

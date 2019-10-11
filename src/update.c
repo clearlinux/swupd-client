@@ -106,7 +106,6 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 {
 	int ret;
 
-	progress_next_step("download_fullfiles", PROGRESS_BAR);
 	ret = download_fullfiles(updates, &nonpack);
 	if (ret) {
 		error("Could not download all files, aborting update\n");
@@ -471,7 +470,6 @@ version_check:
 
 	/* get the packs and untar */
 	timelist_timer_start(globals.global_times, "Download packs");
-	progress_next_step("download_packs", PROGRESS_BAR);
 	download_subscribed_packs(latest_subs, server_manifest, false);
 	timelist_timer_stop(globals.global_times); // closing: Download packs
 
@@ -724,8 +722,7 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code update_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
-	/* 7 steps + 2 extras for pack and fullfile */;
-	int steps_in_update = 9;
+	int steps_in_update = 10;
 
 	if (!parse_options(argc, argv)) {
 		print_help();

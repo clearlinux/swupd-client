@@ -210,7 +210,7 @@ done:
 enum swupd_code repair_main(int argc, char **argv)
 {
 	int ret;
-	const int steps_in_repair = 8;
+	const int steps_in_repair = 9;
 
 	string_or_die(&cmdline_option_picky_tree, "%s", picky_tree_default);
 

@@ -335,7 +335,6 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 
 	/* download necessary packs */
 	timelist_timer_start(globals.global_times, "Download packs");
-	progress_next_step("download_packs", PROGRESS_BAR);
 
 	if (rm_staging_dir_contents("download") < 0) {
 		debug("rm_staging_dir_contents failed - resuming operation");
@@ -353,7 +352,6 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 
 	/* Download missing files */
 	timelist_timer_start(globals.global_times, "Download missing files");
-	progress_next_step("download_fullfiles", PROGRESS_BAR);
 	err = download_fullfiles(to_install_files, NULL);
 	timelist_timer_stop(globals.global_times); // closing: Download missing files
 	if (err) {
@@ -526,8 +524,7 @@ clean_and_exit:
 enum swupd_code bundle_add_main(int argc, char **argv)
 {
 	int ret;
-	/* 5 steps + 2 extras for pack and fullfile */;
-	const int steps_in_bundleadd = 7;
+	const int steps_in_bundleadd = 8;
 
 	if (!parse_options(argc, argv)) {
 		print_help();

@@ -3170,7 +3170,7 @@ get_next_available_id() { # swupd_function
 	id=$((id+1))
 	test_dir=$(basename "$(realpath "$test_dir")")
 	case "$test_dir" in
-		autoupdate) group=AUP;;
+		autoupdate) group=AUT;;
 		bundleadd) group=ADD;;
 		bundleremove) group=REM;;
 		bundlelist) group=LST;;

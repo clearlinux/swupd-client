@@ -109,7 +109,7 @@ static void policy_warn(void)
 
 enum swupd_code autoupdate_main(int argc, char **argv)
 {
-	
+
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
@@ -136,6 +136,7 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 		 * system daemon to communicate for rootfs.
 		 */
 		if (globals.path_prefix) {
+			warn("Running autoupdate with --path will not restart swupd-update.timer. This will have to be done manually\n");
 			return SWUPD_OK;
 		}
 
@@ -167,6 +168,11 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 		} else if (rc1 >= STATUS_UNKNOWN || rc2 >= STATUS_UNKNOWN) {
 			/* systemctl returns 1,2, or 3 when program dead or not running */
 			error("Unable to determine autoupdate status\n");
+			return SWUPD_SUBPROCESS_ERROR;
+			// Swupd-service is unmasked, static but timer is inactive for --path
+		} else if (rc1 == SWUPD_OK && rc2 == (STATUS_UNKNOWN - 1) && globals.path_prefix) {
+			info("swupd-update.service has been unmasked with --path option, but the timer has not been restarted\n");
+			error("Unable to determine autoupdate status with --path option\n");
 			return SWUPD_SUBPROCESS_ERROR;
 		} else {
 			print("Disabled\n");

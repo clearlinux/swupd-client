@@ -65,6 +65,7 @@ install:
         - sudo apt-get install clang-format-6.0
         - sudo apt-get install shellcheck
         - sudo apt-get install doxygen
+        - sudo apt-get install systemd
         - sudo pip install coverxygen
         - sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
         - git fetch origin master:refs/remotes/origin/master #Download origin/master for shelcheck

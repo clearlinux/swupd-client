@@ -7,22 +7,15 @@ load "../testlib"
 
 test_setup() {
 
-	if [ -z "TRAVIS"]; then
+	if [ -z "$TRAVIS" ]; then
 		skip "This test is intended to run only in Travis (use TRAVIS=true to run it anyway)..."
 	fi
 
 	create_test_environment "$TEST_NAME"
 
-	run sudo sh -c "mkdir '$TEST_DIRNAME'/fakepath"
-	# mock systemctl if it doesnt exist to always return true
 	if [ ! -e /usr/bin/systemctl ]; then
 		print "systemctl was not found installed in the system"
-		{
-			printf '#!/bin/bash\n'
-			echo ''
-		} | sudo tee /usr/bin/systemctl > /dev/null
-		sudo chmod +x /usr/bin/systemctl
-		file_created=true
+		return
 	else
 		print "systemctl was found installed in the system"
 	fi
@@ -35,29 +28,56 @@ test_teardown() {
 		return
 	fi
 
-	if [ "$file_created" = true ]; then
-		print "removing mock systemctl from the system ..."
-		sudo rm -r /usr/bin/systemctl
-	fi
-
 }
 
-@test "AUP001: Basic test, Check auto-update enable" {
+@test "AUT001: Basic test, Check auto-update enable" {
 
-	run sudo sh -c "$SWUPD autoupdate --disable --path='$TEST_DIRNAME'/fakepath"
-
+	# perform autoupdate disable
+	run sudo sh -c "$SWUPD autoupdate --disable $SWUPD_OPTS"
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Warning: disabling automatic updates may take you out of compliance with your IT policy
 		Running systemctl to disable updates
 	EOM
 	)
-
-	assert_status_is "$SWUPD_OK"
 	assert_is_output "$expected_output"
 
-	run sudo sh -c "$SWUPD autoupdate --enable --path='$TEST_DIRNAME'/fakepath"
+	# check autoupdate status after disable
+	#run sudo sh -c "$SWUPD autoupdate $SWUPD_OPTS"
+	#assert_status_is "$SWUPD_OK"
+	#assert_is_output "Disabled"
+
+	# check for files(should exist)
+	# We cant use assert_file_exists here as it is symlinked to /dev/null
+	run sudo sh -c "ls -l '$PATH_PREFIX'/etc/systemd/system/swupd-update.service"
+	assert_status_is "$SWUPD_OK"
+	run sudo sh -c "ls -l '$PATH_PREFIX'/etc/systemd/system/swupd-update.timer"
+	assert_status_is "$SWUPD_OK"
+
+	# perform autoupdate enable
+	run sudo sh -c "$SWUPD autoupdate --enable $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_OK"
-	assert_is_output "Running systemctl to enable updates"
+	expected_output=$(cat <<-EOM
+		Running systemctl to enable updates
+		Warning: Running autoupdate with --path will not restart swupd-update.timer. This will have to be done manually
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+	# check for files(should not exist)
+	run sudo sh -c "ls -l '$PATH_PREFIX'/etc/systemd/system/swupd-update.service"
+	assert_status_is_not "$SWUPD_OK"
+	run sudo sh -c "ls -l '$PATH_PREFIX'/etc/systemd/system/swupd-update.timer"
+	assert_status_is_not "$SWUPD_OK"
+
+	# check autoupdate status after enable
+	#run sudo sh -c "$SWUPD autoupdate $SWUPD_OPTS"
+	#assert_status_is "$SWUPD_OK"
+	#expected_output=$(cat <<-EOM
+	#	Disabled
+	#EOM
+	#)
+	#assert_is_output "$expected_output"
 
 }

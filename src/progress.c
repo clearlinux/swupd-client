@@ -153,6 +153,7 @@ static void start_step()
 	} else {
 		progress_function(current_step_title, current_step, total_steps,
 				  0);
+		last_percentage = 0;
 	}
 }
 

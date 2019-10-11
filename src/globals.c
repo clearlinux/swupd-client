@@ -62,6 +62,7 @@ static int log_level = LOG_INFO;
 static bool quiet = false;
 static bool debug = false;
 static bool verbose = false;
+static bool json_format = false;
 
 static void set_json_format(bool on)
 {
@@ -595,7 +596,7 @@ static bool global_parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'j':
-		set_json_format(optarg_to_bool(optarg));
+		json_format = optarg_to_bool(optarg);
 		return true;
 	case FLAG_NO_PROGRESS:
 		progress_set_enabled(!optarg_to_bool(optarg));
@@ -767,6 +768,7 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 		log_level = LOG_INFO_VERBOSE;
 	}
 	log_set_level(log_level);
+	set_json_format(json_format);
 
 	if (!config_found) {
 		debug("No configuration file was found\n");

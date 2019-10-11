@@ -27,6 +27,8 @@
 #include "macros.h"
 #include "strings.h"
 
+static bool json_stream_active = false;
+
 static void json_sanitize_string(char *full_msg)
 {
 	int i;
@@ -82,21 +84,32 @@ void json_start(const char *op)
 {
 	fprintf(stdout, "[\n{ \"type\" : \"start\", \"section\" : \"%s\" },\n", op);
 	fflush(stdout);
+	json_stream_active = true;
 }
 
 void json_end(const char *op, int status)
 {
+	json_stream_active = false;
+
 	fprintf(stdout, "{ \"type\" : \"end\", \"section\" : \"%s\", \"status\" : %d }\n]\n", op, status);
 	fflush(stdout);
 }
 
 void log_json(FILE *out UNUSED_PARAM, const char *file UNUSED_PARAM, int line UNUSED_PARAM, const char *label, const char *format, va_list args_list)
 {
+	if (!json_stream_active) {
+		return;
+	}
+
 	json_message(label, format, args_list);
 }
 
 void json_progress(const char *step_description, unsigned int current_step, unsigned int total_steps, int percentage)
 {
+	if (!json_stream_active) {
+		return;
+	}
+
 	fprintf(stdout, "{ \"type\" : \"progress\", "
 			"\"currentStep\" : %d, "
 			"\"totalSteps\" : %d, "

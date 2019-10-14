@@ -107,6 +107,11 @@ enum swupd_code info_main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 	}
 
 	ret = print_update_conf_info();
+	printf("!!! %d\n", run_command("/usr/bin/systemctl", NULL));
+	printf("!!! %d\n", run_command("/usr/bin/systemctl", "mask", "systemd-journal-flush.service", NULL));
+	printf("!!! %d\n", run_command("/usr/bin/ls", "/etc/systemd/system", NULL));
+
+
 
 	swupd_deinit();
 

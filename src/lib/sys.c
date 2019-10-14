@@ -85,6 +85,7 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 		while ((result = fgets(buf, MAX_BUFFER_SIZE, fstreamp)) != NULL) {
 			info("External command: %s", result);
 		}
+		fclose(fstreamp);
 
 		while ((ret = waitpid(pid, &child_ret, 0)) < 0) {
 			if (errno != EINTR) {
@@ -93,7 +94,6 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 				return -errno;
 			}
 		}
-		fclose(fstreamp);
 
 		return WEXITSTATUS(child_ret);
 	}

@@ -42,7 +42,6 @@ jobs:
 # Pre-install missing build dependencies:
 # - bsdiff 1.* is the Clear Linux OS fork
 # - libcurl 7.35.0 is too old. Installing a newer version.
-# - the Swupd_Root.pem cert must be installed out-of-tree to run the test suite with signature verification enabled
 # - python3-docutils for the rst2man script
 install:
         # Install dependencies from ubuntu
@@ -69,10 +68,6 @@ install:
 
         # Use rst2man from python3
         - sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
-
-        # Install clear linux certificate
-        - wget https://download.clearlinux.org/releases/13010/clear/Swupd_Root.pem
-        - sudo install -D -m0644 Swupd_Root.pem /usr/share/clear/update-ca/Swupd_Root.pem
 
         # Install new clang-format from llvm repository
         - wget -O llvm.gpg.key https://apt.llvm.org/llvm-snapshot.gpg.key

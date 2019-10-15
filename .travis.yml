@@ -72,8 +72,8 @@ install:
         - sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
 
         # Install clear linux certificate
-        - wget https://download.clearlinux.org/releases/13010/clear/Swupd_Root.pem
-        - sudo install -D -m0644 Swupd_Root.pem /usr/share/clear/update-ca/Swupd_Root.pem
+        # - wget https://download.clearlinux.org/releases/13010/clear/Swupd_Root.pem
+        # - sudo install -D -m0644 Swupd_Root.pem /usr/share/clear/update-ca/Swupd_Root.pem
 
         # Install new clang-format from llvm repository
         - wget -O llvm.gpg.key https://apt.llvm.org/llvm-snapshot.gpg.key

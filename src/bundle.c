@@ -54,17 +54,25 @@ void remove_set_option_recursive(bool opt)
 */
 bool is_installed_bundle(const char *bundle_name)
 {
-	struct stat statb;
 	char *filename = NULL;
 	bool ret = true;
 
 	string_or_die(&filename, "%s/%s/%s", globals.path_prefix, BUNDLES_DIR, bundle_name);
-
-	if (stat(filename, &statb) == -1) {
-		ret = false;
-	}
-
+	ret = sys_file_exists(filename);
 	free_string(&filename);
+
+	return ret;
+}
+
+static bool is_tracked_bundle(const char *bundle_name)
+{
+	char *filename = NULL;
+	bool ret;
+
+	string_or_die(&filename, "%s/bundles/%s", globals.state_dir, bundle_name);
+	ret = sys_file_exists(filename);
+	free_string(&filename);
+
 	return ret;
 }
 

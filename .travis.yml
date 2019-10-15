@@ -40,7 +40,6 @@ jobs:
                   script: env TESTS="$GROUP4" make -e check
 
 # Pre-install missing build dependencies:
-# - libcheck 0.9.10 is slightly too old, since 0.9.12 adds TAP support
 # - bsdiff 1.* is the Clear Linux OS fork
 # - libcurl 7.35.0 is too old. Installing a newer version.
 # - the Swupd_Root.pem cert must be installed out-of-tree to run the test suite with signature verification enabled

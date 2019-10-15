@@ -36,6 +36,7 @@ test_setup() {
 		Installing OS version 10
 		Downloading missing manifests...
 		No packs need to be downloaded
+		Validate downloaded files
 		Checking for corrupt files
 		No extra files need to be downloaded
 		Installing base OS and selected bundles
@@ -121,6 +122,7 @@ test_setup() {
 		Installing OS version 10
 		Downloading missing manifests...
 		No packs need to be downloaded
+		Validate downloaded files
 		Checking for corrupt files
 		Error: Failed to connect to update server: https://localhost
 		Possible solutions for this problem are:

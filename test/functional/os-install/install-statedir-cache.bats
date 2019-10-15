@@ -36,6 +36,7 @@ test_setup() {
 		Installing OS version 10 (latest)
 		Downloading missing manifests...
 		No packs need to be downloaded
+		Validate downloaded files
 		Checking for corrupt files
 		No extra files need to be downloaded
 		Installing base OS and selected bundles
@@ -102,6 +103,7 @@ test_setup() {
 		Installing OS version 10 (latest)
 		Downloading missing manifests...
 		No packs need to be downloaded
+		Validate downloaded files
 		Checking for corrupt files
 		Starting download of remaining update content. This may take a while...
 		Installing base OS and selected bundles
@@ -134,6 +136,7 @@ test_setup() {
 		Warning: hash check failed for Manifest.os-core for version 10. Deleting it
 		Warning: Removing corrupt Manifest.os-core artifacts and re-downloading...
 		No packs need to be downloaded
+		Validate downloaded files
 		Checking for corrupt files
 		No extra files need to be downloaded
 		Installing base OS and selected bundles

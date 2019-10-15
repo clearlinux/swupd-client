@@ -26,6 +26,7 @@ check_sort_makefile()
 
 	run clang-format-9 -i -style=file src/*.[ch] src/lib/*.[ch]
 	if [ "$status" -ne 0 ]; then
+		echo "clang-format-9 failed with status $status. Check if you have clang-format-9 installed"
 		return "$status"
 	fi
 

@@ -218,6 +218,11 @@ SUBCOMMANDS
 
         Removes a bundle along with all the bundles that depend on it.
 
+    -  `-R, --recursive`
+
+        Removes a bundle and its dependencies recursively, except for bundle
+        os-core.
+
 ``bundle-list``
 
     List all installed software bundles in the local system. Bundles available

@@ -37,6 +37,7 @@ test_setup() {
 		Downloading missing manifests...
 		No packs need to be downloaded
 		Checking for corrupt files
+		Validate downloaded files
 		No extra files need to be downloaded
 		Installing base OS and selected bundles
 		Inspected 2 files
@@ -71,6 +72,7 @@ test_setup() {
 		 - os-core
 		Finishing packs extraction...
 		Checking for corrupt files
+		Validate downloaded files
 		No extra files need to be downloaded
 		Installing base OS and selected bundles
 		Inspected 2 files
@@ -103,6 +105,7 @@ test_setup() {
 		Downloading missing manifests...
 		No packs need to be downloaded
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Installing base OS and selected bundles
 		Inspected 2 files
@@ -135,6 +138,7 @@ test_setup() {
 		Warning: Removing corrupt Manifest.os-core artifacts and re-downloading...
 		No packs need to be downloaded
 		Checking for corrupt files
+		Validate downloaded files
 		No extra files need to be downloaded
 		Installing base OS and selected bundles
 		Inspected 2 files

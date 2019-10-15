@@ -28,6 +28,7 @@ test_setup() {
 		Diagnosing version 100
 		Downloading missing manifests...
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		.* Missing file: .*/target-dir/test-file2 -> fixed

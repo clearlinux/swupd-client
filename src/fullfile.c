@@ -170,6 +170,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	const unsigned int MAX_FILES = 1000;
 
 	progress_next_step("validate_fullfiles", PROGRESS_BAR);
+	info("Validate downloaded files\n");
 	if (!files) {
 		/* nothing needs to be downloaded */
 		progress_next_step("download_fullfiles", PROGRESS_BAR);

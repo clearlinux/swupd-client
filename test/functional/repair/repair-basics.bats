@@ -38,6 +38,7 @@ test_setup() {
 		Diagnosing version 20
 		Downloading missing manifests...
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		 -> Missing file: $PATH_PREFIX/baz -> fixed
@@ -87,6 +88,7 @@ test_setup() {
 		Diagnosing version 20
 		Downloading missing manifests...
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		 -> Missing file: $PATH_PREFIX/baz -> fixed
@@ -142,6 +144,7 @@ test_setup() {
 		Diagnosing version 20
 		Downloading missing manifests...
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		 -> Missing file: $PATH_PREFIX/baz -> fixed

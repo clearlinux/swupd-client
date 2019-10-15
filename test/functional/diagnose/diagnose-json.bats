@@ -87,7 +87,7 @@ test_setup() {
 		\{ "type" : "progress", "currentStep" : 4, "totalSteps" : 4, "stepCompletion" : 88, "stepDescription" : "remove_extraneous_files" \},
 		\{ "type" : "progress", "currentStep" : 4, "totalSteps" : 4, "stepCompletion" : 94, "stepDescription" : "remove_extraneous_files" \},
 		\{ "type" : "progress", "currentStep" : 4, "totalSteps" : 4, "stepCompletion" : 100, "stepDescription" : "remove_extraneous_files" \},
-		\{ "type" : "info", "msg" : " Inspected 17 files" \},
+		\{ "type" : "info", "msg" : "Inspected 17 files" \},
 		\{ "type" : "info", "msg" : "  2 files were missing" \},
 		\{ "type" : "info", "msg" : " Use 'swupd repair' to correct the problems in the system" \},
 		\{ "type" : "info", "msg" : " Diagnose successful" \},

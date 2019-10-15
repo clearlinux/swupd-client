@@ -28,6 +28,7 @@ test_setup() {
 		 - test-bundle2
 		Downloading missing manifests...
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/bar/test-file2 -> fixed
@@ -62,6 +63,7 @@ test_setup() {
 		 - test-bundle3
 		Downloading missing manifests...
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/baz -> fixed
@@ -98,6 +100,7 @@ test_setup() {
 		 - test-bundle2
 		Downloading missing manifests...
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/bar/test-file2 -> fixed

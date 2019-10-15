@@ -40,6 +40,7 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 8, "stepCompletion" : -1, "stepDescription" : "extract_packs" },
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "extract_packs" },
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 8, "stepCompletion" : 0, "stepDescription" : "validate_fullfiles" },
+		{ "type" : "info", "msg" : "Validate downloaded files" },
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 8, "stepCompletion" : 8, "stepDescription" : "validate_fullfiles" },
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 8, "stepCompletion" : 16, "stepDescription" : "validate_fullfiles" },
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 8, "stepCompletion" : 25, "stepDescription" : "validate_fullfiles" },

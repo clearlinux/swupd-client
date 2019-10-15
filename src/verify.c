@@ -260,7 +260,6 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 		return 0;
 	}
 
-	print("\n");
 	ret = download_fullfiles(official_manifest->files, NULL);
 	if (ret) {
 		error("Unable to download necessary files for this OS release\n");
@@ -1155,7 +1154,7 @@ brick_the_system_and_clean_curl:
 	 */
 
 	/* report a summary of what we managed to do and not do */
-	info("\nInspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
+	info("Inspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
 
 	if (counts.missing) {
 		info("  %i file%s %s missing\n", counts.missing, (counts.missing > 1 ? "s" : ""), (counts.missing > 1 ? "were" : "was"));

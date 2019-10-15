@@ -54,6 +54,7 @@ test_setup() {
 		{ "type" : "info", "msg" : "    deleted files     : 0" },
 		{ "type" : "progress", "currentStep" : 5, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "prepare_for_update" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 10, "stepCompletion" : 0, "stepDescription" : "validate_fullfiles" },
+		{ "type" : "info", "msg" : "Validate downloaded files" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 10, "stepCompletion" : 33, "stepDescription" : "validate_fullfiles" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 10, "stepCompletion" : 66, "stepDescription" : "validate_fullfiles" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "validate_fullfiles" },

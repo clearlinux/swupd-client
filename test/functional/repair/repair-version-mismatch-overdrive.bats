@@ -27,6 +27,7 @@ test_setup() {
 		Warning: The --force option is specified; ignoring version mismatch for repair
 		Downloading missing manifests...
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/usr/bin -> fixed

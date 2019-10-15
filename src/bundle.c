@@ -37,10 +37,16 @@
 #define MODE_RW_O (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 
 static bool cmdline_option_force = false;
+static bool cmdline_option_recursive = false;
 
 void remove_set_option_force(bool opt)
 {
 	cmdline_option_force = opt;
+}
+
+void remove_set_option_recursive(bool opt)
+{
+	cmdline_option_recursive = opt;
 }
 
 /* Finds out whether bundle_name is installed bundle on

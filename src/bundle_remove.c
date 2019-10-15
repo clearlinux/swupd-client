@@ -37,6 +37,7 @@
 
 static char **bundles;
 static bool cmdline_option_force = false;
+static bool cmdline_option_recursive = false;
 
 static void print_help(void)
 {
@@ -48,12 +49,14 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
-	print("   -x, --force             Removes a bundle along with all the bundles that depend on it\n");
+	print("   -x, --force            Removes a bundle along with all the bundles that depend on it\n");
+	print("   -R, --recursive        Removes a bundle and its dependencies recursively\n");
 	print("\n");
 }
 
 static const struct option prog_opts[] = {
 	{ "force", no_argument, 0, 'x' },
+	{ "recursive", no_argument, 0, 'R' },
 };
 
 static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
@@ -61,6 +64,9 @@ static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 	switch (opt) {
 	case 'x':
 		cmdline_option_force = optarg_to_bool(optarg);
+		return true;
+	case 'R':
+		cmdline_option_recursive = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;
@@ -113,6 +119,7 @@ enum swupd_code bundle_remove_main(int argc, char **argv)
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 
 	remove_set_option_force(cmdline_option_force);
+	remove_set_option_recursive(cmdline_option_recursive);
 
 	/* move the bundles provided in the command line into a
 	 * list so it is easier to handle them */

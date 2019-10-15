@@ -223,6 +223,7 @@ if [[ -n "$state" ]]; then
           local -a rmbundle; rmbundle=(
             $global_opts
             '(help -x --force)'{-x,--force}'[Removes a bundle along with all its dependent bundles]'
+            '(help -R --recursive)'{-R,--recursive}'[Removes a bundle and its dependencies recursively]'
             '*:bundle-remove: _swupd_installed_bundles'
           )
           _arguments $rmbundle && ret=0

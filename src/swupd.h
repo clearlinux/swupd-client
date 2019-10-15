@@ -347,6 +347,7 @@ extern regex_t *compile_whitelist(const char *whitelist_pattern);
 
 /* bundle-remove */
 extern void remove_set_option_force(bool opt);
+extern void remove_set_option_recursive(bool opt);
 
 /* telemetry.c */
 typedef enum telem_prio_t {

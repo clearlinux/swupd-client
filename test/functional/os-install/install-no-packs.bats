@@ -30,6 +30,7 @@ test_setup() {
 		Finishing packs extraction...
 		Error: zero pack downloads failed
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Installing base OS and selected bundles
 		Inspected 2 files

@@ -67,6 +67,7 @@ test_setup() {
 		    changed files     : 3
 		    new files         : 0
 		    deleted files     : 0
+		Validate downloaded files
 		No extra files need to be downloaded
 		Installing files...
 		Update was applied
@@ -93,6 +94,7 @@ test_setup() {
 		    changed files     : 2
 		    new files         : 0
 		    deleted files     : 0
+		Validate downloaded files
 		No extra files need to be downloaded
 		Installing files...
 		Update was applied
@@ -126,6 +128,7 @@ test_setup() {
 		    changed files     : 3
 		    new files         : 0
 		    deleted files     : 0
+		Validate downloaded files
 		No extra files need to be downloaded
 		Installing files...
 		Update was applied

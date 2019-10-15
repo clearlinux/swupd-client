@@ -32,6 +32,7 @@ test_setup() {
 		    changed files     : 4
 		    new files         : 0
 		    deleted files     : 0
+		Validate downloaded files
 		Installing files...
 		Update was applied
 		Calling post-update helper scripts

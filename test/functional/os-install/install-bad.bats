@@ -51,6 +51,7 @@ test_setup() {
 		 - test-bundle
 		Finishing packs extraction...
 		Checking for corrupt files
+		Validate downloaded files
 		No extra files need to be downloaded
 		Installing base OS and selected bundles
 		Inspected 5 files

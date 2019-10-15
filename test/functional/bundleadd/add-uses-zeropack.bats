@@ -34,6 +34,7 @@ test_setup() {
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...
+		Validate downloaded files
 		No extra files need to be downloaded
 		Installing files...
 		Calling post-update helper scripts

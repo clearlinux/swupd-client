@@ -117,6 +117,7 @@ test_setup() {
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/pack-test-bundle-from-0.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
 		Finishing packs extraction...
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?

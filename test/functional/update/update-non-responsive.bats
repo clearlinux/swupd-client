@@ -3,6 +3,7 @@
 # Author: Castulo Martinez
 # Email: castulo.martinez@intel.com
 
+
 load "../testlib"
 
 test_setup() {
@@ -17,7 +18,7 @@ test_setup() {
 		skip "Skipping slow test for local development, test only runs in CI"
 	fi
 
-	create_test_environment "$TEST_NAME"
+	create_test_environment $TEST_NAME
 
 	# create an update
 	create_version -p "$TEST_NAME" 20 10

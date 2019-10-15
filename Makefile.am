@@ -217,6 +217,7 @@ BATS = \
 	test/functional/bundleremove/remove-optional-bundles.bats \
 	test/functional/bundleremove/remove-os-core.bats \
 	test/functional/bundleremove/remove-parse-args.bats \
+	test/functional/bundleremove/remove-recursive.bats \
 	test/functional/bundleremove/remove-with-dependency.bats \
 	test/functional/checkupdate/chk-update-client-certificate.bats \
 	test/functional/checkupdate/chk-update-format-bump.bats \

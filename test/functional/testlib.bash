@@ -2413,12 +2413,15 @@ create_bundle() { # swupd_function
 	create_tar "$manifest"
 
 	# 9) Create the subscription to the bundle if the local_bundle flag is enabled
+	# all installed bundles in the system should have a file in this directory
 	if [ "$local_bundle" = true ]; then
 		debug_msg "Creating tracking file for bundle so it show as installed"
 		sudo touch "$target_path"/usr/share/clear/bundles/"$bundle_name"
 	fi
 
 	# 10) Create the tracking file for the bundle if the track_bundle flag is set
+	# all bundles specifically installed by a user should have a file in this directory
+	# bundles installed as dependencies should not have files here
 	if [ "$track_bundle" = true ]; then
 		sudo mkdir -p "$state_path"/bundles
 		sudo touch "$state_path"/bundles/"$bundle_name"

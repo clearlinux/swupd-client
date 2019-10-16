@@ -147,6 +147,19 @@ enum swupd_code install_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
 
+	/*
+	 * Steps for os-install:
+	 *
+	 *  1) load_manifests
+	 *  2) download_packs
+	 *  3) extract_packs
+	 *  4) check_files_hash
+	 *  5) validate_fullfiles
+	 *  6) download_fullfiles
+	 *  7) extract_fullfiles
+	 *  8) add_missing_files
+	 *  9) run_postupdate_scripts
+	 */
 	const int steps_in_os_install = 9;
 
 	/* add os-core to the list of bundles to install to make sure

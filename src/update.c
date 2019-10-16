@@ -722,6 +722,21 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code update_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
+
+	/*
+	 * Steps for update:
+	 *
+	 *   1) load_manifests
+	 *   2) run_preupdate_scripts
+	 *   3) download_packs
+	 *   4) extract_packs
+	 *   5) prepare_for_update
+	 *   6) validate_fullfiles
+	 *   7) download_fullfiles
+	 *   8) extract_fullfiles
+	 *   9) update_files
+	 *  10) run_postupdate_scripts
+	 */
 	int steps_in_update = 10;
 
 	if (!parse_options(argc, argv)) {

@@ -388,7 +388,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 
 	/* Run any scripts that are needed to complete update */
 	timelist_timer_start(globals.global_times, "Run Scripts");
-	progress_next_step("run_scripts", PROGRESS_UNDEFINED);
+	progress_next_step("run_postupdate_scripts", PROGRESS_UNDEFINED);
 	scripts_run_post_update(globals.wait_for_scripts);
 	timelist_timer_stop(globals.global_times); // closing: Run Scripts
 
@@ -524,6 +524,19 @@ clean_and_exit:
 enum swupd_code bundle_add_main(int argc, char **argv)
 {
 	int ret;
+
+	/*
+	 * Steps for bundle-add:
+	 *
+	 *  1) load_manifests
+	 *  2) download_packs
+	 *  3) extract_packs
+	 *  4) validate_fullfiles
+	 *  5) download_fullfiles
+	 *  6) extract_fullfiles
+	 *  7) install_files
+	 *  8) run_postupdate_scripts
+	 */
 	const int steps_in_bundleadd = 8;
 
 	if (!parse_options(argc, argv)) {

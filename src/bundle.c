@@ -301,19 +301,6 @@ static int filter_files_to_delete(const void *a, const void *b)
  *  improved speed and space as well as more robustness and
  *  flexibility. The function removes one or more bundles
  *  passed in the bundles param.
- *
- *  For each one of the bundles to be removed what it does
- *  is basically:
- *
- *  1) Read MoM and load all submanifests except the one to be
- *  	removed and then consolidate them.
- *  2) Load the removed bundle submanifest.
- *  3) Order the file list by filename
- *  4) Deduplicate removed submanifest file list that happens
- *  	to be on the MoM (minus bundle to be removed).
- *  5) iterate over to be removed bundle submanifest file list
- *  	performing a unlink(2) for each filename.
- *  6) Done.
  */
 enum swupd_code remove_bundles(struct list *bundles)
 {

@@ -84,10 +84,10 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 7, "totalSteps" : 8, "stepCompletion" : 91, "stepDescription" : "install_files" },
 		{ "type" : "progress", "currentStep" : 7, "totalSteps" : 8, "stepCompletion" : 95, "stepDescription" : "install_files" },
 		{ "type" : "progress", "currentStep" : 7, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "install_files" },
-		{ "type" : "progress", "currentStep" : 8, "totalSteps" : 8, "stepCompletion" : -1, "stepDescription" : "run_scripts" },
+		{ "type" : "progress", "currentStep" : 8, "totalSteps" : 8, "stepCompletion" : -1, "stepDescription" : "run_postupdate_scripts" },
 		{ "type" : "info", "msg" : "Calling post-update helper scripts" },
 		{ "type" : "info", "msg" : "Successfully installed 1 bundle" },
-		{ "type" : "progress", "currentStep" : 8, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "run_scripts" },
+		{ "type" : "progress", "currentStep" : 8, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "run_postupdate_scripts" },
 		{ "type" : "end", "section" : "bundle-add", "status" : 0 }
 		]
 	EOM

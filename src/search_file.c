@@ -505,6 +505,13 @@ enum swupd_code search_file_main(int argc, char **argv)
 	int err = 0;
 	struct manifest *mom = NULL;
 	int current_version;
+
+	/*
+	 * Steps for search-file:
+	 *
+	 *  1) load_manifests
+	 *  2) search_term
+	 */
 	int steps_in_search = 2;
 
 	if (!parse_options(argc, argv)) {

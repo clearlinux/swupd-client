@@ -210,6 +210,20 @@ done:
 enum swupd_code repair_main(int argc, char **argv)
 {
 	int ret;
+
+	/*
+	 * Steps for repair:
+	 *
+	 *  1) load_manifests
+	 *  2) check_files_hash
+	 *  3) validate_fullfiles
+	 *  4) download_fullfiles
+	 *  5) extract_fullfiles
+	 *  6) add_missing_files
+	 *  7) fix_files
+	 *  8) remove_extraneous_files
+	 *  9) remove_extra_files
+	 */
 	const int steps_in_repair = 9;
 
 	string_or_die(&cmdline_option_picky_tree, "%s", picky_tree_default);

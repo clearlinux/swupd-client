@@ -1310,6 +1310,14 @@ enum swupd_code diagnose_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
 
+	/*
+	 * Steps for diagnose:
+	 *
+	 *  1) load_manifests
+	 *  2) add_missing_files
+	 *  3) fix_files
+	 *  4) remove_extraneous_files
+	 */
 	const int steps_in_diagnose = 4;
 	string_or_die(&cmdline_option_picky_tree, "/usr");
 

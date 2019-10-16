@@ -296,6 +296,40 @@ static int filter_files_to_delete(const void *a, const void *b)
 	return -1;
 }
 
+static enum swupd_code validate_bundle(const char *bundle, struct manifest *mom, struct list *bundles, struct list **reqd_by)
+{
+	enum swupd_code ret = SWUPD_OK;
+	char *msg;
+	int number_of_reqd;
+
+	/* os-core bundle not allowed to be removed */
+	if (strcmp(bundle, "os-core") == 0) {
+		warn("\nBundle \"os-core\" not allowed to be removed, skipping it...\n");
+		return SWUPD_REQUIRED_BUNDLE_ERROR;
+	}
+
+	if (!mom_search_bundle(mom, bundle)) {
+		warn("\nBundle \"%s\" is invalid, skipping it...\n", bundle);
+		return SWUPD_INVALID_BUNDLE;
+	}
+
+	if (!is_installed_bundle(bundle)) {
+		warn("\nBundle \"%s\" is not installed, skipping it...\n", bundle);
+		return SWUPD_BUNDLE_NOT_TRACKED;
+	}
+
+	/* check if bundle is required by another installed bundle */
+	string_or_die(&msg, "\nBundle \"%s\" is required by the following bundles:\n", bundle);
+	number_of_reqd = required_by(reqd_by, bundle, mom, 0, bundles, msg);
+	free_string(&msg);
+	if (number_of_reqd > 0) {
+		/* the bundle is required by other bundles */
+		return SWUPD_NO;
+	}
+
+	return ret;
+}
+
 /*  This function is a fresh new implementation for a bundle
  *  remove without being tied to verify loop, this means
  *  improved speed and space as well as more robustness and
@@ -314,6 +348,7 @@ enum swupd_code remove_bundles(struct list *bundles)
 	struct list *bundles_to_remove = NULL;
 	struct list *files_to_remove = NULL;
 	struct list *reqd_by = NULL;
+	struct list *iter = NULL;
 	char *bundles_list_str = NULL;
 	bool mix_exists;
 
@@ -339,7 +374,7 @@ enum swupd_code remove_bundles(struct list *bundles)
 		goto out_deinit;
 	}
 
-	/* load all tracked bundles into memory */
+	/* load all installed bundles into memory */
 	read_subscriptions(&subs);
 	set_subscription_versions(current_mom, NULL, &subs);
 
@@ -355,62 +390,32 @@ enum swupd_code remove_bundles(struct list *bundles)
 
 		char *bundle = bundles->data;
 
-		/* os-core bundle not allowed to be removed...
-		* although this is going to be caught later because of all files
-		* being marked as 'duplicated' and note removing anything
-		* anyways, better catch here and return success, no extra work to be done.
-		*/
-		if (strcmp(bundle, "os-core") == 0) {
-			warn("\nBundle \"os-core\" not allowed to be removed, skipping it...\n");
-			ret_code = SWUPD_REQUIRED_BUNDLE_ERROR;
-			bad++;
-			continue;
-		}
+		/* check if the bundle is allowed to be removed */
+		ret = validate_bundle(bundle, current_mom, bundles, &reqd_by);
+		if (ret) {
+			if (ret != SWUPD_NO) {
+				/* invalid bundle, skip it */
+				ret_code = ret;
+				bad++;
+				continue;
+			}
 
-		if (!mom_search_bundle(current_mom, bundle)) {
-			warn("\nBundle \"%s\" is invalid, skipping it...\n", bundle);
-			ret_code = SWUPD_INVALID_BUNDLE;
-			bad++;
-			continue;
-		}
-
-		if (!is_installed_bundle(bundle)) {
-			warn("\nBundle \"%s\" is not installed, skipping it...\n", bundle);
-			ret_code = SWUPD_BUNDLE_NOT_TRACKED;
-			bad++;
-			continue;
-		}
-
-		/* check if bundle is required by another installed bundle */
-		char *msg;
-		string_or_die(&msg, "\nBundle \"%s\" is required by the following bundles:\n", bundle);
-		int number_of_reqd = required_by(&reqd_by, bundle, current_mom, 0, bundles, msg);
-		free_string(&msg);
-		if (number_of_reqd > 0) {
-			/* the bundle is required by other bundles, do not continue with the removal
-			 * unless the --force flag is used */
+			/* there are bundles that depend on bundle */
+			int number_of_reqd = list_len(reqd_by);
 			if (!cmdline_option_force) {
-
 				error("\nBundle \"%s\" is required by %d bundle%s, skipping it...\n", bundle, number_of_reqd, number_of_reqd == 1 ? "" : "s");
 				info("Use \"swupd bundle-remove --force %s\" to remove \"%s\" and all bundles that require it\n", bundle, bundle);
-				ret_code = SWUPD_REQUIRED_BUNDLE_ERROR;
-				bad++;
 				list_free_list_and_data(reqd_by, free);
 				reqd_by = NULL;
+				ret_code = SWUPD_REQUIRED_BUNDLE_ERROR;
+				bad++;
 				continue;
-
 			} else {
-
 				/* the --force option was specified */
 				info("\nThe --force option was used, bundle \"%s\" and all bundles that require it will be removed from the system\n", bundle);
-
-				/* move the manifest of dependent bundles to the list of bundles to be removed */
-				struct list *iter = NULL;
 				char *dep;
-				iter = list_head(reqd_by);
-				while (iter) {
+				for (iter = list_head(reqd_by); iter; iter = iter->next) {
 					dep = iter->data;
-					iter = iter->next;
 					list_move_item(dep, &current_mom->submanifests, &bundles_to_remove, find_manifest);
 					remove_tracked(dep);
 				}

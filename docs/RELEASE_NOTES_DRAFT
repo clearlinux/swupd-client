@@ -5,5 +5,7 @@ Release vX.XX.XX
 Bug Fixes:
 
 Features:
+ - Add a bundle-remove --recursive flag to remove a bundle and all its dependencies from
+ the system (with some exceptions, e.g. dependencies required by other installed bundles).
 
 Tests:

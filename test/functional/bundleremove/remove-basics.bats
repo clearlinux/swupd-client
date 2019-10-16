@@ -55,7 +55,8 @@ global_teardown() {
 	assert_file_exists "$TARGETDIR"/bat/common
 	assert_file_exists "$STATEDIR"/bundles/test-bundle2
 	expected_output=$(cat <<-EOM
-		Removing bundle: test-bundle1
+		The following bundles are being removed:
+		 - test-bundle1
 		Deleting bundle files...
 		Total deleted files: 6
 		Successfully removed 1 bundle
@@ -84,8 +85,9 @@ global_teardown() {
 	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
 	assert_file_not_exists "$STATEDIR"/bundles/test-bundle2
 	expected_output=$(cat <<-EOM
-		Removing bundle: test-bundle1
-		Removing bundle: test-bundle2
+		The following bundles are being removed:
+		 - test-bundle2
+		 - test-bundle1
 		Deleting bundle files...
 		Total deleted files: 9
 		Successfully removed 2 bundles
@@ -170,7 +172,8 @@ global_teardown() {
 	assert_file_exists "$TARGETDIR"/bat/common
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "test-bundle3" is not installed, skipping it...
-		Removing bundle: test-bundle1
+		The following bundles are being removed:
+		 - test-bundle1
 		Deleting bundle files...
 		Total deleted files: 6
 		Failed to remove 1 of 2 bundles
@@ -197,7 +200,8 @@ global_teardown() {
 	assert_file_exists "$TARGETDIR"/bat/common
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "fake-bundle" is invalid, skipping it...
-		Removing bundle: test-bundle1
+		The following bundles are being removed:
+		 - test-bundle1
 		Deleting bundle files...
 		Total deleted files: 6
 		Failed to remove 1 of 2 bundles

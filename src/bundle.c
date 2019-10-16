@@ -76,6 +76,25 @@ static bool is_tracked_bundle(const char *bundle_name)
 	return ret;
 }
 
+static bool is_installed(const void *bundle_name)
+{
+	return is_installed_bundle(bundle_name);
+}
+
+static bool is_deletable_dependency(const void *dependency)
+{
+	if (strcmp(dependency, "os-core") == 0) {
+		return false;
+	}
+	if (!is_installed_bundle(dependency)) {
+		return false;
+	}
+	if (is_tracked_bundle(dependency)) {
+		return false;
+	}
+	return true;
+}
+
 static int find_manifest(const void *a, const void *b)
 {
 	struct manifest *A;
@@ -338,6 +357,85 @@ static enum swupd_code validate_bundle(const char *bundle, struct manifest *mom,
 	return ret;
 }
 
+static void print_remove_summary(unsigned int requested, unsigned int bad, unsigned int total_removed)
+{
+	int deps_removed;
+
+	if (bad > 0) {
+		print("\nFailed to remove %i of %i bundles\n", bad, requested);
+	} else {
+		print("\nSuccessfully removed %i bundle%s\n", requested, (requested > 1 ? "s" : ""));
+	}
+
+	deps_removed = total_removed + bad - requested;
+	if (deps_removed > 0) {
+		if (cmdline_option_force) {
+			print("%i bundle%s\n", deps_removed, deps_removed > 1 ? "s that depended on the specified bundle(s) were removed" : " that depended on the specified bundle(s) was removed");
+		} else {
+			print("%i bundle%s\n", deps_removed, deps_removed > 1 ? "s that were installed as a dependency were removed" : " that was installed as a dependency was removed");
+		}
+	}
+}
+
+static void get_removable_dependencies(struct manifest *mom, struct list **bundles_to_remove)
+{
+	char *bundle;
+	struct list *iter;
+	struct list *candidates_for_removal = NULL;
+	struct manifest *m;
+
+	/* for each of the bundles requested to be deleted
+	 * get a list of their dependencies we are allowed to remove */
+	for (iter = *bundles_to_remove; iter; iter = iter->next) {
+		m = iter->data;
+		bundle = m->component;
+		recurse_dependencies(mom, bundle, &candidates_for_removal, is_deletable_dependency);
+	}
+
+	/* get a list of dependencies still required by bundles
+	 * that won't be removed */
+	struct list *required_bundles = NULL;
+	for (iter = mom->submanifests; iter; iter = iter->next) {
+		m = iter->data;
+		bundle = m->component;
+		if (!list_search(candidates_for_removal, bundle, manifest_bundlename_strcmp)) {
+			recurse_dependencies(mom, bundle, &required_bundles, is_installed);
+		}
+	}
+
+	/* filter out those required bundles from the
+	 * candidates for removal */
+	iter = candidates_for_removal;
+	while (iter) {
+		m = iter->data;
+		bundle = m->component;
+		if (list_search(required_bundles, bundle, manifest_bundlename_strcmp)) {
+			if (iter == candidates_for_removal) {
+				if (iter->next) {
+					candidates_for_removal = iter->next;
+				} else {
+					candidates_for_removal = NULL;
+				}
+			}
+			iter = list_free_item(iter, manifest_free_data);
+			continue;
+		}
+		iter = iter->next;
+	}
+
+	/* the list of dependencies is ready, move the
+	 * manifests to the bundles to be removed */
+	for (iter = candidates_for_removal; iter; iter = iter->next) {
+		m = iter->data;
+		bundle = m->component;
+		list_move_item(bundle, &mom->submanifests, bundles_to_remove, find_manifest);
+	}
+	*bundles_to_remove = list_sort(*bundles_to_remove, manifest_component_strcmp);
+
+	list_free_list_and_data(candidates_for_removal, manifest_free_data);
+	list_free_list_and_data(required_bundles, manifest_free_data);
+}
+
 /*  This function is a fresh new implementation for a bundle
  *  remove without being tied to verify loop, this means
  *  improved speed and space as well as more robustness and
@@ -348,14 +446,13 @@ enum swupd_code remove_bundles(struct list *bundles)
 {
 	int ret = SWUPD_OK;
 	int ret_code = 0;
-	int bad = 0;
-	int total = 0;
+	unsigned int bad = 0;
+	unsigned int total = 0;
 	int current_version = CURRENT_OS_VERSION;
 	struct manifest *current_mom = NULL;
 	struct list *subs = NULL;
 	struct list *bundles_to_remove = NULL;
 	struct list *files_to_remove = NULL;
-	struct list *reqd_by = NULL;
 	struct list *iter = NULL;
 	char *bundles_list_str = NULL;
 	bool mix_exists;
@@ -394,9 +491,23 @@ enum swupd_code remove_bundles(struct list *bundles)
 		goto out_subs;
 	}
 
+	/* inform user about the effects of using the options */
+	if (cmdline_option_force) {
+		info("\nThe --force option was used, the specified bundle%s and all bundles "
+		     "that require %s will be removed from the system\n",
+		     total > 1 ? "s" : "",
+		     total > 1 ? "them" : "it");
+	} else if (cmdline_option_recursive) {
+		info("\nThe --recursive option was used, the specified bundle%s and %s "
+		     "dependencies will be removed from the system\n",
+		     total > 1 ? "s" : "",
+		     total > 1 ? "their" : "its");
+	}
+
 	for (; bundles; bundles = bundles->next, total++) {
 
 		char *bundle = bundles->data;
+		struct list *reqd_by = NULL;
 
 		/* check if the bundle is allowed to be removed */
 		ret = validate_bundle(bundle, current_mom, bundles, &reqd_by);
@@ -414,13 +525,11 @@ enum swupd_code remove_bundles(struct list *bundles)
 				error("\nBundle \"%s\" is required by %d bundle%s, skipping it...\n", bundle, number_of_reqd, number_of_reqd == 1 ? "" : "s");
 				info("Use \"swupd bundle-remove --force %s\" to remove \"%s\" and all bundles that require it\n", bundle, bundle);
 				list_free_list_and_data(reqd_by, free);
-				reqd_by = NULL;
 				ret_code = SWUPD_REQUIRED_BUNDLE_ERROR;
 				bad++;
 				continue;
 			} else {
 				/* the --force option was specified */
-				info("\nThe --force option was used, bundle \"%s\" and all bundles that require it will be removed from the system\n", bundle);
 				char *dep;
 				for (iter = list_head(reqd_by); iter; iter = iter->next) {
 					dep = iter->data;
@@ -428,19 +537,31 @@ enum swupd_code remove_bundles(struct list *bundles)
 					remove_tracked(dep);
 				}
 				list_free_list_and_data(reqd_by, free);
-				reqd_by = NULL;
 			}
 		}
 
-		/* move the manifest of the bundle to be removed from the list of subscribed bundles
-		 * to the list of bundles to be removed */
+		/* if we have reached this point the bundle is
+		 * "deletable" move the manifest of the bundle
+		 * to be remove from the list of subscribed
+		 * bundles to the list of bundles to be removed */
 		list_move_item(bundle, &current_mom->submanifests, &bundles_to_remove, find_manifest);
-		info("\nRemoving bundle: %s\n", bundle);
 		remove_tracked(bundle);
+	}
+
+	/* if recursive, the dependencies need to be removed too */
+	if (cmdline_option_recursive) {
+		get_removable_dependencies(current_mom, &bundles_to_remove);
 	}
 
 	/* if there are no bundles to remove we are done */
 	if (bundles_to_remove) {
+
+		/* inform user about extra bundles being removed (if any) */
+		info("\nThe following bundles are being removed:\n");
+		for (iter = list_head(bundles_to_remove); iter; iter = iter->next) {
+			struct manifest *m = iter->data;
+			info(" - %s\n", m->component);
+		}
 
 		/* get the list of all files required by the installed bundles (except the ones to be removed) */
 		current_mom->files = consolidate_files_from_bundles(current_mom->submanifests);
@@ -460,12 +581,10 @@ enum swupd_code remove_bundles(struct list *bundles)
 		}
 	}
 
-	if (bad > 0) {
-		print("\nFailed to remove %i of %i bundles\n", bad, total);
-	} else {
-		print("\nSuccessfully removed %i bundle%s\n", total, (total > 1 ? "s" : ""));
-	}
+	/* print a summary of the remove operation */
+	print_remove_summary(total, bad, list_len(bundles_to_remove));
 
+	/* cleanup */
 	list_free_list(files_to_remove);
 	list_free_list_and_data(bundles_to_remove, manifest_free_data);
 	manifest_free(current_mom);

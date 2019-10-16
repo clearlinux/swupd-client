@@ -21,6 +21,11 @@ Feature:
     - Using the --dependencies flag users can show all dependencies of the
       bundle.
     - Using the --files flag users can get the list of files in a bundle.
+ - Create an undefined progress status that should be used when there's no
+   information on how long an operation will take and use a spinner to display
+   that
+ - Improve progress report output when --json-output is used to never stop
+   in an operation without a spinner or progress bar report.
 
 Test Improvements:
  -

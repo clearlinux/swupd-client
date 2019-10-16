@@ -53,11 +53,19 @@ test_setup() {
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle1 --recursive"
 
 	assert_status_is "$SWUPD_OK"
-	# expected_output=$(cat <<-EOM
-	# 	TBD
-	# EOM
-	# )
-	# assert_is_output "$expected_output"
+	expected_output=$(cat <<-EOM
+		The --recursive option was used, the specified bundle and its dependencies will be removed from the system
+		The following bundles are being removed:
+		 - test-bundle1
+		 - test-bundle2
+		 - test-bundle3
+		Deleting bundle files...
+		Total deleted files: 9
+		Successfully removed 1 bundle
+		2 bundles that were installed as a dependency were removed
+	EOM
+	)
+	assert_is_output "$expected_output"
 
 	# bundles/files that should be deleted
 	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
@@ -91,11 +99,21 @@ test_setup() {
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle1 test-bundle5 -R"
 
 	assert_status_is "$SWUPD_OK"
-	# expected_output=$(cat <<-EOM
-	# 	TBD
-	# EOM
-	# )
-	# assert_is_output "$expected_output"
+	expected_output=$(cat <<-EOM
+		The --recursive option was used, the specified bundle and its dependencies will be removed from the system
+		The following bundles are being removed:
+		 - test-bundle1
+		 - test-bundle2
+		 - test-bundle3
+		 - test-bundle4
+		 - test-bundle5
+		Deleting bundle files...
+		Total deleted files: 14
+		Successfully removed 2 bundles
+		3 bundles that were installed as a dependency were removed
+	EOM
+	)
+	assert_is_output "$expected_output"
 
 	# bundles/files that should be deleted
 	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
@@ -127,11 +145,22 @@ test_setup() {
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle1 test-bundle5 test-bundle6 -R"
 
 	assert_status_is "$SWUPD_OK"
-	# expected_output=$(cat <<-EOM
-	# 	TBD
-	# EOM
-	# )
-	# assert_is_output "$expected_output"
+	expected_output=$(cat <<-EOM
+		The --recursive option was used, the specified bundle and its dependencies will be removed from the system
+		The following bundles are being removed:
+		 - test-bundle1
+		 - test-bundle2
+		 - test-bundle3
+		 - test-bundle4
+		 - test-bundle5
+		 - test-bundle6
+		Deleting bundle files...
+		Total deleted files: 16
+		Successfully removed 3 bundles
+		3 bundles that were installed as a dependency were removed
+	EOM
+	)
+	assert_is_output "$expected_output"
 
 	# bundles/files that should be deleted
 	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
@@ -152,5 +181,46 @@ test_setup() {
 	# bundles/files that should not be deleted
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
 	assert_file_exists "$TARGETDIR"/core
+
+}
+
+@test "REM029: Remove bundles recursively assumes everything is tracked if nothing is tracked" {
+
+	# when running bundle-remove --recursive, if the tracking directory is
+	# not found or empty, bundle-remove should assume everything is tracked
+
+	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle1 --recursive"
+
+	assert_status_is "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		The --recursive option was used, the specified bundle and its dependencies will be removed from the system
+		The following bundles are being removed:
+		 - test-bundle1
+		Deleting bundle files...
+		Total deleted files: 3
+		Successfully removed 1 bundle
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+	# bundles/files that should be deleted
+	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
+	assert_file_not_exists "$TARGETDIR"/foo/test-file1
+
+	# bundles/files that should not be deleted
+	assert_file_exists "$STATEDIR"/bundles/test-bundle6
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle4
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle5
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle6
+	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGETDIR"/bar/test-file2
+	assert_file_exists "$TARGETDIR"/bat/test-file3
+	assert_file_exists "$TARGETDIR"/baz/test-file4
+	assert_file_exists "$TARGETDIR"/test-file5
+	assert_file_exists "$TARGETDIR"/test-file6
 
 }

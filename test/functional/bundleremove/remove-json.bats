@@ -25,7 +25,8 @@ test_setup() {
 		[
 		{ "type" : "start", "section" : "bundle-remove" },
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 2, "stepCompletion" : -1, "stepDescription" : "load_manifests" },
-		{ "type" : "info", "msg" : " Removing bundle: test-bundle" },
+		{ "type" : "info", "msg" : " The following bundles are being removed:" },
+		{ "type" : "info", "msg" : " - test-bundle" },
 		{ "type" : "info", "msg" : " Deleting bundle files..." },
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 2, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 2, "stepCompletion" : 0, "stepDescription" : "remove_files" },

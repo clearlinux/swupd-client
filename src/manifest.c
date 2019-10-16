@@ -1226,6 +1226,14 @@ int manifest_bundlename_strcmp(const void *a, const void *b)
 	return strcmp(((struct manifest *)a)->component, (const char *)b);
 }
 
+int manifest_component_strcmp(const void *a, const void *b)
+{
+	struct manifest *m1 = (struct manifest *)a;
+	struct manifest *m2 = (struct manifest *)b;
+
+	return strcmp(m1->component, m2->component);
+}
+
 int recurse_dependencies(struct manifest *mom, const char *bundle, struct list **manifests, filter_fn_t filter_fn)
 {
 	int err = 0;

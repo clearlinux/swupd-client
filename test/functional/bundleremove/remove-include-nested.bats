@@ -71,14 +71,18 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
+		The --force option was used, the specified bundle and all bundles that require it will be removed from the system
 		Bundle "test-bundle1" is required by the following bundles:
 		 - test-bundle2
 		 - test-bundle3
-		The --force option was used, bundle "test-bundle1" and all bundles that require it will be removed from the system
-		Removing bundle: test-bundle1
+		The following bundles are being removed:
+		 - test-bundle1
+		 - test-bundle3
+		 - test-bundle2
 		Deleting bundle files...
 		Total deleted files: 6
 		Successfully removed 1 bundle
+		2 bundles that depended on the specified bundle(s) were removed
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -166,9 +170,10 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Removing bundle: test-bundle2
-		Removing bundle: test-bundle1
-		Removing bundle: test-bundle3
+		The following bundles are being removed:
+		 - test-bundle3
+		 - test-bundle1
+		 - test-bundle2
 		Deleting bundle files...
 		Total deleted files: 7
 		Successfully removed 3 bundles
@@ -195,9 +200,10 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Removing bundle: test-bundle1
-		Removing bundle: test-bundle3
-		Removing bundle: test-bundle2
+		The following bundles are being removed:
+		 - test-bundle2
+		 - test-bundle3
+		 - test-bundle1
 		Deleting bundle files...
 		Total deleted files: 7
 		Successfully removed 3 bundles

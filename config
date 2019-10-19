@@ -173,6 +173,12 @@
 # Options for the "swupd bundle-remove" command
 #
 
+# Removes a bundle along with all the bundles that depend on it (boolean value)
+#force=<true/false>
+
+# Removes a bundle and its dependencies recursively (boolean value)
+#recursive=<true/false>
+
 
 [bundle-list]
 

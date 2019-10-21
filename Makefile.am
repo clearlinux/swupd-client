@@ -38,6 +38,7 @@ swupd_SOURCES = \
 	src/binary_loader.c \
 	src/bundle_add.c \
 	src/bundle.c \
+	src/bundle.h \
 	src/bundle_info.c \
 	src/bundle_list.c \
 	src/bundle_remove.c \

@@ -73,6 +73,25 @@ AS_IF(
 )
 
 AC_ARG_ENABLE(
+  [third-party],
+  [AS_HELP_STRING([--enable-third-party], [Enable 3rd-party (disabled by default)])]
+)
+THIRDPARTY="no"
+AS_IF(
+  [test "x$enable_third_party" = "xyes"],
+  [AC_DEFINE(THIRDPARTY, 1, [Enable third party])
+     THIRDPARTY="yes"],
+  [THIRDPARTY="no"]
+)
+
+AH_TEMPLATE([THIRDPARTY_REPO_PREFIX], [prefix path for third party repos])
+
+AS_IF(
+  [test "$enable_third_party" = "yes"],
+  [AC_DEFINE([THIRDPARTY_REPO_PREFIX], ["/opt/user-repo/"])]
+)
+
+AC_ARG_ENABLE(
   [tests],
   [AS_HELP_STRING([--disable-tests], [Do not enable unit or functional test framework (enabled by default)])]
 )
@@ -383,6 +402,7 @@ Configuration to build swupd-client:
   Version URL:                  ${VERSIONURL}
   Format Identifier:            ${FORMATID}
   Signature verification:       ${SIGVERIFICATION}
+  Third party:                  ${THIRDPARTY}
   Update certificate path:      ${cert_path}
   Configuration file path(s):   ${config_file_path}
   Use bzip compression:         ${BZIP}

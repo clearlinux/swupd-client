@@ -175,6 +175,7 @@ if [[ -n "$state" ]]; then
         "mirror:Configure mirror url for swupd content"
         "clean:Clean cached files"
         "hashdump:Dump the HMAC hash of a file"
+        "3rd-party: Indicate Swupd to use user's third party repo"
       )
       _describe -t subcmds 'swupd subcommand' subcmds && ret=0
       ;;
@@ -183,6 +184,32 @@ if [[ -n "$state" ]]; then
           info)
           _arguments $global_opts && ret=0
               ;;
+          3rd-party)
+          local -a thirdparty; thirdparty=(
+          $global_opt
+          '(help)list[List third party repo(s)]'
+          '(help)remove[Remove third party repo]'
+          '(help)add[Add third party repo]'
+          _arguments $thirdparty && ret=0
+          ;;
+          add)
+          local -a add; add=(
+          $global_opt
+          '(help)Positional arg: [repo-name]'
+          '(help)Positional arg: [repo-url]'
+          _arguments $add && ret=0
+          ;;
+          remove)
+          local -a remove; remove=(
+          $global_opt
+          '(help)Positional arg: [repo-name]'
+          _arguments $remove && ret=0
+          ;;
+          list)
+          local -a list; list=(
+          $global_opt
+          _arguments $list && ret=0
+          ;;
         autoupdate)
           local -a autoupdates; autoupdates=(
         $global_opts

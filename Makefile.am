@@ -32,6 +32,11 @@ bin_PROGRAMS = swupd
 AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS)
 
 swupd_SOURCES = \
+	src/3rd_party_add.c \
+	src/3rd_party.c \
+	src/3rd_party_internal.h \
+	src/3rd_party_list.c \
+	src/3rd_party_remove.c \
 	src/alias.c \
 	src/alias.h \
 	src/autoupdate.c \

@@ -28,12 +28,6 @@
 #include "swupd_build_opts.h"
 #include "swupd_internal.h"
 
-struct subcmd {
-	char *name;
-	char *doc;
-	enum swupd_code (*mainfunc)(int, char **);
-};
-
 static enum swupd_code external_search_main(int argc, char **argv)
 {
 	int ret;
@@ -49,7 +43,7 @@ static enum swupd_code external_search_main(int argc, char **argv)
 
 // TODO(castulo): remove the superseded command from the help menu by end of November 2019,
 // so it is not visible but the command must remain available in the back so we don't break users
-static struct subcmd commands[] = {
+static struct subcmd main_commands[] = {
 	{ "info", "Show the version and the update URLs", info_main },
 	{ "autoupdate", "Enable/disable automatic system updates", autoupdate_main },
 	{ "check-update", "Check if a new OS version is available", check_update_main },
@@ -91,7 +85,7 @@ static void print_help(const char *name)
 	print("   -v, --version           Output version information and exit\n\n");
 	print("Subcommands:\n");
 
-	struct subcmd *entry = commands;
+	struct subcmd *entry = main_commands;
 
 	while (entry->name != NULL) {
 		print("   %-20s    %-30s\n", entry->name, entry->doc);
@@ -115,27 +109,6 @@ static void print_compile_opts(void)
 	info("Compile-time configuration:\n%s\n", BUILD_CONFIGURE);
 }
 
-static int subcmd_index(char *arg)
-{
-	struct subcmd *entry = commands;
-	int i = 0;
-	size_t input_len;
-	size_t cmd_len;
-
-	input_len = strlen(arg);
-
-	while (entry->name != NULL) {
-		cmd_len = strlen(entry->name);
-		if (cmd_len == input_len && strcmp(arg, entry->name) == 0) {
-			return i;
-		}
-		entry++;
-		i++;
-	}
-
-	return -1;
-}
-
 static int parse_options(int argc, char **argv, int *index)
 {
 	int opt;
@@ -153,7 +126,7 @@ static int parse_options(int argc, char **argv, int *index)
 			exit(EXIT_SUCCESS);
 		case '\01':
 			/* found a subcommand, or a random non-option argument */
-			ret = subcmd_index(optarg);
+			ret = subcmd_index(optarg, main_commands);
 			if (ret < 0) {
 				error("unrecognized subcommand `%s'\n\n",
 				      optarg);
@@ -204,7 +177,7 @@ int main(int argc, char **argv)
 	 */
 	optind = 0;
 
-	ret = commands[index].mainfunc(argc - 1, argv + 1);
+	ret = main_commands[index].mainfunc(argc - 1, argv + 1);
 
 	return ret;
 }

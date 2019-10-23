@@ -1,37 +1,9 @@
 Release notes draft for next version
 
-Release v3.23.0
+Release vX.XX.XX
 
-This release adds multiple new features and improvements to swupd.
+Bug Fixes:
 
-Feature:
- - Add a bundle-remove --force flag to remove a bundle and all bundles that
-   depends on it with a single command
- - Add a verbose option to check-update, displaying last version of custom
-   formats
- - Improvements in documentation
- - Warn users if latest file isn't signed. Enforcement of signature will come
-   next
- - Adds the bundle-info command to show detailed data related to a bundle.
-   Among the data currently displayed it includes:
-    - If the bundle is installed or not
-    - If the bundle is experimental or not
-    - If the bundle is up to date (when installed)
-    - The latest available version of the bundle
-    - The size of the bundle
-    - The max size needed in disk to install a bundle if not installed
-    - Using the --version flag a user can display bundle information in
-      a specific version, not only the current version.
-    - Using the --dependencies flag users can show all dependencies of the
-      bundle.
-    - Using the --files flag users can get the list of files in a bundle.
- - Performance improvement for bundle-remove and bundle-add. Bundle remove is
-   significantly faster (more than 90% faster when removing a large number of
-   bundles) and bundle-add is around 20% faster for a large number of bundles
-   added, running as fast as an os-install for the same bundles.
- - Create an undefined progress status that should be used when there's no
-   information on how long an operation will take and use a spinner to display
-   that
- - Improve progress report output when --json-output is used to never stop
-   in an operation without a spinner or progress bar report.
- - Support enabling and disabling the autoupdate in a chroot using the --path flag
+Features:
+
+Tests:

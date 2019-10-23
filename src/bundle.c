@@ -184,6 +184,66 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 	return count;
 }
 
+void track_bundle_in_statedir(const char *bundle_name, const char *state_dir)
+{
+	int ret = 0;
+	char *src;
+	char *tracking_dir;
+
+	tracking_dir = mk_full_filename(state_dir, "bundles");
+
+	/* if state_dir_parent/bundles doesn't exist or is empty, assume this is
+	 * the first time tracking installed bundles. Since we don't know what the
+	 * user installed themselves just copy the entire system tracking directory
+	 * into the state tracking directory. */
+	if (!is_populated_dir(tracking_dir)) {
+		char *rmfile;
+		ret = rm_rf(tracking_dir);
+		if (ret) {
+			goto out;
+		}
+		src = mk_full_filename(globals.path_prefix, "/usr/share/clear/bundles");
+		/* at the point this function is called <bundle_name> is already
+		 * installed on the system and therefore has a tracking file under
+		 * /usr/share/clear/bundles. A simple cp -a of that directory will
+		 * accurately track that bundle as manually installed. */
+		ret = copy_all(src, state_dir);
+		free_string(&src);
+		if (ret) {
+			goto out;
+		}
+		/* remove uglies that live in the system tracking directory */
+		rmfile = mk_full_filename(tracking_dir, ".MoM");
+		(void)unlink(rmfile);
+		free_string(&rmfile);
+		/* set perms on the directory correctly */
+		ret = chmod(tracking_dir, S_IRWXU);
+		if (ret) {
+			goto out;
+		}
+	}
+
+	char *tracking_file = mk_full_filename(tracking_dir, bundle_name);
+	int fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+	free_string(&tracking_file);
+	if (fd < 0) {
+		ret = -1;
+		goto out;
+	}
+	close(fd);
+
+out:
+	if (ret) {
+		debug("Issue creating tracking file in %s for %s\n", tracking_dir, bundle_name);
+	}
+	free_string(&tracking_dir);
+}
+
+void track_bundle(const char *bundle_name)
+{
+	track_bundle_in_statedir(bundle_name, globals.state_dir);
+}
+
 /*
  * remove_tracked removes the tracking file in
  * path_prefix/state_dir_parent/bundles if it exists to untrack as manually

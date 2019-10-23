@@ -785,6 +785,33 @@ static int find_unsafe_to_delete(const void *a, const void *b)
 	return -1;
 }
 
+static bool init_tracking_dir(const char *state_dir, const char *init_file)
+{
+
+	char *tracking_dir;
+	char *tracking_file;
+
+	/* make sure the state directory exist */
+	if (create_state_dirs(state_dir)) {
+		return false;
+	}
+
+	/* add a temporary control file to the tracking
+	 * directory so it is not empty to avoid tracking
+	 * all installed bundles */
+	tracking_dir = mk_full_filename(state_dir, "bundles");
+	tracking_file = mk_full_filename(tracking_dir, init_file);
+	int fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+	free_string(&tracking_dir);
+	free_string(&tracking_file);
+	if (fd < 0) {
+		return false;
+	}
+	close(fd);
+
+	return true;
+}
+
 /* This function does a simple verification of files listed in the
  * subscribed bundle manifests.  If the optional "fix" or "install" parameter
  * is specified, the disk will be modified at each point during the
@@ -1152,6 +1179,30 @@ brick_the_system_and_clean_curl:
 	/*
 	 * naming convention: All exit goto labels must follow the "brick_the_system_and_FOO:" pattern
 	 */
+
+	/* track bundles specified by user */
+	if (cmdline_option_install && cmdline_option_bundles) {
+		/* this is a fresh install so the tracking directory
+		 * needs to be created */
+		char *new_os_statedir = mk_full_filename(globals.path_prefix, "/var/lib/swupd");
+		bool tracking = init_tracking_dir(new_os_statedir, ".init");
+		if (tracking) {
+			for (iter = cmdline_option_bundles; iter; iter = iter->next) {
+				char *bundle = iter->data;
+				/* make sure the bundle was in fact valid and will
+				 * be installed before creating the tracking file */
+				if (list_search(bundles_subs, bundle, subscription_bundlename_strcmp)) {
+					track_bundle_in_statedir(bundle, new_os_statedir);
+				}
+			}
+			/* remove the temporary file created during
+			 * the initialization of the tracking directory */
+			char *init_file = mk_full_filename(new_os_statedir, "/bundles/.init");
+			sys_rm(init_file);
+			free_string(&init_file);
+		}
+		free_string(&new_os_statedir);
+	}
 
 	/* report a summary of what we managed to do and not do */
 	info("Inspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));

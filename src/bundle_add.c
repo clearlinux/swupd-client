@@ -103,68 +103,6 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-/*
- * track_installed creates a tracking file in path_prefix/var/lib/bundles If
- * there are no tracked files in that directory (directory is empty or does not
- * exist) copy the tracking directory at path_prefix/usr/share/clear/bundles to
- * path_prefix/var/lib/bundles to initiate the tracking files.
- *
- * This function does not return an error code because weird state in this
- * directory must be handled gracefully whenever encountered.
- */
-static void track_installed(const char *bundle_name)
-{
-	int ret = 0;
-	char *dst = get_tracking_dir();
-	char *src;
-
-	/* if state_dir_parent/bundles doesn't exist or is empty, assume this is
-	 * the first time tracking installed bundles. Since we don't know what the
-	 * user installed themselves just copy the entire system tracking directory
-	 * into the state tracking directory. */
-	if (!is_populated_dir(dst)) {
-		char *rmfile;
-		ret = rm_rf(dst);
-		if (ret) {
-			goto out;
-		}
-		src = mk_full_filename(globals.path_prefix, "/usr/share/clear/bundles");
-		/* at the point this function is called <bundle_name> is already
-		 * installed on the system and therefore has a tracking file under
-		 * /usr/share/clear/bundles. A simple cp -a of that directory will
-		 * accurately track that bundle as manually installed. */
-		ret = copy_all(src, globals.state_dir);
-		free_string(&src);
-		if (ret) {
-			goto out;
-		}
-		/* remove uglies that live in the system tracking directory */
-		rmfile = mk_full_filename(dst, ".MoM");
-		(void)unlink(rmfile);
-		free_string(&rmfile);
-		/* set perms on the directory correctly */
-		ret = chmod(dst, S_IRWXU);
-		if (ret) {
-			goto out;
-		}
-	}
-
-	char *tracking_file = mk_full_filename(dst, bundle_name);
-	int fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-	free_string(&tracking_file);
-	if (fd < 0) {
-		ret = -1;
-		goto out;
-	}
-	close(fd);
-
-out:
-	if (ret) {
-		debug("Issue creating tracking file in %s for %s\n", dst, bundle_name);
-	}
-	free_string(&dst);
-}
-
 static int check_disk_space_availability(struct list *to_install_bundles)
 {
 	char *filepath = NULL;
@@ -246,7 +184,7 @@ static int compute_bundle_dependecies(struct manifest *mom, struct list *bundles
 			warn("Bundle \"%s\" is already installed, skipping it...\n", bundle);
 			(*already_installed)++;
 			/* track as installed since the user tried to install */
-			track_installed(bundle);
+			track_bundle(bundle);
 			continue;
 		}
 
@@ -405,7 +343,7 @@ out:
 		if (is_installed_bundle(to_install_manifest->component)) {
 			if (string_in_list(to_install_manifest->component, bundles)) {
 				bundles_installed++;
-				track_installed(to_install_manifest->component);
+				track_bundle(to_install_manifest->component);
 			} else {
 				dependencies_installed++;
 			}

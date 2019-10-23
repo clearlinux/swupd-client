@@ -10,6 +10,7 @@ test_setup() {
 	create_test_environment -e "$TEST_NAME" 10
 	create_bundle -n os-core -f /core "$TEST_NAME"
 	create_bundle -n test-bundle -f /file_1,/file_2 "$TEST_NAME"
+	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle os-core
 
 }
 

@@ -1625,7 +1625,7 @@ create_test_environment() { # swupd_function
 
 	# state files & dirs
 	debug_msg "Creating a state dir"
-	sudo mkdir -p "$statedir"/{staged,download,delta,telemetry}
+	sudo mkdir -p "$statedir"/{staged,download,delta,telemetry,bundles}
 	sudo chmod -R 0700 "$statedir"
 
 	# export environment variables that are dependent of the test env

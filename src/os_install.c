@@ -162,10 +162,6 @@ enum swupd_code install_main(int argc, char **argv)
 	 */
 	const int steps_in_os_install = 9;
 
-	/* add os-core to the list of bundles to install to make sure
-	 * it is included regardless of user selection */
-	cmdline_bundles = list_prepend_data(cmdline_bundles, strdup_or_die("os-core"));
-
 	if (!parse_options(argc, argv)) {
 		print("\n");
 		print_help();

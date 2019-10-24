@@ -305,7 +305,7 @@ static X509 *get_cert_from_path(const char *certificate_path)
 
 	fp_pubkey = fopen(certificate_path, "re");
 	if (!fp_pubkey) {
-		error("Failed fopen %s\n", certificate_path);
+		error("Failed fopen %s (%i - %s)\n", certificate_path, errno, strerror(errno));
 		goto error;
 	}
 

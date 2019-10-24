@@ -356,9 +356,7 @@ char *sys_path_join(const char *prefix, const char *path)
 		prefix = "";
 	}
 
-	if (prefix) {
-		len = strlen(prefix);
-	}
+	len = strlen(prefix);
 
 	//Remove trailing '/' at the end of prefix
 	while (len && prefix[len - 1] == PATH_SEPARATOR) {

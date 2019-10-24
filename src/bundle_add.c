@@ -115,7 +115,7 @@ static int check_disk_space_availability(struct list *to_install_bundles)
 
 	timelist_timer_start(globals.global_times, "Check disk space availability");
 	bundle_size = get_manifest_list_contentsize(to_install_bundles);
-	filepath = mk_full_filename(globals.path_prefix, "/usr/");
+	filepath = sys_path_join(globals.path_prefix, "/usr/");
 
 	/* Calculate free space on filepath */
 	fs_free = get_available_space(filepath);

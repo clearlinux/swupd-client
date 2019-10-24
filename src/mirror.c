@@ -118,8 +118,8 @@ static int unset_mirror_url()
 	char *content_path;
 	char *version_path;
 	int ret1 = 0, ret2 = 0;
-	content_path = mk_full_filename(globals.path_prefix, MIRROR_CONTENT_URL_PATH);
-	version_path = mk_full_filename(globals.path_prefix, MIRROR_VERSION_URL_PATH);
+	content_path = sys_path_join(globals.path_prefix, MIRROR_CONTENT_URL_PATH);
+	version_path = sys_path_join(globals.path_prefix, MIRROR_VERSION_URL_PATH);
 
 	ret1 = sys_rm(content_path);
 	ret2 = sys_rm(version_path);
@@ -203,7 +203,7 @@ static enum swupd_code set_new_url(const char *url, const char *url_path)
 
 	/* concatenate path_prefix and configuration paths if necessary
 	 * if path_prefix is NULL the second argument will be returned */
-	path = mk_full_filename(globals.path_prefix, url_path);
+	path = sys_path_join(globals.path_prefix, url_path);
 
 	/* write url to path_prefix/MIRROR_VERSION_URL_PATH */
 	ret = write_to_path(url, path);
@@ -253,8 +253,8 @@ static bool mirror_is_set(void)
 	char *version_path;
 	char *content_path;
 
-	version_path = mk_full_filename(globals.path_prefix, MIRROR_VERSION_URL_PATH);
-	content_path = mk_full_filename(globals.path_prefix, MIRROR_CONTENT_URL_PATH);
+	version_path = sys_path_join(globals.path_prefix, MIRROR_VERSION_URL_PATH);
+	content_path = sys_path_join(globals.path_prefix, MIRROR_CONTENT_URL_PATH);
 	mirror_set = sys_filelink_exists(version_path) && sys_filelink_exists(content_path);
 
 	free_string(&version_path);
@@ -278,7 +278,7 @@ int handle_mirror_if_stale(void)
 	// Force curl to be initialized with mirror url
 	get_latest_version("");
 
-	fullpath = mk_full_filename(globals.path_prefix, DEFAULT_VERSION_URL_PATH);
+	fullpath = sys_path_join(globals.path_prefix, DEFAULT_VERSION_URL_PATH);
 	ret = get_value_from_path(&ret_str, fullpath, true);
 	if (ret != 0 || ret_str == NULL) {
 		/* no versionurl file here, might not exist under --path argument */

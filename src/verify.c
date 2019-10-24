@@ -229,7 +229,7 @@ static int check_files_hash(struct list *files)
 			goto progress;
 		}
 
-		fullname = mk_full_filename(globals.path_prefix, f->filename);
+		fullname = sys_path_join(globals.path_prefix, f->filename);
 		valid = cmdline_option_quick ? verify_file_lazy(fullname) : verify_file(f, fullname);
 		free_string(&fullname);
 		if (valid) {
@@ -333,7 +333,7 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 			goto progress;
 		}
 
-		fullname = mk_full_filename(globals.path_prefix, file->filename);
+		fullname = sys_path_join(globals.path_prefix, file->filename);
 		memset(&local, 0, sizeof(struct file));
 		local.filename = file->filename;
 		populate_file_struct(&local, fullname);
@@ -403,7 +403,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	}
 
 	/* compare the hash and report mismatch */
-	fullname = mk_full_filename(globals.path_prefix, file->filename);
+	fullname = sys_path_join(globals.path_prefix, file->filename);
 	if (verify_file(file, fullname)) {
 		goto end;
 	}
@@ -499,7 +499,7 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 			goto progress;
 		}
 
-		fullname = mk_full_filename(globals.path_prefix, file->filename);
+		fullname = sys_path_join(globals.path_prefix, file->filename);
 
 		if (lstat(fullname, &sb) != 0) {
 			/* correctly, the file is not present */
@@ -753,7 +753,7 @@ static enum swupd_code deal_with_extra_files(struct manifest *manifest, bool fix
 {
 	enum swupd_code ret;
 
-	char *start = mk_full_filename(globals.path_prefix, cmdline_option_picky_tree);
+	char *start = sys_path_join(globals.path_prefix, cmdline_option_picky_tree);
 	info("\n%s extra files under %s\n", fix ? "Removing" : "Checking for", start);
 	ret = walk_tree(manifest, start, fix, picky_whitelist, &counts);
 	free_string(&start);
@@ -799,8 +799,8 @@ static bool init_tracking_dir(const char *state_dir, const char *init_file)
 	/* add a temporary control file to the tracking
 	 * directory so it is not empty to avoid tracking
 	 * all installed bundles */
-	tracking_dir = mk_full_filename(state_dir, "bundles");
-	tracking_file = mk_full_filename(tracking_dir, init_file);
+	tracking_dir = sys_path_join(state_dir, "bundles");
+	tracking_file = sys_path_join(tracking_dir, init_file);
 	int fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 	free_string(&tracking_dir);
 	free_string(&tracking_file);
@@ -1184,7 +1184,7 @@ brick_the_system_and_clean_curl:
 	if (cmdline_option_install && cmdline_option_bundles) {
 		/* this is a fresh install so the tracking directory
 		 * needs to be created */
-		char *new_os_statedir = mk_full_filename(globals.path_prefix, "/var/lib/swupd");
+		char *new_os_statedir = sys_path_join(globals.path_prefix, "/var/lib/swupd");
 		bool tracking = init_tracking_dir(new_os_statedir, ".init");
 		if (tracking) {
 			for (iter = cmdline_option_bundles; iter; iter = iter->next) {
@@ -1197,7 +1197,7 @@ brick_the_system_and_clean_curl:
 			}
 			/* remove the temporary file created during
 			 * the initialization of the tracking directory */
-			char *init_file = mk_full_filename(new_os_statedir, "/bundles/.init");
+			char *init_file = sys_path_join(new_os_statedir, "/bundles/.init");
 			sys_rm(init_file);
 			free_string(&init_file);
 		}

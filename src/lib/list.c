@@ -399,7 +399,7 @@ struct list *list_filter_common_elements(struct list *list1, struct list *list2,
 	return preserver;
 }
 
-void *list_remove(void *item_to_remove, struct list **list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn)
+void *list_remove(void *item_to_remove, struct list **list, comparison_fn_t comparison_fn)
 {
 	struct list *iter = NULL;
 	void *item = NULL;
@@ -417,14 +417,9 @@ void *list_remove(void *item_to_remove, struct list **list, comparison_fn_t comp
 				/* "*list" should always point to the head of the list,
 				 * if that is the element being removed, we need to
 				 * point to the new head */
-				*list = list_free_item(iter, list_free_data_fn);
+				*list = list_free_item(iter, NULL);
 			} else {
-				list_free_item(iter, list_free_data_fn);
-			}
-			/* if the data was freed, return NULL, otherwise return the element
-			 * removed from the list */
-			if (list_free_data_fn) {
-				return NULL;
+				list_free_item(iter, NULL);
 			}
 			return item;
 		}
@@ -438,9 +433,9 @@ void list_move_item(void *item_to_move, struct list **list1, struct list **list2
 {
 	void *item;
 
-	item = list_remove(item_to_move, list1, comparison_fn, NULL);
+	item = list_remove(item_to_move, list1, comparison_fn);
 	while (item) {
 		*list2 = list_prepend_data(*list2, item);
-		item = list_remove(item_to_move, list1, comparison_fn, NULL);
+		item = list_remove(item_to_move, list1, comparison_fn);
 	}
 }

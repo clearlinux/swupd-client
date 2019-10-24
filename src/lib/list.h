@@ -155,13 +155,12 @@ struct list *list_deduplicate(struct list *list, comparison_fn_t comparison_fn, 
 struct list *list_filter_common_elements(struct list *list1, struct list *list2, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
 
 /**
- * @brief removes the first occurrence of an item, it returns a pointer to the data removed from the list as long as the
- * data was not freed, it returns NULL if the data was freed or nothing was removed (item not found)
+ * @brief removes the first occurrence of an item and returs a pointer to its data.
  *
  * Function requirements:
  * - the comparison_fn should behave similar to strcmp(), returning 0 if it's a match, and "< 0" or "> 0" if it's not
  */
-void *list_remove(void *item_to_remove, struct list **list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
+void *list_remove(void *item_to_remove, struct list **list, comparison_fn_t comparison_fn);
 
 /**
  * @brief moves all occurrences of the specified item if found from list1 to list2

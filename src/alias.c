@@ -37,6 +37,11 @@ void free_alias_lookup(void *lookup)
 	free(l);
 }
 
+static void *strdup_wrapper(const void *data)
+{
+	return strdup_or_die(data);
+}
+
 struct list *get_alias_bundles(struct list *alias_definitions, char *alias)
 {
 	struct list *bundles = NULL;
@@ -46,7 +51,7 @@ struct list *get_alias_bundles(struct list *alias_definitions, char *alias)
 		struct alias_lookup *lookup = (struct alias_lookup *)iter->data;
 		iter = iter->next;
 		if (strcmp(lookup->alias, alias) == 0) {
-			bundles = list_deep_clone_strs(lookup->bundles);
+			bundles = list_clone_deep(lookup->bundles, strdup_wrapper);
 			break;
 		}
 	}

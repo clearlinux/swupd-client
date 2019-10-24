@@ -36,6 +36,9 @@ typedef void (*list_free_data_fn_t)(void *data);
 /** @brief Callback to filter a data in a list. */
 typedef bool (*filter_fn_t)(const void *a);
 
+/** @brief Callback to cone a data in a list. */
+typedef void *(*clone_fn_t)(const void *a);
+
 /**
  * Creates a new list item, store data, and inserts item in list (which can
  * be NULL). Returns created link, or NULL if failure. Created link can be
@@ -99,13 +102,17 @@ void list_free_list(struct list *list);
 
 /**
  * @brief Shallow copy of the the list.
+ *
+ * Same as calling list_clone(list, NULL);
  */
 struct list *list_clone(struct list *list);
 
 /**
- * @brief Deep copy of a string list
+ * @brief Produce a cloned copy of list, cloning all elements using clone_fn
+ *
+ * If clone_fn is NULL, elements aren't going to be cloned.
  */
-struct list *list_deep_clone_strs(struct list *source);
+struct list *list_clone_deep(struct list *list, clone_fn_t clone_fn);
 
 /**
  * @brief Check list length.

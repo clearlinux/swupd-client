@@ -262,27 +262,20 @@ void list_free_list(struct list *list)
 
 struct list *list_clone(struct list *list)
 {
-	struct list *clone = NULL;
-	struct list *item;
-
-	item = list_tail(list);
-	while (item) {
-		clone = list_prepend_data(clone, item->data);
-		item = item->prev;
-	}
-
-	return clone;
+	return list_clone_deep(list, NULL);
 }
 
 /* deep clone a list of char * */
-struct list *list_deep_clone_strs(struct list *list)
+struct list *list_clone_deep(struct list *list, clone_fn_t clone_fn)
 {
 	struct list *clone = NULL;
 	struct list *item;
+	void *data;
 
 	item = list_tail(list);
 	while (item) {
-		clone = list_prepend_data(clone, strdup_or_die(item->data));
+		data = clone_fn ? clone_fn(item->data) : item->data;
+		clone = list_prepend_data(clone, data);
 		item = item->prev;
 	}
 

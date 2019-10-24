@@ -399,12 +399,6 @@ struct list *list_filter_common_elements(struct list *list1, struct list *list2,
 	return preserver;
 }
 
-struct list *list_str_deduplicate(struct list *list)
-{
-	list = list_sort(list, list_strcmp);
-	return list_deduplicate(list, list_strcmp, free);
-}
-
 void *list_remove(void *item_to_remove, struct list **list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn)
 {
 	struct list *iter = NULL;

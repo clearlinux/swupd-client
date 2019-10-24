@@ -160,7 +160,8 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 
 	if (recursion == 1) {
 		/* get rid of duplicated dependencies */
-		*reqd_by = list_str_deduplicate(*reqd_by);
+		*reqd_by = list_sort(*reqd_by, list_strcmp);
+		*reqd_by = list_deduplicate(*reqd_by, list_strcmp, free);
 
 		/* if not using --verbose, we need to print the simplified
 		 * list of bundles that depend on *bundle_name */

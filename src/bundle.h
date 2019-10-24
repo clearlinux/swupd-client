@@ -21,6 +21,14 @@ extern "C" {
 bool is_installed_bundle(const char *bundle_name);
 
 /**
+ * @brief Check if a bundle is tracked in the system.
+ * @param bundle_name The name of the bundle.
+ *
+ * @return True if a bundle is tracked and false otherwise.
+ */
+bool is_tracked_bundle(const char *bundle_name);
+
+/**
  * @brief Create a list of bundles required by bundle_name.
  * TODO: Make this function more generic. Right now it's too specific for
  * bundle-list and bundle-remove use cases.

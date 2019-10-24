@@ -269,35 +269,6 @@ static void get_mounted_directories(void)
 	fclose(file);
 }
 
-// prepends prefix to an path (eg: the global path_prefix to a
-// file->filename or some other path prefix and path), insuring there
-// is no duplicate '/' at the strings' junction and no trailing '/'
-char *mk_full_filename(const char *prefix, const char *path)
-{
-	char *fname = NULL;
-	size_t len = 0;
-
-	if (!path) {
-		return NULL;
-	}
-
-	if (prefix) {
-		len = strlen(prefix);
-	}
-	//Remove trailing '/' at the end of prefix
-	while (len && prefix[len - 1] == '/') {
-		len--;
-	}
-
-	//make sure a '/' will always be added between prefix and path
-	if (path[0] == '/') {
-		string_or_die(&fname, "%.*s%s", len, prefix, path);
-	} else {
-		string_or_die(&fname, "%.*s/%s", len, prefix, path);
-	}
-	return fname;
-}
-
 // expects filename w/o path_prefix prepended
 bool is_directory_mounted(const char *filename)
 {
@@ -309,7 +280,7 @@ bool is_directory_mounted(const char *filename)
 		return false;
 	}
 
-	tmp = mk_full_filename(globals.path_prefix, filename);
+	tmp = sys_path_join(globals.path_prefix, filename);
 	string_or_die(&fname, ":%s:", tmp);
 	free_string(&tmp);
 
@@ -343,7 +314,7 @@ bool is_under_mounted_directory(const char *filename)
 	while (token != NULL) {
 		string_or_die(&mountpoint, "%s/", token);
 
-		tmp = mk_full_filename(globals.path_prefix, filename);
+		tmp = sys_path_join(globals.path_prefix, filename);
 		string_or_die(&fname, ":%s:", tmp);
 		free_string(&tmp);
 
@@ -586,7 +557,7 @@ enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		free_string(&tar_dotfile);
 		free_string(&url);
 
-		target = mk_full_filename(globals.path_prefix, path);
+		target = sys_path_join(globals.path_prefix, path);
 
 		/* Search for the file in the manifest, to get the hash for the file */
 		file = search_file_in_manifest(target_MoM, path);
@@ -1117,5 +1088,5 @@ void prettify_size(long size_in_bytes, char **pretty_size)
 }
 char *get_tracking_dir(void)
 {
-	return mk_full_filename(globals.state_dir, "bundles");
+	return sys_path_join(globals.state_dir, "bundles");
 }

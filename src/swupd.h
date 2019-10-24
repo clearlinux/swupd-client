@@ -276,7 +276,6 @@ void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2);
 extern struct file *mom_search_bundle(struct manifest *mom, const char *bundlename);
 extern struct file *search_file_in_manifest(struct manifest *manifest, const char *filename);
 
-extern char *mk_full_filename(const char *prefix, const char *path);
 extern bool is_directory_mounted(const char *filename);
 extern bool is_under_mounted_directory(const char *filename);
 extern bool is_populated_dir(const char *dirname);

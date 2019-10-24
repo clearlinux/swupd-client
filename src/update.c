@@ -207,7 +207,7 @@ static bool is_installed_and_verified(struct file *file)
 		return false;
 	}
 
-	char *fullname = mk_full_filename(globals.path_prefix, file->filename);
+	char *fullname = sys_path_join(globals.path_prefix, file->filename);
 
 	if (verify_file(file, fullname)) {
 		free_string(&fullname);

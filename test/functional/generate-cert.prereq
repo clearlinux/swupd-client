@@ -16,5 +16,3 @@ test_teardown() {
   generate_certificate "$TEST_ROOT_DIR"/private.pem "$TEST_ROOT_DIR"/Swupd_Root.pem "$FUNC_DIR"/certattributes.cnf
 
 }
-
-# vi: ft=sh ts=8 sw=2 sts=2 et tw=80

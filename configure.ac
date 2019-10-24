@@ -377,17 +377,17 @@ swupd-client
 
 Configuration to build swupd-client:
 
-  System alias path:			${system_alias_path}
-  User alias path:			${user_alias_path}
-  Content URL:				${CONTENTURL}
-  Version URL:				${VERSIONURL}
-  Format Identifier:			${FORMATID}
-  Signature verification:		${SIGVERIFICATION}
-  Update certificate path:		${cert_path}
-  Configuration file path(s):		${config_file_path}
-  Use bzip compression:			${BZIP}
-  Run Tests:				${TESTS}
-  Use extended file attributes		${XATTR}
-  Use --selinux option for tar		${TARSELINUX}
-  External modules support		${external_modules}
+  System alias path:            ${system_alias_path}
+  User alias path:              ${user_alias_path}
+  Content URL:                  ${CONTENTURL}
+  Version URL:                  ${VERSIONURL}
+  Format Identifier:            ${FORMATID}
+  Signature verification:       ${SIGVERIFICATION}
+  Update certificate path:      ${cert_path}
+  Configuration file path(s):   ${config_file_path}
+  Use bzip compression:         ${BZIP}
+  Run Tests:                    ${TESTS}
+  Use extended file attributes  ${XATTR}
+  Use --selinux option for tar  ${TARSELINUX}
+  External modules support      ${external_modules}
 ])

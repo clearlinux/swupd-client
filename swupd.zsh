@@ -180,12 +180,12 @@ if [[ -n "$state" ]]; then
       ;;
     args)
       case $line[1] in
-	      info)
+          info)
           _arguments $global_opts && ret=0
-		      ;;
+              ;;
         autoupdate)
           local -a autoupdates; autoupdates=(
-	    $global_opts
+        $global_opts
             '(-)--enable[enable autoupdates]'
             '(-)--disable[disable autoupdates]'
             '(-)'{-h,--help}'[Show help options]'

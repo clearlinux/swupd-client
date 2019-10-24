@@ -155,11 +155,6 @@ struct list *list_deduplicate(struct list *list, comparison_fn_t comparison_fn, 
 struct list *list_filter_common_elements(struct list *list1, struct list *list2, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
 
 /**
- * @brief sorts and removes all duplicates from a list of strings
- */
-struct list *list_str_deduplicate(struct list *list);
-
-/**
  * @brief removes the first occurrence of an item, it returns a pointer to the data removed from the list as long as the
  * data was not freed, it returns NULL if the data was freed or nothing was removed (item not found)
  *

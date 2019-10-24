@@ -3,88 +3,88 @@ dist: bionic
 language: c
 
 stages:
-        - "Static Analysis"
-        - test
+	- "Static Analysis"
+	- test
 
 env:
-        global:
-                - MAKEFLAGS="-j 2"
-                - UPDATE_TOTAL="$(find test/functional/update -name *.bats | wc -l)"
-                - UPDATE_SUBGROUP1_TOTAL=17
-                - UPDATE_SUBGROUP2_TOTAL="$((UPDATE_TOTAL - UPDATE_SUBGROUP1_TOTAL))"
-                - UPDATE_SUBGROUP1="$(find test/functional/update -name *.bats | head -n $UPDATE_SUBGROUP1_TOTAL | tr '\n' ' ')"
-                - UPDATE_SUBGROUP2="$(find test/functional/update -name *.bats | tail -n $UPDATE_SUBGROUP2_TOTAL | tr '\n' ' ')"
-                - GROUP1="$UPDATE_SUBGROUP1 $(find test/functional/{autoupdate,bundleinfo,verify-legacy} -name *.bats -printf '%p ')"
-                - GROUP2="$UPDATE_SUBGROUP2 $(find test/functional/{checkupdate,hashdump,mirror,usability} -name *.bats \( ! -name usa-config-file.bats \) -printf '%p ')"
-                - GROUP3="$(find test/functional/{diagnose,search,os-install,repair} -name *.bats -printf '%p ')"
-                - GROUP4="$(find test/functional/{bundleadd,bundleremove,bundlelist,signature} -name *.bats -printf '%p ')"
-                # The config file cannot be isolated to a test environment, so tests related to it have to run separate
-                - CONFIG_FILE_TESTS="$(find test/functional/usability -name usa-config-file.bats -printf '%p ')"
+	global:
+		- MAKEFLAGS="-j 2"
+		- UPDATE_TOTAL="$(find test/functional/update -name *.bats | wc -l)"
+		- UPDATE_SUBGROUP1_TOTAL=17
+		- UPDATE_SUBGROUP2_TOTAL="$((UPDATE_TOTAL - UPDATE_SUBGROUP1_TOTAL))"
+		- UPDATE_SUBGROUP1="$(find test/functional/update -name *.bats | head -n $UPDATE_SUBGROUP1_TOTAL | tr '\n' ' ')"
+		- UPDATE_SUBGROUP2="$(find test/functional/update -name *.bats | tail -n $UPDATE_SUBGROUP2_TOTAL | tr '\n' ' ')"
+		- GROUP1="$UPDATE_SUBGROUP1 $(find test/functional/{autoupdate,bundleinfo,verify-legacy} -name *.bats -printf '%p ')"
+		- GROUP2="$UPDATE_SUBGROUP2 $(find test/functional/{checkupdate,hashdump,mirror,usability} -name *.bats \( ! -name usa-config-file.bats \) -printf '%p ')"
+		- GROUP3="$(find test/functional/{diagnose,search,os-install,repair} -name *.bats -printf '%p ')"
+		- GROUP4="$(find test/functional/{bundleadd,bundleremove,bundlelist,signature} -name *.bats -printf '%p ')"
+		# The config file cannot be isolated to a test environment, so tests related to it have to run separate
+		- CONFIG_FILE_TESTS="$(find test/functional/usability -name usa-config-file.bats -printf '%p ')"
 
 jobs:
-        include:
-                - stage: "Static Analysis"
-                  name: "Static Analysis & Unit Tests"
-                  script: make compliant && make shellcheck && sudo sh -c 'umask 0022 && make unit-check' && make docs-coverage
-                - stage: test
-                  name: "Functional Tests - update (group 1), autoupdate, bundle-info, verify-legacy"
-                  script: env TESTS="$GROUP1" make -e check
-                - stage: test
-                  name: "Functional Tests - update (group 2), checkupdate, hashdump, mirror, usability"
-                  script: env TESTS="$GROUP2" make -e check && env TESTS="$CONFIG_FILE_TESTS" make -e check
-                - stage: test
-                  name: "Functional Tests - diagnose, os-install, repair, search"
-                  script: env TESTS="$GROUP3" make -e check
-                - stage: test
-                  name: "Functional Tests - bundle-add, bundle-remove, bundle-list, signature"
-                  script: env TESTS="$GROUP4" make -e check
+	include:
+		- stage: "Static Analysis"
+		  name: "Static Analysis & Unit Tests"
+		  script: make compliant && make shellcheck && sudo sh -c 'umask 0022 && make unit-check' && make docs-coverage
+		- stage: test
+		  name: "Functional Tests - update (group 1), autoupdate, bundle-info, verify-legacy"
+		  script: env TESTS="$GROUP1" make -e check
+		- stage: test
+		  name: "Functional Tests - update (group 2), checkupdate, hashdump, mirror, usability"
+		  script: env TESTS="$GROUP2" make -e check && env TESTS="$CONFIG_FILE_TESTS" make -e check
+		- stage: test
+		  name: "Functional Tests - diagnose, os-install, repair, search"
+		  script: env TESTS="$GROUP3" make -e check
+		- stage: test
+		  name: "Functional Tests - bundle-add, bundle-remove, bundle-list, signature"
+		  script: env TESTS="$GROUP4" make -e check
 
 # Pre-install missing build dependencies:
 # - bsdiff 1.* is the Clear Linux OS fork
 # - libcurl 7.35.0 is too old. Installing a newer version.
 # - python3-docutils for the rst2man script
 install:
-        # Install dependencies from ubuntu
-        - sudo apt-get install python3-docutils
-        - sudo apt-get install shellcheck
-        - sudo apt-get install doxygen
-        - sudo apt-get install check
-        - sudo pip install coverxygen
-        - sudo ln -s /bin/systemctl /usr/bin/systemctl
+	# Install dependencies from ubuntu
+	- sudo apt-get install python3-docutils
+	- sudo apt-get install shellcheck
+	- sudo apt-get install doxygen
+	- sudo apt-get install check
+	- sudo pip install coverxygen
+	- sudo ln -s /bin/systemctl /usr/bin/systemctl
 
-        # build bsdiff
-        - wget https://github.com/clearlinux/bsdiff/releases/download/v1.0.2/bsdiff-1.0.2.tar.xz
-        - tar -xvf bsdiff-1.0.2.tar.xz
-        - pushd bsdiff-1.0.2 && ./configure --prefix=/usr --disable-tests && make -j48 && sudo make install && popd
+	# build bsdiff
+	- wget https://github.com/clearlinux/bsdiff/releases/download/v1.0.2/bsdiff-1.0.2.tar.xz
+	- tar -xvf bsdiff-1.0.2.tar.xz
+	- pushd bsdiff-1.0.2 && ./configure --prefix=/usr --disable-tests && make -j48 && sudo make install && popd
 
-        # build curl
-        - wget https://curl.haxx.se/download/curl-7.64.0.tar.gz
-        - tar -xvf curl-7.64.0.tar.gz
-        - pushd curl-7.64.0 && ./configure --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu && make -j48 && sudo make install && popd
+	# build curl
+	- wget https://curl.haxx.se/download/curl-7.64.0.tar.gz
+	- tar -xvf curl-7.64.0.tar.gz
+	- pushd curl-7.64.0 && ./configure --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu && make -j48 && sudo make install && popd
 
-        # build libarchive
-        - wget https://github.com/libarchive/libarchive/archive/v3.3.1.tar.gz
-        - tar -xvf v3.3.1.tar.gz
-        - pushd libarchive-3.3.1 && autoreconf -fi && ./configure --prefix=/usr && make -j48 && sudo make install && popd
+	# build libarchive
+	- wget https://github.com/libarchive/libarchive/archive/v3.3.1.tar.gz
+	- tar -xvf v3.3.1.tar.gz
+	- pushd libarchive-3.3.1 && autoreconf -fi && ./configure --prefix=/usr && make -j48 && sudo make install && popd
 
-        # Use rst2man from python3
-        - sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
+	# Use rst2man from python3
+	- sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
 
-        # Install new clang-format from llvm repository
-        - wget -O llvm.gpg.key https://apt.llvm.org/llvm-snapshot.gpg.key
-        - sudo apt-key add llvm.gpg.key
-        - sudo add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main"
-        - sudo apt-get update
-        - sudo apt-get install -y clang-format-9
+	# Install new clang-format from llvm repository
+	- wget -O llvm.gpg.key https://apt.llvm.org/llvm-snapshot.gpg.key
+	- sudo apt-key add llvm.gpg.key
+	- sudo add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main"
+	- sudo apt-get update
+	- sudo apt-get install -y clang-format-9
 
 # Ubuntu's default umask is 0002, but this break's swupd hash calculations.
 before_script:
-        - autoreconf --verbose --warnings=none --install --force
-        - ./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --with-fallback-capaths=$TRAVIS_BUILD_DIR/swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path=./testconfig
-        - sudo find test/functional -exec chmod g-w {} \;
-        - make &&
-          sudo sh -c 'umask 0022 && make install' &&
-          sudo sh -c 'umask 0022 && make install-check'
+	- autoreconf --verbose --warnings=none --install --force
+	- ./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --with-fallback-capaths=$TRAVIS_BUILD_DIR/swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path=./testconfig
+	- sudo find test/functional -exec chmod g-w {} \;
+	- make &&
+	  sudo sh -c 'umask 0022 && make install' &&
+	  sudo sh -c 'umask 0022 && make install-check'
 
 after_failure:
-        - cat test-suite.log
+	- cat test-suite.log

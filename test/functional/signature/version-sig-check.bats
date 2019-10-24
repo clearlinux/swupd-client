@@ -21,7 +21,7 @@ test_setup() {
 	# absolute latest version get checked during check-update
 	sudo sh -c "mv $WEBDIR/version/latest_version.sig $WEBDIR/version/latest_version_bad_name.sig"
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
-        assert_status_is "$SWUPD_SIGNATURE_VERIFICATION_FAILED"
+	assert_status_is "$SWUPD_SIGNATURE_VERIFICATION_FAILED"
 
 	expected_output=$(cat <<-EOM
 		Error: Failed to retrieve size for signature file: .*latest_version.sig
@@ -53,9 +53,9 @@ test_setup() {
 
 	# Update fails as signature match error occurs as expected
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
-        assert_status_is "$SWUPD_SIGNATURE_VERIFICATION_FAILED"
+	assert_status_is "$SWUPD_SIGNATURE_VERIFICATION_FAILED"
 
-        expected_output=$(cat <<-EOM
+	expected_output=$(cat <<-EOM
 		Update started
 		Error: Signature check error
 		.*:not enough data.*

@@ -16,8 +16,8 @@ mkdir -p /build
 cd /build
 
 if [[ ! -d /source ]]; then
-    echo "Missing source tree!" >&2
-    exit 1
+	echo "Missing source tree!" >&2
+	exit 1
 fi
 
 # Copy all the files across to prevent contaminating the bind mount
@@ -25,18 +25,18 @@ cp -Ra /source/. /build
 
 die_fatal()
 {
-    echo "$*"
-    exit 1
+	echo "$*"
+	exit 1
 }
 
 die_log_fatal()
 {
-    if [[ -e test-suite.log ]]; then
-        cat test-suite.log
-    else
-        echo "test-suite.log is missing." >&2
-    fi
-    exit 1
+	if [[ -e test-suite.log ]]; then
+		cat test-suite.log
+	else
+		echo "test-suite.log is missing." >&2
+	fi
+	exit 1
 }
 
 jobCount="-j$(($(getconf _NPROCESSORS_ONLN)+1))"

@@ -44,7 +44,7 @@ get_current_format() {
 
 install_bundles() {
 	local CMD=os-install
-    # TODO: Replace verify --fix with repair as soon as the feature is implemented
+	# TODO: Replace verify --fix with repair as soon as the feature is implemented
 	[ "$1" = "-r" ] && { CMD="verify --fix"; shift ; }
 
 	if [ -z "$BUNDLE_LIST" ]; then

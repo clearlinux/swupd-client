@@ -17,7 +17,7 @@ export SWUPD_CONFIG_FILE="$SWUPD_CONFIG_DIR"/config
 # detect where the swupd binary is
 if [ -e "$SWUPD" ]; then
 	# nothing to be done, variable already set up
-        export SWUPD
+	export SWUPD
 elif [ -e "$SWUPD_DIR"/swupd ]; then
 	# using the path relative to the test dir
 	export SWUPD="$SWUPD_DIR"/swupd
@@ -1281,9 +1281,9 @@ sign_manifest() { # swupd_function
 	validate_item "$manifest"
 
 	sudo openssl smime -sign -binary -in "$manifest" \
-    -signer "$TEST_ROOT_DIR"/Swupd_Root.pem \
-    -inkey "$TEST_ROOT_DIR"/private.pem \
-    -outform DER -out "$(dirname "$manifest")"/Manifest.MoM.sig
+	-signer "$TEST_ROOT_DIR"/Swupd_Root.pem \
+	-inkey "$TEST_ROOT_DIR"/private.pem \
+	-outform DER -out "$(dirname "$manifest")"/Manifest.MoM.sig
 }
 
 # Signs the version file with a PEM key and generates the signature in the same location

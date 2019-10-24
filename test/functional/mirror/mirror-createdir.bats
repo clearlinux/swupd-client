@@ -85,7 +85,7 @@ global_teardown() {
 	)
 	assert_is_output "$expected_output"
 
-  	! [[ -L "$TARGETDIR/etc/swupd" ]]
+	! [[ -L "$TARGETDIR/etc/swupd" ]]
 	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
 	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
 

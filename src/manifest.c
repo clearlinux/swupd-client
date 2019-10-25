@@ -1188,8 +1188,8 @@ int mom_get_manifests_list(struct manifest *mom, struct list **manifest_list, fi
 {
 	struct manifest *manifest = NULL;
 	struct list *list;
-	unsigned int complete = 0;
-	unsigned int total;
+	int complete = 0;
+	int total;
 	int err = 0, last_error = 0;
 
 	total = list_len(mom->manifests);

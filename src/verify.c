@@ -212,8 +212,8 @@ static int get_all_files(struct manifest *official_manifest, struct list *subs)
 static int check_files_hash(struct list *files)
 {
 	struct list *iter;
-	unsigned int complete = 0;
-	unsigned int total = list_len(files);
+	int complete = 0;
+	int total = list_len(files);
 	int ret = 1;
 
 	info("Checking for corrupt files\n");
@@ -316,8 +316,8 @@ static void add_missing_files(struct manifest *official_manifest, bool repair)
 	int ret;
 	struct file local;
 	struct list *iter;
-	unsigned int list_length = list_len(official_manifest->files);
-	unsigned int complete = 0;
+	int list_length = list_len(official_manifest->files);
+	int complete = 0;
 
 	iter = list_head(official_manifest->files);
 	while (iter) {
@@ -466,8 +466,8 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 {
 	int ret;
 	struct list *iter;
-	unsigned int list_length = list_len(official_manifest->files);
-	unsigned int complete = 0;
+	int list_length = list_len(official_manifest->files);
+	int complete = 0;
 
 	info("\n%s extraneous files\n", repair ? "Removing" : "Checking for");
 

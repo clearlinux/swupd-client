@@ -165,9 +165,9 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	struct list *need_download = NULL;
 	struct file *file;
 	struct download_progress download_progress = { 0, 0 };
-	unsigned int complete = 0;
-	unsigned int list_length;
-	const unsigned int MAX_FILES = 1000;
+	int complete = 0;
+	int list_length;
+	const int MAX_FILES = 1000;
 
 	progress_next_step("validate_fullfiles", PROGRESS_BAR);
 	info("Validate downloaded files\n");

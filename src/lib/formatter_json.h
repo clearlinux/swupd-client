@@ -31,7 +31,7 @@ void log_json(FILE *out, const char *file, int line, const char *label, const ch
 /**
  * @brief Prints the progress of a given step into the JSON stream
  */
-void json_progress(const char *, unsigned int, unsigned int, int);
+void json_progress(const char *, int, int, int);
 
 #ifdef __cplusplus
 }

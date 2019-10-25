@@ -169,9 +169,9 @@ struct list *list_tail(struct list *item)
 	return item;
 }
 
-unsigned int list_len(struct list *list)
+int list_len(struct list *list)
 {
-	unsigned int len;
+	int len;
 	struct list *item;
 
 	if (list == NULL) {
@@ -196,7 +196,7 @@ unsigned int list_len(struct list *list)
 struct list *list_sort(struct list *list, comparison_fn_t comparison_fn)
 {
 	list = list_head(list);
-	unsigned int len = list_len(list);
+	int len = list_len(list);
 	return list_merge_sort(list, len, comparison_fn);
 }
 

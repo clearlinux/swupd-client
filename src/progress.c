@@ -31,11 +31,11 @@
 #define PERCENTAGE_OFF -2
 #define PERCENTAGE_ON -3
 
-static void default_progress_function(const char *step_description, unsigned int current_step, unsigned int total_steps, int percentage);
+static void default_progress_function(const char *step_description, int current_step, int total_steps, int percentage);
 
 static const char *title = NULL;
-static unsigned int total_steps = 0;
-static unsigned int current_step = 0;
+static int total_steps = 0;
+static int current_step = 0;
 static const char *current_step_title = "";
 static int last_percentage;
 static bool progress_report_enabled = true;
@@ -84,7 +84,7 @@ static void progress_spinner_start(void)
 	swupd_curl_download_set_progress_callback(progress_spinner_callback, &spinner_data);
 }
 
-static void default_progress_function(const char UNUSED_PARAM *step_description, unsigned int UNUSED_PARAM current_step, unsigned int UNUSED_PARAM total_steps, int percentage)
+static void default_progress_function(const char UNUSED_PARAM *step_description, int UNUSED_PARAM current_step, int UNUSED_PARAM total_steps, int percentage)
 {
 	if (percentage != PERCENTAGE_UNDEFINED &&
 	    (percentage < 0 || percentage > 100)) {

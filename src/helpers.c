@@ -25,7 +25,6 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <libgen.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -474,12 +473,10 @@ int get_dirfd_path(const char *fullname)
 {
 	int ret = -1;
 	int fd;
-	char *tmp = NULL;
-	char *dir;
+	char *dir = NULL;
 	char *real_path = NULL;
 
-	string_or_die(&tmp, "%s", fullname);
-	dir = dirname(tmp);
+	dir = sys_dirname(fullname);
 
 	fd = open(dir, O_RDONLY);
 	if (fd < 0) {
@@ -505,7 +502,7 @@ int get_dirfd_path(const char *fullname)
 
 	free_string(&real_path);
 out:
-	free_string(&tmp);
+	free_string(&dir);
 	return ret;
 }
 
@@ -542,7 +539,7 @@ enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 	 */
 	while (strcmp(path, "/") != 0) {
 		path_list = list_prepend_data(path_list, strdup_or_die(path));
-		tmp = strdup_or_die(dirname(path));
+		tmp = sys_dirname(path);
 		free_string(&path);
 		path = tmp;
 	}

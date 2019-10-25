@@ -21,7 +21,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <getopt.h>
-#include <libgen.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -141,10 +140,9 @@ static int unset_mirror_url()
 
 static enum swupd_code write_to_path(const char *content, const char *path)
 {
-	char *dir, *tmp = NULL;
+	char *dir = NULL;
 	struct stat dirstat;
-	string_or_die(&tmp, "%s", path);
-	dir = dirname(tmp);
+	dir = sys_dirname(path);
 
 	/* attempt to make the directory, ok if already exists */
 	int ret = mkdir(dir, S_IRWXU | S_IRWXG | S_IRWXO);
@@ -187,7 +185,7 @@ static enum swupd_code write_to_path(const char *content, const char *path)
 	}
 
 out:
-	free_string(&tmp);
+	free_string(&dir);
 	return ret;
 }
 

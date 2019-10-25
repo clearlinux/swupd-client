@@ -205,19 +205,20 @@ struct list *list_concat(struct list *list1, struct list *list2)
 	struct list *tail;
 
 	list2 = list_head(list2);
+	tail = list_tail(list1);
+	list1 = list_head(list1);
 
 	if (list1 == NULL) {
 		return list2;
 	}
 
-	list1 = list_head(list1);
-
-	if (list2) {
-		tail = list_tail(list1);
-
-		tail->next = list2;
-		list2->prev = tail;
+	if (list2 == NULL) {
+		return list1;
 	}
+
+	tail = list_tail(list1);
+	tail->next = list2;
+	list2->prev = tail;
 
 	return list1;
 }
@@ -314,7 +315,7 @@ int list_strcmp(const void *a, const void *b)
 	return strcmp((const char *)a, (const char *)b);
 }
 
-struct list *list_deduplicate(struct list *list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn)
+struct list *list_sorted_deduplicate(struct list *list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn)
 {
 	struct list *iter = NULL;
 	void *item1, *item2 = NULL;
@@ -359,7 +360,7 @@ struct list *list_filter_elements(struct list *list, filter_fn_t filter_fn, list
 	return list;
 }
 
-struct list *list_filter_common_elements(struct list *list1, struct list *list2, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn)
+struct list *list_sorted_filter_common_elements(struct list *list1, struct list *list2, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn)
 {
 	struct list *iter1, *iter2 = NULL;
 	struct list *preserver = NULL;

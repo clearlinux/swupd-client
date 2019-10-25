@@ -225,7 +225,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 		/* different directories may need the same tar, in those cases it needs
 		 * to be downloaded only once, the tar for each file is downloaded from
 		 * <last_change>/files/<hash>.tar */
-		need_download = list_deduplicate(need_download, compare_fullfile, NULL);
+		need_download = list_sorted_deduplicate(need_download, compare_fullfile, NULL);
 
 		download_progress.total_download_size = fullfile_query_total_download_size(need_download);
 		if (download_progress.total_download_size > 0) {

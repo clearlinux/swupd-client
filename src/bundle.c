@@ -161,7 +161,7 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 	if (recursion == 1) {
 		/* get rid of duplicated dependencies */
 		*reqd_by = list_sort(*reqd_by, list_strcmp);
-		*reqd_by = list_deduplicate(*reqd_by, list_strcmp, free);
+		*reqd_by = list_sorted_deduplicate(*reqd_by, list_strcmp, free);
 
 		/* if not using --verbose, we need to print the simplified
 		 * list of bundles that depend on *bundle_name */
@@ -445,7 +445,7 @@ enum swupd_code remove_bundles(struct list *bundles)
 
 		/* sanitize files to remove; if a file is needed by a bundle that
 		 * is installed, it should be kept in the system */
-		files_to_remove = list_filter_common_elements(files_to_remove, current_mom->files, filter_files_to_delete, NULL);
+		files_to_remove = list_sorted_filter_common_elements(files_to_remove, current_mom->files, filter_files_to_delete, NULL);
 
 		if (list_len(files_to_remove) > 0) {
 			info("\nDeleting bundle files...\n");

@@ -4,6 +4,17 @@
 /**
  * @file
  * @brief Doubly linked list implementation.
+ *
+ * All list functions that performs operation in all nodes should always require
+ * that any element of the list is used as a parameter and return the first
+ * element of the list. Caller is not required to use list_head() in the
+ * parameter or result.
+ *
+ * List functions that operates in a single element, like list_append(),
+ * list_prepend() have documentation on what's expected from caller.
+ *
+ * A NULL pointer is always considered an empty list, so all functions should
+ * work when NULL is used as a list parameter.
  */
 
 #include <stdbool.h>
@@ -36,19 +47,30 @@ typedef void (*list_free_data_fn_t)(void *data);
 /** @brief Callback to filter a data in a list. */
 typedef bool (*filter_fn_t)(const void *a);
 
-/** @brief Callback to cone a data in a list. */
+/** @brief Callback to clone a data in a list. */
 typedef void *(*clone_fn_t)(const void *a);
 
 /**
- * Creates a new list item, store data, and inserts item in list (which can
- * be NULL). Returns created link, or NULL if failure. Created link can be
- * used as the list parameter to efficiently append new elements without
- * having to traverse the whole list to find the last one.
+ * @brief Append an element at the end of the list
+ * @param list any element of the list
+ * @param data the data the new element should keep
+ *
+ * @returns the appended element or NULL on failures.
+ *
+ * @note Created link can be used as the list parameter to efficiently append
+ * new elements without having to traverse the whole list to find the last one.
  */
 struct list *list_append_data(struct list *list, void *data);
 
 /**
  * @brief Prepend one element to the list.
+ * @param list any element of the list
+ * @param data the data the new element should keep
+ *
+ * @returns the prepended elemement or NULL on failures.
+ *
+ * @note Created link can be used as the list parameter to efficiently prepend
+ * new elements without having to traverse the whole list to find the last one.
  */
 struct list *list_prepend_data(struct list *list, void *data);
 
@@ -76,7 +98,8 @@ int list_len(struct list *list);
 struct list *list_sort(struct list *list, comparison_fn_t comparison_fn);
 
 /**
- * @brief Appends list2 at the tail of list1. Either list1 or list2 can be NULL.
+ * @brief Appends list2 at the tail of list1
+ *
  * @returns The head of the resulting concatenation
  */
 struct list *list_concat(struct list *list1, struct list *list2);
@@ -137,28 +160,17 @@ void *list_search(struct list *list, const void *item, comparison_fn_t compariso
 int list_strcmp(const void *a, const void *b);
 
 /**
- * @brief removes duplicated elements from a list
- *
- * Function requirements:
- * - the list has to be sorted
- * - the comparison_fn should behave similar to strcmp(), returning 0 if it's a match, and "< 0" or "> 0" if it's not
+ * @brief removes duplicated elements from a sorted list
  */
-struct list *list_deduplicate(struct list *list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
+struct list *list_sorted_deduplicate(struct list *list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
 
 /**
- * @brief Filters any element from list1 that happens to be in list2 as long as it meets the criteria
- *
- * Function requirements:
- * - list1 and list2 are sorted
- * - the comparison_fn should behave similar to strcmp(), returning 0 if it's a match, and "< 0" or "> 0" if it's not
+ * @brief Filters any element from sorted list list1 that happens to be in the sorted list list2 meeting the criteria.
  */
-struct list *list_filter_common_elements(struct list *list1, struct list *list2, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
+struct list *list_sorted_filter_common_elements(struct list *list1, struct list *list2, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
 
 /**
- * @brief removes the first occurrence of an item and returs a pointer to its data.
- *
- * Function requirements:
- * - the comparison_fn should behave similar to strcmp(), returning 0 if it's a match, and "< 0" or "> 0" if it's not
+ * @brief removes the first occurrence of an item and returns a pointer to its data.
  */
 void *list_remove(void *item_to_remove, struct list **list, comparison_fn_t comparison_fn);
 

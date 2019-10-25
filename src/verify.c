@@ -1074,7 +1074,7 @@ enum swupd_code verify_main(void)
 		 * are compared against the full list of consolidated files
 		 * from all bundles so we don't end up deleting a file that
 		 * is needed by another bundle */
-		bundles_files = list_filter_common_elements(bundles_files, all_files, find_unsafe_to_delete, NULL);
+		bundles_files = list_sorted_filter_common_elements(bundles_files, all_files, find_unsafe_to_delete, NULL);
 		official_manifest->files = bundles_files;
 
 		/* at this point we no longer need the data regarding bundles

@@ -347,12 +347,12 @@ enum swupd_code remove_bundles(struct list *bundles)
 
 	/* inform user about the effects of using the options */
 	if (cmdline_option_force) {
-		info("\nThe --force option was used, the specified bundle%s and all bundles "
+		warn("\nThe --force option was used, the specified bundle%s and all bundles "
 		     "that require %s will be removed from the system\n",
 		     total > 1 ? "s" : "",
 		     total > 1 ? "them" : "it");
 	} else if (cmdline_option_recursive) {
-		info("\nThe --recursive option was used, the specified bundle%s and %s "
+		warn("\nThe --recursive option was used, the specified bundle%s and %s "
 		     "dependencies will be removed from the system\n",
 		     total > 1 ? "s" : "",
 		     total > 1 ? "their" : "its");

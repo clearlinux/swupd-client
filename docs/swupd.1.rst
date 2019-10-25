@@ -218,10 +218,16 @@ SUBCOMMANDS
 
         Removes a bundle along with all the bundles that depend on it.
 
+        Warning: This operation is dangerous and must be used with care since it
+        can remove many unexpected bundles.
+
     -  `-R, --recursive`
 
         Removes a bundle and its dependencies recursively, except for bundle
         os-core.
+
+        Warning: This operation is dangerous and must be used with care since it
+        can remove many unexpected bundles.
 
 ``bundle-list``
 

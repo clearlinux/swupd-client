@@ -129,7 +129,7 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 		}
 
 		/* If globals.path_prefix is given and we have succeeded so far,
-		 * make sense to return SWUPD_OK at this point. In that case, 
+		 * make sense to return SWUPD_OK at this point. In that case,
 		 * a swupd timer restart cannot be done as there is no
 		 * system daemon to communicate for rootfs.
 		 */

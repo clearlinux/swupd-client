@@ -212,13 +212,6 @@ int rm_rf(const char *file)
 	return run_command_quiet("/bin/rm", "-rf", file, NULL);
 }
 
-static int lex_sort(const void *a, const void *b)
-{
-	const char *name1 = (char *)a;
-	const char *name2 = (char *)b;
-	return strcmp(name1, name2);
-}
-
 /* Get a list of files in a directory sorted by filename
  * with their fullpath, returns NULL on error (errno set by
  * opendir).
@@ -251,7 +244,7 @@ struct list *get_dir_files_sorted(char *path)
 	}
 	(void)closedir(dir);
 
-	return list_sort(files, lex_sort);
+	return list_sort(files, strcmp_wrapper);
 }
 
 bool sys_file_exists(const char *filename)

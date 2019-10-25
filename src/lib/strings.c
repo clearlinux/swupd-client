@@ -204,3 +204,8 @@ char *str_subchar(const char *str, char c1, char c2)
 
 	return new;
 }
+
+int strcmp_wrapper(const void *a, const void *b)
+{
+	return strcmp((const char *)a, (const char *)b);
+}

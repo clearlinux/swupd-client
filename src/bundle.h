@@ -55,6 +55,13 @@ void track_bundle_in_statedir(const char *bundle_name, const char *state_dir);
  */
 void track_bundle(const char *bundle_name);
 
+/**
+ * @brief Validates that a tracking directory exists and that it is not
+ * empty, if it is, it creates it and marks all installed bundles as tracked.
+ * @param state_dir The path to the state directory.
+ */
+bool validate_tracking_dir(const char *state_dir);
+
 #ifdef __cplusplus
 }
 #endif

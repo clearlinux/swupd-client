@@ -319,7 +319,6 @@ extern int create_state_dirs(const char *state_dir_path);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);
-struct list *free_bundle(struct list *item);
 extern void create_and_append_subscription(struct list **subs, const char *component);
 extern char *get_tracking_dir(void);
 extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);

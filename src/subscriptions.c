@@ -48,11 +48,6 @@ void free_subscriptions(struct list **subs)
 	*subs = NULL;
 }
 
-struct list *free_bundle(struct list *item)
-{
-	return list_free_item(item, free_subscription_data);
-}
-
 struct list *free_list_file(struct list *item)
 {
 	return list_free_item(item, free_file_data);

@@ -166,11 +166,12 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 	return count;
 }
 
-void track_bundle_in_statedir(const char *bundle_name, const char *state_dir)
+bool validate_tracking_dir(const char *state_dir)
 {
 	int ret = 0;
 	char *src;
 	char *tracking_dir;
+	char *rmfile;
 
 	tracking_dir = sys_path_join(state_dir, "bundles");
 
@@ -179,12 +180,13 @@ void track_bundle_in_statedir(const char *bundle_name, const char *state_dir)
 	 * user installed themselves just copy the entire system tracking directory
 	 * into the state tracking directory. */
 	if (!is_populated_dir(tracking_dir)) {
-		char *rmfile;
 		ret = rm_rf(tracking_dir);
 		if (ret) {
 			goto out;
 		}
+
 		src = sys_path_join(globals.path_prefix, "/usr/share/clear/bundles");
+
 		/* at the point this function is called <bundle_name> is already
 		 * installed on the system and therefore has a tracking file under
 		 * /usr/share/clear/bundles. A simple cp -a of that directory will
@@ -194,20 +196,44 @@ void track_bundle_in_statedir(const char *bundle_name, const char *state_dir)
 		if (ret) {
 			goto out;
 		}
+
 		/* remove uglies that live in the system tracking directory */
 		rmfile = sys_path_join(tracking_dir, ".MoM");
 		(void)unlink(rmfile);
 		free_string(&rmfile);
+
 		/* set perms on the directory correctly */
 		ret = chmod(tracking_dir, S_IRWXU);
 		if (ret) {
 			goto out;
 		}
 	}
+out:
+	free_string(&tracking_dir);
+	if (ret) {
+		return false;
+	}
+	return true;
+}
 
-	char *tracking_file = sys_path_join(tracking_dir, bundle_name);
-	int fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-	free_string(&tracking_file);
+void track_bundle_in_statedir(const char *bundle_name, const char *state_dir)
+{
+	int ret = 0;
+	int fd;
+	char *tracking_dir;
+	char *tracking_file;
+
+	tracking_dir = sys_path_join(state_dir, "bundles");
+	tracking_file = sys_path_join(tracking_dir, bundle_name);
+
+	/* make sure the tracking file exists and is not empty */
+	if (!validate_tracking_dir(state_dir)) {
+		ret = -1;
+		goto out;
+	}
+
+	/* touch a tracking file */
+	fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 	if (fd < 0) {
 		ret = -1;
 		goto out;
@@ -219,6 +245,7 @@ out:
 		debug("Issue creating tracking file in %s for %s\n", tracking_dir, bundle_name);
 	}
 	free_string(&tracking_dir);
+	free_string(&tracking_file);
 }
 
 void track_bundle(const char *bundle_name)

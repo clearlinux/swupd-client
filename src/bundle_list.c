@@ -23,7 +23,6 @@
 #define _GNU_SOURCE
 #include <errno.h>
 #include <getopt.h>
-#include <libgen.h>
 #include <string.h>
 
 #include "config.h"
@@ -156,20 +155,19 @@ skip_mom:
 
 	while (item) {
 		if (MoM) {
-			bundle_manifest = mom_search_bundle(MoM, basename((char *)item->data));
+			bundle_manifest = mom_search_bundle(MoM, sys_basename((char *)item->data));
 		}
 		if (bundle_manifest) {
 			name = get_printable_bundle_name(bundle_manifest->filename, bundle_manifest->is_experimental);
+			print("%s\n", name);
+			free(name);
 		} else {
-			string_or_die(&name, basename((char *)item->data));
+			print("%s\n", sys_basename((char *)item->data));
 		}
-		print("%s\n", name);
-		free_string(&name);
-		free(item->data);
 		item = item->next;
 	}
 
-	list_free_list(bundles);
+	list_free_list_and_data(bundles, free);
 
 	free_string(&path);
 	manifest_free(MoM);

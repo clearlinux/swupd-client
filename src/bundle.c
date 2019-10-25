@@ -23,7 +23,6 @@
 
 #define _GNU_SOURCE
 #include <fcntl.h>
-#include <libgen.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>

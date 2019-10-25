@@ -173,7 +173,7 @@ struct list *get_alias_definitions(void)
 	iters = system_alias_files;
 	iteru = user_alias_files;
 	while (iters && iteru) {
-		int pivot = strcmp(basename(iteru->data), basename(iters->data));
+		int pivot = strcmp(sys_basename(iteru->data), sys_basename(iters->data));
 		if (pivot == 0) {
 			if (iters == system_alias_files) {
 				system_alias_files = iters->next;

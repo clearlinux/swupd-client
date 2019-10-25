@@ -23,7 +23,6 @@
 
 #define _GNU_SOURCE
 #include <fcntl.h>
-#include <libgen.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -59,8 +58,8 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 
 	close(fd);
 
-	filename_n = basename(filename);
-	if (!filename_n) {
+	filename_n = sys_basename(filename);
+	if (!filename_n || !filename_n[0]) {
 		free_string(&filename);
 		goto error;
 	}

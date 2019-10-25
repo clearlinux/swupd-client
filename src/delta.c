@@ -25,7 +25,6 @@
 #include <bsdiff.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <libgen.h>
 #include <linux/fs.h>
 #include <stdio.h>
 #include <stdlib.h>

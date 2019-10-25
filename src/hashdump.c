@@ -47,7 +47,7 @@ static struct option opts[] = {
 static void usage(const char *name)
 {
 	print("Usage:\n");
-	print("   swupd %s [OPTION...] filename\n\n", basename((char *)name));
+	print("   swupd %s [OPTION...] filename\n\n", sys_basename(name));
 	print("Help Options:\n");
 	print("   -h, --help              Show help options\n\n");
 	print("Application Options:\n");

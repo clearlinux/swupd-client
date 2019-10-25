@@ -164,6 +164,18 @@ bool systemd_in_container(void);
 char *sys_dirname(const char *path);
 
 /**
+ * @brief Safe GNU implementation of basename
+ *
+ * Make sure the GNU implementation of basename will be used and not the
+ * posix one. The GNU implementation is read-only and won't change the value
+ * of path. For more information consult GNU basename manual.
+ *
+ * A pointer for a portion of the path string will be returned and shoudn't be
+ * freed. If you need to keep it you need to strdup it.
+ */
+char *sys_basename(const char *path);
+
+/**
  * @brief Join 2 paths using the default path separator.
  *
  * Can be used to prepend a prefix to an path (eg: the global path_prefix to a

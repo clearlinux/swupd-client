@@ -17,22 +17,25 @@
  *
  */
 
+// Make sure we are getting the gnu version of basename
 #define _GNU_SOURCE
-#include "sys.h"
+#include <libgen.h>
+#undef basename
+#include <string.h>
+
 #include "list.h"
 #include "log.h"
 #include "macros.h"
 #include "memory.h"
 #include "strings.h"
+#include "sys.h"
 
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <libgen.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #include <sys/wait.h>
@@ -352,6 +355,15 @@ char *sys_dirname(const char *path)
 	dir = strdup_or_die(dir);
 	free(tmp);
 	return dir;
+}
+
+char *sys_basename(const char *path)
+{
+	if (!path) {
+		return NULL;
+	}
+
+	return basename(path);
 }
 
 char *sys_path_join(const char *prefix, const char *path)

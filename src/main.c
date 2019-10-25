@@ -17,7 +17,7 @@
  *
  */
 
-#define _GNU_SOURCE // for basename()
+#define _GNU_SOURCE
 #include <getopt.h>
 #include <locale.h>
 #include <stdio.h>
@@ -81,8 +81,8 @@ static const struct option prog_opts[] = {
 static void print_help(const char *name)
 {
 	print("Usage:\n");
-	print("    %s [OPTION...]\n", basename((char *)name));
-	print(" or %s [OPTION...] SUBCOMMAND [OPTION...]\n\n", basename((char *)name));
+	print("    %s [OPTION...]\n", sys_basename(name));
+	print(" or %s [OPTION...] SUBCOMMAND [OPTION...]\n\n", sys_basename(name));
 	print("Help Options:\n");
 	print("   -h, --help              Show help options\n");
 	print("   -v, --version           Output version information and exit\n\n");
@@ -95,7 +95,7 @@ static void print_help(const char *name)
 		entry++;
 	}
 	print("\n");
-	print("To view subcommand options, run `%s SUBCOMMAND --help'\n", basename((char *)name));
+	print("To view subcommand options, run `%s SUBCOMMAND --help'\n", sys_basename(name));
 }
 
 /* this function prints the copyright message for the --version command */

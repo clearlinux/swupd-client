@@ -918,7 +918,7 @@ struct list *filter_out_existing_files(struct list *to_install_files, struct lis
 		list = list->next;
 	}
 
-	return list;
+	return list_head(list);
 }
 
 void populate_file_struct(struct file *file, char *filename)
@@ -1018,7 +1018,7 @@ void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2)
 	int count = 0;
 
 	bmanifest = *m1;
-	iter1 = preserver = list_head(bmanifest->files);
+	iter1 = preserver = bmanifest->files;
 	iter2 = list_head(m2->files);
 
 	while (iter1 && iter2) {
@@ -1050,7 +1050,7 @@ void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2)
 	}
 
 	/* give me back my list pointer */
-	bmanifest->files = preserver;
+	bmanifest->files = list_head(preserver);
 }
 
 int file_bundlename_strcmp(const void *a, const void *b)

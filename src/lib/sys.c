@@ -338,9 +338,18 @@ char *sys_dirname(const char *path)
 {
 	char *tmp, *dir;
 
-	tmp = strdup_or_die(path);
-	dir = strdup_or_die(dirname(tmp));
+	if (!path) {
+		return NULL;
+	}
 
+	tmp = strdup_or_die(path);
+	dir = dirname(tmp);
+
+	if (dir == tmp) {
+		return tmp;
+	}
+
+	dir = strdup_or_die(dir);
 	free(tmp);
 	return dir;
 }

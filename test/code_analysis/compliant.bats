@@ -45,7 +45,7 @@ check_sort_makefile()
 		return 1
 	fi
 
-	run grep -r '[[:blank:]]$' test/ -l --include \*.bats --include \*.c
+	run grep -r '[[:blank:]]$' test/ src/ -l --include \*.bats --include \*.c
 	if [ "$status" -eq 0 ]; then
 		echo "Trailing whitespaces in files:"
 		echo "$output"

@@ -169,9 +169,6 @@ void list_move_item(void *item_to_move, struct list **list1, struct list **list2
 
 /**
  * @brief Filters from list any element that doesn't fit the condition defined in filter_fn.
- *
- * Function requirements:
- * - list is sorted
  */
 struct list *list_filter_elements(struct list *list, filter_fn_t filter_fn, list_free_data_fn_t list_free_data_fn);
 

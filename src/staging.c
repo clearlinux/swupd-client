@@ -332,8 +332,8 @@ static int rename_all_files_to_final(struct list *updates)
 {
 	int ret, update_errs = 0, update_good = 0, skip = 0;
 	struct list *list;
-	unsigned int complete = 0;
-	unsigned int list_length = list_len(updates);
+	int complete = 0;
+	int list_length = list_len(updates);
 
 	list = list_head(updates);
 	while (list) {

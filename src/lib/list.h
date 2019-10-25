@@ -65,7 +65,7 @@ struct list *list_tail(struct list *item);
 /**
  * @brief Returns the length of a list given anyone of its items.
  */
-unsigned int list_len(struct list *list);
+int list_len(struct list *list);
 
 /**
  * @brief Sorts the list using the comparison function.

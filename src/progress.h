@@ -27,7 +27,7 @@ enum progress_type {
  * @brief Progress format callback.
  * @see progress_set_format().
  */
-typedef void (*progress_fn_t)(const char *step_description, unsigned int current_step, unsigned int total_steps, int percentage);
+typedef void (*progress_fn_t)(const char *step_description, int current_step, int total_steps, int percentage);
 
 /**
  * @brief Callback to print start header in progress reporting.

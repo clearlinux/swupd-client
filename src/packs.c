@@ -234,8 +234,8 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	struct file *bundle = NULL;
 	struct download_progress download_progress = { 0, 0 };
 	int err;
-	unsigned int list_length;
-	unsigned int complete = 0;
+	int list_length;
+	int complete = 0;
 	struct swupd_curl_parallel_handle *download_handle;
 	char *packs_size;
 

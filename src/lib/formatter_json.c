@@ -104,7 +104,7 @@ void log_json(FILE *out UNUSED_PARAM, const char *file UNUSED_PARAM, int line UN
 	json_message(label, format, args_list);
 }
 
-void json_progress(const char *step_description, unsigned int current_step, unsigned int total_steps, int percentage)
+void json_progress(const char *step_description, int current_step, int total_steps, int percentage)
 {
 	if (!json_stream_active) {
 		return;

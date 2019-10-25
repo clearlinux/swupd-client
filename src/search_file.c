@@ -321,7 +321,7 @@ static int search_in_manifest(struct manifest *mom, struct manifest *manifest, c
 
 	// Sort and print results if postponed
 	if (sort == SORT_TYPE_ALPHA) {
-		files = list_sort(files, list_strcmp);
+		files = list_sort(files, strcmp_wrapper);
 		for (l = files; l; l = l->next) {
 			if (count > num_results) {
 				break;

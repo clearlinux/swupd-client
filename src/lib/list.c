@@ -310,11 +310,6 @@ void *list_search(struct list *list, const void *item, comparison_fn_t compariso
 	return NULL;
 }
 
-int list_strcmp(const void *a, const void *b)
-{
-	return strcmp((const char *)a, (const char *)b);
-}
-
 struct list *list_sorted_deduplicate(struct list *list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn)
 {
 	struct list *iter = NULL;

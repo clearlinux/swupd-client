@@ -385,8 +385,8 @@ static struct list *generate_bundles_to_install(char **bundles)
 	}
 
 	list_free_list_and_data(aliases, free_alias_lookup);
-	bundles_list = list_sort(bundles_list, list_strcmp);
-	bundles_list = list_sorted_deduplicate(bundles_list, list_strcmp, free);
+	bundles_list = list_sort(bundles_list, strcmp_wrapper);
+	bundles_list = list_sorted_deduplicate(bundles_list, strcmp_wrapper, free);
 
 	return bundles_list;
 }

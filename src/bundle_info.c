@@ -256,11 +256,11 @@ static enum swupd_code get_bundle_dependencies(struct manifest *manifest, struct
 	/* from the list of dependencies, remove those that were
 	 * directly pulled by the bundle so we are left only with the ones
 	 * indirectly pulled */
-	*indirect_includes = list_sort(*indirect_includes, list_strcmp);
-	manifest->includes = list_sort(manifest->includes, list_strcmp);
-	manifest->optional = list_sort(manifest->optional, list_strcmp);
-	*indirect_includes = list_sorted_filter_common_elements(*indirect_includes, manifest->includes, list_strcmp, NULL);
-	*indirect_includes = list_sorted_filter_common_elements(*indirect_includes, manifest->optional, list_strcmp, NULL);
+	*indirect_includes = list_sort(*indirect_includes, strcmp_wrapper);
+	manifest->includes = list_sort(manifest->includes, strcmp_wrapper);
+	manifest->optional = list_sort(manifest->optional, strcmp_wrapper);
+	*indirect_includes = list_sorted_filter_common_elements(*indirect_includes, manifest->includes, strcmp_wrapper, NULL);
+	*indirect_includes = list_sorted_filter_common_elements(*indirect_includes, manifest->optional, strcmp_wrapper, NULL);
 
 	return SWUPD_OK;
 }

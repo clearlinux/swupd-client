@@ -155,11 +155,6 @@ bool list_longer_than(struct list *list, int count);
 void *list_search(struct list *list, const void *item, comparison_fn_t comparison_fn);
 
 /**
- * @brief strcmp to be used with list_search() or list_sort() on a list of strings.
- */
-int list_strcmp(const void *a, const void *b);
-
-/**
  * @brief removes duplicated elements from a sorted list
  */
 struct list *list_sorted_deduplicate(struct list *list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);

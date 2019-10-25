@@ -13,12 +13,12 @@ void test_list_sorted_deduplicate()
 	char *str;
 
 	// Deduplicating an empty list
-	list = list_sorted_deduplicate(NULL, list_strcmp, NULL);
+	list = list_sorted_deduplicate(NULL, strcmp_wrapper, NULL);
 	check(list == NULL);
 
 	// Deduplicating a list of a single element
 	list = list_prepend_data(list, "A");
-	list = list_sorted_deduplicate(list, list_strcmp, NULL);
+	list = list_sorted_deduplicate(list, strcmp_wrapper, NULL);
 
 	str = string_join(", ", list);
 	check(strcmp("A", str) == 0);
@@ -38,7 +38,7 @@ void test_list_sorted_deduplicate()
 	list = list_append_data(list, "E");
 	list = list_append_data(list, "E");
 	list = list_head(list);
-	list = list_sorted_deduplicate(list, list_strcmp, NULL);
+	list = list_sorted_deduplicate(list, strcmp_wrapper, NULL);
 
 	str = string_join(", ", list);
 	check(strcmp("A, B, C, D, E", str) == 0);
@@ -58,7 +58,7 @@ void test_list_filter_elements()
 	char *str;
 
 	// Filter empty list
-	list = list_sorted_deduplicate(NULL, list_strcmp, NULL);
+	list = list_sorted_deduplicate(NULL, strcmp_wrapper, NULL);
 	check(list == NULL);
 
 	// Don't remove element

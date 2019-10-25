@@ -123,7 +123,7 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 				 * then don't consider it as a dependency, the user added it to
 				 * the list of bundles to be removed too, but we DO want to
 				 * consider its list of includes */
-				if (!list_search(exclusions, bundle->component, list_strcmp)) {
+				if (!list_search(exclusions, bundle->component, strcmp_wrapper)) {
 
 					/* add bundle to list of dependencies */
 					char *bundle_str = NULL;
@@ -160,8 +160,8 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 
 	if (recursion == 1) {
 		/* get rid of duplicated dependencies */
-		*reqd_by = list_sort(*reqd_by, list_strcmp);
-		*reqd_by = list_sorted_deduplicate(*reqd_by, list_strcmp, free);
+		*reqd_by = list_sort(*reqd_by, strcmp_wrapper);
+		*reqd_by = list_sorted_deduplicate(*reqd_by, strcmp_wrapper, free);
 
 		/* if not using --verbose, we need to print the simplified
 		 * list of bundles that depend on *bundle_name */

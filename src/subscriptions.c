@@ -58,6 +58,11 @@ struct list *free_list_file(struct list *item)
 	return list_free_item(item, free_file_data);
 }
 
+int subscription_bundlename_strcmp(const void *a, const void *b)
+{
+	return strcmp(((struct sub *)a)->component, (const char *)b);
+}
+
 static int subscription_sort_component(const void *a, const void *b)
 {
 	struct sub *A, *B;

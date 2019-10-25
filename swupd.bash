@@ -34,7 +34,7 @@ _swupd()
 		opts="$global "
 		break;;
 	    ("autoupdate")
-		opts="--help --enable --disable "
+		opts="$global --help --enable --disable "
 		break;;
 	    ("check-update")
 		opts="$global "

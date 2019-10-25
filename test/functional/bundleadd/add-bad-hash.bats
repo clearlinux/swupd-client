@@ -29,6 +29,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		No packs need to be downloaded
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Error: File content hash mismatch for $TEST_DIRNAME/testfs/state/staged/e6d85023c5e619eb43d5cfbfdbdec784afef5a82ffa54e8c93bda3e0883360a3 (bad server data?)
 	EOM

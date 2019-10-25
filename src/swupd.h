@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bundle.h"
 #include "config_loader.h"
 #include "globals.h"
 #include "lib/archives.h"
@@ -18,11 +19,11 @@
 #include "lib/list.h"
 #include "lib/log.h"
 #include "lib/macros.h"
-#include "lib/progress.h"
 #include "lib/strings.h"
 #include "lib/sys.h"
 #include "lib/timelist.h"
 #include "manifest.h"
+#include "progress.h"
 #include "scripts.h"
 #include "swupd_curl.h"
 #include "swupd_exit_codes.h"
@@ -278,7 +279,7 @@ extern struct file *search_file_in_manifest(struct manifest *manifest, const cha
 extern char *mk_full_filename(const char *prefix, const char *path);
 extern bool is_directory_mounted(const char *filename);
 extern bool is_under_mounted_directory(const char *filename);
-extern bool is_populated_dir(char *dirname);
+extern bool is_populated_dir(const char *dirname);
 
 /* filedesc.c */
 extern void dump_file_descriptor_leaks(void);
@@ -313,22 +314,19 @@ extern int link_or_copy_all(const char *orig, const char *dest);
 extern int remove_files_from_fs(struct list *files);
 extern void print_pattern(const char *pattern, int times);
 extern void prettify_size(long size_in_bytes, char **pretty_size);
+extern int link_or_rename(const char *orig, const char *dest);
+extern int create_state_dirs(const char *state_dir_path);
 
 /* subscription.c */
 struct list *free_list_file(struct list *item);
 struct list *free_bundle(struct list *item);
 extern void create_and_append_subscription(struct list **subs, const char *component);
 extern char *get_tracking_dir(void);
+extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
+extern int subscription_bundlename_strcmp(const void *a, const void *b);
 
 /* bundle.c */
-extern bool is_installed_bundle(const char *bundle_name);
 extern enum swupd_code remove_bundles(struct list *bundles);
-extern enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server);
-extern enum swupd_code show_included_bundles(char *bundle_name);
-extern enum swupd_code list_installable_bundles();
-extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
-enum swupd_code list_local_bundles();
-extern int link_or_rename(const char *orig, const char *dest);
 
 /* verify.c */
 extern enum swupd_code verify_main(void);

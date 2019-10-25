@@ -50,6 +50,7 @@ test_setup() {
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
 		Warning: One or more installed bundles that are not available at version 10 will be removed
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
@@ -95,6 +96,7 @@ test_setup() {
 		Warning: Bundle "test-bundle2" is invalid, skipping it...
 		Warning: One or more installed bundles that are not available at version 10 will be removed
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files

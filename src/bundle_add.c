@@ -103,68 +103,6 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-/*
- * track_installed creates a tracking file in path_prefix/var/lib/bundles If
- * there are no tracked files in that directory (directory is empty or does not
- * exist) copy the tracking directory at path_prefix/usr/share/clear/bundles to
- * path_prefix/var/lib/bundles to initiate the tracking files.
- *
- * This function does not return an error code because weird state in this
- * directory must be handled gracefully whenever encountered.
- */
-static void track_installed(const char *bundle_name)
-{
-	int ret = 0;
-	char *dst = get_tracking_dir();
-	char *src;
-
-	/* if state_dir_parent/bundles doesn't exist or is empty, assume this is
-	 * the first time tracking installed bundles. Since we don't know what the
-	 * user installed themselves just copy the entire system tracking directory
-	 * into the state tracking directory. */
-	if (!is_populated_dir(dst)) {
-		char *rmfile;
-		ret = rm_rf(dst);
-		if (ret) {
-			goto out;
-		}
-		src = mk_full_filename(globals.path_prefix, "/usr/share/clear/bundles");
-		/* at the point this function is called <bundle_name> is already
-		 * installed on the system and therefore has a tracking file under
-		 * /usr/share/clear/bundles. A simple cp -a of that directory will
-		 * accurately track that bundle as manually installed. */
-		ret = copy_all(src, globals.state_dir);
-		free_string(&src);
-		if (ret) {
-			goto out;
-		}
-		/* remove uglies that live in the system tracking directory */
-		rmfile = mk_full_filename(dst, ".MoM");
-		(void)unlink(rmfile);
-		free_string(&rmfile);
-		/* set perms on the directory correctly */
-		ret = chmod(dst, S_IRWXU);
-		if (ret) {
-			goto out;
-		}
-	}
-
-	char *tracking_file = mk_full_filename(dst, bundle_name);
-	int fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-	free_string(&tracking_file);
-	if (fd < 0) {
-		ret = -1;
-		goto out;
-	}
-	close(fd);
-
-out:
-	if (ret) {
-		debug("Issue creating tracking file in %s for %s\n", dst, bundle_name);
-	}
-	free_string(&dst);
-}
-
 static int check_disk_space_availability(struct list *to_install_bundles)
 {
 	char *filepath = NULL;
@@ -246,7 +184,7 @@ static int compute_bundle_dependecies(struct manifest *mom, struct list *bundles
 			warn("Bundle \"%s\" is already installed, skipping it...\n", bundle);
 			(*already_installed)++;
 			/* track as installed since the user tried to install */
-			track_installed(bundle);
+			track_bundle(bundle);
 			continue;
 		}
 
@@ -288,10 +226,10 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 	struct list *installed_bundles = NULL;
 	struct list *to_install_bundles = NULL;
 
-	/* step 1: get subscriptions for bundles to be installed */
+	/* get subscriptions for bundles to be installed */
 	info("Loading required manifests...\n");
 	timelist_timer_start(globals.global_times, "Add bundles and recurse");
-	progress_set_step(1, "load_manifests");
+	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 
 	err = mom_get_manifests_list(mom, &installed_bundles, is_installed_bundle_data);
 	if (err) {
@@ -310,10 +248,8 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 	}
 	timelist_timer_stop(globals.global_times); // closing: Add bundles and recurse
 
-	/* Step 2: Get a list with all files needed to be installed for the requested bundles */
+	/* Get a list with all files needed to be installed for the requested bundles */
 	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
-	progress_set_step(2, "consolidate_files");
-
 	installed_files = files_from_bundles(installed_bundles);
 	installed_files = filter_out_deleted_files(installed_files);
 	installed_files = consolidate_files(installed_files);
@@ -322,25 +258,21 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 	to_install_files = filter_out_deleted_files(to_install_files);
 	to_install_files = consolidate_files(to_install_files);
 
-	progress_complete_step();
 	timelist_timer_stop(globals.global_times); // closing: Consolidate files from bundles
 
 	if (!to_install_files) {
 		goto out;
 	}
 
-	///* Step 3: Check if we have enough space */
-	progress_set_step(3, "check_disk_space_availability");
+	/* Check if we have enough space */
 	err = check_disk_space_availability(to_install_bundles);
-	progress_complete_step();
 	if (err) {
 		ret = SWUPD_DISK_SPACE_ERROR;
 		goto out;
 	}
 
-	/* step 4: download necessary packs */
+	/* download necessary packs */
 	timelist_timer_start(globals.global_times, "Download packs");
-	progress_set_step(4, "download_packs");
 
 	if (rm_staging_dir_contents("download") < 0) {
 		debug("rm_staging_dir_contents failed - resuming operation");
@@ -353,13 +285,11 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 		 * download_subscribed_packs function, since we
 		 * didn't run it, manually mark the step as completed */
 		info("No packs need to be downloaded\n");
-		progress_complete_step();
 	}
 	timelist_timer_stop(globals.global_times); // closing: Download packs
 
-	/* step 5: Download missing files */
+	/* Download missing files */
 	timelist_timer_start(globals.global_times, "Download missing files");
-	progress_set_step(5, "download_fullfiles");
 	err = download_fullfiles(to_install_files, NULL);
 	timelist_timer_stop(globals.global_times); // closing: Download missing files
 	if (err) {
@@ -369,9 +299,9 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 		goto out;
 	}
 
-	/* step 6: Install all bundle(s) files into the fs */
+	/* Install all bundle(s) files into the fs */
 	timelist_timer_start(globals.global_times, "Installing bundle(s) files onto filesystem");
-	progress_set_step(6, "install_files");
+	progress_next_step("install_files", PROGRESS_BAR);
 
 	// Apply heuristics to all files
 	timelist_timer_start(globals.global_times, "Appling heuristics");
@@ -394,12 +324,11 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 	}
 	timelist_timer_stop(globals.global_times); // closing: Installing bundles
 
-	/* step 7: Run any scripts that are needed to complete update */
+	/* Run any scripts that are needed to complete update */
 	timelist_timer_start(globals.global_times, "Run Scripts");
-	progress_set_step(7, "run_scripts");
+	progress_next_step("run_postupdate_scripts", PROGRESS_UNDEFINED);
 	scripts_run_post_update(globals.wait_for_scripts);
 	timelist_timer_stop(globals.global_times); // closing: Run Scripts
-	progress_complete_step();
 
 	ret = SWUPD_OK;
 
@@ -414,7 +343,7 @@ out:
 		if (is_installed_bundle(to_install_manifest->component)) {
 			if (string_in_list(to_install_manifest->component, bundles)) {
 				bundles_installed++;
-				track_installed(to_install_manifest->component);
+				track_bundle(to_install_manifest->component);
 			} else {
 				dependencies_installed++;
 			}
@@ -533,19 +462,20 @@ clean_and_exit:
 enum swupd_code bundle_add_main(int argc, char **argv)
 {
 	int ret;
-	const int steps_in_bundleadd = 7;
 
 	/*
 	 * Steps for bundle-add:
 	 *
 	 *  1) load_manifests
-	 *  2) consolidate_files
-	 *  3) check_disk_space_availability
-	 *  4) download_packs
+	 *  2) download_packs
+	 *  3) extract_packs
+	 *  4) validate_fullfiles
 	 *  5) download_fullfiles
-	 *  6) install_files
-	 *  7) progress_set_step
+	 *  6) extract_fullfiles
+	 *  7) install_files
+	 *  8) run_postupdate_scripts
 	 */
+	const int steps_in_bundleadd = 8;
 
 	if (!parse_options(argc, argv)) {
 		print_help();

@@ -1,26 +1,9 @@
 Release notes draft for next version
 
-Release v3.23.0
+Release vX.XX.XX
 
-This release adds enhancements, bug fixes and test improvements.
+Bug Fixes:
 
-Bug fixes:
- -
+Features:
 
-Feature:
- - Adds the bundle-info command to show detailed data related to a bundle.
-   Among the data currently displayed it includes:
-    - If the bundle is installed or not
-    - If the bundle is experimental or not
-    - If the bundle is up to date (when installed)
-    - The latest available version of the bundle
-    - The size of the bundle
-    - The max size needed in disk to install a bundle if not installed
-    - Using the --version flag a user can display bundle information in
-      a specific version, not only the current version.
-    - Using the --dependencies flag users can show all dependencies of the
-      bundle.
-    - Using the --files flag users can get the list of files in a bundle.
-
-Test Improvements:
- -
+Tests:

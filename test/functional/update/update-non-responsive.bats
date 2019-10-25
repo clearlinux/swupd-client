@@ -133,6 +133,7 @@ test_teardown() {
 		    changed files     : 0
 		    new files         : 1
 		    deleted files     : 0
+		Validate downloaded files
 		No extra files need to be downloaded
 		Installing files...
 		Update was applied

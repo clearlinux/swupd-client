@@ -35,6 +35,7 @@ test_setup() {
 		    changed files     : 1
 		    new files         : 0
 		    deleted files     : 0
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Installing files...
 		Warning: Update target directory does not exist: .*/target-dir/usr/foo. Trying to fix it

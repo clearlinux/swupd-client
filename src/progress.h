@@ -6,6 +6,7 @@
  * @brief Swupd progress bar.
  */
 
+#include "src/swupd_curl.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -13,29 +14,14 @@ extern "C" {
 #endif
 
 /**
- * @brief Saves a step to report progress to.
+ * @brief The progress report type.
  */
-struct step {
-	/** @brief Steps title */
-	const char *title;
-	/** @brief Current step. */
-	unsigned int current;
-	/** @brief Total step. */
-	unsigned int total;
-	/** @brief Current step description. */
-	const char *description;
+enum progress_type {
+	/** @brief Progress is undefined so a spinner should be displayed if possible */
+	PROGRESS_UNDEFINED,
+	/** @brief Progress is defined so a progress bar can be used */
+	PROGRESS_BAR,
 };
-
-/**
- * @brief progress callback callback type
- * @see progress.c
- */
-typedef int (*progress_callback_fn_t)(void);
-
-/**
- * @brief This function is used to set the callback on the curl for single file download
- */
-extern void set_progress_callback(progress_callback_fn_t progress_cb);
 
 /**
  * @brief Progress format callback.
@@ -76,36 +62,28 @@ void progress_init_steps(const char *title, int steps_in_process);
 void progress_finish_steps(int status);
 
 /**
- * @brief Sets a step of the process to be tracked/reported.
- */
-void progress_set_step(unsigned int current_step, const char *desc);
-
-/**
  * @brief Increases the current step by one and assigns the provided description to it.
+ * @param step_title The title of this step
+ * @param type The type of the step progress (undefined or bar).
+ */
+void progress_next_step(const char *desc, enum progress_type type);
+
+/**
+ * @brief Report the current progress of the step.
+ * @param count The number of units processed
+ * @param max The total units to process.
  *
- * Useful when you don't know the number of the current step.
+ * So the progress in percentage will be count/max.
  */
-void progress_set_next_step(const char *desc);
+void progress_report(double count, double max);
 
 /**
- * @brief Gets the current step defined.
+ * @brief Enable or diable the progress bar.
+ * @param enable If the progress bar should be displayed or not.
+ *
+ * Default value is enabled.
  */
-struct step progress_get_step(void);
-
-/**
- * @brief Marks the current step as completed (progress = 100%).
- */
-void progress_complete_step(void);
-
-/**
- * @brief It reports the partial progress of the step. Useful in long running steps.
- */
-void progress_report(double, double);
-
-/**
- * @brief Disable progress report.
- */
-void progress_disable(bool);
+void progress_set_enabled(bool enabled);
 
 #ifdef __cplusplus
 }

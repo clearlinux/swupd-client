@@ -43,7 +43,7 @@
 #include "swupd.h"
 
 static struct filerecord *F; /* Array of filerecords */
-static int nF = 0;	   /* Number of filerecords */
+static int nF = 0;	     /* Number of filerecords */
 
 static const regex_t *path_whitelist;
 static int path_prefix_len;
@@ -74,7 +74,7 @@ static int record_filename(const char *name, const struct stat *stat __attribute
 	}
 
 	char *savedname = strdup_or_die(relname); /* Only store name relative to top of area */
-	F = realloc(F, (nF + 1) * sizeof(*F));    /* TODO, check realloc is smart, so don't need to double myself */
+	F = realloc(F, (nF + 1) * sizeof(*F));	  /* TODO, check realloc is smart, so don't need to double myself */
 	ON_NULL_ABORT(F);
 
 	F[nF].filename = savedname;

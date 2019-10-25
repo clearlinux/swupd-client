@@ -24,6 +24,7 @@ test_setup() {
 		 - os-core
 		Finishing packs extraction...
 		Checking for corrupt files
+		Validate downloaded files
 		No extra files need to be downloaded
 		Installation files downloaded
 	EOM

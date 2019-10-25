@@ -37,6 +37,7 @@ test_setup() {
 		Downloading missing manifests...
 		No packs need to be downloaded
 		Checking for corrupt files
+		Validate downloaded files
 		No extra files need to be downloaded
 		Installing base OS and selected bundles
 		Inspected 2 files
@@ -122,6 +123,7 @@ test_setup() {
 		Downloading missing manifests...
 		No packs need to be downloaded
 		Checking for corrupt files
+		Validate downloaded files
 		Error: Failed to connect to update server: https://localhost
 		Possible solutions for this problem are:
 		.Check if your network connection is working
@@ -158,6 +160,7 @@ test_setup() {
 		.Check if the server SSL certificate is trusted by your system \('clrtrust generate' may help\)
 		Error: zero pack downloads failed
 		Checking for corrupt files
+		Validate downloaded files
 		No extra files need to be downloaded
 		Installing base OS and selected bundles
 		Inspected 2 files

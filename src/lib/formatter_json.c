@@ -25,13 +25,9 @@
 #include "formatter_json.h"
 #include "log.h"
 #include "macros.h"
-#include "progress.h"
 #include "strings.h"
 
-static void log_json(FILE *out UNUSED_PARAM, const char *file UNUSED_PARAM, int line UNUSED_PARAM, const char *label, const char *format, va_list args_list)
-{
-	json_message(label, format, args_list);
-}
+static bool json_stream_active = false;
 
 static void json_sanitize_string(char *full_msg)
 {
@@ -55,30 +51,7 @@ static void json_sanitize_string(char *full_msg)
 	}
 }
 
-void set_json_format(bool on)
-{
-	if (on) {
-		log_set_function(log_json);
-		progress_set_format(json_progress, json_start, json_end);
-	} else {
-		log_set_function(NULL);
-		progress_set_format(NULL, NULL, NULL);
-	}
-}
-
-void json_start(const char *op)
-{
-	fprintf(stdout, "[\n{ \"type\" : \"start\", \"section\" : \"%s\" },\n", op);
-	fflush(stdout);
-}
-
-void json_end(const char *op, int status)
-{
-	fprintf(stdout, "{ \"type\" : \"end\", \"section\" : \"%s\", \"status\" : %d }\n]\n", op, status);
-	fflush(stdout);
-}
-
-void json_message(const char *msg_type, const char *msg, va_list args_list)
+static void json_message(const char *msg_type, const char *msg, va_list args_list)
 {
 	char *full_msg;
 	char *type = NULL;
@@ -107,8 +80,36 @@ void json_message(const char *msg_type, const char *msg, va_list args_list)
 	}
 }
 
+void json_start(const char *op)
+{
+	fprintf(stdout, "[\n{ \"type\" : \"start\", \"section\" : \"%s\" },\n", op);
+	fflush(stdout);
+	json_stream_active = true;
+}
+
+void json_end(const char *op, int status)
+{
+	json_stream_active = false;
+
+	fprintf(stdout, "{ \"type\" : \"end\", \"section\" : \"%s\", \"status\" : %d }\n]\n", op, status);
+	fflush(stdout);
+}
+
+void log_json(FILE *out UNUSED_PARAM, const char *file UNUSED_PARAM, int line UNUSED_PARAM, const char *label, const char *format, va_list args_list)
+{
+	if (!json_stream_active) {
+		return;
+	}
+
+	json_message(label, format, args_list);
+}
+
 void json_progress(const char *step_description, unsigned int current_step, unsigned int total_steps, int percentage)
 {
+	if (!json_stream_active) {
+		return;
+	}
+
 	fprintf(stdout, "{ \"type\" : \"progress\", "
 			"\"currentStep\" : %d, "
 			"\"totalSteps\" : %d, "

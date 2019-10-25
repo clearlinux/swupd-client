@@ -156,7 +156,7 @@ static int ensure_root_owned_dir(const char *dirname)
 	return true; /* doesn't exist now */
 }
 
-bool is_populated_dir(char *dirname)
+bool is_populated_dir(const char *dirname)
 {
 	int n = 0;
 	struct dirent *d;
@@ -175,13 +175,13 @@ bool is_populated_dir(char *dirname)
 	return false;
 }
 
-static int create_state_dirs(const char *state_dir_path)
+int create_state_dirs(const char *state_dir_path)
 {
 	int ret = 0;
 	unsigned int i;
 	char *dir;
 #define STATE_DIR_COUNT (sizeof(state_dirs) / sizeof(state_dirs[0]))
-	const char *state_dirs[] = { "delta", "staged", "download", "telemetry" };
+	const char *state_dirs[] = { "delta", "staged", "download", "telemetry", "bundles" };
 
 	// check for existence
 	if (ensure_root_owned_dir(state_dir_path)) {
@@ -501,7 +501,7 @@ void delete_motd(void)
 
 int get_dirfd_path(const char *fullname)
 {
-	int ret;
+	int ret = -1;
 	int fd;
 	char *tmp = NULL;
 	char *dir;
@@ -512,14 +512,12 @@ int get_dirfd_path(const char *fullname)
 
 	fd = open(dir, O_RDONLY);
 	if (fd < 0) {
-		ret = -errno;
 		error("Failed to open dir %s (%s)\n", dir, strerror(errno));
 		goto out;
 	}
 
 	real_path = realpath(dir, NULL);
 	if (!real_path) {
-		ret = -errno;
 		error("Failed to get real path of %s (%s)\n", dir, strerror(errno));
 		close(fd);
 		goto out;
@@ -528,7 +526,7 @@ int get_dirfd_path(const char *fullname)
 	if (strcmp(real_path, dir) != 0) {
 		/* The path to the file contains a symlink, skip the file,
 		 * because we cannot safely determine if it can be deleted. */
-		ret = -EPERM;
+		ret = -2;
 		close(fd);
 	} else {
 		ret = fd;

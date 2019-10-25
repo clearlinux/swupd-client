@@ -33,6 +33,7 @@ test_setup() {
 		    changed files     : 1
 		    new files         : 2
 		    deleted files     : 2
+		Validate downloaded files
 		No extra files need to be downloaded
 		Installing files...
 		Update was applied

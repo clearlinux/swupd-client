@@ -38,6 +38,7 @@ swupd_SOURCES = \
 	src/binary_loader.c \
 	src/bundle_add.c \
 	src/bundle.c \
+	src/bundle.h \
 	src/bundle_info.c \
 	src/bundle_list.c \
 	src/bundle_remove.c \
@@ -71,8 +72,6 @@ swupd_SOURCES = \
 	src/lib/log.c \
 	src/lib/log.h \
 	src/lib/macros.h \
-	src/lib/progress.c \
-	src/lib/progress.h \
 	src/lib/strings.c \
 	src/lib/strings.h \
 	src/lib/sys.c \
@@ -89,6 +88,8 @@ swupd_SOURCES = \
 	src/mirror.c \
 	src/os_install.c \
 	src/packs.c \
+	src/progress.c \
+	src/progress.h \
 	src/repair.c \
 	src/scripts.c \
 	src/scripts.h \
@@ -165,6 +166,7 @@ BATS_LOG_DRIVER = $(tap_driver)
 TESTS = $(dist_check_SCRIPTS) $(UNIT_TESTS)
 
 BATS = \
+	test/functional/autoupdate/aup-basic.bats \
 	test/functional/bundleadd/add-alias-basic.bats \
 	test/functional/bundleadd/add-also-add-flag.bats \
 	test/functional/bundleadd/add-bad-hash.bats \
@@ -340,7 +342,6 @@ BATS = \
 	test/functional/usability/usa-external-modules.bats \
 	test/functional/verify-legacy/verify-bundle.bats \
 	test/functional/verify-legacy/verify-flags.bats
-
 
 UNIT_TESTS = \
 	test/unit/test_list.test \

@@ -63,11 +63,6 @@ typedef void (*swupd_curl_free_cb)(void *data);
 typedef int (*swupd_curl_progress_cb)(void *clientp, int64_t dltotal, int64_t dlnow, int64_t ultotal, int64_t ulnow);
 
 /**
- * @brief function to turn on/off the spinner
- */
-void progress_set_spinner(bool status_flag);
-
-/**
  * @brief Test a connection with a server.
  *
  * @param url The url to use to test server connectivity
@@ -175,6 +170,12 @@ int swupd_curl_parallel_download_end(struct swupd_curl_parallel_handle *handle, 
  * @note This function MAY be blocked.
  */
 void swupd_curl_parallel_download_cancel(struct swupd_curl_parallel_handle *h);
+
+/**
+ * @brief This function is used to set the callback on the curl for single file download
+ */
+void swupd_curl_download_set_progress_callback(swupd_curl_progress_cb progress_cb, void *data);
+
 #ifdef __cplusplus
 }
 #endif

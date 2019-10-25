@@ -98,6 +98,7 @@ test_setup() {
 		Warning: The --force option is specified; ignoring version mismatch for repair
 		Downloading missing manifests...
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$fhash.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?

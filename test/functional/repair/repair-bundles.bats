@@ -35,6 +35,7 @@ test_setup() {
 		 - test-bundle2
 		Downloading missing manifests...
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		 -> Missing file: $PATH_PREFIX/common -> fixed
@@ -85,6 +86,7 @@ test_setup() {
 		 - test-bundle1
 		Downloading missing manifests...
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		 -> Missing file: $PATH_PREFIX/common -> fixed
@@ -126,6 +128,7 @@ test_setup() {
 		 - test-bundle3
 		Downloading missing manifests...
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
@@ -166,6 +169,7 @@ test_setup() {
 		 - test-bundle1
 		Downloading missing manifests...
 		Checking for corrupt files
+		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		 -> Missing file: $PATH_PREFIX/common -> fixed

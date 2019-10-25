@@ -147,9 +147,20 @@ enum swupd_code install_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
 
-	/* add os-core to the list of bundles to install to make sure
-	 * it is included regardless of user selection */
-	cmdline_bundles = list_prepend_data(cmdline_bundles, strdup_or_die("os-core"));
+	/*
+	 * Steps for os-install:
+	 *
+	 *  1) load_manifests
+	 *  2) download_packs
+	 *  3) extract_packs
+	 *  4) check_files_hash
+	 *  5) validate_fullfiles
+	 *  6) download_fullfiles
+	 *  7) extract_fullfiles
+	 *  8) add_missing_files
+	 *  9) run_postupdate_scripts
+	 */
+	const int steps_in_os_install = 9;
 
 	if (!parse_options(argc, argv)) {
 		print("\n");
@@ -167,6 +178,7 @@ enum swupd_code install_main(int argc, char **argv)
 	verify_set_option_version(cmdline_option_version);
 
 	/* install */
+	progress_init_steps("os-install", steps_in_os_install);
 	ret = verify_main();
 
 	return ret;

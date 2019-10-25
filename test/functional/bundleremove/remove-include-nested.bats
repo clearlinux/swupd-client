@@ -71,7 +71,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		The --force option was used, the specified bundle and all bundles that require it will be removed from the system
+		Warning: The --force option was used, the specified bundle and all bundles that require it will be removed from the system
 		Bundle "test-bundle1" is required by the following bundles:
 		 - test-bundle2
 		 - test-bundle3

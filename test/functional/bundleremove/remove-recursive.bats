@@ -54,7 +54,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		The --recursive option was used, the specified bundle and its dependencies will be removed from the system
+		Warning: The --recursive option was used, the specified bundle and its dependencies will be removed from the system
 		The following bundles are being removed:
 		 - test-bundle1
 		 - test-bundle2
@@ -100,7 +100,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		The --recursive option was used, the specified bundle and its dependencies will be removed from the system
+		Warning: The --recursive option was used, the specified bundle and its dependencies will be removed from the system
 		The following bundles are being removed:
 		 - test-bundle1
 		 - test-bundle2
@@ -146,7 +146,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		The --recursive option was used, the specified bundle and its dependencies will be removed from the system
+		Warning: The --recursive option was used, the specified bundle and its dependencies will be removed from the system
 		The following bundles are being removed:
 		 - test-bundle1
 		 - test-bundle2
@@ -188,12 +188,13 @@ test_setup() {
 
 	# when running bundle-remove --recursive, if the tracking directory is
 	# not found or empty, bundle-remove should assume everything is tracked
+	sudo rm -rf "$STATEDIR"/bundles
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle1 --recursive"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		The --recursive option was used, the specified bundle and its dependencies will be removed from the system
+		Warning: The --recursive option was used, the specified bundle and its dependencies will be removed from the system
 		The following bundles are being removed:
 		 - test-bundle1
 		Deleting bundle files...

@@ -174,6 +174,55 @@ bool is_populated_dir(const char *dirname)
 	return false;
 }
 
+static bool validate_tracking_dir(const char *state_dir)
+{
+	int ret = 0;
+	char *src;
+	char *tracking_dir;
+	char *rmfile;
+
+	tracking_dir = sys_path_join(state_dir, "bundles");
+
+	/* if state_dir_parent/bundles doesn't exist or is empty, assume this is
+	 * the first time tracking installed bundles. Since we don't know what the
+	 * user installed themselves just copy the entire system tracking directory
+	 * into the state tracking directory. */
+	if (!is_populated_dir(tracking_dir)) {
+		ret = rm_rf(tracking_dir);
+		if (ret) {
+			goto out;
+		}
+
+		src = sys_path_join(globals.path_prefix, "/usr/share/clear/bundles");
+		/* at the point this function is called <bundle_name> is already
+		 * installed on the system and therefore has a tracking file under
+		 * /usr/share/clear/bundles. A simple cp -a of that directory will
+		 * accurately track that bundle as manually installed. */
+		ret = copy_all(src, state_dir);
+		free_string(&src);
+		if (ret) {
+			goto out;
+		}
+
+		/* remove uglies that live in the system tracking directory */
+		rmfile = sys_path_join(tracking_dir, ".MoM");
+		(void)unlink(rmfile);
+		free_string(&rmfile);
+
+		/* set perms on the directory correctly */
+		ret = chmod(tracking_dir, S_IRWXU);
+		if (ret) {
+			goto out;
+		}
+	}
+out:
+	free_string(&tracking_dir);
+	if (ret) {
+		return false;
+	}
+	return true;
+}
+
 int create_state_dirs(const char *state_dir_path)
 {
 	int ret = 0;
@@ -205,7 +254,17 @@ int create_state_dirs(const char *state_dir_path)
 	}
 	/* Do a final check to make sure that the top level dir wasn't
 	 * tampered with whilst we were creating the dirs */
-	return ensure_root_owned_dir(state_dir_path);
+	if (ensure_root_owned_dir(state_dir_path)) {
+		return -1;
+	}
+
+	/* make sure the tracking directory is not empty, if it is,
+	 * mark all installed bundles as tracked */
+	if (!validate_tracking_dir(state_dir_path)) {
+		debug("There was an error accessing the tracking directory %s/bundles\n", state_dir_path);
+	}
+
+	return ret;
 }
 
 /**

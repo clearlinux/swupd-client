@@ -356,13 +356,6 @@ enum swupd_code remove_bundles(struct list *bundles)
 		     "dependencies will be removed from the system\n",
 		     total > 1 ? "s" : "",
 		     total > 1 ? "their" : "its");
-
-		/* when recursive we also need to make sure the tracking directory
-		 * is not empty, if it is, is safer to consider all installed bundles
-		 * as tracked */
-		if (!validate_tracking_dir(globals.state_dir)) {
-			debug("There was an error accessing the tracking directory %s/bundles\n", globals.state_dir);
-		}
 	}
 
 	for (; bundles; bundles = bundles->next, total++) {

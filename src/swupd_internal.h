@@ -17,5 +17,7 @@ extern enum swupd_code install_main(int argc, char **argv);
 extern enum swupd_code repair_main(int argc, char **argv);
 extern enum swupd_code diagnose_main(int argc, char **argv);
 extern enum swupd_code bundle_info_main(int argc, char **argv);
+extern enum swupd_code verify_main(int argc, char **argv);
+
 
 #endif

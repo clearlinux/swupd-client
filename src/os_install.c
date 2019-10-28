@@ -20,7 +20,6 @@
 #define _GNU_SOURCE
 
 #include "swupd.h"
-#include "swupd_internal.h"
 
 #define FLAG_DOWNLOAD_ONLY 2000
 

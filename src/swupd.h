@@ -327,7 +327,7 @@ extern int subscription_bundlename_strcmp(const void *a, const void *b);
 extern enum swupd_code remove_bundles(struct list *bundles);
 
 /* verify.c */
-extern enum swupd_code verify_main(void);
+extern enum swupd_code execute_verify(void);
 extern void verify_set_option_download(bool opt);
 extern void verify_set_command_verify(bool opt);
 extern void verify_set_option_force(bool opt);

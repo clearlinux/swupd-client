@@ -68,7 +68,10 @@ static struct subcmd commands[] = {
 	{ "mirror", "Configure mirror url for swupd content", mirror_main },
 	{ "clean", "Clean cached files", clean_main },
 	{ "hashdump", "Dump the HMAC hash of a file", hashdump_main },
-	{ "verify", "NOTE: this command has been superseded, please use \"swupd diagnose\" instead", diagnose_main },
+	{ "verify", "NOTE: this command has been superseded, please use \"swupd diagnose\" instead", verify_main },
+#ifdef THIRDPARTY
+	{ "3rd-party", "Indicate Swupd to use user's third party repo", third_party_main },
+#endif
 	{ 0 }
 };
 
@@ -119,10 +122,6 @@ static int subcmd_index(char *arg)
 	size_t input_len;
 	size_t cmd_len;
 
-	if (strcmp(arg, "verify") == 0) {
-		verify_set_command_verify(true); // set to true so we know the "verify" command was used
-		arg = "diagnose";
-	}
 	input_len = strlen(arg);
 
 	while (entry->name != NULL) {

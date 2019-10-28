@@ -819,7 +819,7 @@ static bool init_tracking_dir(const char *state_dir, const char *init_file)
  * found to not match the manifest.  This is notably different from update,
  * which attempts to atomically (or nearly atomically) activate a set of
  * pre-computed and validated staged changes as a group. */
-enum swupd_code verify_main(void)
+enum swupd_code execute_verify(void)
 {
 	struct manifest *official_manifest = NULL;
 	int ret;
@@ -1357,6 +1357,37 @@ clean_args_and_exit:
 	return ret;
 }
 
+enum swupd_code verify_main(int argc, char **argv)
+{
+	int ret = SWUPD_OK;
+
+	verify_set_command_verify(true); // set to true so we know the "verify" command was used
+
+	/*
+	 * Steps for verify:
+	 *
+	 *  1) load_manifests
+	 *  2) add_missing_files
+	 *  3) fix_files
+	 *  4) remove_extraneous_files
+	 */
+	const int steps_in_verify = 4;
+	string_or_die(&cmdline_option_picky_tree, "/usr");
+
+	if (!parse_options(argc, argv)) {
+		print("\n");
+		print_help();
+		return SWUPD_INVALID_OPTION;
+	}
+
+	/* diagnose */
+	progress_init_steps("verify", steps_in_verify);
+	ret = execute_verify();
+
+	free_string(&cmdline_option_picky_tree);
+	return ret;
+}
+
 enum swupd_code diagnose_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
@@ -1380,7 +1411,7 @@ enum swupd_code diagnose_main(int argc, char **argv)
 
 	/* diagnose */
 	progress_init_steps("diagnose", steps_in_diagnose);
-	ret = verify_main();
+	ret = execute_verify();
 
 	free_string(&cmdline_option_picky_tree);
 	return ret;

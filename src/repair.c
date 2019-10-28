@@ -248,7 +248,7 @@ enum swupd_code repair_main(int argc, char **argv)
 
 	/* run verify --fix */
 	progress_init_steps("repair", steps_in_repair);
-	ret = verify_main();
+	ret = execute_verify();
 
 	free_string(&cmdline_option_picky_tree);
 	return ret;

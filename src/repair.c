@@ -233,6 +233,13 @@ enum swupd_code repair_main(int argc, char **argv)
 		return SWUPD_INVALID_OPTION;
 	}
 
+	ret = swupd_init(SWUPD_ALL);
+	if (ret != 0) {
+		error("Failed swupd initialization, exiting now\n");
+		free_string(&cmdline_option_picky_tree);
+		return ret;
+	}
+
 	/* set options needed for the verify --fix command */
 	verify_set_option_install(false);
 	verify_set_option_fix(true);

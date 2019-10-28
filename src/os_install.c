@@ -167,6 +167,21 @@ enum swupd_code install_main(int argc, char **argv)
 		return SWUPD_INVALID_OPTION;
 	}
 
+	ret = swupd_init(SWUPD_ALL);
+	if (ret != 0) {
+		error("Failed swupd initialization, exiting now\n");
+		return ret;
+	}
+
+	/* Initialize the default state dir of the system to be installed */
+	char *new_os_state = sys_path_join(globals.path_prefix, "/var/lib/swupd");
+	if (create_state_dirs(new_os_state)) {
+		ret = SWUPD_COULDNT_CREATE_DIR;
+		free_string(&new_os_state);
+		return ret;
+	}
+	free_string(&new_os_state);
+
 	/* set options needed for the install in the verify command */
 	verify_set_option_quick(true);
 	verify_set_option_install(true);

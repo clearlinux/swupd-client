@@ -43,15 +43,18 @@ test_setup() {
 
 @test "ADD048: Adding a bundle that includes another bundle (no tracking state)" {
 
+	# simulate as if test-bundle3 is already installed
+	sudo touch "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 
 	assert_status_is "$SWUPD_OK"
 	assert_file_exists "$TARGETDIR"/foo/test-file1
 	assert_file_exists "$TARGETDIR"/bar/test-file2
 	assert_file_exists "$STATEDIR"/bundles/test-bundle1
+	assert_file_exists "$STATEDIR"/bundles/test-bundle3
 	# When no tracking directly previously existed, all currently installed
 	# bundles are added to the tracked state.
-	assert_file_exists "$STATEDIR"/bundles/test-bundle2
+	assert_file_not_exists "$STATEDIR"/bundles/test-bundle2
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		No packs need to be downloaded

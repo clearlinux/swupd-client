@@ -22,7 +22,6 @@
 #include <assert.h>
 
 #include "swupd.h"
-#include "swupd_internal.h"
 
 #define FLAG_EXTRA_FILES_ONLY 2000
 

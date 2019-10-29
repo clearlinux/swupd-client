@@ -414,6 +414,14 @@ SUBCOMMANDS
         Do not perform an os-install, instead download all resources needed
         to perform the os-install, and exit.
 
+    - `--skip-optional`
+
+        Do not install optional bundles (also-add flag in Manifests).
+        A bundle may include other bundles that will also get installed
+        when installing the bundle that includes them. This included bundles
+        can be either optional, or mandatory. Optional bundles can be skipped
+        at install time by using this option.
+
 ``repair``
 
     Correct any issues found. This will overwrite incorrect file content,

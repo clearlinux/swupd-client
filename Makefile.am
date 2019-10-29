@@ -251,6 +251,7 @@ BATS = \
 	test/functional/os-install/install-json.bats \
 	test/functional/os-install/install-latest-missing.bats \
 	test/functional/os-install/install-multiple.bats \
+	test/functional/os-install/install-no-also-add.bats \
 	test/functional/os-install/install-no-fullfile-fallback.bats \
 	test/functional/os-install/install-no-packs.bats \
 	test/functional/os-install/install-statedir-cache.bats \

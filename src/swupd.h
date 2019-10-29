@@ -329,6 +329,7 @@ extern enum swupd_code remove_bundles(struct list *bundles);
 /* verify.c */
 extern enum swupd_code execute_verify(void);
 extern void verify_set_option_download(bool opt);
+extern void verify_set_option_skip_optional(bool opt);
 extern void verify_set_command_verify(bool opt);
 extern void verify_set_option_force(bool opt);
 extern void verify_set_option_install(bool opt);

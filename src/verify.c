@@ -43,6 +43,7 @@ static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|
 
 static bool warning_printed = false;
 static bool cmdline_option_download = false;
+static bool cmdline_option_skip_optional = false;
 static bool cmdline_command_verify = false;
 static bool cmdline_option_force = false;
 static bool cmdline_option_fix = false;
@@ -87,6 +88,11 @@ void verify_set_command_verify(bool opt)
 void verify_set_option_download(bool opt)
 {
 	cmdline_option_download = opt;
+}
+
+void verify_set_option_skip_optional(bool opt)
+{
+	cmdline_option_skip_optional = opt;
 }
 
 void verify_set_option_force(bool opt)
@@ -821,9 +827,9 @@ enum swupd_code verify_main(void)
 		goto clean_args_and_exit;
 	}
 
-	/* Unless we are installing a new bundle we shoudn't include optional
-	* bundles to the bundle list */
-	if (!cmdline_option_install) {
+	/* Unless we are installing a new bundle and the --skip-optional flag is not
+	* set we shoudn't include optional bundles to the bundle list */
+	if (!cmdline_option_install || cmdline_option_skip_optional) {
 		globals.skip_optional_bundles = true;
 	}
 

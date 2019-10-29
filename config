@@ -313,6 +313,8 @@
 # Download all content, but do not actually install it (boolean value)
 #download=<true/false>
 
+# Do not install optional bundles, also-add flag in Manifests (boolean value)
+#skip_optional=<true/false>
 
 [mirror]
 

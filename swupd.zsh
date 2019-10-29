@@ -309,6 +309,7 @@ if [[ -n "$state" ]]; then
             '(help -V --version)'{-V,--version=}'[If the version to install is not the latest, it can be specified with this option]:version:()'
             '(help -s --statedir-cache)'{-s,--statedir-cache=}'[After checking for content in the statedir, check the statedir-cache before downloading it over the network]'
             '(help status)--download[Download all content, but do not actually install it]'
+            '(help status)--skip-optional[Do not install optional bundles (also-add flag in Manifests)]'
           )
           _arguments $osinstall && ret=0
           ;;

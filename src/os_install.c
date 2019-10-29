@@ -23,9 +23,11 @@
 #include "swupd_internal.h"
 
 #define FLAG_DOWNLOAD_ONLY 2000
+#define FLAG_SKIP_OPTIONAL 2001
 
 static bool cmdline_option_download = false;
 static bool cmdline_option_force = false;
+static bool cmdline_option_skip_optional = false;
 static struct list *cmdline_bundles = NULL;
 static char *path;
 static int cmdline_option_version = -1;
@@ -38,6 +40,7 @@ static const struct option prog_opts[] = {
 	{ "manifest", required_argument, 0, 'm' },
 	{ "statedir-cache", required_argument, 0, 's' },
 	{ "download", no_argument, 0, FLAG_DOWNLOAD_ONLY },
+	{ "skip-optional", no_argument, 0, FLAG_SKIP_OPTIONAL },
 };
 
 static void print_help(void)
@@ -53,6 +56,7 @@ static void print_help(void)
 	print("   -V, --version=[VER]         If the version to install is not the latest, it can be specified with this option\n");
 	print("   -s, --statedir-cache=[PATH] After checking for content in the statedir, check the statedir-cache before downloading it over the network\n");
 	print("   --download                  Download all content, but do not actually install it\n");
+	print("   --skip-optional             Do not install optional bundles (also-add flag in Manifests)\n");
 	print("\n");
 }
 
@@ -98,6 +102,9 @@ static bool parse_opt(int opt, char *optarg)
 	}
 	case FLAG_DOWNLOAD_ONLY:
 		cmdline_option_download = optarg_to_bool(optarg);
+		return true;
+	case FLAG_SKIP_OPTIONAL:
+		cmdline_option_skip_optional = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;
@@ -177,6 +184,7 @@ enum swupd_code install_main(int argc, char **argv)
 	verify_set_option_install(true);
 	verify_set_option_statedir_cache(cmdline_option_statedir_cache);
 	verify_set_option_download(cmdline_option_download);
+	verify_set_option_skip_optional(cmdline_option_skip_optional);
 	verify_set_option_force(cmdline_option_force);
 	verify_set_option_bundles(cmdline_bundles);
 	verify_set_option_version(cmdline_option_version);

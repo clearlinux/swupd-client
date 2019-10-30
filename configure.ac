@@ -88,7 +88,7 @@ AH_TEMPLATE([THIRDPARTY_REPO_PREFIX], [prefix path for third party repos])
 
 AS_IF(
   [test "$enable_third_party" = "yes"],
-  [AC_DEFINE([THIRDPARTY_REPO_PREFIX], ["/opt/user-repo/"])]
+  [AC_DEFINE([THIRDPARTY_REPO_PREFIX], ["/opt/3rd-party/"])]
 )
 
 AC_ARG_ENABLE(

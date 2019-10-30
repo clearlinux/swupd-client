@@ -3174,6 +3174,7 @@ get_next_available_id() { # swupd_function
 	id=$((id+1))
 	test_dir=$(basename "$(realpath "$test_dir")")
 	case "$test_dir" in
+		3rd-party) group=THP;;
 		autoupdate) group=AUT;;
 		bundleadd) group=ADD;;
 		bundleremove) group=REM;;
@@ -3730,6 +3731,74 @@ assert_files_not_equal() { # assertion
 	else
 		return 0
 	fi
+
+}
+
+# Third party functions 
+# Creates a repo config directory under STATE_DIR to maintain a list of third party repos.
+# Parameters:
+create_repo_config() { # swupd_function
+
+	local repo_config_dir="$STATEDIR"/3rd_party
+
+	if sudo test ! -d "$repo_config_dir"; then
+		sudo mkdir -p "$repo_config_dir" && export REPO_CONFIG_DIR="$repo_config_dir"
+		debug_msg "Created repo_config_directory: $repo_config_dir"
+	fi
+
+}
+
+# Third party functions 
+# Creates a repo entry under the repo.ini
+# Parameters:
+# - repo_name: name of the repository to be created
+# - repo_url: URL of the repo to be created
+create_repo() { # swupd_function
+
+	local repo_name=$1
+	local repo_url=$2
+	local repo_config_file
+
+	if sudo test -z "$REPO_CONFIG_DIR"; then
+		echo "ENV REPO_CONFIG_DIR empty. Run create_repo_config first"
+	fi
+
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage: Create repo inside repo.ini
+			    create_repo <repo_name> <repo_url>
+			EOM
+		return
+	fi
+
+	if [ -z "$repo_name" ] || [ -z "$repo_url" ]; then
+		echo "Args repo_name or repo_url cant be empty"
+		return
+	fi
+
+	if sudo test ! -d "$REPO_CONFIG_DIR"; then
+		echo "Cannot find repo config directory"
+		return
+	fi
+
+	repo_config_file="$REPO_CONFIG_DIR/repo.ini"
+	if sudo test -f "$repo_config_file"; then
+		if sudo grep -q "$repo_name" "$repo_config_file"; then
+			echo "Repo with that name already exists"
+			return
+		fi
+	fi
+
+	VAR=$(cat <<- EOM
+		[REPO]
+		repo-name=$repo_name
+		repo-url=$repo_url
+		\n
+	EOM
+	)
+
+	write_to_protected_file -a "$repo_config_file" "$VAR"
+	debug_msg "repo written to file: $repo_config_file"
 
 }
 

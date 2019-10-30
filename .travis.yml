@@ -17,7 +17,7 @@ env:
                 - GROUP1="$UPDATE_SUBGROUP1 $(find test/functional/{autoupdate,bundleinfo,verify-legacy} -name *.bats -printf '%p ')"
                 - GROUP2="$UPDATE_SUBGROUP2 $(find test/functional/{checkupdate,hashdump,mirror,usability} -name *.bats \( ! -name usa-config-file.bats \) -printf '%p ')"
                 - GROUP3="$(find test/functional/{diagnose,search,os-install,repair} -name *.bats -printf '%p ')"
-                - GROUP4="$(find test/functional/{bundleadd,bundleremove,bundlelist,signature} -name *.bats -printf '%p ')"
+                - GROUP4="$(find test/functional/{bundleadd,bundleremove,bundlelist,signature,3rd-party} -name *.bats -printf '%p ')"
                 # The config file cannot be isolated to a test environment, so tests related to it have to run separate
                 - CONFIG_FILE_TESTS="$(find test/functional/usability -name usa-config-file.bats -printf '%p ')"
 

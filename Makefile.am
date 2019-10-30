@@ -40,6 +40,7 @@ swupd_SOURCES = \
 	src/alias.c \
 	src/alias.h \
 	src/autoupdate.c \
+	src/3rd_party_config.c \
 	src/binary_loader.c \
 	src/bundle_add.c \
 	src/bundle.c \
@@ -171,6 +172,7 @@ BATS_LOG_DRIVER = $(tap_driver)
 TESTS = $(dist_check_SCRIPTS) $(UNIT_TESTS)
 
 BATS = \
+	test/functional/3rd-party/3rd-party-repo-list.bats \
 	test/functional/autoupdate/aup-basic.bats \
 	test/functional/bundleadd/add-alias-basic.bats \
 	test/functional/bundleadd/add-also-add-flag.bats \

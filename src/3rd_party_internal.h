@@ -2,6 +2,8 @@
 #define __THIRD_PARTY_INTERNAL_H
 
 #include "swupd.h"
+#include <fcntl.h>
+#include <unistd.h>
 
 /**
  * @file
@@ -14,9 +16,6 @@ extern "C" {
 #endif
 
 #ifdef THIRDPARTY
-
-/* TODO Implement */
-
 #endif
 
 #ifdef __cplusplus

@@ -1,33 +1,44 @@
 #!/bin/bash
 
 # shellcheck source=scripts/flag_validator_common.bash
-source $(dirname ${BASH_SOURCE[0]})/flag_validator_common.bash
+source "$(dirname "${BASH_SOURCE[0]}")"/flag_validator_common.bash
 conflict=0
 
-usage() {
+# add 3rd-party swupcommands
+swupd_commands+=("3rd-party add" "3rd-party remove" "3rd-party list")
 
+usage() {
 	cat <<-EOM
 
-		Validates that the flags used in swupd are not duplicated
+		Validates that the flags used in swupd vs swupd commands are not duplicated
 
 		Usage:
-		    flag_validator.bash <command> <flag>
+		flag_validator_3rd_party.bash <command> <sub-command> <flag>
 
 		Example:
-		    flag_validator.bash bundle-add w
+		flag_validator_3rd_party.bash 3rd-party add w
 
 		Notes:
-		    If run with no argument, it validates the existing flags
-		    If run with the <command> <flag> arguments, it validate that <flag> is a valid option for <command>
-		    If <flag> is a global option, use "global <flag>"
+			If run with no argument, it validates the existing flags
+			If run with the <command> <sub-command> <flag>
+			arguments, it validate that <flag> is a valid option for
+			<command> <subcommand>
+			If <flag> is a global option, use "global <flag>"
 
 	EOM
-
 }
 
+
 # Entry point
-arg=$1
-flag=$2
+arg_word_count=$(echo "$1 $2" | wc -w)
+
+if [ "$arg_word_count" == 1 ]; then
+	echo "Error: Expects a sub-command arg"
+	usage
+	exit 1
+elif [ "$arg_word_count" == 2 ]; then
+	arg="$1 $2"
+fi
 
 if [ "$arg" == "--help" ] || [ "$arg" == "-h" ]; then
 	usage

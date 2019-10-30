@@ -1146,3 +1146,25 @@ char *get_tracking_dir(void)
 {
 	return sys_path_join(globals.state_dir, "bundles");
 }
+
+static bool startswith(const char *a, const char *b)
+{
+	if (strncmp(a, b, strlen(b)) == 0) {
+		return 1;
+	}
+	return 0;
+}
+
+/* This function makes sure that input string starts as a valid
+ * http, https or file url
+ */
+bool is_valid_url(const char *input)
+{
+	bool ret = false;
+
+	if (startswith(input, "http://") || startswith(input, "file://") || startswith(input, "https://")) {
+		ret = true;
+	}
+
+	return ret;
+}

@@ -34,6 +34,7 @@ AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS)
 swupd_SOURCES = \
 	src/3rd_party_add.c \
 	src/3rd_party.c \
+	src/3rd_party_config.c \
 	src/3rd_party_internal.h \
 	src/3rd_party_list.c \
 	src/3rd_party_remove.c \
@@ -68,6 +69,8 @@ swupd_SOURCES = \
 	src/lib/archives.h \
 	src/lib/config_parser.c \
 	src/lib/config_parser.h \
+	src/lib/config_writer.c \
+	src/lib/config_writer.h \
 	src/lib/formatter_json.c \
 	src/lib/formatter_json.h \
 	src/lib/hashmap.c \

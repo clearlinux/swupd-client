@@ -19,7 +19,6 @@
 
 #define _GNU_SOURCE
 #include "3rd_party_internal.h"
-#include "config.h"
 
 #ifdef THIRDPARTY
 
@@ -48,21 +47,22 @@ static bool parse_options(int argc, char **argv)
 		return false;
 	}
 
-	if (argc == 1) {
-		error("The positional args: repo-name and URL are missing\n\n");
+	int positional_args = argc - ind;
+	/* Ensure that repo add expects only two args: repo-name, repo-url */
+	switch (positional_args) {
+	case 0:
+		error("The positional args: repo-name and repo-url are missing\n\n");
 		return false;
-	} else if (argc == 2) {
-		error("The positional args: repo-URL is missing\n\n");
+	case 1:
+		error("The positional args: repo-url is missing\n\n");
 		return false;
-	}
-
-	/* Ensure that repo add only expects only two args: repo-name, repo-url */
-	if ((argc - ind) != EXACT_ARG_COUNT) {
+	case EXACT_ARG_COUNT:
+		return true;
+	default:
 		error("Unexpected arguments\n\n");
 		return false;
 	}
-
-	return true;
+	return false;
 }
 
 enum swupd_code third_party_add_main(int argc, char **argv)
@@ -75,18 +75,23 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("third-party", step_in_third_party_add);
+	progress_init_steps("third-party-add", step_in_third_party_add);
 
-	ret = swupd_init(SWUPD_NO_ROOT);
+	ret = swupd_init(SWUPD_ALL);
 	if (ret != SWUPD_OK) {
 		goto finish;
 	}
 
-	/* TODO implement */
-
-	swupd_deinit();
+	/* The last two in reverse are the repo-name, repo-url */
+	if (add_repo_config(argv[argc - 2], argv[argc - 1]) == 0) {
+		info("Repository %s added successfully\n", argv[argc - 2]);
+	} else {
+		ret = SWUPD_COULDNT_WRITE_FILE;
+		error("Failed to add repo: %s to config\n", argv[argc - 2]);
+	}
 
 finish:
+	swupd_deinit();
 	progress_finish_steps(ret);
 	return ret;
 }

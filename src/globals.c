@@ -410,6 +410,45 @@ bool set_default_urls()
 	return true;
 }
 
+#ifdef THIRDPARTY
+
+bool set_repo_config_dir(void)
+{
+
+	string_or_die(&globals.repo_config_dir, "%s", "3rd_party");
+	return true;
+}
+
+bool set_repo_config_file(void)
+{
+
+	string_or_die(&globals.repo_config_file, "%s", "repo.ini");
+	return true;
+}
+
+bool third_party_globals_init(void)
+{
+	if (!globals.repo_config_dir && !set_repo_config_dir()) {
+		return false;
+	}
+
+	if (!globals.repo_config_file && !set_repo_config_file()) {
+		return false;
+	}
+	return true;
+}
+
+void third_party_globals_deinit(void)
+{
+	/* freeing all globals and set ALL them to NULL (via free_string)
+	 * to avoid memory corruption on multiple calls
+	 * to swupd_init() */
+	free_string(&globals.repo_config_file);
+	free_string(&globals.repo_config_dir);
+}
+
+#endif
+
 bool globals_init(void)
 {
 	if (!globals.state_dir) {
@@ -452,6 +491,11 @@ bool globals_init(void)
 		globals.global_times = timelist_new();
 	}
 
+#ifdef THIRDPARTY
+	if (!third_party_globals_init()) {
+		return false;
+	}
+#endif
 	return true;
 }
 
@@ -469,6 +513,9 @@ void globals_deinit(void)
 	free_string(&globals.state_dir_cache);
 	timelist_free(globals.global_times);
 	globals.global_times = NULL;
+#ifdef THIRDPARTY
+	third_party_globals_deinit();
+#endif
 }
 
 void save_cmd(char **argv)

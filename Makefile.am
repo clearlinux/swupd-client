@@ -34,6 +34,7 @@ AM_CPPFLAGS = $(AM_CFLAGS) $(libarchive_CFLAGS)
 swupd_SOURCES = \
 	src/3rd_party_add.c \
 	src/3rd_party.c \
+	src/3rd_party_config.c \
 	src/3rd_party_internal.h \
 	src/3rd_party_list.c \
 	src/3rd_party_remove.c \
@@ -68,6 +69,8 @@ swupd_SOURCES = \
 	src/lib/archives.h \
 	src/lib/config_parser.c \
 	src/lib/config_parser.h \
+	src/lib/config_writer.c \
+	src/lib/config_writer.h \
 	src/lib/formatter_json.c \
 	src/lib/formatter_json.h \
 	src/lib/hashmap.c \
@@ -350,6 +353,14 @@ BATS = \
 	test/functional/verify-legacy/verify-bundle.bats \
 	test/functional/verify-legacy/verify-flags.bats
 
+if ENABLE_THIRD_PARTY_TESTS
+
+BATS += \
+	test/functional/3rd-party-repo-add/3rd-party-repo-add.bats \
+	test/functional/3rd-party-repo-add/3rd-party-repo-add-negative.bats
+
+endif
+
 UNIT_TESTS = \
 	test/unit/test_list.test \
 	test/unit/test_manifest.test \
@@ -402,10 +413,19 @@ distclean-local:
 install-exec-hook:
 	perl $(top_srcdir)/scripts/findstatic.pl */*.o | grep -v Checking ||:
 
+if ENABLE_THIRD_PARTY_TESTS
+FLAG_VALIDATOR= \
+		scripts/flag_validator_3rd_party.bash
+else
+FLAG_VALIDATOR= \
+		scripts/flag_validator.bash
+endif
+
+
 compliant:
 	test/code_analysis/compliant.bats
 	test/functional/check_ids.bash
-	scripts/flag_validator.bash
+	$(FLAG_VALIDATOR)
 
 # Ignore SC1008 because scripts are using an unsupported shebang
 shellcheck:

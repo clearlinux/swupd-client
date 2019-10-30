@@ -50,6 +50,8 @@ extern struct globals {
 	int update_server_port;
 	int update_skip;
 	timelist *global_times;
+	char *repo_config_dir;
+	char *repo_config_file;
 } globals;
 
 struct global_options {

@@ -182,6 +182,22 @@ extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct l
 extern int get_value_from_path(char **contents, const char *path, bool is_abs_path);
 extern int version_get_absolute_latest(void);
 
+/* thirdparty extern */
+/* thirdparty config */
+
+/**
+ * @brief This function performs the repo config operation part for repo add
+ * It checks if a repo with repo_name already exists and if not creates an
+ * entry in the repo config file.
+ *
+ * @param repo_name A string containing repo_name
+ * @param repo_url A string containing repo_url
+ *
+ * @returns 0 on success ie: a repo with the name is successfully added to repo config
+ * otherwise a -1 on any failure
+ */
+extern int add_repo_config(char *repo_name, char *repo_url);
+
 static inline int bsearch_file_helper(const void *A, const void *B)
 {
 	struct file *key = (struct file *)A;
@@ -363,6 +379,8 @@ extern enum swupd_code print_update_conf_info(void);
 extern int handle_mirror_if_stale(void);
 
 extern enum swupd_code clean_statedir(bool all, bool dry_run);
+
+extern bool is_valid_url(const char *input);
 
 /* Parameter parsing in global.c */
 extern struct global_const global;

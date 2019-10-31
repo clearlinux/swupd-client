@@ -64,7 +64,7 @@ static struct subcmd main_commands[] = {
 	{ "hashdump", "Dump the HMAC hash of a file", hashdump_main },
 	{ "verify", "NOTE: this command has been superseded, please use \"swupd diagnose\" instead", verify_main },
 #ifdef THIRDPARTY
-	{ "3rd-party", "Indicate Swupd to use user's third party repo", third_party_main },
+	{ "3rd-party", "Indicate swupd to use user's third party repository", third_party_main },
 #endif
 	{ 0 }
 };

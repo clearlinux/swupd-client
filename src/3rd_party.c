@@ -25,18 +25,18 @@
 #ifdef THIRDPARTY
 
 static struct subcmd third_party_commands[] = {
-	{ "add", "Add third party repo", third_party_add_main },
-	{ "remove", "Remove third party repo", third_party_remove_main },
-	{ "list", "List third party repo", third_party_list_main },
+	{ "add", "Add third party repository", third_party_add_main },
+	{ "remove", "Remove third party repository", third_party_remove_main },
+	{ "list", "List third party repository", third_party_list_main },
 	{ 0 }
 };
 
 static void print_help(const char *name)
 {
 	print("Usage:\n");
-	print(" or %s SUBCOMMAND [OPTION...]\n\n", basename((char *)name));
+	print("    swupd %s SUBCOMMAND [OPTION...]\n\n", sys_basename(name));
 	print("Help Options:\n");
-	print("   -h, --help              Show help options\n");
+	print("   -h, --help              Show help options\n\n");
 	print("Subcommands:\n");
 
 	struct subcmd *entry = third_party_commands;
@@ -46,7 +46,7 @@ static void print_help(const char *name)
 		entry++;
 	}
 	print("\n");
-	print("To view subcommand options, run `%s SUBCOMMAND --help'\n", basename((char *)name));
+	print("To view subcommand options, run `swupd %s SUBCOMMAND --help'\n", sys_basename(name));
 }
 
 static const struct option prog_opts[] = {

@@ -138,6 +138,7 @@ or more of the [assertions](#assertions) provided by the test library.
 | Clean cached files                             | clean         | CLN      |
 | Configure mirror URL for swupd content         | mirror        | MIR      |
 | Usability                                      | N/A           | USA      |
+| 3rd-party                                      | 3rd-party     | THP      |
 
 ### Test Principles
 

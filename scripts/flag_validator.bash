@@ -4,8 +4,15 @@ SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SWUPD_DIR="$SCRIPTS_DIR"/..
 SWUPD="$SWUPD_DIR"/swupd
 
-swupd_commands=(info autoupdate check-update update bundle-add bundle-remove bundle-list search-file diagnose repair os-install mirror clean hashdump)
+swupd_commands=(info autoupdate check-update update bundle-add bundle-remove
+	bundle-list search-file diagnose repair os-install mirror clean hashdump 3rd-party)
 conflict=0
+
+check_command_exist() {
+
+	local command=$1
+	sudo "$SWUPD" "$command" --help 2>&1 > /dev/null | grep "Error: unrecognized subcommand" > /dev/null
+}
 
 count_global_flags() {
 
@@ -83,6 +90,11 @@ validate_existing_flags() {
 	find_global_flag_conflict
 
 	for cmd in "${swupd_commands[@]}"; do
+		# Commands which are not compiled dont have to be validated and
+		# can be skipped eg: 3rd-party
+		if check_command_exist "$cmd"; then
+			continue
+		fi
 		find_command_flag_conflict "$cmd"
 	done
 
@@ -172,6 +184,7 @@ for val in "${swupd_commands[@]}"; do
 	if [ "$val" == "$arg" ]; then
 		# remove the '-' if it has one
 		flag=$(echo "$flag" | tr --delete '-')
+		echo "here"
 		validate_flag "$arg" "$flag"
 		exit "$conflict"
 	fi

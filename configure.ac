@@ -83,6 +83,7 @@ AS_IF(
      THIRDPARTY="yes"],
   [THIRDPARTY="no"]
 )
+AM_CONDITIONAL([ENABLE_THIRD_PARTY_TESTS], [test "x$enable_third_party" = "xyes"])
 
 AH_TEMPLATE([THIRDPARTY_REPO_PREFIX], [prefix path for third party repos])
 

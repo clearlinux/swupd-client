@@ -206,6 +206,18 @@ extern int list_repos();
  */
 extern int add_repo_config(char *repo_name, char *repo_url);
 
+/**
+ * @brief This function performs the repo config operation part for repo remove
+ * Its function is lookup the repo_name in the repo.ini file and if it exists, remove it
+ * and adjust the repo config file.
+ *
+ * @param repo_name A string containing repo_name
+ *
+ * @returns 0 on success ie: a repo is found, removed & repo config is adjusted
+ * otherwise a -1 on any failure
+ */
+extern int remove_repo_from_config(char *repo_name);
+
 static inline int bsearch_file_helper(const void *A, const void *B)
 {
 	struct file *key = (struct file *)A;

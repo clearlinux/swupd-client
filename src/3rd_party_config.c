@@ -7,17 +7,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
-struct global {
-	void *value1;
-	void *value2;
-};
-
-struct repo {
-	char *repo_name;
-	char *url;
-};
-
-struct list *repos_kv;
+#ifdef THIRDPARTY
 
 #define REPO_CONFIG_DIR "3rd_party"
 #define REPO_CONFIG_CONFIG_FILE "repo.ini"
@@ -25,8 +15,35 @@ struct list *repos_kv;
 #define MAX_GLOBAL_ALLOWED_FIELDS 2
 #define MAX_FILE_PATH 1000
 
+/** @brief Storing global key,value pairs. */
+struct global {
+	void *value1;
+	void *value2;
+};
+
+/** @brief Internal Memory representation of a repo.  */
+struct repo {
+	char *repo_name;
+	char *url;
+};
+
+/** @brief List of repos. */
+struct list *repos_kv;
+
+/** @brief We populate this once every swupd init and use it many times. */
 static char *repo_config_file_path;
 
+/**
+ * @brief This function is called by the repo ini parser It is called
+ * once for every line which is successfully parsed with a key,value,section
+ * Once a section is completely read, it is stored in the global lists.
+ *
+ * @param section A string containing section of the file
+ * @param key A string containing key
+ * @param value A string containing value
+ *
+ * @returns True for every match of section with REPO or GLOBAL, false otherwise
+ */
 bool parse_key_values(char *section, char *key, char *value, void UNUSED_PARAM *data)
 {
 	static int repo_field_count = 0;
@@ -76,30 +93,6 @@ bool parse_key_values(char *section, char *key, char *value, void UNUSED_PARAM *
 			}
 		}
 	}
-	return ret;
-}
-
-static void generate_path()
-{
-	char *repo_config_dir;
-	repo_config_dir = sys_path_join(globals.state_dir, REPO_CONFIG_DIR);
-	repo_config_file_path = sys_path_join(repo_config_dir, REPO_CONFIG_CONFIG_FILE);
-	free_string(&repo_config_dir);
-}
-
-static inline int ensure_repo_config_dir()
-{
-	char *repo_config_dir;
-	int ret = 0;
-	repo_config_dir = sys_dirname(repo_config_file_path);
-	if (!is_dir(repo_config_dir)) {
-		ret = mkdir_p(repo_config_dir);
-		if (ret) {
-			error("Failed to create repository config directory\n");
-		}
-	}
-
-	free_string(&repo_config_dir);
 	return ret;
 }
 
@@ -180,6 +173,30 @@ static void repo_config_read_free()
 	list_free_list(repos_kv);
 }
 
+static void generate_path()
+{
+	char *repo_config_dir;
+	repo_config_dir = sys_path_join(globals.state_dir, REPO_CONFIG_DIR);
+	repo_config_file_path = sys_path_join(repo_config_dir, REPO_CONFIG_CONFIG_FILE);
+	free_string(&repo_config_dir);
+}
+
+static int ensure_repo_config_dir()
+{
+	char *repo_config_dir;
+	int ret = 0;
+	repo_config_dir = sys_dirname(repo_config_file_path);
+	if (!is_dir(repo_config_dir)) {
+		ret = mkdir_p(repo_config_dir);
+		if (ret) {
+			error("Failed to create repository config directory\n");
+		}
+	}
+
+	free_string(&repo_config_dir);
+	return ret;
+}
+
 static int ensure_repo_config()
 {
 	int fd = open(repo_config_file_path, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
@@ -240,9 +257,14 @@ int add_repo_config(char *repo_name, char *repo_url)
 		if (!strncmp(repo_iter->repo_name, repo_name, strlen(repo_name))) {
 			error("The repo: %s already exists\n", repo_name);
 			ret = -1;
+			break;
 		}
 		repo = repo->next;
 	}
+	if (ret) {
+		goto exit;
+	}
+
 	ret = write_section("[REPO]\n");
 	ret = write_kv("repo-name", repo_name);
 	ret = write_kv("repo-url", repo_url);
@@ -278,3 +300,78 @@ exit:
 	repo_config_deinit();
 	return ret;
 }
+
+static int adjust_repo_config_file()
+{
+	struct list *repo;
+	int ret = 0;
+
+	int fd = open(repo_config_file_path, O_WRONLY | O_TRUNC);
+
+	if (fd < 0) {
+		return -1;
+	}
+
+	repo = list_head(repos_kv);
+	while (repo) {
+		struct repo *repo_iter = repo->data;
+		ret = write_section("[REPO]\n");
+		ret = write_kv("repo-name", repo_iter->repo_name);
+		ret = write_kv("repo-url", repo_iter->url);
+		ret = write_empty_line();
+		repo = repo->next;
+	}
+
+	close(fd);
+	return ret;
+}
+
+/**
+ * @brief This callback function helps remove_repo perform an item by item comparision
+ * from the repos_kv list.
+ *
+ * @param repo_item Each repo_item retreived from a list
+ * @param repo_name_find A string containing the repo_name the user passed
+ *
+ * @returns 0 on success ie: a repo is found, any other value on a mismatch to
+ * move to next element in list.
+ */
+int compare_repos(const void *repo_item, const void *repo_name_find)
+{
+	struct repo *repo = (struct repo *)repo_item;
+	char *repo_name = (char *)repo_name_find;
+	int ret = strncmp(repo->repo_name, repo_name, strlen(repo->repo_name));
+	if (!ret) {
+		info("Match found for repository: %s\n", repo_name);
+	}
+	return ret;
+}
+
+int remove_repo_from_config(char *repo_name)
+{
+	struct repo *repo;
+	struct list *iter;
+	int ret = 0;
+
+	if (repo_config_init()) {
+		ret = -1;
+		goto exit;
+	}
+
+	iter = list_head(repos_kv);
+	repo = list_remove(repo_name, &iter, compare_repos);
+	repos_kv = iter;
+
+	if (!repo) {
+		info("Repository not found\n");
+		ret = -1;
+	} else {
+		adjust_repo_config_file();
+	}
+
+exit:
+	repo_config_deinit();
+	return ret;
+}
+
+#endif

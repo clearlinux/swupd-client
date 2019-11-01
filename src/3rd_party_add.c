@@ -19,20 +19,10 @@
 
 #define _GNU_SOURCE
 #include "3rd_party_internal.h"
-#include "config.h"
 
 #ifdef THIRDPARTY
 
-static inline char *get_repo_path(char *repo_name)
-{
-	char *third_party_temp = sys_path_join(globals.path_prefix, THIRDPARTY_REPO_PREFIX);
-	char *abs_third_party_folder;
-	abs_third_party_folder = sys_path_join(third_party_temp, repo_name);
-	free_string(&third_party_temp);
-	return abs_third_party_folder;
-}
-
-static inline int create_repo_folder(char *repo_name)
+static int create_repo_folder(char *repo_name)
 {
 	char *repo_dir;
 	int ret = 0;

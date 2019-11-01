@@ -171,8 +171,15 @@ BATS_LOG_DRIVER = $(tap_driver)
 
 TESTS = $(dist_check_SCRIPTS) $(UNIT_TESTS)
 
-BATS = \
-	test/functional/3rd-party/3rd-party-repo-list.bats \
+if ENABLE_THIRD_PARTY_TESTS
+
+THIRD_PARTY_BATS = \
+	test/functional/3rd-party/3rd-party-repo-manage.bats \
+	test/functional/3rd-party/3rd-party-repo-manage-negative.bats
+
+endif
+
+NORMAL_BATS = \
 	test/functional/autoupdate/aup-basic.bats \
 	test/functional/bundleadd/add-alias-basic.bats \
 	test/functional/bundleadd/add-also-add-flag.bats \
@@ -351,6 +358,10 @@ BATS = \
 	test/functional/usability/usa-external-modules.bats \
 	test/functional/verify-legacy/verify-bundle.bats \
 	test/functional/verify-legacy/verify-flags.bats
+
+BATS = \
+	$(THIRD_PARTY_BATS) \
+	$(NORMAL_BATS)
 
 UNIT_TESTS = \
 	test/unit/test_list.test \

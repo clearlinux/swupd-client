@@ -184,7 +184,27 @@ extern int get_version_from_path(const char *abs_path);
 extern int version_get_absolute_latest(void);
 
 /* thirdparty extern */
+
+/* thirdparty config */
+/**
+ * @brief This function is to list all repos from the repo config.
+ *
+ * @returns 0 always
+ */
 extern int list_repos();
+
+/**
+ * @brief This function performs the repo config operation part for repo add
+ * It's checks if a repo with repo_name already exists and if not creates an
+ * entry in the repo config file.
+ *
+ * @param repo_name A string containing repo_name
+ * @param reo_url A string containing repo_url
+ *
+ * @returns 0 on success ie: a repo with the name is successfully added to repo config
+ * otherwise a -1 on any failure
+ */
+extern int add_repo_config(char *repo_name, char *repo_url);
 
 static inline int bsearch_file_helper(const void *A, const void *B)
 {

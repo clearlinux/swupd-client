@@ -23,6 +23,30 @@
 
 #ifdef THIRDPARTY
 
+static inline char *get_repo_path(char *repo_name)
+{
+	char *third_party_temp = sys_path_join(globals.path_prefix, THIRDPARTY_REPO_PREFIX);
+	char *abs_third_party_folder;
+	abs_third_party_folder = sys_path_join(third_party_temp, repo_name);
+	free_string(&third_party_temp);
+	return abs_third_party_folder;
+}
+
+static inline int create_repo_folder(char *repo_name)
+{
+	char *repo_dir;
+	int ret = 0;
+	repo_dir = get_repo_path(repo_name);
+	if (!is_dir(repo_dir)) {
+		ret = mkdir_p(repo_dir);
+		if (ret) {
+			error("Failed to create repository directory\n");
+		}
+	}
+	free_string(&repo_dir);
+	return ret;
+}
+
 static void print_help(void)
 {
 	print("Usage:\n");
@@ -48,21 +72,22 @@ static bool parse_options(int argc, char **argv)
 		return false;
 	}
 
-	if (argc == 1) {
+	int positional_args = argc - ind;
+	/* Ensure that repo add only expects only two args: repo-name, repo-url */
+	switch (positional_args) {
+	case 0:
 		error("The positional args: repo-name and URL are missing\n\n");
 		return false;
-	} else if (argc == 2) {
+	case 1:
 		error("The positional args: repo-URL is missing\n\n");
 		return false;
-	}
-
-	/* Ensure that repo add only expects only two args: repo-name, repo-url */
-	if ((argc - ind) != EXACT_ARG_COUNT) {
+	case EXACT_ARG_COUNT:
+		return true;
+	default:
 		error("Unexpected arguments\n\n");
 		return false;
 	}
-
-	return true;
+	return false;
 }
 
 enum swupd_code third_party_add_main(int argc, char **argv)
@@ -82,7 +107,16 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 		goto finish;
 	}
 
-	/* TODO implement */
+	/* The last two in reverse are the repo-name, repo-url */
+	if (add_repo_config(argv[argc - 2], argv[argc - 1])) {
+		ret = SWUPD_NO;
+	} else {
+		if (create_repo_folder(argv[argc - 2])) {
+			ret = SWUPD_NO;
+		} else {
+			info("Repository %s added successfully\n", argv[argc - 2]);
+		}
+	}
 
 	swupd_deinit();
 

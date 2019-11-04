@@ -125,7 +125,6 @@ or more of the [assertions](#assertions) provided by the test library.
 
 | Main Business Scenarios                        | Commands      | Group ID |
 | ---------------------------------------------- | ------------- | -------- |
-| Enables/Disables autoupdate                    | auto-update   | AUT      |
 | Install new bundles                            | bundle-add    | ADD      |
 | Uninstall bundles                              | bundle-remove | REM      |
 | List bundles                                   | bundle-list   | LST      |

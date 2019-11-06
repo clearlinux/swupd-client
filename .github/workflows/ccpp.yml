@@ -9,9 +9,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: autogen
-      run: ./autogen.sh
-    - name: make
-      run: make
-    - name: make check
-      run: make check
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: Check install
+      run:  sudo make install && make install-check
+
+    - name: Check style
+      run:  make compliant && make shellcheck && make docs-coverage
+
+    - name: Run bat tests
+      run:  make -j5 check
+
+    - name: Print status
+      if: failure()
+      run: cat test-suite.log

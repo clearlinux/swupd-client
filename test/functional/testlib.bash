@@ -73,7 +73,8 @@ generate_random_content() { # swupd_function
 	local top_range=${2:-100}
 	local range=$((top_range - bottom_range + 1))
 	local number_of_lines=$((RANDOM%range + bottom_range))
-	< /dev/urandom tr -dc 'a-zA-Z0-9-_!@#$%^&*()_+{}|:<>?=' | fold -w 100 | head -n $number_of_lines
+	local total_bytes=$((number_of_lines * 400))
+	< /dev/urandom head -c "$total_bytes" | tr -dc 'a-zA-Z0-9-_!@#$%^&*()_+{}|:<>?=' | fold -w 100 | head -n $number_of_lines
 
 }
 
@@ -83,7 +84,7 @@ generate_random_name() { # swupd_function
 	local uuid
 
 	# generate random 8 character alphanumeric string (lowercase only)
-	uuid=$(< /dev/urandom tr -dc 'a-f0-9' | fold -w 8 | head -n 1)
+	uuid=$(< /dev/urandom head -c 100 | tr -dc 'a-f0-9' | fold -w 8 | head -n 1)
 	echo "$prefix$uuid"
 
 }
@@ -560,7 +561,7 @@ create_file() { # swupd_function
 	validate_path "$path"
 
 	if [ -n "$size" ]; then
-		< /dev/urandom tr -dc 'a-zA-Z0-9-_!@#$%^&*()_+{}|:<>?=' | head -c "$size" | sudo tee "$path/testfile" > /dev/null
+		< /dev/urandom head -c "$size" | sudo tee "$path/testfile" > /dev/null
 	else
 		generate_random_content | sudo tee "$path/testfile" > /dev/null
 	fi

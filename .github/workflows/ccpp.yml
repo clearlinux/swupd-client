@@ -3,25 +3,171 @@ name: C/C++ CI
 on: [push, pull_request]
 
 jobs:
-  build:
-
+  unit_and_style:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v1
 
     - name: build
       run:  scripts/build_ci.bash
 
-    - name: Check install
-      run:  sudo make install && make install-check
-
-    - name: Check style
+    - name: check style
       run:  make compliant && make shellcheck && make docs-coverage
 
-    - name: Run bat tests
-      run:  make -j5 check
+    - name: check install
+      run:  sudo make install && make install-check
 
-    - name: Print status
+    - name: run unit tests
+      run:  make unit-check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_update1:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: run check
+      run: |
+            UPDATE_TOTAL="$(find test/functional/update -name *.bats | wc -l)"
+            UPDATE_SUBGROUP1_TOTAL=17
+            UPDATE_SUBGROUP2_TOTAL="$((UPDATE_TOTAL - UPDATE_SUBGROUP1_TOTAL))"
+            UPDATE_SUBGROUP="$(find test/functional/update -name *.bats | head -n $UPDATE_SUBGROUP1_TOTAL | tr '\n' ' ')"
+            env TESTS="$UPDATE_SUBGROUP" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_update2:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: run check
+      run: |
+            UPDATE_TOTAL="$(find test/functional/update -name *.bats | wc -l)"
+            UPDATE_SUBGROUP1_TOTAL=17
+            UPDATE_SUBGROUP2_TOTAL="$((UPDATE_TOTAL - UPDATE_SUBGROUP1_TOTAL))"
+            UPDATE_SUBGROUP="$(find test/functional/update -name *.bats | tail -n $UPDATE_SUBGROUP2_TOTAL | tr '\n' ' ')"
+            env TESTS="$UPDATE_SUBGROUP" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_multiple:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: run check
+      run: env TESTS="$(find test/functional/{autoupdate,bundleinfo,verify-legacy,checkupdate,hashdump,mirror,usability,signature} -name *.bats \( ! -name usa-config-file.bats \) -printf '%p ')" make -e -j2 check
+
+    - name: run check - config file
+      run: env TESTS="$(find test/functional/usability -name usa-config-file.bats -printf '%p ')" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_diagnose_search:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: run check
+      run: env TESTS="$(find test/functional/{diagnose,search} -name *.bats -printf '%p ')" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_os_install:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: run check
+      run: env TESTS="$(find test/functional/os-install -name *.bats -printf '%p ')" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_repair:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: run check
+      run: env TESTS="$(find test/functional/repair -name *.bats -printf '%p ')" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_bundle_add:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: run check
+      run: env TESTS="$(find test/functional/bundleadd -name *.bats -printf '%p ')" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_bundle_remove:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: run check
+      run: env TESTS="$(find test/functional/bundleremove -name *.bats -printf '%p ')" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_bundle_list:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: run check
+      run: env TESTS="$(find test/functional/bundlelist -name *.bats -printf '%p ')" make -e -j2 check
+
+    - name: print status
       if: failure()
       run: cat test-suite.log

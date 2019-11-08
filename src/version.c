@@ -247,7 +247,7 @@ int version_get_absolute_latest(void)
    - key: 	Key in os-release file to read.
    - buff:	Buffer to store associated value.
  */
-bool get_osrelease_value(char *path_prefix, char *key, char *buff)
+static bool get_osrelease_value(char *path_prefix, char *key, char *buff)
 {
 	char line[LINE_MAX];
 	FILE *file = NULL;

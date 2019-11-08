@@ -337,7 +337,7 @@ static void remove_manifest_files(char *filename, int version, char *hash)
  * returns: true if signature verification succeeded, false if verification
  * failed, or the signature download failed
  */
-bool mom_signature_verify(const char *data_url, const char *data_filename, int version, bool mix_exists)
+static bool mom_signature_verify(const char *data_url, const char *data_filename, int version, bool mix_exists)
 {
 	char *local = NULL;
 	char *sig_url = NULL;
@@ -1053,7 +1053,7 @@ void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2)
 	bmanifest->files = list_head(preserver);
 }
 
-int file_bundlename_strcmp(const void *a, const void *b)
+static int file_bundlename_strcmp(const void *a, const void *b)
 {
 	return strcmp(((struct file *)a)->filename, (const char *)b);
 }

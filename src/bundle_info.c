@@ -265,7 +265,7 @@ static enum swupd_code get_bundle_dependencies(struct manifest *manifest, struct
 	return SWUPD_OK;
 }
 
-enum swupd_code bundle_info(char *bundle)
+static enum swupd_code bundle_info(char *bundle)
 {
 	enum swupd_code ret = SWUPD_OK;
 	int requested_version, latest_version;

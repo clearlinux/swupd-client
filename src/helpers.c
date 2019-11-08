@@ -155,7 +155,7 @@ static int ensure_root_owned_dir(const char *dirname)
 	return true; /* doesn't exist now */
 }
 
-bool is_populated_dir(const char *dirname)
+static bool is_populated_dir(const char *dirname)
 {
 	int n = 0;
 	struct dirent *d;
@@ -325,6 +325,27 @@ static void get_mounted_directories(void)
 	}
 	free_string(&line);
 	fclose(file);
+}
+
+static int get_version_from_path(const char *abs_path)
+{
+	int ret = -1;
+	int val;
+	char *ret_str;
+
+	ret = get_value_from_path(&ret_str, abs_path, true);
+	if (ret == 0) {
+		int err = strtoi_err(ret_str, &val);
+		free_string(&ret_str);
+
+		if (err != 0) {
+			error("Invalid version\n");
+		} else {
+			return val;
+		}
+	}
+
+	return -1;
 }
 
 // expects filename w/o path_prefix prepended
@@ -989,27 +1010,6 @@ bool is_url_allowed(const char *url)
 	}
 
 	return true;
-}
-
-int get_version_from_path(const char *abs_path)
-{
-	int ret = -1;
-	int val;
-	char *ret_str;
-
-	ret = get_value_from_path(&ret_str, abs_path, true);
-	if (ret == 0) {
-		int err = strtoi_err(ret_str, &val);
-		free_string(&ret_str);
-
-		if (err != 0) {
-			error("Invalid version\n");
-		} else {
-			return val;
-		}
-	}
-
-	return -1;
 }
 
 int get_value_from_path(char **contents, const char *path, bool is_abs_path)

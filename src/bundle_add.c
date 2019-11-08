@@ -140,7 +140,7 @@ static int check_disk_space_availability(struct list *to_install_bundles)
 	return 0;
 }
 
-void print_summary(int bundles_requested, int already_installed, int bundles_installed, int dependencies_installed)
+static void print_summary(int bundles_requested, int already_installed, int bundles_installed, int dependencies_installed)
 {
 	/* print totals */
 	int bundles_failed = bundles_requested - bundles_installed - already_installed;
@@ -393,7 +393,7 @@ static struct list *generate_bundles_to_install(char **bundles)
 /* Bundle install one ore more bundles passed in bundles
  * param as a null terminated array of strings
  */
-enum swupd_code main_bundle_add()
+static enum swupd_code main_bundle_add()
 {
 	int ret = 0;
 	int current_version;

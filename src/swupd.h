@@ -180,7 +180,6 @@ extern void link_manifests(struct manifest *m1, struct manifest *m2);
 extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2, bool server);
 
 extern int get_value_from_path(char **contents, const char *path, bool is_abs_path);
-extern int get_version_from_path(const char *abs_path);
 extern int version_get_absolute_latest(void);
 
 static inline int bsearch_file_helper(const void *A, const void *B)
@@ -278,7 +277,6 @@ extern struct file *search_file_in_manifest(struct manifest *manifest, const cha
 
 extern bool is_directory_mounted(const char *filename);
 extern bool is_under_mounted_directory(const char *filename);
-extern bool is_populated_dir(const char *dirname);
 
 /* filedesc.c */
 extern void dump_file_descriptor_leaks(void);
@@ -323,14 +321,10 @@ extern char *get_tracking_dir(void);
 extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
 extern int subscription_bundlename_strcmp(const void *a, const void *b);
 
-/* bundle.c */
-extern enum swupd_code remove_bundles(struct list *bundles);
-
 /* verify.c */
 extern enum swupd_code execute_verify(void);
 extern void verify_set_option_download(bool opt);
 extern void verify_set_option_skip_optional(bool opt);
-extern void verify_set_command_verify(bool opt);
 extern void verify_set_option_force(bool opt);
 extern void verify_set_option_install(bool opt);
 extern void verify_set_option_statedir_cache(char *opt);

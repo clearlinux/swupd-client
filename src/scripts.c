@@ -64,7 +64,7 @@ static void update_boot(void)
 	}
 }
 
-void exec_post_update_script(bool reexec, bool block)
+static void exec_post_update_script(bool reexec, bool block)
 {
 
 	char *params[5];

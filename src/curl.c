@@ -81,7 +81,7 @@ void swupd_curl_download_set_progress_callback(swupd_curl_progress_cb user_progr
  * The emphasis is rather on how using an SSL client certificate is an opt-in
  * function rather than an opt-out function.
  */
-CURLcode swupd_curl_set_optional_client_cert(CURL *curl)
+static CURLcode swupd_curl_set_optional_client_cert(CURL *curl)
 {
 	CURLcode curl_ret = CURLE_OK;
 	char *client_cert_path;

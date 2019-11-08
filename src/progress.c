@@ -49,7 +49,7 @@ struct spinner_data {
 	int index;
 } spinner_data;
 
-int progress_spinner_callback(void *clientp, int64_t UNUSED_PARAM dltotal, int64_t UNUSED_PARAM dlnow, int64_t UNUSED_PARAM ultotal, int64_t UNUSED_PARAM ulnow)
+static int progress_spinner_callback(void *clientp, int64_t UNUSED_PARAM dltotal, int64_t UNUSED_PARAM dlnow, int64_t UNUSED_PARAM ultotal, int64_t UNUSED_PARAM ulnow)
 {
 	const char spinner[4] = { '|', '/', '-', '\\' };
 	struct spinner_data *data = clientp;

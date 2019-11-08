@@ -308,7 +308,7 @@ static enum swupd_code list_installable_bundles()
 	return 0;
 }
 
-enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
+static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 {
 	int ret = 0;
 	int version = CURRENT_OS_VERSION;

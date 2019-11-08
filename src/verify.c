@@ -79,7 +79,7 @@ static const struct option prog_opts[] = {
 };
 
 /* setter functions */
-void verify_set_command_verify(bool opt)
+static void verify_set_command_verify(bool opt)
 {
 	/* indicates if the superseded "swupd verify" command was used */
 	cmdline_command_verify = opt;

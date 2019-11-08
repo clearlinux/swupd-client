@@ -296,7 +296,7 @@ static void print_remove_summary(unsigned int requested, unsigned int bad, unsig
 /*  The function removes one or more bundles
  *  passed in the bundles list.
  */
-enum swupd_code remove_bundles(struct list *bundles)
+static enum swupd_code remove_bundles(struct list *bundles)
 {
 	int ret = SWUPD_OK;
 	int ret_code = 0;

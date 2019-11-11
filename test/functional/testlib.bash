@@ -11,7 +11,7 @@ export TEST_NAME_SHORT="$TEST_NAME"
 export THEME_DIRNAME
 export FUNC_DIR
 export SWUPD_DIR="$FUNC_DIR/../.."
-export SWUPD_CONFIG_DIR="$SWUPD_DIR"/testconfig
+export SWUPD_CONFIG_DIR="$TEST_NAME"/testconfig
 export SWUPD_CONFIG_FILE="$SWUPD_CONFIG_DIR"/config
 
 # detect where the swupd binary is
@@ -1784,14 +1784,14 @@ create_config_file() { # swupd_function
 		destroy_config_file
 	fi
 
-	mkdir -p "$SWUPD_CONFIG_DIR"
-	touch "$SWUPD_CONFIG_FILE"
+	sudo mkdir -p "$SWUPD_CONFIG_DIR"
+	sudo touch "$SWUPD_CONFIG_FILE"
 
 }
 
 destroy_config_file() { # swupd_function
 
-	rm -rf "$SWUPD_CONFIG_DIR"
+	sudo rm -rf "$SWUPD_CONFIG_DIR"
 	# we need to make sure the config file is deleted before
 	# another test is run so it does not interfere with it since
 	# the config file is common and shared by all commands
@@ -1818,9 +1818,9 @@ add_option_to_config_file() { # swupd_function
 	validate_param "$value"
 
 	if [ -n "$section" ]; then
-		echo "[$section]" >> "$SWUPD_CONFIG_FILE"
+		write_to_protected_file -a "$SWUPD_CONFIG_FILE" "[$section]\n"
 	fi
-	echo "$option"="$value" >> "$SWUPD_CONFIG_FILE"
+	write_to_protected_file -a "$SWUPD_CONFIG_FILE" "$option=$value\n"
 
 }
 

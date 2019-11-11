@@ -7,9 +7,7 @@ load "../testlib"
 
 test_setup() {
 
-	if [ -z "$TRAVIS" ]; then
-		skip "This test is intended to run only in Travis (use TRAVIS=true to run it anyway)..."
-	fi
+	skip "This test is broken on github actions"
 
 	create_test_environment "$TEST_NAME"
 

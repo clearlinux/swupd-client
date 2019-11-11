@@ -7,13 +7,6 @@ load "../testlib"
 
 global_setup() {
 
-	# Skip this test for local development because it needs an special config
-	# flag. To run this test locally, configure swupd with
-	# --with-config-file-path=./testconfig and run: TRAVIS=true make check
-	if [ -z "${TRAVIS}" ]; then
-		return
-	fi
-
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle -f /file_1 "$TEST_NAME"
 
@@ -21,9 +14,6 @@ global_setup() {
 
 test_setup() {
 
-	if [ -z "$TRAVIS" ]; then
-		skip "This test is intended to run only in Travis (use TRAVIS=true to run it anyway)..."
-	fi
 	create_config_file
 
 }
@@ -46,6 +36,7 @@ global_teardown() {
 
 	add_option_to_config_file json_output true
 
+	cd "$TEST_NAME" || exit 1
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
 	assert_status_is "$SWUPD_OK"
@@ -71,6 +62,7 @@ global_teardown() {
 
 	add_option_to_config_file json_output true GLOBAL
 
+	cd "$TEST_NAME" || exit 1
 	run sudo sh -c "$SWUPD info $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_OK"
@@ -96,6 +88,7 @@ global_teardown() {
 
 	add_option_to_config_file json_output true info
 
+	cd "$TEST_NAME" || exit 1
 	run sudo sh -c "$SWUPD info $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_OK"
@@ -124,6 +117,7 @@ global_teardown() {
 	add_option_to_config_file json_output true global
 	add_option_to_config_file json_output false check-update
 
+	cd "$TEST_NAME" || exit 1
 	run sudo sh -c "$SWUPD info $SWUPD_OPTS"
 
 	assert_status_is 0
@@ -151,6 +145,7 @@ global_teardown() {
 
 	add_option_to_config_file picky true diagnose
 
+	cd "$TEST_NAME" || exit 1
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
@@ -167,6 +162,7 @@ global_teardown() {
 
 	add_option_to_config_file url https://someurl.com global
 
+	cd "$TEST_NAME" || exit 1
 	run sudo sh -c "$SWUPD info $SWUPD_OPTS -v https://anotherurl.com"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -187,6 +183,7 @@ global_teardown() {
 	add_option_to_config_file picky true diagnose
 	add_option_to_config_file picky_tree /fake/path
 
+	cd "$TEST_NAME" || exit 1
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS --picky-tree /usr/lib"
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
@@ -203,6 +200,7 @@ global_teardown() {
 
 	add_option_to_config_file json_output true invalid_section
 
+	cd "$TEST_NAME" || exit 1
 	run sudo sh -c "$SWUPD info $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -223,6 +221,7 @@ global_teardown() {
 
 	add_option_to_config_file invalid_option true global
 
+	cd "$TEST_NAME" || exit 1
 	run sudo sh -c "$SWUPD info $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -243,8 +242,9 @@ global_teardown() {
 	# a warning should be generated and the option should be ignored
 
 	add_option_to_config_file picky true diagnose
-	{ echo "picky-tree="; echo "=true"; echo "picky-tree=/some/path=/usr"; } >> "$SWUPD_CONFIG_FILE"
+	sudo sh -c "{ echo 'picky-tree='; echo '=true'; echo 'picky-tree=/some/path=/usr'; } >> $SWUPD_CONFIG_FILE"
 
+	cd "$TEST_NAME" || exit 1
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM

@@ -21,7 +21,7 @@ test_setup() {
 	sudo rm "$WEBDIR"/10/Manifest.test-bundle2.tar
 }
 
-@test "REP033: Report error when an included manifest is deleted" {
+@test "REP037: Report error when an included manifest is deleted" {
 
 	run sudo sh -c "$SWUPD repair $SWUPD_OPTS"
 

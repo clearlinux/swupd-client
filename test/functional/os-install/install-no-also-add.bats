@@ -19,7 +19,7 @@ test_setup() {
 
 }
 
-@test "INS026: Install without also-add bundles" {
+@test "INS016: Install without also-add bundles" {
 
 	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH --path $TARGETDIR --skip-optional"
 

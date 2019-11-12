@@ -1,49 +1,32 @@
 #!/bin/bash
 
-FUNC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1090
+# SC1090: Can't follow non-constant source. Use a directive to specify location.
+# We already process that file, so it's fine to ignore
+SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_PATH/../functional/testlib.bash"
 
-# shellcheck source=/dev/null
-source "$FUNC_DIR"/testlib.bash
+set -e
 
-declare -A groups=( ["autoupdate"]="AUT" ["bundleadd"]="ADD" ["bundlelist"]="LST" ["bundleremove"]="REM" \
-	["checkupdate"]="CHK" ["hashdump"]="HSD" ["mirror"]="MIR" ["search"]="SRH" \
-	["update"]="UPD" ["usability"]="USA" ["verify"]="VER" )
+#Check if there's no dupicated test
+list_tests --all| cut -f 1 -d ':'|sort -cu
 
-invalid=false
+last_lbl=""
+last_num=0
+for t in $(list_tests --all| cut -f 1 -d ':'|sort); do
+	lbl=$(echo "$t" | cut -b 1-3)
+	num=$(echo "$t" | cut -b 4-6)
+	if [ "$last_lbl" != "$lbl" ]; then
+		last_lbl="$lbl"
+		last_num=0
+	fi
 
-for group in "${!groups[@]}"; do
-
-	group_code="${groups[$group]}"
-	num_tests=$(list_tests "$FUNC_DIR/$group" | wc -l)
-
-	for iter in $(seq -f "%03g" 1 "$num_tests"); do
-
-		found=0
-
-		for id in $(list_tests "$FUNC_DIR/$group" | cut -d ":" -f 1 | sort); do
-			if [ "$group_code$iter" = "$id" ]; then
-				found=$((found + 1))
-			fi
-		done
-
-		if [ "$found" -eq 0 ]; then
-			echo "A test with ID '$group_code$iter' was not found."
-			invalid=true
-		elif [ "$found" -gt 1  ]; then
-			echo "Found $found tests with duplicated IDs in '$group'."
-			invalid=true
-		fi
-
-	done
-
+	last_num=$((last_num + 1))
+	if [ "$last_num" -ne "$num" ]; then
+		echo "Test $t has an incorrect number"
+		exit 1
+	fi
 done
-
-if [ "$invalid" = true ]; then
-
-	echo -e "\nRun 'list_tests --all' to check the test IDs."
-	exit 1
-
-fi
 
 echo "All tests have valid IDs."
 

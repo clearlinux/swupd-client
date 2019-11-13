@@ -22,6 +22,21 @@
 
 #ifdef THIRDPARTY
 
+static int remove_repo_directory(char *repo_name)
+{
+	char *repo_dir;
+	int ret = 0;
+	repo_dir = get_repo_path(repo_name);
+	if (is_dir(repo_dir)) {
+		ret = sys_rm_recursive(repo_dir);
+		if (ret) {
+			error("Failed to delete repository directory\n");
+		}
+	}
+	free_string(&repo_dir);
+	return ret;
+}
+
 static void print_help(void)
 {
 	print("Usage:\n");
@@ -47,18 +62,19 @@ static bool parse_options(int argc, char **argv)
 		return false;
 	}
 
-	if (argc == 1) {
+	int positional_args = argc - ind;
+	/* Ensure that repo remove expects only one args: repo-name */
+	switch (positional_args) {
+	case 0:
 		error("The positional args: repo-name is missing\n\n");
 		return false;
-	}
-
-	/* Ensure that repo remove only expects only one arg: repo-name */
-	if ((argc - ind) != EXACT_ARG_COUNT) {
+	case EXACT_ARG_COUNT:
+		return true;
+	default:
 		error("Unexpected arguments\n\n");
 		return false;
 	}
-
-	return true;
+	return false;
 }
 
 enum swupd_code third_party_remove_main(int argc, char **argv)
@@ -77,7 +93,16 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 		goto finish;
 	}
 
-	/* TODO Implement */
+	/* The last argument has to be the repo-name to be deleted */
+	if (remove_repo_from_config(argv[argc - 1]) == 0) {
+		if (remove_repo_directory(argv[argc - 1])) {
+			ret = SWUPD_NO;
+		} else {
+			info("Repository %s and its contents removed successfully\n", argv[argc - 1]);
+		}
+	} else {
+		ret = SWUPD_NO;
+	}
 
 	swupd_deinit();
 

@@ -357,7 +357,9 @@ if ENABLE_THIRD_PARTY_TESTS
 
 BATS += \
 	test/functional/3rd-party-repo-add/3rd-party-repo-add.bats \
-	test/functional/3rd-party-repo-add/3rd-party-repo-add-negative.bats
+	test/functional/3rd-party-repo-add/3rd-party-repo-add-negative.bats \
+	test/functional/3rd-party-repo-remove/3rd-party-repo-remove.bats \
+	test/functional/3rd-party-repo-remove/3rd-party-repo-remove-negative.bats
 
 endif
 

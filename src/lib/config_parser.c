@@ -98,7 +98,7 @@ bool config_parse(const char *filename, parse_config_fn_t parse_config_fn, void 
 		}
 
 		/* load the configuration value read in the application */
-		if (!parse_config_fn(section, key, value, data)) {
+		if (parse_config_fn && !parse_config_fn(section, key, value, data)) {
 			warn("Unrecognized option '%s=%s' from section [%s] in the configuration file\n", key, value, section);
 		}
 	}

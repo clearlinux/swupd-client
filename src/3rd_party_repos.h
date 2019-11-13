@@ -51,6 +51,18 @@ struct list *third_party_get_repos(void);
  */
 int third_party_add_repo(const char *repo_name, const char *repo_url);
 
+/**
+ * @brief This function performs the repo config operation part for repo remove
+ * Its function is lookup the repo_name in the repo.ini file and if it exists, remove it
+ * and adjust the repo config file.
+ *
+ * @param repo_name A string containing repo_name
+ *
+ * @returns 0 on success ie: a repo is found, removed & repo config is adjusted
+ * otherwise a -1 on any failure
+ */
+int third_party_remove_repo(char *repo_name);
+
 #endif
 
 #ifdef __cplusplus

@@ -322,6 +322,9 @@ extern char *get_tracking_dir(void);
 extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
 extern int subscription_bundlename_strcmp(const void *a, const void *b);
 
+/* bundle_add.c*/
+extern enum swupd_code execute_bundle_add(struct list *bundles_list);
+
 /* verify.c */
 extern enum swupd_code execute_verify(void);
 extern void verify_set_option_download(bool opt);

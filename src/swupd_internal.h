@@ -26,6 +26,7 @@ enum swupd_code diagnose_main(int argc, char **argv);
 enum swupd_code bundle_info_main(int argc, char **argv);
 enum swupd_code verify_main(int argc, char **argv);
 enum swupd_code third_party_main(int argc, char **argv);
+enum swupd_code third_party_bundle_add_main(int argc, char **argv);
 
 /**
  * @brief Creates a new third-party repo under THIRDPARTY_REPO_PREFIX

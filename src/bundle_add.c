@@ -40,14 +40,12 @@
 #define FLAG_SKIP_OPTIONAL 2000
 #define FLAG_SKIP_DISKSPACE_CHECK 2001
 
-static char **bundles;
+static char **cmdline_bundles;
 
 static void print_help(void)
 {
 	print("Usage:\n");
 	print("   swupd bundle-add [OPTION...] [bundle1 bundle2 (...)]\n\n");
-
-	//TODO: Add documentation explaining this command
 
 	global_print_help();
 
@@ -97,7 +95,7 @@ static bool parse_options(int argc, char **argv)
 		return false;
 	}
 
-	bundles = argv + optind;
+	cmdline_bundles = argv + optind;
 
 	return true;
 }
@@ -368,18 +366,21 @@ out:
 	return ret;
 }
 
-static struct list *generate_bundles_to_install(char **bundles)
+static struct list *generate_bundles_to_install(struct list *bundles)
 {
 	struct list *aliases = NULL;
 	struct list *bundles_list = NULL;
+	struct list *iter = NULL;
 
 	aliases = get_alias_definitions();
-	for (; *bundles; ++bundles) {
-		struct list *alias_bundles = get_alias_bundles(aliases, *bundles);
+	for (iter = bundles; iter; iter = iter->next) {
+		char *bundle = iter->data;
+
+		struct list *alias_bundles = get_alias_bundles(aliases, bundle);
 		char *alias_list_str = string_join(", ", alias_bundles);
 
-		if (strcmp(*bundles, alias_list_str) != 0) {
-			info("Alias %s will install bundle(s): %s\n", *bundles, alias_list_str);
+		if (strcmp(bundle, alias_list_str) != 0) {
+			info("Alias %s will install bundle(s): %s\n", bundle, alias_list_str);
 		}
 		free_string(&alias_list_str);
 		bundles_list = list_concat(alias_bundles, bundles_list);
@@ -395,21 +396,14 @@ static struct list *generate_bundles_to_install(char **bundles)
 /* Bundle install one ore more bundles passed in bundles
  * param as a null terminated array of strings
  */
-static enum swupd_code main_bundle_add()
+enum swupd_code execute_bundle_add(struct list *bundles_list)
 {
 	int ret = 0;
 	int current_version;
-	struct list *bundles_list = NULL;
+	struct list *bundles_to_install = NULL;
 	struct manifest *mom;
 	char *bundles_list_str = NULL;
 	bool mix_exists;
-
-	/* initialize swupd and get current version from OS */
-	ret = swupd_init(SWUPD_ALL);
-	if (ret != 0) {
-		error("Failed updater initialization, exiting now\n");
-		return ret;
-	}
 
 	timelist_timer_start(globals.global_times, "Load MoM");
 	current_version = get_current_version(globals.path_prefix);
@@ -430,18 +424,18 @@ static enum swupd_code main_bundle_add()
 	timelist_timer_stop(globals.global_times); // closing: Load MoM
 
 	timelist_timer_start(globals.global_times, "Prepend bundles to list");
-	bundles_list = generate_bundles_to_install(bundles);
+	bundles_to_install = generate_bundles_to_install(bundles_list);
 	timelist_timer_stop(globals.global_times); // closing: Prepend bundles to list
 
 	timelist_timer_start(globals.global_times, "Install bundles");
-	ret = install_bundles(bundles_list, mom);
+	ret = install_bundles(bundles_to_install, mom);
 	timelist_timer_stop(globals.global_times); // closing: Install bundles
 
 	timelist_print_stats(globals.global_times);
 
 	manifest_free(mom);
 clean_and_exit:
-	bundles_list_str = string_join(", ", bundles_list);
+	bundles_list_str = string_join(", ", bundles_to_install);
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
 		  "bundleadd",
 		  "bundles=%s\n"
@@ -453,15 +447,15 @@ clean_and_exit:
 		  ret,
 		  total_curl_sz);
 
-	list_free_list_and_data(bundles_list, free);
+	list_free_list_and_data(bundles_to_install, free);
 	free_string(&bundles_list_str);
-	swupd_deinit();
 
 	return ret;
 }
 
 enum swupd_code bundle_add_main(int argc, char **argv)
 {
+	struct list *bundles_list = NULL;
 	int ret;
 
 	/*
@@ -484,8 +478,25 @@ enum swupd_code bundle_add_main(int argc, char **argv)
 	}
 	progress_init_steps("bundle-add", steps_in_bundleadd);
 
-	ret = main_bundle_add();
+	/* initialize swupd */
+	ret = swupd_init(SWUPD_ALL);
+	if (ret != 0) {
+		error("Failed swupd initialization, exiting now\n");
+		return ret;
+	}
 
+	/* move the bundles provided in the command line into a
+	 * list so it is easier to handle them */
+	for (; *cmdline_bundles; ++cmdline_bundles) {
+		char *bundle = *cmdline_bundles;
+		bundles_list = list_append_data(bundles_list, bundle);
+	}
+	bundles_list = list_head(bundles_list);
+
+	ret = execute_bundle_add(bundles_list);
+
+	list_free_list(bundles_list);
+	swupd_deinit();
 	progress_finish_steps(ret);
 	return ret;
 }

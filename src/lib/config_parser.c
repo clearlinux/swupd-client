@@ -38,11 +38,11 @@ bool config_parse(const char *filename, parse_config_fn_t parse_config_fn, void 
 	char *section = NULL;
 	char *key = NULL;
 	char *value = NULL;
-	bool ret = false;
+	bool ret = true;
 
 	config_file = fopen(filename, "rbm");
 	if (config_file == NULL) {
-		goto exit;
+		return false;
 	}
 
 	/* read the config file line by line */
@@ -56,6 +56,7 @@ bool config_parse(const char *filename, parse_config_fn_t parse_config_fn, void 
 		/* remove the line break from the current line */
 		line_ptr = strchr(line, '\n');
 		if (!line_ptr) {
+			ret = false;
 			goto close_and_exit;
 		}
 		*line_ptr = '\0';
@@ -103,12 +104,8 @@ bool config_parse(const char *filename, parse_config_fn_t parse_config_fn, void 
 		}
 	}
 
-	/* we made it this far, config file parsed correctly */
-	ret = true;
-
 close_and_exit:
 	free_string(&section);
 	fclose(config_file);
-exit:
 	return ret;
 }

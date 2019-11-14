@@ -21,7 +21,7 @@ jobs:
       run:  sudo make install && make install-check
 
     - name: run unit tests
-      run:  make unit-check
+      run:  make check
 
     - name: print status
       if: failure()
@@ -35,6 +35,9 @@ jobs:
 
     - name: build
       run:  scripts/build_ci.bash
+
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
@@ -57,6 +60,9 @@ jobs:
     - name: build
       run:  scripts/build_ci.bash
 
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
+
     - name: run check
       run: |
             UPDATE_TOTAL="$(find test/functional/update -name *.bats | wc -l)"
@@ -78,6 +84,9 @@ jobs:
     - name: build
       run:  scripts/build_ci.bash
 
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
+
     - name: run check
       run: env TESTS="$(find test/functional/{autoupdate,bundleinfo,verify-legacy,checkupdate,hashdump,mirror,usability,signature} -name *.bats -printf '%p ')" make -e -j2 check
 
@@ -93,6 +102,9 @@ jobs:
 
     - name: build
       run:  scripts/build_ci.bash
+
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: env TESTS="$(find test/functional/{diagnose,search} -name *.bats -printf '%p ')" make -e -j2 check
@@ -110,6 +122,9 @@ jobs:
     - name: build
       run:  scripts/build_ci.bash
 
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
+
     - name: run check
       run: env TESTS="$(find test/functional/os-install -name *.bats -printf '%p ')" make -e -j2 check
 
@@ -125,6 +140,9 @@ jobs:
 
     - name: build
       run:  scripts/build_ci.bash
+
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: env TESTS="$(find test/functional/repair -name *.bats -printf '%p ')" make -e -j2 check
@@ -142,6 +160,9 @@ jobs:
     - name: build
       run:  scripts/build_ci.bash
 
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
+
     - name: run check
       run: env TESTS="$(find test/functional/bundleadd -name *.bats -printf '%p ')" make -e -j2 check
 
@@ -158,6 +179,9 @@ jobs:
     - name: build
       run:  scripts/build_ci.bash
 
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
+
     - name: run check
       run: env TESTS="$(find test/functional/bundleremove -name *.bats -printf '%p ')" make -e -j2 check
 
@@ -173,6 +197,9 @@ jobs:
 
     - name: build
       run:  scripts/build_ci.bash
+
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: env TESTS="$(find test/functional/bundlelist -name *.bats -printf '%p ')" make -e -j2 check

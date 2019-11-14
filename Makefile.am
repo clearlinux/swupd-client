@@ -168,204 +168,15 @@ tap_driver = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 
 BATS_LOG_DRIVER = $(tap_driver)
 
-TESTS = $(dist_check_SCRIPTS) $(UNIT_TESTS)
-
-BATS = \
-	test/functional/autoupdate/aup-basic.bats \
-	test/functional/bundleadd/add-alias-basic.bats \
-	test/functional/bundleadd/add-also-add-flag.bats \
-	test/functional/bundleadd/add-bad-hash.bats \
-	test/functional/bundleadd/add-bad-hash-state.bats \
-	test/functional/bundleadd/add-bad-manifest.bats \
-	test/functional/bundleadd/add-basics.bats \
-	test/functional/bundleadd/add-boot-file.bats \
-	test/functional/bundleadd/add-boot-skip.bats \
-	test/functional/bundleadd/add-client-certificate.bats \
-	test/functional/bundleadd/add-directory.bats \
-	test/functional/bundleadd/add-experimental.bats \
-	test/functional/bundleadd/add-fall-back-to-fullfile.bats \
-	test/functional/bundleadd/add-include.bats \
-	test/functional/bundleadd/add-install-time.bats \
-	test/functional/bundleadd/add-json.bats \
-	test/functional/bundleadd/add-multiple.bats \
-	test/functional/bundleadd/add-no-disk-space.bats \
-	test/functional/bundleadd/add-no-signature.bats \
-	test/functional/bundleadd/add-overwrite-files.bats \
-	test/functional/bundleadd/add-skip-scripts.bats \
-	test/functional/bundleadd/add-uses-fullfile.bats \
-	test/functional/bundleadd/add-uses-zeropack.bats \
-	test/functional/bundleadd/add-verify-fix-path.bats \
-	test/functional/bundleinfo/bundle-info-basic.bats \
-	test/functional/bundleinfo/bundle-info-files.bats \
-	test/functional/bundleinfo/bundle-info-includes.bats \
-	test/functional/bundlelist/list-all.bats \
-	test/functional/bundlelist/list-client-certificate.bats \
-	test/functional/bundlelist/list-deps-flat.bats \
-	test/functional/bundlelist/list-deps-invalid-bundle.bats \
-	test/functional/bundlelist/list-deps-nested.bats \
-	test/functional/bundlelist/list-experimental.bats \
-	test/functional/bundlelist/list-has-dep-nested.bats \
-	test/functional/bundlelist/list-has-dep-nested-not-installed.bats \
-	test/functional/bundlelist/list-has-dep-nested-server.bats \
-	test/functional/bundlelist/list-installed.bats \
-	test/functional/bundlelist/list-json.bats \
-	test/functional/bundlelist/list-no-deps.bats \
-	test/functional/bundlelist/list-no-disk-space.bats \
-	test/functional/bundlelist/list-none-has-deps.bats \
-	test/functional/bundleremove/remove-basics.bats \
-	test/functional/bundleremove/remove-boot-file.bats \
-	test/functional/bundleremove/remove-client-certificate.bats \
-	test/functional/bundleremove/remove-include.bats \
-	test/functional/bundleremove/remove-include-nested.bats \
-	test/functional/bundleremove/remove-json.bats \
-	test/functional/bundleremove/remove-no-disk-space.bats \
-	test/functional/bundleremove/remove-optional-bundles.bats \
-	test/functional/bundleremove/remove-os-core.bats \
-	test/functional/bundleremove/remove-parse-args.bats \
-	test/functional/bundleremove/remove-recursive.bats \
-	test/functional/bundleremove/remove-with-dependency.bats \
-	test/functional/checkupdate/chk-update-client-certificate.bats \
-	test/functional/checkupdate/chk-update-format-bump.bats \
-	test/functional/checkupdate/chk-update-json.bats \
-	test/functional/checkupdate/chk-update-new-version.bats \
-	test/functional/checkupdate/chk-update-no-server-content.bats \
-	test/functional/checkupdate/chk-update-no-target-content.bats \
-	test/functional/checkupdate/chk-update-slow-server.bats \
-	test/functional/checkupdate/chk-update-version-match.bats \
-	test/functional/diagnose/diagnose-also-add.bats \
-	test/functional/diagnose/diagnose-basics.bats \
-	test/functional/diagnose/diagnose-boot-file.bats \
-	test/functional/diagnose/diagnose-bundles.bats \
-	test/functional/diagnose/diagnose-client-certificate.bats \
-	test/functional/diagnose/diagnose-directory-tree-deleted.bats \
-	test/functional/diagnose/diagnose-flags.bats \
-	test/functional/diagnose/diagnose-good.bats \
-	test/functional/diagnose/diagnose-json.bats \
-	test/functional/diagnose/diagnose-missing-file.bats \
-	test/functional/diagnose/diagnose-picky.bats \
-	test/functional/diagnose/diagnose-picky-downgrade.bats \
-	test/functional/diagnose/diagnose-picky-whitelist.bats \
-	test/functional/hashdump/hashdump-file-hash.bats \
-	test/functional/mirror/mirror-createdir.bats \
-	test/functional/mirror/mirror-createdir-negative.bats \
-	test/functional/mirror/mirror-json.bats \
-	test/functional/os-install/install-also-add.bats \
-	test/functional/os-install/install-bad.bats \
-	test/functional/os-install/install-basics.bats \
-	test/functional/os-install/install-download.bats \
-	test/functional/os-install/install-json.bats \
-	test/functional/os-install/install-latest-missing.bats \
-	test/functional/os-install/install-multiple.bats \
-	test/functional/os-install/install-no-also-add.bats \
-	test/functional/os-install/install-no-fullfile-fallback.bats \
-	test/functional/os-install/install-no-packs.bats \
-	test/functional/os-install/install-statedir-cache.bats \
-	test/functional/os-install/install-statedir-cache-offline.bats \
-	test/functional/os-install/install-version.bats \
-	test/functional/repair/repair-add-missing-include.bats \
-	test/functional/repair/repair-add-missing-include-old.bats \
-	test/functional/repair/repair-basics.bats \
-	test/functional/repair/repair-boot-file.bats \
-	test/functional/repair/repair-boot-file-deleted.bats \
-	test/functional/repair/repair-boot-skip.bats \
-	test/functional/repair/repair-bundles.bats \
-	test/functional/repair/repair-deleted-include-manifest.bats \
-	test/functional/repair/repair-directory-tree-deleted.bats \
-	test/functional/repair/repair-empty-dir-deleted.bats \
-	test/functional/repair/repair-flags.bats \
-	test/functional/repair/repair-format-mismatch.bats \
-	test/functional/repair/repair-format-mismatch-overdrive.bats \
-	test/functional/repair/repair-ghosted.bats \
-	test/functional/repair/repair-ignore-also-add.bats \
-	test/functional/repair/repair-json.bats \
-	test/functional/repair/repair-missing-file.bats \
-	test/functional/repair/repair-no-disk-space.bats \
-	test/functional/repair/repair-picky.bats \
-	test/functional/repair/repair-picky-downgrade.bats \
-	test/functional/repair/repair-picky-ghosted.bats \
-	test/functional/repair/repair-picky-ghosted-missing.bats \
-	test/functional/repair/repair-skip-scripts.bats \
-	test/functional/repair/repair-unsafe-to-delete.bats \
-	test/functional/repair/repair-version-mismatch.bats \
-	test/functional/repair/repair-version-mismatch-overdrive.bats \
-	test/functional/search/search-client-certificate.bats \
-	test/functional/search/search-content-check-negative.bats \
-	test/functional/search/search-content-check-positive.bats \
-	test/functional/search/search-experimental.bats \
-	test/functional/search/search-json.bats \
-	test/functional/search/search-no-disk-space.bats \
-	test/functional/search/search-sort.bats \
-	test/functional/signature/cert-chain.bats \
-	test/functional/signature/corrupted-certificate.bats \
-	test/functional/signature/corrupted-signature.bats \
-	test/functional/signature/invalid-certificate.bats \
-	test/functional/signature/key-rotation.bats \
-	test/functional/signature/no-signature.bats \
-	test/functional/signature/permission-incorrect.bats \
-	test/functional/signature/version-sig-check.bats \
-	test/functional/update/update-boot-file.bats \
-	test/functional/update/update-boot-skip.bats \
-	test/functional/update/update-bundle-removed.bats \
-	test/functional/update/update-client-certificate.bats \
-	test/functional/update/update-deleted-include-manifest.bats \
-	test/functional/update/update-download.bats \
-	test/functional/update/update-fail-to-get-mom.bats \
-	test/functional/update/update-ignore-also-add.bats \
-	test/functional/update/update-include.bats \
-	test/functional/update/update-include-old-bundle.bats \
-	test/functional/update/update-include-old-bundle-with-tracked-file.bats \
-	test/functional/update/update-json.bats \
-	test/functional/update/update-manifest-delta.bats \
-	test/functional/update/update-minversion.bats \
-	test/functional/update/update-missing-os-core.bats \
-	test/functional/update/update-newest-added.bats \
-	test/functional/update/update-newest-deleted.bats \
-	test/functional/update/update-newest-ghosted.bats \
-	test/functional/update/update-no-disk-space.bats \
-	test/functional/update/update-non-responsive.bats \
-	test/functional/update/update-older-server-version.bats \
-	test/functional/update/update-rename.bats \
-	test/functional/update/update-rename-ghosted.bats \
-	test/functional/update/update-re-update-bad-os-release.bats \
-	test/functional/update/update-re-update-required.bats \
-	test/functional/update/update-show-time.bats \
-	test/functional/update/update-skip-scripts.bats \
-	test/functional/update/update-slow-server.bats \
-	test/functional/update/update-statedir-bad-hash.bats \
-	test/functional/update/update-status.bats \
-	test/functional/update/update-status-no-server-content.bats \
-	test/functional/update/update-status-no-target-content.bats \
-	test/functional/update/update-use-full-file.bats \
-	test/functional/update/update-use-pack.bats \
-	test/functional/update/update-verify-fix-path-hash-mismatch.bats \
-	test/functional/update/update-verify-fix-path-missing-dir.bats \
-	test/functional/update/update-verify-fullfile-hash.bats \
-	test/functional/update/update-with-mirror.bats \
-	test/functional/update/update-with-old-mirror.bats \
-	test/functional/update/update-with-slightly-old-mirror.bats \
-	test/functional/usability/usa-completion-basic.bats \
-	test/functional/usability/usa-config-file.bats \
-	test/functional/usability/usa-download-retries.bats \
-	test/functional/usability/usa-external-modules.bats \
-	test/functional/verify-legacy/verify-bundle.bats \
-	test/functional/verify-legacy/verify-flags.bats
-
-UNIT_TESTS = \
+TESTS = \
 	test/unit/test_list.test \
 	test/unit/test_manifest.test \
 	test/unit/test_signature.test \
 	test/unit/test_strings.test
 
-EXTRA_DIST += test/unit/test_helper.h test/unit/data test/functional
+EXTRA_DIST += test/unit/test_helper.h test/unit/data
 
-dist_check_SCRIPTS = $(BATS)
-# Must be run before all other tests
-dist_check_SCRIPTS += test/functional/generate-cert.prereq
-
-parallel_tests = $(BATS:.bats=.log)
-$(parallel_tests) : test/functional/generate-cert.log
-
-check_PROGRAMS = $(UNIT_TESTS)
+check_PROGRAMS = $(TESTS)
 LDADD = $(swupd_LDADD) $(swupd_OBJECTS:src/main.o=)
 
 endif
@@ -435,8 +246,9 @@ if ENABLE_TESTS
 install-check:
 	test/installation/test.bats
 
-unit-check:
-	env TEST_SUITE_LOG=unit_tests.log TESTS="$(UNIT_TESTS)" make -e check
+functional-check:
+	test/functional/generate-cert.prereq
+	env TESTS="$(shell find test/functional  -name *.bats)" make -e check
 
 docs-coverage:
 	doxygen docs/Doxyfile || die; \

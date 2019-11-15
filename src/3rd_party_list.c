@@ -70,11 +70,12 @@ enum swupd_code third_party_list_main(int argc, char **argv)
 		goto finish;
 	}
 
-	/* TODO Implement */
-
-	swupd_deinit();
+	if (list_repos()) {
+		ret = SWUPD_NO;
+	}
 
 finish:
+	swupd_deinit();
 	progress_finish_steps(ret);
 	return ret;
 }

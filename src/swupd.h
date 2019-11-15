@@ -198,6 +198,13 @@ extern int version_get_absolute_latest(void);
  */
 extern int add_repo_config(char *repo_name, char *repo_url);
 
+/**
+ * @brief This function is to list all repos from the repo config.
+ *
+ * @returns 0 on successful read of repo config file and a non-negative otherwise
+ */
+extern int list_repos();
+
 static inline int bsearch_file_helper(const void *A, const void *B)
 {
 	struct file *key = (struct file *)A;

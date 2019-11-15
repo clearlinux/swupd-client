@@ -207,4 +207,30 @@ exit:
 	return ret;
 }
 
+int list_repos()
+{
+	struct list *repo;
+	int ret = 0;
+
+	if (repo_config_init()) {
+		ret = -1;
+		goto exit;
+	}
+
+	repo = list_head(repos);
+	while (repo) {
+		struct repo *repo_iter = repo->data;
+		info("Repo\n");
+		info("--------\n");
+		info("name:\t%s\n", repo_iter->name);
+		info("url:\t%s\n", repo_iter->url);
+		info("\n");
+		repo = repo->next;
+	}
+
+exit:
+	repo_config_deinit();
+	return ret;
+}
+
 #endif

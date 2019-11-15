@@ -71,7 +71,9 @@ enum swupd_code third_party_list_main(int argc, char **argv)
 		goto finish;
 	}
 
-	/* TODO Implement */
+	if (list_repos()) {
+		ret = SWUPD_NO;
+	}
 
 	swupd_deinit();
 

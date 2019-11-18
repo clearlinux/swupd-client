@@ -35,7 +35,6 @@ swupd_SOURCES = \
 	src/3rd_party_add.c \
 	src/3rd_party.c \
 	src/3rd_party_config.c \
-	src/3rd_party_internal.h \
 	src/3rd_party_list.c \
 	src/3rd_party_remove.c \
 	src/alias.c \

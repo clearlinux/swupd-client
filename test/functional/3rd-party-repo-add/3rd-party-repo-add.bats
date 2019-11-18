@@ -7,7 +7,7 @@ load "../testlib"
 
 @test "TRA001: Add a single repo" {
 
-	run sudo sh -c "$SWUPD 3rd-party add test-repo1 http://xyz.com $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD 3rd-party add test-repo1 https://xyz.com $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 			Repository test-repo1 added successfully
@@ -18,7 +18,8 @@ load "../testlib"
 	run sudo sh -c "cat $STATEDIR/3rd_party/repo.ini"
 	expected_output=$(cat <<-EOM
 			[test-repo1]
-			url=http://xyz.com
+			url=https://xyz.com
+			version=0
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -52,7 +53,7 @@ load "../testlib"
 	)
 	assert_is_output "$expected_output"
 
-	run sudo sh -c "$SWUPD 3rd-party add test-repo4 http://hij.com $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD 3rd-party add test-repo4 https://hij.com $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 			Repository test-repo4 added successfully
@@ -71,26 +72,25 @@ load "../testlib"
 	run sudo sh -c "cat $STATEDIR/3rd_party/repo.ini"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-
 			[test-repo1]
-
 			url=https://xyz.com
+			version=0
 
 			[test-repo2]
-
 			url=file://abc.com
+			version=0
 
 			[test-repo3]
-
 			url=https://efg.com
+			version=0
 
 			[test-repo4]
-
-			url=http://hij.com
+			url=https://hij.com
+			version=0
 
 			[test-repo5]
-
 			url=https://klm.com
+			version=0
 	EOM
 	)
 	assert_is_output --identical "$expected_output"

@@ -40,6 +40,7 @@ test_setup() {
 		Warning: Maximum number of retries reached
 		Error: Failed to retrieve 10 MoM manifest
 		Error: Cannot load official manifest MoM for version 10
+		Failed to install 1 of 1 bundles
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -61,6 +62,7 @@ test_setup() {
 		Download retries is disabled
 		Error: Failed to retrieve 10 MoM manifest
 		Error: Cannot load official manifest MoM for version 10
+		Failed to install 1 of 1 bundles
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -90,6 +92,7 @@ test_setup() {
 		Warning: Maximum number of retries reached
 		Error: Failed to retrieve 10 MoM manifest
 		Error: Cannot load official manifest MoM for version 10
+		Failed to install 1 of 1 bundles
 	EOM
 	)
 	assert_is_output "$expected_output"

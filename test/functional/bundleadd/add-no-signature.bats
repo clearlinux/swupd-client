@@ -19,6 +19,7 @@ test_setup() {
 		Warning: Removing corrupt Manifest.MoM artifacts and re-downloading...
 		Error: FAILED TO VERIFY SIGNATURE OF Manifest.MoM version 10!!!
 		Error: Cannot load official manifest MoM for version 10
+		Failed to install 1 of 1 bundles
 	EOM
 	)
 	assert_is_output "$expected_output"

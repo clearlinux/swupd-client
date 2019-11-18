@@ -27,12 +27,13 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Searching for bundle test-bundle2 in the 3rd-party repositories...
 		Bundle test-bundle2 found in 3rd-party repository test-repo
+		Bundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Loading required manifests...
 		No packs need to be downloaded
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Installing files...
-		Calling post-update helper scripts
+		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Successfully installed 1 bundle
 	EOM
 	)
@@ -82,12 +83,13 @@ test_setup() {
 		Error: bundle test-bundle1 was not found in any 3rd-party repository
 		Searching for bundle test-bundle2 in the 3rd-party repositories...
 		Bundle test-bundle2 found in 3rd-party repository test-repo
+		Bundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Loading required manifests...
 		No packs need to be downloaded
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Installing files...
-		Calling post-update helper scripts
+		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Successfully installed 1 bundle
 	EOM
 	)
@@ -108,12 +110,13 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Searching for bundle test-bundle2 in the 3rd-party repositories...
 		Bundle test-bundle2 found in 3rd-party repository test-repo
+		Bundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Loading required manifests...
 		No packs need to be downloaded
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Installing files...
-		Calling post-update helper scripts
+		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Successfully installed 1 bundle
 		Searching for bundle test-bundle1 in the 3rd-party repositories...
 		Error: bundle test-bundle1 was not found in any 3rd-party repository

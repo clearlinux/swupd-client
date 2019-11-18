@@ -214,111 +214,26 @@ static int compute_bundle_dependecies(struct manifest *mom, struct list *bundles
 	return 0;
 }
 
-static enum swupd_code install_bundles(struct list *bundles, struct manifest *mom)
+static enum swupd_code install_files(struct manifest *mom, struct list *to_install_files)
 {
 	enum swupd_code ret = SWUPD_OK;
-	int err = 0;
-	int already_installed = 0;
-	int bundles_installed = 0;
-	int dependencies_installed = 0;
-
-	int bundles_requested;
 	struct list *iter;
-	struct list *installed_files = NULL;
-	struct list *to_install_files = NULL;
-	int invalid_bundles = 0;
-	struct list *installed_bundles = NULL;
-	struct list *to_install_bundles = NULL;
-
-	/* get subscriptions for bundles to be installed */
-	info("Loading required manifests...\n");
-	timelist_timer_start(globals.global_times, "Add bundles and recurse");
-	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
-
-	err = mom_get_manifests_list(mom, &installed_bundles, is_installed_bundle_data);
-	if (err) {
-		ret = SWUPD_COULDNT_LOAD_MANIFEST;
-		goto out;
-	}
-
-	// check for errors
-	err = compute_bundle_dependecies(mom, bundles, &to_install_bundles, &already_installed, &invalid_bundles);
-	if (err) {
-		ret = SWUPD_RECURSE_MANIFEST;
-		goto out;
-	}
-	if (!to_install_bundles) {
-		goto out;
-	}
-	timelist_timer_stop(globals.global_times); // closing: Add bundles and recurse
-
-	/* Get a list with all files needed to be installed for the requested bundles */
-	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
-	installed_files = files_from_bundles(installed_bundles);
-	installed_files = filter_out_deleted_files(installed_files);
-	installed_files = consolidate_files(installed_files);
-
-	to_install_files = files_from_bundles(to_install_bundles);
-	to_install_files = filter_out_deleted_files(to_install_files);
-	to_install_files = consolidate_files(to_install_files);
-
-	timelist_timer_stop(globals.global_times); // closing: Consolidate files from bundles
-
-	if (!to_install_files) {
-		goto out;
-	}
-
-	/* Check if we have enough space */
-	err = check_disk_space_availability(to_install_bundles);
-	if (err) {
-		ret = SWUPD_DISK_SPACE_ERROR;
-		goto out;
-	}
-
-	/* download necessary packs */
-	timelist_timer_start(globals.global_times, "Download packs");
-
-	if (rm_staging_dir_contents("download") < 0) {
-		debug("rm_staging_dir_contents failed - resuming operation\n");
-	}
-
-	if (list_longer_than(to_install_files, 10 * list_len(to_install_bundles))) {
-		download_zero_packs(to_install_bundles, mom);
-	} else {
-		/* the progress would be completed within the
-		 * download_subscribed_packs function, since we
-		 * didn't run it, manually mark the step as completed */
-		info("No packs need to be downloaded\n");
-	}
-	timelist_timer_stop(globals.global_times); // closing: Download packs
-
-	/* Download missing files */
-	timelist_timer_start(globals.global_times, "Download missing files");
-	err = download_fullfiles(to_install_files, NULL);
-	timelist_timer_stop(globals.global_times); // closing: Download missing files
-	if (err) {
-		/* make sure the return code is positive */
-		error("Could not download some files from bundles, aborting bundle installation\n");
-		ret = SWUPD_COULDNT_DOWNLOAD_FILE;
-		goto out;
-	}
 
 	/* Install all bundle(s) files into the fs */
 	timelist_timer_start(globals.global_times, "Installing bundle(s) files onto filesystem");
 	progress_next_step("install_files", PROGRESS_BAR);
 
 	// Apply heuristics to all files
-	timelist_timer_start(globals.global_times, "Appling heuristics");
+	timelist_timer_start(globals.global_times, "Applying heuristics");
 	for (iter = to_install_files; iter; iter = iter->next) {
 		struct file *file = iter->data;
 		(void)ignore(file);
 		apply_heuristics(file);
 	}
-	timelist_timer_stop(globals.global_times); // closing: Appling heuristics
+	timelist_timer_stop(globals.global_times); // closing: Applying heuristics
 
 	//TODO: Improve staging functions so we won't need this hack
 	globals.update_count = list_len(to_install_files) - globals.update_skip;
-	mom->files = installed_files;
 	ret = staging_install_all_files(to_install_files, mom);
 	mom->files = NULL;
 	if (ret) {
@@ -333,40 +248,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 	scripts_run_post_update(globals.wait_for_scripts);
 	timelist_timer_stop(globals.global_times); // closing: Run Scripts
 
-	ret = SWUPD_OK;
-
 out:
-	/* count how many of the requested bundles were actually installed, note that the
-	 * to_install_bundles list could also have extra dependencies */
-	iter = list_head(to_install_bundles);
-	while (iter) {
-		struct manifest *to_install_manifest;
-		to_install_manifest = iter->data;
-		iter = iter->next;
-		if (is_installed_bundle(to_install_manifest->component)) {
-			if (string_in_list(to_install_manifest->component, bundles)) {
-				bundles_installed++;
-				track_bundle(to_install_manifest->component);
-			} else {
-				dependencies_installed++;
-			}
-		}
-	}
-
-	bundles_requested = list_len(bundles);
-	print_summary(bundles_requested, already_installed, bundles_installed, dependencies_installed, ret);
-
-	/* if one or more of the requested bundles was invalid, and
-	 * there is no other error return SWUPD_INVALID_BUNDLE */
-	if (invalid_bundles > 0 && ret == SWUPD_OK) {
-		ret = SWUPD_INVALID_BUNDLE;
-	}
-
-	list_free_list(installed_files);
-	list_free_list(to_install_files);
-	list_free_list_and_data(to_install_bundles, manifest_free_data);
-	list_free_list_and_data(installed_bundles, manifest_free_data);
-
 	return ret;
 }
 
@@ -397,17 +279,68 @@ static struct list *generate_bundles_to_install(struct list *bundles)
 	return bundles_list;
 }
 
+static enum swupd_code download_content(struct manifest *mom, struct list *to_install_bundles, struct list *to_install_files)
+{
+	enum swupd_code ret;
+
+	/* download necessary packs */
+	timelist_timer_start(globals.global_times, "Download packs");
+
+	if (rm_staging_dir_contents("download") < 0) {
+		debug("rm_staging_dir_contents failed - resuming operation");
+	}
+
+	if (list_longer_than(to_install_files, 10 * list_len(to_install_bundles))) {
+		download_zero_packs(to_install_bundles, mom);
+	} else {
+		/* the progress would be completed within the
+		 * download_subscribed_packs function, since we
+		 * didn't run it, manually mark the step as completed */
+		info("No packs need to be downloaded\n");
+	}
+	timelist_timer_stop(globals.global_times); // closing: Download packs
+
+	/* Download missing files */
+	timelist_timer_start(globals.global_times, "Download missing files");
+	ret = download_fullfiles(to_install_files, NULL);
+	timelist_timer_stop(globals.global_times); // closing: Download missing files
+	if (ret) {
+		/* make sure the return code is positive */
+		error("Could not download some files from bundles, aborting bundle installation\n");
+		ret = SWUPD_COULDNT_DOWNLOAD_FILE;
+	}
+
+	return ret;
+}
+
 /* Bundle install one ore more bundles passed in bundles
  * param as a null terminated array of strings
  */
 enum swupd_code execute_bundle_add(struct list *bundles_list, int version)
 {
 	int ret = 0;
-	struct list *bundles_to_install = NULL;
 	struct manifest *mom;
+	struct list *bundles = NULL;
+	struct list *installed_bundles = NULL;
+	struct list *to_install_bundles = NULL;
+	struct list *installed_files = NULL;
+	struct list *to_install_files = NULL;
+	struct list *iter;
+	int already_installed = 0;
+	int invalid_bundles = 0;
+	int bundles_installed = 0;
+	int dependencies_installed = 0;
+	int bundles_requested;
+
 	char *bundles_list_str = NULL;
 	bool mix_exists;
 
+	/* check if the user is using an alias for a bundle */
+	timelist_timer_start(globals.global_times, "Prepend bundles to list");
+	bundles = generate_bundles_to_install(bundles_list);
+	timelist_timer_stop(globals.global_times); // closing: Prepend bundles to list
+
+	/* get the current Mom */
 	timelist_timer_start(globals.global_times, "Load MoM");
 	mix_exists = (check_mix_exists() & system_on_mix());
 	mom = load_mom(version, mix_exists, NULL);
@@ -418,19 +351,92 @@ enum swupd_code execute_bundle_add(struct list *bundles_list, int version)
 	}
 	timelist_timer_stop(globals.global_times); // closing: Load MoM
 
-	timelist_timer_start(globals.global_times, "Prepend bundles to list");
-	bundles_to_install = generate_bundles_to_install(bundles_list);
-	timelist_timer_stop(globals.global_times); // closing: Prepend bundles to list
-
 	timelist_timer_start(globals.global_times, "Install bundles");
-	ret = install_bundles(bundles_to_install, mom);
+
+	timelist_timer_start(globals.global_times, "Add bundles and recurse");
+	/* get a list of bundles already installed in the system */
+	info("Loading required manifests...\n");
+	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
+	ret = mom_get_manifests_list(mom, &installed_bundles, is_installed_bundle_data);
+	if (ret) {
+		ret = SWUPD_COULDNT_LOAD_MANIFEST;
+		goto clean_and_exit;
+	}
+
+	/* get a list of bundles to install (get dependencies) */
+	ret = compute_bundle_dependecies(mom, bundles, &to_install_bundles, &already_installed, &invalid_bundles);
+	if (ret) {
+		ret = SWUPD_RECURSE_MANIFEST;
+		goto clean_and_exit;
+	}
+	if (!to_install_bundles) {
+		goto clean_and_exit;
+	}
+	timelist_timer_stop(globals.global_times); // closing: Add bundles and recurse
+
+	/* Get a list with all files needed to be installed for the requested bundles */
+	timelist_timer_start(globals.global_times, "Consolidate files from bundles");
+	installed_files = files_from_bundles(installed_bundles);
+	installed_files = filter_out_deleted_files(installed_files);
+	installed_files = consolidate_files(installed_files);
+	to_install_files = files_from_bundles(to_install_bundles);
+	to_install_files = filter_out_deleted_files(to_install_files);
+	to_install_files = consolidate_files(to_install_files);
+	timelist_timer_stop(globals.global_times); // closing: Consolidate files from bundles
+
+	if (!to_install_files) {
+		goto clean_and_exit;
+	}
+
+	/* Check if we have enough space */
+	ret = check_disk_space_availability(to_install_bundles);
+	if (ret) {
+		ret = SWUPD_DISK_SPACE_ERROR;
+		goto clean_and_exit;
+	}
+
+	/* get necessary packs and/or files */
+	ret = download_content(mom, to_install_bundles, to_install_files);
+	if (ret) {
+		goto clean_and_exit;
+	}
+
+	mom->files = installed_files;
+	ret = install_files(mom, to_install_files);
+
 	timelist_timer_stop(globals.global_times); // closing: Install bundles
 
 	timelist_print_stats(globals.global_times);
 
-	manifest_free(mom);
 clean_and_exit:
-	bundles_list_str = string_join(", ", bundles_to_install);
+	iter = list_head(to_install_bundles);
+	/* count how many of the requested bundles were actually installed, note that the
+	 * to_install_bundles list could also have extra dependencies */
+	while (iter) {
+		struct manifest *to_install_manifest;
+		to_install_manifest = iter->data;
+		iter = iter->next;
+		if (is_installed_bundle(to_install_manifest->component)) {
+			if (string_in_list(to_install_manifest->component, bundles)) {
+				bundles_installed++;
+				track_bundle(to_install_manifest->component);
+			} else {
+				dependencies_installed++;
+			}
+		}
+	}
+
+	bundles_requested = list_len(bundles);
+	print_summary(bundles_requested, already_installed, bundles_installed, dependencies_installed, ret);
+
+	/* if one or more of the requested bundles was invalid, and
+	 * there is no other error return SWUPD_INVALID_BUNDLE */
+	if (invalid_bundles > 0 && ret == SWUPD_OK) {
+		ret = SWUPD_INVALID_BUNDLE;
+	}
+
+	/* report command result to telemetry */
+	bundles_list_str = string_join(", ", bundles);
 	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
 		  "bundleadd",
 		  "bundles=%s\n"
@@ -442,7 +448,12 @@ clean_and_exit:
 		  ret,
 		  total_curl_sz);
 
-	list_free_list_and_data(bundles_to_install, free);
+	list_free_list(installed_files);
+	list_free_list(to_install_files);
+	list_free_list_and_data(to_install_bundles, manifest_free_data);
+	list_free_list_and_data(installed_bundles, manifest_free_data);
+	list_free_list_and_data(bundles, free);
+	manifest_free(mom);
 	free_string(&bundles_list_str);
 
 	return ret;

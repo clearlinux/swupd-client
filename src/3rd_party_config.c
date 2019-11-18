@@ -17,8 +17,6 @@
  *
  */
 
-#include "3rd_party_internal.h"
-#include "config.h"
 #include "lib/config_parser.h"
 #include "lib/config_writer.h"
 #include "lib/list.h"

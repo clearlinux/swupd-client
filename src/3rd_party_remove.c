@@ -18,8 +18,7 @@
  */
 
 #define _GNU_SOURCE
-#include "3rd_party_internal.h"
-#include "config.h"
+#include "swupd.h"
 
 #ifdef THIRDPARTY
 

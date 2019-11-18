@@ -98,10 +98,22 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 	int ret_code = SWUPD_OK;
 	int ret = SWUPD_OK;
 
+	/*
+	 * Steps for 3rd-party bundle-add:
+	 *
+	 *  1) load_manifests
+	 *  2) download_packs
+	 *  3) extract_packs
+	 *  4) validate_fullfiles
+	 *  5) download_fullfiles
+	 *  6) extract_fullfiles
+	 *  7) install_files
+	 */
+
 	// TODO(s):
 	// 1) if the bundle is in multiple repos we need to ask the user to choose one
 
-	const int steps_in_bundleadd = 8;
+	const int steps_in_bundleadd = 7;
 
 	if (!parse_options(argc, argv)) {
 		print_help();
@@ -191,6 +203,9 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 		 * the one bundle we want to install in this iteration */
 		struct list *bundle_to_install = NULL;
 		bundle_to_install = list_append_data(bundle_to_install, bundle);
+
+		info("\nBundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons\n\n");
+		globals.no_scripts = true;
 
 		ret = execute_bundle_add(bundle_to_install, selected_repo->version);
 

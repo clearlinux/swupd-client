@@ -37,6 +37,7 @@ test_setup() {
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Failed to retrieve 10 MoM manifest
 		Error: Cannot load official manifest MoM for version 10
+		Failed to install 1 of 1 bundles
 	EOM
 	)
 	assert_is_output "$expected_output"

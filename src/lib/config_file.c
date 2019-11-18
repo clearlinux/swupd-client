@@ -118,6 +118,12 @@ int config_write_section(FILE *file, const char *section)
 	if (!file) {
 		return -EINVAL;
 	}
+
+	// Break line if not first item in file
+	if (ftell(file) > 0) {
+		fprintf(file, "\n");
+	}
+
 	ret = fprintf(file, "[%s]\n", section);
 
 	return ret < 0 ? ret : 0;

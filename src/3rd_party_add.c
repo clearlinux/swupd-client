@@ -18,6 +18,7 @@
  */
 
 #define _GNU_SOURCE
+#include "3rd_party_repos.h"
 #include "swupd.h"
 
 #ifdef THIRDPARTY
@@ -83,7 +84,7 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	}
 
 	/* The last two in reverse are the repo-name, repo-url */
-	if (add_repo_config(argv[argc - 2], argv[argc - 1]) == 0) {
+	if (third_party_add_repo(argv[argc - 2], argv[argc - 1]) == 0) {
 		info("Repository %s added successfully\n", argv[argc - 2]);
 	} else {
 		ret = SWUPD_COULDNT_WRITE_FILE;

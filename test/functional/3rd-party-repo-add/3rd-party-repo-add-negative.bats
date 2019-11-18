@@ -10,7 +10,7 @@ load "../testlib"
 	run sudo sh -c "$SWUPD 3rd-party add $SWUPD_OPTS"
 	assert_status_is "$SWUPD_INVALID_OPTION"
 	expected_output=$(cat <<-EOM
-			Error: The positional args: repo-name and repo-url are missing
+		Error: The positional args: repo-name and repo-url are missing
 	EOM
 	)
 	assert_in_output "$expected_output"
@@ -18,7 +18,7 @@ load "../testlib"
 	run sudo sh -c "$SWUPD 3rd-party add test-repo1 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_INVALID_OPTION"
 	expected_output=$(cat <<-EOM
-			Error: The positional args: repo-url is missing
+		Error: The positional args: repo-url is missing
 	EOM
 	)
 	assert_in_output "$expected_output"
@@ -26,7 +26,7 @@ load "../testlib"
 	run sudo sh -c "$SWUPD 3rd-party add test-repo1 http://abc.com junk_positional $SWUPD_OPTS"
 	assert_status_is "$SWUPD_INVALID_OPTION"
 	expected_output=$(cat <<-EOM
-			Error: Unexpected arguments
+		Error: Unexpected arguments
 	EOM
 	)
 	assert_in_output "$expected_output"
@@ -38,7 +38,7 @@ load "../testlib"
 	run sudo sh -c "$SWUPD 3rd-party add test-repo1 https://www.xyz.com $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-			Repository test-repo1 added successfully
+		Repository test-repo1 added successfully
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -48,19 +48,6 @@ load "../testlib"
 	expected_output=$(cat <<-EOM
 		Error: The repo: test-repo1 already exists
 		Error: Failed to add repo: test-repo1 to config
-	EOM
-	)
-	assert_is_output "$expected_output"
-
-}
-
-@test "TRA005: Negative test, Invalid URL" {
-
-	run sudo sh -c "$SWUPD 3rd-party add test-repo1 www.xyz.com $SWUPD_OPTS"
-	assert_status_is "$SWUPD_COULDNT_WRITE_FILE"
-	expected_output=$(cat <<-EOM
-			Error: Invalid argument: repo-url
-
 	EOM
 	)
 	assert_is_output "$expected_output"

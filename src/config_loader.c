@@ -28,8 +28,6 @@ bool config_loader_set_opt(char *section, char *opt, char *value, void *data)
 {
 	struct config_loader_data *cl = data;
 	const struct option *options;
-	char *lvalue = NULL;
-	char *lsection = NULL;
 	char *flag = NULL;
 	bool ret = false;
 
@@ -47,8 +45,7 @@ bool config_loader_set_opt(char *section, char *opt, char *value, void *data)
 
 	/* options within a section are by default considered to be global */
 	if (section) {
-		lsection = str_tolower(section);
-		if (!is_from_global_section(lsection) && !is_from_command_section(lsection, cl->command)) {
+		if (!is_from_global_section(section) && !is_from_command_section(section, cl->command)) {
 			/* values being parsed are from a command not currently
 			 * running, we are not interested in these */
 			ret = true;
@@ -62,7 +59,6 @@ bool config_loader_set_opt(char *section, char *opt, char *value, void *data)
 	/* search the option from within the available options */
 	while (options->name != NULL) {
 		if (strcmp(flag, options->name) == 0) {
-			lvalue = str_tolower(value);
 			/* if it was not a long option try looking at the global short
 			 * options first... */
 			ret = cl->parse_global_opt(options->val, value);
@@ -83,8 +79,6 @@ bool config_loader_set_opt(char *section, char *opt, char *value, void *data)
 	}
 
 exit:
-	free_string(&lvalue);
-	free_string(&lsection);
 	free_string(&flag);
 	return ret;
 }

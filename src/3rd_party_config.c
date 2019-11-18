@@ -17,8 +17,7 @@
  *
  */
 
-#include "lib/config_parser.h"
-#include "lib/config_writer.h"
+#include "lib/config_file.h"
 #include "lib/list.h"
 #include "lib/sys.h"
 #include "swupd.h"
@@ -79,7 +78,7 @@ static bool repo_config_read(void)
 	bool parse_ret = false;
 	char *repo_config_file_path = get_repo_config_path();
 
-	parse_ret = config_parse(repo_config_file_path, parse_key_values, NULL);
+	parse_ret = config_file_parse(repo_config_file_path, parse_key_values, NULL);
 	free_string(&repo_config_file_path);
 	return parse_ret;
 }

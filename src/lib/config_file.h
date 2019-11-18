@@ -1,5 +1,5 @@
-#ifndef __CONFIG_PARSER__
-#define __CONFIG_PARSER__
+#ifndef __CONFIG_FILE__
+#define __CONFIG_FILE__
 
 /**
  * @file
@@ -29,7 +29,27 @@ typedef bool (*parse_config_fn_t)(char *section, char *key, char *value, void *d
  * @returns True if there were no errors when parsing and processing the parsed options,
  *          False otherwise
  */
-bool config_parse(const char *filename, parse_config_fn_t parse_config_fn, void *data);
+bool config_file_parse(const char *filename, parse_config_fn_t parse_config_fn, void *data);
+
+/**
+ * @brief Writes a section to ini file using string as an argument.
+ *
+ * @param FILE file pointer *FILE to the config file
+ * @param section string to written to config file
+ * @returns 0 if no errors or negative on any error
+ */
+int config_write_section(FILE *file, const char *section);
+
+/**
+ * @brief Writes a config(key,value) line to ini file using key,value strings as an
+ * argument
+ *
+ * @param FILE file pointer *FILE to the config file
+ * @param key string
+ * @param value string
+ * @returns 0 if no errors or negative on any error
+ */
+int config_write_config(FILE *file, const char *key, const char *value);
 
 #ifdef __cplusplus
 }

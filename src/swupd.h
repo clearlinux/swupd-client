@@ -15,7 +15,7 @@
 #include "config_loader.h"
 #include "globals.h"
 #include "lib/archives.h"
-#include "lib/config_parser.h"
+#include "lib/config_file.h"
 #include "lib/formatter_json.h"
 #include "lib/list.h"
 #include "lib/log.h"

@@ -66,10 +66,8 @@ swupd_SOURCES = \
 	src/info.c \
 	src/lib/archives.c \
 	src/lib/archives.h \
-	src/lib/config_parser.c \
-	src/lib/config_parser.h \
-	src/lib/config_writer.c \
-	src/lib/config_writer.h \
+	src/lib/config_file.c \
+	src/lib/config_file.h \
 	src/lib/formatter_json.c \
 	src/lib/formatter_json.h \
 	src/lib/hashmap.c \

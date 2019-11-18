@@ -699,7 +699,7 @@ static bool load_flags_in_config(char *command, struct option *opts_array, const
 			continue;
 		}
 		string_or_die(&config_file, "%s/config", tok);
-		if (config_parse(config_file, config_loader_set_opt, &loader_data)) {
+		if (config_file_parse(config_file, config_loader_set_opt, &loader_data)) {
 			config_found = true;
 		}
 		free_string(&config_file);

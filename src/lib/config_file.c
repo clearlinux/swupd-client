@@ -19,18 +19,19 @@
 
 #define _GNU_SOURCE
 
+#include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config_parser.h"
+#include "config_file.h"
 #include "log.h"
 #include "macros.h"
 #include "strings.h"
 
 #define CONFIG_LINE_MAXLEN (PATH_MAX * 2)
 
-bool config_parse(const char *filename, parse_config_fn_t parse_config_fn, void *data)
+bool config_file_parse(const char *filename, parse_config_fn_t parse_config_fn, void *data)
 {
 	FILE *config_file;
 	char line[CONFIG_LINE_MAXLEN];
@@ -108,4 +109,29 @@ close_and_exit:
 	free_string(&section);
 	fclose(config_file);
 	return ret;
+}
+
+int config_write_section(FILE *file, const char *section)
+{
+	int ret = 0;
+
+	if (!file) {
+		return -EINVAL;
+	}
+	ret = fprintf(file, "[%s]\n", section);
+
+	return ret < 0 ? ret : 0;
+}
+
+int config_write_config(FILE *file, const char *key, const char *value)
+{
+	int ret = 0;
+
+	if (!file) {
+		return -EINVAL;
+	}
+
+	ret = fprintf(file, "%s=%s\n", key, value);
+
+	return ret < 0 ? ret : 0;
 }

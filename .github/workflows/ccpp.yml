@@ -23,6 +23,9 @@ jobs:
     - name: run unit tests
       run:  make check
 
+    - name: run distcheck
+      run:  make distcheck
+
     - name: print status
       if: failure()
       run: cat test-suite.log

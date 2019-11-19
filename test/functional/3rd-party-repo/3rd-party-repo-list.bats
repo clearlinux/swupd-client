@@ -11,16 +11,16 @@ test_setup(){
 
 	contents=$(cat <<- EOM
 		[test1]
-		url=www.abc.com
-		\n
+		url=https://www.abc.com
+
 		[test2]
-		url=www.efg.com
-		\n
+		url=https://www.efg.com
+
 		[test4]
-		url=www.pqr.com
-		\n
+		url=https://www.pqr.com
+
 		[test5]
-		url=www.lmn.com
+		url=https://www.lmn.com
 		\n
 	EOM
 	)
@@ -34,36 +34,20 @@ test_setup(){
 
 test_teardown(){
 
-	run sudo sh -c "rm -r $PATH_PREFIX/opt/3rd-party"
-	run sudo sh -c "rm -r $STATEDIR/3rd_party"
 	destroy_test_environment "$TEST_NAME"
 
 }
 
-@test "TRA006: Basic List of third-party entire repositories" {
+@test "TPR007: Basic List of third-party entire repositories" {
 
 	run sudo sh -c "$SWUPD 3rd-party list $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Repo
-		--------
-		name:	test1
-		url:	www.abc.com
-
-		Repo
-		--------
-		name:	test2
-		url:	www.efg.com
-
-		Repo
-		--------
-		name:	test4
-		url:	www.pqr.com
-
-		Repo
-		--------
-		name:	test5
-		url:	www.lmn.com
+		Swupd 3rd party repositories found: 4
+		test1: https://www.abc.com
+		test2: https://www.efg.com
+		test4: https://www.pqr.com
+		test5: https://www.lmn.com
 	EOM
 	)
 	assert_is_output --identical "$expected_output"

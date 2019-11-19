@@ -18,6 +18,7 @@
  */
 
 #define _GNU_SOURCE
+#include "3rd_party_repos.h"
 #include "swupd.h"
 
 #ifdef THIRDPARTY
@@ -54,6 +55,19 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
+static void list_repos(void)
+{
+	struct list *repos, *l;
+
+	repos = third_party_get_repos();
+	info("Swupd 3rd party repositories found: %d\n", list_len(repos));
+	for (l = repos; l; l = l->next) {
+		struct repo *repo = l->data;
+		info("%s: %s\n", repo->name, repo->url)
+	}
+	list_free_list_and_data(repos, repo_free_data);
+}
+
 enum swupd_code third_party_list_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
@@ -69,10 +83,7 @@ enum swupd_code third_party_list_main(int argc, char **argv)
 	if (ret != SWUPD_OK) {
 		goto finish;
 	}
-
-	if (list_repos()) {
-		ret = SWUPD_NO;
-	}
+	list_repos();
 
 finish:
 	swupd_deinit();

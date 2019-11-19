@@ -45,8 +45,9 @@ static int compare_fullfile(const void *a, const void *b)
 	return file1->last_change - file2->last_change;
 }
 
-static void download_mix_file(struct file *file)
+static int download_mix_file(struct file *file)
 {
+	int ret = -1;
 	char *url, *filename;
 
 	string_or_die(&url, "%s/%i/files/%s.tar", MIX_STATE_DIR, file->last_change, file->hash);
@@ -54,24 +55,29 @@ static void download_mix_file(struct file *file)
 
 	/* Mix content is local, so don't queue files up for curl downloads */
 	if (link_or_rename(url, filename) == 0) {
-		untar_full_download(file);
+		ret = untar_full_download(file);
 	} else {
 		warn("Failed to copy local mix file: %s\n", file->staging);
 	}
 
 	free_string(&url);
 	free_string(&filename);
+
+	return ret;
 }
 
-static void download_file(struct swupd_curl_parallel_handle *download_handle, struct file *file)
+static int download_file(struct swupd_curl_parallel_handle *download_handle, struct file *file)
 {
+	int ret = -1;
 	char *url, *filename;
 
 	string_or_die(&filename, "%s/download/.%s.tar", globals.state_dir, file->hash);
 	string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
-	swupd_curl_parallel_download_enqueue(download_handle, url, filename, file->hash, file);
+	ret = swupd_curl_parallel_download_enqueue(download_handle, url, filename, file->hash, file);
 	free_string(&url);
 	free_string(&filename);
+
+	return ret;
 }
 
 static bool download_successful(void *data)
@@ -246,9 +252,9 @@ int download_fullfiles(struct list *files, int *num_downloads)
 		file = iter->data;
 
 		if (file->is_mix) {
-			download_mix_file(file);
+			ret = download_mix_file(file);
 		} else {
-			download_file(download_handle, file);
+			ret = download_file(download_handle, file);
 		}
 
 		/* fall back for progress reporting when the download size
@@ -256,6 +262,12 @@ int download_fullfiles(struct list *files, int *num_downloads)
 		if (download_progress.total_download_size == 0) {
 			complete++;
 			progress_report(complete, list_length);
+		}
+
+		if (ret < 0) {
+			swupd_curl_parallel_download_cancel(download_handle);
+			list_free_list(need_download);
+			goto out;
 		}
 	}
 	list_free_list(need_download);

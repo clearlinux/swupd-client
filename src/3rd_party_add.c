@@ -71,6 +71,7 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 
 	enum swupd_code ret = SWUPD_OK;
 	const int step_in_third_party_add = 1;
+	const char *name, *url;
 
 	if (!parse_options(argc, argv)) {
 		print_help();
@@ -83,8 +84,15 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 		goto finish;
 	}
 
+	name = argv[argc - 2];
+	url = argv[argc - 1];
+
+	if (!is_url_allowed(url)) {
+		return SWUPD_INVALID_OPTION;
+	}
+
 	/* The last two in reverse are the repo-name, repo-url */
-	if (third_party_add_repo(argv[argc - 2], argv[argc - 1]) == 0) {
+	if (third_party_add_repo(name, url) == 0) {
 		info("Repository %s added successfully\n", argv[argc - 2]);
 	} else {
 		ret = SWUPD_COULDNT_WRITE_FILE;

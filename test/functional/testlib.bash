@@ -1780,6 +1780,10 @@ destroy_test_fs() { # swupd_function
 
 create_config_file() { # swupd_function
 
+	if [ "$("$SWUPD" --version | grep "config file path" | awk '{print $4}')" != "./testconfig" ]; then
+		skip "Tests that use a config file require swupd to be built with '--with-config-file-path=./testconfig'"
+	fi
+
 	if [ -e "$SWUPD_CONFIG_FILE" ]; then
 		destroy_config_file
 	fi
@@ -3248,6 +3252,9 @@ list_tests() { # swupd_function
 
 setup() {
 
+	TESTLIB_WD="$(pwd)"
+	export TESTLIB_WD
+
 	print "\\n\\n\\n$sep"
 	print "$alt_sep"
 	print "$sep\\n"
@@ -3311,6 +3318,12 @@ setup() {
 }
 
 teardown() {
+
+	# make sure to go back to the original working directory if the user
+	# changed it during a test
+	if [ "$(pwd)" != "$TESTLIB_WD" ]; then
+		cd "$TESTLIB_WD" || terminate "there was an error going back to the original working directory"
+	fi
 
 	local index
 	# if the user wants to preserve the output and we are using an global environment

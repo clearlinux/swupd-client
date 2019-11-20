@@ -40,7 +40,7 @@ test_setup() {
 	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo/bar/file_2
 	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$REPO_STATEDIR"/bundles/test-bundle2
+	assert_file_exists "$TPSTATEDIR"/bundles/test-bundle2
 
 }
 
@@ -96,7 +96,7 @@ test_setup() {
 	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo/bar/file_2
 	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$REPO_STATEDIR"/bundles/test-bundle2
+	assert_file_exists "$TPSTATEDIR"/bundles/test-bundle2
 	assert_file_not_exists "$TARGETDIR"/opt/3rd_party/test-repo/usr/share/clear/bundles/test-bundle1
 
 	# same scenario with the arguments switched
@@ -125,5 +125,5 @@ test_setup() {
 	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo/bar/file_2
 	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$REPO_STATEDIR"/bundles/test-bundle2
+	assert_file_exists "$TPSTATEDIR"/bundles/test-bundle2
 }

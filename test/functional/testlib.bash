@@ -11,8 +11,6 @@ export TEST_NAME_SHORT="$TEST_NAME"
 export THEME_DIRNAME
 export FUNC_DIR
 export SWUPD_DIR="$FUNC_DIR/../.."
-export SWUPD_CONFIG_DIR="$TEST_NAME"/testconfig
-export SWUPD_CONFIG_FILE="$SWUPD_CONFIG_DIR"/config
 
 # detect where the swupd binary is
 if [ -e "$SWUPD" ]; then
@@ -1429,7 +1427,10 @@ create_third_party_repo() { #swupd_function
 	} | sudo tee -a "$STATEDIR"/3rd_party/repo.ini > /dev/null
 
 	sudo chmod -R 0700 "$STATEDIR"
-	export REPO_STATEDIR="$repo_state_dir"
+	export TPSTATEDIR="$repo_state_dir"
+	export TPWEBDIR="$env_name"/3rd_party/"$repo_name"
+	debug_msg "3rd-party repo state dir: $TPSTATEDIR"
+	debug_msg "3rd-party repo content dir: $TPWEBDIR"
 
 }
 
@@ -1845,26 +1846,45 @@ destroy_test_fs() { # swupd_function
 
 create_config_file() { # swupd_function
 
+	if [ ! -d "$TEST_NAME" ]; then
+		terminate "The TEST_NAME needs to be specified to create a config file"
+	fi
+
+	# these values have to be exported in this function because the
+	# TEST_NAME changes during the setup
+	export SWUPD_CONFIG_DIR="$TEST_NAME"/testconfig
+	export SWUPD_CONFIG_FILE="$SWUPD_CONFIG_DIR"/config
+	debug_msg "Creating config file $SWUPD_CONFIG_FILE..."
+
 	if [ "$("$SWUPD" --version | grep "config file path" | awk '{print $4}')" != "./testconfig" ]; then
 		skip "Tests that use a config file require swupd to be built with '--with-config-file-path=./testconfig'"
 	fi
 
 	if [ -e "$SWUPD_CONFIG_FILE" ]; then
+		debug_msg "A config file already existed in that location, deleting it..."
 		destroy_config_file
 	fi
 
 	sudo mkdir -p "$SWUPD_CONFIG_DIR"
 	sudo touch "$SWUPD_CONFIG_FILE"
+	debug_msg "Config file created successfully"
 
 }
 
 destroy_config_file() { # swupd_function
 
+	if [ ! -d "$SWUPD_CONFIG_DIR" ]; then
+		print "There was no directory $SWUPD_CONFIG_DIR, nothing was deleted"
+		return
+	fi
+
+	debug_msg "Deleting config file directory $SWUPD_CONFIG_DIR"
 	sudo rm -rf "$SWUPD_CONFIG_DIR"
 	# we need to make sure the config file is deleted before
 	# another test is run so it does not interfere with it since
 	# the config file is common and shared by all commands
 	wait_for_deletion "$SWUPD_CONFIG_DIR"
+	debug_msg "Config file directory deleted successfully"
 
 }
 

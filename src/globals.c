@@ -682,11 +682,21 @@ static bool load_flags_in_config(char *command, struct option *opts_array, const
 	bool config_found = false;
 #ifdef CONFIG_FILE_PATH
 	// load configuration values from the config file
-	struct config_loader_data loader_data = { command, opts_array, global_parse_opt, opts->parse_opt };
 	struct stat st;
 	char *ctx = NULL;
 	char *config_file = NULL;
 	char *str = strdup_or_die(CONFIG_FILE_PATH);
+	char *full_command = NULL;
+
+	/* the command we get here can actually be a subcommand, if that
+	 * is the case we need to build the section name as "command-subcommand",
+	 * so we can distinguish it the config file */
+	if (strcmp(globals.swupd_argv[1], "3rd-party") == 0) {
+		string_or_die(&full_command, "%s-%s", "3rd-party", command);
+	} else {
+		full_command = strdup_or_die(command);
+	}
+	struct config_loader_data loader_data = { full_command, opts_array, global_parse_opt, opts->parse_opt };
 
 	for (char *tok = strtok_r(str, ":", &ctx); tok; tok = strtok_r(NULL, ":", &ctx)) {
 		/* load values from all configuration files found, starting from
@@ -705,6 +715,7 @@ static bool load_flags_in_config(char *command, struct option *opts_array, const
 		free_string(&config_file);
 	}
 
+	free_string(&full_command);
 	free_string(&str);
 #endif
 	return config_found;

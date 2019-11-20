@@ -343,3 +343,16 @@
 #
 
 
+[3rd-party-bundle-add]
+
+#
+# Options for the "swupd 3rd-party bundle-add" command
+#
+
+# Do not check free disk space before adding bundle (boolean value)
+#skip_diskspace_check=<true/false>
+
+# Do not install optional bundles, also-add flag in Manifests (boolean value)
+#skip_optional=<true/false>
+
+

@@ -30,7 +30,7 @@ global_teardown() {
 
 }
 
-@test "TRA005: Trying to add a http repo" {
+@test "TPR005: Trying to add a http repo" {
 
 	run sudo sh -c "$SWUPD 3rd-party add my_repo http://example.com/swupd-file $SWUPD_OPTS"
 
@@ -44,7 +44,7 @@ global_teardown() {
 
 }
 
-@test "TRA006: Forcing a http repo add" {
+@test "TPR006: Forcing a http repo add" {
 
 	run sudo sh -c "$SWUPD 3rd-party add my_repo http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS"
 

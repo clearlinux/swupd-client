@@ -116,7 +116,7 @@ jobs:
       if: failure()
       run: cat test-suite.log
 
-  test_os_install:
+  test_os_install_3rd_party_repo:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -129,7 +129,7 @@ jobs:
       run:  test/functional/generate-cert.prereq
 
     - name: run check
-      run: env TESTS="$(find test/functional/os-install -name *.bats -printf '%p ')" make -e -j2 check
+      run: env TESTS="$(find test/functional/{os-install,3rd-party-repo} -name *.bats -printf '%p ')" make -e -j2 check
 
     - name: print status
       if: failure()

@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-@test "TRA001: Add a single repo" {
+@test "TPR001: Add a single repo" {
 
 	run sudo sh -c "$SWUPD 3rd-party add test-repo1 https://xyz.com $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
@@ -26,7 +26,7 @@ load "../testlib"
 
 }
 
-@test "TRA002: Add multiple repos in repo config" {
+@test "TPR002: Add multiple repos in repo config" {
 
 	# Add 5 repos in a row one by one
 	run sudo sh -c "$SWUPD 3rd-party add test-repo1 https://xyz.com $SWUPD_OPTS"

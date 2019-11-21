@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-@test "TRA003: Negative test, repo add usage" {
+@test "TPR003: Negative test, repo add usage" {
 
 	run sudo sh -c "$SWUPD 3rd-party add $SWUPD_OPTS"
 	assert_status_is "$SWUPD_INVALID_OPTION"
@@ -33,7 +33,7 @@ load "../testlib"
 
 }
 
-@test "TRA004: Negative test, Add an already added repo" {
+@test "TPR004: Negative test, Add an already added repo" {
 
 	run sudo sh -c "$SWUPD 3rd-party add test-repo1 https://www.xyz.com $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"

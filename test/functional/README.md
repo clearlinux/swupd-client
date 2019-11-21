@@ -123,22 +123,22 @@ or more of the [assertions](#assertions) provided by the test library.
 
 ### Test Groups
 
-| Main Business Scenarios                        | Commands      | Group ID |
-| ---------------------------------------------- | ------------- | -------- |
-| Install new bundles                            | bundle-add    | ADD      |
-| Uninstall bundles                              | bundle-remove | REM      |
-| List bundles                                   | bundle-list   | LST      |
-| Verify installed content for a an OS version   | verify        | VER      |
-| Update installed bundles                       | update        | UPD      |
-| Enable / disable automatic system updates      | autoupdate    | AUT      |
-| Check if a new OS version is available         | check-update  | CHK      |
-| Search Clear Linux for a binary or library     | search        | SRH      |
-| Dump the HMAC hash of a file                   | hashdump      | HSD      |
-| Show version and update URLs                   | info          | INF      |
-| Clean cached files                             | clean         | CLN      |
-| Configure mirror URL for swupd content         | mirror        | MIR      |
-| Usability                                      | N/A           | USA      |
-| 3rd-party repo add                             | 3rd-party-repo-add | TRA |
+| Main Business Scenarios                        | Commands       | Group ID |
+| -----------------------------------------------| ---------------| ---------|
+| Install new bundles                            | bundle-add     | ADD      |
+| Uninstall bundles                              | bundle-remove  | REM      |
+| List bundles                                   | bundle-list    | LST      |
+| Verify installed content for a an OS version   | verify         | VER      |
+| Update installed bundles                       | update         | UPD      |
+| Enable / disable automatic system updates      | autoupdate     | AUT      |
+| Check if a new OS version is available         | check-update   | CHK      |
+| Search Clear Linux for a binary or library     | search         | SRH      |
+| Dump the HMAC hash of a file                   | hashdump       | HSD      |
+| Show version and update URLs                   | info           | INF      |
+| Clean cached files                             | clean          | CLN      |
+| Configure mirror URL for swupd content         | mirror         | MIR      |
+| Usability                                      | N/A            | USA      |
+| 3rd-party repo                                 | 3rd-party-repo | TPR      |
 
 ### Test Principles
 

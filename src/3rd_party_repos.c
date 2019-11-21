@@ -29,6 +29,11 @@ static char *get_repo_config_path(void)
 	return str_or_die("%s/%s/%s", globals.state_dir, "3rd_party", "repo.ini");
 }
 
+static int repo_name_cmp(const void *repo, const void *name)
+{
+	return strcmp(((struct repo *)repo)->name, name);
+}
+
 /**
  * @brief This function is called by the repo ini parse.
  *
@@ -43,14 +48,24 @@ static bool parse_key_values(char *section, char *key, char *value, void *data)
 	struct repo *repo;
 	struct list **repos = data;
 
-	//TODO: Extend to support other fields on the config file too.
-	//TODO: Don't load duplicated entries in the list
-	if (strcasecmp(key, "url") == 0) {
+	repo = list_search(*repos, section, repo_name_cmp);
+	if (!repo) {
 		repo = calloc(1, sizeof(struct repo));
 		ON_NULL_ABORT(repo);
 		repo->name = strdup_or_die(section);
-		repo->url = strdup_or_die(value);
 		*repos = list_append_data(*repos, repo);
+	}
+
+	if (strcasecmp(key, "url") == 0) {
+		if (repo->url) {
+			free(repo->url);
+		}
+		repo->url = strdup_or_die(value);
+	} else if (strcasecmp(key, "version") == 0) {
+		if (repo->version) {
+			free(repo->version);
+		}
+		repo->version = strdup_or_die(value);
 	}
 
 	return true;
@@ -72,15 +87,11 @@ struct list *third_party_get_repos(void)
 	return repos;
 }
 
-static int repo_name_cmp(const void *repo, const void *name)
-{
-	return strcmp(((struct repo *)repo)->name, name);
-}
-
 void repo_free(struct repo *repo)
 {
 	free(repo->name);
 	free(repo->url);
+	free(repo->version);
 	free(repo);
 }
 

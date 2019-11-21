@@ -45,7 +45,7 @@ _swupd()
 		opts="$global --download --status --force --migrate --allow-mix-collisions --keepcache --update-search-file-index "
 		break;;
 		("bundle-add")
-		opts="$global --skip-diskspace-check "
+		opts="$global --skip-diskspace-check --skip-optional "
 		break;;
 		("bundle-remove")
 		opts="$global --force --recursive "
@@ -84,7 +84,7 @@ _swupd()
 		opts="$global --version --manifest --fix --picky --picky-tree --picky-whitelist --install --quick --force --install "
 		break;;
 		("3rd-party")
-		opts="$global add remove list"
+		opts="$global add remove list bundle-add"
 		break;;
 		("add")
 		opts="$global --repo"
@@ -99,19 +99,23 @@ _swupd()
 	then
 	case "${COMP_WORDS[$i]}" in
 		("bundle-add")
-		MoM=""
-		if [ -r /var/tmp/swupd/Manifest.MoM ]
-		then MoM=/var/tmp/swupd/Manifest.MoM
-		elif [ -r /var/lib/swupd/version ] &&
-			   installed=$(</var/lib/swupd/version) &&
-			   [ -r "/var/lib/swupd/$installed/Manifest.MoM" ]
-		then
-			MoM=/var/lib/swupd/$installed/Manifest.MoM
+		# only show the list of upstream bundles if not using "3rd-party bundle-add"
+		if [ "${COMP_WORDS[$i - 1]}" != "3rd-party" ]; then
+			MoM=""
+			if [ -r /var/tmp/swupd/Manifest.MoM ]
+			then MoM=/var/tmp/swupd/Manifest.MoM
+			elif [ -r /var/lib/swupd/version ] &&
+				   installed=$(</var/lib/swupd/version) &&
+				   [ -r "/var/lib/swupd/$installed/Manifest.MoM" ]
+			then
+				MoM=/var/lib/swupd/$installed/Manifest.MoM
+			fi
+			if [ -n "$MoM" ]
+			then
+				opts+="$( sed '/^[^M]/d' "$MoM" | cut -f4 | LC_ALL=C sort )"
+			fi
 		fi
-		if [ -n "$MoM" ]
-		then
-			opts+="$( sed '/^[^M]/d' "$MoM" | cut -f4 | LC_ALL=C sort )"
-		fi ;;
+		;;
 		("bundle-remove")
 		opts+=" $(unset CDPATH; test -d /usr/share/clear/bundles && \
 			find /usr/share/clear/bundles/ -maxdepth 1 -type f ! -name os-core -printf '%f ')"

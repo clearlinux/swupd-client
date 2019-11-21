@@ -81,6 +81,7 @@ void repo_free(struct repo *repo)
 {
 	free(repo->name);
 	free(repo->url);
+	free(repo);
 }
 
 void repo_free_data(void *data)

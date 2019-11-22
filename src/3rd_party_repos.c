@@ -29,7 +29,7 @@ static char *get_repo_config_path(void)
 	return str_or_die("%s/%s/%s", globals.state_dir, "3rd_party", "repo.ini");
 }
 
-static int repo_name_cmp(const void *repo, const void *name)
+int repo_name_cmp(const void *repo, const void *name)
 {
 	return strcmp(((struct repo *)repo)->name, name);
 }

@@ -73,6 +73,11 @@ int third_party_remove_repo(char *repo_name);
  */
 int third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo);
 
+/**
+ * @brief strcmp like function to search for a repo based on its name
+ */
+int repo_name_cmp(const void *repo, const void *name);
+
 #endif
 
 #ifdef __cplusplus

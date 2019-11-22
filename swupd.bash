@@ -114,6 +114,8 @@ _swupd()
 			then
 				opts+="$( sed '/^[^M]/d' "$MoM" | cut -f4 | LC_ALL=C sort )"
 			fi
+		else
+			opts+="--repo"
 		fi
 		;;
 		("bundle-remove")

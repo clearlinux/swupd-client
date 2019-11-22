@@ -89,9 +89,11 @@ struct list *third_party_get_repos(void)
 
 void repo_free(struct repo *repo)
 {
-	free(repo->name);
-	free(repo->url);
-	free(repo->version);
+	if (repo) {
+		free(repo->name);
+		free(repo->url);
+		free(repo->version);
+	}
 	free(repo);
 }
 
@@ -142,7 +144,33 @@ exit:
 	return ret;
 }
 
-static int adjust_repo_config_file()
+static int write_repo(FILE *fp, struct repo *repo)
+{
+	int ret;
+
+	ret = config_write_section(fp, repo->name);
+	if (ret) {
+		return ret;
+	}
+
+	if (repo->url) {
+		ret = config_write_config(fp, "url", repo->url);
+		if (ret) {
+			return ret;
+		}
+	}
+
+	if (repo->version) {
+		ret = config_write_config(fp, "version", repo->version);
+		if (ret) {
+			return ret;
+		}
+	}
+
+	return 0;
+}
+
+static int overwrite_repo_config_file(struct list *repos)
 {
 	struct list *repo;
 	int ret = 0;
@@ -151,18 +179,19 @@ static int adjust_repo_config_file()
 
 	repo_config_file_path = get_repo_config_path();
 	// open it in trunc mode as we re-write all the contents again
-	fp = fopen(repo_config_file_path, "w+");
-	repo = list_head(repos);
+	fp = fopen(repo_config_file_path, "w");
+	if (!fp) {
+		error("Impossible to write to file %s", repo_config_file_path);
+		goto exit;
+	}
+
+	repo = repos;
 	while (repo) {
-		// If we are here, we are cleared to write to file
-		struct repo *repo_temp = repo->data;
-		ret = config_write_section(fp, repo_temp->name);
-		if (ret) {
+		ret = write_repo(fp, repo->data);
+		if (ret < 0) {
+			error("Write error when trying to write to %s", repo_config_file_path);
 			goto exit;
 		}
-
-		// write url
-		ret = config_write_config(fp, "url", repo_temp->url);
 		repo = repo->next;
 	}
 
@@ -174,54 +203,29 @@ exit:
 	return ret;
 }
 
-/**
- * @brief This callback function helps remove_repo perform an item by item comparision
- * from the repos list.
- *
- * @param repo_item Each repo_item retreived from a list
- * @param repo_name_find A string containing the repo_name the user passed
- *
- * @returns 0 on success ie: a repo is found, any other value on a mismatch to
- * move to next element in list.
- */
-int compare_repos(const void *repo_item, const void *repo_name_find)
-{
-	struct repo *repo = (struct repo *)repo_item;
-	char *repo_name = (char *)repo_name_find;
-	int ret = strncmp(repo->name, repo_name, strlen(repo->name));
-	if (!ret) {
-		info("Match found for repository: %s\n", repo_name);
-	}
-	return ret;
-}
-
-int remove_repo_from_config(char *repo_name)
+int third_party_remove_repo(char *repo_name)
 {
 	struct repo *repo;
-	struct list *iter;
+	struct list *repos;
 	int ret = 0;
 
-	if (repo_config_init()) {
-		ret = -1;
+	repos = third_party_get_repos();
+	repo = list_remove(repo_name, &repos, repo_name_cmp);
+
+	if (!repo) {
+		error("Repository not found\n");
+		ret = -ENOENT;
 		goto exit;
 	}
 
-	iter = list_head(repos);
-	repo = list_remove(repo_name, &iter, compare_repos);
-	repos = iter;
-
-	if (!repo) {
-		info("Repository not found\n");
-		ret = -1;
-	} else {
-		ret = adjust_repo_config_file();
-		if (ret) {
-			error("Failed while adjusting repository config file");
-		}
+	repo_free(repo);
+	ret = overwrite_repo_config_file(repos);
+	if (ret) {
+		error("Failed while adjusting repository config file");
 	}
 
 exit:
-	repo_config_deinit();
+	list_free_list_and_data(repos, repo_free_data);
 	return ret;
 }
 #endif

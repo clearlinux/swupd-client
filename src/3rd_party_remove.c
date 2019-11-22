@@ -18,7 +18,10 @@
  */
 
 #define _GNU_SOURCE
+#include "3rd_party_repos.h"
 #include "swupd.h"
+
+#include <errno.h>
 
 #ifdef THIRDPARTY
 
@@ -26,14 +29,18 @@ static int remove_repo_directory(char *repo_name)
 {
 	char *repo_dir;
 	int ret = 0;
-	repo_dir = get_repo_path(repo_name);
-	if (is_dir(repo_dir)) {
-		ret = sys_rm_recursive(repo_dir);
-		if (ret) {
-			error("Failed to delete repository directory\n");
-		}
+
+	//TODO: use a global function to get this value
+	repo_dir = str_or_die("%s/%s/%s", globals.path_prefix, "opt/3rd_party", repo_name);
+	ret = sys_rm_recursive(repo_dir);
+	if (ret == -ENOENT) {
+		ret = 0;
 	}
-	free_string(&repo_dir);
+	if (ret < 0) {
+		error("Failed to delete repository directory\n");
+	}
+
+	free(repo_dir);
 	return ret;
 }
 
@@ -80,6 +87,7 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code third_party_remove_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
+	int err;
 	const int step_in_third_party_remove = 1;
 
 	if (!parse_options(argc, argv)) {
@@ -90,23 +98,29 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 
 	ret = swupd_init(SWUPD_NO_ROOT);
 	if (ret != SWUPD_OK) {
-		goto finish;
+		goto exit;
 	}
 
 	/* The last argument has to be the repo-name to be deleted */
-	if (remove_repo_from_config(argv[argc - 1]) == 0) {
-		if (remove_repo_directory(argv[argc - 1])) {
-			ret = SWUPD_NO;
+	err = third_party_remove_repo(argv[argc - 1]);
+	if (err < 0) {
+		if (err == -ENOENT) {
+			ret = SWUPD_INVALID_OPTION;
 		} else {
-			info("Repository %s and its contents removed successfully\n", argv[argc - 1]);
+			ret = SWUPD_COULDNT_WRITE_FILE;
 		}
-	} else {
-		ret = SWUPD_NO;
+		goto exit;
 	}
 
-	swupd_deinit();
+	if (remove_repo_directory(argv[argc - 1]) < 0) {
+		ret = SWUPD_COULDNT_REMOVE_FILE;
+		goto exit;
+	}
 
-finish:
+	info("Repository %s and its content removed successfully\n", argv[argc - 1]);
+
+exit:
+	swupd_deinit();
 	progress_finish_steps(ret);
 	return ret;
 }

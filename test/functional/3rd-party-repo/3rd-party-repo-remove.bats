@@ -12,44 +12,43 @@ test_setup(){
 	contents=$(cat <<- EOM
 		\n
 		[test1]
-		\n
 		url=www.abc.com
-		\n
+		version=0
+
 		[test2]
-		\n
 		url=www.efg.com
-		\n
+		version=0
+
 		[test3]
-		\n
 		url=www.xyz.com
-		\n
+		version=0
+
 		[test4]
-		\n
 		url=www.pqr.com
-		\n
+		version=123
+		invalid=456
+
 		[test5]
-		\n
 		url=www.lmn.com
+		version=0
 		\n
 	EOM
 	)
 
 	repo_config_file="$STATEDIR"/3rd_party/repo.ini
 	run sudo sh -c "mkdir -p $STATEDIR/3rd_party/"
-	run sudo sh -c "mkdir -p $PATH_PREFIX/opt/3rd-party/{test1,test2,test3,test4,test5}"
+	run sudo sh -c "mkdir -p $PATH_PREFIX/opt/3rd_party/{test1,test2,test3,test4,test5}"
 	write_to_protected_file -a "$repo_config_file" "$contents"
 
 }
 
 test_teardown(){
 
-	run sudo sh -c "rm -r $PATH_PREFIX/opt/3rd-party"
-	run sudo sh -c "rm -r $STATEDIR/3rd_party"
 	destroy_test_environment "$TEST_NAME"
 
 }
 
-@test "TRA006: Remove a multiple repos" {
+@test "TPR008: Remove multiple repos" {
 
 	repo_config_file="$STATEDIR"/3rd_party/repo.ini
 
@@ -57,8 +56,7 @@ test_teardown(){
 	run sudo sh -c "$SWUPD 3rd-party remove test1 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Match found for repository: test1
-		Repository test1 and its contents removed successfully
+		Repository test1 and its content removed successfully
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -68,8 +66,7 @@ test_teardown(){
 	run sudo sh -c "$SWUPD 3rd-party remove test3 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Match found for repository: test3
-		Repository test3 and its contents removed successfully
+		Repository test3 and its content removed successfully
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -79,23 +76,20 @@ test_teardown(){
 	run sudo sh -c "$SWUPD 3rd-party remove test5 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Match found for repository: test5
-		Repository test5 and its contents removed successfully
+		Repository test5 and its content removed successfully
 	EOM
 	)
 	assert_is_output "$expected_output"
 	assert_dir_not_exists "$PATH_PREFIX/opt/3rd-party/test1"
 
 	expected_contents=$(cat <<- EOM
-
 		[test2]
-
 		url=www.efg.com
+		version=0
 
 		[test4]
-
 		url=www.pqr.com
-
+		version=123
 	EOM
 	)
 

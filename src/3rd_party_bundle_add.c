@@ -28,6 +28,7 @@
 #define FLAG_SKIP_DISKSPACE_CHECK 2001
 
 static char **cmdline_bundles;
+static char *cmdline_repo = NULL;
 
 static void print_help(void)
 {
@@ -45,6 +46,7 @@ static void print_help(void)
 static const struct option prog_opts[] = {
 	{ "skip-optional", no_argument, 0, FLAG_SKIP_OPTIONAL },
 	{ "skip-diskspace-check", no_argument, 0, FLAG_SKIP_DISKSPACE_CHECK },
+	{ "repo", required_argument, 0, 'R' },
 };
 
 static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
@@ -55,6 +57,9 @@ static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 		return true;
 	case FLAG_SKIP_DISKSPACE_CHECK:
 		globals.skip_diskspace_check = optarg_to_bool(optarg);
+		return true;
+	case 'R':
+		cmdline_repo = strdup_or_die(optarg);
 		return true;
 	default:
 		return false;
@@ -110,9 +115,6 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 	 *  7) install_files
 	 */
 
-	// TODO(s):
-	// 1) if the bundle is in multiple repos we need to ask the user to choose one
-
 	const int steps_in_bundleadd = 7;
 
 	if (!parse_options(argc, argv)) {
@@ -149,47 +151,62 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 		struct repo *selected_repo = NULL;
 		int count = 0;
 
-		/* search for the bundle in all the 3rd-party repos */
-		info("Searching for bundle %s in the 3rd-party repositories...\n", bundle);
-		for (iter2 = repos; iter2; iter2 = iter2->next) {
-			struct repo *repo = iter2->data;
-			struct manifest *mom = NULL;
-			struct file *file = NULL;
+		/* if the repo to be used was specified, use it, otherwise
+		* search for the bundle in all the 3rd-party repos */
+		if (cmdline_repo) {
 
-			/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-			if (third_party_set_repo(state_dir, path_prefix, repo)) {
-				ret_code = SWUPD_COULDNT_CREATE_DIR;
-				goto clean_and_exit;
+			selected_repo = list_search(repos, cmdline_repo, repo_name_cmp);
+
+		} else {
+
+			info("Searching for bundle %s in the 3rd-party repositories...\n", bundle);
+			for (iter2 = repos; iter2; iter2 = iter2->next) {
+				struct repo *repo = iter2->data;
+				struct manifest *mom = NULL;
+				struct file *file = NULL;
+
+				/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
+				if (third_party_set_repo(state_dir, path_prefix, repo)) {
+					ret_code = SWUPD_COULDNT_CREATE_DIR;
+					goto clean_and_exit;
+				}
+
+				/* load the repo's MoM*/
+				mom = load_mom(repo->version, false, NULL);
+				if (!mom) {
+					error("Cannot load manifest MoM for 3rd-party repository %s version %i\n", repo->name, repo->version);
+					ret_code = SWUPD_COULDNT_LOAD_MOM;
+					goto clean_and_exit;
+				}
+
+				/* search for the bundle in the MoM */
+				file = mom_search_bundle(mom, bundle);
+				if (file) {
+					/* the bundle was found in this repo, keep a pointer to the repo */
+					info("Bundle %s found in 3rd-party repository %s\n", bundle, repo->name);
+					count++;
+					selected_repo = repo;
+				}
+				manifest_free(mom);
 			}
 
-			/* load the repo's MoM*/
-			mom = load_mom(repo->version, false, NULL);
-			if (!mom) {
-				error("Cannot load manifest MoM for 3rd-party repository %s version %i\n", repo->name, repo->version);
-				ret_code = SWUPD_COULDNT_LOAD_MOM;
-				goto clean_and_exit;
+			/* if the bundle exists in only one repo, we can continue */
+			if (count == 0) {
+				error("bundle %s was not found in any 3rd-party repository\n\n", bundle);
+				ret_code = SWUPD_INVALID_BUNDLE;
+				continue;
+			} else if (count > 1) {
+				error("bundle %s was found in more than one 3rd-party repository\n", bundle);
+				info("Please specify a repository using the --repo flag\n\n");
+				ret_code = SWUPD_INVALID_OPTION;
+				continue;
 			}
-
-			/* search for the bundle in the MoM */
-			file = mom_search_bundle(mom, bundle);
-			if (file) {
-				/* the bundle was found in this repo, keep a pointer to the repo */
-				info("Bundle %s found in 3rd-party repository %s\n", bundle, repo->name);
-				count++;
-				selected_repo = repo;
-			}
-			manifest_free(mom);
 		}
 
-		/* if the bundle exists in only one repo, we can continue */
-		if (count == 0) {
-			error("bundle %s was not found in any 3rd-party repository\n\n", bundle);
-			ret_code = SWUPD_INVALID_BUNDLE;
-			continue;
-		} else if (count > 1) {
-			error("bundle %s was found in more than one 3rd-party repository, please specify a repository\n\n", bundle);
+		if (!selected_repo) {
+			error("3rd-party repository %s was not found\n\n", cmdline_repo);
 			ret_code = SWUPD_INVALID_OPTION;
-			continue;
+			goto clean_and_exit;
 		}
 
 		/* set the content_url and state_dir to those from the 3rd-party repo

@@ -1382,6 +1382,57 @@ set_latest_version() { # swupd_function
 
 }
 
+# Creates a new version of the server side content in the specified
+# location to serve as a 3rd-party repository
+# Parameters:
+# - ENVIRONMENT_NAME: the name of the test environment
+# - VERSION: the version of the server side content
+# - FORMAT: the format to use for the version
+# - REPO_NAME: the name of the 3rd-party repo, defaults to "test-repo"
+create_third_party_repo() { #swupd_function
+
+	local env_name=$1
+	local version=$2
+	local format=${3:-staging}
+	local repo_name=${4:-test-repo}
+	local repo_state_dir
+	local path
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    create_third_party_repo <environment_name> <new_version> [format] [repo_name]
+			EOM
+		return
+	fi
+	validate_item "$env_name"
+	validate_param "$version"
+
+	debug_msg "Creating 3rd-party repo $repo_name"
+	path=$(dirname "$(realpath "$env_name")")
+
+	# create the state dir for the 3rd-party repo
+	repo_state_dir="$STATEDIR"/3rd_party/"$repo_name"
+	debug_msg "Creating a state directory for repo $repo_name at $repo_state_dir"
+	sudo mkdir -p "$repo_state_dir"/{staged,download,delta,telemetry,bundles}
+
+	# create the basic content for the 3rd-party repo
+	create_version "$env_name" "$version" 0 "$format" "$repo_name"
+	debug_msg "3rd-party repo $repo_name created successfully"
+
+	# add the new repo to the repo.ini file
+	{
+		printf '[%s]\n\n' "$repo_name"
+		printf 'URL=%s\n\n' "file://$path/$env_name/3rd_party/$repo_name"
+		printf 'VERSION=%s\n\n' "$version"
+	} | sudo tee -a "$STATEDIR"/3rd_party/repo.ini > /dev/null
+
+	sudo chmod -R 0700 "$STATEDIR"
+	export REPO_STATEDIR="$repo_state_dir"
+
+}
+
 # Creates a new version of the server side content
 # Parameters:
 # - -p: if the p flag is set (partial), the function skips creating the MoM's
@@ -1393,6 +1444,7 @@ set_latest_version() { # swupd_function
 # - VERSION: the version of the server side content
 # - FROM_VERSION: the previous version, if nothing is selected defaults to 0
 # - FORMAT: the format to use for the version
+# - CONTENT_DIR: the directory where all the content is to be created, defaults to "web-dir"
 create_version() { # swupd_function
 
 	local partial=false
@@ -1406,13 +1458,14 @@ create_version() { # swupd_function
 	local version=$2
 	local from_version=${3:-0}
 	local format=${4:-staging}
+	local content_dir=${5:-web-dir}
 	local mom
 	local hashed_name
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    create_version [-p] [-r] <environment_name> <new_version> [from_version] [format]
+			    create_version [-p] [-r] <environment_name> <new_version> [from_version] [format] [content_dir]
 
 			Options:
 			    -p    if the p flag is set (partial), the function skips creating the MoM's
@@ -1429,22 +1482,29 @@ create_version() { # swupd_function
 	validate_item "$env_name"
 	validate_param "$version"
 
+	# if a content_dir is specified it means we are using a 3rd-party repo
+	if [ "$content_dir" != web-dir ]; then
+		content_dir=3rd_party/"$content_dir"
+	fi
+
+	debug_msg "Creating content for version $version at $content_dir..."
+
 	# if the requested version already exists do nothing
-	if [ -d "$env_name"/web-dir/"$version" ]; then
+	if [ -d "$env_name"/"$content_dir"/"$version" ]; then
 		echo "the requested version $version already exists"
 		return
 	fi
 
-	sudo mkdir -p "$env_name"/web-dir/"$version"/{files,delta}
-	sudo mkdir -p "$env_name"/web-dir/version/format"$format"
-	write_to_protected_file "$env_name"/web-dir/version/format"$format"/latest "$version"
-	sign_version "$env_name"/web-dir/version/format"$format"/latest
-	write_to_protected_file "$env_name"/web-dir/version/latest_version "$version"
-	sign_version "$env_name"/web-dir/version/latest_version
+	sudo mkdir -p "$env_name"/"$content_dir"/"$version"/{files,delta}
+	sudo mkdir -p "$env_name"/"$content_dir"/version/format"$format"
+	write_to_protected_file "$env_name"/"$content_dir"/version/format"$format"/latest "$version"
+	sign_version "$env_name"/"$content_dir"/version/format"$format"/latest
+	write_to_protected_file "$env_name"/"$content_dir"/version/latest_version "$version"
+	sign_version "$env_name"/"$content_dir"/version/latest_version
 	if [ "$format" = staging ]; then
 		format=1
 	fi
-	write_to_protected_file "$env_name"/web-dir/"$version"/format "$format"
+	write_to_protected_file "$env_name"/"$content_dir"/"$version"/format "$format"
 	# create a new os-release file per version
 	{
 		printf 'NAME="Swupd Test Distro"\n'
@@ -1456,37 +1516,41 @@ create_version() { # swupd_function
 		printf 'HOME_URL="https://clearlinux.org"\n'
 		printf 'SUPPORT_URL="https://clearlinux.org"\n'
 		printf 'BUG_REPORT_URL="https://bugs.clearlinux.org/jira"\n'
-	} | sudo tee "$env_name"/web-dir/"$version"/os-release > /dev/null
+	} | sudo tee "$env_name"/"$content_dir"/"$version"/os-release > /dev/null
 	# copy hashed versions of os-release and format to the files directory
 	if [ "$release_files" = true ]; then
-		hashed_name=$(sudo "$SWUPD" hashdump --quiet "$env_name"/web-dir/"$version"/os-release)
-		sudo cp "$env_name"/web-dir/"$version"/os-release "$env_name"/web-dir/"$version"/files/"$hashed_name"
-		create_tar "$env_name"/web-dir/"$version"/files/"$hashed_name"
-		OS_RELEASE="$env_name"/web-dir/"$version"/files/"$hashed_name"
+		debug_msg "Creating release files"
+		hashed_name=$(sudo "$SWUPD" hashdump --quiet "$env_name"/"$content_dir"/"$version"/os-release)
+		sudo cp "$env_name"/"$content_dir"/"$version"/os-release "$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
+		create_tar "$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
+		OS_RELEASE="$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
 		export OS_RELEASE
-		hashed_name=$(sudo "$SWUPD" hashdump --quiet "$env_name"/web-dir/"$version"/format)
-		sudo cp "$env_name"/web-dir/"$version"/format "$env_name"/web-dir/"$version"/files/"$hashed_name"
-		create_tar "$env_name"/web-dir/"$version"/files/"$hashed_name"
-		FORMAT="$env_name"/web-dir/"$version"/files/"$hashed_name"
+		hashed_name=$(sudo "$SWUPD" hashdump --quiet "$env_name"/"$content_dir"/"$version"/format)
+		sudo cp "$env_name"/"$content_dir"/"$version"/format "$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
+		create_tar "$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
+		FORMAT="$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
 		export FORMAT
 	fi
 	# if the previous version is 0 then create a new MoM, otherwise copy the MoM
 	# from the previous version
 	if [ "$from_version" = 0 ]; then
 
-		mom=$(create_manifest "$env_name"/web-dir/"$version" MoM)
+		debug_msg "This is the first version in the content directory, creating a new MoM..."
+		mom=$(create_manifest "$env_name"/"$content_dir"/"$version" MoM)
 		if [ "$partial" = false ]; then
 			create_tar "$mom"
 			sign_manifest "$mom"
 		fi
+		debug_msg "MoM created successfully"
 
 	else
 
 		# copy the packs from the previous version
-		sudo cp "$env_name"/web-dir/"$from_version"/pack-*.tar "$env_name"/web-dir/"$version"
+		debug_msg "Creating a new MoM for version $version based on the MoM from version $from_version"
+		sudo cp "$env_name"/"$content_dir"/"$from_version"/pack-*.tar "$env_name"/"$content_dir"/"$version"
 
-		sudo cp "$env_name"/web-dir/"$from_version"/Manifest.MoM "$env_name"/web-dir/"$version"
-		mom="$env_name"/web-dir/"$version"/Manifest.MoM
+		sudo cp "$env_name"/"$content_dir"/"$from_version"/Manifest.MoM "$env_name"/"$content_dir"/"$version"
+		mom="$env_name"/"$content_dir"/"$version"/Manifest.MoM
 		# update MoM info and create the tars
 		update_manifest -p "$mom" format "$format"
 		update_manifest -p "$mom" version "$version"
@@ -1500,23 +1564,24 @@ create_version() { # swupd_function
 		# files in the os-core bundle (unless otherwise specified or if bundle does not exist)
 		if [ "$release_files" = true ]; then
 			oldversion="$version"
-			while [ "$oldversion" -gt 0 ] && [ ! -e "$env_name"/web-dir/"$oldversion"/Manifest.os-core ]; do
-				oldversion=$(awk '/^previous/ { print $2 }' "$env_name"/web-dir/"$oldversion"/Manifest.MoM)
+			while [ "$oldversion" -gt 0 ] && [ ! -e "$env_name"/"$content_dir"/"$oldversion"/Manifest.os-core ]; do
+				oldversion=$(awk '/^previous/ { print $2 }' "$env_name"/"$content_dir"/"$oldversion"/Manifest.MoM)
 			done
 			# if no os-core manifest was found, nothing else needs to be done
-			if [ -e "$env_name"/web-dir/"$oldversion"/Manifest.os-core ]; then
+			if [ -e "$env_name"/"$content_dir"/"$oldversion"/Manifest.os-core ]; then
 				update_bundle -p "$env_name" os-core --header-only
-				if [ -n "$(get_hash_from_manifest "$env_name"/web-dir/"$oldversion"/Manifest.os-core /usr/lib/os-release)" ]; then
-					remove_from_manifest -p "$env_name"/web-dir/"$version"/Manifest.os-core /usr/lib/os-release
+				if [ -n "$(get_hash_from_manifest "$env_name"/"$content_dir"/"$oldversion"/Manifest.os-core /usr/lib/os-release)" ]; then
+					remove_from_manifest -p "$env_name"/"$content_dir"/"$version"/Manifest.os-core /usr/lib/os-release
 				fi
 				update_bundle -p "$env_name" os-core --add /usr/lib/os-release:"$OS_RELEASE"
-				if [ -n "$(get_hash_from_manifest "$env_name"/web-dir/"$oldversion"/Manifest.os-core /usr/share/defaults/swupd/format)" ]; then
-					remove_from_manifest -p "$env_name"/web-dir/"$version"/Manifest.os-core /usr/share/defaults/swupd/format
+				if [ -n "$(get_hash_from_manifest "$env_name"/"$content_dir"/"$oldversion"/Manifest.os-core /usr/share/defaults/swupd/format)" ]; then
+					remove_from_manifest -p "$env_name"/"$content_dir"/"$version"/Manifest.os-core /usr/share/defaults/swupd/format
 				fi
 				# update without -p flag to refresh tar and MoM
 				update_bundle "$env_name" os-core --add /usr/share/defaults/swupd/format:"$FORMAT"
 			fi
 		fi
+		debug_msg "MoM created successfully"
 
 	fi
 
@@ -2111,7 +2176,7 @@ create_bundle() { # swupd_function
 	cb_usage() {
 		cat <<-EOM
 		Usage:
-		    create_bundle [-L] [-t] [-e] [-n] <bundle_name> [-v] <version> [-d] <list of dirs> [-f] <list of files> [-l] <list of links> ENV_NAME
+		    create_bundle [-L] [-t] [-e] [-n] <bundle_name> [-v] <version> [-u] <3rd-party repo> [-d] <list of dirs> [-f] <list of files> [-l] <list of links> ENV_NAME
 
 		Options:
 		    -L    When the flag is selected the bundle will be 'installed' in the target-dir, otherwise it will only be created in web-dir
@@ -2119,6 +2184,7 @@ create_bundle() { # swupd_function
 		    -e    The bundle will be marked as experimental
 		    -n    The name of the bundle to be created, if not specified a name will be autogenerated
 		    -v    The version for the bundle, if non selected version 10 will be used
+		    -u    If the bundle is to be created inside a 3rd-party repo, the repo's name should be specified here
 		    -d    Comma-separated list of directories to be included in the bundle
 		    -f    Comma-separated list of files to be created and included in the bundle
 		    -l    Comma-separated list of symlinks to files to be created and included in the bundle
@@ -2149,13 +2215,15 @@ create_bundle() { # swupd_function
 		if [[ "$val" != "/"* ]]; then
 			val=/"$val"
 		fi
-		# if the directories the file is don't exist, add them to the bundle,
+		# if the directories the file is don't exist, add them to the bundle
 		# do not add all the directories of the tracking file /usr/share/clear/bundles,
 		# this file is added in every bundle by default, it would add too much overhead
-		# for most tests
+		# for most tests (except for 3rd-party)
 		fdir=$(dirname "${val%:*}")
-		if ! sudo cat "$manifest" | grep -qx "[DL]\\.\\.\\..*$fdir" && [ "$fdir" != "/usr/share/clear/bundles" ] \
-		&& [ "$fdir" != "/" ]; then
+		if ! sudo cat "$manifest" | grep -qx "[DL]\\.\\.\\..*$fdir" && [ "$fdir" != "/" ]; then
+			if [ "$third_party" = false ] && [ "$fdir" = "/usr/share/clear/bundles" ]; then
+				return
+			fi
 			bundle_dir=$(create_dir "$files_path")
 			add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 			# add each one of the directories of the path if they are not in the manifest already
@@ -2190,6 +2258,8 @@ create_bundle() { # swupd_function
 	local pfile_path
 	local dir_name
 	local dir_path
+	local content_dir
+	local third_party=false
 
 	# If no parameters are received show help
 	if [ $# -eq 0 ]; then
@@ -2197,7 +2267,7 @@ create_bundle() { # swupd_function
 		return
 	fi
 	set -f  # turn off globbing
-	while getopts :v:d:f:l:b:c:n:tLe opt; do
+	while getopts :v:d:f:l:b:c:n:u:tLe opt; do
 		case "$opt" in
 			d)	IFS=, read -r -a dir_list <<< "$OPTARG"  ;;
 			f)	IFS=, read -r -a file_list <<< "$OPTARG" ;;
@@ -2206,6 +2276,7 @@ create_bundle() { # swupd_function
 			c)	IFS=, read -r -a dlink_list <<< "$OPTARG" ;;
 			n)	bundle_name="$OPTARG" ;;
 			v)	version="$OPTARG" ;;
+			u)	content_dir="$OPTARG"; third_party=true ;;
 			t)	track_bundle=true ;;
 			L)	local_bundle=true ;;
 			e)	experimental=true ;;
@@ -2216,6 +2287,15 @@ create_bundle() { # swupd_function
 	set +f  # turn globbing back on
 	env_name=${*:$OPTIND:1}
 
+	# if a 3rd-party repo was specified, the bundle should be created in there
+	if [ "$third_party" = true ]; then
+		target_path="$env_name"/testfs/target-dir/opt/3rd_party/"$content_dir"
+		content_dir=3rd_party/"$content_dir"
+	else
+		target_path="$env_name"/testfs/target-dir
+		content_dir=web-dir
+	fi
+
 	# set default values
 	bundle_name=${bundle_name:-$(generate_random_name test-bundle-)}
 	debug_msg "Creating bundle: $bundle_name"
@@ -2224,16 +2304,15 @@ create_bundle() { # swupd_function
 	# SC2010: Don't use ls | grep. Use a glob.
 	# Exception: ls has sorting options that are tricky
 	# to get right with other commands.
-	version=${version:-$(ls "$env_name"/web-dir | grep -E '^[0-9]+$' | sort -rn | head -n1)}
+	version=${version:-$(ls "$env_name"/"$content_dir" | grep -E '^[0-9]+$' | sort -rn | head -n1)}
 	# all bundles should include their own tracking file, so append it to the
 	# list of files to be created in the bundle
 	file_list+=(/usr/share/clear/bundles/"$bundle_name")
 
 	# get useful paths
 	validate_path "$env_name"
-	version_path="$env_name"/web-dir/"$version"
+	version_path="$env_name"/"$content_dir"/"$version"
 	files_path="$version_path"/files
-	target_path="$env_name"/testfs/target-dir
 	state_path="$env_name"/testfs/state
 
 	# 1) create the initial manifest
@@ -2441,13 +2520,15 @@ create_bundle() { # swupd_function
 # - -L: if this option is set the bundle is removed from the target-dir only,
 #       otherwise it is removed from target-dir and web-dir
 # - BUNDLE_MANIFEST: the manifest of the bundle to be removed
+# - REPO_NAME: if the bundle is from a 3rd-party repo we need to specify the repo name
+#              since these bundles get installed in a different location
 remove_bundle() { # swupd_function
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    remove_bundle [-L] <bundle_manifest>
+			    remove_bundle [-L] <bundle_manifest> [3rd-party repo name]
 
 			Options:
 			    -L   If set, the bundle will be removed from the target-dir only,
@@ -2458,6 +2539,7 @@ remove_bundle() { # swupd_function
 	local remove_local=false
 	[ "$1" = "-L" ] && { remove_local=true ; shift ; }
 	local bundle_manifest=$1
+	local repo_name=$2
 	local target_path
 	local version_path
 	local bundle_name
@@ -2471,7 +2553,11 @@ remove_bundle() { # swupd_function
 		return
 	fi
 
-	target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir
+	if [ -z "$repo_name" ]; then
+		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir
+	else
+		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/opt/3rd_party/"$repo_name"
+	fi
 	version_path=$(dirname "$bundle_manifest")
 	manifest_file=$(basename "$bundle_manifest")
 	bundle_name=${manifest_file#Manifest.}
@@ -3051,21 +3137,27 @@ add_to_pack() { # swupd_function
 # Cleans up the directories in the state dir
 # Parameters:
 # - ENV_NAME: the name of the test environment to have the state dir cleaned up
+# - REPO_NAME: if the state dir belongs to 3rd-party repo, the name should be specified here
 clean_state_dir() { # swupd_function
 
 	local env_name=$1
+	local repo_name=$2
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    clean_state_dir <environment_name>
+			    clean_state_dir <environment_name> [3rd-party repo]
 			EOM
 		return
 	fi
 	validate_path "$env_name"
-
-	sudo rm -rf "$env_name"/testfs/state
-	sudo mkdir -p "$env_name"/testfs/state/{staged,download,delta,telemetry}
+	if [ -z "$repo_name" ]; then
+		sudo rm -rf "$env_name"/testfs/state
+		sudo mkdir -p "$env_name"/testfs/state/{staged,download,delta,telemetry}
+	else
+		sudo rm -rf "$env_name"/testfs/state/3rd_party/"$repo_name"
+		sudo mkdir -p "$env_name"/testfs/state/3rd_party/"$repo_name"/{staged,download,delta,telemetry,bundles}
+	fi
 	sudo chmod -R 0700 "$env_name"/testfs/state
 
 }

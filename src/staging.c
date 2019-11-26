@@ -366,7 +366,7 @@ enum swupd_code staging_install_all_files(struct list *files, struct manifest *m
 {
 	struct list *iter;
 	struct file *file;
-	int ret = 0;
+	int ret = SWUPD_OK;
 	int complete = 0;
 	unsigned int list_length = list_len(files);
 
@@ -395,7 +395,7 @@ which ends after rename_all_files_to_final() succeeds
 		/* todo: hash check */
 
 		ret = do_staging(file, mom);
-		if (ret != 0) {
+		if (ret != SWUPD_OK) {
 			error("File staging failed: %s\n", file->filename);
 			return ret;
 		}
@@ -410,7 +410,7 @@ which ends after rename_all_files_to_final() succeeds
 
 	/* rename to apply update */
 	ret = rename_all_files_to_final(files);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		ret = SWUPD_COULDNT_RENAME_FILE;
 		return ret;
 	}
@@ -424,5 +424,5 @@ which ends after rename_all_files_to_final() succeeds
 	/* NOTE: critical section starts when update_loop() calls do_staging() */
 	/*********** critical section ends *************************************/
 
-	return 0;
+	return SWUPD_OK;
 }

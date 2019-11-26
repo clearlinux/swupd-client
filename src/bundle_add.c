@@ -140,17 +140,20 @@ static int check_disk_space_availability(struct list *to_install_bundles)
 	return 0;
 }
 
-static void print_summary(int bundles_requested, int already_installed, int bundles_installed, int dependencies_installed)
+static void print_summary(int bundles_requested, int already_installed, int bundles_installed, int dependencies_installed, int rc)
 {
 	/* print totals */
 	int bundles_failed = bundles_requested - bundles_installed - already_installed;
 	if (bundles_failed > 0) {
 		print("Failed to install %i of %i bundles\n", bundles_failed, bundles_requested - already_installed);
 	} else if (bundles_installed > 0) {
-		print("Successfully installed %i bundle%s\n", bundles_installed, (bundles_installed > 1 ? "s" : ""));
+		print("%snstalled %i bundle%s\n", (rc == SWUPD_OK ? "Successfully i" : "I"), bundles_installed, (bundles_installed > 1 ? "s" : ""));
 	}
 	if (dependencies_installed > 0) {
 		print("%i bundle%s\n", dependencies_installed, (dependencies_installed > 1 ? "s were installed as dependencies" : " was installed as dependency"));
+	}
+	if ((bundles_installed > 0 || dependencies_installed > 0) && rc != SWUPD_OK) {
+		print("Some files from the installed bundle%s may be missing\n", (bundles_installed + dependencies_installed > 1 ? "s" : ""));
 	}
 	if (already_installed > 0) {
 		print("%i bundle%s already installed\n", already_installed, (already_installed > 1 ? "s were" : " was"));
@@ -274,7 +277,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 	timelist_timer_start(globals.global_times, "Download packs");
 
 	if (rm_staging_dir_contents("download") < 0) {
-		debug("rm_staging_dir_contents failed - resuming operation");
+		debug("rm_staging_dir_contents failed - resuming operation\n");
 	}
 
 	if (list_longer_than(to_install_files, 10 * list_len(to_install_bundles))) {
@@ -317,7 +320,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 	ret = staging_install_all_files(to_install_files, mom);
 	mom->files = NULL;
 	if (ret) {
-		error("Failed to install required files");
+		error("Failed to install required files\n");
 		goto out;
 	}
 	timelist_timer_stop(globals.global_times); // closing: Installing bundles
@@ -349,7 +352,7 @@ out:
 	}
 
 	bundles_requested = list_len(bundles);
-	print_summary(bundles_requested, already_installed, bundles_installed, dependencies_installed);
+	print_summary(bundles_requested, already_installed, bundles_installed, dependencies_installed, ret);
 
 	/* if one or more of the requested bundles was invalid, and
 	 * there is no other error return SWUPD_INVALID_BUNDLE */

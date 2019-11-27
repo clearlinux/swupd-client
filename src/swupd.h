@@ -323,7 +323,7 @@ extern int add_subscriptions(struct list *bundles, struct list **subs, struct ma
 extern int subscription_bundlename_strcmp(const void *a, const void *b);
 
 /* bundle_add.c*/
-extern enum swupd_code execute_bundle_add(struct list *bundles_list);
+extern enum swupd_code execute_bundle_add(struct list *bundles_list, int version);
 
 /* verify.c */
 extern enum swupd_code execute_verify(void);

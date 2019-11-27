@@ -62,7 +62,7 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		[my_repo]
 		url=http://example.com/swupd-file
-		version=0
+		version=10
 	EOM
 	)
 	assert_is_output --identical "$expected_output"

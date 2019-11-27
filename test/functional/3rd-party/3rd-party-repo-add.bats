@@ -19,7 +19,7 @@ load "../testlib"
 	expected_output=$(cat <<-EOM
 			[test-repo1]
 			url=https://xyz.com
-			version=0
+			version=10
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -74,23 +74,23 @@ load "../testlib"
 	expected_output=$(cat <<-EOM
 			[test-repo1]
 			url=https://xyz.com
-			version=0
+			version=10
 
 			[test-repo2]
 			url=file://abc.com
-			version=0
+			version=10
 
 			[test-repo3]
 			url=https://efg.com
-			version=0
+			version=10
 
 			[test-repo4]
 			url=https://hij.com
-			version=0
+			version=10
 
 			[test-repo5]
 			url=https://klm.com
-			version=0
+			version=10
 	EOM
 	)
 	assert_is_output --identical "$expected_output"

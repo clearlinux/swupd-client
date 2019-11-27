@@ -63,6 +63,16 @@ int third_party_add_repo(const char *repo_name, const char *repo_url);
  */
 int third_party_remove_repo(char *repo_name);
 
+/**
+ * @brief This function sets up swupd to use a specific 3rd-party repo.
+ *
+ * @param state_dir the original state directory of the system
+ * @param path_prefix the original path prefix of the system
+ *
+ * @returns 0 on success, -1 on any failure
+ */
+int third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo);
+
 #endif
 
 #ifdef __cplusplus

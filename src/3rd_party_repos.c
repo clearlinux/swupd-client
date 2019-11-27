@@ -227,4 +227,29 @@ exit:
 	list_free_list_and_data(repos, repo_free_data);
 	return ret;
 }
+
+int third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo)
+{
+	char *repo_state_dir;
+	char *repo_path_prefix;
+
+	set_content_url(repo->url);
+
+	string_or_die(&repo_path_prefix, "%s/opt/3rd_party/%s", path_prefix, repo->name);
+	set_path_prefix(repo_path_prefix);
+	free_string(&repo_path_prefix);
+
+	/* make sure there are state directories for the 3rd-party
+	 * repo if not there already */
+	string_or_die(&repo_state_dir, "%s/3rd_party/%s", state_dir, repo->name);
+	if (create_state_dirs(repo_state_dir)) {
+		free_string(&repo_state_dir);
+		return -1;
+	}
+	set_state_dir(repo_state_dir);
+	free_string(&repo_state_dir);
+
+	return 0;
+}
+
 #endif

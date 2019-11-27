@@ -76,7 +76,7 @@ static void set_json_format(bool on)
 }
 
 /* Sets the content_url global variable */
-static void set_content_url(char *url)
+void set_content_url(char *url)
 {
 	if (globals.content_url) {
 		free_string(&globals.content_url);
@@ -193,7 +193,7 @@ static bool is_valid_integer_format(char *str)
  * NULL, state_dir will be set to its value. Otherwise, the value is the
  * build-time default (STATE_DIR).
  */
-static bool set_state_dir(char *path)
+bool set_state_dir(char *path)
 {
 	if (!path) {
 		error("Statedir shouldn't be NULL\n");

@@ -188,12 +188,20 @@ static bool validate_tracking_dir(const char *state_dir)
 	 * user installed themselves just copy the entire system tracking directory
 	 * into the state tracking directory. */
 	if (!is_populated_dir(tracking_dir)) {
+		src = sys_path_join(globals.path_prefix, "/usr/share/clear/bundles");
+
+		if (!sys_file_exists(src)) {
+			/* there is no bundles directory to copy from */
+			free_string(&src);
+			free_string(&tracking_dir);
+			return false;
+		}
+
 		ret = rm_rf(tracking_dir);
 		if (ret) {
 			goto out;
 		}
 
-		src = sys_path_join(globals.path_prefix, "/usr/share/clear/bundles");
 		/* at the point this function is called <bundle_name> is already
 		 * installed on the system and therefore has a tracking file under
 		 * /usr/share/clear/bundles. A simple cp -a of that directory will
@@ -233,7 +241,7 @@ int create_state_dirs(const char *state_dir_path)
 
 	// check for existence
 	if (ensure_root_owned_dir(state_dir_path)) {
-		//state dir doesn't exist
+		// state dir doesn't exist
 		if (mkdir_p(state_dir_path) != 0 || chmod(state_dir_path, S_IRWXU) != 0) {
 			error("failed to create %s\n", state_dir_path);
 			return -1;
@@ -247,6 +255,7 @@ int create_state_dirs(const char *state_dir_path)
 			ret = mkdir(dir, S_IRWXU);
 			if (ret) {
 				error("failed to create %s\n", dir);
+				free_string(&dir);
 				return -1;
 			}
 		}

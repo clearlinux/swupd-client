@@ -113,6 +113,10 @@ static int check_disk_space_availability(struct list *to_install_bundles)
 	timelist_timer_start(globals.global_times, "Check disk space availability");
 	bundle_size = get_manifest_list_contentsize(to_install_bundles);
 	filepath = sys_path_join(globals.path_prefix, "/usr/");
+	if (!sys_file_exists(filepath)) {
+		free_string(&filepath);
+		return 0;
+	}
 
 	/* Calculate free space on filepath */
 	fs_free = get_available_space(filepath);
@@ -396,28 +400,19 @@ static struct list *generate_bundles_to_install(struct list *bundles)
 /* Bundle install one ore more bundles passed in bundles
  * param as a null terminated array of strings
  */
-enum swupd_code execute_bundle_add(struct list *bundles_list)
+enum swupd_code execute_bundle_add(struct list *bundles_list, int version)
 {
 	int ret = 0;
-	int current_version;
 	struct list *bundles_to_install = NULL;
 	struct manifest *mom;
 	char *bundles_list_str = NULL;
 	bool mix_exists;
 
 	timelist_timer_start(globals.global_times, "Load MoM");
-	current_version = get_current_version(globals.path_prefix);
-	if (current_version < 0) {
-		error("Unable to determine current OS version\n");
-		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
-		goto clean_and_exit;
-	}
-
 	mix_exists = (check_mix_exists() & system_on_mix());
-
-	mom = load_mom(current_version, mix_exists, NULL);
+	mom = load_mom(version, mix_exists, NULL);
 	if (!mom) {
-		error("Cannot load official manifest MoM for version %i\n", current_version);
+		error("Cannot load official manifest MoM for version %i\n", version);
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto clean_and_exit;
 	}
@@ -443,7 +438,7 @@ clean_and_exit:
 		  "result=%d\n"
 		  "bytes=%ld\n",
 		  bundles_list_str,
-		  current_version,
+		  version,
 		  ret,
 		  total_curl_sz);
 
@@ -456,6 +451,7 @@ clean_and_exit:
 enum swupd_code bundle_add_main(int argc, char **argv)
 {
 	struct list *bundles_list = NULL;
+	int version;
 	int ret;
 
 	/*
@@ -493,8 +489,16 @@ enum swupd_code bundle_add_main(int argc, char **argv)
 	}
 	bundles_list = list_head(bundles_list);
 
-	ret = execute_bundle_add(bundles_list);
+	version = get_current_version(globals.path_prefix);
+	if (version < 0) {
+		error("Unable to determine current OS version\n");
+		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
+		goto clean_and_exit;
+	}
 
+	ret = execute_bundle_add(bundles_list, version);
+
+clean_and_exit:
 	list_free_list(bundles_list);
 	swupd_deinit();
 	progress_finish_steps(ret);

@@ -312,8 +312,7 @@ static enum swupd_code install_bundles(struct list *bundles, struct manifest *mo
 	timelist_timer_stop(globals.global_times); // closing: Appling heuristics
 
 	//TODO: Improve staging functions so we won't need this hack
-	globals.update_count = list_len(to_install_files);
-	globals.update_skip = 0;
+	globals.update_count = list_len(to_install_files) - globals.update_skip;
 	mom->files = installed_files;
 	ret = staging_install_all_files(to_install_files, mom);
 	mom->files = NULL;

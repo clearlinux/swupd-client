@@ -103,3 +103,48 @@ global_teardown() {
 	assert_is_output --identical "$expected_output"
 
 }
+
+@test "TPR022: List installed 3rd-party bundles from a specific repo" {
+
+	# users should be able to list installed 3rd-party bundles from a specific repo
+
+	run sudo sh -c "$SWUPD 3rd-party bundle-list --repo repo2 $SWUPD_OPTS"
+
+	assert_status_is "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		_______________________
+		 3rd-Party Repo: repo2
+		_______________________
+
+		Installed bundles:
+		 - test-bundle3
+
+		Total: 1
+	EOM
+	)
+	assert_is_output --identical "$expected_output"
+
+}
+
+@test "TPR023: List all available 3rd-party bundles from a specific repo" {
+
+	# users should be able to list all 3rd-party bundles from a specific repo
+
+	run sudo sh -c "$SWUPD 3rd-party bundle-list --all --repo repo1 $SWUPD_OPTS"
+
+	assert_status_is "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		_______________________
+		 3rd-Party Repo: repo1
+		_______________________
+
+		All available bundles:
+		 - test-bundle1
+		 - test-bundle2
+
+		Total: 2
+	EOM
+	)
+	assert_is_output --identical "$expected_output"
+
+}

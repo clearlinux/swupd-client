@@ -30,6 +30,7 @@ static bool cmdline_local = true;
 static bool cmdline_option_all = false;
 static char *cmdline_option_has_dep = NULL;
 static char *cmdline_option_deps = NULL;
+static char *cmdline_repo = NULL;
 
 static void free_has_dep(void)
 {
@@ -49,6 +50,7 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
+	print("   -R, --repo              Specify the 3rd-party repo to use\n");
 	print("   -a, --all               List all available bundles for the current version of Clear Linux\n");
 	print("   -D, --has-dep=[BUNDLE]  List all bundles which have BUNDLE as a dependency\n");
 	print("   --deps=[BUNDLE]         List bundles included by BUNDLE\n");
@@ -59,6 +61,7 @@ static const struct option prog_opts[] = {
 	{ "all", no_argument, 0, 'a' },
 	{ "deps", required_argument, 0, FLAG_DEPS },
 	{ "has-dep", required_argument, 0, 'D' },
+	{ "repo", required_argument, 0, 'R' },
 };
 
 static bool parse_opt(int opt, char *optarg)
@@ -72,6 +75,9 @@ static bool parse_opt(int opt, char *optarg)
 		string_or_die(&cmdline_option_has_dep, "%s", optarg);
 		atexit(free_has_dep);
 		cmdline_local = false;
+		return true;
+	case 'R':
+		cmdline_repo = strdup_or_die(optarg);
 		return true;
 	case FLAG_DEPS:
 		string_or_die(&cmdline_option_deps, "%s", optarg);
@@ -143,6 +149,7 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 {
 	struct list *repos = NULL;
 	struct list *iter = NULL;
+	struct repo *repo = NULL;
 	char *state_dir;
 	char *path_prefix;
 	enum swupd_code ret;
@@ -172,8 +179,16 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 	state_dir = strdup_or_die(globals.state_dir);
 	path_prefix = strdup_or_die(globals.path_prefix);
 
-	for (iter = repos; iter; iter = iter->next) {
-		struct repo *repo = iter->data;
+	/* if the repo to be used was specified, use it, otherwise
+	 * list the bundles in all the 3rd-party repos */
+	if (cmdline_repo) {
+
+		repo = list_search(repos, cmdline_repo, repo_name_cmp);
+		if (!repo) {
+			error("3rd-party repository %s was not found\n\n", cmdline_repo);
+			ret = SWUPD_INVALID_REPOSITORY;
+			goto clean_and_exit;
+		}
 
 		/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
 		if (third_party_set_repo(state_dir, path_prefix, repo)) {
@@ -183,6 +198,21 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 
 		print_repo_header(repo->name);
 		ret = list_bundles(repo);
+
+	} else {
+
+		for (iter = repos; iter; iter = iter->next) {
+			repo = iter->data;
+
+			/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
+			if (third_party_set_repo(state_dir, path_prefix, repo)) {
+				ret = SWUPD_COULDNT_CREATE_DIR;
+				goto clean_and_exit;
+			}
+
+			print_repo_header(repo->name);
+			ret = list_bundles(repo);
+		}
 	}
 
 clean_and_exit:

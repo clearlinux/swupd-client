@@ -206,7 +206,7 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 
 		if (!selected_repo) {
 			error("3rd-party repository %s was not found\n\n", cmdline_repo);
-			ret_code = SWUPD_INVALID_OPTION;
+			ret_code = SWUPD_INVALID_REPOSITORY;
 			goto clean_and_exit;
 		}
 

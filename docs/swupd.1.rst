@@ -774,6 +774,7 @@ The non-zero return codes for other operations are listed here:
   - **34**: swupd ran out of memory
   - **35**: Unable to fix/replace/delete one or more files
   - **36**: Unable to execute binary, is either missing or invalid
+  - **37**: Invalid 3rd-party repository (not found)
 
 
 SEE ALSO

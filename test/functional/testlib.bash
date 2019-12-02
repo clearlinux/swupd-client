@@ -61,6 +61,8 @@ export SWUPD_COULDNT_WRITE_FILE=32  # couldn't write to a file
 export SWUPD_MIX_COLLISIONS=33  # collisions were found between mix and upstream
 export SWUPD_OUT_OF_MEMORY_ERROR=34  # swupd ran out of memory
 export SWUPD_VERIFY_FAILED=35  # verify could not fix/replace/delete one or more files
+export SWUPD_INVALID_BINARY=36  # binary to be executed is missing or invalid
+export SWUPD_INVALID_REPOSITORY=37  # the specified 3rd-party repository is invalid
 
 # global constant
 export zero_hash="0000000000000000000000000000000000000000000000000000000000000000"

@@ -38,6 +38,7 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
+	print("   -R, --repo              Specify the 3rd-party repo to use\n");
 	print("   --skip-optional         Do not install optional bundles (also-add flag in Manifests)\n");
 	print("   --skip-diskspace-check  Do not check free disk space before adding bundle\n");
 	print("\n");

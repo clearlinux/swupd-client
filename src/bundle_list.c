@@ -118,7 +118,7 @@ static bool parse_options(int argc, char **argv)
  * /usr/share/clear/bundles/), get the list of local bundles and print
  * them sorted.
  */
-static enum swupd_code list_local_bundles()
+enum swupd_code list_local_bundles(int version)
 {
 	char *name;
 	char *path = NULL;
@@ -126,22 +126,17 @@ static enum swupd_code list_local_bundles()
 	struct list *item = NULL;
 	struct manifest *MoM = NULL;
 	struct file *bundle_manifest = NULL;
-	int current_version;
 	bool mix_exists;
 	int count = 0;
 
-	current_version = get_current_version(globals.path_prefix);
-	if (current_version < 0) {
-		goto skip_mom;
+	if (version > 0) {
+		mix_exists = (check_mix_exists() & system_on_mix());
+		MoM = load_mom(version, mix_exists, NULL);
+		if (!MoM) {
+			warn("Could not determine which installed bundles are experimental\n\n");
+		}
 	}
 
-	mix_exists = (check_mix_exists() & system_on_mix());
-	MoM = load_mom(current_version, mix_exists, NULL);
-	if (!MoM) {
-		warn("Could not determine which installed bundles are experimental\n");
-	}
-
-skip_mom:
 	string_or_die(&path, "%s/%s", globals.path_prefix, BUNDLES_DIR);
 
 	errno = 0;
@@ -181,25 +176,17 @@ skip_mom:
 }
 
 /* Return recursive list of included bundles */
-static enum swupd_code show_included_bundles(char *bundle_name)
+enum swupd_code show_included_bundles(char *bundle_name, int version)
 {
 	int ret = 0;
-	int current_version = CURRENT_OS_VERSION;
 	struct list *subs = NULL;
 	struct list *deps = NULL;
 	struct manifest *mom = NULL;
 	int count = 0;
 
-	current_version = get_current_version(globals.path_prefix);
-	if (current_version < 0) {
-		error("Unable to determine current OS version\n");
-		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
-		goto out;
-	}
-
-	mom = load_mom(current_version, false, NULL);
+	mom = load_mom(version, false, NULL);
 	if (!mom) {
-		error("Cannot load official manifest MoM for version %i\n", current_version);
+		error("Cannot load official manifest MoM for version %i\n", version);
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto out;
 	}
@@ -283,24 +270,17 @@ out:
 * Parse the full manifest for the current version of the OS and print
 *   all available bundles.
 */
-static enum swupd_code list_installable_bundles()
+enum swupd_code list_installable_bundles(int version)
 {
 	char *name;
 	struct list *list;
 	struct file *file;
 	struct manifest *MoM = NULL;
-	int current_version;
-	int count;
+	int count = 0;
 	bool mix_exists;
 
-	current_version = get_current_version(globals.path_prefix);
-	if (current_version < 0) {
-		error("Unable to determine current OS version\n");
-		return SWUPD_CURRENT_VERSION_UNKNOWN;
-	}
-
 	mix_exists = (check_mix_exists() & system_on_mix());
-	MoM = load_mom(current_version, mix_exists, NULL);
+	MoM = load_mom(version, mix_exists, NULL);
 	if (!MoM) {
 		return SWUPD_COULDNT_LOAD_MOM;
 	}
@@ -322,10 +302,9 @@ static enum swupd_code list_installable_bundles()
 	return 0;
 }
 
-static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
+enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server, int version)
 {
 	int ret = 0;
-	int version = CURRENT_OS_VERSION;
 	struct manifest *current_manifest = NULL;
 	struct list *subs = NULL;
 	struct list *reqd_by = NULL;
@@ -335,13 +314,6 @@ static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 		info("Bundle \"%s\" does not seem to be installed\n", bundle_name);
 		info("       try passing --all to check uninstalled bundles\n");
 		ret = SWUPD_BUNDLE_NOT_TRACKED;
-		goto out;
-	}
-
-	version = get_current_version(globals.path_prefix);
-	if (version < 0) {
-		error("Unable to determine current OS version\n");
-		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 		goto out;
 	}
 
@@ -411,7 +383,8 @@ out:
 
 enum swupd_code bundle_list_main(int argc, char **argv)
 {
-	int ret;
+	enum swupd_code ret;
+	int current_version;
 	const int steps_in_bundlelist = 1;
 
 	/* there is no need to report in progress for bundle-list at this time */
@@ -427,27 +400,35 @@ enum swupd_code bundle_list_main(int argc, char **argv)
 	} else {
 		ret = swupd_init(SWUPD_ALL);
 	}
-	/* if swupd fails to initialize, the only list command we can still attempt is
+
+	if (ret != SWUPD_OK) {
+		error("Failed swupd initialization, exiting now\n");
+		progress_finish_steps(ret);
+		return ret;
+	}
+
+	/* if we cannot get the current_version, the only list command we can still attempt is
 	 * listing locally installed bundles (with the limitation of not showing what
 	 * bundles are experimental) */
-	if (ret != 0) {
-		error("Failed updater initialization. Exiting now\n");
+	current_version = get_current_version(globals.path_prefix);
+	if (current_version < 0 && !cmdline_local) {
+		error("Unable to determine current OS version\n");
+		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 		goto finish;
 	}
 
 	if (cmdline_local) {
-		ret = list_local_bundles();
+		ret = list_local_bundles(current_version);
 	} else if (cmdline_option_deps != NULL) {
-		ret = show_included_bundles(cmdline_option_deps);
+		ret = show_included_bundles(cmdline_option_deps, current_version);
 	} else if (cmdline_option_has_dep != NULL) {
-		ret = show_bundle_reqd_by(cmdline_option_has_dep, cmdline_option_all);
+		ret = show_bundle_reqd_by(cmdline_option_has_dep, cmdline_option_all, current_version);
 	} else {
-		ret = list_installable_bundles();
+		ret = list_installable_bundles(current_version);
 	}
 
-	swupd_deinit();
-
 finish:
+	swupd_deinit();
 	progress_finish_steps(ret);
 	return ret;
 }

@@ -84,7 +84,7 @@ _swupd()
 		opts="$global --version --manifest --fix --picky --picky-tree --picky-whitelist --install --quick --force --install "
 		break;;
 		("3rd-party")
-		opts="$global add remove list bundle-add"
+		opts="$global add remove list bundle-add bundle-list "
 		break;;
 		("add")
 		opts="$global --repo"

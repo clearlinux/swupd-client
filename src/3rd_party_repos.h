@@ -69,9 +69,9 @@ int third_party_remove_repo(char *repo_name);
  * @param state_dir the original state directory of the system
  * @param path_prefix the original path prefix of the system
  *
- * @returns 0 on success, -1 on any failure
+ * @returns a swupd_code
  */
-int third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo);
+enum swupd_code third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo);
 
 /**
  * @brief strcmp like function to search for a repo based on its name

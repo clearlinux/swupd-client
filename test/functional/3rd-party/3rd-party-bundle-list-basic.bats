@@ -52,18 +52,20 @@ global_teardown() {
 		_______________________
 
 		Installed bundles:
+		 - os-core
 		 - test-bundle2
 
-		Total: 1
+		Total: 2
 
 		_______________________
 		 3rd-Party Repo: repo2
 		_______________________
 
 		Installed bundles:
+		 - os-core
 		 - test-bundle3
 
-		Total: 1
+		Total: 2
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
@@ -84,20 +86,22 @@ global_teardown() {
 		_______________________
 
 		All available bundles:
+		 - os-core
 		 - test-bundle1
 		 - test-bundle2
 
-		Total: 2
+		Total: 3
 
 		_______________________
 		 3rd-Party Repo: repo2
 		_______________________
 
 		All available bundles:
+		 - os-core
 		 - test-bundle1
 		 - test-bundle3
 
-		Total: 2
+		Total: 3
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
@@ -117,9 +121,10 @@ global_teardown() {
 		_______________________
 
 		Installed bundles:
+		 - os-core
 		 - test-bundle3
 
-		Total: 1
+		Total: 2
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
@@ -139,10 +144,11 @@ global_teardown() {
 		_______________________
 
 		All available bundles:
+		 - os-core
 		 - test-bundle1
 		 - test-bundle2
 
-		Total: 2
+		Total: 3
 	EOM
 	)
 	assert_is_output --identical "$expected_output"

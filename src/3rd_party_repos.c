@@ -228,7 +228,7 @@ exit:
 	return ret;
 }
 
-int third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo)
+enum swupd_code third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo)
 {
 	char *repo_state_dir;
 	char *repo_path_prefix;
@@ -244,12 +244,13 @@ int third_party_set_repo(const char *state_dir, const char *path_prefix, struct 
 	string_or_die(&repo_state_dir, "%s/3rd_party/%s", state_dir, repo->name);
 	if (create_state_dirs(repo_state_dir)) {
 		free_string(&repo_state_dir);
-		return -1;
+		error("Unable to create the state directories for repository %s\n\n", repo->name);
+		return SWUPD_COULDNT_CREATE_DIR;
 	}
 	set_state_dir(repo_state_dir);
 	free_string(&repo_state_dir);
 
-	return 0;
+	return SWUPD_OK;
 }
 
 #endif

@@ -344,6 +344,12 @@ extern void verify_set_extra_files_only(bool opt);
 /* repair.c */
 extern regex_t *compile_whitelist(const char *whitelist_pattern);
 
+/* bundle_list.c*/
+extern enum swupd_code list_local_bundles(int version);
+extern enum swupd_code list_installable_bundles(int version);
+extern enum swupd_code show_included_bundles(char *bundle_name, int version);
+extern enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server, int version);
+
 /* telemetry.c */
 typedef enum telem_prio_t {
 	TELEMETRY_DEBG = 1,

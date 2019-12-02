@@ -356,3 +356,19 @@
 #skip_optional=<true/false>
 
 
+[3rd-party-bundle-list]
+
+#
+# Options for the "swupd 3rd-party bundle-list" command
+#
+
+# List all available bundles for the current version of Clear
+# Linux (boolean value)
+#all=<true/false>
+
+# List bundles included by BUNDLE (string value)
+#deps=[BUNDLE]
+
+# List dependency tree of all bundles which have BUNDLE as a
+# dependency (string value)
+#has_dep=[BUNDLE]

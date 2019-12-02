@@ -191,6 +191,7 @@ if [[ -n "$state" ]]; then
           '(help)remove[Remove third party repo]'
           '(help)add[Add third party repo]'
           '(help)bundle-add[Install a bundle from a third party repository]'
+          '(help)bundle-list[List bundles from a third party repository]'
           _arguments $thirdparty && ret=0
           ;;
           add)

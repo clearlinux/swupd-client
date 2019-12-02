@@ -20,10 +20,12 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Bundles included by test-bundle1:
-		test-bundle2
-		test-bundle3
+		 - test-bundle2
+		 - test-bundle3
+
+		Total: 2
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }

@@ -158,7 +158,8 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 					print_msg = false;
 					info("%s", msg);
 				}
-				info(" - %s\n", name);
+				info(" - ");
+				print("%s\n", name);
 			}
 		}
 	}

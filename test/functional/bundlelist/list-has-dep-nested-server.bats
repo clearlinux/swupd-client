@@ -20,12 +20,13 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		All installable and installed bundles that have test-bundle1 as a dependency:
+		All bundles that have test-bundle1 as a dependency:
 		 - test-bundle2
 		 - test-bundle3
-		Bundle 'test-bundle1' is required by 2 bundles
+
+		Total: 2
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }

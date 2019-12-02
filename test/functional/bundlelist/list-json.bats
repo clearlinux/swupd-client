@@ -24,12 +24,16 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		[
 		{ "type" : "start", "section" : "bundle-list" },
+		{ "type" : "info", "msg" : "Installed bundles:" },
+		{ "type" : "info", "msg" : " -" },
 		{ "type" : "info", "msg" : "os-core" },
+		{ "type" : "info", "msg" : " -" },
 		{ "type" : "info", "msg" : "test-bundle" },
+		{ "type" : "info", "msg" : " Total: 2" },
 		{ "type" : "end", "section" : "bundle-list", "status" : 0 }
 		]
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }

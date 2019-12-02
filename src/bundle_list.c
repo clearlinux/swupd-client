@@ -128,6 +128,7 @@ static enum swupd_code list_local_bundles()
 	struct file *bundle_manifest = NULL;
 	int current_version;
 	bool mix_exists;
+	int count = 0;
 
 	current_version = get_current_version(globals.path_prefix);
 	if (current_version < 0) {
@@ -151,21 +152,25 @@ skip_mom:
 		return SWUPD_COULDNT_LIST_DIR;
 	}
 
+	info("Installed bundles:\n");
 	item = bundles;
-
 	while (item) {
 		if (MoM) {
 			bundle_manifest = mom_search_bundle(MoM, sys_basename((char *)item->data));
 		}
 		if (bundle_manifest) {
 			name = get_printable_bundle_name(bundle_manifest->filename, bundle_manifest->is_experimental);
+			info(" - ");
 			print("%s\n", name);
 			free(name);
 		} else {
+			info(" - ");
 			print("%s\n", sys_basename((char *)item->data));
 		}
+		count++;
 		item = item->next;
 	}
+	info("\nTotal: %d\n", count);
 
 	list_free_list_and_data(bundles, free);
 
@@ -183,6 +188,7 @@ static enum swupd_code show_included_bundles(char *bundle_name)
 	struct list *subs = NULL;
 	struct list *deps = NULL;
 	struct manifest *mom = NULL;
+	int count = 0;
 
 	current_version = get_current_version(globals.path_prefix);
 	if (current_version < 0) {
@@ -236,7 +242,7 @@ static enum swupd_code show_included_bundles(char *bundle_name)
 		goto out;
 	}
 
-	info("Bundles included by %s:\n\n", bundle_name);
+	info("Bundles included by %s:\n", bundle_name);
 
 	struct list *iter;
 	iter = list_head(deps);
@@ -248,8 +254,11 @@ static enum swupd_code show_included_bundles(char *bundle_name)
 			continue;
 		}
 
+		info(" - ");
 		print("%s\n", included_bundle->component);
+		count++;
 	}
+	info("\nTotal: %d\n", count);
 
 	ret = SWUPD_OK;
 
@@ -281,6 +290,7 @@ static enum swupd_code list_installable_bundles()
 	struct file *file;
 	struct manifest *MoM = NULL;
 	int current_version;
+	int count;
 	bool mix_exists;
 
 	current_version = get_current_version(globals.path_prefix);
@@ -295,14 +305,18 @@ static enum swupd_code list_installable_bundles()
 		return SWUPD_COULDNT_LOAD_MOM;
 	}
 
+	info("All available bundles:\n");
 	list = MoM->manifests = list_sort(MoM->manifests, file_sort_filename);
 	while (list) {
 		file = list->data;
 		list = list->next;
 		name = get_printable_bundle_name(file->filename, file->is_experimental);
+		info(" - ");
 		print("%s\n", name);
 		free_string(&name);
+		count++;
 	}
+	info("\nTotal: %d\n", count);
 
 	manifest_free(MoM);
 	return 0;
@@ -366,7 +380,7 @@ static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 	}
 
 	char *msg;
-	string_or_die(&msg, "%s bundles that have %s as a dependency:\n", server ? "All installable and installed" : "Installed", bundle_name);
+	string_or_die(&msg, "%s bundles that have %s as a dependency:\n", server ? "All" : "Installed", bundle_name);
 	number_of_reqd = required_by(&reqd_by, bundle_name, current_manifest, 0, NULL, msg);
 	free_string(&msg);
 	if (reqd_by == NULL) {
@@ -375,7 +389,7 @@ static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server)
 		goto out;
 	}
 	list_free_list_and_data(reqd_by, free);
-	info("\nBundle '%s' is required by %d bundle%s\n", bundle_name, number_of_reqd, number_of_reqd == 1 ? "" : "s");
+	info("\nTotal: %d\n", number_of_reqd);
 
 	ret = SWUPD_OK;
 

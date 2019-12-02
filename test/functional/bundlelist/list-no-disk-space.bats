@@ -35,8 +35,10 @@ test_setup() {
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
 		Error: Failed to retrieve 10 MoM manifest
 		Warning: Could not determine which installed bundles are experimental
-		os-core
-		test-bundle1
+		Installed bundles:
+		 - os-core
+		 - test-bundle1
+		Total: 2
 	EOM
 	)
 	assert_is_output "$expected_output"

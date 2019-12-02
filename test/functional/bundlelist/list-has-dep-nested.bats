@@ -23,10 +23,11 @@ test_setup() {
 		Installed bundles that have test-bundle1 as a dependency:
 		 - test-bundle2
 		 - test-bundle3
-		Bundle 'test-bundle1' is required by 2 bundles
+
+		Total: 2
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -37,16 +38,19 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Installed bundles that have test-bundle1 as a dependency:
+
 		format:
 		 # * is-required-by
 		 #   |-- is-required-by
 		 # * is-also-required-by
 		 # ...
+
 		  * test-bundle2
 		    |-- test-bundle3
-		Bundle 'test-bundle1' is required by 2 bundles
+
+		Total: 2
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }

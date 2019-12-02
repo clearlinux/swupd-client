@@ -40,13 +40,16 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		os-core
-		test-bundle1 (experimental)
-		test-bundle2 (experimental)
-		test-bundle3
+		All available bundles:
+		 - os-core
+		 - test-bundle1 (experimental)
+		 - test-bundle2 (experimental)
+		 - test-bundle3
+
+		Total: 4
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -59,11 +62,14 @@ global_teardown() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		os-core
-		test-bundle1 (experimental)
+		Installed bundles:
+		 - os-core
+		 - test-bundle1 (experimental)
+
+		Total: 2
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }
 
@@ -81,8 +87,10 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Error: Failed to retrieve 10 MoM manifest
 		Warning: Could not determine which installed bundles are experimental
-		os-core
-		test-bundle1
+		Installed bundles:
+		 - os-core
+		 - test-bundle1
+		Total: 2
 	EOM
 	)
 	assert_in_output "$expected_output"

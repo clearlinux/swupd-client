@@ -22,11 +22,14 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
-		os-core
-		test-bundle1
-		test-bundle2
+		Installed bundles:
+		 - os-core
+		 - test-bundle1
+		 - test-bundle2
+
+		Total: 3
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }

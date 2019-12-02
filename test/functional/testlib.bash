@@ -1418,7 +1418,7 @@ create_third_party_repo() { #swupd_function
 	sudo mkdir -p "$repo_state_dir"/{staged,download,delta,telemetry,bundles}
 
 	# create the basic content for the 3rd-party repo
-	create_version "$env_name" "$version" 0 "$format" "$repo_name"
+	create_version -r "$env_name" "$version" 0 "$format" "$repo_name"
 	debug_msg "3rd-party repo $repo_name created successfully"
 
 	# add the new repo to the repo.ini file
@@ -1433,6 +1433,11 @@ create_third_party_repo() { #swupd_function
 	export TPWEBDIR="$env_name"/3rd_party/"$repo_name"
 	debug_msg "3rd-party repo state dir: $TPSTATEDIR"
 	debug_msg "3rd-party repo content dir: $TPWEBDIR"
+
+	# every 3rd-party repo needs to have at least the os-core bundle so this should be
+	# added by default
+	debug_msg "Adding bundle os-core to the 3rd-party repo"
+	create_bundle -L -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
 
 }
 

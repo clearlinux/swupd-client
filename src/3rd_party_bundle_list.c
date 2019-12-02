@@ -127,22 +127,28 @@ static void print_repo_header(const char *repo_name)
 	free_string(&header);
 }
 
-static enum swupd_code list_bundles(struct repo *repo)
+static enum swupd_code list_repo_bundles(char *state_dir, char *path_prefix, struct repo *repo)
 {
+	int current_version;
 	enum swupd_code ret;
 
-	if (cmdline_local) {
-		ret = list_local_bundles(repo->version);
-	} else if (cmdline_option_deps != NULL) {
-		ret = show_included_bundles(cmdline_option_deps, repo->version);
-	} else if (cmdline_option_has_dep != NULL) {
-		ret = show_bundle_reqd_by(cmdline_option_has_dep, cmdline_option_all, repo->version);
-	} else {
-		ret = list_installable_bundles(repo->version);
+	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
+	ret = third_party_set_repo(state_dir, path_prefix, repo);
+	if (ret) {
+		return ret;
 	}
-	info("\n");
 
-	return ret;
+	/* get the current version of the 3rd-party repo, if we cannot get the current_version,
+	 * the only list command we can still attempt is listing locally installed bundles
+	 * (with the limitation of not showing what bundles are experimental)*/
+	current_version = get_current_version(globals.path_prefix);
+	if (current_version < 0 && !cmdline_local) {
+		error("Unable to determine current OS version for repository %s\n\n", repo->name);
+		return SWUPD_CURRENT_VERSION_UNKNOWN;
+	}
+
+	print_repo_header(repo->name);
+	return list_bundles(current_version);
 }
 
 enum swupd_code third_party_bundle_list_main(int argc, char **argv)
@@ -153,6 +159,7 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 	char *state_dir;
 	char *path_prefix;
 	enum swupd_code ret;
+	enum swupd_code ret_code = SWUPD_OK;
 	const int steps_in_bundlelist = 1;
 
 	if (!parse_options(argc, argv)) {
@@ -162,15 +169,19 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 	progress_init_steps("3rd-party-bundle-list", steps_in_bundlelist);
 
 	if (cmdline_local && !is_root()) {
-		ret = swupd_init(SWUPD_NO_ROOT);
+		ret_code = swupd_init(SWUPD_NO_ROOT);
 	} else {
-		ret = swupd_init(SWUPD_ALL);
+		ret_code = swupd_init(SWUPD_ALL);
 	}
 
-	if (ret != SWUPD_OK) {
+	if (ret_code != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
 		goto finish;
 	}
+
+	bundle_list_set_option_all(cmdline_option_all);
+	bundle_list_set_option_has_dep(cmdline_option_has_dep);
+	bundle_list_set_option_deps(cmdline_option_deps);
 
 	/* load the existing 3rd-party repos from the repo.ini config file */
 	repos = third_party_get_repos();
@@ -182,36 +193,21 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 	/* if the repo to be used was specified, use it, otherwise
 	 * list the bundles in all the 3rd-party repos */
 	if (cmdline_repo) {
-
 		repo = list_search(repos, cmdline_repo, repo_name_cmp);
 		if (!repo) {
 			error("3rd-party repository %s was not found\n\n", cmdline_repo);
-			ret = SWUPD_INVALID_REPOSITORY;
+			ret_code = SWUPD_INVALID_REPOSITORY;
 			goto clean_and_exit;
 		}
-
-		/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-		if (third_party_set_repo(state_dir, path_prefix, repo)) {
-			ret = SWUPD_COULDNT_CREATE_DIR;
-			goto clean_and_exit;
-		}
-
-		print_repo_header(repo->name);
-		ret = list_bundles(repo);
-
+		ret_code = list_repo_bundles(state_dir, path_prefix, repo);
 	} else {
-
 		for (iter = repos; iter; iter = iter->next) {
 			repo = iter->data;
-
-			/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-			if (third_party_set_repo(state_dir, path_prefix, repo)) {
-				ret = SWUPD_COULDNT_CREATE_DIR;
-				goto clean_and_exit;
+			ret = list_repo_bundles(state_dir, path_prefix, repo);
+			if (ret) {
+				/* if any of the repos failed, keep the error */
+				ret_code = ret;
 			}
-
-			print_repo_header(repo->name);
-			ret = list_bundles(repo);
 		}
 	}
 
@@ -222,8 +218,8 @@ clean_and_exit:
 	swupd_deinit();
 
 finish:
-	progress_finish_steps(ret);
-	return ret;
+	progress_finish_steps(ret_code);
+	return ret_code;
 }
 
 #endif

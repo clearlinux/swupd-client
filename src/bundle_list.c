@@ -35,6 +35,32 @@ static char *cmdline_option_has_dep = NULL;
 static char *cmdline_option_deps = NULL;
 static bool cmdline_local = true;
 
+void bundle_list_set_option_all(bool opt)
+{
+	cmdline_option_all = opt;
+	cmdline_local = !cmdline_option_all;
+}
+
+void bundle_list_set_option_has_dep(char *bundle)
+{
+	if (!bundle) {
+		return;
+	}
+	free_string(&cmdline_option_has_dep);
+	cmdline_option_has_dep = bundle;
+	cmdline_local = false;
+}
+
+void bundle_list_set_option_deps(char *bundle)
+{
+	if (!bundle) {
+		return;
+	}
+	free_string(&cmdline_option_deps);
+	cmdline_option_deps = bundle;
+	cmdline_local = false;
+}
+
 static void free_has_dep(void)
 {
 	free_string(&cmdline_option_has_dep);
@@ -118,7 +144,7 @@ static bool parse_options(int argc, char **argv)
  * /usr/share/clear/bundles/), get the list of local bundles and print
  * them sorted.
  */
-enum swupd_code list_local_bundles(int version)
+static enum swupd_code list_local_bundles(int version)
 {
 	char *name;
 	char *path = NULL;
@@ -176,7 +202,7 @@ enum swupd_code list_local_bundles(int version)
 }
 
 /* Return recursive list of included bundles */
-enum swupd_code show_included_bundles(char *bundle_name, int version)
+static enum swupd_code show_included_bundles(char *bundle_name, int version)
 {
 	int ret = 0;
 	struct list *subs = NULL;
@@ -270,7 +296,7 @@ out:
 * Parse the full manifest for the current version of the OS and print
 *   all available bundles.
 */
-enum swupd_code list_installable_bundles(int version)
+static enum swupd_code list_installable_bundles(int version)
 {
 	char *name;
 	struct list *list;
@@ -302,7 +328,7 @@ enum swupd_code list_installable_bundles(int version)
 	return 0;
 }
 
-enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server, int version)
+static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server, int version)
 {
 	int ret = 0;
 	struct manifest *current_manifest = NULL;
@@ -381,6 +407,24 @@ out:
 	return ret;
 }
 
+enum swupd_code list_bundles(int version)
+{
+	enum swupd_code ret;
+
+	if (cmdline_local) {
+		ret = list_local_bundles(version);
+	} else if (cmdline_option_deps != NULL) {
+		ret = show_included_bundles(cmdline_option_deps, version);
+	} else if (cmdline_option_has_dep != NULL) {
+		ret = show_bundle_reqd_by(cmdline_option_has_dep, cmdline_option_all, version);
+	} else {
+		ret = list_installable_bundles(version);
+	}
+	info("\n");
+
+	return ret;
+}
+
 enum swupd_code bundle_list_main(int argc, char **argv)
 {
 	enum swupd_code ret;
@@ -417,15 +461,7 @@ enum swupd_code bundle_list_main(int argc, char **argv)
 		goto finish;
 	}
 
-	if (cmdline_local) {
-		ret = list_local_bundles(current_version);
-	} else if (cmdline_option_deps != NULL) {
-		ret = show_included_bundles(cmdline_option_deps, current_version);
-	} else if (cmdline_option_has_dep != NULL) {
-		ret = show_bundle_reqd_by(cmdline_option_has_dep, cmdline_option_all, current_version);
-	} else {
-		ret = list_installable_bundles(current_version);
-	}
+	ret = list_bundles(current_version);
 
 finish:
 	swupd_deinit();

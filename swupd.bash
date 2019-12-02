@@ -122,6 +122,11 @@ _swupd()
 		opts+=" $(unset CDPATH; test -d /usr/share/clear/bundles && \
 			find /usr/share/clear/bundles/ -maxdepth 1 -type f ! -name os-core -printf '%f ')"
 		;;
+		("bundle-list")
+		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
+			opts+="--repo"
+		fi
+		;;
 		("hashdump")
 		# Add in filenames. TODO add in directory completion
 		opts+=" $( compgen -f -- "$2" )"

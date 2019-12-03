@@ -93,6 +93,27 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
+static int get_repo_version(const char *state_dir, const char *path_prefix, struct repo *repo)
+{
+	int current_version;
+	int ret;
+
+	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
+	ret = third_party_set_repo(state_dir, path_prefix, repo);
+	if (ret) {
+		return -ret;
+	}
+
+	/* get repo's version */
+	current_version = get_current_version(globals.path_prefix);
+	if (current_version < 0) {
+		error("Unable to determine current OS version for repository %s\n\n", repo->name);
+		return -SWUPD_CURRENT_VERSION_UNKNOWN;
+	}
+
+	return current_version;
+}
+
 enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 {
 	struct list *bundles = NULL;
@@ -101,6 +122,7 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 	struct list *repos = NULL;
 	char *state_dir;
 	char *path_prefix;
+	int repo_version;
 	int ret_code = SWUPD_OK;
 	int ret = SWUPD_OK;
 
@@ -166,16 +188,16 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 				struct manifest *mom = NULL;
 				struct file *file = NULL;
 
-				/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-				if (third_party_set_repo(state_dir, path_prefix, repo)) {
-					ret_code = SWUPD_COULDNT_CREATE_DIR;
+				repo_version = get_repo_version(state_dir, path_prefix, repo);
+				if (repo_version < 0) {
+					ret_code = -repo_version;
 					goto clean_and_exit;
 				}
 
 				/* load the repo's MoM*/
-				mom = load_mom(repo->version, false, NULL);
+				mom = load_mom(repo_version, false, NULL);
 				if (!mom) {
-					error("Cannot load manifest MoM for 3rd-party repository %s version %i\n", repo->name, repo->version);
+					error("Cannot load manifest MoM for 3rd-party repository %s version %i\n", repo->name, repo_version);
 					ret_code = SWUPD_COULDNT_LOAD_MOM;
 					goto clean_and_exit;
 				}
@@ -212,8 +234,9 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 
 		/* set the content_url and state_dir to those from the 3rd-party repo
 		 * where the requested bundle was found */
-		if (third_party_set_repo(state_dir, path_prefix, selected_repo)) {
-			ret_code = SWUPD_COULDNT_CREATE_DIR;
+		repo_version = get_repo_version(state_dir, path_prefix, selected_repo);
+		if (repo_version < 0) {
+			ret_code = -repo_version;
 			goto clean_and_exit;
 		}
 
@@ -225,7 +248,7 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 		info("\nBundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons\n\n");
 		globals.no_scripts = true;
 
-		ret = execute_bundle_add(bundle_to_install, selected_repo->version);
+		ret = execute_bundle_add(bundle_to_install, repo_version);
 
 		if (ret != SWUPD_OK) {
 			ret_code = ret;

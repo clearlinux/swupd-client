@@ -61,10 +61,6 @@ static bool parse_key_values(char *section, char *key, char *value, void *data)
 			free(repo->url);
 		}
 		repo->url = strdup_or_die(value);
-	} else if (strcasecmp(key, "version") == 0) {
-		if (strtoi_err(value, &repo->version) != 0) {
-			return false;
-		}
 	}
 
 	return true;
@@ -128,9 +124,8 @@ int third_party_add_repo(const char *repo_name, const char *repo_url)
 		goto exit;
 	}
 
-	// write url and version
+	// write url
 	ret = config_write_config(fp, "url", repo_url);
-	ret = config_write_config(fp, "version", "10");
 
 exit:
 	if (fp) {
@@ -145,7 +140,6 @@ exit:
 static int write_repo(FILE *fp, struct repo *repo)
 {
 	int ret;
-	char *version;
 
 	ret = config_write_section(fp, repo->name);
 	if (ret) {
@@ -159,9 +153,6 @@ static int write_repo(FILE *fp, struct repo *repo)
 		}
 	}
 
-	string_or_die(&version, "%d", repo->version);
-	ret = config_write_config(fp, "version", version);
-	free_string(&version);
 	if (ret) {
 		return ret;
 	}

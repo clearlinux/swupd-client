@@ -48,7 +48,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD 3rd-party add my_repo http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Warning: This is an insecure connection
 		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
@@ -62,7 +62,6 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		[my_repo]
 		url=http://example.com/swupd-file
-		version=10
 	EOM
 	)
 	assert_is_output --identical "$expected_output"

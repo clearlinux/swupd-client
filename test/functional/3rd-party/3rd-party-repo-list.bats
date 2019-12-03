@@ -12,23 +12,18 @@ test_setup(){
 	contents=$(cat <<- EOM
 		[test1]
 		url=https://www.abc.com
-		version=0
 
 		[test2]
 		url=https://www.efg.com
-		version=0
 
 		[test4]
 		url=https://www.pqr.com
-		version=0
 
 		[test5]
 		url=ERROR
-		version=0
 
 		[test5]
 		url=https://www.lmn.com
-		version=0
 		\n
 	EOM
 	)

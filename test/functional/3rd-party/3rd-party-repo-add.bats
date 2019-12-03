@@ -5,12 +5,34 @@
 
 load "../testlib"
 
+export repo1
+export repo2
+
+test_setup() {
+
+	create_test_environment "$TEST_NAME"
+	create_third_party_repo "$TEST_NAME" 10 staging test-repo1
+	repo1="$TPWEBDIR"
+	create_third_party_repo "$TEST_NAME" 10 staging test-repo2
+	repo2="$TPWEBDIR"
+
+}
+
 @test "TPR001: Add a single repo" {
 
-	run sudo sh -c "$SWUPD 3rd-party add test-repo1 https://xyz.com $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD 3rd-party add test-repo1 file://$repo1 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-			Repository test-repo1 added successfully
+		Repository test-repo1 added successfully
+		Installing bundle 'os-core' from 3rd-party repository test-repo1...
+		Note that bundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
+		Loading required manifests...
+		No packs need to be downloaded
+		Validate downloaded files
+		Starting download of remaining update content. This may take a while...
+		Installing files...
+		Warning: post-update helper scripts skipped due to --no-scripts argument
+		Successfully installed 1 bundle
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -18,73 +40,48 @@ load "../testlib"
 	run sudo sh -c "cat $STATEDIR/3rd_party/repo.ini"
 	expected_output=$(cat <<-EOM
 			[test-repo1]
-			url=https://xyz.com
+			url=file://$repo1
 	EOM
 	)
 	assert_is_output "$expected_output"
+
+	# make sure the os-core bundle of the repo is installed in the appropriate place
+	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo1/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo1/usr/lib/os-release
 
 }
 
 @test "TPR002: Add multiple repos in repo config" {
 
-	# Add 5 repos in a row one by one
-	run sudo sh -c "$SWUPD 3rd-party add test-repo1 https://xyz.com $SWUPD_OPTS"
+	# Add multiple repos in a row one by one
+	run sudo sh -c "$SWUPD 3rd-party add test-repo1 file://$repo1 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 			Repository test-repo1 added successfully
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_in_output "$expected_output"
+	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo1/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo1/usr/lib/os-release
 
-	run sudo sh -c "$SWUPD 3rd-party add test-repo2 file://abc.com $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD 3rd-party add test-repo2 file://$repo2 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 			Repository test-repo2 added successfully
 	EOM
 	)
-	assert_is_output "$expected_output"
-
-	run sudo sh -c "$SWUPD 3rd-party add test-repo3 https://efg.com $SWUPD_OPTS"
-	assert_status_is "$SWUPD_OK"
-	expected_output=$(cat <<-EOM
-			Repository test-repo3 added successfully
-	EOM
-	)
-	assert_is_output "$expected_output"
-
-	run sudo sh -c "$SWUPD 3rd-party add test-repo4 https://hij.com $SWUPD_OPTS"
-	assert_status_is "$SWUPD_OK"
-	expected_output=$(cat <<-EOM
-			Repository test-repo4 added successfully
-	EOM
-	)
-	assert_is_output "$expected_output"
-
-	run sudo sh -c "$SWUPD 3rd-party add test-repo5 https://klm.com $SWUPD_OPTS"
-	assert_status_is "$SWUPD_OK"
-	expected_output=$(cat <<-EOM
-			Repository test-repo5 added successfully
-	EOM
-	)
-	assert_is_output "$expected_output"
+	assert_in_output "$expected_output"
+	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo2/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo2/usr/lib/os-release
 
 	run sudo sh -c "cat $STATEDIR/3rd_party/repo.ini"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 			[test-repo1]
-			url=https://xyz.com
+			url=file://$repo1
 
 			[test-repo2]
-			url=file://abc.com
-
-			[test-repo3]
-			url=https://efg.com
-
-			[test-repo4]
-			url=https://hij.com
-
-			[test-repo5]
-			url=https://klm.com
+			url=file://$repo2
 	EOM
 	)
 	assert_is_output --identical "$expected_output"

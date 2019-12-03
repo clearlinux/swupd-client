@@ -1395,6 +1395,41 @@ create_third_party_repo() { #swupd_function
 	local version=$2
 	local format=${3:-staging}
 	local repo_name=${4:-test-repo}
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    create_third_party_repo <environment_name> <new_version> [format] [repo_name]
+			EOM
+		return
+	fi
+	validate_item "$env_name"
+	validate_param "$version"
+
+	debug_msg "Creating 3rd-party repo $repo_name..."
+	create_version -r "$env_name" "$version" 0 "$format" "$repo_name"
+	create_bundle -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
+	TPWEBDIR=$(realpath "$env_name/3rd_party/$repo_name")
+	export TPWEBDIR
+	debug_msg "3rd-party repo content dir: $TPWEBDIR"
+	debug_msg "3rd-party repo created successfully"
+
+}
+
+# Creates and adds a  new version of the server side content in the specified
+# location to serve as a 3rd-party repository
+# Parameters:
+# - ENVIRONMENT_NAME: the name of the test environment
+# - VERSION: the version of the server side content
+# - FORMAT: the format to use for the version
+# - REPO_NAME: the name of the 3rd-party repo, defaults to "test-repo"
+add_third_party_repo() { #swupd_function
+
+	local env_name=$1
+	local version=$2
+	local format=${3:-staging}
+	local repo_name=${4:-test-repo}
 	local repo_state_dir
 	local path
 
@@ -1402,7 +1437,7 @@ create_third_party_repo() { #swupd_function
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    create_third_party_repo <environment_name> <new_version> [format] [repo_name]
+			    add_third_party_repo <environment_name> <new_version> [format] [repo_name]
 			EOM
 		return
 	fi

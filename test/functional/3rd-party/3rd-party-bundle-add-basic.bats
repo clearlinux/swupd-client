@@ -12,7 +12,7 @@ test_setup() {
 
 	# create a 3rd-party repo within the test environment and add
 	# a bundle in the 3rd-party repo
-	create_third_party_repo "$TEST_NAME" 10
+	add_third_party_repo "$TEST_NAME" 10
 	create_bundle -n test-bundle2 -f /bar/file_2 -u test-repo "$TEST_NAME"
 
 }

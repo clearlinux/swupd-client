@@ -72,6 +72,9 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	enum swupd_code ret = SWUPD_OK;
 	const int step_in_third_party_add = 1;
 	const char *name, *url;
+	struct list *repos = NULL;
+	struct repo *repo = NULL;
+	int repo_version;
 
 	if (!parse_options(argc, argv)) {
 		print_help();
@@ -92,14 +95,48 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	}
 
 	/* The last two in reverse are the repo-name, repo-url */
-	if (third_party_add_repo(name, url) == 0) {
-		info("Repository %s added successfully\n", argv[argc - 2]);
-	} else {
+	ret = third_party_add_repo(name, url);
+	if (ret) {
 		ret = SWUPD_COULDNT_WRITE_FILE;
-		error("Failed to add repo: %s to config\n", argv[argc - 2]);
+		goto finish;
+	}
+	info("Repository %s added successfully\n", name);
+
+	/* at this point the repo has been added to the repo.ini file */
+	repos = third_party_get_repos();
+	repo = list_search(repos, name, repo_name_cmp);
+	if (!repo) {
+		ret = SWUPD_COULDNT_WRITE_FILE;
+		error("Failed to add repo: %s to config\n", name);
+		goto finish;
 	}
 
+	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
+	ret = third_party_set_repo(globals.state_dir, globals.path_prefix, repo);
+	if (ret) {
+		goto finish;
+	}
+
+	/* get repo's latest version */
+	repo_version = get_latest_version(repo->url);
+	if (repo_version < 0) {
+		error("Unable to determine the latest version for repository %s\n\n", repo->name);
+		ret = SWUPD_INVALID_REPOSITORY;
+		goto finish;
+	}
+
+	/* the repo's "os-core" bundle needs to be installed at this moment
+	 * so we can track the version of the repo */
+	info("Installing bundle 'os-core' from 3rd-party repository %s...\n", name);
+	info("Note that bundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons\n");
+	globals.no_scripts = true;
+	struct list *bundle_to_install = NULL;
+	bundle_to_install = list_append_data(bundle_to_install, "os-core");
+	ret = execute_bundle_add(bundle_to_install, repo_version);
+	list_free_list(bundle_to_install);
+
 finish:
+	list_free_list_and_data(repos, repo_free_data);
 	swupd_deinit();
 	progress_finish_steps(ret);
 	return ret;

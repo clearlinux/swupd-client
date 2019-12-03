@@ -10,11 +10,11 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 
 	# create a couple of 3rd-party repos with bundles
-	create_third_party_repo "$TEST_NAME" 10 staging repo1
+	add_third_party_repo "$TEST_NAME" 10 staging repo1
 	create_bundle -n test-bundle1 -f /foo/file_1A -u repo1 "$TEST_NAME"
 	create_bundle -n test-bundle2 -f /bar/file_2 -u repo1 "$TEST_NAME"
 
-	create_third_party_repo "$TEST_NAME" 10 staging repo2
+	add_third_party_repo "$TEST_NAME" 10 staging repo2
 	create_bundle -n test-bundle1 -f /baz/file_1B -u repo2 "$TEST_NAME"
 
 }

@@ -11,11 +11,11 @@ global_setup() {
 	create_bundle -n test-bundle-upstream -f /file_upstream "$TEST_NAME"
 
 	# create a couple of 3rd-party repos with bundles
-	create_third_party_repo "$TEST_NAME" 10 staging repo1
+	add_third_party_repo "$TEST_NAME" 10 staging repo1
 	create_bundle    -n test-bundle1 -f /foo/file_1A -u repo1 "$TEST_NAME"
 	create_bundle -L -n test-bundle2 -f /bar/file_2  -u repo1 "$TEST_NAME"
 
-	create_third_party_repo "$TEST_NAME" 10 staging repo2
+	add_third_party_repo "$TEST_NAME" 10 staging repo2
 	create_bundle    -n test-bundle1 -f /baz/file_1B -u repo2 "$TEST_NAME"
 	create_bundle -L -n test-bundle3 -f /baz/file_3  -u repo2 "$TEST_NAME"
 

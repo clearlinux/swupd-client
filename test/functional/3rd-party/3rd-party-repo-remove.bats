@@ -13,24 +13,19 @@ test_setup(){
 		\n
 		[test1]
 		url=www.abc.com
-		version=0
 
 		[test2]
 		url=www.efg.com
-		version=0
 
 		[test3]
 		url=www.xyz.com
-		version=0
 
 		[test4]
 		url=www.pqr.com
-		version=123
 		invalid=456
 
 		[test5]
 		url=www.lmn.com
-		version=0
 		\n
 	EOM
 	)
@@ -85,11 +80,9 @@ test_teardown(){
 	expected_contents=$(cat <<- EOM
 		[test2]
 		url=www.efg.com
-		version=0
 
 		[test4]
 		url=www.pqr.com
-		version=123
 	EOM
 	)
 

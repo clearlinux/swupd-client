@@ -18,7 +18,6 @@ extern "C" {
 struct repo {
 	char *name;
 	char *url;
-	int version;
 };
 
 /**

@@ -244,4 +244,161 @@ enum swupd_code third_party_set_repo(const char *state_dir, const char *path_pre
 	return SWUPD_OK;
 }
 
+static enum swupd_code third_party_find_bundle(const char *bundle, struct list *repos, struct repo **found_repo)
+{
+	struct list *iter = NULL;
+	char *state_dir;
+	char *path_prefix;
+	char *content_url;
+	int count = 0;
+	int version;
+	enum swupd_code ret_code = SWUPD_OK;
+
+	/* backup the original state_dir and path_prefix values */
+	state_dir = strdup_or_die(globals.state_dir);
+	path_prefix = strdup_or_die(globals.path_prefix);
+	content_url = strdup_or_die(globals.content_url);
+
+	info("Searching for bundle %s in the 3rd-party repositories...\n", bundle);
+	for (iter = repos; iter; iter = iter->next) {
+		struct repo *repo = iter->data;
+		struct manifest *mom = NULL;
+		struct file *file = NULL;
+
+		/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
+		ret_code = third_party_set_repo(state_dir, path_prefix, repo);
+		if (ret_code != SWUPD_OK) {
+			return ret_code;
+		}
+
+		/* get repo's version */
+		version = get_current_version(globals.path_prefix);
+		if (version < 0) {
+			error("Unable to determine current version for repository %s\n\n", repo->name);
+			ret_code = SWUPD_CURRENT_VERSION_UNKNOWN;
+			goto clean_and_exit;
+		}
+
+		/* load the repo's MoM*/
+		mom = load_mom(version, false, NULL);
+		if (!mom) {
+			error("Cannot load manifest MoM for 3rd-party repository %s version %i\n", repo->name, version);
+			ret_code = SWUPD_COULDNT_LOAD_MOM;
+			goto clean_and_exit;
+		}
+
+		/* search for the bundle in the MoM */
+		file = mom_search_bundle(mom, bundle);
+		if (file) {
+			/* the bundle was found in this repo, keep a pointer to the repo */
+			info("Bundle %s found in 3rd-party repository %s\n", bundle, repo->name);
+			count++;
+			*found_repo = repo;
+		}
+		manifest_free(mom);
+	}
+
+	/* if the bundle was not found or exists in more than one repo,
+	 * return NULL */
+	if (count == 0) {
+		error("bundle %s was not found in any 3rd-party repository\n\n", bundle);
+		ret_code = SWUPD_INVALID_BUNDLE;
+	} else if (count > 1) {
+		error("bundle %s was found in more than one 3rd-party repository\n", bundle);
+		info("Please specify a repository using the --repo flag\n\n");
+		ret_code = SWUPD_INVALID_OPTION;
+	}
+
+clean_and_exit:
+	set_path_prefix(path_prefix);
+	set_state_dir(state_dir);
+	set_content_url(content_url);
+	free_string(&path_prefix);
+	free_string(&state_dir);
+	free_string(&content_url);
+
+	return ret_code;
+}
+
+enum swupd_code third_party_run_operation(struct list *bundles, const char *repo, run_operation_fn_t run_operation_fn)
+{
+	struct list *repos = NULL;
+	struct list *iter = NULL;
+	struct repo *selected_repo = NULL;
+	char *state_dir;
+	char *path_prefix;
+	char *content_url;
+	int ret;
+	enum swupd_code ret_code = SWUPD_OK;
+
+	/* load the existing 3rd-party repos from the repo.ini config file */
+	repos = third_party_get_repos();
+
+	/* backup the original global values */
+	state_dir = strdup_or_die(globals.state_dir);
+	path_prefix = strdup_or_die(globals.path_prefix);
+	content_url = strdup_or_die(globals.content_url);
+
+	/* try action on the bundles one by one */
+	for (iter = bundles; iter; iter = iter->next) {
+		char *bundle = iter->data;
+
+		/* if the repo to be used was specified, use it, otherwise
+		 * search for the bundle in all the 3rd-party repos */
+		if (repo) {
+
+			selected_repo = list_search(repos, repo, repo_name_cmp);
+			if (!selected_repo) {
+				error("3rd-party repository %s was not found\n\n", repo);
+				ret_code = SWUPD_INVALID_REPOSITORY;
+				goto clean_and_exit;
+			}
+
+		} else {
+
+			/* search for the bundle in all repos */
+			ret = third_party_find_bundle(bundle, repos, &selected_repo);
+			if (ret) {
+				ret_code = ret;
+				/* something went wrong or wasn't found,
+				 * go to the next bundle */
+				continue;
+			}
+		}
+
+		if (selected_repo) {
+
+			/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
+			ret = third_party_set_repo(state_dir, path_prefix, selected_repo);
+			if (ret) {
+				ret_code = ret;
+				goto next;
+			}
+
+			/* perform appropriate action on the bundle */
+			ret = run_operation_fn(bundle);
+			if (ret) {
+				/* if we have an error here it is ok to overwrite any previous error */
+				ret_code = ret;
+			}
+			info("\n");
+
+			/* return the global variables to the original values */
+		next:
+			set_path_prefix(path_prefix);
+			set_state_dir(state_dir);
+			set_content_url(content_url);
+		}
+	}
+
+	/* free data */
+clean_and_exit:
+	list_free_list_and_data(repos, repo_free_data);
+	free_string(&path_prefix);
+	free_string(&state_dir);
+	free_string(&content_url);
+
+	return ret_code;
+}
+
 #endif

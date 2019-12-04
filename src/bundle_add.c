@@ -316,7 +316,7 @@ static enum swupd_code download_content(struct manifest *mom, struct list *to_in
 /* Bundle install one ore more bundles passed in bundles
  * param as a null terminated array of strings
  */
-enum swupd_code execute_bundle_add(struct list *bundles_list, int version)
+enum swupd_code bundle_add(struct list *bundles_list, int version)
 {
 	int ret = 0;
 	struct manifest *mom;
@@ -459,10 +459,23 @@ clean_and_exit:
 	return ret;
 }
 
+enum swupd_code execute_bundle_add(struct list *bundles_list)
+{
+	int version;
+
+	/* get the current version of the system */
+	version = get_current_version(globals.path_prefix);
+	if (version < 0) {
+		error("Unable to determine current OS version\n");
+		return SWUPD_CURRENT_VERSION_UNKNOWN;
+	}
+
+	return bundle_add(bundles_list, version);
+}
+
 enum swupd_code bundle_add_main(int argc, char **argv)
 {
 	struct list *bundles_list = NULL;
-	int version;
 	int ret;
 
 	/*
@@ -500,16 +513,8 @@ enum swupd_code bundle_add_main(int argc, char **argv)
 	}
 	bundles_list = list_head(bundles_list);
 
-	version = get_current_version(globals.path_prefix);
-	if (version < 0) {
-		error("Unable to determine current OS version\n");
-		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
-		goto clean_and_exit;
-	}
+	ret = execute_bundle_add(bundles_list);
 
-	ret = execute_bundle_add(bundles_list, version);
-
-clean_and_exit:
 	list_free_list(bundles_list);
 	swupd_deinit();
 	progress_finish_steps(ret);

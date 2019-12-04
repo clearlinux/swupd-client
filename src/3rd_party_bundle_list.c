@@ -129,7 +129,6 @@ static void print_repo_header(const char *repo_name)
 
 static enum swupd_code list_repo_bundles(char *state_dir, char *path_prefix, struct repo *repo)
 {
-	int current_version;
 	enum swupd_code ret;
 
 	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
@@ -138,17 +137,8 @@ static enum swupd_code list_repo_bundles(char *state_dir, char *path_prefix, str
 		return ret;
 	}
 
-	/* get the current version of the 3rd-party repo, if we cannot get the current_version,
-	 * the only list command we can still attempt is listing locally installed bundles
-	 * (with the limitation of not showing what bundles are experimental)*/
-	current_version = get_current_version(globals.path_prefix);
-	if (current_version < 0 && !cmdline_local) {
-		error("Unable to determine current OS version for repository %s\n\n", repo->name);
-		return SWUPD_CURRENT_VERSION_UNKNOWN;
-	}
-
 	print_repo_header(repo->name);
-	return list_bundles(current_version);
+	return list_bundles();
 }
 
 enum swupd_code third_party_bundle_list_main(int argc, char **argv)

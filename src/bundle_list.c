@@ -407,9 +407,19 @@ out:
 	return ret;
 }
 
-enum swupd_code list_bundles(int version)
+enum swupd_code list_bundles(void)
 {
 	enum swupd_code ret;
+	int version;
+
+	/* if we cannot get the current version, the only list command we can still
+	 * attempt is listing locally installed bundles (with the limitation of not
+	 * showing what bundles are experimental) */
+	version = get_current_version(globals.path_prefix);
+	if (version < 0 && !cmdline_local) {
+		error("Unable to determine current OS version\n");
+		return SWUPD_CURRENT_VERSION_UNKNOWN;
+	}
 
 	if (cmdline_local) {
 		ret = list_local_bundles(version);
@@ -428,7 +438,6 @@ enum swupd_code list_bundles(int version)
 enum swupd_code bundle_list_main(int argc, char **argv)
 {
 	enum swupd_code ret;
-	int current_version;
 	const int steps_in_bundlelist = 1;
 
 	/* there is no need to report in progress for bundle-list at this time */
@@ -451,19 +460,8 @@ enum swupd_code bundle_list_main(int argc, char **argv)
 		return ret;
 	}
 
-	/* if we cannot get the current_version, the only list command we can still attempt is
-	 * listing locally installed bundles (with the limitation of not showing what
-	 * bundles are experimental) */
-	current_version = get_current_version(globals.path_prefix);
-	if (current_version < 0 && !cmdline_local) {
-		error("Unable to determine current OS version\n");
-		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
-		goto finish;
-	}
+	ret = list_bundles();
 
-	ret = list_bundles(current_version);
-
-finish:
 	swupd_deinit();
 	progress_finish_steps(ret);
 	return ret;

@@ -18,6 +18,9 @@
  */
 
 #define _GNU_SOURCE
+
+#include <errno.h>
+
 #include "3rd_party_repos.h"
 #include "swupd.h"
 
@@ -69,12 +72,13 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code third_party_add_main(int argc, char **argv)
 {
 
-	enum swupd_code ret = SWUPD_OK;
+	enum swupd_code ret_code = SWUPD_OK;
 	const int step_in_third_party_add = 1;
 	const char *name, *url;
 	struct list *repos = NULL;
 	struct repo *repo = NULL;
 	int repo_version;
+	int ret;
 
 	if (!parse_options(argc, argv)) {
 		print_help();
@@ -82,8 +86,8 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	}
 	progress_init_steps("third-party-add", step_in_third_party_add);
 
-	ret = swupd_init(SWUPD_ALL);
-	if (ret != SWUPD_OK) {
+	ret_code = swupd_init(SWUPD_ALL);
+	if (ret_code != SWUPD_OK) {
 		goto finish;
 	}
 
@@ -97,7 +101,12 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	/* The last two in reverse are the repo-name, repo-url */
 	ret = third_party_add_repo(name, url);
 	if (ret) {
-		ret = SWUPD_COULDNT_WRITE_FILE;
+		if (ret != -EEXIST) {
+			error("Failed to add repo: %s to config\n", name);
+			ret_code = SWUPD_COULDNT_WRITE_FILE;
+		} else {
+			ret_code = SWUPD_INVALID_OPTION;
+		}
 		goto finish;
 	}
 	info("Repository %s added successfully\n", name);
@@ -106,14 +115,14 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	repos = third_party_get_repos();
 	repo = list_search(repos, name, repo_name_cmp);
 	if (!repo) {
-		ret = SWUPD_COULDNT_WRITE_FILE;
-		error("Failed to add repo: %s to config\n", name);
+		/* this should not happen */
+		ret_code = SWUPD_UNEXPECTED_CONDITION;
 		goto finish;
 	}
 
 	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-	ret = third_party_set_repo(globals.state_dir, globals.path_prefix, repo);
-	if (ret) {
+	ret_code = third_party_set_repo(globals.state_dir, globals.path_prefix, repo);
+	if (ret_code) {
 		goto finish;
 	}
 
@@ -121,7 +130,7 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	repo_version = get_latest_version(repo->url);
 	if (repo_version < 0) {
 		error("Unable to determine the latest version for repository %s\n\n", repo->name);
-		ret = SWUPD_INVALID_REPOSITORY;
+		ret_code = SWUPD_INVALID_REPOSITORY;
 		goto finish;
 	}
 
@@ -132,14 +141,14 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	globals.no_scripts = true;
 	struct list *bundle_to_install = NULL;
 	bundle_to_install = list_append_data(bundle_to_install, "os-core");
-	ret = bundle_add(bundle_to_install, repo_version);
+	ret_code = bundle_add(bundle_to_install, repo_version);
 	list_free_list(bundle_to_install);
 
 finish:
 	list_free_list_and_data(repos, repo_free_data);
 	swupd_deinit();
-	progress_finish_steps(ret);
-	return ret;
+	progress_finish_steps(ret_code);
+	return ret_code;
 }
 
 #endif

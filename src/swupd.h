@@ -322,8 +322,9 @@ extern char *get_tracking_dir(void);
 extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
 extern int subscription_bundlename_strcmp(const void *a, const void *b);
 
-/* bundle_add.c*/
-extern enum swupd_code execute_bundle_add(struct list *bundles_list, int version);
+/* bundle_add.c */
+extern enum swupd_code execute_bundle_add(struct list *bundles_list);
+extern enum swupd_code bundle_add(struct list *bundles_list, int version);
 
 /* verify.c */
 extern enum swupd_code execute_verify(void);
@@ -345,7 +346,7 @@ extern void verify_set_extra_files_only(bool opt);
 extern regex_t *compile_whitelist(const char *whitelist_pattern);
 
 /* bundle_list.c*/
-extern enum swupd_code list_bundles(int version);
+extern enum swupd_code list_bundles(void);
 extern void bundle_list_set_option_all(bool opt);
 extern void bundle_list_set_option_has_dep(char *bundle);
 extern void bundle_list_set_option_deps(char *bundle);

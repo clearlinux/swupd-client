@@ -93,27 +93,6 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static int get_repo_version(const char *state_dir, const char *path_prefix, struct repo *repo)
-{
-	int current_version;
-	int ret;
-
-	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-	ret = third_party_set_repo(state_dir, path_prefix, repo);
-	if (ret) {
-		return -ret;
-	}
-
-	/* get repo's version */
-	current_version = get_current_version(globals.path_prefix);
-	if (current_version < 0) {
-		error("Unable to determine current OS version for repository %s\n\n", repo->name);
-		return -SWUPD_CURRENT_VERSION_UNKNOWN;
-	}
-
-	return current_version;
-}
-
 enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 {
 	struct list *bundles = NULL;
@@ -123,8 +102,8 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 	char *state_dir;
 	char *path_prefix;
 	int repo_version;
-	int ret_code = SWUPD_OK;
-	int ret = SWUPD_OK;
+	int ret;
+	enum swupd_code ret_code = SWUPD_OK;
 
 	/*
 	 * Steps for 3rd-party bundle-add:
@@ -188,9 +167,18 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 				struct manifest *mom = NULL;
 				struct file *file = NULL;
 
-				repo_version = get_repo_version(state_dir, path_prefix, repo);
+				/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
+				ret = third_party_set_repo(state_dir, path_prefix, repo);
+				if (ret) {
+					ret_code = ret;
+					goto clean_and_exit;
+				}
+
+				/* get repo's version */
+				repo_version = get_current_version(globals.path_prefix);
 				if (repo_version < 0) {
-					ret_code = -repo_version;
+					error("Unable to determine current version for repository %s\n\n", repo->name);
+					ret_code = SWUPD_CURRENT_VERSION_UNKNOWN;
 					goto clean_and_exit;
 				}
 
@@ -232,11 +220,10 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 			goto clean_and_exit;
 		}
 
-		/* set the content_url and state_dir to those from the 3rd-party repo
-		 * where the requested bundle was found */
-		repo_version = get_repo_version(state_dir, path_prefix, selected_repo);
-		if (repo_version < 0) {
-			ret_code = -repo_version;
+		/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
+		ret = third_party_set_repo(state_dir, path_prefix, selected_repo);
+		if (ret) {
+			ret_code = ret;
 			goto clean_and_exit;
 		}
 
@@ -248,7 +235,7 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 		info("\nBundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons\n\n");
 		globals.no_scripts = true;
 
-		ret = execute_bundle_add(bundle_to_install, repo_version);
+		ret = execute_bundle_add(bundle_to_install);
 
 		if (ret != SWUPD_OK) {
 			ret_code = ret;

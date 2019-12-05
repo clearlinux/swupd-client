@@ -35,6 +35,7 @@ swupd_SOURCES = \
 	src/3rd_party_add.c \
 	src/3rd_party_bundle_add.c \
 	src/3rd_party_bundle_list.c \
+	src/3rd_party_bundle_remove.c \
 	src/3rd_party.c \
 	src/3rd_party_list.c \
 	src/3rd_party_remove.c \

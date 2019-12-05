@@ -326,6 +326,11 @@ extern int subscription_bundlename_strcmp(const void *a, const void *b);
 extern enum swupd_code execute_bundle_add(struct list *bundles_list);
 extern enum swupd_code bundle_add(struct list *bundles_list, int version);
 
+/* bundle_remove.c */
+extern enum swupd_code execute_remove_bundles(struct list *bundles);
+extern void bundle_remove_set_option_force(bool opt);
+extern void bundle_remove_set_option_recursive(bool opt);
+
 /* verify.c */
 extern enum swupd_code execute_verify(void);
 extern void verify_set_option_download(bool opt);

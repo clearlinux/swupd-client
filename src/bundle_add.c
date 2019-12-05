@@ -516,7 +516,8 @@ enum swupd_code bundle_add_main(int argc, char **argv)
 	ret = execute_bundle_add(bundles_list);
 
 	list_free_list(bundles_list);
-	swupd_deinit();
 	progress_finish_steps(ret);
+	swupd_deinit();
+
 	return ret;
 }

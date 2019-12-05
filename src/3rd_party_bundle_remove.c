@@ -24,43 +24,42 @@
 
 #ifdef THIRDPARTY
 
-#define FLAG_SKIP_OPTIONAL 2000
-#define FLAG_SKIP_DISKSPACE_CHECK 2001
-
 static char **cmdline_bundles;
-static char *cmdline_repo = NULL;
+static char *cmdline_option_repo = NULL;
+static bool cmdline_option_force = false;
+static bool cmdline_option_recursive = false;
 
 static void print_help(void)
 {
 	print("Usage:\n");
-	print("   swupd 3rd-party bundle-add [OPTION...] [bundle1 bundle2 (...)]\n\n");
+	print("   swupd 3rd-party bundle-remove [OPTION...] [bundle1 bundle2 (...)]\n\n");
 
 	global_print_help();
 
 	print("Options:\n");
-	print("   -R, --repo              Specify the 3rd-party repo to use\n");
-	print("   --skip-optional         Do not install optional bundles (also-add flag in Manifests)\n");
-	print("   --skip-diskspace-check  Do not check free disk space before adding bundle\n");
+	print("   -e, --repo             Specify the 3rd-party repo to use\n");
+	print("   -x, --force            Removes a bundle along with all the bundles that depend on it\n");
+	print("   -R, --recursive        Removes a bundle and its dependencies recursively\n");
 	print("\n");
 }
 
 static const struct option prog_opts[] = {
-	{ "skip-optional", no_argument, 0, FLAG_SKIP_OPTIONAL },
-	{ "skip-diskspace-check", no_argument, 0, FLAG_SKIP_DISKSPACE_CHECK },
-	{ "repo", required_argument, 0, 'R' },
+	{ "force", no_argument, 0, 'x' },
+	{ "recursive", no_argument, 0, 'R' },
+	{ "repo", required_argument, 0, 'e' },
 };
 
 static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 {
 	switch (opt) {
-	case FLAG_SKIP_OPTIONAL:
-		globals.skip_optional_bundles = optarg_to_bool(optarg);
-		return true;
-	case FLAG_SKIP_DISKSPACE_CHECK:
-		globals.skip_diskspace_check = optarg_to_bool(optarg);
+	case 'x':
+		cmdline_option_force = optarg_to_bool(optarg);
 		return true;
 	case 'R':
-		cmdline_repo = strdup_or_die(optarg);
+		cmdline_option_recursive = optarg_to_bool(optarg);
+		return true;
+	case 'e':
+		cmdline_option_repo = strdup_or_die(optarg);
 		return true;
 	default:
 		return false;
@@ -77,63 +76,55 @@ static const struct global_options opts = {
 
 static bool parse_options(int argc, char **argv)
 {
-	int optind = global_parse_options(argc, argv, &opts);
+	int ind = global_parse_options(argc, argv, &opts);
 
-	if (optind < 0) {
+	if (ind < 0) {
 		return false;
 	}
 
-	if (argc <= optind) {
-		error("missing bundle(s) to be installed\n\n");
+	if (argc <= ind) {
+		error("missing bundle(s) to be removed\n\n");
 		return false;
 	}
 
-	cmdline_bundles = argv + optind;
+	cmdline_bundles = argv + ind;
 
 	return true;
 }
 
-static enum swupd_code add_bundle(char *bundle)
+enum swupd_code remove_bundle(char *bundle)
 {
-	struct list *bundle_to_install = NULL;
+	struct list *bundle_to_remove = NULL;
 	enum swupd_code ret = SWUPD_OK;
 
-	/* execute_bundle_add expects a list */
-	bundle_to_install = list_append_data(bundle_to_install, bundle);
+	/* execute_remove_bundles expects a list */
+	bundle_to_remove = list_append_data(bundle_to_remove, bundle);
 
-	info("\nBundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons\n\n");
-	globals.no_scripts = true;
+	ret = execute_remove_bundles(bundle_to_remove);
 
-	ret = execute_bundle_add(bundle_to_install);
-
-	list_free_list(bundle_to_install);
+	list_free_list(bundle_to_remove);
 	return ret;
 }
 
-enum swupd_code third_party_bundle_add_main(int argc, char **argv)
+enum swupd_code third_party_bundle_remove_main(int argc, char **argv)
 {
 	struct list *bundles = NULL;
 	enum swupd_code ret_code = SWUPD_OK;
 
 	/*
-	 * Steps for 3rd-party bundle-add:
+	 * Steps for bundle-remove:
 	 *
 	 *  1) load_manifests
-	 *  2) download_packs
-	 *  3) extract_packs
-	 *  4) validate_fullfiles
-	 *  5) download_fullfiles
-	 *  6) extract_fullfiles
-	 *  7) install_files
+	 *  2) remove_files
 	 */
 
-	const int steps_in_bundleadd = 7;
+	const int steps_in_bundle_remove = 2;
 
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("3rd-party-bundle-add", steps_in_bundleadd);
+	progress_init_steps("3rd-party-bundle-remove", steps_in_bundle_remove);
 
 	/* initialize swupd */
 	ret_code = swupd_init(SWUPD_ALL);
@@ -150,8 +141,12 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 	}
 	bundles = list_head(bundles);
 
-	/* try installing bundles one by one */
-	ret_code = third_party_run_operation(bundles, cmdline_repo, add_bundle);
+	/* set the command options */
+	bundle_remove_set_option_force(cmdline_option_force);
+	bundle_remove_set_option_recursive(cmdline_option_recursive);
+
+	/* try removing bundles one by one */
+	ret_code = third_party_run_operation(bundles, cmdline_option_repo, remove_bundle);
 
 	list_free_list(bundles);
 	swupd_deinit();

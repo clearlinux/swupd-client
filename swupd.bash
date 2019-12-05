@@ -84,7 +84,7 @@ _swupd()
 		opts="$global --version --manifest --fix --picky --picky-tree --picky-whitelist --install --quick --force --install "
 		break;;
 		("3rd-party")
-		opts="$global add remove list bundle-add bundle-list "
+		opts="$global add remove list bundle-add bundle-list bundle-remove "
 		break;;
 		("add")
 		opts="$global --repo"
@@ -119,8 +119,13 @@ _swupd()
 		fi
 		;;
 		("bundle-remove")
-		opts+=" $(unset CDPATH; test -d /usr/share/clear/bundles && \
-			find /usr/share/clear/bundles/ -maxdepth 1 -type f ! -name os-core -printf '%f ')"
+		#
+		if [ "${COMP_WORDS[$i - 1]}" != "3rd-party" ]; then
+			opts+=" $(unset CDPATH; test -d /usr/share/clear/bundles && \
+				find /usr/share/clear/bundles/ -maxdepth 1 -type f ! -name os-core -printf '%f ')"
+		else
+			opts+="--repo"
+		fi
 		;;
 		("bundle-list")
 		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then

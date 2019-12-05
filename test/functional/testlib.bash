@@ -2320,6 +2320,7 @@ create_bundle() { # swupd_function
 	local pfile_path
 	local dir_name
 	local dir_path
+	local repo_name
 	local content_dir
 	local third_party=false
 
@@ -2338,7 +2339,7 @@ create_bundle() { # swupd_function
 			c)	IFS=, read -r -a dlink_list <<< "$OPTARG" ;;
 			n)	bundle_name="$OPTARG" ;;
 			v)	version="$OPTARG" ;;
-			u)	content_dir="$OPTARG"; third_party=true ;;
+			u)	repo_name="$OPTARG"; third_party=true ;;
 			t)	track_bundle=true ;;
 			L)	local_bundle=true ;;
 			e)	experimental=true ;;
@@ -2351,11 +2352,13 @@ create_bundle() { # swupd_function
 
 	# if a 3rd-party repo was specified, the bundle should be created in there
 	if [ "$third_party" = true ]; then
-		target_path="$env_name"/testfs/target-dir/opt/3rd_party/"$content_dir"
-		content_dir=3rd_party/"$content_dir"
+		state_path="$env_name"/testfs/state/3rd_party/"$repo_name"
+		target_path="$env_name"/testfs/target-dir/opt/3rd_party/"$repo_name"
+		content_dir=3rd_party/"$repo_name"
 	else
 		target_path="$env_name"/testfs/target-dir
 		content_dir=web-dir
+		state_path="$env_name"/testfs/state
 	fi
 
 	# set default values
@@ -2375,7 +2378,6 @@ create_bundle() { # swupd_function
 	validate_path "$env_name"
 	version_path="$env_name"/"$content_dir"/"$version"
 	files_path="$version_path"/files
-	state_path="$env_name"/testfs/state
 
 	# 1) create the initial manifest
 	debug_msg "Creating the initial manifest for the bundle"
@@ -2652,10 +2654,12 @@ remove_bundle() { # swupd_function
 # Installs a bundle in target-dir
 # Parameters:
 # - BUNDLE_MANIFEST: the manifest of the bundle to be installed
-
+# - REPO_NAME: if the bundle is from a 3rd-party repo we need to specify the repo name
+#              since these bundles get installed in a different location
 install_bundle() { # swupd_function
 
 	local bundle_manifest=$1
+	local repo_name=$2
 	local target_path
 	local file_names
 	local dir_names
@@ -2670,12 +2674,16 @@ install_bundle() { # swupd_function
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    install_bundle <bundle_manifest>
+			    install_bundle <bundle_manifest> [3rd-party repo name]
 			EOM
 		return
 	fi
 	validate_item "$bundle_manifest"
-	target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir
+	if [ -z "$repo_name" ]; then
+		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir
+	else
+		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/opt/3rd_party/"$repo_name"
+	fi
 	files_path=$(dirname "$bundle_manifest")/files
 	manifest_file=$(basename "$bundle_manifest")
 	bundle_name=${manifest_file#Manifest.}

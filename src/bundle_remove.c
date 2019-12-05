@@ -39,6 +39,16 @@ static char **bundles;
 static bool cmdline_option_force = false;
 static bool cmdline_option_recursive = false;
 
+void bundle_remove_set_option_force(bool opt)
+{
+	cmdline_option_force = opt;
+}
+
+void bundle_remove_set_option_recursive(bool opt)
+{
+	cmdline_option_recursive = opt;
+}
+
 static void print_help(void)
 {
 	print("Usage:\n");
@@ -296,7 +306,7 @@ static void print_remove_summary(unsigned int requested, unsigned int bad, unsig
 /*  The function removes one or more bundles
  *  passed in the bundles list.
  */
-static enum swupd_code remove_bundles(struct list *bundles)
+enum swupd_code execute_remove_bundles(struct list *bundles)
 {
 	int ret = SWUPD_OK;
 	int ret_code = 0;
@@ -311,26 +321,21 @@ static enum swupd_code remove_bundles(struct list *bundles)
 	char *bundles_list_str = NULL;
 	bool mix_exists;
 
-	ret = swupd_init(SWUPD_ALL);
-	if (ret != 0) {
-		error("Failed updater initialization, exiting now\n");
-		return ret;
-	}
-
 	current_version = get_current_version(globals.path_prefix);
 	if (current_version < 0) {
 		error("Unable to determine current OS version\n");
 		ret_code = SWUPD_CURRENT_VERSION_UNKNOWN;
-		goto out_deinit;
+		goto out;
 	}
 
 	mix_exists = (check_mix_exists() & system_on_mix());
 
+	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	current_mom = load_mom(current_version, mix_exists, NULL);
 	if (!current_mom) {
 		error("Unable to download/verify %d Manifest.MoM\n", current_version);
 		ret_code = SWUPD_COULDNT_LOAD_MOM;
-		goto out_deinit;
+		goto out;
 	}
 
 	/* load all installed bundles into memory */
@@ -443,14 +448,13 @@ static enum swupd_code remove_bundles(struct list *bundles)
 	list_free_list_and_data(bundles_to_remove, manifest_free_data);
 	manifest_free(current_mom);
 	free_subscriptions(&subs);
-	swupd_deinit();
 
 	return ret_code;
 
 out_subs:
 	manifest_free(current_mom);
 	free_subscriptions(&subs);
-out_deinit:
+out:
 	bundles_list_str = string_join(", ", bundles);
 	telemetry(TELEMETRY_CRIT,
 		  "bundleremove",
@@ -463,7 +467,6 @@ out_deinit:
 		  ret_code,
 		  total_curl_sz);
 	free_string(&bundles_list_str);
-	swupd_deinit();
 	print("\nFailed to remove bundle(s)\n");
 
 	return ret_code;
@@ -486,7 +489,13 @@ enum swupd_code bundle_remove_main(int argc, char **argv)
 		return SWUPD_INVALID_OPTION;
 	}
 	progress_init_steps("bundle-remove", steps_in_bundle_remove);
-	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
+
+	/* initialize swupd */
+	ret = swupd_init(SWUPD_ALL);
+	if (ret != SWUPD_OK) {
+		error("Failed swupd initialization, exiting now\n");
+		return ret;
+	}
 
 	/* move the bundles provided in the command line into a
 	 * list so it is easier to handle them */
@@ -495,9 +504,12 @@ enum swupd_code bundle_remove_main(int argc, char **argv)
 		bundles_list = list_append_data(bundles_list, bundle);
 	}
 	bundles_list = list_head(bundles_list);
-	ret = remove_bundles(bundles_list);
-	list_free_list(bundles_list);
 
+	ret = execute_remove_bundles(bundles_list);
+
+	list_free_list(bundles_list);
 	progress_finish_steps(ret);
+	swupd_deinit();
+
 	return ret;
 }

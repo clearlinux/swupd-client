@@ -126,7 +126,7 @@ found:
 }
 
 /* Sets the version_url global variable */
-static void set_version_url(char *url)
+void set_version_url(char *url)
 {
 	if (globals.version_url) {
 		free_string(&globals.version_url);

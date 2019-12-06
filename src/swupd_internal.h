@@ -30,6 +30,7 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv);
 enum swupd_code third_party_bundle_list_main(int argc, char **argv);
 enum swupd_code third_party_bundle_remove_main(int argc, char **argv);
 enum swupd_code third_party_bundle_info_main(int argc, char **argv);
+enum swupd_code thir_party_update_main(int argc, char **argv);
 
 /**
  * @brief Creates a new third-party repo under THIRDPARTY_REPO_PREFIX

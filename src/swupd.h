@@ -337,6 +337,12 @@ extern void bundle_info_set_option_version(int opt);
 extern void bundle_info_set_option_dependencies(bool opt);
 extern void bundle_info_set_option_files(bool opt);
 
+/* update.c */
+extern enum swupd_code execute_update(void);
+extern void update_set_option_version(int opt);
+extern void update_set_option_download_only(bool opt);
+extern void update_set_option_keepcache(bool opt);
+
 /* verify.c */
 extern enum swupd_code execute_verify(void);
 extern void verify_set_option_download(bool opt);

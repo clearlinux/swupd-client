@@ -52,7 +52,7 @@ static void print_format(int format)
 }
 
 /* Return 0 if there is an update available, 1 if not and > 1 on errors. */
-enum swupd_code check_update()
+enum swupd_code check_update(void)
 {
 	int current_version, server_version;
 	enum swupd_code ret = SWUPD_OK;

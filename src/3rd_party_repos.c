@@ -225,6 +225,7 @@ enum swupd_code third_party_set_repo(const char *state_dir, const char *path_pre
 	char *repo_path_prefix;
 
 	set_content_url(repo->url);
+	set_version_url(repo->url);
 
 	string_or_die(&repo_path_prefix, "%s/opt/3rd_party/%s", path_prefix, repo->name);
 	set_path_prefix(repo_path_prefix);
@@ -250,6 +251,7 @@ static enum swupd_code third_party_find_bundle(const char *bundle, struct list *
 	char *state_dir;
 	char *path_prefix;
 	char *content_url;
+	char *version_url;
 	int count = 0;
 	int version;
 	enum swupd_code ret_code = SWUPD_OK;
@@ -258,6 +260,7 @@ static enum swupd_code third_party_find_bundle(const char *bundle, struct list *
 	state_dir = strdup_or_die(globals.state_dir);
 	path_prefix = strdup_or_die(globals.path_prefix);
 	content_url = strdup_or_die(globals.content_url);
+	version_url = strdup_or_die(globals.version_url);
 
 	info("Searching for bundle %s in the 3rd-party repositories...\n", bundle);
 	for (iter = repos; iter; iter = iter->next) {
@@ -313,9 +316,11 @@ clean_and_exit:
 	set_path_prefix(path_prefix);
 	set_state_dir(state_dir);
 	set_content_url(content_url);
+	set_version_url(version_url);
 	free_string(&path_prefix);
 	free_string(&state_dir);
 	free_string(&content_url);
+	free_string(&version_url);
 
 	return ret_code;
 }
@@ -328,6 +333,7 @@ enum swupd_code third_party_run_operation(struct list *bundles, const char *repo
 	char *state_dir;
 	char *path_prefix;
 	char *content_url;
+	char *version_url;
 	int ret;
 	enum swupd_code ret_code = SWUPD_OK;
 
@@ -338,6 +344,7 @@ enum swupd_code third_party_run_operation(struct list *bundles, const char *repo
 	state_dir = strdup_or_die(globals.state_dir);
 	path_prefix = strdup_or_die(globals.path_prefix);
 	content_url = strdup_or_die(globals.content_url);
+	version_url = strdup_or_die(globals.version_url);
 
 	/* try action on the bundles one by one */
 	for (iter = bundles; iter; iter = iter->next) {
@@ -388,6 +395,7 @@ enum swupd_code third_party_run_operation(struct list *bundles, const char *repo
 			set_path_prefix(path_prefix);
 			set_state_dir(state_dir);
 			set_content_url(content_url);
+			set_version_url(version_url);
 		}
 	}
 
@@ -397,8 +405,23 @@ clean_and_exit:
 	free_string(&path_prefix);
 	free_string(&state_dir);
 	free_string(&content_url);
+	free_string(&version_url);
 
 	return ret_code;
+}
+
+void third_party_repo_header(const char *repo_name)
+{
+	char *header = NULL;
+	int header_length;
+
+	string_or_die(&header, " 3rd-Party Repo: %s", repo_name);
+	header_length = strlen(header);
+	print_pattern("_", header_length + 1);
+	info("%s\n", header);
+	print_pattern("_", header_length + 1);
+	info("\n");
+	free_string(&header);
 }
 
 #endif

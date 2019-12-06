@@ -113,20 +113,6 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static void print_repo_header(const char *repo_name)
-{
-	char *header = NULL;
-	int header_length;
-
-	string_or_die(&header, " 3rd-Party Repo: %s", repo_name);
-	header_length = strlen(header);
-	print_pattern("_", header_length + 1);
-	info("%s\n", header);
-	print_pattern("_", header_length + 1);
-	info("\n");
-	free_string(&header);
-}
-
 static enum swupd_code list_repo_bundles(char *state_dir, char *path_prefix, struct repo *repo)
 {
 	enum swupd_code ret;
@@ -137,7 +123,7 @@ static enum swupd_code list_repo_bundles(char *state_dir, char *path_prefix, str
 		return ret;
 	}
 
-	print_repo_header(repo->name);
+	third_party_repo_header(repo->name);
 	return list_bundles();
 }
 

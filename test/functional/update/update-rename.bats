@@ -7,7 +7,7 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle -f /foo/testfile1,/foo/testfile3 "$TEST_NAME"
 	create_version -p "$TEST_NAME" 100 10
-	update_bundle "$TEST_NAME" test-bundle --rename /foo/testfile3 /foo/testfile2
+	update_bundle "$TEST_NAME" test-bundle --rename /foo/testfile3:/foo/testfile2
 
 }
 

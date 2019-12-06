@@ -355,7 +355,7 @@ $ update_bundle my_env test-bundle --update /foo/test-file
 # /foo/test-file has been renamed, also add one more file
 # to test-bundle
 $ create_version my_env 40 30
-$ update_bundle my_env test-bundle --rename /foo/test-file /foo/new-name
+$ update_bundle my_env test-bundle --rename /foo/test-file:/foo/new-name
 $ update_bundle my_env test-bundle --add /bar/another-file
 
 # set the current version in the target system to 20
@@ -643,7 +643,7 @@ Usage:
     update_bundle [-p] [-i] <environment_name> <bundle_name> --delete <file_name>
     update_bundle [-p] [-i] <environment_name> <bundle_name> --ghost <file_name>
     update_bundle [-p] [-i] <environment_name> <bundle_name> --update <file_name>
-    update_bundle [-p] [-i] <environment_name> <bundle_name> --rename[-legacy] <file_name> <new_name>
+    update_bundle [-p] [-i] <environment_name> <bundle_name> --rename[-legacy] <file_name:new_name>
     update_bundle [-p] [-i] <environment_name> <bundle_name> --header-only
 
 Options:

@@ -7,8 +7,8 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle -f /foo/test-file1,/bar/test-file2,/test-file3 "$TEST_NAME"
 	create_version "$TEST_NAME" 20 10
-	update_bundle "$TEST_NAME" test-bundle --rename-legacy /foo/test-file1 /foo/test-file1-renamed
-	update_bundle "$TEST_NAME" test-bundle --rename-legacy /bar/test-file2 /bar/test-file2-renamed
+	update_bundle "$TEST_NAME" test-bundle --rename-legacy /foo/test-file1:/foo/test-file1-renamed
+	update_bundle "$TEST_NAME" test-bundle --rename-legacy /bar/test-file2:/bar/test-file2-renamed
 	update_bundle "$TEST_NAME" test-bundle --update /test-file3
 	update_manifest "$WEBDIR"/20/Manifest.test-bundle file-status /foo/test-file1 .g.r
 	update_manifest "$WEBDIR"/20/Manifest.test-bundle file-status /bar/test-file2 .g.r

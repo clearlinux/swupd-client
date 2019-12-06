@@ -282,7 +282,7 @@ static enum swupd_code third_party_find_bundle(const char *bundle, struct list *
 		/* load the repo's MoM*/
 		mom = load_mom(version, false, NULL);
 		if (!mom) {
-			error("Cannot load manifest MoM for 3rd-party repository %s version %i\n", repo->name, version);
+			error("Cannot load manifest MoM for 3rd-party repository %s version %i\n\n", repo->name, version);
 			ret_code = SWUPD_COULDNT_LOAD_MOM;
 			goto clean_and_exit;
 		}

@@ -31,8 +31,22 @@
 static bool cmdline_option_dependencies = false;
 static bool cmdline_option_files = false;
 static int cmdline_option_version = 0;
-
 static char *bundle;
+
+void bundle_info_set_option_version(int opt)
+{
+	cmdline_option_version = opt;
+}
+
+void bundle_info_set_option_dependencies(bool opt)
+{
+	cmdline_option_dependencies = opt;
+}
+
+void bundle_info_set_option_files(bool opt)
+{
+	cmdline_option_files = opt;
+}
 
 static void print_help(void)
 {
@@ -236,7 +250,7 @@ static enum swupd_code get_bundle_files(struct manifest *manifest, struct manife
 	return SWUPD_OK;
 }
 
-static enum swupd_code get_bundle_dependencies(struct manifest *manifest, struct list *subs, struct list **indirect_includes)
+static enum swupd_code get_bundle_dependencies(struct manifest *manifest, struct list *subs, struct list **indirect_includes, const char *bundle)
 {
 	struct list *iter;
 	struct sub *sub;
@@ -265,7 +279,7 @@ static enum swupd_code get_bundle_dependencies(struct manifest *manifest, struct
 	return SWUPD_OK;
 }
 
-static enum swupd_code bundle_info(char *bundle)
+enum swupd_code bundle_info(char *bundle)
 {
 	enum swupd_code ret = SWUPD_OK;
 	int requested_version, latest_version;
@@ -400,7 +414,7 @@ static enum swupd_code bundle_info(char *bundle)
 	if (cmdline_option_dependencies) {
 
 		struct list *indirect_includes = NULL;
-		ret = get_bundle_dependencies(manifest, subs, &indirect_includes);
+		ret = get_bundle_dependencies(manifest, subs, &indirect_includes, bundle);
 		if (ret) {
 			error("Could not get all bundles included by %s\n", bundle);
 			goto clean;
@@ -445,18 +459,18 @@ enum swupd_code bundle_info_main(int argc, char **argv)
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-
 	progress_init_steps("bundle-info", steps_in_bundleinfo);
+
 	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {
-		error("Failed swupd initialization. Exiting now\n");
-		ret = SWUPD_CURL_INIT_FAILED;
+		error("Failed swupd initialization, exiting now\n");
 		goto exit;
 	}
 
 	ret = bundle_info(bundle);
 
 	swupd_deinit();
+
 exit:
 	progress_finish_steps(ret);
 

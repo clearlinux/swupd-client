@@ -31,6 +31,7 @@ static struct subcmd third_party_commands[] = {
 	{ "bundle-add", "Install a bundle from a third party repository", third_party_bundle_add_main },
 	{ "bundle-remove", "Remove a bundle from a third party repository", third_party_bundle_remove_main },
 	{ "bundle-list", "List bundles from a third party repository", third_party_bundle_list_main },
+	{ "bundle-info", "Display information about a bundle in a third party repository", third_party_bundle_info_main },
 	{ 0 }
 };
 

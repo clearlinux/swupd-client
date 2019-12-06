@@ -331,6 +331,12 @@ extern enum swupd_code execute_remove_bundles(struct list *bundles);
 extern void bundle_remove_set_option_force(bool opt);
 extern void bundle_remove_set_option_recursive(bool opt);
 
+/* bundle_info.c */
+extern enum swupd_code bundle_info(char *bundle);
+extern void bundle_info_set_option_version(int opt);
+extern void bundle_info_set_option_dependencies(bool opt);
+extern void bundle_info_set_option_files(bool opt);
+
 /* verify.c */
 extern enum swupd_code execute_verify(void);
 extern void verify_set_option_download(bool opt);

@@ -136,7 +136,7 @@ global_teardown() {
 
 }
 
-@test "BIN005: Try fo show nfo about an invalid bundle" {
+@test "BIN005: Try to show info about an invalid bundle" {
 
 	run sudo sh -c "$SWUPD bundle-info $SWUPD_OPTS bad-bundle"
 

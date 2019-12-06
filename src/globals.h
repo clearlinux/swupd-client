@@ -83,6 +83,7 @@ bool set_state_dir_cache(char *path);
 void set_default_path_prefix(void);
 void set_content_url(char *url);
 bool set_state_dir(char *path);
+void set_version_url(char *url);
 
 #ifdef __cplusplus
 }

@@ -92,6 +92,13 @@ int repo_name_cmp(const void *repo, const void *name);
  */
 enum swupd_code third_party_run_operation(struct list *bundles, const char *repo, run_operation_fn_t run_operation_fn);
 
+/**
+ * @brief Prints a header with the repository name, useful when showing info from multiple repos.
+ *
+ * @param repo_name, the name of the 3rd-party repository
+ */
+void third_party_repo_header(const char *repo_name);
+
 #endif
 
 #ifdef __cplusplus

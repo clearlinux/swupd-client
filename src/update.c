@@ -48,6 +48,21 @@ static char swupd_binary[LINE_MAX] = { 0 };
 
 int nonpack;
 
+void update_set_option_version(int opt)
+{
+	requested_version = opt;
+}
+
+void update_set_option_download_only(bool opt)
+{
+	download_only = opt;
+}
+
+void update_set_option_keepcache(bool opt)
+{
+	keepcache = opt;
+}
+
 static void save_swupd_binary_path()
 {
 	/* we need to resolve the whole path to swupd first, proc/self/exe
@@ -272,7 +287,7 @@ static struct list *create_update_list(struct manifest *server)
 	return output;
 }
 
-static enum swupd_code main_update()
+enum swupd_code execute_update(void)
 {
 	int current_version = -1, server_version = -1;
 	int mix_current_version = -1, mix_server_version = -1;
@@ -760,7 +775,7 @@ enum swupd_code update_main(int argc, char **argv)
 	if (cmd_line_status) {
 		ret = check_update();
 	} else {
-		ret = main_update();
+		ret = execute_update();
 	}
 
 	swupd_deinit();

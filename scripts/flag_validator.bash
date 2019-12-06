@@ -5,7 +5,7 @@ SWUPD_DIR="$SCRIPTS_DIR"/..
 SWUPD="$SWUPD_DIR"/swupd
 
 swupd_commands=(info autoupdate check-update update bundle-add bundle-remove bundle-list bundle-info search-file diagnose repair os-install mirror clean hashdump 3rd-party)
-third_party_commands=(bundle-add bundle-remove bundle-list bundle-info)
+third_party_commands=(bundle-add bundle-remove bundle-list bundle-info update)
 conflict=0
 
 count_global_flags() {

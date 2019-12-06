@@ -42,6 +42,7 @@ swupd_SOURCES = \
 	src/3rd_party_remove.c \
 	src/3rd_party_repos.c \
 	src/3rd_party_repos.h \
+	src/3rd_party_update.c \
 	src/alias.c \
 	src/alias.h \
 	src/autoupdate.c \

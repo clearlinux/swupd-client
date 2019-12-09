@@ -41,8 +41,6 @@ static enum swupd_code external_search_main(int argc, char **argv)
 	return ret;
 }
 
-// TODO(castulo): remove the superseded command from the help menu by end of November 2019,
-// so it is not visible but the command must remain available in the back so we don't break users
 static struct subcmd main_commands[] = {
 	{ "info", "Show the version and the update URLs", info_main },
 	{ "autoupdate", "Enable/disable automatic system updates", autoupdate_main },
@@ -88,7 +86,11 @@ static void print_help(const char *name)
 	struct subcmd *entry = main_commands;
 
 	while (entry->name != NULL) {
-		print("   %-20s    %-30s\n", entry->name, entry->doc);
+		if (strcmp(entry->name, "verify") != 0) {
+			/* this command was superseded so it won't be shown in the help menu
+			 * anymore, but it needs to continue to work due to backwards compatibility */
+			print("   %-20s    %-30s\n", entry->name, entry->doc);
+		}
 		entry++;
 	}
 	print("\n");

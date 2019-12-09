@@ -652,15 +652,12 @@ static void print_help(void)
 
 	global_print_help();
 
-	// TODO(castulo): remove the superseded -m option from the help menu by end of November 2019,
-	// so it is not visible but the option must remain available in the back so we don't break users
 	print("Options:\n");
 	print("   -V, --version=V         Update to version V, also accepts 'latest' (default)\n");
 	print("   -s, --status            Show current OS version and latest version available on server. Equivalent to \"swupd check-update\"\n");
 	print("   -k, --keepcache         Do not delete the swupd state directory content after updating the system\n");
 	print("   -T, --migrate           Migrate to augmented upstream/mix content\n");
 	print("   -a, --allow-mix-collisions	Ignore and continue if custom user content conflicts with upstream provided content\n");
-	print("   -m, --manifest=V        NOTE: this flag has been superseded. Please use -V instead\n");
 	print("   --download              Download all content, but do not actually install the update\n");
 	print("   --update-search-file-index Update the index used by search-file to speed up searches (Don't enable this if you have download or space restrictions)\n");
 	print("\n");

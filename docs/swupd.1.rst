@@ -561,10 +561,6 @@ SUBCOMMANDS
 
         Update to a specific version, also accepts 'latest' (default).
 
-    - `-m, --manifest`
-
-        Update to a specific version. This flag has been superseded. Please use -V instead.
-
     - `-s, --status`
 
         Do not perform an update, instead display whether an update is
@@ -595,102 +591,6 @@ SUBCOMMANDS
 
         Update the index used by search-file to speed up searches. Don't
         enable this if you have download or space restrictions.
-
-``verify``
-
-    Perform system software installation verification. The program will
-    obtain all the manifests needed from version url and content url to
-    establish whether the system software is correctly installed and not
-    overwritten, modified, missing or otherwise incorrect (permissions, etc.).
-
-    After obtaining the proper resources, all files that are under
-    control of the software update program are verified according to the
-    manifest data.
-
-    NOTE: This command has been superseded, please consider using "swupd diagnose"
-    instead.
-
-    - `-V, --version`
-
-        Verify against a specific version.
-
-    - `-m, --manifest`
-
-        Verify against a specific version. This flag has been superseded. Please use -V instead.
-
-    - `-f, --fix`
-
-        Correct any issues found. This will overwrite incorrect file
-        content, add missing files and do additional corrections, permissions
-        etc.  This option has been superseded, please consider using
-        "swupd repair" instead.
-
-    - `-Y, --picky`
-
-        Also List files which should not exist. Only files listed in the
-        manifests should exist. If the flag is used along with --fix, it
-        removes these files.
-
-    - `-X, --picky-tree=[PATH]`
-
-        Selects the sub-tree where --picky looks for extra files. To be
-        specified as absolute path. The default is `/usr`.
-
-    - `-w, --picky-whitelist=[RE]`
-
-        Any path matching the POSIX extended regular expression is
-        ignored by --picky. The given expression is always wrapped
-        in ``^(`` and ``)$`` and thus has to match the entire path.
-        Matched directories get skipped completely.
-
-        The default is to ignore ``/usr/lib/kernel``,
-        ``/usr/lib/modules``, ``/usr/src`` and ``/usr/local``.
-
-        Examples:
-
-        - ``/var|/etc/machine-id``
-
-            Ignores ``/var`` or ``/etc/machine-id``, regardless of
-            whether they are directories or something else. In the
-            usual case that ``/var`` is a directory, also everything
-            inside it is ignored because the directory gets skipped
-            while scanning the directory tree.
-
-        - empty string or ``^$``
-
-            Matches nothing, because paths are never empty.
-
-    - `-i, --install`
-
-        Install all files into {path} as specified by the `--path={path}`
-        option. Useful to generate a new system root, or verify side
-        by side. This option has been superseded, please consider using
-        "swupd os-install" instead.
-
-    - `-q, --quick`
-
-        Omit checking hash values. Instead only looks for missing files
-        and directories and/or symlinks.
-
-    - `-x, --force`
-
-        Attempt to proceed even if non-critical errors found.
-
-    - `-B, --bundles=[BUNDLES]`
-
-        Forces swupd to only consider the (comma separated) list of BUNDLES for
-        verify.
-
-        Examples:
-
-        - ``--bundles os-core,vi``
-
-            Only runs the verify operation on the os-core and vi bundles.
-
-    - `--extra-files-only`
-
-        Like --picky, but it only removes extra files. It omits checking
-        hash values, and for missing files, directories and/or symlinks.
 
 
 FILES

@@ -1,0 +1,237 @@
+#!/usr/bin/env bats
+
+# Author: Castulo Martinez
+# Email: castulo.martinez@intel.com
+
+load "../testlib"
+
+global_setup() {
+
+	create_test_environment "$TEST_NAME" 10 1
+
+	# add a 3rd-party repo with some "findings" for diagnose
+	add_third_party_repo "$TEST_NAME" 10 1 test-repo1
+	create_bundle -L -t -n test-bundle1 -f /foo/file_1,/bar/file_2 -u test-repo1 "$TEST_NAME"
+	create_version -p "$TEST_NAME" 20 10 1 test-repo1
+	update_bundle -p "$TEST_NAME" test-bundle1 --update /foo/file_1 test-repo1
+	update_bundle -p "$TEST_NAME" test-bundle1 --delete /bar/file_2 test-repo1
+	update_bundle    "$TEST_NAME" test-bundle1 --add    /baz/file_3 test-repo1
+	set_current_version "$TEST_NAME" 20 test-repo1
+
+	# add another 3rd-party repo that has nothing to get fixed
+	add_third_party_repo "$TEST_NAME" 10 1 test-repo2
+	create_bundle -L -t -n test-bundle2 -f /baz/file_3 -u test-repo2 "$TEST_NAME"
+
+	# adding an untracked files into an untracked directory (/bat)
+	sudo mkdir "$TARGETDIR"/opt/3rd_party/test-repo1/bat
+	sudo touch "$TARGETDIR"/opt/3rd_party/test-repo1/bat/untracked_file1
+	# adding an untracked file into tracked directory (/bar)
+	sudo touch "$TARGETDIR"/opt/3rd_party/test-repo1/bar/untracked_file2
+	# adding an untracked file into /usr
+	sudo touch "$TARGETDIR"/opt/3rd_party/test-repo2/usr/untracked_file3
+
+}
+
+test_setup() {
+
+	return
+
+}
+
+test_teardown() {
+
+	return
+
+}
+
+global_teardown() {
+
+	destroy_test_environment "$TEST_NAME"
+
+}
+
+@test "TPR042: Diagnose shows modified files, new files and deleted files from 3rd-party bundles" {
+
+	run sudo sh -c "$SWUPD 3rd-party diagnose $SWUPD_OPTS"
+
+	assert_status_is "$SWUPD_NO"
+	expected_output=$(cat <<-EOM
+		____________________________
+		 3rd-Party Repo: test-repo1
+		____________________________
+		Diagnosing version 20
+		Downloading missing manifests...
+		Checking for missing files
+		 -> Missing file: $PATH_PREFIX/opt/3rd_party/test-repo1/baz
+		 -> Missing file: $PATH_PREFIX/opt/3rd_party/test-repo1/baz/file_3
+		Checking for corrupt files
+		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd_party/test-repo1/foo/file_1
+		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd_party/test-repo1/usr/lib/os-release
+		Checking for extraneous files
+		 -> File that should be deleted: $PATH_PREFIX/opt/3rd_party/test-repo1/bar/file_2
+		Inspected 17 files
+		  2 files were missing
+		  2 files did not match
+		  1 file found which should be deleted
+		Use "swupd repair" to correct the problems in the system
+		Diagnose successful
+		____________________________
+		 3rd-Party Repo: test-repo2
+		____________________________
+		Diagnosing version 10
+		Downloading missing manifests...
+		Checking for missing files
+		Checking for corrupt files
+		Checking for extraneous files
+		Inspected 13 files
+		Diagnose successful
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
+@test "TPR043: Diagnose 3rd-party bundles from a specific repo" {
+
+	run sudo sh -c "$SWUPD 3rd-party diagnose $SWUPD_OPTS --repo test-repo2"
+
+	assert_status_is "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		Diagnosing version 10
+		Downloading missing manifests...
+		Checking for missing files
+		Checking for corrupt files
+		Checking for extraneous files
+		Inspected 13 files
+		Diagnose successful
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
+@test "TPR044: Try diagnose 3rd-party bundles to a specific version without specifying a repo" {
+
+	run sudo sh -c "$SWUPD 3rd-party diagnose $SWUPD_OPTS --version 10"
+
+	assert_status_is "$SWUPD_INVALID_OPTION"
+	expected_output=$(cat <<-EOM
+		Error: a repository needs to be specified to use the --version flag
+	EOM
+	)
+	assert_in_output "$expected_output"
+
+}
+
+@test "TPR045: Diagnose 3rd-party bundles to a specific version" {
+
+	run sudo sh -c "$SWUPD 3rd-party diagnose $SWUPD_OPTS --version 10 --repo test-repo1"
+
+	assert_status_is "$SWUPD_NO"
+	expected_output=$(cat <<-EOM
+		Diagnosing version 10
+		Downloading missing manifests...
+		Checking for missing files
+		Checking for corrupt files
+		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd_party/test-repo1/usr/lib/os-release
+		Checking for extraneous files
+		Inspected 15 files
+		  1 file did not match
+		Use "swupd repair" to correct the problems in the system
+		Diagnose successful
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
+@test "TPR046: Diagnose 3rd-party bundles using the picky option" {
+
+	run sudo sh -c "$SWUPD 3rd-party diagnose $SWUPD_OPTS --picky"
+
+	assert_status_is "$SWUPD_NO"
+	expected_output=$(cat <<-EOM
+		____________________________
+		 3rd-Party Repo: test-repo1
+		____________________________
+		Diagnosing version 20
+		Downloading missing manifests...
+		Checking for missing files
+		 -> Missing file: $PATH_PREFIX/opt/3rd_party/test-repo1/baz
+		 -> Missing file: $PATH_PREFIX/opt/3rd_party/test-repo1/baz/file_3
+		Checking for corrupt files
+		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd_party/test-repo1/foo/file_1
+		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd_party/test-repo1/usr/lib/os-release
+		Checking for extraneous files
+		 -> File that should be deleted: $PATH_PREFIX/opt/3rd_party/test-repo1/bar/file_2
+		Checking for extra files under $PATH_PREFIX/opt/3rd_party/test-repo1/usr
+		Inspected 17 files
+		  2 files were missing
+		  2 files did not match
+		  1 file found which should be deleted
+		Use "swupd repair" to correct the problems in the system
+		Diagnose successful
+		____________________________
+		 3rd-Party Repo: test-repo2
+		____________________________
+		Diagnosing version 10
+		Downloading missing manifests...
+		Checking for missing files
+		Checking for corrupt files
+		Checking for extraneous files
+		Checking for extra files under $PATH_PREFIX/opt/3rd_party/test-repo2/usr
+		 -> Extra file: $PATH_PREFIX/opt/3rd_party/test-repo2/usr/untracked_file3
+		Inspected 14 files
+		  1 file found which should be deleted
+		Use "swupd repair --picky" to correct the problems in the system
+		Diagnose successful
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
+@test "TPR047: Diagnose 3rd-party bundles using the picky option specifying the tree" {
+
+	run sudo sh -c "$SWUPD 3rd-party diagnose $SWUPD_OPTS --picky --picky-tree /bat"
+
+	assert_status_is "$SWUPD_NO"
+	expected_output=$(cat <<-EOM
+		____________________________
+		 3rd-Party Repo: test-repo1
+		____________________________
+		Diagnosing version 20
+		Downloading missing manifests...
+		Checking for missing files
+		 -> Missing file: $PATH_PREFIX/opt/3rd_party/test-repo1/baz
+		 -> Missing file: $PATH_PREFIX/opt/3rd_party/test-repo1/baz/file_3
+		Checking for corrupt files
+		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd_party/test-repo1/foo/file_1
+		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd_party/test-repo1/usr/lib/os-release
+		Checking for extraneous files
+		 -> File that should be deleted: $PATH_PREFIX/opt/3rd_party/test-repo1/bar/file_2
+		Checking for extra files under $PATH_PREFIX/opt/3rd_party/test-repo1/bat
+		 -> Extra file: $PATH_PREFIX/opt/3rd_party/test-repo1/bat/untracked_file1
+		 -> Extra file: $PATH_PREFIX/opt/3rd_party/test-repo1/bat/
+		Inspected 19 files
+		  2 files were missing
+		  2 files did not match
+		  3 files found which should be deleted
+		Use "swupd repair --picky" to correct the problems in the system
+		Diagnose successful
+		____________________________
+		 3rd-Party Repo: test-repo2
+		____________________________
+		Diagnosing version 10
+		Downloading missing manifests...
+		Checking for missing files
+		Checking for corrupt files
+		Checking for extraneous files
+		Checking for extra files under $PATH_PREFIX/opt/3rd_party/test-repo2/bat
+		Inspected 13 files
+		Diagnose successful
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}

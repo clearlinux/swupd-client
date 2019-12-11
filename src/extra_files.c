@@ -42,8 +42,8 @@
 #include "signature.h"
 #include "swupd.h"
 
-static struct filerecord *F; /* Array of filerecords */
-static int nF = 0;	     /* Number of filerecords */
+static struct filerecord *F = NULL; /* Array of filerecords */
+static int nF = 0;		    /* Number of filerecords */
 
 static const regex_t *path_whitelist;
 static int path_prefix_len;
@@ -195,6 +195,8 @@ tidy:
 		free_string(&F[i].filename);
 	}
 	free(F);
+	F = NULL;
+	nF = 0;
 
 	return rc;
 }

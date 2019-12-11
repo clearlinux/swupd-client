@@ -81,16 +81,28 @@ enum swupd_code third_party_set_repo(const char *state_dir, const char *path_pre
 int repo_name_cmp(const void *repo, const void *name);
 
 /**
- * @brief Performs an operation on every bundle from the list.
+ * @brief Performs an operation on every 3rd-party bundle from the list.
  *
+ * @param bundles the list of bundles to which the operation will be performed
  * @param repo the name of the 3rd-party repository where the bundles
  * should be looked for. If no repo is specified the bundles are searched for
  * in all existing repos.
- * @param run_operation_fn the function to be performed on the bundles
+ * @param run_operation_fn the function to be performed
  *
  * @returns a swupd_code
  */
 enum swupd_code third_party_run_operation(struct list *bundles, const char *repo, run_operation_fn_t run_operation_fn);
+
+/**
+ * @brief Performs an operation on 3rd-party repos.
+ *
+ * @param repo the name of the 3rd-party repository where the operation will be run
+ * @param run_operation_fn the function to be performed
+ * @param expected_ret_code the expected return code from the operation
+ *
+ * @returns a swupd_code
+ */
+enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operation_fn_t run_operation_fn, enum swupd_code expected_ret_code);
 
 /**
  * @brief Prints a header with the repository name, useful when showing info from multiple repos.

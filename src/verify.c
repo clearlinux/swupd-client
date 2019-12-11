@@ -1170,7 +1170,7 @@ brick_the_system_and_clean_curl:
 	}
 
 	/* report a summary of what we managed to do and not do */
-	info("Inspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
+	info("\nInspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
 
 	if (counts.missing) {
 		info("  %i file%s %s missing\n", counts.missing, (counts.missing > 1 ? "s" : ""), (counts.missing > 1 ? "were" : "was"));
@@ -1309,16 +1309,12 @@ clean_and_exit:
 
 	timelist_print_stats(globals.global_times);
 
-	swupd_deinit();
-
 clean_args_and_exit:
-	if (picky_whitelist) {
-		regfree(picky_whitelist);
-		picky_whitelist = NULL;
-	}
 	list_free_list_and_data(cmdline_option_bundles, free);
 
-	progress_finish_steps(ret);
+	/* rest counters */
+	counts = (struct file_counts){ 0 };
+
 	return ret;
 }
 
@@ -1357,12 +1353,20 @@ enum swupd_code verify_main(int argc, char **argv)
 	ret = execute_verify();
 
 	free_string(&cmdline_option_picky_tree);
+	free_string(&cmdline_option_picky_tree);
+	if (picky_whitelist) {
+		regfree(picky_whitelist);
+		picky_whitelist = NULL;
+	}
+	swupd_deinit();
+	progress_finish_steps(ret);
+
 	return ret;
 }
 
 enum swupd_code diagnose_main(int argc, char **argv)
 {
-	int ret = SWUPD_OK;
+	enum swupd_code ret = SWUPD_OK;
 
 	/*
 	 * Steps for diagnose:
@@ -1393,5 +1397,12 @@ enum swupd_code diagnose_main(int argc, char **argv)
 	ret = execute_verify();
 
 	free_string(&cmdline_option_picky_tree);
+	if (picky_whitelist) {
+		regfree(picky_whitelist);
+		picky_whitelist = NULL;
+	}
+	swupd_deinit();
+	progress_finish_steps(ret);
+
 	return ret;
 }

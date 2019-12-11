@@ -55,7 +55,7 @@ test_setup() {
 		{ "type" : "info", "msg" : " Installing base OS and selected bundles" },
 		{ "type" : "progress", "currentStep" : 8, "totalSteps" : 9, "stepCompletion" : 50, "stepDescription" : "add_missing_files" },
 		{ "type" : "progress", "currentStep" : 8, "totalSteps" : 9, "stepCompletion" : 100, "stepDescription" : "add_missing_files" },
-		{ "type" : "info", "msg" : "Inspected 2 files" },
+		{ "type" : "info", "msg" : " Inspected 2 files" },
 		{ "type" : "info", "msg" : "  2 files were missing" },
 		{ "type" : "info", "msg" : "    2 of 2 missing files were installed" },
 		{ "type" : "info", "msg" : "    0 of 2 missing files were not installed" },

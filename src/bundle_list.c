@@ -430,7 +430,6 @@ enum swupd_code list_bundles(void)
 	} else {
 		ret = list_installable_bundles(version);
 	}
-	info("\n");
 
 	return ret;
 }

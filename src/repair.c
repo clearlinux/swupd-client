@@ -257,5 +257,12 @@ enum swupd_code repair_main(int argc, char **argv)
 	ret = execute_verify();
 
 	free_string(&cmdline_option_picky_tree);
+	if (picky_whitelist) {
+		regfree(picky_whitelist);
+		picky_whitelist = NULL;
+	}
+	swupd_deinit();
+	progress_finish_steps(ret);
+
 	return ret;
 }

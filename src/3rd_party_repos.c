@@ -410,6 +410,76 @@ clean_and_exit:
 	return ret_code;
 }
 
+enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operation_fn_t run_operation_fn, enum swupd_code expected_ret_code)
+{
+	enum swupd_code ret_code = SWUPD_OK;
+	enum swupd_code ret;
+	struct list *repos = NULL;
+	struct list *iter = NULL;
+	struct repo *selected_repo = NULL;
+	char *state_dir;
+	char *path_prefix;
+
+	/* load the existing 3rd-party repos from the repo.ini config file */
+	repos = third_party_get_repos();
+
+	/* backup the original state_dir and path_prefix values */
+	state_dir = strdup_or_die(globals.state_dir);
+	path_prefix = strdup_or_die(globals.path_prefix);
+
+	/* if the repo to be used was specified, use it,
+	 * otherwise perform operation in all 3rd-party repos */
+	if (repo) {
+
+		selected_repo = list_search(repos, repo, repo_name_cmp);
+		if (!selected_repo) {
+			error("3rd-party repository %s was not found\n\n", repo);
+			ret_code = SWUPD_INVALID_REPOSITORY;
+			goto clean_and_exit;
+		}
+
+		/* set the appropriate variables for the selected 3rd-party repo */
+		ret_code = third_party_set_repo(state_dir, path_prefix, selected_repo);
+		if (ret_code) {
+			goto clean_and_exit;
+		}
+
+		ret_code = run_operation_fn(NULL);
+
+	} else {
+
+		for (iter = repos; iter; iter = iter->next) {
+			selected_repo = iter->data;
+
+			/* set the appropriate variables for the selected 3rd-party repo */
+			ret = third_party_set_repo(state_dir, path_prefix, selected_repo);
+			if (ret) {
+				ret_code = ret;
+				goto clean_and_exit;
+			}
+
+			/* set the repo's header */
+			third_party_repo_header(selected_repo->name);
+
+			ret = run_operation_fn(NULL);
+			if (ret != expected_ret_code) {
+				/* if the operation failed in any of the repos,
+				 * keep the error */
+				ret_code = ret;
+			}
+			info("\n\n");
+		}
+	}
+
+	/* free data */
+clean_and_exit:
+	list_free_list_and_data(repos, repo_free_data);
+	free_string(&path_prefix);
+	free_string(&state_dir);
+
+	return ret_code;
+}
+
 void third_party_repo_header(const char *repo_name)
 {
 	char *header = NULL;

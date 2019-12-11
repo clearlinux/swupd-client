@@ -57,6 +57,7 @@ global_teardown() {
 
 		Total: 2
 
+
 		_______________________
 		 3rd-Party Repo: repo2
 		_______________________
@@ -92,6 +93,7 @@ global_teardown() {
 
 		Total: 3
 
+
 		_______________________
 		 3rd-Party Repo: repo2
 		_______________________
@@ -116,10 +118,6 @@ global_teardown() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		_______________________
-		 3rd-Party Repo: repo2
-		_______________________
-
 		Installed bundles:
 		 - os-core
 		 - test-bundle3
@@ -139,10 +137,6 @@ global_teardown() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
-
 		All available bundles:
 		 - os-core
 		 - test-bundle1

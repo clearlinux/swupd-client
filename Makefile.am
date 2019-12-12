@@ -38,6 +38,7 @@ swupd_SOURCES = \
 	src/3rd_party_bundle_list.c \
 	src/3rd_party_bundle_remove.c \
 	src/3rd_party.c \
+	src/3rd_party_check_update.c \
 	src/3rd_party_diagnose.c \
 	src/3rd_party_list.c \
 	src/3rd_party_remove.c \

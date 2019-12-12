@@ -196,6 +196,7 @@ if [[ -n "$state" ]]; then
           '(help)update[Update to latest version of a third party repository]'
           '(help)diagnose[Verify content from a third party repository]'
           '(help)repair[Repair local issues relative to a third party repository]'
+          '(help)check-update[Check if a new version of a third party repository is available]'
           _arguments $thirdparty && ret=0
           ;;
           add)

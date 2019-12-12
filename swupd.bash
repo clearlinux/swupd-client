@@ -84,7 +84,7 @@ _swupd()
 		opts="$global --version --manifest --fix --picky --picky-tree --picky-whitelist --install --quick --force --install "
 		break;;
 		("3rd-party")
-		opts="$global add remove list bundle-add bundle-list bundle-remove bundle-info update diagnose "
+		opts="$global add remove list bundle-add bundle-list bundle-remove bundle-info update diagnose repair "
 		break;;
 		("add")
 		opts="$global --repo"
@@ -143,6 +143,11 @@ _swupd()
 		fi
 		;;
 		("diagnose")
+		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
+			opts+="--repo"
+		fi
+		;;
+		("repair")
 		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
 			opts+="--repo"
 		fi

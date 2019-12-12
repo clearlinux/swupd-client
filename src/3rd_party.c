@@ -34,6 +34,7 @@ static struct subcmd third_party_commands[] = {
 	{ "bundle-list", "List bundles from a third party repository", third_party_bundle_list_main },
 	{ "bundle-info", "Display information about a bundle in a third party repository", third_party_bundle_info_main },
 	{ "diagnose", "Verify content from a third party repository", third_party_diagnose_main },
+	{ "repair", "Repair local issues relative to a third party repository", third_party_repair_main },
 	{ 0 }
 };
 

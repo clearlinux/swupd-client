@@ -50,7 +50,7 @@ static void print_help(void)
 	print("   -R, --repo              Specify the 3rd-party repository to use\n");
 	print("   -V, --version=[VER]     Diagnose against manifest version VER\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
-	print("   -q, --quick             Don't check for corrupt files, only fix missing files\n");
+	print("   -q, --quick             Don't check for corrupt files, only find missing files\n");
 	print("   -B, --bundles=[BUNDLES] Forces swupd to only diagnose the specified BUNDLES. Example: --bundles=os-core,vi\n");
 	print("   -Y, --picky             Also list files which should not exist\n");
 	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky and --extra-files-only look for extra files. Default: /usr\n");

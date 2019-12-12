@@ -29,7 +29,7 @@ _swupd()
 	do case "${COMP_WORDS[$i]}" in
 		("$1")
 		opts="--help --version autoupdate bundle-add bundle-remove
-		bundle-list hashdump update diagnose check-update search
+		bundle-list bundle-info hashdump update diagnose check-update search
 		search-file info clean mirror os-install repair verify 3rd-party"
 		break;;
 		("info")

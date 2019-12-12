@@ -167,6 +167,7 @@ if [[ -n "$state" ]]; then
         "bundle-add:Install a new bundle"
         "bundle-remove:Uninstall a bundle"
         "bundle-list:List installed bundles"
+        "bundle-info: Display information about a bundle"
         "search:Searches for the best bundle to install a binary or library"
         "search-file:Command to search files in Clear Linux bundles"
         "diagnose:Verify content for OS version"
@@ -191,6 +192,7 @@ if [[ -n "$state" ]]; then
           '(help)remove[Remove third party repo]'
           '(help)add[Add third party repo]'
           '(help)bundle-add[Install a bundle from a third party repository]'
+          '(help)bundle-remove[Uninstall a bundle from a third party repository]'
           '(help)bundle-list[List bundles from a third party repository]'
           '(help)bundle-info[Display information about a bundle in a third party repository]'
           '(help)update[Update to latest version of a third party repository]'

@@ -37,7 +37,7 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
-	print("   -e, --repo             Specify the 3rd-party repo to use\n");
+	print("   -e, --repo             Specify the 3rd-party repository to use\n");
 	print("   -x, --force            Removes a bundle along with all the bundles that depend on it\n");
 	print("   -R, --recursive        Removes a bundle and its dependencies recursively\n");
 	print("\n");
@@ -92,7 +92,7 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-enum swupd_code remove_bundle(char *bundle)
+static enum swupd_code remove_bundle(char *bundle)
 {
 	struct list *bundle_to_remove = NULL;
 	enum swupd_code ret = SWUPD_OK;
@@ -124,7 +124,6 @@ enum swupd_code third_party_bundle_remove_main(int argc, char **argv)
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("3rd-party-bundle-remove", steps_in_bundle_remove);
 
 	/* initialize swupd */
 	ret_code = swupd_init(SWUPD_ALL);
@@ -132,6 +131,7 @@ enum swupd_code third_party_bundle_remove_main(int argc, char **argv)
 		error("Failed swupd initialization, exiting now\n");
 		return ret_code;
 	}
+	progress_init_steps("3rd-party-bundle-remove", steps_in_bundle_remove);
 
 	/* move the bundles provided in the command line into a
 	 * list so it is easier to handle them */

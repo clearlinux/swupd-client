@@ -136,7 +136,7 @@ global_teardown() {
 		Please specify a repository using the --repo flag
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }
 

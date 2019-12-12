@@ -50,7 +50,7 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
-	print("   -R, --repo              Specify the 3rd-party repo to use\n");
+	print("   -R, --repo              Specify the 3rd-party repository to use\n");
 	print("   -a, --all               List all available bundles for the current version of Clear Linux\n");
 	print("   -D, --has-dep=[BUNDLE]  List all bundles which have BUNDLE as a dependency\n");
 	print("   --deps=[BUNDLE]         List bundles included by BUNDLE\n");

@@ -198,6 +198,22 @@
 #has_dep=[BUNDLE]
 
 
+[bundle-info]
+
+#
+# Options for the "swupd bundle-info" command
+#
+
+# Show the bundle info for the specified version (integer value)
+#version=[VER]
+
+# Show the bundle dependencies as part of the information displayed (boolean value)
+#dependencies=<true/false>
+
+# Show the bundle files as part of the information displayed (boolean value)
+#files=<true/false>
+
+
 [search-file]
 
 #
@@ -237,6 +253,9 @@
 # Attempt to proceed even if non-critical errors found (boolean value)
 #force=<true/false>
 
+# Don't check for corrupt files, only find missing files (boolean value)
+#quick=<true/false>
+
 # List files which should not exist (boolean value)
 #picky=<true/false>
 
@@ -254,7 +273,7 @@
 # Example: --bundles=os-core,vi
 #bundles=[BUNDLES]
 
-# Like --picky, but it only searches for extra files
+# Like --picky, but it only searches for extra files (boolean value)
 #extra_files_only=<true/false>
 
 
@@ -291,7 +310,7 @@
 # Default: /usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src
 #picky_whitelist=[RE]
 
-# Like --picky, but it only removes extra files
+# Like --picky, but it only removes extra files (boolean value)
 #extra_files_only=<true/false>
 
 
@@ -349,6 +368,9 @@
 # Options for the "swupd 3rd-party bundle-add" command
 #
 
+# Specify the 3rd-party repository to use (string value)
+#repo=[REPOSITORY]
+
 # Do not check free disk space before adding bundle (boolean value)
 #skip_diskspace_check=<true/false>
 
@@ -356,11 +378,30 @@
 #skip_optional=<true/false>
 
 
+[3rd-party-bundle-remove]
+
+#
+# Options for the "swupd 3rd-party bundle-remove" command
+#
+
+# Specify the 3rd-party repository to use (string value)
+#repo=[REPOSITORY]
+
+# Removes a bundle along with all the bundles that depend on it (boolean value)
+#force=<true/false>
+
+# Removes a bundle and its dependencies recursively (boolean value)
+#recursive=<true/false>
+
+
 [3rd-party-bundle-list]
 
 #
 # Options for the "swupd 3rd-party bundle-list" command
 #
+
+# Specify the 3rd-party repository to use (string value)
+#repo=[REPOSITORY]
 
 # List all available bundles for the current version of Clear
 # Linux (boolean value)
@@ -372,3 +413,111 @@
 # List dependency tree of all bundles which have BUNDLE as a
 # dependency (string value)
 #has_dep=[BUNDLE]
+
+
+[3rd-party-bundle-info]
+
+#
+# Options for the "swupd 3rd-party bundle-info" command
+#
+
+# Specify the 3rd-party repository to use (string value)
+#repo=[REPOSITORY]
+
+# Show the bundle info for the specified version (integer value)
+#version=[VER]
+
+# Show the bundle dependencies as part of the information displayed (boolean value)
+#dependencies=<true/false>
+
+# Show the bundle files as part of the information displayed (boolean value)
+#files=<true/false>
+
+
+[3rd-party-diagnose]
+
+#
+# Options for the "swupd 3rd-party diagnose" command
+#
+
+# Specify the 3rd-party repository to use (string value)
+#repo=[REPOSITORY]
+
+# Diagnose the system against manifest version V (integer value)
+#version=[VER]
+
+# Attempt to proceed even if non-critical errors found (boolean value)
+#force=<true/false>
+
+# Don't check for corrupt files, only find missing files (boolean value)
+#quick=<true/false>
+
+# List files which should not exist (boolean value)
+#picky=<true/false>
+
+# Selects the sub-tree where --picky looks for extra files (string value)
+# Default: /usr (string value)
+#picky_tree=[PATH]
+
+# Any path completely matching the POSIX extended regular expression is ignored
+# by --picky, matched directories get skipped (string value)
+# Example: /var|/etc/machine-id
+# Default: /usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src
+#picky_whitelist=[RE]
+
+# Diagnose if BUNDLES are installed correctly (string value)
+# Example: --bundles=os-core,vi
+#bundles=[BUNDLES]
+
+# Like --picky, but it only searches for extra files (boolean value)
+#extra_files_only=<true/false>
+
+
+[3rd-party-repair]
+
+#
+# Options for the "swupd 3rd-party repair" command
+#
+
+# Specify the 3rd-party repository to use (string value)
+#repo=[REPOSITORY]
+
+# Compare against version V to determine what needs to be
+# repaired (integer value)
+#version=[VER]
+
+# Attempt to proceed even if non-critical errors found (boolean value)
+#force=<true/false>
+
+# Don't fix corrupt files, only fix missing files (boolean value)
+#quick=<true/false>
+
+# Repair BUNDLES that are not installed correctly (string value)
+# Example: --bundles=os-core,vi
+#bundles=[BUNDLES]
+
+# Remove files which should not exist (boolean value)
+#picky=<true/false>
+
+# Selects the sub-tree where --picky looks for extra files (string value)
+# Default: /usr
+#picky_tree=[PATH]
+
+# Any path completely matching the POSIX extended regular expression is ignored
+# by --picky, matched directories get skipped (string value)
+# Example: /var|/etc/machine-id
+# Default: /usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src
+#picky_whitelist=[RE]
+
+# Like --picky, but it only removes extra files (boolean value)
+#extra_files_only=<true/false>
+
+
+[3rd-party-check-update]
+
+#
+# Options for the "swupd 3rd-party check-update" command
+#
+
+# Specify the 3rd-party repository to use (string value)
+#repo=[REPOSITORY]

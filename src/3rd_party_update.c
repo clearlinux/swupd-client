@@ -135,7 +135,7 @@ static enum swupd_code update_repos(UNUSED_PARAM char *unused)
 	}
 }
 
-enum swupd_code thir_party_update_main(int argc, char **argv)
+enum swupd_code third_party_update_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
 

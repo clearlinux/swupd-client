@@ -51,7 +51,7 @@ test_setup() {
 		1 bundle was installed as dependency
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 
 	# test-bundle1 is installed and tracked
 	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo/usr/share/clear/bundles/test-bundle1

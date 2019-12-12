@@ -128,13 +128,13 @@ enum swupd_code third_party_bundle_info_main(int argc, char **argv)
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("3rd-party-bundle-info", steps_in_bundleinfo);
 
 	ret_code = swupd_init(SWUPD_ALL);
 	if (ret_code != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
-		goto exit;
+		return ret_code;
 	}
+	progress_init_steps("3rd-party-bundle-info", steps_in_bundleinfo);
 
 	/* set the command options */
 	bundle_info_set_option_version(cmdline_option_version);
@@ -146,8 +146,6 @@ enum swupd_code third_party_bundle_info_main(int argc, char **argv)
 
 	list_free_list(bundles);
 	swupd_deinit();
-
-exit:
 	progress_finish_steps(ret_code);
 
 	return ret_code;

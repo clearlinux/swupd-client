@@ -38,7 +38,7 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
-	print("   -R, --repo              Specify the 3rd-party repo to use\n");
+	print("   -R, --repo              Specify the 3rd-party repository to use\n");
 	print("   --skip-optional         Do not install optional bundles (also-add flag in Manifests)\n");
 	print("   --skip-diskspace-check  Do not check free disk space before adding bundle\n");
 	print("\n");
@@ -133,7 +133,6 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("3rd-party-bundle-add", steps_in_bundleadd);
 
 	/* initialize swupd */
 	ret_code = swupd_init(SWUPD_ALL);
@@ -141,6 +140,7 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 		error("Failed swupd initialization, exiting now\n");
 		return ret_code;
 	}
+	progress_init_steps("3rd-party-bundle-add", steps_in_bundleadd);
 
 	/* move the bundles provided in the command line into a
 	 * list so it is easier to handle them */

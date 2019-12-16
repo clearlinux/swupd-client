@@ -193,14 +193,14 @@ exit:
 	return ret;
 }
 
-int third_party_remove_repo(char *repo_name)
+int third_party_remove_repo(const char *repo_name)
 {
 	struct repo *repo;
 	struct list *repos;
 	int ret = 0;
 
 	repos = third_party_get_repos();
-	repo = list_remove(repo_name, &repos, repo_name_cmp);
+	repo = list_remove((void *)repo_name, &repos, repo_name_cmp);
 
 	if (!repo) {
 		error("Repository not found\n");
@@ -216,6 +216,25 @@ int third_party_remove_repo(char *repo_name)
 
 exit:
 	list_free_list_and_data(repos, repo_free_data);
+	return ret;
+}
+
+int third_party_remove_repo_directory(const char *repo_name)
+{
+	char *repo_dir;
+	int ret = 0;
+
+	//TODO: use a global function to get this value
+	repo_dir = str_or_die("%s/%s/%s", globals.path_prefix, "opt/3rd_party", repo_name);
+	ret = sys_rm_recursive(repo_dir);
+	if (ret == -ENOENT) {
+		ret = 0;
+	}
+	if (ret < 0) {
+		error("Failed to delete repository directory\n");
+	}
+
+	free(repo_dir);
 	return ret;
 }
 

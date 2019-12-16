@@ -63,7 +63,16 @@ int third_party_add_repo(const char *repo_name, const char *repo_url);
  * @returns 0 on success ie: a repo is found, removed & repo config is adjusted
  * otherwise a -1 on any failure
  */
-int third_party_remove_repo(char *repo_name);
+int third_party_remove_repo(const char *repo_name);
+
+/**
+ * @brief This function removes the directory where the content of a repo is installed.
+ *
+ * @param repo_name A string containing repo_name
+ *
+ * @returns 0 on success, otherwise a negative errno on any failure
+ */
+int third_party_remove_repo_directory(const char *repo_name);
 
 /**
  * @brief This function sets up swupd to use a specific 3rd-party repo.

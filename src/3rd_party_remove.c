@@ -25,25 +25,6 @@
 
 #ifdef THIRDPARTY
 
-static int remove_repo_directory(char *repo_name)
-{
-	char *repo_dir;
-	int ret = 0;
-
-	//TODO: use a global function to get this value
-	repo_dir = str_or_die("%s/%s/%s", globals.path_prefix, "opt/3rd_party", repo_name);
-	ret = sys_rm_recursive(repo_dir);
-	if (ret == -ENOENT) {
-		ret = 0;
-	}
-	if (ret < 0) {
-		error("Failed to delete repository directory\n");
-	}
-
-	free(repo_dir);
-	return ret;
-}
-
 static void print_help(void)
 {
 	print("Usage:\n");
@@ -112,7 +93,7 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 		goto exit;
 	}
 
-	if (remove_repo_directory(argv[argc - 1]) < 0) {
+	if (third_party_remove_repo_directory(argv[argc - 1]) < 0) {
 		ret = SWUPD_COULDNT_REMOVE_FILE;
 		goto exit;
 	}

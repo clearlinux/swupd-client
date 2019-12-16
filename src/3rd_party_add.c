@@ -69,6 +69,23 @@ static bool parse_options(int argc, char **argv)
 	return false;
 }
 
+static int remove_repo(const char *repo_name)
+{
+	int ret;
+
+	ret = third_party_remove_repo(repo_name);
+	if (ret != 0 && ret != -ENOENT) {
+		return ret;
+	}
+
+	ret = third_party_remove_repo_directory(repo_name);
+	if (ret != 0 && ret != -ENOENT) {
+		return ret;
+	}
+
+	return 0;
+}
+
 enum swupd_code third_party_add_main(int argc, char **argv)
 {
 
@@ -77,6 +94,9 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	const char *name, *url;
 	struct list *repos = NULL;
 	struct repo *repo = NULL;
+	char *path_prefix = NULL;
+	char *state_dir = NULL;
+	bool revert = false;
 	int repo_version;
 	int ret;
 
@@ -95,8 +115,13 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	url = argv[argc - 1];
 
 	if (!is_url_allowed(url)) {
-		return SWUPD_INVALID_OPTION;
+		ret_code = SWUPD_INVALID_OPTION;
+		goto finish;
 	}
+
+	/* backup the original global values */
+	path_prefix = strdup_or_die(globals.path_prefix);
+	state_dir = strdup_or_die(globals.state_dir);
 
 	/* The last two in reverse are the repo-name, repo-url */
 	ret = third_party_add_repo(name, url);
@@ -117,12 +142,14 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	if (!repo) {
 		/* this should not happen */
 		ret_code = SWUPD_UNEXPECTED_CONDITION;
+		revert = true;
 		goto finish;
 	}
 
 	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
 	ret_code = third_party_set_repo(globals.state_dir, globals.path_prefix, repo);
 	if (ret_code) {
+		revert = true;
 		goto finish;
 	}
 
@@ -131,6 +158,7 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	if (repo_version < 0) {
 		error("Unable to determine the latest version for repository %s\n\n", repo->name);
 		ret_code = SWUPD_INVALID_REPOSITORY;
+		revert = true;
 		goto finish;
 	}
 
@@ -142,12 +170,31 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	struct list *bundle_to_install = NULL;
 	bundle_to_install = list_append_data(bundle_to_install, "os-core");
 	ret_code = bundle_add(bundle_to_install, repo_version);
+	if (ret_code) {
+		revert = true;
+	}
 	list_free_list(bundle_to_install);
 
 finish:
+	if (revert) {
+		/* there was an error adding the repo, revert the action,
+		 * we don't want to keep a corrupt repo */
+		info("There was an error adding 3rd-party repository %s, reverting...\n", name);
+		set_path_prefix(path_prefix);
+		set_state_dir(state_dir);
+		ret = remove_repo(name);
+		if (!ret) {
+			info("Operation reverted\n");
+		} else {
+			error("There was an error removing the repository (errno: %d)\n", ret);
+		}
+	}
 	list_free_list_and_data(repos, repo_free_data);
+	free_string(&path_prefix);
+	free_string(&state_dir);
 	swupd_deinit();
 	progress_finish_steps(ret_code);
+
 	return ret_code;
 }
 

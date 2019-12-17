@@ -115,7 +115,19 @@ static bool parse_options(int argc, char **argv)
 
 static enum swupd_code list_repo_bundles(UNUSED_PARAM char *unused)
 {
-	return list_bundles();
+	static enum swupd_code ret_code = SWUPD_NO;
+	int ret;
+
+	ret = list_bundles();
+
+	/* When using the --deps or --has-dep flags which take a BUNDLE as argument,
+	 * one or more repositories may not have BUNDLE, but we should not propagate
+	 * the SWUPD_INVALID_BUNDLE error unless the bundle is not found in any repository. */
+	if (ret != SWUPD_INVALID_BUNDLE || ret_code == SWUPD_NO) {
+		ret_code = ret;
+	}
+
+	return ret_code;
 }
 
 enum swupd_code third_party_bundle_list_main(int argc, char **argv)

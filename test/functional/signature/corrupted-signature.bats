@@ -20,11 +20,15 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
+		Warning: Signature check failed
+		Warning: Removing corrupt Manifest.MoM artifacts and re-downloading...
+		Warning: Signature check failed
 		Error: Signature verification failed for manifest version 10
 		Error: Cannot load official manifest MoM for version 10
+		Failed to install 1 of 1 bundles
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_not_exists "$TARGETDIR"/test-file
 
 }
@@ -46,7 +50,7 @@ test_setup() {
 		Successfully installed 1 bundle
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/test-file
 
 }

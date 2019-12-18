@@ -145,12 +145,14 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Preparing to update from 40 to 50
-		Error: Certificate verification error - self signed certificate
-		Error: Signature check error
-		Signature check failed!
+		Warning: Signature check failed
+		Warning: Removing corrupt Manifest.MoM artifacts and re-downloading...
+		Warning: Signature check failed
+		Error: Signature verification failed for manifest version 40
+		Update failed
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/core
 
 }

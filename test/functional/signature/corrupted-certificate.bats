@@ -19,10 +19,11 @@ test_setup() {
 
 	assert_status_is "$SWUPD_SIGNATURE_VERIFICATION_FAILED"
 	expected_output=$(cat <<-EOM
-		Error: Failed to verify certificate: .*
+		Error: Failed to verify certificate: unknown certificate verification error
+		Error: Failed swupd initialization, exiting now
 	EOM
 	)
-	assert_regex_in_output "$expected_output"
+	assert_regex_is_output "$expected_output"
 	assert_file_not_exists "$TARGETDIR"/test-file
 
 }
@@ -44,7 +45,7 @@ test_setup() {
 		Successfully installed 1 bundle
 	EOM
 	)
-	assert_in_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_file_exists "$TARGETDIR"/test-file
 
 }

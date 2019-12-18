@@ -95,19 +95,19 @@ bool signature_init(const char *certificate_path, const char *crl)
 			info("Certificate validity is:\n");
 			b = BIO_new_fp(stdout, BIO_NOCLOSE);
 			if (b == NULL) {
-				error("Failed to create BIO wrapping stream\n");
+				debug("Failed to create BIO wrapping stream\n");
 				goto fail;
 			}
 			/* The ASN1_TIME_print function does not include a newline... */
 			if (!ASN1_TIME_print(b, X509_get_notBefore(cert))) {
 				info("\n");
-				error("Failed to get certificate begin date\n");
+				debug("Failed to get certificate begin date\n");
 				goto fail;
 			}
 			info("\n");
 			if (!ASN1_TIME_print(b, X509_get_notAfter(cert))) {
 				info("\n");
-				error("Failed to get certificate expiration date\n");
+				debug("Failed to get certificate expiration date\n");
 				goto fail;
 			}
 			info("\n");
@@ -162,27 +162,27 @@ bool signature_verify_data(const unsigned char *data, size_t data_len, const uns
 
 	sig_BIO = BIO_new_mem_buf(sig_data, sig_data_len);
 	if (!sig_BIO) {
-		string_or_die(&errorstr, "Unable to load signature data into BIO\n");
+		string_or_die(&errorstr, "Unable to load signature data into BIO");
 		goto error;
 	}
 
 	/* the signature is in DER format, so d2i it into verification pkcs7 form */
 	p7 = d2i_PKCS7_bio(sig_BIO, NULL);
 	if (p7 == NULL) {
-		string_or_die(&errorstr, "NULL PKCS7 File\n");
+		string_or_die(&errorstr, "NULL PKCS7 File");
 		goto error;
 	}
 
 	data_BIO = BIO_new_mem_buf(data, data_len);
 	if (!data_BIO) {
-		string_or_die(&errorstr, "Unable to load data into BIO\n");
+		string_or_die(&errorstr, "Unable to load data into BIO");
 		goto error;
 	}
 
 	/* munge the signature and data into a verifiable format */
 	verify_BIO = PKCS7_dataInit(p7, data_BIO);
 	if (!verify_BIO) {
-		string_or_die(&errorstr, "Failed PKCS7_dataInit()\n");
+		string_or_die(&errorstr, "Failed PKCS7_dataInit()");
 		goto error;
 	}
 
@@ -191,14 +191,15 @@ bool signature_verify_data(const unsigned char *data, size_t data_len, const uns
 	if (ret == 1) {
 		result = true;
 	} else {
-		string_or_die(&errorstr, "Signature check failed!\n");
+		string_or_die(&errorstr, "Signature check failed");
 	}
 
 error:
 
 	if (!result && print_errors) {
-		error("Signature check error\n%s", errorstr);
-		ERR_print_errors_fp(stderr);
+		if (errorstr) {
+			debug("%s\n", errorstr);
+		}
 	}
 
 	free_string(&errorstr);
@@ -241,34 +242,34 @@ bool signature_verify(const char *file, const char *sig_file, bool print_errors)
 	/* get the signature */
 	sig_fd = open(sig_file, O_RDONLY);
 	if (sig_fd == -1) {
-		string_or_die(&errorstr, "Failed open %s: %s\n", sig_file, strerror(errno));
+		string_or_die(&errorstr, "Failed to open %s: %s", sig_file, strerror(errno));
 		goto error;
 	}
 	if (fstat(sig_fd, &st) != 0) {
-		string_or_die(&errorstr, "Failed to stat %s file\n", sig_file);
+		string_or_die(&errorstr, "Failed to stat %s file", sig_file);
 		goto error;
 	}
 	sig_len = st.st_size;
 	sig = mmap(NULL, sig_len, PROT_READ, MAP_PRIVATE, sig_fd, 0);
 	if (sig == MAP_FAILED) {
-		string_or_die(&errorstr, "Failed to mmap %s signature\n", sig_file);
+		string_or_die(&errorstr, "Failed to mmap %s signature", sig_file);
 		goto error;
 	}
 	/* get the data to be verified */
 
 	data_fd = open(file, O_RDONLY);
 	if (data_fd == -1) {
-		string_or_die(&errorstr, "Failed open %s\n", file);
+		string_or_die(&errorstr, "Failed to open %s", file);
 		goto error;
 	}
 	if (fstat(data_fd, &st) != 0) {
-		string_or_die(&errorstr, "Failed to stat %s\n", file);
+		string_or_die(&errorstr, "Failed to stat %s", file);
 		goto error;
 	}
 	data_len = st.st_size;
 	data = mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
 	if (data == MAP_FAILED) {
-		string_or_die(&errorstr, "Failed to mmap %s\n", file);
+		string_or_die(&errorstr, "Failed to mmap %s", file);
 		goto error;
 	}
 
@@ -276,8 +277,10 @@ bool signature_verify(const char *file, const char *sig_file, bool print_errors)
 
 error:
 	if (!result && print_errors) {
-		error("Signature check error\n%s", errorstr);
-		ERR_print_errors_fp(stderr);
+		if (errorstr) {
+			debug("%s\n", errorstr);
+		}
+		warn("Signature check failed\n");
 	}
 
 	free_string(&errorstr);
@@ -305,21 +308,20 @@ static X509 *get_cert_from_path(const char *certificate_path)
 
 	fp_pubkey = fopen(certificate_path, "re");
 	if (!fp_pubkey) {
-		error("Failed fopen %s (%i - %s)\n", certificate_path, errno, strerror(errno));
+		debug("Failed fopen %s (%i - %s)\n", certificate_path, errno, strerror(errno));
 		goto error;
 	}
 
 	cert = PEM_read_X509(fp_pubkey, NULL, NULL, NULL);
 	fclose(fp_pubkey);
 	if (!cert) {
-		error("Failed PEM_read_X509() for %s\n", certificate_path);
+		debug("Failed PEM_read_X509() for %s\n", certificate_path);
 		goto error;
 	}
 
 	return cert;
 
 error:
-	ERR_print_errors_fp(stderr);
 	return NULL;
 }
 
@@ -381,14 +383,14 @@ static int validate_authority(X509 *cert)
 	for (i = 0; i < n; i++) {
 		ACCESS_DESCRIPTION *ad = sk_ACCESS_DESCRIPTION_value(info, i);
 		if (OBJ_obj2nid(ad->method) == NID_ad_OCSP) {
-			error("OCSP uri found, but method not supported\n");
+			debug("OCSP uri found, but method not supported\n");
 			goto error;
 		}
 	}
 
 error:
 	AUTHORITY_INFO_ACCESS_free(info);
-	error("Supported Authority Information Access methods not found in the certificate\n");
+	debug("Supported Authority Information Access methods not found in the certificate\n");
 
 	return -1;
 }
@@ -409,33 +411,33 @@ static int validate_certificate(X509 *cert, const char *certificate_path, const 
 
 	/* create the cert store and set the verify callback */
 	if (!(store = X509_STORE_new())) {
-		error("Failed X509_STORE_new() for %s\n", certificate_path);
+		debug("Failed X509_STORE_new() for %s\n", certificate_path);
 		goto error;
 	}
 
 	X509_STORE_set_verify_cb_func(store, verify_callback);
 
 	if (X509_STORE_set_purpose(store, X509_PURPOSE_ANY) != 1) {
-		error("Failed X509_STORE_set_purpose() for %s\n", certificate_path);
+		debug("Failed X509_STORE_set_purpose() for %s\n", certificate_path);
 		goto error;
 	}
 
 	/* Add the certificates to be verified to the store */
 	if (!(lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file()))) {
-		error("Failed X509_STORE_add_lookup() for %s\n", certificate_path);
+		debug("Failed X509_STORE_add_lookup() for %s\n", certificate_path);
 		goto error;
 	}
 
 	/*  Load the our Root cert, which can be in either DER or PEM format */
 	if (!X509_load_cert_file(lookup, certificate_path, X509_FILETYPE_PEM)) {
-		error("Failed X509_load_cert_file() for %s\n", certificate_path);
+		debug("Failed X509_load_cert_file() for %s\n", certificate_path);
 		goto error;
 	}
 
 	if (crl) {
 		if (!(lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file())) ||
 		    (X509_load_crl_file(lookup, crl, X509_FILETYPE_PEM) != 1)) {
-			error("Failed X509 crl init for %s\n", certificate_path);
+			debug("Failed X509 crl init for %s\n", certificate_path);
 			goto error;
 		}
 		/* set the flags of the store so that CLRs are consulted */
@@ -444,12 +446,12 @@ static int validate_certificate(X509 *cert, const char *certificate_path, const 
 
 	/* create a verification context and initialize it */
 	if (!(verify_ctx = X509_STORE_CTX_new())) {
-		error("Failed X509_STORE_CTX_new() for %s\n", certificate_path);
+		debug("Failed X509_STORE_CTX_new() for %s\n", certificate_path);
 		goto error;
 	}
 
 	if (X509_STORE_CTX_init(verify_ctx, store, cert, NULL) != 1) {
-		error("Failed X509_STORE_CTX_init() for %s\n", certificate_path);
+		debug("Failed X509_STORE_CTX_init() for %s\n", certificate_path);
 		goto error;
 	}
 	/* Specify which cert to validate in the verify context.
@@ -459,14 +461,14 @@ static int validate_certificate(X509 *cert, const char *certificate_path, const 
 
 	/* verify the certificate */
 	if (X509_verify_cert(verify_ctx) != 1) {
-		error("Failed X509_verify_cert() for %s\n", certificate_path);
+		debug("Failed X509_verify_cert() for %s\n", certificate_path);
 		goto error;
 	}
 
 	X509_STORE_CTX_free(verify_ctx);
 
 	if (validate_authority(cert) < 0) {
-		error("Failed to validate certificate using 'Authority Information Access'\n");
+		debug("Failed to validate certificate using 'Authority Information Access'\n");
 		return -1;
 	}
 
@@ -474,8 +476,6 @@ static int validate_certificate(X509 *cert, const char *certificate_path, const 
 	return 0;
 
 error:
-	ERR_print_errors_fp(stderr);
-
 	if (verify_ctx) {
 		X509_STORE_CTX_free(verify_ctx);
 	}
@@ -486,7 +486,7 @@ error:
 static int verify_callback(int ok, X509_STORE_CTX *stor)
 {
 	if (!ok) {
-		error("Certificate verification error - %s\n",
+		debug("Certificate verification error - %s\n",
 		      X509_verify_cert_error_string(X509_STORE_CTX_get_error(stor)));
 	}
 	return ok;

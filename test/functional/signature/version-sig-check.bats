@@ -24,13 +24,13 @@ test_setup() {
 	assert_status_is "$SWUPD_SIGNATURE_VERIFICATION_FAILED"
 
 	expected_output=$(cat <<-EOM
-		Error: Failed to retrieve size for signature file: .*latest_version.sig
-		Error: Signature Verification failed for URL: .*latest_version
+		Error: Failed to retrieve size for signature file: file://$TEST_DIRNAME/web-dir/version/latest_version.sig
+		Error: Signature Verification failed for URL: file://$TEST_DIRNAME/web-dir/version/latest_version
 		Error: Unable to determine the server version as signature verification failed
 		Current OS version: 10
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 
 	sudo sh -c "mv $WEBDIR/version/latest_version_bad_name.sig $WEBDIR/version/latest_version.sig"
 	# check-update succeeds as verification is successful
@@ -57,12 +57,11 @@ test_setup() {
 
 	expected_output=$(cat <<-EOM
 		Update started
-		Error: Signature check error
-		.*:not enough data.*
+		Error: Signature verification failed for URL: file://$TEST_DIRNAME/web-dir/version/formatstaging/latest
 		Error: Unable to determine the server version as signature verification failed
 		Update failed
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 
 }

@@ -176,10 +176,9 @@ static int get_version_from_url(char *url)
 	if (globals.sigcheck) {
 		sig_verified = verify_signature(url, &tmp_version);
 	} else {
-		error("FAILED TO VERIFY SIGNATURE OF %s. Operation proceeding due to \n"
-		      " --nosigcheck, but system security may be compromised\n",
-		      url);
-		journal_log_error("swupd security notice:  --nosigcheck used to bypass version signature");
+		warn("The --nosigcheck flag was used, THE SIGNATURE OF %s WILL NOT BE VERIFIED\n", url);
+		info("Be aware that this compromises the system security\n\n");
+		journal_log_error("swupd security notice: --nosigcheck used to bypass version signature");
 		sig_verified = 0;
 	}
 
@@ -188,7 +187,7 @@ static int get_version_from_url(char *url)
 		warn("Signature for latest file (%s) is missing\n", url);
 		warn("Support for unsigned latest file will be deprecated soon\n");
 	} else if (sig_verified != 0) {
-		error("Signature Verification failed for URL: %s\n", url);
+		error("Signature verification failed for URL: %s\n", url);
 		return -SWUPD_ERROR_SIGNATURE_VERIFICATION;
 	}
 

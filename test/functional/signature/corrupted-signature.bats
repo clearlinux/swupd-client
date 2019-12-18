@@ -20,7 +20,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Error: FAILED TO VERIFY SIGNATURE OF Manifest.MoM version 10!!!
+		Error: Signature verification failed for manifest version 10
 		Error: Cannot load official manifest MoM for version 10
 	EOM
 	)
@@ -35,8 +35,8 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to
-		  --nosigcheck, but system security may be compromised
+		Warning: The --nosigcheck flag was used, THE MANIFEST SIGNATURE WILL NOT BE VERIFIED
+		Be aware that this compromises the system security
 		Loading required manifests...
 		No packs need to be downloaded
 		Validate downloaded files

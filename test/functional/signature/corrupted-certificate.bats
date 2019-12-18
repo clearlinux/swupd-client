@@ -33,8 +33,8 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		FAILED TO VERIFY SIGNATURE OF Manifest.MoM. Operation proceeding due to
-		  --nosigcheck, but system security may be compromised
+		Warning: The --nosigcheck flag was used, THE MANIFEST SIGNATURE WILL NOT BE VERIFIED
+		Be aware that this compromises the system security
 		Loading required manifests...
 		No packs need to be downloaded
 		Validate downloaded files

@@ -38,7 +38,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Error: FAILED TO VERIFY SIGNATURE OF Manifest.MoM version 10!!!
+		Error: Signature verification failed for manifest version 10
 		Error: Cannot load official manifest MoM for version 10
 	EOM
 	)
@@ -75,7 +75,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Error: FAILED TO VERIFY SIGNATURE OF Manifest.MoM version 10!!!
+		Error: Signature verification failed for manifest version 10
 		Error: Cannot load official manifest MoM for version 10
 	EOM
 	)
@@ -112,7 +112,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Error: FAILED TO VERIFY SIGNATURE OF Manifest.MoM version 10!!!
+		Error: Signature verification failed for manifest version 10
 		Error: Cannot load official manifest MoM for version 10
 	EOM
 	)

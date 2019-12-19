@@ -69,7 +69,7 @@ global_teardown() {
 		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd_party/test-repo1/usr/lib/os-release
 		Checking for extraneous files
 		 -> File that should be deleted: $PATH_PREFIX/opt/3rd_party/test-repo1/bar/file_2
-		Inspected 17 files
+		Inspected 19 files
 		  2 files were missing
 		  2 files did not match
 		  1 file found which should be deleted
@@ -83,7 +83,7 @@ global_teardown() {
 		Checking for missing files
 		Checking for corrupt files
 		Checking for extraneous files
-		Inspected 13 files
+		Inspected 15 files
 		Diagnose successful
 	EOM
 	)
@@ -102,7 +102,7 @@ global_teardown() {
 		Checking for missing files
 		Checking for corrupt files
 		Checking for extraneous files
-		Inspected 13 files
+		Inspected 15 files
 		Diagnose successful
 	EOM
 	)
@@ -135,7 +135,7 @@ global_teardown() {
 		Checking for corrupt files
 		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd_party/test-repo1/usr/lib/os-release
 		Checking for extraneous files
-		Inspected 15 files
+		Inspected 17 files
 		  1 file did not match
 		Use "swupd repair" to correct the problems in the system
 		Diagnose successful
@@ -165,7 +165,7 @@ global_teardown() {
 		Checking for extraneous files
 		 -> File that should be deleted: $PATH_PREFIX/opt/3rd_party/test-repo1/bar/file_2
 		Checking for extra files under $PATH_PREFIX/opt/3rd_party/test-repo1/usr
-		Inspected 17 files
+		Inspected 19 files
 		  2 files were missing
 		  2 files did not match
 		  1 file found which should be deleted
@@ -181,7 +181,7 @@ global_teardown() {
 		Checking for extraneous files
 		Checking for extra files under $PATH_PREFIX/opt/3rd_party/test-repo2/usr
 		 -> Extra file: $PATH_PREFIX/opt/3rd_party/test-repo2/usr/untracked_file3
-		Inspected 14 files
+		Inspected 16 files
 		  1 file found which should be deleted
 		Use "swupd repair --picky" to correct the problems in the system
 		Diagnose successful
@@ -213,7 +213,7 @@ global_teardown() {
 		Checking for extra files under $PATH_PREFIX/opt/3rd_party/test-repo1/bat
 		 -> Extra file: $PATH_PREFIX/opt/3rd_party/test-repo1/bat/untracked_file1
 		 -> Extra file: $PATH_PREFIX/opt/3rd_party/test-repo1/bat/
-		Inspected 19 files
+		Inspected 21 files
 		  2 files were missing
 		  2 files did not match
 		  3 files found which should be deleted
@@ -228,7 +228,7 @@ global_teardown() {
 		Checking for corrupt files
 		Checking for extraneous files
 		Checking for extra files under $PATH_PREFIX/opt/3rd_party/test-repo2/bat
-		Inspected 13 files
+		Inspected 15 files
 		Diagnose successful
 	EOM
 	)

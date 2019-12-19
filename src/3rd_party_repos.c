@@ -18,6 +18,8 @@
  */
 
 #include "3rd_party_repos.h"
+#include "config.h"
+#include "signature.h"
 #include "swupd.h"
 
 #include <errno.h>
@@ -248,13 +250,29 @@ int third_party_remove_repo_directory(const char *repo_name)
 	return ret;
 }
 
-enum swupd_code third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo)
+enum swupd_code third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo, bool sigcheck)
 {
 	char *repo_state_dir;
 	char *repo_path_prefix;
+	char *repo_cert_path;
 
 	set_content_url(repo->url);
 	set_version_url(repo->url);
+
+	/* set up swupd to use the certificate from the 3rd-party repository */
+	string_or_die(&repo_cert_path, "%s/opt/3rd_party/%s/%s", path_prefix, repo->name, CERT_PATH);
+	set_cert_path(repo_cert_path);
+	/* if --nosigcheck was used, we do not attempt any signature checking */
+	if (sigcheck) {
+		signature_deinit();
+		if (!signature_init(globals.cert_path, NULL)) {
+			signature_deinit();
+			error("Unable to validate the certificate %s\n\n", repo_cert_path);
+			free_string(&repo_cert_path);
+			return SWUPD_SIGNATURE_VERIFICATION_FAILED;
+		}
+	}
+	free_string(&repo_cert_path);
 
 	string_or_die(&repo_path_prefix, "%s/opt/3rd_party/%s", path_prefix, repo->name);
 	set_path_prefix(repo_path_prefix);
@@ -298,9 +316,9 @@ static enum swupd_code third_party_find_bundle(const char *bundle, struct list *
 		struct file *file = NULL;
 
 		/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-		ret_code = third_party_set_repo(state_dir, path_prefix, repo);
+		ret_code = third_party_set_repo(state_dir, path_prefix, repo, globals.sigcheck);
 		if (ret_code != SWUPD_OK) {
-			return ret_code;
+			goto clean_and_exit;
 		}
 
 		/* get repo's version */
@@ -405,7 +423,7 @@ enum swupd_code third_party_run_operation(struct list *bundles, const char *repo
 		if (selected_repo) {
 
 			/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-			ret = third_party_set_repo(state_dir, path_prefix, selected_repo);
+			ret = third_party_set_repo(state_dir, path_prefix, selected_repo, globals.sigcheck);
 			if (ret) {
 				ret_code = ret;
 				goto next;
@@ -468,7 +486,7 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operat
 		}
 
 		/* set the appropriate variables for the selected 3rd-party repo */
-		ret_code = third_party_set_repo(state_dir, path_prefix, selected_repo);
+		ret_code = third_party_set_repo(state_dir, path_prefix, selected_repo, globals.sigcheck);
 		if (ret_code) {
 			goto clean_and_exit;
 		}
@@ -481,7 +499,7 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operat
 			selected_repo = iter->data;
 
 			/* set the appropriate variables for the selected 3rd-party repo */
-			ret = third_party_set_repo(state_dir, path_prefix, selected_repo);
+			ret = third_party_set_repo(state_dir, path_prefix, selected_repo, globals.sigcheck);
 			if (ret) {
 				ret_code = ret;
 				goto clean_and_exit;

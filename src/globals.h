@@ -84,6 +84,7 @@ void set_default_path_prefix(void);
 void set_content_url(char *url);
 bool set_state_dir(char *path);
 void set_version_url(char *url);
+void set_cert_path(char *path);
 
 #ifdef __cplusplus
 }

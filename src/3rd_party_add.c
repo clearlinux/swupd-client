@@ -99,6 +99,7 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	bool revert = false;
 	int repo_version;
 	int ret;
+	const bool DONT_VERIFY_CERTIFICATE = false;
 
 	if (!parse_options(argc, argv)) {
 		print_help();
@@ -147,7 +148,7 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	}
 
 	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-	ret_code = third_party_set_repo(globals.state_dir, globals.path_prefix, repo);
+	ret_code = third_party_set_repo(globals.state_dir, globals.path_prefix, repo, DONT_VERIFY_CERTIFICATE);
 	if (ret_code) {
 		revert = true;
 		goto finish;

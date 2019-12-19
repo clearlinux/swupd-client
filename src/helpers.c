@@ -537,6 +537,11 @@ out_close_lock:
 out_fds:
 	dump_file_descriptor_leaks();
 
+	/* This means there was a problem after global_init earlier.
+	 * This is needed to prevent memory leak
+	 */
+	globals_deinit();
+
 	return ret;
 }
 

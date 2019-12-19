@@ -79,10 +79,11 @@ int third_party_remove_repo_directory(const char *repo_name);
  *
  * @param state_dir the original state directory of the system
  * @param path_prefix the original path prefix of the system
+ * @param sigcheck indicates if the repo certificate has to be validate or not
  *
  * @returns a swupd_code
  */
-enum swupd_code third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo);
+enum swupd_code third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo, bool sigcheck);
 
 /**
  * @brief strcmp like function to search for a repo based on its name

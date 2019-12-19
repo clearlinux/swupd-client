@@ -369,7 +369,7 @@ void set_default_path_prefix()
 	globals.path_prefix = strdup_or_die("/");
 }
 
-static void set_cert_path(char *path)
+void set_cert_path(char *path)
 {
 	if (globals.cert_path) {
 		free_string(&globals.cert_path);

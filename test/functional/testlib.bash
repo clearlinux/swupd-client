@@ -1404,6 +1404,8 @@ create_third_party_repo() { #swupd_function
 	local version=$2
 	local format=${3:-staging}
 	local repo_name=${4:-test-repo}
+	local hashed_name
+	local CERT
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
@@ -1418,7 +1420,15 @@ create_third_party_repo() { #swupd_function
 
 	debug_msg "Creating 3rd-party repo $repo_name..."
 	create_version -r "$env_name" "$version" 0 "$format" "$repo_name"
-	create_bundle -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
+
+	# we need to create os-core which should include the os-release and Swupd_Root.pem
+	debug_msg "Creating os-core with Swupd_Root.pem and os-release..."
+	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$TEST_ROOT_DIR"/Swupd_Root.pem)
+	sudo cp -p "$TEST_ROOT_DIR"/Swupd_Root.pem "$env_name"/3rd_party/"$repo_name"/"$version"/files/"$hashed_name"
+	create_tar "$env_name"/3rd_party/"$repo_name"/"$version"/files/"$hashed_name"
+	CERT="$env_name"/3rd_party/"$repo_name"/"$version"/files/"$hashed_name"
+	create_bundle -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$CERT",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
+
 	TPWEBDIR=$(realpath "$env_name/3rd_party/$repo_name")
 	export TPWEBDIR
 	debug_msg "3rd-party repo content dir: $TPWEBDIR"
@@ -1479,9 +1489,13 @@ add_third_party_repo() { #swupd_function
 	debug_msg "3rd-party repo content dir: $TPWEBDIR"
 
 	# every 3rd-party repo needs to have at least the os-core bundle so this should be
-	# added by default
+	# added by default which should include the os-release and Swupd_Root.pem
 	debug_msg "Adding bundle os-core to the 3rd-party repo"
-	create_bundle -L -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
+	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$TEST_ROOT_DIR"/Swupd_Root.pem)
+	sudo cp -p "$TEST_ROOT_DIR"/Swupd_Root.pem "$env_name"/3rd_party/"$repo_name"/"$version"/files/"$hashed_name"
+	create_tar "$env_name"/3rd_party/"$repo_name"/"$version"/files/"$hashed_name"
+	CERT="$env_name"/3rd_party/"$repo_name"/"$version"/files/"$hashed_name"
+	create_bundle -L -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$CERT",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
 
 }
 
@@ -2480,7 +2494,7 @@ create_bundle() { # swupd_function
 		# bundle had been locally installed
 		if [ "$local_bundle" = true ]; then
 			sudo mkdir -p "$target_path$(dirname "$val")"
-			sudo cp "$bundle_file" "$target_path$val"
+			sudo cp -p "$bundle_file" "$target_path$val"
 		fi
 	done
 
@@ -2521,7 +2535,7 @@ create_bundle() { # swupd_function
 			sudo mkdir -p "$target_path$(dirname "$val")"
 			# if local_bundle is enabled copy the link to target-dir but also
 			# copy the file it points to
-			sudo cp "$pfile" "$target_path$pfile_path"
+			sudo cp -p "$pfile" "$target_path$pfile_path"
 			sudo ln -rs "$target_path$pfile_path" "$target_path$val"
 		fi
 	done

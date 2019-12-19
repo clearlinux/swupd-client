@@ -54,7 +54,7 @@ test_setup() {
 		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd_party/test-repo1/usr/lib/os-release -> fixed
 		Removing extraneous files
 		 -> File that should be deleted: $PATH_PREFIX/opt/3rd_party/test-repo1/bar/file_2 -> deleted
-		Inspected 17 files
+		Inspected 19 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
 		    0 of 2 missing files were not replaced
@@ -75,7 +75,7 @@ test_setup() {
 		Adding any missing files
 		Repairing corrupt files
 		Removing extraneous files
-		Inspected 13 files
+		Inspected 15 files
 		Calling post-update helper scripts
 		Repair successful
 	EOM
@@ -96,7 +96,7 @@ test_setup() {
 		Adding any missing files
 		Repairing corrupt files
 		Removing extraneous files
-		Inspected 13 files
+		Inspected 15 files
 		Calling post-update helper scripts
 		Repair successful
 	EOM
@@ -121,7 +121,7 @@ test_setup() {
 		Repairing corrupt files
 		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd_party/test-repo1/usr/lib/os-release -> fixed
 		Removing extraneous files
-		Inspected 15 files
+		Inspected 17 files
 		  1 file did not match
 		    1 of 1 files were repaired
 		    0 of 1 files were not repaired
@@ -156,7 +156,7 @@ test_setup() {
 		Removing extraneous files
 		 -> File that should be deleted: $PATH_PREFIX/opt/3rd_party/test-repo1/bar/file_2 -> deleted
 		Removing extra files under $PATH_PREFIX/opt/3rd_party/test-repo1/usr
-		Inspected 17 files
+		Inspected 19 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
 		    0 of 2 missing files were not replaced
@@ -179,7 +179,7 @@ test_setup() {
 		Removing extraneous files
 		Removing extra files under $PATH_PREFIX/opt/3rd_party/test-repo2/usr
 		 -> Extra file: $PATH_PREFIX/opt/3rd_party/test-repo2/usr/untracked_file3 -> deleted
-		Inspected 14 files
+		Inspected 16 files
 		  1 file found which should be deleted
 		    1 of 1 files were deleted
 		    0 of 1 files were not deleted
@@ -216,7 +216,7 @@ test_setup() {
 		Removing extra files under $PATH_PREFIX/opt/3rd_party/test-repo1/bat
 		 -> Extra file: $PATH_PREFIX/opt/3rd_party/test-repo1/bat/untracked_file1 -> deleted
 		 -> Extra file: $PATH_PREFIX/opt/3rd_party/test-repo1/bat/ -> deleted
-		Inspected 19 files
+		Inspected 21 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
 		    0 of 2 missing files were not replaced
@@ -238,7 +238,7 @@ test_setup() {
 		Repairing corrupt files
 		Removing extraneous files
 		Removing extra files under $PATH_PREFIX/opt/3rd_party/test-repo2/bat
-		Inspected 13 files
+		Inspected 15 files
 		Calling post-update helper scripts
 		Repair successful
 	EOM

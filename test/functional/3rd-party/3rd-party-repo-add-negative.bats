@@ -76,7 +76,7 @@ global_teardown() {
 	run sudo sh -c "$SWUPD 3rd-party add test-repo1 https://abc.com $SWUPD_OPTS"
 	assert_status_is "$SWUPD_INVALID_OPTION"
 	expected_output=$(cat <<-EOM
-		Error: The repo: test-repo1 already exists
+		Error: The repository: test-repo1 already exists
 	EOM
 	)
 	assert_is_output "$expected_output"

@@ -127,7 +127,7 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	ret = third_party_add_repo(name, url);
 	if (ret) {
 		if (ret != -EEXIST) {
-			error("Failed to add repo: %s to config\n", name);
+			error("Failed to add repository: %s to config\n", name);
 			ret_code = SWUPD_COULDNT_WRITE_FILE;
 		} else {
 			ret_code = SWUPD_INVALID_OPTION;

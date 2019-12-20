@@ -36,6 +36,7 @@ static struct subcmd third_party_commands[] = {
 	{ "diagnose", "Verify content from a third party repository", third_party_diagnose_main },
 	{ "repair", "Repair local issues relative to a third party repository", third_party_repair_main },
 	{ "check-update", "Check if a new version of a third party repository is available", third_party_check_update_main },
+	{ "clean", "Clean cached files of a third party repository", third_party_clean_main },
 	{ 0 }
 };
 

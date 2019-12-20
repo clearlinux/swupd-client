@@ -188,9 +188,9 @@ if [[ -n "$state" ]]; then
           3rd-party)
           local -a thirdparty; thirdparty=(
           $global_opt
-          '(help)list[List third party repo(s)]'
-          '(help)remove[Remove third party repo]'
-          '(help)add[Add third party repo]'
+          '(help)list[List third party repositories]'
+          '(help)remove[Remove third party repository]'
+          '(help)add[Add third party repository]'
           '(help)bundle-add[Install a bundle from a third party repository]'
           '(help)bundle-remove[Uninstall a bundle from a third party repository]'
           '(help)bundle-list[List bundles from a third party repository]'
@@ -199,6 +199,7 @@ if [[ -n "$state" ]]; then
           '(help)diagnose[Verify content from a third party repository]'
           '(help)repair[Repair local issues relative to a third party repository]'
           '(help)check-update[Check if a new version of a third party repository is available]'
+          '(help)clean[Clean cached files of a third party repository]'
           _arguments $thirdparty && ret=0
           ;;
           add)

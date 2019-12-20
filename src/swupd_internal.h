@@ -34,6 +34,7 @@ enum swupd_code third_party_update_main(int argc, char **argv);
 enum swupd_code third_party_diagnose_main(int argc, char **argv);
 enum swupd_code third_party_repair_main(int argc, char **argv);
 enum swupd_code third_party_check_update_main(int argc, char **argv);
+enum swupd_code third_party_clean_main(int argc, char **argv);
 
 /**
  * @brief Creates a new third-party repo under THIRDPARTY_REPO_PREFIX

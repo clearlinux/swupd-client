@@ -368,6 +368,9 @@ extern void bundle_list_set_option_all(bool opt);
 extern void bundle_list_set_option_has_dep(char *bundle);
 extern void bundle_list_set_option_deps(char *bundle);
 
+/* clean.c */
+extern int clean_get_stats(void);
+
 /* telemetry.c */
 typedef enum telem_prio_t {
 	TELEMETRY_DEBG = 1,

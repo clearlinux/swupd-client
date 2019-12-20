@@ -54,6 +54,11 @@ static struct {
 	int files_removed;
 } stats;
 
+int clean_get_stats(void)
+{
+	return stats.files_removed;
+}
+
 static struct timespec now;
 
 static const struct option prog_opts[] = {
@@ -367,22 +372,13 @@ enum swupd_code clean_main(int argc, char **argv)
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("clean", steps_in_clean);
 
 	ret = swupd_init(SWUPD_ALL);
 	if (ret != 0) {
 		error("Failed swupd initialization, exiting now\n");
-		goto exit;
+		return ret;
 	}
-
-	if (!options.all) {
-		ret = clock_gettime(CLOCK_REALTIME, &now);
-		if (ret != 0) {
-			ret = SWUPD_TIME_UNKNOWN;
-			error("couldn't read current time to decide what files to clean");
-			goto end;
-		}
-	}
+	progress_init_steps("clean", steps_in_clean);
 
 	/* NOTE: Delete specific file patterns to avoid disasters in case some paths are
 	 * set incorrectly. */
@@ -393,6 +389,7 @@ enum swupd_code clean_main(int argc, char **argv)
 	 * and keeping all the staged files of the current version. This helps recovering the
 	 * current version. Or do it for the previous version to allow a rollback. */
 	ret = clean_statedir(options.dry_run, options.all);
+
 	/* TODO: Also print the bytes removed, need to take into account the hardlinks. */
 	if (options.dry_run) {
 		print("Would remove %d files\n", stats.files_removed);
@@ -400,11 +397,9 @@ enum swupd_code clean_main(int argc, char **argv)
 		print("%d files removed\n", stats.files_removed);
 	}
 
-end:
 	swupd_deinit();
-
-exit:
 	progress_finish_steps(ret);
+
 	return ret;
 }
 
@@ -414,28 +409,35 @@ exit:
  * be removed but will not actually remove them. */
 enum swupd_code clean_statedir(bool dry_run, bool all)
 {
-
+	enum swupd_code ret;
 	char *staged_dir = NULL;
+
+	if (!all) {
+		if (clock_gettime(CLOCK_REALTIME, &now)) {
+			error("couldn't read current time to decide what files to clean\n\n");
+			return SWUPD_TIME_UNKNOWN;
+		}
+	}
+
 	string_or_die(&staged_dir, "%s/staged", globals.state_dir);
-	int ret = remove_if(staged_dir, dry_run, is_fullfile);
+	ret = remove_if(staged_dir, dry_run, is_fullfile);
 	free_string(&staged_dir);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		return ret;
 	}
 
 	/* Pack presence indicator files. */
 	ret = remove_if(globals.state_dir, dry_run, is_pack_indicator);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		return ret;
 	}
 
 	/* Manifest delta files. */
 	ret = remove_if(globals.state_dir, dry_run, is_manifest_delta);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		return ret;
 	}
 
 	/* NOTE: do not clean the state_dir/bundles directory */
-
 	return clean_staged_manifests(globals.state_dir, dry_run, all);
 }

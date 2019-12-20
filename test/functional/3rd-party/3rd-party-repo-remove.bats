@@ -31,9 +31,10 @@ test_setup(){
 	)
 
 	repo_config_file="$STATEDIR"/3rd_party/repo.ini
-	run sudo sh -c "mkdir -p $STATEDIR/3rd_party/"
-	run sudo sh -c "mkdir -p $PATH_PREFIX/opt/3rd_party/{test1,test2,test3,test4,test5}"
+	sudo mkdir -p "$STATEDIR"/3rd_party
+	sudo mkdir -p "$PATH_PREFIX"/opt/3rd_party/{test1,test2,test3,test4,test5}
 	write_to_protected_file -a "$repo_config_file" "$contents"
+	sudo mkdir "$STATEDIR"/3rd_party/{test1,test2,test3,test4,test5}
 
 }
 
@@ -48,6 +49,8 @@ test_teardown(){
 	repo_config_file="$STATEDIR"/3rd_party/repo.ini
 
 	#remove at start of file
+	assert_dir_exists "$PATH_PREFIX"/opt/3rd_party/test1
+	assert_dir_exists "$STATEDIR"/3rd_party/test1
 	run sudo sh -c "$SWUPD 3rd-party remove test1 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -55,9 +58,12 @@ test_teardown(){
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_dir_not_exists "$PATH_PREFIX/opt/3rd-party/test1"
+	assert_dir_not_exists "$PATH_PREFIX"/opt/3rd_party/test1
+	assert_dir_not_exists "$STATEDIR"/3rd_party/test1
 
 	#remove at middle of file
+	assert_dir_exists "$PATH_PREFIX"/opt/3rd_party/test3
+	assert_dir_exists "$STATEDIR"/3rd_party/test3
 	run sudo sh -c "$SWUPD 3rd-party remove test3 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -65,9 +71,12 @@ test_teardown(){
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_dir_not_exists "$PATH_PREFIX/opt/3rd-party/test1"
+	assert_dir_not_exists "$PATH_PREFIX"/opt/3rd_party/test3
+	assert_dir_not_exists "$STATEDIR"/3rd_party/test3
 
 	#remove at end of file
+	assert_dir_exists "$PATH_PREFIX"/opt/3rd_party/test5
+	assert_dir_exists "$STATEDIR"/3rd_party/test5
 	run sudo sh -c "$SWUPD 3rd-party remove test5 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -75,7 +84,8 @@ test_teardown(){
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_dir_not_exists "$PATH_PREFIX/opt/3rd-party/test1"
+	assert_dir_not_exists "$PATH_PREFIX"/opt/3rd_party/test5
+	assert_dir_not_exists "$STATEDIR"/3rd_party/test5
 
 	expected_contents=$(cat <<- EOM
 		[test2]

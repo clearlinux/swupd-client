@@ -235,19 +235,26 @@ int third_party_remove_repo_directory(const char *repo_name)
 {
 	char *repo_dir;
 	int ret = 0;
+	int ret_code = 0;
 
 	//TODO: use a global function to get this value
-	repo_dir = str_or_die("%s/%s/%s", globals.path_prefix, "opt/3rd_party", repo_name);
+	repo_dir = str_or_die("%s/opt/3rd_party/%s", globals.path_prefix, repo_name);
 	ret = sys_rm_recursive(repo_dir);
-	if (ret == -ENOENT) {
-		ret = 0;
-	}
-	if (ret < 0) {
+	if (ret < 0 && ret != -ENOENT) {
 		error("Failed to delete repository directory\n");
+		ret_code = ret;
 	}
-
 	free(repo_dir);
-	return ret;
+
+	repo_dir = str_or_die("%s/3rd_party/%s", globals.state_dir, repo_name);
+	ret = sys_rm_recursive(repo_dir);
+	if (ret < 0 && ret != -ENOENT) {
+		error("Failed to delete repository state directory\n");
+		ret_code = ret;
+	}
+	free(repo_dir);
+
+	return ret_code;
 }
 
 enum swupd_code third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo, bool sigcheck)

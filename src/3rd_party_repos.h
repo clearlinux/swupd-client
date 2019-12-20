@@ -63,7 +63,16 @@ int third_party_add_repo(const char *repo_name, const char *repo_url);
  * @returns 0 on success ie: a repo is found, removed & repo config is adjusted
  * otherwise a -1 on any failure
  */
-int third_party_remove_repo(char *repo_name);
+int third_party_remove_repo(const char *repo_name);
+
+/**
+ * @brief This function removes the directory where the content of a repo is installed.
+ *
+ * @param repo_name A string containing repo_name
+ *
+ * @returns 0 on success, otherwise a negative errno on any failure
+ */
+int third_party_remove_repo_directory(const char *repo_name);
 
 /**
  * @brief This function sets up swupd to use a specific 3rd-party repo.
@@ -81,16 +90,28 @@ enum swupd_code third_party_set_repo(const char *state_dir, const char *path_pre
 int repo_name_cmp(const void *repo, const void *name);
 
 /**
- * @brief Performs an operation on every bundle from the list.
+ * @brief Performs an operation on every 3rd-party bundle from the list.
  *
+ * @param bundles the list of bundles to which the operation will be performed
  * @param repo the name of the 3rd-party repository where the bundles
  * should be looked for. If no repo is specified the bundles are searched for
  * in all existing repos.
- * @param run_operation_fn the function to be performed on the bundles
+ * @param run_operation_fn the function to be performed
  *
  * @returns a swupd_code
  */
 enum swupd_code third_party_run_operation(struct list *bundles, const char *repo, run_operation_fn_t run_operation_fn);
+
+/**
+ * @brief Performs an operation on 3rd-party repos.
+ *
+ * @param repo the name of the 3rd-party repository where the operation will be run
+ * @param run_operation_fn the function to be performed
+ * @param expected_ret_code the expected return code from the operation
+ *
+ * @returns a swupd_code
+ */
+enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operation_fn_t run_operation_fn, enum swupd_code expected_ret_code);
 
 /**
  * @brief Prints a header with the repository name, useful when showing info from multiple repos.

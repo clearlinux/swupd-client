@@ -1339,22 +1339,31 @@ get_hash_from_manifest() { # swupd_function
 # Parameters:
 # - ENVIRONMENT_NAME: the name of the test environmnt to act upon
 # - NEW_VERSION: the version for the target to be set to
+# - REPO_NAME: the name of the 3rd-party repository (if any)
 set_current_version() { # swupd_function
 
 	local env_name=$1
 	local new_version=$2
+	local repo_name=$3
+	local os_release
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    set_current_version <environment_name> <new_version>
+			    set_current_version <environment_name> <new_version> <3rd-party repo>
 			EOM
 		return
 	fi
 	validate_path "$env_name"
 
-	sudo sed -i "s/VERSION_ID=.*/VERSION_ID=$new_version/" "$env_name"/testfs/target-dir/usr/lib/os-release
+	if [ -n "$repo_name" ]; then
+		os_release="$env_name"/testfs/target-dir/opt/3rd_party/"$repo_name"/usr/lib/os-release
+	else
+		os_release="$env_name"/testfs/target-dir/usr/lib/os-release
+	fi
+
+	sudo sed -i "s/VERSION_ID=.*/VERSION_ID=$new_version/" "$os_release"
 
 }
 

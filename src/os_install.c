@@ -203,5 +203,8 @@ enum swupd_code install_main(int argc, char **argv)
 	progress_init_steps("os-install", steps_in_os_install);
 	ret = execute_verify();
 
+	swupd_deinit();
+	progress_finish_steps(ret);
+
 	return ret;
 }

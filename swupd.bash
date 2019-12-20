@@ -29,7 +29,7 @@ _swupd()
 	do case "${COMP_WORDS[$i]}" in
 		("$1")
 		opts="--help --version autoupdate bundle-add bundle-remove
-		bundle-list hashdump update diagnose check-update search
+		bundle-list bundle-info hashdump update diagnose check-update search
 		search-file info clean mirror os-install repair verify 3rd-party"
 		break;;
 		("info")
@@ -84,7 +84,7 @@ _swupd()
 		opts="$global --version --manifest --fix --picky --picky-tree --picky-whitelist --install --quick --force --install "
 		break;;
 		("3rd-party")
-		opts="$global add remove list bundle-add bundle-list bundle-remove bundle-info update "
+		opts="$global add remove list bundle-add bundle-list bundle-remove bundle-info update diagnose repair check-update "
 		break;;
 		("add")
 		opts="$global --repo"
@@ -138,6 +138,21 @@ _swupd()
 		fi
 		;;
 		("update")
+		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
+			opts+="--repo"
+		fi
+		;;
+		("diagnose")
+		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
+			opts+="--repo"
+		fi
+		;;
+		("repair")
+		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
+			opts+="--repo"
+		fi
+		;;
+		("check-update")
 		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
 			opts+="--repo"
 		fi

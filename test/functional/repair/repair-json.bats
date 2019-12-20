@@ -143,7 +143,7 @@ test_setup() {
 		{ "type" : "info", "msg" : " -> deleted" },
 		{ "type" : "info", "msg" : " -> Extra file: $PATH_PREFIX/usr/extraneous-file" },
 		{ "type" : "info", "msg" : " -> deleted" },
-		{ "type" : "info", "msg" : "Inspected 20 files" },
+		{ "type" : "info", "msg" : " Inspected 20 files" },
 		{ "type" : "info", "msg" : "  2 files were missing" },
 		{ "type" : "info", "msg" : "    2 of 2 missing files were replaced" },
 		{ "type" : "info", "msg" : "    0 of 2 missing files were not replaced" },

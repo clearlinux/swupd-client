@@ -229,14 +229,15 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 			string_or_die(&m, "Processing error");
 			ret = SWUPD_COULDNT_LOAD_MANIFEST;
 		} else if (ret & add_sub_BADNAME) {
-			string_or_die(&m, "Bad bundle name detected");
 			ret = SWUPD_INVALID_BUNDLE;
 		} else {
 			string_or_die(&m, "Unknown error");
 			ret = SWUPD_UNEXPECTED_CONDITION;
 		}
 
-		error("%s - Aborting\n", m);
+		if (m) {
+			error("%s - Aborting\n", m);
+		}
 		free_string(&m);
 		goto out;
 	}
@@ -351,7 +352,7 @@ static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server,
 	}
 
 	if (!mom_search_bundle(current_manifest, bundle_name)) {
-		error("Bundle name %s is invalid, aborting dependency list\n", bundle_name);
+		warn("Bundle \"%s\" is invalid, skipping it...\n", bundle_name);
 		ret = SWUPD_INVALID_BUNDLE;
 		goto out;
 	}
@@ -396,10 +397,6 @@ out:
 		manifest_free(current_manifest);
 	}
 
-	if (ret) {
-		print("Bundle list failed\n");
-	}
-
 	if (subs) {
 		free_subscriptions(&subs);
 	}
@@ -430,7 +427,6 @@ enum swupd_code list_bundles(void)
 	} else {
 		ret = list_installable_bundles(version);
 	}
-	info("\n");
 
 	return ret;
 }

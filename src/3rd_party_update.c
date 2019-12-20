@@ -123,15 +123,10 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static enum swupd_code update_repos(const char *state_dir, const char *path_prefix, struct repo *repo)
+static enum swupd_code update_repos(UNUSED_PARAM char *unused)
 {
-	enum swupd_code ret = SWUPD_OK;
-
-	/* set the appropriate global variables for the selected 3rd-party repo */
-	ret = third_party_set_repo(state_dir, path_prefix, repo);
-	if (ret) {
-		return ret;
-	}
+	/* Update should always ignore optional bundles */
+	globals.skip_optional_bundles = true;
 
 	if (cmdline_option_status) {
 		return check_update();
@@ -140,15 +135,9 @@ static enum swupd_code update_repos(const char *state_dir, const char *path_pref
 	}
 }
 
-enum swupd_code thir_party_update_main(int argc, char **argv)
+enum swupd_code third_party_update_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
-	struct list *repos = NULL;
-	struct list *iter = NULL;
-	struct repo *repo = NULL;
-	char *state_dir;
-	char *path_prefix;
-	int ret;
 
 	/*
 	 * Steps for update:
@@ -170,66 +159,23 @@ enum swupd_code thir_party_update_main(int argc, char **argv)
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("3rd-party-update", steps_in_update);
 
 	ret_code = swupd_init(SWUPD_ALL);
 	if (ret_code != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
-		goto exit;
+		return ret_code;
 	}
-
-	/* Update should always ignore optional bundles */
-	globals.skip_optional_bundles = true;
+	progress_init_steps("3rd-party-update", steps_in_update);
 
 	/* set the command options */
 	update_set_option_version(cmdline_option_version);
 	update_set_option_download_only(cmdline_option_download_only);
 	update_set_option_keepcache(cmdline_option_keepcache);
 
-	/* load the existing 3rd-party repos from the repo.ini config file */
-	repos = third_party_get_repos();
+	/* update 3rd-party bundles */
+	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, update_repos, SWUPD_NO);
 
-	/* backup the original state_dir and path_prefix values */
-	state_dir = strdup_or_die(globals.state_dir);
-	path_prefix = strdup_or_die(globals.path_prefix);
-
-	if (cmdline_option_repo) {
-
-		/* a repo was specified, use that one only */
-		repo = list_search(repos, cmdline_option_repo, repo_name_cmp);
-		if (!repo) {
-			error("3rd-party repository %s was not found\n\n", cmdline_option_repo);
-			ret_code = SWUPD_INVALID_REPOSITORY;
-			goto clean_and_exit;
-		}
-		ret_code = update_repos(state_dir, path_prefix, repo);
-
-	} else {
-
-		/* no repo was specified, update all repos */
-		ret_code = SWUPD_NO;
-
-		for (iter = repos; iter; iter = iter->next) {
-			repo = iter->data;
-			third_party_repo_header(repo->name);
-			ret = update_repos(state_dir, path_prefix, repo);
-			/* if all repos are up to date we should return SWUPD_NO,
-			 * if at least one repo needs an update we should return SWUPD_OK,
-			 * in case of a problem, we should return the appropriate error code */
-			if (ret == SWUPD_OK || ret != SWUPD_NO) {
-				ret_code = ret;
-			}
-			info("\n");
-		}
-	}
-
-clean_and_exit:
-	free_string(&state_dir);
-	free_string(&path_prefix);
-	list_free_list_and_data(repos, repo_free_data);
 	swupd_deinit();
-
-exit:
 	progress_finish_steps(ret_code);
 
 	return ret_code;

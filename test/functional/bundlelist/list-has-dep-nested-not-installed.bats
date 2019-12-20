@@ -22,7 +22,6 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Bundle "test-bundle1" does not seem to be installed
 		       try passing --all to check uninstalled bundles
-		Bundle list failed
 	EOM
 	)
 	assert_is_output "$expected_output"

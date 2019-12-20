@@ -50,7 +50,7 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
-	print("   -R, --repo              Specify the 3rd-party repo to use\n");
+	print("   -R, --repo              Specify the 3rd-party repository to use\n");
 	print("   -a, --all               List all available bundles for the current version of Clear Linux\n");
 	print("   -D, --has-dep=[BUNDLE]  List all bundles which have BUNDLE as a dependency\n");
 	print("   --deps=[BUNDLE]         List bundles included by BUNDLE\n");
@@ -113,28 +113,25 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static enum swupd_code list_repo_bundles(char *state_dir, char *path_prefix, struct repo *repo)
+static enum swupd_code list_repo_bundles(UNUSED_PARAM char *unused)
 {
-	enum swupd_code ret;
+	static enum swupd_code ret_code = SWUPD_NO;
+	int ret;
 
-	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-	ret = third_party_set_repo(state_dir, path_prefix, repo);
-	if (ret) {
-		return ret;
+	ret = list_bundles();
+
+	/* When using the --deps or --has-dep flags which take a BUNDLE as argument,
+	 * one or more repositories may not have BUNDLE, but we should not propagate
+	 * the SWUPD_INVALID_BUNDLE error unless the bundle is not found in any repository. */
+	if (ret != SWUPD_INVALID_BUNDLE || ret_code == SWUPD_NO) {
+		ret_code = ret;
 	}
 
-	third_party_repo_header(repo->name);
-	return list_bundles();
+	return ret_code;
 }
 
 enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 {
-	struct list *repos = NULL;
-	struct list *iter = NULL;
-	struct repo *repo = NULL;
-	char *state_dir;
-	char *path_prefix;
-	enum swupd_code ret;
 	enum swupd_code ret_code = SWUPD_OK;
 	const int steps_in_bundlelist = 1;
 
@@ -142,7 +139,6 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("3rd-party-bundle-list", steps_in_bundlelist);
 
 	if (cmdline_local && !is_root()) {
 		ret_code = swupd_init(SWUPD_NO_ROOT);
@@ -152,49 +148,21 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 
 	if (ret_code != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
-		goto finish;
+		return ret_code;
 	}
+	progress_init_steps("3rd-party-bundle-list", steps_in_bundlelist);
 
+	/* set the command options */
 	bundle_list_set_option_all(cmdline_option_all);
 	bundle_list_set_option_has_dep(cmdline_option_has_dep);
 	bundle_list_set_option_deps(cmdline_option_deps);
 
-	/* load the existing 3rd-party repos from the repo.ini config file */
-	repos = third_party_get_repos();
+	/* list the bundles */
+	ret_code = third_party_run_operation_multirepo(cmdline_repo, list_repo_bundles, SWUPD_OK);
 
-	/* backup the original state_dir and path_prefix values */
-	state_dir = strdup_or_die(globals.state_dir);
-	path_prefix = strdup_or_die(globals.path_prefix);
-
-	/* if the repo to be used was specified, use it, otherwise
-	 * list the bundles in all the 3rd-party repos */
-	if (cmdline_repo) {
-		repo = list_search(repos, cmdline_repo, repo_name_cmp);
-		if (!repo) {
-			error("3rd-party repository %s was not found\n\n", cmdline_repo);
-			ret_code = SWUPD_INVALID_REPOSITORY;
-			goto clean_and_exit;
-		}
-		ret_code = list_repo_bundles(state_dir, path_prefix, repo);
-	} else {
-		for (iter = repos; iter; iter = iter->next) {
-			repo = iter->data;
-			ret = list_repo_bundles(state_dir, path_prefix, repo);
-			if (ret) {
-				/* if any of the repos failed, keep the error */
-				ret_code = ret;
-			}
-		}
-	}
-
-clean_and_exit:
-	free_string(&state_dir);
-	free_string(&path_prefix);
-	list_free_list_and_data(repos, repo_free_data);
 	swupd_deinit();
-
-finish:
 	progress_finish_steps(ret_code);
+
 	return ret_code;
 }
 

@@ -9,7 +9,6 @@ load "../testlib"
 	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "not-a-bundle" is invalid, skipping it...
-		Error: Bad bundle name detected - Aborting
 	EOM
 	)
 	assert_is_output "$expected_output"

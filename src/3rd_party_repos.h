@@ -90,7 +90,12 @@ enum swupd_code third_party_set_repo(const char *state_dir, const char *path_pre
 int repo_name_cmp(const void *repo, const void *name);
 
 /**
- * @brief Performs an operation on every 3rd-party bundle from the list.
+ * @brief strcmp like function to search for a repo based on its URL
+ */
+int repo_url_cmp(const void *repo, const void *url);
+
+/**
+ * @brief Performs an operation on every bundle from the list.
  *
  * @param bundles the list of bundles to which the operation will be performed
  * @param repo the name of the 3rd-party repository where the bundles

@@ -34,6 +34,11 @@ int repo_name_cmp(const void *repo, const void *name)
 	return strcmp(((struct repo *)repo)->name, name);
 }
 
+int repo_url_cmp(const void *repo, const void *url)
+{
+	return strcmp(((struct repo *)repo)->url, url);
+}
+
 /**
  * @brief This function is called by the repo ini parse.
  *
@@ -106,7 +111,12 @@ int third_party_add_repo(const char *repo_name, const char *repo_url)
 
 	repos = third_party_get_repos();
 	if (list_search(repos, repo_name, repo_name_cmp)) {
-		error("The repo: %s already exists\n", repo_name);
+		error("The repository: %s already exists\n", repo_name);
+		ret = -EEXIST;
+		goto exit;
+	}
+	if (list_search(repos, repo_url, repo_url_cmp)) {
+		error("The specified URL %s is already assigned to another repository\n", repo_url);
 		ret = -EEXIST;
 		goto exit;
 	}

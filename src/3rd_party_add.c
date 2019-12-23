@@ -90,7 +90,6 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 {
 
 	enum swupd_code ret_code = SWUPD_OK;
-	const int step_in_third_party_add = 1;
 	const char *name, *url;
 	struct list *repos = NULL;
 	struct repo *repo = NULL;
@@ -100,6 +99,9 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	int repo_version;
 	int ret;
 	const bool DONT_VERIFY_CERTIFICATE = false;
+	/* total steps for adding a 3rd-party repo are 8:
+	 * one for adding the repo, plus 7 steps for adding bundle os-core */
+	const int step_in_third_party_add = 8;
 
 	if (!parse_options(argc, argv)) {
 		print_help();
@@ -125,6 +127,7 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	state_dir = strdup_or_die(globals.state_dir);
 
 	/* The last two in reverse are the repo-name, repo-url */
+	progress_next_step("add_repo", PROGRESS_UNDEFINED);
 	ret = third_party_add_repo(name, url);
 	if (ret) {
 		if (ret != -EEXIST) {

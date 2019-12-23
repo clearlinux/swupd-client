@@ -129,7 +129,7 @@ static void default_progress_function(const char UNUSED_PARAM *step_description,
 	fflush(stdout);
 }
 
-static void complete_previous_step()
+static void complete_previous_step(void)
 {
 	if (!progress_report_enabled) {
 		return;

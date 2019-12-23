@@ -128,17 +128,17 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 
 	/* The last two in reverse are the repo-name, repo-url */
 	progress_next_step("add_repo", PROGRESS_UNDEFINED);
+	info("Adding 3rd-party repository %s...\n\n", name);
 	ret = third_party_add_repo(name, url);
 	if (ret) {
 		if (ret != -EEXIST) {
-			error("Failed to add repository: %s to config\n", name);
+			error("Failed to add repository %s to config\n\n", name);
 			ret_code = SWUPD_COULDNT_WRITE_FILE;
 		} else {
 			ret_code = SWUPD_INVALID_OPTION;
 		}
 		goto finish;
 	}
-	info("Repository %s added successfully\n", name);
 
 	/* at this point the repo has been added to the repo.ini file */
 	repos = third_party_get_repos();
@@ -168,8 +168,8 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 
 	/* the repo's "os-core" bundle needs to be installed at this moment
 	 * so we can track the version of the repo */
-	info("Installing bundle 'os-core' from 3rd-party repository %s...\n", name);
-	info("Note that bundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons\n");
+	info("Installing the required bundle 'os-core' from the repository...\n");
+	info("Note that all bundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons\n");
 	globals.no_scripts = true;
 	struct list *bundle_to_install = NULL;
 	bundle_to_install = list_append_data(bundle_to_install, "os-core");
@@ -183,16 +183,20 @@ finish:
 	if (revert) {
 		/* there was an error adding the repo, revert the action,
 		 * we don't want to keep a corrupt repo */
-		info("There was an error adding 3rd-party repository %s, reverting...\n", name);
 		set_path_prefix(path_prefix);
 		set_state_dir(state_dir);
 		ret = remove_repo(name);
-		if (!ret) {
-			info("Operation reverted\n");
-		} else {
-			error("There was an error removing the repository (errno: %d)\n", ret);
+		if (ret) {
+			error("The corrupt repository failed to be removed (errno: %d)\n\n", ret);
 		}
 	}
+
+	if (ret_code == SWUPD_OK && !revert) {
+		print("\nRepository added successfully\n");
+	} else {
+		print("\nFailed to add repository\n");
+	}
+
 	list_free_list_and_data(repos, repo_free_data);
 	free_string(&path_prefix);
 	free_string(&state_dir);

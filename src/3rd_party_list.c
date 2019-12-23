@@ -60,11 +60,13 @@ static void list_repos(void)
 	struct list *repos, *l;
 
 	repos = third_party_get_repos();
-	info("Swupd 3rd party repositories found: %d\n", list_len(repos));
+	info("Swupd 3rd-party repositories:\n");
 	for (l = repos; l; l = l->next) {
 		struct repo *repo = l->data;
-		info("%s: %s\n", repo->name, repo->url)
+		info(" - ");
+		print("%s: %s\n", repo->name, repo->url)
 	}
+	info("\nTotal: %d\n", list_len(repos));
 	list_free_list_and_data(repos, repo_free_data);
 }
 
@@ -77,7 +79,7 @@ enum swupd_code third_party_list_main(int argc, char **argv)
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("third-party", step_in_third_party_list);
+	progress_init_steps("third-party-list", step_in_third_party_list);
 
 	ret = swupd_init(SWUPD_NO_ROOT);
 	if (ret != SWUPD_OK) {

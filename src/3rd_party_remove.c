@@ -69,13 +69,14 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
 	int err;
+	char *name = NULL;
 	const int step_in_third_party_remove = 1;
 
 	if (!parse_options(argc, argv)) {
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("third-party", step_in_third_party_remove);
+	progress_init_steps("third-party-remove", step_in_third_party_remove);
 
 	ret = swupd_init(SWUPD_NO_ROOT);
 	if (ret != SWUPD_OK) {
@@ -83,7 +84,9 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 	}
 
 	/* The last argument has to be the repo-name to be deleted */
-	err = third_party_remove_repo(argv[argc - 1]);
+	name = argv[argc - 1];
+	info("Removing repository %s...\n", name);
+	err = third_party_remove_repo(name);
 	if (err < 0) {
 		if (err == -ENOENT) {
 			ret = SWUPD_INVALID_OPTION;
@@ -93,14 +96,16 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 		goto exit;
 	}
 
-	if (third_party_remove_repo_directory(argv[argc - 1]) < 0) {
+	if (third_party_remove_repo_directory(name) < 0) {
 		ret = SWUPD_COULDNT_REMOVE_FILE;
-		goto exit;
 	}
 
-	info("Repository %s and its content removed successfully\n", argv[argc - 1]);
-
 exit:
+	if (ret == SWUPD_OK) {
+		print("\nRepository and its content removed successfully\n");
+	} else {
+		print("\nFailed to remove repository\n");
+	}
 	swupd_deinit();
 	progress_finish_steps(ret);
 	return ret;

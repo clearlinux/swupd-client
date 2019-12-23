@@ -23,9 +23,9 @@ test_setup() {
 	run sudo sh -c "$SWUPD 3rd-party add test-repo1 file://$repo1 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Repository test-repo1 added successfully
-		Installing bundle 'os-core' from 3rd-party repository test-repo1...
-		Note that bundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
+		Adding 3rd-party repository test-repo1...
+		Installing the required bundle 'os-core' from the repository...
+		Note that all bundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Loading required manifests...
 		Downloading packs for:
 		 - os-core
@@ -35,6 +35,7 @@ test_setup() {
 		Installing files...
 		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Successfully installed 1 bundle
+		Repository added successfully
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -59,7 +60,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD 3rd-party add test-repo1 file://$repo1 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-			Repository test-repo1 added successfully
+			Repository added successfully
 	EOM
 	)
 	assert_in_output "$expected_output"
@@ -69,7 +70,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD 3rd-party add test-repo2 file://$repo2 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-			Repository test-repo2 added successfully
+			Repository added successfully
 	EOM
 	)
 	assert_in_output "$expected_output"

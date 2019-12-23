@@ -48,6 +48,7 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Error: This is an insecure connection
 		Use the --allow-insecure-http flag to proceed
+		Failed to add repository
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -64,10 +65,11 @@ global_teardown() {
 	expected_output=$(cat <<-EOM
 		Warning: This is an insecure connection
 		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
-		Repository my_repo added successfully
+		Adding 3rd-party repository my_repo...
 	EOM
 	)
 	assert_in_output "$expected_output"
+	assert_in_output "Repository added successfully"
 
 	run sudo sh -c "cat $STATEDIR/3rd_party/repo.ini"
 	assert_status_is 0

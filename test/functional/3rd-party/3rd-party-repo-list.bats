@@ -46,11 +46,13 @@ test_teardown(){
 	run sudo sh -c "$SWUPD 3rd-party list $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Swupd 3rd party repositories found: 4
-		test1: https://www.abc.com
-		test2: https://www.efg.com
-		test4: https://www.pqr.com
-		test5: https://www.lmn.com
+		Swupd 3rd-party repositories:
+		 - test1: https://www.abc.com
+		 - test2: https://www.efg.com
+		 - test4: https://www.pqr.com
+		 - test5: https://www.lmn.com
+
+		Total: 4
 	EOM
 	)
 	assert_is_output --identical "$expected_output"

@@ -113,7 +113,7 @@ int third_party_add_repo(const char *repo_name, const char *repo_url)
 
 	repos = third_party_get_repos();
 	if (list_search(repos, repo_name, repo_name_cmp)) {
-		error("The repository: %s already exists\n", repo_name);
+		error("The repository %s already exists\n", repo_name);
 		ret = -EEXIST;
 		goto exit;
 	}
@@ -183,7 +183,7 @@ static int overwrite_repo_config_file(struct list *repos)
 	// open it in trunc mode as we re-write all the contents again
 	fp = fopen(repo_config_file_path, "w");
 	if (!fp) {
-		error("Impossible to write to file %s", repo_config_file_path);
+		error("Unable to open file %s for writing\n", repo_config_file_path);
 		goto exit;
 	}
 
@@ -191,7 +191,7 @@ static int overwrite_repo_config_file(struct list *repos)
 	while (repo) {
 		ret = write_repo(fp, repo->data);
 		if (ret < 0) {
-			error("Write error when trying to write to %s", repo_config_file_path);
+			error("Unable to write to file %s\n", repo_config_file_path);
 			goto exit;
 		}
 		repo = repo->next;
@@ -223,7 +223,7 @@ int third_party_remove_repo(const char *repo_name)
 	repo_free(repo);
 	ret = overwrite_repo_config_file(repos);
 	if (ret) {
-		error("Failed while adjusting repository config file");
+		error("Failed while adjusting repository config file\n");
 	}
 
 exit:

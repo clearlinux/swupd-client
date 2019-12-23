@@ -61,7 +61,9 @@ test_teardown(){
 	run sudo sh -c "$SWUPD 3rd-party remove test3 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_INVALID_OPTION"
 	expected_output=$(cat <<-EOM
+			Removing repository test3...
 			Error: Repository not found
+			Failed to remove repository
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -76,7 +78,9 @@ test_teardown(){
 	run sudo sh -c "$SWUPD 3rd-party remove test3 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_INVALID_OPTION"
 	expected_output=$(cat <<-EOM
+			Removing repository test3...
 			Error: Repository not found
+			Failed to remove repository
 	EOM
 	)
 	assert_is_output "$expected_output"

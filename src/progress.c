@@ -49,6 +49,13 @@ struct spinner_data {
 	int index;
 } spinner_data;
 
+void clean_spinner(void)
+{
+	if (current_type == PROGRESS_UNDEFINED) {
+		info("    \r");
+	}
+}
+
 static int progress_spinner_callback(void *clientp, int64_t UNUSED_PARAM dltotal, int64_t UNUSED_PARAM dlnow, int64_t UNUSED_PARAM ultotal, int64_t UNUSED_PARAM ulnow)
 {
 	const char spinner[4] = { '|', '/', '-', '\\' };
@@ -69,6 +76,9 @@ static void progress_spinner_end(void)
 	if (!isatty(fileno(stdout)) || log_get_level() == LOG_DEBUG) {
 		return;
 	}
+
+	/* clean the spinner from the screen */
+	clean_spinner();
 
 	swupd_curl_download_set_progress_callback(NULL, NULL);
 }

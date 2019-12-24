@@ -3612,10 +3612,15 @@ use_ignore_list() {
 	local filtered_output
 	validate_param "$ignore_enabled"
 
+	# remove the "    \r" that could have been inserted to the output when
+	# cleaning up the spinner (this should be done regardless of if we are
+	# filtering more things otherwise the assertions would fail)
+	filtered_output="$(printf "%s" "$output" | sed 's/    \r//g')"
+
 	# if selected, remove things in the ignore list from the actual output
 	if [ "$ignore_enabled" = true ]; then
-		# always remove blank lines, lines with only dots and lines with progress percentage
-		filtered_output=$(echo "$output" | sed -E '/^$/d' | sed -E '/^\.+$/d' | sed -E '/^\t\.\.\.[0-9]{1,3}%$/d')
+		# always remove blank lines, lines with only dots or spaces and lines with progress percentage
+		filtered_output=$(echo "$filtered_output" | sed -E '/^$/d' | sed -E '/^\.+$/d' | sed -E '/^\t\.\.\.[0-9]{1,3}%$/d')
 		# now remove lines that are included in any of the ignore-lists
 		# there are 3 possible ignore-lists that the function is going
 		# to recognize (in order of precedence):
@@ -3638,8 +3643,9 @@ use_ignore_list() {
 		done < "$ignore_list"
 	else
 		debug_msg "The use of ignore lists is disabled"
-		filtered_output="$output"
+		filtered_output="$filtered_output"
 	fi
+
 	echo "$filtered_output"
 
 }
@@ -3793,7 +3799,7 @@ assert_is_output() { # assertion
 	if [[ ! "$actual_output" == "$expected_output" ]]; then
 		print_assert_failure "The following text was not the command output:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		diff -u <(echo "$expected_output") <(echo "$actual_output")
+		diff -u <(echo -e "$expected_output") <(echo -e "$actual_output") || true
 		return 1
 	fi
 
@@ -3812,7 +3818,7 @@ assert_is_not_output() { # assertion
 	if [[ "$actual_output" == "$expected_output" ]]; then
 		print_assert_failure "The following text was the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		diff -u <(echo "$expected_output") <(echo "$actual_output")
+		diff -u <(echo "$expected_output") <(echo "$actual_output") || true
 		return 1
 	fi
 
@@ -3831,7 +3837,7 @@ assert_regex_in_output() { # assertion
 	if [[ ! "$actual_output" =~ $expected_output ]]; then
 		print_assert_failure "The following text (regex) was not found in the command output:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		diff -u <(echo "$expected_output") <(echo "$actual_output")
+		diff -u <(echo "$expected_output") <(echo "$actual_output") || true
 		return 1
 	fi
 
@@ -3850,7 +3856,7 @@ assert_regex_not_in_output() { # assertion
 	if [[ "$actual_output" =~ $expected_output ]]; then
 		print_assert_failure "The following text (regex) was found in the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		diff -u <(echo "$expected_output") <(echo "$actual_output")
+		diff -u <(echo "$expected_output") <(echo "$actual_output") || true
 		return 1
 	fi
 
@@ -3869,7 +3875,7 @@ assert_regex_is_output() { # assertion
 	if [[ ! "$actual_output" =~ ^$expected_output$ ]]; then
 		print_assert_failure "The following text (regex) was not the command output:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		diff -u <(echo "$expected_output") <(echo "$actual_output")
+		diff -u <(echo "$expected_output") <(echo "$actual_output") || true
 		return 1
 	fi
 
@@ -3888,7 +3894,7 @@ assert_regex_is_not_output() { # assertion
 	if [[ "$actual_output" =~ ^$expected_output$ ]]; then
 		print_assert_failure "The following text (regex) was the command output and should not have:\\n$sep\\n$expected_output\\n$sep"
 		echo -e "Difference:\\n$sep"
-		diff -u <(echo "$expected_output") <(echo "$actual_output")
+		diff -u <(echo "$expected_output") <(echo "$actual_output") || true
 		return 1
 	fi
 

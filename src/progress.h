@@ -85,6 +85,11 @@ void progress_report(double count, double max);
  */
 void progress_set_enabled(bool enabled);
 
+/**
+ * @brief Cleans a spinner from the screen.
+ */
+void clean_spinner(void);
+
 #ifdef __cplusplus
 }
 #endif

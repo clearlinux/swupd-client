@@ -681,7 +681,12 @@ static int retry_download_loop(const char *url, char *filename, struct curl_file
  */
 int swupd_curl_get_file(const char *url, char *filename)
 {
-	return retry_download_loop(url, filename, NULL, false);
+	int ret;
+
+	ret = retry_download_loop(url, filename, NULL, false);
+	clean_spinner();
+
+	return ret;
 }
 
 /*
@@ -691,7 +696,12 @@ int swupd_curl_get_file(const char *url, char *filename)
  */
 int swupd_curl_get_file_memory(const char *url, struct curl_file_data *file_data)
 {
-	return retry_download_loop(url, NULL, file_data, false);
+	int ret;
+
+	ret = retry_download_loop(url, NULL, file_data, false);
+	clean_spinner();
+
+	return ret;
 }
 
 static CURLcode swupd_curl_set_security_opts(CURL *curl)

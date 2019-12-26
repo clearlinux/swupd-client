@@ -450,7 +450,7 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 	int complete = 0;
 	int list_length;
 
-	info("\n%s corrupt files\n", repair ? "Repairing" : "Checking for");
+	info("%s corrupt files\n", repair ? "Repairing" : "Checking for");
 
 	/* for each expected and present file which hash-mismatches vs
 	 * the manifest, replace the file */
@@ -475,7 +475,7 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 	int list_length = list_len(official_manifest->files);
 	int complete = 0;
 
-	info("\n%s extraneous files\n", repair ? "Removing" : "Checking for");
+	info("%s extraneous files\n", repair ? "Removing" : "Checking for");
 
 	official_manifest->files = list_sort(official_manifest->files, file_sort_filename_reverse);
 
@@ -760,7 +760,7 @@ static enum swupd_code deal_with_extra_files(struct manifest *manifest, bool fix
 	enum swupd_code ret;
 
 	char *start = sys_path_join(globals.path_prefix, cmdline_option_picky_tree);
-	info("\n%s extra files under %s\n", fix ? "Removing" : "Checking for", start);
+	info("%s extra files under %s\n", fix ? "Removing" : "Checking for", start);
 	ret = walk_tree(manifest, start, fix, picky_whitelist, &counts);
 	free_string(&start);
 
@@ -978,6 +978,7 @@ enum swupd_code execute_verify(void)
 			struct sub *sub = iter->data;
 			info(" - %s\n", sub->component);
 		}
+		info("\n");
 	}
 
 	info("Downloading missing manifests...\n");
@@ -1108,9 +1109,9 @@ enum swupd_code execute_verify(void)
 	timelist_timer_start(globals.global_times, "Add missing files");
 	progress_next_step("add_missing_files", PROGRESS_BAR);
 	if (cmdline_option_install) {
-		info("\nInstalling base OS and selected bundles\n");
+		info("Installing base OS and selected bundles\n");
 	} else if (cmdline_option_fix) {
-		info("\nAdding any missing files\n");
+		info("Adding any missing files\n");
 	} else {
 		info("\nChecking for missing files\n");
 	}
@@ -1170,7 +1171,7 @@ brick_the_system_and_clean_curl:
 	}
 
 	/* report a summary of what we managed to do and not do */
-	info("\nInspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
+	info("Inspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
 
 	if (counts.missing) {
 		info("  %i file%s %s missing\n", counts.missing, (counts.missing > 1 ? "s" : ""), (counts.missing > 1 ? "were" : "was"));

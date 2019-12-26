@@ -26,6 +26,7 @@
 #include "lib/log.h"
 #include "lib/macros.h"
 #include "progress.h"
+#include "swupd_exit_codes.h"
 
 #define PERCENTAGE_UNDEFINED -1
 #define PERCENTAGE_OFF -2
@@ -204,6 +205,10 @@ void progress_finish_steps(int status)
 	if (end_function) {
 		end_function(title, status);
 	}
+
+	if (current_step != total_steps) {
+		debug("Warning: Less steps than expected were executed for the current operation: expected (%d), executed (%d)\n", current_step, total_steps);
+	}
 }
 
 void progress_next_step(const char *step_title, enum progress_type type)
@@ -213,9 +218,12 @@ void progress_next_step(const char *step_title, enum progress_type type)
 		debug("Please initialize the steps\n");
 		return;
 	}
+	debug("Current step name: %s\n", step_title);
+	debug("Current step number: %d (out of %d)\n", current_step + 1, total_steps);
 	if (current_step >= total_steps) {
-		debug("The current step (%d) is >= total steps (%d)\n", current_step, total_steps);
-		return;
+		debug("Warning: The current steps exceed the number of steps defined for the current operation\n");
+		debug("Increasing the number of total steps by one\n");
+		total_steps++;
 	}
 
 	complete_previous_step();

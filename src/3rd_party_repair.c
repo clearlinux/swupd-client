@@ -204,25 +204,11 @@ static enum swupd_code repair_repos(UNUSED_PARAM char *unused)
 enum swupd_code third_party_repair_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
-
-	/*
-	 * Steps for repair:
-	 *
-	 *  1) load_manifests
-	 *  2) check_files_hash
-	 *  3) validate_fullfiles
-	 *  4) download_fullfiles
-	 *  5) extract_fullfiles
-	 *  6) add_missing_files
-	 *  7) fix_files
-	 *  8) remove_extraneous_files
-	 *  9) remove_extra_files
-	 */
-	const int steps_in_repair = 9;
-
+	int steps_in_repair;
 	string_or_die(&cmdline_option_picky_tree, "%s", picky_tree_default);
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
@@ -233,7 +219,6 @@ enum swupd_code third_party_repair_main(int argc, char **argv)
 		free_string(&cmdline_option_picky_tree);
 		return ret_code;
 	}
-	progress_init_steps("3rd-party-repair", steps_in_repair);
 
 	/* set the command options */
 	verify_set_option_fix(true);
@@ -245,8 +230,31 @@ enum swupd_code third_party_repair_main(int argc, char **argv)
 	verify_set_picky_tree(cmdline_option_picky_tree);
 	verify_set_option_bundles(cmdline_option_bundles);
 
+	/*
+	 * Steps for repair:
+	 *  1) load_manifests (with --extra-files-only jumps to step 9)
+	 *  2) check_files_hash
+	 *  3) validate_fullfiles
+	 *  4) download_fullfiles
+	 *  5) extract_fullfiles
+	 *  6) add_missing_files (with --quick jumps to step 10)
+	 *  7) fix_files
+	 *  8) remove_extraneous_files
+	 *  9) remove_extra_files (only with --picky or with --extra-files-only)
+	 *  10) run_postupdate_scripts
+	 */
+	if (cmdline_option_extra_files_only) {
+		steps_in_repair = 3;
+	} else if (cmdline_option_quick) {
+		steps_in_repair = 7;
+	} else if (cmdline_option_picky) {
+		steps_in_repair = 10;
+	} else {
+		steps_in_repair = 9;
+	}
+
 	/* run repair (verify --fix) */
-	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, repair_repos, SWUPD_OK);
+	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, repair_repos, SWUPD_OK, "repair", steps_in_repair);
 
 	free_string(&cmdline_option_picky_tree);
 	if (picky_whitelist) {

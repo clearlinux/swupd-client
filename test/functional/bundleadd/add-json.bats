@@ -26,8 +26,8 @@ test_setup() {
 	expected_output1=$(cat <<-EOM
 		[
 		{ "type" : "start", "section" : "bundle-add" },
-		{ "type" : "info", "msg" : "Loading required manifests..." },
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 8, "stepCompletion" : -1, "stepDescription" : "load_manifests" },
+		{ "type" : "info", "msg" : "Loading required manifests..." },
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 8, "stepCompletion" : 0, "stepDescription" : "download_packs" },
 		{ "type" : "info", "msg" : "Downloading packs for:" },

@@ -501,42 +501,43 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code search_file_main(int argc, char **argv)
 {
 
-	int ret = SWUPD_OK;
+	enum swupd_code ret = SWUPD_OK;
+	int steps_in_search;
 	int err = 0;
-	struct manifest *mom = NULL;
 	int current_version;
+	struct manifest *mom = NULL;
+
+	if (!parse_options(argc, argv)) {
+		print("\n");
+		print_help();
+		return SWUPD_INVALID_OPTION;
+	}
+
+	ret = swupd_init(SWUPD_ALL);
+	if (ret != SWUPD_OK) {
+		error("Failed swupd initialization, exiting now\n");
+		return ret;
+	}
 
 	/*
 	 * Steps for search-file:
-	 *
-	 *  1) load_manifests
+	 *  1) load_manifests (with --init finishes here)
 	 *  2) search_term
 	 */
-	int steps_in_search = 2;
-
-	if (!parse_options(argc, argv)) {
-		return SWUPD_INVALID_OPTION;
-	}
 	if (init) {
-		/* if user selected the --init option the number of steps in the
-		 * search process are just 2 */
 		steps_in_search = 1;
+	} else {
+		steps_in_search = 2;
 	}
 	progress_init_steps("search", steps_in_search);
 
-	ret = swupd_init(SWUPD_ALL);
-	if (ret != 0) {
-		error("Failed swupd initialization, exiting now\n");
-		goto exit;
-	}
-
-	progress_next_step("load_manifests", PROGRESS_BAR);
 	current_version = get_current_version(globals.path_prefix);
 	if (current_version < 0) {
 		error("Unable to determine current OS version\n");
 		return SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
 
+	progress_next_step("load_manifests", PROGRESS_BAR);
 	mom = load_mom(current_version, false, NULL);
 	if (!mom) {
 		error("Cannot load official manifest MoM for version %i\n", current_version);
@@ -576,10 +577,8 @@ clean_exit:
 	manifest_free(mom);
 	list_free_list_and_data(manifest_list, manifest_free_data);
 	list_free_list_and_data(bundle_size_cache, free);
-
 	swupd_deinit();
-
-exit:
 	progress_finish_steps(ret);
+
 	return ret;
 }

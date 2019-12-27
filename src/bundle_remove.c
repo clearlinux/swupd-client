@@ -474,21 +474,15 @@ out:
 
 enum swupd_code bundle_remove_main(int argc, char **argv)
 {
-	struct list *bundles_list = NULL;
-	int ret;
-	/*
-	 * Steps for bundle-remove:
-	 *
-	 *  1) load_manifests
-	 *  2) remove_files
-	 */
+	enum swupd_code ret = SWUPD_OK;
 	const int steps_in_bundle_remove = 2;
+	struct list *bundles_list = NULL;
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("bundle-remove", steps_in_bundle_remove);
 
 	/* initialize swupd */
 	ret = swupd_init(SWUPD_ALL);
@@ -504,6 +498,13 @@ enum swupd_code bundle_remove_main(int argc, char **argv)
 		bundles_list = list_append_data(bundles_list, bundle);
 	}
 	bundles_list = list_head(bundles_list);
+
+	/*
+	 * Steps for bundle-remove:
+	 *  1) load_manifests
+	 *  2) remove_files
+	 */
+	progress_init_steps("bundle-remove", steps_in_bundle_remove);
 
 	ret = execute_remove_bundles(bundles_list);
 

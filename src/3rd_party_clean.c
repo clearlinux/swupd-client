@@ -112,9 +112,10 @@ static enum swupd_code clean_repos_state(UNUSED_PARAM char *unused)
 enum swupd_code third_party_clean_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
-	const int steps_in_clean = 1;
+	const int steps_in_clean = 0;
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
@@ -124,10 +125,9 @@ enum swupd_code third_party_clean_main(int argc, char **argv)
 		error("Failed swupd initialization, exiting now\n");
 		return ret_code;
 	}
-	progress_init_steps("3rd-party-clean", steps_in_clean);
 
 	/* clean the cache */
-	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, clean_repos_state, SWUPD_OK);
+	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, clean_repos_state, SWUPD_OK, "clean", steps_in_clean);
 
 	swupd_deinit();
 	progress_finish_steps(ret_code);

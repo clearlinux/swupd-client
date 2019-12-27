@@ -133,9 +133,10 @@ static enum swupd_code list_repo_bundles(UNUSED_PARAM char *unused)
 enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
-	const int steps_in_bundlelist = 1;
+	const int steps_in_bundlelist = 0;
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
@@ -145,12 +146,10 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 	} else {
 		ret_code = swupd_init(SWUPD_ALL);
 	}
-
 	if (ret_code != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
 		return ret_code;
 	}
-	progress_init_steps("3rd-party-bundle-list", steps_in_bundlelist);
 
 	/* set the command options */
 	bundle_list_set_option_all(cmdline_option_all);
@@ -158,7 +157,7 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 	bundle_list_set_option_deps(cmdline_option_deps);
 
 	/* list the bundles */
-	ret_code = third_party_run_operation_multirepo(cmdline_repo, list_repo_bundles, SWUPD_OK);
+	ret_code = third_party_run_operation_multirepo(cmdline_repo, list_repo_bundles, SWUPD_OK, "bundle-list", steps_in_bundlelist);
 
 	swupd_deinit();
 	progress_finish_steps(ret_code);

@@ -73,23 +73,24 @@ static void list_repos(void)
 enum swupd_code third_party_list_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
-	const int step_in_third_party_list = 1;
+	const int step_in_third_party_list = 0;
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("third-party-list", step_in_third_party_list);
-
 	ret = swupd_init(SWUPD_NO_ROOT);
 	if (ret != SWUPD_OK) {
-		goto finish;
+		return ret;
 	}
+	progress_init_steps("third-party-list", step_in_third_party_list);
+
 	list_repos();
 
-finish:
 	swupd_deinit();
 	progress_finish_steps(ret);
+
 	return ret;
 }
 

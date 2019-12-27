@@ -114,22 +114,10 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 {
 	struct list *bundles = NULL;
 	enum swupd_code ret_code = SWUPD_OK;
-
-	/*
-	 * Steps for 3rd-party bundle-add:
-	 *
-	 *  1) load_manifests
-	 *  2) download_packs
-	 *  3) extract_packs
-	 *  4) validate_fullfiles
-	 *  5) download_fullfiles
-	 *  6) extract_fullfiles
-	 *  7) install_files
-	 */
-
-	const int steps_in_bundleadd = 7;
+	const int steps_in_bundleadd = 8;
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
@@ -140,6 +128,18 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 		error("Failed swupd initialization, exiting now\n");
 		return ret_code;
 	}
+
+	/*
+	 * Steps for 3rd-party bundle-add:
+	 *  1) load_manifests
+	 *  2) download_packs
+	 *  3) extract_packs
+	 *  4) validate_fullfiles
+	 *  5) download_fullfiles
+	 *  6) extract_fullfiles
+	 *  7) install_files
+	 *  8) run_postupdate_scripts
+	 */
 	progress_init_steps("3rd-party-bundle-add", steps_in_bundleadd);
 
 	/* move the bundles provided in the command line into a

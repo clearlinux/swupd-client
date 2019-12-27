@@ -114,10 +114,12 @@ enum swupd_code third_party_run_operation(struct list *bundles, const char *repo
  * @param repo the name of the 3rd-party repository where the operation will be run
  * @param run_operation_fn the function to be performed
  * @param expected_ret_code the expected return code from the operation
+ * @param op_name the name of the operation to be run in all repos
+ * @param op_steps the number of steps involved in the operation
  *
  * @returns a swupd_code
  */
-enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operation_fn_t run_operation_fn, enum swupd_code expected_ret_code);
+enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operation_fn_t run_operation_fn, enum swupd_code expected_ret_code, const char *op_name, int op_steps);
 
 /**
  * @brief Prints a header with the repository name, useful when showing info from multiple repos.

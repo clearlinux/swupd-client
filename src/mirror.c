@@ -349,14 +349,15 @@ enum swupd_code mirror_main(int argc, char **argv)
 {
 	int ret = SWUPD_OK;
 	enum swupd_code init_ret;
-	const int steps_in_mirror = 1;
-
+	const int steps_in_mirror = 0;
 	/* there is no need to report in progress for mirror at this time */
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
+
 	progress_init_steps("mirror", steps_in_mirror);
 
 	if (set) {

@@ -366,18 +366,20 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 enum swupd_code clean_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
-	const int steps_in_clean = 1;
+	const int steps_in_clean = 0;
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
 
 	ret = swupd_init(SWUPD_ALL);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
 		return ret;
 	}
+
 	progress_init_steps("clean", steps_in_clean);
 
 	/* NOTE: Delete specific file patterns to avoid disasters in case some paths are

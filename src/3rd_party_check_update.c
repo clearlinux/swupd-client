@@ -84,11 +84,10 @@ static enum swupd_code check_update_repo(UNUSED_PARAM char *unused)
 enum swupd_code third_party_check_update_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
-	const int steps_in_checkupdate = 1;
-
-	/* there is no need to report in progress for check-update at this time */
+	const int steps_in_checkupdate = 0;
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
@@ -97,10 +96,9 @@ enum swupd_code third_party_check_update_main(int argc, char **argv)
 	if (ret_code != SWUPD_OK) {
 		return ret_code;
 	}
-	progress_init_steps("3rd-party-check-update", steps_in_checkupdate);
 
 	/* run check-update */
-	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, check_update_repo, SWUPD_NO);
+	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, check_update_repo, SWUPD_NO, "check-update", steps_in_checkupdate);
 
 	swupd_deinit();
 	progress_finish_steps(ret_code);

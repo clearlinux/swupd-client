@@ -151,22 +151,8 @@ static bool parse_options(int argc, char **argv)
 
 enum swupd_code install_main(int argc, char **argv)
 {
-	int ret = SWUPD_OK;
-
-	/*
-	 * Steps for os-install:
-	 *
-	 *  1) load_manifests
-	 *  2) download_packs
-	 *  3) extract_packs
-	 *  4) check_files_hash
-	 *  5) validate_fullfiles
-	 *  6) download_fullfiles
-	 *  7) extract_fullfiles
-	 *  8) add_missing_files
-	 *  9) run_postupdate_scripts
-	 */
-	const int steps_in_os_install = 9;
+	enum swupd_code ret = SWUPD_OK;
+	int steps_in_os_install;
 
 	if (!parse_options(argc, argv)) {
 		print("\n");
@@ -175,7 +161,7 @@ enum swupd_code install_main(int argc, char **argv)
 	}
 
 	ret = swupd_init(SWUPD_ALL);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
 		return ret;
 	}
@@ -199,8 +185,26 @@ enum swupd_code install_main(int argc, char **argv)
 	verify_set_option_bundles(cmdline_bundles);
 	verify_set_option_version(cmdline_option_version);
 
-	/* install */
+	/*
+	 * Steps for os-install:
+	 *  1) load_manifests
+	 *  2) download_packs
+	 *  3) extract_packs
+	 *  4) check_files_hash
+	 *  5) validate_fullfiles
+	 *  6) download_fullfiles
+	 *  7) extract_fullfiles (with --download finishes here)
+	 *  8) add_missing_files
+	 *  9) run_postupdate_scripts
+	 */
+	if (cmdline_option_download) {
+		steps_in_os_install = 7;
+	} else {
+		steps_in_os_install = 9;
+	}
 	progress_init_steps("os-install", steps_in_os_install);
+
+	/* install */
 	ret = execute_verify();
 
 	swupd_deinit();

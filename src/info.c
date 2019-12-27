@@ -91,26 +91,26 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code info_main(int UNUSED_PARAM argc, char UNUSED_PARAM **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
-	const int steps_in_info = 1;
-
+	const int steps_in_info = 0;
 	/* there is no need to report in progress for init at this time */
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("info", steps_in_info);
 
 	ret = swupd_init(SWUPD_NO_ROOT);
 	if (ret != SWUPD_OK) {
-		goto finish;
+		return ret;
 	}
+
+	progress_init_steps("info", steps_in_info);
 
 	ret = print_update_conf_info();
 
 	swupd_deinit();
-
-finish:
 	progress_finish_steps(ret);
+
 	return ret;
 }

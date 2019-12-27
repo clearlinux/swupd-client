@@ -138,24 +138,10 @@ static enum swupd_code update_repos(UNUSED_PARAM char *unused)
 enum swupd_code third_party_update_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
-
-	/*
-	 * Steps for update:
-	 *
-	 *   1) load_manifests
-	 *   2) run_preupdate_scripts
-	 *   3) download_packs
-	 *   4) extract_packs
-	 *   5) prepare_for_update
-	 *   6) validate_fullfiles
-	 *   7) download_fullfiles
-	 *   8) extract_fullfiles
-	 *   9) update_files
-	 *  10) run_postupdate_scripts
-	 */
-	const int steps_in_update = 10;
+	int steps_in_update;
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
@@ -165,15 +151,36 @@ enum swupd_code third_party_update_main(int argc, char **argv)
 		error("Failed swupd initialization, exiting now\n");
 		return ret_code;
 	}
-	progress_init_steps("3rd-party-update", steps_in_update);
 
 	/* set the command options */
 	update_set_option_version(cmdline_option_version);
 	update_set_option_download_only(cmdline_option_download_only);
 	update_set_option_keepcache(cmdline_option_keepcache);
 
+	/*
+	 * Steps for update:
+	 *   1) load_manifests
+	 *   2) run_preupdate_scripts
+	 *   3) download_packs
+	 *   4) extract_packs
+	 *   5) prepare_for_update
+	 *   6) validate_fullfiles
+	 *   7) download_fullfiles
+	 *   8) extract_fullfiles (finishes here on --download)
+	 *   9) update_files
+	 *  10) run_postupdate_scripts
+	 *  11) update_search_index (only with --update-search-file-index)
+	 */
+	if (cmdline_option_status) {
+		steps_in_update = 0;
+	} else if (cmdline_option_download_only) {
+		steps_in_update = 8;
+	} else {
+		steps_in_update = 10;
+	}
+
 	/* update 3rd-party bundles */
-	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, update_repos, SWUPD_NO);
+	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, update_repos, SWUPD_NO, "update", steps_in_update);
 
 	swupd_deinit();
 	progress_finish_steps(ret_code);

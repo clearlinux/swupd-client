@@ -208,23 +208,8 @@ done:
 
 enum swupd_code repair_main(int argc, char **argv)
 {
-	int ret;
-
-	/*
-	 * Steps for repair:
-	 *
-	 *  1) load_manifests
-	 *  2) check_files_hash
-	 *  3) validate_fullfiles
-	 *  4) download_fullfiles
-	 *  5) extract_fullfiles
-	 *  6) add_missing_files
-	 *  7) fix_files
-	 *  8) remove_extraneous_files
-	 *  9) remove_extra_files
-	 */
-	const int steps_in_repair = 9;
-
+	enum swupd_code ret = SWUPD_OK;
+	int steps_in_repair;
 	string_or_die(&cmdline_option_picky_tree, "%s", picky_tree_default);
 
 	if (!parse_options(argc, argv)) {
@@ -234,7 +219,7 @@ enum swupd_code repair_main(int argc, char **argv)
 	}
 
 	ret = swupd_init(SWUPD_ALL);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
 		free_string(&cmdline_option_picky_tree);
 		return ret;
@@ -252,8 +237,31 @@ enum swupd_code repair_main(int argc, char **argv)
 	verify_set_extra_files_only(cmdline_option_extra_files_only);
 	verify_set_option_bundles(cmdline_bundles);
 
-	/* run verify --fix */
+	/*
+	 * Steps for repair:
+	 *  1) load_manifests (with --extra-files-only jumps to step 9)
+	 *  2) check_files_hash
+	 *  3) validate_fullfiles
+	 *  4) download_fullfiles
+	 *  5) extract_fullfiles
+	 *  6) add_missing_files (with --quick jumps to step 10)
+	 *  7) fix_files
+	 *  8) remove_extraneous_files
+	 *  9) remove_extra_files (only with --picky or with --extra-files-only)
+	 *  10) run_postupdate_scripts
+	 */
+	if (cmdline_option_extra_files_only) {
+		steps_in_repair = 3;
+	} else if (cmdline_option_quick) {
+		steps_in_repair = 7;
+	} else if (cmdline_option_picky) {
+		steps_in_repair = 10;
+	} else {
+		steps_in_repair = 9;
+	}
 	progress_init_steps("repair", steps_in_repair);
+
+	/* run verify --fix */
 	ret = execute_verify();
 
 	free_string(&cmdline_option_picky_tree);

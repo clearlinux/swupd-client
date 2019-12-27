@@ -263,6 +263,11 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 	progress_next_step("check_files_hash", PROGRESS_BAR);
 	print("\n");
 	if (check_files_hash(official_manifest->files)) {
+		/* we don't need to do these steps, we already have the files,
+		 * just complete the steps */
+		progress_next_step("validate_fullfiles", PROGRESS_BAR);
+		progress_next_step("download_fullfiles", PROGRESS_BAR);
+		progress_next_step("extract_fullfiles", PROGRESS_UNDEFINED);
 		return 0;
 	}
 
@@ -1321,20 +1326,12 @@ clean_args_and_exit:
 
 enum swupd_code verify_main(int argc, char **argv)
 {
-	int ret = SWUPD_OK;
-
-	verify_set_command_verify(true); // set to true so we know the "verify" command was used
-
-	/*
-	 * Steps for verify:
-	 *
-	 *  1) load_manifests
-	 *  2) add_missing_files
-	 *  3) fix_files
-	 *  4) remove_extraneous_files
-	 */
-	const int steps_in_verify = 4;
+	enum swupd_code ret = SWUPD_OK;
+	const int steps_in_verify = 12;
 	string_or_die(&cmdline_option_picky_tree, "/usr");
+
+	/* set option needed so we know the legacy "verify" command was used */
+	verify_set_command_verify(true);
 
 	if (!parse_options(argc, argv)) {
 		print("\n");
@@ -1343,14 +1340,34 @@ enum swupd_code verify_main(int argc, char **argv)
 	}
 
 	ret = swupd_init(SWUPD_ALL);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
 		free_string(&cmdline_option_picky_tree);
 		return ret;
 	}
 
-	/* diagnose */
+	/*
+	 * Steps for verify:
+	 *  1) load_manifests
+	 *  2) download_packs
+	 *  3) extract_packs
+	 *  4) check_files_hash
+	 *  5) validate_fullfiles
+	 *  6) download_fullfiles
+	 *  7) extract_fullfiles
+	 *  8) add_missing_files
+	 *  9) fix_files
+	 *  10) remove_extraneous_files
+	 *  11) remove_extra_files
+	 *  12) run_postupdate_scripts
+	 *
+	 *  TODO(castulo): steps in verify have to many variables so it is
+	 *  being left as constant for know, this should not be much of a
+	 *  problem since it is a superseded command.
+	 */
 	progress_init_steps("verify", steps_in_verify);
+
+	/* diagnose */
 	ret = execute_verify();
 
 	free_string(&cmdline_option_picky_tree);
@@ -1367,16 +1384,7 @@ enum swupd_code verify_main(int argc, char **argv)
 enum swupd_code diagnose_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
-
-	/*
-	 * Steps for diagnose:
-	 *
-	 *  1) load_manifests
-	 *  2) add_missing_files
-	 *  3) fix_files
-	 *  4) remove_extraneous_files
-	 */
-	const int steps_in_diagnose = 4;
+	int steps_in_diagnose;
 	string_or_die(&cmdline_option_picky_tree, "/usr");
 
 	if (!parse_options(argc, argv)) {
@@ -1386,14 +1394,30 @@ enum swupd_code diagnose_main(int argc, char **argv)
 	}
 
 	ret = swupd_init(SWUPD_ALL);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
 		free_string(&cmdline_option_picky_tree);
 		return ret;
 	}
 
-	/* diagnose */
+	/*
+	 * Steps for diagnose:
+	 *  1) load_manifests (with --extra-files-only jumps to step 5)
+	 *  2) add_missing_files (finishes here on --quick)
+	 *  3) fix_files
+	 *  4) remove_extraneous_files
+	 *  5) remove_extra_files (only with --picky or with --extra-files-only)
+	 */
+	if (cmdline_option_extra_files_only || cmdline_option_quick) {
+		steps_in_diagnose = 2;
+	} else if (cmdline_option_picky) {
+		steps_in_diagnose = 5;
+	} else {
+		steps_in_diagnose = 4;
+	}
 	progress_init_steps("diagnose", steps_in_diagnose);
+
+	/* diagnose */
 	ret = execute_verify();
 
 	free_string(&cmdline_option_picky_tree);

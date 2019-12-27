@@ -88,8 +88,8 @@ static int remove_repo(const char *repo_name)
 
 enum swupd_code third_party_add_main(int argc, char **argv)
 {
-
 	enum swupd_code ret_code = SWUPD_OK;
+	const int step_in_third_party_add = 9;
 	const char *name, *url;
 	struct list *repos = NULL;
 	struct repo *repo = NULL;
@@ -99,20 +99,24 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	int repo_version;
 	int ret;
 	const bool DONT_VERIFY_CERTIFICATE = false;
-	/* total steps for adding a 3rd-party repo are 8:
-	 * one for adding the repo, plus 7 steps for adding bundle os-core */
-	const int step_in_third_party_add = 8;
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("third-party-add", step_in_third_party_add);
 
 	ret_code = swupd_init(SWUPD_ALL);
 	if (ret_code != SWUPD_OK) {
-		goto finish;
+		return ret_code;
 	}
+
+	/*
+	 * Steps for repo add:
+	 *  1) add_repo,
+	 *  2-9) 8 steps for adding bundle os-core
+	 */
+	progress_init_steps("third-party-add", step_in_third_party_add);
 
 	name = argv[argc - 2];
 	url = argv[argc - 1];

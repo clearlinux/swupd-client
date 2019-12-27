@@ -523,24 +523,27 @@ version_check:
 	timelist_timer_stop(globals.global_times); // closing: Update loop
 
 	/* Run any scripts that are needed to complete update */
-	timelist_timer_start(globals.global_times, "Run post-update scripts");
-	progress_next_step("run_postupdate_scripts", PROGRESS_UNDEFINED);
+	if (!download_only) {
+		timelist_timer_start(globals.global_times, "Run post-update scripts");
+		progress_next_step("run_postupdate_scripts", PROGRESS_UNDEFINED);
 
-	/* Determine if another update is needed so the scripts block */
-	int new_current_version = get_current_version(globals.path_prefix);
-	if (on_new_format() && (requested_version == -1 || (requested_version > new_current_version))) {
-		re_update = true;
+		/* Determine if another update is needed so the scripts block */
+		int new_current_version = get_current_version(globals.path_prefix);
+		if (on_new_format() && (requested_version == -1 || (requested_version > new_current_version))) {
+			re_update = true;
+		}
+		scripts_run_post_update(re_update || globals.wait_for_scripts);
+		timelist_timer_stop(globals.global_times); // closing: Run post-update scripts
 	}
-	scripts_run_post_update(re_update || globals.wait_for_scripts);
 
 	/* Downloading all manifests to be used as search-file index */
 	if (update_search_file_index) {
+		timelist_timer_start(globals.global_times, "Updating search file index");
 		progress_next_step("update_search_index", PROGRESS_BAR);
-		info("Downloading all Clear Linux manifests\n");
+		info("Downloading all Clear Linux manifests...\n");
 		mom_get_manifests_list(server_manifest, NULL, NULL);
+		timelist_timer_stop(globals.global_times); // closing: Updating search file index
 	}
-
-	timelist_timer_stop(globals.global_times); // closing: Run post-update scripts
 
 	/* Create the state file that will tell swupd it's on a mix on future runs */
 	if (mix_exists && !system_on_mix()) {
@@ -732,11 +735,26 @@ static bool parse_options(int argc, char **argv)
 
 enum swupd_code update_main(int argc, char **argv)
 {
-	int ret = SWUPD_OK;
+	enum swupd_code ret = SWUPD_OK;
+	int steps_in_update;
+
+	if (!parse_options(argc, argv)) {
+		print("\n");
+		print_help();
+		return SWUPD_INVALID_OPTION;
+	}
+
+	ret = swupd_init(SWUPD_ALL);
+	if (ret != SWUPD_OK) {
+		error("Failed swupd initialization, exiting now\n");
+		return ret;
+	}
+
+	/* Update should always ignore optional bundles */
+	globals.skip_optional_bundles = true;
 
 	/*
 	 * Steps for update:
-	 *
 	 *   1) load_manifests
 	 *   2) run_preupdate_scripts
 	 *   3) download_packs
@@ -744,30 +762,22 @@ enum swupd_code update_main(int argc, char **argv)
 	 *   5) prepare_for_update
 	 *   6) validate_fullfiles
 	 *   7) download_fullfiles
-	 *   8) extract_fullfiles
+	 *   8) extract_fullfiles (finishes here on --download)
 	 *   9) update_files
 	 *  10) run_postupdate_scripts
+	 *  11) update_search_index (only with --update-search-file-index)
 	 */
-	int steps_in_update = 10;
-
-	if (!parse_options(argc, argv)) {
-		print_help();
-		return SWUPD_INVALID_OPTION;
+	if (cmd_line_status) {
+		steps_in_update = 0;
+	} else if (download_only) {
+		steps_in_update = 8;
+	} else {
+		steps_in_update = 10;
 	}
-
 	if (update_search_file_index) {
 		steps_in_update++;
 	}
-
-	/* Update should always ignore optional bundles */
-	globals.skip_optional_bundles = true;
 	progress_init_steps("update", steps_in_update);
-
-	ret = swupd_init(SWUPD_ALL);
-	if (ret != 0) {
-		error("Updater failed to initialize, exiting now\n");
-		return ret;
-	}
 
 	if (cmd_line_status) {
 		ret = check_update();
@@ -776,7 +786,7 @@ enum swupd_code update_main(int argc, char **argv)
 	}
 
 	swupd_deinit();
-
 	progress_finish_steps(ret);
+
 	return ret;
 }

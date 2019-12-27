@@ -464,7 +464,7 @@ clean_and_exit:
 	return ret_code;
 }
 
-enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operation_fn_t run_operation_fn, enum swupd_code expected_ret_code)
+enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operation_fn_t run_operation_fn, enum swupd_code expected_ret_code, const char *op_name, int op_steps)
 {
 	enum swupd_code ret_code = SWUPD_OK;
 	enum swupd_code ret;
@@ -473,6 +473,10 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operat
 	struct repo *selected_repo = NULL;
 	char *state_dir;
 	char *path_prefix;
+	char *steps_title = NULL;
+	int total_steps;
+
+	string_or_die(&steps_title, "3rd-party-%s", op_name);
 
 	/* load the existing 3rd-party repos from the repo.ini config file */
 	repos = third_party_get_repos();
@@ -480,6 +484,10 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operat
 	/* backup the original state_dir and path_prefix values */
 	state_dir = strdup_or_die(globals.state_dir);
 	path_prefix = strdup_or_die(globals.path_prefix);
+
+	/* initialize operation steps so progress can be reported */
+	total_steps = repo ? op_steps : op_steps * list_len(repos);
+	progress_init_steps(steps_title, total_steps);
 
 	/* if the repo to be used was specified, use it,
 	 * otherwise perform operation in all 3rd-party repos */
@@ -528,6 +536,7 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operat
 	/* free data */
 clean_and_exit:
 	list_free_list_and_data(repos, repo_free_data);
+	free_string(&steps_title);
 	free_string(&path_prefix);
 	free_string(&state_dir);
 

@@ -30,7 +30,6 @@ test_setup() {
 		    deleted files     : 0
 		Validate downloaded files
 		No extra files need to be downloaded
-		Calling post-update helper scripts
 	EOM
 	)
 	assert_is_output "$expected_output"

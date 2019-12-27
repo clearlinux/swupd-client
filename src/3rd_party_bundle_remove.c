@@ -108,19 +108,12 @@ static enum swupd_code remove_bundle(char *bundle)
 
 enum swupd_code third_party_bundle_remove_main(int argc, char **argv)
 {
-	struct list *bundles = NULL;
 	enum swupd_code ret_code = SWUPD_OK;
-
-	/*
-	 * Steps for bundle-remove:
-	 *
-	 *  1) load_manifests
-	 *  2) remove_files
-	 */
-
 	const int steps_in_bundle_remove = 2;
+	struct list *bundles = NULL;
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
@@ -131,7 +124,6 @@ enum swupd_code third_party_bundle_remove_main(int argc, char **argv)
 		error("Failed swupd initialization, exiting now\n");
 		return ret_code;
 	}
-	progress_init_steps("3rd-party-bundle-remove", steps_in_bundle_remove);
 
 	/* move the bundles provided in the command line into a
 	 * list so it is easier to handle them */
@@ -144,6 +136,13 @@ enum swupd_code third_party_bundle_remove_main(int argc, char **argv)
 	/* set the command options */
 	bundle_remove_set_option_force(cmdline_option_force);
 	bundle_remove_set_option_recursive(cmdline_option_recursive);
+
+	/*
+	 * Steps for bundle-remove:
+	 *  1) load_manifests
+	 *  2) remove_files
+	 */
+	progress_init_steps("3rd-party-bundle-remove", steps_in_bundle_remove);
 
 	/* try removing bundles one by one */
 	ret_code = third_party_run_operation(bundles, cmdline_option_repo, remove_bundle);

@@ -433,32 +433,33 @@ enum swupd_code list_bundles(void)
 
 enum swupd_code bundle_list_main(int argc, char **argv)
 {
-	enum swupd_code ret;
-	const int steps_in_bundlelist = 1;
-
+	enum swupd_code ret = SWUPD_OK;
+	const int steps_in_bundlelist = 0;
 	/* there is no need to report in progress for bundle-list at this time */
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("bundle-list", steps_in_bundlelist);
 
 	if (cmdline_local && !is_root()) {
 		ret = swupd_init(SWUPD_NO_ROOT);
 	} else {
 		ret = swupd_init(SWUPD_ALL);
 	}
-
 	if (ret != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
 		progress_finish_steps(ret);
 		return ret;
 	}
 
+	progress_init_steps("bundle-list", steps_in_bundlelist);
+
 	ret = list_bundles();
 
 	swupd_deinit();
 	progress_finish_steps(ret);
+
 	return ret;
 }

@@ -202,20 +202,11 @@ static enum swupd_code diagnose_repos(UNUSED_PARAM char *unused)
 enum swupd_code third_party_diagnose_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
-
-	/*
-	 * Steps for diagnose:
-	 *
-	 *  1) load_manifests
-	 *  2) add_missing_files
-	 *  3) fix_files
-	 *  4) remove_extraneous_files
-	 */
-	const int steps_in_diagnose = 4;
-
+	int steps_in_diagnose;
 	string_or_die(&cmdline_option_picky_tree, "/usr");
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
@@ -226,7 +217,6 @@ enum swupd_code third_party_diagnose_main(int argc, char **argv)
 		free_string(&cmdline_option_picky_tree);
 		return ret_code;
 	}
-	progress_init_steps("3rd-party-diagnose", steps_in_diagnose);
 
 	/* set the command options */
 	verify_set_option_force(cmdline_option_force);
@@ -237,8 +227,24 @@ enum swupd_code third_party_diagnose_main(int argc, char **argv)
 	verify_set_picky_tree(cmdline_option_picky_tree);
 	verify_set_extra_files_only(cmdline_option_extra_files_only);
 
+	/*
+	 * Steps for diagnose:
+	 *  1) load_manifests (with --extra-files-only jumps to step 5)
+	 *  2) add_missing_files (finishes here on --quick)
+	 *  3) fix_files
+	 *  4) remove_extraneous_files
+	 *  5) remove_extra_files (only with --picky or with --extra-files-only)
+	 */
+	if (cmdline_option_extra_files_only || cmdline_option_quick) {
+		steps_in_diagnose = 2;
+	} else if (cmdline_option_picky) {
+		steps_in_diagnose = 5;
+	} else {
+		steps_in_diagnose = 4;
+	}
+
 	/* diagnose 3rd-party bundles */
-	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, diagnose_repos, SWUPD_OK);
+	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, diagnose_repos, SWUPD_OK, "diagnose", steps_in_diagnose);
 
 	free_string(&cmdline_option_picky_tree);
 	if (picky_whitelist) {

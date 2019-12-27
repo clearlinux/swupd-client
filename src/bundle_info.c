@@ -450,28 +450,27 @@ clean:
 
 enum swupd_code bundle_info_main(int argc, char **argv)
 {
-	int ret;
-	const int steps_in_bundleinfo = 1;
-
+	enum swupd_code ret = SWUPD_OK;
+	const int steps_in_bundleinfo = 0;
 	/* there is no need to report in progress for bundle-info at this time */
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("bundle-info", steps_in_bundleinfo);
 
 	ret = swupd_init(SWUPD_ALL);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
-		goto exit;
+		return ret;
 	}
+
+	progress_init_steps("bundle-info", steps_in_bundleinfo);
 
 	ret = bundle_info(bundle);
 
 	swupd_deinit();
-
-exit:
 	progress_finish_steps(ret);
 
 	return ret;

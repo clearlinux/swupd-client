@@ -118,13 +118,12 @@ static bool parse_options(int argc, char **argv)
 
 enum swupd_code third_party_bundle_info_main(int argc, char **argv)
 {
-	struct list *bundles = NULL;
 	enum swupd_code ret_code = SWUPD_OK;
-	const int steps_in_bundleinfo = 1;
-
-	/* there is no need to report in progress for bundle-info at this time */
+	const int steps_in_bundleinfo = 0;
+	struct list *bundles = NULL;
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
@@ -134,12 +133,13 @@ enum swupd_code third_party_bundle_info_main(int argc, char **argv)
 		error("Failed swupd initialization, exiting now\n");
 		return ret_code;
 	}
-	progress_init_steps("3rd-party-bundle-info", steps_in_bundleinfo);
 
 	/* set the command options */
 	bundle_info_set_option_version(cmdline_option_version);
 	bundle_info_set_option_dependencies(cmdline_option_dependencies);
 	bundle_info_set_option_files(cmdline_option_files);
+
+	progress_init_steps("3rd-party-bundle-info", steps_in_bundleinfo);
 
 	bundles = list_append_data(bundles, cmdline_option_bundle);
 	ret_code = third_party_run_operation(bundles, cmdline_option_repo, bundle_info);

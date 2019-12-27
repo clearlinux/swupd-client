@@ -296,7 +296,9 @@ static enum swupd_code download_content(struct manifest *mom, struct list *to_in
 		/* the progress would be completed within the
 		 * download_subscribed_packs function, since we
 		 * didn't run it, manually mark the step as completed */
+		progress_next_step("download_packs", PROGRESS_BAR);
 		info("No packs need to be downloaded\n");
+		progress_next_step("extract_packs", PROGRESS_UNDEFINED);
 	}
 	timelist_timer_stop(globals.global_times); // closing: Download packs
 
@@ -343,6 +345,7 @@ enum swupd_code bundle_add(struct list *bundles_list, int version)
 	/* get the current Mom */
 	timelist_timer_start(globals.global_times, "Load MoM");
 	mix_exists = (check_mix_exists() & system_on_mix());
+	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	mom = load_mom(version, mix_exists, NULL);
 	if (!mom) {
 		error("Cannot load official manifest MoM for version %i\n", version);
@@ -356,7 +359,6 @@ enum swupd_code bundle_add(struct list *bundles_list, int version)
 	timelist_timer_start(globals.global_times, "Add bundles and recurse");
 	/* get a list of bundles already installed in the system */
 	info("Loading required manifests...\n");
-	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	ret = mom_get_manifests_list(mom, &installed_bundles, is_installed_bundle_data);
 	if (ret) {
 		ret = SWUPD_COULDNT_LOAD_MANIFEST;
@@ -475,32 +477,19 @@ enum swupd_code execute_bundle_add(struct list *bundles_list)
 
 enum swupd_code bundle_add_main(int argc, char **argv)
 {
-	struct list *bundles_list = NULL;
-	int ret;
-
-	/*
-	 * Steps for bundle-add:
-	 *
-	 *  1) load_manifests
-	 *  2) download_packs
-	 *  3) extract_packs
-	 *  4) validate_fullfiles
-	 *  5) download_fullfiles
-	 *  6) extract_fullfiles
-	 *  7) install_files
-	 *  8) run_postupdate_scripts
-	 */
+	enum swupd_code ret = SWUPD_OK;
 	const int steps_in_bundleadd = 8;
+	struct list *bundles_list = NULL;
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("bundle-add", steps_in_bundleadd);
 
 	/* initialize swupd */
 	ret = swupd_init(SWUPD_ALL);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
 		return ret;
 	}
@@ -513,11 +502,24 @@ enum swupd_code bundle_add_main(int argc, char **argv)
 	}
 	bundles_list = list_head(bundles_list);
 
+	/*
+	 * Steps for bundle-add:
+	 *  1) load_manifests
+	 *  2) download_packs
+	 *  3) extract_packs
+	 *  4) validate_fullfiles
+	 *  5) download_fullfiles
+	 *  6) extract_fullfiles
+	 *  7) install_files
+	 *  8) run_postupdate_scripts
+	 */
+	progress_init_steps("bundle-add", steps_in_bundleadd);
+
 	ret = execute_bundle_add(bundles_list);
 
 	list_free_list(bundles_list);
-	progress_finish_steps(ret);
 	swupd_deinit();
+	progress_finish_steps(ret);
 
 	return ret;
 }

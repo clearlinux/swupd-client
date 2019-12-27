@@ -68,20 +68,22 @@ static bool parse_options(int argc, char **argv)
 enum swupd_code third_party_remove_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
+	const int step_in_third_party_remove = 0;
 	int err;
 	char *name = NULL;
-	const int step_in_third_party_remove = 1;
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("third-party-remove", step_in_third_party_remove);
 
 	ret = swupd_init(SWUPD_NO_ROOT);
 	if (ret != SWUPD_OK) {
-		goto exit;
+		return ret;
 	}
+
+	progress_init_steps("third-party-remove", step_in_third_party_remove);
 
 	/* The last argument has to be the repo-name to be deleted */
 	name = argv[argc - 1];
@@ -108,6 +110,7 @@ exit:
 	}
 	swupd_deinit();
 	progress_finish_steps(ret);
+
 	return ret;
 }
 

@@ -154,25 +154,27 @@ static bool parse_options(int argc, char **argv)
 /* return 0 if update available, non-zero if not */
 enum swupd_code check_update_main(int argc, char **argv)
 {
-	int ret;
-	const int steps_in_checkupdate = 1;
-
+	enum swupd_code ret = SWUPD_OK;
+	const int steps_in_checkupdate = 0;
 	/* there is no need to report in progress for check-update at this time */
 
 	if (!parse_options(argc, argv)) {
+		print("\n");
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
-	progress_init_steps("check-update", steps_in_checkupdate);
 
 	ret = swupd_init(SWUPD_NO_ROOT);
-	if (ret != 0) {
+	if (ret != SWUPD_OK) {
 		return ret;
 	}
 
-	ret = check_update();
-	swupd_deinit();
+	progress_init_steps("check-update", steps_in_checkupdate);
 
+	ret = check_update();
+
+	swupd_deinit();
 	progress_finish_steps(ret);
+
 	return ret;
 }

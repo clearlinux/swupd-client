@@ -129,6 +129,7 @@ static bool parse_options(int argc, char **argv)
 static void print_bundle_dependencies(struct manifest *manifest, struct list *indirect_includes)
 {
 	struct list *iter;
+	struct sub *sub;
 	char *dep;
 
 	/* print direct includes/also-add first */
@@ -144,14 +145,14 @@ static void print_bundle_dependencies(struct manifest *manifest, struct list *in
 			/* optional dependencies can be installed or not, so we
 			 * can also provide this info to the user, this only make
 			 * sense if the requested bundle is also installed */
+			info(" - ");
+			print("%s", dep);
 			if (is_installed_bundle(manifest->component)) {
-				info(" - ");
-				print("%s", dep);
 				info(" (optional, %s)", is_installed_bundle(dep) ? "installed" : "not installed");
-				print("\n");
 			} else {
-				print(" - %s (optional)\n", dep);
+				info(" (optional)");
 			}
+			print("\n");
 		}
 	}
 
@@ -159,9 +160,17 @@ static void print_bundle_dependencies(struct manifest *manifest, struct list *in
 	if (indirect_includes) {
 		info("\nIndirect dependencies (%d):\n", list_len(indirect_includes));
 		for (iter = list_head(indirect_includes); iter; iter = iter->next) {
-			dep = iter->data;
+			sub = iter->data;
 			info(" - ");
-			print("%s\n", dep);
+			print("%s", sub->component);
+			if (sub->is_optional) {
+				if (is_installed_bundle(manifest->component)) {
+					info(" (optional, %s)", is_installed_bundle(sub->component) ? "installed" : "not installed");
+				} else {
+					info(" (optional)");
+				}
+			}
+			print("\n");
 		}
 	}
 }
@@ -264,17 +273,17 @@ static enum swupd_code get_bundle_dependencies(struct manifest *manifest, struct
 		if (strcmp(included_bundle, bundle) == 0) {
 			continue;
 		}
-		*indirect_includes = list_append_data(*indirect_includes, included_bundle);
+		*indirect_includes = list_append_data(*indirect_includes, sub);
 	}
 
 	/* from the list of dependencies, remove those that were
 	 * directly pulled by the bundle so we are left only with the ones
 	 * indirectly pulled */
-	*indirect_includes = list_sort(*indirect_includes, strcmp_wrapper);
+	*indirect_includes = list_sort(*indirect_includes, subscription_sort_component);
 	manifest->includes = list_sort(manifest->includes, strcmp_wrapper);
 	manifest->optional = list_sort(manifest->optional, strcmp_wrapper);
-	*indirect_includes = list_sorted_filter_common_elements(*indirect_includes, manifest->includes, strcmp_wrapper, NULL);
-	*indirect_includes = list_sorted_filter_common_elements(*indirect_includes, manifest->optional, strcmp_wrapper, NULL);
+	*indirect_includes = list_sorted_filter_common_elements(*indirect_includes, manifest->includes, subscription_bundlename_strcmp, NULL);
+	*indirect_includes = list_sorted_filter_common_elements(*indirect_includes, manifest->optional, subscription_bundlename_strcmp, NULL);
 
 	return SWUPD_OK;
 }

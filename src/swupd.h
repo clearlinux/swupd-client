@@ -82,6 +82,10 @@ struct sub {
 
 	/* oldversion: set to 0 by calloc(), possibly overridden by MoM read */
 	int oldversion;
+
+	/* is_optional: true if the subscription referred to by this struct is optional,
+	 * false otherwise */
+	bool is_optional;
 };
 
 enum swupd_init_config {
@@ -322,6 +326,7 @@ extern void create_and_append_subscription(struct list **subs, const char *compo
 extern char *get_tracking_dir(void);
 extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
 extern int subscription_bundlename_strcmp(const void *a, const void *b);
+extern int subscription_sort_component(const void *a, const void *b);
 
 /* bundle_add.c */
 extern enum swupd_code execute_bundle_add(struct list *bundles_list);

@@ -28,9 +28,9 @@ test_setup() {
 		Installing OS version 10 (latest)
 		Downloading missing manifests...
 		Downloading packs for:
+		 - test-bundle1
 		 - test-bundle3
 		 - test-bundle2
-		 - test-bundle1
 		 - os-core
 		Finishing packs extraction...
 		Checking for corrupt files

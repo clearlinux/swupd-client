@@ -58,7 +58,7 @@ int subscription_bundlename_strcmp(const void *a, const void *b)
 	return strcmp(((struct sub *)a)->component, (const char *)b);
 }
 
-static int subscription_sort_component(const void *a, const void *b)
+int subscription_sort_component(const void *a, const void *b)
 {
 	struct sub *A, *B;
 	int ret;
@@ -115,6 +115,25 @@ void read_subscriptions(struct list **subs)
 	*subs = list_sort(*subs, subscription_sort_component);
 }
 
+static bool set_subscription_obligation(struct list *subs, char *component, bool is_optional)
+{
+	struct list *list;
+	struct sub *sub;
+
+	list = list_head(subs);
+	while (list) {
+		sub = list->data;
+		list = list->next;
+
+		if (strcmp(sub->component, component) == 0) {
+			sub->is_optional = is_optional;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool component_subscribed(struct list *subs, char *component)
 {
 	struct list *list;
@@ -163,7 +182,7 @@ void set_subscription_versions(struct manifest *latest, struct manifest *current
 	}
 }
 
-void create_and_append_subscription(struct list **subs, const char *component)
+static void create_new_subscription(struct list **subs, const char *component, bool is_optional)
 {
 	struct sub *sub;
 
@@ -174,7 +193,13 @@ void create_and_append_subscription(struct list **subs, const char *component)
 
 	sub->version = 0;
 	sub->oldversion = 0;
+	sub->is_optional = is_optional;
 	*subs = list_prepend_data(*subs, sub);
+}
+
+void create_and_append_subscription(struct list **subs, const char *component)
+{
+	create_new_subscription(subs, component, false);
 }
 
 /* bitmapped return
@@ -190,6 +215,8 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 	struct file *file;
 	struct list *iter;
 	struct manifest *manifest;
+	static bool is_optional = false;
+	static bool force_optional = false;
 
 	iter = list_head(bundles);
 	while (iter) {
@@ -222,25 +249,34 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 		 * We can't do this for the toplevel of the recursion because
 		 * that is how we initiallly fill in the include tree.
 		 */
-		if (component_subscribed(*subs, bundle)) {
+		if (set_subscription_obligation(*subs, bundle, force_optional | is_optional)) {
 			if (recursion > 0) {
 				manifest_free(manifest);
 				continue;
 			}
 		} else {
 			// Just add it to a list if it doesn't exist
-			create_and_append_subscription(subs, bundle);
+			create_new_subscription(subs, bundle, force_optional | is_optional);
 			ret |= add_sub_NEW; /* We have added at least one */
+		}
+
+		if (!globals.skip_optional_bundles && manifest->optional) {
+			/* merge in recursive call results, all bundles added via an optional
+			 * include should be subscribed as optional */
+			if (recursion == 0) {
+				force_optional = true;
+			}
+			is_optional = true;
+			ret |= add_subscriptions(manifest->optional, subs, mom, find_all, recursion + 1);
 		}
 
 		if (manifest->includes) {
 			/* merge in recursive call results */
+			if (recursion == 0) {
+				force_optional = false;
+			}
+			is_optional = false;
 			ret |= add_subscriptions(manifest->includes, subs, mom, find_all, recursion + 1);
-		}
-
-		if (!globals.skip_optional_bundles && manifest->optional) {
-			/* merge in recursive call results */
-			ret |= add_subscriptions(manifest->optional, subs, mom, find_all, recursion + 1);
 		}
 
 		manifest_free(manifest);

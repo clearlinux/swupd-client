@@ -35,10 +35,9 @@ const char *set_url = NULL;
 
 static void print_help(void)
 {
+	print("Configures a mirror URL for swupd to use instead of the defaults on the system\n\n");
 	print("Usage:\n");
 	print("   swupd mirror [OPTION...]\n\n");
-
-	//TODO: Add documentation explaining this command
 
 	global_print_help();
 

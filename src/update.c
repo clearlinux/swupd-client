@@ -648,6 +648,7 @@ static const struct option prog_opts[] = {
 
 static void print_help(void)
 {
+	print("Performs a system software update\n\n");
 	print("Usage:\n");
 	print("   swupd update [OPTION...]\n\n");
 

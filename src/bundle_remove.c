@@ -51,6 +51,7 @@ void bundle_remove_set_option_recursive(bool opt)
 
 static void print_help(void)
 {
+	print("Removes software bundles\n\n");
 	print("Usage:\n");
 	print("   swupd bundle-remove [OPTION...] [bundle1 bundle2 (...)]\n\n");
 

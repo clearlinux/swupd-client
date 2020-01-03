@@ -50,6 +50,7 @@ void bundle_info_set_option_files(bool opt)
 
 static void print_help(void)
 {
+	print("Displays detailed information about a bundle\n\n");
 	print("Usage:\n");
 	print("   swupd bundle-info [OPTIONS...] BUNDLE\n\n");
 

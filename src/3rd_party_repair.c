@@ -42,6 +42,7 @@ static regex_t *picky_whitelist;
 
 static void print_help(void)
 {
+	print("Corrects any issues found with the current content installed from 3rd-party repositories\n\n");
 	print("Usage:\n");
 	print("   swupd 3rd-party repair [OPTION...]\n\n");
 

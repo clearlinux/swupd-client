@@ -32,6 +32,7 @@ static char *cmdline_repo = NULL;
 
 static void print_help(void)
 {
+	print("Installs new software bundles from 3rd-party repositories\n\n");
 	print("Usage:\n");
 	print("   swupd 3rd-party bundle-add [OPTION...] [bundle1 bundle2 (...)]\n\n");
 

@@ -35,6 +35,7 @@ static char *cmdline_option_bundle = NULL;
 
 static void print_help(void)
 {
+	print("Displays detailed information about a bundle from a 3rd-party repository\n\n");
 	print("Usage:\n");
 	print("   swupd 3rd-party bundle-info [OPTIONS...] BUNDLE\n\n");
 

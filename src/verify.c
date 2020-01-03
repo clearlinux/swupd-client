@@ -154,9 +154,12 @@ void verify_set_extra_files_only(bool opt)
 
 static void print_help(void)
 {
+	print("Performs a system software installation verification\n\n");
 	print("Usage:\n");
 	if (cmdline_command_verify) {
 		print("   swupd verify [OPTION...]\n\n");
+		print("Warning: The \"swupd verify\" command has been superseded\n");
+		print("Please consider using \"swupd diagnose\", \"swupd repair\" or \"swupd os-install\" instead\n\n");
 	} else {
 		print("   swupd diagnose [OPTION...]\n\n");
 	}

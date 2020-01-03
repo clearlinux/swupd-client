@@ -34,6 +34,7 @@ static char *cmdline_option_repo = NULL;
 
 static void print_help(void)
 {
+	print("Performs a system software update for content installed from 3rd-party repositories\n\n");
 	print("Usage:\n");
 	print("   swupd 3rd-party update [OPTION...]\n\n");
 

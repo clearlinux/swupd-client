@@ -46,6 +46,7 @@ static struct option opts[] = {
 
 static void usage(const char *name)
 {
+	print("Calculates and print the Manifest hash for a specific file on disk\n\n");
 	print("Usage:\n");
 	print("   swupd %s [OPTION...] filename\n\n", sys_basename(name));
 	print("Help Options:\n");

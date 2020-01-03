@@ -25,6 +25,9 @@
 
 static void print_help(void)
 {
+	/* TODO(castulo): we need to change this description to match that of the
+	 * documentation once the documentation for this content is added */
+	print("Lists the 3rd-party repositories defined in the system\n\n");
 	print("Usage:\n");
 	print("   swupd 3rd-party list\n\n");
 

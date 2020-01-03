@@ -30,6 +30,7 @@
 
 static void print_help(void)
 {
+	print("Enables or disables automatic updates, or reports current status\n\n");
 	print("Usage:\n");
 	print("   swupd autoupdate [OPTION...]\n\n");
 

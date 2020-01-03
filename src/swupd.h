@@ -311,6 +311,7 @@ extern int link_or_copy(const char *orig, const char *dest);
 extern int link_or_copy_all(const char *orig, const char *dest);
 extern int remove_files_from_fs(struct list *files);
 extern void print_pattern(const char *pattern, int times);
+extern void print_header(const char *header);
 extern void prettify_size(long size_in_bytes, char **pretty_size);
 extern int link_or_rename(const char *orig, const char *dest);
 extern int create_state_dirs(const char *state_dir_path);

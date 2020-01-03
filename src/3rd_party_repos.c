@@ -546,14 +546,9 @@ clean_and_exit:
 void third_party_repo_header(const char *repo_name)
 {
 	char *header = NULL;
-	int header_length;
 
 	string_or_die(&header, " 3rd-Party Repo: %s", repo_name);
-	header_length = strlen(header);
-	print_pattern("_", header_length + 1);
-	info("%s\n", header);
-	print_pattern("_", header_length + 1);
-	info("\n");
+	print_header(header);
 	free_string(&header);
 }
 

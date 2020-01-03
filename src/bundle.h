@@ -32,8 +32,15 @@ bool is_tracked_bundle(const char *bundle_name);
  * @brief Create a list of bundles required by bundle_name.
  * TODO: Make this function more generic. Right now it's too specific for
  * bundle-list and bundle-remove use cases.
+ * @param reqd_by A list where the bundles found will be stored
+ * @param bundle_name The bundle we are looking for
+ * @param mom The MoM
+ * @param recursion A control variable used to sense what level of recursion the function is
+ * @param exlusions A list of bundles that should not be considered when finding dependencies
+ * @param msg The message to be printed if dependencies are found
+ * @param include_optional A flag to indicate if we want to include optional dependencies in the list
  */
-int required_by(struct list **reqd_by, const char *bundle_name, struct manifest *mom, int recursion, struct list *exclusions, char *msg);
+int required_by(struct list **reqd_by, const char *bundle_name, struct manifest *mom, int recursion, struct list *exclusions, char *msg, bool include_optional);
 
 /**
  * @brief Creates a tracking file in the tracking directory within the

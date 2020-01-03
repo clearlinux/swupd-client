@@ -345,6 +345,7 @@ static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server,
 	struct list *subs = NULL;
 	struct list *reqd_by = NULL;
 	int number_of_reqd = 0;
+	const bool INCLUDE_OPTIONAL_DEPS = true;
 
 	if (!server && !is_installed_bundle(bundle_name)) {
 		info("Bundle \"%s\" does not seem to be installed\n", bundle_name);
@@ -393,7 +394,7 @@ static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server,
 
 	char *msg;
 	string_or_die(&msg, "\n%s bundles that have %s as a dependency:\n", server ? "All" : "Installed", bundle_name);
-	number_of_reqd = required_by(&reqd_by, bundle_name, current_manifest, 0, NULL, msg);
+	number_of_reqd = required_by(&reqd_by, bundle_name, current_manifest, 0, NULL, msg, INCLUDE_OPTIONAL_DEPS);
 	free_string(&msg);
 	if (reqd_by == NULL) {
 		info("\nNo bundles have %s as a dependency\n", bundle_name);

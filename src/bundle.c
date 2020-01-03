@@ -62,8 +62,9 @@ bool is_tracked_bundle(const char *bundle_name)
 
 	return ret;
 }
+
 /* Return list of bundles that include bundle_name */
-int required_by(struct list **reqd_by, const char *bundle_name, struct manifest *mom, int recursion, struct list *exclusions, char *msg)
+int required_by(struct list **reqd_by, const char *bundle_name, struct manifest *mom, int recursion, struct list *exclusions, char *msg, bool include_optional)
 {
 	struct list *b, *i;
 	char *name;
@@ -134,7 +135,49 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 				}
 
 				/* let's see what bundles list this new bundle as a dependency */
-				required_by(reqd_by, bundle->component, mom, recursion, exclusions, msg);
+				required_by(reqd_by, bundle->component, mom, recursion, exclusions, msg, include_optional);
+			}
+		}
+
+		/* now look at the optional dependencies */
+		if (include_optional) {
+			i = list_head(bundle->optional);
+			while (i) {
+				name = i->data;
+				i = i->next;
+
+				if (strcmp(name, bundle_name) == 0) {
+
+					if (!list_search(exclusions, bundle->component, strcmp_wrapper)) {
+
+						char *bundle_str = NULL;
+						string_or_die(&bundle_str, "%s (as optional)", bundle->component);
+						*reqd_by = list_append_data(*reqd_by, bundle_str);
+
+						if (verbose) {
+							if (print_msg) {
+								/* these messages should be printed only once */
+								print_msg = false;
+								info("%s", msg);
+								info("\nformat:\n");
+								info(" # * is-required-by\n");
+								info(" #   |-- is-required-by\n");
+								info(" # * is-also-required-by\n # ...\n");
+								info("\n");
+							}
+							indent = (recursion - 1) * 4;
+							if (recursion == 1) {
+								info("%*s* %s (as optional)\n", indent + 2, "", bundle->component);
+							} else {
+								info("%*s|-- %s (as optional)\n", indent, "", bundle->component);
+							}
+						}
+					}
+
+					/* there is no need to recurse when lookin at the bundles that have
+					 * the specified bundle as optional dependency since it may or may
+					 * not include it, so it will only confuse */
+				}
 			}
 		}
 	}

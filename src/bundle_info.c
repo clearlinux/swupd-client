@@ -208,7 +208,7 @@ static void print_bundle_size(struct manifest *manifest, long size, bool bundle_
 
 static long get_bundle_size(struct manifest *mom, bool bundle_installed)
 {
-	int bundle_size;
+	long bundle_size;
 	struct list *bundles_not_installed = NULL;
 	struct list *iter;
 	struct manifest *manifest;

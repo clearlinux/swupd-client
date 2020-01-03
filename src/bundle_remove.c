@@ -195,6 +195,7 @@ static enum swupd_code validate_bundle(const char *bundle, struct manifest *mom,
 	enum swupd_code ret = SWUPD_OK;
 	char *msg;
 	int number_of_reqd;
+	const bool DONT_INCLUDE_OPTIONAL_DEPS = false;
 
 	/* os-core bundle not allowed to be removed */
 	if (strcmp(bundle, "os-core") == 0) {
@@ -214,7 +215,7 @@ static enum swupd_code validate_bundle(const char *bundle, struct manifest *mom,
 
 	/* check if bundle is required by another installed bundle */
 	string_or_die(&msg, "\nBundle \"%s\" is required by the following bundles:\n", bundle);
-	number_of_reqd = required_by(reqd_by, bundle, mom, 0, bundles, msg);
+	number_of_reqd = required_by(reqd_by, bundle, mom, 0, bundles, msg, DONT_INCLUDE_OPTIONAL_DEPS);
 	free_string(&msg);
 	if (number_of_reqd > 0) {
 		/* the bundle is required by other bundles */

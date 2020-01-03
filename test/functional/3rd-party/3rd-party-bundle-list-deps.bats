@@ -49,6 +49,8 @@ global_teardown() {
 		 3rd-Party Repo: repo1
 		_______________________
 
+		Loading required manifests...
+
 		Bundles included by test-bundle2:
 		 - test-bundle3
 		 - test-bundle4
@@ -70,6 +72,8 @@ global_teardown() {
 		_______________________
 		 3rd-Party Repo: repo1
 		_______________________
+
+		Loading required manifests...
 
 		All bundles that have test-bundle4 as a dependency:
 		 - test-bundle2

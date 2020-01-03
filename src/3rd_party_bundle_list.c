@@ -133,7 +133,7 @@ static enum swupd_code list_repo_bundles(UNUSED_PARAM char *unused)
 enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
-	const int steps_in_bundlelist = 0;
+	const int steps_in_bundlelist = 2;
 
 	if (!parse_options(argc, argv)) {
 		print("\n");

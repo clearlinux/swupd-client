@@ -24,16 +24,20 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		[
 		{ "type" : "start", "section" : "bundle-list" },
+		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 2, "stepCompletion" : -1, "stepDescription" : "load_manifests" },
+		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 2, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
+		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 2, "stepCompletion" : -1, "stepDescription" : "list_bundles" },
 		{ "type" : "info", "msg" : "Installed bundles:" },
 		{ "type" : "info", "msg" : " -" },
 		{ "type" : "info", "msg" : "os-core" },
 		{ "type" : "info", "msg" : " -" },
 		{ "type" : "info", "msg" : "test-bundle" },
 		{ "type" : "info", "msg" : " Total: 2" },
+		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 2, "stepCompletion" : 100, "stepDescription" : "list_bundles" },
 		{ "type" : "end", "section" : "bundle-list", "status" : 0 }
 		]
 	EOM
 	)
-	assert_is_output --identical "$expected_output"
+	assert_is_output "$expected_output"
 
 }

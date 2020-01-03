@@ -16,9 +16,11 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Loading required manifests...
+
 		No bundles have test-bundle1 as a dependency
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_is_output --identical "$expected_output"
 
 }

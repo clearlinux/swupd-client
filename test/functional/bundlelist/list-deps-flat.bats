@@ -20,6 +20,8 @@ test_setup() {
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Loading required manifests...
+
 		Bundles included by test-bundle1:
 		 - test-bundle2
 		 - test-bundle3

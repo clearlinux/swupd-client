@@ -8,6 +8,7 @@ load "../testlib"
 
 	assert_status_is "$SWUPD_INVALID_BUNDLE"
 	expected_output=$(cat <<-EOM
+		Loading required manifests...
 		Warning: Bundle "not-a-bundle" is invalid, skipping it...
 	EOM
 	)

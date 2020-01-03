@@ -155,6 +155,7 @@ static enum swupd_code list_local_bundles(int version)
 	bool mix_exists;
 	int count = 0;
 
+	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	if (version > 0) {
 		mix_exists = (check_mix_exists() & system_on_mix());
 		MoM = load_mom(version, mix_exists, NULL);
@@ -172,6 +173,8 @@ static enum swupd_code list_local_bundles(int version)
 		free_string(&path);
 		return SWUPD_COULDNT_LIST_DIR;
 	}
+
+	progress_next_step("list_bundles", PROGRESS_UNDEFINED);
 
 	info("Installed bundles:\n");
 	item = bundles;
@@ -210,6 +213,8 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 	struct manifest *mom = NULL;
 	int count = 0;
 
+	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
+	info("Loading required manifests...\n");
 	mom = load_mom(version, false, NULL);
 	if (!mom) {
 		error("Cannot load official manifest MoM for version %i\n", version);
@@ -248,15 +253,17 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 		goto out;
 	}
 
+	progress_next_step("list_bundles", PROGRESS_UNDEFINED);
+
 	/* deps now includes the bundle indicated by bundle_name
 	 * if deps only has one bundle in it, no included packages were found */
 	if (list_len(deps) == 1) {
-		info("No included bundles\n");
+		info("\nNo included bundles\n");
 		ret = SWUPD_OK;
 		goto out;
 	}
 
-	info("Bundles included by %s:\n", bundle_name);
+	info("\nBundles included by %s:\n", bundle_name);
 
 	struct list *iter;
 	iter = list_head(deps);
@@ -306,12 +313,14 @@ static enum swupd_code list_installable_bundles(int version)
 	int count = 0;
 	bool mix_exists;
 
+	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	mix_exists = (check_mix_exists() & system_on_mix());
 	MoM = load_mom(version, mix_exists, NULL);
 	if (!MoM) {
 		return SWUPD_COULDNT_LOAD_MOM;
 	}
 
+	progress_next_step("list_bundles", PROGRESS_UNDEFINED);
 	info("All available bundles:\n");
 	list = MoM->manifests = list_sort(MoM->manifests, file_sort_filename);
 	while (list) {
@@ -344,6 +353,8 @@ static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server,
 		goto out;
 	}
 
+	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
+	info("Loading required manifests...\n");
 	current_manifest = load_mom(version, false, NULL);
 	if (!current_manifest) {
 		error("Unable to download/verify %d Manifest.MoM\n", version);
@@ -378,12 +389,14 @@ static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server,
 		goto out;
 	}
 
+	progress_next_step("list_bundles", PROGRESS_UNDEFINED);
+
 	char *msg;
-	string_or_die(&msg, "%s bundles that have %s as a dependency:\n", server ? "All" : "Installed", bundle_name);
+	string_or_die(&msg, "\n%s bundles that have %s as a dependency:\n", server ? "All" : "Installed", bundle_name);
 	number_of_reqd = required_by(&reqd_by, bundle_name, current_manifest, 0, NULL, msg);
 	free_string(&msg);
 	if (reqd_by == NULL) {
-		info("No bundles have %s as a dependency\n", bundle_name);
+		info("\nNo bundles have %s as a dependency\n", bundle_name);
 		ret = SWUPD_OK;
 		goto out;
 	}
@@ -434,8 +447,7 @@ enum swupd_code list_bundles(void)
 enum swupd_code bundle_list_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
-	const int steps_in_bundlelist = 0;
-	/* there is no need to report in progress for bundle-list at this time */
+	const int steps_in_bundlelist = 2;
 
 	if (!parse_options(argc, argv)) {
 		print("\n");
@@ -454,6 +466,11 @@ enum swupd_code bundle_list_main(int argc, char **argv)
 		return ret;
 	}
 
+	/*
+	 * Steps for bundle-list:
+	 *  1) load_manifests
+	 *  2) list_bundles
+	 */
 	progress_init_steps("bundle-list", steps_in_bundlelist);
 
 	ret = list_bundles();

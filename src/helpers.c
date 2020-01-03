@@ -1133,6 +1133,17 @@ void print_pattern(const char *pattern, int times)
 	info("\n");
 }
 
+void print_header(const char *header)
+{
+	int header_length;
+
+	header_length = strlen(header);
+	print_pattern("_", header_length + 1);
+	info("%s\n", header);
+	print_pattern("_", header_length + 1);
+	info("\n");
+}
+
 void prettify_size(long size_in_bytes, char **pretty_size)
 {
 	double size;

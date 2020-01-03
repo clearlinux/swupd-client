@@ -383,14 +383,13 @@ enum swupd_code bundle_info(char *bundle)
 	mom->submanifests = recurse_manifest(mom, subs, NULL, false, NULL);
 
 	/* print header */
-	const int HEADER = 19;
-	int bundle_length = strlen(bundle);
-	print_pattern("_", HEADER + bundle_length);
-	info(" Info for bundle: %s\n", bundle);
-	print_pattern("_", HEADER + bundle_length);
+	char *header = NULL;
+	string_or_die(&header, " Info for bundle: %s", bundle);
+	print_header(header);
+	free_string(&header);
 
 	/* status info */
-	info("\nStatus: %s%s\n", installed ? "Installed" : "Not installed", file->is_experimental ? " (experimental)" : "");
+	info("Status: %s%s\n", installed ? "Installed" : "Not installed", file->is_experimental ? " (experimental)" : "");
 
 	/* version info */
 	if (installed) {

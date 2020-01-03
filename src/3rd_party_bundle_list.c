@@ -44,6 +44,7 @@ static void free_deps(void)
 
 static void print_help(void)
 {
+	print("Lists all installed and installable software bundles from 3rd-party repositories\n\n");
 	print("Usage:\n");
 	print("   swupd 3rd-party bundle-list [OPTIONS...]\n\n");
 

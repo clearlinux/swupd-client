@@ -389,8 +389,9 @@ error:
 
 static void print_help(void)
 {
+	print("Searches for matching paths in manifest data\n\n");
 	print("Usage:\n");
-	print("   swupd search [OPTION...] 'search_term'\n\n");
+	print("   swupd search-file [OPTION...] 'search_term'\n\n");
 	print("		'search_term': A substring of a binary, library or filename (default)\n");
 	print("		Return: Bundle name : filename matching search term\n\n");
 

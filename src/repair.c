@@ -55,6 +55,7 @@ static const struct option prog_opts[] = {
 
 static void print_help(void)
 {
+	print("Corrects any issues found with the current system\n\n");
 	print("Usage:\n");
 	print("   swupd repair [OPTION...]\n\n");
 

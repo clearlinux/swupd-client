@@ -73,6 +73,7 @@ static void free_deps(void)
 
 static void print_help(void)
 {
+	print("Lists all installed and installable software bundles\n\n");
 	print("Usage:\n");
 	print("   swupd bundle-list [OPTIONS...]\n\n");
 

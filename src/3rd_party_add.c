@@ -28,6 +28,9 @@
 
 static void print_help(void)
 {
+	/* TODO(castulo): we need to change this description to match that of the
+	 * documentation once the documentation for this content is added */
+	print("Adds a repository from which 3rd-party content can be installed\n\n");
 	print("Usage:\n");
 	print("   swupd 3rd-party add [repo-name] [repo-URL]\n\n");
 

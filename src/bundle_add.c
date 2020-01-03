@@ -44,6 +44,7 @@ static char **cmdline_bundles;
 
 static void print_help(void)
 {
+	print("Installs new software bundles\n\n");
 	print("Usage:\n");
 	print("   swupd bundle-add [OPTION...] [bundle1 bundle2 (...)]\n\n");
 

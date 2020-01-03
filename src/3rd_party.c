@@ -42,6 +42,7 @@ static struct subcmd third_party_commands[] = {
 
 static void print_help(const char *name)
 {
+	print("Gives users the ability for handling custom content not provided upstream\n\n");
 	print("Usage:\n");
 	print("    swupd %s SUBCOMMAND [OPTION...]\n\n", sys_basename(name));
 	print("Help Options:\n");

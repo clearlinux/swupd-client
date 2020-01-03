@@ -28,6 +28,7 @@ static char *cmdline_option_repo = NULL;
 
 static void print_help(void)
 {
+	print("Checks whether an update is available for the 3rd-party repositories and prints out the information if so\n\n");
 	print("Usage:\n");
 	print("   swupd 3rd-party check-update [OPTION...]\n\n");
 

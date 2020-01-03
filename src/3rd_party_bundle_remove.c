@@ -31,6 +31,7 @@ static bool cmdline_option_recursive = false;
 
 static void print_help(void)
 {
+	print("Removes software bundles installed from 3rd-party repositories\n\n");
 	print("Usage:\n");
 	print("   swupd 3rd-party bundle-remove [OPTION...] [bundle1 bundle2 (...)]\n\n");
 

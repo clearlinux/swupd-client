@@ -44,6 +44,7 @@ static const struct option prog_opts[] = {
 
 static void print_help(void)
 {
+	print("Performs a system software installation in the specified location\n\n");
 	print("Usage:\n");
 	print("   swupd os-install [OPTION...] PATH\n\n");
 

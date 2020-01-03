@@ -27,6 +27,9 @@
 
 static void print_help(void)
 {
+	/* TODO(castulo): we need to change this description to match that of the
+	 * documentation once the documentation for this content is added */
+	print("Removes a 3rd-party repository from the list of available repositories in the system\n\n");
 	print("Usage:\n");
 	print("   swupd 3rd-party remove [repo-name]\n\n");
 

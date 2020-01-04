@@ -40,3 +40,11 @@ sudo apt-get install -y clang-format-9
 autoreconf --verbose --warnings=none --install --force
 ./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --enable-third-party --with-fallback-capaths=./swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path=./testconfig
 make -j$CORES
+
+# Needed to initialize the host for auto-update. Without these steps auto-update
+# within a --path would just not work
+sudo mkdir -p /usr/lib/systemd/system/
+sudo cp data/swupd-update.service /usr/lib/systemd/system/
+sudo cp data/swupd-update.timer /usr/lib/systemd/system/
+sudo systemctl enable swupd-update.timer
+sudo systemctl restart swupd-update.timer

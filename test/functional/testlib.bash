@@ -3269,6 +3269,27 @@ clean_state_dir() { # swupd_function
 
 }
 
+# Creates the test environment of the specified test but do not executes the test
+# this is useful when someone wants to run the test manually for debugging a failure
+# - TEST_NAME: the path to a bats test
+create_test_environment_only() { # swupd_function
+
+	local test_name=$1
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    create_test_environment_only <test.bats>
+			EOM
+		return
+	fi
+	validate_item "$test_name"
+
+	echo -e "Creating test environment only: $test_name \n"
+	TEST_ENV_ONLY=true bats -t "$test_name" || true
+
+}
+
 # Creates a new test case based on a template
 # Parameters:
 # - NAME: the name (and path) of the test to be generated
@@ -3513,6 +3534,11 @@ setup() {
 	test_setup
 	debug_msg "Finished running test_setup\\n"
 
+	if [ "$TEST_ENV_ONLY" = true ]; then
+		print "Test setup complete"
+		terminate "Test environment only"
+	fi
+
 	print "Test setup complete. Starting test execution..."
 
 }
@@ -3523,6 +3549,18 @@ teardown() {
 	# changed it during a test
 	if [ "$(pwd)" != "$TESTLIB_WD" ]; then
 		cd "$TESTLIB_WD" || terminate "there was an error going back to the original working directory"
+	fi
+
+	if [ "$TEST_ENV_ONLY" = true ]; then
+		print "Test environment created successfully"
+		print "\nTest variables:\n"
+		print "SWUPD_OPTS=\"$SWUPD_OPTS\"\n"
+		print "TEST_DIRNAME=$TEST_DIRNAME"
+		print "PATH_PREFIX=$PATH_PREFIX"
+		print "WEBDIR=$WEBDIR"
+		print "TARGETDIR=$TARGETDIR"
+		print "STATEDIR=$STATEDIR\n"
+		terminate "Test environment only"
 	fi
 
 	local index

@@ -512,6 +512,10 @@ SUBCOMMANDS
     download all manifests for bundles that are not installed, and may
     result in the download of several mega bytes of manifest data.
 
+    - `-V, --version=[VER]`
+
+        Search for a match of the given file in the specified version VER.
+
     - `-l, --library`
 
         Restrict search to designated dynamic shared library paths.

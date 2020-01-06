@@ -299,6 +299,7 @@ if [[ -n "$state" ]]; then
         search-file)
           local -a searchfiles; searchfiles=(
             $global_opts
+            '(help -V --version)'{-V,--version=}'[Search for a match of the given file in the specified version VER]:version:()'
             '(help -l --library)'{-l,--library=}'[Search paths where libraries are located for a match]:library: _files -W "(/usr/lib/ /usr/lib64/)" -g \*.\(a\|so\)'
             '(help -B --binary)'{-B,--binary=}'[Search paths where binaries are located for a match]:binary: _files -W /usr/bin/'
             '(help -T --top)'{-T,--top=}'[Only display the top NUM results for each bundle]:top:()'

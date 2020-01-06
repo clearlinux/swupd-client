@@ -71,6 +71,7 @@ static int num_results = INT_MAX;
 static int sort = SORT_TYPE_ALPHA_BUNDLES_ONLY;
 static bool regexp = false;
 static regex_t regexp_comp;
+static int cmdline_option_version = 0;
 
 // Context
 static struct list *bundle_size_cache = NULL;
@@ -397,6 +398,7 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
+	print("   -V, --version=[VER]     Search for a match of the given file in the specified version VER\n");
 	print("   -l, --library           Search for a match of the given file in the directories where libraries are located\n");
 	print("   -B, --binary            Search for a match of the given file in the directories where binaries are located\n");
 	print("   -T, --top=[NUM]         Only display the top NUM results for each bundle\n");
@@ -415,6 +417,7 @@ static const struct option prog_opts[] = {
 	{ "order", required_argument, 0, 'o' },
 	{ "top", required_argument, 0, 'T' },
 	{ "regexp", no_argument, 0, FLAG_REGEXP },
+	{ "version", required_argument, 0, 'V' },
 };
 
 static bool parse_opt(int opt, char *optarg)
@@ -422,6 +425,13 @@ static bool parse_opt(int opt, char *optarg)
 	int err;
 
 	switch (opt) {
+	case 'V':
+		err = strtoi_err(optarg, &cmdline_option_version);
+		if (err < 0 || cmdline_option_version < 0) {
+			error("Invalid version argument: %s\n\n", optarg);
+			return false;
+		}
+		return true;
 	case 'o':
 		if (!strcmp(optarg, "alpha")) {
 			sort = SORT_TYPE_ALPHA;
@@ -504,7 +514,7 @@ enum swupd_code search_file_main(int argc, char **argv)
 	enum swupd_code ret = SWUPD_OK;
 	int steps_in_search;
 	int err = 0;
-	int current_version;
+	int version;
 	struct manifest *mom = NULL;
 
 	if (!parse_options(argc, argv)) {
@@ -531,16 +541,21 @@ enum swupd_code search_file_main(int argc, char **argv)
 	}
 	progress_init_steps("search", steps_in_search);
 
-	current_version = get_current_version(globals.path_prefix);
-	if (current_version < 0) {
-		error("Unable to determine current OS version\n");
-		return SWUPD_CURRENT_VERSION_UNKNOWN;
+	/* if a version number was specified used that, otherwise use the current */
+	if (cmdline_option_version) {
+		version = cmdline_option_version;
+	} else {
+		version = get_current_version(globals.path_prefix);
+		if (version < 0) {
+			error("Unable to determine current OS version\n");
+			return SWUPD_CURRENT_VERSION_UNKNOWN;
+		}
 	}
 
 	progress_next_step("load_manifests", PROGRESS_BAR);
-	mom = load_mom(current_version, false, NULL);
+	mom = load_mom(version, false, NULL);
 	if (!mom) {
-		error("Cannot load official manifest MoM for version %i\n", current_version);
+		error("Cannot load official manifest MoM for version %i\n", version);
 		return SWUPD_COULDNT_LOAD_MOM;
 	}
 

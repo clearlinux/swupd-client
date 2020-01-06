@@ -97,13 +97,12 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	ret = stat(targetpath, &s);
 	if ((ret == -1) && (errno == ENOENT)) {
 		if (MoM) {
-			warn("Update target directory does not exist: %s. Trying to fix it\n", targetpath);
 			verify_fix_path(dir, MoM);
 		} else {
-			debug("Update target directory does not exist: %s. Auto-fix disabled\n", targetpath);
+			debug("Target directory does not exist: %s. Auto-fix disabled\n", targetpath);
 		}
 	} else if (!S_ISDIR(s.st_mode)) {
-		error("Update target exists but is NOT a directory: %s\n", targetpath);
+		error("Target exists but is NOT a directory: %s\n", targetpath);
 	}
 
 	if (!realpath(targetpath, real_path)) {

@@ -38,7 +38,9 @@
 #include "swupd.h"
 
 #define FLAG_EXTRA_FILES_ONLY 2000
+#define FLAG_FILE 2001
 
+static const char picky_tree_default[] = "/usr";
 static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src";
 
 static bool warning_printed = false;
@@ -50,6 +52,7 @@ static bool cmdline_option_fix = false;
 static bool cmdline_option_picky = false;
 static char *cmdline_option_statedir_cache = NULL;
 static char *cmdline_option_picky_tree = NULL;
+static char *cmdline_option_file = NULL;
 static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
 static bool cmdline_option_install = false;
 static bool cmdline_option_quick = false;
@@ -76,6 +79,7 @@ static const struct option prog_opts[] = {
 	{ "quick", no_argument, 0, 'q' },
 	{ "bundles", required_argument, 0, 'B' },
 	{ "extra-files-only", no_argument, 0, FLAG_EXTRA_FILES_ONLY },
+	{ "file", required_argument, 0, FLAG_FILE },
 };
 
 /* setter functions */
@@ -152,17 +156,34 @@ void verify_set_extra_files_only(bool opt)
 	cmdline_option_extra_files_only = opt;
 }
 
+void verify_set_option_file(char *path)
+{
+	free_string(&cmdline_option_file);
+	cmdline_option_file = path;
+}
+
+static void print_if_verify(const char *option)
+{
+	if (cmdline_command_verify) {
+		print("%s", option);
+	}
+}
+
+static void print_if_diagnose(const char *option)
+{
+	if (!cmdline_command_verify) {
+		print("%s", option);
+	}
+}
+
 static void print_help(void)
 {
 	print("Performs a system software installation verification\n\n");
 	print("Usage:\n");
-	if (cmdline_command_verify) {
-		print("   swupd verify [OPTION...]\n\n");
-		print("Warning: The \"swupd verify\" command has been superseded\n");
-		print("Please consider using \"swupd diagnose\", \"swupd repair\" or \"swupd os-install\" instead\n\n");
-	} else {
-		print("   swupd diagnose [OPTION...]\n\n");
-	}
+	print_if_verify("   swupd verify [OPTION...]\n\n");
+	print_if_verify("Warning: The \"swupd verify\" command has been superseded\n");
+	print_if_verify("Please consider using \"swupd diagnose\", \"swupd repair\" or \"swupd os-install\" instead\n\n");
+	print_if_diagnose("   swupd diagnose [OPTION...]\n\n");
 
 	global_print_help();
 
@@ -171,18 +192,16 @@ static void print_help(void)
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -q, --quick             Don't check for corrupt files, only fix missing files\n");
 	print("   -B, --bundles=[BUNDLES] Forces swupd to only %s the specified BUNDLES. Example: --bundles=os-core,vi\n", cmdline_command_verify ? "verify" : "diagnose");
-	if (cmdline_command_verify) {
-		print("   -m, --manifest=[VER]    This option has been superseded. Please consider using the -V option instead\n");
-		print("   -f, --fix               This option has been superseded, please consider using \"swupd repair\" instead\n");
-		print("   -i, --install           This option has been superseded, please consider using \"swupd os-install\" instead\n");
-		print("   -Y, --picky             Also list (without --fix) or remove (with --fix) files which should not exist\n");
-	} else {
-		print("   -Y, --picky             Also list files which should not exist. By default swupd only looks for them at /usr\n");
-		print("                           skipping /usr/lib/modules, /usr/lib/kernel, /usr/local, and /usr/src\n");
-	}
+	print_if_verify("   -m, --manifest=[VER]    This option has been superseded. Please consider using the -V option instead\n");
+	print_if_verify("   -f, --fix               This option has been superseded, please consider using \"swupd repair\" instead\n");
+	print_if_verify("   -i, --install           This option has been superseded, please consider using \"swupd os-install\" instead\n");
+	print_if_verify("   -Y, --picky             Also list (without --fix) or remove (with --fix) files which should not exist\n");
+	print_if_diagnose("   -Y, --picky             Also list files which should not exist. By default swupd only looks for them at /usr\n");
+	print_if_diagnose("                           skipping /usr/lib/modules, /usr/lib/kernel, /usr/local, and /usr/src\n");
 	print("   -X, --picky-tree=[PATH] Changes the path where --picky and --extra-files-only look for extra files\n");
 	print("   -w, --picky-whitelist=[RE] Directories that match the regex get skipped during --picky. Example: /usr/bin|/usr/doc\n");
 	print("   --extra-files-only      Like --picky, but it only performs this task\n");
+	print_if_diagnose("   --file                  Forces swupd to only diagnose the specified file or directory (recursively)\n");
 	print("\n");
 }
 
@@ -254,7 +273,7 @@ static int check_files_hash(struct list *files)
 }
 
 /* allow optimization of install case */
-static int get_required_files(struct manifest *official_manifest, struct list *subs)
+static int get_required_files(struct manifest *official_manifest, struct list *required_files, struct list *subs)
 {
 	int ret;
 
@@ -265,7 +284,7 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 
 	progress_next_step("check_files_hash", PROGRESS_BAR);
 	print("\n");
-	if (check_files_hash(official_manifest->files)) {
+	if (check_files_hash(required_files)) {
 		/* we don't need to do these steps, we already have the files,
 		 * just complete the steps */
 		progress_next_step("validate_fullfiles", PROGRESS_BAR);
@@ -274,7 +293,7 @@ static int get_required_files(struct manifest *official_manifest, struct list *s
 		return 0;
 	}
 
-	ret = download_fullfiles(official_manifest->files, NULL);
+	ret = download_fullfiles(required_files, NULL);
 	if (ret) {
 		error("Unable to download necessary files for this OS release\n");
 	}
@@ -325,15 +344,15 @@ out:
 }
 
 /* for each missing but expected file, (re)add the file */
-static void add_missing_files(struct manifest *official_manifest, bool repair)
+static void add_missing_files(struct manifest *official_manifest, struct list *files_to_verify, bool repair)
 {
 	int ret;
 	struct file local;
 	struct list *iter;
-	int list_length = list_len(official_manifest->files);
+	int list_length = list_len(files_to_verify);
 	int complete = 0;
 
-	iter = list_head(official_manifest->files);
+	iter = list_head(files_to_verify);
 	while (iter) {
 		struct file *file;
 		char *fullname;
@@ -452,7 +471,7 @@ end:
 	free_string(&fullname);
 }
 
-static void deal_with_hash_mismatches(struct manifest *official_manifest, bool repair)
+static void deal_with_hash_mismatches(struct manifest *official_manifest, struct list *files_to_verify, bool repair)
 {
 	struct list *iter;
 	int complete = 0;
@@ -462,7 +481,7 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 
 	/* for each expected and present file which hash-mismatches vs
 	 * the manifest, replace the file */
-	iter = list_head(official_manifest->files);
+	iter = list_head(files_to_verify);
 	list_length = list_len(iter);
 
 	while (iter) {
@@ -476,18 +495,18 @@ static void deal_with_hash_mismatches(struct manifest *official_manifest, bool r
 	}
 }
 
-static void remove_orphaned_files(struct manifest *official_manifest, bool repair)
+static void remove_orphaned_files(struct list *files_to_verify, bool repair)
 {
 	int ret;
 	struct list *iter;
-	int list_length = list_len(official_manifest->files);
+	int list_length = list_len(files_to_verify);
 	int complete = 0;
 
 	info("%s extraneous files\n", repair ? "Removing" : "Checking for");
 
-	official_manifest->files = list_sort(official_manifest->files, cmp_file_filename_reverse);
+	files_to_verify = list_sort(files_to_verify, cmp_file_filename_reverse);
 
-	iter = list_head(official_manifest->files);
+	iter = list_head(files_to_verify);
 	while (iter) {
 		struct file *file;
 		char *fullname;
@@ -646,6 +665,11 @@ static bool parse_opt(int opt, char *optarg)
 	case FLAG_EXTRA_FILES_ONLY:
 		cmdline_option_extra_files_only = optarg_to_bool(optarg);
 		return true;
+	case FLAG_FILE:
+		cmdline_option_file = strdup_or_die(optarg);
+		/* Remove trailing '/' at the end of file/dir if any */
+		remove_trailing_slash(cmdline_option_file);
+		return true;
 	default:
 		return false;
 	}
@@ -718,6 +742,13 @@ static bool parse_options(int argc, char **argv)
 			info("\n");
 		}
 
+		/* new options should not be allowed for the legacy verify command
+		 * since it has been superseded, to motivate users to use diagnose/repair */
+		if (cmdline_option_file) {
+			error("unrecognized option '--file'\n");
+			return false;
+		}
+
 	} else {
 
 		/* flag restrictions for "diagnose" */
@@ -725,6 +756,7 @@ static bool parse_options(int argc, char **argv)
 			error("'latest' not supported for --version\n");
 			return false;
 		}
+
 		if (cmdline_option_bundles) {
 			if (cmdline_option_picky) {
 				error("--bundles and --picky options are mutually exclusive\n");
@@ -799,6 +831,23 @@ static int filter_file_unsafe_to_delete(const void *a, const void *b)
 	return -1;
 }
 
+static struct list *keep_matching_path(struct list *all_files)
+{
+	struct list *matching_files = NULL;
+	struct list *iter = NULL;
+	struct file *file;
+
+	for (iter = all_files; iter; iter = iter->next) {
+		file = iter->data;
+		if (strncmp(cmdline_option_file, file->filename, strlen(cmdline_option_file)) == 0) {
+			/* preserving the order is important */
+			matching_files = list_append_data(matching_files, file);
+		}
+	}
+
+	return list_head(matching_files);
+}
+
 /* This function does a simple verification of files listed in the
  * subscribed bundle manifests.  If the optional "fix" or "install" parameter
  * is specified, the disk will be modified at each point during the
@@ -817,6 +866,7 @@ enum swupd_code execute_verify(void)
 	struct list *bundles_submanifests = NULL;
 	struct list *all_files = NULL;
 	struct list *bundles_files = NULL;
+	struct list *files_to_verify = NULL;
 	struct list *iter;
 	bool use_latest = false;
 	bool invalid_bundle = false;
@@ -1036,6 +1086,7 @@ enum swupd_code execute_verify(void)
 		goto clean_and_exit;
 	}
 	official_manifest->submanifests = all_submanifests;
+
 	if (cmdline_option_bundles) {
 		bundles_submanifests = recurse_manifest(official_manifest, bundles_subs, NULL, false, NULL);
 		if (!bundles_submanifests) {
@@ -1066,6 +1117,23 @@ enum swupd_code execute_verify(void)
 	}
 	timelist_timer_stop(globals.global_times);
 
+	/* get the list of files to verify */
+	files_to_verify = official_manifest->files;
+	if (cmdline_option_file) {
+		/* the user specified a file or path to verify, use that instead */
+		files_to_verify = keep_matching_path(official_manifest->files);
+		info("\n");
+		if (files_to_verify) {
+			char *file_path = sys_path_join(globals.path_prefix, cmdline_option_file);
+			info("Limiting diagnose to the following %s:\n", is_dir(file_path) ? "directory (recursively)" : "file");
+			free_string(&file_path);
+			info(" - %s\n", cmdline_option_file);
+		} else {
+			/* we are done, nothing to be done */
+			goto report_and_exit;
+		}
+	}
+
 	if (cmdline_option_extra_files_only) {
 		/* user wants to deal only with the extra files, so skip everything else */
 		goto extra_files;
@@ -1075,11 +1143,11 @@ enum swupd_code execute_verify(void)
 	timelist_timer_start(globals.global_times, "Get required files");
 
 	/* get the initial number of files to be inspected */
-	counts.checked = list_len(official_manifest->files);
+	counts.checked = list_len(files_to_verify);
 
 	/* when fixing or installing we need input files */
 	if (cmdline_option_fix || cmdline_option_install) {
-		ret = get_required_files(official_manifest, selected_subs);
+		ret = get_required_files(official_manifest, files_to_verify, selected_subs);
 		if (ret != 0) {
 			ret = SWUPD_COULDNT_DOWNLOAD_FILE;
 			goto clean_and_exit;
@@ -1123,7 +1191,7 @@ enum swupd_code execute_verify(void)
 	} else {
 		info("\nChecking for missing files\n");
 	}
-	add_missing_files(official_manifest, cmdline_option_fix || cmdline_option_install);
+	add_missing_files(official_manifest, files_to_verify, cmdline_option_fix || cmdline_option_install);
 	timelist_timer_stop(globals.global_times);
 
 	if (cmdline_option_quick) {
@@ -1134,7 +1202,7 @@ enum swupd_code execute_verify(void)
 	/* repair corrupt files */
 	timelist_timer_start(globals.global_times, "Fixing modified files");
 	progress_next_step("fix_files", PROGRESS_BAR);
-	deal_with_hash_mismatches(official_manifest, cmdline_option_fix);
+	deal_with_hash_mismatches(official_manifest, files_to_verify, cmdline_option_fix);
 	timelist_timer_stop(globals.global_times);
 
 	/* remove orphaned files, removing files could be
@@ -1142,7 +1210,7 @@ enum swupd_code execute_verify(void)
 	timelist_timer_start(globals.global_times, "Removing orphaned files");
 	if ((counts.not_fixed == 0) && (counts.not_replaced == 0)) {
 		progress_next_step("remove_extraneous_files", PROGRESS_BAR);
-		remove_orphaned_files(official_manifest, cmdline_option_fix);
+		remove_orphaned_files(files_to_verify, cmdline_option_fix);
 	}
 	timelist_timer_stop(globals.global_times);
 
@@ -1179,6 +1247,7 @@ brick_the_system_and_clean_curl:
 	}
 
 	/* report a summary of what we managed to do and not do */
+report_and_exit:
 	info("Inspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
 
 	if (counts.missing) {
@@ -1236,6 +1305,9 @@ brick_the_system_and_clean_curl:
 	/* this concludes the critical section, after this point it's clean up time, the disk content is finished and final */
 
 clean_and_exit:
+	if (cmdline_option_file) {
+		list_free_list(files_to_verify);
+	}
 	free_subscriptions(&all_subs);
 	free_subscriptions(&bundles_subs);
 	/* if the --bundles flag was used the official_manifest contains
@@ -1331,7 +1403,7 @@ enum swupd_code verify_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
 	const int steps_in_verify = 12;
-	string_or_die(&cmdline_option_picky_tree, "/usr");
+	string_or_die(&cmdline_option_picky_tree, "%s", picky_tree_default);
 
 	/* set option needed so we know the legacy "verify" command was used */
 	verify_set_command_verify(true);
@@ -1388,7 +1460,6 @@ enum swupd_code diagnose_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
 	int steps_in_diagnose;
-	string_or_die(&cmdline_option_picky_tree, "/usr");
 
 	if (!parse_options(argc, argv)) {
 		print("\n");
@@ -1399,8 +1470,15 @@ enum swupd_code diagnose_main(int argc, char **argv)
 	ret = swupd_init(SWUPD_ALL);
 	if (ret != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
-		free_string(&cmdline_option_picky_tree);
 		return ret;
+	}
+
+	/* if the --file flag was used, use that path for --picky as well
+	 * unless --picky-tree was also specified, if none use default */
+	if (!cmdline_option_picky_tree && !cmdline_option_file) {
+		string_or_die(&cmdline_option_picky_tree, "%s", picky_tree_default);
+	} else if (!cmdline_option_picky_tree) {
+		cmdline_option_picky_tree = cmdline_option_file;
 	}
 
 	/*
@@ -1423,6 +1501,9 @@ enum swupd_code diagnose_main(int argc, char **argv)
 	/* diagnose */
 	ret = execute_verify();
 
+	if (cmdline_option_picky_tree != cmdline_option_file) {
+		free_string(&cmdline_option_file);
+	}
 	free_string(&cmdline_option_picky_tree);
 	if (picky_whitelist) {
 		regfree(picky_whitelist);

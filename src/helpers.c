@@ -672,9 +672,9 @@ enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 				/* this subpart of the path does exist, nothing to be done */
 				continue;
 			}
-			info("Hash did not match for path : %s ... fixing\n", path);
+			warn_unlabeled(" -> Corrupt directory: %s", target);
 		} else if (ret == -1 && errno == ENOENT) {
-			info("Path %s is missing on the file system ... fixing\n", path);
+			warn_unlabeled(" -> Missing directory: %s", target);
 		} else {
 			goto end;
 		}
@@ -692,6 +692,7 @@ enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
 		ret = swupd_curl_get_file(url, tar_dotfile);
 		if (ret != 0) {
+			warn_unlabeled(" -> not fixed\n");
 			error("Failed to download file %s in verify_fix_path\n", file->filename);
 			ret = SWUPD_COULDNT_DOWNLOAD_FILE;
 			unlink(tar_dotfile);
@@ -699,6 +700,7 @@ enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		}
 
 		if (untar_full_download(file) != 0) {
+			warn_unlabeled(" -> not fixed\n");
 			error("Failed to untar file %s\n", file->filename);
 			ret = SWUPD_COULDNT_UNTAR_FILE;
 			goto end;
@@ -708,9 +710,11 @@ enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		if (ret != 0) {
 			/* do_staging returns a swupd_code on error,
 			* just propagate the error */
+			warn_unlabeled(" -> not fixed\n");
 			error("Path %s failed to stage in verify_fix_path\n", path);
 			goto end;
 		}
+		warn_unlabeled(" -> fixed\n");
 	}
 end:
 	free_string(&target);

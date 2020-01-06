@@ -60,7 +60,7 @@ _swupd()
 		opts="--help --all --quiet --verbose "
 		break;;
 		("search-file")
-		opts="$global --library --binary --top --csv --init --order "
+		opts="$global --version --library --binary --top --csv --init --order "
 		break;;
 		("diagnose")
 		opts="$global --version --picky --picky-tree --picky-whitelist --quick --force --extra-files-only --bundles "

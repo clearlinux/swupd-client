@@ -220,6 +220,9 @@
 # Options for the "swupd search-file" command
 #
 
+# Search for a match of the given file in the specified version VER
+#version=[VER]
+
 # Search paths where libraries are located for a match (boolean value)
 #library=<true/false>
 

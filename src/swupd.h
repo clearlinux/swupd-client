@@ -363,6 +363,7 @@ extern void verify_set_option_picky(bool opt);
 extern void verify_set_picky_whitelist(regex_t *whitelist);
 extern void verify_set_picky_tree(char *picky_tree);
 extern void verify_set_extra_files_only(bool opt);
+extern void verify_set_option_file(char *path);
 
 /* repair.c */
 extern regex_t *compile_whitelist(const char *whitelist_pattern);

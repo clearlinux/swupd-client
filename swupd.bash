@@ -63,10 +63,10 @@ _swupd()
 		opts="$global --version --library --binary --top --csv --init --order "
 		break;;
 		("diagnose")
-		opts="$global --version --picky --picky-tree --picky-whitelist --quick --force --extra-files-only --bundles "
+		opts="$global --version --picky --picky-tree --picky-whitelist --quick --force --extra-files-only --bundles --file "
 		break;;
 		("repair")
-		opts="$global --version --picky --picky-tree --picky-whitelist --quick --force --extra-files-only --bundles "
+		opts="$global --version --picky --picky-tree --picky-whitelist --quick --force --extra-files-only --bundles --file "
 		break;;
 		("os-install")
 		opts="$global --version --force --bundles --statedir-cache --download --skip-optional"

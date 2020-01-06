@@ -5,11 +5,11 @@ load "../testlib"
 test_setup() {
 
 	create_test_environment "$TEST_NAME"
-	create_bundle -L -n test-bundle -f /usr/foo/test-file "$TEST_NAME"
+	create_bundle -L -n test-bundle -f /foo/bar/baz/test-file "$TEST_NAME"
 	# remove the foo dir
-	sudo rm -rf "$TARGETDIR"/usr/foo
+	sudo rm -rf "$TARGETDIR"/foo
 	create_version "$TEST_NAME" 100 10
-	update_bundle "$TEST_NAME" test-bundle --update /usr/foo/test-file
+	update_bundle "$TEST_NAME" test-bundle --update /foo/bar/baz/test-file
 
 }
 
@@ -35,8 +35,9 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Installing files...
-		Warning: Update target directory does not exist: .*/target-dir/usr/foo. Trying to fix it
-		Path /usr/foo is missing on the file system ... fixing
+		 -> Missing directory: $PATH_PREFIX/foo -> fixed
+		 -> Missing directory: $PATH_PREFIX/foo/bar -> fixed
+		 -> Missing directory: $PATH_PREFIX/foo/bar/baz -> fixed
 		Update was applied
 		Calling post-update helper scripts
 		1 files were not in a pack
@@ -44,8 +45,8 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_dir_exists "$TARGETDIR"/usr/foo
-	assert_file_exists "$TARGETDIR"/usr/foo/test-file
+	assert_dir_exists "$TARGETDIR"/foo/bar/baz
+	assert_file_exists "$TARGETDIR"/foo/bar/baz/test-file
 
 }
 

@@ -24,6 +24,7 @@
 #include "swupd.h"
 
 #define FLAG_EXTRA_FILES_ONLY 2000
+#define FLAG_FILE 2001
 
 static const char picky_tree_default[] = "/usr";
 static const char picky_whitelist_default[] = "/usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src";
@@ -33,6 +34,7 @@ static bool cmdline_option_picky = false;
 static bool cmdline_option_quick = false;
 static int cmdline_option_version = 0;
 static char *cmdline_option_picky_tree = NULL;
+static char *cmdline_option_file = NULL;
 static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
 static bool cmdline_option_extra_files_only = false;
 static struct list *cmdline_bundles = NULL;
@@ -51,6 +53,7 @@ static const struct option prog_opts[] = {
 	{ "quick", no_argument, 0, 'q' },
 	{ "extra-files-only", no_argument, 0, FLAG_EXTRA_FILES_ONLY },
 	{ "bundles", required_argument, 0, 'B' },
+	{ "file", required_argument, 0, FLAG_FILE },
 };
 
 static void print_help(void)
@@ -71,6 +74,7 @@ static void print_help(void)
 	print("   -X, --picky-tree=[PATH] Changes the path where --picky and --extra-files-only look for extra files\n");
 	print("   -w, --picky-whitelist=[RE] Directories that match the regex get skipped during --picky. Example: /usr/man|/usr/doc\n");
 	print("   --extra-files-only      Like --picky, but it only performs this task\n");
+	print("   --file                  Forces swupd to only repair the specified file or directory (recursively)\n");
 	print("\n");
 }
 
@@ -121,6 +125,11 @@ static bool parse_opt(int opt, char *optarg)
 			error("Missing required --bundles argument\n\n");
 			return false;
 		}
+		return true;
+	case FLAG_FILE:
+		cmdline_option_file = strdup_or_die(optarg);
+		/* Remove trailing '/' at the end of file/dir if any */
+		remove_trailing_slash(cmdline_option_file);
 		return true;
 	default:
 		return false;
@@ -211,7 +220,6 @@ enum swupd_code repair_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
 	int steps_in_repair;
-	string_or_die(&cmdline_option_picky_tree, "%s", picky_tree_default);
 
 	if (!parse_options(argc, argv)) {
 		print("\n");
@@ -222,8 +230,15 @@ enum swupd_code repair_main(int argc, char **argv)
 	ret = swupd_init(SWUPD_ALL);
 	if (ret != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
-		free_string(&cmdline_option_picky_tree);
 		return ret;
+	}
+
+	/* if the --file flag was used, use that path for --picky as well
+	 * unless --picky-tree was also specified, if none use default */
+	if (!cmdline_option_picky_tree && !cmdline_option_file) {
+		string_or_die(&cmdline_option_picky_tree, "%s", picky_tree_default);
+	} else if (!cmdline_option_picky_tree) {
+		cmdline_option_picky_tree = cmdline_option_file;
 	}
 
 	/* set options needed for the verify --fix command */
@@ -237,6 +252,7 @@ enum swupd_code repair_main(int argc, char **argv)
 	verify_set_picky_tree(cmdline_option_picky_tree);
 	verify_set_extra_files_only(cmdline_option_extra_files_only);
 	verify_set_option_bundles(cmdline_bundles);
+	verify_set_option_file(cmdline_option_file);
 
 	/*
 	 * Steps for repair:
@@ -265,6 +281,9 @@ enum swupd_code repair_main(int argc, char **argv)
 	/* run verify --fix */
 	ret = execute_verify();
 
+	if (cmdline_option_picky_tree != cmdline_option_file) {
+		free_string(&cmdline_option_file);
+	}
 	free_string(&cmdline_option_picky_tree);
 	if (picky_whitelist) {
 		regfree(picky_whitelist);

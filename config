@@ -282,6 +282,9 @@
 # Like --picky, but it only searches for extra files (boolean value)
 #extra_files_only=<true/false>
 
+# Forces swupd to only diagnose the specified file or directory (recursively)
+#file=[PATH]
+
 
 [repair]
 
@@ -318,6 +321,9 @@
 
 # Like --picky, but it only removes extra files (boolean value)
 #extra_files_only=<true/false>
+
+# Forces swupd to only repair the specified file or directory (recursively)
+#file=[PATH]
 
 
 [os-install]

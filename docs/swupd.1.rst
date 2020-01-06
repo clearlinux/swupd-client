@@ -483,6 +483,11 @@ SUBCOMMANDS
        Like ``--picky``, but it only looks for extra files. It omits checking
        hash values, and for missing files, directories and/or symlinks.
 
+    -  ``--file``
+
+       Forces swupd to only diagnose the specified file or directory
+       (recursively).
+
 ``repair``
 
     Correct any issues found. This will overwrite incorrect file content,
@@ -557,6 +562,11 @@ SUBCOMMANDS
 
        Like ``--picky``, but it only removes extra files. It omits repairing
        corrupt files, and adding missing files, directories and/or symlinks.
+
+    -  ``--file``
+
+       Forces swupd to only repair the specified file or directory
+       (recursively).
 
 ``os-install``
 

@@ -38,9 +38,8 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Installing files...
-		Warning: Update target directory does not exist: .*/target-dir/usr/foo. Trying to fix it
-		Hash did not match for path : /usr ... fixing
-		Path /usr/foo is missing on the file system ... fixing
+		 -> Corrupt directory: $PATH_PREFIX/usr -> fixed
+		 -> Missing directory: $PATH_PREFIX/usr/foo -> fixed
 		Update was applied
 		Calling post-update helper scripts
 		1 files were not in a pack

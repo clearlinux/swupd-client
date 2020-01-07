@@ -210,8 +210,9 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 {
 	int ret = 0;
 	struct list *subs = NULL;
-	struct list *deps = NULL;
+	struct list *iter = NULL;
 	struct manifest *mom = NULL;
+	struct sub *bundle_sub = NULL;
 	int count = 0;
 
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
@@ -230,35 +231,24 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 	list_free_list(bundles);
 	if (ret != add_sub_NEW) {
 		// something went wrong or there were no includes, print a message and exit
-		char *m = NULL;
 		if (ret & add_sub_ERR) {
-			string_or_die(&m, "Processing error");
+			error("Cannot load included bundles\n");
 			ret = SWUPD_COULDNT_LOAD_MANIFEST;
 		} else if (ret & add_sub_BADNAME) {
 			ret = SWUPD_INVALID_BUNDLE;
 		} else {
-			string_or_die(&m, "Unknown error");
+			error("Unknown error\n");
 			ret = SWUPD_UNEXPECTED_CONDITION;
 		}
-
-		if (m) {
-			error("%s - Aborting\n", m);
-		}
-		free_string(&m);
-		goto out;
-	}
-	deps = recurse_manifest(mom, subs, NULL, false, NULL);
-	if (!deps) {
-		error("Cannot load included bundles\n");
-		ret = SWUPD_RECURSE_MANIFEST;
 		goto out;
 	}
 
 	progress_next_step("list_bundles", PROGRESS_UNDEFINED);
 
-	/* deps now includes the bundle indicated by bundle_name
-	 * if deps only has one bundle in it, no included packages were found */
-	if (list_len(deps) == 1) {
+	/* the list of subscription include the bundle indicated by bundle_name and os-core,
+	 * if deps has only two bundles in it, no included bundles were found */
+	const int MINIMAL_SUBSCRIPTIONS = 2;
+	if (strcmp(bundle_name, "os-core") == 0 || list_len(subs) <= MINIMAL_SUBSCRIPTIONS) {
 		info("\nNo included bundles\n");
 		ret = SWUPD_OK;
 		goto out;
@@ -266,18 +256,18 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 
 	info("\nBundles included by %s:\n", bundle_name);
 
-	struct list *iter;
-	iter = list_head(deps);
+	subs = list_sort(subs, subscription_sort_component);
+	iter = list_head(subs);
 	while (iter) {
-		struct manifest *included_bundle = iter->data;
+		bundle_sub = iter->data;
 		iter = iter->next;
-		// deps includes the bundle_name bundle, skip it
-		if (strcmp(bundle_name, included_bundle->component) == 0) {
+		// subs include the requested bundle, skip it
+		if (strcmp(bundle_name, bundle_sub->component) == 0) {
 			continue;
 		}
 
 		info(" - ");
-		print("%s\n", included_bundle->component);
+		print("%s\n", bundle_sub->component);
 		count++;
 	}
 	info("\nTotal: %d\n", count);
@@ -285,17 +275,8 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 	ret = SWUPD_OK;
 
 out:
-	if (mom) {
-		manifest_free(mom);
-	}
-
-	if (deps) {
-		list_free_list_and_data(deps, manifest_free_data);
-	}
-
-	if (subs) {
-		free_subscriptions(&subs);
-	}
+	manifest_free(mom);
+	free_subscriptions(&subs);
 
 	return ret;
 }

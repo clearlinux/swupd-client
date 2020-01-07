@@ -53,10 +53,10 @@ static void print_help(void)
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -q, --quick             Don't check for corrupt files, only find missing files\n");
 	print("   -B, --bundles=[BUNDLES] Forces swupd to only diagnose the specified BUNDLES. Example: --bundles=os-core,vi\n");
-	print("   -Y, --picky             Also list files which should not exist\n");
-	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky and --extra-files-only look for extra files. Default: /usr\n");
-	print("   -w, --picky-whitelist=[RE] Directories that match the regex get skipped. Example: /var|/etc/machine-id\n");
-	print("                           Default: %s\n", picky_whitelist_default);
+	print("   -Y, --picky             Also list files which should not exist. By default swupd only looks for them at /usr\n");
+	print("                           skipping /usr/lib/modules, /usr/lib/kernel, /usr/local, and /usr/src\n");
+	print("   -X, --picky-tree=[PATH] Changes the path where --picky and --extra-files-only look for extra files\n");
+	print("   -w, --picky-whitelist=[RE] Directories that match the regex get skipped during --picky. Example: /usr/man|/usr/doc\n");
 	print("   --extra-files-only      Like --picky, but it only performs this task\n");
 	print("\n");
 }

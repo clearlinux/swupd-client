@@ -177,11 +177,11 @@ static void print_help(void)
 		print("   -i, --install           This option has been superseded, please consider using \"swupd os-install\" instead\n");
 		print("   -Y, --picky             Also list (without --fix) or remove (with --fix) files which should not exist\n");
 	} else {
-		print("   -Y, --picky             Also list files which should not exist\n");
+		print("   -Y, --picky             Also list files which should not exist. By default swupd only looks for them at /usr\n");
+		print("                           skipping /usr/lib/modules, /usr/lib/kernel, /usr/local, and /usr/src\n");
 	}
-	print("   -X, --picky-tree=[PATH] Selects the sub-tree where --picky and --extra-files-only look for extra files. Default: /usr\n");
-	print("   -w, --picky-whitelist=[RE] Directories that match the regex get skipped. Example: /var|/etc/machine-id\n");
-	print("                           Default: %s\n", picky_whitelist_default);
+	print("   -X, --picky-tree=[PATH] Changes the path where --picky and --extra-files-only look for extra files\n");
+	print("   -w, --picky-whitelist=[RE] Directories that match the regex get skipped during --picky. Example: /usr/bin|/usr/doc\n");
 	print("   --extra-files-only      Like --picky, but it only performs this task\n");
 	print("\n");
 }

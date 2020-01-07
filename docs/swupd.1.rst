@@ -292,12 +292,19 @@ SUBCOMMANDS
     - `-Y, --picky`
 
         Also list files which should not exist. Only files listed in the
-        manifests should exist.
+        manifests should exist. By default swupd only looks for these
+        files at `/usr`, this path can be changed using --picky-tree.
+        Some paths at '`\usr` are skipped by default:
+        ``/usr/lib/modules``, ``/usr/lib/kernel``, ``/usr/local``
+        and ``/usr/src``. These paths can be changed using
+        --picky-whitelist.
 
     - `-X, --picky-tree=[PATH]`
 
-        Selects the sub-tree where --picky and --extra-files-only looks for extra files.
-        To be specified as absolute path. The default is `/usr`.
+        Changes the path where --picky and --extra-files-only looks for
+        extra files. To be specified as absolute path.
+
+        The default path is `/usr`.
 
     - `-w, --picky-whitelist=[RE]`
 
@@ -433,13 +440,19 @@ SUBCOMMANDS
 
     - `-Y, --picky`
 
-        Also remove files which should not exist. Only files listed in the
-        manifests should exist.
+        Also removes files which should not exist. Only files listed in the
+        manifests should exist. By default swupd only looks for these
+        files at `/usr`, this path can be changed using --picky-tree.
+        Some paths at '`\usr` are skipped by default:
+        ``/usr/lib/modules``, ``/usr/lib/kernel``, ``/usr/local``
+        and ``/usr/src``. These paths can be changed using
+        --picky-whitelist.
 
     - `-X, --picky-tree=[PATH]`
 
-        Selects the sub-tree where --picky and --extra-files-only looks for extra files.
-        To be specified as absolute path. The default is `/usr`.
+        Changes the path where --picky and --extra-files-only looks for
+        extra files. To be specified as absolute path.
+        The default path is `/usr`.
 
     - `-w, --picky-whitelist=[RE]`
 

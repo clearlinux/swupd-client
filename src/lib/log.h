@@ -56,8 +56,12 @@ void log_full(int log_level, FILE *out, const char *file, int line, const char *
 #define print(_fmt, ...) log_full(LOG_ALWAYS, stdout, __FILE__, __LINE__, NULL, _fmt, ##__VA_ARGS__);
 /** @brief Print messages using LOG_ERROR level. */
 #define error(_fmt, ...) log_full(LOG_ERROR, stderr, __FILE__, __LINE__, "Error", _fmt, ##__VA_ARGS__);
+/** @brief Print messages using LOG_ERROR level with no label. */
+#define error_unlabeled(_fmt, ...) log_full(LOG_ERROR, stderr, __FILE__, __LINE__, NULL, _fmt, ##__VA_ARGS__);
 /** @brief Print messages using LOG_WARN level. */
 #define warn(_fmt, ...) log_full(LOG_WARN, stderr, __FILE__, __LINE__, "Warning", _fmt, ##__VA_ARGS__);
+/** @brief Print messages using LOG_WARN level with no label. */
+#define warn_unlabeled(_fmt, ...) log_full(LOG_WARN, stderr, __FILE__, __LINE__, NULL, _fmt, ##__VA_ARGS__);
 /** @brief Print messages using LOG_INFO level. */
 #define info(_fmt, ...) log_full(LOG_INFO, stdout, __FILE__, __LINE__, NULL, _fmt, ##__VA_ARGS__);
 /** @brief Print messages using LOG_INFO_VERBOSE level. */

@@ -83,8 +83,8 @@ static void print_help(void)
 
 	print("Options:\n");
 	print("   -a, --all               List all available bundles for the current version of Clear Linux\n");
-	print("   -D, --has-dep=[BUNDLE]  List all bundles which have BUNDLE as a dependency\n");
-	print("   --deps=[BUNDLE]         List bundles included by BUNDLE\n");
+	print("   -D, --has-dep=[BUNDLE]  List all bundles which have BUNDLE as a dependency (use --verbose for tree view)\n");
+	print("   --deps=[BUNDLE]         List BUNDLE dependencies (use --verbose for tree view)\n");
 	print("\n");
 }
 
@@ -209,11 +209,12 @@ static enum swupd_code list_local_bundles(int version)
 static enum swupd_code show_included_bundles(char *bundle_name, int version)
 {
 	int ret = 0;
+	struct list *bundles = NULL;
 	struct list *subs = NULL;
 	struct list *iter = NULL;
 	struct manifest *mom = NULL;
 	struct sub *bundle_sub = NULL;
-	int count = 0;
+	bool verbose = (log_get_level() == LOG_INFO_VERBOSE);
 
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	info("Loading required manifests...\n");
@@ -225,10 +226,8 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 	}
 
 	// add_subscriptions takes a list, so construct one with only bundle_name
-	struct list *bundles = NULL;
 	bundles = list_prepend_data(bundles, bundle_name);
 	ret = add_subscriptions(bundles, &subs, mom, true, 0);
-	list_free_list(bundles);
 	if (ret != add_sub_NEW) {
 		// something went wrong or there were no includes, print a message and exit
 		if (ret & add_sub_ERR) {
@@ -256,25 +255,28 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 
 	info("\nBundles included by %s:\n", bundle_name);
 
-	subs = list_sort(subs, subscription_sort_component);
-	iter = list_head(subs);
-	while (iter) {
-		bundle_sub = iter->data;
-		iter = iter->next;
-		// subs include the requested bundle, skip it
-		if (strcmp(bundle_name, bundle_sub->component) == 0) {
-			continue;
+	if (verbose) {
+		ret = subscription_get_tree(bundles, &subs, mom, true, 0);
+	} else {
+		subs = list_sort(subs, subscription_sort_component);
+		iter = list_head(subs);
+		while (iter) {
+			bundle_sub = iter->data;
+			iter = iter->next;
+			// subs include the requested bundle, skip it
+			if (strcmp(bundle_name, bundle_sub->component) == 0) {
+				continue;
+			}
+			info(" - ");
+			print("%s\n", bundle_sub->component);
 		}
-
-		info(" - ");
-		print("%s\n", bundle_sub->component);
-		count++;
 	}
-	info("\nTotal: %d\n", count);
+	info("\nTotal: %d\n", list_len(subs) - 1);
 
 	ret = SWUPD_OK;
 
 out:
+	list_free_list(bundles);
 	manifest_free(mom);
 	free_subscriptions(&subs);
 

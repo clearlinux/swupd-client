@@ -207,7 +207,7 @@ void create_and_append_subscription(struct list **subs, const char *component)
    2 new subscriptions
    4 bad name given
 */
-int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion)
+static int recurse_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion, subs_fn_t subs_fn)
 {
 	char *bundle;
 	int manifest_err;
@@ -241,24 +241,13 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 			goto out;
 		}
 
-		/*
-		 * If we're recursing a tree of includes, we need to cut out early
-		 * if the bundle we're looking at is already subscribed...
-		 * Because if it is, we'll visit it soon anyway at the top level.
-		 *
-		 * We can't do this for the toplevel of the recursion because
-		 * that is how we initiallly fill in the include tree.
-		 */
-		if (set_subscription_obligation(*subs, bundle, force_optional | is_optional)) {
-			if (recursion > 0) {
-				manifest_free(manifest);
-				continue;
-			}
-		} else {
-			// Just add it to a list if it doesn't exist
-			create_new_subscription(subs, bundle, force_optional | is_optional);
-			ret |= add_sub_NEW; /* We have added at least one */
+		if (!subs_fn(subs, bundle, recursion, force_optional | is_optional)) {
+			/* nothing else to do with the current bundle */
+			manifest_free(manifest);
+			continue;
 		}
+
+		ret |= add_sub_NEW; /* We have gone through at least one bundle */
 
 		if (!globals.skip_optional_bundles && manifest->optional) {
 			/* merge in recursive call results, all bundles added via an optional
@@ -267,7 +256,7 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 				force_optional = true;
 			}
 			is_optional = true;
-			ret |= add_subscriptions(manifest->optional, subs, mom, find_all, recursion + 1);
+			ret |= recurse_subscriptions(manifest->optional, subs, mom, find_all, recursion + 1, subs_fn);
 		}
 
 		if (manifest->includes) {
@@ -276,11 +265,56 @@ int add_subscriptions(struct list *bundles, struct list **subs, struct manifest 
 				force_optional = false;
 			}
 			is_optional = false;
-			ret |= add_subscriptions(manifest->includes, subs, mom, find_all, recursion + 1);
+			ret |= recurse_subscriptions(manifest->includes, subs, mom, find_all, recursion + 1, subs_fn);
 		}
 
 		manifest_free(manifest);
 	}
 out:
 	return ret;
+}
+
+static bool create_subscriptions(struct list **subs, const char *component, int recursion, bool is_optional)
+{
+	/*
+	 * If we're recursing a tree of includes, we need to cut out early
+	 * if the bundle we're looking at is already subscribed...
+	 * Because if it is, we'll visit it soon anyway at the top level.
+	 *
+	 * We can't do this for the toplevel of the recursion because
+	 * that is how we initiallly fill in the include tree.
+	 */
+	if (set_subscription_obligation(*subs, (char *)component, is_optional)) {
+		if (recursion > 0) {
+			return false;
+		}
+		return true;
+	}
+	create_new_subscription(subs, component, is_optional);
+
+	return true;
+}
+
+static bool print_subscriptions_tree(UNUSED_PARAM struct list **subs, const char *component, int recursion, UNUSED_PARAM bool is_optional)
+{
+	int indent = 0;
+
+	if (recursion == 0) {
+		info("%*s* %s\n", 2, "", component);
+	} else {
+		indent = recursion * 4;
+		info("%*s|-- %s\n", indent, "", component);
+	}
+
+	return true;
+}
+
+int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion)
+{
+	return recurse_subscriptions(bundles, subs, mom, find_all, recursion, create_subscriptions);
+}
+
+int subscription_get_tree(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion)
+{
+	return recurse_subscriptions(bundles, subs, mom, find_all, recursion, print_subscriptions_tree);
 }

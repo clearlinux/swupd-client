@@ -17,13 +17,34 @@ test_setup() {
 @test "LST007: List bundle's dependencies when bundle has nested dependencies" {
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --deps test-bundle1"
-	assert_status_is 0
+
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 
 		Bundles included by test-bundle1:
 		 - test-bundle2
 		 - test-bundle3
+
+		Total: 2
+	EOM
+	)
+	assert_is_output --identical "$expected_output"
+
+}
+
+@test "LST023: List bundle's dependencies (with nested deps) in a tree view" {
+
+	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --deps test-bundle1 --verbose"
+
+	assert_status_is "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		Loading required manifests...
+
+		Bundles included by test-bundle1:
+		  * test-bundle1
+		    |-- test-bundle2
+		        |-- test-bundle3
 
 		Total: 2
 	EOM

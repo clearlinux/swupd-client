@@ -321,10 +321,12 @@ extern int link_or_rename(const char *orig, const char *dest);
 extern int create_state_dirs(const char *state_dir_path);
 
 /* subscription.c */
+typedef bool (*subs_fn_t)(struct list **subs, const char *component, int recursion, bool is_optional);
 struct list *free_list_file(struct list *item);
 extern void create_and_append_subscription(struct list **subs, const char *component);
 extern char *get_tracking_dir(void);
 extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
+extern int subscription_get_tree(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
 extern int subscription_bundlename_strcmp(const void *a, const void *b);
 extern int subscription_sort_component(const void *a, const void *b);
 

@@ -488,19 +488,7 @@ set_env_variables() { # swupd_function
 	export CLIENT_CERT_DIR="$testfs_path/target-dir/etc/swupd"
 	export CLIENT_CERT="$CLIENT_CERT_DIR/client.pem"
 	export CACERT_DIR="$SWUPD_DIR/swupd_test_certificates" # trusted key store path
-	export PORT_FILE="$path/$env_name/port_file.txt" # stores web server port
-	export SERVER_PID_FILE="$path/$env_name/pid_file.txt" # stores web server pid
 
-	# Add environment variables for PORT and SERVER_PID when web server used
-	if [ -f "$PORT_FILE" ]; then
-		PORT=$(cat "$PORT_FILE")
-		export PORT
-	fi
-
-	if [ -f "$SERVER_PID_FILE" ]; then
-		SERVER_PID=$(cat "$SERVER_PID_FILE")
-		export SERVER_PID
-	fi
 
 }
 
@@ -2103,6 +2091,7 @@ start_web_server() { # swupd_function
 	local port
 	local server_args
 	local status
+	local hostname
 
 	web_server_usage() {
 		cat <<-EOF
@@ -2130,7 +2119,8 @@ start_web_server() { # swupd_function
 		    -d    File name that will be partially downloaded on the first attempt and successfully
 		          downloaded on the second attempt
 		    -f    Forces the web server to respond with a specific code to any request
-
+		    -h    Optional hostname if we need to create more than one
+		    server
 		Notes:
 		    - When the server is using SSL authentication, a pair of corresponding public and private keys must be passed
 		      as arguments.
@@ -2145,7 +2135,7 @@ start_web_server() { # swupd_function
 		EOF
 	}
 
-	while getopts :c:d:k:p:st:rP:D:l:n:Hf: opt; do
+	while getopts :c:d:k:p:st:rP:D:l:n:Hf:h: opt; do
 		case "$opt" in
 			c)	server_args="$server_args --client-cert $OPTARG" ;;
 			d)	server_args="$server_args --partial-download-file $OPTARG" ;;
@@ -2160,6 +2150,8 @@ start_web_server() { # swupd_function
 			n)	server_args="$server_args --after-requests $OPTARG" ;;
 			H)	server_args="$server_args --hang-server" ;;
 			f)	server_args="$server_args --force-response $OPTARG" ;;
+			h)	server_args="$server_args --hostname $OPTARG"
+				hostname=${OPTARG:=localhost} ;;
 			*)	web_server_usage
 				return ;;
 		esac
@@ -2171,19 +2163,21 @@ start_web_server() { # swupd_function
 	else
 		sudo sh -c "python3 $FUNC_DIR/server.py $server_args &"
 	fi
+	
+	echo "127.0.0.1 $hostname" | sudo tee -a /etc/hosts
 
 	# make sure localhost is present in no_proxy settings
-	if [ -n "$no_proxy" ] && grep -v 'localhost' <<< "$no_proxy"; then
-		no_proxy="${no_proxy},localhost"
+	if [ -n "$no_proxy" ] && grep -v "$hostname" <<< "$no_proxy"; then
+		no_proxy="${no_proxy},$hostname"
 	elif [ -z "$no_proxy" ]; then
-		no_proxy="localhost"
+		no_proxy="$hostname"
 	fi
 	export no_proxy
 
 	# wait for server to be available
 	for i in $(seq 1 100); do
 		if [ -f "$PORT_FILE" ]; then
-			port=$(get_web_server_port "$TEST_NAME")
+			port=$(get_web_server_port "$TEST_NAME" "$hostname")
 			status=0
 
 			# use https when the server is using certificates
@@ -2191,9 +2185,9 @@ start_web_server() { # swupd_function
 				# to avoid hanging the server while testing for the connection to be ready
 				# when the -H (hang server) option is set, we need to use the special url
 				# "/test-connection"
-				curl https://localhost:"$port"/test-connection > /dev/null --silent || status=$?
+				curl --noproxy "$hostname" https://"$hostname":"$port"/test-connection > /dev/null --silent || status=$?
 			else
-				curl http://localhost:"$port"/test-connection > /dev/null --silent || status=$?
+				curl --noproxy "$hostname" http://"$hostname":"$port"/test-connection > /dev/null --silent || status=$?
 			fi
 
 			# the web server is ready for connections when 0 or 60 is returned. When using
@@ -2212,8 +2206,38 @@ start_web_server() { # swupd_function
 		sleep 1
 	done
 
-	print "Web server port: $port"
-	print "Web server PID: $(cat "$SERVER_PID_FILE")"
+	print "Web server port: $(cat "$env_name/$hostname".port_file.txt)"
+	print "Web server PID: $(cat "$env_name/$hostname".pid_file.txt)"
+
+}
+
+# gets the pid used by the web server if found
+get_web_server_pid() { # swupd_function
+
+	local env_name=$1
+	local hostname=${$2:=localhost}
+
+	if [ -z "$SERVER_PID_FILE" ] && [ -z "$env_name" ]; then
+		cat <<-EOM
+			Usage:
+		        get_web_server_pid [ENV_NAME]
+
+			Note: the ENV_NAME does not need to be specified if the PORT_FILE env
+			      variable is set.
+
+			EOM
+		terminate "No server pid file was found. Please specify a test environment"
+	fi
+
+	if [ -z "$SERVER_PID_FILE" ] && [ -n "$env_name" ]; then
+		SERVER_PID_FILE="$env_name/$hostname.pid_file.txt"
+	fi
+
+	if [ ! -e "$SERVER_PID_FILE" ]; then
+		terminate "The specified pid file was not found"
+	fi
+
+	cat "$SERVER_PID_FILE"
 
 }
 
@@ -2221,6 +2245,7 @@ start_web_server() { # swupd_function
 get_web_server_port() { # swupd_function
 
 	local env_name=$1
+	local hostname=${$2:=localhost}
 
 	if [ -z "$PORT_FILE" ] && [ -z "$env_name" ]; then
 		cat <<-EOM
@@ -2235,7 +2260,7 @@ get_web_server_port() { # swupd_function
 	fi
 
 	if [ -z "$PORT_FILE" ] && [ -n "$env_name" ]; then
-		PORT_FILE="$env_name/port_file.txt"
+		PORT_FILE="$env_name/$hostname.port_file.txt"
 	fi
 
 	if [ ! -e "$PORT_FILE" ]; then

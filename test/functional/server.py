@@ -226,6 +226,8 @@ def parse_arguments():
                         help="forces the web server to respond with a specific"
                         "code to any request")
 
+    parser.add_argument("--hostname", default="localhost", help="makes the host reachable by hostname")
+
     return parser.parse_args()
 
 
@@ -237,7 +239,7 @@ if __name__ == "__main__":
     if args.reachable:
         addr = ("0.0.0.0", args.port)
     else:
-        addr = ("localhost", args.port)
+        addr = (args.hostname, args.port)
     partial_download_file = args.partial_download_file
     if args.slow_server:
         time_delay = (args.time_delay if args.time_delay else 1)/1000
@@ -253,14 +255,14 @@ if __name__ == "__main__":
     # write pid to file to be read by other processes
     pid = os.getpid()
     if args.pid_file:
-        with open(args.pid_file, "w") as f:
+        with open('.'.join(args.hostname, args.pid_file), "w") as f:
             f.write(str(pid))
     print("Web server PID: ", pid)
 
     # write port to file which can be read by other processes
     port = httpd.socket.getsockname()[1]
     if args.port_file:
-        with open(args.port_file, "w") as f:
+        with open('.'.join(args.hostname, args.port_file), "w") as f:
             f.write(str(port))
     print("Web server port: ", port)
 

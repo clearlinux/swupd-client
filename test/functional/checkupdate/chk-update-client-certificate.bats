@@ -75,7 +75,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_OK"
 }
 
 @test "CHK007: Try checking for available updates over HTTPS with no client certificate" {
@@ -106,4 +106,22 @@ global_teardown() {
 	EOM
 	)
 	assert_regex_in_output "$expected_output"
+}
+
+@test "CHK012: Force checking for available updates over HTTPS with an invalid signature for latest version" {
+
+	# move the signature to create a missing signature which should ideally fail check-update
+	sudo sh -c "mv $WEBDIR/version/latest_version.sig $WEBDIR/version/latest_version_bad_name.sig"
+	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS --nosigcheck"
+
+	assert_status_is "$SWUPD_OK"
+
+	expected_output=$(cat <<-EOM
+		Current OS version: 10
+		Latest server version: 100
+		There is a new OS version available: 100
+	EOM
+	)
+	assert_regex_in_output "$expected_output"
+
 }

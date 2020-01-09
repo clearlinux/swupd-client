@@ -30,6 +30,8 @@
 #define FLAG_ALL 2000
 #define FLAG_DRY_RUN 2001
 
+static const int BLOCK_SIZE = 512;
+
 static void print_help(void)
 {
 	print("Remove cached content used for updates from state directory\n\n");
@@ -52,6 +54,7 @@ static struct {
 
 static struct {
 	int files_removed;
+	long bytes_removed;
 } stats;
 
 int clean_get_stats(void)
@@ -114,6 +117,8 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 {
 	int ret = SWUPD_OK;
 	DIR *dir;
+	struct stat st;
+	long size;
 
 	dir = opendir(path);
 	if (!dir) {
@@ -142,10 +147,23 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 			continue;
 		}
 
-		string_or_die(&file, "%s/%s", path, entry->d_name);
+		file = sys_path_join(path, entry->d_name);
 
 		if (!pred(path, entry)) {
 			continue;
+		}
+
+		if (lstat(file, &st) == 0) {
+			/* a file being removed (unlinked) may have many hardlinks which may
+			 * stay in the system, so the only files being trully removed are
+			 * those which only have one inode left in the system.
+			 * This also means that when doing dry-run we can only guess how
+			 * much space we would free since we cannot know what inodes will
+			 * have all their hardlinks removed */
+			size = st.st_nlink == 1 ? (st.st_blocks * BLOCK_SIZE) : 0;
+		} else {
+			size = 0;
+			warn("Couldn't get file size: %s\n", file);
 		}
 
 		if (dry_run) {
@@ -158,6 +176,7 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 		}
 		if (ret == 0) {
 			stats.files_removed++;
+			stats.bytes_removed += size;
 		}
 	}
 
@@ -293,6 +312,8 @@ end:
 static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bool all)
 {
 	DIR *dir;
+	struct stat st;
+	long size;
 
 	dir = opendir(path);
 	if (!dir) {
@@ -335,8 +356,7 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 			continue;
 		}
 
-		char *version_dir;
-		string_or_die(&version_dir, "%s/%s", globals.state_dir, name);
+		char *version_dir = sys_path_join(globals.state_dir, name);
 
 		/* This is not precise: it may keep Manifest files that we don't use, and
 		 * also will keep the previous version. If that extra precision is
@@ -350,7 +370,14 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 		}
 
 		/* Remove empty dirs if possible. */
-		(void)rmdir(version_dir);
+		if (lstat(version_dir, &st) == 0) {
+			size = st.st_blocks * BLOCK_SIZE;
+		} else {
+			size = 0;
+		}
+		if (!rmdir(version_dir) || (dry_run && all)) {
+			stats.bytes_removed += size;
+		}
 
 		free_string(&version_dir);
 		if (ret != 0) {
@@ -367,6 +394,7 @@ enum swupd_code clean_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
 	const int steps_in_clean = 0;
+	char *bytes_removed_pretty = NULL;
 
 	if (!parse_options(argc, argv)) {
 		print("\n");
@@ -390,14 +418,19 @@ enum swupd_code clean_main(int argc, char **argv)
 	/* TODO: Consider having a mode for clean that parses the current manifest (if available)
 	 * and keeping all the staged files of the current version. This helps recovering the
 	 * current version. Or do it for the previous version to allow a rollback. */
+
 	ret = clean_statedir(options.dry_run, options.all);
 
 	/* TODO: Also print the bytes removed, need to take into account the hardlinks. */
+	prettify_size(stats.bytes_removed, &bytes_removed_pretty);
 	if (options.dry_run) {
 		print("Would remove %d files\n", stats.files_removed);
+		print("Aproximatelly %s would be freed\n", bytes_removed_pretty);
 	} else {
 		print("%d files removed\n", stats.files_removed);
+		print("%s freed\n", bytes_removed_pretty);
 	}
+	free_string(&bytes_removed_pretty);
 
 	swupd_deinit();
 	progress_finish_steps(ret);
@@ -421,7 +454,7 @@ enum swupd_code clean_statedir(bool dry_run, bool all)
 		}
 	}
 
-	string_or_die(&staged_dir, "%s/staged", globals.state_dir);
+	staged_dir = sys_path_join(globals.state_dir, "staged");
 	ret = remove_if(staged_dir, dry_run, is_fullfile);
 	free_string(&staged_dir);
 	if (ret != SWUPD_OK) {

@@ -237,7 +237,7 @@ int create_state_dirs(const char *state_dir_path)
 	unsigned int i;
 	char *dir;
 #define STATE_DIR_COUNT (sizeof(state_dirs) / sizeof(state_dirs[0]))
-	const char *state_dirs[] = { "delta", "staged", "download", "telemetry", "bundles", "3rd_party" };
+	const char *state_dirs[] = { "delta", "staged", "download", "telemetry", "bundles", "3rd-party" };
 
 	// check for existence
 	if (ensure_root_owned_dir(state_dir_path)) {

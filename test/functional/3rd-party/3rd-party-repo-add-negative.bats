@@ -6,7 +6,7 @@
 load "../testlib"
 
 test_path=$(realpath "$TEST_NAME")
-repo="$test_path"/3rd_party/test-repo1
+repo="$test_path"/3rd-party/test-repo1
 
 global_setup() {
 

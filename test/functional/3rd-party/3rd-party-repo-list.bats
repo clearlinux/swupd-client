@@ -28,8 +28,8 @@ test_setup(){
 	EOM
 	)
 
-	repo_config_file="$STATEDIR"/3rd_party/repo.ini
-	run sudo sh -c "mkdir -p $STATEDIR/3rd_party/"
+	repo_config_file="$STATEDIR"/3rd-party/repo.ini
+	run sudo sh -c "mkdir -p $STATEDIR/3rd-party/"
 	run sudo sh -c "mkdir -p $PATH_PREFIX/opt/3rd-party/{test1,test2,test3,test4,test5}"
 	write_to_protected_file -a "$repo_config_file" "$contents"
 

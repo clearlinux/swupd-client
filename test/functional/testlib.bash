@@ -1358,7 +1358,7 @@ set_current_version() { # swupd_function
 	validate_path "$env_name"
 
 	if [ -n "$repo_name" ]; then
-		os_release="$env_name"/testfs/target-dir/opt/3rd_party/"$repo_name"/usr/lib/os-release
+		os_release="$env_name"/testfs/target-dir/opt/3rd-party/"$repo_name"/usr/lib/os-release
 	else
 		os_release="$env_name"/testfs/target-dir/usr/lib/os-release
 	fi
@@ -1424,12 +1424,12 @@ create_third_party_repo() { #swupd_function
 	# we need to create os-core which should include the os-release and Swupd_Root.pem
 	debug_msg "Creating os-core with Swupd_Root.pem and os-release..."
 	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$TEST_ROOT_DIR"/Swupd_Root.pem)
-	sudo cp -p "$TEST_ROOT_DIR"/Swupd_Root.pem "$env_name"/3rd_party/"$repo_name"/"$version"/files/"$hashed_name"
-	create_tar "$env_name"/3rd_party/"$repo_name"/"$version"/files/"$hashed_name"
-	CERT="$env_name"/3rd_party/"$repo_name"/"$version"/files/"$hashed_name"
+	sudo cp -p "$TEST_ROOT_DIR"/Swupd_Root.pem "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
+	create_tar "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
+	CERT="$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
 	create_bundle -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$CERT",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
 
-	TPWEBDIR=$(realpath "$env_name/3rd_party/$repo_name")
+	TPWEBDIR=$(realpath "$env_name/3rd-party/$repo_name")
 	export TPWEBDIR
 	debug_msg "3rd-party repo content dir: $TPWEBDIR"
 	debug_msg "3rd-party repo created successfully"
@@ -1467,7 +1467,7 @@ add_third_party_repo() { #swupd_function
 	path=$(dirname "$(realpath "$env_name")")
 
 	# create the state dir for the 3rd-party repo
-	repo_state_dir="$STATEDIR"/3rd_party/"$repo_name"
+	repo_state_dir="$STATEDIR"/3rd-party/"$repo_name"
 	debug_msg "Creating a state directory for repo $repo_name at $repo_state_dir"
 	sudo mkdir -p "$repo_state_dir"/{staged,download,delta,telemetry,bundles}
 
@@ -1478,13 +1478,13 @@ add_third_party_repo() { #swupd_function
 	# add the new repo to the repo.ini file
 	{
 		printf '[%s]\n\n' "$repo_name"
-		printf 'URL=%s\n\n' "file://$path/$env_name/3rd_party/$repo_name"
+		printf 'URL=%s\n\n' "file://$path/$env_name/3rd-party/$repo_name"
 		printf 'VERSION=%s\n\n' "$version"
-	} | sudo tee -a "$STATEDIR"/3rd_party/repo.ini > /dev/null
+	} | sudo tee -a "$STATEDIR"/3rd-party/repo.ini > /dev/null
 
 	sudo chmod -R 0700 "$STATEDIR"
 	export TPSTATEDIR="$repo_state_dir"
-	export TPWEBDIR="$env_name"/3rd_party/"$repo_name"
+	export TPWEBDIR="$env_name"/3rd-party/"$repo_name"
 	debug_msg "3rd-party repo state dir: $TPSTATEDIR"
 	debug_msg "3rd-party repo content dir: $TPWEBDIR"
 
@@ -1492,9 +1492,9 @@ add_third_party_repo() { #swupd_function
 	# added by default which should include the os-release and Swupd_Root.pem
 	debug_msg "Adding bundle os-core to the 3rd-party repo"
 	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$TEST_ROOT_DIR"/Swupd_Root.pem)
-	sudo cp -p "$TEST_ROOT_DIR"/Swupd_Root.pem "$env_name"/3rd_party/"$repo_name"/"$version"/files/"$hashed_name"
-	create_tar "$env_name"/3rd_party/"$repo_name"/"$version"/files/"$hashed_name"
-	CERT="$env_name"/3rd_party/"$repo_name"/"$version"/files/"$hashed_name"
+	sudo cp -p "$TEST_ROOT_DIR"/Swupd_Root.pem "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
+	create_tar "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
+	CERT="$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
 	create_bundle -L -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$CERT",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
 
 }
@@ -1550,7 +1550,7 @@ create_version() { # swupd_function
 
 	# if a content_dir is specified it means we are using a 3rd-party repo
 	if [ "$content_dir" != web-dir ]; then
-		content_dir=3rd_party/"$content_dir"
+		content_dir=3rd-party/"$content_dir"
 	fi
 
 	debug_msg "Creating content for version $version at $content_dir..."
@@ -1757,7 +1757,7 @@ create_test_environment() { # swupd_function
 
 	# state files & dirs
 	debug_msg "Creating a state dir"
-	sudo mkdir -p "$statedir"/{staged,download,delta,telemetry,bundles,3rd_party}
+	sudo mkdir -p "$statedir"/{staged,download,delta,telemetry,bundles,3rd-party}
 	sudo chmod -R 0700 "$statedir"
 
 	# export environment variables that are dependent of the test env
@@ -2375,9 +2375,9 @@ create_bundle() { # swupd_function
 
 	# if a 3rd-party repo was specified, the bundle should be created in there
 	if [ "$third_party" = true ]; then
-		state_path="$env_name"/testfs/state/3rd_party/"$repo_name"
-		target_path="$env_name"/testfs/target-dir/opt/3rd_party/"$repo_name"
-		content_dir=3rd_party/"$repo_name"
+		state_path="$env_name"/testfs/state/3rd-party/"$repo_name"
+		target_path="$env_name"/testfs/target-dir/opt/3rd-party/"$repo_name"
+		content_dir=3rd-party/"$repo_name"
 	else
 		target_path="$env_name"/testfs/target-dir
 		content_dir=web-dir
@@ -2643,7 +2643,7 @@ remove_bundle() { # swupd_function
 	if [ -z "$repo_name" ]; then
 		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir
 	else
-		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/opt/3rd_party/"$repo_name"
+		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/opt/3rd-party/"$repo_name"
 	fi
 	version_path=$(dirname "$bundle_manifest")
 	manifest_file=$(basename "$bundle_manifest")
@@ -2705,7 +2705,7 @@ install_bundle() { # swupd_function
 	if [ -z "$repo_name" ]; then
 		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir
 	else
-		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/opt/3rd_party/"$repo_name"
+		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/opt/3rd-party/"$repo_name"
 	fi
 	files_path=$(dirname "$bundle_manifest")/files
 	manifest_file=$(basename "$bundle_manifest")
@@ -2843,7 +2843,7 @@ update_bundle() { # swupd_function
 
 	# if a 3rd-party repo was specified, set it up
 	if [ -n "$repo_name" ]; then
-		content_dir="$env_name"/3rd_party/"$repo_name"
+		content_dir="$env_name"/3rd-party/"$repo_name"
 	else
 		content_dir="$env_name"/web-dir
 	fi
@@ -3262,8 +3262,8 @@ clean_state_dir() { # swupd_function
 		sudo rm -rf "$env_name"/testfs/state
 		sudo mkdir -p "$env_name"/testfs/state/{staged,download,delta,telemetry}
 	else
-		sudo rm -rf "$env_name"/testfs/state/3rd_party/"$repo_name"
-		sudo mkdir -p "$env_name"/testfs/state/3rd_party/"$repo_name"/{staged,download,delta,telemetry,bundles}
+		sudo rm -rf "$env_name"/testfs/state/3rd-party/"$repo_name"
+		sudo mkdir -p "$env_name"/testfs/state/3rd-party/"$repo_name"/{staged,download,delta,telemetry,bundles}
 	fi
 	sudo chmod -R 0700 "$env_name"/testfs/state
 

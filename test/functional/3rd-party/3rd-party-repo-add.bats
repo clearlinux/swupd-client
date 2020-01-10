@@ -40,7 +40,7 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	run sudo sh -c "cat $STATEDIR/3rd_party/repo.ini"
+	run sudo sh -c "cat $STATEDIR/3rd-party/repo.ini"
 	expected_output=$(cat <<-EOM
 			[test-repo1]
 			url=file://$repo1
@@ -49,8 +49,8 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# make sure the os-core bundle of the repo is installed in the appropriate place
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo1/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo1/usr/lib/os-release
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo1/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo1/usr/lib/os-release
 
 }
 
@@ -64,8 +64,8 @@ test_setup() {
 	EOM
 	)
 	assert_in_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo1/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo1/usr/lib/os-release
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo1/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo1/usr/lib/os-release
 
 	run sudo sh -c "$SWUPD 3rd-party add test-repo2 file://$repo2 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
@@ -74,10 +74,10 @@ test_setup() {
 	EOM
 	)
 	assert_in_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo2/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo2/usr/lib/os-release
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/usr/lib/os-release
 
-	run sudo sh -c "cat $STATEDIR/3rd_party/repo.ini"
+	run sudo sh -c "cat $STATEDIR/3rd-party/repo.ini"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 			[test-repo1]

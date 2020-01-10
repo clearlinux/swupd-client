@@ -6,7 +6,7 @@
 load "../testlib"
 
 test_path=$(realpath "$TEST_NAME")
-repo="$test_path"/3rd_party/my_repo
+repo="$test_path"/3rd-party/my_repo
 
 global_setup() {
 
@@ -71,7 +71,7 @@ global_teardown() {
 	assert_in_output "$expected_output"
 	assert_in_output "Repository added successfully"
 
-	run sudo sh -c "cat $STATEDIR/3rd_party/repo.ini"
+	run sudo sh -c "cat $STATEDIR/3rd-party/repo.ini"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		[my_repo]
@@ -79,6 +79,6 @@ global_teardown() {
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/my_repo/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/my_repo/usr/lib/os-release
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/my_repo/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/my_repo/usr/lib/os-release
 }

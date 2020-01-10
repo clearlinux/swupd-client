@@ -14,6 +14,8 @@ extern "C" {
 
 #ifdef THIRDPARTY
 
+#define SWUPD_3RD_PARTY_DIRNAME "3rd-party"
+
 /** @brief Store information of a repository.  */
 struct repo {
 	char *name;

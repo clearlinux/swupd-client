@@ -42,8 +42,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo2/foo/file_2
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo2/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/foo/file_2
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TPSTATEDIR"/bundles/test-bundle2
 
 }
@@ -98,14 +98,14 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo2/foo/file_2
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo2/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/foo/file_2
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TPSTATEDIR"/bundles/test-bundle2
-	assert_file_not_exists "$TARGETDIR"/opt/3rd_party/test-repo2/usr/share/clear/bundles/upstream-bundle
+	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/test-repo2/usr/share/clear/bundles/upstream-bundle
 
 	# same scenario with the arguments switched
 
-	remove_bundle -L "$TEST_NAME"/3rd_party/test-repo2/10/Manifest.test-bundle2 test-repo2
+	remove_bundle -L "$TEST_NAME"/3rd-party/test-repo2/10/Manifest.test-bundle2 test-repo2
 	clean_state_dir "$TEST_NAME" test-repo2
 
 	run sudo sh -c "$SWUPD 3rd-party bundle-add $SWUPD_OPTS test-bundle2 upstream-bundle"
@@ -127,7 +127,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo2/foo/file_2
-	assert_file_exists "$TARGETDIR"/opt/3rd_party/test-repo2/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/foo/file_2
+	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TPSTATEDIR"/bundles/test-bundle2
 }

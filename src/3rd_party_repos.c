@@ -28,7 +28,7 @@
 
 static char *get_repo_config_path(void)
 {
-	return str_or_die("%s/%s/%s", globals.state_dir, "3rd_party", "repo.ini");
+	return str_or_die("%s/%s/%s", globals.state_dir, SWUPD_3RD_PARTY_DIRNAME, "repo.ini");
 }
 
 int repo_name_cmp(const void *repo, const void *name)
@@ -238,7 +238,7 @@ int third_party_remove_repo_directory(const char *repo_name)
 	int ret_code = 0;
 
 	//TODO: use a global function to get this value
-	repo_dir = str_or_die("%s/opt/3rd_party/%s", globals.path_prefix, repo_name);
+	repo_dir = str_or_die("%s/opt/%s/%s", globals.path_prefix, SWUPD_3RD_PARTY_DIRNAME, repo_name);
 	ret = sys_rm_recursive(repo_dir);
 	if (ret < 0 && ret != -ENOENT) {
 		error("Failed to delete repository directory\n");
@@ -246,7 +246,7 @@ int third_party_remove_repo_directory(const char *repo_name)
 	}
 	free(repo_dir);
 
-	repo_dir = str_or_die("%s/3rd_party/%s", globals.state_dir, repo_name);
+	repo_dir = str_or_die("%s/%s/%s", globals.state_dir, SWUPD_3RD_PARTY_DIRNAME, repo_name);
 	ret = sys_rm_recursive(repo_dir);
 	if (ret < 0 && ret != -ENOENT) {
 		error("Failed to delete repository state directory\n");
@@ -267,7 +267,7 @@ enum swupd_code third_party_set_repo(const char *state_dir, const char *path_pre
 	set_version_url(repo->url);
 
 	/* set up swupd to use the certificate from the 3rd-party repository */
-	string_or_die(&repo_cert_path, "%s/opt/3rd_party/%s/%s", path_prefix, repo->name, CERT_PATH);
+	string_or_die(&repo_cert_path, "%s/opt/%s/%s/%s", path_prefix, SWUPD_3RD_PARTY_DIRNAME, repo->name, CERT_PATH);
 	set_cert_path(repo_cert_path);
 	/* if --nosigcheck was used, we do not attempt any signature checking */
 	if (sigcheck) {
@@ -281,13 +281,13 @@ enum swupd_code third_party_set_repo(const char *state_dir, const char *path_pre
 	}
 	free_string(&repo_cert_path);
 
-	string_or_die(&repo_path_prefix, "%s/opt/3rd_party/%s", path_prefix, repo->name);
+	string_or_die(&repo_path_prefix, "%s/opt/%s/%s", path_prefix, SWUPD_3RD_PARTY_DIRNAME, repo->name);
 	set_path_prefix(repo_path_prefix);
 	free_string(&repo_path_prefix);
 
 	/* make sure there are state directories for the 3rd-party
 	 * repo if not there already */
-	string_or_die(&repo_state_dir, "%s/3rd_party/%s", state_dir, repo->name);
+	string_or_die(&repo_state_dir, "%s/%s/%s", state_dir, SWUPD_3RD_PARTY_DIRNAME, repo->name);
 	if (create_state_dirs(repo_state_dir)) {
 		free_string(&repo_state_dir);
 		error("Unable to create the state directories for repository %s\n\n", repo->name);

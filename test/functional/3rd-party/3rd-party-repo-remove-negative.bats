@@ -25,7 +25,7 @@ test_setup(){
 	EOM
 	)
 
-	repo_config_file="$STATEDIR"/3rd_party/repo.ini
+	repo_config_file="$STATEDIR"/3rd-party/repo.ini
 	write_to_protected_file -a "$repo_config_file" "$contents"
 
 }
@@ -73,7 +73,7 @@ test_teardown(){
 @test "TPR011: Negative test, Remove a repo on a new system" {
 
 	run sudo sh -c "rm -r $PATH_PREFIX/opt/3rd-party"
-	run sudo sh -c "rm -r $STATEDIR/3rd_party"
+	run sudo sh -c "rm -r $STATEDIR/3rd-party"
 
 	run sudo sh -c "$SWUPD 3rd-party remove test3 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_INVALID_OPTION"

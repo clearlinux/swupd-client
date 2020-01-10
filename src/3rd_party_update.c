@@ -128,10 +128,12 @@ static enum swupd_code update_repos(UNUSED_PARAM char *unused)
 {
 	/* Update should always ignore optional bundles */
 	globals.skip_optional_bundles = true;
+	globals.no_scripts = true;
 
 	if (cmdline_option_status) {
 		return check_update();
 	} else {
+		info("Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons\n\n");
 		return execute_update();
 	}
 }

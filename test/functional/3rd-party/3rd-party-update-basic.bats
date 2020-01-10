@@ -31,6 +31,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
+		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
 		Preparing to update from 10 to 20
 		Downloading packs for:
@@ -47,7 +48,7 @@ test_setup() {
 		No extra files need to be downloaded
 		Installing files...
 		Update was applied
-		Calling post-update helper scripts
+		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Update successful - System updated from version 10 to version 20
 	EOM
 	)
@@ -82,6 +83,7 @@ test_setup() {
 		____________________________
 		 3rd-Party Repo: test-repo1
 		____________________________
+		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
 		Preparing to update from 10 to 20
 		Downloading packs for:
@@ -98,11 +100,12 @@ test_setup() {
 		No extra files need to be downloaded
 		Installing files...
 		Update was applied
-		Calling post-update helper scripts
+		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Update successful - System updated from version 10 to version 20
 		____________________________
 		 3rd-Party Repo: test-repo2
 		____________________________
+		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
 		Version on server (10) is not newer than system version (10)
 		Update complete - System already up-to-date at version 10

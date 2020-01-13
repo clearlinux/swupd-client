@@ -79,6 +79,6 @@ global_teardown() {
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/my_repo/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/my_repo/usr/lib/os-release
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/my_repo/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/my_repo/usr/lib/os-release
 }

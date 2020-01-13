@@ -36,10 +36,10 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/repo1/foo/file_1A
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/repo2/baz/file_1B
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/repo1/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/repo2/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo1/foo/file_1A
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo2/baz/file_1B
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo1/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo2/usr/share/clear/bundles/test-bundle1
 	assert_file_not_exists "$STATEDIR"/3rd-party/repo1/bundles/test-bundle1
 	assert_file_not_exists "$STATEDIR"/3rd-party/repo2/bundles/test-bundle1
 
@@ -65,10 +65,10 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/repo1/foo/file_1A
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/repo2/baz/file_1B
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/repo1/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/repo2/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo1/foo/file_1A
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo2/baz/file_1B
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo1/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo2/usr/share/clear/bundles/test-bundle1
 	assert_file_not_exists "$STATEDIR"/3rd-party/repo1/bundles/test-bundle1
 	assert_file_exists "$STATEDIR"/3rd-party/repo2/bundles/test-bundle1
 

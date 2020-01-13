@@ -54,15 +54,15 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# test-bundle1 is installed and tracked
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo/usr/share/clear/bundles/test-bundle1
 	assert_file_exists "$TPSTATEDIR"/bundles/test-bundle1
 
 	# test-bundle2 is installed but not tracked
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo/usr/share/clear/bundles/test-bundle2
 	assert_file_not_exists "$TPSTATEDIR"/bundles/test-bundle2
 
 	# test-bundle3 is not installed at all
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/test-repo/usr/share/clear/bundles/test-bundle3
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo/usr/share/clear/bundles/test-bundle3
 	assert_file_not_exists "$TPSTATEDIR"/bundles/test-bundle3
 
 }

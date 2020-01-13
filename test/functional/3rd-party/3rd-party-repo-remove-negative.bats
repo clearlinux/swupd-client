@@ -72,7 +72,7 @@ test_teardown(){
 
 @test "TPR011: Negative test, Remove a repo on a new system" {
 
-	run sudo sh -c "rm -r $PATH_PREFIX/opt/3rd-party"
+	run sudo sh -c "rm -r $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR"
 	run sudo sh -c "rm -r $STATEDIR/3rd-party"
 
 	run sudo sh -c "$SWUPD 3rd-party remove test3 $SWUPD_OPTS"

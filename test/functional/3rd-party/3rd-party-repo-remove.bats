@@ -32,7 +32,7 @@ test_setup(){
 
 	repo_config_file="$STATEDIR"/3rd-party/repo.ini
 	sudo mkdir -p "$STATEDIR"/3rd-party
-	sudo mkdir -p "$PATH_PREFIX"/opt/3rd-party/{test1,test2,test3,test4,test5}
+	sudo mkdir -p "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/{test1,test2,test3,test4,test5}
 	write_to_protected_file -a "$repo_config_file" "$contents"
 	sudo mkdir "$STATEDIR"/3rd-party/{test1,test2,test3,test4,test5}
 
@@ -49,7 +49,7 @@ test_teardown(){
 	repo_config_file="$STATEDIR"/3rd-party/repo.ini
 
 	#remove at start of file
-	assert_dir_exists "$PATH_PREFIX"/opt/3rd-party/test1
+	assert_dir_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/test1
 	assert_dir_exists "$STATEDIR"/3rd-party/test1
 	run sudo sh -c "$SWUPD 3rd-party remove test1 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
@@ -59,11 +59,11 @@ test_teardown(){
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_dir_not_exists "$PATH_PREFIX"/opt/3rd-party/test1
+	assert_dir_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/test1
 	assert_dir_not_exists "$STATEDIR"/3rd-party/test1
 
 	#remove at middle of file
-	assert_dir_exists "$PATH_PREFIX"/opt/3rd-party/test3
+	assert_dir_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/test3
 	assert_dir_exists "$STATEDIR"/3rd-party/test3
 	run sudo sh -c "$SWUPD 3rd-party remove test3 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
@@ -73,11 +73,11 @@ test_teardown(){
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_dir_not_exists "$PATH_PREFIX"/opt/3rd-party/test3
+	assert_dir_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/test3
 	assert_dir_not_exists "$STATEDIR"/3rd-party/test3
 
 	#remove at end of file
-	assert_dir_exists "$PATH_PREFIX"/opt/3rd-party/test5
+	assert_dir_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/test5
 	assert_dir_exists "$STATEDIR"/3rd-party/test5
 	run sudo sh -c "$SWUPD 3rd-party remove test5 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
@@ -87,7 +87,7 @@ test_teardown(){
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_dir_not_exists "$PATH_PREFIX"/opt/3rd-party/test5
+	assert_dir_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/test5
 	assert_dir_not_exists "$STATEDIR"/3rd-party/test5
 
 	expected_contents=$(cat <<- EOM

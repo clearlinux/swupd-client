@@ -23,12 +23,12 @@ global_setup() {
 	create_bundle -L -t -n test-bundle2 -f /baz/file_3 -u test-repo2 "$TEST_NAME"
 
 	# adding an untracked files into an untracked directory (/bat)
-	sudo mkdir "$TARGETDIR"/opt/3rd-party/test-repo1/bat
-	sudo touch "$TARGETDIR"/opt/3rd-party/test-repo1/bat/untracked_file1
+	sudo mkdir "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/bat
+	sudo touch "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/bat/untracked_file1
 	# adding an untracked file into tracked directory (/bar)
-	sudo touch "$TARGETDIR"/opt/3rd-party/test-repo1/bar/untracked_file2
+	sudo touch "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/bar/untracked_file2
 	# adding an untracked file into /usr
-	sudo touch "$TARGETDIR"/opt/3rd-party/test-repo2/usr/untracked_file3
+	sudo touch "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/usr/untracked_file3
 
 }
 
@@ -62,13 +62,13 @@ global_teardown() {
 		Diagnosing version 20
 		Downloading missing manifests...
 		Checking for missing files
-		 -> Missing file: $PATH_PREFIX/opt/3rd-party/test-repo1/baz
-		 -> Missing file: $PATH_PREFIX/opt/3rd-party/test-repo1/baz/file_3
+		 -> Missing file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/baz
+		 -> Missing file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/baz/file_3
 		Checking for corrupt files
-		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd-party/test-repo1/foo/file_1
-		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd-party/test-repo1/usr/lib/os-release
+		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/foo/file_1
+		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/usr/lib/os-release
 		Checking for extraneous files
-		 -> File that should be deleted: $PATH_PREFIX/opt/3rd-party/test-repo1/bar/file_2
+		 -> File that should be deleted: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/bar/file_2
 		Inspected 19 files
 		  2 files were missing
 		  2 files did not match
@@ -133,7 +133,7 @@ global_teardown() {
 		Downloading missing manifests...
 		Checking for missing files
 		Checking for corrupt files
-		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd-party/test-repo1/usr/lib/os-release
+		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/usr/lib/os-release
 		Checking for extraneous files
 		Inspected 17 files
 		  1 file did not match
@@ -157,14 +157,14 @@ global_teardown() {
 		Diagnosing version 20
 		Downloading missing manifests...
 		Checking for missing files
-		 -> Missing file: $PATH_PREFIX/opt/3rd-party/test-repo1/baz
-		 -> Missing file: $PATH_PREFIX/opt/3rd-party/test-repo1/baz/file_3
+		 -> Missing file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/baz
+		 -> Missing file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/baz/file_3
 		Checking for corrupt files
-		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd-party/test-repo1/foo/file_1
-		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd-party/test-repo1/usr/lib/os-release
+		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/foo/file_1
+		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/usr/lib/os-release
 		Checking for extraneous files
-		 -> File that should be deleted: $PATH_PREFIX/opt/3rd-party/test-repo1/bar/file_2
-		Checking for extra files under $PATH_PREFIX/opt/3rd-party/test-repo1/usr
+		 -> File that should be deleted: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/bar/file_2
+		Checking for extra files under $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/usr
 		Inspected 19 files
 		  2 files were missing
 		  2 files did not match
@@ -179,8 +179,8 @@ global_teardown() {
 		Checking for missing files
 		Checking for corrupt files
 		Checking for extraneous files
-		Checking for extra files under $PATH_PREFIX/opt/3rd-party/test-repo2/usr
-		 -> Extra file: $PATH_PREFIX/opt/3rd-party/test-repo2/usr/untracked_file3
+		Checking for extra files under $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo2/usr
+		 -> Extra file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo2/usr/untracked_file3
 		Inspected 16 files
 		  1 file found which should be deleted
 		Use "swupd repair --picky" to correct the problems in the system
@@ -203,16 +203,16 @@ global_teardown() {
 		Diagnosing version 20
 		Downloading missing manifests...
 		Checking for missing files
-		 -> Missing file: $PATH_PREFIX/opt/3rd-party/test-repo1/baz
-		 -> Missing file: $PATH_PREFIX/opt/3rd-party/test-repo1/baz/file_3
+		 -> Missing file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/baz
+		 -> Missing file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/baz/file_3
 		Checking for corrupt files
-		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd-party/test-repo1/foo/file_1
-		 -> Hash mismatch for file: $PATH_PREFIX/opt/3rd-party/test-repo1/usr/lib/os-release
+		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/foo/file_1
+		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/usr/lib/os-release
 		Checking for extraneous files
-		 -> File that should be deleted: $PATH_PREFIX/opt/3rd-party/test-repo1/bar/file_2
-		Checking for extra files under $PATH_PREFIX/opt/3rd-party/test-repo1/bat
-		 -> Extra file: $PATH_PREFIX/opt/3rd-party/test-repo1/bat/untracked_file1
-		 -> Extra file: $PATH_PREFIX/opt/3rd-party/test-repo1/bat/
+		 -> File that should be deleted: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/bar/file_2
+		Checking for extra files under $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/bat
+		 -> Extra file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/bat/untracked_file1
+		 -> Extra file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/bat/
 		Inspected 21 files
 		  2 files were missing
 		  2 files did not match
@@ -227,7 +227,7 @@ global_teardown() {
 		Checking for missing files
 		Checking for corrupt files
 		Checking for extraneous files
-		Checking for extra files under $PATH_PREFIX/opt/3rd-party/test-repo2/bat
+		Checking for extra files under $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo2/bat
 		Inspected 15 files
 		Diagnose successful
 	EOM

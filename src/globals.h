@@ -33,6 +33,7 @@ extern struct globals {
 	bool sigcheck;
 	bool timecheck;
 	bool wait_for_scripts;
+	bool user_defined_cert_path;
 	char **swupd_argv;
 	char *cert_path;
 	char *content_url;

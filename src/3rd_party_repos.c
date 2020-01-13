@@ -276,9 +276,14 @@ enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck)
 	set_content_url(repo->url);
 	set_version_url(repo->url);
 
-	/* set up swupd to use the certificate from the 3rd-party repository */
+	/* set up swupd to use the certificate from the 3rd-party repository,
+	 * unless the user is specifying a path for the certificate to use */
 	string_or_die(&repo_cert_path, "%s%s/%s%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BUNDLES_DIR, repo->name, CERT_PATH);
-	set_cert_path(repo_cert_path);
+	if (!globals.user_defined_cert_path) {
+		/* the user did not specify a cert, use repo's default */
+		set_cert_path(repo_cert_path);
+	}
+
 	/* if --nosigcheck was used, we do not attempt any signature checking */
 	if (sigcheck) {
 		signature_deinit();

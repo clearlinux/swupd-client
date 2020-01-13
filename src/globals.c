@@ -587,6 +587,7 @@ static bool global_parse_opt(int opt, char *optarg)
 		return true;
 	case 'C':
 		set_cert_path(optarg);
+		globals.user_defined_cert_path = true;
 		return true;
 	case 'W':
 		err = strtoi_err(optarg, &max_parallel_downloads);

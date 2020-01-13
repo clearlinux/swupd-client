@@ -15,6 +15,7 @@ extern "C" {
 #ifdef THIRDPARTY
 
 #define SWUPD_3RD_PARTY_DIRNAME "3rd-party"
+#define SWUPD_3RD_PARTY_BUNDLES_DIR "/opt/" SWUPD_3RD_PARTY_DIRNAME "/bundles"
 
 /** @brief Store information of a repository.  */
 struct repo {

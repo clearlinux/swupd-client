@@ -47,7 +47,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/test-repo1/new_file
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/new_file
 
 }
 

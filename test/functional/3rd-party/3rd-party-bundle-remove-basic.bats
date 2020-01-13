@@ -37,8 +37,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/test-repo2/foo/file_2
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/test-repo2/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/foo/file_2
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/usr/share/clear/bundles/test-bundle2
 	assert_file_not_exists "$TPSTATEDIR"/bundles/test-bundle2
 
 }
@@ -70,8 +70,8 @@ test_setup() {
 
 @test "TPR026: Try removing one valid bundle from a third party repo and one invalid" {
 
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo1/foo/file_1
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo1/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/foo/file_1
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/usr/share/clear/bundles/test-bundle1
 	assert_file_exists "$STATEDIR"/3rd-party/test-repo1/bundles/test-bundle1
 
 	run sudo sh -c "$SWUPD 3rd-party bundle-remove $SWUPD_OPTS test-bundle1 upstream-bundle"
@@ -90,15 +90,15 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/test-repo1/foo/file_1
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/test-repo1/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/foo/file_1
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/usr/share/clear/bundles/test-bundle1
 	assert_file_not_exists "$STATEDIR"/3rd-party/test-repo1/bundles/test-bundle1
 
 	# run the same scenario with the arguments switched
 	install_bundle "$TEST_NAME"/3rd-party/test-repo1/10/Manifest.test-bundle1 test-repo1
 	clean_state_dir "$TEST_NAME" test-repo1
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo1/foo/file_1
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo1/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/foo/file_1
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/usr/share/clear/bundles/test-bundle1
 
 	run sudo sh -c "$SWUPD 3rd-party bundle-remove $SWUPD_OPTS upstream-bundle test-bundle1"
 
@@ -116,7 +116,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/test-repo1/foo/file_1
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/test-repo1/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/foo/file_1
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/usr/share/clear/bundles/test-bundle1
 
 }

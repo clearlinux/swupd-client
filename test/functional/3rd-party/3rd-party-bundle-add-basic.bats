@@ -42,8 +42,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/foo/file_2
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/foo/file_2
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TPSTATEDIR"/bundles/test-bundle2
 
 }
@@ -98,10 +98,10 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/foo/file_2
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/foo/file_2
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TPSTATEDIR"/bundles/test-bundle2
-	assert_file_not_exists "$TARGETDIR"/opt/3rd-party/test-repo2/usr/share/clear/bundles/upstream-bundle
+	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/usr/share/clear/bundles/upstream-bundle
 
 	# same scenario with the arguments switched
 
@@ -127,7 +127,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/foo/file_2
-	assert_file_exists "$TARGETDIR"/opt/3rd-party/test-repo2/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/foo/file_2
+	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TPSTATEDIR"/bundles/test-bundle2
 }

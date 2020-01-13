@@ -5,6 +5,7 @@ TEST_ROOT_DIR="$(pwd)"
 TEST_FILENAME=$(basename "$BATS_TEST_FILENAME")
 TEST_NAME=${TEST_FILENAME%.bats}
 THEME_DIRNAME="$BATS_TEST_DIRNAME"
+THIRD_PARTY_BUNDLES_DIR="opt/3rd-party/bundles"
 
 export TEST_NAME
 export TEST_NAME_SHORT="$TEST_NAME"
@@ -1358,7 +1359,7 @@ set_current_version() { # swupd_function
 	validate_path "$env_name"
 
 	if [ -n "$repo_name" ]; then
-		os_release="$env_name"/testfs/target-dir/opt/3rd-party/"$repo_name"/usr/lib/os-release
+		os_release="$env_name"/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"/usr/lib/os-release
 	else
 		os_release="$env_name"/testfs/target-dir/usr/lib/os-release
 	fi
@@ -2376,7 +2377,7 @@ create_bundle() { # swupd_function
 	# if a 3rd-party repo was specified, the bundle should be created in there
 	if [ "$third_party" = true ]; then
 		state_path="$env_name"/testfs/state/3rd-party/"$repo_name"
-		target_path="$env_name"/testfs/target-dir/opt/3rd-party/"$repo_name"
+		target_path="$env_name"/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
 		content_dir=3rd-party/"$repo_name"
 	else
 		target_path="$env_name"/testfs/target-dir
@@ -2643,7 +2644,7 @@ remove_bundle() { # swupd_function
 	if [ -z "$repo_name" ]; then
 		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir
 	else
-		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/opt/3rd-party/"$repo_name"
+		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
 	fi
 	version_path=$(dirname "$bundle_manifest")
 	manifest_file=$(basename "$bundle_manifest")
@@ -2705,7 +2706,7 @@ install_bundle() { # swupd_function
 	if [ -z "$repo_name" ]; then
 		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir
 	else
-		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/opt/3rd-party/"$repo_name"
+		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
 	fi
 	files_path=$(dirname "$bundle_manifest")/files
 	manifest_file=$(basename "$bundle_manifest")

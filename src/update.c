@@ -505,7 +505,7 @@ version_check:
 	/* need update list in filename order to insure directories are
 	 * created before their contents */
 	timelist_timer_start(globals.global_times, "Update loop");
-	updates = list_sort(updates, file_sort_filename);
+	updates = list_sort(updates, cmp_file_filename_is_deleted);
 
 	ret = update_loop(updates, server_manifest);
 	if (ret == 0 && !download_only) {

@@ -48,12 +48,6 @@ static int nF = 0;		    /* Number of filerecords */
 static const regex_t *path_whitelist;
 static int path_prefix_len;
 
-/* Helper function to call from nftw */
-static inline int bsearch_helper(const void *A, const void *B)
-{
-	return strcmp(*(const char **)A, ((struct filerecord *)B)->filename);
-}
-
 static int record_filename(const char *name, const struct stat *stat __attribute__((unused)), int type, struct FTW *ftw __attribute__((unused)))
 {
 	/* Name as it would appear in manifest, f.i. /usr */
@@ -82,12 +76,6 @@ static int record_filename(const char *name, const struct stat *stat __attribute
 	F[nF].in_manifest = false; /* Because we do yet know */
 	nF++;
 	return 0;
-}
-
-/* qsort helper function */
-static int qsort_helper(const void *A, const void *B)
-{
-	return strcmp(((struct filerecord *)A)->filename, ((struct filerecord *)B)->filename);
 }
 
 /* return true if the function deletes the specified filename, otherwise false */
@@ -133,7 +121,7 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 		}
 		goto tidy; /* Already printed out of memory */
 	}
-	qsort(F, nF, sizeof(*F), &qsort_helper);
+	qsort(F, nF, sizeof(*F), &cmp_filerecord_filename);
 	/* Interesting question, would it be faster to sort this linked list,
 	 * or convert it to an array of pointers, or just pull them off one
 	 * at a time? Try one at a time first.
@@ -149,7 +137,7 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 		if (file->is_deleted && !file->is_ghosted) {
 			continue;
 		}
-		found = bsearch(&file->filename, F, nF, sizeof(*F), &bsearch_helper);
+		found = bsearch(&file->filename, F, nF, sizeof(*F), &cmp_string_filerecord_filename);
 		if (found) {
 			found->in_manifest = true;
 		}

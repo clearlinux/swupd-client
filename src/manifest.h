@@ -97,17 +97,6 @@ int mom_get_manifests_list(struct manifest *mom, struct list **manifest_list, fi
  */
 int recurse_dependencies(struct manifest *mom, const char *bundle, struct list **manifests, filter_fn_t filter_fn);
 
-/**
- * @brief Compares the "component" of a manifest "a" to a string "b"
- */
-int manifest_bundlename_strcmp(const void *a, const void *b);
-
-/**
- * @brief Compares the "component" of a manifest "a"
- *        to the "component" of string "b"
- */
-int manifest_component_strcmp(const void *a, const void *b);
-
 #ifdef __cplusplus
 }
 #endif

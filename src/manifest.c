@@ -43,52 +43,6 @@
 
 #define MANIFEST_LINE_MAXLEN 8192
 
-/* sort by full path filename */
-int file_sort_filename(const void *a, const void *b)
-{
-	struct file *A, *B;
-	int ret;
-	A = (struct file *)a;
-	B = (struct file *)b;
-
-	ret = strcmp(A->filename, B->filename);
-	if (ret) {
-		return ret;
-	}
-	if (A->is_deleted > B->is_deleted) {
-		return 1;
-	}
-	if (A->is_deleted < B->is_deleted) {
-		return -1;
-	}
-
-	return 0;
-}
-
-int file_sort_filename_reverse(const void *a, const void *b)
-{
-	struct file *A, *B;
-	int ret;
-	A = (struct file *)a;
-	B = (struct file *)b;
-
-	ret = strcmp(A->filename, B->filename);
-
-	return -ret;
-}
-
-int file_sort_hash(const void *a, const void *b)
-{
-	struct file *A, *B;
-	int ret;
-	A = (struct file *)a;
-	B = (struct file *)b;
-
-	ret = strcmp(A->hash, B->hash);
-
-	return ret;
-}
-
 static struct manifest *manifest_from_file(int version, char *component, bool header_only, bool is_mix)
 {
 	char *filename;
@@ -557,8 +511,8 @@ void link_manifests(struct manifest *m1, struct manifest *m2)
 	struct list *list1, *list2;
 	struct file *file1, *file2;
 
-	m1->files = list_sort(m1->files, file_sort_filename);
-	m2->files = list_sort(m2->files, file_sort_filename);
+	m1->files = list_sort(m1->files, cmp_file_filename_is_deleted);
+	m2->files = list_sort(m2->files, cmp_file_filename_is_deleted);
 
 	list1 = list_head(m1->files);
 	list2 = list_head(m2->files);
@@ -614,8 +568,8 @@ void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *su
 	struct list *list1, *list2;
 	struct file *file1, *file2;
 
-	m1->manifests = list_sort(m1->manifests, file_sort_filename);
-	m2->manifests = list_sort(m2->manifests, file_sort_filename);
+	m1->manifests = list_sort(m1->manifests, cmp_file_filename_is_deleted);
+	m2->manifests = list_sort(m2->manifests, cmp_file_filename_is_deleted);
 
 	list1 = list_head(m1->manifests);
 	list2 = list_head(m2->manifests);
@@ -720,7 +674,7 @@ struct list *consolidate_files(struct list *files)
 	struct list *list, *next, *tmp;
 	struct file *file1, *file2;
 
-	files = list_sort(files, file_sort_filename);
+	files = list_sort(files, cmp_file_filename_is_deleted);
 
 	/* Two pointers ("list" and "next") traverse the consolidated, filename sorted
 	 * struct list of files.  The "list" pointer is marched forward through the
@@ -835,7 +789,7 @@ static struct list *list_common_files(struct list *list1, struct list *list2)
 	l2 = list_clone(list2);
 
 	combined = list_concat(l1, l2);
-	combined = list_sort(combined, file_sort_filename);
+	combined = list_sort(combined, cmp_file_filename_is_deleted);
 
 	for (list = list_head(combined); list; list = list->next) {
 		if (list->next == NULL) {
@@ -899,7 +853,7 @@ struct list *filter_out_existing_files(struct list *to_install_files, struct lis
 
 	/* remove the common files from the to_install_files */
 	to_install_files = list_concat(to_install_files, common);
-	to_install_files = list_sort(to_install_files, file_sort_filename);
+	to_install_files = list_sort(to_install_files, cmp_file_filename_is_deleted);
 	list = list_head(to_install_files);
 	while (list) {
 		if (list->next == NULL) {
@@ -1053,14 +1007,9 @@ void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2)
 	bmanifest->files = list_head(preserver);
 }
 
-static int file_bundlename_strcmp(const void *a, const void *b)
-{
-	return strcmp(((struct file *)a)->filename, (const char *)b);
-}
-
 struct file *mom_search_bundle(struct manifest *mom, const char *bundlename)
 {
-	return list_search(mom->manifests, bundlename, file_bundlename_strcmp);
+	return list_search(mom->manifests, bundlename, cmp_file_filename_string);
 }
 
 /* This performs a linear search through the files list. */
@@ -1114,11 +1063,6 @@ void manifest_free_array(struct file **array)
 	free(array);
 }
 
-static int cmpnames(const void *a, const void *b)
-{
-	return strcmp((*(struct file **)a)->filename, (*(struct file **)b)->filename);
-}
-
 static bool is_version_data(const char *filename)
 {
 	if (strcmp(filename, "/usr/lib/os-release") == 0 ||
@@ -1140,7 +1084,7 @@ int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize,
 	struct file **found;
 	int ret = 0;
 
-	qsort(b, size, sizeof(struct file *), cmpnames);
+	qsort(b, size, sizeof(struct file *), cmp_file_filename_ptr);
 	info("Checking manifest uniqueness...\n");
 	for (int i = 0; i < searchsize; i++) {
 		found = bsearch(a[i], b, size, sizeof(struct file *), bsearch_file_helper);
@@ -1221,19 +1165,6 @@ int mom_get_manifests_list(struct manifest *mom, struct list **manifest_list, fi
 	return last_error;
 }
 
-int manifest_bundlename_strcmp(const void *a, const void *b)
-{
-	return strcmp(((struct manifest *)a)->component, (const char *)b);
-}
-
-int manifest_component_strcmp(const void *a, const void *b)
-{
-	struct manifest *m1 = (struct manifest *)a;
-	struct manifest *m2 = (struct manifest *)b;
-
-	return strcmp(m1->component, m2->component);
-}
-
 int recurse_dependencies(struct manifest *mom, const char *bundle, struct list **manifests, filter_fn_t filter_fn)
 {
 	int err = 0;
@@ -1244,7 +1175,7 @@ int recurse_dependencies(struct manifest *mom, const char *bundle, struct list *
 		return 0;
 	}
 
-	if (list_search(*manifests, bundle, manifest_bundlename_strcmp)) {
+	if (list_search(*manifests, bundle, cmp_manifest_component_string)) {
 		return 0;
 	}
 

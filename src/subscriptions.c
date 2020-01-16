@@ -53,23 +53,6 @@ struct list *free_list_file(struct list *item)
 	return list_free_item(item, free_file_data);
 }
 
-int subscription_bundlename_strcmp(const void *a, const void *b)
-{
-	return strcmp(((struct sub *)a)->component, (const char *)b);
-}
-
-int subscription_sort_component(const void *a, const void *b)
-{
-	struct sub *A, *B;
-	int ret;
-	A = (struct sub *)a;
-	B = (struct sub *)b;
-
-	ret = strcmp(A->component, B->component);
-
-	return ret;
-}
-
 /* Custom content comes from a different location and is not required to
  * have os-core added */
 void read_subscriptions(struct list **subs)
@@ -112,7 +95,7 @@ void read_subscriptions(struct list **subs)
 		create_and_append_subscription(subs, "os-core");
 	}
 
-	*subs = list_sort(*subs, subscription_sort_component);
+	*subs = list_sort(*subs, cmp_subscription_component);
 }
 
 static bool set_subscription_obligation(struct list *subs, char *component, bool is_optional)

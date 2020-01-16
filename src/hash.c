@@ -256,14 +256,6 @@ bool verify_file_lazy(char *filename)
 	return !hash_is_zeros(local.hash);
 }
 
-static int file_name_cmp(const void *a, const void *b)
-{
-	const struct file *fa = a;
-	const struct file *fb = b;
-
-	return strcmp(fa->filename, fb->filename);
-}
-
 /* Compares the hash for BUNDLE with that listed in the Manifest.MoM.  If the
  * hash check fails, we should assume the bundle manifest is incorrect and
  * discard it. A retry should then force redownloading of the bundle manifest.
@@ -274,7 +266,7 @@ int verify_bundle_hash(struct manifest *mom, struct file *bundle)
 	char *local = NULL, *cached;
 	int ret = 0;
 
-	current = list_search(list_head(mom->manifests), bundle, file_name_cmp);
+	current = list_search(list_head(mom->manifests), bundle, cmp_file_filename);
 	if (!current) {
 		return -1;
 	}

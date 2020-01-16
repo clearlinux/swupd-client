@@ -84,14 +84,6 @@ static int bundle_cmp(const void *bundle, const void *bundle_name)
 	return strcmp(b->bundle_name, bundle_name);
 }
 
-static int manifest_name_cmp(const void *a, const void *b)
-{
-	const struct manifest *ma = a;
-	const struct manifest *mb = b;
-
-	return strcmp(ma->component, mb->component);
-}
-
 static int manifest_str_cmp(const void *manifest, const void *manifest_name)
 {
 	const struct manifest *m = manifest;
@@ -345,7 +337,7 @@ static int do_search(struct manifest *mom, const char *search_term)
 	int regexp_err;
 
 	if (sort == SORT_TYPE_ALPHA_BUNDLES_ONLY || sort == SORT_TYPE_ALPHA) {
-		manifest_list = list_sort(manifest_list, manifest_name_cmp);
+		manifest_list = list_sort(manifest_list, cmp_manifest_component);
 	} else if (sort == SORT_TYPE_SIZE) {
 		// pre process the bundle size of all bundles for sorting
 		for (l = manifest_list; l; l = l->next) {

@@ -51,9 +51,9 @@ static void print_help(void)
 	global_print_help();
 
 	print("Options:\n");
+	print("   -V, --version=[VER]         If the version to install is not the latest, it can be specified with this option\n");
 	print("   -x, --force                 Attempt to proceed even if non-critical errors found\n");
 	print("   -B, --bundles=[BUNDLES]     Include the specified BUNDLES in the OS installation. Example: --bundles=os-core,vi\n");
-	print("   -V, --version=[VER]         If the version to install is not the latest, it can be specified with this option\n");
 	print("   -s, --statedir-cache=[PATH] After checking for content in the statedir, check the statedir-cache before downloading it over the network\n");
 	print("   --download                  Download all content, but do not actually install it\n");
 	print("   --skip-optional             Do not install optional bundles (also-add flag in Manifests)\n");

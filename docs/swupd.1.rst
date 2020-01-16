@@ -604,6 +604,22 @@ SUBCOMMANDS
         Remove the content and version URL configuration by removing
         <path>/etc/swupd
 
+``clean``
+
+    Removes files cached by swupd.
+
+    Note that removing these files may cause swupd to perform slower the next time
+    it is used since it may need to download some files from the update server
+    again.
+
+    - `--all`
+
+        Removes all the content including recent metadata.
+
+    - `--dry-run`
+
+        Just prints files that would be removed.
+
 ``hashdump {path}``
 
     Calculates and print the Manifest hash for a specific file on disk.

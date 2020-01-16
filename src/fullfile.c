@@ -30,21 +30,6 @@
 //FIXME #562
 #define MAX_XFER 15
 
-static int compare_fullfile(const void *a, const void *b)
-{
-	struct file *file1 = (struct file *)a;
-	struct file *file2 = (struct file *)b;
-	int comp;
-
-	comp = strcmp(file1->hash, file2->hash);
-	if (comp != 0) {
-		return comp;
-	}
-
-	/* they have the same hash, now let's check the version */
-	return file1->last_change - file2->last_change;
-}
-
 static int download_mix_file(struct file *file)
 {
 	int ret = -1;
@@ -226,12 +211,12 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	complete = 0;
 	if (list_length < MAX_FILES) {
 		/* remove tar duplicates from the list first */
-		need_download = list_sort(need_download, file_sort_hash);
+		need_download = list_sort(need_download, cmp_file_hash);
 
 		/* different directories may need the same tar, in those cases it needs
 		 * to be downloaded only once, the tar for each file is downloaded from
 		 * <last_change>/files/<hash>.tar */
-		need_download = list_sorted_deduplicate(need_download, compare_fullfile, NULL);
+		need_download = list_sorted_deduplicate(need_download, cmp_file_hash_last_change, NULL);
 
 		download_progress.total_download_size = fullfile_query_total_download_size(need_download);
 		if (download_progress.total_download_size > 0) {

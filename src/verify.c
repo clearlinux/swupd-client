@@ -485,7 +485,7 @@ static void remove_orphaned_files(struct manifest *official_manifest, bool repai
 
 	info("%s extraneous files\n", repair ? "Removing" : "Checking for");
 
-	official_manifest->files = list_sort(official_manifest->files, file_sort_filename_reverse);
+	official_manifest->files = list_sort(official_manifest->files, cmp_file_filename_reverse);
 
 	iter = list_head(official_manifest->files);
 	while (iter) {
@@ -775,7 +775,7 @@ static enum swupd_code deal_with_extra_files(struct manifest *manifest, bool fix
 	return ret;
 }
 
-static int find_unsafe_to_delete(const void *a, const void *b)
+static int filter_file_unsafe_to_delete(const void *a, const void *b)
 {
 	struct file *A, *B;
 	int ret;
@@ -1056,7 +1056,7 @@ enum swupd_code execute_verify(void)
 		 * are compared against the full list of consolidated files
 		 * from all bundles so we don't end up deleting a file that
 		 * is needed by another bundle */
-		bundles_files = list_sorted_filter_common_elements(bundles_files, all_files, find_unsafe_to_delete, NULL);
+		bundles_files = list_sorted_filter_common_elements(bundles_files, all_files, filter_file_unsafe_to_delete, NULL);
 		official_manifest->files = bundles_files;
 
 		/* at this point we no longer need the data regarding bundles
@@ -1171,7 +1171,7 @@ brick_the_system_and_clean_curl:
 			char *bundle = iter->data;
 			/* make sure the bundle was in fact valid and will
 			 * be installed before creating the tracking file */
-			if (list_search(bundles_subs, bundle, subscription_bundlename_strcmp)) {
+			if (list_search(bundles_subs, bundle, cmp_sub_component_string)) {
 				track_bundle_in_statedir(bundle, new_os_statedir);
 			}
 		}

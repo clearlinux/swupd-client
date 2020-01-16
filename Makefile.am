@@ -76,6 +76,8 @@ swupd_SOURCES = \
 	src/info.c \
 	src/lib/archives.c \
 	src/lib/archives.h \
+	src/lib/comp_functions.c \
+	src/lib/comp_functions.h \
 	src/lib/config_file.c \
 	src/lib/config_file.h \
 	src/lib/formatter_json.c \
@@ -116,6 +118,8 @@ swupd_SOURCES = \
 	src/subscriptions.c \
 	src/swupd_build_opts.h \
 	src/swupd_build_variant.h \
+	src/swupd_comp_functions.c \
+	src/swupd_comp_functions.h \
 	src/swupd_curl.h \
 	src/swupd_curl_internal.h \
 	src/swupd_exit_codes.h \

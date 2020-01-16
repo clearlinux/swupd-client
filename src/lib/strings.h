@@ -13,11 +13,6 @@ extern "C" {
 #endif
 
 /**
- * @brief strcmp wrapper casting void * to char *.
- */
-int strcmp_wrapper(const void *a, const void *b);
-
-/**
  * Save in strp a new allocated string with content printed from fmt and
  * parameters using vasprintf. Abort on memory allocation errors.
  */

@@ -15,6 +15,7 @@
 #include "config_loader.h"
 #include "globals.h"
 #include "lib/archives.h"
+#include "lib/comp_functions.h"
 #include "lib/config_file.h"
 #include "lib/formatter_json.h"
 #include "lib/list.h"
@@ -26,6 +27,7 @@
 #include "manifest.h"
 #include "progress.h"
 #include "scripts.h"
+#include "swupd_comp_functions.h"
 #include "swupd_curl.h"
 #include "swupd_exit_codes.h"
 #include "swupd_progress.h"
@@ -175,9 +177,6 @@ extern int get_server_format(int server_version);
 extern bool ignore(struct file *file);
 extern void apply_heuristics(struct file *file);
 
-extern int file_sort_filename(const void *a, const void *b);
-extern int file_sort_filename_reverse(const void *a, const void *b);
-extern int file_sort_hash(const void *a, const void *b);
 extern struct manifest *load_mom(int version, bool mix_exists, int *err);
 extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err);
 extern struct manifest *load_manifest_full(int version, bool mix);
@@ -327,8 +326,6 @@ extern void create_and_append_subscription(struct list **subs, const char *compo
 extern char *get_tracking_dir(void);
 extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
 extern int subscription_get_tree(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
-extern int subscription_bundlename_strcmp(const void *a, const void *b);
-extern int subscription_sort_component(const void *a, const void *b);
 
 /* bundle_add.c */
 extern enum swupd_code execute_bundle_add(struct list *bundles_list);

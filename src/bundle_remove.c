@@ -143,25 +143,7 @@ static void remove_tracked(const char *bundle)
 	free_string(&tracking_file);
 }
 
-static int find_manifest(const void *a, const void *b)
-{
-	struct manifest *A;
-	char *B;
-	int ret;
-
-	A = (struct manifest *)a;
-	B = (char *)b;
-
-	ret = strcmp(A->component, B);
-	if (ret != 0) {
-		return ret;
-	}
-
-	/* we found a match*/
-	return 0;
-}
-
-static int filter_files_to_delete(const void *a, const void *b)
+static int filter_file_to_delete(const void *a, const void *b)
 {
 	struct file *A, *B;
 	int ret;
@@ -247,7 +229,7 @@ static void get_removable_dependencies(struct manifest *mom, struct list **bundl
 	for (iter = mom->submanifests; iter; iter = iter->next) {
 		m = iter->data;
 		bundle = m->component;
-		if (!list_search(candidates_for_removal, bundle, manifest_bundlename_strcmp)) {
+		if (!list_search(candidates_for_removal, bundle, cmp_manifest_component_string)) {
 			recurse_dependencies(mom, bundle, &required_bundles, is_installed);
 		}
 	}
@@ -258,7 +240,7 @@ static void get_removable_dependencies(struct manifest *mom, struct list **bundl
 	while (iter) {
 		m = iter->data;
 		bundle = m->component;
-		if (list_search(required_bundles, bundle, manifest_bundlename_strcmp)) {
+		if (list_search(required_bundles, bundle, cmp_manifest_component_string)) {
 			if (iter == candidates_for_removal) {
 				if (iter->next) {
 					candidates_for_removal = iter->next;
@@ -277,9 +259,9 @@ static void get_removable_dependencies(struct manifest *mom, struct list **bundl
 	for (iter = candidates_for_removal; iter; iter = iter->next) {
 		m = iter->data;
 		bundle = m->component;
-		list_move_item(bundle, &mom->submanifests, bundles_to_remove, find_manifest);
+		list_move_item(bundle, &mom->submanifests, bundles_to_remove, cmp_manifest_component_string);
 	}
-	*bundles_to_remove = list_sort(*bundles_to_remove, manifest_component_strcmp);
+	*bundles_to_remove = list_sort(*bundles_to_remove, cmp_manifest_component);
 
 	list_free_list_and_data(candidates_for_removal, manifest_free_data);
 	list_free_list_and_data(required_bundles, manifest_free_data);
@@ -394,7 +376,7 @@ enum swupd_code execute_remove_bundles(struct list *bundles)
 				char *dep;
 				for (iter = list_head(reqd_by); iter; iter = iter->next) {
 					dep = iter->data;
-					list_move_item(dep, &current_mom->submanifests, &bundles_to_remove, find_manifest);
+					list_move_item(dep, &current_mom->submanifests, &bundles_to_remove, cmp_manifest_component_string);
 					remove_tracked(dep);
 				}
 				list_free_list_and_data(reqd_by, free);
@@ -405,7 +387,7 @@ enum swupd_code execute_remove_bundles(struct list *bundles)
 		 * "deletable" move the manifest of the bundle
 		 * to be remove from the list of subscribed
 		 * bundles to the list of bundles to be removed */
-		list_move_item(bundle, &current_mom->submanifests, &bundles_to_remove, find_manifest);
+		list_move_item(bundle, &current_mom->submanifests, &bundles_to_remove, cmp_manifest_component_string);
 		remove_tracked(bundle);
 	}
 
@@ -432,7 +414,7 @@ enum swupd_code execute_remove_bundles(struct list *bundles)
 
 		/* sanitize files to remove; if a file is needed by a bundle that
 		 * is installed, it should be kept in the system */
-		files_to_remove = list_sorted_filter_common_elements(files_to_remove, current_mom->files, filter_files_to_delete, NULL);
+		files_to_remove = list_sorted_filter_common_elements(files_to_remove, current_mom->files, filter_file_to_delete, NULL);
 
 		if (list_len(files_to_remove) > 0) {
 			info("\nDeleting bundle files...\n");

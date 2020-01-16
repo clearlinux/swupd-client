@@ -258,7 +258,7 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 	if (verbose) {
 		ret = subscription_get_tree(bundles, &subs, mom, true, 0);
 	} else {
-		subs = list_sort(subs, subscription_sort_component);
+		subs = list_sort(subs, cmp_subscription_component);
 		iter = list_head(subs);
 		while (iter) {
 			bundle_sub = iter->data;
@@ -306,7 +306,7 @@ static enum swupd_code list_installable_bundles(int version)
 
 	progress_next_step("list_bundles", PROGRESS_UNDEFINED);
 	info("All available bundles:\n");
-	list = MoM->manifests = list_sort(MoM->manifests, file_sort_filename);
+	list = MoM->manifests = list_sort(MoM->manifests, cmp_file_filename_is_deleted);
 	while (list) {
 		file = list->data;
 		list = list->next;

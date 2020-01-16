@@ -20,6 +20,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "comp_functions.h"
+
 /**
  * @brief List node.
  */
@@ -31,15 +33,6 @@ struct list {
 	/** @brief Next list node. */
 	struct list *next;
 };
-
-/**
- * @brief Callback to compare two datas in a list.
- * The comparison function should return 0 if a is equal to b,
- * any number "< 0" if a is lower than b and any number "> 0" if
- * a is bigger than b.
- * This behavior is similar to strcmp() and other standard compare functions.
- */
-typedef int (*comparison_fn_t)(const void *a, const void *b);
 
 /** @brief Callback to free data used in list. */
 typedef void (*list_free_data_fn_t)(void *data);

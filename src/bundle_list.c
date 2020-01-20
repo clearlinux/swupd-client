@@ -29,11 +29,13 @@
 #include "swupd.h"
 
 #define FLAG_DEPS 2000
+#define FLAG_STATUS 2001
 
 static bool cmdline_option_all = false;
 static char *cmdline_option_has_dep = NULL;
 static char *cmdline_option_deps = NULL;
 static bool cmdline_local = true;
+static bool cmdline_option_status = false;
 
 void bundle_list_set_option_all(bool opt)
 {
@@ -61,6 +63,11 @@ void bundle_list_set_option_deps(char *bundle)
 	cmdline_local = false;
 }
 
+void bundle_list_set_option_status(bool opt)
+{
+	cmdline_option_status = opt;
+}
+
 static void free_has_dep(void)
 {
 	free_string(&cmdline_option_has_dep);
@@ -77,14 +84,13 @@ static void print_help(void)
 	print("Usage:\n");
 	print("   swupd bundle-list [OPTIONS...]\n\n");
 
-	//TODO: Add documentation explaining this command
-
 	global_print_help();
 
 	print("Options:\n");
 	print("   -a, --all               List all available bundles for the current version of Clear Linux\n");
 	print("   -D, --has-dep=[BUNDLE]  List all bundles which have BUNDLE as a dependency (use --verbose for tree view)\n");
 	print("   --deps=[BUNDLE]         List BUNDLE dependencies (use --verbose for tree view)\n");
+	print("   --status                Show the installation status of the listed bundles\n");
 	print("\n");
 }
 
@@ -92,6 +98,7 @@ static const struct option prog_opts[] = {
 	{ "all", no_argument, 0, 'a' },
 	{ "deps", required_argument, 0, FLAG_DEPS },
 	{ "has-dep", required_argument, 0, 'D' },
+	{ "status", no_argument, 0, FLAG_STATUS },
 };
 
 static bool parse_opt(int opt, char *optarg)
@@ -110,6 +117,9 @@ static bool parse_opt(int opt, char *optarg)
 		string_or_die(&cmdline_option_deps, "%s", optarg);
 		atexit(free_deps);
 		cmdline_local = false;
+		return true;
+	case FLAG_STATUS:
+		cmdline_option_status = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;
@@ -137,6 +147,18 @@ static bool parse_options(int argc, char **argv)
 		return false;
 	}
 
+	/* flag restrictions */
+	if (cmdline_option_status) {
+		if (cmdline_option_deps) {
+			error("--status and --deps options are mutually exclusive\n");
+			return false;
+		}
+		if (cmdline_option_has_dep) {
+			error("--status and --has-dep options are mutually exclusive\n");
+			return false;
+		}
+	}
+
 	return true;
 }
 
@@ -155,6 +177,8 @@ static enum swupd_code list_local_bundles(int version)
 	struct file *bundle_manifest = NULL;
 	bool mix_exists;
 	int count = 0;
+	const bool DONT_SHOW = false;
+	bool quiet = (log_get_level() == LOG_ERROR);
 
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	if (version > 0) {
@@ -183,8 +207,8 @@ static enum swupd_code list_local_bundles(int version)
 		if (MoM) {
 			bundle_manifest = mom_search_bundle(MoM, sys_basename((char *)item->data));
 		}
-		if (bundle_manifest) {
-			name = get_printable_bundle_name(bundle_manifest->filename, bundle_manifest->is_experimental);
+		if (bundle_manifest && !quiet) {
+			name = get_printable_bundle_name(bundle_manifest->filename, bundle_manifest->is_experimental, DONT_SHOW, cmdline_option_status && is_tracked_bundle(bundle_manifest->filename));
 			info(" - ");
 			print("%s\n", name);
 			free(name);
@@ -296,6 +320,7 @@ static enum swupd_code list_installable_bundles(int version)
 	struct manifest *MoM = NULL;
 	int count = 0;
 	bool mix_exists;
+	bool quiet = (log_get_level() == LOG_ERROR);
 
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	mix_exists = (check_mix_exists() & system_on_mix());
@@ -310,10 +335,14 @@ static enum swupd_code list_installable_bundles(int version)
 	while (list) {
 		file = list->data;
 		list = list->next;
-		name = get_printable_bundle_name(file->filename, file->is_experimental);
-		info(" - ");
-		print("%s\n", name);
-		free_string(&name);
+		if (!quiet) {
+			name = get_printable_bundle_name(file->filename, file->is_experimental, cmdline_option_status && is_installed_bundle(file->filename), cmdline_option_status && is_tracked_bundle(file->filename));
+			info(" - ");
+			print("%s\n", name);
+			free_string(&name);
+		} else {
+			print("%s\n", file->filename);
+		}
 		count++;
 	}
 	info("\nTotal: %d\n", count);

@@ -25,12 +25,14 @@
 #ifdef THIRDPARTY
 
 #define FLAG_DEPS 2000
+#define FLAG_STATUS 2001
 
 static bool cmdline_local = true;
 static bool cmdline_option_all = false;
 static char *cmdline_option_has_dep = NULL;
 static char *cmdline_option_deps = NULL;
 static char *cmdline_repo = NULL;
+static bool cmdline_option_status = false;
 
 static void free_has_dep(void)
 {
@@ -55,6 +57,7 @@ static void print_help(void)
 	print("   -a, --all               List all available bundles for the current version of Clear Linux\n");
 	print("   -D, --has-dep=[BUNDLE]  List all bundles which have BUNDLE as a dependency (use --verbose for tree view)\n");
 	print("   --deps=[BUNDLE]         List BUNDLE dependencies (use --verbose for tree view)\n");
+	print("   --status                Show the installation status of the listed bundles\n");
 	print("\n");
 }
 
@@ -62,6 +65,7 @@ static const struct option prog_opts[] = {
 	{ "all", no_argument, 0, 'a' },
 	{ "deps", required_argument, 0, FLAG_DEPS },
 	{ "has-dep", required_argument, 0, 'D' },
+	{ "status", no_argument, 0, FLAG_STATUS },
 	{ "repo", required_argument, 0, 'R' },
 };
 
@@ -84,6 +88,9 @@ static bool parse_opt(int opt, char *optarg)
 		string_or_die(&cmdline_option_deps, "%s", optarg);
 		atexit(free_deps);
 		cmdline_local = false;
+		return true;
+	case FLAG_STATUS:
+		cmdline_option_status = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;
@@ -156,6 +163,7 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 	bundle_list_set_option_all(cmdline_option_all);
 	bundle_list_set_option_has_dep(cmdline_option_has_dep);
 	bundle_list_set_option_deps(cmdline_option_deps);
+	bundle_list_set_option_status(cmdline_option_status);
 
 	/* list the bundles */
 	ret_code = third_party_run_operation_multirepo(cmdline_repo, list_repo_bundles, SWUPD_OK, "bundle-list", steps_in_bundlelist);

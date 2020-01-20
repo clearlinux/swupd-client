@@ -197,6 +197,9 @@
 # dependency (string value)
 #has_dep=[BUNDLE]
 
+# Show the installation status of the listed bundles (boolean value)
+#status=<true/false>
+
 
 [bundle-info]
 
@@ -416,6 +419,9 @@
 # List dependency tree of all bundles which have BUNDLE as a
 # dependency (string value)
 #has_dep=[BUNDLE]
+
+# Show the installation status of the listed bundles (boolean value)
+#status=<true/false>
 
 
 [3rd-party-bundle-info]

@@ -252,6 +252,14 @@ SUBCOMMANDS
         not installed on the system. Combine with `--verbose` to show a tree of
         these bundles.
 
+    - `--status`
+
+        Show the installation status of the listed bundles. Bundles installation
+        status can be; "explicitly installed", meaning that they were specifically
+        requested to be installed by the user, or they can be "implicitly installed",
+        meaning they were installed as a dependency of another explicitly installed
+        bundle.
+
 ``bundle-info``
 
     Display detailed information about a bundle.

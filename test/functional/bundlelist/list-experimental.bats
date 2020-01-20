@@ -8,9 +8,9 @@ load "../testlib"
 global_setup() {
 
 	create_test_environment "$TEST_NAME"
-	create_bundle -L -e -n test-bundle1 -f /file_1 "$TEST_NAME"
-	create_bundle -e -n test-bundle2 -f /file_2 "$TEST_NAME"
-	create_bundle -n test-bundle3 -f /file_3 "$TEST_NAME"
+	create_bundle -L -e -t -n test-bundle1 -f /file_1 "$TEST_NAME"
+	create_bundle    -e    -n test-bundle2 -f /file_2 "$TEST_NAME"
+	create_bundle          -n test-bundle3 -f /file_3 "$TEST_NAME"
 
 }
 
@@ -60,7 +60,7 @@ global_teardown() {
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Installed bundles:
 		 - os-core
@@ -78,12 +78,12 @@ global_teardown() {
 	# bundle-list with no options should list only installed bundles, there should
 	# be a way to distinguish those that are experimental
 
-	sudo rm "$STATEDIR"/10/Manifest.MoM
-	sudo rm "$WEBDIR"/10/Manifest.MoM.tar
+	sudo mv "$STATEDIR"/10/Manifest.MoM "$STATEDIR"/10/Manifest.MoM.temp
+	sudo mv "$WEBDIR"/10/Manifest.MoM.tar "$WEBDIR"/10/Manifest.MoM.tar.temp
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Error: Failed to retrieve 10 MoM manifest
 		Warning: Could not determine which installed bundles are experimental
@@ -94,5 +94,25 @@ global_teardown() {
 	EOM
 	)
 	assert_in_output "$expected_output"
+
+	sudo mv "$STATEDIR"/10/Manifest.MoM.temp "$STATEDIR"/10/Manifest.MoM
+	sudo mv "$WEBDIR"/10/Manifest.MoM.tar.temp "$WEBDIR"/10/Manifest.MoM.tar
+
+}
+
+@test "LST025: List all installed bundles including experimental showing their installation status" {
+
+	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --status"
+
+	assert_status_is "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		Installed bundles:
+		 - os-core
+		 - test-bundle1 (experimental, explicitly installed)
+
+		Total: 2
+	EOM
+	)
+	assert_is_output --identical "$expected_output"
 
 }

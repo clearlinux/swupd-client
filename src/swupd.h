@@ -306,7 +306,7 @@ extern bool string_in_list(char *string_to_check, struct list *list_to_check);
 extern bool is_compatible_format(int format_num);
 extern bool is_current_version(int version);
 extern bool on_new_format(void);
-extern char *get_printable_bundle_name(const char *bundle_name, bool is_experimental);
+extern char *get_printable_bundle_name(const char *bundle_name, bool is_experimental, bool is_installed, bool is_tracked);
 extern void print_regexp_error(int errcode, regex_t *regexp);
 extern bool is_url_allowed(const char *url);
 extern bool is_url_insecure(const char *url);
@@ -375,6 +375,7 @@ extern enum swupd_code list_bundles(void);
 extern void bundle_list_set_option_all(bool opt);
 extern void bundle_list_set_option_has_dep(char *bundle);
 extern void bundle_list_set_option_deps(char *bundle);
+extern void bundle_list_set_option_status(bool opt);
 
 /* clean.c */
 extern int clean_get_stats(void);

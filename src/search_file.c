@@ -214,6 +214,7 @@ static void print_bundle(struct manifest *mom, struct manifest *m)
 	bool installed;
 	struct file *bundle_file;
 	bool is_experimental;
+	const bool DONT_SHOW_STATUS = false;
 
 	if (csv_format) {
 		return;
@@ -223,7 +224,7 @@ static void print_bundle(struct manifest *mom, struct manifest *m)
 	is_experimental = bundle_file ? bundle_file->is_experimental : false;
 	installed = is_installed_bundle(m->component);
 
-	name = get_printable_bundle_name(m->component, is_experimental);
+	name = get_printable_bundle_name(m->component, is_experimental, DONT_SHOW_STATUS, DONT_SHOW_STATUS);
 	print("\nBundle %s %s", name, installed ? "[installed] " : "");
 	free_string(&name);
 

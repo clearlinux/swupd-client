@@ -19,6 +19,10 @@ global_setup() {
 	add_third_party_repo "$TEST_NAME" 10 staging repo2
 	create_bundle    -n test-bundle1 -f /baz/file_1B -u repo2 "$TEST_NAME"
 	create_bundle    -n test-bundle3 -f /baz/file_3  -u repo2 "$TEST_NAME"
+	# when swupd initializes, if the tracking directory is empty, it will
+	# mark all installed bundles as tracked, to avoid this, let's add a dummy
+	# value to the tracking directory
+	sudo touch "$STATEDIR"/3rd-party/{repo1,repo2}/bundles/dummy
 
 }
 

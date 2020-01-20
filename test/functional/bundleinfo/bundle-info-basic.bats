@@ -14,6 +14,10 @@ global_setup() {
 	update_bundle "$TEST_NAME" test-bundle1 --update /file_1
 	create_version "$TEST_NAME" 30 20
 	update_bundle "$TEST_NAME" test-bundle1 --add /foo/file_5
+	# when swupd initializes, if the tracking directory is empty, it will
+	# mark all installed bundles as tracked, to avoid this, let's add a dummy
+	# value to the tracking directory
+	sudo touch "$STATEDIR"/bundles/dummy
 
 }
 

@@ -302,6 +302,7 @@ enum swupd_code bundle_info(char *bundle)
 	long bundle_size;
 	bool mix_exists;
 	bool installed = is_installed_bundle(bundle);
+	bool tracked = is_tracked_bundle(bundle);
 
 	/* get the very latest version available */
 	latest_version = get_latest_version(NULL);
@@ -399,7 +400,14 @@ enum swupd_code bundle_info(char *bundle)
 	free_string(&header);
 
 	/* status info */
-	info("Status: %s%s\n", installed ? "Installed" : "Not installed", file->is_experimental ? " (experimental)" : "");
+	char *status = NULL;
+	if (tracked) {
+		string_or_die(&status, "Explicitly installed");
+	} else if (installed) {
+		string_or_die(&status, "Installed");
+	}
+	info("Status: %s%s\n", status ? status : "Not installed", file->is_experimental ? " (experimental)" : "");
+	free_string(&status);
 
 	/* version info */
 	if (installed) {

@@ -51,7 +51,7 @@ _swupd()
 		opts="$global --force --recursive "
 		break;;
 		("bundle-list")
-		opts="$global --all --deps --has-dep "
+		opts="$global --all --deps --has-dep --status "
 		break;;
 		("bundle-info")
 		opts="$global --dependencies --files --version "

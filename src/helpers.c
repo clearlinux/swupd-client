@@ -968,12 +968,35 @@ exit:
 	return err;
 }
 
-/* Appends the (experimental) label if applicable to the bundle name */
-char *get_printable_bundle_name(const char *bundle_name, bool is_experimental)
+/* Appends the appropriate label to the bundle name */
+char *get_printable_bundle_name(const char *bundle_name, bool is_experimental, bool is_installed, bool is_tracked)
 {
 	char *printable_name = NULL;
+	char *details = NULL;
+	char *status = NULL;
 
-	string_or_die(&printable_name, "%s%s", bundle_name, is_experimental ? " (experimental)" : "");
+	if (is_installed || is_tracked) {
+		string_or_die(&status, "%s", is_installed && !is_tracked ? "installed" : "explicitly installed");
+	}
+
+	if (is_experimental) {
+		if (status) {
+			string_or_die(&details, "experimental, %s", status);
+		} else {
+			string_or_die(&details, "%s", "experimental");
+		}
+	} else if (status) {
+		string_or_die(&details, "%s", status);
+	}
+	free_string(&status);
+
+	if (details) {
+		string_or_die(&printable_name, "%s (%s)", bundle_name, details);
+	} else {
+		string_or_die(&printable_name, "%s", bundle_name);
+	}
+	free_string(&details);
+
 	return printable_name;
 }
 

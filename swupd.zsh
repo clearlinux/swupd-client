@@ -272,6 +272,7 @@ if [[ -n "$state" ]]; then
             '(help)'{-a,--all}'[List all available bundles for the current version of Clear Linux]'
             '(help)--deps=[List bundles included by BUNDLE]:deps: _swupd_installed_bundles -u'
             '(help)'{-D,--has-dep=}'[List dependency tree of all bundles which have BUNDLE as a dependency]:has-dep: _swupd_installed_bundles -u'
+            '(help --status)'[Show the installation status of the listed bundles]'
           )
           _arguments $lsbundle && ret=0
           ;;

@@ -232,6 +232,7 @@ static enum swupd_code list_local_bundles(int version)
 /* Return recursive list of included bundles */
 static enum swupd_code show_included_bundles(char *bundle_name, int version)
 {
+	enum swupd_code ret_code = SWUPD_OK;
 	int ret = 0;
 	struct list *bundles = NULL;
 	struct list *subs = NULL;
@@ -245,7 +246,7 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 	mom = load_mom(version, false, NULL);
 	if (!mom) {
 		error("Cannot load official manifest MoM for version %i\n", version);
-		ret = SWUPD_COULDNT_LOAD_MOM;
+		ret_code = SWUPD_COULDNT_LOAD_MOM;
 		goto out;
 	}
 
@@ -256,12 +257,12 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 		// something went wrong or there were no includes, print a message and exit
 		if (ret & add_sub_ERR) {
 			error("Cannot load included bundles\n");
-			ret = SWUPD_COULDNT_LOAD_MANIFEST;
+			ret_code = SWUPD_COULDNT_LOAD_MANIFEST;
 		} else if (ret & add_sub_BADNAME) {
-			ret = SWUPD_INVALID_BUNDLE;
+			ret_code = SWUPD_INVALID_BUNDLE;
 		} else {
 			error("Unknown error\n");
-			ret = SWUPD_UNEXPECTED_CONDITION;
+			ret_code = SWUPD_UNEXPECTED_CONDITION;
 		}
 		goto out;
 	}
@@ -273,7 +274,6 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 	const int MINIMAL_SUBSCRIPTIONS = 2;
 	if (strcmp(bundle_name, "os-core") == 0 || list_len(subs) <= MINIMAL_SUBSCRIPTIONS) {
 		info("\nNo included bundles\n");
-		ret = SWUPD_OK;
 		goto out;
 	}
 
@@ -281,6 +281,9 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 
 	if (verbose) {
 		ret = subscription_get_tree(bundles, &subs, mom, true, 0);
+		if (ret != add_sub_NEW && ret != 0) {
+			ret_code = SWUPD_COULDNT_LOAD_MANIFEST;
+		}
 	} else {
 		subs = list_sort(subs, cmp_subscription_component);
 		iter = list_head(subs);
@@ -297,14 +300,12 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 	}
 	info("\nTotal: %d\n", list_len(subs) - 1);
 
-	ret = SWUPD_OK;
-
 out:
 	list_free_list(bundles);
 	manifest_free(mom);
 	free_subscriptions(&subs);
 
-	return ret;
+	return ret_code;
 }
 
 /*

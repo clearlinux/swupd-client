@@ -191,7 +191,7 @@ char *sys_path_join(const char *prefix, const char *path);
 bool is_root(void);
 
 /**
- * @brief Check if the provided path is a directory
+ * @brief Check if the provided path is a directory.
  */
 bool is_dir(const char *path);
 

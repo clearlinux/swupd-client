@@ -180,7 +180,7 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	globals.no_scripts = true;
 	struct list *bundle_to_install = NULL;
 	bundle_to_install = list_append_data(bundle_to_install, "os-core");
-	ret_code = bundle_add(bundle_to_install, repo_version, NULL);
+	ret_code = bundle_add(bundle_to_install, repo_version, NULL, NULL);
 	if (ret_code) {
 		revert = true;
 	}

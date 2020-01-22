@@ -329,8 +329,9 @@ extern int add_subscriptions(struct list *bundles, struct list **subs, struct ma
 extern int subscription_get_tree(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
 
 /* bundle_add.c */
-extern enum swupd_code execute_bundle_add(struct list *bundles_list);
-extern enum swupd_code bundle_add(struct list *bundles_list, int version);
+typedef enum swupd_code (*post_add_fn_t)(struct list *files_installed);
+extern enum swupd_code bundle_add(struct list *bundles_list, int version, post_add_fn_t post_add_fn);
+extern enum swupd_code execute_bundle_add(struct list *bundles_list, post_add_fn_t post_add_fn);
 
 /* bundle_remove.c */
 extern enum swupd_code execute_remove_bundles(struct list *bundles);

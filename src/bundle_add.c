@@ -319,7 +319,7 @@ static enum swupd_code download_content(struct manifest *mom, struct list *to_in
 /* Bundle install one ore more bundles passed in bundles
  * param as a null terminated array of strings
  */
-enum swupd_code bundle_add(struct list *bundles_list, int version)
+enum swupd_code bundle_add(struct list *bundles_list, int version, post_add_fn_t post_add_fn)
 {
 	int ret = 0;
 	struct manifest *mom;
@@ -406,10 +406,18 @@ enum swupd_code bundle_add(struct list *bundles_list, int version)
 
 	mom->files = installed_files;
 	ret = install_files(mom, to_install_files);
+	if (ret) {
+		goto clean_and_exit;
+	}
 
 	timelist_timer_stop(globals.global_times); // closing: Install bundles
 
 	timelist_print_stats(globals.global_times);
+
+	/* execute extra processing (if any) to the recently installed files */
+	if (post_add_fn) {
+		ret = post_add_fn(to_install_files);
+	}
 
 clean_and_exit:
 	iter = list_head(to_install_bundles);
@@ -462,7 +470,7 @@ clean_and_exit:
 	return ret;
 }
 
-enum swupd_code execute_bundle_add(struct list *bundles_list)
+enum swupd_code execute_bundle_add(struct list *bundles_list, post_add_fn_t post_add_fn)
 {
 	int version;
 
@@ -473,7 +481,7 @@ enum swupd_code execute_bundle_add(struct list *bundles_list)
 		return SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
 
-	return bundle_add(bundles_list, version);
+	return bundle_add(bundles_list, version, post_add_fn);
 }
 
 enum swupd_code bundle_add_main(int argc, char **argv)
@@ -516,7 +524,7 @@ enum swupd_code bundle_add_main(int argc, char **argv)
 	 */
 	progress_init_steps("bundle-add", steps_in_bundleadd);
 
-	ret = execute_bundle_add(bundles_list);
+	ret = execute_bundle_add(bundles_list, NULL);
 
 	list_free_list(bundles_list);
 	swupd_deinit();

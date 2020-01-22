@@ -105,7 +105,7 @@ static enum swupd_code add_bundle(char *bundle)
 	info("\nBundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons\n\n");
 	globals.no_scripts = true;
 
-	ret = execute_bundle_add(bundle_to_install);
+	ret = execute_bundle_add(bundle_to_install, NULL);
 
 	list_free_list(bundle_to_install);
 	return ret;

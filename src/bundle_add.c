@@ -319,7 +319,7 @@ static enum swupd_code download_content(struct manifest *mom, struct list *to_in
 /* Bundle install one ore more bundles passed in bundles
  * param as a null terminated array of strings
  */
-enum swupd_code bundle_add(struct list *bundles_list, int version, post_add_fn_t post_add_fn)
+enum swupd_code bundle_add(struct list *bundles_list, int version, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn)
 {
 	int ret = 0;
 	struct manifest *mom;
@@ -391,6 +391,15 @@ enum swupd_code bundle_add(struct list *bundles_list, int version, post_add_fn_t
 		goto clean_and_exit;
 	}
 
+	/* execute pre-add processing (if any) */
+	if (pre_add_fn) {
+		ret = pre_add_fn(to_install_files);
+		if (ret != SWUPD_OK) {
+			info("Aborting bundle installation...\n\n");
+			goto clean_and_exit;
+		}
+	}
+
 	/* Check if we have enough space */
 	ret = check_disk_space_availability(to_install_bundles);
 	if (ret) {
@@ -414,7 +423,7 @@ enum swupd_code bundle_add(struct list *bundles_list, int version, post_add_fn_t
 
 	timelist_print_stats(globals.global_times);
 
-	/* execute extra processing (if any) to the recently installed files */
+	/* execute post-add processing (if any) */
 	if (post_add_fn) {
 		ret = post_add_fn(to_install_files);
 	}
@@ -470,7 +479,7 @@ clean_and_exit:
 	return ret;
 }
 
-enum swupd_code execute_bundle_add(struct list *bundles_list, post_add_fn_t post_add_fn)
+enum swupd_code execute_bundle_add(struct list *bundles_list, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn)
 {
 	int version;
 
@@ -481,7 +490,7 @@ enum swupd_code execute_bundle_add(struct list *bundles_list, post_add_fn_t post
 		return SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
 
-	return bundle_add(bundles_list, version, post_add_fn);
+	return bundle_add(bundles_list, version, pre_add_fn, post_add_fn);
 }
 
 enum swupd_code bundle_add_main(int argc, char **argv)
@@ -524,7 +533,7 @@ enum swupd_code bundle_add_main(int argc, char **argv)
 	 */
 	progress_init_steps("bundle-add", steps_in_bundleadd);
 
-	ret = execute_bundle_add(bundles_list, NULL);
+	ret = execute_bundle_add(bundles_list, NULL, NULL);
 
 	list_free_list(bundles_list);
 	swupd_deinit();

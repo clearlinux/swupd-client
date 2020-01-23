@@ -14,16 +14,20 @@ extern "C" {
 
 #ifdef THIRDPARTY
 
+/** @brief Name of the directory where 3rd-party content and state should be stored */
 #define SWUPD_3RD_PARTY_DIRNAME "3rd-party"
+/** @brief Full path to the directory where 3rd-party content is going to be installed. */
 #define SWUPD_3RD_PARTY_BUNDLES_DIR "/opt/" SWUPD_3RD_PARTY_DIRNAME "/bundles"
 
 /** @brief Store information of a repository.  */
 struct repo {
+	/** @brief repo's name */
 	char *name;
+	/** @brief repo's url */
 	char *url;
 };
 
-/* @brief Definition of a function that performs an action on a given bundle */
+/** @brief Definition of a function that performs an action on a given bundle */
 typedef enum swupd_code (*run_operation_fn_t)(char *bundle);
 
 /**

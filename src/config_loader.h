@@ -13,7 +13,7 @@ extern "C" {
 #include <stdbool.h>
 
 /**
- * @brief Type of function that sets options for a command based on parsed values
+ * @brief Type of function that sets options for a section based on parsed values
  */
 typedef bool (*parse_opt_fn_t)(int opt, char *optarg);
 
@@ -21,9 +21,13 @@ typedef bool (*parse_opt_fn_t)(int opt, char *optarg);
  * @brief Data structed used by config_loader_set_opt()
  */
 struct config_loader_data {
+	/** @brief Swupd subcommand being executed */
 	char *command;
+	/** @brief Array with available opts. */
 	const struct option *available_opts;
+	/** @brief Function to parse global options */
 	parse_opt_fn_t parse_global_opt;
+	/** @brief Function to parse subcommand specific options */
 	parse_opt_fn_t parse_command_opt;
 };
 

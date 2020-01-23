@@ -8,11 +8,6 @@
 
 #include "lib/list.h"
 
-struct alias_lookup {
-	char *alias;
-	struct list *bundles;
-};
-
 /**
  * @brief Deep free on alias_lookup structs
  */

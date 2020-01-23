@@ -29,6 +29,11 @@
 #include "config.h"
 #include "swupd.h"
 
+struct alias_lookup {
+	char *alias;
+	struct list *bundles;
+};
+
 void free_alias_lookup(void *lookup)
 {
 	struct alias_lookup *l = (struct alias_lookup *)lookup;

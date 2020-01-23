@@ -10,20 +10,25 @@
 extern "C" {
 #endif
 
-#define UNUSED_PARAM __attribute__((__unused__))
+#include "swupd.h"
 
-#include <curl/curl.h>
-
-/* struct to hold information about the overall download progress (including many files) */
+/**
+ * @brief struct to hold information about the overall download progress (including many files).
+ */
 struct download_progress {
-	long total_download_size; /* total number of bytes to download */
-	long downloaded;	  /* total of bytes downloaded so far */
+	/** @brief total number of bytes to download. */
+	long total_download_size;
+	/** @brief total of bytes downloaded so far. */
+	long downloaded;
 };
 
-/* struct to hold information about one file download progress */
+/** @brief struct to hold information about one file download progress. */
 struct file_progress {
+	/** @brief file size. */
 	long file_size;
+	/** @brief downloaded. */
 	long downloaded;
+	/** @brief pointer to a struct holding information about the overall progress. */
 	struct download_progress *overall_progress;
 };
 

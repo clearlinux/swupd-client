@@ -34,7 +34,7 @@ void xattrs_copy(const char *src_filename, const char *dst_filename);
  */
 void xattrs_get_blob(const char *filename, char **blob, size_t *blob_len);
 
-/*
+/**
  * @brief Compare the extended attributes from one file to another.
  *
  * @param filename1 The first file used for the extended attributes

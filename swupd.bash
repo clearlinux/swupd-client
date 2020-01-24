@@ -30,7 +30,7 @@ _swupd()
 		("$1")
 		opts="--help --version autoupdate bundle-add bundle-remove
 		bundle-list bundle-info hashdump update diagnose check-update search
-		search-file info clean mirror os-install repair verify 3rd-party"
+		search-file info clean mirror os-install repair 3rd-party"
 		break;;
 		("info")
 		opts="$global "
@@ -79,9 +79,6 @@ _swupd()
 		break;;
 		("hashdump")
 		opts="--help --no-xattrs --path --debug --quiet "
-		break;;
-		("verify")
-		opts="$global --version --manifest --fix --picky --picky-tree --picky-whitelist --install --quick --force --install "
 		break;;
 		("3rd-party")
 		opts="$global add remove list bundle-add bundle-list bundle-remove bundle-info update diagnose repair check-update clean "

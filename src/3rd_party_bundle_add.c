@@ -32,8 +32,6 @@
 static char **cmdline_bundles;
 static char *cmdline_repo = NULL;
 
-typedef enum swupd_code (*proc_binary_fn_t)(const char *filename);
-
 static void print_help(void)
 {
 	print("Installs new software bundles from 3rd-party repositories\n\n");
@@ -98,21 +96,12 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static bool is_binary(const char *filename)
-{
-	if (strncmp(filename, "/bin", strlen("/bin")) == 0 ||
-	    strncmp(filename, "/usr/bin", strlen("/usr/bin")) == 0 ||
-	    strncmp(filename, "/usr/local/bin", strlen("/usr/local/bin")) == 0) {
-		return true;
-	}
-
-	return false;
-}
-
-static enum swupd_code create_wrapper_script(const char *filename)
+static enum swupd_code create_wrapper_script(void *data)
 {
 	enum swupd_code ret_code = 0;
 	FILE *fp = NULL;
+	char *filename = (char *)data;
+	char *content_dir = NULL;
 	char *bin_directory = NULL;
 	char *script = NULL;
 	char *binary = NULL;
@@ -122,16 +111,8 @@ static enum swupd_code create_wrapper_script(const char *filename)
 	char *third_party_ld_path = NULL;
 	mode_t mode = 0755;
 
-	/* the path_prefix has the path to the 3rd-party repo, like:
-	 *  /<original_path_prefix>/opt/3rd-party/bundles/<repo>/
-	 *  we can use it to find the path to the bin directory:
-	 *  /<original_path_prefix>/opt/3rd-party/bin */
-	char *tmp1 = sys_dirname(globals.path_prefix);
-	char *tmp2 = sys_dirname(tmp1);
-	bin_directory = sys_path_join(tmp2, "/bin");
-	free_string(&tmp1);
-	free_string(&tmp2);
-
+	content_dir = get_3rd_party_content_path();
+	bin_directory = sys_path_join(content_dir, "bin");
 	script = sys_path_join(bin_directory, sys_basename(filename));
 	binary = sys_path_join(globals.path_prefix, filename);
 
@@ -193,6 +174,7 @@ close_and_exit:
 	if (fp) {
 		fclose(fp);
 	}
+	free_string(&content_dir);
 	free_string(&binary);
 	free_string(&script);
 	free_string(&bin_directory);
@@ -202,9 +184,10 @@ close_and_exit:
 	return ret_code;
 }
 
-static enum swupd_code validate_binaries(const char *filename)
+static enum swupd_code validate_binary(void *data)
 {
 	enum swupd_code ret_code = SWUPD_OK;
+	char *filename = (char *)data;
 	char *bin_directory = NULL;
 	char *script = NULL;
 
@@ -227,35 +210,6 @@ static enum swupd_code validate_binaries(const char *filename)
 	return ret_code;
 }
 
-static enum swupd_code process_bundle_binaries(struct list *installed_files, const char *msg, const char *step, proc_binary_fn_t proc_binary_fn)
-{
-	enum swupd_code ret, ret_code = SWUPD_OK;
-	struct list *iter = NULL;
-	struct file *file = NULL;
-	char *filename = NULL;
-	int count = 0;
-	int number_of_files = list_len(installed_files);
-
-	info("%s", msg);
-
-	progress_next_step(step, PROGRESS_BAR);
-	for (iter = list_head(installed_files); iter; iter = iter->next) {
-		file = iter->data;
-		filename = file->filename;
-		if (is_binary(filename) && file->is_exported) {
-			ret = proc_binary_fn(filename);
-			if (ret) {
-				/* at least one wrapper failed */
-				ret_code = ret;
-			}
-		}
-		count++;
-		progress_report(count, number_of_files);
-	}
-
-	return ret_code;
-}
-
 static enum swupd_code export_bundle_binaries(struct list *installed_files)
 {
 	return process_bundle_binaries(installed_files, "\nExporting 3rd-party bundle binaries...\n", "export_binaries", create_wrapper_script);
@@ -263,13 +217,14 @@ static enum swupd_code export_bundle_binaries(struct list *installed_files)
 
 static enum swupd_code validate_bundle_binaries(struct list *files_to_be_installed)
 {
-	return process_bundle_binaries(files_to_be_installed, "\nValidating 3rd-party bundle binaries...\n", "validate_binaries", validate_binaries);
+	return process_bundle_binaries(files_to_be_installed, "\nValidating 3rd-party bundle binaries...\n", "validate_binaries", validate_binary);
 }
 
-static enum swupd_code add_bundle(char *bundle)
+static enum swupd_code add_bundle(void *data)
 {
 	struct list *bundle_to_install = NULL;
 	enum swupd_code ret = SWUPD_OK;
+	char *bundle = (char *)data;
 
 	/* execute_bundle_add expects a list */
 	bundle_to_install = list_append_data(bundle_to_install, bundle);

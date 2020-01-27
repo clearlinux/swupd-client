@@ -93,7 +93,7 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static enum swupd_code clean_repos_state(UNUSED_PARAM char *unused)
+static enum swupd_code clean_repos_state(UNUSED_PARAM void *unused)
 {
 	enum swupd_code ret;
 	int files_removed;

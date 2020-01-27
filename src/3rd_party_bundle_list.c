@@ -121,7 +121,7 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static enum swupd_code list_repo_bundles(UNUSED_PARAM char *unused)
+static enum swupd_code list_repo_bundles(UNUSED_PARAM void *unused)
 {
 	static enum swupd_code ret_code = SWUPD_NO;
 	int ret;

@@ -196,7 +196,7 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static enum swupd_code repair_repos(UNUSED_PARAM char *unused)
+static enum swupd_code repair_repos(UNUSED_PARAM void *unused)
 {
 	verify_set_option_version(cmdline_option_version);
 	return execute_verify();

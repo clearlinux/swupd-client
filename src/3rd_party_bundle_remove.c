@@ -19,6 +19,8 @@
 
 #define _GNU_SOURCE
 
+#include <errno.h>
+
 #include "3rd_party_repos.h"
 #include "swupd.h"
 
@@ -93,15 +95,52 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static enum swupd_code remove_bundle(char *bundle)
+static enum swupd_code remove_binary(void *data)
+{
+	enum swupd_code ret_code = SWUPD_OK;
+	int ret;
+	char *filename = (char *)data;
+	char *content_dir = NULL;
+	char *bin_dir = NULL;
+	char *script = NULL;
+	char *binary = NULL;
+
+	content_dir = get_3rd_party_content_path();
+	bin_dir = sys_path_join(content_dir, "bin");
+	script = sys_path_join(bin_dir, sys_basename(filename));
+	binary = sys_path_join(globals.path_prefix, filename);
+
+	if (sys_file_exists(script) && !sys_file_exists(binary)) {
+		ret = sys_rm(script);
+		if (ret != 0 && ret != -ENOENT) {
+			error("File %s could not be removed\n\n", script);
+			ret_code = SWUPD_COULDNT_REMOVE_FILE;
+		}
+	}
+
+	free_string(&content_dir);
+	free_string(&bin_dir);
+	free_string(&script);
+	free_string(&binary);
+
+	return ret_code;
+}
+
+static enum swupd_code remove_bundle_binaries(struct list *removed_files)
+{
+	return process_bundle_binaries(removed_files, "\nRemoving 3rd-party bundle binaries...\n", "remove_binaries", remove_binary);
+}
+
+static enum swupd_code remove_bundle(void *data)
 {
 	struct list *bundle_to_remove = NULL;
 	enum swupd_code ret = SWUPD_OK;
+	char *bundle = (char *)data;
 
 	/* execute_remove_bundles expects a list */
 	bundle_to_remove = list_append_data(bundle_to_remove, bundle);
 
-	ret = execute_remove_bundles(bundle_to_remove);
+	ret = execute_remove_bundles(bundle_to_remove, remove_bundle_binaries);
 
 	list_free_list(bundle_to_remove);
 	return ret;
@@ -110,7 +149,7 @@ static enum swupd_code remove_bundle(char *bundle)
 enum swupd_code third_party_bundle_remove_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
-	const int steps_in_bundle_remove = 2;
+	const int steps_in_bundle_remove = 3;
 	struct list *bundles = NULL;
 
 	if (!parse_options(argc, argv)) {
@@ -142,6 +181,7 @@ enum swupd_code third_party_bundle_remove_main(int argc, char **argv)
 	 * Steps for bundle-remove:
 	 *  1) load_manifests
 	 *  2) remove_files
+	 *  3) remove_binaries
 	 */
 	progress_init_steps("3rd-party-bundle-remove", steps_in_bundle_remove);
 

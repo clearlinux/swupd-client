@@ -77,7 +77,7 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static enum swupd_code check_update_repo(UNUSED_PARAM char *unused)
+static enum swupd_code check_update_repo(UNUSED_PARAM void *unused)
 {
 	return check_update();
 }

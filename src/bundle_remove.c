@@ -290,10 +290,10 @@ static void print_remove_summary(unsigned int requested, unsigned int bad, unsig
 /*  The function removes one or more bundles
  *  passed in the bundles list.
  */
-enum swupd_code execute_remove_bundles(struct list *bundles)
+enum swupd_code execute_remove_bundles(struct list *bundles, extra_proc_fn_t post_remove_fn)
 {
-	int ret = SWUPD_OK;
-	int ret_code = 0;
+	enum swupd_code ret_code = SWUPD_OK;
+	enum swupd_code ret = SWUPD_OK;
 	unsigned int bad = 0;
 	unsigned int total = 0;
 	int current_version = CURRENT_OS_VERSION;
@@ -424,6 +424,10 @@ enum swupd_code execute_remove_bundles(struct list *bundles)
 		}
 	}
 
+	if (post_remove_fn) {
+		ret_code = post_remove_fn(files_to_remove);
+	}
+
 	/* print a summary of the remove operation */
 	print_remove_summary(total, bad, list_len(bundles_to_remove));
 
@@ -490,7 +494,7 @@ enum swupd_code bundle_remove_main(int argc, char **argv)
 	 */
 	progress_init_steps("bundle-remove", steps_in_bundle_remove);
 
-	ret = execute_remove_bundles(bundles_list);
+	ret = execute_remove_bundles(bundles_list, NULL);
 
 	list_free_list(bundles_list);
 	progress_finish_steps(ret);

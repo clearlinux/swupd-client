@@ -31,6 +31,20 @@ static char *get_repo_config_path(void)
 	return str_or_die("%s/%s/%s", globals.state_dir, SWUPD_3RD_PARTY_DIRNAME, "repo.ini");
 }
 
+char *get_3rd_party_content_path(void)
+{
+	char *bundles_path = NULL;
+	char *third_party_path = NULL;
+
+	/* the path_prefix has the path to the 3rd-party repo, like:
+	 *  /<original_path_prefix>/opt/3rd-party/bundles/<repo>/ */
+	bundles_path = sys_dirname(globals.path_prefix);
+	third_party_path = sys_dirname(bundles_path);
+	free_string(&bundles_path);
+
+	return third_party_path;
+}
+
 int repo_name_cmp(const void *repo, const void *name)
 {
 	return strcmp(((struct repo *)repo)->name, name);
@@ -379,7 +393,7 @@ clean_and_exit:
 	return ret_code;
 }
 
-enum swupd_code third_party_run_operation(struct list *bundles, const char *repo, run_operation_fn_t run_operation_fn)
+enum swupd_code third_party_run_operation(struct list *bundles, const char *repo, process_data_fn_t process_bundle_fn)
 {
 	struct list *repos = NULL;
 	struct list *iter = NULL;
@@ -437,7 +451,7 @@ enum swupd_code third_party_run_operation(struct list *bundles, const char *repo
 			}
 
 			/* perform appropriate action on the bundle */
-			ret = run_operation_fn(bundle);
+			ret = process_bundle_fn(bundle);
 			if (ret) {
 				/* if we have an error here it is ok to overwrite any previous error */
 				ret_code = ret;
@@ -464,7 +478,7 @@ clean_and_exit:
 	return ret_code;
 }
 
-enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operation_fn_t run_operation_fn, enum swupd_code expected_ret_code, const char *op_name, int op_steps)
+enum swupd_code third_party_run_operation_multirepo(const char *repo, process_data_fn_t run_operation_fn, enum swupd_code expected_ret_code, const char *op_name, int op_steps)
 {
 	enum swupd_code ret_code = SWUPD_OK;
 	enum swupd_code ret;
@@ -550,6 +564,54 @@ void third_party_repo_header(const char *repo_name)
 	string_or_die(&header, " 3rd-Party Repo: %s", repo_name);
 	print_header(header);
 	free_string(&header);
+}
+
+static bool is_binary(const char *filename)
+{
+	if (strncmp(filename, "/bin", strlen("/bin")) == 0 ||
+	    strncmp(filename, "/usr/bin", strlen("/usr/bin")) == 0 ||
+	    strncmp(filename, "/usr/local/bin", strlen("/usr/local/bin")) == 0) {
+		return true;
+	}
+
+	return false;
+}
+
+bool third_party_file_is_binary(struct file *file)
+{
+	if (is_binary(file->filename) && file->is_exported) {
+		return true;
+	} else
+		return false;
+}
+
+enum swupd_code process_bundle_binaries(struct list *files, const char *msg, const char *step, process_data_fn_t proc_binary_fn)
+{
+	enum swupd_code ret, ret_code = SWUPD_OK;
+	struct list *iter = NULL;
+	struct file *file = NULL;
+	char *filename = NULL;
+	int count = 0;
+	int number_of_files = list_len(files);
+
+	info("%s", msg);
+
+	progress_next_step(step, PROGRESS_BAR);
+	for (iter = list_head(files); iter; iter = iter->next) {
+		file = iter->data;
+		filename = file->filename;
+		if (third_party_file_is_binary(file)) {
+			ret = proc_binary_fn(filename);
+			if (ret) {
+				/* at least one file failed to process */
+				ret_code = ret;
+			}
+		}
+		count++;
+		progress_report(count, number_of_files);
+	}
+
+	return ret_code;
 }
 
 #endif

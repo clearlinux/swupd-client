@@ -117,6 +117,12 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
+static enum swupd_code bundle_information(void *data)
+{
+	char *bundle = (char *)data;
+	return bundle_info(bundle);
+}
+
 enum swupd_code third_party_bundle_info_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
@@ -143,7 +149,7 @@ enum swupd_code third_party_bundle_info_main(int argc, char **argv)
 	progress_init_steps("3rd-party-bundle-info", steps_in_bundleinfo);
 
 	bundles = list_append_data(bundles, cmdline_option_bundle);
-	ret_code = third_party_run_operation(bundles, cmdline_option_repo, bundle_info);
+	ret_code = third_party_run_operation(bundles, cmdline_option_repo, bundle_information);
 
 	list_free_list(bundles);
 	swupd_deinit();

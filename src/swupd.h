@@ -329,12 +329,12 @@ extern int add_subscriptions(struct list *bundles, struct list **subs, struct ma
 extern int subscription_get_tree(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
 
 /* bundle_add.c */
-typedef enum swupd_code (*extra_proc_fn_t)(struct list *files_installed);
+typedef enum swupd_code (*extra_proc_fn_t)(struct list *files);
 extern enum swupd_code bundle_add(struct list *bundles_list, int version, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn);
 extern enum swupd_code execute_bundle_add(struct list *bundles_list, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn);
 
 /* bundle_remove.c */
-extern enum swupd_code execute_remove_bundles(struct list *bundles);
+extern enum swupd_code execute_remove_bundles(struct list *bundles, extra_proc_fn_t post_remove_fn);
 extern void bundle_remove_set_option_force(bool opt);
 extern void bundle_remove_set_option_recursive(bool opt);
 

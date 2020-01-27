@@ -124,7 +124,7 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static enum swupd_code update_repos(UNUSED_PARAM char *unused)
+static enum swupd_code update_repos(UNUSED_PARAM void *unused)
 {
 	/* Update should always ignore optional bundles */
 	globals.skip_optional_bundles = true;

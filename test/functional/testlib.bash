@@ -2502,6 +2502,14 @@ create_bundle() { # swupd_function
 		else
 			if [ "$(dirname "$val")" = "/bin" ] || [ "$(dirname "$val")" = "/usr/bin" ] || [ "$(dirname "$val")" = "/usr/local/bin" ]; then
 				bundle_file=$(create_file -x "$files_path")
+				# if the bundle is from a 3rd-party repo and has binaries, they should
+				# be exported to /opt/3rd-party/bin
+				if [ "$third_party" = true ] && [ "$local_bundle" = true ]; then
+					debug_msg "Exporting 3rd-party bundle binary $THIRD_PARTY_BIN_DIR/$(basename "$val")"
+					sudo mkdir -p "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"
+					sudo touch "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
+					sudo chmod +x "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
+				fi
 			else
 				bundle_file=$(create_file "$files_path")
 			fi

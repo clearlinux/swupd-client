@@ -93,7 +93,7 @@ enum swupd_code third_party_check_update_main(int argc, char **argv)
 		return SWUPD_INVALID_OPTION;
 	}
 
-	ret_code = swupd_init(SWUPD_NO_ROOT);
+	ret_code = swupd_init(SWUPD_ALL);
 	if (ret_code != SWUPD_OK) {
 		return ret_code;
 	}

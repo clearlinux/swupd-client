@@ -149,11 +149,7 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 		return SWUPD_INVALID_OPTION;
 	}
 
-	if (cmdline_local && !is_root()) {
-		ret_code = swupd_init(SWUPD_NO_ROOT);
-	} else {
-		ret_code = swupd_init(SWUPD_ALL);
-	}
+	ret_code = swupd_init(SWUPD_ALL);
 	if (ret_code != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
 		return ret_code;

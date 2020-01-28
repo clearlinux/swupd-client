@@ -81,7 +81,7 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 		return SWUPD_INVALID_OPTION;
 	}
 
-	ret = swupd_init(SWUPD_NO_ROOT);
+	ret = swupd_init(SWUPD_ALL);
 	if (ret != SWUPD_OK) {
 		return ret;
 	}

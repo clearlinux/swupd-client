@@ -163,16 +163,6 @@ static bool parse_options(int argc, char **argv)
 			return false;
 		}
 	}
-	if (cmdline_option_quick) {
-		if (cmdline_option_picky) {
-			error("--quick and --picky options are mutually exclusive\n");
-			return false;
-		}
-		if (cmdline_option_extra_files_only) {
-			error("--quick and --extra-files-only options are mutually exclusive\n");
-			return false;
-		}
-	}
 	if (cmdline_option_extra_files_only) {
 		if (cmdline_option_picky) {
 			error("--extra-files-only and --picky options are mutually exclusive\n");

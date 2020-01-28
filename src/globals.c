@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "3rd_party_repos.h"
 #include "config.h"
 #include "lib/log.h"
 #include "swupd.h"
@@ -50,6 +51,8 @@ struct globals globals = {
 	.retry_delay = DEFAULT_RETRY_DELAY,
 	.update_server_port = -1,
 };
+
+struct globals_bkp globals_bkp;
 
 /* NOTE: Today the content and version server urls are the same in
  * all cases.  It is highly likely these will eventually differ, eg:
@@ -452,6 +455,12 @@ bool globals_init(void)
 		globals.global_times = timelist_new();
 	}
 
+	/* backup the global variables modified by 3rd-party so we can recover them */
+	globals_bkp.path_prefix = strdup_or_die(globals.path_prefix);
+	globals_bkp.state_dir = strdup_or_die(globals.state_dir);
+	globals_bkp.version_url = strdup_or_die(globals.version_url);
+	globals_bkp.content_url = strdup_or_die(globals.content_url);
+
 	return true;
 }
 
@@ -469,6 +478,10 @@ void globals_deinit(void)
 	free_string(&globals.state_dir_cache);
 	timelist_free(globals.global_times);
 	globals.global_times = NULL;
+	free_string(&globals_bkp.path_prefix);
+	free_string(&globals_bkp.state_dir);
+	free_string(&globals_bkp.version_url);
+	free_string(&globals_bkp.content_url);
 }
 
 void save_cmd(char **argv)

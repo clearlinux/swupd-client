@@ -101,7 +101,6 @@ static enum swupd_code create_wrapper_script(void *data)
 	enum swupd_code ret_code = 0;
 	FILE *fp = NULL;
 	char *filename = (char *)data;
-	char *content_dir = NULL;
 	char *bin_directory = NULL;
 	char *script = NULL;
 	char *binary = NULL;
@@ -111,9 +110,8 @@ static enum swupd_code create_wrapper_script(void *data)
 	char *third_party_ld_path = NULL;
 	mode_t mode = 0755;
 
-	content_dir = get_3rd_party_content_path();
-	bin_directory = sys_path_join(content_dir, "bin");
-	script = sys_path_join(bin_directory, sys_basename(filename));
+	bin_directory = third_party_get_bin_dir();
+	script = third_party_get_binary_path(sys_basename(filename));
 	binary = sys_path_join(globals.path_prefix, filename);
 
 	if (!sys_filelink_is_executable(binary)) {
@@ -174,7 +172,6 @@ close_and_exit:
 	if (fp) {
 		fclose(fp);
 	}
-	free_string(&content_dir);
 	free_string(&binary);
 	free_string(&script);
 	free_string(&bin_directory);
@@ -191,13 +188,8 @@ static enum swupd_code validate_binary(void *data)
 	char *bin_directory = NULL;
 	char *script = NULL;
 
-	char *tmp1 = sys_dirname(globals.path_prefix);
-	char *tmp2 = sys_dirname(tmp1);
-	bin_directory = sys_path_join(tmp2, "/bin");
-	free_string(&tmp1);
-	free_string(&tmp2);
-
-	script = sys_path_join(bin_directory, sys_basename(filename));
+	bin_directory = third_party_get_bin_dir();
+	script = third_party_get_binary_path(sys_basename(filename));
 
 	/* if a file already exists, report the problem to the user */
 	if (sys_file_exists(script)) {

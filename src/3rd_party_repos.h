@@ -16,8 +16,15 @@ extern "C" {
 
 /** @brief Name of the directory where 3rd-party content and state should be stored */
 #define SWUPD_3RD_PARTY_DIRNAME "3rd-party"
+
+/** @brief Full path to the main directory for 3rd-party */
+#define SWUPD_3RD_PARTY_DIR "/opt/" SWUPD_3RD_PARTY_DIRNAME
+
 /** @brief Full path to the directory where 3rd-party content is going to be installed. */
-#define SWUPD_3RD_PARTY_BUNDLES_DIR "/opt/" SWUPD_3RD_PARTY_DIRNAME "/bundles"
+#define SWUPD_3RD_PARTY_BUNDLES_DIR SWUPD_3RD_PARTY_DIR "/bundles"
+
+/** @brief Full path to the directory where 3rd-party binaries are going to be installed */
+#define SWUPD_3RD_PARTY_BIN_DIR SWUPD_3RD_PARTY_DIR "/bin"
 
 /** @brief Store information of a repository.  */
 struct repo {
@@ -30,8 +37,11 @@ struct repo {
 /** @brief Definition of a function that performs some processing on a given data item */
 typedef enum swupd_code (*process_data_fn_t)(void *data);
 
-/** @brief Function that returns the path to the 3rd-party content directory */
-char *get_3rd_party_content_path(void);
+/** @brief Function that returns the path to the 3rd-party bin directory */
+char *third_party_get_bin_dir(void);
+
+/** @brief Function that returns the path to a 3rd-party binary */
+char *third_party_get_binary_path(const char *binary_name);
 
 /**
  * @brief Free repo pointed by @c repo.
@@ -93,7 +103,7 @@ int third_party_remove_repo_directory(const char *repo_name);
  *
  * @returns a swupd_code
  */
-enum swupd_code third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo, bool sigcheck);
+enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck);
 
 /**
  * @brief strcmp like function to search for a repo based on its name

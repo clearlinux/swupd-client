@@ -100,14 +100,10 @@ static enum swupd_code remove_binary(void *data)
 	enum swupd_code ret_code = SWUPD_OK;
 	int ret;
 	char *filename = (char *)data;
-	char *content_dir = NULL;
-	char *bin_dir = NULL;
 	char *script = NULL;
 	char *binary = NULL;
 
-	content_dir = get_3rd_party_content_path();
-	bin_dir = sys_path_join(content_dir, "bin");
-	script = sys_path_join(bin_dir, sys_basename(filename));
+	script = third_party_get_binary_path(sys_basename(filename));
 	binary = sys_path_join(globals.path_prefix, filename);
 
 	if (sys_file_exists(script) && !sys_file_exists(binary)) {
@@ -118,8 +114,6 @@ static enum swupd_code remove_binary(void *data)
 		}
 	}
 
-	free_string(&content_dir);
-	free_string(&bin_dir);
 	free_string(&script);
 	free_string(&binary);
 

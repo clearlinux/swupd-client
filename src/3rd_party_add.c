@@ -96,8 +96,6 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	const char *name, *url;
 	struct list *repos = NULL;
 	struct repo *repo = NULL;
-	char *path_prefix = NULL;
-	char *state_dir = NULL;
 	bool revert = false;
 	int repo_version;
 	int ret;
@@ -129,10 +127,6 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 		goto finish;
 	}
 
-	/* backup the original global values */
-	path_prefix = strdup_or_die(globals.path_prefix);
-	state_dir = strdup_or_die(globals.state_dir);
-
 	/* The last two in reverse are the repo-name, repo-url */
 	progress_next_step("add_repo", PROGRESS_UNDEFINED);
 	info("Adding 3rd-party repository %s...\n\n", name);
@@ -158,7 +152,7 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	}
 
 	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-	ret_code = third_party_set_repo(globals.state_dir, globals.path_prefix, repo, DONT_VERIFY_CERTIFICATE);
+	ret_code = third_party_set_repo(repo, DONT_VERIFY_CERTIFICATE);
 	if (ret_code) {
 		revert = true;
 		goto finish;
@@ -190,8 +184,6 @@ finish:
 	if (revert) {
 		/* there was an error adding the repo, revert the action,
 		 * we don't want to keep a corrupt repo */
-		set_path_prefix(path_prefix);
-		set_state_dir(state_dir);
 		ret = remove_repo(name);
 		if (ret) {
 			error("The corrupt repository failed to be removed (errno: %d)\n\n", ret);
@@ -205,8 +197,6 @@ finish:
 	}
 
 	list_free_list_and_data(repos, repo_free_data);
-	free_string(&path_prefix);
-	free_string(&state_dir);
 	swupd_deinit();
 	progress_finish_steps(ret_code);
 

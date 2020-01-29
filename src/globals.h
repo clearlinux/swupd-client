@@ -52,6 +52,15 @@ extern struct globals {
 	timelist *global_times;
 } globals;
 
+/* Struct that holds the original values of some global variables,
+ * useful to recover the values after modifying them */
+extern struct globals_bkp {
+	char *path_prefix;
+	char *state_dir;
+	char *version_url;
+	char *content_url;
+} globals_bkp;
+
 struct global_options {
 	const struct option *longopts;
 	const int longopts_len;

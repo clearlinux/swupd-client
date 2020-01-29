@@ -165,6 +165,13 @@ bool third_party_file_is_binary(struct file *file);
  */
 enum swupd_code process_bundle_binaries(struct list *files, const char *msg, const char *step, process_data_fn_t proc_binary_fn);
 
+/**
+ * @brief Function that removes a script to export a binary from the 3rd-party bin dir.
+ *
+ * @param data the filename of a binary file
+ */
+enum swupd_code remove_binary(void *data);
+
 #endif
 
 #ifdef __cplusplus

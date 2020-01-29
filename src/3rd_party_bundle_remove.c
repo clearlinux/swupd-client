@@ -95,31 +95,6 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static enum swupd_code remove_binary(void *data)
-{
-	enum swupd_code ret_code = SWUPD_OK;
-	int ret;
-	char *filename = (char *)data;
-	char *script = NULL;
-	char *binary = NULL;
-
-	script = third_party_get_binary_path(sys_basename(filename));
-	binary = sys_path_join(globals.path_prefix, filename);
-
-	if (sys_file_exists(script) && !sys_file_exists(binary)) {
-		ret = sys_rm(script);
-		if (ret != 0 && ret != -ENOENT) {
-			error("File %s could not be removed\n\n", script);
-			ret_code = SWUPD_COULDNT_REMOVE_FILE;
-		}
-	}
-
-	free_string(&script);
-	free_string(&binary);
-
-	return ret_code;
-}
-
 static enum swupd_code remove_bundle_binaries(struct list *removed_files)
 {
 	return process_bundle_binaries(removed_files, "\nRemoving 3rd-party bundle binaries...\n", "remove_binaries", remove_binary);

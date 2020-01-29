@@ -8,39 +8,18 @@ load "../testlib"
 test_setup(){
 
 	create_test_environment "$TEST_NAME"
+	# create a few 3rd-party repos within the test environment and add
+	# some bundles to them
+	add_third_party_repo "$TEST_NAME" 10 1 repo1
+	create_bundle -L -t -n test-bundle1 -f /file_1,/bin/binary_1           -u repo1 "$TEST_NAME"
 
-	contents=$(cat <<- EOM
-		\n
-		[test1]
-		url=www.abc.com
+	add_third_party_repo "$TEST_NAME" 10 1 repo2
+	create_bundle -L -t -n test-bundle2 -f /file_2,/bin/binary_2           -u repo2 "$TEST_NAME"
+	create_bundle -L -t -n test-bundle3 -f /file_3,/usr/bin/binary_3       -u repo2 "$TEST_NAME"
+	create_bundle -L -t -n test-bundle4 -f /file_4,/usr/local/bin/binary_4 -u repo2 "$TEST_NAME"
 
-		[test2]
-		url=www.efg.com
-
-		[test3]
-		url=www.xyz.com
-
-		[test4]
-		url=www.pqr.com
-		invalid=456
-
-		[test5]
-		url=www.lmn.com
-		\n
-	EOM
-	)
-
-	repo_config_file="$STATEDIR"/3rd-party/repo.ini
-	sudo mkdir -p "$STATEDIR"/3rd-party
-	sudo mkdir -p "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/{test1,test2,test3,test4,test5}
-	write_to_protected_file -a "$repo_config_file" "$contents"
-	sudo mkdir "$STATEDIR"/3rd-party/{test1,test2,test3,test4,test5}
-
-}
-
-test_teardown(){
-
-	destroy_test_environment "$TEST_NAME"
+	add_third_party_repo "$TEST_NAME" 10 1 repo3
+	create_bundle -L -t -n test-bundle5 -f /file_5,/usr/bin/binary_5       -u repo3 "$TEST_NAME"
 
 }
 
@@ -49,57 +28,34 @@ test_teardown(){
 	repo_config_file="$STATEDIR"/3rd-party/repo.ini
 
 	#remove at start of file
-	assert_dir_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/test1
-	assert_dir_exists "$STATEDIR"/3rd-party/test1
-	run sudo sh -c "$SWUPD 3rd-party remove test1 $SWUPD_OPTS"
+	assert_dir_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/repo1
+	assert_dir_exists "$STATEDIR"/3rd-party/repo1
+	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_1
+	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_2
+	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_3
+	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_4
+	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_5
+
+	run sudo sh -c "$SWUPD 3rd-party remove $SWUPD_OPTS repo2"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Removing repository test1...
+		Loading required manifests...
+		Removing repository repo2...
+		Removing 3rd-party bundle binaries...
 		Repository and its content removed successfully
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_dir_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/test1
-	assert_dir_not_exists "$STATEDIR"/3rd-party/test1
-
-	#remove at middle of file
-	assert_dir_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/test3
-	assert_dir_exists "$STATEDIR"/3rd-party/test3
-	run sudo sh -c "$SWUPD 3rd-party remove test3 $SWUPD_OPTS"
-	assert_status_is "$SWUPD_OK"
-	expected_output=$(cat <<-EOM
-		Removing repository test3...
-		Repository and its content removed successfully
-	EOM
-	)
-	assert_is_output "$expected_output"
-	assert_dir_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/test3
-	assert_dir_not_exists "$STATEDIR"/3rd-party/test3
-
-	#remove at end of file
-	assert_dir_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/test5
-	assert_dir_exists "$STATEDIR"/3rd-party/test5
-	run sudo sh -c "$SWUPD 3rd-party remove test5 $SWUPD_OPTS"
-	assert_status_is "$SWUPD_OK"
-	expected_output=$(cat <<-EOM
-		Removing repository test5...
-		Repository and its content removed successfully
-	EOM
-	)
-	assert_is_output "$expected_output"
-	assert_dir_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/test5
-	assert_dir_not_exists "$STATEDIR"/3rd-party/test5
-
-	expected_contents=$(cat <<- EOM
-		[test2]
-		url=www.efg.com
-
-		[test4]
-		url=www.pqr.com
-	EOM
-	)
-
-	run sudo sh -c "cat $repo_config_file"
-	assert_is_output --identical "$expected_contents"
+	assert_dir_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/repo1
+	assert_dir_exists "$STATEDIR"/3rd-party/repo1
+	assert_dir_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/repo2
+	assert_dir_not_exists "$STATEDIR"/3rd-party/repo2
+	assert_dir_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/repo3
+	assert_dir_exists "$STATEDIR"/3rd-party/repo3
+	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_1
+	assert_file_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_2
+	assert_file_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_3
+	assert_file_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_4
+	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_5
 
 }

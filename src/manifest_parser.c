@@ -219,6 +219,8 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 		} else if (line[3] == 'm') {
 			file->is_mix = 1;
 			manifest->is_mix = 1;
+		} else if (line[3] == 'x') {
+			file->is_exported = 1;
 		}
 
 		c2 = strchr(c, '\t');

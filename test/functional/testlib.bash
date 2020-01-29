@@ -6,12 +6,15 @@ TEST_FILENAME=$(basename "$BATS_TEST_FILENAME")
 TEST_NAME=${TEST_FILENAME%.bats}
 THEME_DIRNAME="$BATS_TEST_DIRNAME"
 THIRD_PARTY_BUNDLES_DIR="opt/3rd-party/bundles"
+THIRD_PARTY_BIN_DIR="opt/3rd-party/bin"
 
 export TEST_NAME
 export TEST_NAME_SHORT="$TEST_NAME"
 export THEME_DIRNAME
 export FUNC_DIR
 export SWUPD_DIR="$FUNC_DIR/../.."
+export THIRD_PARTY_BUNDLES_DIR
+export THIRD_PARTY_BIN_DIR
 
 # detect where the swupd binary is
 if [ -e "$SWUPD" ]; then
@@ -403,7 +406,7 @@ copy_manifest() {
 	update_manifest "$to_path"/Manifest."$bundle" format "$format"
 
 	# untar the zero pack into the files directory in the to_version
-	sudo tar -xf "$to_path"/pack-"$bundle"-from-0.tar --strip-components 1 --directory "$to_path"/files
+	sudo tar --preserve-permissions -xf "$to_path"/pack-"$bundle"-from-0.tar --strip-components 1 --directory "$to_path"/files
 
 	# copy the tar file of each fullfile from a previous version
 	files=("$(ls -I "*.tar" "$to_path"/files)")
@@ -547,24 +550,31 @@ create_dir() { # swupd_function
 #         will be random but fairly small
 create_file() { # swupd_function
 
-	local path=$1
-	local size=$2
 	local hashed_name
-
+	local executable=false
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    create_file <path> [size in bytes]
+			    create_file [-x] <path> [size in bytes]
+
+			Options:
+			    -x    If set, the file is created as executable
 			EOM
 		return
 	fi
+	[ "$1" = "-x" ] && { executable=true ; shift ; }
+	local path=$1
+	local size=$2
 	validate_path "$path"
 
 	if [ -n "$size" ]; then
 		< /dev/urandom head -c "$size" | sudo tee "$path/testfile" > /dev/null
 	else
 		generate_random_content | sudo tee "$path/testfile" > /dev/null
+	fi
+	if [ "$executable" = true ]; then
+		sudo chmod +x "$path/testfile"
 	fi
 	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$path"/testfile)
 	sudo mv "$path"/testfile "$path"/"$hashed_name"
@@ -641,9 +651,9 @@ create_tar() { # swupd_function
 	item_name=$(basename "$item")
 	# if the item is a directory exclude its content when taring
 	if [ -d "$item" ]; then
-		sudo tar -C "$path" -cf "$path"/"$item_name".tar --exclude="$item_name"/* "$item_name"
+		sudo tar --preserve-permissions -C "$path" -cf "$path"/"$item_name".tar --exclude="$item_name"/* "$item_name"
 	else
-		sudo tar -C "$path" -cf "$path"/"$item_name".tar "$item_name"
+		sudo tar --preserve-permissions -C "$path" -cf "$path"/"$item_name".tar "$item_name"
 	fi
 
 }
@@ -700,7 +710,7 @@ set_as_minversion() { # swupd_function
 			sudo cp "$webdir_path"/"$previous_version"/pack-"$bundle"-from-0.tar "$webdir_path"/"$minversion"/pack-"$bundle"-from-0.tar
 			# extract the content of the zero pack in the files directory so we have
 			# all files available to create future delta packs
-			sudo tar -xf "$webdir_path"/"$minversion"/pack-"$bundle"-from-0.tar --strip-components 1 --directory "$webdir_path"/"$minversion"/files
+			sudo tar --preserve-permissions -xf "$webdir_path"/"$minversion"/pack-"$bundle"-from-0.tar --strip-components 1 --directory "$webdir_path"/"$minversion"/files
 			files=("$(ls -I "*.tar" "$webdir_path"/"$minversion"/files)")
 			for bundle_file in ${files[*]}; do
 				if [ ! -e "$webdir_path"/"$minversion"/files/"$bundle_file".tar ]; then
@@ -830,6 +840,7 @@ add_to_manifest() { # swupd_function
 	local contentsize
 	local linked_file
 	local boot_type="."
+	local exported_type="."
 	local file_path
 	local skip_param_validation=false
 	local partial=false
@@ -907,9 +918,13 @@ add_to_manifest() { # swupd_function
 	if [ "$(dirname "$item_path")" = "/usr/lib/kernel" ] || [ "$(dirname "$item_path")" = "/usr/lib/modules/" ]; then
 		boot_type="b"
 	fi
+	# if the file is in any of these paths: /bin, /usr/bin. /usr/local/bin, then it is an exported file
+	if [ "$(dirname "$item_path")" = "/bin" ] || [ "$(dirname "$item_path")" = "/usr/bin" ] || [ "$(dirname "$item_path")" = "/usr/local/bin" ]; then
+		exported_type="x"
+	fi
 	sudo sed -i "s/^contentsize:.*/contentsize:\\t$contentsize/" "$manifest"
 	# add to manifest content
-	write_to_protected_file -a "$manifest" "$item_type$experimental$boot_type.\\t$name\\t$version\\t$item_path\\n"
+	write_to_protected_file -a "$manifest" "$item_type$experimental$boot_type$exported_type\\t$name\\t$version\\t$item_path\\n"
 	# If a manifest tar already exists for that manifest, renew the manifest tar unless specified otherwise
 	if [ "$partial" = false ]; then
 		retar_manifest "$manifest"
@@ -2306,7 +2321,7 @@ create_bundle() { # swupd_function
 		# this file is added in every bundle by default, it would add too much overhead
 		# for most tests (except for 3rd-party)
 		fdir=$(dirname "${val%:*}")
-		if ! sudo cat "$manifest" | grep -qx "[DL]\\.\\.\\..*$fdir" && [ "$fdir" != "/" ]; then
+		if ! sudo cat "$manifest" | grep -qx "[DL]\\.\\.\\."$'\t'".*"$'\t'"$fdir" && [ "$fdir" != "/" ]; then
 			if [ "$third_party" = false ] && [ "$fdir" = "/usr/share/clear/bundles" ]; then
 				return
 			fi
@@ -2315,7 +2330,7 @@ create_bundle() { # swupd_function
 			# add each one of the directories of the path if they are not in the manifest already
 			while [ "$(dirname "$fdir")" != "/" ]; do
 				fdir=$(dirname "$fdir")
-				if ! sudo cat "$manifest" | grep -qx "[DL]\\.\\.\\..*$fdir"; then
+				if ! sudo cat "$manifest" | grep -qx "[DL]\\.\\.\\."$'\t'".*"$'\t'"$fdir"; then
 					add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
 				fi
 			done
@@ -2422,7 +2437,7 @@ create_bundle() { # swupd_function
 	debug_msg "Directory -> $bundle_dir"
 	# Create a zero pack for the bundle and add the directory to it
 	debug_msg "Creating a zero pack for the bundle and adding the directory to it"
-	sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_dir")"
+	sudo tar --preserve-permissions -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_dir")"
 	for val in "${dir_list[@]}"; do
 		add_dirs
 		if [ "$val" != "/" ]; then
@@ -2461,7 +2476,7 @@ create_bundle() { # swupd_function
 		# add the pointed file to the manifest (no need to add it to the pack)
 		add_to_manifest "$manifest" "$bundle_dir" "$dir_path"
 		# add the symlink to zero pack and manifest
-		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
+		sudo tar --preserve-permissions -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
 		add_to_manifest -s "$manifest" "$bundle_link" "$val"
 		if [ "$DEBUG" == true ]; then
 			echo "link -> $bundle_link"
@@ -2485,12 +2500,24 @@ create_bundle() { # swupd_function
 			val="${val%:*}"
 			validate_item "$bundle_file"
 		else
-			bundle_file=$(create_file "$files_path")
+			if [ "$(dirname "$val")" = "/bin" ] || [ "$(dirname "$val")" = "/usr/bin" ] || [ "$(dirname "$val")" = "/usr/local/bin" ]; then
+				bundle_file=$(create_file -x "$files_path")
+				# if the bundle is from a 3rd-party repo and has binaries, they should
+				# be exported to /opt/3rd-party/bin
+				if [ "$third_party" = true ] && [ "$local_bundle" = true ]; then
+					debug_msg "Exporting 3rd-party bundle binary $THIRD_PARTY_BIN_DIR/$(basename "$val")"
+					sudo mkdir -p "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"
+					sudo touch "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
+					sudo chmod +x "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
+				fi
+			else
+				bundle_file=$(create_file "$files_path")
+			fi
 		fi
 		debug_msg "file -> $bundle_file"
 		add_to_manifest -p "$manifest" "$bundle_file" "$val"
 		# Add the file to the zero pack of the bundle
-		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_file")"
+		sudo tar --preserve-permissions -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_file")"
 		# if the local_bundle flag is set, copy the files to the target-dir as if the
 		# bundle had been locally installed
 		if [ "$local_bundle" = true ]; then
@@ -2525,10 +2552,10 @@ create_bundle() { # swupd_function
 		bundle_link=$(create_link "$files_path" "$(dirname "$pfile")"/"$pfile_name")
 		sudo mv "$(dirname "$pfile")"/"$pfile_name" "$pfile"
 		# add the pointed file to the zero pack and manifest
-		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$pfile")"
+		sudo tar --preserve-permissions -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$pfile")"
 		add_to_manifest "$manifest" "$pfile" "$pfile_path"
 		# add the symlink to zero pack and manifest
-		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
+		sudo tar --preserve-permissions -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
 		add_to_manifest -s "$manifest" "$bundle_link" "$val"
 		debug_msg "link -> $bundle_link"
 		debug_msg "file pointed to -> $pfile"
@@ -2559,7 +2586,7 @@ create_bundle() { # swupd_function
 		fi
 		# Create a link passing a file that does not exits
 		bundle_link=$(create_link "$files_path" "$files_path"/"$(generate_random_name does_not_exist-)")
-		sudo tar -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
+		sudo tar --preserve-permissions -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
 		add_to_manifest -s "$manifest" "$bundle_link" "$val"
 		# Add the file pointed by the link to the zero pack of the bundle
 		debug_msg "dangling link -> $bundle_link"
@@ -3231,11 +3258,11 @@ add_to_pack() { # swupd_function
 	# item should be a file from the "delta" or "files" directories
 	# fullfiles are expected to be in the staged dir when extracted
 	if [[ "$item" = *"/files"* ]]; then
-		sudo tar -C "$item_path" -rf "$version_path"/pack-"$bundle"-from-"$version".tar --transform "s,^,staged/," "$(basename "$item")"
+		sudo tar --preserve-permissions -C "$item_path" -rf "$version_path"/pack-"$bundle"-from-"$version".tar --transform "s,^,staged/," "$(basename "$item")"
 	elif [[ "$item" = *"/delta"* ]]; then
-		sudo tar -C "$version_path" -rf "$version_path"/pack-"$bundle"-from-"$version".tar delta/"$(basename "$item")"
+		sudo tar --preserve-permissions -C "$version_path" -rf "$version_path"/pack-"$bundle"-from-"$version".tar delta/"$(basename "$item")"
 	elif [[ "$item" = *"/Manifest."*".D"* ]]; then
-		sudo tar -C "$version_path" -rf "$version_path"/pack-"$bundle"-from-"$version".tar "$(basename "$version_path")"/"$(basename "$item")"
+		sudo tar --preserve-permissions -C "$version_path" -rf "$version_path"/pack-"$bundle"-from-"$version".tar "$(basename "$version_path")"/"$(basename "$item")"
 	else
 		terminate "the provided file is not valid in a zero pack"
 	fi

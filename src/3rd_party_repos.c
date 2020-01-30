@@ -26,9 +26,29 @@
 
 #ifdef THIRDPARTY
 
+char *third_party_get_bin_dir(void)
+{
+	return sys_path_join(globals_bkp.path_prefix, SWUPD_3RD_PARTY_BIN_DIR);
+}
+
+char *third_party_get_binary_path(const char *binary_name)
+{
+	return str_or_die("%s%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BIN_DIR, binary_name);
+}
+
 static char *get_repo_config_path(void)
 {
-	return str_or_die("%s/%s/%s", globals.state_dir, SWUPD_3RD_PARTY_DIRNAME, "repo.ini");
+	return str_or_die("%s/%s/%s", globals_bkp.state_dir, SWUPD_3RD_PARTY_DIRNAME, "repo.ini");
+}
+
+static char *get_repo_content_path(const char *repo_name)
+{
+	return str_or_die("%s%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BUNDLES_DIR, repo_name);
+}
+
+static char *get_repo_state_dir(const char *repo_name)
+{
+	return str_or_die("%s/%s/%s", globals_bkp.state_dir, SWUPD_3RD_PARTY_DIRNAME, repo_name);
 }
 
 int repo_name_cmp(const void *repo, const void *name)
@@ -238,7 +258,7 @@ int third_party_remove_repo_directory(const char *repo_name)
 	int ret_code = 0;
 
 	//TODO: use a global function to get this value
-	repo_dir = str_or_die("%s/%s/%s", globals.path_prefix, SWUPD_3RD_PARTY_BUNDLES_DIR, repo_name);
+	repo_dir = get_repo_content_path(repo_name);
 	ret = sys_rm_recursive(repo_dir);
 	if (ret < 0 && ret != -ENOENT) {
 		error("Failed to delete repository directory\n");
@@ -246,7 +266,7 @@ int third_party_remove_repo_directory(const char *repo_name)
 	}
 	free(repo_dir);
 
-	repo_dir = str_or_die("%s/%s/%s", globals.state_dir, SWUPD_3RD_PARTY_DIRNAME, repo_name);
+	repo_dir = get_repo_state_dir(repo_name);
 	ret = sys_rm_recursive(repo_dir);
 	if (ret < 0 && ret != -ENOENT) {
 		error("Failed to delete repository state directory\n");
@@ -257,7 +277,7 @@ int third_party_remove_repo_directory(const char *repo_name)
 	return ret_code;
 }
 
-enum swupd_code third_party_set_repo(const char *state_dir, const char *path_prefix, struct repo *repo, bool sigcheck)
+enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck)
 {
 	char *repo_state_dir;
 	char *repo_path_prefix;
@@ -267,7 +287,7 @@ enum swupd_code third_party_set_repo(const char *state_dir, const char *path_pre
 	set_version_url(repo->url);
 
 	/* set up swupd to use the certificate from the 3rd-party repository */
-	string_or_die(&repo_cert_path, "%s/%s/%s/%s", path_prefix, SWUPD_3RD_PARTY_BUNDLES_DIR, repo->name, CERT_PATH);
+	string_or_die(&repo_cert_path, "%s%s/%s%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BUNDLES_DIR, repo->name, CERT_PATH);
 	set_cert_path(repo_cert_path);
 	/* if --nosigcheck was used, we do not attempt any signature checking */
 	if (sigcheck) {
@@ -281,13 +301,13 @@ enum swupd_code third_party_set_repo(const char *state_dir, const char *path_pre
 	}
 	free_string(&repo_cert_path);
 
-	string_or_die(&repo_path_prefix, "%s/%s/%s", path_prefix, SWUPD_3RD_PARTY_BUNDLES_DIR, repo->name);
+	repo_path_prefix = get_repo_content_path(repo->name);
 	set_path_prefix(repo_path_prefix);
 	free_string(&repo_path_prefix);
 
 	/* make sure there are state directories for the 3rd-party
 	 * repo if not there already */
-	string_or_die(&repo_state_dir, "%s/%s/%s", state_dir, SWUPD_3RD_PARTY_DIRNAME, repo->name);
+	repo_state_dir = get_repo_state_dir(repo->name);
 	if (create_state_dirs(repo_state_dir)) {
 		free_string(&repo_state_dir);
 		error("Unable to create the state directories for repository %s\n\n", repo->name);
@@ -302,19 +322,9 @@ enum swupd_code third_party_set_repo(const char *state_dir, const char *path_pre
 static enum swupd_code third_party_find_bundle(const char *bundle, struct list *repos, struct repo **found_repo)
 {
 	struct list *iter = NULL;
-	char *state_dir;
-	char *path_prefix;
-	char *content_url;
-	char *version_url;
 	int count = 0;
 	int version;
 	enum swupd_code ret_code = SWUPD_OK;
-
-	/* backup the original state_dir and path_prefix values */
-	state_dir = strdup_or_die(globals.state_dir);
-	path_prefix = strdup_or_die(globals.path_prefix);
-	content_url = strdup_or_die(globals.content_url);
-	version_url = strdup_or_die(globals.version_url);
 
 	info("Searching for bundle %s in the 3rd-party repositories...\n", bundle);
 	for (iter = repos; iter; iter = iter->next) {
@@ -323,7 +333,7 @@ static enum swupd_code third_party_find_bundle(const char *bundle, struct list *
 		struct file *file = NULL;
 
 		/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-		ret_code = third_party_set_repo(state_dir, path_prefix, repo, globals.sigcheck);
+		ret_code = third_party_set_repo(repo, globals.sigcheck);
 		if (ret_code != SWUPD_OK) {
 			goto clean_and_exit;
 		}
@@ -367,14 +377,10 @@ static enum swupd_code third_party_find_bundle(const char *bundle, struct list *
 	}
 
 clean_and_exit:
-	set_path_prefix(path_prefix);
-	set_state_dir(state_dir);
-	set_content_url(content_url);
-	set_version_url(version_url);
-	free_string(&path_prefix);
-	free_string(&state_dir);
-	free_string(&content_url);
-	free_string(&version_url);
+	set_path_prefix(globals_bkp.path_prefix);
+	set_state_dir(globals_bkp.state_dir);
+	set_content_url(globals_bkp.content_url);
+	set_version_url(globals_bkp.version_url);
 
 	return ret_code;
 }
@@ -384,21 +390,11 @@ enum swupd_code third_party_run_operation(struct list *bundles, const char *repo
 	struct list *repos = NULL;
 	struct list *iter = NULL;
 	struct repo *selected_repo = NULL;
-	char *state_dir;
-	char *path_prefix;
-	char *content_url;
-	char *version_url;
 	int ret;
 	enum swupd_code ret_code = SWUPD_OK;
 
 	/* load the existing 3rd-party repos from the repo.ini config file */
 	repos = third_party_get_repos();
-
-	/* backup the original global values */
-	state_dir = strdup_or_die(globals.state_dir);
-	path_prefix = strdup_or_die(globals.path_prefix);
-	content_url = strdup_or_die(globals.content_url);
-	version_url = strdup_or_die(globals.version_url);
 
 	/* try action on the bundles one by one */
 	for (iter = bundles; iter; iter = iter->next) {
@@ -430,7 +426,7 @@ enum swupd_code third_party_run_operation(struct list *bundles, const char *repo
 		if (selected_repo) {
 
 			/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-			ret = third_party_set_repo(state_dir, path_prefix, selected_repo, globals.sigcheck);
+			ret = third_party_set_repo(selected_repo, globals.sigcheck);
 			if (ret) {
 				ret_code = ret;
 				goto next;
@@ -446,20 +442,16 @@ enum swupd_code third_party_run_operation(struct list *bundles, const char *repo
 
 			/* return the global variables to the original values */
 		next:
-			set_path_prefix(path_prefix);
-			set_state_dir(state_dir);
-			set_content_url(content_url);
-			set_version_url(version_url);
+			set_path_prefix(globals_bkp.path_prefix);
+			set_state_dir(globals_bkp.state_dir);
+			set_content_url(globals_bkp.content_url);
+			set_version_url(globals_bkp.version_url);
 		}
 	}
 
 	/* free data */
 clean_and_exit:
 	list_free_list_and_data(repos, repo_free_data);
-	free_string(&path_prefix);
-	free_string(&state_dir);
-	free_string(&content_url);
-	free_string(&version_url);
 
 	return ret_code;
 }
@@ -471,8 +463,6 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operat
 	struct list *repos = NULL;
 	struct list *iter = NULL;
 	struct repo *selected_repo = NULL;
-	char *state_dir;
-	char *path_prefix;
 	char *steps_title = NULL;
 	int total_steps;
 
@@ -480,10 +470,6 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operat
 
 	/* load the existing 3rd-party repos from the repo.ini config file */
 	repos = third_party_get_repos();
-
-	/* backup the original state_dir and path_prefix values */
-	state_dir = strdup_or_die(globals.state_dir);
-	path_prefix = strdup_or_die(globals.path_prefix);
 
 	/* initialize operation steps so progress can be reported */
 	total_steps = repo ? op_steps : op_steps * list_len(repos);
@@ -501,7 +487,7 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operat
 		}
 
 		/* set the appropriate variables for the selected 3rd-party repo */
-		ret_code = third_party_set_repo(state_dir, path_prefix, selected_repo, globals.sigcheck);
+		ret_code = third_party_set_repo(selected_repo, globals.sigcheck);
 		if (ret_code) {
 			goto clean_and_exit;
 		}
@@ -514,7 +500,7 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operat
 			selected_repo = iter->data;
 
 			/* set the appropriate variables for the selected 3rd-party repo */
-			ret = third_party_set_repo(state_dir, path_prefix, selected_repo, globals.sigcheck);
+			ret = third_party_set_repo(selected_repo, globals.sigcheck);
 			if (ret) {
 				ret_code = ret;
 				goto clean_and_exit;
@@ -537,8 +523,6 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operat
 clean_and_exit:
 	list_free_list_and_data(repos, repo_free_data);
 	free_string(&steps_title);
-	free_string(&path_prefix);
-	free_string(&state_dir);
 
 	return ret_code;
 }

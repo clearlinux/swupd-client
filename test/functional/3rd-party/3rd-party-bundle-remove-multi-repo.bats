@@ -49,6 +49,7 @@ test_setup() {
 		 - test-bundle1
 		Deleting bundle files...
 		Total deleted files: 3
+		Removing 3rd-party bundle binaries...
 		Successfully removed 1 bundle
 	EOM
 	)
@@ -68,6 +69,7 @@ test_setup() {
 		 - test-bundle2
 		Deleting bundle files...
 		Total deleted files: 6
+		Removing 3rd-party bundle binaries...
 		Successfully removed 1 bundle
 		1 bundle that was installed as a dependency was removed
 	EOM
@@ -90,6 +92,7 @@ test_setup() {
 		 - test-bundle1
 		Deleting bundle files...
 		Total deleted files: 6
+		Removing 3rd-party bundle binaries...
 		Successfully removed 1 bundle
 		1 bundle that depended on the specified bundle(s) was removed
 	EOM

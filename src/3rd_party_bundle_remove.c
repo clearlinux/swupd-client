@@ -93,15 +93,20 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static enum swupd_code remove_bundle(char *bundle)
+static enum swupd_code remove_bundle_binaries(struct list *removed_files)
+{
+	return third_party_process_binaries(removed_files, "\nRemoving 3rd-party bundle binaries...\n", "remove_binaries", third_party_remove_binary);
+}
+
+static enum swupd_code remove_bundle(char *bundle_name)
 {
 	struct list *bundle_to_remove = NULL;
 	enum swupd_code ret = SWUPD_OK;
 
-	/* execute_remove_bundles expects a list */
-	bundle_to_remove = list_append_data(bundle_to_remove, bundle);
+	/* execute_remove_bundles_extra expects a list */
+	bundle_to_remove = list_append_data(bundle_to_remove, bundle_name);
 
-	ret = execute_remove_bundles(bundle_to_remove);
+	ret = execute_remove_bundles_extra(bundle_to_remove, remove_bundle_binaries);
 
 	list_free_list(bundle_to_remove);
 	return ret;
@@ -110,7 +115,7 @@ static enum swupd_code remove_bundle(char *bundle)
 enum swupd_code third_party_bundle_remove_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
-	const int steps_in_bundle_remove = 2;
+	const int steps_in_bundle_remove = 3;
 	struct list *bundles = NULL;
 
 	if (!parse_options(argc, argv)) {
@@ -142,6 +147,7 @@ enum swupd_code third_party_bundle_remove_main(int argc, char **argv)
 	 * Steps for bundle-remove:
 	 *  1) load_manifests
 	 *  2) remove_files
+	 *  3) remove_binaries
 	 */
 	progress_init_steps("3rd-party-bundle-remove", steps_in_bundle_remove);
 

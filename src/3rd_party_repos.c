@@ -583,4 +583,28 @@ enum swupd_code third_party_process_binaries(struct list *files, const char *msg
 	return ret_code;
 }
 
+enum swupd_code third_party_remove_binary(char *filename)
+{
+	enum swupd_code ret_code = SWUPD_OK;
+	int ret;
+	char *script = NULL;
+	char *binary = NULL;
+
+	script = third_party_get_binary_path(sys_basename(filename));
+	binary = sys_path_join(globals.path_prefix, filename);
+
+	if (!sys_file_exists(binary)) {
+		ret = sys_rm(script);
+		if (ret != 0 && ret != -ENOENT) {
+			error("File %s could not be removed\n\n", script);
+			ret_code = SWUPD_COULDNT_REMOVE_FILE;
+		}
+	}
+
+	free_string(&script);
+	free_string(&binary);
+
+	return ret_code;
+}
+
 #endif

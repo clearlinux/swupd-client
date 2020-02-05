@@ -33,6 +33,7 @@ test_setup() {
 		 - test-bundle2
 		Deleting bundle files...
 		Total deleted files: 3
+		Removing 3rd-party bundle binaries...
 		Successfully removed 1 bundle
 	EOM
 	)
@@ -84,6 +85,7 @@ test_setup() {
 		 - test-bundle1
 		Deleting bundle files...
 		Total deleted files: 3
+		Removing 3rd-party bundle binaries...
 		Successfully removed 1 bundle
 		Searching for bundle upstream-bundle in the 3rd-party repositories...
 		Error: bundle upstream-bundle was not found in any 3rd-party repository
@@ -112,6 +114,7 @@ test_setup() {
 		 - test-bundle1
 		Deleting bundle files...
 		Total deleted files: 3
+		Removing 3rd-party bundle binaries...
 		Successfully removed 1 bundle
 	EOM
 	)

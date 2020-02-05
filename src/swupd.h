@@ -337,6 +337,7 @@ extern enum swupd_code execute_bundle_add_extra(struct list *bundles_list, extra
 
 /* bundle_remove.c */
 extern enum swupd_code execute_remove_bundles(struct list *bundles);
+extern enum swupd_code execute_remove_bundles_extra(struct list *bundles, extra_proc_fn_t post_remove_fn);
 extern void bundle_remove_set_option_force(bool opt);
 extern void bundle_remove_set_option_recursive(bool opt);
 

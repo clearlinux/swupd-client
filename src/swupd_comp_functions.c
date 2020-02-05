@@ -21,6 +21,7 @@
 
 #include <string.h>
 
+#include "3rd_party_repos.h"
 #include "swupd.h"
 
 /**
@@ -134,3 +135,17 @@ int cmp_file_filename_is_deleted(const void *a, const void *b)
 
 	return 0;
 }
+
+#ifdef THIRDPARTY
+
+int cmp_repo_name_string(const void *a, const void *b)
+{
+	return strcmp(((struct repo *)a)->name, (const char *)b);
+}
+
+int cmp_repo_url_string(const void *a, const void *b)
+{
+	return strcmp(((struct repo *)a)->url, (const char *)b);
+}
+
+#endif

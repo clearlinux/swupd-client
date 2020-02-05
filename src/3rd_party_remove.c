@@ -68,12 +68,24 @@ static bool parse_options(int argc, char **argv)
 	return false;
 }
 
+static bool is_installed_bundle_data(const void *bundle)
+{
+	return is_installed_bundle(bundle);
+}
+
 enum swupd_code third_party_remove_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
-	const int step_in_third_party_remove = 0;
+	const int step_in_third_party_remove = 2;
 	int err;
+	int version;
 	char *name = NULL;
+	char *repo_dir = NULL;
+	struct list *installed_bundles = NULL;
+	struct list *repos = NULL;
+	struct repo *repo = NULL;
+	struct manifest *mom = NULL;
+	const bool NOT_A_MIX = false;
 
 	if (!parse_options(argc, argv)) {
 		print("\n");
@@ -86,10 +98,58 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 		return ret;
 	}
 
+	/*
+	 * Steps for 3rd-party remove:
+	 *  1) load_manifests
+	 *  2) remove_binaries
+	 */
+
 	progress_init_steps("third-party-remove", step_in_third_party_remove);
 
 	/* The last argument has to be the repo-name to be deleted */
 	name = argv[argc - 1];
+
+	/* load the existing 3rd-party repos from the repo.ini config file
+	 * and find the requested repo */
+	repos = third_party_get_repos();
+	repo = list_search(repos, name, cmp_repo_name_string);
+	if (!repo) {
+		error("3rd-party repository %s was not found\n\n", name);
+		ret = SWUPD_INVALID_REPOSITORY;
+		goto exit;
+	}
+
+	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
+	if (third_party_set_repo(repo, globals.sigcheck)) {
+		goto exit;
+	}
+
+	/* get the current mom */
+	version = get_current_version(globals.path_prefix);
+	if (version < 0) {
+		error("Unable to determine current version for repository %s\n\n", name);
+		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
+		goto exit;
+	}
+
+	mom = load_mom(version, NOT_A_MIX, NULL);
+	if (!mom) {
+		error("Could not load the manifest for repository %s\n\n", name);
+		ret = SWUPD_COULDNT_LOAD_MOM;
+		goto exit;
+	}
+
+	/* get a list of bundles already installed in the system */
+	progress_next_step("load_manifests", PROGRESS_BAR);
+	info("Loading required manifests...\n");
+	ret = mom_get_manifests_list(mom, &mom->submanifests, is_installed_bundle_data);
+	if (ret) {
+		ret = SWUPD_COULDNT_LOAD_MANIFEST;
+		goto exit;
+	}
+	mom->files = consolidate_files_from_bundles(mom->submanifests);
+
+	/* remove the repo from repo.ini */
 	info("Removing repository %s...\n", name);
 	err = third_party_remove_repo(name);
 	if (err < 0) {
@@ -101,9 +161,14 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 		goto exit;
 	}
 
+	/* remove the repo's content directory */
 	if (third_party_remove_repo_directory(name) < 0) {
 		ret = SWUPD_COULDNT_REMOVE_FILE;
 	}
+
+	/* remove the repo's exported binaries from the system */
+	progress_next_step("load_manifests", PROGRESS_BAR);
+	ret = third_party_process_binaries(mom->files, "\nRemoving 3rd-party bundle binaries...\n", "remove_binaries", third_party_remove_binary);
 
 exit:
 	if (ret == SWUPD_OK) {
@@ -111,6 +176,10 @@ exit:
 	} else {
 		print("\nFailed to remove repository\n");
 	}
+	manifest_free(mom);
+	free_string(&repo_dir);
+	list_free_list_and_data(repos, repo_free_data);
+	list_free_list_and_data(installed_bundles, free);
 	swupd_deinit();
 	progress_finish_steps(ret);
 

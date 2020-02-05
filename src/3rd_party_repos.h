@@ -106,16 +106,6 @@ int third_party_remove_repo_directory(const char *repo_name);
 enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck);
 
 /**
- * @brief strcmp like function to search for a repo based on its name
- */
-int repo_name_cmp(const void *repo, const void *name);
-
-/**
- * @brief strcmp like function to search for a repo based on its URL
- */
-int repo_url_cmp(const void *repo, const void *url);
-
-/**
  * @brief Performs an operation on every bundle from the list.
  *
  * @param bundles the list of bundles to which the operation will be performed

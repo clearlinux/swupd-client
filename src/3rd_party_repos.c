@@ -51,16 +51,6 @@ static char *get_repo_state_dir(const char *repo_name)
 	return str_or_die("%s/%s/%s", globals_bkp.state_dir, SWUPD_3RD_PARTY_DIRNAME, repo_name);
 }
 
-int repo_name_cmp(const void *repo, const void *name)
-{
-	return strcmp(((struct repo *)repo)->name, name);
-}
-
-int repo_url_cmp(const void *repo, const void *url)
-{
-	return strcmp(((struct repo *)repo)->url, url);
-}
-
 /**
  * @brief This function is called by the repo ini parse.
  *
@@ -75,7 +65,7 @@ static bool parse_key_values(char *section, char *key, char *value, void *data)
 	struct repo *repo;
 	struct list **repos = data;
 
-	repo = list_search(*repos, section, repo_name_cmp);
+	repo = list_search(*repos, section, cmp_repo_name_string);
 	if (!repo) {
 		repo = calloc(1, sizeof(struct repo));
 		ON_NULL_ABORT(repo);
@@ -132,12 +122,12 @@ int third_party_add_repo(const char *repo_name, const char *repo_url)
 	FILE *fp = NULL;
 
 	repos = third_party_get_repos();
-	if (list_search(repos, repo_name, repo_name_cmp)) {
+	if (list_search(repos, repo_name, cmp_repo_name_string)) {
 		error("The repository %s already exists\n", repo_name);
 		ret = -EEXIST;
 		goto exit;
 	}
-	if (list_search(repos, repo_url, repo_url_cmp)) {
+	if (list_search(repos, repo_url, cmp_repo_url_string)) {
 		error("The specified URL %s is already assigned to another repository\n", repo_url);
 		ret = -EEXIST;
 		goto exit;
@@ -232,7 +222,7 @@ int third_party_remove_repo(const char *repo_name)
 	int ret = 0;
 
 	repos = third_party_get_repos();
-	repo = list_remove((void *)repo_name, &repos, repo_name_cmp);
+	repo = list_remove((void *)repo_name, &repos, cmp_repo_name_string);
 
 	if (!repo) {
 		error("Repository not found\n");
@@ -404,7 +394,7 @@ enum swupd_code third_party_run_operation(struct list *bundles, const char *repo
 		 * search for the bundle in all the 3rd-party repos */
 		if (repo) {
 
-			selected_repo = list_search(repos, repo, repo_name_cmp);
+			selected_repo = list_search(repos, repo, cmp_repo_name_string);
 			if (!selected_repo) {
 				error("3rd-party repository %s was not found\n\n", repo);
 				ret_code = SWUPD_INVALID_REPOSITORY;
@@ -479,7 +469,7 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operat
 	 * otherwise perform operation in all 3rd-party repos */
 	if (repo) {
 
-		selected_repo = list_search(repos, repo, repo_name_cmp);
+		selected_repo = list_search(repos, repo, cmp_repo_name_string);
 		if (!selected_repo) {
 			error("3rd-party repository %s was not found\n\n", repo);
 			ret_code = SWUPD_INVALID_REPOSITORY;

@@ -52,6 +52,12 @@ int cmp_file_hash_last_change(const void *a, const void *b);
 /** @brief compare file->filename, file->is_deleted with file->filename, file->is_deleted */
 int cmp_file_filename_is_deleted(const void *a, const void *b);
 
+/** @brief compare repo->name with a string */
+int cmp_repo_name_string(const void *a, const void *b);
+
+/** @brief compare repo->url with a string */
+int cmp_repo_url_string(const void *a, const void *b);
+
 #ifdef __cplusplus
 }
 #endif

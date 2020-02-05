@@ -143,7 +143,7 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 
 	/* at this point the repo has been added to the repo.ini file */
 	repos = third_party_get_repos();
-	repo = list_search(repos, name, repo_name_cmp);
+	repo = list_search(repos, name, cmp_repo_name_string);
 	if (!repo) {
 		/* this should not happen */
 		ret_code = SWUPD_UNEXPECTED_CONDITION;

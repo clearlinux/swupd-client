@@ -319,7 +319,7 @@ static enum swupd_code download_content(struct manifest *mom, struct list *to_in
 /* Bundle install one ore more bundles passed in bundles
  * param as a null terminated array of strings
  */
-enum swupd_code bundle_add(struct list *bundles_list, int version)
+enum swupd_code bundle_add_extra(struct list *bundles_list, int version, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn)
 {
 	int ret = 0;
 	struct manifest *mom;
@@ -391,6 +391,15 @@ enum swupd_code bundle_add(struct list *bundles_list, int version)
 		goto clean_and_exit;
 	}
 
+	/* execute pre-add processing (if any) */
+	if (pre_add_fn) {
+		ret = pre_add_fn(to_install_files);
+		if (ret != SWUPD_OK) {
+			info("Aborting bundle installation...\n\n");
+			goto clean_and_exit;
+		}
+	}
+
 	/* Check if we have enough space */
 	ret = check_disk_space_availability(to_install_bundles);
 	if (ret) {
@@ -406,10 +415,18 @@ enum swupd_code bundle_add(struct list *bundles_list, int version)
 
 	mom->files = installed_files;
 	ret = install_files(mom, to_install_files);
+	if (ret) {
+		goto clean_and_exit;
+	}
 
 	timelist_timer_stop(globals.global_times); // closing: Install bundles
 
 	timelist_print_stats(globals.global_times);
+
+	/* execute post-add processing (if any) */
+	if (post_add_fn) {
+		ret = post_add_fn(to_install_files);
+	}
 
 clean_and_exit:
 	iter = list_head(to_install_bundles);
@@ -462,7 +479,12 @@ clean_and_exit:
 	return ret;
 }
 
-enum swupd_code execute_bundle_add(struct list *bundles_list)
+enum swupd_code bundle_add(struct list *bundles_list, int version)
+{
+	return bundle_add_extra(bundles_list, version, NULL, NULL);
+}
+
+enum swupd_code execute_bundle_add_extra(struct list *bundles_list, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn)
 {
 	int version;
 
@@ -473,7 +495,12 @@ enum swupd_code execute_bundle_add(struct list *bundles_list)
 		return SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
 
-	return bundle_add(bundles_list, version);
+	return bundle_add_extra(bundles_list, version, pre_add_fn, post_add_fn);
+}
+
+enum swupd_code execute_bundle_add(struct list *bundles_list)
+{
+	return execute_bundle_add_extra(bundles_list, NULL, NULL);
 }
 
 enum swupd_code bundle_add_main(int argc, char **argv)

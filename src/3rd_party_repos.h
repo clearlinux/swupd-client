@@ -34,8 +34,8 @@ struct repo {
 	char *url;
 };
 
-/** @brief Definition of a function that performs an action on a given bundle */
-typedef enum swupd_code (*run_operation_fn_t)(char *bundle);
+/** @brief Definition of a function that performs some processing on a given data */
+typedef enum swupd_code (*process_data_fn_t)(char *data_name);
 
 /** @brief Function that returns the path to the 3rd-party bin directory */
 char *third_party_get_bin_dir(void);
@@ -112,24 +112,24 @@ enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck);
  * @param repo the name of the 3rd-party repository where the bundles
  * should be looked for. If no repo is specified the bundles are searched for
  * in all existing repos.
- * @param run_operation_fn the function to be performed
+ * @param process_bundle_fn the bundle processing to be performed
  *
  * @returns a swupd_code
  */
-enum swupd_code third_party_run_operation(struct list *bundles, const char *repo, run_operation_fn_t run_operation_fn);
+enum swupd_code third_party_run_operation(struct list *bundles, const char *repo, process_data_fn_t process_bundle_fn);
 
 /**
  * @brief Performs an operation on 3rd-party repos.
  *
  * @param repo the name of the 3rd-party repository where the operation will be run
- * @param run_operation_fn the function to be performed
+ * @param process_bundle_fn the bundle processing to be performed
  * @param expected_ret_code the expected return code from the operation
  * @param op_name the name of the operation to be run in all repos
  * @param op_steps the number of steps involved in the operation
  *
  * @returns a swupd_code
  */
-enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operation_fn_t run_operation_fn, enum swupd_code expected_ret_code, const char *op_name, int op_steps);
+enum swupd_code third_party_run_operation_multirepo(const char *repo, process_data_fn_t process_bundle_fn, enum swupd_code expected_ret_code, const char *op_name, int op_steps);
 
 /**
  * @brief Prints a header with the repository name, useful when showing info from multiple repos.
@@ -137,6 +137,23 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, run_operat
  * @param repo_name, the name of the 3rd-party repository
  */
 void third_party_repo_header(const char *repo_name);
+
+/**
+ * @brief Determines if a file from the manifest is 3rd-party exported binary
+ *
+ * @returns true if the file is an exported binary, false otherwise
+ */
+bool third_party_file_is_binary(struct file *file);
+
+/**
+ * @brief Function that perform some processing to binaries from a 3rd-party bundle
+ *
+ * @param files is the list of files that are part of the bundle and its dependencies
+ * @param msg the message to be printed at the beginning of the processing
+ * @param step the name of the step to show during the reporting of progress
+ * @param proc_binary_fn the function with the processing to be performed on each binary file
+ */
+enum swupd_code third_party_process_binaries(struct list *files, const char *msg, const char *step, process_data_fn_t proc_binary_fn);
 
 #endif
 

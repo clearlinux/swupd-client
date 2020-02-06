@@ -118,6 +118,7 @@ static enum swupd_code create_wrapper_script(char *filename)
 	binary = sys_path_join(globals.path_prefix, filename);
 
 	if (!sys_filelink_is_executable(binary)) {
+		warn("File %s does not have 'execute' permission so it won't be exported\n", filename);
 		goto close_and_exit;
 	}
 

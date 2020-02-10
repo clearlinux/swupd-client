@@ -48,6 +48,7 @@ test_setup() {
 		No extra files need to be downloaded
 		Installing files...
 		Update was applied
+		Updating 3rd-party bundle binaries...
 		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Update successful - System updated from version 10 to version 20
 	EOM
@@ -100,6 +101,7 @@ test_setup() {
 		No extra files need to be downloaded
 		Installing files...
 		Update was applied
+		Updating 3rd-party bundle binaries...
 		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Update successful - System updated from version 10 to version 20
 		____________________________

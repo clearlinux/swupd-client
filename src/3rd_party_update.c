@@ -124,6 +124,53 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
+static enum swupd_code update_binary_script(struct file *file)
+{
+	enum swupd_code ret_code = 0;
+	int ret;
+	char *bin_directory = NULL;
+	char *script = NULL;
+	char *binary = NULL;
+	char *filename = NULL;
+
+	if (!file) {
+		return ret_code;
+	}
+
+	filename = file->filename;
+	bin_directory = third_party_get_bin_dir();
+	script = third_party_get_binary_path(sys_basename(filename));
+	binary = sys_path_join(globals.path_prefix, filename);
+
+	/* if the script for the binary doesn't exist it is probably a new
+	 * binary, create the script */
+	if (!sys_file_exists(script) && sys_file_exists(binary)) {
+		ret_code = third_party_create_wrapper_script(file);
+		goto close_and_exit;
+	}
+
+	/* if the binary was removed during the update then we need to
+	 * remove the script that exports it too */
+	if (file->is_deleted) {
+		ret = sys_rm(script);
+		if (ret) {
+			ret_code = SWUPD_COULDNT_REMOVE_FILE;
+		}
+	}
+
+close_and_exit:
+	free_string(&binary);
+	free_string(&script);
+	free_string(&bin_directory);
+
+	return ret_code;
+}
+
+static enum swupd_code update_exported_binaries(struct list *updated_files)
+{
+	return third_party_process_binaries(updated_files, "\nUpdating 3rd-party bundle binaries...\n", "update_binaries", update_binary_script);
+}
+
 static enum swupd_code update_repos(UNUSED_PARAM char *unused)
 {
 	/* Update should always ignore optional bundles */
@@ -134,7 +181,7 @@ static enum swupd_code update_repos(UNUSED_PARAM char *unused)
 		return check_update();
 	} else {
 		info("Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons\n\n");
-		return execute_update();
+		return execute_update_extra(update_exported_binaries);
 	}
 }
 
@@ -171,15 +218,15 @@ enum swupd_code third_party_update_main(int argc, char **argv)
 	 *   7) download_fullfiles
 	 *   8) extract_fullfiles (finishes here on --download)
 	 *   9) update_files
-	 *  10) run_postupdate_scripts
-	 *  11) update_search_index (only with --update-search-file-index)
+	 *   10) update_binaries
+	 *   11) run_postupdate_scripts
 	 */
 	if (cmdline_option_status) {
 		steps_in_update = 0;
 	} else if (cmdline_option_download_only) {
 		steps_in_update = 8;
 	} else {
-		steps_in_update = 10;
+		steps_in_update = 11;
 	}
 
 	/* update 3rd-party bundles */

@@ -23,8 +23,14 @@
 #include "swupd.h"
 
 #include <errno.h>
+#include <fcntl.h>
 
 #ifdef THIRDPARTY
+
+#define SCRIPT_TEMPLATE "#!/bin/bash\n\n"                                \
+			"export PATH=%s:$PATH\n"                         \
+			"export LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH\n\n" \
+			"%s \"$@\"\n"
 
 char *third_party_get_bin_dir(void)
 {
@@ -380,7 +386,7 @@ clean_and_exit:
 	return ret_code;
 }
 
-enum swupd_code third_party_run_operation(struct list *bundles, const char *repo, process_data_fn_t process_bundle_fn)
+enum swupd_code third_party_run_operation(struct list *bundles, const char *repo, process_bundle_fn_t process_bundle_fn)
 {
 	struct list *repos = NULL;
 	struct list *iter = NULL;
@@ -451,7 +457,7 @@ clean_and_exit:
 	return ret_code;
 }
 
-enum swupd_code third_party_run_operation_multirepo(const char *repo, process_data_fn_t process_bundle_fn, enum swupd_code expected_ret_code, const char *op_name, int op_steps)
+enum swupd_code third_party_run_operation_multirepo(const char *repo, process_bundle_fn_t process_bundle_fn, enum swupd_code expected_ret_code, const char *op_name, int op_steps)
 {
 	enum swupd_code ret_code = SWUPD_OK;
 	enum swupd_code ret;
@@ -554,12 +560,11 @@ bool third_party_file_is_binary(struct file *file)
 		return false;
 }
 
-enum swupd_code third_party_process_binaries(struct list *files, const char *msg, const char *step, process_data_fn_t proc_binary_fn)
+enum swupd_code third_party_process_binaries(struct list *files, const char *msg, const char *step, process_file_fn_t proc_binary_fn)
 {
 	enum swupd_code ret, ret_code = SWUPD_OK;
 	struct list *iter = NULL;
 	struct file *file = NULL;
-	char *filename = NULL;
 	int count = 0;
 	int number_of_files = list_len(files);
 
@@ -568,9 +573,8 @@ enum swupd_code third_party_process_binaries(struct list *files, const char *msg
 	progress_next_step(step, PROGRESS_BAR);
 	for (iter = list_head(files); iter; iter = iter->next) {
 		file = iter->data;
-		filename = file->filename;
 		if (third_party_file_is_binary(file)) {
-			ret = proc_binary_fn(filename);
+			ret = proc_binary_fn(file);
 			if (ret) {
 				/* at least one file failed to process */
 				ret_code = ret;
@@ -583,13 +587,19 @@ enum swupd_code third_party_process_binaries(struct list *files, const char *msg
 	return ret_code;
 }
 
-enum swupd_code third_party_remove_binary(char *filename)
+enum swupd_code third_party_remove_binary(struct file *file)
 {
 	enum swupd_code ret_code = SWUPD_OK;
 	int ret;
 	char *script = NULL;
 	char *binary = NULL;
+	char *filename = NULL;
 
+	if (!file) {
+		return ret_code;
+	}
+
+	filename = file->filename;
 	script = third_party_get_binary_path(sys_basename(filename));
 	binary = sys_path_join(globals.path_prefix, filename);
 
@@ -603,6 +613,86 @@ enum swupd_code third_party_remove_binary(char *filename)
 
 	free_string(&script);
 	free_string(&binary);
+
+	return ret_code;
+}
+
+enum swupd_code third_party_create_wrapper_script(struct file *file)
+{
+	enum swupd_code ret_code = 0;
+	int fd;
+	FILE *fp = NULL;
+	char *bin_directory = NULL;
+	char *script = NULL;
+	char *binary = NULL;
+	char *third_party_bin_path = NULL;
+	char *third_party_ld_path = NULL;
+	char *filename = NULL;
+	mode_t mode = 0755;
+
+	if (!file) {
+		return ret_code;
+	}
+
+	filename = file->filename;
+	bin_directory = third_party_get_bin_dir();
+	script = third_party_get_binary_path(sys_basename(filename));
+	binary = sys_path_join(globals.path_prefix, filename);
+
+	if (!sys_filelink_is_executable(binary)) {
+		warn("File %s does not have 'execute' permission so it won't be exported\n", filename);
+		goto close_and_exit;
+	}
+
+	if (sys_file_exists(script)) {
+		/* the binary already exists, this condition should never happen
+		 * since we checked before installing */
+		ret_code = SWUPD_UNEXPECTED_CONDITION;
+		error("There is already a binary called %s in %s, it will be skipped\n", sys_basename(filename), bin_directory);
+		goto close_and_exit;
+	}
+
+	/* if the SWUPD_3RD_PARTY_BIN_DIR does not exist, attempt to create it */
+	if (mkdir_p(bin_directory)) {
+		ret_code = SWUPD_COULDNT_CREATE_DIR;
+		goto close_and_exit;
+	}
+
+	if (!is_dir(bin_directory)) {
+		error("The path %s for 3rd-party content exists but is not a directory\n", bin_directory);
+		ret_code = SWUPD_COULDNT_CREATE_DIR;
+		goto close_and_exit;
+	}
+
+	/* open the file with mode set to 0755 */
+	fd = open(script, O_RDWR | O_CREAT, mode);
+	if (fd < 0) {
+		error("The file %s failed to be created\n", script);
+		ret_code = SWUPD_COULDNT_CREATE_FILE;
+		goto close_and_exit;
+	}
+	fp = fdopen(fd, "w");
+	if (!fp) {
+		error("The file %s failed to be created\n", script);
+		ret_code = SWUPD_COULDNT_CREATE_FILE;
+		goto close_and_exit;
+	}
+
+	/* get the path for the 3rd-party content */
+	third_party_bin_path = str_or_die("%sbin:%susr/bin:%susr/local/bin", globals.path_prefix, globals.path_prefix, globals.path_prefix);
+	third_party_ld_path = str_or_die("%susr/lib64:%susr/local/lib64", globals.path_prefix, globals.path_prefix);
+
+	fprintf(fp, SCRIPT_TEMPLATE, third_party_bin_path, third_party_ld_path, binary);
+
+close_and_exit:
+	if (fp) {
+		fclose(fp);
+	}
+	free_string(&binary);
+	free_string(&script);
+	free_string(&bin_directory);
+	free_string(&third_party_bin_path);
+	free_string(&third_party_ld_path);
 
 	return ret_code;
 }

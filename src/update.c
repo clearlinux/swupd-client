@@ -287,7 +287,7 @@ static struct list *create_update_list(struct manifest *server)
 	return output;
 }
 
-enum swupd_code execute_update(void)
+enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn)
 {
 	int current_version = -1, server_version = -1;
 	int mix_current_version = -1, mix_server_version = -1;
@@ -522,8 +522,13 @@ version_check:
 	delete_motd();
 	timelist_timer_stop(globals.global_times); // closing: Update loop
 
-	/* Run any scripts that are needed to complete update */
 	if (!download_only) {
+		/* execute post-update processing (if any) */
+		if (post_update_fn) {
+			ret = post_update_fn(updates);
+		}
+
+		/* Run any scripts that are needed to complete update */
 		timelist_timer_start(globals.global_times, "Run post-update scripts");
 		progress_next_step("run_postupdate_scripts", PROGRESS_UNDEFINED);
 
@@ -631,6 +636,11 @@ clean_curl:
 	}
 
 	return ret;
+}
+
+enum swupd_code execute_update(void)
+{
+	return execute_update_extra(NULL);
 }
 
 static bool cmd_line_status = false;

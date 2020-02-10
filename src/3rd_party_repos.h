@@ -34,8 +34,11 @@ struct repo {
 	char *url;
 };
 
-/** @brief Definition of a function that performs some processing on a given data */
-typedef enum swupd_code (*process_data_fn_t)(char *data_name);
+/** @brief Definition of a function that performs some processing on a given bundle */
+typedef enum swupd_code (*process_bundle_fn_t)(char *bundle_name);
+
+/** @brief Definition of a function that performs some processing on a given file */
+typedef enum swupd_code (*process_file_fn_t)(struct file *file);
 
 /** @brief Function that returns the path to the 3rd-party bin directory */
 char *third_party_get_bin_dir(void);
@@ -116,7 +119,7 @@ enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck);
  *
  * @returns a swupd_code
  */
-enum swupd_code third_party_run_operation(struct list *bundles, const char *repo, process_data_fn_t process_bundle_fn);
+enum swupd_code third_party_run_operation(struct list *bundles, const char *repo, process_bundle_fn_t process_bundle_fn);
 
 /**
  * @brief Performs an operation on 3rd-party repos.
@@ -129,7 +132,7 @@ enum swupd_code third_party_run_operation(struct list *bundles, const char *repo
  *
  * @returns a swupd_code
  */
-enum swupd_code third_party_run_operation_multirepo(const char *repo, process_data_fn_t process_bundle_fn, enum swupd_code expected_ret_code, const char *op_name, int op_steps);
+enum swupd_code third_party_run_operation_multirepo(const char *repo, process_bundle_fn_t process_bundle_fn, enum swupd_code expected_ret_code, const char *op_name, int op_steps);
 
 /**
  * @brief Prints a header with the repository name, useful when showing info from multiple repos.
@@ -153,14 +156,21 @@ bool third_party_file_is_binary(struct file *file);
  * @param step the name of the step to show during the reporting of progress
  * @param proc_binary_fn the function with the processing to be performed on each binary file
  */
-enum swupd_code third_party_process_binaries(struct list *files, const char *msg, const char *step, process_data_fn_t proc_binary_fn);
+enum swupd_code third_party_process_binaries(struct list *files, const char *msg, const char *step, process_file_fn_t proc_binary_fn);
 
 /**
  * @brief Function that removes a script to export a binary from the 3rd-party bin dir.
  *
- * @param filename the name of a binary file
+ * @param file the binary file struct
  */
-enum swupd_code third_party_remove_binary(char *filename);
+enum swupd_code third_party_remove_binary(struct file *file);
+
+/**
+ * @brief Function that creates a script to export a 3rd-party binary
+ *
+ * @param file the file struct of the binary to be exported
+ */
+enum swupd_code third_party_create_wrapper_script(struct file *file);
 
 #endif
 

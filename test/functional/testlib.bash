@@ -2932,7 +2932,11 @@ update_bundle() { # swupd_function
 			new_file="$version_path"/files/"$new_fhash"
 			fname="${fname%:*}"
 		else
-			new_file=$(create_file "$version_path"/files)
+			if [ "$(dirname "$fname")" = "/bin" ] || [ "$(dirname "$fname")" = "/usr/bin" ] || [ "$(dirname "$fname")" = "/usr/local/bin" ]; then
+				new_file=$(create_file -x "$version_path"/files)
+			else
+				new_file=$(create_file "$version_path"/files)
+			fi
 		fi
 		add_to_manifest -p "$bundle_manifest" "$new_file" "$fname"
 

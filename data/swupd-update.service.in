@@ -4,3 +4,4 @@ Description=Update Software content
 [Service]
 Type=oneshot
 ExecStart=@prefix@/bin/swupd update --no-progress
+ExecStartPost=@prefix@/bin/swupd 3rd-party update --no-progress

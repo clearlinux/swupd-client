@@ -19,9 +19,12 @@
 
 #define _GNU_SOURCE
 
+#include <ctype.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "3rd_party_repos.h"
+#include "signature.h"
 #include "swupd.h"
 
 #ifdef THIRDPARTY
@@ -87,6 +90,138 @@ static int remove_repo(const char *repo_name)
 	}
 
 	return 0;
+}
+
+static bool confirm_certificate(const char *cert)
+{
+	int c;
+
+	info("Importing 3rd-party repository public certificate:\n\n");
+	signature_print_info(cert);
+
+	info("\n");
+	info("Do you want to accept this certificate? (y/N): ");
+
+	c = tolower(getchar());
+	info("\n");
+
+	return c == 'y';
+}
+
+static int import_temp_certificate(int version, char *hash)
+{
+	char *cert_tar, *cert, *url;
+	int ret = 0;
+
+	cert_tar = sys_path_join(globals.state_dir, "temp_cert.tar");
+	cert = sys_path_join(globals.state_dir, hash);
+
+	url = str_or_die("%s/%d/files/%s.tar", globals.content_url, version, hash);
+
+	ret = swupd_curl_get_file(url, cert_tar);
+	if (ret != 0) {
+		goto out;
+	}
+
+	ret = archives_check_single_file_tarball(cert_tar, hash);
+	if (ret != 0) {
+		goto out;
+	}
+
+	ret = archives_extract_to(cert_tar, globals.state_dir);
+	if (ret != 0) {
+		goto out;
+	}
+
+	if (confirm_certificate(cert)) {
+		signature_deinit();
+		if (!signature_init(cert, NULL)) {
+			signature_deinit();
+			ret = -EPERM;
+			goto out;
+		}
+	} else {
+		ret = -EACCES;
+		goto out;
+	}
+
+out:
+	unlink(cert_tar);
+	unlink(cert);
+	free(cert);
+	free(cert_tar);
+	free(url);
+	return ret;
+}
+
+static int import_certificate_from_version(int version)
+{
+	int ret = 0;
+	char *os_core, *url, *os_core_tar;
+	struct manifest *manifest = NULL;
+	struct list *i;
+	struct file *cert_file = NULL;
+
+	os_core_tar = sys_path_join(globals.state_dir, "temp_manifest.tar");
+	os_core = sys_path_join(globals.state_dir, "Manifest.os-core");
+	url = str_or_die("%s/%d/%s", globals.content_url, version, "Manifest.os-core.tar");
+
+	unlink(os_core_tar);
+	ret = swupd_curl_get_file(url, os_core_tar);
+	if (ret) {
+		goto out;
+	}
+
+	ret = archives_extract_to(os_core_tar, globals.state_dir);
+	if (ret != 0) {
+		goto out;
+	}
+
+	manifest = manifest_parse("os-core", os_core, false);
+	if (!manifest) {
+		ret = -EPROTO;
+		goto out;
+	}
+
+	for (i = manifest->files; i; i = i->next) {
+		struct file *f = i->data;
+		if (strncmp(f->filename, CERT_PATH, sizeof(CERT_PATH)) == 0) {
+			cert_file = f;
+			break;
+		}
+	}
+
+	if (!cert_file) {
+		ret = -ENOENT;
+		goto out;
+	}
+
+	ret = import_temp_certificate(cert_file->last_change, cert_file->hash);
+
+out:
+	manifest_free(manifest);
+	unlink(os_core_tar);
+	unlink(os_core);
+	free(os_core);
+	free(os_core_tar);
+	free(url);
+	return ret;
+}
+
+static int import_third_party_certificate(void)
+{
+	char *url;
+	int tmp_version;
+
+	url = str_or_die("%s/version/format%s/latest", globals.content_url, globals.format_string);
+	tmp_version = get_int_from_url(url);
+	free(url);
+
+	if (tmp_version <= 0) {
+		return -1;
+	}
+
+	return import_certificate_from_version(tmp_version);
 }
 
 enum swupd_code third_party_add_main(int argc, char **argv)
@@ -156,6 +291,23 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	if (ret_code) {
 		revert = true;
 		goto finish;
+	}
+
+	if (globals.sigcheck && !globals.user_defined_cert_path) {
+		ret = import_third_party_certificate();
+		if (ret < 0) {
+			if (ret == -ENOENT) {
+				error("Public certificate not found on 3rd-party repository\n");
+				info("To ignore certificate check use --nosigcheck\n");
+			} else if (ret != -EACCES) {
+				error("Impossible to import 3rd party repository certificate\n");
+				info("To ignore certificate check use --nosigcheck\n");
+			}
+			revert = true;
+
+			ret_code = SWUPD_BAD_CERT;
+			goto finish;
+		}
 	}
 
 	/* get repo's latest version */

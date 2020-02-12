@@ -57,6 +57,16 @@ bool signature_verify(const char *file, const char *sig_file, bool print_errors)
  */
 bool signature_verify_data(const unsigned char *data, size_t data_len, const unsigned char *sig_data, size_t sig_data_len, bool print_errors);
 
+/**
+ * Print extra information about the certificate pointed by PATH.
+ *
+ * Currently printing Issuer, Subject and the dump of the certificate data.
+ * Init is not required to run this function.
+*
+ * @param path the path to the certificate to be printed.
+ */
+void signature_print_info(const char *path);
+
 #ifdef __cplusplus
 }
 #endif

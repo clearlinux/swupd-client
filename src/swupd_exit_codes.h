@@ -48,6 +48,7 @@ enum swupd_code {
 	SWUPD_VERIFY_FAILED,		     /* 35 verify could not fix/replace/delete one or more files */
 	SWUPD_INVALID_BINARY,		     /* 36 binary to be executed is missing or invalid */
 	SWUPD_INVALID_REPOSITORY,	     /* 37 the specified 3rd-party repository is invalid */
+	SWUPD_INVALID_FILE,		     /* 38 file is missing or invalid */
 
 };
 

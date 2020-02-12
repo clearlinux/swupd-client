@@ -331,9 +331,9 @@ extern int subscription_get_tree(struct list *bundles, struct list **subs, struc
 /* bundle_add.c */
 typedef enum swupd_code (*extra_proc_fn_t)(struct list *files);
 extern enum swupd_code bundle_add(struct list *bundles_list, int version);
-extern enum swupd_code bundle_add_extra(struct list *bundles_list, int version, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn);
+extern enum swupd_code bundle_add_extra(struct list *bundles_list, int version, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn, extra_proc_fn_t file_validation_fn);
 extern enum swupd_code execute_bundle_add(struct list *bundles_list);
-extern enum swupd_code execute_bundle_add_extra(struct list *bundles_list, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn);
+extern enum swupd_code execute_bundle_add_extra(struct list *bundles_list, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn, extra_proc_fn_t file_validation_fn);
 
 /* bundle_remove.c */
 extern enum swupd_code execute_remove_bundles(struct list *bundles);

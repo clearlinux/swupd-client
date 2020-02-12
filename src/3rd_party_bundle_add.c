@@ -22,6 +22,9 @@
 #include "3rd_party_repos.h"
 #include "swupd.h"
 
+#include <ctype.h>
+#include <sys/stat.h>
+
 #ifdef THIRDPARTY
 
 #define FLAG_SKIP_OPTIONAL 2000
@@ -101,7 +104,7 @@ static enum swupd_code validate_binary(struct file *file)
 	char *script = NULL;
 	char *filename = NULL;
 
-	if (!file) {
+	if (!file || !third_party_file_is_binary(file)) {
 		return ret_code;
 	}
 
@@ -120,14 +123,71 @@ static enum swupd_code validate_binary(struct file *file)
 	return ret_code;
 }
 
+static enum swupd_code validate_permissions(struct file *file)
+{
+	enum swupd_code ret_code = SWUPD_OK;
+	struct stat file_stats;
+	char *staged_file = NULL;
+
+	if (!file) {
+		return ret_code;
+	}
+
+	string_or_die(&staged_file, "%s/staged/%s", globals.state_dir, file->hash);
+	if (stat(staged_file, &file_stats) == 0) {
+		if ((file_stats.st_mode & S_ISUID) || (file_stats.st_mode & S_ISGID) || (file_stats.st_mode & S_ISVTX)) {
+			warn("File %s has dangerous permissions\n", file->filename);
+			ret_code = SWUPD_NO;
+		}
+	} else {
+		ret_code = SWUPD_INVALID_FILE;
+	}
+
+	free_string(&staged_file);
+
+	return ret_code;
+}
+
+static bool confirm_installing_dangerous_files(void)
+{
+	int response;
+
+	warn("\nThe 3rd-party bundle you are about to install contains files with dangerous permission\n");
+	info("Do you want to continue with the installation? (y/N): ");
+	response = tolower(getchar());
+	info("%s\n", response == 'y' ? "y" : "N");
+
+	return response == 'y';
+}
+
 static enum swupd_code export_bundle_binaries(struct list *installed_files)
 {
-	return third_party_process_binaries(installed_files, "\nExporting 3rd-party bundle binaries...\n", "export_binaries", third_party_create_wrapper_script);
+	return third_party_process_files(installed_files, "\nExporting 3rd-party bundle binaries...\n", "export_binaries", third_party_create_wrapper_script);
 }
 
 static enum swupd_code validate_bundle_binaries(struct list *files_to_be_installed)
 {
-	return third_party_process_binaries(files_to_be_installed, "\nValidating 3rd-party bundle binaries...\n", "validate_binaries", validate_binary);
+	return third_party_process_files(files_to_be_installed, "\nValidating 3rd-party bundle binaries...\n", "validate_binaries", validate_binary);
+}
+
+static enum swupd_code validate_file_permissions(struct list *files_to_be_installed)
+{
+	static enum swupd_code ret_code = SWUPD_OK;
+
+	ret_code = third_party_process_files(files_to_be_installed, "\nValidating 3rd-party bundle file permissions...\n", "validate_file_permissions", validate_permissions);
+	if (ret_code) {
+		if (ret_code == SWUPD_NO) {
+			/* the bundle has files with dangerous permissions,
+			 * ask the user wether to continue or not */
+			if (confirm_installing_dangerous_files()) {
+				ret_code = SWUPD_OK;
+			} else {
+				ret_code = SWUPD_INVALID_FILE;
+			}
+		}
+	}
+
+	return ret_code;
 }
 
 static enum swupd_code add_bundle(char *bundle_name)
@@ -141,7 +201,7 @@ static enum swupd_code add_bundle(char *bundle_name)
 	info("\nBundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons\n\n");
 	globals.no_scripts = true;
 
-	ret = execute_bundle_add_extra(bundle_to_install, validate_bundle_binaries, export_bundle_binaries);
+	ret = execute_bundle_add_extra(bundle_to_install, validate_bundle_binaries, export_bundle_binaries, validate_file_permissions);
 
 	list_free_list(bundle_to_install);
 	return ret;
@@ -151,7 +211,7 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 {
 	struct list *bundles = NULL;
 	enum swupd_code ret_code = SWUPD_OK;
-	const int steps_in_bundleadd = 10;
+	const int steps_in_bundleadd = 11;
 
 	if (!parse_options(argc, argv)) {
 		print("\n");
@@ -175,9 +235,10 @@ enum swupd_code third_party_bundle_add_main(int argc, char **argv)
 	 *  5) validate_fullfiles
 	 *  6) download_fullfiles
 	 *  7) extract_fullfiles
-	 *  8) install_files
-	 *  9) run_postupdate_scripts
-	 *  10) export_binaries
+	 *  8) validate_file_permissions
+	 *  9) install_files
+	 *  10) run_postupdate_scripts
+	 *  11) export_binaries
 	 */
 	progress_init_steps("3rd-party-bundle-add", steps_in_bundleadd);
 

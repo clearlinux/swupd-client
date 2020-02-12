@@ -849,6 +849,7 @@ The non-zero return codes for other operations are listed here:
 - **35**: Unable to fix/replace/delete one or more files
 - **36**: Unable to execute binary, is either missing or invalid
 - **37**: Invalid 3rd-party repository (not found)
+- **38**: File is missing or invalid
 
 
 SEE ALSO

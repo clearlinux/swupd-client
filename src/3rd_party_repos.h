@@ -154,9 +154,9 @@ bool third_party_file_is_binary(struct file *file);
  * @param files is the list of files that are part of the bundle and its dependencies
  * @param msg the message to be printed at the beginning of the processing
  * @param step the name of the step to show during the reporting of progress
- * @param proc_binary_fn the function with the processing to be performed on each binary file
+ * @param proc_file_fn the function with the processing to be performed on each file
  */
-enum swupd_code third_party_process_binaries(struct list *files, const char *msg, const char *step, process_file_fn_t proc_binary_fn);
+enum swupd_code third_party_process_files(struct list *files, const char *msg, const char *step, process_file_fn_t proc_file_fn);
 
 /**
  * @brief Function that removes a script to export a binary from the 3rd-party bin dir.

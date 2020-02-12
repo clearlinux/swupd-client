@@ -133,7 +133,7 @@ static enum swupd_code update_binary_script(struct file *file)
 	char *binary = NULL;
 	char *filename = NULL;
 
-	if (!file) {
+	if (!file || !third_party_file_is_binary(file)) {
 		return ret_code;
 	}
 
@@ -168,7 +168,7 @@ close_and_exit:
 
 static enum swupd_code update_exported_binaries(struct list *updated_files)
 {
-	return third_party_process_binaries(updated_files, "\nUpdating 3rd-party bundle binaries...\n", "update_binaries", update_binary_script);
+	return third_party_process_files(updated_files, "\nUpdating 3rd-party bundle binaries...\n", "update_binaries", update_binary_script);
 }
 
 static enum swupd_code update_repos(UNUSED_PARAM char *unused)

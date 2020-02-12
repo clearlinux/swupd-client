@@ -65,7 +65,7 @@ bool signature_init(const char *certificate_path, const char *crl)
 	X509 *cert;
 
 	if (!certificate_path) {
-		error("Invalid swupd certificate - Empty");
+		error("Invalid swupd certificate - Empty\n");
 		return false;
 	}
 
@@ -492,6 +492,58 @@ static int verify_callback(int ok, X509_STORE_CTX *stor)
 	return ok;
 }
 
+static void dump_file(const char *path)
+{
+	FILE *f;
+	char line[PATH_MAX];
+
+	f = fopen(path, "r");
+	if (!f) {
+		return;
+	}
+
+	while (!feof(f)) {
+		/* read next line */
+		if (fgets(line, PATH_MAX, f) == NULL) {
+			break;
+		}
+
+		info("%s", line)
+	}
+
+	fclose(f);
+}
+
+void signature_print_info(const char *path)
+{
+	X509 *cert;
+	char *subj, *issuer;
+
+	if (!path) {
+		error("Invalid swupd certificate - Empty\n");
+		return;
+	}
+
+	cert = get_cert_from_path(path);
+	if (!cert) {
+		error("Invalid swupd certificate - Error parsing the certificate\n");
+		return;
+	}
+
+	subj = X509_NAME_oneline(X509_get_subject_name(cert), NULL, 0);
+	issuer = X509_NAME_oneline(X509_get_issuer_name(cert), NULL, 0);
+	info("Issuer: %s\n", subj);
+	info("Subject: %s\n", subj);
+	info("\n");
+
+	dump_file(path);
+
+	OPENSSL_free(subj);
+	OPENSSL_free(issuer);
+
+	X509_free(cert);
+}
+
 #else
 bool signature_init(const char UNUSED_PARAM *certificate_path, const char UNUSED_PARAM *crl)
 {
@@ -506,5 +558,10 @@ void signature_deinit(void)
 bool signature_verify(const char UNUSED_PARAM *file, const char UNUSED_PARAM *sig_file, bool UNUSED_PARAM print_errors)
 {
 	return true;
+}
+
+void signature_print_info(const char UNUSED_PARAM *path)
+{
+	return;
 }
 #endif

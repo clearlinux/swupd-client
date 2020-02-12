@@ -34,36 +34,43 @@
 
 #define MAX_VERSION_STR_SIZE 11
 
-int get_server_format(int server_version)
+int get_int_from_url(const char *url)
 {
-	if (server_version < 0) {
-		return -1;
-	}
-
-	int ret, err = -1;
-	char *url;
-
-	char format_string[MAX_VERSION_STR_SIZE];
-	struct curl_file_data format = {
+	int err, value;
+	char tmp_string[MAX_VERSION_STR_SIZE];
+	struct curl_file_data tmp_data = {
 		MAX_VERSION_STR_SIZE, 0,
-		format_string
+		tmp_string
 	};
 
-	string_or_die(&url, "%s/%d/format", globals.version_url, server_version);
-	ret = swupd_curl_get_file_memory(url, &format);
-	free_string(&url);
-
-	if (ret) {
+	value = swupd_curl_get_file_memory(url, &tmp_data);
+	if (value) {
 		return -1;
 	}
 
-	format.data[format.len] = '\0';
-	err = strtoi_err(format.data, &ret);
+	tmp_data.data[tmp_data.len] = '\0';
+	err = strtoi_err(tmp_data.data, &value);
 	if (err != 0) {
 		return -1;
 	}
 
-	return ret;
+	return value;
+}
+
+int get_server_format(int server_version)
+{
+	char *url;
+	int value;
+
+	if (server_version < 0) {
+		return -1;
+	}
+
+	string_or_die(&url, "%s/%d/format", globals.version_url, server_version);
+	value = get_int_from_url(url);
+	free_string(&url);
+
+	return value;
 }
 
 int get_current_format(void)

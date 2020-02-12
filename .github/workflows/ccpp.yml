@@ -3,6 +3,7 @@ name: C/C++ CI
 on: [push, pull_request]
 env:
    TRAVIS: true
+   NUM_JOBS: 10
 
 jobs:
   unit_and_style:
@@ -30,9 +31,11 @@ jobs:
       if: failure()
       run: cat test-suite.log
 
-  test_3rd_party1:
+  test_job1:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+       JOB_NUMBER: 1
     steps:
     - uses: actions/checkout@v1
 
@@ -44,19 +47,18 @@ jobs:
 
     - name: run check
       run: |
-            THIRD_PARTY_TOTAL="$(find test/functional/3rd-party -name *.bats | wc -l)"
-            THIRD_PARTY_SUBGROUP1_TOTAL=9
-            THIRD_PARTY_SUBGROUP2_TOTAL="$((THIRD_PARTY_TOTAL - THIRD_PARTY_SUBGROUP1_TOTAL))"
-            THIRD_PARTY_SUBGROUP="$(find test/functional/3rd-party -name *.bats | head -n $THIRD_PARTY_SUBGROUP1_TOTAL | tr '\n' ' ')"
-            env TESTS="$THIRD_PARTY_SUBGROUP" make -e -j2 check
+            FILES="$(scripts/filter_bats_list.sh $JOB_NUMBER $NUM_JOBS)"
+            env TESTS="$FILES" make -e -j2 check
 
     - name: print status
       if: failure()
       run: cat test-suite.log
 
-  test_3rd_party2:
+  test_job2:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+       JOB_NUMBER: 2
     steps:
     - uses: actions/checkout@v1
 
@@ -68,190 +70,18 @@ jobs:
 
     - name: run check
       run: |
-            THIRD_PARTY_TOTAL="$(find test/functional/3rd-party -name *.bats | wc -l)"
-            THIRD_PARTY_SUBGROUP1_TOTAL=9
-            THIRD_PARTY_SUBGROUP2_TOTAL="$((THIRD_PARTY_TOTAL - THIRD_PARTY_SUBGROUP1_TOTAL))"
-            THIRD_PARTY_SUBGROUP="$(find test/functional/3rd-party -name *.bats | tail -n $THIRD_PARTY_SUBGROUP2_TOTAL | tr '\n' ' ')"
-            env TESTS="$THIRD_PARTY_SUBGROUP" make -e -j2 check
+            FILES="$(scripts/filter_bats_list.sh $JOB_NUMBER $NUM_JOBS)"
+            env TESTS="$FILES" make -e -j2 check
 
     - name: print status
       if: failure()
       run: cat test-suite.log
 
-  test_multiple:
+  test_job3:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: env TESTS="$(find test/functional/{autoupdate,checkupdate,hashdump,info,mirror,signature,usability,verify-legacy} -name *.bats -printf '%p ')" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_bundle_add:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: env TESTS="$(find test/functional/bundleadd -name *.bats -printf '%p ')" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_bundle_info:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: env TESTS="$(find test/functional/bundleinfo -name *.bats -printf '%p ')" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_bundle_list:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: env TESTS="$(find test/functional/bundlelist -name *.bats -printf '%p ')" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_bundle_remove:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: env TESTS="$(find test/functional/bundleremove -name *.bats -printf '%p ')" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_diagnose:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: env TESTS="$(find test/functional/diagnose -name *.bats -printf '%p ')" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_os_install:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: env TESTS="$(find test/functional/os-install -name *.bats -printf '%p ')" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_repair:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: env TESTS="$(find test/functional/repair -name *.bats -printf '%p ')" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_search:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: env TESTS="$(find test/functional/search -name *.bats -printf '%p ')" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_update1:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+    env:
+       JOB_NUMBER: 3
     steps:
     - uses: actions/checkout@v1
 
@@ -263,19 +93,18 @@ jobs:
 
     - name: run check
       run: |
-            UPDATE_TOTAL="$(find test/functional/update -name *.bats | wc -l)"
-            UPDATE_SUBGROUP1_TOTAL=25
-            UPDATE_SUBGROUP2_TOTAL="$((UPDATE_TOTAL - UPDATE_SUBGROUP1_TOTAL))"
-            UPDATE_SUBGROUP="$(find test/functional/update -name *.bats | head -n $UPDATE_SUBGROUP1_TOTAL | tr '\n' ' ')"
-            env TESTS="$UPDATE_SUBGROUP" make -e -j2 check
+            FILES="$(scripts/filter_bats_list.sh $JOB_NUMBER $NUM_JOBS)"
+            env TESTS="$FILES" make -e -j2 check
 
     - name: print status
       if: failure()
       run: cat test-suite.log
 
-  test_update2:
+  test_job4:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+       JOB_NUMBER: 4
     steps:
     - uses: actions/checkout@v1
 
@@ -287,11 +116,146 @@ jobs:
 
     - name: run check
       run: |
-            UPDATE_TOTAL="$(find test/functional/update -name *.bats | wc -l)"
-            UPDATE_SUBGROUP1_TOTAL=25
-            UPDATE_SUBGROUP2_TOTAL="$((UPDATE_TOTAL - UPDATE_SUBGROUP1_TOTAL))"
-            UPDATE_SUBGROUP="$(find test/functional/update -name *.bats | tail -n $UPDATE_SUBGROUP2_TOTAL | tr '\n' ' ')"
-            env TESTS="$UPDATE_SUBGROUP" make -e -j2 check
+            FILES="$(scripts/filter_bats_list.sh $JOB_NUMBER $NUM_JOBS)"
+            env TESTS="$FILES" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_job5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+       JOB_NUMBER: 5
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
+
+    - name: run check
+      run: |
+            FILES="$(scripts/filter_bats_list.sh $JOB_NUMBER $NUM_JOBS)"
+            env TESTS="$FILES" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_job6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+       JOB_NUMBER: 6
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
+
+    - name: run check
+      run: |
+            FILES="$(scripts/filter_bats_list.sh $JOB_NUMBER $NUM_JOBS)"
+            env TESTS="$FILES" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_job7:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+       JOB_NUMBER: 7
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
+
+    - name: run check
+      run: |
+            FILES="$(scripts/filter_bats_list.sh $JOB_NUMBER $NUM_JOBS)"
+            env TESTS="$FILES" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_job8:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+       JOB_NUMBER: 8
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
+
+    - name: run check
+      run: |
+            FILES="$(scripts/filter_bats_list.sh $JOB_NUMBER $NUM_JOBS)"
+            env TESTS="$FILES" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_job9:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+       JOB_NUMBER: 9
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
+
+    - name: run check
+      run: |
+            FILES="$(scripts/filter_bats_list.sh $JOB_NUMBER $NUM_JOBS)"
+            env TESTS="$FILES" make -e -j2 check
+
+    - name: print status
+      if: failure()
+      run: cat test-suite.log
+
+  test_job10:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+       JOB_NUMBER: 10
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run:  scripts/build_ci.bash
+
+    - name: Run prereq
+      run:  test/functional/generate-cert.prereq
+
+    - name: run check
+      run: |
+            FILES="$(scripts/filter_bats_list.sh $JOB_NUMBER $NUM_JOBS)"
+            env TESTS="$FILES" make -e -j2 check
 
     - name: print status
       if: failure()

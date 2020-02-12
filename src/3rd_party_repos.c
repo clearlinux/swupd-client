@@ -560,7 +560,7 @@ bool third_party_file_is_binary(struct file *file)
 		return false;
 }
 
-enum swupd_code third_party_process_binaries(struct list *files, const char *msg, const char *step, process_file_fn_t proc_binary_fn)
+enum swupd_code third_party_process_files(struct list *files, const char *msg, const char *step, process_file_fn_t proc_file_fn)
 {
 	enum swupd_code ret, ret_code = SWUPD_OK;
 	struct list *iter = NULL;
@@ -573,12 +573,10 @@ enum swupd_code third_party_process_binaries(struct list *files, const char *msg
 	progress_next_step(step, PROGRESS_BAR);
 	for (iter = list_head(files); iter; iter = iter->next) {
 		file = iter->data;
-		if (third_party_file_is_binary(file)) {
-			ret = proc_binary_fn(file);
-			if (ret) {
-				/* at least one file failed to process */
-				ret_code = ret;
-			}
+		ret = proc_file_fn(file);
+		if (ret) {
+			/* at least one file failed to process */
+			ret_code = ret;
 		}
 		count++;
 		progress_report(count, number_of_files);
@@ -595,7 +593,7 @@ enum swupd_code third_party_remove_binary(struct file *file)
 	char *binary = NULL;
 	char *filename = NULL;
 
-	if (!file) {
+	if (!file || !third_party_file_is_binary(file)) {
 		return ret_code;
 	}
 
@@ -630,7 +628,7 @@ enum swupd_code third_party_create_wrapper_script(struct file *file)
 	char *filename = NULL;
 	mode_t mode = 0755;
 
-	if (!file) {
+	if (!file || !third_party_file_is_binary(file)) {
 		return ret_code;
 	}
 

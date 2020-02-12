@@ -319,7 +319,7 @@ static enum swupd_code download_content(struct manifest *mom, struct list *to_in
 /* Bundle install one ore more bundles passed in bundles
  * param as a null terminated array of strings
  */
-enum swupd_code bundle_add_extra(struct list *bundles_list, int version, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn)
+enum swupd_code bundle_add_extra(struct list *bundles_list, int version, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn, extra_proc_fn_t file_validation_fn)
 {
 	int ret = 0;
 	struct manifest *mom;
@@ -413,6 +413,17 @@ enum swupd_code bundle_add_extra(struct list *bundles_list, int version, extra_p
 		goto clean_and_exit;
 	}
 
+	/* now that we have the files, perform extra validation on them
+	 * before installing them (if applicable) */
+	if (file_validation_fn) {
+		ret = file_validation_fn(to_install_files);
+		if (ret != SWUPD_OK) {
+			info("Aborting bundle installation...\n\n");
+			goto clean_and_exit;
+		}
+	}
+
+	/* we are ready to start installing the files at this point */
 	mom->files = installed_files;
 	ret = install_files(mom, to_install_files);
 	if (ret) {
@@ -481,10 +492,10 @@ clean_and_exit:
 
 enum swupd_code bundle_add(struct list *bundles_list, int version)
 {
-	return bundle_add_extra(bundles_list, version, NULL, NULL);
+	return bundle_add_extra(bundles_list, version, NULL, NULL, NULL);
 }
 
-enum swupd_code execute_bundle_add_extra(struct list *bundles_list, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn)
+enum swupd_code execute_bundle_add_extra(struct list *bundles_list, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn, extra_proc_fn_t file_validation_fn)
 {
 	int version;
 
@@ -495,12 +506,12 @@ enum swupd_code execute_bundle_add_extra(struct list *bundles_list, extra_proc_f
 		return SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
 
-	return bundle_add_extra(bundles_list, version, pre_add_fn, post_add_fn);
+	return bundle_add_extra(bundles_list, version, pre_add_fn, post_add_fn, file_validation_fn);
 }
 
 enum swupd_code execute_bundle_add(struct list *bundles_list)
 {
-	return execute_bundle_add_extra(bundles_list, NULL, NULL);
+	return execute_bundle_add_extra(bundles_list, NULL, NULL, NULL);
 }
 
 enum swupd_code bundle_add_main(int argc, char **argv)

@@ -95,7 +95,7 @@ static bool parse_options(int argc, char **argv)
 
 static enum swupd_code remove_bundle_binaries(struct list *removed_files)
 {
-	return third_party_process_binaries(removed_files, "\nRemoving 3rd-party bundle binaries...\n", "remove_binaries", third_party_remove_binary);
+	return third_party_process_files(removed_files, "\nRemoving 3rd-party bundle binaries...\n", "remove_binaries", third_party_remove_binary);
 }
 
 static enum swupd_code remove_bundle(char *bundle_name)

@@ -120,7 +120,8 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 	}
 
 	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-	if (third_party_set_repo(repo, globals.sigcheck)) {
+	ret = third_party_set_repo(repo, globals.sigcheck);
+	if (ret) {
 		goto exit;
 	}
 

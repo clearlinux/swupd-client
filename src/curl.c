@@ -746,8 +746,6 @@ exit:
 
 CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_error)
 {
-	static bool use_ssl = true;
-
 	CURLcode curl_ret = CURLE_OK;
 
 	curl_ret = curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -784,10 +782,6 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_
 		curl_ret = swupd_curl_set_security_opts(curl);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
-		}
-	} else {
-		if (use_ssl) {
-			use_ssl = false;
 		}
 	}
 

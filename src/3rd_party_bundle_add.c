@@ -22,7 +22,6 @@
 #include "3rd_party_repos.h"
 #include "swupd.h"
 
-#include <ctype.h>
 #include <sys/stat.h>
 
 #ifdef THIRDPARTY
@@ -148,18 +147,6 @@ static enum swupd_code validate_permissions(struct file *file)
 	return ret_code;
 }
 
-static bool confirm_installing_dangerous_files(void)
-{
-	int response;
-
-	warn("\nThe 3rd-party bundle you are about to install contains files with dangerous permission\n");
-	info("Do you want to continue with the installation? (y/N): ");
-	response = tolower(getchar());
-	info("%s\n", response == 'y' ? "y" : "N");
-
-	return response == 'y';
-}
-
 static enum swupd_code export_bundle_binaries(struct list *installed_files)
 {
 	return third_party_process_files(installed_files, "\nExporting 3rd-party bundle binaries...\n", "export_binaries", third_party_create_wrapper_script);
@@ -179,7 +166,8 @@ static enum swupd_code validate_file_permissions(struct list *files_to_be_instal
 		if (ret_code == SWUPD_NO) {
 			/* the bundle has files with dangerous permissions,
 			 * ask the user wether to continue or not */
-			if (confirm_installing_dangerous_files()) {
+			info("\n");
+			if (confirm_action("The 3rd-party bundle you are about to install contains files with dangerous permission", " with the installation")) {
 				ret_code = SWUPD_OK;
 			} else {
 				ret_code = SWUPD_INVALID_FILE;

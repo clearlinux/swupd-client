@@ -116,7 +116,7 @@ error:
 	return ret;
 }
 
-static int update_loop(struct list *updates, struct manifest *server_manifest)
+static int update_loop(struct list *updates, struct manifest *server_manifest, extra_proc_fn_t file_validation_fn)
 {
 	int ret;
 
@@ -130,8 +130,17 @@ static int update_loop(struct list *updates, struct manifest *server_manifest)
 		return 0;
 	}
 
-	progress_next_step("update_files", PROGRESS_BAR);
+	/* now that we have the files, perform extra validation on them
+	 * before installing them (if applicable) */
+	if (file_validation_fn) {
+		ret = file_validation_fn(updates);
+		if (ret) {
+			info("Aborting update...\n\n");
+			return ret;
+		}
+	}
 
+	progress_next_step("update_files", PROGRESS_BAR);
 	return staging_install_all_files(updates, server_manifest);
 }
 
@@ -287,7 +296,7 @@ static struct list *create_update_list(struct manifest *server)
 	return output;
 }
 
-enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn)
+enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_fn_t file_validation_fn)
 {
 	int current_version = -1, server_version = -1;
 	int mix_current_version = -1, mix_server_version = -1;
@@ -507,7 +516,7 @@ version_check:
 	timelist_timer_start(globals.global_times, "Update loop");
 	updates = list_sort(updates, cmp_file_filename_is_deleted);
 
-	ret = update_loop(updates, server_manifest);
+	ret = update_loop(updates, server_manifest, file_validation_fn);
 	if (ret == 0 && !download_only) {
 		/* Failure to write the version file in the state directory
 		 * should not affect exit status. */
@@ -640,7 +649,7 @@ clean_curl:
 
 enum swupd_code execute_update(void)
 {
-	return execute_update_extra(NULL);
+	return execute_update_extra(NULL, NULL);
 }
 
 static bool cmd_line_status = false;

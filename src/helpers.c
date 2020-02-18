@@ -22,6 +22,7 @@
  */
 
 #define _GNU_SOURCE
+#include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -1198,4 +1199,18 @@ void prettify_size(long size_in_bytes, char **pretty_size)
 char *get_tracking_dir(void)
 {
 	return sys_path_join(globals.state_dir, "bundles");
+}
+
+bool confirm_action(const char *warning_msg, const char *action)
+{
+	int response;
+
+	if (warning_msg) {
+		warn("%s\n", warning_msg);
+	}
+	info("Do you want to continue%s? (y/N): ", action ? action : "");
+	response = tolower(getchar());
+	info("%s\n", response == 'y' ? "y" : "N");
+
+	return response == 'y';
 }

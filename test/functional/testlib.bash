@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+set -e
+
 FUNC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_ROOT_DIR="$(pwd)"
 TEST_FILENAME=$(basename "$BATS_TEST_FILENAME")
@@ -551,20 +553,41 @@ create_dir() { # swupd_function
 #         will be random but fairly small
 create_file() { # swupd_function
 
+	create_file_usage() {
+		cat <<-EOM
+		Usage:
+		    create_file [-x] [-u] [-g] <path> [size in bytes]
+
+		Options:
+		    -x    If set, the file is created as executable
+		    -u    If set, the file is created with the SETUID flag
+		    -g    If set, the file is created with the SETGID flag
+		EOM
+	}
+
+	local OPTIND
+	local opt
 	local hashed_name
 	local executable=false
+	local setuid=false
+	local setgid=false
+
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    create_file [-x] <path> [size in bytes]
-
-			Options:
-			    -x    If set, the file is created as executable
-			EOM
+		create_file_usage
 		return
 	fi
-	[ "$1" = "-x" ] && { executable=true ; shift ; }
+
+	while getopts :xug opt; do
+		case "$opt" in
+			x)	executable=true ;;
+			u)	setuid=true ;;
+			g)	setgid=true ;;
+			*)	create_file_usage
+				return ;;
+		esac
+	done
+	shift $((OPTIND-1))
 	local path=$1
 	local size=$2
 	validate_path "$path"
@@ -576,6 +599,12 @@ create_file() { # swupd_function
 	fi
 	if [ "$executable" = true ]; then
 		sudo chmod +x "$path/testfile"
+	fi
+	if [ "$setuid" = true ]; then
+		sudo chmod u+s "$path/testfile"
+	fi
+	if [ "$setgid" = true ]; then
+		sudo chmod g+s "$path/testfile"
 	fi
 	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$path"/testfile)
 	sudo mv "$path"/testfile "$path"/"$hashed_name"
@@ -2822,6 +2851,7 @@ update_bundle() { # swupd_function
 	local from_manifest_content
 	local pre_ver
 	local pre_hash
+	local existing_file
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
@@ -2893,6 +2923,12 @@ update_bundle() { # swupd_function
 	copy_manifest "$content_dir" "$bundle" "$oldversion" "$version"
 	contentsize=$(awk '/^contentsize/ { print $2 }' "$bundle_manifest")
 
+	# if the option received an existing file, parse it
+	if [[ "$fname" = *":"* ]]; then
+		existing_file="${fname#*:}"
+		fname="${fname%:*}"
+	fi
+
 	# these actions apply to all operations that modify an existing file somehow
 	if [ "$option" != "--add" ] && [ "$option" != "--add-dir" ] && [ "$option" != "--add-file" ] && [ "$option" != "--header-only" ]; then
 		fhash=$(get_hash_from_manifest "$bundle_manifest" "$fname")
@@ -2906,7 +2942,7 @@ update_bundle() { # swupd_function
 	--add | --add-file)
 
 		# if the directories the file is don't exist, add them to the bundle
-		fdir=$(dirname "${fname%:*}")
+		fdir=$(dirname "$fname")
 		if ! sudo cat "$bundle_manifest" | grep -qx "D\\.\\.\\..*$fdir" && [ "$fdir" != "/" ]; then
 			new_dir=$(create_dir "$version_path"/files)
 			add_to_manifest -p "$bundle_manifest" "$new_dir" "$fdir"
@@ -2922,16 +2958,14 @@ update_bundle() { # swupd_function
 		fi
 
 		# if the user wants to use an existing file, use it, else create a new one
-		if [[ "$fname" = *":"* ]]; then
-			new_file="${fname#*:}"
-			validate_item "$new_file"
-			new_fhash=$(sudo "$SWUPD" hashdump --quiet "$new_file")
-			sudo rsync -aq "$new_file" "$version_path"/files/"$new_fhash"
+		if [ -n "$existing_file" ]; then
+			validate_item "$existing_file"
+			new_fhash=$(sudo "$SWUPD" hashdump --quiet "$existing_file")
+			sudo rsync -aq "$existing_file" "$version_path"/files/"$new_fhash"
 			if [ ! -e "$version_path"/files/"$new_fhash".tar ]; then
 				create_tar "$version_path"/files/"$new_fhash"
 			fi
 			new_file="$version_path"/files/"$new_fhash"
-			fname="${fname%:*}"
 		else
 			if [ "$(dirname "$fname")" = "/bin" ] || [ "$(dirname "$fname")" = "/usr/bin" ] || [ "$(dirname "$fname")" = "/usr/local/bin" ]; then
 				new_file=$(create_file -x "$version_path"/files)
@@ -3027,14 +3061,36 @@ update_bundle() { # swupd_function
 
 	--update)
 
-		# append random content to the file
-		generate_random_content 1 20 | sudo tee -a "$version_path"/files/"$fhash" > /dev/null
+		# if the user wants to use an existing file for the update, use it, else add
+		# a random update
+		if [ -n "$existing_file" ]; then
 
-		# recalculate hash and update file names
-		new_fhash=$(sudo "$SWUPD" hashdump --quiet "$version_path"/files/"$fhash")
-		sudo mv "$version_path"/files/"$fhash" "$version_path"/files/"$new_fhash"
-		create_tar "$version_path"/files/"$new_fhash"
-		sudo rm -f "$version_path"/files/"$fhash".tar
+			validate_item "$existing_file"
+			new_fhash=$(sudo "$SWUPD" hashdump --quiet "$existing_file")
+
+			sudo rsync -aq "$existing_file" "$version_path"/files/"$new_fhash"
+			if [ ! -e "$version_path"/files/"$new_fhash".tar ]; then
+				create_tar "$version_path"/files/"$new_fhash"
+			fi
+
+			# remove the old file
+			sudo rm -f "$version_path"/files/"$fhash"
+			sudo rm -f "$version_path"/files/"$fhash".tar
+
+		else
+
+			# append random content to the file
+			generate_random_content 1 20 | sudo tee -a "$version_path"/files/"$fhash" > /dev/null
+
+			# recalculate hash and update file names
+			new_fhash=$(sudo "$SWUPD" hashdump --quiet "$version_path"/files/"$fhash")
+			sudo mv "$version_path"/files/"$fhash" "$version_path"/files/"$new_fhash"
+			create_tar "$version_path"/files/"$new_fhash"
+
+			# remove the old tar file, is not needed anymore
+			sudo rm -f "$version_path"/files/"$fhash".tar
+
+		fi
 
 		# update the manifest with the new hash
 		update_manifest -p "$bundle_manifest" file-hash "$fname" "$new_fhash"
@@ -3076,7 +3132,7 @@ update_bundle() { # swupd_function
 				continue
 			fi
 			delta_name="$pre_ver-$version-$pre_hash-$new_fhash"
-			sudo bsdiff "$content_dir"/"$pre_ver"/files/"$pre_hash" "$version_path"/files/"$new_fhash" "$version_path"/delta/"$delta_name"
+			sudo bsdiff "$content_dir"/"$pre_ver"/files/"$pre_hash" "$version_path"/files/"$new_fhash" "$version_path"/delta/"$delta_name" || [ "$?" = 1 ] && true
 
 			# create or add to the delta-pack
 			add_to_pack "$bundle" "$version_path"/delta/"$delta_name" "$pre_ver"
@@ -3147,7 +3203,7 @@ update_bundle() { # swupd_function
 
 			# create the delta file
 			delta_name="$pre_ver-$version-$fhash-$fhash"
-			sudo bsdiff "$content_dir"/"$pre_ver"/files/"$fhash" "$version_path"/files/"$fhash" "$version_path"/delta/"$delta_name"
+			sudo bsdiff "$content_dir"/"$pre_ver"/files/"$fhash" "$version_path"/files/"$fhash" "$version_path"/delta/"$delta_name" || [ "$?" = 1 ] && true
 
 			# create or add to the delta-pack
 			add_to_pack "$bundle" "$version_path"/delta/"$delta_name" "$pre_ver"
@@ -3233,7 +3289,7 @@ create_delta_manifest() { # swupd_function
 		return
 	fi
 
-	sudo bsdiff "$WEBDIR/$from_version/Manifest.$bundle" "$WEBDIR/$version/Manifest.$bundle" "$WEBDIR/$version/Manifest-$bundle-delta-from-$from_version"
+	sudo bsdiff "$WEBDIR/$from_version/Manifest.$bundle" "$WEBDIR/$version/Manifest.$bundle" "$WEBDIR/$version/Manifest-$bundle-delta-from-$from_version" || [ "$?" = 1 ] && true
 }
 
 # Adds the specified file to the zero or delta pack for the bundle

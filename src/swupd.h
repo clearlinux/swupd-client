@@ -319,6 +319,7 @@ extern void print_header(const char *header);
 extern void prettify_size(long size_in_bytes, char **pretty_size);
 extern int link_or_rename(const char *orig, const char *dest);
 extern int create_state_dirs(const char *state_dir_path);
+extern bool confirm_action(const char *warning_msg, const char *action);
 
 /* subscription.c */
 typedef bool (*subs_fn_t)(struct list **subs, const char *component, int recursion, bool is_optional);
@@ -349,7 +350,7 @@ extern void bundle_info_set_option_files(bool opt);
 
 /* update.c */
 extern enum swupd_code execute_update(void);
-extern enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn);
+extern enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_fn_t file_validation_fn);
 extern void update_set_option_version(int opt);
 extern void update_set_option_download_only(bool opt);
 extern void update_set_option_keepcache(bool opt);

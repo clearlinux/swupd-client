@@ -11,22 +11,10 @@ test_setup() {
 	add_third_party_repo "$TEST_NAME" 10 1 repo1
 
 	# create a file with the setuid flag set
-	file_2="$TPWEBDIR"/10/files/tmp
-	write_to_protected_file "$file_2" "test file"
-	sudo chmod u+s "$file_2"
-	file_hash=$(sudo "$SWUPD" hashdump --quiet "$file_2")
-	sudo mv "$file_2" "$TPWEBDIR"/10/files/"$file_hash"
-	file_2="$TPWEBDIR"/10/files/"$file_hash"
-	create_tar "$file_2"
+	file_2=$(create_file -u "$TPWEBDIR"/10/files)
 
 	# create a file with the setgid flag set
-	file_3="$TPWEBDIR"/10/files/tmp
-	write_to_protected_file "$file_3" "test file"
-	sudo chmod g+s "$file_3"
-	file_hash=$(sudo "$SWUPD" hashdump --quiet "$file_3")
-	sudo mv "$file_3" "$TPWEBDIR"/10/files/"$file_hash"
-	file_3="$TPWEBDIR"/10/files/"$file_hash"
-	create_tar "$file_3"
+	file_3=$(create_file -g "$TPWEBDIR"/10/files)
 
 	# create a bundle that has the file previosuly created
 	create_bundle -n test-bundle1 -f /foo/file_1,/bar/file_2:"$file_2",/bar/file_3:"$file_3" -u repo1 "$TEST_NAME"

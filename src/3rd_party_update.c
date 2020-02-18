@@ -22,6 +22,8 @@
 #include "3rd_party_repos.h"
 #include "swupd.h"
 
+#include <sys/stat.h>
+
 #ifdef THIRDPARTY
 
 #define FLAG_DOWNLOAD_ONLY 2000
@@ -166,6 +168,74 @@ close_and_exit:
 	return ret_code;
 }
 
+static enum swupd_code validate_permissions(struct file *file)
+{
+	enum swupd_code ret_code = SWUPD_OK;
+	struct stat file_stats;
+	struct stat original_file_stats;
+	char *staged_file = NULL;
+	char *original_file = NULL;
+
+	if (!file || file->is_deleted) {
+		return ret_code;
+	}
+
+	string_or_die(&staged_file, "%s/staged/%s", globals.state_dir, file->hash);
+	if (stat(staged_file, &file_stats) == 0) {
+		/* see if the file being updated has dangerous flags */
+		if ((file_stats.st_mode & S_ISUID) || (file_stats.st_mode & S_ISGID) || (file_stats.st_mode & S_ISVTX)) {
+			if (!file->peer) {
+				/* a new file included in the update has dangerous flags */
+				warn("The update has a new file %s with dangerous permissions\n", file->filename);
+				ret_code = SWUPD_NO;
+			} else {
+				/* an existing file has dangerous flags, do not warn unless
+				 * the flags changed from non-dangerous to dangerous in the update */
+				original_file = sys_path_join(globals.path_prefix, file->filename);
+				if (stat(original_file, &original_file_stats) == 0) {
+					if (
+					    ((file_stats.st_mode & S_ISUID) && !(original_file_stats.st_mode & S_ISUID)) ||
+					    ((file_stats.st_mode & S_ISGID) && !(original_file_stats.st_mode & S_ISGID)) ||
+					    ((file_stats.st_mode & S_ISVTX) && !(original_file_stats.st_mode & S_ISVTX))) {
+						warn("The update sets dangerous permissions to file %s\n", file->filename);
+						ret_code = SWUPD_NO;
+					}
+				} else {
+					ret_code = SWUPD_INVALID_FILE;
+				}
+			}
+		}
+	} else {
+		ret_code = SWUPD_INVALID_FILE;
+	}
+
+	free_string(&staged_file);
+	free_string(&original_file);
+
+	return ret_code;
+}
+
+static enum swupd_code validate_file_permissions(struct list *files_to_be_updated)
+{
+	static enum swupd_code ret_code = SWUPD_OK;
+
+	ret_code = third_party_process_files(files_to_be_updated, "\nValidating 3rd-party bundle file permissions...\n", "validate_file_permissions", validate_permissions);
+	if (ret_code) {
+		if (ret_code == SWUPD_NO) {
+			/* the bundle has files with dangerous permissions,
+			 * ask the user wether to continue or not */
+			info("\n");
+			if (confirm_action("The 3rd-party update you are about to install contains files with dangerous permission", " with the update")) {
+				ret_code = SWUPD_OK;
+			} else {
+				ret_code = SWUPD_INVALID_FILE;
+			}
+		}
+	}
+
+	return ret_code;
+}
+
 static enum swupd_code update_exported_binaries(struct list *updated_files)
 {
 	return third_party_process_files(updated_files, "\nUpdating 3rd-party bundle binaries...\n", "update_binaries", update_binary_script);
@@ -181,7 +251,7 @@ static enum swupd_code update_repos(UNUSED_PARAM char *unused)
 		return check_update();
 	} else {
 		info("Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons\n\n");
-		return execute_update_extra(update_exported_binaries);
+		return execute_update_extra(update_exported_binaries, validate_file_permissions);
 	}
 }
 

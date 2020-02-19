@@ -319,7 +319,7 @@ extern void print_header(const char *header);
 extern void prettify_size(long size_in_bytes, char **pretty_size);
 extern int link_or_rename(const char *orig, const char *dest);
 extern int create_state_dirs(const char *state_dir_path);
-extern bool confirm_action(const char *warning_msg, const char *action);
+extern bool confirm_action(void);
 
 /* subscription.c */
 typedef bool (*subs_fn_t)(struct list **subs, const char *component, int recursion, bool is_optional);

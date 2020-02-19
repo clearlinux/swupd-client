@@ -18,6 +18,12 @@ extern "C" {
 
 #define optarg_to_bool(_optarg) (_optarg ? strtobool(_optarg) : true)
 
+enum user_interaction {
+	INTERACTIVE = 0,
+	NON_INTERACTIVE_ASSUME_YES,
+	NON_INTERACTIVE_ASSUME_NO
+};
+
 /*
  * Global variables
  */
@@ -50,6 +56,7 @@ extern struct globals {
 	int update_count;
 	int update_server_port;
 	int update_skip;
+	int user_interaction;
 	timelist *global_times;
 } globals;
 

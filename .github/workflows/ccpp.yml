@@ -12,7 +12,7 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: build
-      run:  scripts/build_ci.bash
+      run:  scripts/build_ci_style.bash
 
     - name: check style
       run:  make compliant && make shellcheck && make docs-coverage

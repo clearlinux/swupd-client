@@ -143,8 +143,10 @@ local -a global_opts; global_opts=(
   '(help status -t --time)'{-t,--time}'[Show verbose time output for swupd operations]'
   '(help status -N --no-scripts)'{-N,--no-scripts}'[Do not run the post-update scripts and boot update tool]'
   '(help status -b --no-boot-update)'{-b,--no-boot-update}'[Do not install boot files to the boot partition (containers)]'
+  '(help status -y --yes)'{-y,--yes}'[Assume yes as answer to all prompts and run non-interactively]'
   '(help status)--no-progress[Don`t print progress report]'
   '(help status)--wait-for-scripts[Wait for the post-update scripts to complete]'
+  '(help status)--assume[Sets an automatic response to all prompts and run non-interactively]'
 )
 
 # Level-1 completion for sub-command and options to swupd

@@ -166,8 +166,8 @@ static enum swupd_code validate_file_permissions(struct list *files_to_be_instal
 		if (ret_code == SWUPD_NO) {
 			/* the bundle has files with dangerous permissions,
 			 * ask the user wether to continue or not */
-			info("\n");
-			if (confirm_action("The 3rd-party bundle you are about to install contains files with dangerous permission", " with the installation")) {
+			warn("\nThe 3rd-party bundle you are about to install contains files with dangerous permission\n");
+			if (confirm_action()) {
 				ret_code = SWUPD_OK;
 			} else {
 				ret_code = SWUPD_INVALID_FILE;

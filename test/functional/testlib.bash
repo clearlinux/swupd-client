@@ -1,7 +1,5 @@
 #!/usr/bin/bash
 
-set -e
-
 FUNC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_ROOT_DIR="$(pwd)"
 TEST_FILENAME=$(basename "$BATS_TEST_FILENAME")
@@ -9,6 +7,8 @@ TEST_NAME=${TEST_FILENAME%.bats}
 THEME_DIRNAME="$BATS_TEST_DIRNAME"
 THIRD_PARTY_BUNDLES_DIR="opt/3rd-party/bundles"
 THIRD_PARTY_BIN_DIR="opt/3rd-party/bin"
+SPACE=" "
+TAB="	"
 
 export TEST_NAME
 export TEST_NAME_SHORT="$TEST_NAME"
@@ -17,6 +17,8 @@ export FUNC_DIR
 export SWUPD_DIR="$FUNC_DIR/../.."
 export THIRD_PARTY_BUNDLES_DIR
 export THIRD_PARTY_BIN_DIR
+export SPACE
+export TAB
 
 # detect where the swupd binary is
 if [ -e "$SWUPD" ]; then

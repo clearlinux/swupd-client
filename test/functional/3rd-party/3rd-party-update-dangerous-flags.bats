@@ -68,7 +68,7 @@ test_setup() {
 		Warning: The update has a new file /bar/file_4 with dangerous permissions
 		Warning: The update sets dangerous permissions to file /foo/file_1
 		Warning: The 3rd-party update you are about to install contains files with dangerous permission
-		Do you want to continue with the update? (y/N): y
+		Do you want to continue? (y/N):$SPACE
 		Installing files...
 		Update was applied
 		Updating 3rd-party bundle binaries...
@@ -110,9 +110,87 @@ test_setup() {
 		Warning: The update has a new file /bar/file_4 with dangerous permissions
 		Warning: The update sets dangerous permissions to file /foo/file_1
 		Warning: The 3rd-party update you are about to install contains files with dangerous permission
-		Do you want to continue with the update? (y/N): N
+		Do you want to continue? (y/N):$SPACE
 		Aborting update...
 		Update failed
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
+@test "TPR064: Try updating a system from a 3rd-party repo when the update has files with dangerous flags using --assume to run non interactively" {
+
+	# the --non-interactive flag can be used to avoid getting prompots
+	# from swupd
+
+	run sudo sh -c "$SWUPD 3rd-party update $SWUPD_OPTS --assume=no"
+
+	assert_status_is "$SWUPD_INVALID_FILE"
+	expected_output=$(cat <<-EOM
+		_______________________
+		 3rd-Party Repo: repo1
+		_______________________
+		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
+		Update started
+		Preparing to update from 10 to 20
+		Downloading packs for:
+		 - test-bundle1
+		Finishing packs extraction...
+		Statistics for going from version 10 to version 20:
+		    changed bundles   : 1
+		    new bundles       : 0
+		    deleted bundles   : 0
+		    changed files     : 3
+		    new files         : 2
+		    deleted files     : 0
+		Validate downloaded files
+		No extra files need to be downloaded
+		Validating 3rd-party bundle file permissions...
+		Warning: The update has a new file /bar/file_4 with dangerous permissions
+		Warning: The update sets dangerous permissions to file /foo/file_1
+		Warning: The 3rd-party update you are about to install contains files with dangerous permission
+		Do you want to continue? (y/N): N
+		The "--assume=no" option was used
+		Aborting update...
+		Update failed
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+	run sudo sh -c "$SWUPD 3rd-party update $SWUPD_OPTS --yes"
+
+	assert_status_is "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		_______________________
+		 3rd-Party Repo: repo1
+		_______________________
+		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
+		Update started
+		Preparing to update from 10 to 20
+		Downloading packs for:
+		 - test-bundle1
+		Finishing packs extraction...
+		Statistics for going from version 10 to version 20:
+		    changed bundles   : 1
+		    new bundles       : 0
+		    deleted bundles   : 0
+		    changed files     : 3
+		    new files         : 2
+		    deleted files     : 0
+		Validate downloaded files
+		No extra files need to be downloaded
+		Validating 3rd-party bundle file permissions...
+		Warning: The update has a new file /bar/file_4 with dangerous permissions
+		Warning: The update sets dangerous permissions to file /foo/file_1
+		Warning: The 3rd-party update you are about to install contains files with dangerous permission
+		Do you want to continue? (y/N): y
+		The "--assume=yes" option was used
+		Installing files...
+		Update was applied
+		Updating 3rd-party bundle binaries...
+		Warning: post-update helper scripts skipped due to --no-scripts argument
+		Update successful - System updated from version 10 to version 20
 	EOM
 	)
 	assert_is_output "$expected_output"

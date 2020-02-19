@@ -1201,16 +1201,19 @@ char *get_tracking_dir(void)
 	return sys_path_join(globals.state_dir, "bundles");
 }
 
-bool confirm_action(const char *warning_msg, const char *action)
+bool confirm_action(void)
 {
 	int response;
 
-	if (warning_msg) {
-		warn("%s\n", warning_msg);
+	info("Do you want to continue? (y/N): ");
+	if (globals.user_interaction == INTERACTIVE) {
+		response = tolower(getchar());
+		info("\n");
+	} else {
+		info("%s\n", globals.user_interaction == NON_INTERACTIVE_ASSUME_YES ? "y" : "N");
+		info("The \"--assume=%s\" option was used\n", globals.user_interaction == NON_INTERACTIVE_ASSUME_YES ? "yes" : "no");
+		response = globals.user_interaction == NON_INTERACTIVE_ASSUME_YES ? 'y' : 'n';
 	}
-	info("Do you want to continue%s? (y/N): ", action ? action : "");
-	response = tolower(getchar());
-	info("%s\n", response == 'y' ? "y" : "N");
 
 	return response == 'y';
 }

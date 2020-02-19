@@ -42,10 +42,12 @@
 #define FLAG_DEBUG 1003
 #define FLAG_ALLOW_INSECURE_HTTP 1004
 #define FLAG_VERBOSE 1005
+#define FLAG_ASSUME 1006
 
 struct globals globals = {
 	.sigcheck = true,
 	.timecheck = true,
+	.user_interaction = INTERACTIVE,
 	.max_retries = DEFAULT_MAX_RETRIES,
 	.retry_delay = DEFAULT_RETRY_DELAY,
 	.update_server_port = -1,
@@ -412,6 +414,34 @@ bool set_default_urls()
 	return true;
 }
 
+bool set_assume_option(char *option)
+{
+	bool ret;
+	char *option_lower = NULL;
+
+	if (!option) {
+		error("Option shouldn't be NULL, please choose either 'yes' or 'no' as your option\n");
+		return false;
+	}
+
+	option_lower = str_tolower(option);
+
+	if (strcmp(option_lower, "y") == 0 || strcmp(option_lower, "yes") == 0) {
+		globals.user_interaction = NON_INTERACTIVE_ASSUME_YES;
+		ret = true;
+	} else if (strcmp(option_lower, "n") == 0 || strcmp(option_lower, "no") == 0) {
+		globals.user_interaction = NON_INTERACTIVE_ASSUME_NO;
+		ret = true;
+	} else {
+		error("Please choose either 'yes' or 'no' as your non interactive option\n");
+		ret = false;
+	}
+
+	free_string(&option_lower);
+
+	return ret;
+}
+
 bool globals_init(void)
 {
 	if (!globals.state_dir) {
@@ -524,6 +554,8 @@ static const struct option global_opts[] = {
 	{ "allow-insecure-http", no_argument, 0, FLAG_ALLOW_INSECURE_HTTP },
 	{ "wait-for-scripts", no_argument, 0, FLAG_WAIT_FOR_SCRIPTS },
 	{ "verbose", no_argument, 0, FLAG_VERBOSE },
+	{ "assume", required_argument, 0, FLAG_ASSUME },
+	{ "yes", no_argument, 0, 'y' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -613,6 +645,8 @@ static bool global_parse_opt(int opt, char *optarg)
 	case 'j':
 		json_format = optarg_to_bool(optarg);
 		return true;
+	case 'y':
+		return set_assume_option("y");
 	case FLAG_NO_PROGRESS:
 		progress_set_enabled(!optarg_to_bool(optarg));
 		return true;
@@ -631,6 +665,8 @@ static bool global_parse_opt(int opt, char *optarg)
 	case FLAG_VERBOSE:
 		verbose = true;
 		return true;
+	case FLAG_ASSUME:
+		return set_assume_option(optarg);
 	default:
 		return false;
 	}
@@ -683,12 +719,14 @@ void global_print_help(void)
 	print("   -N, --no-scripts        Do not run the post-update scripts and boot update tool\n");
 	print("   -b, --no-boot-update    Do not install boot files to the boot partition (containers)\n");
 	print("   -j, --json-output       Print all output as a JSON stream\n");
+	print("   -y, --yes               Assume yes as answer to all prompts and run non-interactively\n");
 	print("   --allow-insecure-http   Allow updates over insecure connections\n");
 	print("   --quiet                 Quiet output. Print only important information and errors\n");
 	print("   --verbose               Enable verbosity for commands\n");
 	print("   --debug                 Print extra information to help debugging problems\n");
 	print("   --no-progress           Don't print progress report\n");
 	print("   --wait-for-scripts      Wait for the post-update scripts to complete\n");
+	print("   --assume=[yes|no]       Sets an automatic response to all prompts and run non-interactively\n");
 	print("\n");
 }
 

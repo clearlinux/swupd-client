@@ -82,6 +82,9 @@
 # Wait for the post-update scripts to complete (boolean value)
 #wait_for_scripts=<true/false>
 
+# Sets an automatic response to all prompts and run non-interactively (string value)
+#assume=<yes/no>
+
 
 #
 # The sections below contain the options that apply specifically to

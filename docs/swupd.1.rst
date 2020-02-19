@@ -144,6 +144,10 @@ used to modify the core behavior and resources that swupd uses.
 
    Prints the swupd output as a machine readable JSON stream.
 
+-  ``-y, --yes``
+
+   Assume yes as answer to all prompts and run non-interactively.
+
 -  ``--allow-insecure-http``
 
    For security reasons, swupd only allows system updates using
@@ -174,6 +178,10 @@ used to modify the core behavior and resources that swupd uses.
 -  ``--wait-for-scripts``
 
    Wait for the post-update scripts to complete.
+
+-  ``--assume={yes|no}``
+
+   Sets an automatic response to all prompts and run non-interactively.
 
 
 SUBCOMMANDS

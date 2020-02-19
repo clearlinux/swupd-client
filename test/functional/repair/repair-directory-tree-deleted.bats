@@ -46,3 +46,4 @@ test_setup() {
 	assert_file_not_exists "$TARGETDIR"/testdir1/testdir2/testfile
 
 }
+#WEIGHT=2

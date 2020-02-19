@@ -70,3 +70,4 @@ test_teardown() {
 	assert_file_not_exists "$PATH_PREFIX/etc/systemd/system/swupd-update.timer"
 
 }
+#WEIGHT=2

@@ -74,3 +74,4 @@ load "../testlib"
 	assert_in_output "Error: '--manifest latest' only supported with the --install option"
 
 }
+#WEIGHT=2

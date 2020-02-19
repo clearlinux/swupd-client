@@ -42,3 +42,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/bar/test-file2
 
 }
+#WEIGHT=2

@@ -182,3 +182,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/usr/untracked_file3
 
 }
+#WEIGHT=13

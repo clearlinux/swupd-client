@@ -90,3 +90,4 @@ global_teardown() {
 	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
 
 }
+#WEIGHT=2

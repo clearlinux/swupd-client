@@ -40,3 +40,4 @@ test_setup() {
 	assert_file_exists "$STATEDIR"/staged/"$core_hash"
 
 }
+#WEIGHT=1

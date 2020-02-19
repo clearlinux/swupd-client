@@ -24,3 +24,4 @@ test_setup() {
 	assert_is_output --identical "$expected_output"
 
 }
+#WEIGHT=2

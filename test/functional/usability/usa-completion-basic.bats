@@ -39,3 +39,4 @@ test_teardown() {
 	grep -q  'opts="--help --no-xattrs --path --debug --quiet "' "$SWUPD_DIR"/swupd.bash
 
 }
+#WEIGHT=1

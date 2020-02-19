@@ -24,3 +24,4 @@ test_setup() {
 	assert_in_output "700"
 
 }
+#WEIGHT=2

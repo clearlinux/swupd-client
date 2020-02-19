@@ -64,3 +64,4 @@ test_setup() {
 	assert_file_not_exists "$TARGETDIR"/var/lib/swupd/bundles/os-core
 
 }
+#WEIGHT=4

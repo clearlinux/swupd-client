@@ -246,3 +246,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/common
 
 }
+#WEIGHT=17

@@ -42,3 +42,4 @@ test_setup() {
 	assert_files_equal "$TARGETDIR"/core "$TEST_NAME"/web-dir/100/files/"$fhash"
 
 }
+#WEIGHT=2

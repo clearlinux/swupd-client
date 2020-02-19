@@ -10,3 +10,4 @@ load "../testlib"
 	assert_in_output "Error: missing bundle(s) to be removed"
 
 }
+#WEIGHT=1

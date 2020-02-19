@@ -15,3 +15,4 @@ load "../testlib"
 	assert_is_output "$expected_output"
 
 }
+#WEIGHT=1

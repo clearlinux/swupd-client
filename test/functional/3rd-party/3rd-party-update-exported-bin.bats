@@ -76,3 +76,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_7
 
 }
+#WEIGHT=9

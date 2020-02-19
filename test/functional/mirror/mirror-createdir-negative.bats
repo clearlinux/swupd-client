@@ -61,3 +61,4 @@ global_teardown() {
 	assert_regex_is_output "$expected_output"
 
 }
+#WEIGHT=1

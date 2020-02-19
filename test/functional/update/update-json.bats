@@ -89,3 +89,4 @@ test_setup() {
 	assert_regex_in_output "$expected_output3"
 
 }
+#WEIGHT=4

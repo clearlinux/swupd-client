@@ -72,3 +72,4 @@ test_setup() {
 	assert_file_not_exists "$STATEDIR"/10/Manifest.test-bundle1
 }
 
+#WEIGHT=5

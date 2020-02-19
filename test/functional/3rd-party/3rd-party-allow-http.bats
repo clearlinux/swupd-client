@@ -82,3 +82,4 @@ global_teardown() {
 	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/my_repo/usr/share/clear/bundles/os-core
 	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/my_repo/usr/lib/os-release
 }
+#WEIGHT=4

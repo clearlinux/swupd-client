@@ -145,3 +145,4 @@ test_teardown() {
 	assert_file_exists "$TARGETDIR"/test_file1
 
 }
+#WEIGHT=40

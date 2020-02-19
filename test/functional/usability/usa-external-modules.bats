@@ -64,3 +64,4 @@ test_teardown() {
 	assert_in_output "Fake search invoked successfully with these arguments: arg1 arg2 arg3"
 
 }
+#WEIGHT=1

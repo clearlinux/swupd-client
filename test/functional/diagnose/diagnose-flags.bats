@@ -70,3 +70,4 @@ load "../testlib"
 	assert_in_output "Error: --bundles and --extra-files-only options are mutually exclusive"
 
 }
+#WEIGHT=2

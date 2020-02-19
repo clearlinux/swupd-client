@@ -91,3 +91,4 @@ global_teardown() {
 	)
 	assert_in_output "$expected_output"
 }
+#WEIGHT=72

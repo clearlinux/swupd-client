@@ -331,3 +331,4 @@ global_teardown() {
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/alias-bundle1
 
 }
+#WEIGHT=7

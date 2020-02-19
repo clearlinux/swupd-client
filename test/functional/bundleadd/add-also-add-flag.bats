@@ -81,3 +81,4 @@ test_setup() {
 	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
 
 }
+#WEIGHT=8

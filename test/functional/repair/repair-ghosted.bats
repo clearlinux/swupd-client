@@ -36,3 +36,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/foo
 
 }
+#WEIGHT=2

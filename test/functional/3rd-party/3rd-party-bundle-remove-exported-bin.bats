@@ -46,3 +46,4 @@ test_setup() {
 	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/file_3
 
 }
+#WEIGHT=5

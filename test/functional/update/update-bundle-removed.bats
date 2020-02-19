@@ -53,3 +53,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
 
 }
+#WEIGHT=5

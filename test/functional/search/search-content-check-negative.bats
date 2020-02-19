@@ -78,3 +78,4 @@ global_teardown() {
 
 }
 
+#WEIGHT=2

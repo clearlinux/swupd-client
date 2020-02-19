@@ -148,3 +148,4 @@ global_teardown() {
 	assert_is_output --identical "$expected_output"
 
 }
+#WEIGHT=8

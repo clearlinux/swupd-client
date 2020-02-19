@@ -180,3 +180,4 @@ global_teardown() {
 	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_contenturl
 	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_versionurl
 }
+#WEIGHT=2

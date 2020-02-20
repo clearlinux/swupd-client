@@ -81,8 +81,8 @@ static void download_free_data(void *data)
 		return;
 	}
 
-	free_string(&pack_data->url);
-	free_string(&pack_data->filename);
+	free_and_clear_pointer(&pack_data->url);
+	free_and_clear_pointer(&pack_data->filename);
 	free(pack_data);
 }
 
@@ -125,15 +125,15 @@ static int download_pack(struct swupd_curl_parallel_handle *download_handle, int
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", MIX_STATE_DIR, newversion, module, oldversion);
 		err = link(url, filename);
 		if (err) {
-			free_string(&filename);
-			free_string(&url);
+			free_and_clear_pointer(&filename);
+			free_and_clear_pointer(&url);
 			return err;
 		}
 		info("Linked %s to %s\n", url, filename);
 
 		err = finalize_pack_download(module, newversion, filename);
-		free_string(&url);
-		free_string(&filename);
+		free_and_clear_pointer(&url);
+		free_and_clear_pointer(&filename);
 	} else {
 		struct pack_data *pack_data;
 
@@ -182,13 +182,13 @@ static double packs_query_total_download_size(struct list *subs, struct manifest
 			total_size += size;
 		} else {
 			debug("The pack header for bundle %s could not be downloaded\n", sub->component);
-			free_string(&url);
+			free_and_clear_pointer(&url);
 			return -SWUPD_COULDNT_DOWNLOAD_FILE;
 		}
 
 		count++;
 		debug("Pack: %s (%.2lf MB)\n", url, (double)size / 1000000);
-		free_string(&url);
+		free_and_clear_pointer(&url);
 	}
 
 	debug("Number of packs to download: %d\n", count);
@@ -216,10 +216,10 @@ static int get_cached_packs(struct sub *sub)
 					ret = 0;
 				}
 			}
-			free_string(&targetfile_cache);
+			free_and_clear_pointer(&targetfile_cache);
 		}
 	}
-	free_string(&targetfile);
+	free_and_clear_pointer(&targetfile);
 
 	return ret;
 }
@@ -296,7 +296,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	/* show the packs size only if > 1 MB */
 	string_or_die(&packs_size, "(%.2lf MB) ", (double)download_progress.total_download_size / 1000000);
 	info("Downloading packs %sfor:\n", ((double)download_progress.total_download_size / 1000000) > 1 ? packs_size : "");
-	free_string(&packs_size);
+	free_and_clear_pointer(&packs_size);
 	for (iter = list_head(need_download); iter; iter = iter->next) {
 		sub = iter->data;
 

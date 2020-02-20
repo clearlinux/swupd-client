@@ -115,13 +115,13 @@ static int check_disk_space_availability(struct list *to_install_bundles)
 	bundle_size = get_manifest_list_contentsize(to_install_bundles);
 	filepath = sys_path_join(globals.path_prefix, "/usr/");
 	if (!sys_file_exists(filepath)) {
-		free_string(&filepath);
+		free_and_clear_pointer(&filepath);
 		return 0;
 	}
 
 	/* Calculate free space on filepath */
 	fs_free = get_available_space(filepath);
-	free_string(&filepath);
+	free_and_clear_pointer(&filepath);
 	timelist_timer_stop(globals.global_times); // closing: Check disk space availability
 
 	/* Add 10% to bundle_size as a 'fudge factor' */
@@ -269,7 +269,7 @@ static struct list *generate_bundles_to_install(struct list *bundles)
 		if (strcmp(bundle, alias_list_str) != 0) {
 			info("Alias %s will install bundle(s): %s\n", bundle, alias_list_str);
 		}
-		free_string(&alias_list_str);
+		free_and_clear_pointer(&alias_list_str);
 		bundles_list = list_concat(alias_bundles, bundles_list);
 	}
 
@@ -485,7 +485,7 @@ clean_and_exit:
 	list_free_list_and_data(installed_bundles, manifest_free_data);
 	list_free_list_and_data(bundles, free);
 	manifest_free(mom);
-	free_string(&bundles_list_str);
+	free_and_clear_pointer(&bundles_list_str);
 
 	return ret;
 }

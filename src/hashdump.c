@@ -136,7 +136,7 @@ enum swupd_code hashdump_main(int argc, char **argv)
 		}
 	}
 
-	free_string(&fullname);
-	free_string(&file.filename);
+	free_and_clear_pointer(&fullname);
+	free_and_clear_pointer(&file.filename);
 	return SWUPD_OK;
 }

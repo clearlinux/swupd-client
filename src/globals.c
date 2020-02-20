@@ -83,7 +83,7 @@ static void set_json_format(bool on)
 void set_content_url(char *url)
 {
 	if (globals.content_url) {
-		free_string(&globals.content_url);
+		free_and_clear_pointer(&globals.content_url);
 	}
 
 	globals.content_url = strdup_or_die(url);
@@ -125,7 +125,7 @@ static bool set_default_content_url(void)
 
 found:
 	set_content_url(new_content_url);
-	free_string(&new_content_url);
+	free_and_clear_pointer(&new_content_url);
 	return true;
 }
 
@@ -133,7 +133,7 @@ found:
 void set_version_url(char *url)
 {
 	if (globals.version_url) {
-		free_string(&globals.version_url);
+		free_and_clear_pointer(&globals.version_url);
 	}
 
 	globals.version_url = strdup_or_die(url);
@@ -175,7 +175,7 @@ static bool set_default_version_url(void)
 
 found:
 	set_version_url(new_version_url);
-	free_string(&new_version_url);
+	free_and_clear_pointer(&new_version_url);
 	return true;
 }
 
@@ -217,7 +217,7 @@ bool set_state_dir(char *path)
 		return false;
 	}
 
-	free_string(&globals.state_dir);
+	free_and_clear_pointer(&globals.state_dir);
 	string_or_die(&globals.state_dir, "%s", path);
 
 	return true;
@@ -246,7 +246,7 @@ bool set_state_dir_cache(char *path)
 		return false;
 	}
 
-	free_string(&globals.state_dir_cache);
+	free_and_clear_pointer(&globals.state_dir_cache);
 	string_or_die(&globals.state_dir_cache, "%s", path);
 
 	return true;
@@ -273,7 +273,7 @@ static bool set_format_string(char *format)
 	}
 
 	if (globals.format_string) {
-		free_string(&globals.format_string);
+		free_and_clear_pointer(&globals.format_string);
 	}
 
 	globals.format_string = strdup_or_die(format);
@@ -307,7 +307,7 @@ static bool set_default_format_string()
 
 found:
 	result = set_format_string(new_format_string);
-	free_string(&new_format_string);
+	free_and_clear_pointer(&new_format_string);
 	return result;
 }
 
@@ -376,7 +376,7 @@ void set_default_path_prefix()
 void set_cert_path(char *path)
 {
 	if (globals.cert_path) {
-		free_string(&globals.cert_path);
+		free_and_clear_pointer(&globals.cert_path);
 	}
 
 	globals.cert_path = strdup_or_die(path);
@@ -396,8 +396,8 @@ bool set_default_urls()
 {
 	/* we need to also unset the mirror urls from the cache and set it to
 	 * the central version */
-	free_string(&globals.version_url);
-	free_string(&globals.content_url);
+	free_and_clear_pointer(&globals.version_url);
+	free_and_clear_pointer(&globals.content_url);
 	if (!set_default_version_url()) {
 		return false;
 	}
@@ -437,7 +437,7 @@ bool set_assume_option(char *option)
 		ret = false;
 	}
 
-	free_string(&option_lower);
+	free_and_clear_pointer(&option_lower);
 
 	return ret;
 }
@@ -497,22 +497,22 @@ bool globals_init(void)
 
 void globals_deinit(void)
 {
-	/* freeing all globals and set ALL them to NULL (via free_string)
+	/* freeing all globals and set ALL them to NULL (via free_and_clear_pointer)
 	 * to avoid memory corruption on multiple calls
 	 * to swupd_init() */
-	free_string(&globals.content_url);
-	free_string(&globals.version_url);
-	free_string(&globals.path_prefix);
-	free_string(&globals.format_string);
-	free_string(&globals.mounted_dirs);
-	free_string(&globals.state_dir);
-	free_string(&globals.state_dir_cache);
+	free_and_clear_pointer(&globals.content_url);
+	free_and_clear_pointer(&globals.version_url);
+	free_and_clear_pointer(&globals.path_prefix);
+	free_and_clear_pointer(&globals.format_string);
+	free_and_clear_pointer(&globals.mounted_dirs);
+	free_and_clear_pointer(&globals.state_dir);
+	free_and_clear_pointer(&globals.state_dir_cache);
 	timelist_free(globals.global_times);
 	globals.global_times = NULL;
-	free_string(&globals_bkp.path_prefix);
-	free_string(&globals_bkp.state_dir);
-	free_string(&globals_bkp.version_url);
-	free_string(&globals_bkp.content_url);
+	free_and_clear_pointer(&globals_bkp.path_prefix);
+	free_and_clear_pointer(&globals_bkp.state_dir);
+	free_and_clear_pointer(&globals_bkp.version_url);
+	free_and_clear_pointer(&globals_bkp.content_url);
 }
 
 void save_cmd(char **argv)
@@ -765,11 +765,11 @@ static bool load_flags_in_config(char *command, struct option *opts_array, const
 		if (config_file_parse(config_file, config_loader_set_opt, &loader_data)) {
 			config_found = true;
 		}
-		free_string(&config_file);
+		free_and_clear_pointer(&config_file);
 	}
 
-	free_string(&full_command);
-	free_string(&str);
+	free_and_clear_pointer(&full_command);
+	free_and_clear_pointer(&str);
 #endif
 	return config_found;
 }

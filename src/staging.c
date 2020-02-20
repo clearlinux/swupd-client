@@ -150,7 +150,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 			}
 		}
 	}
-	free_string(&statfile);
+	free_and_clear_pointer(&statfile);
 
 	/* copy the file/directory to its final destination, if it is a file
 	 * keep its name with a .update prefix for now like this .update.(file_name)
@@ -187,7 +187,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		if (WIFEXITED(ret)) {
 			ret = WEXITSTATUS(ret);
 		}
-		free_string(&tarcommand);
+		free_and_clear_pointer(&tarcommand);
 		if (rename(rename_target, original)) {
 			ret = SWUPD_COULDNT_RENAME_DIR;
 			goto out;
@@ -232,7 +232,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 			if (WIFEXITED(ret)) {
 				ret = WEXITSTATUS(ret);
 			}
-			free_string(&tarcommand);
+			free_and_clear_pointer(&tarcommand);
 			ret = rename(rename_target, original);
 			if (ret) {
 				ret = SWUPD_COULDNT_RENAME_FILE;
@@ -240,24 +240,24 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 			}
 		}
 
-		free_string(&file->staging);
+		free_and_clear_pointer(&file->staging);
 		string_or_die(&file->staging, "%s%s/.update.%s", globals.path_prefix, rel_dir, base);
 		err = lstat(file->staging, &buf);
 		if (err != 0) {
-			free_string(&file->staging);
+			free_and_clear_pointer(&file->staging);
 			ret = SWUPD_COULDNT_CREATE_FILE;
 			goto out;
 		}
 	}
 
 out:
-	free_string(&target);
-	free_string(&targetpath);
-	free_string(&original);
-	free_string(&rename_target);
-	free_string(&rename_tmpdir);
-	free_string(&tmp);
-	free_string(&tmp2);
+	free_and_clear_pointer(&target);
+	free_and_clear_pointer(&targetpath);
+	free_and_clear_pointer(&original);
+	free_and_clear_pointer(&rename_target);
+	free_and_clear_pointer(&rename_tmpdir);
+	free_and_clear_pointer(&tmp);
+	free_and_clear_pointer(&tmp2);
 
 	return ret;
 }
@@ -271,7 +271,7 @@ int rename_staged_file_to_final(struct file *file)
 	string_or_die(&target, "%s%s", globals.path_prefix, file->filename);
 
 	if (!file->staging && !file->is_deleted && !file->is_dir) {
-		free_string(&target);
+		free_and_clear_pointer(&target);
 		return -1;
 	}
 
@@ -304,11 +304,11 @@ int rename_staged_file_to_final(struct file *file)
 			string_or_die(&lostnfound, "%slost+found", globals.path_prefix);
 			ret = mkdir(lostnfound, S_IRWXU);
 			if ((ret != 0) && (errno != EEXIST)) {
-				free_string(&lostnfound);
-				free_string(&target);
+				free_and_clear_pointer(&lostnfound);
+				free_and_clear_pointer(&target);
 				return ret;
 			}
-			free_string(&lostnfound);
+			free_and_clear_pointer(&lostnfound);
 
 			base = basename(file->filename);
 			string_or_die(&lostnfound, "%slost+found/%s", globals.path_prefix, base);
@@ -318,7 +318,7 @@ int rename_staged_file_to_final(struct file *file)
 				error("failed to move %s to lost+found: %s\n",
 				      base, strerror(errno));
 			}
-			free_string(&lostnfound);
+			free_and_clear_pointer(&lostnfound);
 		} else {
 			ret = rename(file->staging, target);
 			if (ret < 0) {
@@ -329,7 +329,7 @@ int rename_staged_file_to_final(struct file *file)
 		}
 	}
 
-	free_string(&target);
+	free_and_clear_pointer(&target);
 	return ret;
 }
 

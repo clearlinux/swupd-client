@@ -79,6 +79,6 @@ bool config_loader_set_opt(char *section, char *opt, char *value, void *data)
 	}
 
 exit:
-	free_string(&flag);
+	free_and_clear_pointer(&flag);
 	return ret;
 }

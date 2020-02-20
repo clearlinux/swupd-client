@@ -454,8 +454,8 @@ static int sys_rm_dir_recursive(const char *path)
 			continue;
 		}
 
-		free_string(&filename);
-		string_or_die(&filename, "%s/%s", path, entry->d_name);
+		free(filename);
+		filename = str_or_die("%s/%s", path, entry->d_name);
 
 		ret = sys_rm_recursive(filename);
 		if (ret) {
@@ -468,7 +468,7 @@ static int sys_rm_dir_recursive(const char *path)
 
 exit:
 	closedir(dir);
-	free_string(&filename);
+	free(filename);
 	return ret;
 }
 

@@ -97,7 +97,7 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 		print(" -> Extra file: %s%s\n", temp, is_dir ? "/" : "");
 		ret = false;
 	}
-	free_string(&temp);
+	free_and_clear_pointer(&temp);
 
 	return ret;
 }
@@ -180,7 +180,7 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 	}
 tidy:
 	for (int i = 0; i < nF; i++) {
-		free_string(&F[i].filename);
+		free_and_clear_pointer(&F[i].filename);
 	}
 	free(F);
 	F = NULL;

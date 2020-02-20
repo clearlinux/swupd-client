@@ -128,7 +128,7 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 	char *file = NULL;
 
 	while (true) {
-		free_string(&file);
+		free_and_clear_pointer(&file);
 		ret = SWUPD_OK;
 
 		/* Reset errno to distinguish between a previous
@@ -274,7 +274,7 @@ static char *read_mom_contents(int version)
 	char *mom_path = NULL;
 	string_or_die(&mom_path, "%s/%d/Manifest.MoM", globals.state_dir, version);
 	FILE *f = fopen(mom_path, "r");
-	free_string(&mom_path);
+	free_and_clear_pointer(&mom_path);
 	if (!f) {
 		/* This is a best effort. */
 		return NULL;
@@ -379,7 +379,7 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 			stats.bytes_removed += size;
 		}
 
-		free_string(&version_dir);
+		free_and_clear_pointer(&version_dir);
 		if (ret != 0) {
 			break;
 		}
@@ -430,7 +430,7 @@ enum swupd_code clean_main(int argc, char **argv)
 		print("%d files removed\n", stats.files_removed);
 		print("%s freed\n", bytes_removed_pretty);
 	}
-	free_string(&bytes_removed_pretty);
+	free_and_clear_pointer(&bytes_removed_pretty);
 
 	swupd_deinit();
 	progress_finish_steps(ret);
@@ -456,7 +456,7 @@ enum swupd_code clean_statedir(bool dry_run, bool all)
 
 	staged_dir = sys_path_join(globals.state_dir, "staged");
 	ret = remove_if(staged_dir, dry_run, is_fullfile);
-	free_string(&staged_dir);
+	free_and_clear_pointer(&staged_dir);
 	if (ret != SWUPD_OK) {
 		return ret;
 	}

@@ -301,6 +301,6 @@ void manifest_free(struct manifest *manifest)
 	if (manifest->optional) {
 		list_free_list_and_data(manifest->optional, free);
 	}
-	free_string(&manifest->component);
+	free_and_clear_pointer(&manifest->component);
 	free(manifest);
 }

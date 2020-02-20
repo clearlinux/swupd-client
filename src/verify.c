@@ -126,7 +126,7 @@ void verify_set_option_version(int ver)
 
 void verify_set_option_statedir_cache(char *path)
 {
-	free_string(&cmdline_option_statedir_cache);
+	free_and_clear_pointer(&cmdline_option_statedir_cache);
 	cmdline_option_statedir_cache = path;
 }
 
@@ -147,7 +147,7 @@ void verify_set_picky_whitelist(regex_t *whitelist)
 
 void verify_set_picky_tree(char *picky_tree)
 {
-	free_string(&cmdline_option_picky_tree);
+	free_and_clear_pointer(&cmdline_option_picky_tree);
 	cmdline_option_picky_tree = picky_tree;
 }
 
@@ -158,7 +158,7 @@ void verify_set_extra_files_only(bool opt)
 
 void verify_set_option_file(char *path)
 {
-	free_string(&cmdline_option_file);
+	free_and_clear_pointer(&cmdline_option_file);
 	cmdline_option_file = path;
 }
 
@@ -259,7 +259,7 @@ static int check_files_hash(struct list *files)
 
 		fullname = sys_path_join(globals.path_prefix, f->filename);
 		valid = cmdline_option_quick ? verify_file_lazy(fullname) : verify_file(f, fullname);
-		free_string(&fullname);
+		free_and_clear_pointer(&fullname);
 		if (valid) {
 			f->do_not_update = 1;
 		} else {
@@ -340,7 +340,7 @@ static void check_warn_freespace(const struct file *file)
 
 out:
 	info("\tContinuing operation...\n");
-	free_string(&original);
+	free_and_clear_pointer(&original);
 }
 
 /* for each missing but expected file, (re)add the file */
@@ -419,7 +419,7 @@ static void add_missing_files(struct manifest *official_manifest, struct list *f
 			}
 		}
 	out:
-		free_string(&fullname);
+		free_and_clear_pointer(&fullname);
 	progress:
 		progress_report(complete, list_length);
 	}
@@ -468,7 +468,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 		print(" -> not fixed\n");
 	}
 end:
-	free_string(&fullname);
+	free_and_clear_pointer(&fullname);
 }
 
 static void deal_with_hash_mismatches(struct manifest *official_manifest, struct list *files_to_verify, bool repair)
@@ -586,7 +586,7 @@ static void remove_orphaned_files(struct list *files_to_verify, bool repair)
 		}
 		close(fd);
 	out:
-		free_string(&fullname);
+		free_and_clear_pointer(&fullname);
 	progress:
 		progress_report(complete, list_length);
 	}
@@ -645,7 +645,7 @@ static bool parse_opt(int opt, char *optarg)
 			error("--picky-tree must be an absolute path, for example /usr\n\n");
 			return false;
 		}
-		free_string(&cmdline_option_picky_tree);
+		free_and_clear_pointer(&cmdline_option_picky_tree);
 		cmdline_option_picky_tree = strdup_or_die(optarg);
 		return true;
 	case 'w':
@@ -802,7 +802,7 @@ static enum swupd_code deal_with_extra_files(struct manifest *manifest, bool fix
 	char *start = sys_path_join(globals.path_prefix, cmdline_option_picky_tree);
 	info("%s extra files under %s\n", fix ? "Removing" : "Checking for", start);
 	ret = walk_tree(manifest, start, fix, picky_whitelist, &counts);
-	free_string(&start);
+	free_and_clear_pointer(&start);
 
 	return ret;
 }
@@ -1126,7 +1126,7 @@ enum swupd_code execute_verify(void)
 		if (files_to_verify) {
 			char *file_path = sys_path_join(globals.path_prefix, cmdline_option_file);
 			info("Limiting diagnose to the following %s:\n", is_dir(file_path) ? "directory (recursively)" : "file");
-			free_string(&file_path);
+			free_and_clear_pointer(&file_path);
 			info(" - %s\n", cmdline_option_file);
 		} else {
 			/* we are done, nothing to be done */
@@ -1243,7 +1243,7 @@ brick_the_system_and_clean_curl:
 				track_bundle_in_statedir(bundle, new_os_statedir);
 			}
 		}
-		free_string(&new_os_statedir);
+		free_and_clear_pointer(&new_os_statedir);
 	}
 
 	/* report a summary of what we managed to do and not do */
@@ -1417,7 +1417,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	ret = swupd_init(SWUPD_ALL);
 	if (ret != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
-		free_string(&cmdline_option_picky_tree);
+		free_and_clear_pointer(&cmdline_option_picky_tree);
 		return ret;
 	}
 
@@ -1445,7 +1445,7 @@ enum swupd_code verify_main(int argc, char **argv)
 	/* diagnose */
 	ret = execute_verify();
 
-	free_string(&cmdline_option_picky_tree);
+	free_and_clear_pointer(&cmdline_option_picky_tree);
 	if (picky_whitelist) {
 		regfree(picky_whitelist);
 		picky_whitelist = NULL;
@@ -1502,9 +1502,9 @@ enum swupd_code diagnose_main(int argc, char **argv)
 	ret = execute_verify();
 
 	if (cmdline_option_picky_tree != cmdline_option_file) {
-		free_string(&cmdline_option_file);
+		free_and_clear_pointer(&cmdline_option_file);
 	}
-	free_string(&cmdline_option_picky_tree);
+	free_and_clear_pointer(&cmdline_option_picky_tree);
 	if (picky_whitelist) {
 		regfree(picky_whitelist);
 		picky_whitelist = NULL;

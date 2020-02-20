@@ -41,8 +41,8 @@
 #include "config.h"
 #include "lib/log.h"
 #include "lib/macros.h"
-#include "lib/strings.h"
 #include "signature.h"
+#include "swupd.h"
 
 #ifdef SIGNATURES
 
@@ -202,7 +202,7 @@ error:
 		}
 	}
 
-	free_string(&errorstr);
+	free_and_clear_pointer(&errorstr);
 
 	if (sig_BIO) {
 		BIO_free(sig_BIO);
@@ -283,7 +283,7 @@ error:
 		warn("Signature check failed\n");
 	}
 
-	free_string(&errorstr);
+	free_and_clear_pointer(&errorstr);
 
 	if (sig) {
 		munmap(sig, sig_len);

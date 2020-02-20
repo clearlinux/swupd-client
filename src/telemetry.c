@@ -45,7 +45,7 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 
 	fd = mkostemp(filename, O_CREAT | O_RDONLY);
 	if (fd < 0) {
-		free_string(&filename);
+		free_and_clear_pointer(&filename);
 		goto error;
 	}
 
@@ -60,15 +60,15 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 
 	filename_n = sys_basename(filename);
 	if (!filename_n || !filename_n[0]) {
-		free_string(&filename);
+		free_and_clear_pointer(&filename);
 		goto error;
 	}
 
 	string_or_die(&newname, "%s/telemetry/%s", globals.state_dir, filename_n);
 
 	ret = rename(filename, newname);
-	free_string(&filename);
-	free_string(&newname);
+	free_and_clear_pointer(&filename);
+	free_and_clear_pointer(&newname);
 	if (ret < 0) {
 		goto error;
 	}

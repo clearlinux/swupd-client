@@ -218,7 +218,7 @@ static void print_bundle(struct manifest *mom, struct manifest *m)
 
 	name = get_printable_bundle_name(m->component, is_experimental, DONT_SHOW_STATUS, DONT_SHOW_STATUS);
 	print("\nBundle %s %s", name, installed ? "[installed] " : "");
-	free_string(&name);
+	free_and_clear_pointer(&name);
 
 	print("(%li MB%s)", get_bundle_size(m->component) / 1000 / 1000,
 	      installed ? " on system" : " to install");

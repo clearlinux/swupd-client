@@ -60,7 +60,7 @@ static void update_boot(void)
 	} else {
 		string_or_die(&scriptname, "%s/usr/bin/clr-boot-manager", globals.path_prefix);
 		run_script_if_exists(scriptname, "update", "--path", globals.path_prefix, NULL);
-		free_string(&scriptname);
+		free_and_clear_pointer(&scriptname);
 	}
 }
 
@@ -198,5 +198,5 @@ void scripts_run_pre_update(struct manifest *manifest)
 	}
 
 end:
-	free_string(&script);
+	free_and_clear_pointer(&script);
 }

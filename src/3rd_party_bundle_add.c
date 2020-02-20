@@ -116,8 +116,8 @@ static enum swupd_code validate_binary(struct file *file)
 		error("There is already a binary called %s in %s\n", sys_basename(filename), bin_directory);
 		ret_code = SWUPD_COULDNT_CREATE_FILE;
 	}
-	free_string(&script);
-	free_string(&bin_directory);
+	free_and_clear_pointer(&script);
+	free_and_clear_pointer(&bin_directory);
 
 	return ret_code;
 }
@@ -142,7 +142,7 @@ static enum swupd_code validate_permissions(struct file *file)
 		ret_code = SWUPD_INVALID_FILE;
 	}
 
-	free_string(&staged_file);
+	free_and_clear_pointer(&staged_file);
 
 	return ret_code;
 }

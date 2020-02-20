@@ -33,11 +33,6 @@ char *str_or_die(const char *fmt, ...);
 char *strdup_or_die(const char *const str);
 
 /**
- * Free string and set it's value to NULL.
- */
-void free_string(char **s);
-
-/**
  * Join strings from string list separated by the separator.
  */
 char *string_join(const char *separator, struct list *string);

@@ -48,7 +48,7 @@ void bundle_list_set_option_has_dep(char *bundle)
 	if (!bundle) {
 		return;
 	}
-	free_string(&cmdline_option_has_dep);
+	free_and_clear_pointer(&cmdline_option_has_dep);
 	cmdline_option_has_dep = bundle;
 	cmdline_local = false;
 }
@@ -58,7 +58,7 @@ void bundle_list_set_option_deps(char *bundle)
 	if (!bundle) {
 		return;
 	}
-	free_string(&cmdline_option_deps);
+	free_and_clear_pointer(&cmdline_option_deps);
 	cmdline_option_deps = bundle;
 	cmdline_local = false;
 }
@@ -70,12 +70,12 @@ void bundle_list_set_option_status(bool opt)
 
 static void free_has_dep(void)
 {
-	free_string(&cmdline_option_has_dep);
+	free_and_clear_pointer(&cmdline_option_has_dep);
 }
 
 static void free_deps(void)
 {
-	free_string(&cmdline_option_deps);
+	free_and_clear_pointer(&cmdline_option_deps);
 }
 
 static void print_help(void)
@@ -195,7 +195,7 @@ static enum swupd_code list_local_bundles(int version)
 	bundles = get_dir_files_sorted(path);
 	if (!bundles && errno) {
 		error("couldn't open bundles directory");
-		free_string(&path);
+		free_and_clear_pointer(&path);
 		return SWUPD_COULDNT_LIST_DIR;
 	}
 
@@ -223,7 +223,7 @@ static enum swupd_code list_local_bundles(int version)
 
 	list_free_list_and_data(bundles, free);
 
-	free_string(&path);
+	free_and_clear_pointer(&path);
 	manifest_free(MoM);
 
 	return SWUPD_OK;
@@ -340,7 +340,7 @@ static enum swupd_code list_installable_bundles(int version)
 			name = get_printable_bundle_name(file->filename, file->is_experimental, cmdline_option_status && is_installed_bundle(file->filename), cmdline_option_status && is_tracked_bundle(file->filename));
 			info(" - ");
 			print("%s\n", name);
-			free_string(&name);
+			free_and_clear_pointer(&name);
 		} else {
 			print("%s\n", file->filename);
 		}
@@ -409,7 +409,7 @@ static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server,
 	char *msg;
 	string_or_die(&msg, "\n%s bundles that have %s as a dependency:\n", server ? "All" : "Installed", bundle_name);
 	number_of_reqd = required_by(&reqd_by, bundle_name, current_manifest, 0, NULL, msg, INCLUDE_OPTIONAL_DEPS);
-	free_string(&msg);
+	free_and_clear_pointer(&msg);
 	if (reqd_by == NULL) {
 		info("\nNo bundles have %s as a dependency\n", bundle_name);
 		ret = SWUPD_OK;

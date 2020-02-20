@@ -45,8 +45,8 @@ static int download_mix_file(struct file *file)
 		warn("Failed to copy local mix file: %s\n", file->staging);
 	}
 
-	free_string(&url);
-	free_string(&filename);
+	free_and_clear_pointer(&url);
+	free_and_clear_pointer(&filename);
 
 	return ret;
 }
@@ -59,8 +59,8 @@ static int download_file(struct swupd_curl_parallel_handle *download_handle, str
 	string_or_die(&filename, "%s/download/.%s.tar", globals.state_dir, file->hash);
 	string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
 	ret = swupd_curl_parallel_download_enqueue(download_handle, url, filename, file->hash, file);
-	free_string(&url);
-	free_string(&filename);
+	free_and_clear_pointer(&url);
+	free_and_clear_pointer(&filename);
 
 	return ret;
 }
@@ -101,13 +101,13 @@ static double fullfile_query_total_download_size(struct list *files)
 			total_size += size;
 		} else {
 			debug("The header for file %s could not be downloaded\n", file->filename);
-			free_string(&url);
+			free_and_clear_pointer(&url);
 			return -SWUPD_COULDNT_DOWNLOAD_FILE;
 		}
 
 		count++;
 		debug("File: %s (%.2lf MB)\n", url, (double)size / 1000000);
-		free_string(&url);
+		free_and_clear_pointer(&url);
 	}
 
 	debug("Number of files to download: %d\n", count);
@@ -135,10 +135,10 @@ static int get_cached_fullfile(struct file *file)
 					ret = 0;
 				}
 			}
-			free_string(&targetfile_cache);
+			free_and_clear_pointer(&targetfile_cache);
 		}
 	}
-	free_string(&targetfile);
+	free_and_clear_pointer(&targetfile);
 
 	return ret;
 }

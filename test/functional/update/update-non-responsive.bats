@@ -10,10 +10,10 @@ test_setup() {
 	# Skip this test if not running in Travis CI, because test takes too long for
 	# local development.
 	# To run this locally along with all other tests do:
-	#    TRAVIS=true make check
+	#    RUNNING_IN_CI=true make check
 	# or to run only this test locally do:
-	#    TRAVIS=true bats update-non-responsive.bats
-	if [ -z "$TRAVIS" ]; then
+	#    RUNNING_IN_CI=true bats update-non-responsive.bats
+	if [ -z "$RUNNING_IN_CI" ]; then
 		skip "Skipping slow test for local development, test only runs in CI"
 	fi
 
@@ -35,7 +35,7 @@ test_setup() {
 test_teardown() {
 
 	# teardown only if in travis CI
-	if [ -n "$TRAVIS" ]; then
+	if [ -n "$RUNNING_IN_CI" ]; then
 		destroy_test_environment "$TEST_NAME"
 	fi
 

@@ -415,6 +415,11 @@ extern enum swupd_code clean_statedir(bool all, bool dry_run);
 /* Parameter parsing in global.c */
 extern struct global_const global;
 
+/**
+ * Free string and set it's value to NULL.
+ */
+extern void free_and_clear_pointer(char **s);
+
 enum swupd_code check_update();
 
 /* some disk sizes constants for the various features:

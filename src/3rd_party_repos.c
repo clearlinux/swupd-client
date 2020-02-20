@@ -100,7 +100,7 @@ struct list *third_party_get_repos(void)
 	}
 
 	repos = list_head(repos);
-	free_string(&repo_config_file_path);
+	free_and_clear_pointer(&repo_config_file_path);
 
 	return repos;
 }
@@ -217,7 +217,7 @@ exit:
 	if (fp) {
 		fclose(fp);
 	}
-	free_string(&repo_config_file_path);
+	free_and_clear_pointer(&repo_config_file_path);
 	return ret;
 }
 
@@ -296,26 +296,26 @@ enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck)
 		if (!signature_init(globals.cert_path, NULL)) {
 			signature_deinit();
 			error("Unable to validate the certificate %s\n\n", repo_cert_path);
-			free_string(&repo_cert_path);
+			free_and_clear_pointer(&repo_cert_path);
 			return SWUPD_SIGNATURE_VERIFICATION_FAILED;
 		}
 	}
-	free_string(&repo_cert_path);
+	free_and_clear_pointer(&repo_cert_path);
 
 	repo_path_prefix = get_repo_content_path(repo->name);
 	set_path_prefix(repo_path_prefix);
-	free_string(&repo_path_prefix);
+	free_and_clear_pointer(&repo_path_prefix);
 
 	/* make sure there are state directories for the 3rd-party
 	 * repo if not there already */
 	repo_state_dir = get_repo_state_dir(repo->name);
 	if (create_state_dirs(repo_state_dir)) {
-		free_string(&repo_state_dir);
+		free_and_clear_pointer(&repo_state_dir);
 		error("Unable to create the state directories for repository %s\n\n", repo->name);
 		return SWUPD_COULDNT_CREATE_DIR;
 	}
 	set_state_dir(repo_state_dir);
-	free_string(&repo_state_dir);
+	free_and_clear_pointer(&repo_state_dir);
 
 	return SWUPD_OK;
 }
@@ -523,7 +523,7 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, process_bu
 	/* free data */
 clean_and_exit:
 	list_free_list_and_data(repos, repo_free_data);
-	free_string(&steps_title);
+	free_and_clear_pointer(&steps_title);
 
 	return ret_code;
 }
@@ -534,7 +534,7 @@ void third_party_repo_header(const char *repo_name)
 
 	string_or_die(&header, " 3rd-Party Repo: %s", repo_name);
 	print_header(header);
-	free_string(&header);
+	free_and_clear_pointer(&header);
 }
 
 bool third_party_file_is_binary(struct file *file)
@@ -594,8 +594,8 @@ enum swupd_code third_party_remove_binary(struct file *file)
 		}
 	}
 
-	free_string(&script);
-	free_string(&binary);
+	free_and_clear_pointer(&script);
+	free_and_clear_pointer(&binary);
 
 	return ret_code;
 }
@@ -671,11 +671,11 @@ close_and_exit:
 	if (fp) {
 		fclose(fp);
 	}
-	free_string(&binary);
-	free_string(&script);
-	free_string(&bin_directory);
-	free_string(&third_party_bin_path);
-	free_string(&third_party_ld_path);
+	free_and_clear_pointer(&binary);
+	free_and_clear_pointer(&script);
+	free_and_clear_pointer(&bin_directory);
+	free_and_clear_pointer(&third_party_bin_path);
+	free_and_clear_pointer(&third_party_ld_path);
 
 	return ret_code;
 }

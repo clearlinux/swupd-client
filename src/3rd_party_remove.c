@@ -178,7 +178,7 @@ exit:
 		print("\nFailed to remove repository\n");
 	}
 	manifest_free(mom);
-	free_string(&repo_dir);
+	free_and_clear_pointer(&repo_dir);
 	list_free_list_and_data(repos, repo_free_data);
 	list_free_list_and_data(installed_bundles, free);
 	swupd_deinit();

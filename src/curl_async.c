@@ -150,8 +150,8 @@ static void free_curl_file(struct swupd_curl_parallel_handle *h, struct multi_cu
 		h->free_cb(file->data);
 	}
 
-	free_string(&file->url);
-	free_string(&file->file.path);
+	free_and_clear_pointer(&file->url);
+	free_and_clear_pointer(&file->file.path);
 	if (curl != NULL) {
 		/* Must remove handle out of multi queue first!*/
 		curl_multi_remove_handle(h->mcurl, curl);

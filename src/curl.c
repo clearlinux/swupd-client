@@ -99,7 +99,7 @@ static CURLcode swupd_curl_set_optional_client_cert(CURL *curl)
 	}
 
 exit:
-	free_string(&client_cert_path);
+	free_and_clear_pointer(&client_cert_path);
 	return curl_ret;
 }
 
@@ -244,7 +244,7 @@ static bool perform_curl_init(const char *url)
 				break;
 			}
 		}
-		free_string(&str);
+		free_and_clear_pointer(&str);
 	}
 
 exit:
@@ -283,7 +283,7 @@ void swupd_curl_cleanup(void)
 
 	curl_easy_cleanup(curl);
 	curl = NULL;
-	free_string(&capath);
+	free_and_clear_pointer(&capath);
 	curl_global_cleanup();
 }
 

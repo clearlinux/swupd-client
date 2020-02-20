@@ -66,14 +66,6 @@ char *str_or_die(const char *fmt, ...)
 	return str;
 }
 
-void free_string(char **s)
-{
-	if (s) {
-		free(*s);
-		*s = NULL;
-	}
-}
-
 char *string_join(const char *separator, struct list *strings)
 {
 	char *str, *ret;
@@ -189,7 +181,7 @@ bool strtobool(const char *str)
 	}
 
 	/* return false for everything else */
-	free_string(&str_lower);
+	free(str_lower);
 	return ret;
 }
 

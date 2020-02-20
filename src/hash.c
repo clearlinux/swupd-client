@@ -95,7 +95,7 @@ static void hmac_sha256_for_data(char *hash,
 	}
 
 	hash_assign(digest_str, hash);
-	free_string(&digest_str);
+	free_and_clear_pointer(&digest_str);
 }
 
 static void hmac_sha256_for_string(char *hash,
@@ -133,7 +133,7 @@ static void hmac_compute_key(const char *filename,
 	}
 
 	if (xattrs_blob_len != 0) {
-		free_string(&xattrs_blob);
+		free_and_clear_pointer(&xattrs_blob);
 	}
 }
 
@@ -295,7 +295,7 @@ int verify_bundle_hash(struct manifest *mom, struct file *bundle)
 	}
 
 out:
-	free_string(&cached);
-	free_string(&local);
+	free_and_clear_pointer(&cached);
+	free_and_clear_pointer(&local);
 	return ret;
 }

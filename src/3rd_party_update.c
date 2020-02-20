@@ -161,9 +161,9 @@ static enum swupd_code update_binary_script(struct file *file)
 	}
 
 close_and_exit:
-	free_string(&binary);
-	free_string(&script);
-	free_string(&bin_directory);
+	free_and_clear_pointer(&binary);
+	free_and_clear_pointer(&script);
+	free_and_clear_pointer(&bin_directory);
 
 	return ret_code;
 }
@@ -209,8 +209,8 @@ static enum swupd_code validate_permissions(struct file *file)
 		ret_code = SWUPD_INVALID_FILE;
 	}
 
-	free_string(&staged_file);
-	free_string(&original_file);
+	free_and_clear_pointer(&staged_file);
+	free_and_clear_pointer(&original_file);
 
 	return ret_code;
 }

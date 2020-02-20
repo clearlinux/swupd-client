@@ -118,7 +118,7 @@ static int try_manifest_delta_download(int from, int to, char *component)
 	if (!sys_file_exists(manifest_delta)) {
 		string_or_die(&url, "%s/%i/Manifest-%s-delta-from-%i", globals.content_url, to, component, from);
 		ret = swupd_curl_get_file(url, manifest_delta);
-		free_string(&url);
+		free_and_clear_pointer(&url);
 		if (ret != 0) {
 			unlink(manifest_delta);
 			goto out;
@@ -141,10 +141,10 @@ static int try_manifest_delta_download(int from, int to, char *component)
 	}
 
 out:
-	free_string(&to_manifest);
-	free_string(&to_dir);
-	free_string(&from_manifest);
-	free_string(&manifest_delta);
+	free_and_clear_pointer(&to_manifest);
+	free_and_clear_pointer(&to_dir);
+	free_and_clear_pointer(&from_manifest);
+	free_and_clear_pointer(&manifest_delta);
 	return ret;
 }
 
@@ -190,7 +190,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 		ret = 0;
 		goto out;
 	}
-	free_string(&filename);
+	free_and_clear_pointer(&filename);
 
 	/* If it's mix content just hardlink instead of curl download */
 	if (is_mix) {
@@ -201,8 +201,8 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 		if (ret == 0) {
 			goto untar;
 		}
-		free_string(&filename);
-		free_string(&url);
+		free_and_clear_pointer(&filename);
+		free_and_clear_pointer(&url);
 	}
 
 	/* Either we're not on mix or it failed, try curl-ing the file if link didn't work */
@@ -226,10 +226,10 @@ untar:
 	}
 
 out:
-	free_string(&dir);
-	free_string(&filename);
-	free_string(&filename_cache);
-	free_string(&url);
+	free_and_clear_pointer(&dir);
+	free_and_clear_pointer(&filename);
+	free_and_clear_pointer(&filename_cache);
+	free_and_clear_pointer(&url);
 	return ret;
 }
 
@@ -268,17 +268,17 @@ static void remove_manifest_files(char *filename, int version, char *hash)
 
 		string_or_die(&file, "%s/%i/Manifest.%s", state_dirs[i], version, filename);
 		unlink(file);
-		free_string(&file);
+		free_and_clear_pointer(&file);
 		string_or_die(&file, "%s/%i/Manifest.%s.tar", state_dirs[i], version, filename);
 		unlink(file);
-		free_string(&file);
+		free_and_clear_pointer(&file);
 		string_or_die(&file, "%s/%i/Manifest.%s.sig", state_dirs[i], version, filename);
 		unlink(file);
-		free_string(&file);
+		free_and_clear_pointer(&file);
 		if (hash != NULL) {
 			string_or_die(&file, "%s/%i/Manifest.%s.%s", state_dirs[i], version, filename, hash);
 			unlink(file);
-			free_string(&file);
+			free_and_clear_pointer(&file);
 		}
 	}
 }
@@ -335,10 +335,10 @@ static bool mom_signature_verify(const char *data_url, const char *data_filename
 		result = false;
 	}
 out:
-	free_string(&local);
-	free_string(&sig_filename);
-	free_string(&sig_url);
-	free_string(&sig_filename_cache);
+	free_and_clear_pointer(&local);
+	free_and_clear_pointer(&sig_filename);
+	free_and_clear_pointer(&sig_url);
+	free_and_clear_pointer(&sig_filename_cache);
 	return result;
 }
 /* Loads the MoM (Manifest of Manifests) for VERSION.
@@ -400,16 +400,16 @@ retry_load:
 		if (needs_sig_verification && !mom_signature_verify(url, filename, version, mix_exists)) {
 			/* cleanup and try one more time, statedir could have got corrupt/stale */
 			if (retried == false && !mix_exists) {
-				free_string(&filename);
-				free_string(&url);
+				free_and_clear_pointer(&filename);
+				free_and_clear_pointer(&url);
 				manifest_free(manifest);
 				remove_manifest_files("MoM", version, NULL);
 				retried = true;
 				goto retry_load;
 			}
 			error("Signature verification failed for manifest version %d\n", version);
-			free_string(&filename);
-			free_string(&url);
+			free_and_clear_pointer(&filename);
+			free_and_clear_pointer(&url);
 			manifest_free(manifest);
 			if (err) {
 				*err = SWUPD_SIGNATURE_VERIFICATION_FAILED;
@@ -418,8 +418,8 @@ retry_load:
 		}
 	}
 
-	free_string(&filename);
-	free_string(&url);
+	free_and_clear_pointer(&filename);
+	free_and_clear_pointer(&url);
 	return manifest;
 }
 
@@ -942,7 +942,7 @@ void remove_files_in_manifest_from_fs(struct manifest *m)
 			 * this is a limitation */
 			count--;
 		}
-		free_string(&fullfile);
+		free_and_clear_pointer(&fullfile);
 	}
 	info("Total deleted files: %i\n", count);
 }

@@ -68,7 +68,7 @@ int get_server_format(int server_version)
 
 	string_or_die(&url, "%s/%d/format", globals.version_url, server_version);
 	value = get_int_from_url(url);
-	free_string(&url);
+	free_and_clear_pointer(&url);
 
 	return value;
 }
@@ -88,7 +88,7 @@ int get_current_format(void)
 	}
 
 out:
-	free_string(&temp_format_buffer);
+	free_and_clear_pointer(&temp_format_buffer);
 	return ret;
 }
 
@@ -112,14 +112,14 @@ static int get_sig_inmemory(char *url, struct curl_file_data *tmp_version_sig)
 	ret = swupd_curl_get_file_memory(sig_fname, tmp_version_sig);
 	if (ret != 0) {
 		warn("Failed to fetch signature file in memory: %s\n", sig_fname);
-		free_string(&tmp_version_sig->data);
+		free_and_clear_pointer(&tmp_version_sig->data);
 		tmp_version_sig->data = NULL;
 		ret = -ENOENT;
 		goto exit;
 	}
 
 exit:
-	free_string(&sig_fname);
+	free_and_clear_pointer(&sig_fname);
 	return ret;
 }
 
@@ -147,7 +147,7 @@ static int verify_signature(char *url, struct curl_file_data *tmp_version)
 				    tmp_version_sig.len, true)
 		  ? 0
 		  : -SWUPD_ERROR_SIGNATURE_VERIFICATION;
-	free_string(&tmp_version_sig.data);
+	free_and_clear_pointer(&tmp_version_sig.data);
 
 out:
 	return ret;
@@ -225,7 +225,7 @@ int get_latest_version(char *v_url)
 
 	string_or_die(&url, "%s/version/format%s/latest", v_url, globals.format_string);
 	ret = get_version_from_url(url);
-	free_string(&url);
+	free_and_clear_pointer(&url);
 	cached_version = ret;
 
 	return ret;
@@ -240,7 +240,7 @@ int version_get_absolute_latest(void)
 
 	string_or_die(&url, "%s/version/latest_version", globals.version_url);
 	ret = get_version_from_url(url);
-	free_string(&url);
+	free_and_clear_pointer(&url);
 
 	return ret;
 }
@@ -266,11 +266,11 @@ static bool get_osrelease_value(char *path_prefix, char *key, char *buff)
 	string_or_die(&releasefile, "%s/usr/lib/os-release", path_prefix);
 	file = fopen(releasefile, "rm");
 	if (!file) {
-		free_string(&releasefile);
+		free_and_clear_pointer(&releasefile);
 		string_or_die(&releasefile, "%s/etc/os-release", path_prefix);
 		file = fopen(releasefile, "rm");
 		if (!file) {
-			free_string(&releasefile);
+			free_and_clear_pointer(&releasefile);
 			return false;
 		}
 	}
@@ -301,8 +301,8 @@ static bool get_osrelease_value(char *path_prefix, char *key, char *buff)
 		}
 	}
 
-	free_string(&releasefile);
-	free_string(&keystr);
+	free_and_clear_pointer(&releasefile);
+	free_and_clear_pointer(&keystr);
 	fclose(file);
 	return keyfound;
 }
@@ -369,7 +369,7 @@ int read_mix_version_file(char *filename, char *path_prefix)
 	string_or_die(&buildstamp, "%s%s", path_prefix, filename);
 	file = fopen(buildstamp, "rm");
 	if (!file) {
-		free_string(&buildstamp);
+		free_and_clear_pointer(&buildstamp);
 		return v;
 	}
 
@@ -390,7 +390,7 @@ int read_mix_version_file(char *filename, char *path_prefix)
 			v = -1;
 		}
 	}
-	free_string(&buildstamp);
+	free_and_clear_pointer(&buildstamp);
 	fclose(file);
 	return v;
 }
@@ -401,7 +401,7 @@ void check_mix_versions(int *current_version, int *server_version, char *path_pr
 	char *format_file;
 	string_or_die(&format_file, MIX_STATE_DIR "version/format%s/latest", globals.format_string);
 	*server_version = read_mix_version_file(format_file, path_prefix);
-	free_string(&format_file);
+	free_and_clear_pointer(&format_file);
 }
 
 int update_device_latest_version(int version)
@@ -412,7 +412,7 @@ int update_device_latest_version(int version)
 	string_or_die(&path, "%s/version", globals.state_dir);
 	file = fopen(path, "w");
 	if (!file) {
-		free_string(&path);
+		free_and_clear_pointer(&path);
 		return -1;
 	}
 
@@ -420,6 +420,6 @@ int update_device_latest_version(int version)
 	fflush(file);
 	fdatasync(fileno(file));
 	fclose(file);
-	free_string(&path);
+	free_and_clear_pointer(&path);
 	return 0;
 }

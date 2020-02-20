@@ -99,7 +99,7 @@ static bool parse_opt(int opt, char *optarg)
 			error("--picky-tree must be an absolute path, for example /usr\n\n");
 			return false;
 		}
-		free_string(&cmdline_option_picky_tree);
+		free_and_clear_pointer(&cmdline_option_picky_tree);
 		cmdline_option_picky_tree = strdup_or_die(optarg);
 		return true;
 	case 'w':
@@ -215,7 +215,7 @@ enum swupd_code third_party_diagnose_main(int argc, char **argv)
 	ret_code = swupd_init(SWUPD_ALL);
 	if (ret_code != SWUPD_OK) {
 		error("Failed swupd initialization, exiting now\n");
-		free_string(&cmdline_option_picky_tree);
+		free_and_clear_pointer(&cmdline_option_picky_tree);
 		return ret_code;
 	}
 
@@ -247,7 +247,7 @@ enum swupd_code third_party_diagnose_main(int argc, char **argv)
 	/* diagnose 3rd-party bundles */
 	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, diagnose_repos, SWUPD_OK, "diagnose", steps_in_diagnose);
 
-	free_string(&cmdline_option_picky_tree);
+	free_and_clear_pointer(&cmdline_option_picky_tree);
 	if (picky_whitelist) {
 		regfree(picky_whitelist);
 		picky_whitelist = NULL;

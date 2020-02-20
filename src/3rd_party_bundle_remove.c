@@ -127,7 +127,7 @@ static enum swupd_code remove_bundle_binaries(struct list *removed_files, struct
 		}
 	}
 
-	free_string(&script);
+	free_and_clear_pointer(&script);
 
 	return ret_code;
 }

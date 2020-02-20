@@ -122,8 +122,8 @@ static int unset_mirror_url()
 	ret1 = sys_rm(content_path);
 	ret2 = sys_rm(version_path);
 
-	free_string(&content_path);
-	free_string(&version_path);
+	free_and_clear_pointer(&content_path);
+	free_and_clear_pointer(&version_path);
 
 	// No errors
 	if ((ret1 == -ENOENT && !ret2) ||
@@ -184,7 +184,7 @@ static enum swupd_code write_to_path(const char *content, const char *path)
 	}
 
 out:
-	free_string(&dir);
+	free_and_clear_pointer(&dir);
 	return ret;
 }
 
@@ -254,8 +254,8 @@ static bool mirror_is_set(void)
 	content_path = sys_path_join(globals.path_prefix, MIRROR_CONTENT_URL_PATH);
 	mirror_set = sys_filelink_exists(version_path) && sys_filelink_exists(content_path);
 
-	free_string(&version_path);
-	free_string(&content_path);
+	free_and_clear_pointer(&version_path);
+	free_and_clear_pointer(&content_path);
 
 	return mirror_set;
 }
@@ -338,8 +338,8 @@ int handle_mirror_if_stale(void)
 	get_latest_version("");
 
 out:
-	free_string(&fullpath);
-	free_string(&ret_str);
+	free_and_clear_pointer(&fullpath);
+	free_and_clear_pointer(&ret_str);
 	return ret;
 }
 

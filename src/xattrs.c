@@ -195,7 +195,7 @@ static void xattrs_do_action(xattrs_action_type_t action,
 		ret = xattr_get_value(src_filename, sorted_list[i], &value, &value_len,
 				      action);
 		if (ret < 0) {
-			free_string(&value);
+			free_and_clear_pointer(&value);
 			value_len = 0;
 			break;
 		}
@@ -205,7 +205,7 @@ static void xattrs_do_action(xattrs_action_type_t action,
 			 * case. */
 			ret = lsetxattr(dst_filename, sorted_list[i],
 					value, value_len, 0);
-			free_string(&value);
+			free_and_clear_pointer(&value);
 			if (ret < 0) {
 				break;
 			}
@@ -267,11 +267,11 @@ int xattrs_compare(const char *filename1, const char *filename2)
 	}
 out:
 	if (old_xattrs_len != 0) {
-		free_string(&old_xattrs);
+		free_and_clear_pointer(&old_xattrs);
 	}
 
 	if (new_xattrs_len != 0) {
-		free_string(&new_xattrs);
+		free_and_clear_pointer(&new_xattrs);
 	}
 
 	return ret;

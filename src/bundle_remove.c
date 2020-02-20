@@ -136,11 +136,11 @@ static void remove_tracked(const char *bundle)
 {
 	char *destdir = get_tracking_dir();
 	char *tracking_file = sys_path_join(destdir, bundle);
-	free_string(&destdir);
+	free_and_clear_pointer(&destdir);
 	/* we don't care about failures here since any weird state in the tracking
 	 * dir MUST be handled gracefully */
 	sys_rm(tracking_file);
-	free_string(&tracking_file);
+	free_and_clear_pointer(&tracking_file);
 }
 
 static int filter_file_to_delete(const void *a, const void *b)
@@ -199,7 +199,7 @@ static enum swupd_code validate_bundle(const char *bundle, struct manifest *mom,
 	/* check if bundle is required by another installed bundle */
 	string_or_die(&msg, "\nBundle \"%s\" is required by the following bundles:\n", bundle);
 	number_of_reqd = required_by(reqd_by, bundle, mom, 0, bundles, msg, DONT_INCLUDE_OPTIONAL_DEPS);
-	free_string(&msg);
+	free_and_clear_pointer(&msg);
 	if (number_of_reqd > 0) {
 		/* the bundle is required by other bundles */
 		return SWUPD_NO;
@@ -456,7 +456,7 @@ out:
 		  current_version,
 		  ret_code,
 		  total_curl_sz);
-	free_string(&bundles_list_str);
+	free_and_clear_pointer(&bundles_list_str);
 	print("\nFailed to remove bundle(s)\n");
 
 	return ret_code;

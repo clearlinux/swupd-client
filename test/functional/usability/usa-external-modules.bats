@@ -9,8 +9,8 @@ file_created=false
 
 test_setup() {
 
-	if [ -z "$TRAVIS" ]; then
-		skip "This test is intended to run only in Travis (use TRAVIS=true to run it anyway)..."
+	if [ -z "$RUNNING_IN_CI" ]; then
+		skip "This test is intended to run only in Travis (use RUNNING_IN_CI=true to run it anyway)..."
 	fi
 
 	if [ ! -e /usr/bin/swupd-search ]; then
@@ -31,7 +31,7 @@ test_setup() {
 
 test_teardown() {
 
-	if [ -z "$TRAVIS" ]; then
+	if [ -z "$RUNNING_IN_CI" ]; then
 		return
 	fi
 

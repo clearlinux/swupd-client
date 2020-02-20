@@ -2,7 +2,7 @@ name: C/C++ CI
 
 on: [push, pull_request]
 env:
-   TRAVIS: true
+   RUNNING_IN_CI: true
    NUM_JOBS: 10
 
 jobs:

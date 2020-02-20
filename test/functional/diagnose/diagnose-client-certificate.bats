@@ -11,8 +11,8 @@ global_setup() {
 
 	# Skip this test for local development because it takes a long time. To run this test locally,
 	# configure swupd with --with-fallback-capaths=<path to top level of repo>/swupd_test_certificates
-	# and run: TRAVIS=true make check
-	if [ -z "${TRAVIS}" ]; then
+	# and run: RUNNING_IN_CI=true make check
+	if [ -z "${RUNNING_IN_CI}" ]; then
 		return
 	fi
 
@@ -37,7 +37,7 @@ global_setup() {
 
 test_setup() {
 
-	if [ -z "${TRAVIS}" ]; then
+	if [ -z "${RUNNING_IN_CI}" ]; then
 		skip "Skipping client certificate tests for local development, test runs in CI"
 	fi
 
@@ -48,7 +48,7 @@ test_setup() {
 
 test_teardown() {
 
-	if [ -z "${TRAVIS}" ]; then
+	if [ -z "${RUNNING_IN_CI}" ]; then
 		return
 	fi
 
@@ -58,7 +58,7 @@ test_teardown() {
 
 global_teardown() {
 
-	if [ -z "${TRAVIS}" ]; then
+	if [ -z "${RUNNING_IN_CI}" ]; then
 		return
 	fi
 

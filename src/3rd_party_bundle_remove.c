@@ -22,6 +22,8 @@
 #include "3rd_party_repos.h"
 #include "swupd.h"
 
+#include <errno.h>
+
 #ifdef THIRDPARTY
 
 static char **cmdline_bundles;
@@ -93,9 +95,41 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
-static enum swupd_code remove_bundle_binaries(struct list *removed_files)
+static enum swupd_code remove_bundle_binaries(struct list *removed_files, struct list *common_files)
 {
-	return third_party_process_files(removed_files, "\nRemoving 3rd-party bundle binaries...\n", "remove_binaries", third_party_remove_binary);
+	enum swupd_code ret_code = SWUPD_OK;
+	int ret;
+	char *script = NULL;
+	struct list *iter = NULL;
+	struct file *file = NULL;
+
+	/* remove scripts associated with all the binaries removed */
+	ret_code = third_party_process_files(removed_files, "\nRemoving 3rd-party bundle binaries...\n", "remove_binaries", third_party_remove_binary);
+
+	/* after removing the bundle, some binary files may not have been removed
+	 * due to being needed by bundles still installed in the system. However,
+	 * if those bundles that are still installed didn't intend to export those
+	 * binaries (by setting the is_exported flag) then the scripts from those
+	 * binaries must be deleted so they are no longer "exported" */
+	for (iter = common_files; iter; iter = iter->next) {
+		file = iter->data;
+		if (!file->is_file || !is_binary(file->filename) || file->is_exported) {
+			/* not a binary or the binary is still required to be exported */
+			continue;
+		}
+
+		/* the binary is no longer required to be exported, we can remove its script */
+		script = third_party_get_binary_path(sys_basename(file->filename));
+		ret = sys_rm(script);
+		if (ret != 0 && ret != -ENOENT) {
+			error("The script %s could not be removed\n\n", script);
+			ret_code = SWUPD_COULDNT_REMOVE_FILE;
+		}
+	}
+
+	free_string(&script);
+
+	return ret_code;
 }
 
 static enum swupd_code remove_bundle(char *bundle_name)

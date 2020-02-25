@@ -321,6 +321,7 @@ extern void prettify_size(long size_in_bytes, char **pretty_size);
 extern int link_or_rename(const char *orig, const char *dest);
 extern int create_state_dirs(const char *state_dir_path);
 extern bool confirm_action(void);
+extern bool is_binary(const char *filename);
 
 /* subscription.c */
 typedef bool (*subs_fn_t)(struct list **subs, const char *component, int recursion, bool is_optional);
@@ -338,8 +339,9 @@ extern enum swupd_code execute_bundle_add(struct list *bundles_list);
 extern enum swupd_code execute_bundle_add_extra(struct list *bundles_list, extra_proc_fn_t pre_add_fn, extra_proc_fn_t post_add_fn, extra_proc_fn_t file_validation_fn);
 
 /* bundle_remove.c */
+typedef enum swupd_code (*remove_extra_proc_fn_t)(struct list *removed_files, struct list *common_files);
 extern enum swupd_code execute_remove_bundles(struct list *bundles);
-extern enum swupd_code execute_remove_bundles_extra(struct list *bundles, extra_proc_fn_t post_remove_fn);
+extern enum swupd_code execute_remove_bundles_extra(struct list *bundles, remove_extra_proc_fn_t post_remove_fn);
 extern void bundle_remove_set_option_force(bool opt);
 extern void bundle_remove_set_option_recursive(bool opt);
 

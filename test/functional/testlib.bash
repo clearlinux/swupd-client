@@ -1477,10 +1477,23 @@ create_third_party_repo() { #swupd_function
 	CERT="$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
 	create_bundle -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$CERT",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
 
-	TPWEBDIR=$(realpath "$env_name/3rd-party/$repo_name")
-	export TPWEBDIR
+	TPURL=$(realpath "$env_name/3rd-party/$repo_name")
+	export TPURL
+
+	export TPWEBDIR="$env_name"/3rd-party/"$repo_name"
 	debug_msg "3rd-party repo content dir: $TPWEBDIR"
+
+	export TPTARGETDIR="$env_name"/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
+	debug_msg "3rd-party repo target dir: $TPTARGETDIR"
+
 	debug_msg "3rd-party repo created successfully"
+
+	if [ "$TEST_ENV_ONLY" = true ]; then
+		print "\n3rd-party environment variables:\n"
+		print "TPURL=$TPURL"
+		print "TPWEBDIR=$TPWEBDIR"
+		print "TPTARGETDIR=$TPTARGETDIR"
+	fi
 
 }
 
@@ -1533,8 +1546,12 @@ add_third_party_repo() { #swupd_function
 	sudo chmod -R 0700 "$STATEDIR"
 	export TPSTATEDIR="$repo_state_dir"
 	export TPWEBDIR="$env_name"/3rd-party/"$repo_name"
+	export TPTARGETDIR="$env_name"/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
+	TPURL=$(realpath "$env_name/3rd-party/$repo_name")
+	export TPURL
 	debug_msg "3rd-party repo state dir: $TPSTATEDIR"
 	debug_msg "3rd-party repo content dir: $TPWEBDIR"
+	debug_msg "3rd-party repo target dir: $TPTARGETDIR"
 
 	# every 3rd-party repo needs to have at least the os-core bundle so this should be
 	# added by default which should include the os-release and Swupd_Root.pem
@@ -1544,6 +1561,13 @@ add_third_party_repo() { #swupd_function
 	create_tar "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
 	CERT="$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
 	create_bundle -L -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$CERT",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
+
+	if [ "$TEST_ENV_ONLY" = true ]; then
+		print "\n3rd-party environment variables:\n"
+		print "TPURL=$TPURL"
+		print "TPWEBDIR=$TPWEBDIR"
+		print "TPTARGETDIR=$TPTARGETDIR"
+	fi
 
 }
 
@@ -2534,18 +2558,11 @@ create_bundle() { # swupd_function
 		else
 			if [ "$(dirname "$val")" = "/bin" ] || [ "$(dirname "$val")" = "/usr/bin" ] || [ "$(dirname "$val")" = "/usr/local/bin" ]; then
 				bundle_file=$(create_file -x "$files_path")
-				# if the bundle is from a 3rd-party repo and has binaries, they should
-				# be exported to /opt/3rd-party/bin
-				if [ "$third_party" = true ] && [ "$local_bundle" = true ]; then
-					debug_msg "Exporting 3rd-party bundle binary $THIRD_PARTY_BIN_DIR/$(basename "$val")"
-					sudo mkdir -p "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"
-					sudo touch "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
-					sudo chmod +x "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
-				fi
 			else
 				bundle_file=$(create_file "$files_path")
 			fi
 		fi
+
 		debug_msg "file -> $bundle_file"
 		add_to_manifest -p "$manifest" "$bundle_file" "$val"
 		# Add the file to the zero pack of the bundle
@@ -2555,6 +2572,16 @@ create_bundle() { # swupd_function
 		if [ "$local_bundle" = true ]; then
 			sudo mkdir -p "$target_path$(dirname "$val")"
 			sudo cp -p "$bundle_file" "$target_path$val"
+			if [ "$third_party" = true ]; then
+				if [ "$(dirname "$val")" = "/bin" ] || [ "$(dirname "$val")" = "/usr/bin" ] || [ "$(dirname "$val")" = "/usr/local/bin" ]; then
+					# if the bundle is from a 3rd-party repo and has binaries, they should
+					# be exported to /opt/3rd-party/bin
+					debug_msg "Exporting 3rd-party bundle binary $THIRD_PARTY_BIN_DIR/$(basename "$val")"
+					sudo mkdir -p "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"
+					sudo touch "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
+					sudo chmod +x "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
+				fi
+			fi
 		fi
 	done
 

@@ -1217,3 +1217,18 @@ bool confirm_action(void)
 
 	return response == 'y';
 }
+
+bool is_binary(const char *filename)
+{
+	const char *binary_paths[] = { "/bin", "/usr/bin", "/usr/local/bin", NULL };
+	int i = 0;
+
+	while (binary_paths[i]) {
+		if (strncmp(filename, binary_paths[i], strlen(binary_paths[i])) == 0) {
+			return true;
+		}
+		i++;
+	}
+
+	return false;
+}

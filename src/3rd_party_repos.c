@@ -537,21 +537,6 @@ void third_party_repo_header(const char *repo_name)
 	free_string(&header);
 }
 
-static bool is_binary(const char *filename)
-{
-	const char *binary_paths[] = { "/bin", "/usr/bin", "/usr/local/bin", NULL };
-	int i = 0;
-
-	while (binary_paths[i]) {
-		if (strncmp(filename, binary_paths[i], strlen(binary_paths[i])) == 0) {
-			return true;
-		}
-		i++;
-	}
-
-	return false;
-}
-
 bool third_party_file_is_binary(struct file *file)
 {
 	if (file->is_exported && is_binary(file->filename)) {

@@ -38,9 +38,9 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo "$TEST_NAME" 10 staging test-repo1
-	repo1="$TPWEBDIR"
+	repo1="$TPURL"
 	create_third_party_repo "$TEST_NAME" 10 staging test-repo2
-	repo2="$TPWEBDIR"
+	repo2="$TPURL"
 }
 
 @test "TPR066: Add a single repo importing the certificate" {

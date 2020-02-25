@@ -153,6 +153,11 @@ void *list_search(struct list *list, const void *item, comparison_fn_t compariso
 struct list *list_sorted_deduplicate(struct list *list, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
 
 /**
+ * @brief Splits any element from sorted list list1 that happens to be in the sorted list list2 meeting the criteria and moves it to common_elements.
+ */
+struct list *list_sorted_split_common_elements(struct list *list1, struct list *list2, struct list **common_elements, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);
+
+/**
  * @brief Filters any element from sorted list list1 that happens to be in the sorted list list2 meeting the criteria.
  */
 struct list *list_sorted_filter_common_elements(struct list *list1, struct list *list2, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn);

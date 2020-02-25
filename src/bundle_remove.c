@@ -290,7 +290,7 @@ static void print_remove_summary(unsigned int requested, unsigned int bad, unsig
 /*  The function removes one or more bundles
  *  passed in the bundles list.
  */
-enum swupd_code execute_remove_bundles_extra(struct list *bundles, extra_proc_fn_t post_remove_fn)
+enum swupd_code execute_remove_bundles_extra(struct list *bundles, remove_extra_proc_fn_t post_remove_fn)
 {
 	enum swupd_code ret_code = SWUPD_OK;
 	enum swupd_code ret = SWUPD_OK;
@@ -300,6 +300,7 @@ enum swupd_code execute_remove_bundles_extra(struct list *bundles, extra_proc_fn
 	struct manifest *current_mom = NULL;
 	struct list *subs = NULL;
 	struct list *bundles_to_remove = NULL;
+	struct list *common_files = NULL;
 	struct list *files_to_remove = NULL;
 	struct list *iter = NULL;
 	char *bundles_list_str = NULL;
@@ -414,7 +415,7 @@ enum swupd_code execute_remove_bundles_extra(struct list *bundles, extra_proc_fn
 
 		/* sanitize files to remove; if a file is needed by a bundle that
 		 * is installed, it should be kept in the system */
-		files_to_remove = list_sorted_filter_common_elements(files_to_remove, current_mom->files, filter_file_to_delete, NULL);
+		files_to_remove = list_sorted_split_common_elements(files_to_remove, current_mom->files, &common_files, filter_file_to_delete, NULL);
 
 		if (list_len(files_to_remove) > 0) {
 			info("\nDeleting bundle files...\n");
@@ -425,13 +426,14 @@ enum swupd_code execute_remove_bundles_extra(struct list *bundles, extra_proc_fn
 	}
 
 	if (post_remove_fn) {
-		ret_code = post_remove_fn(files_to_remove);
+		ret_code = post_remove_fn(files_to_remove, common_files);
 	}
 
 	/* print a summary of the remove operation */
 	print_remove_summary(total, bad, list_len(bundles_to_remove));
 
 	/* cleanup */
+	list_free_list(common_files);
 	list_free_list(files_to_remove);
 	list_free_list_and_data(bundles_to_remove, manifest_free_data);
 	manifest_free(current_mom);

@@ -355,7 +355,7 @@ struct list *list_filter_elements(struct list *list, filter_fn_t filter_fn, list
 	return list;
 }
 
-struct list *list_sorted_filter_common_elements(struct list *list1, struct list *list2, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn)
+struct list *list_sorted_split_common_elements(struct list *list1, struct list *list2, struct list **common_elements, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn)
 {
 	struct list *iter1, *iter2 = NULL;
 	struct list *preserver = NULL;
@@ -389,10 +389,22 @@ struct list *list_sorted_filter_common_elements(struct list *list1, struct list 
 		if (preserver == iter1) {
 			preserver = iter1->next;
 		}
+
+		/* if a list was provided to store the common elements,
+		 * store them, otherwise just remove the common element */
+		if (common_elements) {
+			*common_elements = list_prepend_data(*common_elements, item2);
+		}
+
 		iter1 = list_free_item(iter1, list_free_data_fn);
 	}
 
 	return preserver;
+}
+
+struct list *list_sorted_filter_common_elements(struct list *list1, struct list *list2, comparison_fn_t comparison_fn, list_free_data_fn_t list_free_data_fn)
+{
+	return list_sorted_split_common_elements(list1, list2, NULL, comparison_fn, list_free_data_fn);
 }
 
 void *list_remove(void *item_to_remove, struct list **list, comparison_fn_t comparison_fn)

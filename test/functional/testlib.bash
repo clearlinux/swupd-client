@@ -1,24 +1,26 @@
 #!/usr/bin/bash
 
+# global variables
 FUNC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TEST_ROOT_DIR="$(pwd)"
-TEST_FILENAME=$(basename "$BATS_TEST_FILENAME")
-TEST_NAME=${TEST_FILENAME%.bats}
-THEME_DIRNAME="$BATS_TEST_DIRNAME"
-THIRD_PARTY_BUNDLES_DIR="opt/3rd-party/bundles"
-THIRD_PARTY_BIN_DIR="opt/3rd-party/bin"
-SPACE=" "
-TAB="	"
-
-export TEST_NAME
-export TEST_NAME_SHORT="$TEST_NAME"
-export THEME_DIRNAME
 export FUNC_DIR
+TEST_ROOT_DIR="$(pwd)"
+export TEST_ROOT_DIR
+TEST_FILENAME=$(basename "$BATS_TEST_FILENAME")
+export TEST_FILENAME
+export TEST_NAME=${TEST_FILENAME%.bats}
+export THEME_DIRNAME="$BATS_TEST_DIRNAME"
+export TEST_NAME_SHORT="$TEST_NAME"
 export SWUPD_DIR="$FUNC_DIR/../.."
-export THIRD_PARTY_BUNDLES_DIR
-export THIRD_PARTY_BIN_DIR
-export SPACE
-export TAB
+
+# 3rd-party variables
+export THIRD_PARTY_DIR="opt/3rd-party"
+export THIRD_PARTY_BUNDLES_DIR="$THIRD_PARTY_DIR/bundles"
+export THIRD_PARTY_BIN_DIR="$THIRD_PARTY_DIR/bin"
+
+# formatting variables
+export SPACE=" "
+export TAB="	"
+
 
 # detect where the swupd binary is
 if [ -e "$SWUPD" ]; then
@@ -1439,134 +1441,96 @@ set_latest_version() { # swupd_function
 
 }
 
-# Creates a new version of the server side content in the specified
-# location to serve as a 3rd-party repository
+# Creates a new version of the server side content in the
+# specified location to serve as a 3rd-party repository
 # Parameters:
+# - -a: if the a (add) flag is set the repository is also added to the
+#       repo.ini file
 # - ENVIRONMENT_NAME: the name of the test environment
 # - VERSION: the version of the server side content
 # - FORMAT: the format to use for the version
 # - REPO_NAME: the name of the 3rd-party repo, defaults to "test-repo"
 create_third_party_repo() { #swupd_function
 
+	local add=false
+	[ "$1" = "-a" ] && { add=true ; shift ; }
 	local env_name=$1
 	local version=$2
 	local format=${3:-staging}
 	local repo_name=${4:-test-repo}
-	local hashed_name
-	local CERT
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    create_third_party_repo <environment_name> <new_version> [format] [repo_name]
-			EOM
-		return
-	fi
-	validate_item "$env_name"
-	validate_param "$version"
-
-	debug_msg "Creating 3rd-party repo $repo_name..."
-	create_version -r "$env_name" "$version" 0 "$format" "$repo_name"
-
-	# we need to create os-core which should include the os-release and Swupd_Root.pem
-	debug_msg "Creating os-core with Swupd_Root.pem and os-release..."
-	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$TEST_ROOT_DIR"/Swupd_Root.pem)
-	sudo cp -p "$TEST_ROOT_DIR"/Swupd_Root.pem "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
-	create_tar "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
-	CERT="$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
-	create_bundle -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$CERT",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
-
-	TPURL=$(realpath "$env_name/3rd-party/$repo_name")
-	export TPURL
-
-	export TPWEBDIR="$env_name"/3rd-party/"$repo_name"
-	debug_msg "3rd-party repo content dir: $TPWEBDIR"
-
-	export TPTARGETDIR="$env_name"/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
-	debug_msg "3rd-party repo target dir: $TPTARGETDIR"
-
-	debug_msg "3rd-party repo created successfully"
-
-	if [ "$TEST_ENV_ONLY" = true ]; then
-		print "\n3rd-party environment variables:\n"
-		print "TPURL=$TPURL"
-		print "TPWEBDIR=$TPWEBDIR"
-		print "TPTARGETDIR=$TPTARGETDIR"
-	fi
-
-}
-
-# Creates and adds a  new version of the server side content in the specified
-# location to serve as a 3rd-party repository
-# Parameters:
-# - ENVIRONMENT_NAME: the name of the test environment
-# - VERSION: the version of the server side content
-# - FORMAT: the format to use for the version
-# - REPO_NAME: the name of the 3rd-party repo, defaults to "test-repo"
-add_third_party_repo() { #swupd_function
-
-	local env_name=$1
-	local version=$2
-	local format=${3:-staging}
-	local repo_name=${4:-test-repo}
-	local repo_state_dir
 	local path
+	local hashed_name
+	local cert
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    add_third_party_repo <environment_name> <new_version> [format] [repo_name]
+			    add_third_party_repo [-a] <environment_name> <new_version> [format] [repo_name]
+
+		    Options:
+		        -a    if the a flag is set (add), the 3rd-party repository is also added
+		              to the repo.ini file as if a user already added it to swupd
 			EOM
 		return
 	fi
 	validate_item "$env_name"
 	validate_param "$version"
-
-	debug_msg "Creating 3rd-party repo $repo_name"
 	path=$(dirname "$(realpath "$env_name")")
 
+	debug_msg "Creating 3rd-party repo $repo_name..."
+
 	# create the state dir for the 3rd-party repo
-	repo_state_dir="$STATEDIR"/3rd-party/"$repo_name"
-	debug_msg "Creating a state directory for repo $repo_name at $repo_state_dir"
-	sudo mkdir -p "$repo_state_dir"/{staged,download,delta,telemetry,bundles}
+	TPSTATEDIR="$STATEDIR"/3rd-party/"$repo_name"
+	debug_msg "Creating a state directory for repo $repo_name at $TPSTATEDIR..."
+	sudo mkdir -p "$TPSTATEDIR"/{staged,download,delta,telemetry,bundles}
+	sudo chmod -R 0700 "$STATEDIR"
 
 	# create the basic content for the 3rd-party repo
 	create_version -r "$env_name" "$version" 0 "$format" "$repo_name"
 	debug_msg "3rd-party repo $repo_name created successfully"
 
-	# add the new repo to the repo.ini file
-	{
-		printf '[%s]\n\n' "$repo_name"
-		printf 'URL=%s\n\n' "file://$path/$env_name/3rd-party/$repo_name"
-		printf 'VERSION=%s\n\n' "$version"
-	} | sudo tee -a "$STATEDIR"/3rd-party/repo.ini > /dev/null
-
-	sudo chmod -R 0700 "$STATEDIR"
-	export TPSTATEDIR="$repo_state_dir"
+	export TPSTATEDIR
 	export TPWEBDIR="$env_name"/3rd-party/"$repo_name"
 	export TPTARGETDIR="$env_name"/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
-	TPURL=$(realpath "$env_name/3rd-party/$repo_name")
-	export TPURL
+	export TPURL="$path"/"$env_name"/3rd-party/"$repo_name"
 	debug_msg "3rd-party repo state dir: $TPSTATEDIR"
 	debug_msg "3rd-party repo content dir: $TPWEBDIR"
 	debug_msg "3rd-party repo target dir: $TPTARGETDIR"
+	debug_msg "3rd-party repo URL: $TPURL"
 
-	# every 3rd-party repo needs to have at least the os-core bundle so this should be
-	# added by default which should include the os-release and Swupd_Root.pem
-	debug_msg "Adding bundle os-core to the 3rd-party repo"
+	# if requested, add the new repo to the repo.ini file
+	sudo mkdir -p "$env_name"/testfs/target-dir/"$THIRD_PARTY_DIR"
+	if [ "$add" = true ]; then
+		{
+			printf '[%s]\n\n' "$repo_name"
+			printf 'URL=%s\n\n' "file://$TPURL"
+			printf 'VERSION=%s\n\n' "$version"
+		} | sudo tee -a "$STATEDIR"/3rd-party/repo.ini > /dev/null
+	fi
+
+	# every 3rd-party repo needs to have at least the special os-core bundle,
+	# this should be added by default and should include:
+	# - os-release
+	# - Swupd_Root.pem
+	# - format
+	debug_msg "Adding bundle os-core to the 3rd-party repo..."
 	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$TEST_ROOT_DIR"/Swupd_Root.pem)
 	sudo cp -p "$TEST_ROOT_DIR"/Swupd_Root.pem "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
 	create_tar "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
-	CERT="$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
-	create_bundle -L -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$CERT",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
+	cert="$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
+	if [ "$add" = true ]; then
+		create_bundle -L -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$cert",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
+	else
+		create_bundle -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$cert",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
+	fi
 
 	if [ "$TEST_ENV_ONLY" = true ]; then
-		print "\n3rd-party environment variables:\n"
+		print "\nVariables for 3rd-party repo $repo_name:\n"
 		print "TPURL=$TPURL"
 		print "TPWEBDIR=$TPWEBDIR"
 		print "TPTARGETDIR=$TPTARGETDIR"
+		print "TPSTATEDIR=$TPSTATEDIR\n"
 	fi
 
 }

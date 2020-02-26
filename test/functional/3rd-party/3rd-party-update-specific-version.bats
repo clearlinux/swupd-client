@@ -9,7 +9,7 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME"
 
-	add_third_party_repo "$TEST_NAME" 10 staging test-repo1
+	create_third_party_repo -a "$TEST_NAME" 10 staging test-repo1
 	create_bundle -L -t -n test-bundle1 -f /foo/file_1 -u test-repo1 "$TEST_NAME"
 	create_version -p "$TEST_NAME" 20 10 staging test-repo1
 	update_bundle "$TEST_NAME" test-bundle1 --update /foo/file_1 test-repo1

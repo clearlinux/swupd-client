@@ -10,7 +10,7 @@ test_setup() {
 	create_test_environment "$TEST_NAME" 10 1
 
 	# add a 3rd-party repo with some "findings" for diagnose
-	add_third_party_repo "$TEST_NAME" 10 1 test-repo1
+	create_third_party_repo -a "$TEST_NAME" 10 1 test-repo1
 	create_bundle -L -t -n test-bundle1 -f /foo/file_1,/bar/file_2 -u test-repo1 "$TEST_NAME"
 	create_version -p "$TEST_NAME" 20 10 1 test-repo1
 	update_bundle -p "$TEST_NAME" test-bundle1 --update /foo/file_1 test-repo1
@@ -19,7 +19,7 @@ test_setup() {
 	set_current_version "$TEST_NAME" 20 test-repo1
 
 	# add another 3rd-party repo that has nothing to get fixed
-	add_third_party_repo "$TEST_NAME" 10 1 test-repo2
+	create_third_party_repo -a "$TEST_NAME" 10 1 test-repo2
 	create_bundle -L -t -n test-bundle2 -f /baz/file_3 -u test-repo2 "$TEST_NAME"
 
 	# adding an untracked files into an untracked directory (/bat)

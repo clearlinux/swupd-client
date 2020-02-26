@@ -8,7 +8,7 @@ load "../testlib"
 test_setup() {
 
 	create_test_environment "$TEST_NAME"
-	add_third_party_repo "$TEST_NAME" 10 staging repo1
+	create_third_party_repo -a "$TEST_NAME" 10 staging repo1
 
 	file_1=$(create_file "$TPWEBDIR"/10/files)
 	# create a file with a dangerous flag (setuid)

@@ -8,7 +8,7 @@ load "../testlib"
 test_setup() {
 
 	create_test_environment "$TEST_NAME"
-	add_third_party_repo "$TEST_NAME" 10 1 repo1
+	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
 	# create 3rd-party bundles that share a binary
 	bin_file1=$(create_file -x "$TPWEBDIR"/10/files)
 	create_bundle -L -n test-bundle1 -f /file1,/foo/file2,/usr/bin/bin_file1:"$bin_file1",/bin/bin_file2 -u repo1 "$TEST_NAME"

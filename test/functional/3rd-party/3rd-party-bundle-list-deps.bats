@@ -10,7 +10,7 @@ global_setup() {
 	create_test_environment "$TEST_NAME"
 
 	# create a 3rd-party repo with bundles that have dependencies
-	add_third_party_repo "$TEST_NAME" 10 staging repo1
+	create_third_party_repo -a "$TEST_NAME" 10 staging repo1
 	create_bundle  -n test-bundle1 -f /foo/file_1 -u repo1 "$TEST_NAME"
 	create_bundle  -n test-bundle2 -f /bar/file_2 -u repo1 "$TEST_NAME"
 	create_bundle  -n test-bundle3 -f /baz/file_3 -u repo1 "$TEST_NAME"

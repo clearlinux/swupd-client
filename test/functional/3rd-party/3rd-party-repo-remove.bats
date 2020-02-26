@@ -10,15 +10,15 @@ test_setup(){
 	create_test_environment "$TEST_NAME"
 	# create a few 3rd-party repos within the test environment and add
 	# some bundles to them
-	add_third_party_repo "$TEST_NAME" 10 1 repo1
+	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
 	create_bundle -L -t -n test-bundle1 -f /file_1,/bin/binary_1           -u repo1 "$TEST_NAME"
 
-	add_third_party_repo "$TEST_NAME" 10 1 repo2
+	create_third_party_repo -a "$TEST_NAME" 10 1 repo2
 	create_bundle -L -t -n test-bundle2 -f /file_2,/bin/binary_2           -u repo2 "$TEST_NAME"
 	create_bundle -L -t -n test-bundle3 -f /file_3,/usr/bin/binary_3       -u repo2 "$TEST_NAME"
 	create_bundle -L -t -n test-bundle4 -f /file_4,/usr/local/bin/binary_4 -u repo2 "$TEST_NAME"
 
-	add_third_party_repo "$TEST_NAME" 10 1 repo3
+	create_third_party_repo -a "$TEST_NAME" 10 1 repo3
 	create_bundle -L -t -n test-bundle5 -f /file_5,/usr/bin/binary_5       -u repo3 "$TEST_NAME"
 
 }

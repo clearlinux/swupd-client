@@ -9,7 +9,7 @@ test_setup() {
 
 	# create an initial environment
 	create_test_environment "$TEST_NAME"
-	add_third_party_repo "$TEST_NAME" 10 staging repo1
+	create_third_party_repo -a "$TEST_NAME" 10 staging repo1
 	create_bundle -L -t -n test-bundle1 -f /foo/file_1,/usr/bin/binary_1,/bin/binary_2,/bin/binary_3 -u repo1 "$TEST_NAME"
 	create_bundle       -n test-bundle2 -f /bar/file_2,/bin/binary_4                                 -u repo1 "$TEST_NAME"
 	create_bundle       -n test-bundle3 -f /bin/binary_5                                             -u repo1 "$TEST_NAME"

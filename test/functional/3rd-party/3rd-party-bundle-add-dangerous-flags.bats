@@ -8,7 +8,7 @@ load "../testlib"
 test_setup() {
 
 	create_test_environment "$TEST_NAME"
-	add_third_party_repo "$TEST_NAME" 10 1 repo1
+	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
 
 	# create a file with the setuid flag set
 	file_2=$(create_file -u "$TPWEBDIR"/10/files)

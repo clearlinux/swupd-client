@@ -12,10 +12,10 @@ test_setup() {
 
 	# create a couple 3rd-party repos within the test environment and add
 	# some bundles to them
-	add_third_party_repo "$TEST_NAME" 10 1 test-repo1
+	create_third_party_repo -a "$TEST_NAME" 10 1 test-repo1
 	create_bundle -L -n test-bundle1 -f /foo/file_1 -u test-repo1 "$TEST_NAME"
 
-	add_third_party_repo "$TEST_NAME" 10 1 test-repo2
+	create_third_party_repo -a "$TEST_NAME" 10 1 test-repo2
 	create_bundle -L -t -n test-bundle1 -f /foo/file_2 -u test-repo2 "$TEST_NAME"
 	create_bundle -L    -n test-bundle2 -f /bar/file_3 -u test-repo2 "$TEST_NAME"
 	add_dependency_to_manifest "$TEST_NAME"/3rd-party/test-repo2/10/Manifest.test-bundle1 test-bundle2

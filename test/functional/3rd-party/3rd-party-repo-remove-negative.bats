@@ -51,7 +51,7 @@ test_setup(){
 
 @test "TPR011: Negative test, Remove a repo on a new system" {
 
-	run sudo sh -c "rm -r $STATEDIR/3rd-party"
+	run sudo sh -c "rm -r $PATH_PREFIX/$THIRD_PARTY_DIR"
 
 	run sudo sh -c "$SWUPD 3rd-party remove $SWUPD_OPTS repo1"
 	assert_status_is "$SWUPD_INVALID_REPOSITORY"

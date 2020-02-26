@@ -40,7 +40,7 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	run sudo sh -c "cat $STATEDIR/3rd-party/repo.ini"
+	run sudo sh -c "cat $PATH_PREFIX/$THIRD_PARTY_DIR/repo.ini"
 	expected_output=$(cat <<-EOM
 			[test-repo1]
 			url=file://$repo1
@@ -77,7 +77,7 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/usr/share/clear/bundles/os-core
 	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/usr/lib/os-release
 
-	run sudo sh -c "cat $STATEDIR/3rd-party/repo.ini"
+	run sudo sh -c "cat $PATH_PREFIX/$THIRD_PARTY_DIR/repo.ini"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 			[test-repo1]

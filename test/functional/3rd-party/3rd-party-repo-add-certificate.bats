@@ -69,7 +69,7 @@ test_setup() {
 	)
 	assert_regex_is_output "$expected_output"
 
-	run sudo sh -c "cat $STATEDIR/3rd-party/repo.ini"
+	run sudo sh -c "cat $PATH_PREFIX/$THIRD_PARTY_DIR/repo.ini"
 	expected_output=$(cat <<-EOM
 			[test-repo1]
 			url=file://$repo1

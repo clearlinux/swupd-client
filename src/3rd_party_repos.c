@@ -44,7 +44,7 @@ char *third_party_get_binary_path(const char *binary_name)
 
 static char *get_repo_config_path(void)
 {
-	return str_or_die("%s/%s/%s", globals_bkp.state_dir, SWUPD_3RD_PARTY_DIRNAME, "repo.ini");
+	return str_or_die("%s/%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_DIR, "repo.ini");
 }
 
 static char *get_repo_content_path(const char *repo_name)

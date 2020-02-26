@@ -71,7 +71,7 @@ global_teardown() {
 	assert_in_output "$expected_output"
 	assert_in_output "Repository added successfully"
 
-	run sudo sh -c "cat $STATEDIR/3rd-party/repo.ini"
+	run sudo sh -c "cat $PATH_PREFIX/$THIRD_PARTY_DIR/repo.ini"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		[my_repo]

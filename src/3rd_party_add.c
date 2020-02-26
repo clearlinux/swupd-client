@@ -254,6 +254,7 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	 */
 	progress_init_steps("third-party-add", step_in_third_party_add);
 
+	/* The last two in reverse are the repo-name, repo-url */
 	name = argv[argc - 2];
 	url = argv[argc - 1];
 
@@ -262,7 +263,7 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 		goto finish;
 	}
 
-	/* The last two in reverse are the repo-name, repo-url */
+	/* add the repo configuration to the repo.ini file */
 	progress_next_step("add_repo", PROGRESS_UNDEFINED);
 	info("Adding 3rd-party repository %s...\n\n", name);
 	ret = third_party_add_repo(name, url);

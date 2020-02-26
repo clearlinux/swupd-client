@@ -28,7 +28,7 @@ test_setup(){
 	EOM
 	)
 
-	repo_config_file="$STATEDIR"/3rd-party/repo.ini
+	repo_config_file="$PATH_PREFIX"/"$THIRD_PARTY_DIR"/repo.ini
 	run sudo sh -c "mkdir -p $STATEDIR/3rd-party/"
 	run sudo sh -c "mkdir -p $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/{test1,test2,test3,test4,test5}"
 	write_to_protected_file -a "$repo_config_file" "$contents"

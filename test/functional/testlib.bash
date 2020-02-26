@@ -1506,7 +1506,7 @@ create_third_party_repo() { #swupd_function
 			printf '[%s]\n\n' "$repo_name"
 			printf 'URL=%s\n\n' "file://$TPURL"
 			printf 'VERSION=%s\n\n' "$version"
-		} | sudo tee -a "$STATEDIR"/3rd-party/repo.ini > /dev/null
+		} | sudo tee -a "$env_name"/testfs/target-dir/"$THIRD_PARTY_DIR"/repo.ini > /dev/null
 	fi
 
 	# every 3rd-party repo needs to have at least the special os-core bundle,

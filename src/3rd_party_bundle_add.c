@@ -133,7 +133,7 @@ static enum swupd_code validate_permissions(struct file *file)
 	}
 
 	string_or_die(&staged_file, "%s/staged/%s", globals.state_dir, file->hash);
-	if (stat(staged_file, &file_stats) == 0) {
+	if (lstat(staged_file, &file_stats) == 0) {
 		if ((file_stats.st_mode & S_ISUID) || (file_stats.st_mode & S_ISGID) || (file_stats.st_mode & S_ISVTX)) {
 			warn("File %s has dangerous permissions\n", file->filename);
 			ret_code = SWUPD_NO;

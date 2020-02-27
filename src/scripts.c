@@ -94,6 +94,21 @@ static void exec_post_update_script(bool reexec, bool block)
 	free(params[0]);
 }
 
+static void run_ldconfig(void)
+{
+	int err;
+
+	if (strcmp("/", globals.path_prefix) == 0) {
+		err = run_command_quiet("/usr/bin/ldconfig", NULL);
+	} else {
+		err = run_command_quiet("/bin/chroot", globals.path_prefix, "/usr/bin/ldconfig", NULL);
+	}
+
+	if (err) {
+		debug("Running ldconfig failed with error code = %d\n", err);
+	}
+}
+
 static void update_triggers(bool block)
 {
 	if (strlen(POST_UPDATE) == 0) {
@@ -152,6 +167,7 @@ void scripts_run_post_update(bool block)
 		}
 	}
 
+	run_ldconfig();
 	update_triggers(block);
 }
 

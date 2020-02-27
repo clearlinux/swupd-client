@@ -504,15 +504,17 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, process_bu
 		for (iter = repos; iter; iter = iter->next) {
 			selected_repo = iter->data;
 
+			/* set the repo's header */
+			third_party_repo_header(selected_repo->name);
+
 			/* set the appropriate variables for the selected 3rd-party repo */
 			ret = third_party_set_repo(selected_repo, globals.sigcheck);
 			if (ret) {
+				/* if one repo failed to set up, we can still try the rest of
+				 * the repos, but keep the error */
 				ret_code = ret;
-				goto clean_and_exit;
+				continue;
 			}
-
-			/* set the repo's header */
-			third_party_repo_header(selected_repo->name);
 
 			ret = process_bundle_fn(NULL);
 			if (ret != expected_ret_code) {

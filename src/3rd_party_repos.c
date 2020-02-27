@@ -124,6 +124,7 @@ int third_party_add_repo(const char *repo_name, const char *repo_url)
 {
 	int ret = 0;
 	struct list *repos;
+	char *repo_config_file = NULL;
 	char *repo_config_file_path = NULL;
 	FILE *fp = NULL;
 
@@ -140,8 +141,10 @@ int third_party_add_repo(const char *repo_name, const char *repo_url)
 	}
 
 	// If we are here, we are cleared to write to file
-	repo_config_file_path = get_repo_config_path();
-	fp = fopen(repo_config_file_path, "a");
+	repo_config_file = get_repo_config_path();
+	repo_config_file_path = sys_dirname(repo_config_file);
+	mkdir_p(repo_config_file_path);
+	fp = fopen(repo_config_file, "a");
 	if (!fp) {
 		ret = -errno;
 	}
@@ -160,6 +163,7 @@ exit:
 		fclose(fp);
 	}
 
+	free(repo_config_file);
 	free(repo_config_file_path);
 	list_free_list_and_data(repos, repo_free_data);
 	return ret;

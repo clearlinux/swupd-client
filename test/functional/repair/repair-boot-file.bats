@@ -7,10 +7,7 @@ load "../testlib"
 
 test_setup() {
 
-	create_test_environment "$TEST_NAME"
-	create_bundle -L -n test-bundle -f /usr/lib/kernel/testfile "$TEST_NAME"
-	# change the content of testfile so the hash doesn't match
-	write_to_protected_file -a "$TARGETDIR"/usr/lib/kernel/testfile "some new content"
+	test_setup_gen
 
 }
 

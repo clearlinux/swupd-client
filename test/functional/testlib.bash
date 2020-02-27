@@ -5,9 +5,14 @@ FUNC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export FUNC_DIR
 TEST_ROOT_DIR="$(pwd)"
 export TEST_ROOT_DIR
-TEST_FILENAME=$(basename "$BATS_TEST_FILENAME")
-export TEST_FILENAME
+if [ -z $TEST_FILENAME ]; then
+	TEST_FILENAME=$(basename "$BATS_TEST_FILENAME")
+	export TEST_FILENAME
+fi
+
 export TEST_NAME=${TEST_FILENAME%.bats}
+export TEST_NAME=${TEST_NAME%-generate.bash}
+
 export THEME_DIRNAME="$BATS_TEST_DIRNAME"
 export TEST_NAME_SHORT="$TEST_NAME"
 export SWUPD_DIR="$FUNC_DIR/../.."
@@ -4136,5 +4141,15 @@ testlib() {
 		echo "$assertions"
 	fi
 	echo ""
+
+}
+
+test_setup_gen() {
+
+	mkdir -p "$TEST_NAME"
+	set_env_variables "$TEST_NAME"
+	sudo tar xf tests-cache/"$TEST_NAME_SHORT".tar -C "$TEST_NAME"
+	path=$(dirname "$(realpath "$TEST_NAME")")
+	set_upstream_server "$TEST_NAME" "file://$path/$TEST_NAME/web-dir"
 
 }

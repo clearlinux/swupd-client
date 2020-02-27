@@ -7,12 +7,7 @@ load "../testlib"
 
 test_setup() {
 
-	create_test_environment "$TEST_NAME"
-	create_bundle -L -n test-bundle1 -f /foo/test-file1 "$TEST_NAME"
-	create_bundle -n test-bundle2 -f /bar/test-file2 "$TEST_NAME"
-	# add test-bundle2 and os-core as dependency of test-bundle1
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle1 os-core
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle1 test-bundle2
+	test_setup_gen
 
 }
 

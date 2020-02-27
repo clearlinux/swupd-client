@@ -7,22 +7,7 @@ load "../testlib"
 
 test_setup() {
 
-	create_test_environment -r "$TEST_NAME" 10 1
-	create_bundle -L -n test-bundle1 -f /foo/file_1,/bar/file_2 -d /baz/testdir "$TEST_NAME"
-	create_version "$TEST_NAME" 20 10 1
-	update_bundle -p "$TEST_NAME" test-bundle1 --update /foo/file_1
-	update_bundle -p "$TEST_NAME" test-bundle1 --delete /bar/file_2
-	update_bundle "$TEST_NAME" test-bundle1 --add /baz/testdir/file_3
-	update_bundle "$TEST_NAME" test-bundle1 --add /bar/file_4
-	update_bundle "$TEST_NAME" test-bundle1 --add /bar/bat/file_5
-	set_current_version "$TEST_NAME" 20
-	# adding an untracked files into an untracked directory (/bat)
-	sudo mkdir "$TARGETDIR"/bat
-	sudo touch "$TARGETDIR"/bat/untracked_file1
-	# adding an untracked file into tracked directory (/bar)
-	sudo touch "$TARGETDIR"/bar/untracked_file2
-	# adding an untracked file into /usr
-	sudo touch "$TARGETDIR"/usr/untracked_file3
+	test_setup_gen
 
 }
 

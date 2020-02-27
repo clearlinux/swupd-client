@@ -7,11 +7,7 @@ load "../testlib"
 
 test_setup() {
 
-	create_test_environment "$TEST_NAME"
-	create_bundle -L -n test-bundle -c /foo -f /foo/file1,/foo/file2,/bar/file3 "$TEST_NAME"
-	create_version "$TEST_NAME" 20 10
-	update_bundle "$TEST_NAME" test-bundle --delete /foo/file1
-	set_current_version "$TEST_NAME" 20
+	test_setup_gen
 
 }
 

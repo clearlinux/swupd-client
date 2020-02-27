@@ -7,9 +7,7 @@ load "../testlib"
 
 test_setup() {
 
-	create_test_environment -e "$TEST_NAME"
-	create_bundle -L -n os-core -f /foo "$TEST_NAME"
-	update_manifest "$WEBDIR"/10/Manifest.os-core file-status /foo .g..
+	test_setup_gen
 
 }
 

@@ -7,10 +7,7 @@ load "../testlib"
 
 test_setup() {
 
-	create_test_environment -r "$TEST_NAME" 10 1
-	bump_format "$TEST_NAME"
-	create_version -r "$TEST_NAME" 40 30 2
-	update_bundle "$TEST_NAME" os-core --add-dir /usr/bin
+	test_setup_gen
 
 }
 

@@ -7,11 +7,7 @@ load "../testlib"
 
 test_setup() {
 
-	create_test_environment "$TEST_NAME"
-	create_bundle -L -n test-bundle -f /usr/lib/kernel/testfile "$TEST_NAME"
-	create_version "$TEST_NAME" 20 10
-	update_bundle "$TEST_NAME" test-bundle --delete /usr/lib/kernel/testfile
-	set_current_version "$TEST_NAME" 20
+	test_setup_gen
 
 }
 

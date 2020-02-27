@@ -7,11 +7,7 @@ load "../testlib"
 
 test_setup() {
 
-	create_test_environment -r "$TEST_NAME"
-	create_bundle -L -n test-bundle -f /usr/foo -d/usr/share/clear/bundles "$TEST_NAME"
-	update_manifest "$WEBDIR"/10/Manifest.test-bundle file-status /usr/foo .g..
-	# since the files must have been installed by the -L option, remove /usr/foo
-	sudo rm -f "$TARGETDIR"/usr/foo
+	test_setup_gen
 
 }
 

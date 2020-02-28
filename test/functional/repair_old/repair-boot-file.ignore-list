@@ -1,0 +1,13 @@
+Update took .*
+Compile-time options:.*
+Compile-time configuration:
+mount point.*
+state directory.*
+bundles directory.*
+certificate path.*
+fallback certificate path.*
+content URL.*
+version URL.*
+format ID.*
+pre-update hook.*
+post-update hook.*

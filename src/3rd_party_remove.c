@@ -168,7 +168,6 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 	}
 
 	/* remove the repo's exported binaries from the system */
-	progress_next_step("load_manifests", PROGRESS_BAR);
 	ret = third_party_process_files(mom->files, "\nRemoving 3rd-party bundle binaries...\n", "remove_binaries", third_party_remove_binary);
 
 exit:

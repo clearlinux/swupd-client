@@ -94,18 +94,12 @@ static int remove_repo(const char *repo_name)
 
 static bool confirm_certificate(const char *cert)
 {
-	int c;
-
 	info("Importing 3rd-party repository public certificate:\n\n");
 	signature_print_info(cert);
 
 	info("\n");
-	info("Do you want to accept this certificate? (y/N): ");
-
-	c = tolower(getchar());
-	info("\n");
-
-	return c == 'y';
+	info("To add the 3rd-party repository you need to accept this certificate\n");
+	return confirm_action();
 }
 
 static int import_temp_certificate(int version, char *hash)

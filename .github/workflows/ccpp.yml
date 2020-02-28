@@ -1,290 +1,37 @@
 name: C/C++ CI
 
 on: [push, pull_request]
-env:
-   RUNNING_IN_CI: true
-   NUM_JOBS: 10
-
 jobs:
-  unit_and_style:
+  test_repair:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci_style.bash
-
-    - name: check style
-      run:  make compliant && make shellcheck && make docs-coverage
-
-    - name: check install
-      run:  sudo make install && make install-check
-
-    - name: run unit tests
-      run:  make check
-
-    - name: run distcheck
-      run:  make distcheck
-
-    - name: Validate bats tests
-      run:  |
-             TESTS=$(for i in $(seq $NUM_JOBS); do scripts/filter_bats_list.bash $i $NUM_JOBS; done|wc -l)
-             TOTAL=$(find test/functional/ -name "*.bats" | wc -l)
-             if [ "$TOTAL" -ne "$TESTS" ]; then
-                 echo "Error in filter_bats_test.bash script"
-                 exit 1
-             fi
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_job1:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-       JOB_NUMBER: 1
     steps:
     - uses: actions/checkout@v1
 
     - name: build
       run:  scripts/build_ci.bash
 
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
     - name: run check
-      run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
-            NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
-            echo "Running $NUM_FILES tests"
-            env TESTS="$(echo $FILES)" make -e -j2 check
+      run: bats ./test/functional/repair
 
     - name: print status
       if: failure()
       run: cat test-suite.log
 
-  test_job2:
+  test_repair_old:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    env:
-       JOB_NUMBER: 2
     steps:
     - uses: actions/checkout@v1
 
     - name: build
       run:  scripts/build_ci.bash
 
-    - name: Run prereq
+    - name: run prereq
       run:  test/functional/generate-cert.prereq
 
     - name: run check
-      run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
-            NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
-            echo "Running $NUM_FILES tests"
-            env TESTS="$(echo $FILES)" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_job3:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-       JOB_NUMBER: 3
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
-            NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
-            echo "Running $NUM_FILES tests"
-            env TESTS="$(echo $FILES)" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_job4:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-       JOB_NUMBER: 4
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
-            NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
-            echo "Running $NUM_FILES tests"
-            env TESTS="$(echo $FILES)" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_job5:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-       JOB_NUMBER: 5
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
-            NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
-            echo "Running $NUM_FILES tests"
-            env TESTS="$(echo $FILES)" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_job6:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-       JOB_NUMBER: 6
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
-            NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
-            echo "Running $NUM_FILES tests"
-            env TESTS="$(echo $FILES)" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_job7:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-       JOB_NUMBER: 7
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
-            NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
-            echo "Running $NUM_FILES tests"
-            env TESTS="$(echo $FILES)" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_job8:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-       JOB_NUMBER: 8
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
-            NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
-            echo "Running $NUM_FILES tests"
-            env TESTS="$(echo $FILES)" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_job9:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-       JOB_NUMBER: 9
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
-            NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
-            echo "Running $NUM_FILES tests"
-            env TESTS="$(echo $FILES)" make -e -j2 check
-
-    - name: print status
-      if: failure()
-      run: cat test-suite.log
-
-  test_job10:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-       JOB_NUMBER: 10
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: build
-      run:  scripts/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
-    - name: run check
-      run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
-            NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
-            echo "Running $NUM_FILES tests"
-            env TESTS="$(echo $FILES)" make -e -j2 check
+      run: bats ./test/functional/repair_old
 
     - name: print status
       if: failure()

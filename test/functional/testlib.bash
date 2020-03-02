@@ -1760,6 +1760,7 @@ create_test_environment() { # swupd_function
 	# create all the files and directories needed
 	# web-dir files & dirs
 	sudo mkdir -p "$env_name"
+	sudo touch "$env_name"/.test_env
 	if [ "$release_files" = true ]; then
 		create_version -p -r "$env_name" "$version" "0" "$format"
 	else
@@ -1871,12 +1872,10 @@ destroy_test_environment() { # swupd_function
 
 	# since the action to be performed is very destructive, at least
 	# make sure the directory does look like a test environment
-	for var in "testfs" "web-dir"; do
-		if [ ! -d "$env_name"/"$var" ]; then
+	if [ ! -e "$env_name"/.test_env ]; then
 			echo "The name provided \"$env_name\" doesn't seem to be a valid test environment"
 			return 1
-		fi
-	done
+	fi
 
 	# if a test fs was created, destroy it
 	if [ -e "$env_name"/.testfs ]; then

@@ -873,7 +873,7 @@ add_to_manifest() { # swupd_function
 	local filecount
 	local contentsize
 	local linked_file
-	local boot_type="."
+	local file_type="."
 	local exported_type="."
 	local file_path
 	local skip_param_validation=false
@@ -948,17 +948,24 @@ add_to_manifest() { # swupd_function
 	elif [ -d "$item" ]; then
 		item_type=D
 	fi
-	# if the file is in the /usr/lib/{kernel, modules} dir then it is a boot file
-	if [ "$(dirname "$item_path")" = "/usr/lib/kernel" ] || [ "$(dirname "$item_path")" = "/usr/lib/modules/" ]; then
-		boot_type="b"
-	fi
+
+	# apply heuristics to the file and select the appropriate flag
+	case "$item_path" in
+		/data/* | /dev/* | /home/* | /proc/* | /root/* | /run/* | /sys/* | /tmp/* | /usr/src* | /var/* | /lost+found/* )
+			file_type="s";;
+		/boot/* | /usr/lib/modules/* | /usr/lib/kernel/* | /usr/bin/bootctl* | /usr/lib/systemd/boot* )
+			file_type="b";;
+		/etc/* )
+			file_type="C";;
+	esac
+
 	# if the file is in any of these paths: /bin, /usr/bin. /usr/local/bin, then it is an exported file
 	if [ "$(dirname "$item_path")" = "/bin" ] || [ "$(dirname "$item_path")" = "/usr/bin" ] || [ "$(dirname "$item_path")" = "/usr/local/bin" ]; then
 		exported_type="x"
 	fi
 	sudo sed -i "s/^contentsize:.*/contentsize:\\t$contentsize/" "$manifest"
 	# add to manifest content
-	write_to_protected_file -a "$manifest" "$item_type$experimental$boot_type$exported_type\\t$name\\t$version\\t$item_path\\n"
+	write_to_protected_file -a "$manifest" "$item_type$experimental$file_type$exported_type\\t$name\\t$version\\t$item_path\\n"
 	# If a manifest tar already exists for that manifest, renew the manifest tar unless specified otherwise
 	if [ "$partial" = false ]; then
 		retar_manifest "$manifest"

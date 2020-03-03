@@ -75,8 +75,6 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	char *rename_tmpdir = NULL;
 	char real_path[4096] = { 0 };
 	struct stat s;
-	struct stat buf;
-	int err;
 	int ret;
 
 	tmp = strdup_or_die(file->filename);
@@ -95,14 +93,13 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	/* make sure the directory where the file should be copied to exists
 	 * and is in deed a directory */
 	string_or_die(&targetpath, "%s%s", globals.path_prefix, rel_dir);
-	ret = stat(targetpath, &s);
-	if ((ret == -1) && (errno == ENOENT)) {
+	if (!sys_filelink_exists(targetpath)) {
 		if (MoM) {
 			verify_fix_path(dir, MoM);
 		} else {
 			debug("Target directory does not exist: %s. Auto-fix disabled\n", targetpath);
 		}
-	} else if (!S_ISDIR(s.st_mode)) {
+	} else if (!sys_filelink_is_dir(targetpath)) {
 		error("Target exists but is NOT a directory: %s\n", targetpath);
 	}
 
@@ -242,8 +239,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 
 		free_and_clear_pointer(&file->staging);
 		string_or_die(&file->staging, "%s%s/.update.%s", globals.path_prefix, rel_dir, base);
-		err = lstat(file->staging, &buf);
-		if (err != 0) {
+		if (!sys_file_exists(file->staging)) {
 			free_and_clear_pointer(&file->staging);
 			ret = SWUPD_COULDNT_CREATE_FILE;
 			goto out;
@@ -288,16 +284,13 @@ int rename_staged_file_to_final(struct file *file)
 	} else if (file->is_dir || file->is_ghosted) {
 		ret = 0;
 	} else {
-		struct stat stat;
-		ret = lstat(target, &stat);
-
 		/* If the file was previously a directory but no longer, then
 		 * we need to move it out of the way.
 		 * This should not happen because the server side complains
 		 * when creating update content that includes such a state
 		 * change.  But...you never know. */
 
-		if ((ret == 0) && (S_ISDIR(stat.st_mode))) {
+		if (sys_is_dir(target)) {
 			char *lostnfound;
 			char *base;
 

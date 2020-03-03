@@ -511,7 +511,6 @@ static void remove_orphaned_files(struct list *files_to_verify, bool repair)
 		struct file *file;
 		char *fullname;
 		char *base;
-		struct stat sb;
 		int fd;
 
 		file = iter->data;
@@ -534,7 +533,7 @@ static void remove_orphaned_files(struct list *files_to_verify, bool repair)
 
 		fullname = sys_path_join(globals.path_prefix, file->filename);
 
-		if (lstat(fullname, &sb) != 0) {
+		if (!sys_file_exists(fullname)) {
 			/* correctly, the file is not present */
 			goto out;
 		}
@@ -559,7 +558,7 @@ static void remove_orphaned_files(struct list *files_to_verify, bool repair)
 
 		base = basename(fullname);
 
-		if (!S_ISDIR(sb.st_mode)) {
+		if (!sys_is_dir(fullname)) {
 			ret = unlinkat(fd, base, 0);
 			if (ret && errno != ENOENT) {
 				warn(" -> Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));

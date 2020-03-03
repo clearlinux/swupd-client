@@ -290,6 +290,17 @@ bool sys_file_is_hardlink(const char *file1, const char *file2)
 	return lstat(file1, &sb) == 0 && lstat(file2, &sb2) == 0 && sb.st_ino == sb2.st_ino;
 }
 
+long sys_file_hardlink_count(const char *file)
+{
+	struct stat st;
+
+	if (lstat(file, &st)) {
+		return -errno;
+	}
+
+	return st.st_nlink;
+}
+
 void journal_log_error(const char *message)
 {
 	if (!message) {
@@ -500,4 +511,15 @@ int sys_rm(const char *filename)
 	}
 
 	return sys_rmdir(filename);
+}
+
+long sys_get_file_size(const char *filename)
+{
+	static const int BLOCK_SIZE = 512;
+	struct stat st;
+
+	if (lstat(filename, &st) == 0) {
+		return st.st_blocks * BLOCK_SIZE;
+	}
+	return -errno;
 }

@@ -1125,7 +1125,7 @@ enum swupd_code execute_verify(void)
 		info("\n");
 		if (files_to_verify) {
 			char *file_path = sys_path_join(globals.path_prefix, cmdline_option_file);
-			info("Limiting diagnose to the following %s:\n", is_dir(file_path) ? "directory (recursively)" : "file");
+			info("Limiting diagnose to the following %s:\n", sys_filelink_is_dir(file_path) ? "directory (recursively)" : "file");
 			free_and_clear_pointer(&file_path);
 			info(" - %s\n", cmdline_option_file);
 		} else {

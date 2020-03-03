@@ -647,7 +647,7 @@ enum swupd_code third_party_create_wrapper_script(struct file *file)
 		goto close_and_exit;
 	}
 
-	if (!is_dir(bin_directory)) {
+	if (!sys_filelink_is_dir(bin_directory)) {
 		error("The path %s for 3rd-party content exists but is not a directory\n", bin_directory);
 		ret_code = SWUPD_COULDNT_CREATE_DIR;
 		goto close_and_exit;

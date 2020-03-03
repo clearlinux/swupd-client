@@ -193,7 +193,12 @@ bool is_root(void);
 /**
  * @brief Check if the provided path is a directory
  */
-bool is_dir(const char *path);
+bool sys_is_dir(const char *path);
+
+/**
+ * @brief Check if the provided path is a directory following symlinks
+ */
+bool sys_filelink_is_dir(const char *path);
 
 /**
  * @brief Remove file or directory.

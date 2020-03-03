@@ -215,23 +215,29 @@ static int compute_bundle_dependecies(struct manifest *mom, struct list *bundles
 	return 0;
 }
 
+static enum swupd_code apply_heuristics_for_new_files(struct list *files)
+{
+	struct list *iter;
+	struct file *file;
+
+	timelist_timer_start(globals.global_times, "Applying heuristics");
+	for (iter = files; iter; iter = iter->next) {
+		file = iter->data;
+		(void)ignore(file);
+		apply_heuristics(file);
+	}
+	timelist_timer_stop(globals.global_times);
+
+	return SWUPD_OK;
+}
+
 static enum swupd_code install_files(struct manifest *mom, struct list *to_install_files)
 {
 	enum swupd_code ret = SWUPD_OK;
-	struct list *iter;
 
 	/* Install all bundle(s) files into the fs */
 	timelist_timer_start(globals.global_times, "Installing bundle(s) files onto filesystem");
 	progress_next_step("install_files", PROGRESS_BAR);
-
-	// Apply heuristics to all files
-	timelist_timer_start(globals.global_times, "Applying heuristics");
-	for (iter = to_install_files; iter; iter = iter->next) {
-		struct file *file = iter->data;
-		(void)ignore(file);
-		apply_heuristics(file);
-	}
-	timelist_timer_stop(globals.global_times); // closing: Applying heuristics
 
 	//TODO: Improve staging functions so we won't need this hack
 	globals.update_count = list_len(to_install_files) - globals.update_skip;
@@ -511,7 +517,7 @@ enum swupd_code execute_bundle_add_extra(struct list *bundles_list, extra_proc_f
 
 enum swupd_code execute_bundle_add(struct list *bundles_list)
 {
-	return execute_bundle_add_extra(bundles_list, NULL, NULL, NULL);
+	return execute_bundle_add_extra(bundles_list, apply_heuristics_for_new_files, NULL, NULL);
 }
 
 enum swupd_code bundle_add_main(int argc, char **argv)

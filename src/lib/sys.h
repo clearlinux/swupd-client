@@ -221,6 +221,19 @@ int sys_rm_recursive(const char *filename);
 int sys_rm(const char *filename);
 
 /**
+ * @brief Get the count of hard links to a file.
+ *
+ * @return Return the hard link count or a negative number on errors.
+ */
+long sys_file_hardlink_count(const char *file);
+
+/**
+ * @brief Get the size of a file.
+ *
+ * @return Return the size of a file or a negative number on errors.
+ */
+long sys_get_file_size(const char *filename);
+/**
  * @brief Run a systemctl command with the informed parameters.
  */
 #define systemctl_cmd(...) run_command_quiet(SYSTEMCTL, __VA_ARGS__)

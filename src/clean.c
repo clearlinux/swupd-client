@@ -30,8 +30,6 @@
 #define FLAG_ALL 2000
 #define FLAG_DRY_RUN 2001
 
-static const int BLOCK_SIZE = 512;
-
 static void print_help(void)
 {
 	print("Remove cached content used for updates from state directory\n\n");
@@ -117,8 +115,7 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 {
 	int ret = SWUPD_OK;
 	DIR *dir;
-	struct stat st;
-	long size;
+	long size, hardlink_count;
 
 	dir = opendir(path);
 	if (!dir) {
@@ -153,17 +150,20 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 			continue;
 		}
 
-		if (lstat(file, &st) == 0) {
+		hardlink_count = sys_file_hardlink_count(file);
+		if (hardlink_count == 1) {
 			/* a file being removed (unlinked) may have many hardlinks which may
 			 * stay in the system, so the only files being trully removed are
 			 * those which only have one inode left in the system.
 			 * This also means that when doing dry-run we can only guess how
 			 * much space we would free since we cannot know what inodes will
 			 * have all their hardlinks removed */
-			size = st.st_nlink == 1 ? (st.st_blocks * BLOCK_SIZE) : 0;
+			size = sys_get_file_size(file);
 		} else {
 			size = 0;
-			warn("Couldn't get file size: %s\n", file);
+			if (hardlink_count < 0) {
+				warn("Couldn't get file size: %s\n", file);
+			}
 		}
 
 		if (dry_run) {
@@ -312,7 +312,6 @@ end:
 static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bool all)
 {
 	DIR *dir;
-	struct stat st;
 	long size;
 
 	dir = opendir(path);
@@ -370,9 +369,8 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 		}
 
 		/* Remove empty dirs if possible. */
-		if (lstat(version_dir, &st) == 0) {
-			size = st.st_blocks * BLOCK_SIZE;
-		} else {
+		size = sys_get_file_size(version_dir);
+		if (size < 0) {
 			size = 0;
 		}
 		if (!rmdir(version_dir) || (dry_run && all)) {

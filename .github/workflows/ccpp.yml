@@ -73,9 +73,6 @@ jobs:
     - name: build
       run:  scripts/github_actions/build_ci.bash
 
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
     - name: run check
       run: |
             FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
@@ -107,9 +104,6 @@ jobs:
 
     - name: build
       run:  scripts/github_actions/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
@@ -143,9 +137,6 @@ jobs:
     - name: build
       run:  scripts/github_actions/build_ci.bash
 
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
     - name: run check
       run: |
             FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
@@ -177,9 +168,6 @@ jobs:
 
     - name: build
       run:  scripts/github_actions/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
@@ -213,9 +201,6 @@ jobs:
     - name: build
       run:  scripts/github_actions/build_ci.bash
 
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
     - name: run check
       run: |
             FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
@@ -247,9 +232,6 @@ jobs:
 
     - name: build
       run:  scripts/github_actions/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
@@ -283,9 +265,6 @@ jobs:
     - name: build
       run:  scripts/github_actions/build_ci.bash
 
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
     - name: run check
       run: |
             FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
@@ -317,9 +296,6 @@ jobs:
 
     - name: build
       run:  scripts/github_actions/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
@@ -353,9 +329,6 @@ jobs:
     - name: build
       run:  scripts/github_actions/build_ci.bash
 
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
     - name: run check
       run: |
             FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
@@ -388,9 +361,6 @@ jobs:
     - name: build
       run:  scripts/github_actions/build_ci.bash
 
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
-
     - name: run check
       run: |
             FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
@@ -420,9 +390,6 @@ jobs:
 
     - name: build
       run:  scripts/github_actions/build_ci.bash
-
-    - name: Run prereq
-      run:  test/functional/generate-cert.prereq
 
     - name: run check slow
       run: |

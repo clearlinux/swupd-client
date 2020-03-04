@@ -5,7 +5,10 @@ Release vX.XX.XX
 Bug Fixes:
 
 Features:
- - Add the --file flag to diagnose and repair to allow users to diagnose/repair a specific
-   file or directory (recursively).
+ - Introduces management of 3rd-party repositories and content installed from them.
+   A 3rd-party repository enables the distribution of user produced content. Multiple
+   repositories can be managed along with the default upstream server. Most of the
+   swupd subcommands used for managing upstream content are supported to manage
+   3rd-party content along with most of their options.
 
 Tests:

@@ -175,7 +175,7 @@ systemdunit_DATA = \
 	data/swupd-update.timer \
 	data/verifytime.service
 
-TEST_EXTENSIONS = .bats .prereq .test
+TEST_EXTENSIONS = .bats .test
 
 if ENABLE_TESTS
 tap_driver = env AM_TAP_AWK='$(AWK)' $(SHELL) \
@@ -260,7 +260,6 @@ install-check:
 	test/installation/test.bats
 
 functional-check:
-	test/functional/generate-cert.prereq
 	env TESTS="$(shell find test/functional  -name *.bats \( ! -path "*only_in_ci_system*" \) | sort)" $(MAKE) -e check
 	env TESTS="$(shell find ./test/functional/only_in_ci_system  -name *.bats | sort)" $(MAKE) -e -j1 check
 

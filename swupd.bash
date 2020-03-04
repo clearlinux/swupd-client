@@ -87,7 +87,7 @@ _swupd()
 		opts="$global --repo"
 		break;;
 		("remove")
-		opts="$global --repo"
+		opts="$global --repo --force"
 		break;;
 	esac
 	done

@@ -679,6 +679,11 @@ SUBCOMMANDS
        Removes a 3rd-party repository along with all the content installed
        from it from the system.
 
+         -  ``force``
+
+         Attempt to proceed with the removal of the repo even if non-critical
+         errors found.
+
     -  ``list``
 
        Lists the 3rd-party repositories available to the system. These

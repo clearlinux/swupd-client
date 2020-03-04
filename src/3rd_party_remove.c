@@ -25,22 +25,43 @@
 
 #ifdef THIRDPARTY
 
+static bool cmdline_option_force = false;
+
+static const struct option prog_opts[] = {
+	{ "force", no_argument, 0, 'x' },
+};
+
 static void print_help(void)
 {
 	/* TODO(castulo): we need to change this description to match that of the
 	 * documentation once the documentation for this content is added */
 	print("Removes a 3rd-party repository from the list of available repositories in the system\n\n");
 	print("Usage:\n");
-	print("   swupd 3rd-party remove [repo-name]\n\n");
+	print("   swupd 3rd-party remove [OPTION...] [repo-name]\n\n");
 
 	global_print_help();
+
+	print("Options:\n");
+	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("\n");
 }
 
+static bool parse_opt(int opt, char *optarg)
+{
+	switch (opt) {
+	case 'x':
+		cmdline_option_force = optarg_to_bool(optarg);
+		return true;
+	default:
+		return false;
+	}
+	return false;
+}
+
 static const struct global_options opts = {
-	NULL,
-	0,
-	NULL,
+	prog_opts,
+	sizeof(prog_opts) / sizeof(struct option),
+	parse_opt,
 	print_help,
 };
 
@@ -75,7 +96,7 @@ static bool is_installed_bundle_data(const void *bundle)
 
 enum swupd_code third_party_remove_main(int argc, char **argv)
 {
-	enum swupd_code ret = SWUPD_OK;
+	enum swupd_code ret, ret_partial = SWUPD_OK;
 	const int step_in_third_party_remove = 2;
 	int err;
 	int version;
@@ -122,7 +143,7 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
 	ret = third_party_set_repo(repo, globals.sigcheck);
 	if (ret) {
-		goto exit;
+		goto remove_repo;
 	}
 
 	/* get the current mom */
@@ -130,14 +151,14 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 	if (version < 0) {
 		error("Unable to determine current version for repository %s\n\n", name);
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
-		goto exit;
+		goto remove_repo;
 	}
 
 	mom = load_mom(version, NOT_A_MIX, NULL);
 	if (!mom) {
 		error("Could not load the manifest for repository %s\n\n", name);
 		ret = SWUPD_COULDNT_LOAD_MOM;
-		goto exit;
+		goto remove_repo;
 	}
 
 	/* get a list of bundles already installed in the system */
@@ -146,9 +167,30 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 	ret = mom_get_manifests_list(mom, &mom->submanifests, is_installed_bundle_data);
 	if (ret) {
 		ret = SWUPD_COULDNT_LOAD_MANIFEST;
-		goto exit;
+		goto remove_repo;
 	}
 	mom->files = consolidate_files_from_bundles(mom->submanifests);
+
+	/* if there are errors at this point the repo may be corrupt,
+	 * continue only if forced by the user */
+remove_repo:
+	if (ret) {
+		char *bin_dir;
+		bin_dir = third_party_get_bin_dir();
+		if (cmdline_option_force) {
+			warn("The --force option is specified; forcing the removal of the repository\n");
+			info("Please be aware that this may leave exported files in %s\n", bin_dir);
+			ret_partial = ret;
+			ret = SWUPD_OK;
+			free_and_clear_pointer(&bin_dir);
+		} else {
+			error("The 3rd-party repository %s is corrupt and cannot be removed cleanly\n", name);
+			info("To force the removal of the repository use the --force option\n");
+			info("Please be aware that this may leave exported files in %s\n", bin_dir);
+			free_and_clear_pointer(&bin_dir);
+			goto exit;
+		}
+	}
 
 	/* remove the repo from repo.ini */
 	info("Removing repository %s...\n", name);
@@ -168,11 +210,18 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 	}
 
 	/* remove the repo's exported binaries from the system */
-	ret = third_party_process_files(mom->files, "\nRemoving 3rd-party bundle binaries...\n", "remove_binaries", third_party_remove_binary);
+	if (mom && mom->files) {
+		ret = third_party_process_files(mom->files, "\nRemoving 3rd-party bundle binaries...\n", "remove_binaries", third_party_remove_binary);
+	}
 
 exit:
 	if (ret == SWUPD_OK) {
-		print("\nRepository and its content removed successfully\n");
+		if (ret_partial == SWUPD_OK) {
+			print("\nRepository and its content removed successfully\n");
+		} else {
+			print("\nRepository and its content partially removed\n");
+			ret = ret_partial;
+		}
 	} else {
 		print("\nFailed to remove repository\n");
 	}

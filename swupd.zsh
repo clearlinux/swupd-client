@@ -51,7 +51,7 @@ local -a installed all_bundles
 
     (( $#comma )) && local separator="-s ,"
     if (( ! $#installed )); then
-      _message -r "Can't find installed bundles."
+      _message -r "Cannot find installed bundles."
     elif (( ! $#return_only )); then
       (( ! $#unique )) && installed=(${installed:|words})
       _alternative "bundle:installed bundles: _values $separator $installed" && ret=0
@@ -91,7 +91,7 @@ local -a installed all_bundles
         _alternative "available bundles:available bundles: _values $separator $all_bundles" && ret=0
       fi
     else
-      _message -r "Can't find Manifest file."
+      _message -r "Cannot find Manifest file."
     fi
   }
 
@@ -178,7 +178,7 @@ if [[ -n "$state" ]]; then
         "mirror:Configure mirror url for swupd content"
         "clean:Clean cached files"
         "hashdump:Dump the HMAC hash of a file"
-        "3rd-party: Indicate Swupd to use user's third party repo"
+        "3rd-party: Manage third party repositories"
       )
       _describe -t subcmds 'swupd subcommand' subcmds && ret=0
       ;;
@@ -214,6 +214,7 @@ if [[ -n "$state" ]]; then
           remove)
           local -a remove; remove=(
           $global_opt
+          '(help status -x --force)'{-x,--force}'[Attempt to proceed even if non-critical errors found]'
           '(help)Positional arg: [repo-name]'
           _arguments $remove && ret=0
           ;;

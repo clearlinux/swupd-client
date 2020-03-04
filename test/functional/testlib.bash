@@ -488,13 +488,13 @@ set_env_variables() { # swupd_function
 	debug_msg "PATH_PREFIX: $PATH_PREFIX"
 
 	# different options for swupd
-	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $TEST_ROOT_DIR/Swupd_Root.pem -I --no-progress"
-	export SWUPD_OPTS_PROGRESS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $TEST_ROOT_DIR/Swupd_Root.pem -I"
+	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $TEST_DIRNAME/Swupd_Root.pem -I --no-progress"
+	export SWUPD_OPTS_PROGRESS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $TEST_DIRNAME/Swupd_Root.pem -I"
 	export SWUPD_OPTS_KEEPCACHE="$SWUPD_OPTS --keepcache"
 	export SWUPD_OPTS_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -F staging -I --no-progress"
-	export SWUPD_OPTS_NO_FMT="-S $testfs_path/state -p $testfs_path/target-dir -C $TEST_ROOT_DIR/Swupd_Root.pem -I --no-progress"
+	export SWUPD_OPTS_NO_FMT="-S $testfs_path/state -p $testfs_path/target-dir -C $TEST_DIRNAME/Swupd_Root.pem -I --no-progress"
 	export SWUPD_OPTS_NO_FMT_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -I --no-progress"
-	export SWUPD_OPTS_NO_PATH="-S $testfs_path/state -F staging -C $TEST_ROOT_DIR/Swupd_Root.pem -I --no-progress"
+	export SWUPD_OPTS_NO_PATH="-S $testfs_path/state -F staging -C $TEST_DIRNAME/Swupd_Root.pem -I --no-progress"
 
 	export CLIENT_CERT_DIR="$testfs_path/target-dir/etc/swupd"
 	export CLIENT_CERT="$CLIENT_CERT_DIR/client.pem"
@@ -1339,8 +1339,8 @@ sign_manifest() { # swupd_function
 	validate_item "$manifest"
 
 	sudo openssl smime -sign -binary -in "$manifest" \
-	-signer "$TEST_ROOT_DIR"/Swupd_Root.pem \
-	-inkey "$TEST_ROOT_DIR"/private.pem \
+	-signer "$TEST_DIRNAME"/Swupd_Root.pem \
+	-inkey "$TEST_DIRNAME"/private.pem \
 	-outform DER -out "$(dirname "$manifest")"/Manifest.MoM.sig
 }
 
@@ -1362,8 +1362,8 @@ sign_version() { # swupd_function
 	validate_item "$version_file"
 
 	sudo openssl smime -sign -binary -in "$version_file" \
-		-signer "$TEST_ROOT_DIR"/Swupd_Root.pem \
-		-inkey "$TEST_ROOT_DIR"/private.pem \
+		-signer "$TEST_DIRNAME"/Swupd_Root.pem \
+		-inkey "$TEST_DIRNAME"/private.pem \
 		-outform DER -out "$version_file".sig
 
 }
@@ -1522,8 +1522,8 @@ create_third_party_repo() { #swupd_function
 	# - Swupd_Root.pem
 	# - format
 	debug_msg "Adding bundle os-core to the 3rd-party repo..."
-	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$TEST_ROOT_DIR"/Swupd_Root.pem)
-	sudo cp -p "$TEST_ROOT_DIR"/Swupd_Root.pem "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
+	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$TEST_DIRNAME"/Swupd_Root.pem)
+	sudo cp -p "$TEST_DIRNAME"/Swupd_Root.pem "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
 	create_tar "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
 	cert="$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
 	if [ "$add" = true ]; then
@@ -1766,8 +1766,16 @@ create_test_environment() { # swupd_function
 
 	# create all the files and directories needed
 	# web-dir files & dirs
-	sudo mkdir -p "$env_name"
-	sudo touch "$env_name"/.test_env
+	mkdir -p "$env_name"
+	touch "$env_name"/.test_env
+
+	# export environment variables that are dependent of the test env
+	set_env_variables "$env_name"
+
+	# Generate certificates
+	generate_certificate "$env_name"/private.pem "$env_name"/Swupd_Root.pem "$FUNC_DIR"/certattributes.cnf
+
+	# Create version
 	if [ "$release_files" = true ]; then
 		create_version -p -r "$env_name" "$version" "0" "$format"
 	else
@@ -1803,9 +1811,6 @@ create_test_environment() { # swupd_function
 	debug_msg "Creating a state dir"
 	sudo mkdir -p "$statedir"/{staged,download,delta,telemetry,bundles,3rd-party}
 	sudo chmod -R 0700 "$statedir"
-
-	# export environment variables that are dependent of the test env
-	set_env_variables "$env_name"
 
 	# every environment needs to have at least the os-core bundle so this should be
 	# added by default to every test environment unless specified otherwise

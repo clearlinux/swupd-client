@@ -24,7 +24,6 @@
 #define _GNU_SOURCE
 #include <assert.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -203,12 +202,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		 * inefficient.  So prefer hardlink and fall back if needed: */
 		ret = -1;
 		if (!file->is_config && !file->is_state && !file->use_xattrs) {
-			if (!file->is_link) {
-				ret = link(original, target);
-			} else {
-				ret = linkat(-1, original, -1, target,
-					     AT_SYMLINK_FOLLOW);
-			}
+			ret = link(original, target);
 		}
 		if (ret < 0) {
 			/* either the hardlink failed, or it was undesirable (config), do a tar-tar dance */

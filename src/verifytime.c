@@ -77,10 +77,16 @@ exit:
 
 static bool set_time(time_t mtime)
 {
-	if (stime(&mtime) != 0) {
+	struct timespec clock_time = {
+		.tv_sec = mtime,
+		.tv_nsec = 0,
+	};
+
+	if (clock_settime(CLOCK_REALTIME, &clock_time) < 0) {
 		error("Failed to set system time\n");
 		return false;
 	}
+
 	info("Set system time to %s\n", ctime(&mtime));
 	return true;
 }

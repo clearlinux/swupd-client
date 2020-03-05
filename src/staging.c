@@ -201,7 +201,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		 * might have for overlaid mounts.  The use of tar is a simple way to copy, but
 		 * inefficient.  So prefer hardlink and fall back if needed: */
 		ret = -1;
-		if (!file->is_config && !file->is_state && !file->use_xattrs) {
+		if (!file->is_config && !file->is_state && !file->use_xattrs && !file->is_link) {
 			ret = link(original, target);
 		}
 		if (ret < 0) {

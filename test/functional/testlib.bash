@@ -2303,7 +2303,7 @@ create_bundle() { # swupd_function
 	cb_usage() {
 		cat <<-EOM
 		Usage:
-		    create_bundle [-L] [-t] [-e] [-n] <bundle_name> [-v] <version> [-u] <3rd-party repo> [-d] <list of dirs> [-f] <list of files> [-l] <list of links> ENV_NAME
+		    create_bundle [-L] [-t] [-e] [-n] <bundle_name> [-v] <version> [-u] <3rd-party repo> [-d] <list of dirs> [-f] <list of files> [-l] <list of links> [-h] <list of hardlinks> [-H] <list of symlinks hardlinks> ENV_NAME
 
 		Options:
 		    -L    When the flag is selected the bundle will be 'installed' in the target-dir, otherwise it will only be created in content dir
@@ -2315,6 +2315,8 @@ create_bundle() { # swupd_function
 		    -d    Comma-separated list of directories to be included in the bundle
 		    -f    Comma-separated list of files to be created and included in the bundle
 		    -l    Comma-separated list of symlinks to files to be created and included in the bundle
+		    -h    Comma-separated list of hardlinks to be created and included in the bundle. All files in the list are hardlinks to the same file
+		    -H    Comma-separated list of symlink hardlinks to be created and included in the bundle. All symlink in the list are hardlinks to the same file and aren't broken
 		    -c    Comma-separated list of symlinks to directories to be created and included in the bundle
 		    -b    Comma-separated list of dangling (broken) symlinks to be created and included in the bundle
 
@@ -2368,6 +2370,8 @@ create_bundle() { # swupd_function
 	local opt
 	local dir_list
 	local file_list
+	local hardlink_list
+	local hardsymlink_list
 	local link_list
 	local dangling_link_list
 	local dlink_list
@@ -2395,10 +2399,12 @@ create_bundle() { # swupd_function
 		return
 	fi
 	set -f  # turn off globbing
-	while getopts :v:d:f:l:b:c:n:u:tLe opt; do
+	while getopts :v:d:f:l:h:H:b:c:n:u:tLe opt; do
 		case "$opt" in
 			d)	IFS=, read -r -a dir_list <<< "$OPTARG"  ;;
 			f)	IFS=, read -r -a file_list <<< "$OPTARG" ;;
+			h)	IFS=, read -r -a hardlink_list <<< "$OPTARG" ;;
+			H)	IFS=, read -r -a hardsymlink_list <<< "$OPTARG" ;;
 			l)	IFS=, read -r -a link_list <<< "$OPTARG" ;;
 			b)	IFS=, read -r -a dangling_link_list <<< "$OPTARG" ;;
 			c)	IFS=, read -r -a dlink_list <<< "$OPTARG" ;;
@@ -2627,7 +2633,133 @@ create_bundle() { # swupd_function
 		fi
 	done
 
-	# 7) Add the bundle to the MoM (do not use -p option so the MoM's tar is created and signed)
+	# 7) Create the requested hardlinks files
+	if (( ${#hardlink_list[@]} )); then
+		val="${hardlink_list[0]}"
+		add_dirs
+		# if the user wants to use an existing file, use it, else create a new one
+		if [[ "$val" = *":"* ]]; then
+			bundle_file="${val#*:}"
+			val="${val%:*}"
+			validate_item "$bundle_file"
+		else
+			if [ "$(dirname "$val")" = "/bin" ] || [ "$(dirname "$val")" = "/usr/bin" ] || [ "$(dirname "$val")" = "/usr/local/bin" ]; then
+				bundle_file=$(create_file -x "$files_path")
+			else
+				bundle_file=$(create_file "$files_path")
+			fi
+		fi
+
+		debug_msg "hardlink $val -> $bundle_file"
+		add_to_manifest -p "$manifest" "$bundle_file" "$val"
+		# Add the file to the zero pack of the bundle
+		sudo tar --preserve-permissions -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_file")"
+		# if the local_bundle flag is set, copy the files to the target-dir as if the
+		# bundle had been locally installed
+		if [ "$local_bundle" = true ]; then
+			sudo mkdir -p "$target_path$(dirname "$val")"
+			sudo cp -p "$bundle_file" "$target_path$val"
+
+			if [ "$third_party" = true ]; then
+				if [ "$(dirname "$val")" = "/bin" ] || [ "$(dirname "$val")" = "/usr/bin" ] || [ "$(dirname "$val")" = "/usr/local/bin" ]; then
+					# if the bundle is from a 3rd-party repo and has binaries, they should
+					# be exported to /opt/3rd-party/bin
+					debug_msg "Exporting 3rd-party bundle binary $THIRD_PARTY_BIN_DIR/$(basename "$val")"
+					sudo mkdir -p "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"
+					sudo touch "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
+					sudo chmod +x "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
+				fi
+			fi
+		fi
+
+		for val_link in "${hardlink_list[@]:1}"; do
+			debug_msg "hardlink $val_link -> $val"
+			add_to_manifest -p "$manifest" "$bundle_file" "$val_link"
+
+			# bundle had been locally installed
+			if [ "$local_bundle" = true ]; then
+				sudo mkdir -p "$target_path$(dirname "$val_link")"
+				sudo ln "$target_path$val" "$target_path$val_link"
+				if [ "$third_party" = true ]; then
+					if [ "$(dirname "$val_link")" = "/bin" ] || [ "$(dirname "$val_link")" = "/usr/bin" ] || [ "$(dirname "$val_link")" = "/usr/local/bin" ]; then
+						# if the bundle is from a 3rd-party repo and has binaries, they should
+						# be exported to /opt/3rd-party/bin
+						debug_msg "Exporting 3rd-party bundle binary $THIRD_PARTY_BIN_DIR/$(basename "$val_link")"
+						sudo mkdir -p "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"
+						sudo touch "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val_link")"
+						sudo chmod +x "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val_link")"
+					fi
+				fi
+			fi
+		done
+	fi
+
+	# 8) Create the requested hardlink to symlinks
+	if (( ${#hardsymlink_list[@]} )); then
+		val="${hardsymlink_list[0]}"
+
+		if [[ "$val" != "/"* ]]; then
+			val=/"$val"
+		fi
+		# if the directory the link is doesn't exist,
+		# add it to the bundle (except if the directory is "/")
+		fdir=$(dirname "$val")
+		if [ "$fdir" != "/" ]; then
+			if ! sudo cat "$manifest" | grep -qx "[DL]\\.\\.\\..*$fdir"; then
+				bundle_dir=$(create_dir "$files_path")
+				add_to_manifest -p "$manifest" "$bundle_dir" "$fdir"
+			fi
+		else
+			fdir=""
+		fi
+		# first create the file that will be pointed by the symlink
+		pfile=$(create_file "$files_path")
+		pfile_name=$(generate_random_name file_)
+		pfile_path="$fdir"/"$pfile_name"
+		# temporarily rename the file to the name it will have in the file system
+		# so we can create the symlink with the correct name
+		sudo mv "$pfile" "$(dirname "$pfile")"/"$pfile_name"
+		bundle_link=$(create_link "$files_path" "$(dirname "$pfile")"/"$pfile_name")
+		sudo mv "$(dirname "$pfile")"/"$pfile_name" "$pfile"
+		# add the pointed file to the zero pack and manifest
+		sudo tar --preserve-permissions -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$pfile")"
+		add_to_manifest "$manifest" "$pfile" "$pfile_path"
+		# add the symlink to zero pack and manifest
+		sudo tar --preserve-permissions -C "$files_path" -rf "$version_path"/pack-"$bundle_name"-from-0.tar --transform "s,^,staged/," "$(basename "$bundle_link")"
+		add_to_manifest -p -s "$manifest" "$bundle_link" "$val"
+		debug_msg "hardlink symlink -> $bundle_link"
+		debug_msg "file pointed to -> $pfile"
+		if [ "$local_bundle" = true ]; then
+			sudo mkdir -p "$target_path$(dirname "$val")"
+			# if local_bundle is enabled copy the link to target-dir but also
+			# copy the file it points to
+			sudo cp -p "$pfile" "$target_path$pfile_path"
+			sudo ln -rs "$target_path$pfile_path" "$target_path$val"
+		fi
+
+		for val_link in "${hardsymlink_list[@]:1}"; do
+			debug_msg "hardlink symlink $val_link -> $val"
+			add_to_manifest -p -s "$manifest" "$bundle_link" "$val_link"
+
+			# bundle had been locally installed
+			if [ "$local_bundle" = true ]; then
+				sudo mkdir -p "$target_path$(dirname "$val_link")"
+				sudo ln "$target_path$val" "$target_path$val_link"
+				if [ "$third_party" = true ]; then
+					if [ "$(dirname "$val_link")" = "/bin" ] || [ "$(dirname "$val_link")" = "/usr/bin" ] || [ "$(dirname "$val_link")" = "/usr/local/bin" ]; then
+						# if the bundle is from a 3rd-party repo and has binaries, they should
+						# be exported to /opt/3rd-party/bin
+						debug_msg "Exporting 3rd-party bundle binary $THIRD_PARTY_BIN_DIR/$(basename "$val_link")"
+						sudo mkdir -p "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"
+						sudo touch "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val_link")"
+						sudo chmod +x "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val_link")"
+					fi
+				fi
+			fi
+		done
+	fi
+
+	# 9) Add the bundle to the MoM (do not use -p option so the MoM's tar is created and signed)
 	debug_msg "Adding bundle to the MoM"
 	if [ "$experimental" = true ]; then
 		add_to_manifest -e "$version_path"/Manifest.MoM "$manifest" "$bundle_name"
@@ -2635,19 +2767,19 @@ create_bundle() { # swupd_function
 		add_to_manifest "$version_path"/Manifest.MoM "$manifest" "$bundle_name"
 	fi
 
-	# 8) Create/renew manifest tars
+	# 10) Create/renew manifest tars
 	debug_msg "Creating the manifest tar"
 	sudo rm -f "$manifest".tar
 	create_tar "$manifest"
 
-	# 9) Create the subscription to the bundle if the local_bundle flag is enabled
+	# 11) Create the subscription to the bundle if the local_bundle flag is enabled
 	# all installed bundles in the system should have a file in this directory
 	if [ "$local_bundle" = true ]; then
 		debug_msg "Creating tracking file for bundle so it show as installed"
 		sudo touch "$target_path"/usr/share/clear/bundles/"$bundle_name"
 	fi
 
-	# 10) Create the tracking file for the bundle if the track_bundle flag is set
+	# 12) Create the tracking file for the bundle if the track_bundle flag is set
 	# all bundles specifically installed by a user should have a file in this directory
 	# bundles installed as dependencies should not have files here
 	if [ "$track_bundle" = true ]; then

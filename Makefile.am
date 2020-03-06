@@ -41,6 +41,7 @@ swupd_SOURCES = \
 	src/3rd_party_check_update.c \
 	src/3rd_party_clean.c \
 	src/3rd_party_diagnose.c \
+	src/3rd_party_info.c \
 	src/3rd_party_list.c \
 	src/3rd_party_remove.c \
 	src/3rd_party_repair.c \

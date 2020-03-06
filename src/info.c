@@ -21,7 +21,7 @@
 #include "lib/log.h"
 #include "swupd.h"
 
-enum swupd_code print_update_conf_info()
+enum swupd_code print_update_conf_info(void)
 {
 	enum swupd_code ret = SWUPD_OK;
 	char dist_string[LINE_MAX];
@@ -59,6 +59,7 @@ enum swupd_code print_update_conf_info()
 
 static void print_help(void)
 {
+	print("Shows the current OS version and the URLs used for updates\n\n");
 	print("Usage:\n");
 	print("   swupd info [OPTION...]\n\n");
 

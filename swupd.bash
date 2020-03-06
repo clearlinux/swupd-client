@@ -81,7 +81,7 @@ _swupd()
 		opts="--help --no-xattrs --path --debug --quiet "
 		break;;
 		("3rd-party")
-		opts="$global add remove list bundle-add bundle-list bundle-remove bundle-info update diagnose repair check-update clean "
+		opts="$global add remove list bundle-add bundle-list bundle-remove bundle-info update diagnose repair check-update clean info "
 		break;;
 		("add")
 		opts="$global --repo"
@@ -121,6 +121,11 @@ _swupd()
 			opts+=" $(unset CDPATH; test -d /usr/share/clear/bundles && \
 				find /usr/share/clear/bundles/ -maxdepth 1 -type f ! -name os-core -printf '%f ')"
 		else
+			opts+="--repo"
+		fi
+		;;
+		("info")
+		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
 			opts+="--repo"
 		fi
 		;;

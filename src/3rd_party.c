@@ -25,6 +25,7 @@
 #ifdef THIRDPARTY
 
 static struct subcmd third_party_commands[] = {
+	{ "info", "Show the version of third party repositories and the update URLs", third_party_info_main },
 	{ "add", "Add third party repository", third_party_add_main },
 	{ "remove", "Remove third party repository", third_party_remove_main },
 	{ "list", "List third party repository", third_party_list_main },

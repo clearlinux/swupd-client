@@ -387,6 +387,16 @@
 #force=<true/false>
 
 
+[3rd-party-info]
+
+#
+# Options for the "swupd 3rd-party info" command
+#
+
+# Specify the 3rd-party repository to use (string value)
+#repo=[REPOSITORY]
+
+
 [3rd-party-bundle-add]
 
 #

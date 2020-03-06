@@ -202,6 +202,7 @@ if [[ -n "$state" ]]; then
           '(help)repair[Repair local issues relative to a third party repository]'
           '(help)check-update[Check if a new version of a third party repository is available]'
           '(help)clean[Clean cached files of a third party repository]'
+          '(help)info[Shows the current version of 3rd-party repositories and the URLs used for updates]'
           _arguments $thirdparty && ret=0
           ;;
           add)

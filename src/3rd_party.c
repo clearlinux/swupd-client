@@ -25,10 +25,11 @@
 #ifdef THIRDPARTY
 
 static struct subcmd third_party_commands[] = {
-	{ "info", "Show the version of third party repositories and the update URLs", third_party_info_main },
 	{ "add", "Add third party repository", third_party_add_main },
 	{ "remove", "Remove third party repository", third_party_remove_main },
 	{ "list", "List third party repository", third_party_list_main },
+	{ "info", "Show the version of third party repositories and the update URLs", third_party_info_main },
+	{ "check-update", "Check if a new version of a third party repository is available", third_party_check_update_main },
 	{ "update", "Update to latest version of a third party repository", third_party_update_main },
 	{ "bundle-add", "Install a bundle from a third party repository", third_party_bundle_add_main },
 	{ "bundle-remove", "Remove a bundle from a third party repository", third_party_bundle_remove_main },
@@ -36,7 +37,6 @@ static struct subcmd third_party_commands[] = {
 	{ "bundle-info", "Display information about a bundle in a third party repository", third_party_bundle_info_main },
 	{ "diagnose", "Verify content from a third party repository", third_party_diagnose_main },
 	{ "repair", "Repair local issues relative to a third party repository", third_party_repair_main },
-	{ "check-update", "Check if a new version of a third party repository is available", third_party_check_update_main },
 	{ "clean", "Clean cached files of a third party repository", third_party_clean_main },
 	{ 0 }
 };

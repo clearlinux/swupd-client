@@ -157,6 +157,7 @@
 # Update the index used by search-file to speed up searches (boolean value)
 #update_search_file_index=<true/false>
 
+
 [bundle-add]
 
 #
@@ -356,6 +357,7 @@
 # Do not install optional bundles, also-add flag in Manifests (boolean value)
 #skip_optional=<true/false>
 
+
 [mirror]
 
 #
@@ -377,6 +379,13 @@
 #
 
 
+[3rd-party-add]
+
+#
+# Options for the "swupd 3rd-party add" command
+#
+
+
 [3rd-party-remove]
 
 #
@@ -387,6 +396,13 @@
 #force=<true/false>
 
 
+[3rd-party-list]
+
+#
+# Options for the "swupd 3rd-party list" command
+#
+
+
 [3rd-party-info]
 
 #
@@ -395,6 +411,43 @@
 
 # Specify the 3rd-party repository to use (string value)
 #repo=[REPOSITORY]
+
+
+[3rd-party-check-update]
+
+#
+# Options for the "swupd 3rd-party check-update" command
+#
+
+# Specify the 3rd-party repository to use (string value)
+#repo=[REPOSITORY]
+
+
+[3rd-party-update]
+
+#
+# Options for the "swupd 3rd-party update" command
+#
+
+# Specify the 3rd-party repository to use (string value)
+#repo=[REPOSITORY]
+
+# Update to the specified version
+# Possible values:
+# ..., 29890, 29900, 29910, ...                     (integer value)
+# latest - used to refer to the most recent version (string value)
+#version=<VERSION>
+
+# Download all content, but do not actually install the update (boolean value)
+#download=<true/false>
+
+# Show current OS version and latest version available on server, eEquivalent
+# to "swupd check-update" (boolean value)
+#status=<true/false>
+
+# Do not delete the swupd state directory content after updating the
+# system (boolean value)
+#keepcache=<true/false>
 
 
 [3rd-party-bundle-add]
@@ -551,10 +604,10 @@
 #extra_files_only=<true/false>
 
 
-[3rd-party-check-update]
+[3rd-party-clean]
 
 #
-# Options for the "swupd 3rd-party check-update" command
+# Options for the "swupd 3rd-party clean" command
 #
 
 # Specify the 3rd-party repository to use (string value)

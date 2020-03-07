@@ -71,6 +71,12 @@ static bool parse_key_values(char *section, char *key, char *value, void *data)
 	struct repo *repo;
 	struct list **repos = data;
 
+	if (!section) {
+		// 3rd party doesn't have any key to be set outside of a section
+		// Ignoring it
+		return true;
+	}
+
 	repo = list_search(*repos, section, cmp_repo_name_string);
 	if (!repo) {
 		repo = calloc(1, sizeof(struct repo));
@@ -147,6 +153,7 @@ int third_party_add_repo(const char *repo_name, const char *repo_url)
 	fp = fopen(repo_config_file, "a");
 	if (!fp) {
 		ret = -errno;
+		goto exit;
 	}
 
 	// write name
@@ -183,10 +190,6 @@ static int write_repo(FILE *fp, struct repo *repo)
 		if (ret) {
 			return ret;
 		}
-	}
-
-	if (ret) {
-		return ret;
 	}
 
 	return 0;

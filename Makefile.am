@@ -257,7 +257,7 @@ install-check:
 
 functional-check:
 	test/functional/generate-cert.prereq
-	env TESTS="$(shell find test/functional  -name *.bats)" make -e check
+	env TESTS="$(shell find test/functional  -name *.bats)" $(MAKE) -e check
 
 docs-coverage:
 	doxygen docs/Doxyfile || die; \

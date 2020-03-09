@@ -385,7 +385,7 @@ AS_IF(
 
 AC_SUBST([cert_path], ["$cert_path"])
 
-AC_CONFIG_FILES([Makefile data/check-update.service data/swupd-update.service docs/swupd-alias.7.rst])
+AC_CONFIG_FILES([Makefile data/swupd-update.service docs/swupd-alias.7.rst])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])
 AC_OUTPUT
 

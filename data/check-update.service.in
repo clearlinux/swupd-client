@@ -1,9 +1,0 @@
-[Unit]
-Description=Check for new OS version
-
-[Service]
-Type=oneshot
-ExecStart=@prefix@/bin/swupd check-update
-
-[Install]
-WantedBy=multi-user.target

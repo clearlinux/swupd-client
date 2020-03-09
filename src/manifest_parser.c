@@ -189,10 +189,6 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			file->is_link = 1;
 		} else if (line[0] == 'M') {
 			file->is_manifest = 1;
-		} else if (line[0] == 'I') {
-			/* ignore this file for future iterative manifest feature */
-			free(file);
-			continue;
 		}
 
 		if (line[1] == 'd') {

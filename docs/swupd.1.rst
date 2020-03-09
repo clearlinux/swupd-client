@@ -868,8 +868,6 @@ The non-zero return codes for other operations are listed here:
 SEE ALSO
 --------
 
-- ``check-update.service``\(4)
-- ``check-update.timer``\(4)
 - ``swupd-update.service``\(4)
 - ``swupd-update.timer``\(4)
 - ``update-triggers.target``\(4)

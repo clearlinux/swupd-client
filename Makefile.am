@@ -157,8 +157,6 @@ verifytime_LDADD =
 bin_PROGRAMS += verifytime
 
 EXTRA_DIST += \
-	data/check-update.service \
-	data/check-update.timer \
 	data/swupd-update.service \
 	data/swupd-update.timer \
 	data/verifytime.service
@@ -169,8 +167,6 @@ DISTCHECK_CONFIGURE_FLAGS = \
 systemdunitdir = @SYSTEMD_UNITDIR@
 
 systemdunit_DATA = \
-	data/check-update.service \
-	data/check-update.timer \
 	data/swupd-update.service \
 	data/swupd-update.timer \
 	data/verifytime.service
@@ -200,8 +196,6 @@ if ENABLE_MANPAGE
 MANPAGES = \
 	docs/swupd.1 \
 	docs/swupd-alias.7 \
-	docs/check-update.service.4 \
-	docs/check-update.timer.4 \
 	docs/swupd-update.service.4 \
 	docs/swupd-update.timer.4 \
 	docs/update-triggers.target.4

@@ -243,12 +243,7 @@ static bool is_hashed_manifest(const char UNUSED_PARAM *dir, const struct dirent
 	const char *ename = entry->d_name + start;
 
 	/* check for the correct number of '.' characters (i.e.
-	 * Manifest.bundlename.hashvalue). Note, this function returns false for
-	 * iterative manifests (Manifest.bundlename.I.version) and delta manifests
-	 * (Manifest.bundlename.D.version) because of the number of '.' characters
-	 * in the file name. Expect 1 '.' because we are starting after the prefix
-	 * 'Manifest.'
-	 */
+	 * Manifest.bundlename.hashvalue). */
 	for (ename = entry->d_name + start; *ename; ename++) {
 		if (*ename == '.') {
 			counter++;

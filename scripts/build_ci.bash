@@ -28,7 +28,7 @@ pushd libarchive-3.3.1 && autoreconf -fi && ./configure --prefix=/usr && make -j
 
 # Build Swupd
 autoreconf --verbose --warnings=none --install --force
-./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --enable-third-party --with-fallback-capaths=./swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path=./testconfig
+./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --with-fallback-capaths=./swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path=./testconfig
 make -j$CORES
 
 # Needed to initialize the host for auto-update. Without these steps auto-update

@@ -2807,7 +2807,6 @@ install_bundle() { # swupd_function
 # - -p: if the p (partial) flag is set the function skips updating the hashes
 #       in the MoM, and re-creating the bundle's tar, this is useful if more changes are to be done
 #       in order to reduce time
-# - -i: if the i (iterative) flag is set the iterative manifests are created with every update
 # - ENVIRONMENT_NAME: the name of the test environment
 # - BUNDLE_NAME: the name of the bundle to be updated
 # - OPTION: the kind of update to be performed { --add, --add-dir, --delete, --ghost, --rename, --rename-legacy, --update }
@@ -2817,8 +2816,6 @@ update_bundle() { # swupd_function
 
 	local partial=false
 	[ "$1" = "-p" ] && { partial=true ; shift ; }
-	local iterative=false
-	[ "$1" = "-i" ] && { iterative=true ; shift ; }
 	local env_name=$1
 	local bundle=$2
 	local option=$3
@@ -2844,10 +2841,6 @@ update_bundle() { # swupd_function
 	local new_fname
 	local delta_name
 	local format
-	local to_manifest
-	local to_manifest_content
-	local from_manifest
-	local from_manifest_content
 	local pre_ver
 	local pre_hash
 	local existing_file
@@ -2856,24 +2849,18 @@ update_bundle() { # swupd_function
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    update_bundle [-p] [-i] <environment_name> <bundle_name> --add <file_name>[:<path_to_existing_file>] [REPO_NAME]
-			    update_bundle [-p] [-i] <environment_name> <bundle_name> --add-dir <directory_name> [REPO_NAME]
-			    update_bundle [-p] [-i] <environment_name> <bundle_name> --delete <file_name> [REPO_NAME]
-			    update_bundle [-p] [-i] <environment_name> <bundle_name> --ghost <file_name> [REPO_NAME]
-			    update_bundle [-p] [-i] <environment_name> <bundle_name> --update <file_name> [REPO_NAME]
-			    update_bundle [-p] [-i] <environment_name> <bundle_name> --rename[-legacy] <file_name:new_name> [REPO_NAME]
-			    update_bundle [-p] [-i] <environment_name> <bundle_name> --header-only
+			    update_bundle [-p] <environment_name> <bundle_name> --add <file_name>[:<path_to_existing_file>] [REPO_NAME]
+			    update_bundle [-p] <environment_name> <bundle_name> --add-dir <directory_name> [REPO_NAME]
+			    update_bundle [-p] <environment_name> <bundle_name> --delete <file_name> [REPO_NAME]
+			    update_bundle [-p] <environment_name> <bundle_name> --ghost <file_name> [REPO_NAME]
+			    update_bundle [-p] <environment_name> <bundle_name> --update <file_name> [REPO_NAME]
+			    update_bundle [-p] <environment_name> <bundle_name> --rename[-legacy] <file_name:new_name> [REPO_NAME]
+			    update_bundle [-p] <environment_name> <bundle_name> --header-only
 
 			Options:
 			    -p    If set (partial), the bundle will be updated, but the manifest's tar won't
 			          be re-created nor the hash will be updated in the MoM. Use this flag when more
 			          updates or changes will be done to the bundle to save time.
-			    -i    If set (iterative), the iterative manifests will be created with every bundle
-			          update.
-
-			    NOTE: if both options -p and -i are to be used, they must be specified in that order or
-			          one option will be ignored.
-
 			EOM
 		return
 	fi
@@ -3137,9 +3124,6 @@ update_bundle() { # swupd_function
 			add_to_pack "$bundle" "$version_path"/delta/"$delta_name" "$pre_ver"
 
 		done
-
-		# keep the modified file for the iterative "from manifest"
-		from_manifest_content="$(awk "/....\\t.*\\t.*\\t$filename/" "$oldversion_path"/Manifest."$bundle")"$'\n'
 		;;
 
 	--rename | --rename-legacy)
@@ -3226,38 +3210,6 @@ update_bundle() { # swupd_function
 	sudo sort -t$'\t' -k3 -s -h -o "$bundle_manifest" "$bundle_manifest"
 	update_manifest -p "$bundle_manifest" contentsize "$contentsize"
 	update_manifest -p "$bundle_manifest" timestamp "$(date +"%s")"
-
-	if [ "$iterative" = true ]; then
-		# create the iterative "to manifest"
-		to_manifest="$bundle_manifest".I."$oldversion"
-		# get the manifest header as is
-		to_manifest_content=$(sed "/^[^\\t]*\\t[^\\t]*$/! d" "$bundle_manifest")$'\n'$'\n'
-		# get only those bundles that match the latest version
-		to_manifest_content+=$(sed "/^....\\t.*\\t$version\\t.*$/! d" "$bundle_manifest")$'\n'
-		write_to_protected_file "$to_manifest" "$to_manifest_content"
-		update_manifest "$to_manifest" filecount "$(grep -c -E "^[FDL]..." "$to_manifest")"
-		# TODO(castulo): update the contentsize in the to_manifest
-		# update the MoM, first remove any other iterative manifest for that bundle if one exists
-		if [ -n "$(awk "/$bundle.I.*/"'{ print $4 }' "$version_path"/Manifest.MoM)" ]; then
-			remove_from_manifest -p "$version_path"/Manifest.MoM "$(awk "/$bundle.I.*/"'{ print $4 }' "$version_path"/Manifest.MoM)"
-		fi
-		# now add the iterative manifest
-		add_to_manifest -p "$version_path"/Manifest.MoM "$to_manifest" "$bundle".I."$oldversion"
-
-		# create the iterative "from manifest" (if there are deltas)
-		if [ -n "$from_manifest_content" ]; then
-			from_manifest="$version_path"/"$version"/Manifest."$bundle".D."$oldversion"
-			if [ ! -e "$from_manifest" ]; then
-				sudo mkdir -p "$version_path"/"$version"
-				write_to_protected_file "$from_manifest" "$(sed "/^[^\\t]*\\t[^\\t]*$/! d" "$oldversion_path"/Manifest."$bundle")"$'\n'$'\n'
-			fi
-			write_to_protected_file -a "$from_manifest" "$from_manifest_content"
-			update_manifest -p "$from_manifest" filecount "$(grep -c -E "^(F|D)..." "$from_manifest")"
-			update_manifest -p "$from_manifest" timestamp "$(date +"%s")"
-			# TODO(castulo): update the contentsize in the from_manifest
-			add_to_pack "$bundle" "$from_manifest" "$oldversion"
-		fi
-	fi
 
 	# renew the manifest tar
 	if [ "$partial" = false ]; then

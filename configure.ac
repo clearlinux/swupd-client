@@ -74,11 +74,11 @@ AS_IF(
 
 AC_ARG_ENABLE(
   [third-party],
-  [AS_HELP_STRING([--enable-third-party], [Enable 3rd-party (disabled by default)])]
+  [AS_HELP_STRING([--disable-third-party], [Disable 3rd-party (enabled by default)])]
 )
-THIRDPARTY="no"
+THIRDPARTY="yes"
 AS_IF(
-  [test "x$enable_third_party" = "xyes"],
+  [test "x$enable_third_party" != "xno"],
   [AC_DEFINE(THIRDPARTY, 1, [Enable third party])
      THIRDPARTY="yes"],
   [THIRDPARTY="no"]

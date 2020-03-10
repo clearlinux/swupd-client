@@ -181,7 +181,7 @@ static enum swupd_code validate_permissions(struct file *file)
 	}
 
 	string_or_die(&staged_file, "%s/staged/%s", globals.state_dir, file->hash);
-	if (stat(staged_file, &file_stats) == 0) {
+	if (lstat(staged_file, &file_stats) == 0) {
 		/* see if the file being updated has dangerous flags */
 		if ((file_stats.st_mode & S_ISUID) || (file_stats.st_mode & S_ISGID) || (file_stats.st_mode & S_ISVTX)) {
 			if (!file->peer) {
@@ -192,7 +192,7 @@ static enum swupd_code validate_permissions(struct file *file)
 				/* an existing file has dangerous flags, do not warn unless
 				 * the flags changed from non-dangerous to dangerous in the update */
 				original_file = sys_path_join(globals.path_prefix, file->filename);
-				if (stat(original_file, &original_file_stats) == 0) {
+				if (lstat(original_file, &original_file_stats) == 0) {
 					if (
 					    ((file_stats.st_mode & S_ISUID) && !(original_file_stats.st_mode & S_ISUID)) ||
 					    ((file_stats.st_mode & S_ISGID) && !(original_file_stats.st_mode & S_ISGID)) ||

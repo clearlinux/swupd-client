@@ -216,6 +216,46 @@ to *true*.
 $ DEBUG_TEST=true bats <theme_directory>/<test_script>.bats
 ```
 
+Another useful thing to try when debugging tests is to create a specific test
+environment without running the related tests, this way you can use that environment
+to debug a problem.
+
+To create a test environment use the *create_test_environment_only* function:
+```bash
+$ create_test_environment_only <theme_directory>/<test_script>.bats
+```
+Example:
+```bash
+# create a test environment related to the add-boot-file.bats test
+$ create_test_environment_only test/functional/bundleadd/add-boot-file.bats
+
+------------------------------------------------------------------
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+------------------------------------------------------------------
+
+Test setup complete
+Test environment created successfully
+
+Test variables:
+
+SWUPD_OPTS="-S /home/user/swupd-client/add-boot-file_ADD014/testfs/state
+-p /home/user/swupd-client/add-boot-file_ADD014/testfs/target-dir -F staging
+-C /home/user/swupd-client/Swupd_Root.pem -I --no-progress"
+
+TEST_DIRNAME=/home/user/swupd-client/add-boot-file_ADD014
+PATH_PREFIX=/home/user/swupd-client/add-boot-file_ADD014/testfs/target-dir
+WEBDIR=add-boot-file_ADD014/web-dir
+TARGETDIR=add-boot-file_ADD014/testfs/target-dir
+STATEDIR=add-boot-file_ADD014/testfs/state
+
+# now that we have created the test environment, we can use the SWUPD_OPTS to
+# debug our swupd code using that environment
+$ sudo gdb /home/user/swupd-client/swupd --tui
+(gdb) run bundle-add test-bundle1 -S /home/user/swupd-client/add-boot-file_ADD014/testfs/state
+-p /home/user/swupd-client/add-boot-file_ADD014/testfs/target-dir -F staging
+-C /home/user/swupd-client/Swupd_Root.pem -I --no-progress
+```
+
 ## Test Fixtures
 ### Test Environment
 A test environment is nothing but a directory that contains the necessary file
@@ -638,21 +678,16 @@ For example:
 ```
 $ update_bundle
 Usage:
-    update_bundle [-p] [-i] <environment_name> <bundle_name> --add <file_name>[:<path_to_existing_file>]
-    update_bundle [-p] [-i] <environment_name> <bundle_name> --add-dir <directory_name>
-    update_bundle [-p] [-i] <environment_name> <bundle_name> --delete <file_name>
-    update_bundle [-p] [-i] <environment_name> <bundle_name> --ghost <file_name>
-    update_bundle [-p] [-i] <environment_name> <bundle_name> --update <file_name>
-    update_bundle [-p] [-i] <environment_name> <bundle_name> --rename[-legacy] <file_name:new_name>
-    update_bundle [-p] [-i] <environment_name> <bundle_name> --header-only
+    update_bundle [-p] <environment_name> <bundle_name> --add <file_name>[:<path_to_existing_file>]
+    update_bundle [-p] <environment_name> <bundle_name> --add-dir <directory_name>
+    update_bundle [-p] <environment_name> <bundle_name> --delete <file_name>
+    update_bundle [-p] <environment_name> <bundle_name> --ghost <file_name>
+    update_bundle [-p] <environment_name> <bundle_name> --update <file_name>
+    update_bundle [-p] <environment_name> <bundle_name> --rename[-legacy] <file_name:new_name>
+    update_bundle [-p] <environment_name> <bundle_name> --header-only
 
 Options:
     -p    If set (partial), the bundle will be updated, but the manifest's tar won't
           be re-created nor the hash will be updated in the MoM. Use this flag when more
           updates or changes will be done to the bundle to save time.
-    -i    If set (iterative), the iterative manifests will be created with every bundle
-          update.
-
-    NOTE: if both options -p and -i are to be used, they must be specified in that order or
-          one option will be ignored.
 ```

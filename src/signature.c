@@ -564,4 +564,9 @@ void signature_print_info(const char UNUSED_PARAM *path)
 {
 	return;
 }
+
+bool signature_verify_data(const unsigned char UNUSED_PARAM *data, size_t UNUSED_PARAM data_len, const unsigned char UNUSED_PARAM *sig_data, size_t UNUSED_PARAM sig_data_len, bool UNUSED_PARAM print_errors)
+{
+	return true;
+}
 #endif

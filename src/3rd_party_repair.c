@@ -53,7 +53,7 @@ static void print_help(void)
 	print("   -V, --version=[VER]     Compare against version VER to repair\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -q, --quick             Don't compare hashes, only fix missing files\n");
-	print("   -B, --bundles=[BUNDLES] Forces swupd to only repair the specified BUNDLES. Example: --bundles=os-core,vi\n");
+	print("   -B, --bundles=[BUNDLES] Forces swupd to only repair the specified BUNDLES. Example: --bundles=xterm,vim\n");
 	print("   -Y, --picky             Also remove files which should not exist. By default swupd only looks for them at /usr\n");
 	print("                           skipping /usr/lib/modules, /usr/lib/kernel, /usr/local, and /usr/src\n");
 	print("   -X, --picky-tree=[PATH] Changes the path where --picky and --extra-files-only look for extra files\n");

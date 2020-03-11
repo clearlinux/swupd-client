@@ -280,7 +280,7 @@
 #picky_whitelist=[RE]
 
 # Diagnose if BUNDLES are installed correctly (string value)
-# Example: --bundles=os-core,vi
+# Example: --bundles=xterm,vim
 #bundles=[BUNDLES]
 
 # Like --picky, but it only searches for extra files (boolean value)
@@ -307,7 +307,7 @@
 #quick=<true/false>
 
 # Repair BUNDLES that are not installed correctly (string value)
-# Example: --bundles=os-core,vi
+# Example: --bundles=xterm,vim
 #bundles=[BUNDLES]
 
 # Remove files which should not exist (boolean value)
@@ -340,7 +340,7 @@
 #force=<true/false>
 
 # Include the specified BUNDLES in the OS installation (string value)
-# Example: --bundles=os-core,vi
+# Example: --bundles=xterm,vim
 #bundles=[BUNDLES]
 
 # If the version to install is not the latest, it can be specified with this
@@ -557,7 +557,7 @@
 #picky_whitelist=[RE]
 
 # Diagnose if BUNDLES are installed correctly (string value)
-# Example: --bundles=os-core,vi
+# Example: --bundles=xterm,vim
 #bundles=[BUNDLES]
 
 # Like --picky, but it only searches for extra files (boolean value)
@@ -584,7 +584,7 @@
 #quick=<true/false>
 
 # Repair BUNDLES that are not installed correctly (string value)
-# Example: --bundles=os-core,vi
+# Example: --bundles=xterm,vim
 #bundles=[BUNDLES]
 
 # Remove files which should not exist (boolean value)

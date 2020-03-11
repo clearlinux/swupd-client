@@ -52,7 +52,7 @@ static void print_help(void)
 	print("   -V, --version=[VER]     Diagnose against manifest version VER\n");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -q, --quick             Don't check for corrupt files, only find missing files\n");
-	print("   -B, --bundles=[BUNDLES] Forces swupd to only diagnose the specified BUNDLES. Example: --bundles=os-core,vi\n");
+	print("   -B, --bundles=[BUNDLES] Forces swupd to only diagnose the specified BUNDLES. Example: --bundles=xterm,vim\n");
 	print("   -Y, --picky             Also list files which should not exist. By default swupd only looks for them at /usr\n");
 	print("                           skipping /usr/lib/modules, /usr/lib/kernel, /usr/local, and /usr/src\n");
 	print("   -X, --picky-tree=[PATH] Changes the path where --picky and --extra-files-only look for extra files\n");

@@ -191,7 +191,7 @@ static void print_help(void)
 	print("   -V, --version=[VER]     %s against manifest version VER\n", cmdline_command_verify ? "Verify" : "Diagnose");
 	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("   -q, --quick             Don't check for corrupt files, only fix missing files\n");
-	print("   -B, --bundles=[BUNDLES] Forces swupd to only %s the specified BUNDLES. Example: --bundles=os-core,vi\n", cmdline_command_verify ? "verify" : "diagnose");
+	print("   -B, --bundles=[BUNDLES] Forces swupd to only %s the specified BUNDLES. Example: --bundles=xterm,vim\n", cmdline_command_verify ? "verify" : "diagnose");
 	print_if_verify("   -m, --manifest=[VER]    This option has been superseded. Please consider using the -V option instead\n");
 	print_if_verify("   -f, --fix               This option has been superseded, please consider using \"swupd repair\" instead\n");
 	print_if_verify("   -i, --install           This option has been superseded, please consider using \"swupd os-install\" instead\n");

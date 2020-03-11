@@ -327,7 +327,7 @@ if [[ -n "$state" ]]; then
             '(help -X --picky-tree)'{-X,--picky-tree=}'[Selects the sub-tree where --picky and --extra-files-only looks for extra files. Default\: /usr]:picky-tree: _path_files -/'
             '(help -w --picky-whitelist)'{-w,--picky-whitelist=}'[Directories that match the regex get skipped. Example\: /var|/etc/machine-id. Default\: /usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src]:picky-whitelist:()'
             '(help)--extra-files-only[Only list files which should not exist]'
-            '(help -B --bundles)'{-B,--bundles=}'[Forces swupd to only diagnose the specified BUNDLES. Example: --bundles=os-core,vi]:bundles:()'
+            '(help -B --bundles)'{-B,--bundles=}'[Forces swupd to only diagnose the specified BUNDLES. Example: --bundles=xterm,vim]:bundles:()'
             '(help)--file[Forces swupd to only diagnose the specified file or directory (recursively)]'
           )
           _arguments $diagnoses && ret=0
@@ -342,7 +342,7 @@ if [[ -n "$state" ]]; then
             '(help -w --picky-whitelist)'{-w,--picky-whitelist=}'[Directories that match the regex get skipped. Example: /var|/etc/machine-id. Default: /usr/lib/modules|/usr/lib/kernel|/usr/local|/usr/src]:picky-whitelist:()'
             '(help -X --picky-tree)'{-X,--picky-tree=}'[Selects the sub-tree where --picky and --extra-files-only looks for extra files. Default\: /usr]:picky-tree: _path_files -/'
             '(help)--extra-files-only[Only remove files which should not exist]'
-            '(help -B --bundles)'{-B,--bundles=}'[Forces swupd to only repair the specified BUNDLES. Example: --bundles=os-core,vi]:bundles:()'
+            '(help -B --bundles)'{-B,--bundles=}'[Forces swupd to only repair the specified BUNDLES. Example: --bundles=xterm,vim]:bundles:()'
             '(help)--file[Forces swupd to only repair the specified file or directory (recursively)]'
           )
           _arguments $repair && ret=0
@@ -351,7 +351,7 @@ if [[ -n "$state" ]]; then
           local -a osinstall; osinstall=(
             $global_opts
             '(help -x --force)'{-x,--force}'[Attempt to proceed even if non-critical errors found]'
-            '(help -B --bundles)'{-B,--bundles=}'[Include the specified BUNDLES in the OS installation. Example: --bundles=os-core,vi]:diagnose: _swupd_all_bundles'
+            '(help -B --bundles)'{-B,--bundles=}'[Include the specified BUNDLES in the OS installation. Example: --bundles=xterm,vim]:diagnose: _swupd_all_bundles'
             '(help -V --version)'{-V,--version=}'[If the version to install is not the latest, it can be specified with this option]:version:()'
             '(help -s --statedir-cache)'{-s,--statedir-cache=}'[After checking for content in the statedir, check the statedir-cache before downloading it over the network]'
             '(help status)--download[Download all content, but do not actually install it]'

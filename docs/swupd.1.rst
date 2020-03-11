@@ -441,9 +441,9 @@ SUBCOMMANDS
 
        Examples:
 
-         -  ``--bundles os-core,vi``
+         -  ``--bundles xterm,vim``
 
-            Diagnoses only bundles `os-core` and `vi`.
+            Diagnoses only bundles `xterm` and `vim`.
 
     -  ``-Y, --picky``
 
@@ -521,9 +521,9 @@ SUBCOMMANDS
 
        Examples:
 
-         -  ``--bundles os-core,vi``
+         -  ``--bundles xterm,vim``
 
-            Repairs only bundles `os-core` and `vi`.
+            Repairs only bundles `xterm` and `vim`.
 
     -  ``-Y, --picky``
 
@@ -596,9 +596,9 @@ SUBCOMMANDS
 
        Examples:
 
-         -  ``--bundles xterm,vi``
+         -  ``--bundles xterm,vim``
 
-            Installs bundles `xterm` and `vi`, along with `os-core` (installed by default).
+            Installs bundles `xterm` and `vim`, along with `os-core` (installed by default).
 
     -  ``-s, --statedir-cache={PATH}``
 

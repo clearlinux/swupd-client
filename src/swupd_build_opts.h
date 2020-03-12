@@ -28,6 +28,12 @@
 #define OPT_BZIP2 "-BZIP2"
 #endif
 
+#ifdef THIRDPARTY
+#define OPT_THIRD_PARTY "+THIRDPARTY"
+#else
+#define OPT_THIRD_PARTY "-THIRDPARTY"
+#endif
+
 #ifdef SIGNATURES
 #define OPT_SIGNATURES "+SIGVERIFY"
 #else
@@ -101,7 +107,7 @@
 #endif
 
 #define BUILD_OPTS \
-	OPT_BZIP2 " " OPT_SIGNATURES " " OPT_COVERAGE " " OPT_BSDTAR " " OPT_XATTRS " " OPT_SELINUX " " OPT_STATELESS
+	OPT_BZIP2 " " OPT_SIGNATURES " " OPT_COVERAGE " " OPT_BSDTAR " " OPT_XATTRS " " OPT_SELINUX " " OPT_STATELESS " " OPT_THIRD_PARTY
 
 #define BUILD_CONFIGURE                                          \
 	"mount point                  " MOUNT_POINT "\n"         \

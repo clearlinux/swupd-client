@@ -88,14 +88,12 @@ static bool parse_opt(int opt, char *optarg)
 		char *arg_copy = strdup_or_die(optarg);
 		char *token = strtok(arg_copy, ",");
 		while (token) {
-			if (strcmp(token, "os-core") != 0) {
-				cmdline_bundles = list_prepend_data(cmdline_bundles, strdup_or_die(token));
-			}
+			cmdline_bundles = list_prepend_data(cmdline_bundles, strdup_or_die(token));
 			token = strtok(NULL, ",");
 		}
 		free(arg_copy);
 		if (!cmdline_bundles) {
-			error("Missing --bundle argument\n\n");
+			error("Missing --bundles argument\n\n");
 			return false;
 		}
 		return true;

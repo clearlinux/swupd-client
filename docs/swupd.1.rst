@@ -580,7 +580,9 @@ SUBCOMMANDS
 
     Perform system software installation in the specified location. Install
     all files into `{path}` as specified by the ``swupd os-install {path}``
-    option. Useful to generate a new system root.
+    option. Useful to generate a new system root. The only bundle that will
+    be installed by default is ``os-core`` unless more bundles are specified
+    with the ``--bundles`` option.
 
     -  ``-V, --version={VERSION}``
 

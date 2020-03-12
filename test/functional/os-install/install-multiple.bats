@@ -64,4 +64,45 @@ test_setup() {
 	assert_file_not_exists "$TARGETDIR"/var/lib/swupd/bundles/os-core
 
 }
+
+@test "INS026: An OS install with user specified bundles that include os-core works correctly" {
+
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS --bundles test-bundle2,os-core"
+
+	assert_status_is "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		Installing OS version 10 (latest)
+		Downloading missing manifests...
+		Downloading packs for:
+		 - test-bundle2
+		 - os-core
+		Finishing packs extraction...
+		Checking for corrupt files
+		Validate downloaded files
+		No extra files need to be downloaded
+		Installing base OS and selected bundles
+		Inspected 5 files
+		  5 files were missing
+		    5 of 5 missing files were installed
+		    0 of 5 missing files were not installed
+		Calling post-update helper scripts
+		Installation successful
+	EOM
+	)
+	assert_is_output "$expected_output"
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGETDIR"/foo/file_3
+	assert_file_exists "$TARGETDIR"/var/lib/swupd/bundles/test-bundle2
+	assert_file_exists "$TARGETDIR"/var/lib/swupd/bundles/os-core
+	# make sure non specified bundles were not installed
+	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGETDIR"/file_1
+	assert_file_not_exists "$TARGETDIR"/file_2
+	assert_file_not_exists "$TARGETDIR"/var/lib/swupd/bundles/test-bundle1
+	assert_file_not_exists "$TARGETDIR"/var/lib/swupd/bundles/test-bundle3
+	assert_file_not_exists "$TARGETDIR"/bar/file_4
+
+}
 #WEIGHT=4

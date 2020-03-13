@@ -1,5 +1,6 @@
 #!/usr/bin/env bats
 
+
 # Author: Castulo Martinez
 # Email: castulo.martinez@intel.com
 
@@ -60,7 +61,7 @@ global_teardown() {
 		 - Latest available version: 30
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Size bundle takes on disk \(includes dependencies\): .* KB
+		 - Size bundle takes on disk \\(includes dependencies\\): .* KB
 	EOM
 	)
 	assert_regex_in_output "$expected_output"
@@ -81,11 +82,11 @@ global_teardown() {
 		_______________________________
 		 Info for bundle: test-bundle2
 		_______________________________
-		Status: Not installed \(experimental\)
+		Status: Not installed \\(experimental\\)
 		Latest available version: 10
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Maximum amount of disk size the bundle will take if installed \(includes dependencies\): .* KB
+		 - Maximum amount of disk size the bundle will take if installed \\(includes dependencies\\): .* KB
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -109,7 +110,7 @@ global_teardown() {
 		 - Latest available version: 30
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Size bundle takes on disk \(includes dependencies\): .* KB
+		 - Size bundle takes on disk \\(includes dependencies\\): .* KB
 	EOM
 	)
 	assert_regex_in_output "$expected_output"
@@ -133,7 +134,7 @@ global_teardown() {
 		 - Latest available version: 30
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Size bundle takes on disk \(includes dependencies\): .* KB
+		 - Size bundle takes on disk \\(includes dependencies\\): .* KB
 	EOM
 	)
 	assert_regex_in_output "$expected_output"

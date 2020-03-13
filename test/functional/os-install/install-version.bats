@@ -50,7 +50,7 @@ test_setup() {
 
 }
 
-@test "INS006: User can specify \"latest\" OS version when installing" {
+@test "INS006: User can specify latest OS version when installing" {
 
 	# users can specify the "latest" version
 

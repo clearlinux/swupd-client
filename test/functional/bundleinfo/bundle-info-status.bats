@@ -52,7 +52,7 @@ global_teardown() {
 		 - Latest available version: 10
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Size bundle takes on disk \(includes dependencies\): .* KB
+		 - Size bundle takes on disk \\(includes dependencies\\): .* KB
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -76,7 +76,7 @@ global_teardown() {
 		 - Latest available version: 10
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Size bundle takes on disk \(includes dependencies\): .* KB
+		 - Size bundle takes on disk \\(includes dependencies\\): .* KB
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

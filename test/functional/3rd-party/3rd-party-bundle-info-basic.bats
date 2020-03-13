@@ -60,7 +60,7 @@ global_teardown() {
 		 - Latest available version: 10
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Size bundle takes on disk \(includes dependencies\): .* KB
+		 - Size bundle takes on disk \\(includes dependencies\\): .* KB
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -82,7 +82,7 @@ global_teardown() {
 		Latest available version: 10
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Maximum amount of disk size the bundle will take if installed \(includes dependencies\): .* KB
+		 - Maximum amount of disk size the bundle will take if installed \\(includes dependencies\\): .* KB
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -106,10 +106,10 @@ global_teardown() {
 		 - Latest available version: 10
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Size bundle takes on disk \(includes dependencies\): .* KB
-		Direct dependencies \(1\):
+		 - Size bundle takes on disk \\(includes dependencies\\): .* KB
+		Direct dependencies \\(1\\):
 		 - test-bundle1
-		Files in bundle \(includes dependencies\):
+		Files in bundle \\(includes dependencies\\):
 		 - /bar
 		 - /bar/file_2
 		 - /foo
@@ -157,7 +157,7 @@ global_teardown() {
 		Latest available version: 10
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Maximum amount of disk size the bundle will take if installed \(includes dependencies\): .* KB
+		 - Maximum amount of disk size the bundle will take if installed \\(includes dependencies\\): .* KB
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

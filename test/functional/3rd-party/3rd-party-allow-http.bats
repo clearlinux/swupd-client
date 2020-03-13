@@ -5,9 +5,6 @@
 
 load "../testlib"
 
-test_path=$(realpath "$TEST_NAME")
-repo="$test_path"/3rd-party/my_repo
-
 global_setup() {
 
 	create_test_environment "$TEST_NAME"

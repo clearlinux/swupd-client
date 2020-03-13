@@ -1,0 +1,18 @@
+name: C/C++ CI
+
+on: [push]
+env:
+   RUNNING_IN_CI: true
+
+jobs:
+  shellcheck-all:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build_dependencies
+      run:  sudo apt-get install bats
+
+    - name: shellcheck-all
+      run:  bats -t test/code_analysis/shellcheck-all.bats

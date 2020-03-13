@@ -804,13 +804,13 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_
 			goto exit;
 		}
 
-		curl_ret = curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION,
+		curl_ret = curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION,
 					    progress_cb);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
 
-		curl_ret = curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, progress_cb_data);
+		curl_ret = curl_easy_setopt(curl, CURLOPT_XFERINFODATA, progress_cb_data);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}

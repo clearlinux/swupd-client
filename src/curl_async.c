@@ -475,7 +475,7 @@ static int process_download(struct swupd_curl_parallel_handle *h, struct multi_c
 			goto out_bad;
 		}
 
-		curl_ret = curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, file->progress);
+		curl_ret = curl_easy_setopt(curl, CURLOPT_XFERINFODATA, file->progress);
 		if (curl_ret != CURLE_OK) {
 			goto out_bad;
 		}

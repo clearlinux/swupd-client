@@ -872,17 +872,15 @@ add_to_manifest() { # swupd_function
 	local version
 	local filecount
 	local contentsize
-	local linked_file
 	local file_type="."
 	local exported_type="."
-	local file_path
 	local skip_param_validation=false
 	local partial=false
 	local experimental="."
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
-		add_to_manifest -h
+		add_to_manifest_usage
 		return
 	fi
 
@@ -931,18 +929,9 @@ add_to_manifest() { # swupd_function
 		name=$(sudo "$SWUPD" hashdump --quiet "$item")
 	elif [ -L "$item" ]; then
 		item_type=L
-		# when adding a link to a bundle, we need to make sure we add
-		# its associated file too, unless it is a dangling link
-		linked_file=$(readlink "$item")
-		if [ -e "$(dirname "$item")"/"$linked_file" ]; then
-			if ! sudo cat "$manifest" | grep -q "$linked_file"; then
-				file_path="$(dirname "$item_path")"
-				if [ "$file_path" = "/" ]; then
-					file_path=""
-				fi
-				add_to_manifest -p "$manifest" "$(dirname "$item")"/"$linked_file" "$file_path"/"$(generate_random_name test-file-)"
-			fi
-		fi
+		# when adding a link to a bundle we may want to also add the file the
+		# link is pointin too to the manifest too, if this is the case this has
+		# to be done explicitely
 	elif [ -f "$item" ]; then
 		item_type=F
 	elif [ -d "$item" ]; then

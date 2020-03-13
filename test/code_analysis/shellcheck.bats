@@ -5,7 +5,7 @@
 
 @test "ANL001: Shellcheck on changed files" {
 	for i in $(git diff --name-only origin/master HEAD | \grep -E "\.bats|\.bash"); do
-		echo checking "$i"
+		echo checking "$i" >&3
 
 		sed 's/^@.*/func() {/' "$i" |
 		sed 's/^load.*/source test\/functional\/testlib.bash/' |

@@ -59,7 +59,7 @@ test_teardown() {
 		.Check if your network connection is working
 		.Fix the system clock
 		.Run 'swupd info' to check if the urls are correct
-		.Check if the server SSL certificate is trusted by your system \('clrtrust generate' may help\)
+		.Check if the server SSL certificate is trusted by your system \\('clrtrust generate' may help\\)
 		Error: Unable to determine the server version
 		Update failed
 	EOM
@@ -92,7 +92,7 @@ test_teardown() {
 		.Check if your network connection is working
 		.Fix the system clock
 		.Run 'swupd info' to check if the urls are correct
-		.Check if the server SSL certificate is trusted by your system \('clrtrust generate' may help\)
+		.Check if the server SSL certificate is trusted by your system \\('clrtrust generate' may help\\)
 		Warning: Upstream server http://localhost:$port/ not responding, cannot determine upstream version
 		Warning: Unable to determine if the mirror is up to date
 		Error: Unable to determine the server version

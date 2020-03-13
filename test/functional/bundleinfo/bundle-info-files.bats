@@ -54,7 +54,7 @@ global_teardown() {
 		Latest available version: 20
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Maximum amount of disk size the bundle will take if installed \(includes dependencies\): .* KB
+		 - Maximum amount of disk size the bundle will take if installed \\(includes dependencies\\): .* KB
 		Files in bundle:
 		 - /usr/share/clear/bundles/test-bundle1
 		 - /foo/file_2
@@ -83,10 +83,10 @@ global_teardown() {
 		Latest available version: 20
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Maximum amount of disk size the bundle will take if installed \(includes dependencies\): .* KB
-		Direct dependencies \(1\):
+		 - Maximum amount of disk size the bundle will take if installed \\(includes dependencies\\): .* KB
+		Direct dependencies \\(1\\):
 		 - test-bundle2
-		Files in bundle \(includes dependencies\):
+		Files in bundle \\(includes dependencies\\):
 		 - /bar
 		 - /bar/file_4
 		 - /file_1
@@ -117,10 +117,10 @@ global_teardown() {
 		Latest available version: 20
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Maximum amount of disk size the bundle will take if installed \(includes dependencies\): .* KB
-		Direct dependencies \(1\):
+		 - Maximum amount of disk size the bundle will take if installed \\(includes dependencies\\): .* KB
+		Direct dependencies \\(1\\):
 		 - test-bundle2
-		Files in bundle \(includes dependencies\):
+		Files in bundle \\(includes dependencies\\):
 		 - /bar
 		 - /bar/file_4
 		 - /file_1

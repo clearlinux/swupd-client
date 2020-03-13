@@ -52,13 +52,13 @@ global_teardown() {
 		Latest available version: 10
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Maximum amount of disk size the bundle will take if installed \(includes dependencies\): .* KB
-		Direct dependencies \(2\):
+		 - Maximum amount of disk size the bundle will take if installed \\(includes dependencies\\): .* KB
+		Direct dependencies \\(2\\):
 		 - test-bundle2
-		 - test-bundle3 \(optional\)
-		Indirect dependencies \(2\):
+		 - test-bundle3 \\(optional\\)
+		Indirect dependencies \\(2\\):
 		 - test-bundle4
-		 - test-bundle5 \(optional\)
+		 - test-bundle5 \\(optional\\)
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -84,13 +84,13 @@ global_teardown() {
 		 - Latest available version: 10
 		Bundle size:
 		 - Size of bundle: .* KB
-		 - Size bundle takes on disk \(includes dependencies\): .* KB
-		Direct dependencies \(2\):
+		 - Size bundle takes on disk \\(includes dependencies\\): .* KB
+		Direct dependencies \\(2\\):
 		 - test-bundle2
-		 - test-bundle3 \(optional, not installed\)
-		Indirect dependencies \(2\):
+		 - test-bundle3 \\(optional, not installed\\)
+		Indirect dependencies \\(2\\):
 		 - test-bundle4
-		 - test-bundle5 \(optional, installed\)
+		 - test-bundle5 \\(optional, installed\\)
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

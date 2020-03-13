@@ -155,7 +155,7 @@ test_setup() {
 	expected_output1=$(cat <<-EOM
 		Update started
 		Preparing to update from 10 to 20
-		Downloading packs \(20.*\) for:
+		Downloading packs \\(20.*\\) for:
 	EOM
 	)
 	expected_output2=$(cat <<-EOM

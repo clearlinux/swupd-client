@@ -44,7 +44,7 @@ global_teardown() {
 
 @test "UPD035: Show current OS version when os-release has double quote on version" {
 
-	set_current_version "$TEST_NAME" "\"10\""
+	set_current_version "$TEST_NAME" "\\'10\\'"
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS --status"
 

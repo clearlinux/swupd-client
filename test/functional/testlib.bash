@@ -3208,6 +3208,15 @@ update_bundle() { # swupd_function
 			# remove the old tar file, is not needed anymore
 			sudo rm -f "$version_path"/files/"$fhash".tar
 
+			# if the file changed type, update the manifest accordingly
+			if [ -L "$version_path"/files/"$new_fhash" ]; then
+				update_manifest -p "$bundle_manifest" file-status "$fname" "L..."
+			elif [ -d "$version_path"/files/"$new_fhash" ]; then
+				update_manifest -p "$bundle_manifest" file-status "$fname" "D..."
+			else
+				update_manifest -p "$bundle_manifest" file-status "$fname" "F..."
+			fi
+
 		fi
 
 		# update the manifest with the new hash

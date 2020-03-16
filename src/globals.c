@@ -414,7 +414,7 @@ bool set_default_urls()
 	return true;
 }
 
-bool set_assume_option(char *option)
+static bool set_assume_option(char *option)
 {
 	bool ret;
 	char *option_lower = NULL;

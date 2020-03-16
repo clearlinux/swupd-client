@@ -36,8 +36,10 @@ run_checks
 # Run build with basic configurations
 CFLAGS="-O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math" run_build "$CONFIGURE_ARGS"
 ./swupd -v |grep "+SIGVERIFY"
+./swupd -v |grep "+THIRDPARTY"
 run_checks
 
 ## Make sure build isn't broken for other settings
 run_build --disable-signature-verification --disable-third-party
 ./swupd -v |grep "\\-SIGVERIFY"
+./swupd -v |grep "\\-THIRDPARTY"

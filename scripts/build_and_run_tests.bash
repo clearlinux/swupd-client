@@ -34,7 +34,7 @@ CFLAGS="-fsanitize=address -fno-omit-frame-pointer" run_build --disable-optimiza
 run_checks
 
 # Run build with basic configurations
-CFLAGS="$CFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math" run_build "$CONFIGURE_ARGS"
+CFLAGS="-O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math" run_build "$CONFIGURE_ARGS"
 ./swupd -v |grep "+SIGVERIFY"
 run_checks
 

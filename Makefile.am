@@ -2,7 +2,7 @@ SUFFIXES= .rst
 
 EXTRA_DIST = COPYING scripts/findstatic.pl swupd.bash swupd.zsh config
 
-AM_CFLAGS = -fPIE -fPIC -g -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99 \
+AM_CFLAGS = -fPIE -fPIC -g -fno-common -std=gnu99 \
 	-O$(OPTIMIZE) \
 	-Wall \
 	-Wextra \
@@ -21,6 +21,10 @@ AM_CFLAGS = -fPIE -fPIC -g -D_FORTIFY_SOURCE=2 -fno-common -std=gnu99 \
 	-fno-strict-overflow \
 	-fno-delete-null-pointer-checks \
 	-fwrapv
+
+if ENABLE_FORTIFY
+AM_CFLAGS += -D_FORTIFY_SOURCE=2
+endif
 
 AM_LDFLAGS = -z noexecstack -z relro -z now \
 	-pie

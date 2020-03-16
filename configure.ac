@@ -41,6 +41,7 @@ AS_IF(
   [AC_SUBST(OPTIMIZE, [0])],
   [AC_SUBST(OPTIMIZE, [2])]
 )
+AM_CONDITIONAL([ENABLE_FORTIFY], [test "$enable_optimizations" != "no"])
 
 AC_ARG_ENABLE(
   [bzip2],

@@ -30,7 +30,7 @@ run_checks() {
 }
 
 # Run tests without any security optimization and with address sanitizer
-CFLAGS="-fsanitize=address -fno-omit-frame-pointer" run_build --disable-optimizations "$CONFIGURE_ARGS"
+CFLAGS="-fsanitize=address -fno-omit-frame-pointer -Werror" run_build --disable-optimizations "$CONFIGURE_ARGS"
 run_checks
 
 # Run build with basic configurations

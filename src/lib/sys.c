@@ -59,12 +59,37 @@ static int replace_fd(int fd, const char *fd_file)
 	return replaced_fd;
 }
 
+static void print_debug_run_command(char **params)
+{
+	struct list *str = NULL;
+	char *output;
+	char **p = params;
+
+	str = list_append_data(str, "Running command - ");
+
+	while (*p) {
+		str = list_append_data(str, *p);
+		p++;
+	}
+
+	str = list_head(str);
+	output = string_join(" ", str);
+	list_free_list(str);
+
+	debug(output);
+	free(output);
+}
+
 int run_command_full_params(const char *stdout_file, const char *stderr_file, char **params)
 {
 	int pid, ret, child_ret;
 	const char *cmd = params[0];
 	int null_fd;
 	int pipe_fds[2];
+
+	if (log_get_level() == LOG_DEBUG) {
+		print_debug_run_command(params);
+	}
 
 	if (pipe2(pipe_fds, O_CLOEXEC) < 0) {
 		error("run_command %s failed to create pipe: \n", cmd);

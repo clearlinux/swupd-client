@@ -7,10 +7,10 @@ TEST_ROOT_DIR="$(pwd)"
 export TEST_ROOT_DIR
 TEST_FILENAME=$(basename "$BATS_TEST_FILENAME")
 export TEST_FILENAME
-export TEST_NAME=${TEST_FILENAME%.bats}
+export TEST_NAME_SHORT=${TEST_FILENAME%.bats}
 export THEME_DIRNAME="$BATS_TEST_DIRNAME"
-export TEST_NAME_SHORT="$TEST_NAME"
 export SWUPD_DIR="$FUNC_DIR/../.."
+export CACERT_DIR="$SWUPD_DIR/swupd_test_certificates" # trusted key store path
 
 # 3rd-party variables
 export THIRD_PARTY_DIR="opt/3rd-party"
@@ -476,6 +476,8 @@ set_env_variables() { # swupd_function
 	testfs_path="$path"/"$env_name"/testfs
 
 	debug_msg "Exporting environment variables for $env_name"
+	export TEST_NAME="$env_name"
+	debug_msg "TEST_NAME: $TEST_NAME"
 	export TEST_DIRNAME="$path"/"$env_name"
 	debug_msg "TEST_DIRNAME: $TEST_DIRNAME"
 	export WEBDIR="$env_name"/web-dir
@@ -498,7 +500,6 @@ set_env_variables() { # swupd_function
 
 	export CLIENT_CERT_DIR="$testfs_path/target-dir/etc/swupd"
 	export CLIENT_CERT="$CLIENT_CERT_DIR/client.pem"
-	export CACERT_DIR="$SWUPD_DIR/swupd_test_certificates" # trusted key store path
 	export PORT_FILE="$path/$env_name/port_file.txt" # stores web server port
 	export SERVER_PID_FILE="$path/$env_name/pid_file.txt" # stores web server pid
 
@@ -1696,6 +1697,25 @@ create_version() { # swupd_function
 
 }
 
+
+# Creates the directory to save test files
+# If it already exists, destroy it.
+# Parameters:
+# - DIRECTORY_NAME: the path of the directory
+create_test_env_directory() { # swupd_function
+	local dir_name=$1
+
+	if [ -d "$dir_name" ]; then
+		debug_msg "\\nAn old test environment was found for: $dir_name"
+		debug_msg "Deleting it..."
+		destroy_test_environment --force "$dir_name"
+	fi
+
+	mkdir -p "$dir_name"
+	touch "$dir_name"/.test_env
+
+}
+
 # Creates a test environment with the basic directory structure needed to
 # validate the swupd client
 # Parameters:
@@ -1763,14 +1783,6 @@ create_test_environment() { # swupd_function
 
 	# clean test environment when test interrupted
 	trap 'destroy_test_environment $TEST_NAME' INT
-
-	# create all the files and directories needed
-	# web-dir files & dirs
-	mkdir -p "$env_name"
-	touch "$env_name"/.test_env
-
-	# export environment variables that are dependent of the test env
-	set_env_variables "$env_name"
 
 	# Generate certificates
 	generate_certificate "$env_name"/private.pem "$env_name"/Swupd_Root.pem "$FUNC_DIR"/certattributes.cnf
@@ -1899,6 +1911,10 @@ destroy_test_environment() { # swupd_function
 		debug_msg "Environment $env_name deleted successfully"
 	else
 		debug_msg "The environment $env_name failed to be deleted"
+		# If force was used function should fail on errors
+		if [ "$force" = true ]; then
+			exit 1
+		fi
 	fi
 
 }
@@ -3525,51 +3541,35 @@ setup() {
 	print "$alt_sep"
 	print "$sep\\n"
 
-	debug_msg "Test file: $TEST_NAME.bats"
+	debug_msg "Test file: $TEST_FILENAME"
 	debug_msg "BATS test number: $BATS_TEST_NUMBER"
+
+	# Create a name for this specific test
+	if ! [[ $BATS_TEST_DESCRIPTION =~ ^[a-zA-Z]{3}[0-9]{3}":"* ]]; then
+		terminate "Bad test, missing test ID: \"$BATS_TEST_DESCRIPTION\""
+	fi
+	TEST_REAL_NAME="$TEST_NAME_SHORT"_"${BATS_TEST_DESCRIPTION%:*}"
 
 	# run the global_setup only once
 	if [ "$BATS_TEST_NAME" = "${BATS_TEST_NAMES[0]}" ]; then
+		# create the global temp directory
+		create_test_env_directory "$TEST_NAME_SHORT"
 
-		# if a global environment exists at this point it means
-		# it was a leftover from a previous execution, remove it
-		if [ -d "$TEST_NAME" ]; then
-			debug_msg "\\nAn old test environment was found for this test: $TEST_NAME"
-			debug_msg "Deleting it..."
-			destroy_test_environment --force "$TEST_NAME"
-		fi
+		# Set all env variables left
+		debug_msg "\\nSetting environment variables for global ..."
+		set_env_variables "$TEST_NAME_SHORT"
 
 		debug_msg "\\nRunning global setup..."
 		global_setup
 		debug_msg "Global setup finished\\n"
-
-		# check if we created a test environment in the global_setup
-		if [ -d "$TEST_NAME" ]; then
-			sudo touch "$TEST_NAME"/.global_env
-			print "Global test environment created: $TEST_NAME"
-		fi
-
 	fi
 
-	if [ -e "$TEST_NAME"/.global_env ]; then
-		debug_msg "\\nSetting environment variables for the current test..."
-		set_env_variables "$TEST_NAME"
-	else
-		# individual environments will be used for each test,
-		# we need to name the env differently for each test
-		if ! [[ $BATS_TEST_DESCRIPTION =~ ^[a-zA-Z]{3}[0-9]{3}":"* ]]; then
-			terminate "Bad test, missing test ID: \"$BATS_TEST_DESCRIPTION\""
-		fi
-		TEST_NAME="$TEST_NAME"_"${BATS_TEST_DESCRIPTION%:*}"
+	# create the test temp directory
+	create_test_env_directory "$TEST_REAL_NAME"
 
-		# if a local environment exists at this point it is a
-		# leftover from a previous execution, remove it
-		if [ -d "$TEST_NAME" ]; then
-			debug_msg "\\nAn old test environment was found for this test: $TEST_NAME"
-			debug_msg "Deleting it..."
-			destroy_test_environment --force "$TEST_NAME"
-		fi
-	fi
+	# Set all env variables left
+	debug_msg "\\nSetting environment variables for the current test..."
+	set_env_variables "$TEST_REAL_NAME"
 
 	debug_msg "\\nTEST_NAME: $TEST_NAME"
 	debug_msg "Test path: $(pwd)/$TEST_NAME"
@@ -3609,30 +3609,29 @@ teardown() {
 	fi
 
 	local index
-	# if the user wants to preserve the output and we are using an global environment
-	# we need to copy the state of the environment before starting the next test or
-	# the state will be overrriden
-	if [ "$KEEP_ENV" = true ] && [ -e "$TEST_NAME"/.global_env ] && [ -d "$TEST_NAME" ]; then
-		print "Saving a copy of the state dir in $TEST_NAME/state_${BATS_TEST_DESCRIPTION%:*}"
-		sudo cp -r "$TEST_NAME"/testfs/state "$TEST_NAME"/state_"${BATS_TEST_DESCRIPTION%:*}"
-	fi
 
 	debug_msg "\\nRunning test_teardown..."
 	test_teardown
 	debug_msg "Finished running test_teardown\\n"
 
+	# Perform cleanups if the user left anything behind
+	destroy_test_environment "$TEST_NAME"
+	print "Test teardown complete."
+
 	# if the last test just ran, run the global teardown
 	index=$(( ${#BATS_TEST_NAMES[*]} - 1 ))
 	if [ "$BATS_TEST_NAME" = "${BATS_TEST_NAMES[$index]}" ]; then
+		# Set all env variables left
+		debug_msg "\\nSetting environment variables for global ..."
+		set_env_variables "$TEST_NAME_SHORT"
 
 		debug_msg "\\nRunning global teardown..."
 		global_teardown
 		debug_msg "Global teardown finished\\n"
 
+		# Perform cleanups if the user left anything behind
+		destroy_test_environment "$TEST_NAME"
 	fi
-
-	print "Test teardown complete."
-
 }
 
 global_setup() {
@@ -3652,16 +3651,14 @@ global_teardown() {
 # Default test_setup
 test_setup() {
 
-	debug_msg "No test_setup was defined, using the default one..."
-	create_test_environment "$TEST_NAME"
+	debug_msg "No test_setup was defined"
 
 }
 
 # Default test_teardown
 test_teardown() {
 
-	debug_msg "No test_teardown was defined, using the default one..."
-	destroy_test_environment "$TEST_NAME"
+	debug_msg "No test_teardown was defined"
 
 }
 

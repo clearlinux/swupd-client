@@ -780,6 +780,7 @@ create_manifest() { # swupd_function
 	local path=$1
 	local name=$2
 	local format=${3:-1}
+	local previous_version=${4:-0}
 	local minversion="0"
 	local version
 
@@ -787,7 +788,7 @@ create_manifest() { # swupd_function
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    create_manifest <path> <bundle_name> [format]
+			    create_manifest <path> <bundle_name> [format] [previous_version]
 			EOM
 		return
 	fi
@@ -803,7 +804,7 @@ create_manifest() { # swupd_function
 			printf 'minversion:\t%s\n' "$minversion"
 		fi
 
-		printf 'previous:\t0\n'
+		printf 'previous:\t%s\n' "$previous_version"
 		printf 'filecount:\t0\n'
 		printf 'timestamp:\t%s\n' "$(date +"%s")"
 		printf 'contentsize:\t0\n'
@@ -2887,7 +2888,7 @@ create_bundle_from_content() { #swupd_function
 	cbfc_usage() {
 		cat <<-EOM
 		Usage:
-		    create_bundle_from_content [-L] [-t] [-e] [-n] <bundle_name> [-v] <version> -c <content_directory>  ENV_NAME
+		    create_bundle_from_content [-L] [-t] [-e] [-n] <bundle_name> [-v] <version> -c <content_directory> <ENV_NAME>
 
 		Options:
 		    -c    The directory with the content that will be used to create the bundle
@@ -2999,6 +3000,205 @@ create_bundle_from_content() { #swupd_function
 	fi
 
 	debug_msg "Bundle $bundle_name created successfully!"
+
+}
+
+update_content() {
+
+	uc_usage() {
+		cat <<-EOM
+		Usage:
+		    update_content <old manifest> <new manifest>
+		EOM
+	}
+
+	# user provided
+	local old_manifest=$1
+	local new_manifest=$2
+	validate_item "$old_manifest"
+	validate_item "$new_manifest"
+
+	# local variables
+	local bundle_name="${new_manifest#*Manifest.}"
+	local old_version
+	local new_version
+	local old_version_dir
+	local new_version_dir
+	local files_old_manifest
+	local files_new_manifest
+	local old_hash
+	local new_hash
+	local filename
+	local entry
+
+	old_version=$(basename "$(dirname "$old_manifest")")
+	new_version=$(basename "$(dirname "$new_manifest")")
+
+	# shortcut to useful directories
+	old_version_dir=$(dirname "$old_manifest")
+	new_version_dir=$(dirname "$new_manifest")
+
+	# get a list of all entries in the old manifest and iterate on each one
+	# comparing them with the same entry in the new manifest to see if they
+	# have changed
+	mapfile -t files_old_manifest < <(get_entry_from_manifest "$old_manifest" | awk '{ print $4 }')
+
+	for filename in "${files_old_manifest[@]}"; do
+
+		debug_msg "Checking file $filename for updates..."
+
+		old_hash=$(get_hash_from_manifest "$old_manifest" "$filename")
+		debug_msg "old hash -> $old_hash"
+		new_hash=$(get_hash_from_manifest "$new_manifest" "$filename")
+		debug_msg "new hash -> $new_hash"
+
+		if [ "$old_hash" == "$new_hash" ]; then
+			# the file did not change from last version to the new version so the
+			# last version should be updated in the new manifest for that file
+			debug_msg "File $filename did not change in the new version"
+			update_manifest -p "$new_manifest" file-version "$filename" "$old_version"
+		elif [ -z "$new_hash" ]; then
+			# the file was not found in the new manifest, it must have been deleted
+			# in the new version, it needs to be added to the new manifest as deleted
+			debug_msg "File $filename was deleted in the latest version"
+			entry=$(get_entry_from_manifest "$old_manifest" "$filename")
+			write_to_protected_file -a "$new_manifest" "${entry:0:1}d${entry:2:2}\\t$zero_hash\\t$new_version${entry:72}\\n"
+		else
+			# the file in new version is different from old version, the file was updated,
+			# it needs to have a delta created and added to the pack
+			debug_msg "File $filename was updated in the latest version"
+			delta_name="$old_version"-"$new_version"-"$old_hash"-"$new_hash"
+			debug_msg "Creating delta $old_version-$new_version-$old_hash-$new_hash..."
+			debug_msg "sudo bsdiff $old_version_dir/files/$old_hash $new_version_dir/files/$new_hash $new_version_dir/delta/$delta_name"
+			sudo bsdiff "$old_version_dir"/files/"$old_hash" "$new_version_dir"/files/"$new_hash" "$new_version_dir"/delta/"$delta_name" || [ "$?" = 1 ] && true
+			if [ -e "$new_version_dir"/delta/"$delta_name" ]; then
+				debug_msg "Adding delta to pack -> $new_version_dir/delta/$delta_name"
+				add_to_pack "$bundle_name" "$new_version_dir"/delta/"$delta_name" "$old_version"
+			else
+				debug_msg "Error: Delta failed to be created!"
+			fi
+		fi
+
+	done
+
+	# we are done updating files that existed in the old version, but files added in
+	# the new version have not been accounted for, we need to find them and add their
+	# fullfile to the delta packs
+	mapfile -t files_new_manifest < <(get_entry_from_manifest "$new_manifest" | awk '{ print $4 }')
+	debug_msg "Looking for files added during the update..."
+
+	for filename in "${files_new_manifest[@]}"; do
+
+		debug_msg "Looking for file $filename in the previous version..."
+
+		old_hash=$(get_hash_from_manifest "$old_manifest" "$filename")
+		new_hash=$(get_hash_from_manifest "$new_manifest" "$filename")
+
+		if [ -z "$old_hash" ]; then
+			# if the file didn't exist in the old version, we need to add the
+			# whole file not just the delta
+			debug_msg "File $filename is a new file"
+			debug_msg "Adding fullfile to pack -> $new_version_dir/files/$new_hash"
+			add_to_pack "$bundle_name" "$new_version_dir"/files/"$new_hash" "$old_version"
+		fi
+
+	done
+
+}
+
+update_bundle_from_content() { #swupd_function
+
+	ubfc_usage() {
+		cat <<-EOM
+		Usage:
+		    update_bundle_from_content -n <bundle_name> -c <content_directory> [-v] <version> <ENV_NAME>
+
+		Options:
+		    -n    The name of the bundle to be updated
+		    -c    The directory with the content that will be used to create the bundle's update
+		    -v    The version where the update will be creted, if no version is selected the update
+		          will be created at the latest version found
+		EOM
+	}
+
+	# variables required by getopts
+	local OPTIND
+	local opt
+	# user provided
+	local env_name
+	local bundle_name
+	local version
+	local content_dir
+	# locally generated
+	local manifest
+	local web_dir
+	local target_dir
+	local state_dir
+	local version_dir
+	local old_version
+	local old_version_dir
+
+	# If no parameters are received show help
+	if [ $# -eq 0 ]; then
+		ubfc_usage
+		return
+	fi
+	set -f  # turn off globbing
+	while getopts :n:c:v: opt; do
+		case "$opt" in
+			n)	bundle_name="$OPTARG" ;;
+			v)	version="$OPTARG" ;;
+			c)	content_dir="$OPTARG" ;;
+			*)	ubfc_usage
+				return ;;
+		esac
+	done
+	set +f  # turn globbing back on
+	env_name=${*:$OPTIND:1}
+	validate_path "$env_name"
+	validate_path "$content_dir"
+	validate_param "$bundle_name"
+
+	echo "Updating bundle $bundle_name using content from $content_dir..."
+
+	# default values
+	version=${version:-$(get_latest_version "$env_name"/web-dir)}
+	old_version=$(get_entry_from_manifest "$env_name"/web-dir/"$version"/Manifest.MoM "$bundle_name" | cut -f 3)
+
+	# shortcut to useful directories
+	web_dir="$env_name"/web-dir
+	target_dir="$env_name"/testfs/target-dir
+	state_dir="$env_name"/testfs/state
+	version_dir="$web_dir"/"$version"
+	old_version_dir="$web_dir"/"$old_version"
+
+	# create the manifest of the new version
+	debug_msg "Creating the new manifest for bundle $bundle_name..."
+	manifest=$(create_manifest "$version_dir" "$bundle_name" "$(cat "$version_dir"/format)" "$old_version")
+	debug_msg "Manifest -> $manifest"
+
+	# add all new content to the bundle
+	add_content_to_bundle "$manifest" "$content_dir"
+
+	# we need to find the updates in the bundle for this we need to compare entries
+	# from the new and the previous manifests
+	debug_msg "Starting to update artifacts based on content..."
+	update_content "$old_version_dir"/Manifest."$bundle_name" "$version_dir"/Manifest."$bundle_name"
+	debug_msg "The files have been updated in bundle $bundle_name successfully!"
+
+	# re-order items on the manifest so they are in the correct order based on version
+	debug_msg "Re-ordering items in the manifest $version_dir/Manifest.$bundle_name based on version..."
+	sudo sort -t$'\t' -k3 -s -h -o "$version_dir"/Manifest."$bundle_name" "$version_dir"/Manifest."$bundle_name"
+
+	# renew the manifest tar
+	debug_msg "Creating the manifest $version_dir/Manifest.$bundle_name tar"
+	retar_manifest "$version_dir"/Manifest."$bundle_name"
+
+	# update_hashes_in_mom "$version_dir"/Manifest.MoM
+	debug_msg "Updating the hashes in the MoM..."
+	update_hashes_in_mom "$version_dir"/Manifest.MoM
+
+	debug_msg "The update from content has been created successfully!"
 
 }
 
@@ -3630,6 +3830,7 @@ add_to_pack() { # swupd_function
 	else
 		terminate "the provided file is not valid in a zero pack"
 	fi
+	debug_msg "$item added to pack -> $version_path/pack-$bundle-from-$version.tar"
 
 }
 

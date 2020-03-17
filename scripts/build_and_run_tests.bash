@@ -3,24 +3,31 @@
 
 set -e
 
-#configurable parameters
-if [ -z "$JOB_COUNT" ]; then
-	JOB_COUNT=2
-fi
+usage() {
+	cat <<-EOM
+		Usage:
+		   ./scripts/build_and_run_tests.bash [-b] [-j <jobs>]
 
-CONFIGURE_ARGS="--with-fallback-capaths=./swupd_test_certificates -with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path=./testconfig"
+		Options:
+		    -b    Don't run any tests, just build swupd with different configuration options
+		    -j    Set the number of jobs used in a build and number of tests to run in parallel
+	EOM
+}
 
-export RUNNING_IN_CI=true
 run_build() {
 	make distclean || echo "No distclean - System already cleaned"
 	autoreconf -fi
 	# shellcheck disable=SC2068
 	# We want to expand the variable, so ignore shellcheck warning
 	./configure $@
-	make V=1 -j "${JOB_COUNT}"
+	make V=1 -j "$JOB_COUNT"
 }
 
 run_checks() {
+	if [ -n "$BUILD_ONLY" ]; then
+		return
+	fi
+
 	make -j "$JOB_COUNT" check
 	make -j "$JOB_COUNT" functional-check
 	make compliant
@@ -29,17 +36,41 @@ run_checks() {
 	make distcheck
 }
 
-# Run tests without any security optimization and with address sanitizer
-CFLAGS="-fsanitize=address -fno-omit-frame-pointer -Werror" run_build --disable-optimizations "$CONFIGURE_ARGS"
-run_checks
+main() {
+	# Parse parameters
+	while getopts :bj: opt; do
+		case "$opt" in
+			b)	BUILD_ONLY=1 ;;
+			j)	JOB_COUNT="$OPTARG" ;;
+			*)	usage
+				return ;;
+		esac
+	done
+	shift $((OPTIND-1))
 
-# Run build with basic configurations
-CFLAGS="-O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math" run_build "$CONFIGURE_ARGS"
-./swupd -v |grep "+SIGVERIFY"
-./swupd -v |grep "+THIRDPARTY"
-run_checks
+	if [ -z "$JOB_COUNT" ]; then
+		JOB_COUNT=2
+	fi
 
-## Make sure build isn't broken for other settings
-run_build --disable-signature-verification --disable-third-party
-./swupd -v |grep "\\-SIGVERIFY"
-./swupd -v |grep "\\-THIRDPARTY"
+	export RUNNING_IN_CI=true
+	export JOB_COUNT
+	export BUILD_ONLY
+	local configure_args="--with-fallback-capaths=./swupd_test_certificates -with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path=./testconfig"
+
+	# Run tests without any security optimization and with address sanitizer
+	CFLAGS="-fsanitize=address -fno-omit-frame-pointer -Werror" run_build --disable-optimizations "$configure_args"
+	run_checks
+
+	# Run build with basic configurations
+	CFLAGS="-O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math" run_build "$configure_args"
+	./swupd -v |grep "+SIGVERIFY"
+	./swupd -v |grep "+THIRDPARTY"
+	run_checks
+
+	## Make sure build isn't broken for other settings
+	run_build --disable-signature-verification --disable-third-party
+	./swupd -v |grep "\\-SIGVERIFY"
+	./swupd -v |grep "\\-THIRDPARTY"
+}
+
+main "$@"

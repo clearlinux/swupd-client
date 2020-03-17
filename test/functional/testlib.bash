@@ -2246,7 +2246,7 @@ start_web_server() { # swupd_function
 	# wait for server to be available
 	for i in $(seq 1 100); do
 		if [ -f "$PORT_FILE" ]; then
-			port=$(get_web_server_port "$TEST_NAME")
+			port=$(get_web_server_port)
 			status=0
 
 			# use https when the server is using certificates
@@ -2283,22 +2283,15 @@ start_web_server() { # swupd_function
 # gets the port used by the web server if found
 get_web_server_port() { # swupd_function
 
-	local env_name=$1
-
-	if [ -z "$PORT_FILE" ] && [ -z "$env_name" ]; then
+	if [ -z "$PORT_FILE" ]; then
 		cat <<-EOM
 			Usage:
-		        get_web_server_port [ENV_NAME]
+		        get_web_server_port
 
-			Note: the ENV_NAME does not need to be specified if the PORT_FILE env
-			      variable is set.
+			Note: PORT_FILE env should be set.
 
 			EOM
-		terminate "No port file was found. Please specify a test environment"
-	fi
-
-	if [ -z "$PORT_FILE" ] && [ -n "$env_name" ]; then
-		PORT_FILE="$env_name/port_file.txt"
+		terminate "No port file was found"
 	fi
 
 	if [ ! -e "$PORT_FILE" ]; then

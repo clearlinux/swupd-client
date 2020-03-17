@@ -500,8 +500,8 @@ set_env_variables() { # swupd_function
 
 	export CLIENT_CERT_DIR="$testfs_path/target-dir/etc/swupd"
 	export CLIENT_CERT="$CLIENT_CERT_DIR/client.pem"
-	export PORT_FILE="$path/$env_name/port_file.txt" # stores web server port
-	export SERVER_PID_FILE="$path/$env_name/pid_file.txt" # stores web server pid
+	export PORT_FILE="$path/$TEST_NAME_SHORT/port_file.txt" # stores web server port
+	export SERVER_PID_FILE="$path/$TEST_NAME_SHORT/pid_file.txt" # stores web server pid
 
 	# Add environment variables for PORT and SERVER_PID when web server used
 	if [ -f "$PORT_FILE" ]; then
@@ -1877,7 +1877,6 @@ destroy_test_environment() { # swupd_function
 		debug_msg "The --force option was used"
 	fi
 
-	destroy_web_server
 	destroy_trusted_cacert
 
 	# if the test environment doesn't exist warn the user but don't terminate script
@@ -2228,11 +2227,16 @@ start_web_server() { # swupd_function
 		esac
 	done
 
+	if [ -f "$PORT_FILE" ] || [ -f "$SERVER_PID_FILE" ]; then
+		debug_msg "Server is already running on PID $SERVER_PID, port $PORT"
+		terminate "It's not allowed to run 2 webservers at the same time"
+	fi
+
 	# start web server and write port/pid numbers to their respective files
 	if [ -n "$PORT_FILE" ] && [ -n "$SERVER_PID_FILE" ]; then
 		sudo sh -c "python3 $FUNC_DIR/server.py $server_args --port-file $PORT_FILE --pid-file $SERVER_PID_FILE &"
 	else
-		sudo sh -c "python3 $FUNC_DIR/server.py $server_args &"
+		terminate "Undefined pid file and port file is not supported."
 	fi
 
 	# make sure localhost is present in no_proxy settings
@@ -2307,6 +2311,8 @@ destroy_web_server() { # swupd_function
 
 	if [ -f "$SERVER_PID_FILE" ]; then
 		sudo kill "$(<"$SERVER_PID_FILE")"
+		sudo rm "$SERVER_PID_FILE"
+		sudo rm "$PORT_FILE"
 	fi
 
 }
@@ -3623,6 +3629,7 @@ teardown() {
 		debug_msg "Global teardown finished\\n"
 
 		# Perform cleanups if the user left anything behind
+		destroy_web_server
 		destroy_test_environment "$TEST_NAME"
 	fi
 }

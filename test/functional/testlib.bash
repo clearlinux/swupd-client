@@ -1175,6 +1175,42 @@ update_manifest() { # swupd_function
 
 }
 
+get_entry_from_manifest() { # swupd_function
+
+	local manifest=$1
+	local entry_key=$2
+	local value
+
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    get_entry_from_manifest <manifest> [file_hash or file_name]
+			EOM
+		return
+	fi
+	validate_item "$manifest"
+
+	# if no key is provided, return a list with all
+	# files/entries from the manifest
+	if [ -z "$entry_key" ]; then
+		sudo cat "$manifest" | grep -E -x "(D|F|L)..."$'\t'".*"$'\t'".*"$'\t'"/.*"
+		return
+	fi
+
+	# a key was provided, try with the key as a file
+	# path first which should be unique in a Manifest
+	value=$(sudo cat "$manifest" | grep "$entry_key"$)
+
+	# if an entry was not found using the file path, try with the hash next
+	if [ -z "$value" ]; then
+		value=$(sudo cat "$manifest" | grep ^"...."$'\t'"$entry_key")
+	fi
+
+	echo "$value"
+
+}
+
 # Recalculate the hashes of the elements in the specified MoM and updates it
 # if there are changes in hashes.
 # Parameters:

@@ -5,18 +5,11 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME" 10 1
 
 }
-
-test_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 
 @test "INF001: Basic test, Check info verbose" {
 

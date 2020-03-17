@@ -5,33 +5,10 @@
 
 load "../testlib"
 
-test_path=$(realpath "$TEST_NAME")
-repo="$test_path"/3rd-party/test-repo1
-
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo "$TEST_NAME" 10 staging test-repo1
-
-}
-
-test_setup() {
-
-	# do nothing
-	return
-
-}
-
-test_teardown() {
-
-	# do nothing
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 
@@ -53,7 +30,7 @@ global_teardown() {
 	)
 	assert_in_output "$expected_output"
 
-	run sudo sh -c "$SWUPD 3rd-party add test-repo1 file://$repo junk_positional $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD 3rd-party add test-repo1 file://$TP_BASE_DIR/test-repo1 junk_positional $SWUPD_OPTS"
 	assert_status_is "$SWUPD_INVALID_OPTION"
 	expected_output=$(cat <<-EOM
 		Error: Unexpected arguments
@@ -65,7 +42,7 @@ global_teardown() {
 
 @test "TPR004: Negative test, Add an already added repo" {
 
-	run sudo sh -c "$SWUPD 3rd-party add test-repo1 file://$repo $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD 3rd-party add test-repo1 file://$TP_BASE_DIR/test-repo1 $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Repository added successfully

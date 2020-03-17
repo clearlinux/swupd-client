@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle1 -f /file_1 "$TEST_NAME"
@@ -17,26 +17,6 @@ global_setup() {
 	add_dependency_to_manifest -o "$WEBDIR"/10/Manifest.test-bundle1 test-bundle3
 	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle2 test-bundle4
 	add_dependency_to_manifest -o "$WEBDIR"/10/Manifest.test-bundle2 test-bundle5
-}
-
-test_setup() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
-test_teardown() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
 }
 
 @test "BIN011: Show info about a bundle including its optional and non-optional dependencies" {
@@ -78,7 +58,7 @@ global_teardown() {
 		_______________________________
 		 Info for bundle: test-bundle1
 		_______________________________
-		Status: Installed
+		Status: Explicitly installed
 		Bundle test-bundle1 is up to date:
 		 - Installed bundle last updated in version: 10
 		 - Latest available version: 10

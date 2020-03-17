@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 
@@ -16,26 +16,6 @@ global_setup() {
 	create_bundle -n alfa-zulu -f /yankee/alfalfa,/alfaromeo/echo,/foo/quebec,/foo/alfa,/foo/delta,/bar/alfa,"$small" "$TEST_NAME"
 	create_bundle -n victor -f /yankee,/bar/alfa,/alfa/zulu,/papa,"$large" "$TEST_NAME"
 	create_bundle -n alfa-charly -f /foxtrot,/tango/sierra,/kilo,"$medium" "$TEST_NAME"
-
-}
-
-test_setup() {
-
-	# do nothing
-	return
-
-}
-
-test_teardown() {
-
-	# do nothing
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

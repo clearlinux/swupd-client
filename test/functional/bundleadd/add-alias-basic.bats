@@ -5,37 +5,13 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle1 -f /foo/test-file1 "$TEST_NAME"
 	create_bundle -n alias-bundle1 -f /foo/alias-file1 "$TEST_NAME"
 	create_bundle -n alias-bundle2 -f /foo/alias-file2 "$TEST_NAME"
 	create_bundle -n alias-bundle3 -f /foo/alias-file3 "$TEST_NAME"
-}
-
-test_setup() {
-
-	return
-
-}
-
-test_teardown() {
-
-	remove_bundle -L "$TEST_NAME"/web-dir/10/Manifest.test-bundle1
-	remove_bundle -L "$TEST_NAME"/web-dir/10/Manifest.alias-bundle1
-	remove_bundle -L "$TEST_NAME"/web-dir/10/Manifest.alias-bundle2
-	remove_bundle -L "$TEST_NAME"/web-dir/10/Manifest.alias-bundle3
-	sudo sh -c "rm -rf $TARGETDIR/usr/share/defaults/swupd/alias.d/"
-	sudo sh -c "rm -rf $TARGETDIR/etc/swupd/alias.d/"
-	clean_state_dir "$TEST_NAME"
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
 }
 
 @test "ADD033: Add bundle without alias" {

@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 
@@ -16,26 +16,9 @@ global_setup() {
 	create_bundle  -n test-bundle3 -f /baz/file_3 -u repo1 "$TEST_NAME"
 	create_bundle  -n test-bundle4 -f /file_4     -u repo1 "$TEST_NAME"
 	create_bundle  -n test-bundle5 -f /bat/file_5 -u repo1 "$TEST_NAME"
-	add_dependency_to_manifest "$TPWEBDIR"/10/Manifest.test-bundle2 test-bundle3
-	add_dependency_to_manifest "$TPWEBDIR"/10/Manifest.test-bundle3 test-bundle4
-	add_dependency_to_manifest "$TPWEBDIR"/10/Manifest.test-bundle2 test-bundle5
-
-}
-
-test_setup() {
-
-	return
-
-}
-
-test_teardown() {
-
-	return
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
+	add_dependency_to_manifest "$TP_BASE_DIR"/repo1/10/Manifest.test-bundle2 test-bundle3
+	add_dependency_to_manifest "$TP_BASE_DIR"/repo1/10/Manifest.test-bundle3 test-bundle4
+	add_dependency_to_manifest "$TP_BASE_DIR"/repo1/10/Manifest.test-bundle2 test-bundle5
 
 }
 

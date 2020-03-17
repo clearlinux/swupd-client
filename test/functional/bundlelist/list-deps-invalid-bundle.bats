@@ -2,6 +2,12 @@
 
 load "../testlib"
 
+metadata_setup() {
+
+	create_test_environment "$TEST_NAME"
+
+}
+
 @test "LST009: Try listing bundle's dependencies when bundle does not exist" {
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --deps not-a-bundle"

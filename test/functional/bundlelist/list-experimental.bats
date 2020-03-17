@@ -5,29 +5,12 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -e -t -n test-bundle1 -f /file_1 "$TEST_NAME"
 	create_bundle    -e    -n test-bundle2 -f /file_2 "$TEST_NAME"
 	create_bundle          -n test-bundle3 -f /file_3 "$TEST_NAME"
-
-}
-
-test_setup() {
-
-	return
-
-}
-
-test_teardown() {
-
-	return
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 
@@ -78,8 +61,7 @@ global_teardown() {
 	# bundle-list with no options should list only installed bundles, there should
 	# be a way to distinguish those that are experimental
 
-	sudo mv "$STATEDIR"/10/Manifest.MoM "$STATEDIR"/10/Manifest.MoM.temp
-	sudo mv "$WEBDIR"/10/Manifest.MoM.tar "$WEBDIR"/10/Manifest.MoM.tar.temp
+	sudo rm "$WEBDIR"/10/Manifest.MoM.tar
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS"
 
@@ -94,9 +76,6 @@ global_teardown() {
 	EOM
 	)
 	assert_in_output "$expected_output"
-
-	sudo mv "$STATEDIR"/10/Manifest.MoM.temp "$STATEDIR"/10/Manifest.MoM
-	sudo mv "$WEBDIR"/10/Manifest.MoM.tar.temp "$WEBDIR"/10/Manifest.MoM.tar
 
 }
 

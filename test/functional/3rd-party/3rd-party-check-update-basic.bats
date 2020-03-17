@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 
@@ -17,23 +17,6 @@ global_setup() {
 
 	create_third_party_repo -a "$TEST_NAME" 10 staging test-repo2
 	create_bundle -L -t -n test-bundle2 -f /bar/file_2 -u test-repo2 "$TEST_NAME"
-
-}
-
-test_setup() {
-
-	return
-
-}
-
-test_teardown() {
-
-	return
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

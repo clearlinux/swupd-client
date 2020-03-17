@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n upstream-bundle -f /upstream_file "$TEST_NAME"

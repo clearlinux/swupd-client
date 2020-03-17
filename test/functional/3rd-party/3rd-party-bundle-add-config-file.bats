@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 
@@ -17,10 +17,11 @@ test_setup() {
 	create_bundle -n test-bundle3 -f /file_3     -u test-repo "$TEST_NAME"
 
 	# add test-bundle2 as a dependency of test-bundle1 and test-bundle3 as optional
-	add_dependency_to_manifest "$TPWEBDIR"/10/Manifest.test-bundle1 test-bundle2
-	add_dependency_to_manifest -o "$TPWEBDIR"/10/Manifest.test-bundle1 test-bundle3
+	add_dependency_to_manifest "$TP_BASE_DIR"/test-repo/10/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest -o "$TP_BASE_DIR"/test-repo/10/Manifest.test-bundle1 test-bundle3
 
 	create_config_file
+	add_option_to_config_file skip_optional true 3rd-party-bundle-add
 
 }
 
@@ -29,8 +30,6 @@ test_setup() {
 	# some commands can include subcommands, in those cases the command and
 	# subcommand are represented by a section like [command-subcommand] in the
 	# config file
-
-	add_option_to_config_file skip_optional true 3rd-party-bundle-add
 
 	cd "$TEST_NAME" || exit 1
 	run sudo sh -c "$SWUPD 3rd-party bundle-add $SWUPD_OPTS test-bundle1"
@@ -58,15 +57,15 @@ test_setup() {
 
 	# test-bundle1 is installed and tracked
 	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TPSTATEDIR"/bundles/test-bundle1
+	assert_file_exists "$TP_BASE_STATEDIR"/test-repo/bundles/test-bundle1
 
 	# test-bundle2 is installed but not tracked
 	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo/usr/share/clear/bundles/test-bundle2
-	assert_file_not_exists "$TPSTATEDIR"/bundles/test-bundle2
+	assert_file_not_exists "$TP_BASE_STATEDIR"/test-repo/bundles/test-bundle2
 
 	# test-bundle3 is not installed at all
 	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo/usr/share/clear/bundles/test-bundle3
-	assert_file_not_exists "$TPSTATEDIR"/bundles/test-bundle3
+	assert_file_not_exists "$TP_BASE_STATEDIR"/test-repo/bundles/test-bundle3
 
 }
 #WEIGHT=6

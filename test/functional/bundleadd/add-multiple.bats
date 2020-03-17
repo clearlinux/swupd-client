@@ -2,7 +2,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	test_files=/usr/bin/1,/usr/bin/2,/usr/bin/3,/usr/bin/4,/usr/bin/5,/usr/bin/6,/usr/bin/7,/usr/bin/8,/usr/bin/9,/usr/bin/10

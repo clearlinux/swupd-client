@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME" 10 1
 
@@ -29,24 +29,6 @@ global_setup() {
 	sudo touch "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/bar/untracked_file2
 	# adding an untracked file into /usr
 	sudo touch "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/usr/untracked_file3
-
-}
-
-test_setup() {
-
-	return
-
-}
-
-test_teardown() {
-
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

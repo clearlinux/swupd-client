@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment -r "$TEST_NAME"
 	# create some extra files in /usr

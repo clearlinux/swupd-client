@@ -2,7 +2,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	# remove os-release file from target-dir so no current version can be determined

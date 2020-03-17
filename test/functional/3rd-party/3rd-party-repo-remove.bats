@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-test_setup(){
+metadata_setup(){
 
 	create_test_environment "$TEST_NAME"
 	# create a few 3rd-party repos within the test environment and add

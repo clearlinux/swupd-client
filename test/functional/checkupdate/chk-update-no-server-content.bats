@@ -2,7 +2,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	# remove the version from web-dir so there is no "server" data

@@ -2,6 +2,12 @@
 
 load "../testlib"
 
+metadata_setup() {
+
+	create_test_environment "$TEST_NAME"
+
+}
+
 @test "CHK002: Check for available updates when we are at latest" {
 
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"

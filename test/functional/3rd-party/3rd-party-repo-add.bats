@@ -8,13 +8,18 @@ load "../testlib"
 export repo1
 export repo2
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo "$TEST_NAME" 10 staging test-repo1
-	repo1="$TPURL"
 	create_third_party_repo "$TEST_NAME" 10 staging test-repo2
-	repo2="$TPURL"
+
+}
+
+test_setup() {
+
+	repo1="$TP_BASE_DIR"/test-repo1
+	repo2="$TP_BASE_DIR"/test-repo2
 
 }
 

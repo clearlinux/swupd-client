@@ -2,28 +2,10 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	printf "test-data" | sudo tee "$TARGETDIR"/test-hash > /dev/null
-
-}
-
-test_setup() {
-
-	return
-
-}
-
-test_teardown() {
-
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

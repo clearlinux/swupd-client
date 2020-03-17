@@ -5,47 +5,46 @@
 
 load "../testlib"
 
-export repo1
-export repo2
-
 global_setup() {
 	# Skip this test for local development because we write the certificate on /
     # This is necessary because the default certificate location is hardcoded on build time and we
 	# need to run swupd without -C parameter to test this feature.
-	if [ -z "${RUNNING_IN_CI}" ]; then
+	if [ -z "$RUNNING_IN_CI" ]; then
 		return
 	fi
 
 	if [ ! -f /usr/share/clear/update-ca/Swupd_Root.pem ]; then
 		sudo mkdir -p /usr/share/clear/update-ca
-		sudo cp "$TEST_ROOT_DIR"/Swupd_Root.pem /usr/share/clear/update-ca
+		sudo cp "$TEST_METADATA"/Swupd_Root.pem /usr/share/clear/update-ca
 		export CERT_WAS_INSTALLED=1
 	fi
 }
 
 global_teardown() {
 
-	if [ -z "${RUNNING_IN_CI}" ]; then
+	if [ -z "$RUNNING_IN_CI" ]; then
 		return
 	fi
 
-	if [ ! -z "${CERT_WAS_INSTALLED}" ]; then
-		sudo rm usr/share/clear/update-ca/Swupd_Root.pem
+	if [ -n "${CERT_WAS_INSTALLED}" ]; then
+		sudo rm /usr/share/clear/update-ca/Swupd_Root.pem
 	fi
 }
 
-test_setup() {
+metadata_setup() {
+
+	if [ -z "${RUNNING_IN_CI}" ]; then
+		skip "Skipping test because it writes files to /"
+	fi
 
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo "$TEST_NAME" 10 staging test-repo1
-	repo1="$TPURL"
-	create_third_party_repo "$TEST_NAME" 10 staging test-repo2
-	repo2="$TPURL"
+
 }
 
 @test "TPR066: Add a single repo importing the certificate" {
 
-	run sudo sh -c "echo 'y' | $SWUPD 3rd-party add test-repo1 file://$repo1 $SWUPD_OPTS_NO_CERT"
+	run sudo sh -c "echo 'y' | $SWUPD 3rd-party add test-repo1 file://$TP_BASE_DIR/test-repo1 $SWUPD_OPTS_NO_CERT"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Adding 3rd-party repository test-repo1...
@@ -72,7 +71,7 @@ test_setup() {
 	run sudo sh -c "cat $PATH_PREFIX/$THIRD_PARTY_DIR/repo.ini"
 	expected_output=$(cat <<-EOM
 			[test-repo1]
-			url=file://$repo1
+			url=file://$TP_BASE_DIR/test-repo1
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -85,7 +84,7 @@ test_setup() {
 
 @test "TPR067: Reject a certificate when adding a repository" {
 
-	run sudo sh -c "echo 'n' | $SWUPD 3rd-party add test-repo1 file://$repo1 $SWUPD_OPTS_NO_CERT"
+	run sudo sh -c "echo 'n' | $SWUPD 3rd-party add test-repo1 file://$TP_BASE_DIR/test-repo1 $SWUPD_OPTS_NO_CERT"
 	assert_status_is "$SWUPD_BAD_CERT"
 	expected_output=$(cat <<-EOM
 		Adding 3rd-party repository test-repo1...

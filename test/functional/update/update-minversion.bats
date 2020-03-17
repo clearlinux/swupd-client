@@ -2,7 +2,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME" 10
 	create_bundle -L -n bundle1 -v 10 -f /file1 "$TEST_NAME"

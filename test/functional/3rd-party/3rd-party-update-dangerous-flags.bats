@@ -5,14 +5,14 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo -a "$TEST_NAME" 10 staging repo1
 
-	file_1=$(create_file "$TPWEBDIR"/10/files)
+	file_1=$(create_file "$TP_BASE_DIR"/repo1/10/files)
 	# create a file with a dangerous flag (setuid)
-	file_2=$(create_file -u "$TPWEBDIR"/10/files)
+	file_2=$(create_file -u "$TP_BASE_DIR"/repo1/10/files)
 
 	# create and install a bundle that already has a file with
 	# a dangerous flag (file_2)
@@ -22,7 +22,7 @@ test_setup() {
 	# that changes the flags of an existing file with dangerous ones
 	create_version -p "$TEST_NAME" 20 10 staging repo1
 	sudo chmod g+s "$file_1"
-	file_4=$(create_file -u "$TPWEBDIR"/20/files)
+	file_4=$(create_file -u "$TP_BASE_DIR"/repo1/20/files)
 
 	# file_1 was not dangerous, it now is
 	update_bundle -p "$TEST_NAME" test-bundle1 --update /foo/file_1:"$file_1" repo1

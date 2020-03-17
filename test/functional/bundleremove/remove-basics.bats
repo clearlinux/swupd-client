@@ -2,33 +2,12 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -t -n test-bundle1 -d /foo -f /test-file1,/bar/test-file2,/bat/test-file3,/bat/common "$TEST_NAME"
 	create_bundle -L -t -n test-bundle2 -f /bat/test-file4,/bat/common "$TEST_NAME"
 	create_bundle -n test-bundle3 -f /baz/test-file5 "$TEST_NAME"
-
-}
-
-test_setup() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
-test_teardown() {
-
-	# reinstall test-bundle1 and test-bundle2
-	install_bundle "$WEBDIR"/10/Manifest.test-bundle1
-	install_bundle "$WEBDIR"/10/Manifest.test-bundle2
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

@@ -2,6 +2,19 @@
 
 load "../testlib"
 
+metadata_setup() {
+
+	if [ -z "${RUNNING_IN_CI}" ]; then
+		return
+	fi
+
+	create_test_environment "$TEST_NAME"
+	create_bundle -L -n test-bundle -f /foo/bar "$TEST_NAME"
+	create_version -p "$TEST_NAME" 100 10
+	update_bundle "$TEST_NAME" test-bundle --update /foo/bar
+
+}
+
 test_setup() {
 
 	# Skip this test if not running in Travis CI, because test takes too long for
@@ -9,25 +22,22 @@ test_setup() {
 	if [ -z "${RUNNING_IN_CI}" ]; then
 		skip "Skipping slow test for local development, test only runs in CI"
 	fi
-	create_test_environment "$TEST_NAME"
-	create_bundle -L -n test-bundle -f /foo/bar "$TEST_NAME"
-	create_version -p "$TEST_NAME" 100 10
-	update_bundle "$TEST_NAME" test-bundle --update /foo/bar
 
 	start_web_server -D "$WEBDIR" -d 100/pack-test-bundle-from-10.tar -s
 
 	# Set the web server as our upstream server
-	port=$(get_web_server_port "$TEST_NAME")
+	port=$(get_web_server_port)
 	set_upstream_server "$TEST_NAME" "http://localhost:$port"
 
 }
 
 test_teardown() {
 
-	# teardown only if in travis CI
-	if [ -n "${RUNNING_IN_CI}" ]; then
-		destroy_test_environment "$TEST_NAME"
+	if [ -z "${RUNNING_IN_CI}" ]; then
+		return
 	fi
+
+	destroy_web_server
 
 }
 

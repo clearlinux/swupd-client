@@ -5,28 +5,9 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
-
-}
-
-test_setup() {
-
-	# do nothing
-	return
-
-}
-
-test_teardown() {
-
-	sudo rm -rf "$TARGETDIR"/etc/swupd
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

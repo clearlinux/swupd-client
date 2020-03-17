@@ -104,7 +104,7 @@ test_setup() {
 	# use a web server for serving the content, this is necessary
 	# since the code behaves differently if the content is local (e.g. file://)
 	start_web_server -r
-	set_upstream_server "$TEST_NAME" http://localhost:"$(get_web_server_port "$TEST_NAME")"/"$TEST_NAME"/web-dir
+	set_upstream_server "$TEST_NAME" http://localhost:"$(get_web_server_port)"/"$TEST_NAME"/web-dir
 
 	run sudo sh -c "timeout 30 $SWUPD bundle-add --skip-diskspace-check --allow-insecure-http $SWUPD_OPTS test-bundle"
 
@@ -115,38 +115,40 @@ test_setup() {
 		Loading required manifests...
 		Downloading packs \\(.* MB\\) for:
 		 - test-bundle
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/pack-test-bundle-from-0.tar'
+		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port)/$TEST_NAME/web-dir/10/pack-test-bundle-from-0.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
 		Finishing packs extraction...
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
+		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port)/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
+		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port)/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
+		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port)/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
+		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port)/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
+		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port)/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
+		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port)/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
+		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port)/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
+		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port)/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
+		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port)/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
+		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port)/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
+		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port)/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
 		Error: Could not download some files from bundles, aborting bundle installation
 		Failed to install 1 of 1 bundles
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
+
+	destroy_web_server
 
 }
 #WEIGHT=13

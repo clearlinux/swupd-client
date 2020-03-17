@@ -5,10 +5,12 @@
 
 load "../testlib"
 
-test_setup() {
-
+metadata_setup() {
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle -f /test-file "$TEST_NAME"
+}
+
+test_setup() {
 
 	key_generation_cmd=$(cat <<-EOM
 			# Create a root key and cert

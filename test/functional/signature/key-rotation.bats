@@ -5,14 +5,13 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
+
+	export CERT_PATH="/usr/share/clear/update-ca/Swupd_Root.pem"
 
 	create_test_environment -r "$TEST_NAME" 10 1
-	export CERT_PATH="/usr/share/clear/update-ca/Swupd_Root.pem"
-	export SWUPD_OPTS_EXTRA="$SWUPD_OPTS_NO_FMT_NO_CERT -C $TARGETDIR$CERT_PATH"
-
 	create_version -r "$TEST_NAME" 20 10
-	update_bundle "$TEST_NAME" os-core --add "$CERT_PATH":"$TEST_ROOT_DIR"/Swupd_Root.pem
+	update_bundle "$TEST_NAME" os-core --add "$CERT_PATH":"$TEST_NAME"/Swupd_Root.pem
 	bump_format "$TEST_NAME"
 
 	# Rotate the key inside the content. We need to sign release 30 using old root key and sign the release 40 and 50 using the new key. And include the new key in releases 30, 40 and 50.
@@ -39,6 +38,11 @@ test_setup() {
 
 	sudo sh -c "$sign_cmd"
 
+}
+
+test_setup() {
+	export CERT_PATH="/usr/share/clear/update-ca/Swupd_Root.pem"
+	export SWUPD_OPTS_EXTRA="$SWUPD_OPTS_NO_FMT_NO_CERT -C $TARGETDIR$CERT_PATH"
 }
 
 @test "SIG017: Key rotation" {

@@ -2,6 +2,12 @@
 
 load "../testlib"
 
+metadata_setup() {
+
+	create_test_environment "$TEST_NAME"
+
+}
+
 @test "REM009: Try removing bundle 'os-core'" {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS os-core"

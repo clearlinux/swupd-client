@@ -5,17 +5,15 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
 	create_bundle -n test-bundle1 -f /foo/file_1 -u repo1 "$TEST_NAME"
-	URL1=$TPURL
 
 	create_third_party_repo -a "$TEST_NAME" 20 5 repo2
 	create_bundle -n test-bundle2 -f /foo/file_2 -u repo2 "$TEST_NAME"
-	URL2=$TPURL
 
 }
 
@@ -30,15 +28,15 @@ test_setup() {
 		_______________________
 		Distribution:      Swupd Test Distro
 		Installed version: 10 (format 1)
-		Version URL:       file://$URL1
-		Content URL:       file://$URL1
+		Version URL:       file://$TP_BASE_DIR/repo1
+		Content URL:       file://$TP_BASE_DIR/repo1
 		_______________________
 		 3rd-Party Repo: repo2
 		_______________________
 		Distribution:      Swupd Test Distro
 		Installed version: 20 (format 5)
-		Version URL:       file://$URL2
-		Content URL:       file://$URL2
+		Version URL:       file://$TP_BASE_DIR/repo2
+		Content URL:       file://$TP_BASE_DIR/repo2
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -53,8 +51,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Distribution:      Swupd Test Distro
 		Installed version: 20
-		Version URL:       file://$URL2
-		Content URL:       file://$URL2
+		Version URL:       file://$TP_BASE_DIR/repo2
+		Content URL:       file://$TP_BASE_DIR/repo2
 	EOM
 	)
 	assert_is_output "$expected_output"

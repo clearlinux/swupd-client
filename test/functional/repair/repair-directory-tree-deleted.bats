@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment -e "$TEST_NAME"
 	create_bundle -L -n os-core -f /testdir1/testdir2/testfile "$TEST_NAME"

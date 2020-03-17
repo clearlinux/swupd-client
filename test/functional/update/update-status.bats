@@ -2,28 +2,10 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment -e "$TEST_NAME"
 	create_version "$TEST_NAME" 100
-
-}
-
-test_setup() {
-
-	:
-
-}
-
-test_teardown() {
-
-	:
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	# create an initial environment
 	create_test_environment "$TEST_NAME"
@@ -21,7 +21,7 @@ test_setup() {
 	update_bundle -p "$TEST_NAME" test-bundle1 --add    /usr/local/bin/binary_6     repo1
 	update_bundle -p "$TEST_NAME" test-bundle1 --delete /usr/bin/binary_1           repo1
 	update_bundle -p "$TEST_NAME" test-bundle1 --rename /bin/binary_3:/bin/binary_7 repo1
-	add_dependency_to_manifest "$TPWEBDIR"/20/Manifest.test-bundle1 test-bundle3
+	add_dependency_to_manifest "$TP_BASE_DIR"/repo1/20/Manifest.test-bundle1 test-bundle3
 
 }
 

@@ -5,15 +5,9 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
-
-}
-
-test_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

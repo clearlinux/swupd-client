@@ -5,10 +5,15 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle -f /test-file "$TEST_NAME"
+
+}
+
+test_setup() {
+
 	sudo sh -c "openssl req -x509 -sha512 -days 1 -newkey rsa:4096  -keyout $TEST_NAME/key -out $TEST_NAME/cert -nodes -subj '/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost'"
 
 }

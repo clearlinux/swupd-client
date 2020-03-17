@@ -6,7 +6,7 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /file_1,/foo/file_2 "$TEST_NAME"
@@ -19,26 +19,6 @@ global_setup() {
 	# mark all installed bundles as tracked, to avoid this, let's add a dummy
 	# value to the tracking directory
 	sudo touch "$STATEDIR"/bundles/dummy
-
-}
-
-test_setup() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
-test_teardown() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

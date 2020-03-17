@@ -2,7 +2,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment -r "$TEST_NAME" 10 1
 	bump_format "$TEST_NAME"

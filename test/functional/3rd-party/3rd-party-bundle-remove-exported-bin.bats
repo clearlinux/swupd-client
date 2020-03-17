@@ -5,17 +5,17 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
 	# create 3rd-party bundles that share a binary
-	bin_file1=$(create_file -x "$TPWEBDIR"/10/files)
+	bin_file1=$(create_file -x "$TP_BASE_DIR"/repo1/10/files)
 	create_bundle -L -n test-bundle1 -f /file1,/foo/file2,/usr/bin/bin_file1:"$bin_file1",/bin/bin_file2 -u repo1 "$TEST_NAME"
 	create_bundle -L -n test-bundle2 -f /file3,/usr/bin/bin_file1:"$bin_file1"                           -u repo1 "$TEST_NAME"
 	create_bundle -L -n test-bundle3 -f /file1,/usr/bin/bin_file1:"$bin_file1"                           -u repo1 "$TEST_NAME"
 	# let's make test-bundle3 contain /usr/bin/bin_file1 but not export it
-	update_manifest "$TPWEBDIR"/10/Manifest.test-bundle3 file-status /usr/bin/bin_file1 F...
+	update_manifest "$TP_BASE_DIR"/repo1/10/Manifest.test-bundle3 file-status /usr/bin/bin_file1 F...
 
 }
 
@@ -49,7 +49,6 @@ test_setup() {
 	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file1
 
 }
-#WEIGHT=5
 
 @test "TPR070: Removing all third party bundles that exported a binary that is still needed but non-exported" {
 
@@ -87,7 +86,7 @@ test_setup() {
 	# non-confilcting scripts to binaries should have been removed
 	assert_file_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file1
 	assert_file_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file2
-	assert_file_exists "$TPTARGETDIR"/usr/bin/bin_file1
+	assert_file_exists "$TP_TARGETDIR"/repo1/usr/bin/bin_file1
 
 }
 
@@ -117,6 +116,7 @@ test_setup() {
 
 	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file1
 	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file2
-	assert_file_exists "$TPTARGETDIR"/usr/bin/bin_file1
+	assert_file_exists "$TP_TARGETDIR"/repo1/usr/bin/bin_file1
 
 }
+#WEIGHT=5

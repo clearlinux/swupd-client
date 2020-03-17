@@ -5,16 +5,16 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
 	# create a 3rd-party bundle that has a couple of binaries
-	bin_file1=$(create_file -x "$TPWEBDIR"/10/files)
+	bin_file1=$(create_file -x "$TP_BASE_DIR"/repo1/10/files)
 	create_bundle -n test-bundle1 -f /file1,/foo/file_2,/usr/bin/bin_file1:"$bin_file1",/bin/bin_file2 -u repo1 "$TEST_NAME"
 	create_bundle -n test-bundle2 -f /file3,/usr/bin/bin_file1:"$bin_file1"                            -u repo1 "$TEST_NAME"
 	# let's make test-bundle2 contain /bin/bin_file1 but not export it
-	update_manifest "$TPWEBDIR"/10/Manifest.test-bundle2 file-status /usr/bin/bin_file1 F...
+	update_manifest "$TP_BASE_DIR"/repo1/10/Manifest.test-bundle2 file-status /usr/bin/bin_file1 F...
 
 }
 

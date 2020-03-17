@@ -2,7 +2,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment -r "$TEST_NAME"
 	create_bundle -n test-bundle1 -f /tracked_file,/foo/ftb1 "$TEST_NAME"  # not installed

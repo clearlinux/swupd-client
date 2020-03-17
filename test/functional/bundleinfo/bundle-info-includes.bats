@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle1 -f /file_1 "$TEST_NAME"
@@ -22,26 +22,6 @@ global_setup() {
 	update_bundle "$TEST_NAME" test-bundle1 --header-only
 	create_bundle -n test-bundle5 -f /file_5 "$TEST_NAME"
 	add_dependency_to_manifest "$WEBDIR"/20/Manifest.test-bundle1 test-bundle5
-
-}
-
-test_setup() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
-test_teardown() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

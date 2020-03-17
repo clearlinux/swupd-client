@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n upstream-bundle -f /upstream_file "$TEST_NAME"
@@ -40,7 +40,7 @@ test_setup() {
 	assert_is_output "$expected_output"
 	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/foo/file_2
 	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/usr/share/clear/bundles/test-bundle2
-	assert_file_not_exists "$TPSTATEDIR"/bundles/test-bundle2
+	assert_file_not_exists "$TP_BASE_STATEDIR"/test-repo2/bundles/test-bundle2
 
 }
 

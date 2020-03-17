@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle-upstream -f /file_upstream "$TEST_NAME"
@@ -23,23 +23,6 @@ global_setup() {
 	# mark all installed bundles as tracked, to avoid this, let's add a dummy
 	# value to the tracking directory
 	sudo touch "$STATEDIR"/3rd-party/{repo1,repo2}/bundles/dummy
-
-}
-
-test_setup() {
-
-	return
-
-}
-
-test_teardown() {
-
-	return
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

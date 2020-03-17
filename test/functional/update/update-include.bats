@@ -2,7 +2,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	# create the test env with two bundles (one installed)
 	create_test_environment "$TEST_NAME"

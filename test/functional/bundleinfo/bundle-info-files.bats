@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle1 -f /file_1,/foo/file_2 "$TEST_NAME"
@@ -15,26 +15,6 @@ global_setup() {
 	create_version "$TEST_NAME" 20 10
 	update_bundle "$TEST_NAME" test-bundle1 --header-only
 	update_bundle "$TEST_NAME" test-bundle2 --add /file_5
-
-}
-
-test_setup() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
-test_teardown() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

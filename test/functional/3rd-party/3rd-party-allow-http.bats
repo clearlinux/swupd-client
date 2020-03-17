@@ -5,39 +5,29 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo "$TEST_NAME" 10 staging my_repo
 
-	# use a web server for serving the content, this is necessary
-	# since the code behaves differently if the content is local (e.g. file://)
-	start_web_server -r -D "$TPWEBDIR"
-
 }
 
-test_setup() {
+test_setup () {
 
-	# do nothing
-	return
+	# use a web server for serving the content, this is necessary
+	# since the code behaves differently if the content is local (e.g. file://)
+	start_web_server -r -D "$TP_BASE_DIR"/my_repo
+	port=$(get_web_server_port)
 
 }
 
 test_teardown() {
 
-	sudo rm -rf "$TARGETDIR"/etc/swupd
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
+	destroy_web_server
 
 }
 
 @test "TPR005: Trying to add a http repo" {
-
-	port=$(get_web_server_port "$TEST_NAME")
 
 	run sudo sh -c "$SWUPD 3rd-party add my_repo http://localhost:$port $SWUPD_OPTS"
 
@@ -53,8 +43,6 @@ global_teardown() {
 }
 
 @test "TPR006: Forcing a http repo add" {
-
-	port=$(get_web_server_port "$TEST_NAME")
 
 	run sudo sh -c "$SWUPD 3rd-party add my_repo http://localhost:$port --allow-insecure-http $SWUPD_OPTS"
 

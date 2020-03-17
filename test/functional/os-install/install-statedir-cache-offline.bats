@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment -e "$TEST_NAME" 10
 	create_bundle -n os-core -f /core "$TEST_NAME"
@@ -22,6 +22,10 @@ test_setup() {
 	sudo touch "$statedir_cache_path"/pack-os-core-from-0-to-10.tar
 	sudo rsync -r "$WEBDIR"/10/files/* "$statedir_cache_path"/staged --exclude="*.tar"
 
+}
+
+test_setup() {
+	statedir_cache_path="${TEST_DIRNAME}/testfs/statedir-cache"
 }
 
 @test "INS021: Install with populated statedir-cache and no network" {

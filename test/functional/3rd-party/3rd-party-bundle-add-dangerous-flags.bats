@@ -5,16 +5,16 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
 
 	# create a file with the setuid flag set
-	file_2=$(create_file -u "$TPWEBDIR"/10/files)
+	file_2=$(create_file -u "$TP_BASE_DIR"/repo1/10/files)
 
 	# create a file with the setgid flag set
-	file_3=$(create_file -g "$TPWEBDIR"/10/files)
+	file_3=$(create_file -g "$TP_BASE_DIR"/repo1/10/files)
 
 	# create a bundle that has the file previosuly created
 	create_bundle -n test-bundle1 -f /foo/file_1,/bar/file_2:"$file_2",/bar/file_3:"$file_3" -u repo1 "$TEST_NAME"

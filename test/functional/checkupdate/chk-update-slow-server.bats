@@ -2,23 +2,42 @@
 
 load "../testlib"
 
-test_setup() {
+metadata_setup() {
+
+	if [ -z "${RUNNING_IN_CI}" ]; then
+		return
+	fi
 
 	create_test_environment "$TEST_NAME"
 	create_version "$TEST_NAME" 99990 10 staging
+
+}
+
+test_setup() {
+
+	# Skip this test if not running in Travis CI, because test takes too long for
+	# local development. To run this locally do: RUNNING_IN_CI=true make check
+	if [ -z "${RUNNING_IN_CI}" ]; then
+		skip "Skipping slow test for local development, test only runs in CI"
+	fi
 
 	# start slow response web server
 	start_web_server -s -l 1
 
 	# Set the web server as our upstream server
-	port=$(get_web_server_port "$TEST_NAME")
+	port=$(get_web_server_port)
 	set_upstream_server "$TEST_NAME" "http://localhost:$port/$TEST_NAME/web-dir"
 
 }
 
 test_teardown() {
 
-	destroy_test_environment "$TEST_NAME"
+	if [ -z "${RUNNING_IN_CI}" ]; then
+		return
+	fi
+
+	destroy_web_server
+
 }
 
 @test "CHK003: Check for available updates with a slow server" {

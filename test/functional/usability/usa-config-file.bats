@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+metadata_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle -f /file_1 "$TEST_NAME"
@@ -21,12 +21,6 @@ test_setup() {
 test_teardown() {
 
 	destroy_config_file
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
 
 }
 

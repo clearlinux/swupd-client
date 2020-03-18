@@ -450,6 +450,9 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 		case 404:
 			debug("Curl - Download failed - file not found (404) - '%s'\n", url);
 			return DOWNLOAD_STATUS_NOT_FOUND;
+		case 416:
+			debug("Curl - Download failed - range not satisfiable (416) - '%s'\n", url);
+			return DOWNLOAD_STATUS_RANGE_NOT_SATISFIABLE;
 		default:
 			error("Curl - Download failed: response (%ld) -  '%s'\n", response, url);
 			return DOWNLOAD_STATUS_ERROR;

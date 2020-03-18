@@ -1,6 +1,3 @@
-#!/usr/bin/bash
-
-# global variables
 FUNC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export FUNC_DIR
 TEST_ROOT_DIR="$(pwd)"
@@ -11,6 +8,9 @@ export TEST_NAME_SHORT=${TEST_FILENAME%.bats}
 export THEME_DIRNAME="$BATS_TEST_DIRNAME"
 export SWUPD_DIR="$FUNC_DIR/../.."
 export CACERT_DIR="$SWUPD_DIR/swupd_test_certificates" # trusted key store path
+
+# Metadata variables
+export TEST_METADATA="$TEST_NAME_SHORT"_META
 
 # 3rd-party variables
 export THIRD_PARTY_DIR="opt/3rd-party"
@@ -3551,6 +3551,9 @@ setup() {
 
 	# run the global_setup only once
 	if [ "$BATS_TEST_NAME" = "${BATS_TEST_NAMES[0]}" ]; then
+		# restore or regenerate metadata before global_setup
+		restore_metadata
+
 		# create the global temp directory
 		create_test_env_directory "$TEST_NAME_SHORT"
 
@@ -3572,6 +3575,9 @@ setup() {
 
 	debug_msg "\\nTEST_NAME: $TEST_NAME"
 	debug_msg "Test path: $(pwd)/$TEST_NAME"
+
+	# Make a clean copy of all metadata before running test_setup
+	copy_metadata_to_tests
 
 	# now run the test setup
 	debug_msg "\\nRunning test_setup..."
@@ -3631,6 +3637,8 @@ teardown() {
 		# Perform cleanups if the user left anything behind
 		destroy_web_server
 		destroy_test_environment "$TEST_NAME"
+		destroy_test_environment "$TEST_METADATA"
+
 	fi
 }
 
@@ -3659,6 +3667,38 @@ test_setup() {
 test_teardown() {
 
 	debug_msg "No test_teardown was defined"
+
+}
+
+# Restore metadata to tests
+copy_metadata_to_tests() {
+	# Can we do the same with cp?
+	sudo rsync -a "$TEST_METADATA"/ "$TEST_NAME"/
+	if [ -d "$TARGETDIR" ]; then
+		sudo find "$TARGETDIR" -type f -exec sed -i "s/$TEST_METADATA/$TEST_NAME/g" {} \;
+	fi
+
+}
+
+# Restore metadata produced to be used by this test
+restore_metadata() {
+
+	create_test_env_directory "$TEST_METADATA"
+
+	# Set all env variables left
+	debug_msg "\\nSetting environment variables for metadata..."
+	set_env_variables "$TEST_METADATA"
+
+	debug_msg "\\nRunning metadata_setup..."
+	metadata_setup
+	debug_msg "Finished running metadata_setup\\n"
+
+}
+
+metadata_setup() {
+
+	# if metadata_setup is not defined it will default to this one
+	debug_msg "No metadata setup was defined"
 
 }
 

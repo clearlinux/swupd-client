@@ -32,7 +32,7 @@ global_teardown() {
 
 @test "MIR007: Trying to set a http mirror" {
 
-	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD mirror -s http://invalid_server_for_swupd $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_INVALID_OPTION"
 	expected_output=$(cat <<-EOM
@@ -46,7 +46,7 @@ global_teardown() {
 
 @test "MIR008: Forcing a http mirror ang checking if the mirror works" {
 
-	run sudo sh -c "$SWUPD mirror -s http://example.com/swupd-file --allow-insecure-http $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD mirror -s http://invalid_server_for_swupd --allow-insecure-http $SWUPD_OPTS"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -56,18 +56,18 @@ global_teardown() {
 		Mirror url set
 		Distribution:      Swupd Test Distro
 		Installed version: 10
-		Version URL:       http://example.com/swupd-file
-		Content URL:       http://example.com/swupd-file
+		Version URL:       http://invalid_server_for_swupd
+		Content URL:       http://invalid_server_for_swupd
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
-	assert_equal "http://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
+	assert_equal "http://invalid_server_for_swupd" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
+	assert_equal "http://invalid_server_for_swupd" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
 }
 
 @test "MIR009: swupd operations when http mirror is used without allow-insecure-http" {
 
-	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS -u http://cdn.download.clearlinux.org/update"
+	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS -u http://invalid_server_for_swupd"
 
 	assert_status_is "$SWUPD_INIT_GLOBALS_FAILED"
 	expected_output=$(cat <<-EOM
@@ -80,7 +80,7 @@ global_teardown() {
 
 @test "MIR010: swupd operations when http mirror is used without allow-insecure-http" {
 
-	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS --allow-insecure-http -u http://cdn.download.clearlinux.org/update"
+	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS --allow-insecure-http -u http://invalid_server_for_swupd"
 
 	# Error is because server doesn't respond to this manifest, but connection was created
 	assert_status_is_not "$SWUPD_OK"

@@ -172,6 +172,11 @@ enum swupd_code third_party_remove_binary(struct file *file);
  */
 enum swupd_code third_party_create_wrapper_script(struct file *file);
 
+/**
+ * @brief Function that retrieves the content director of a 3rd-party repo
+ */
+char *get_repo_content_path(const char *repo_name);
+
 #endif
 
 #ifdef __cplusplus

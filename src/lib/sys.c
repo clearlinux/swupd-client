@@ -548,3 +548,36 @@ long sys_get_file_size(const char *filename)
 	}
 	return -errno;
 }
+
+int sys_dir_is_empty(const char *path)
+{
+	DIR *dir;
+	struct dirent *entry;
+	int ret = 1;
+
+	dir = opendir(path);
+	if (dir == NULL) {
+		ret = -errno;
+		goto exit;
+	}
+
+	while (true) {
+		entry = readdir(dir);
+		if (!entry) {
+			break;
+		}
+
+		if (!strcmp(entry->d_name, ".") ||
+		    !strcmp(entry->d_name, "..")) {
+			continue;
+		}
+
+		/* the directory is not empty*/
+		ret = 0;
+		break;
+	}
+
+exit:
+	closedir(dir);
+	return ret;
+}

@@ -233,6 +233,7 @@ long sys_file_hardlink_count(const char *file);
  * @return Return the size of a file or a negative number on errors.
  */
 long sys_get_file_size(const char *filename);
+
 /**
  * @brief Run a systemctl command with the informed parameters.
  */
@@ -243,6 +244,13 @@ long sys_get_file_size(const char *filename);
  */
 #define systemctl_cmd_path(path, ...) \
 	path ? run_command_quiet(SYSTEMCTL, "--root", path, __VA_ARGS__) : run_command_quiet(SYSTEMCTL, __VA_ARGS__)
+
+/**
+ * @brief function that checks if a directory is empty
+ *
+ * @return 1 if the directory is empty, 0 if it is not empty, < 0 on errors
+ */
+int sys_dir_is_empty(const char *path);
 
 #ifdef __cplusplus
 }

@@ -16,16 +16,13 @@ test_setup() {
 
 @test "SIG019: Verify signature for absolute latest version with swupd check-update" {
 
-	#TODO: Remove on FB 30
-	skip "Skipping until FB 30 - feature disabled"
 	# absolute latest version get checked during check-update
 	sudo sh -c "mv $WEBDIR/version/latest_version.sig $WEBDIR/version/latest_version_bad_name.sig"
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"
 	assert_status_is "$SWUPD_SIGNATURE_VERIFICATION_FAILED"
 
 	expected_output=$(cat <<-EOM
-		Error: Failed to retrieve size for signature file: file://$TEST_DIRNAME/web-dir/version/latest_version.sig
-		Error: Signature Verification failed for URL: file://$TEST_DIRNAME/web-dir/version/latest_version
+		Error: Signature for latest file (file://$TEST_DIRNAME/web-dir/version/latest_version) is missing
 		Error: Unable to determine the server version as signature verification failed
 		Current OS version: 10
 	EOM

@@ -135,9 +135,6 @@ static int verify_signature(char *url, struct curl_file_data *tmp_version)
 
 	ret = get_sig_inmemory(url, &tmp_version_sig);
 	if (ret < 0) {
-		//TODO: enforce sigcheck on format bump
-		// For now consider any download error as ENOENT to prevent sig check
-		ret = -ENOENT;
 		goto out;
 	}
 
@@ -189,12 +186,12 @@ static int get_version_from_url(char *url)
 		sig_verified = 0;
 	}
 
-	if (sig_verified == -ENOENT) {
-		//TODO: enforce sigcheck on format bump
-		warn("Signature for latest file (%s) is missing\n", url);
-		warn("Support for unsigned latest file will be deprecated soon\n");
-	} else if (sig_verified != 0) {
-		error("Signature verification failed for URL: %s\n", url);
+	if (sig_verified != 0) {
+		if (sig_verified == -ENOENT) {
+			error("Signature for latest file (%s) is missing\n", url);
+		} else {
+			error("Signature verification failed for URL: %s\n", url);
+		}
 		return -SWUPD_ERROR_SIGNATURE_VERIFICATION;
 	}
 

@@ -124,6 +124,10 @@ used to modify the core behavior and resources that swupd uses.
 
    Do not attempt to enforce certificate or signature checking.
 
+-  ``-n, --nosigcheck-latest``
+
+   Do not attempt to enforce signature checking when retrieving the latest version number.
+
 -  ``-I, --ignore-time``
 
    Ignore system/certificate time when validating signature.

@@ -43,9 +43,11 @@
 #define FLAG_ALLOW_INSECURE_HTTP 1004
 #define FLAG_VERBOSE 1005
 #define FLAG_ASSUME 1006
+#define FLAG_NOSIGCHECK_LATEST 1007
 
 struct globals globals = {
 	.sigcheck = true,
+	.sigcheck_latest = true,
 	.timecheck = true,
 	.user_interaction = INTERACTIVE,
 	.max_retries = DEFAULT_MAX_RETRIES,
@@ -540,6 +542,7 @@ static const struct option global_opts[] = {
 	{ "no-scripts", no_argument, 0, 'N' },
 	{ "no-progress", no_argument, 0, FLAG_NO_PROGRESS },
 	{ "nosigcheck", no_argument, 0, 'n' },
+	{ "nosigcheck-latest", no_argument, 0, FLAG_NOSIGCHECK_LATEST },
 	{ "path", required_argument, 0, 'p' },
 	{ "port", required_argument, 0, 'P' },
 	{ "statedir", required_argument, 0, 'S' },
@@ -667,6 +670,9 @@ static bool global_parse_opt(int opt, char *optarg)
 		return true;
 	case FLAG_ASSUME:
 		return set_assume_option(optarg);
+	case FLAG_NOSIGCHECK_LATEST:
+		globals.sigcheck_latest = !optarg_to_bool(optarg);
+		return true;
 	default:
 		return false;
 	}
@@ -727,6 +733,7 @@ void global_print_help(void)
 	print("   --no-progress           Don't print progress report\n");
 	print("   --wait-for-scripts      Wait for the post-update scripts to complete\n");
 	print("   --assume=[yes|no]       Sets an automatic response to all prompts and run non-interactively\n");
+	print("   --nosigcheck-latest     Do not attempt to enforce signature checking when retrieving the latest version number\n");
 	print("\n");
 }
 

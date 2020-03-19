@@ -147,6 +147,7 @@ local -a global_opts; global_opts=(
     '(help status)--no-progress[Don`t print progress report]'
     '(help status)--wait-for-scripts[Wait for the post-update scripts to complete]'
     '(help status)--assume[Sets an automatic response to all prompts and run non-interactively]'
+    '(help status)--nosigcheck-latest[Do not attempt to enforce signature checking when retrieving the latest version number]'
 )
 
 # Level-1 completion for sub-command and options to swupd

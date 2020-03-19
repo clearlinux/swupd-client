@@ -62,4 +62,104 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 }
+
+@test "SIG021: Update using nosigcheck" {
+
+	write_to_protected_file "$WEBDIR/version/formatstaging/latest.sig" "bad signature"
+
+	# Update fails as signature match error occurs as expected
+	run sudo sh -c "$SWUPD update $SWUPD_OPTS --nosigcheck"
+	assert_status_is "$SWUPD_OK"
+
+	expected_output=$(cat <<-EOM
+		Update started
+		Warning: The --nosigcheck flag was used, THE SIGNATURE OF file://$TEST_DIRNAME/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
+		Be aware that this compromises the system security
+		Preparing to update from 10 to 20
+		Warning: The --nosigcheck flag was used, THE MANIFEST SIGNATURE WILL NOT BE VERIFIED
+		Be aware that this compromises the system security
+		Warning: The --nosigcheck flag was used, THE MANIFEST SIGNATURE WILL NOT BE VERIFIED
+		Be aware that this compromises the system security
+		Downloading packs for:
+		 - test-bundle1
+		Finishing packs extraction...
+		Statistics for going from version 10 to version 20:
+		    changed bundles   : 1
+		    new bundles       : 0
+		    deleted bundles   : 0
+		    changed files     : 0
+		    new files         : 1
+		    deleted files     : 0
+		Validate downloaded files
+		No extra files need to be downloaded
+		Installing files...
+		Update was applied
+		Calling post-update helper scripts
+		Update successful - System updated from version 10 to version 20
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
+@test "SIG022: Update using nosigcheck-latest" {
+
+	write_to_protected_file "$WEBDIR/version/formatstaging/latest.sig" "bad signature"
+
+	# Update fails as signature match error occurs as expected
+	run sudo sh -c "$SWUPD update $SWUPD_OPTS --nosigcheck-latest"
+	assert_status_is "$SWUPD_OK"
+
+	expected_output=$(cat <<-EOM
+		Update started
+		Warning: The --nosigcheck-latest flag was used, THE SIGNATURE OF file://$TEST_DIRNAME/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
+		Be aware that this compromises the system security
+		Preparing to update from 10 to 20
+		Downloading packs for:
+		 - test-bundle1
+		Finishing packs extraction...
+		Statistics for going from version 10 to version 20:
+		    changed bundles   : 1
+		    new bundles       : 0
+		    deleted bundles   : 0
+		    changed files     : 0
+		    new files         : 1
+		    deleted files     : 0
+		Validate downloaded files
+		No extra files need to be downloaded
+		Installing files...
+		Update was applied
+		Calling post-update helper scripts
+		Update successful - System updated from version 10 to version 20
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
+@test "SIG023: Fail update using nosigcheck-latest with an invalid MoM sig" {
+
+	write_to_protected_file "$WEBDIR/version/formatstaging/latest.sig" "bad signature"
+	write_to_protected_file "$WEBDIR/10/Manifest.MoM.sig"
+
+	# Update fails as signature match error occurs as expected
+	run sudo sh -c "$SWUPD update $SWUPD_OPTS --nosigcheck-latest"
+	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
+
+	expected_output=$(cat <<-EOM
+		Update started
+		Warning: The --nosigcheck-latest flag was used, THE SIGNATURE OF file://$TEST_DIRNAME/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
+		Be aware that this compromises the system security
+		Preparing to update from 10 to 20
+		Warning: Signature check failed
+		Warning: Removing corrupt Manifest.MoM artifacts and re-downloading...
+		Warning: Signature check failed
+		Error: Signature verification failed for manifest version 10
+		Update failed
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
 #WEIGHT=5

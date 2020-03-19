@@ -61,6 +61,9 @@
 # Do not attempt to enforce certificate or signature checking (boolean value)
 #nosigcheck=<true/false>
 
+# Do not attempt to enforce signature checking when retrieving the latest version number (boolean value)
+#nosigcheck_latest=<true/false>
+
 # Do not install boot files to the boot partition (containers) (boolean value)
 #no_boot_update=<true/false>
 

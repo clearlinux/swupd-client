@@ -177,12 +177,12 @@ static int get_version_from_url(char *url)
 	}
 
 	/* Sig check */
-	if (globals.sigcheck) {
+	if (globals.sigcheck && globals.sigcheck_latest) {
 		sig_verified = verify_signature(url, &tmp_version);
 	} else {
-		warn("The --nosigcheck flag was used, THE SIGNATURE OF %s WILL NOT BE VERIFIED\n", url);
+		const char *flag = globals.sigcheck ? "--nosigcheck-latest" : "--nosigcheck";
+		warn("The %s flag was used, THE SIGNATURE OF %s WILL NOT BE VERIFIED\n", flag, url);
 		info("Be aware that this compromises the system security\n\n");
-		journal_log_error("swupd security notice: --nosigcheck used to bypass version signature");
 		sig_verified = 0;
 	}
 

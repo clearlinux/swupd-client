@@ -94,14 +94,14 @@ out:
 
 static int get_sig_inmemory(char *url, struct curl_file_data *tmp_version_sig)
 {
+	static const int sig_size = 4096;
 	int ret = -1;
 	char *sig_fname;
 	string_or_die(&sig_fname, "%s.sig", url);
 	ret = swupd_curl_query_content_size(sig_fname);
 	if (ret <= 0) {
-		warn("Failed to retrieve size for signature file: %s\n", sig_fname);
-		ret = -ENOENT;
-		goto exit;
+		debug("Failed to retrieve size for signature file: %s - assuming %d\n", sig_fname, sig_size);
+		ret = sig_size;
 	}
 
 	tmp_version_sig->capacity = ret;
@@ -111,7 +111,7 @@ static int get_sig_inmemory(char *url, struct curl_file_data *tmp_version_sig)
 
 	ret = swupd_curl_get_file_memory(sig_fname, tmp_version_sig);
 	if (ret != 0) {
-		warn("Failed to fetch signature file in memory: %s\n", sig_fname);
+		debug("Failed to fetch signature file in memory: %s\n", sig_fname);
 		free_and_clear_pointer(&tmp_version_sig->data);
 		tmp_version_sig->data = NULL;
 		ret = -ENOENT;

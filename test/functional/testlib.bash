@@ -488,6 +488,10 @@ set_env_variables() { # swupd_function
 	debug_msg "STATEDIR: $STATEDIR"
 	export PATH_PREFIX="$TEST_DIRNAME"/testfs/target-dir
 	debug_msg "PATH_PREFIX: $PATH_PREFIX"
+	export SWUPD_CONFIG_DIR="$TEST_NAME"/testconfig
+	debug_msg "SWUPD_CONFIG_DIR: $SWUPD_CONFIG_DIR"
+	export SWUPD_CONFIG_FILE="$SWUPD_CONFIG_DIR"/config
+	debug_msg "SWUPD_CONFIG_FILE: $SWUPD_CONFIG_FILE"
 
 	# different options for swupd
 	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $TEST_DIRNAME/Swupd_Root.pem -I --no-progress"
@@ -1979,8 +1983,6 @@ create_config_file() { # swupd_function
 
 	# these values have to be exported in this function because the
 	# TEST_NAME changes during the setup
-	export SWUPD_CONFIG_DIR="$TEST_NAME"/testconfig
-	export SWUPD_CONFIG_FILE="$SWUPD_CONFIG_DIR"/config
 	debug_msg "Creating config file $SWUPD_CONFIG_FILE..."
 
 	if [ "$("$SWUPD" --version | grep "config file path" | awk '{print $4}')" != "./testconfig" ]; then

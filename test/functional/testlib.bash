@@ -488,6 +488,12 @@ set_env_variables() { # swupd_function
 	debug_msg "STATEDIR: $STATEDIR"
 	export PATH_PREFIX="$TEST_DIRNAME"/testfs/target-dir
 	debug_msg "PATH_PREFIX: $PATH_PREFIX"
+	export TP_BASE_DIR="$TEST_DIRNAME"/3rd-party
+	debug_msg "TP_BASE_DIR: $TP_BASE_DIR"
+	export TP_BASE_STATEDIR="$STATEDIR"/3rd-party
+	debug_msg "TP_BASE_STATEDIR: $TP_BASE_STATEDIR"
+	export TP_TARGETDIR="$env_name"/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"
+	debug_msg "3rd-party repo target dir: $TP_TARGETDIR"
 	export SWUPD_CONFIG_DIR="$TEST_NAME"/testconfig
 	debug_msg "SWUPD_CONFIG_DIR: $SWUPD_CONFIG_DIR"
 	export SWUPD_CONFIG_FILE="$SWUPD_CONFIG_DIR"/config
@@ -1502,13 +1508,7 @@ create_third_party_repo() { #swupd_function
 	create_version -r "$env_name" "$version" 0 "$format" "$repo_name"
 	debug_msg "3rd-party repo $repo_name created successfully"
 
-	export TPSTATEDIR
-	export TPWEBDIR="$env_name"/3rd-party/"$repo_name"
-	export TPTARGETDIR="$env_name"/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
-	export TPURL="$path"/"$env_name"/3rd-party/"$repo_name"
-	debug_msg "3rd-party repo state dir: $TPSTATEDIR"
-	debug_msg "3rd-party repo content dir: $TPWEBDIR"
-	debug_msg "3rd-party repo target dir: $TPTARGETDIR"
+	TPURL="$TP_BASE_DIR"/"$repo_name"
 	debug_msg "3rd-party repo URL: $TPURL"
 
 	# if requested, add the new repo to the repo.ini file
@@ -1535,14 +1535,6 @@ create_third_party_repo() { #swupd_function
 		create_bundle -L -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$cert",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
 	else
 		create_bundle -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$cert",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
-	fi
-
-	if [ "$TEST_ENV_ONLY" = true ]; then
-		print "\nVariables for 3rd-party repo $repo_name:\n"
-		print "TPURL=$TPURL"
-		print "TPWEBDIR=$TPWEBDIR"
-		print "TPTARGETDIR=$TPTARGETDIR"
-		print "TPSTATEDIR=$TPSTATEDIR\n"
 	fi
 
 }

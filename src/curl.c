@@ -819,3 +819,8 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_
 exit:
 	return curl_ret;
 }
+
+bool curl_is_url_local(const char *url)
+{
+	return strncmp(url, "file://", 7) == 0;
+}

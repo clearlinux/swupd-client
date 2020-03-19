@@ -119,7 +119,6 @@ test_teardown() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Checking mirror status
-		Error: Curl - Communicating with server timed out - 'http://localhost:$port//version/formatstaging/latest'
 		Warning: Upstream server http://localhost:$port/ not responding, cannot determine upstream version
 		Warning: Unable to determine if the mirror is up to date
 		Preparing to update from 10 to 20

@@ -88,7 +88,7 @@ void set_content_url(char *url)
 
 	globals.content_url = strdup_or_die(url);
 	remove_trailing_slash(globals.content_url);
-	globals.content_url_is_local = strncmp(globals.content_url, "file://", 7) == 0;
+	globals.content_url_is_local = curl_is_url_local(globals.content_url);
 }
 
 /* Initializes the content_url global variable with the default value,

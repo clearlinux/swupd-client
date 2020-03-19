@@ -260,11 +260,49 @@ static bool mirror_is_set(void)
 	return mirror_set;
 }
 
+int get_version_no_mirror(void)
+{
+	char *fullpath = NULL;
+	char *version_url = NULL;
+	int version = -1, err;
+
+	fullpath = sys_path_join(globals.path_prefix, DEFAULT_VERSION_URL_PATH);
+	err = get_value_from_path(&version_url, fullpath, true);
+	if (err != 0 || version_url == NULL) {
+		/* no versionurl file here, might not exist under --path argument */
+#ifdef VERSIONURL
+		// Try the hardcoded URL
+		version_url = strdup_or_die(VERSIONURL);
+#else
+		goto out;
+#endif
+	}
+
+	/* before trying to get the latest version let's make sure the central version is up */
+	if (!curl_is_url_local(version_url) && check_connection(version_url) != 0) {
+		goto out;
+	}
+
+	version = get_latest_version(version_url);
+
+out:
+	if (!version_url) {
+		warn("No default upstream version url set\n");
+	} else if (version == -SWUPD_ERROR_SIGNATURE_VERIFICATION) {
+		warn("Cannot determine upstream version since signature verification for path: %s failed\n", version_url);
+	} else if (version < 0) {
+		warn("Upstream server %s not responding, cannot determine upstream version\n", version_url);
+	}
+
+	free(fullpath);
+	free(version_url);
+	return version;
+}
+
 int handle_mirror_if_stale(void)
 {
 	int ret = 0;
-	char *ret_str = NULL;
-	char *fullpath = NULL;
+	int mirror_version = 0, central_version = 0;
 
 	/* make sure there is a mirror set up first */
 	if (!mirror_is_set()) {
@@ -272,39 +310,13 @@ int handle_mirror_if_stale(void)
 	}
 
 	info("Checking mirror status\n");
-	// Force curl to be initialized with mirror url
-	get_latest_version("");
+	// Force curl to be initialized with mirror url before upstream url
+	mirror_version = get_latest_version("");
+	central_version = get_version_no_mirror();
 
-	fullpath = sys_path_join(globals.path_prefix, DEFAULT_VERSION_URL_PATH);
-	ret = get_value_from_path(&ret_str, fullpath, true);
-	if (ret != 0 || ret_str == NULL) {
-		/* no versionurl file here, might not exist under --path argument */
-		goto out;
-	}
-
-	/* before trying to get the latest version let's make sure the central version is up */
-	if (!globals.content_url_is_local && check_connection(ret_str) != 0) {
-		warn("Upstream server %s not responding, cannot determine upstream version\n", ret_str);
+	if (central_version < 0) {
 		warn("Unable to determine if the mirror is up to date\n");
-		goto out;
-	}
-
-	int central_version = get_latest_version(ret_str);
-	int mirror_version = get_latest_version("");
-
-	/* if the latest version could not be retrieved from the central server we cannot
-	 * check if mirror is stale, this would be very odd since we already check connection
-	 * with the server earlier. Another possible explanation for this if the signature
-	 * for central_version dont verify
-	 */
-	if (central_version == -SWUPD_ERROR_SIGNATURE_VERIFICATION) {
-		warn("Cannot determine upstream version since signature verification for path: %s failed\n", ret_str);
-		warn("Unable to determine if the mirror is up to date\n");
-		goto out;
-	} else if (central_version < 0) {
-		warn("Upstream server %s not responding, cannot determine upstream version\n", ret_str);
-		warn("Unable to determine if the mirror is up to date\n");
-		goto out;
+		return 0;
 	}
 
 	/* if the mirror_version has an error or it's outdated and central_version works,
@@ -313,11 +325,10 @@ int handle_mirror_if_stale(void)
 	if (mirror_version > 0 && diff <= MIRROR_STALE_UNSET) {
 		if (diff > MIRROR_STALE_WARN) {
 			warn("mirror version (%d) is behind upstream version (%d)\n",
-			     mirror_version,
-			     central_version);
+			     mirror_version, central_version);
 		}
 		/* no need to unset */
-		goto out;
+		return 0;
 	}
 
 	/* if we've made it this far we need to unset */
@@ -325,8 +336,7 @@ int handle_mirror_if_stale(void)
 		warn("the mirror version could not be determined\n");
 	} else {
 		warn("the mirror version (%d) is too far behind upstream version (%d)\n",
-		     mirror_version,
-		     central_version);
+		     mirror_version, central_version);
 	}
 
 	info("Removing mirror configuration\n");
@@ -338,8 +348,6 @@ int handle_mirror_if_stale(void)
 	get_latest_version("");
 
 out:
-	free_and_clear_pointer(&fullpath);
-	free_and_clear_pointer(&ret_str);
 	return ret;
 }
 

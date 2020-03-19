@@ -176,6 +176,11 @@ void swupd_curl_parallel_download_cancel(struct swupd_curl_parallel_handle *h);
  */
 void swupd_curl_download_set_progress_callback(swupd_curl_progress_cb progress_cb, void *data);
 
+/**
+ * Check if url is local or remote
+ */
+bool curl_is_url_local(const char *url);
+
 #ifdef __cplusplus
 }
 #endif

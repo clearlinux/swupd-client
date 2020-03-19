@@ -11,6 +11,8 @@ export TEST_NAME=${TEST_FILENAME%.bats}
 export THEME_DIRNAME="$BATS_TEST_DIRNAME"
 export TEST_NAME_SHORT="$TEST_NAME"
 export SWUPD_DIR="$FUNC_DIR/../.."
+SWUPD_DIR_ABS="$(realpath "$SWUPD_DIR")"
+export SWUPD_DIR_ABS
 
 # 3rd-party variables
 export THIRD_PARTY_DIR="opt/3rd-party"

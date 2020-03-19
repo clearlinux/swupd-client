@@ -47,7 +47,7 @@ static char *get_repo_config_path(void)
 	return str_or_die("%s/%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_DIR, "repo.ini");
 }
 
-static char *get_repo_content_path(const char *repo_name)
+char *get_repo_content_path(const char *repo_name)
 {
 	return str_or_die("%s%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BUNDLES_DIR, repo_name);
 }

@@ -75,23 +75,6 @@ static bool parse_options(int argc, char **argv)
 	return false;
 }
 
-static int remove_repo(const char *repo_name)
-{
-	int ret;
-
-	ret = third_party_remove_repo(repo_name);
-	if (ret != 0 && ret != -ENOENT) {
-		return ret;
-	}
-
-	ret = third_party_remove_repo_directory(repo_name);
-	if (ret != 0 && ret != -ENOENT) {
-		return ret;
-	}
-
-	return 0;
-}
-
 static bool confirm_certificate(const char *cert)
 {
 	info("Importing 3rd-party repository public certificate:\n\n");
@@ -222,10 +205,10 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
 	const int step_in_third_party_add = 9;
-	const char *name, *url;
+	char *repo_content_dir = NULL;
 	struct list *repos = NULL;
-	struct repo *repo = NULL;
-	bool revert = false;
+	struct repo *repo_ptr = NULL;
+	struct repo repo;
 	int repo_version;
 	int ret;
 	const bool DONT_VERIFY_CERTIFICATE = false;
@@ -249,42 +232,35 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	progress_init_steps("third-party-add", step_in_third_party_add);
 
 	/* The last two in reverse are the repo-name, repo-url */
-	name = argv[argc - 2];
-	url = argv[argc - 1];
+	repo.name = argv[argc - 2];
+	repo.url = argv[argc - 1];
 
-	if (!is_url_allowed(url)) {
+	if (!is_url_allowed(repo.url)) {
 		ret_code = SWUPD_INVALID_OPTION;
 		goto finish;
 	}
 
-	/* add the repo configuration to the repo.ini file */
-	progress_next_step("add_repo", PROGRESS_UNDEFINED);
-	info("Adding 3rd-party repository %s...\n\n", name);
-	ret = third_party_add_repo(name, url);
-	if (ret) {
-		if (ret != -EEXIST) {
-			error("Failed to add repository %s to config\n\n", name);
-			ret_code = SWUPD_COULDNT_WRITE_FILE;
-		} else {
-			ret_code = SWUPD_INVALID_OPTION;
-		}
+	/* make sure a repo with that name doesn't already exist */
+	repos = third_party_get_repos();
+	repo_ptr = list_search(repos, repo.name, cmp_repo_name_string);
+	if (repo_ptr) {
+		error("A 3rd-party repository called \"%s\" already exists\n", repo.name);
+		ret_code = SWUPD_INVALID_OPTION;
 		goto finish;
 	}
 
-	/* at this point the repo has been added to the repo.ini file */
-	repos = third_party_get_repos();
-	repo = list_search(repos, name, cmp_repo_name_string);
-	if (!repo) {
-		/* this should not happen */
-		ret_code = SWUPD_UNEXPECTED_CONDITION;
-		revert = true;
+	/* make sure the content directory for that repo doesn't already exist,
+	 * if it does, warn the user and abort */
+	repo_content_dir = get_repo_content_path(repo.name);
+	if (sys_file_exists(repo_content_dir) && !sys_dir_is_empty(repo_content_dir)) {
+		error("A content directory for a 3rd-party repository called \"%s\" already exists at %s, aborting...", repo.name, repo_content_dir);
+		ret_code = SWUPD_INVALID_REPOSITORY;
 		goto finish;
 	}
 
 	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */
-	ret_code = third_party_set_repo(repo, DONT_VERIFY_CERTIFICATE);
+	ret_code = third_party_set_repo(&repo, DONT_VERIFY_CERTIFICATE);
 	if (ret_code) {
-		revert = true;
 		goto finish;
 	}
 
@@ -298,7 +274,6 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 				error("Impossible to import 3rd party repository certificate\n");
 				info("To ignore certificate check use --nosigcheck\n");
 			}
-			revert = true;
 
 			ret_code = SWUPD_BAD_CERT;
 			goto finish;
@@ -306,13 +281,15 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	}
 
 	/* get repo's latest version */
-	repo_version = get_latest_version(repo->url);
+	repo_version = get_latest_version(repo.url);
 	if (repo_version < 0) {
-		error("Unable to determine the latest version for repository %s\n\n", repo->name);
+		error("Unable to determine the latest version for repository %s\n\n", repo.name);
 		ret_code = SWUPD_INVALID_REPOSITORY;
-		revert = true;
 		goto finish;
 	}
+
+	/* beyond this point we need to roll back if some error occurrs */
+	info("Adding 3rd-party repository %s...\n\n", repo.name);
 
 	/* the repo's "os-core" bundle needs to be installed at this moment
 	 * so we can track the version of the repo */
@@ -322,28 +299,37 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	struct list *bundle_to_install = NULL;
 	bundle_to_install = list_append_data(bundle_to_install, "os-core");
 	ret_code = bundle_add(bundle_to_install, repo_version);
-	if (ret_code) {
-		revert = true;
-	}
 	list_free_list(bundle_to_install);
-
-finish:
-	if (revert) {
+	if (ret_code) {
 		/* there was an error adding the repo, revert the action,
 		 * we don't want to keep a corrupt repo */
-		ret = remove_repo(name);
-		if (ret) {
-			error("The corrupt repository failed to be removed (errno: %d)\n\n", ret);
+		third_party_remove_repo_directory(repo.name);
+	}
+
+	/* add the repo configuration to the repo.ini file */
+	progress_next_step("add_repo", PROGRESS_UNDEFINED);
+	ret = third_party_add_repo(repo.name, repo.url);
+	if (ret) {
+		if (ret != -EEXIST) {
+			/* there was an error adding the repo, revert the action,
+			 * we don't want to keep a corrupt repo */
+			third_party_remove_repo_directory(repo.name);
+			error("Failed to add repository %s to config\n\n", repo.name);
+			ret_code = SWUPD_COULDNT_WRITE_FILE;
+		} else {
+			ret_code = SWUPD_INVALID_OPTION;
 		}
 	}
 
-	if (ret_code == SWUPD_OK && !revert) {
+finish:
+	if (ret_code == SWUPD_OK) {
 		print("\nRepository added successfully\n");
 	} else {
 		print("\nFailed to add repository\n");
 	}
 
 	list_free_list_and_data(repos, repo_free_data);
+	free_and_clear_pointer(&repo_content_dir);
 	swupd_deinit();
 	progress_finish_steps(ret_code);
 

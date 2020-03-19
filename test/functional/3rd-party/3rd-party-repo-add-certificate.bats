@@ -48,11 +48,11 @@ test_setup() {
 	run sudo sh -c "echo 'y' | $SWUPD 3rd-party add test-repo1 file://$repo1 $SWUPD_OPTS_NO_CERT"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Adding 3rd-party repository test-repo1...
 		Importing 3rd-party repository public certificate:
 		Issuer: /C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost
 		Subject: /C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost
 		.*
+		Adding 3rd-party repository test-repo1...
 		Installing the required bundle 'os-core' from the repository...
 		Note that all bundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Loading required manifests...
@@ -88,7 +88,6 @@ test_setup() {
 	run sudo sh -c "echo 'n' | $SWUPD 3rd-party add test-repo1 file://$repo1 $SWUPD_OPTS_NO_CERT"
 	assert_status_is "$SWUPD_BAD_CERT"
 	expected_output=$(cat <<-EOM
-		Adding 3rd-party repository test-repo1...
 		Importing 3rd-party repository public certificate:
 		Issuer: /C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost
 		Subject: /C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost

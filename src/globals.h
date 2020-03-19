@@ -37,6 +37,7 @@ extern struct globals {
 	bool no_boot_update;
 	bool no_scripts;
 	bool sigcheck;
+	bool sigcheck_latest;
 	bool timecheck;
 	bool wait_for_scripts;
 	bool user_defined_cert_path;

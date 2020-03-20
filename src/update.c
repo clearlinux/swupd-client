@@ -230,7 +230,7 @@ static bool is_installed_and_verified(struct file *file)
 		return false;
 	}
 
-	char *fullname = sys_path_join(globals.path_prefix, file->filename);
+	char *fullname = sys_path_join("%s/%s", globals.path_prefix, file->filename);
 
 	if (verify_file(file, fullname)) {
 		free_and_clear_pointer(&fullname);

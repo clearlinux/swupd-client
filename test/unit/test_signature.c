@@ -83,12 +83,12 @@ static int test_signature()
 	     *config_ocsp_critical, *config_noocsp_critical;
 	int result = -1, ret;
 
-	private_key = sys_path_join(test_dir, "private.pem");
-	public_key = sys_path_join(test_dir, "public.pem");
+	private_key = sys_path_join("%s/%s", test_dir, "private.pem");
+	public_key = sys_path_join("%s/%s", test_dir, "public.pem");
 	dir = sys_dirname(__FILE__);
-	config_ocsp = sys_path_join(dir, "data/config_ocsp.cnf");
-	config_noocsp_critical = sys_path_join(dir, "data/config_noocsp_critical.cnf");
-	config_ocsp_critical = sys_path_join(dir, "data/config_ocsp_critical.cnf");
+	config_ocsp = sys_path_join("%s/%s", dir, "data/config_ocsp.cnf");
+	config_noocsp_critical = sys_path_join("%s/%s", dir, "data/config_noocsp_critical.cnf");
+	config_ocsp_critical = sys_path_join("%s/%s", dir, "data/config_ocsp_critical.cnf");
 
 	// Create a good key
 	printf("Testing with a valid RSA certificate\n");

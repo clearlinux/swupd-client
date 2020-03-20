@@ -144,7 +144,7 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 			continue;
 		}
 
-		file = sys_path_join(path, entry->d_name);
+		file = sys_path_join("%s/%s", path, entry->d_name);
 
 		if (!pred(path, entry)) {
 			continue;
@@ -350,7 +350,7 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 			continue;
 		}
 
-		char *version_dir = sys_path_join(globals.state_dir, name);
+		char *version_dir = sys_path_join("%s/%s", globals.state_dir, name);
 
 		/* This is not precise: it may keep Manifest files that we don't use, and
 		 * also will keep the previous version. If that extra precision is
@@ -447,7 +447,7 @@ enum swupd_code clean_statedir(bool dry_run, bool all)
 		}
 	}
 
-	staged_dir = sys_path_join(globals.state_dir, "staged");
+	staged_dir = sys_path_join("%s/%s", globals.state_dir, "staged");
 	ret = remove_if(staged_dir, dry_run, is_fullfile);
 	free_and_clear_pointer(&staged_dir);
 	if (ret != SWUPD_OK) {

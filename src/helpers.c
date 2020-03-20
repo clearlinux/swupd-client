@@ -182,14 +182,14 @@ static bool validate_tracking_dir(const char *state_dir)
 	char *tracking_dir;
 	char *rmfile;
 
-	tracking_dir = sys_path_join(state_dir, "bundles");
+	tracking_dir = sys_path_join("%s/%s", state_dir, "bundles");
 
 	/* if state_dir_parent/bundles doesn't exist or is empty, assume this is
 	 * the first time tracking installed bundles. Since we don't know what the
 	 * user installed themselves just copy the entire system tracking directory
 	 * into the state tracking directory. */
 	if (!is_populated_dir(tracking_dir)) {
-		src = sys_path_join(globals.path_prefix, "/usr/share/clear/bundles");
+		src = sys_path_join("%s/%s", globals.path_prefix, "/usr/share/clear/bundles");
 
 		if (!sys_file_exists(src)) {
 			/* there is no bundles directory to copy from */
@@ -214,7 +214,7 @@ static bool validate_tracking_dir(const char *state_dir)
 		}
 
 		/* remove uglies that live in the system tracking directory */
-		rmfile = sys_path_join(tracking_dir, ".MoM");
+		rmfile = sys_path_join("%s/%s", tracking_dir, ".MoM");
 		(void)unlink(rmfile);
 		free_and_clear_pointer(&rmfile);
 
@@ -369,7 +369,7 @@ bool is_directory_mounted(const char *filename)
 		return false;
 	}
 
-	tmp = sys_path_join(globals.path_prefix, filename);
+	tmp = sys_path_join("%s/%s", globals.path_prefix, filename);
 	string_or_die(&fname, ":%s:", tmp);
 	free_and_clear_pointer(&tmp);
 
@@ -403,7 +403,7 @@ bool is_under_mounted_directory(const char *filename)
 	while (token != NULL) {
 		string_or_die(&mountpoint, "%s/", token);
 
-		tmp = sys_path_join(globals.path_prefix, filename);
+		tmp = sys_path_join("%s/%s", globals.path_prefix, filename);
 		string_or_die(&fname, ":%s:", tmp);
 		free_and_clear_pointer(&tmp);
 
@@ -649,7 +649,7 @@ enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 		free_and_clear_pointer(&tar_dotfile);
 		free_and_clear_pointer(&url);
 
-		target = sys_path_join(globals.path_prefix, path);
+		target = sys_path_join("%s/%s", globals.path_prefix, path);
 
 		/* Search for the file in the manifest, to get the hash for the file */
 		file = search_file_in_manifest(target_MoM, path);
@@ -1198,7 +1198,7 @@ void prettify_size(long size_in_bytes, char **pretty_size)
 
 char *get_tracking_dir(void)
 {
-	return sys_path_join(globals.state_dir, "bundles");
+	return sys_path_join("%s/%s", globals.state_dir, "bundles");
 }
 
 bool confirm_action(void)

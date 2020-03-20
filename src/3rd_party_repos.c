@@ -34,27 +34,27 @@
 
 char *third_party_get_bin_dir(void)
 {
-	return sys_path_join(globals_bkp.path_prefix, SWUPD_3RD_PARTY_BIN_DIR);
+	return sys_path_join("%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BIN_DIR);
 }
 
 char *third_party_get_binary_path(const char *binary_name)
 {
-	return str_or_die("%s%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BIN_DIR, binary_name);
+	return sys_path_join("%s/%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BIN_DIR, binary_name);
 }
 
 static char *get_repo_config_path(void)
 {
-	return str_or_die("%s/%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_DIR, "repo.ini");
+	return sys_path_join("%s/%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_DIR, "repo.ini");
 }
 
 char *get_repo_content_path(const char *repo_name)
 {
-	return str_or_die("%s%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BUNDLES_DIR, repo_name);
+	return sys_path_join("%s/%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BUNDLES_DIR, repo_name);
 }
 
 static char *get_repo_state_dir(const char *repo_name)
 {
-	return str_or_die("%s/%s/%s", globals_bkp.state_dir, SWUPD_3RD_PARTY_DIRNAME, repo_name);
+	return sys_path_join("%s/%s/%s", globals_bkp.state_dir, SWUPD_3RD_PARTY_DIRNAME, repo_name);
 }
 
 /**
@@ -593,7 +593,7 @@ enum swupd_code third_party_remove_binary(struct file *file)
 
 	filename = file->filename;
 	script = third_party_get_binary_path(sys_basename(filename));
-	binary = sys_path_join(globals.path_prefix, filename);
+	binary = sys_path_join("%s/%s", globals.path_prefix, filename);
 
 	if (!sys_file_exists(binary)) {
 		ret = sys_rm(script);
@@ -629,7 +629,7 @@ enum swupd_code third_party_create_wrapper_script(struct file *file)
 	filename = file->filename;
 	bin_directory = third_party_get_bin_dir();
 	script = third_party_get_binary_path(sys_basename(filename));
-	binary = sys_path_join(globals.path_prefix, filename);
+	binary = sys_path_join("%s/%s", globals.path_prefix, filename);
 
 	if (!sys_filelink_is_executable(binary)) {
 		warn("File %s does not have 'execute' permission so it won't be exported\n", filename);

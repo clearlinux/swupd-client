@@ -402,30 +402,38 @@ char *sys_basename(const char *path)
 	return basename(path);
 }
 
-char *sys_path_join(const char *prefix, const char *path)
+char *sys_path_join(const char *fmt, ...)
 {
-	size_t len = 0;
+	char *path;
+	va_list ap;
+	int len;
+	int i, j;
 
-	if (!path) {
-		path = "";
+	/* merge arguments into one path */
+	va_start(ap, fmt);
+	if (vasprintf(&path, fmt, ap) < 0) {
+		abort();
 	}
-	if (!prefix) {
-		prefix = "";
+	va_end(ap);
+
+	len = strlen(path);
+	char *pretty_path = malloc(strlen(path) + 1);
+	ON_NULL_ABORT(pretty_path);
+
+	/* remove all duplicated PATH_SEPARATOR from the path */
+	for (i = j = 0; i < len; i++) {
+		if (path[i] == PATH_SEPARATOR && path[i + 1] == PATH_SEPARATOR) {
+			/* duplicated PATH_SEPARATOR, throw it away */
+			continue;
+		}
+		pretty_path[j] = path[i];
+		j++;
 	}
+	pretty_path[j] = '\0';
 
-	len = strlen(prefix);
+	free(path);
 
-	//Remove trailing '/' at the end of prefix
-	while (len && prefix[len - 1] == PATH_SEPARATOR) {
-		len--;
-	}
-
-	//Remove leading  '/' at the beginning of path
-	while (path[0] == PATH_SEPARATOR) {
-		path++;
-	}
-
-	return str_or_die("%.*s%c%s", len, prefix, PATH_SEPARATOR, path);
+	return pretty_path;
 }
 
 bool is_root(void)

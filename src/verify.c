@@ -257,7 +257,7 @@ static int check_files_hash(struct list *files)
 			goto progress;
 		}
 
-		fullname = sys_path_join(globals.path_prefix, f->filename);
+		fullname = sys_path_join("%s/%s", globals.path_prefix, f->filename);
 		valid = cmdline_option_quick ? verify_file_lazy(fullname) : verify_file(f, fullname);
 		free_and_clear_pointer(&fullname);
 		if (valid) {
@@ -366,7 +366,7 @@ static void add_missing_files(struct manifest *official_manifest, struct list *f
 			goto progress;
 		}
 
-		fullname = sys_path_join(globals.path_prefix, file->filename);
+		fullname = sys_path_join("%s/%s", globals.path_prefix, file->filename);
 		memset(&local, 0, sizeof(struct file));
 		local.filename = file->filename;
 		populate_file_struct(&local, fullname);
@@ -436,7 +436,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	}
 
 	/* compare the hash and report mismatch */
-	fullname = sys_path_join(globals.path_prefix, file->filename);
+	fullname = sys_path_join("%s/%s", globals.path_prefix, file->filename);
 	if (verify_file(file, fullname)) {
 		goto end;
 	}
@@ -531,7 +531,7 @@ static void remove_orphaned_files(struct list *files_to_verify, bool repair)
 			goto progress;
 		}
 
-		fullname = sys_path_join(globals.path_prefix, file->filename);
+		fullname = sys_path_join("%s/%s", globals.path_prefix, file->filename);
 
 		if (!sys_file_exists(fullname)) {
 			/* correctly, the file is not present */
@@ -798,7 +798,7 @@ static enum swupd_code deal_with_extra_files(struct manifest *manifest, bool fix
 {
 	enum swupd_code ret;
 
-	char *start = sys_path_join(globals.path_prefix, cmdline_option_picky_tree);
+	char *start = sys_path_join("%s/%s", globals.path_prefix, cmdline_option_picky_tree);
 	info("%s extra files under %s\n", fix ? "Removing" : "Checking for", start);
 	ret = walk_tree(manifest, start, fix, picky_whitelist, &counts);
 	free_and_clear_pointer(&start);
@@ -1123,7 +1123,7 @@ enum swupd_code execute_verify(void)
 		files_to_verify = keep_matching_path(official_manifest->files);
 		info("\n");
 		if (files_to_verify) {
-			char *file_path = sys_path_join(globals.path_prefix, cmdline_option_file);
+			char *file_path = sys_path_join("%s/%s", globals.path_prefix, cmdline_option_file);
 			info("Limiting diagnose to the following %s:\n", sys_filelink_is_dir(file_path) ? "directory (recursively)" : "file");
 			free_and_clear_pointer(&file_path);
 			info(" - %s\n", cmdline_option_file);
@@ -1233,7 +1233,7 @@ brick_the_system_and_clean_curl:
 	if (cmdline_option_install && cmdline_option_bundles) {
 		/* this is a fresh install so we need to specify the
 		 * state dir of the new install */
-		char *new_os_statedir = sys_path_join(globals.path_prefix, "/var/lib/swupd");
+		char *new_os_statedir = sys_path_join("%s/%s", globals.path_prefix, "/var/lib/swupd");
 		for (iter = cmdline_option_bundles; iter; iter = iter->next) {
 			char *bundle = iter->data;
 			/* make sure the bundle was in fact valid and will

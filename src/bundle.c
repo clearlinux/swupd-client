@@ -217,8 +217,8 @@ void track_bundle_in_statedir(const char *bundle_name, const char *state_dir)
 	char *tracking_dir;
 	char *tracking_file;
 
-	tracking_dir = sys_path_join(state_dir, "bundles");
-	tracking_file = sys_path_join(tracking_dir, bundle_name);
+	tracking_dir = sys_path_join("%s/%s", state_dir, "bundles");
+	tracking_file = sys_path_join("%s/%s", tracking_dir, bundle_name);
 
 	/* touch a tracking file */
 	fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);

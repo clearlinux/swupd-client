@@ -135,7 +135,7 @@ static bool is_deletable_dependency(const void *dependency)
 static void remove_tracked(const char *bundle)
 {
 	char *destdir = get_tracking_dir();
-	char *tracking_file = sys_path_join(destdir, bundle);
+	char *tracking_file = sys_path_join("%s/%s", destdir, bundle);
 	free_and_clear_pointer(&destdir);
 	/* we don't care about failures here since any weird state in the tracking
 	 * dir MUST be handled gracefully */

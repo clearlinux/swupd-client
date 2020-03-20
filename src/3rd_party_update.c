@@ -142,7 +142,7 @@ static enum swupd_code update_binary_script(struct file *file)
 	filename = file->filename;
 	bin_directory = third_party_get_bin_dir();
 	script = third_party_get_binary_path(sys_basename(filename));
-	binary = sys_path_join(globals.path_prefix, filename);
+	binary = sys_path_join("%s/%s", globals.path_prefix, filename);
 
 	/* if the script for the binary doesn't exist it is probably a new
 	 * binary, create the script */
@@ -191,7 +191,7 @@ static enum swupd_code validate_permissions(struct file *file)
 			} else {
 				/* an existing file has dangerous flags, do not warn unless
 				 * the flags changed from non-dangerous to dangerous in the update */
-				original_file = sys_path_join(globals.path_prefix, file->filename);
+				original_file = sys_path_join("%s/%s", globals.path_prefix, file->filename);
 				if (lstat(original_file, &original_file_stats) == 0) {
 					if (
 					    ((file_stats.st_mode & S_ISUID) && !(original_file_stats.st_mode & S_ISUID)) ||

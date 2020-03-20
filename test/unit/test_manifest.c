@@ -42,7 +42,7 @@ struct manifest *manifest_parse_test(const char *component, const char *dir, con
 	struct manifest *m;
 	char *full_path;
 
-	full_path = sys_path_join(dir, filename);
+	full_path = sys_path_join("%s/%s", dir, filename);
 	m = manifest_parse(component, full_path, header_only);
 	free(full_path);
 

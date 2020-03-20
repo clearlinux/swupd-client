@@ -84,7 +84,7 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 	char *temp;
 	bool ret = true;
 
-	temp = sys_path_join(globals.path_prefix, filename);
+	temp = sys_path_join("%s/%s", globals.path_prefix, filename);
 	if (fix) {
 		print(" -> Extra file: %s%s", temp, is_dir ? "/" : "");
 		if (remove(temp)) {

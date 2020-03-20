@@ -84,7 +84,7 @@ _swupd()
 		opts="$global add remove list bundle-add bundle-list bundle-remove bundle-info update diagnose repair check-update clean info "
 		break;;
 		("add")
-		opts="$global --repo"
+		opts="$global --repo --force"
 		break;;
 		("remove")
 		opts="$global --repo --force"

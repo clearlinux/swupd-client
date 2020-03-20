@@ -385,6 +385,9 @@
 # Options for the "swupd 3rd-party add" command
 #
 
+# Attempt to proceed even if non-critical errors found (boolean value)
+#force=<true/false>
+
 
 [3rd-party-remove]
 

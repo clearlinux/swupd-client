@@ -209,6 +209,7 @@ if [[ -n "$state" ]]; then
                 add)
                     local -a add; add=(
                         $global_opt
+                        '(help status -x --force)'{-x,--force}'[Attempt to proceed even if non-critical errors found]'
                         '(help)Positional arg: [repo-name]'
                         '(help)Positional arg: [repo-url]'
                     )

@@ -676,6 +676,11 @@ SUBCOMMANDS
 
        Adds a 3rd-party repository.
 
+         -  ``force``
+
+         Attempt to proceed with the removal of the repo even if non-critical
+         errors found.
+
     -  ``remove``
 
        Removes a 3rd-party repository along with all the content installed

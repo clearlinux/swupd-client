@@ -180,9 +180,7 @@ static int get_version_from_url(char *url)
 	if (globals.sigcheck && globals.sigcheck_latest) {
 		sig_verified = verify_signature(url, &tmp_version);
 	} else {
-		const char *flag = globals.sigcheck ? "--nosigcheck-latest" : "--nosigcheck";
-		warn("The %s flag was used, THE SIGNATURE OF %s WILL NOT BE VERIFIED\n", flag, url);
-		info("Be aware that this compromises the system security\n\n");
+		warn_nosigcheck(url);
 		sig_verified = 0;
 	}
 

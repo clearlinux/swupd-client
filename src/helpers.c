@@ -1240,3 +1240,23 @@ void free_and_clear_pointer(char **s)
 		*s = NULL;
 	}
 }
+
+void warn_nosigcheck(const char *file)
+{
+	static bool first_time = true;
+
+	if (first_time) {
+		const char *flag = globals.sigcheck ? "--nosigcheck-latest" : "--nosigcheck";
+		char journal_msg[LINE_MAX] = { 0 };
+		warn("The %s flag was used and this compromises the system security\n", flag);
+
+		snprintf(journal_msg, sizeof(journal_msg), "swupd security notice: %s used to bypass MoM signature verification", flag);
+
+		journal_log_error(journal_msg);
+
+		first_time = false;
+	}
+
+	warn("\n");
+	warn("THE SIGNATURE OF %s WILL NOT BE VERIFIED\n\n", file);
+}

@@ -29,6 +29,8 @@
 
 #ifdef THIRDPARTY
 
+static bool cmdline_option_force = false;
+
 static void print_help(void)
 {
 	/* TODO(castulo): we need to change this description to match that of the
@@ -38,13 +40,32 @@ static void print_help(void)
 	print("   swupd 3rd-party add [repo-name] [repo-URL]\n\n");
 
 	global_print_help();
+
+	print("Options:\n");
+	print("   -x, --force             Attempt to proceed even if non-critical errors found\n");
 	print("\n");
 }
 
+static const struct option prog_opts[] = {
+	{ "force", no_argument, 0, 'x' },
+};
+
+static bool parse_opt(int opt, char *optarg)
+{
+	switch (opt) {
+	case 'x':
+		cmdline_option_force = optarg_to_bool(optarg);
+		return true;
+	default:
+		return false;
+	}
+	return false;
+}
+
 static const struct global_options opts = {
-	NULL,
-	0,
-	NULL,
+	prog_opts,
+	sizeof(prog_opts) / sizeof(struct option),
+	parse_opt,
 	print_help,
 };
 
@@ -253,9 +274,21 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 	 * if it does, warn the user and abort */
 	repo_content_dir = get_repo_content_path(repo.name);
 	if (sys_file_exists(repo_content_dir) && !sys_dir_is_empty(repo_content_dir)) {
-		error("A content directory for a 3rd-party repository called \"%s\" already exists at %s, aborting...", repo.name, repo_content_dir);
-		ret_code = SWUPD_INVALID_REPOSITORY;
-		goto finish;
+		if (!cmdline_option_force) {
+			error("A content directory for a 3rd-party repository called \"%s\" already exists at %s, aborting...\n", repo.name, repo_content_dir);
+			info("To force the removal of the directory and continue adding the repository use the --force option\n");
+			ret_code = SWUPD_INVALID_REPOSITORY;
+			goto finish;
+		}
+		/* the --force flag was used, remove the corrupt repo and proceed */
+		warn("A content directory for a 3rd-party repository called \"%s\" already exists at %s\n", repo.name, repo_content_dir);
+		info("The --force option was used; forcing the removal of the directory\n");
+		ret = third_party_remove_repo_directory(repo.name);
+		if (ret) {
+			error("Directory %s could not be removed\n\n", repo_content_dir);
+			ret_code = SWUPD_COULDNT_REMOVE_FILE;
+			goto finish;
+		}
 	}
 
 	/* set the appropriate content_dir and state_dir for the selected 3rd-party repo */

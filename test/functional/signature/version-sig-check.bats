@@ -73,13 +73,11 @@ test_setup() {
 
 	expected_output=$(cat <<-EOM
 		Update started
-		Warning: The --nosigcheck flag was used, THE SIGNATURE OF file://$TEST_DIRNAME/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
-		Be aware that this compromises the system security
+		Warning: The --nosigcheck flag was used and this compromises the system security
+		Warning: THE SIGNATURE OF file://$TEST_DIRNAME/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
 		Preparing to update from 10 to 20
-		Warning: The --nosigcheck flag was used, THE MANIFEST SIGNATURE WILL NOT BE VERIFIED
-		Be aware that this compromises the system security
-		Warning: The --nosigcheck flag was used, THE MANIFEST SIGNATURE WILL NOT BE VERIFIED
-		Be aware that this compromises the system security
+		Warning: THE SIGNATURE OF file://$TEST_DIRNAME/web-dir/10/Manifest.MoM WILL NOT BE VERIFIED
+		Warning: THE SIGNATURE OF file://$TEST_DIRNAME/web-dir/20/Manifest.MoM WILL NOT BE VERIFIED
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...
@@ -112,8 +110,8 @@ test_setup() {
 
 	expected_output=$(cat <<-EOM
 		Update started
-		Warning: The --nosigcheck-latest flag was used, THE SIGNATURE OF file://$TEST_DIRNAME/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
-		Be aware that this compromises the system security
+		Warning: The --nosigcheck-latest flag was used and this compromises the system security
+		Warning: THE SIGNATURE OF file://$TEST_DIRNAME/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
 		Preparing to update from 10 to 20
 		Downloading packs for:
 		 - test-bundle1
@@ -148,8 +146,8 @@ test_setup() {
 
 	expected_output=$(cat <<-EOM
 		Update started
-		Warning: The --nosigcheck-latest flag was used, THE SIGNATURE OF file://$TEST_DIRNAME/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
-		Be aware that this compromises the system security
+		Warning: The --nosigcheck-latest flag was used and this compromises the system security
+		Warning: THE SIGNATURE OF file://$TEST_DIRNAME/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
 		Preparing to update from 10 to 20
 		Warning: Signature check failed
 		Warning: Removing corrupt Manifest.MoM artifacts and re-downloading...

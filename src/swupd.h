@@ -412,6 +412,8 @@ extern int handle_mirror_if_stale(void);
 
 extern enum swupd_code clean_statedir(bool all, bool dry_run);
 
+extern void warn_nosigcheck(const char *file);
+
 /* Parameter parsing in global.c */
 extern struct global_const global;
 

@@ -391,9 +391,7 @@ retry_load:
 	string_or_die(&url, "%s/%i/Manifest.MoM", globals.content_url, version);
 
 	if (!globals.sigcheck) {
-		warn("The --nosigcheck flag was used, THE MANIFEST SIGNATURE WILL NOT BE VERIFIED\n");
-		info("Be aware that this compromises the system security\n\n");
-		journal_log_error("swupd security notice: --nosigcheck used to bypass MoM signature verification");
+		warn_nosigcheck(url);
 	} else {
 		/* Only when migrating , ignore the locally made signature check which is guaranteed to have been signed
 		 * by the user and does not come from any network source */

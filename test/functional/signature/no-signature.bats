@@ -36,8 +36,8 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Warning: The --nosigcheck flag was used, THE MANIFEST SIGNATURE WILL NOT BE VERIFIED
-		Be aware that this compromises the system security
+		Warning: The --nosigcheck flag was used and this compromises the system security
+		Warning: THE SIGNATURE OF file://$TEST_DIRNAME/web-dir/10/Manifest.MoM WILL NOT BE VERIFIED
 		Loading required manifests...
 		No packs need to be downloaded
 		Validate downloaded files

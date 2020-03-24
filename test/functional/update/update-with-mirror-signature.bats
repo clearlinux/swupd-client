@@ -24,11 +24,11 @@ test_setup() {
 	sudo rm "$MIRROR"/version/formatstaging/latest.sig
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Update started
 		Checking mirror status
-		Error: Signature for latest file (file://$SWUPD_DIR_ABS/$MIRROR/version/formatstaging/latest) is missing
+		Error: Signature for latest file (file://$TEST_ROOT_DIR/$MIRROR/version/formatstaging/latest) is missing
 		Warning: the mirror version could not be determined
 		Removing mirror configuration
 		Preparing to update from 10 to 20
@@ -61,11 +61,11 @@ test_setup() {
 	write_to_protected_file "$MIRROR"/version/formatstaging/latest.sig "1234"
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
-	assert_status_is 0
+	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Update started
 		Checking mirror status
-		Error: Signature verification failed for URL: file://$SWUPD_DIR_ABS/$MIRROR/version/formatstaging/latest
+		Error: Signature verification failed for URL: file://$TEST_ROOT_DIR/$MIRROR/version/formatstaging/latest
 		Warning: the mirror version could not be determined
 		Removing mirror configuration
 		Preparing to update from 10 to 20

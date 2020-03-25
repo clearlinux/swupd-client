@@ -711,8 +711,9 @@ static bool parse_opt(int opt, char *optarg)
 		cmd_line_status = optarg_to_bool(optarg);
 		return true;
 	case 'T':
+		warn_mixin_deprecation();
+		warn("Option migrate was deprecated\n");
 		globals.migrate = optarg_to_bool(optarg);
-		error("Attempting to migrate to your mix content...\n\n");
 		return true;
 	case 'k':
 		keepcache = optarg_to_bool(optarg);

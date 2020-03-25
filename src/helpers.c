@@ -1106,6 +1106,9 @@ fail:
 bool system_on_mix(void)
 {
 	bool ret = (access(MIXED_FILE, R_OK) == 0);
+	if (ret) {
+		warn_mixin_deprecation();
+	}
 	return ret;
 }
 
@@ -1118,6 +1121,9 @@ bool check_mix_exists(void)
 	string_or_die(&fullpath, "%s%s/.valid-mix", globals.path_prefix, MIX_DIR);
 	ret = access(fullpath, F_OK) == 0;
 	free_and_clear_pointer(&fullpath);
+	if (ret) {
+		warn_mixin_deprecation();
+	}
 	return ret;
 }
 
@@ -1259,4 +1265,18 @@ void warn_nosigcheck(const char *file)
 
 	warn("\n");
 	warn("THE SIGNATURE OF %s WILL NOT BE VERIFIED\n\n", file);
+}
+
+void warn_mixin_deprecation(void)
+{
+	static bool show = true;
+
+	if (show) {
+		info("\n");
+		warn("Mixin was deprecated in favor of swupd 3rd-party and it will be removed on next swupd release\n");
+		info("For more information check swupd 3rd-party manual or website documentation on:\n");
+		info("https://docs.01.org/clearlinux/latest/guides/clear/swupd-3rd-party.html\n");
+		info("\n");
+		show = false;
+	}
 }

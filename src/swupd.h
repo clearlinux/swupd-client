@@ -422,6 +422,8 @@ extern struct global_const global;
  */
 extern void free_and_clear_pointer(char **s);
 
+extern void warn_mixin_deprecation(void);
+
 enum swupd_code check_update();
 
 /* some disk sizes constants for the various features:

@@ -231,6 +231,31 @@ print() { # swupd_function
 
 }
 
+show_target() { # swupd_function
+
+	local OPTIND
+	local opt
+
+	show_target_usage() {
+		cat <<-EOM
+		Shows the file system of the target directory in a tree view.
+
+		Usage:
+		    show_target
+		EOM
+	}
+
+	while getopts : opt; do
+		case "$opt" in
+			*)	show_target_usage
+				return ;;
+		esac
+	done
+
+	print "\n$(tree "$TARGETDIR")\n"
+
+}
+
 # sometimes it is useful to have extra information to debug
 # a test but you don't want to print all this extra info normally,
 # all messages printed with debug_msg will only be shown when the
@@ -4125,8 +4150,12 @@ setup() {
 	# now run the test setup
 	debug_msg "\\nRunning test_setup..."
 	test_setup
-	debug_msg "Finished running test_setup\\n"
+	debug_msg "Finished running test_setup"
 
+	if [ "$DEBUG_TEST" = true ] || [ "$SHOW_TARGET" = true ]; then
+		print "\nTarget system before the test:"
+		show_target
+	fi
 	if [ "$TEST_ENV_ONLY" = true ]; then
 		print "Test setup complete"
 		terminate "Test environment only"
@@ -4154,6 +4183,11 @@ teardown() {
 		print "TARGETDIR=$TARGETDIR"
 		print "STATEDIR=$STATEDIR\n"
 		terminate "Test environment only"
+	fi
+
+	if [ "$DEBUG_TEST" = true ] || [ "$SHOW_TARGET" = true ]; then
+		print "\nTarget system after the test:"
+		show_target
 	fi
 
 	local index

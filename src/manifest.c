@@ -149,7 +149,7 @@ out:
 }
 
 /* TODO: This should deal with nested manifests better */
-static int retrieve_manifest(int previous_version, int version, char *component, bool is_mix)
+static int retrieve_manifest(int previous_version, int version, char *component, bool is_mix, bool retry)
 {
 	char *url = NULL;
 	char *filename;
@@ -186,7 +186,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 		}
 	}
 
-	if (try_manifest_delta_download(previous_version, version, component) == 0) {
+	if (!retry && try_manifest_delta_download(previous_version, version, component) == 0) {
 		ret = 0;
 		goto out;
 	}
@@ -363,7 +363,7 @@ struct manifest *load_mom(int version, bool mix_exists, int *err)
 	bool needs_sig_verification = !(globals.migrate && mix_exists);
 
 retry_load:
-	ret = retrieve_manifest(0, version, "MoM", mix_exists);
+	ret = retrieve_manifest(0, version, "MoM", mix_exists, retried);
 	if (ret != 0) {
 		error("Failed to retrieve %d MoM manifest\n", version);
 		if (err) {
@@ -438,7 +438,7 @@ struct manifest *load_manifest(int version, struct file *file, struct manifest *
 
 retry_load:
 	prev_version = file->peer ? file->peer->last_change : 0;
-	ret = retrieve_manifest(prev_version, version, file->filename, file->is_mix);
+	ret = retrieve_manifest(prev_version, version, file->filename, file->is_mix, retried);
 	if (ret != 0) {
 		error("Failed to retrieve %d %s manifest\n", version, file->filename);
 		if (err) {
@@ -486,7 +486,7 @@ struct manifest *load_manifest_full(int version, bool mix)
 	struct manifest *manifest = NULL;
 	int ret = 0;
 
-	ret = retrieve_manifest(0, version, "full", mix);
+	ret = retrieve_manifest(0, version, "full", mix, false);
 	if (ret != 0) {
 		error("Failed to retrieve %d Manifest.full\n", version);
 		return NULL;

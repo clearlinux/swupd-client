@@ -55,7 +55,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_INVALID_REPOSITORY"
 	expected_output=$(cat <<-EOM
-		Error: A content directory for a 3rd-party repository called "repo1" already exists at $PATH_PREFIX//opt/3rd-party/bundles/repo1, aborting...
+		Error: A content directory for a 3rd-party repository called "repo1" already exists at $PATH_PREFIX/opt/3rd-party/bundles/repo1, aborting...
 		To force the removal of the directory and continue adding the repository use the --force option
 		Failed to add repository
 	EOM
@@ -76,7 +76,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Warning: A content directory for a 3rd-party repository called "repo1" already exists at $PATH_PREFIX//opt/3rd-party/bundles/repo1
+		Warning: A content directory for a 3rd-party repository called "repo1" already exists at $PATH_PREFIX/opt/3rd-party/bundles/repo1
 		The --force option was used; forcing the removal of the directory
 		Adding 3rd-party repository repo1...
 		Installing the required bundle 'os-core' from the repository...

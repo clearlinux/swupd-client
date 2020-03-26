@@ -12,6 +12,16 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: cache-dependencies
+      id: cache-swupd-deps
+      uses: actions/cache@v1
+      with:
+        path: dependencies
+        key: swupd-dependencies
+
+    - name: build_dep
+      run:  scripts/github_actions/build_ci_dependencies.bash
+
     - name: build
       run:  scripts/github_actions/build_ci_style.bash
 
@@ -48,6 +58,16 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: cache-dependencies
+      id: cache-swupd-deps
+      uses: actions/cache@v1
+      with:
+        path: dependencies
+        key: swupd-dependencies
+
+    - name: build_dep
+      run:  scripts/github_actions/build_ci_dependencies.bash
+
     - name: build
       run:  scripts/github_actions/build_ci.bash
 
@@ -72,6 +92,16 @@ jobs:
        JOB_NUMBER: 2
     steps:
     - uses: actions/checkout@v1
+
+    - name: cache-dependencies
+      id: cache-swupd-deps
+      uses: actions/cache@v1
+      with:
+        path: dependencies
+        key: swupd-dependencies
+
+    - name: build_dep
+      run:  scripts/github_actions/build_ci_dependencies.bash
 
     - name: build
       run:  scripts/github_actions/build_ci.bash
@@ -98,6 +128,16 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: cache-dependencies
+      id: cache-swupd-deps
+      uses: actions/cache@v1
+      with:
+        path: dependencies
+        key: swupd-dependencies
+
+    - name: build_dep
+      run:  scripts/github_actions/build_ci_dependencies.bash
+
     - name: build
       run:  scripts/github_actions/build_ci.bash
 
@@ -122,6 +162,16 @@ jobs:
        JOB_NUMBER: 4
     steps:
     - uses: actions/checkout@v1
+
+    - name: cache-dependencies
+      id: cache-swupd-deps
+      uses: actions/cache@v1
+      with:
+        path: dependencies
+        key: swupd-dependencies
+
+    - name: build_dep
+      run:  scripts/github_actions/build_ci_dependencies.bash
 
     - name: build
       run:  scripts/github_actions/build_ci.bash
@@ -148,6 +198,16 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: cache-dependencies
+      id: cache-swupd-deps
+      uses: actions/cache@v1
+      with:
+        path: dependencies
+        key: swupd-dependencies
+
+    - name: build_dep
+      run:  scripts/github_actions/build_ci_dependencies.bash
+
     - name: build
       run:  scripts/github_actions/build_ci.bash
 
@@ -172,6 +232,16 @@ jobs:
        JOB_NUMBER: 6
     steps:
     - uses: actions/checkout@v1
+
+    - name: cache-dependencies
+      id: cache-swupd-deps
+      uses: actions/cache@v1
+      with:
+        path: dependencies
+        key: swupd-dependencies
+
+    - name: build_dep
+      run:  scripts/github_actions/build_ci_dependencies.bash
 
     - name: build
       run:  scripts/github_actions/build_ci.bash
@@ -198,6 +268,16 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: cache-dependencies
+      id: cache-swupd-deps
+      uses: actions/cache@v1
+      with:
+        path: dependencies
+        key: swupd-dependencies
+
+    - name: build_dep
+      run:  scripts/github_actions/build_ci_dependencies.bash
+
     - name: build
       run:  scripts/github_actions/build_ci.bash
 
@@ -222,6 +302,16 @@ jobs:
        JOB_NUMBER: 8
     steps:
     - uses: actions/checkout@v1
+
+    - name: cache-dependencies
+      id: cache-swupd-deps
+      uses: actions/cache@v1
+      with:
+        path: dependencies
+        key: swupd-dependencies
+
+    - name: build_dep
+      run:  scripts/github_actions/build_ci_dependencies.bash
 
     - name: build
       run:  scripts/github_actions/build_ci.bash
@@ -248,6 +338,16 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: cache-dependencies
+      id: cache-swupd-deps
+      uses: actions/cache@v1
+      with:
+        path: dependencies
+        key: swupd-dependencies
+
+    - name: build_dep
+      run:  scripts/github_actions/build_ci_dependencies.bash
+
     - name: build
       run:  scripts/github_actions/build_ci.bash
 
@@ -272,6 +372,16 @@ jobs:
        JOB_NUMBER: 10
     steps:
     - uses: actions/checkout@v1
+
+    - name: cache-dependencies
+      id: cache-swupd-deps
+      uses: actions/cache@v1
+      with:
+        path: dependencies
+        key: swupd-dependencies
+
+    - name: build_dep
+      run:  scripts/github_actions/build_ci_dependencies.bash
 
     - name: build
       run:  scripts/github_actions/build_ci.bash

@@ -289,3 +289,10 @@ jobs:
     - name: print status
       if: failure()
       run: cat test-suite.log
+
+  test_successful:
+    runs-on: ubuntu-latest
+    needs: [unit_and_style, test_job1, test_job2, test_job3, test_job4, test_job5, test_job6, test_job7, test_job8, test_job9, test_job10]
+    steps:
+    - name: Successful
+      run:  echo "Successful"

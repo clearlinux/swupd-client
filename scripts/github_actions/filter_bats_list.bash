@@ -12,7 +12,7 @@ JOB_NUM=$1
 NUM_JOBS=$2
 DEFAULT_WEIGHT=6
 
-TEST_LIST=$(find test/functional/ -name "*.bats" | sort)
+TEST_LIST=$(find test/functional/ -name "*.bats" \( ! -path "*only_in_ci*" \) | sort)
 
 TOTAL_WEIGHT=0
 for t in $TEST_LIST; do

@@ -2,7 +2,7 @@
 MAX_WEIGHT=40
 
 if [ -z "$1" ]; then
-    TESTS=$(find test/functional/ -name "*.bats")
+    TESTS=$(find test/functional/ -name "*.bats" \( ! -path "*only_in_ci*" \))
 else
     TESTS="$*"
 fi

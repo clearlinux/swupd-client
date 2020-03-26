@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-./scripts/build_ci.bash
+./scripts/github_actions/build_ci.bash
 
 # Install dependencies from ubuntu
 sudo apt-get install shellcheck

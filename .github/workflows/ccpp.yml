@@ -13,7 +13,7 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: build
-      run:  scripts/build_ci_style.bash
+      run:  scripts/github_actions/build_ci_style.bash
 
     - name: check style
       run:  make compliant && make shellcheck && make docs-coverage
@@ -29,7 +29,7 @@ jobs:
 
     - name: Validate bats tests
       run:  |
-             TESTS=$(for i in $(seq $NUM_JOBS); do scripts/filter_bats_list.bash $i $NUM_JOBS; done|wc -l)
+             TESTS=$(for i in $(seq $NUM_JOBS); do scripts/github_actions/filter_bats_list.bash $i $NUM_JOBS; done|wc -l)
              TOTAL=$(find test/functional/ -name "*.bats" | wc -l)
              if [ "$TOTAL" -ne "$TESTS" ]; then
                  echo "Error in filter_bats_test.bash script"
@@ -49,14 +49,14 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: build
-      run:  scripts/build_ci.bash
+      run:  scripts/github_actions/build_ci.bash
 
     - name: Run prereq
       run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
+            FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
             NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
             echo "Running $NUM_FILES tests"
             env TESTS="$(echo $FILES)" make -e -j2 check
@@ -74,14 +74,14 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: build
-      run:  scripts/build_ci.bash
+      run:  scripts/github_actions/build_ci.bash
 
     - name: Run prereq
       run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
+            FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
             NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
             echo "Running $NUM_FILES tests"
             env TESTS="$(echo $FILES)" make -e -j2 check
@@ -99,14 +99,14 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: build
-      run:  scripts/build_ci.bash
+      run:  scripts/github_actions/build_ci.bash
 
     - name: Run prereq
       run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
+            FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
             NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
             echo "Running $NUM_FILES tests"
             env TESTS="$(echo $FILES)" make -e -j2 check
@@ -124,14 +124,14 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: build
-      run:  scripts/build_ci.bash
+      run:  scripts/github_actions/build_ci.bash
 
     - name: Run prereq
       run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
+            FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
             NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
             echo "Running $NUM_FILES tests"
             env TESTS="$(echo $FILES)" make -e -j2 check
@@ -149,14 +149,14 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: build
-      run:  scripts/build_ci.bash
+      run:  scripts/github_actions/build_ci.bash
 
     - name: Run prereq
       run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
+            FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
             NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
             echo "Running $NUM_FILES tests"
             env TESTS="$(echo $FILES)" make -e -j2 check
@@ -174,14 +174,14 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: build
-      run:  scripts/build_ci.bash
+      run:  scripts/github_actions/build_ci.bash
 
     - name: Run prereq
       run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
+            FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
             NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
             echo "Running $NUM_FILES tests"
             env TESTS="$(echo $FILES)" make -e -j2 check
@@ -199,14 +199,14 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: build
-      run:  scripts/build_ci.bash
+      run:  scripts/github_actions/build_ci.bash
 
     - name: Run prereq
       run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
+            FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
             NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
             echo "Running $NUM_FILES tests"
             env TESTS="$(echo $FILES)" make -e -j2 check
@@ -224,14 +224,14 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: build
-      run:  scripts/build_ci.bash
+      run:  scripts/github_actions/build_ci.bash
 
     - name: Run prereq
       run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
+            FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
             NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
             echo "Running $NUM_FILES tests"
             env TESTS="$(echo $FILES)" make -e -j2 check
@@ -249,14 +249,14 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: build
-      run:  scripts/build_ci.bash
+      run:  scripts/github_actions/build_ci.bash
 
     - name: Run prereq
       run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
+            FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
             NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
             echo "Running $NUM_FILES tests"
             env TESTS="$(echo $FILES)" make -e -j2 check
@@ -274,14 +274,14 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: build
-      run:  scripts/build_ci.bash
+      run:  scripts/github_actions/build_ci.bash
 
     - name: Run prereq
       run:  test/functional/generate-cert.prereq
 
     - name: run check
       run: |
-            FILES="$(scripts/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
+            FILES="$(scripts/github_actions/filter_bats_list.bash $JOB_NUMBER $NUM_JOBS)"
             NUM_FILES="$(echo $FILES | tr ' ' '\n' | wc -l)"
             echo "Running $NUM_FILES tests"
             env TESTS="$(echo $FILES)" make -e -j2 check

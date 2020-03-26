@@ -1,8 +1,11 @@
 name: C/C++ CI
 
-on: [push]
+on:
+  push:
+    branches: [master]
+
 env:
-   RUNNING_IN_CI: true
+  RUNNING_IN_CI: true
 
 jobs:
   shellcheck-all:

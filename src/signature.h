@@ -12,6 +12,15 @@
 extern "C" {
 #endif
 
+/** @brief Signature verification modifier flags */
+enum signature_flags {
+	/** @brief Perform default operation */
+	SIGNATURE_DEFAULT = 0,
+
+	/** @brief Verbose when printing errors */
+	SIGNATURE_PRINT_ERRORS = 0x1,
+};
+
 /**
  * Initialize this module.
  *
@@ -34,12 +43,12 @@ void signature_deinit(void);
  *
  * @param file         path to file to be verified.
  * @param sig_file     path to signature file.
- * @param print_errors if false, errors aren't printed.
+ * @param flags        Flags to modify signature check
  *
  * @return true if the file is signed with certificate used signature_init()
 
  */
-bool signature_verify(const char *file, const char *sig_file, bool print_errors);
+bool signature_verify(const char *file, const char *sig_file, enum signature_flags flags);
 
 /**
  * Verify signature of a file in memory.
@@ -51,11 +60,11 @@ bool signature_verify(const char *file, const char *sig_file, bool print_errors)
  * @param data_len     Length of data in bytes
  * @param sig          Data to be verified
  * @param sig_len      Length of data in bytes
- * @param print_errors if false, errors aren't printed.
+ * @param flags        Flags to modify signature check
  *
  * @return true if the file is signed with certificate used signature_init()
  */
-bool signature_verify_data(const unsigned char *data, size_t data_len, const unsigned char *sig_data, size_t sig_data_len, bool print_errors);
+bool signature_verify_data(const unsigned char *data, size_t data_len, const unsigned char *sig_data, size_t sig_data_len, enum signature_flags flags);
 
 /**
  * Print extra information about the certificate pointed by PATH.

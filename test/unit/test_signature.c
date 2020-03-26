@@ -64,10 +64,10 @@ static int test_sign(const char *private_key, const char *public_key, bool succe
 	}
 
 	// Check if signature match
-	check_goto(signature_verify(file, sig, false) == success, error);
+	check_goto(signature_verify(file, sig, SIGNATURE_DEFAULT) == success, error);
 
 	// Check signature against wrong file
-	check_goto(signature_verify(sig, sig, false) == false, error);
+	check_goto(signature_verify(sig, sig, SIGNATURE_DEFAULT) == false, error);
 
 	ret = 0;
 

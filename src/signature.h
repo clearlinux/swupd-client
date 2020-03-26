@@ -19,6 +19,9 @@ enum signature_flags {
 
 	/** @brief Verbose when printing errors */
 	SIGNATURE_PRINT_ERRORS = 0x1,
+
+	/** @brief Successful even when expire date has passed */
+	SIGNATURE_IGNORE_EXPIRATION = 0x2,
 };
 
 /**

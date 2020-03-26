@@ -305,7 +305,7 @@ static bool mom_signature_verify(const char *data_url, const char *data_filename
 	string_or_die(&local, "%s/%i/Manifest.MoM.sig", MIX_STATE_DIR, version);
 
 	// Try verifying a local copy of the signature first
-	result = signature_verify(data_filename, sig_filename, false);
+	result = signature_verify(data_filename, sig_filename, SIGNATURE_DEFAULT);
 	if (result) {
 		goto out;
 	}
@@ -314,7 +314,8 @@ static bool mom_signature_verify(const char *data_url, const char *data_filename
 	if (globals.state_dir_cache != NULL) {
 		string_or_die(&sig_filename_cache, "%s/%i/Manifest.MoM.sig", globals.state_dir_cache, version);
 		if (link_or_copy(sig_filename_cache, sig_filename) == 0) {
-			result = signature_verify(data_filename, sig_filename, false);
+			result = signature_verify(data_filename, sig_filename, SIGNATURE_DEFAULT);
+
 			if (result) {
 				goto out;
 			}
@@ -329,7 +330,7 @@ static bool mom_signature_verify(const char *data_url, const char *data_filename
 	}
 
 	if (ret == 0) {
-		result = signature_verify(data_filename, sig_filename, true);
+		result = signature_verify(data_filename, sig_filename, SIGNATURE_PRINT_ERRORS);
 	} else {
 		// download failed
 		result = false;

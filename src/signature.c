@@ -148,7 +148,7 @@ void signature_deinit(void)
 	CRYPTO_cleanup_all_ex_data();
 }
 
-bool signature_verify_data(const unsigned char *data, size_t data_len, const unsigned char *sig_data, size_t sig_data_len, bool print_errors)
+bool signature_verify_data(const unsigned char *data, size_t data_len, const unsigned char *sig_data, size_t sig_data_len, enum signature_flags flags)
 
 {
 	bool result = false;
@@ -196,7 +196,7 @@ bool signature_verify_data(const unsigned char *data, size_t data_len, const uns
 
 error:
 
-	if (!result && print_errors) {
+	if (!result && flags & SIGNATURE_PRINT_ERRORS) {
 		if (errorstr) {
 			debug("%s\n", errorstr);
 		}
@@ -220,12 +220,7 @@ error:
 	return result;
 }
 
-/* Verifies that the file and the signature exists, and does a signature check
- * afterwards. If any error is to be considered a verify failure, then
- * print_errors should be set to true.
- *
- * returns: true if able to validate the signature, false otherwise */
-bool signature_verify(const char *file, const char *sig_file, bool print_errors)
+bool signature_verify(const char *file, const char *sig_file, enum signature_flags flags)
 {
 	struct stat st;
 	char *errorstr = NULL;
@@ -273,10 +268,10 @@ bool signature_verify(const char *file, const char *sig_file, bool print_errors)
 		goto error;
 	}
 
-	result = signature_verify_data(data, data_len, sig, sig_len, print_errors);
+	result = signature_verify_data(data, data_len, sig, sig_len, flags);
 
 error:
-	if (!result && print_errors) {
+	if (!result && flags & SIGNATURE_PRINT_ERRORS) {
 		if (errorstr) {
 			debug("%s\n", errorstr);
 		}
@@ -555,7 +550,7 @@ void signature_deinit(void)
 	return;
 }
 
-bool signature_verify(const char UNUSED_PARAM *file, const char UNUSED_PARAM *sig_file, bool UNUSED_PARAM print_errors)
+bool signature_verify(const char UNUSED_PARAM *file, const char UNUSED_PARAM *sig_file, enum signature_flags UNUSED_PARAM flags)
 {
 	return true;
 }
@@ -565,7 +560,7 @@ void signature_print_info(const char UNUSED_PARAM *path)
 	return;
 }
 
-bool signature_verify_data(const unsigned char UNUSED_PARAM *data, size_t UNUSED_PARAM data_len, const unsigned char UNUSED_PARAM *sig_data, size_t UNUSED_PARAM sig_data_len, bool UNUSED_PARAM print_errors)
+bool signature_verify_data(const unsigned char UNUSED_PARAM *data, size_t UNUSED_PARAM data_len, const unsigned char UNUSED_PARAM *sig_data, size_t UNUSED_PARAM sig_data_len, enum signature_flags UNUSED_PARAM flags)
 {
 	return true;
 }

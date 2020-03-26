@@ -47,11 +47,40 @@
 #ifdef SIGNATURES
 
 static int validate_certificate(X509 *cert, const char *certificate_path, const char *crl);
-static int verify_callback(int, X509_STORE_CTX *);
 static X509 *get_cert_from_path(const char *certificate_path);
 
 static X509_STORE *store = NULL;
 static STACK_OF(X509) *x509_stack = NULL;
+
+static int verify_callback_ignore_expiration(int ok, X509_STORE_CTX *store)
+{
+	int error;
+
+	if (!ok) {
+		error = X509_STORE_CTX_get_error(store);
+		debug("Certificate verification error - %s\n",
+		      X509_verify_cert_error_string(error));
+		if (error == X509_V_ERR_CERT_HAS_EXPIRED) {
+			debug("Sinature is expired, but operation will proceed\n");
+			return 1;
+		}
+	}
+
+	return ok;
+}
+
+static int verify_callback(int ok, X509_STORE_CTX *store)
+{
+	int error;
+
+	if (!ok) {
+		error = X509_STORE_CTX_get_error(store);
+		debug("Certificate verification error - %s\n",
+		      X509_verify_cert_error_string(error));
+	}
+
+	return ok;
+}
 
 /* This function must be called before trying to sign any file.
  * It loads string for errors, and ciphers are auto-loaded by OpenSSL now.
@@ -186,6 +215,13 @@ bool signature_verify_data(const unsigned char *data, size_t data_len, const uns
 		goto error;
 	}
 
+	/* Always set correct verify callback */
+	if (flags & SIGNATURE_IGNORE_EXPIRATION) {
+		X509_STORE_set_verify_cb_func(store, verify_callback_ignore_expiration);
+	} else {
+		X509_STORE_set_verify_cb_func(store, verify_callback);
+	}
+
 	/* Verify the signature, outdata can be NULL because we don't use it */
 	ret = PKCS7_verify(p7, x509_stack, store, verify_BIO, NULL, 0);
 	if (ret == 1) {
@@ -193,6 +229,9 @@ bool signature_verify_data(const unsigned char *data, size_t data_len, const uns
 	} else {
 		string_or_die(&errorstr, "Signature check failed");
 	}
+
+	/* Restore original callback */
+	X509_STORE_set_verify_cb_func(store, verify_callback);
 
 error:
 
@@ -476,15 +515,6 @@ error:
 	}
 
 	return X509_STORE_CTX_get_error(verify_ctx);
-}
-
-static int verify_callback(int ok, X509_STORE_CTX *stor)
-{
-	if (!ok) {
-		debug("Certificate verification error - %s\n",
-		      X509_verify_cert_error_string(X509_STORE_CTX_get_error(stor)));
-	}
-	return ok;
 }
 
 static void dump_file(const char *path)

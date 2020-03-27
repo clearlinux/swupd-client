@@ -36,7 +36,7 @@ test_setup() {
 		    1 of 1 files were repaired
 		    0 of 1 files were not repaired
 		Calling post-update helper scripts
-		Warning: helper script ($PATH_PREFIX//usr/bin/clr-boot-manager) not found, it will be skipped
+		Warning: helper script ($PATH_PREFIX/usr/bin/clr-boot-manager) not found, it will be skipped
 		Repair successful
 	EOM
 	)

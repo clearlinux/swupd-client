@@ -153,7 +153,7 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 9, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "remove_extra_files" },
 		{ "type" : "progress", "currentStep" : 10, "totalSteps" : 10, "stepCompletion" : -1, "stepDescription" : "run_postupdate_scripts" },
 		{ "type" : "info", "msg" : "Calling post-update helper scripts" },
-		{ "type" : "warning", "msg" : "helper script ($PATH_PREFIX//usr/bin/clr-boot-manager) not found, it will be skipped" },
+		{ "type" : "warning", "msg" : "helper script ($PATH_PREFIX/usr/bin/clr-boot-manager) not found, it will be skipped" },
 		{ "type" : "info", "msg" : " Repair successful" },
 		{ "type" : "progress", "currentStep" : 10, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "run_postupdate_scripts" },
 		{ "type" : "end", "section" : "repair", "status" : 0 }

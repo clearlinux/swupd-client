@@ -58,7 +58,7 @@ static void update_boot(void)
 	if (strcmp("/", globals.path_prefix) == 0) {
 		run_script_if_exists("/usr/bin/clr-boot-manager", "update", NULL);
 	} else {
-		string_or_die(&scriptname, "%s/usr/bin/clr-boot-manager", globals.path_prefix);
+		scriptname = sys_path_join("%s/%s", globals.path_prefix, "/usr/bin/clr-boot-manager");
 		run_script_if_exists(scriptname, "update", "--path", globals.path_prefix, NULL);
 		free_and_clear_pointer(&scriptname);
 	}

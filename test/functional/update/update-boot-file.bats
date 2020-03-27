@@ -32,7 +32,7 @@ test_setup() {
 		Installing files...
 		Update was applied
 		Calling post-update helper scripts
-		Warning: helper script ($TEST_DIRNAME/testfs/target-dir//usr/bin/clr-boot-manager) not found, it will be skipped
+		Warning: helper script ($TEST_DIRNAME/testfs/target-dir/usr/bin/clr-boot-manager) not found, it will be skipped
 		Update successful - System updated from version 10 to version 100
 	EOM
 	)

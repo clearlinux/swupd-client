@@ -178,7 +178,7 @@ static bool is_populated_dir(const char *dirname)
 static bool validate_tracking_dir(const char *state_dir)
 {
 	int ret = 0;
-	char *src;
+	char *src = NULL;
 	char *tracking_dir;
 	char *rmfile;
 
@@ -208,7 +208,6 @@ static bool validate_tracking_dir(const char *state_dir)
 		 * /usr/share/clear/bundles. A simple cp -a of that directory will
 		 * accurately track that bundle as manually installed. */
 		ret = copy_all(src, state_dir);
-		free_and_clear_pointer(&src);
 		if (ret) {
 			goto out;
 		}
@@ -220,12 +219,10 @@ static bool validate_tracking_dir(const char *state_dir)
 
 		/* set perms on the directory correctly */
 		ret = chmod(tracking_dir, S_IRWXU);
-		if (ret) {
-			goto out;
-		}
 	}
 out:
 	free_and_clear_pointer(&tracking_dir);
+	free_and_clear_pointer(&src);
 	if (ret) {
 		return false;
 	}

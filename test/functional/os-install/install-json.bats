@@ -61,7 +61,7 @@ test_setup() {
 		{ "type" : "info", "msg" : "    0 of 2 missing files were not installed" },
 		{ "type" : "progress", "currentStep" : 9, "totalSteps" : 9, "stepCompletion" : -1, "stepDescription" : "run_postupdate_scripts" },
 		{ "type" : "info", "msg" : "Calling post-update helper scripts" },
-		{ "type" : "warning", "msg" : "helper script ($TEST_DIRNAME/testfs/target-dir//usr/bin/clr-boot-manager) not found, it will be skipped" },
+		{ "type" : "warning", "msg" : "helper script ($TEST_DIRNAME/testfs/target-dir/usr/bin/clr-boot-manager) not found, it will be skipped" },
 		{ "type" : "info", "msg" : " Installation successful" },
 		{ "type" : "progress", "currentStep" : 9, "totalSteps" : 9, "stepCompletion" : 100, "stepDescription" : "run_postupdate_scripts" },
 		{ "type" : "end", "section" : "os-install", "status" : 0 }

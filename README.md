@@ -1,6 +1,7 @@
 # Swupd Client
 
-[![Build Status (Travis)](https://api.travis-ci.org/clearlinux/swupd-client.svg?branch=master)](https://travis-ci.org/clearlinux/swupd-client)
+![Shellcheck](https://github.com/clearlinux/swupd-client/workflows/Shellcheck/badge.svg)
+![Swupd tests](https://github.com/clearlinux/swupd-client/workflows/Swupd%20tests/badge.svg)
 
 swupd is an OS-level software update program that applies updates to a Clear Linux OS.
 More information on how to use swupd can be found in the [official documentation](https://clearlinux.org/documentation/clear-linux/guides/maintenance/swupd-guide), [swupd command man page](docs/swupd.1.rst) and other documents on [docs directory](docs/).

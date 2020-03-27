@@ -31,7 +31,7 @@ run_checks() {
 	make -j "$JOB_COUNT" check
 	make -j "$JOB_COUNT" functional-check
 	make compliant
-	make shellcheck
+	make shellcheck-all
 	make docs-coverage
 	make distcheck
 }

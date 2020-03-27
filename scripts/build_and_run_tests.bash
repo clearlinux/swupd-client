@@ -31,7 +31,6 @@ run_checks() {
 	make -j "$JOB_COUNT" check
 	make -j "$JOB_COUNT" functional-check
 	make compliant
-	make shellcheck-all
 	make docs-coverage
 	make distcheck
 }
@@ -66,6 +65,8 @@ main() {
 	./swupd -v |grep "+SIGVERIFY"
 	./swupd -v |grep "+THIRDPARTY"
 	run_checks
+
+	make shellcheck-all
 
 	## Make sure build isn't broken for other settings
 	run_build --disable-signature-verification --disable-third-party

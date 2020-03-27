@@ -29,7 +29,7 @@ global_teardown() {
 		return
 	fi
 
-	if [ ! -z "${CERT_WAS_INSTALLED}" ]; then
+	if [ -n "${CERT_WAS_INSTALLED}" ]; then
 		sudo rm usr/share/clear/update-ca/Swupd_Root.pem
 	fi
 }

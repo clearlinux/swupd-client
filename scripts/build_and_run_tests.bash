@@ -54,7 +54,7 @@ main() {
 	export RUNNING_IN_CI=true
 	export JOB_COUNT
 	export BUILD_ONLY
-	local configure_args="--with-fallback-capaths=./swupd_test_certificates -with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path=./testconfig"
+	local configure_args="--with-fallback-capaths=""$PWD""/swupd_test_certificates -with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path=""$PWD""/testconfig"
 
 	# Run tests without any security optimization and with address sanitizer
 	CFLAGS="-fsanitize=address -fno-omit-frame-pointer -Werror" run_build --disable-optimizations "$configure_args"

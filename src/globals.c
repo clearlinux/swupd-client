@@ -381,7 +381,7 @@ void set_cert_path(char *path)
 		free_and_clear_pointer(&globals.cert_path);
 	}
 
-	globals.cert_path = strdup_or_die(path);
+	globals.cert_path = realpath(path, NULL);
 }
 
 static void set_default_cert_path()
@@ -745,8 +745,12 @@ static bool load_flags_in_config(char *command, struct option *opts_array, const
 	struct stat st;
 	char *ctx = NULL;
 	char *config_file = NULL;
-	char *str = strdup_or_die(CONFIG_FILE_PATH);
+	char *str = realpath(CONFIG_FILE_PATH, NULL);
 	char *full_command = NULL;
+
+	if (!str) {
+		return false;
+	}
 
 	/* the command we get here can actually be a subcommand, if that
 	 * is the case we need to build the section name as "command-subcommand",

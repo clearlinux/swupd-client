@@ -178,10 +178,9 @@ char *sys_basename(const char *path);
 /**
  * @brief Join N paths using the default path separator.
  *
- * Can be used to prepend a prefix to an path (eg: the global path_prefix to a
+ * Can be used to prepend a prefix to a path (eg: the global path_prefix to a
  * file->filename or some other path prefix and path), insuring there is no
- * duplicate '/' at the strings' junction and no trailing '/'.
- * Also works to append a path at the end of URIs.
+ * duplicate '/' at the strings' junction.
  * The first argument must be a string that indicates how many
  * arguments are to be concatenated.
  * For example sys_path("%s/%s/%s", path1, path2, path3)

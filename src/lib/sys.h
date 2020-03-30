@@ -105,6 +105,11 @@ bool sys_file_exists(const char *filename);
 bool sys_filelink_exists(const char *filename);
 
 /**
+ * @brief Checks if all elements of a path are absolute and don't contain symlinks
+ */
+bool sys_path_is_absolute(const char *filename);
+
+/**
  * @brief Checks if a file exists in the filesystem and is executable.
  * Follows symlinks
  */

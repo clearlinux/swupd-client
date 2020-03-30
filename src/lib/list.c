@@ -200,6 +200,21 @@ struct list *list_sort(struct list *list, comparison_fn_t comparison_fn)
 	return list_merge_sort(list, len, comparison_fn);
 }
 
+bool list_is_sorted(struct list *list, comparison_fn_t comparison_fn)
+{
+	if (!comparison_fn) {
+		return false;
+	}
+
+	for (list = list_head(list); list && list->next; list = list->next) {
+		if (comparison_fn(list->data, list->next->data) > 0) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 struct list *list_concat(struct list *list1, struct list *list2)
 {
 	struct list *tail;

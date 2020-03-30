@@ -286,6 +286,29 @@ bool sys_file_exists(const char *filename)
 	return false;
 }
 
+bool sys_path_is_absolute(const char *filename)
+{
+	char *abspath = NULL;
+	bool ret = false;
+
+	abspath = realpath(filename, NULL);
+	if (!abspath) {
+		if (errno != ENOENT) {
+			error("Failed to get absolute path of %s (%s)\n", filename, strerror(errno));
+		}
+		ret = false;
+		goto exit;
+	}
+
+	if (strcmp(abspath, filename) == 0) {
+		ret = true;
+	}
+
+exit:
+	free(abspath);
+	return ret;
+}
+
 bool sys_filelink_exists(const char *filename)
 {
 	struct stat sb;

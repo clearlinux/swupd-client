@@ -87,11 +87,11 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		rel_dir = dir + 1;
 	}
 
-	string_or_die(&original, "%s/staged/%s", globals.state_dir, file->hash);
+	original = sys_path_join("%s/staged/%s", globals.state_dir, file->hash);
 
 	/* make sure the directory where the file should be copied to exists
 	 * and is in deed a directory */
-	string_or_die(&targetpath, "%s%s", globals.path_prefix, rel_dir);
+	targetpath = sys_path_join("%s/%s", globals.path_prefix, rel_dir);
 	if (!sys_filelink_exists(targetpath)) {
 		if (MoM) {
 			verify_fix_path(dir, MoM);
@@ -121,7 +121,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	}
 
 	/* remove a pre-existing .update file in the destination if it exists */
-	string_or_die(&target, "%s%s/.update.%s", globals.path_prefix, rel_dir, base);
+	target = sys_path_join("%s/%s/.update.%s", globals.path_prefix, rel_dir, base);
 	ret = sys_rm_recursive(target);
 	if (ret != 0 && ret != -ENOENT) {
 		ret = SWUPD_COULDNT_REMOVE_FILE;
@@ -131,7 +131,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 
 	/* if the file already exists in the final destination, check to see
 	 * if it is of the same type */
-	string_or_die(&statfile, "%s%s", globals.path_prefix, file->filename);
+	statfile = sys_path_join("%s/%s", globals.path_prefix, file->filename);
 	memset(&s, 0, sizeof(struct stat));
 	ret = lstat(statfile, &s);
 	if (ret == 0) {
@@ -163,13 +163,13 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		 * pre-existing: */
 		/* In order to avoid tar transforms with directories, rename
 		 * the directory before and after the tar command */
-		string_or_die(&rename_tmpdir, "%s/tmprenamedir", globals.state_dir);
+		rename_tmpdir = sys_path_join("%s/tmprenamedir", globals.state_dir);
 		ret = create_staging_renamedir(rename_tmpdir);
 		if (ret) {
 			ret = SWUPD_COULDNT_CREATE_DIR;
 			goto out;
 		}
-		string_or_die(&rename_target, "%s/%s", rename_tmpdir, base);
+		rename_target = sys_path_join("%s/%s", rename_tmpdir, base);
 		if (rename(original, rename_target)) {
 			ret = SWUPD_COULDNT_RENAME_DIR;
 			goto out;
@@ -208,7 +208,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 			/* either the hardlink failed, or it was undesirable (config), do a tar-tar dance */
 			/* In order to avoid tar transforms, rename the file
 			 * before and after the tar command */
-			string_or_die(&rename_target, "%s/staged/.update.%s", globals.state_dir, base);
+			rename_target = sys_path_join("%s/staged/.update.%s", globals.state_dir, base);
 			ret = rename(original, rename_target);
 			if (ret) {
 				ret = SWUPD_COULDNT_RENAME_FILE;
@@ -232,7 +232,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		}
 
 		free_and_clear_pointer(&file->staging);
-		string_or_die(&file->staging, "%s%s/.update.%s", globals.path_prefix, rel_dir, base);
+		file->staging = sys_path_join("%s/%s/.update.%s", globals.path_prefix, rel_dir, base);
 		if (!sys_file_exists(file->staging)) {
 			free_and_clear_pointer(&file->staging);
 			ret = SWUPD_COULDNT_CREATE_FILE;
@@ -255,10 +255,10 @@ out:
 /* caller should not call this function for do_not_update marked files */
 int rename_staged_file_to_final(struct file *file)
 {
-	int ret;
+	int ret = 0;
 	char *target;
 
-	string_or_die(&target, "%s%s", globals.path_prefix, file->filename);
+	target = sys_path_join("%s/%s", globals.path_prefix, file->filename);
 
 	if (!file->staging && !file->is_deleted && !file->is_dir) {
 		free_and_clear_pointer(&target);
@@ -268,12 +268,16 @@ int rename_staged_file_to_final(struct file *file)
 	/* Delete files if they are not ghosted and will be garbage collected by
 	 * another process */
 	if (file->is_deleted && !file->is_ghosted) {
-		ret = sys_rm_recursive(target);
+		/* only delete the file if we can reach it without following symlinks
+		 * or we might end up deleting something else */
+		if (sys_path_is_absolute(target)) {
+			ret = sys_rm_recursive(target);
 
-		/* don't count missing ones as errors...
-		 * if somebody already deleted them for us then all is well */
-		if ((ret == -ENOENT) || (ret == -ENOTDIR)) {
-			ret = 0;
+			/* don't count missing ones as errors...
+			 * if somebody already deleted them for us then all is well */
+			if ((ret == -ENOENT) || (ret == -ENOTDIR)) {
+				ret = 0;
+			}
 		}
 	} else if (file->is_dir || file->is_ghosted) {
 		ret = 0;
@@ -288,7 +292,7 @@ int rename_staged_file_to_final(struct file *file)
 			char *lostnfound;
 			char *base;
 
-			string_or_die(&lostnfound, "%slost+found", globals.path_prefix);
+			lostnfound = sys_path_join("%s/lost+found", globals.path_prefix);
 			ret = mkdir(lostnfound, S_IRWXU);
 			if ((ret != 0) && (errno != EEXIST)) {
 				free_and_clear_pointer(&lostnfound);
@@ -298,7 +302,7 @@ int rename_staged_file_to_final(struct file *file)
 			free_and_clear_pointer(&lostnfound);
 
 			base = basename(file->filename);
-			string_or_die(&lostnfound, "%slost+found/%s", globals.path_prefix, base);
+			lostnfound = sys_path_join("%s/lost+found/%s", globals.path_prefix, base);
 			/* this will fail if the directory was not already emptied */
 			ret = rename(target, lostnfound);
 			if (ret < 0 && errno != ENOTEMPTY && errno != EEXIST) {

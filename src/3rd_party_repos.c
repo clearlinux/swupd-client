@@ -27,9 +27,12 @@
 
 #ifdef THIRDPARTY
 
-#define SCRIPT_TEMPLATE "#!/bin/bash\n\n"                                \
-			"export PATH=%s:$PATH\n"                         \
-			"export LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH\n\n" \
+#define SCRIPT_TEMPLATE "#!/bin/bash\n\n"                              \
+			"export PATH=%s:$PATH\n"                       \
+			"export LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH\n" \
+			"export XDG_DATA_DIRS=%s:$XDG_DATA_DIRS\n"     \
+			"export XDG_CONF_DIRS=%s:$XDG_CONF_DIRS\n"     \
+			"\n"                                           \
 			"%s \"$@\"\n"
 
 char *third_party_get_bin_dir(void)
@@ -619,6 +622,8 @@ enum swupd_code third_party_create_wrapper_script(struct file *file)
 	char *binary = NULL;
 	char *third_party_bin_path = NULL;
 	char *third_party_ld_path = NULL;
+	char *third_party_xdg_data_path = NULL;
+	char *third_party_xdg_conf_path = NULL;
 	char *filename = NULL;
 	mode_t mode = 0755;
 
@@ -671,10 +676,12 @@ enum swupd_code third_party_create_wrapper_script(struct file *file)
 	}
 
 	/* get the path for the 3rd-party content */
-	third_party_bin_path = str_or_die("%sbin:%susr/bin:%susr/local/bin", globals.path_prefix, globals.path_prefix, globals.path_prefix);
-	third_party_ld_path = str_or_die("%susr/lib64:%susr/local/lib64", globals.path_prefix, globals.path_prefix);
+	third_party_bin_path = sys_path_join("%s/bin:%s/usr/bin:%s/usr/local/bin", globals.path_prefix, globals.path_prefix, globals.path_prefix);
+	third_party_ld_path = sys_path_join("%s/usr/lib64:%s/usr/local/lib64", globals.path_prefix, globals.path_prefix);
+	third_party_xdg_data_path = sys_path_join("%s/usr/share:%s/usr/local/share", globals.path_prefix, globals.path_prefix);
+	third_party_xdg_conf_path = sys_path_join("%s/etc", globals.path_prefix);
 
-	fprintf(fp, SCRIPT_TEMPLATE, third_party_bin_path, third_party_ld_path, binary);
+	fprintf(fp, SCRIPT_TEMPLATE, third_party_bin_path, third_party_ld_path, third_party_xdg_data_path, third_party_xdg_conf_path, binary);
 
 close_and_exit:
 	if (fp) {
@@ -685,6 +692,8 @@ close_and_exit:
 	free_and_clear_pointer(&bin_directory);
 	free_and_clear_pointer(&third_party_bin_path);
 	free_and_clear_pointer(&third_party_ld_path);
+	free_and_clear_pointer(&third_party_xdg_data_path);
+	free_and_clear_pointer(&third_party_xdg_conf_path);
 
 	return ret_code;
 }

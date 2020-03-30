@@ -194,6 +194,8 @@ test_setup() {
 		#!/bin/bash
 		export PATH=.*
 		export LD_LIBRARY_PATH=.*
+		export XDG_DATA_DIRS=.*
+		export XDG_CONF_DIRS=.*
 		$PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/repo1/usr/bin/bin_file1 .*
 	EOM
 	)

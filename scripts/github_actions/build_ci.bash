@@ -17,7 +17,7 @@ sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
 
 # Build Swupd
 autoreconf --verbose --warnings=none --install --force
-./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --with-fallback-capaths=./swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path=./testconfig
+./configure CFLAGS="$CFLAGS -fsanitize=address -Werror" --prefix=/usr --with-fallback-capaths="$PWD"/swupd_test_certificates --with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path="$PWD"/testconfig
 make -j$CORES
 
 # Needed to initialize the host for auto-update. Without these steps auto-update

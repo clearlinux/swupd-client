@@ -482,6 +482,15 @@ enum swupd_code swupd_init(enum swupd_init_config config)
 		goto out_fds;
 	}
 
+	/*
+	 * Make sure all swupd commands are executed in a valid path.
+	 * getcwd errors are thrown if the directory where swupd was running is
+	 * deleted and this can occur when swupd removes files from the system.
+	 */
+	if (chdir(globals.path_prefix)) {
+		debug("chdir() to '%s' failed -  running swupd in current directory\n", globals.path_prefix);
+	}
+
 	get_mounted_directories();
 
 	if ((config & SWUPD_NO_ROOT) == 0) {

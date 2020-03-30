@@ -370,6 +370,11 @@ enum swupd_code staging_install_all_files(struct list *files, struct manifest *m
 	int complete = 0;
 	unsigned int list_length = list_len(files);
 
+	if (!list_is_sorted(files, cmp_file_filename_is_deleted)) {
+		debug("List of files to install is not sorted - fixing\n");
+		files = list_sort(files, cmp_file_filename_is_deleted);
+	}
+
 	/*********** rootfs critical section starts ***************************
 NOTE: the next loop calls do_staging() which can remove files, starting a critical section
 which ends after rename_all_files_to_final() succeeds

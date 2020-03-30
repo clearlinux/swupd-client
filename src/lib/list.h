@@ -91,6 +91,13 @@ int list_len(struct list *list);
 struct list *list_sort(struct list *list, comparison_fn_t comparison_fn);
 
 /**
+ * @brief Check if list list is sorted
+ *
+ * Check if list is sorted using the indicated comparison function.
+ */
+bool list_is_sorted(struct list *list, comparison_fn_t comparison_fn);
+
+/**
  * @brief Appends list2 at the tail of list1
  *
  * @returns The head of the resulting concatenation

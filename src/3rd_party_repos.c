@@ -689,4 +689,52 @@ close_and_exit:
 	return ret_code;
 }
 
+enum swupd_code third_party_update_wrapper_script(struct file *file)
+{
+	enum swupd_code ret_code = 0;
+	int ret;
+	char *bin_directory = NULL;
+	char *script = NULL;
+	char *binary = NULL;
+	char *filename = NULL;
+
+	if (!file || !third_party_file_is_binary(file)) {
+		return ret_code;
+	}
+
+	filename = file->filename;
+	bin_directory = third_party_get_bin_dir();
+	script = third_party_get_binary_path(sys_basename(filename));
+	binary = sys_path_join("%s/%s", globals.path_prefix, filename);
+
+	/* the binary is either new or changed in the update, in either case
+	 * we need to create the script */
+	if (sys_file_exists(binary)) {
+		/* if a script for the binary already exists, delete it */
+		ret = sys_rm(script);
+		if (ret && ret != -ENOENT) {
+			ret_code = SWUPD_COULDNT_REMOVE_FILE;
+			goto close_and_exit;
+		}
+		ret_code = third_party_create_wrapper_script(file);
+		goto close_and_exit;
+	}
+
+	/* if the binary was removed during the update then we need to
+	 * remove the script that exports it too */
+	if (file->is_deleted) {
+		ret = sys_rm(script);
+		if (ret) {
+			ret_code = SWUPD_COULDNT_REMOVE_FILE;
+		}
+	}
+
+close_and_exit:
+	free_and_clear_pointer(&binary);
+	free_and_clear_pointer(&script);
+	free_and_clear_pointer(&bin_directory);
+
+	return ret_code;
+}
+
 #endif

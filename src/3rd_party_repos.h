@@ -173,6 +173,13 @@ enum swupd_code third_party_remove_binary(struct file *file);
 enum swupd_code third_party_create_wrapper_script(struct file *file);
 
 /**
+ * @brief Function that regenerates a script to export a 3rd-party binary
+ *
+ * @param file the file struct of the binary to be exported
+ */
+enum swupd_code third_party_update_wrapper_script(struct file *file);
+
+/**
  * @brief Function that retrieves the content director of a 3rd-party repo
  */
 char *get_repo_content_path(const char *repo_name);

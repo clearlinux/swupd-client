@@ -854,7 +854,7 @@ static struct list *keep_matching_path(struct list *all_files)
  * found to not match the manifest.  This is notably different from update,
  * which attempts to atomically (or nearly atomically) activate a set of
  * pre-computed and validated staged changes as a group. */
-enum swupd_code execute_verify(void)
+enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 {
 	struct manifest *official_manifest = NULL;
 	int ret;
@@ -1303,6 +1303,11 @@ report_and_exit:
 
 	/* this concludes the critical section, after this point it's clean up time, the disk content is finished and final */
 
+	/* execute post-verify processing (if any) */
+	if (post_verify_fn) {
+		ret = post_verify_fn(files_to_verify);
+	}
+
 clean_and_exit:
 	if (cmdline_option_file) {
 		list_free_list(files_to_verify);
@@ -1396,6 +1401,11 @@ clean_args_and_exit:
 	counts = (struct file_counts){ 0 };
 
 	return ret;
+}
+
+enum swupd_code execute_verify(void)
+{
+	return execute_verify_extra(NULL);
 }
 
 enum swupd_code verify_main(int argc, char **argv)

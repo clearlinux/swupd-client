@@ -23,6 +23,10 @@ test_setup() {
 	update_bundle -p "$TEST_NAME" test-bundle1 --rename /bin/binary_3:/bin/binary_7 repo1
 	add_dependency_to_manifest "$TPWEBDIR"/20/Manifest.test-bundle1 test-bundle3
 
+	# let's add a line to the script for binary_2 so we can tell if it was
+	# re-generated after the update
+	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2 "TEST_STRING"
+
 }
 
 @test "TPR059: Update a 3rd-party bundle that has exported binaries" {
@@ -75,6 +79,7 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_5
 	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_6
 	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_7
+	sudo grep -vq "TEST_STRING" "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2 || exit 1
 
 }
 #WEIGHT=9

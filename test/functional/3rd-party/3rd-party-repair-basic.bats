@@ -65,6 +65,7 @@ test_setup() {
 		    1 of 1 files were deleted
 		    0 of 1 files were not deleted
 		Calling post-update helper scripts
+		Regenerating 3rd-party bundle binaries...
 		Repair successful
 		____________________________
 		 3rd-Party Repo: test-repo2
@@ -77,6 +78,7 @@ test_setup() {
 		Removing extraneous files
 		Inspected 15 files
 		Calling post-update helper scripts
+		Regenerating 3rd-party bundle binaries...
 		Repair successful
 	EOM
 	)
@@ -98,6 +100,7 @@ test_setup() {
 		Removing extraneous files
 		Inspected 15 files
 		Calling post-update helper scripts
+		Regenerating 3rd-party bundle binaries...
 		Repair successful
 	EOM
 	)
@@ -126,6 +129,7 @@ test_setup() {
 		    1 of 1 files were repaired
 		    0 of 1 files were not repaired
 		Calling post-update helper scripts
+		Regenerating 3rd-party bundle binaries...
 		Repair successful
 	EOM
 	)
@@ -167,6 +171,7 @@ test_setup() {
 		    1 of 1 files were deleted
 		    0 of 1 files were not deleted
 		Calling post-update helper scripts
+		Regenerating 3rd-party bundle binaries...
 		Repair successful
 		____________________________
 		 3rd-Party Repo: test-repo2
@@ -184,6 +189,7 @@ test_setup() {
 		    1 of 1 files were deleted
 		    0 of 1 files were not deleted
 		Calling post-update helper scripts
+		Regenerating 3rd-party bundle binaries...
 		Repair successful
 	EOM
 	)
@@ -227,6 +233,7 @@ test_setup() {
 		    3 of 3 files were deleted
 		    0 of 3 files were not deleted
 		Calling post-update helper scripts
+		Regenerating 3rd-party bundle binaries...
 		Repair successful
 		____________________________
 		 3rd-Party Repo: test-repo2
@@ -240,6 +247,7 @@ test_setup() {
 		Removing extra files under $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo2/bat
 		Inspected 15 files
 		Calling post-update helper scripts
+		Regenerating 3rd-party bundle binaries...
 		Repair successful
 	EOM
 	)

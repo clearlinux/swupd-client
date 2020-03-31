@@ -360,6 +360,7 @@ extern void update_set_option_keepcache(bool opt);
 
 /* verify.c */
 extern enum swupd_code execute_verify(void);
+extern enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn);
 extern void verify_set_option_download(bool opt);
 extern void verify_set_option_skip_optional(bool opt);
 extern void verify_set_option_force(bool opt);

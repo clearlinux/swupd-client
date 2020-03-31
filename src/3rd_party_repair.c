@@ -196,10 +196,15 @@ static bool parse_options(int argc, char **argv)
 	return true;
 }
 
+static enum swupd_code regenerate_binary_scripts(struct list *files_to_verify)
+{
+	return third_party_process_files(files_to_verify, "\nRegenerating 3rd-party bundle binaries...\n", "regenerate_binaries", third_party_update_wrapper_script);
+}
+
 static enum swupd_code repair_repos(UNUSED_PARAM char *unused)
 {
 	verify_set_option_version(cmdline_option_version);
-	return execute_verify();
+	return execute_verify_extra(regenerate_binary_scripts);
 }
 
 enum swupd_code third_party_repair_main(int argc, char **argv)
@@ -243,15 +248,16 @@ enum swupd_code third_party_repair_main(int argc, char **argv)
 	 *  8) remove_extraneous_files
 	 *  9) remove_extra_files (only with --picky or with --extra-files-only)
 	 *  10) run_postupdate_scripts
+	 *  11) regenerate_binaries
 	 */
 	if (cmdline_option_extra_files_only) {
-		steps_in_repair = 3;
+		steps_in_repair = 4;
 	} else if (cmdline_option_quick) {
-		steps_in_repair = 7;
+		steps_in_repair = 8;
 	} else if (cmdline_option_picky) {
-		steps_in_repair = 10;
+		steps_in_repair = 11;
 	} else {
-		steps_in_repair = 9;
+		steps_in_repair = 10;
 	}
 
 	/* run repair (verify --fix) */

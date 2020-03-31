@@ -22,6 +22,7 @@
 #include "3rd_party_repos.h"
 #include "swupd.h"
 
+#include <errno.h>
 #include <sys/stat.h>
 
 #ifdef THIRDPARTY
@@ -144,9 +145,15 @@ static enum swupd_code update_binary_script(struct file *file)
 	script = third_party_get_binary_path(sys_basename(filename));
 	binary = sys_path_join("%s/%s", globals.path_prefix, filename);
 
-	/* if the script for the binary doesn't exist it is probably a new
-	 * binary, create the script */
-	if (!sys_file_exists(script) && sys_file_exists(binary)) {
+	/* the binary is either new or changed in the update, in either case
+	 * we need to create the script */
+	if (sys_file_exists(binary)) {
+		/* if a script for the binary already exists, delete it */
+		ret = sys_rm(script);
+		if (ret && ret != -ENOENT) {
+			ret_code = SWUPD_COULDNT_REMOVE_FILE;
+			goto close_and_exit;
+		}
 		ret_code = third_party_create_wrapper_script(file);
 		goto close_and_exit;
 	}

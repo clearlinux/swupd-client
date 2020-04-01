@@ -154,7 +154,14 @@ verifytime_SOURCES = src/verifytime.h \
 	src/verifytime.c \
 	src/verifytime_main.c \
 	src/lib/log.c \
-	src/lib/log.h
+	src/lib/log.h \
+	src/lib/list.c \
+	src/lib/list.h \
+	src/lib/strings.c \
+	src/lib/strings.h \
+	src/lib/comp_functions.c \
+	src/lib/sys.c \
+	src/lib/sys.h
 
 verifytime_LDADD =
 

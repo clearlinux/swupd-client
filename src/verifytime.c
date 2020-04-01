@@ -23,6 +23,8 @@
 #include "verifytime.h"
 
 #include "lib/log.h"
+#include "lib/sys.h"
+
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -32,44 +34,6 @@
 #include <time.h>
 
 #define DAY_SECONDS 86400
-#define PATH_SEPARATOR '/'
-
-/* this function is a copy from sys_path_join() from lib/sys.c */
-static char *path_join(const char *fmt, ...)
-{
-	char *path;
-	va_list ap;
-	int len;
-	int i, j;
-
-	/* merge arguments into one path */
-	va_start(ap, fmt);
-	if (vasprintf(&path, fmt, ap) < 0) {
-		abort();
-	}
-	va_end(ap);
-
-	len = strlen(path);
-	char *pretty_path = malloc(strlen(path) + 1);
-	if (!pretty_path) {
-		abort();
-	}
-
-	/* remove all duplicated PATH_SEPARATOR from the path */
-	for (i = j = 0; i < len; i++) {
-		if (path[i] == PATH_SEPARATOR && path[i + 1] == PATH_SEPARATOR) {
-			/* duplicated PATH_SEPARATOR, throw it away */
-			continue;
-		}
-		pretty_path[j] = path[i];
-		j++;
-	}
-	pretty_path[j] = '\0';
-
-	free(path);
-
-	return pretty_path;
-}
 
 static unsigned long int get_versionstamp(char *path_prefix)
 {
@@ -78,7 +42,7 @@ static unsigned long int get_versionstamp(char *path_prefix)
 	char *filename;
 	unsigned long int version_num;
 
-	filename = path_join("%s/usr/share/clear/versionstamp", path_prefix ? path_prefix : "");
+	filename = sys_path_join("%s/usr/share/clear/versionstamp", path_prefix ? path_prefix : "");
 
 	errno = 0;
 	fp = fopen(filename, "r");

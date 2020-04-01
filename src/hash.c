@@ -173,10 +173,10 @@ enum swupd_code compute_hash(struct file *file, char *filename)
 	hash_set_zeros(key);
 
 	if (file->is_link) {
-		char link[PATH_MAXLEN];
-		memset(link, 0, PATH_MAXLEN);
+		char link[PATH_MAX];
+		memset(link, 0, PATH_MAX);
 
-		ret = readlink(filename, link, PATH_MAXLEN - 1);
+		ret = readlink(filename, link, PATH_MAX - 1);
 
 		if (ret >= 0) {
 			link[ret] = '\0';

@@ -97,14 +97,14 @@ static void foreach_open_fd(void(pf)(int, void *), void *arg)
 static void dump_file_descriptor_leaks_int(int n, void *a)
 {
 	char *filename;
-	char buffer[PATH_MAXLEN + 1];
+	char buffer[PATH_MAX + 1];
 	ssize_t size;
 	a = a; /* Silence warning */
 	if (FD_ISSET(n, &open_fds)) {
 		return; /* Was already open */
 	}
 	string_or_die(&filename, "/proc/self/fd/%d", n);
-	if ((size = readlink(filename, buffer, PATH_MAXLEN)) != -1) {
+	if ((size = readlink(filename, buffer, PATH_MAX)) != -1) {
 		buffer[size] = '\0'; /* Supply the terminator */
 		if (!strstr(buffer, "socket") &&
 		    !strstr(buffer, "/dev/random") &&

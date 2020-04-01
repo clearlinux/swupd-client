@@ -40,7 +40,6 @@ extern "C" {
 #define LINE_MAX _POSIX2_LINE_MAX
 #endif
 
-#define PATH_MAXLEN 4096
 #define CURRENT_OS_VERSION -1
 #define BUNDLE_NAME_MAXLEN 256
 

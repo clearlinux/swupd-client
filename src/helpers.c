@@ -404,7 +404,7 @@ bool is_under_mounted_directory(const char *filename)
 		string_or_die(&fname, ":%s:", tmp);
 		free_and_clear_pointer(&tmp);
 
-		err = strncmp(fname, mountpoint, strlen(mountpoint));
+		err = strncmp(fname, mountpoint, string_len(mountpoint));
 		free_and_clear_pointer(&fname);
 		if (err == 0) {
 			free_and_clear_pointer(&mountpoint);
@@ -453,7 +453,7 @@ void swupd_deinit(void)
 
 void remove_trailing_slash(char *url)
 {
-	int len = strlen(url);
+	int len = string_len(url);
 
 	while (len > 0 && url[len - 1] == '/') {
 		len--;
@@ -631,8 +631,8 @@ enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
 
 	/* Removing trailing '/' from the path */
 	path = strdup_or_die(targetpath);
-	if (path[strlen(path) - 1] == '/') {
-		path[strlen(path) - 1] = '\0';
+	if (path[string_len(path) - 1] == '/') {
+		path[string_len(path) - 1] = '\0';
 	}
 
 	/* Breaking down the path into parts.
@@ -793,7 +793,7 @@ bool string_in_list(char *string_to_check, struct list *list_to_check)
 
 	iter = list_head(list_to_check);
 	while (iter) {
-		if (strncmp(iter->data, string_to_check, strlen(string_to_check)) == 0) {
+		if (strncmp(iter->data, string_to_check, string_len(string_to_check)) == 0) {
 			return true;
 		}
 
@@ -815,7 +815,7 @@ bool is_compatible_format(int format_num)
 	char *format_manifest = NULL;
 	string_or_die(&format_manifest, "%d", format_num);
 
-	size_t len = strlen(globals.format_string);
+	size_t len = string_len(globals.format_string);
 
 	bool ret;
 	if (strncmp(globals.format_string, format_manifest, len) == 0) {
@@ -1177,7 +1177,7 @@ void print_header(const char *header)
 {
 	int header_length;
 
-	header_length = strlen(header);
+	header_length = string_len(header);
 	print_pattern("_", header_length + 1);
 	info("%s\n", header);
 	print_pattern("_", header_length + 1);
@@ -1236,7 +1236,7 @@ bool is_binary(const char *filename)
 	int i = 0;
 
 	while (binary_paths[i]) {
-		if (strncmp(filename, binary_paths[i], strlen(binary_paths[i])) == 0) {
+		if (strncmp(filename, binary_paths[i], string_len(binary_paths[i])) == 0) {
 			return true;
 		}
 		i++;

@@ -28,8 +28,8 @@
 #define MANIFEST_LINE_MAXLEN (PATH_MAX * 2)
 
 // strncmp helper to be used with consts
-#define strlen_const(_const) sizeof(_const) - 1
-#define strncmp_const(_str, _const) strncmp(_str, _const, strlen_const(_const))
+#define string_len_const(_const) sizeof(_const) - 1
+#define strncmp_const(_str, _const) strncmp(_str, _const, string_len_const(_const))
 
 #define MANIFEST_HEADER "MANIFEST\t"
 
@@ -64,7 +64,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 		goto err_close;
 	}
 
-	c = line + strlen_const(MANIFEST_HEADER);
+	c = line + string_len_const(MANIFEST_HEADER);
 	err = strtoi_err(c, &manifest->manifest_version);
 
 	if (manifest->manifest_version <= 0 || err != 0) {

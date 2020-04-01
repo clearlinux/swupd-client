@@ -439,8 +439,8 @@ char *sys_path_join(const char *fmt, ...)
 	}
 	va_end(ap);
 
-	len = strlen(path);
-	char *pretty_path = malloc(strlen(path) + 1);
+	len = string_len(path);
+	char *pretty_path = malloc(string_len(path) + 1);
 	ON_NULL_ABORT(pretty_path);
 
 	/* remove all duplicated PATH_SEPARATOR from the path */

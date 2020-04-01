@@ -59,14 +59,14 @@ static bool is_state(char *filename)
 		return true;
 	}
 
-	if ((strlen(filename) == 14) && (strncmp(filename, "/usr/src/debug", 14) == 0)) {
+	if ((string_len(filename) == 14) && (strncmp(filename, "/usr/src/debug", 14) == 0)) {
 		return false;
 	}
 
 	/* Compare the first part of the path, first all the entries inside
 	 * kernel directory, then only the kernel directory */
 	if ((strncmp(filename, "/usr/src/kernel/", 16) == 0) ||
-	    ((strlen(filename) == 15) && (strncmp(filename, "/usr/src/kernel", 15) == 0))) {
+	    ((string_len(filename) == 15) && (strncmp(filename, "/usr/src/kernel", 15) == 0))) {
 		return false;
 	}
 

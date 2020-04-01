@@ -87,10 +87,10 @@ char *string_join(const char *separator, struct list *strings)
 	if (!separator) {
 		separator = "";
 	}
-	sep_size = strlen(separator);
+	sep_size = string_len(separator);
 
 	for (i = strings; i; i = i->next) {
-		str_size += strlen(i->data);
+		str_size += string_len(i->data);
 		str_size += sep_size;
 	}
 
@@ -169,14 +169,14 @@ int strtoi_err(const char *str, int *value)
 
 char *str_tolower(const char *str)
 {
-	char *str_lower = malloc(strlen(str) + 1);
+	char *str_lower = malloc(string_len(str) + 1);
 
 	ON_NULL_ABORT(str_lower);
 
 	for (int i = 0; str[i]; i++) {
 		str_lower[i] = tolower(str[i]);
 	}
-	str_lower[strlen(str)] = '\0';
+	str_lower[string_len(str)] = '\0';
 
 	return str_lower;
 }

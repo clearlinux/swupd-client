@@ -111,7 +111,7 @@ static void run_ldconfig(void)
 
 static void update_triggers(bool block)
 {
-	if (strlen(POST_UPDATE) == 0) {
+	if (string_len(POST_UPDATE) == 0) {
 		/* fall back to systemd if path prefix is not the rootfs
 		 * and the POST_UPDATE trigger wasn't specified */
 		if (strcmp("/", globals.path_prefix) != 0) {
@@ -173,7 +173,7 @@ void scripts_run_post_update(bool block)
 
 static void exec_pre_update_script(const char *script)
 {
-	if (strlen(PRE_UPDATE) == 0 || strcmp("/", globals.path_prefix) == 0) {
+	if (string_len(PRE_UPDATE) == 0 || strcmp("/", globals.path_prefix) == 0) {
 		run_script_if_exists(script, NULL);
 	} else {
 		run_script_if_exists(script, globals.path_prefix, NULL);
@@ -186,7 +186,7 @@ void scripts_run_pre_update(struct manifest *manifest)
 	struct file *file;
 	char *script;
 
-	if (strlen(PRE_UPDATE) == 0) {
+	if (string_len(PRE_UPDATE) == 0) {
 		string_or_die(&script, "/usr/bin/clr_pre_update.sh");
 	} else {
 		string_or_die(&script, "%s/%s", globals.path_prefix, PRE_UPDATE);

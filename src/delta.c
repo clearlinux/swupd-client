@@ -93,7 +93,7 @@ static bool check_delta_filename(const char *delta_name, char *from, char *to)
 
 	/* Note: SWUPD_HASH_LEN accounts for the NUL-terminator after the hash. */
 	const size_t hash_len = SWUPD_HASH_LEN - 1;
-	if (strlen(s) != (hash_len * 2 + 1)) {
+	if (string_len(s) != (hash_len * 2 + 1)) {
 		return false;
 	}
 

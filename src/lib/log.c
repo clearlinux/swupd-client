@@ -98,7 +98,7 @@ static void log_internal(FILE *out, const char *file, int line, const char *labe
 
 		msg = vstr_or_die(format, args_list);
 		fprintf(out, "%s", msg);
-		if (msg[strlen(msg) - 1] != '\n') {
+		if (msg[string_len(msg) - 1] != '\n') {
 			fprintf(out, "\n");
 		}
 		free(msg);

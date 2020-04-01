@@ -28,6 +28,7 @@
 #include <unistd.h>
 
 #include "log.h"
+#include "strings.h"
 
 #define DEBUG_HEADER_SIZE 50
 #define LINE_MAX _POSIX2_LINE_MAX
@@ -54,9 +55,6 @@ static void print_debug_info(FILE *out, const char *file, int line)
 
 static void log_internal(FILE *out, const char *file, int line, const char *label, const char *format, va_list args_list)
 {
-
-	char msg[LINE_MAX];
-
 	/* do not print the carriage return found at the beginning of the message if
 	 * in debug mode or if printing to a file, that would mess up the output */
 	while (strncmp(format, "\r", 1) == 0) {
@@ -95,10 +93,17 @@ static void log_internal(FILE *out, const char *file, int line, const char *labe
 	 * Note that the "\n" could have been provided as an argument to the
 	 * string, as in this example: info("example%s", flag ? "" : "\n")
 	 * so we need to pass the string to a variable first to inspect it */
-	vsnprintf(msg, LINE_MAX, format, args_list);
-	fprintf(out, "%s", msg);
-	if ((cur_log_level == LOG_DEBUG) && (msg[strlen(msg) - 1] != '\n')) {
-		fprintf(out, "\n");
+	if (cur_log_level == LOG_DEBUG) {
+		char *msg;
+
+		msg = vstr_or_die(format, args_list);
+		fprintf(out, "%s", msg);
+		if (msg[strlen(msg) - 1] != '\n') {
+			fprintf(out, "\n");
+		}
+		free(msg);
+	} else {
+		vfprintf(out, format, args_list);
 	}
 }
 

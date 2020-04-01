@@ -13,6 +13,14 @@ extern "C" {
 #endif
 
 /**
+ * Return a new allocated string with the content printed from fmt and
+ * parameters using vasprintf. Abort on memory allocation errors.
+ *
+ * @note str_or_die() or string_or_die() are recommended.
+ */
+char *vstr_or_die(const char *fmt, va_list ap);
+
+/**
  * Save in strp a new allocated string with content printed from fmt and
  * parameters using vasprintf. Abort on memory allocation errors.
  */

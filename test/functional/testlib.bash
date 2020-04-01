@@ -3412,6 +3412,7 @@ update_bundle() { # swupd_function
 	local pre_ver
 	local pre_hash
 	local existing_file
+	local current_status
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
@@ -3645,12 +3646,13 @@ update_bundle() { # swupd_function
 			sudo rm -f "$version_path"/files/"$fhash".tar
 
 			# if the file changed type, update the manifest accordingly
+			current_status=$(get_entry_from_manifest "$bundle_manifest" "$fname" | awk '{ print $1 }')
 			if [ -L "$version_path"/files/"$new_fhash" ]; then
-				update_manifest -p "$bundle_manifest" file-status "$fname" "L..."
+				update_manifest -p "$bundle_manifest" file-status "$fname" "L${current_status:1}"
 			elif [ -d "$version_path"/files/"$new_fhash" ]; then
-				update_manifest -p "$bundle_manifest" file-status "$fname" "D..."
+				update_manifest -p "$bundle_manifest" file-status "$fname" "D${current_status:1}"
 			else
-				update_manifest -p "$bundle_manifest" file-status "$fname" "F..."
+				update_manifest -p "$bundle_manifest" file-status "$fname" "F${current_status:1}"
 			fi
 
 		fi

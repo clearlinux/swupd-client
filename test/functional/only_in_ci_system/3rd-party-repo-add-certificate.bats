@@ -8,22 +8,29 @@ load "../testlib"
 export repo1
 export repo2
 
-global_setup() {
+test_setup() {
 	# Skip this test for local development because we write the certificate on /
     # This is necessary because the default certificate location is hardcoded on build time and we
 	# need to run swupd without -C parameter to test this feature.
 	if [ -z "${RUNNING_IN_CI}" ]; then
-		return
+		skip "Skipping test because it will make changes to your system"
 	fi
+
+	create_test_environment "$TEST_NAME"
 
 	if [ ! -f /usr/share/clear/update-ca/Swupd_Root.pem ]; then
 		sudo mkdir -p /usr/share/clear/update-ca
 		sudo cp "$TEST_DIRNAME"/Swupd_Root.pem /usr/share/clear/update-ca
 		export CERT_WAS_INSTALLED=1
 	fi
+
+	create_third_party_repo "$TEST_NAME" 10 staging test-repo1
+	repo1="$TPURL"
+	create_third_party_repo "$TEST_NAME" 10 staging test-repo2
+	repo2="$TPURL"
 }
 
-global_teardown() {
+test_teardown() {
 
 	if [ -z "${RUNNING_IN_CI}" ]; then
 		return
@@ -32,15 +39,6 @@ global_teardown() {
 	if [ -n "${CERT_WAS_INSTALLED}" ]; then
 		sudo rm usr/share/clear/update-ca/Swupd_Root.pem
 	fi
-}
-
-test_setup() {
-
-	create_test_environment "$TEST_NAME"
-	create_third_party_repo "$TEST_NAME" 10 staging test-repo1
-	repo1="$TPURL"
-	create_third_party_repo "$TEST_NAME" 10 staging test-repo2
-	repo2="$TPURL"
 }
 
 @test "TPR066: Add a single repo importing the certificate" {

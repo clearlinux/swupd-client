@@ -116,12 +116,13 @@ error:
 
 struct list *string_split(const char *separator, const char *string_to_split)
 {
+	char *ctx = NULL;
 	struct list *split = NULL;
 	char *string_copy = strdup_or_die(string_to_split);
-	char *token = strtok(string_copy, separator);
+	char *token = strtok_r(string_copy, separator, &ctx);
 	while (token) {
 		split = list_prepend_data(split, strdup_or_die(token));
-		token = strtok(NULL, separator);
+		token = strtok_r(NULL, separator, &ctx);
 	}
 	free(string_copy);
 	return split;

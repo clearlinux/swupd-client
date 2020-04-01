@@ -85,11 +85,12 @@ static bool parse_opt(int opt, char *optarg)
 		cmdline_option_statedir_cache = strdup_or_die(optarg);
 		return true;
 	case 'B': {
+		char *ctx = NULL;
 		char *arg_copy = strdup_or_die(optarg);
-		char *token = strtok(arg_copy, ",");
+		char *token = strtok_r(arg_copy, ",", &ctx);
 		while (token) {
 			cmdline_bundles = list_prepend_data(cmdline_bundles, strdup_or_die(token));
-			token = strtok(NULL, ",");
+			token = strtok_r(NULL, ",", &ctx);
 		}
 		free(arg_copy);
 		if (!cmdline_bundles) {

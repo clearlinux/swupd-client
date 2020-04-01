@@ -289,6 +289,7 @@ static void get_mounted_directories(void)
 	ssize_t ret;
 	char *c;
 	size_t n;
+	char *ctx = NULL;
 
 	file = fopen("/proc/self/mountinfo", "r");
 	if (!file) {
@@ -307,7 +308,7 @@ static void get_mounted_directories(void)
 		}
 
 		n = 0;
-		mnt = strtok(line, " ");
+		mnt = strtok_r(line, " ", &ctx);
 		while (mnt != NULL) {
 			if (n == 4) {
 				/* The "4" assumes today's mountinfo form of:
@@ -326,7 +327,7 @@ static void get_mounted_directories(void)
 				break;
 			}
 			n++;
-			mnt = strtok(NULL, " ");
+			mnt = strtok_r(NULL, " ", &ctx);
 		}
 		free_and_clear_pointer(&line);
 	}
@@ -389,6 +390,7 @@ bool is_under_mounted_directory(const char *filename)
 	char *dir;
 	char *fname;
 	char *tmp;
+	char *ctx = NULL;
 
 	if (globals.mounted_dirs == NULL) {
 		return false;
@@ -396,7 +398,7 @@ bool is_under_mounted_directory(const char *filename)
 
 	dir = strdup_or_die(globals.mounted_dirs);
 
-	token = strtok(dir + 1, ":");
+	token = strtok_r(dir + 1, ":", &ctx);
 	while (token != NULL) {
 		string_or_die(&mountpoint, "%s/", token);
 
@@ -412,7 +414,7 @@ bool is_under_mounted_directory(const char *filename)
 			break;
 		}
 
-		token = strtok(NULL, ":");
+		token = strtok_r(NULL, ":", &ctx);
 
 		free_and_clear_pointer(&mountpoint);
 	}

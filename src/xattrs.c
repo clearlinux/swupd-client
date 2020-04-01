@@ -97,7 +97,7 @@ static int get_xattr_name_count(const char *names_list, ssize_t len)
 	int count = 0;
 	const char *name;
 
-	for (name = names_list; name < (names_list + len); name += strlen(name) + 1) {
+	for (name = names_list; name < (names_list + len); name += string_len(name) + 1) {
 		count++;
 	}
 
@@ -119,7 +119,7 @@ static const char **get_sorted_xattr_name_table(const char *names, int n)
 
 	for (i = 0; i < n; i++) {
 		table[i] = names;
-		names += strlen(names) + 1;
+		names += string_len(names) + 1;
 	}
 
 	qsort(table, n, sizeof(char *), cmp_xattr_name_ptrs);
@@ -181,7 +181,7 @@ static void xattrs_do_action(xattrs_action_type_t action,
 		value_len = len;
 
 		for (i = 0; i < count; i++) {
-			len = strlen(sorted_list[i]) + 1;
+			len = string_len(sorted_list[i]) + 1;
 			memcpy(value + offset, sorted_list[i], len);
 			offset += len;
 		}

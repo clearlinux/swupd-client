@@ -6,11 +6,18 @@
  * @brief Basic string operations.
  */
 
+#include <stdint.h>
+
 #include "list.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * helper to use strnlen() instead of strlen.
+ */
+#define string_len(_str) strnlen(_str, INT64_MAX)
 
 /**
  * Return a new allocated string with the content printed from fmt and

@@ -239,7 +239,7 @@ static bool match_path_prefix(const char *path, const char *path_list[])
 	int i;
 
 	for (i = 0; path_list[i] != NULL; i++) {
-		if (strncmp(path, path_list[i], strlen(path_list[i])) == 0) {
+		if (strncmp(path, path_list[i], string_len(path_list[i])) == 0) {
 			return true;
 		}
 	}
@@ -489,7 +489,7 @@ static bool parse_options(int argc, char **argv)
 	search_string = optind < argc ? argv[optind] : "";
 
 	/* Arbitrary upper limit to ensure we aren't getting handed garbage */
-	if (strlen(search_string) > PATH_MAX) {
+	if (string_len(search_string) > PATH_MAX) {
 		error("Search string is too long\n");
 		return false;
 	}

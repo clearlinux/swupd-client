@@ -109,7 +109,7 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 	int rc;
 	int ret;
 
-	path_prefix_len = strlen(globals.path_prefix);
+	path_prefix_len = string_len(globals.path_prefix);
 	path_whitelist = whitelist;
 	rc = nftw(start, &record_filename, 0, FTW_ACTIONRETVAL | FTW_PHYS | FTW_MOUNT);
 	const char *skip_dir = NULL; /* Skip files below this in printout */
@@ -144,7 +144,7 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 	}
 
 	int skip_len = 0; /* Length of directory name we are skipping
-			   * could have used strlen(skip_dir), but speed! */
+			   * could have used string_len(skip_dir), but speed! */
 	/* list files/directories which are extra.
 	 * This is reverse so that files are removed before their parent dirs */
 	for (int i = nF - 1; i >= 0; i--) {
@@ -164,7 +164,7 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 			}
 			if (F[i].dir) { /* Start of new dir to skip */
 				skip_dir = F[i].filename;
-				skip_len = strlen(skip_dir);
+				skip_len = string_len(skip_dir);
 				ret = handle(F[i].filename, true, fix);
 			} else {
 				ret = handle(F[i].filename, false, fix);

@@ -107,7 +107,7 @@ static void hmac_sha256_for_string(char *hash,
 		return;
 	}
 
-	hmac_sha256_for_data(hash, key, key_len, (const unsigned char *)str, strlen(str));
+	hmac_sha256_for_data(hash, key, key_len, (const unsigned char *)str, string_len(str));
 }
 
 static void hmac_compute_key(const char *filename,

@@ -256,7 +256,7 @@ static bool get_osrelease_value(char *path_prefix, char *key, char *buff)
 	char *releasefile = NULL;
 	char *src = NULL, *dest = NULL;
 	char *keystr = NULL;
-	int keystrlen = 0;
+	int keystring_len = 0;
 	bool keyfound = false;
 
 	string_or_die(&releasefile, "%s/usr/lib/os-release", path_prefix);
@@ -272,15 +272,15 @@ static bool get_osrelease_value(char *path_prefix, char *key, char *buff)
 	}
 
 	string_or_die(&keystr, "%s=", key);
-	keystrlen = strlen(keystr);
+	keystring_len = string_len(keystr);
 	while (!feof(file)) {
 		line[0] = 0x00;
 		if (fgets(line, LINE_MAX, file) == NULL) {
 			break;
 		}
-		if (strncmp(line, keystr, keystrlen) == 0) {
+		if (strncmp(line, keystr, keystring_len) == 0) {
 			keyfound = true;
-			src = &line[keystrlen];
+			src = &line[keystring_len];
 			/* Drop quotes and newline in value */
 			dest = buff;
 			while (*src) {

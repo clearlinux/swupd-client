@@ -838,7 +838,7 @@ static struct list *keep_matching_path(struct list *all_files)
 
 	for (iter = all_files; iter; iter = iter->next) {
 		file = iter->data;
-		if (strncmp(cmdline_option_file, file->filename, strlen(cmdline_option_file)) == 0) {
+		if (strncmp(cmdline_option_file, file->filename, string_len(cmdline_option_file)) == 0) {
 			/* preserving the order is important */
 			matching_files = list_append_data(matching_files, file);
 		}

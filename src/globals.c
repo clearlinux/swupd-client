@@ -349,7 +349,7 @@ bool set_path_prefix(char *path)
 		goto error;
 	}
 
-	len = strlen(new_path);
+	len = string_len(new_path);
 	if (!len || (new_path[len - 1] != '/')) {
 		char *tmp;
 

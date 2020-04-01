@@ -41,14 +41,27 @@ char *strdup_or_die(const char *const str)
 	return result;
 }
 
+char *vstr_or_die(const char *fmt, va_list ap)
+{
+	char *str;
+
+	if (vasprintf(&str, fmt, ap) < 0) {
+		abort();
+	}
+
+	return str;
+}
+
 void string_or_die(char **strp, const char *fmt, ...)
 {
 	va_list ap;
 
-	va_start(ap, fmt);
-	if (vasprintf(strp, fmt, ap) < 0) {
-		abort();
+	if (!strp) {
+		return;
 	}
+
+	va_start(ap, fmt);
+	*strp = vstr_or_die(fmt, ap);
 	va_end(ap);
 }
 
@@ -58,9 +71,7 @@ char *str_or_die(const char *fmt, ...)
 	va_list ap;
 
 	va_start(ap, fmt);
-	if (vasprintf(&str, fmt, ap) < 0) {
-		abort();
-	}
+	str = vstr_or_die(fmt, ap);
 	va_end(ap);
 
 	return str;

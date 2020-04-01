@@ -1259,12 +1259,13 @@ void warn_nosigcheck(const char *file)
 
 	if (first_time) {
 		const char *flag = globals.sigcheck ? "--nosigcheck-latest" : "--nosigcheck";
-		char journal_msg[LINE_MAX] = { 0 };
+		char *journal_msg;
 		warn("The %s flag was used and this compromises the system security\n", flag);
 
-		snprintf(journal_msg, sizeof(journal_msg), "swupd security notice: %s used to bypass MoM signature verification", flag);
+		journal_msg = str_or_die("swupd security notice: %s used to bypass MoM signature verification", flag);
 
 		journal_log_error(journal_msg);
+		free(journal_msg);
 
 		first_time = false;
 	}

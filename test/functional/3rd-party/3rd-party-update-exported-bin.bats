@@ -8,14 +8,16 @@ load "../testlib"
 test_setup() {
 
 	# create an initial environment
-	create_test_environment "$TEST_NAME"
+	create_test_environment -r "$TEST_NAME"
+
 	create_third_party_repo -a "$TEST_NAME" 10 staging repo1
 	create_bundle -L -t -n test-bundle1 -f /foo/file_1,/usr/bin/binary_1,/bin/binary_2,/bin/binary_3 -u repo1 "$TEST_NAME"
 	create_bundle       -n test-bundle2 -f /bar/file_2,/bin/binary_4                                 -u repo1 "$TEST_NAME"
 	create_bundle       -n test-bundle3 -f /bin/binary_5                                             -u repo1 "$TEST_NAME"
 
 	# create an update that adds, removes and updates binaries
-	create_version -p "$TEST_NAME" 20 10 staging repo1
+	create_version -p -r "$TEST_NAME" 20 10 staging repo1
+
 	update_bundle -p "$TEST_NAME" test-bundle1 --update /foo/file_1                 repo1
 	update_bundle -p "$TEST_NAME" test-bundle1 --update /bin/binary_2               repo1
 	update_bundle -p "$TEST_NAME" test-bundle1 --add    /usr/local/bin/binary_6     repo1
@@ -51,13 +53,14 @@ test_setup() {
 		Preparing to update from 10 to 20
 		Downloading packs for:
 		 - test-bundle3
+		 - os-core
 		 - test-bundle1
 		Finishing packs extraction...
 		Statistics for going from version 10 to version 20:
-		    changed bundles   : 1
+		    changed bundles   : 2
 		    new bundles       : 0
 		    deleted bundles   : 0
-		    changed files     : 2
+		    changed files     : 4
 		    new files         : 6
 		    deleted files     : 2
 		Validate downloaded files

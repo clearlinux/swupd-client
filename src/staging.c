@@ -140,6 +140,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		    (file->is_file && !S_ISREG(s.st_mode))) {
 			// file type changed, move old out of the way for new
 			ret = sys_rm_recursive(statfile);
+			free_and_clear_pointer(&statfile);
 			if (ret != 0 && ret != -ENOENT) {
 				ret = SWUPD_COULDNT_REMOVE_FILE;
 				goto out;

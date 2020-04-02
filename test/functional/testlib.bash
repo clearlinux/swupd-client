@@ -1616,9 +1616,10 @@ create_version() { # swupd_function
 	local version=$2
 	local from_version=${3:-0}
 	local format=${4:-staging}
-	local content_dir=${5:-web-dir}
+	local repo_name=$5
 	local mom
 	local hashed_name
+	local content_dir
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
@@ -1641,8 +1642,10 @@ create_version() { # swupd_function
 	validate_param "$version"
 
 	# if a content_dir is specified it means we are using a 3rd-party repo
-	if [ "$content_dir" != web-dir ]; then
-		content_dir=3rd-party/"$content_dir"
+	if [ -n "$repo_name" ]; then
+		content_dir=3rd-party/"$repo_name"
+	else
+		content_dir=web-dir
 	fi
 
 	debug_msg "Creating content for version $version at $content_dir..."
@@ -1727,16 +1730,16 @@ create_version() { # swupd_function
 			done
 			# if no os-core manifest was found, nothing else needs to be done
 			if [ -e "$env_name"/"$content_dir"/"$oldversion"/Manifest.os-core ]; then
-				update_bundle -p "$env_name" os-core --header-only
+				update_bundle -p "$env_name" os-core --header-only "$repo_name"
 				if [ -n "$(get_hash_from_manifest "$env_name"/"$content_dir"/"$oldversion"/Manifest.os-core /usr/lib/os-release)" ]; then
 					remove_from_manifest -p "$env_name"/"$content_dir"/"$version"/Manifest.os-core /usr/lib/os-release
 				fi
-				update_bundle -p "$env_name" os-core --add /usr/lib/os-release:"$OS_RELEASE"
+				update_bundle -p "$env_name" os-core --add /usr/lib/os-release:"$OS_RELEASE" "$repo_name"
 				if [ -n "$(get_hash_from_manifest "$env_name"/"$content_dir"/"$oldversion"/Manifest.os-core /usr/share/defaults/swupd/format)" ]; then
 					remove_from_manifest -p "$env_name"/"$content_dir"/"$version"/Manifest.os-core /usr/share/defaults/swupd/format
 				fi
 				# update without -p flag to refresh tar and MoM
-				update_bundle "$env_name" os-core --add /usr/share/defaults/swupd/format:"$FORMAT"
+				update_bundle "$env_name" os-core --add /usr/share/defaults/swupd/format:"$FORMAT" "$repo_name"
 			fi
 		fi
 		debug_msg "MoM created successfully"
@@ -3263,6 +3266,7 @@ remove_bundle() { # swupd_function
 	local file_names
 	local dir_names
 	local manifest_file
+	local fname
 
 	# if the bundle's manifest is not found just return
 	if [ ! -e "$bundle_manifest" ]; then
@@ -3322,6 +3326,7 @@ install_bundle() { # swupd_function
 	local fdir
 	local manifest_file
 	local bundle_name
+	local fname
 
 	# If no parameters are received show usage
 	if [ $# -eq 0 ]; then
@@ -3407,7 +3412,6 @@ update_bundle() { # swupd_function
 	local contentsize
 	local fsize
 	local fhash
-	local fname
 	local filename
 	local new_fhash
 	local new_fsize
@@ -3429,7 +3433,7 @@ update_bundle() { # swupd_function
 			    update_bundle [-p] <environment_name> <bundle_name> --ghost <file_name> [REPO_NAME]
 			    update_bundle [-p] <environment_name> <bundle_name> --update <file_name>[:<path_to_existing_file>] [REPO_NAME]
 			    update_bundle [-p] <environment_name> <bundle_name> --rename[-legacy] <file_name:new_name> [REPO_NAME]
-			    update_bundle [-p] <environment_name> <bundle_name> --header-only
+			    update_bundle [-p] <environment_name> <bundle_name> --header-only [REPO_NAME]
 
 			Options:
 			    -p    If set (partial), the bundle will be updated, but the manifest's tar won't
@@ -3440,6 +3444,8 @@ update_bundle() { # swupd_function
 	fi
 
 	if [ "$option" = "--header-only" ]; then
+		# --header-only doesn't have the fname parameter
+		repo_name="$fname"
 		fname="dummy"
 	fi
 	validate_path "$env_name"

@@ -126,18 +126,18 @@ generate_certificate() { # swupd_function
 	if [ -z "$config" ]; then
 		sudo openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 \
 			-keyout "$key_path" -out "$cert_path" \
-			-subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost"
+			-subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost" > /dev/null 2>&1
 	else
 		validate_item "$config"
 		openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 \
 			-keyout "$key_path" -out "$cert_path" \
 			-subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost" \
-			-config "$config"
+			-config "$config" > /dev/null 2>&1
 	fi
 
 	debug_msg "Generated private key: $key_path"
 	debug_msg "Generated public key: $cert_path"
-	debug_msg "Keys generated succssfully"
+	debug_msg "Keys generated successfully"
 
 }
 

@@ -8,18 +8,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	sudo rm -rf "$TARGETDIR"/etc/swupd
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "MIR001: Setting a mirror when /etc/swupd doesn't exist" {
 
 	run sudo sh -c "$SWUPD mirror -s https://example.com/swupd-file $SWUPD_OPTS"

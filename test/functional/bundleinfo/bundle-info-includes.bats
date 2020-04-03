@@ -25,19 +25,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "BIN006: Show info about a bundle including its dependencies" {
 
 	# the --includes flag can be used to show all directly and indirectly

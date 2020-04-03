@@ -26,12 +26,6 @@ test_teardown() {
 
 }
 
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "ADD033: Add bundle without alias" {
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"

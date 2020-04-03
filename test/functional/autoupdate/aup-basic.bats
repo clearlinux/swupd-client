@@ -11,12 +11,6 @@ test_setup() {
 
 }
 
-test_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "AUT001: auto-update disable-enable & status" {
 
 	# perform autoupdate disable

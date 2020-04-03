@@ -2,13 +2,6 @@
 
 load "../testlib"
 
-test_teardown() {
-
-	# do nothing
-	return
-
-}
-
 @test "USA001: Verify the script for autocomplete exists" {
 
 	assert_file_exists "$SWUPD_DIR"/swupd.bash

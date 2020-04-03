@@ -13,19 +13,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	# do nothing
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "SRH015: Search for an experimental bundle" {
 
 	# it should find the bundle since the tracking file has the

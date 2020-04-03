@@ -9,19 +9,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	# do nothing
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "SRH009: Try searching for a file that does not exist" {
 
 	# the first time we run search it needs to download the

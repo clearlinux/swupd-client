@@ -16,11 +16,6 @@ test_setup() {
 
 }
 
-test_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-}
-
 @test "CHK003: Check for available updates with a slow server" {
 
 	run sudo sh -c "$SWUPD check-update --allow-insecure-http $SWUPD_OPTS"

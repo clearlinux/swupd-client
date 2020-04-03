@@ -8,18 +8,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	sudo rm -rf "$TARGETDIR"/etc/swupd
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "MIR004: Try setting up a mirror when /etc/swupd is a file instead of a directory" {
 
 	sudo rm -rf "$TARGETDIR"/etc/swupd

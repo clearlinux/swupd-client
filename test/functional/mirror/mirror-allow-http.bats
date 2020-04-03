@@ -11,18 +11,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	sudo rm -rf "$TARGETDIR"/etc/swupd
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "MIR007: Trying to set a http mirror" {
 
 	run sudo sh -c "$SWUPD mirror -s http://invalid_server_for_swupd $SWUPD_OPTS"

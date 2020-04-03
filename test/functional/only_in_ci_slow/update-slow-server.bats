@@ -22,15 +22,6 @@ test_setup() {
 
 }
 
-test_teardown() {
-
-	# teardown only if in travis CI
-	if [ -n "${RUNNING_IN_CI}" ]; then
-		destroy_test_environment "$TEST_NAME"
-	fi
-
-}
-
 @test "UPD025: Updating a system using a slow server" {
 
 	run sudo sh -c "$SWUPD update --allow-insecure-http $SWUPD_OPTS"

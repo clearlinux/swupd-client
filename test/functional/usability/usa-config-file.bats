@@ -18,18 +18,6 @@ test_setup() {
 
 }
 
-test_teardown() {
-
-	destroy_config_file
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "USA010: Use option without section in the configuration file" {
 
 	# Options without a section are considered to be global

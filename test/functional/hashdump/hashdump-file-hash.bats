@@ -9,18 +9,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "HSD001: Calculate the hash of a file" {
 
 	run sudo sh -c "$SWUPD hashdump $TARGETDIR/test-hash"

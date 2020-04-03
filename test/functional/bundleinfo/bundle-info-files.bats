@@ -18,19 +18,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "BIN008: Show the files that are part of a bundle" {
 
 	# bundle-info --files show the files that are part of that bundle

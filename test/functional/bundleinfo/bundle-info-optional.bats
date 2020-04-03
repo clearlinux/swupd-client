@@ -19,19 +19,6 @@ global_setup() {
 	add_dependency_to_manifest -o "$WEBDIR"/10/Manifest.test-bundle2 test-bundle5
 }
 
-test_teardown() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "BIN011: Show info about a bundle including its optional and non-optional dependencies" {
 
 	run sudo sh -c "$SWUPD bundle-info $SWUPD_OPTS test-bundle1 --dependencies"

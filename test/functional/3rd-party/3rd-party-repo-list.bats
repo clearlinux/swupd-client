@@ -35,12 +35,6 @@ test_setup(){
 
 }
 
-test_teardown(){
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "TPR007: Basic List of third-party entire repositories" {
 
 	run sudo sh -c "$SWUPD 3rd-party list $SWUPD_OPTS"

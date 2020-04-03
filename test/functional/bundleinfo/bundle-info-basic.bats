@@ -22,19 +22,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "BIN001: Show info about a bundle installed in the system" {
 
 	# users can use the bundle-info command to see detailed info about a bundle

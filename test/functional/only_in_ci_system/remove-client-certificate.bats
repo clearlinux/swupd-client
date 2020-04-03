@@ -59,16 +59,6 @@ test_teardown() {
 	clean_state_dir "$TEST_NAME"
 }
 
-global_teardown() {
-
-	if [ -z "${RUNNING_IN_CI}" ]; then
-		return
-	fi
-
-
-	destroy_test_environment "$TEST_NAME"
-}
-
 @test "REM014: Removing bundle over HTTPS with a valid client certificate" {
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle"

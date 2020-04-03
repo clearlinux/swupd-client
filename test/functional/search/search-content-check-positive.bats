@@ -10,19 +10,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	# do nothing
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "SRH029: User downloads all the manifests without actually searching for anything" {
 
 	# when using the --init option with search, it should not

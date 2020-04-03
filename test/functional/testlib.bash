@@ -4218,6 +4218,12 @@ teardown() {
 		global_teardown
 		debug_msg "Global teardown finished\\n"
 
+		destroy_test_environment "$TEST_NAME"
+
+	elif [ ! -e "$TEST_NAME"/.global_env ]; then
+
+		destroy_test_environment "$TEST_NAME"
+
 	fi
 
 	print "Test teardown complete."
@@ -4248,8 +4254,7 @@ test_setup() {
 # Default test_teardown
 test_teardown() {
 
-	debug_msg "No test_teardown was defined, using the default one..."
-	destroy_test_environment "$TEST_NAME"
+	debug_msg "No test_teardown was defined"
 
 }
 

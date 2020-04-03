@@ -9,12 +9,6 @@ global_setup() {
 
 }
 
-test_setup() {
-
-	:
-
-}
-
 test_teardown() {
 
 	:

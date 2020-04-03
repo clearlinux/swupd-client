@@ -13,14 +13,6 @@ global_setup() {
 
 }
 
-test_setup() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-
-}
-
 test_teardown() {
 
 	# do nothing, just overwrite the lib test_setup

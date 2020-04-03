@@ -15,13 +15,6 @@ global_setup() {
 
 }
 
-test_setup() {
-
-	# do nothing
-	return
-
-}
-
 test_teardown() {
 
 	# do nothing

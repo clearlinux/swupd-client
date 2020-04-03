@@ -19,13 +19,6 @@ global_setup() {
 	add_dependency_to_manifest -o "$WEBDIR"/10/Manifest.test-bundle2 test-bundle5
 }
 
-test_setup() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
 test_teardown() {
 
 	# do nothing, just overwrite the lib test_setup

@@ -16,6 +16,7 @@ export SWUPD_DIR="$FUNC_DIR/../.."
 export THIRD_PARTY_DIR="opt/3rd-party"
 export THIRD_PARTY_BUNDLES_DIR="$THIRD_PARTY_DIR/bundles"
 export THIRD_PARTY_BIN_DIR="$THIRD_PARTY_DIR/bin"
+export THIRD_PARTY_SCRIPT_TEMPLATE="script.template"
 
 # formatting variables
 export SPACE=" "
@@ -77,6 +78,14 @@ export SWUPD_INVALID_FILE=38  # file is missing or invalid
 
 # global constant
 export zero_hash="0000000000000000000000000000000000000000000000000000000000000000"
+export SCRIPT_TEMPLATE="\
+#!/bin/bash\n\n\
+export PATH=%s:\$PATH\n\
+export LD_LIBRARY_PATH=%s:\$LD_LIBRARY_PATH\n\
+export XDG_DATA_DIRS=%s:\$XDG_DATA_DIRS\n\
+export XDG_CONF_DIRS=%s:\$XDG_CONF_DIRS\n\
+\n\
+%s \"\$@\"\n"
 
 generate_random_content() { # swupd_function
 
@@ -1579,6 +1588,12 @@ create_third_party_repo() { #swupd_function
 		create_bundle -L -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$cert",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
 	else
 		create_bundle -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$cert",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
+	fi
+
+	# if requested, add the template file to the target system
+	if [ "$add" = true ]; then
+		sudo mkdir -p "$env_name"/testfs/target-dir/"$THIRD_PARTY_BIN_DIR"
+		write_to_protected_file "$env_name"/testfs/target-dir/"$THIRD_PARTY_BIN_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE" "$SCRIPT_TEMPLATE"
 	fi
 
 	if [ "$TEST_ENV_ONLY" = true ]; then

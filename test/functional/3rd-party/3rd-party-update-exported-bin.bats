@@ -16,13 +16,13 @@ test_setup() {
 	create_bundle       -n test-bundle3 -f /bin/binary_5                                             -u repo1 "$TEST_NAME"
 
 	# create an update that adds, removes and updates binaries
-	create_version -p -r "$TEST_NAME" 20 10 staging repo1
+	create_version -r "$TEST_NAME" 20 10 staging repo1
 
 	update_bundle -p "$TEST_NAME" test-bundle1 --update /foo/file_1                 repo1
 	update_bundle -p "$TEST_NAME" test-bundle1 --update /bin/binary_2               repo1
 	update_bundle -p "$TEST_NAME" test-bundle1 --add    /usr/local/bin/binary_6     repo1
 	update_bundle -p "$TEST_NAME" test-bundle1 --delete /usr/bin/binary_1           repo1
-	update_bundle -p "$TEST_NAME" test-bundle1 --rename /bin/binary_3:/bin/binary_7 repo1
+	update_bundle    "$TEST_NAME" test-bundle1 --rename /bin/binary_3:/bin/binary_7 repo1
 	add_dependency_to_manifest "$TPWEBDIR"/20/Manifest.test-bundle1 test-bundle3
 
 	# let's add a line to the script for binary_2 so we can tell if it was

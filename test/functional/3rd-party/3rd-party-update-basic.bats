@@ -59,7 +59,7 @@ test_setup() {
 
 }
 
-@test "TPR037: Users can check if the 3rd-party bundles from a specifi repo are up to date" {
+@test "TPR037: Users can check if the 3rd-party bundles from a specific repo are up to date" {
 
 	run sudo sh -c "$SWUPD 3rd-party update $SWUPD_OPTS --repo test-repo1 --status"
 

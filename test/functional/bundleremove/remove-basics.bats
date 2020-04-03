@@ -11,13 +11,6 @@ global_setup() {
 
 }
 
-test_setup() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
 test_teardown() {
 
 	# reinstall test-bundle1 and test-bundle2

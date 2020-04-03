@@ -2,13 +2,6 @@
 
 load "../testlib"
 
-test_setup() {
-
-	# do nothing
-	return
-
-}
-
 test_teardown() {
 
 	# do nothing

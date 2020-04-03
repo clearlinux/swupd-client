@@ -5,6 +5,12 @@
 
 load "../testlib"
 
+test_setup() {
+
+	create_test_environment "$TEST_NAME"
+
+}
+
 @test "VER006: Verify conflicting flags" {
 
 	# Some flags are mutually exclusive

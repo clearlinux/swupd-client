@@ -16,13 +16,6 @@ global_setup() {
 
 }
 
-test_setup() {
-
-	# do nothing
-	return
-
-}
-
 test_teardown() {
 
 	sudo rm -rf "$TARGETDIR"/etc/swupd

@@ -4241,8 +4241,7 @@ global_teardown() {
 # Default test_setup
 test_setup() {
 
-	debug_msg "No test_setup was defined, using the default one..."
-	create_test_environment "$TEST_NAME"
+	debug_msg "No test_setup was defined"
 
 }
 

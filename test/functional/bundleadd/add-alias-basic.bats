@@ -14,12 +14,6 @@ global_setup() {
 	create_bundle -n alias-bundle3 -f /foo/alias-file3 "$TEST_NAME"
 }
 
-test_setup() {
-
-	return
-
-}
-
 test_teardown() {
 
 	remove_bundle -L "$TEST_NAME"/web-dir/10/Manifest.test-bundle1

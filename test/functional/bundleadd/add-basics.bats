@@ -12,13 +12,6 @@ global_setup() {
 
 }
 
-test_setup() {
-
-	# do nothing, just overwrite the lib test_setup
-	return
-
-}
-
 test_teardown() {
 
 	# uninstall the bundle from target-dir if installed

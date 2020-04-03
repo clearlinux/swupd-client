@@ -22,12 +22,6 @@ global_setup() {
 
 }
 
-test_setup() {
-
-	return
-
-}
-
 test_teardown() {
 
 	return

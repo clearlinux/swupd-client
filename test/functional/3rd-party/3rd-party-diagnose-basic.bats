@@ -32,18 +32,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "TPR042: Diagnose shows modified files, new files and deleted files from 3rd-party bundles" {
 
 	run sudo sh -c "$SWUPD 3rd-party diagnose $SWUPD_OPTS"

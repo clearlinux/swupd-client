@@ -61,16 +61,6 @@ test_teardown() {
 	clean_state_dir "$TEST_NAME"
 }
 
-global_teardown() {
-
-	if [ -z "${RUNNING_IN_CI}" ]; then
-		return
-	fi
-
-
-	destroy_test_environment "$TEST_NAME"
-}
-
 @test "CHK006: Check for available updates over HTTPS with a valid client certificate" {
 
 	run sudo sh -c "$SWUPD check-update $SWUPD_OPTS"

@@ -11,13 +11,6 @@ test_setup() {
 
 }
 
-test_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
-
 @test "INF001: Basic test, Check info verbose" {
 
 	run sudo sh -c "$SWUPD info $SWUPD_OPTS --verbose"

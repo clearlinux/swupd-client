@@ -11,18 +11,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	sudo rm -rf "$TARGETDIR"/etc/swupd
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "MIR011: Set/Unset a full mirror" {
 
 	run sudo sh -c "$SWUPD mirror --set https://example.com/swupd-file $SWUPD_OPTS"

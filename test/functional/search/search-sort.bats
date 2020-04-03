@@ -19,19 +19,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	# do nothing
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "SRH023: search shows the results in alphabetical order" {
 
 	run sudo sh -c "$SWUPD search-file $SWUPD_OPTS --order=alpha alfa"

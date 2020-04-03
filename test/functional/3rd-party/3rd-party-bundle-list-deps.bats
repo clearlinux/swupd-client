@@ -22,17 +22,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	return
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "TPR020: List dependencies of a 3rd-party bundle" {
 
 	run sudo sh -c "$SWUPD 3rd-party bundle-list $SWUPD_OPTS --deps test-bundle2"

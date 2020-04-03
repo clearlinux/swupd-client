@@ -26,17 +26,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	return
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "TPR031: Show info about a 3rd-party bundle installed in the system" {
 
 	run sudo sh -c "$SWUPD 3rd-party bundle-info $SWUPD_OPTS test-bundle2"

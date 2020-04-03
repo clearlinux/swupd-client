@@ -32,15 +32,6 @@ test_setup() {
 
 }
 
-test_teardown() {
-
-	# teardown only if in travis CI
-	if [ -n "$RUNNING_IN_CI" ]; then
-		destroy_test_environment "$TEST_NAME"
-	fi
-
-}
-
 @test "UPD042: Updating a system, and the upstream server is not responding" {
 
 	# if the upstream server is unresponsive the update should fail after 2 minute

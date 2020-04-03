@@ -22,12 +22,6 @@ test_teardown() {
 
 }
 
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "TPR005: Trying to add a http repo" {
 
 	port=$(get_web_server_port "$TEST_NAME")

@@ -14,17 +14,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	return
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "LST014: List all available bundles including experimental" {
 
 	# experimental bundles should be listed with something that distinguish them

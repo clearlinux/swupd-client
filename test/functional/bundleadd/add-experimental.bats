@@ -12,11 +12,6 @@ test_setup() {
 
 }
 
-test_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
 @test "ADD032: Add an experimental bundle" {
 
 	# Experimental bundles are added normally but the user gets warned about it

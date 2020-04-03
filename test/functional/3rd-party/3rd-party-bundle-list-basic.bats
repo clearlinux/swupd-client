@@ -21,17 +21,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	return
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "TPR018: List installed 3rd-party bundles" {
 
 	# When a user list 3rd-party bundles without specifiying a repo, all

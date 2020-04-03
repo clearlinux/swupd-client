@@ -15,19 +15,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	# do nothing
-	return
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "TPR003: Negative test, repo add usage" {
 
 	run sudo sh -c "$SWUPD 3rd-party add $SWUPD_OPTS"

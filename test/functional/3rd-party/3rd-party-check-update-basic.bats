@@ -20,17 +20,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	return
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "TPR053: Check for available updates on third party repos" {
 
 	run sudo sh -c "$SWUPD 3rd-party check-update $SWUPD_OPTS"

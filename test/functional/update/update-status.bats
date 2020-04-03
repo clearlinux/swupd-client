@@ -9,18 +9,6 @@ global_setup() {
 
 }
 
-test_teardown() {
-
-	:
-
-}
-
-global_teardown() {
-
-	destroy_test_environment "$TEST_NAME"
-
-}
-
 @test "UPD034: Show current OS version and latest version available on server" {
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS --status"

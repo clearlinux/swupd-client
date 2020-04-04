@@ -258,6 +258,7 @@ int rename_staged_file_to_final(struct file *file)
 {
 	int ret = 0;
 	char *target;
+	char *target_path = NULL;
 
 	target = sys_path_join("%s/%s", globals.path_prefix, file->filename);
 
@@ -271,7 +272,8 @@ int rename_staged_file_to_final(struct file *file)
 	if (file->is_deleted && !file->is_ghosted) {
 		/* only delete the file if we can reach it without following symlinks
 		 * or we might end up deleting something else */
-		if (sys_path_is_absolute(target)) {
+		target_path = sys_dirname(target);
+		if (sys_path_is_absolute(target_path)) {
 			ret = sys_rm_recursive(target);
 
 			/* don't count missing ones as errors...
@@ -280,6 +282,7 @@ int rename_staged_file_to_final(struct file *file)
 				ret = 0;
 			}
 		}
+		free_and_clear_pointer(&target_path);
 	} else if (file->is_dir || file->is_ghosted) {
 		ret = 0;
 	} else {

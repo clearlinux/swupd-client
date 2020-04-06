@@ -929,15 +929,7 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 	timelist_timer_start(globals.global_times, "Load manifests");
 
 	/* Gather current manifests */
-	/* When the version we are verifying against does not match our system version
-	 * disable checks for mixer state so the user can easily switch back to their
-	 * normal update stream */
-	if (version != sys_version) {
-		official_manifest = load_mom(version, false, NULL);
-	} else {
-		official_manifest = load_mom(version, system_on_mix(), NULL);
-	}
-
+	official_manifest = load_mom(version, NULL);
 	if (!official_manifest) {
 		/* This is hit when or if an OS version is specified for --fix which
 		 * is not available, or if there is a server error and a manifest is

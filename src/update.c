@@ -88,8 +88,8 @@ static int check_manifests_uniqueness(int clrver, int mixver)
 	struct file **clearfull = NULL;
 	struct file **mixerfull = NULL;
 
-	mixer = load_manifest_full(mixver, true);
-	clear = load_manifest_full(clrver, false);
+	mixer = load_manifest_full(mixver);
+	clear = load_manifest_full(clrver);
 	if (!clear || !mixer) {
 		error("Could not load full manifests\n");
 		ret = -1;
@@ -414,9 +414,9 @@ version_check:
 
 	/* get the from/to MoM manifests */
 	if (system_on_mix()) {
-		current_manifest = load_mom(current_version, mix_exists, &manifest_err);
+		current_manifest = load_mom(current_version, &manifest_err);
 	} else {
-		current_manifest = load_mom(current_version, false, &manifest_err);
+		current_manifest = load_mom(current_version, &manifest_err);
 	}
 	if (!current_manifest) {
 		/* TODO: possibly remove this as not getting a "from" manifest is not fatal
@@ -425,7 +425,7 @@ version_check:
 		goto clean_exit;
 	}
 
-	server_manifest = load_mom(server_version, mix_exists, &manifest_err);
+	server_manifest = load_mom(server_version, &manifest_err);
 	if (!server_manifest) {
 		ret = SWUPD_COULDNT_LOAD_MOM;
 		goto clean_exit;

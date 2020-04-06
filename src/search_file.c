@@ -547,7 +547,7 @@ enum swupd_code search_file_main(int argc, char **argv)
 	}
 
 	progress_next_step("load_manifests", PROGRESS_BAR);
-	mom = load_mom(version, false, NULL);
+	mom = load_mom(version, NULL);
 	if (!mom) {
 		error("Cannot load official manifest MoM for version %i\n", version);
 		return SWUPD_COULDNT_LOAD_MOM;

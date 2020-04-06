@@ -106,7 +106,6 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 	struct list *repos = NULL;
 	struct repo *repo = NULL;
 	struct manifest *mom = NULL;
-	const bool NOT_A_MIX = false;
 
 	if (!parse_options(argc, argv)) {
 		print("\n");
@@ -154,7 +153,7 @@ enum swupd_code third_party_remove_main(int argc, char **argv)
 		goto remove_repo;
 	}
 
-	mom = load_mom(version, NOT_A_MIX, NULL);
+	mom = load_mom(version, NULL);
 	if (!mom) {
 		error("Could not load the manifest for repository %s\n\n", name);
 		ret = SWUPD_COULDNT_LOAD_MOM;

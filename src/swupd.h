@@ -178,9 +178,9 @@ extern int get_server_format(int server_version);
 extern bool ignore(struct file *file);
 extern void apply_heuristics(struct file *file);
 
-extern struct manifest *load_mom(int version, bool mix_exists, int *err);
+extern struct manifest *load_mom(int version, int *err);
 extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err);
-extern struct manifest *load_manifest_full(int version, bool mix);
+extern struct manifest *load_manifest_full(int version);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
 extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2, bool server);
 

@@ -175,15 +175,13 @@ static enum swupd_code list_local_bundles(int version)
 	struct list *item = NULL;
 	struct manifest *MoM = NULL;
 	struct file *bundle_manifest = NULL;
-	bool mix_exists;
 	int count = 0;
 	const bool DONT_SHOW = false;
 	bool quiet = (log_get_level() == LOG_ERROR);
 
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	if (version > 0) {
-		mix_exists = (check_mix_exists() & system_on_mix());
-		MoM = load_mom(version, mix_exists, NULL);
+		MoM = load_mom(version, NULL);
 		if (!MoM) {
 			warn("Could not determine which installed bundles are experimental\n\n");
 		}
@@ -243,7 +241,7 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	info("Loading required manifests...\n");
-	mom = load_mom(version, false, NULL);
+	mom = load_mom(version, NULL);
 	if (!mom) {
 		error("Cannot load official manifest MoM for version %i\n", version);
 		ret_code = SWUPD_COULDNT_LOAD_MOM;
@@ -320,12 +318,10 @@ static enum swupd_code list_installable_bundles(int version)
 	struct file *file;
 	struct manifest *MoM = NULL;
 	int count = 0;
-	bool mix_exists;
 	bool quiet = (log_get_level() == LOG_ERROR);
 
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
-	mix_exists = (check_mix_exists() & system_on_mix());
-	MoM = load_mom(version, mix_exists, NULL);
+	MoM = load_mom(version, NULL);
 	if (!MoM) {
 		return SWUPD_COULDNT_LOAD_MOM;
 	}
@@ -370,7 +366,7 @@ static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server,
 
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	info("Loading required manifests...\n");
-	current_manifest = load_mom(version, false, NULL);
+	current_manifest = load_mom(version, NULL);
 	if (!current_manifest) {
 		error("Unable to download/verify %d Manifest.MoM\n", version);
 		ret = SWUPD_COULDNT_LOAD_MOM;

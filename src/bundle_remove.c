@@ -304,7 +304,6 @@ enum swupd_code execute_remove_bundles_extra(struct list *bundles, remove_extra_
 	struct list *files_to_remove = NULL;
 	struct list *iter = NULL;
 	char *bundles_list_str = NULL;
-	bool mix_exists;
 
 	current_version = get_current_version(globals.path_prefix);
 	if (current_version < 0) {
@@ -313,10 +312,8 @@ enum swupd_code execute_remove_bundles_extra(struct list *bundles, remove_extra_
 		goto out;
 	}
 
-	mix_exists = (check_mix_exists() & system_on_mix());
-
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
-	current_mom = load_mom(current_version, mix_exists, NULL);
+	current_mom = load_mom(current_version, NULL);
 	if (!current_mom) {
 		error("Unable to download/verify %d Manifest.MoM\n", current_version);
 		ret_code = SWUPD_COULDNT_LOAD_MOM;

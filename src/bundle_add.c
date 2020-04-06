@@ -342,7 +342,6 @@ enum swupd_code bundle_add_extra(struct list *bundles_list, int version, extra_p
 	int bundles_requested;
 
 	char *bundles_list_str = NULL;
-	bool mix_exists;
 
 	/* check if the user is using an alias for a bundle */
 	timelist_timer_start(globals.global_times, "Prepend bundles to list");
@@ -351,9 +350,8 @@ enum swupd_code bundle_add_extra(struct list *bundles_list, int version, extra_p
 
 	/* get the current Mom */
 	timelist_timer_start(globals.global_times, "Load MoM");
-	mix_exists = (check_mix_exists() & system_on_mix());
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
-	mom = load_mom(version, mix_exists, NULL);
+	mom = load_mom(version, NULL);
 	if (!mom) {
 		error("Cannot load official manifest MoM for version %i\n", version);
 		ret = SWUPD_COULDNT_LOAD_MOM;

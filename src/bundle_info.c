@@ -300,7 +300,6 @@ enum swupd_code bundle_info(char *bundle)
 	struct file *file = NULL;
 	struct list *subs = NULL;
 	long bundle_size;
-	bool mix_exists;
 	bool installed = is_installed_bundle(bundle);
 	bool tracked = is_tracked_bundle(bundle);
 
@@ -327,10 +326,8 @@ enum swupd_code bundle_info(char *bundle)
 		requested_version = cmdline_option_version;
 	}
 
-	mix_exists = (check_mix_exists() & system_on_mix());
-
 	/* get the MoM for the requested version */
-	mom = load_mom(requested_version, mix_exists, NULL);
+	mom = load_mom(requested_version, NULL);
 	if (!mom) {
 		error("Cannot load official manifest MoM for version %i\n", requested_version);
 		return SWUPD_COULDNT_LOAD_MOM;
@@ -353,7 +350,7 @@ enum swupd_code bundle_info(char *bundle)
 	/* if there is a newer version of the bundle, get the manifests */
 	if (requested_version != latest_version) {
 		/* get mom from the latest version */
-		latest_mom = load_mom(latest_version, mix_exists, NULL);
+		latest_mom = load_mom(latest_version, NULL);
 		if (!latest_mom) {
 			error("Cannot load official manifest MoM for version %i\n", latest_version);
 			ret = SWUPD_COULDNT_LOAD_MOM;

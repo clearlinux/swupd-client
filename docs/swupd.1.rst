@@ -239,11 +239,6 @@ SUBCOMMANDS
        Do not delete the swupd state directory content after updating the
        system.
 
-    -  ``-a, --allow-mix-collisions``
-
-       Ignore and continue if custom user content conflicts with upstream
-       provided content.
-
     -  ``--download``
 
        Do not perform an update, instead download all resources needed
@@ -863,7 +858,6 @@ The non-zero return codes for other operations are listed here:
 - **30**: An error occurred computing the hash of a file
 - **31**: Unable to get current system time
 - **32**: Unable to write a file
-- **33**: Collisions found between a mix and upstream
 - **34**: swupd ran out of memory
 - **35**: Unable to fix/replace/delete one or more files
 - **36**: Unable to execute binary, is either missing or invalid

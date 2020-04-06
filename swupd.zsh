@@ -248,7 +248,6 @@ if [[ -n "$state" ]]; then
                         '(help status)--download[Download all content, but do not actually install the update]'
                         '(help status)--update-search-file-index[Update the index used by search-file to speed up searches]'
                         '(help status -k --keepcache)'{-k,--keepcache}'[Do not delete the swupd state directory content after updating the system]'
-                        '(help status -a --allow-mix-collisions)'{-a,--allow-mix-collisions}'[Ignore and continue if custom user content conflicts with upstream provided content]'
                         + '(version)'
                         '(help status)'{-V,--version=}'[Update to version V, also accepts "latest" (default)]:version:()'
                         + '(status)'

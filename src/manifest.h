@@ -33,7 +33,6 @@ struct manifest {
 
 	// Helper data
 	struct list *submanifests; /* struct manifest for subscribed manifests */
-	unsigned int is_mix : 1;
 };
 
 /**

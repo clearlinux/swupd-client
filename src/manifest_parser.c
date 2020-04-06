@@ -212,10 +212,6 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 
 		if (line[3] == 'r') {
 			/* rename flag is ignored */
-		} else if (line[3] == 'm') {
-			warn_mixin_deprecation();
-			file->is_mix = 1;
-			manifest->is_mix = 1;
 		} else if (line[3] == 'x') {
 			file->is_exported = 1;
 		}

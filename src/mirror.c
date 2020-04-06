@@ -274,7 +274,8 @@ int get_version_no_mirror(void)
 		// Try the hardcoded URL
 		version_url = strdup_or_die(VERSIONURL);
 #else
-		goto out;
+		warn("No default upstream version url set\n");
+		goto exit;
 #endif
 	}
 
@@ -286,14 +287,13 @@ int get_version_no_mirror(void)
 	version = get_latest_version(version_url);
 
 out:
-	if (!version_url) {
-		warn("No default upstream version url set\n");
-	} else if (version == -SWUPD_ERROR_SIGNATURE_VERIFICATION) {
+	if (version == -SWUPD_ERROR_SIGNATURE_VERIFICATION) {
 		warn("Cannot determine upstream version since signature verification for path: %s failed\n", version_url);
 	} else if (version < 0) {
 		warn("Upstream server %s not responding, cannot determine upstream version\n", version_url);
 	}
 
+exit:
 	free(fullpath);
 	free(version_url);
 	return version;

@@ -40,16 +40,18 @@ enum swupd_code print_update_conf_info(void)
 
 	if (current_version < 0) {
 		error("Unable to determine current OS version\n");
-		info("Installed version: unknown\n");
+		info("Installed version: ");
+		print("unknown\n");
 		ret = SWUPD_CURRENT_VERSION_UNKNOWN;
 	} else {
-		info("Installed version: %d", current_version);
+		info("Installed version: ");
+		print("%d", current_version);
 		if (current_format > 0) {
 			info_verbose(" (format %d)", current_format);
 		} else {
 			info_verbose(" (format unknown)");
 		}
-		info("\n");
+		print("\n");
 	}
 	info("Version URL:       %s\n", globals.version_url);
 	info("Content URL:       %s\n", globals.content_url);

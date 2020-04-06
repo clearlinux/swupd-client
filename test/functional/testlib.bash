@@ -4025,6 +4025,7 @@ get_next_available_id() { # swupd_function
 	test_dir=$(basename "$(realpath "$test_dir")")
 	case "$test_dir" in
 		3rd-party) group=TPR;;
+		api) group=API;;
 		autoupdate) group=AUT;;
 		bundleadd) group=ADD;;
 		bundleremove) group=REM;;

@@ -39,7 +39,6 @@
 #define FLAG_DOWNLOAD_ONLY 2000
 #define FLAG_UPDATE_SEARCH_FILE_INDEX 2001
 
-static bool allow_mix_collisions = false;
 static int requested_version = -1;
 static bool download_only = false;
 static bool update_search_file_index = false;
@@ -546,7 +545,6 @@ static const struct option prog_opts[] = {
 	{ "manifest", required_argument, 0, 'm' },
 	{ "status", no_argument, 0, 's' },
 	{ "keepcache", no_argument, 0, 'k' },
-	{ "allow-mix-collisions", no_argument, 0, 'a' },
 };
 
 static void print_help(void)
@@ -563,7 +561,6 @@ static void print_help(void)
 	print("   -V, --version=V         Update to version V, also accepts 'latest' (default)\n");
 	print("   -s, --status            Show current OS version and latest version available on server. Equivalent to \"swupd check-update\"\n");
 	print("   -k, --keepcache         Do not delete the swupd state directory content after updating the system\n");
-	print("   -a, --allow-mix-collisions	Ignore and continue if custom user content conflicts with upstream provided content\n");
 	print("   --download              Download all content, but do not actually install the update\n");
 	print("   --update-search-file-index Update the index used by search-file to speed up searches (Don't enable this if you have download or space restrictions)\n");
 	print("\n");
@@ -586,9 +583,6 @@ static bool parse_opt(int opt, char *optarg)
 			error("Invalid --version argument: %s\n\n", optarg);
 			return false;
 		}
-		return true;
-	case 'a':
-		allow_mix_collisions = optarg_to_bool(optarg);
 		return true;
 	case 's':
 		cmd_line_status = optarg_to_bool(optarg);

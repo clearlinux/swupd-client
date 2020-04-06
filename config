@@ -139,10 +139,6 @@
 # latest - used to refer to the most recent version (string value)
 #version=<VERSION>
 
-# Ignore and continue if custom user content conflicts with upstream provided
-# content (boolean value)
-#allow_mix_collisions=<true/false>
-
 # Download all content, but do not actually install the update (boolean value)
 #download=<true/false>
 

@@ -42,7 +42,7 @@ _swupd()
 		opts="$global "
 		break;;
 		("update")
-		opts="$global --download --status --force --migrate --allow-mix-collisions --keepcache --update-search-file-index "
+		opts="$global --download --status --force --allow-mix-collisions --keepcache --update-search-file-index "
 		break;;
 		("bundle-add")
 		opts="$global --skip-diskspace-check --skip-optional "

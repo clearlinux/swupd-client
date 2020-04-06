@@ -239,11 +239,6 @@ SUBCOMMANDS
        Do not delete the swupd state directory content after updating the
        system.
 
-    -  ``-T, --migrate``
-
-       Perform an update to the local user mix content, enabling swupd to
-       use content from both upstream, and the local system.
-
     -  ``-a, --allow-mix-collisions``
 
        Ignore and continue if custom user content conflicts with upstream

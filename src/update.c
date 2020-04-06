@@ -661,7 +661,6 @@ static const struct option prog_opts[] = {
 	{ "manifest", required_argument, 0, 'm' },
 	{ "status", no_argument, 0, 's' },
 	{ "keepcache", no_argument, 0, 'k' },
-	{ "migrate", no_argument, 0, 'T' },
 	{ "allow-mix-collisions", no_argument, 0, 'a' },
 };
 
@@ -679,7 +678,6 @@ static void print_help(void)
 	print("   -V, --version=V         Update to version V, also accepts 'latest' (default)\n");
 	print("   -s, --status            Show current OS version and latest version available on server. Equivalent to \"swupd check-update\"\n");
 	print("   -k, --keepcache         Do not delete the swupd state directory content after updating the system\n");
-	print("   -T, --migrate           Migrate to augmented upstream/mix content\n");
 	print("   -a, --allow-mix-collisions	Ignore and continue if custom user content conflicts with upstream provided content\n");
 	print("   --download              Download all content, but do not actually install the update\n");
 	print("   --update-search-file-index Update the index used by search-file to speed up searches (Don't enable this if you have download or space restrictions)\n");
@@ -709,11 +707,6 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case 's':
 		cmd_line_status = optarg_to_bool(optarg);
-		return true;
-	case 'T':
-		warn_mixin_deprecation();
-		warn("Option migrate was deprecated\n");
-		globals.migrate = optarg_to_bool(optarg);
 		return true;
 	case 'k':
 		keepcache = optarg_to_bool(optarg);

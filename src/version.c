@@ -354,52 +354,6 @@ enum swupd_code read_versions(int *current_version, int *server_version, char *p
 	return SWUPD_OK;
 }
 
-int read_mix_version_file(char *filename, char *path_prefix)
-{
-	char line[LINE_MAX];
-	FILE *file;
-	int v = -1;
-	int err;
-	char *buildstamp;
-
-	string_or_die(&buildstamp, "%s%s", path_prefix, filename);
-	file = fopen(buildstamp, "rm");
-	if (!file) {
-		free_and_clear_pointer(&buildstamp);
-		return v;
-	}
-
-	while (!feof(file)) {
-		line[0] = 0;
-		if (fgets(line, LINE_MAX, file) == NULL) {
-			break;
-		}
-
-		/* Drop newline in value */
-		char *c = strchr(line, '\n');
-		if (c) {
-			*c = '\0';
-		}
-
-		err = strtoi_err(line, &v);
-		if (err != 0) {
-			v = -1;
-		}
-	}
-	free_and_clear_pointer(&buildstamp);
-	fclose(file);
-	return v;
-}
-
-void check_mix_versions(int *current_version, int *server_version, char *path_prefix)
-{
-	*current_version = read_mix_version_file("/usr/share/clear/version", path_prefix);
-	char *format_file;
-	string_or_die(&format_file, MIX_STATE_DIR "version/format%s/latest", globals.format_string);
-	*server_version = read_mix_version_file(format_file, path_prefix);
-	free_and_clear_pointer(&format_file);
-}
-
 int update_device_latest_version(int version)
 {
 	FILE *file = NULL;

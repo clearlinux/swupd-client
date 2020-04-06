@@ -168,7 +168,6 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 	}
 	free_and_clear_pointer(&filename);
 
-	/* Either we're not on mix or it failed, try curl-ing the file if link didn't work */
 	string_or_die(&filename, "%s/%i/Manifest.%s.tar", globals.state_dir, version, component);
 	string_or_die(&url, "%s/%i/Manifest.%s.tar", globals.content_url, version, component);
 
@@ -245,8 +244,6 @@ static void remove_manifest_files(char *filename, int version, char *hash)
 
 /* Verifies signature for the local file DATA_FILENAME first, and on failure
  * downloads the signature based on DATA_URL and tries to verify again.
- * Automatically manages the signature for mix content, performing local
- * verification only if the manifest is user created.
  *
  * returns: true if signature verification succeeded, false if verification
  * failed, or the signature download failed
@@ -427,28 +424,6 @@ retry_load:
 	}
 
 	set_untracked_manifest_files(manifest);
-
-	return manifest;
-}
-
-/* Special case manifest for mixer content enforcement */
-struct manifest *load_manifest_full(int version)
-{
-	struct manifest *manifest = NULL;
-	int ret = 0;
-
-	ret = retrieve_manifest(0, version, "full", false);
-	if (ret != 0) {
-		error("Failed to retrieve %d Manifest.full\n", version);
-		return NULL;
-	}
-
-	manifest = manifest_from_file(version, "full", false);
-
-	if (manifest == NULL) {
-		error("Failed to load %d Manifest.full\n", version);
-		return NULL;
-	}
 
 	return manifest;
 }

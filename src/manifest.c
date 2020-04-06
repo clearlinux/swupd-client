@@ -361,7 +361,6 @@ struct manifest *load_mom(int version, bool mix_exists, int *err)
 	char *filename;
 	char *url;
 	bool retried = false;
-	bool needs_sig_verification = !(globals.migrate && mix_exists);
 
 retry_load:
 	ret = retrieve_manifest(0, version, "MoM", mix_exists, retried);
@@ -396,7 +395,7 @@ retry_load:
 	} else {
 		/* Only when migrating , ignore the locally made signature check which is guaranteed to have been signed
 		 * by the user and does not come from any network source */
-		if (needs_sig_verification && !mom_signature_verify(url, filename, version, mix_exists)) {
+		if (!mom_signature_verify(url, filename, version, mix_exists)) {
 			/* cleanup and try one more time, statedir could have got corrupt/stale */
 			if (retried == false && !mix_exists) {
 				free_and_clear_pointer(&filename);

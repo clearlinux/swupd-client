@@ -30,7 +30,6 @@ enum user_interaction {
 extern struct globals {
 	bool allow_insecure_http;
 	bool content_url_is_local;
-	bool migrate;
 	bool need_systemd_reexec;
 	bool need_update_boot;
 	bool need_update_bootloader;

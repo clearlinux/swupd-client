@@ -49,11 +49,6 @@ extern "C" {
 
 #define SWUPD_HASH_DIRNAME "DIRECTORY"
 #define SWUPD_DEFAULTS "/usr/share/defaults/swupd/"
-#define MIX_DIR "/usr/share/mix/"
-#define MIX_STATE_DIR MIX_DIR "update/www/"
-#define MIX_CERT MIX_DIR "Swupd_Root.pem"
-#define MIX_BUNDLES_DIR MIX_STATE_DIR "mix-bundles/"
-#define MIXED_FILE SWUPD_DEFAULTS "mixed"
 #define SSL_CLIENT_CERT "/etc/swupd/client.pem"
 
 #define DEFAULT_VERSION_URL_PATH "/usr/share/defaults/swupd/versionurl"
@@ -179,7 +174,6 @@ extern void apply_heuristics(struct file *file);
 
 extern struct manifest *load_mom(int version, int *err);
 extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err);
-extern struct manifest *load_manifest_full(int version);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);
 extern void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *subs1, struct list *subs2, bool server);
 
@@ -400,11 +394,6 @@ extern struct file **manifest_files_to_array(struct manifest *manifest);
 extern int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize, int size);
 extern void manifest_free_array(struct file **array);
 
-extern bool system_on_mix(void);
-extern bool check_mix_exists(void);
-extern void check_mix_versions(int *current_version, int *server_version, char *path_prefix);
-extern int read_mix_version_file(char *filename, char *path_prefix);
-
 extern enum swupd_code print_update_conf_info(void);
 
 extern int handle_mirror_if_stale(void);
@@ -420,8 +409,6 @@ extern struct global_const global;
  * Free string and set it's value to NULL.
  */
 extern void free_and_clear_pointer(char **s);
-
-extern void warn_mixin_deprecation(void);
 
 enum swupd_code check_update();
 

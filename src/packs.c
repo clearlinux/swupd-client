@@ -148,7 +148,6 @@ static double packs_query_total_download_size(struct list *subs, struct manifest
 	for (list = list_head(subs); list; list = list->next) {
 		sub = list->data;
 
-		/* if it is a pack from a mix, we won't download it */
 		bundle = mom_search_bundle(mom, sub->component);
 		if (!bundle) {
 			debug("The manifest for bundle %s was not found in the MoM", sub->component);

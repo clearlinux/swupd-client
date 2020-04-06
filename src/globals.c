@@ -386,12 +386,8 @@ void set_cert_path(char *path)
 
 static void set_default_cert_path()
 {
-	if (system_on_mix()) {
-		set_cert_path(MIX_CERT);
-	} else {
-		// CERT_PATH is guaranteed to be valid at this point.
-		set_cert_path(CERT_PATH);
-	}
+	// CERT_PATH is guaranteed to be valid at this point.
+	set_cert_path(CERT_PATH);
 }
 
 bool set_default_urls()

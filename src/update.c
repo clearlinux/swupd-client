@@ -77,45 +77,6 @@ static void save_swupd_binary_path()
 	}
 }
 
-/* This loads the upstream Clear Manifest.Full and local
- * Manifest.full, and then checks that there are no conflicts between
- * the files they both include */
-static int check_manifests_uniqueness(int clrver, int mixver)
-{
-	int ret = 0;
-	struct manifest *clear = NULL;
-	struct manifest *mixer = NULL;
-	struct file **clearfull = NULL;
-	struct file **mixerfull = NULL;
-
-	mixer = load_manifest_full(mixver);
-	clear = load_manifest_full(clrver);
-	if (!clear || !mixer) {
-		error("Could not load full manifests\n");
-		ret = -1;
-		goto error;
-	}
-
-	clearfull = manifest_files_to_array(clear);
-	mixerfull = manifest_files_to_array(mixer);
-
-	if (clearfull == NULL || mixerfull == NULL) {
-		error("Could not convert full manifest to array\n");
-		ret = -1;
-		goto error;
-	}
-
-	ret = enforce_compliant_manifest(mixerfull, clearfull, mixer->filecount, clear->filecount);
-
-error:
-	manifest_free_array(clearfull);
-	manifest_free_array(mixerfull);
-	manifest_free(clear);
-	manifest_free(mixer);
-
-	return ret;
-}
-
 static int update_loop(struct list *updates, struct manifest *server_manifest, extra_proc_fn_t file_validation_fn)
 {
 	int ret;
@@ -165,17 +126,6 @@ int add_included_manifests(struct manifest *mom, struct list **subs)
 	}
 
 	return 0;
-}
-
-static bool need_new_upstream(int server)
-{
-	if (!access(MIX_DIR "upstreamversion", R_OK)) {
-		int version = read_mix_version_file(MIX_DIR "upstreamversion", globals.path_prefix);
-		if (version < server) {
-			return true;
-		}
-	}
-	return false;
 }
 
 static enum swupd_code check_versions(int *current_version, int *server_version, int requested_version, char *path_prefix)
@@ -299,7 +249,6 @@ static struct list *create_update_list(struct manifest *server)
 enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_fn_t file_validation_fn)
 {
 	int current_version = -1, server_version = -1;
-	int mix_current_version = -1, mix_server_version = -1;
 	struct manifest *current_manifest = NULL, *server_manifest = NULL;
 	struct list *updates = NULL;
 	struct list *current_subs = NULL;
@@ -307,7 +256,6 @@ enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_
 	int ret;
 	struct timespec ts_start, ts_stop; // For main swupd update time
 	double delta;
-	bool mix_exists;
 	bool re_update = false;
 	bool versions_match = false;
 
@@ -321,8 +269,6 @@ enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	info("Update started\n");
 
-	mix_exists = check_mix_exists();
-
 	read_subscriptions(&current_subs);
 
 	if (handle_mirror_if_stale() < 0) {
@@ -333,55 +279,9 @@ enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_
 
 	/* get versions */
 	timelist_timer_start(globals.global_times, "Get versions");
-version_check:
 	ret = check_versions(&current_version, &server_version, requested_version, globals.path_prefix);
 	if (ret != SWUPD_OK) {
 		goto clean_curl;
-	}
-
-	if (mix_exists) {
-		check_mix_versions(&mix_current_version, &mix_server_version, globals.path_prefix);
-		if (mix_current_version == -1 || mix_server_version == -1) {
-			ret = SWUPD_CURRENT_VERSION_UNKNOWN;
-			goto clean_curl;
-		}
-		/* Check if a new upstream version is available so we can update to it still */
-		if (need_new_upstream(server_version)) {
-			info("NEW CLEAR AVAILABLE %d\n", server_version);
-			/* Update the upstreamversion that will be used to generate the new mix content */
-			FILE *verfile = fopen(MIX_DIR "upstreamversion", "w+");
-			if (!verfile) {
-				error("fopen() %s/upstreamversion returned %s\n", MIX_DIR, strerror(errno));
-			} else {
-				fprintf(verfile, "%d", server_version);
-				fclose(verfile);
-			}
-
-			if (run_command("/usr/bin/mixin", "build", NULL) != 0) {
-				error("Could not execute mixin\n");
-				ret = SWUPD_SUBPROCESS_ERROR;
-				goto clean_curl;
-			}
-
-			// new mix version
-			check_mix_versions(&mix_current_version, &mix_server_version, globals.path_prefix);
-			ret = check_manifests_uniqueness(server_version, mix_server_version);
-			if (ret > 0) {
-				info("\n");
-				warn("%i collisions were found between mix and upstream, please re-create mix !!\n", ret);
-				if (!allow_mix_collisions) {
-					ret = SWUPD_MIX_COLLISIONS;
-					goto clean_curl;
-				}
-			} else if (ret < 0) {
-				ret = SWUPD_COULDNT_LOAD_MANIFEST;
-				goto clean_curl;
-			}
-
-			goto version_check;
-		}
-		current_version = mix_current_version;
-		server_version = mix_server_version;
 	}
 
 	if (server_version <= current_version) {
@@ -412,12 +312,7 @@ version_check:
 	timelist_timer_start(globals.global_times, "Load MoM manifests");
 	int manifest_err;
 
-	/* get the from/to MoM manifests */
-	if (system_on_mix()) {
-		current_manifest = load_mom(current_version, &manifest_err);
-	} else {
-		current_manifest = load_mom(current_version, &manifest_err);
-	}
+	current_manifest = load_mom(current_version, &manifest_err);
 	if (!current_manifest) {
 		/* TODO: possibly remove this as not getting a "from" manifest is not fatal
 		 * - we just don't apply deltas */
@@ -557,16 +452,6 @@ version_check:
 		info("Downloading all Clear Linux manifests...\n");
 		mom_get_manifests_list(server_manifest, NULL, NULL);
 		timelist_timer_stop(globals.global_times); // closing: Updating search file index
-	}
-
-	/* Create the state file that will tell swupd it's on a mix on future runs */
-	if (mix_exists && !system_on_mix()) {
-		int fd = open(MIXED_FILE, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-		if (fd == -1) {
-			error("Failed to create 'mixed' statefile\n");
-			ret = SWUPD_COULDNT_CREATE_FILE;
-		}
-		close(fd);
 	}
 
 clean_exit:

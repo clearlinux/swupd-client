@@ -113,44 +113,26 @@ static bool download_successful(void *data)
 	return finalize_pack_download(pack_data->module, pack_data->newversion, pack_data->filename) == 0;
 }
 
-static int download_pack(struct swupd_curl_parallel_handle *download_handle, int oldversion, int newversion, char *module, int is_mix)
+static int download_pack(struct swupd_curl_parallel_handle *download_handle, int oldversion, int newversion, char *module)
 {
 	char *url = NULL;
-	int err = -1;
 	char *filename;
 
 	string_or_die(&filename, "%s/pack-%s-from-%i-to-%i.tar", globals.state_dir, module, oldversion, newversion);
 
-	if (is_mix) {
-		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", MIX_STATE_DIR, newversion, module, oldversion);
-		err = link(url, filename);
-		if (err) {
-			free_and_clear_pointer(&filename);
-			free_and_clear_pointer(&url);
-			return err;
-		}
-		info("Linked %s to %s\n", url, filename);
+	struct pack_data *pack_data;
 
-		err = finalize_pack_download(module, newversion, filename);
-		free_and_clear_pointer(&url);
-		free_and_clear_pointer(&filename);
-	} else {
-		struct pack_data *pack_data;
+	string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", globals.content_url, newversion, module, oldversion);
 
-		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", globals.content_url, newversion, module, oldversion);
+	pack_data = calloc(1, sizeof(struct pack_data));
+	ON_NULL_ABORT(pack_data);
 
-		pack_data = calloc(1, sizeof(struct pack_data));
-		ON_NULL_ABORT(pack_data);
+	pack_data->url = url;
+	pack_data->filename = filename;
+	pack_data->module = module;
+	pack_data->newversion = newversion;
 
-		pack_data->url = url;
-		pack_data->filename = filename;
-		pack_data->module = module;
-		pack_data->newversion = newversion;
-
-		err = swupd_curl_parallel_download_enqueue(download_handle, url, filename, NULL, pack_data);
-	}
-
-	return err;
+	return swupd_curl_parallel_download_enqueue(download_handle, url, filename, NULL, pack_data);
 }
 
 static double packs_query_total_download_size(struct list *subs, struct manifest *mom)
@@ -171,9 +153,6 @@ static double packs_query_total_download_size(struct list *subs, struct manifest
 		if (!bundle) {
 			debug("The manifest for bundle %s was not found in the MoM", sub->component);
 			return -SWUPD_INVALID_BUNDLE;
-		}
-		if (bundle->is_mix) {
-			continue;
 		}
 
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", globals.content_url, sub->version, sub->component, sub->oldversion);
@@ -316,7 +295,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 			goto out;
 		}
 
-		err = download_pack(download_handle, sub->oldversion, sub->version, sub->component, bundle->is_mix);
+		err = download_pack(download_handle, sub->oldversion, sub->version, sub->component);
 
 		/* fall back for progress reporting when the download size
 		* could not be determined */

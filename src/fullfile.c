@@ -30,27 +30,6 @@
 //FIXME #562
 #define MAX_XFER 15
 
-static int download_mix_file(struct file *file)
-{
-	int ret = -1;
-	char *url, *filename;
-
-	string_or_die(&url, "%s/%i/files/%s.tar", MIX_STATE_DIR, file->last_change, file->hash);
-	string_or_die(&filename, "%s/download/.%s.tar", globals.state_dir, file->hash);
-
-	/* Mix content is local, so don't queue files up for curl downloads */
-	if (link_or_rename(url, filename) == 0) {
-		ret = untar_full_download(file);
-	} else {
-		warn("Failed to copy local mix file: %s\n", file->staging);
-	}
-
-	free_and_clear_pointer(&url);
-	free_and_clear_pointer(&filename);
-
-	return ret;
-}
-
 static int download_file(struct swupd_curl_parallel_handle *download_handle, struct file *file)
 {
 	int ret = -1;
@@ -89,11 +68,6 @@ static double fullfile_query_total_download_size(struct list *files)
 
 	for (list = list_head(files); list; list = list->next) {
 		file = list->data;
-
-		/* if it is a file from a mix, we won't download it */
-		if (file->is_mix) {
-			continue;
-		}
 
 		string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
 		size = swupd_curl_query_content_size(url);
@@ -236,11 +210,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	for (iter = list_head(need_download); iter; iter = iter->next) {
 		file = iter->data;
 
-		if (file->is_mix) {
-			ret = download_mix_file(file);
-		} else {
-			ret = download_file(download_handle, file);
-		}
+		ret = download_file(download_handle, file);
 
 		/* fall back for progress reporting when the download size
 		 * could not be determined */

@@ -275,7 +275,9 @@ int get_version_no_mirror(void)
 		version_url = strdup_or_die(VERSIONURL);
 #else
 		warn("No default upstream version url set\n");
-		goto exit;
+		free(fullpath);
+		free(version_url);
+		return -1;
 #endif
 	}
 
@@ -293,7 +295,6 @@ out:
 		warn("Upstream server %s not responding, cannot determine upstream version\n", version_url);
 	}
 
-exit:
 	free(fullpath);
 	free(version_url);
 	return version;

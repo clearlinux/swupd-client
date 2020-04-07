@@ -25,6 +25,7 @@ test_teardown() {
 	expected_output=$(cat <<-EOM
 		Warning: disabling automatic updates may take you out of compliance with your IT policy
 		Running systemctl to disable updates
+		Autoupdate disabled
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -48,6 +49,7 @@ test_teardown() {
 	expected_output=$(cat <<-EOM
 		Running systemctl to enable updates
 		Warning: Running autoupdate with --path will not restart swupd-update.timer. This will have to be done manually
+		Autoupdate enabled
 	EOM
 	)
 	assert_is_output "$expected_output"

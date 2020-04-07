@@ -135,6 +135,7 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 		 */
 		if (globals.path_prefix) {
 			warn("Running autoupdate with --path will not restart swupd-update.timer. This will have to be done manually\n");
+			info("Autoupdate enabled\n");
 			return SWUPD_OK;
 		}
 
@@ -143,6 +144,7 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 			return SWUPD_SUBPROCESS_ERROR;
 		}
 
+		info("Autoupdate enabled\n");
 		return SWUPD_OK;
 	} else if (cmdline_option_disable) {
 		int rc;
@@ -154,6 +156,8 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 		if (rc) {
 			return SWUPD_SUBPROCESS_ERROR;
 		}
+
+		info("Autoupdate disabled\n");
 		return SWUPD_OK;
 	} else {
 		int rc1, rc2;

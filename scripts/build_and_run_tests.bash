@@ -66,7 +66,9 @@ main() {
 	./swupd -v |grep "+THIRDPARTY"
 	run_checks
 
-	make shellcheck-all
+	if [ -z "$BUILD_ONLY" ]; then
+		make shellcheck-all
+	fi
 
 	## Make sure build isn't broken for other settings
 	run_build --disable-signature-verification --disable-third-party

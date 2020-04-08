@@ -445,7 +445,8 @@ char *sys_path_join(const char *fmt, ...)
 
 	/* remove all duplicated PATH_SEPARATOR from the path */
 	for (i = j = 0; i < len; i++) {
-		if (path[i] == PATH_SEPARATOR && path[i + 1] == PATH_SEPARATOR) {
+		if (path[i] == PATH_SEPARATOR &&
+		    (path[i + 1] == PATH_SEPARATOR || path[i + 1] == '\0')) {
 			/* duplicated PATH_SEPARATOR, throw it away */
 			continue;
 		}

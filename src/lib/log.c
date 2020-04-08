@@ -140,3 +140,8 @@ void log_full(int log_level, FILE *out, const char *file, int line, const char *
 	/* clean memory assigned to arguments list */
 	va_end(ap);
 }
+
+bool log_is_quiet(void)
+{
+	return log_get_level() <= LOG_QUIET;
+}

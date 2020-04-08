@@ -120,11 +120,12 @@ enum swupd_code check_update(void)
 	}
 
 	if (current_version < server_version) {
-		print("There is a new OS version available: %d\n", server_version);
+		info("There is a new OS version available: ");
+		print("%d\n", server_version);
 		update_motd(server_version);
 		return SWUPD_OK; /* update available */
 	} else if (current_version >= server_version) {
-		print("There are no updates available\n");
+		info("There are no updates available\n");
 	}
 	return SWUPD_NO; /* No update available */
 }

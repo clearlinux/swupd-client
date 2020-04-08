@@ -543,11 +543,10 @@ clean_and_exit:
 void third_party_repo_header(const char *repo_name)
 {
 	char *header = NULL;
-	bool quiet = (log_get_level() == LOG_ERROR);
 
 	string_or_die(&header, " 3rd-Party Repo: %s", repo_name);
 	print_header(header);
-	if (quiet) {
+	if (log_is_quiet()) {
 		print("[%s]\n", repo_name);
 	}
 	free_and_clear_pointer(&header);

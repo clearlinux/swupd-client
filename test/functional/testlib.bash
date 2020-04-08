@@ -4601,6 +4601,15 @@ assert_regex_is_not_output() { # assertion
 
 }
 
+assert_output_is_empty() { # assertion
+
+	if [ -n "$output" ]; then
+		print_assert_failure "The output was expected to be empty and it is not"
+		return 1
+	fi
+
+}
+
 assert_equal() { # assertion
 
 	local val1=$1

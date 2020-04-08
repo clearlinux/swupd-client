@@ -1,5 +1,5 @@
-#ifndef __STAGING__
-#define __STAGING__
+#ifndef __SYSTEM_ROOT__
+#define __SYSTEM_ROOT__
 
 /**
  * @file
@@ -19,7 +19,7 @@ extern "C" {
   * @param files The list of files to be installed.
   * @param mom MoM to be used to create missing directories
   */
-enum swupd_code staging_install_files(struct list *files, struct manifest *mom);
+enum swupd_code target_root_install_files(struct list *files, struct manifest *mom);
 
 /**
   * @brief Install a single file into the system.
@@ -27,14 +27,14 @@ enum swupd_code staging_install_files(struct list *files, struct manifest *mom);
   * @param file The file to be installed
   * @param mom MoM to be used to create missing directories
   */
-enum swupd_code staging_install_single_file(struct file *file, struct manifest *mom);
+enum swupd_code target_root_install_single_file(struct file *file, struct manifest *mom);
 
 /**
  * @brief Remove from the system all files in list.
  *
  * @param The files to be removed
  */
-int staging_remove_files(struct list *files);
+int target_root_remove_files(struct list *files);
 
 #ifdef __cplusplus
 }

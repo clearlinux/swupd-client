@@ -227,7 +227,7 @@ int copy_all(const char *src, const char *dst)
 
 int copy(const char *src, const char *dst)
 {
-	return run_command_quiet("/bin/cp", src, dst, NULL);
+	return run_command_quiet("/bin/cp", "--preserve=all", "--no-dereference", src, dst, NULL);
 }
 
 int mkdir_p(const char *dir)

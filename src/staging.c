@@ -64,7 +64,7 @@ static int create_staging_renamedir(char *rename_tmpdir)
  * allow this function to mkdtemp create folders for parallel build */
 enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 {
-	char *statfile = NULL, *tmp = NULL, *tmp2 = NULL;
+	char *statfile = NULL;
 	char *dir, *base, *rel_dir;
 	char *tarcommand = NULL;
 	char *original = NULL;
@@ -76,11 +76,8 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	struct stat s;
 	int ret;
 
-	tmp = strdup_or_die(file->filename);
-	tmp2 = strdup_or_die(file->filename);
-
-	dir = dirname(tmp);
-	base = basename(tmp2);
+	dir = sys_dirname(file->filename);
+	base = sys_basename(file->filename);
 
 	rel_dir = dir;
 	if (*dir == '/') {
@@ -242,13 +239,12 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	}
 
 out:
+	free_and_clear_pointer(&dir);
 	free_and_clear_pointer(&target);
 	free_and_clear_pointer(&targetpath);
 	free_and_clear_pointer(&original);
 	free_and_clear_pointer(&rename_target);
 	free_and_clear_pointer(&rename_tmpdir);
-	free_and_clear_pointer(&tmp);
-	free_and_clear_pointer(&tmp2);
 
 	return ret;
 }

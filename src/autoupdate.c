@@ -161,7 +161,7 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 		rc1 = systemctl_cmd_path(globals.path_prefix, "is-enabled", "swupd-update.service", NULL);
 		rc2 = systemctl_cmd_path(globals.path_prefix, "is-active", "swupd-update.timer", NULL);
 		if (rc1 == SWUPD_OK && rc2 == SWUPD_OK) {
-			print("Enabled\n");
+			info("Enabled\n");
 			return SWUPD_OK;
 		} else if (rc1 >= STATUS_UNKNOWN || rc2 >= STATUS_UNKNOWN) {
 			/* systemctl returns 1,2, or 3 when program dead or not running */
@@ -173,7 +173,7 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 			error("Unable to determine autoupdate status with --path option\n");
 			return SWUPD_SUBPROCESS_ERROR;
 		} else {
-			print("Disabled\n");
+			info("Disabled\n");
 			return SWUPD_NO;
 		}
 	}

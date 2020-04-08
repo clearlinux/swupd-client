@@ -36,6 +36,8 @@
 #include "swupd.h"
 #include "swupd_build_variant.h"
 
+static enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_mom);
+
 /* clean then recreate temporary folder for tar renames */
 static int create_staging_renamedir(char *rename_tmpdir)
 {
@@ -59,10 +61,10 @@ static int create_staging_renamedir(char *rename_tmpdir)
 }
 
 /* Do the staging of new files into the filesystem */
-//TODO: "do_staging is currently not able to be run in parallel"
+//TODO: "stage_single_file is currently not able to be run in parallel"
 /* Consider adding a remove_leftovers() that runs in verify/fix in order to
  * allow this function to mkdtemp create folders for parallel build */
-enum swupd_code do_staging(struct file *file, struct manifest *MoM)
+enum swupd_code stage_single_file(struct file *file, struct manifest *mom)
 {
 	char *statfile = NULL;
 	char *dir, *base;
@@ -85,8 +87,8 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	 * and is in deed a directory */
 	targetpath = sys_path_join("%s/%s", globals.path_prefix, dir);
 	if (!sys_filelink_exists(targetpath)) {
-		if (MoM) {
-			verify_fix_path(dir, MoM);
+		if (mom) {
+			verify_fix_path(dir, mom);
 		} else {
 			debug("Target directory does not exist: %s. Auto-fix disabled\n", targetpath);
 		}
@@ -244,6 +246,130 @@ out:
 	return ret;
 }
 
+/* This function is meant to be called while staging file to fix any missing/incorrect paths.
+ * While staging a file, if its parent directory is missing, this would try to create the path
+ * by breaking it into sub-paths and fixing them top down.
+ * Here, target_mom is the consolidated manifest for the version you are trying to update/verify.
+ */
+static enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_mom)
+{
+	struct list *path_list = NULL; /* path_list contains the subparts in the path */
+	char *path;
+	char *tmp = NULL, *target = NULL;
+	char *url = NULL;
+	struct stat sb;
+	int ret = SWUPD_OK;
+	struct file *file;
+	char *tar_dotfile = NULL;
+	struct list *list1 = NULL;
+
+	/* This shouldn't happen */
+	if (strcmp(targetpath, "/") == 0) {
+		return ret;
+	}
+
+	/* Removing trailing '/' from the path */
+	path = strdup_or_die(targetpath);
+	if (path[string_len(path) - 1] == '/') {
+		path[string_len(path) - 1] = '\0';
+	}
+
+	/* Breaking down the path into parts.
+	 * eg. Path /usr/bin/foo will be broken into /usr,/usr/bin and /usr/bin/foo
+	 */
+	while (strcmp(path, "/") != 0) {
+		path_list = list_prepend_data(path_list, strdup_or_die(path));
+		tmp = sys_dirname(path);
+		free_and_clear_pointer(&path);
+		path = tmp;
+	}
+	free_and_clear_pointer(&path);
+
+	list1 = list_head(path_list);
+	while (list1) {
+		path = list1->data;
+		list1 = list1->next;
+
+		free_and_clear_pointer(&target);
+		free_and_clear_pointer(&tar_dotfile);
+		free_and_clear_pointer(&url);
+
+		target = sys_path_join("%s/%s", globals.path_prefix, path);
+
+		/* Search for the file in the manifest, to get the hash for the file */
+		file = search_file_in_manifest(target_mom, path);
+		if (file == NULL) {
+			error("Path %s not found in any of the subscribed manifests"
+			      "in verify_fix_path for path_prefix %s\n",
+			      path, globals.path_prefix);
+			ret = SWUPD_PATH_NOT_IN_MANIFEST;
+			goto end;
+		}
+
+		if (file->is_deleted) {
+			error("Path %s found deleted in verify_fix_path\n", path);
+			ret = SWUPD_UNEXPECTED_CONDITION;
+			goto end;
+		}
+
+		ret = stat(target, &sb);
+		if (ret == 0) {
+			if (verify_file(file, target)) {
+				/* this subpart of the path does exist, nothing to be done */
+				continue;
+			}
+			warn_unlabeled(" -> Corrupt directory: %s", target);
+		} else if (ret == -1 && errno == ENOENT) {
+			warn_unlabeled(" -> Missing directory: %s", target);
+		} else {
+			goto end;
+		}
+
+		/* In some circumstances (Docker using layers between updates/bundle adds,
+		 * corrupt staging content) we could have content which fails to stage.
+		 * In order to avoid this causing failure in verify_fix_path, remove the
+		 * staging content before proceeding. This also cleans up in case any prior
+		 * download failed in a partial state.
+		 */
+		unlink_all_staged_content(file);
+
+		/* download the fullfile for the missing path */
+		string_or_die(&tar_dotfile, "%s/download/.%s.tar", globals.state_dir, file->hash);
+		string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
+		ret = swupd_curl_get_file(url, tar_dotfile);
+		if (ret != 0) {
+			warn_unlabeled(" -> not fixed\n");
+			error("Failed to download file %s in verify_fix_path\n", file->filename);
+			ret = SWUPD_COULDNT_DOWNLOAD_FILE;
+			unlink(tar_dotfile);
+			goto end;
+		}
+
+		if (untar_full_download(file) != 0) {
+			warn_unlabeled(" -> not fixed\n");
+			error("Failed to untar file %s\n", file->filename);
+			ret = SWUPD_COULDNT_UNTAR_FILE;
+			goto end;
+		}
+
+		ret = stage_single_file(file, target_mom);
+		if (ret != 0) {
+			/* stage_single_file returns a swupd_code on error,
+			* just propagate the error */
+			warn_unlabeled(" -> not fixed\n");
+			error("Path %s failed to stage in verify_fix_path\n", path);
+			goto end;
+		}
+		warn_unlabeled(" -> fixed\n");
+	}
+end:
+	free_and_clear_pointer(&target);
+	free_and_clear_pointer(&tar_dotfile);
+	free_and_clear_pointer(&url);
+	list_free_list_and_data(path_list, free);
+	return ret;
+}
+
 /* caller should not call this function for do_not_update marked files */
 int rename_staged_file_to_final(struct file *file)
 {
@@ -353,29 +479,14 @@ static int rename_all_files_to_final(struct list *updates)
 	return globals.update_count - update_good - update_errs - (globals.update_skip - skip);
 }
 
-enum swupd_code staging_install_all_files(struct list *files, struct manifest *mom)
+static enum swupd_code stage_files(struct list *files, struct manifest *mom)
 {
 	struct list *iter;
+	int list_length = list_len(files);
 	struct file *file;
 	int ret = SWUPD_OK;
 	int complete = 0;
-	unsigned int list_length = list_len(files);
 
-	if (!list_is_sorted(files, cmp_file_filename_is_deleted)) {
-		debug("List of files to install is not sorted - fixing\n");
-		files = list_sort(files, cmp_file_filename_is_deleted);
-	}
-
-	/*********** rootfs critical section starts ***************************
-NOTE: the next loop calls do_staging() which can remove files, starting a critical section
-which ends after rename_all_files_to_final() succeeds
-	 */
-
-	/* from here onward we're doing real update work modifying "the disk" */
-
-	/* starting at list_head in the filename alpha-sorted updates list
-	 * means node directories are added before leaf files */
-	info("Installing files...\n");
 	iter = list_head(files);
 	while (iter) {
 		file = iter->data;
@@ -386,11 +497,11 @@ which ends after rename_all_files_to_final() succeeds
 			continue;
 		}
 
-		/* for each file: fdatasync to persist changed content over reboot, or maybe a global sync */
-		/* for each file: check hash value; on mismatch delete and queue full download */
-		/* todo: hash check */
-
-		ret = do_staging(file, mom);
+		/*
+		 * todo: hash check - We check all hashes before calling this
+		 * function, but it would be good to check here if the hash
+		 * was really validated for every file to provent future bugs. */
+		ret = stage_single_file(file, mom);
 		if (ret != SWUPD_OK) {
 			error("File staging failed: %s\n", file->filename);
 			return ret;
@@ -398,8 +509,50 @@ which ends after rename_all_files_to_final() succeeds
 	}
 	progress_report(complete, list_length * 2);
 
-	/* check policy, and if policy says, "ask", ask the user at this point */
-	/* check for reboot need - if needed, wait for reboot */
+	return SWUPD_OK;
+}
+
+
+enum swupd_code staging_install_single_file(struct file *file, struct manifest *mom)
+{
+	enum swupd_code ret;
+	int err;
+
+	ret = stage_single_file(file, mom);
+	if (ret != SWUPD_OK) {
+		return ret;
+	}
+
+	err = rename_staged_file_to_final(file);
+	if (err) {
+		return SWUPD_COULDNT_RENAME_FILE;
+	}
+
+	return SWUPD_OK;
+}
+
+enum swupd_code staging_install_files(struct list *files, struct manifest *mom)
+{
+	int ret = SWUPD_OK;
+
+	if (!list_is_sorted(files, cmp_file_filename_is_deleted)) {
+		debug("List of files to install is not sorted - fixing\n");
+		files = list_sort(files, cmp_file_filename_is_deleted);
+	}
+
+	/*********** rootfs critical section starts ***************************
+	 * NOTE: the next loop calls stage_single_file() which can remove files,
+	 * starting a critical section.
+	 * from here onward we're doing real update work modifying "the disk" */
+
+	info("Installing files...\n");
+
+	/* Install directories and stage regular files */
+	ret = stage_files(files, mom);
+	if (ret != SWUPD_OK) {
+		ret = SWUPD_COULDNT_RENAME_FILE;
+		return ret;
+	}
 
 	/* sync */
 	sync();
@@ -411,14 +564,41 @@ which ends after rename_all_files_to_final() succeeds
 		return ret;
 	}
 
-	/* TODO: do we need to optimize directory-permission-only changes (directories
-	 *       are now sent as tar's so permissions are handled correctly, even
-	 *       if less than efficiently)? */
-
+	/* sync */
 	sync();
 
-	/* NOTE: critical section starts when update_loop() calls do_staging() */
-	/*********** critical section ends *************************************/
+	/*********** critical section ends ************************************/
 
 	return SWUPD_OK;
+}
+
+/* Iterate the file list and remove from the file system each file/directory */
+int staging_remove_files(struct list *files)
+{
+	struct list *iter = NULL;
+	struct file *file = NULL;
+	char *fullfile = NULL;
+	int total = list_len(files);
+	int deleted = total;
+	int count = 0;
+
+	iter = list_head(files);
+	while (iter) {
+		file = iter->data;
+		iter = iter->next;
+		string_or_die(&fullfile, "%s/%s", globals.path_prefix, file->filename);
+		if (sys_rm_recursive(fullfile) == -1) {
+			/* if a -1 is returned it means there was an issue deleting the
+			 * file or directory, in that case decrease the counter of deleted
+			 * files.
+			 * Note: If a file didn't exist it will still be counted as deleted,
+			 * this is a limitation */
+			deleted--;
+		}
+		free_and_clear_pointer(&fullfile);
+		count++;
+		progress_report(count, total);
+	}
+
+	return deleted;
 }

@@ -35,6 +35,7 @@
 
 #include "config.h"
 #include "signature.h"
+#include "staging.h"
 #include "swupd.h"
 
 #define FLAG_EXTRA_FILES_ONLY 2000
@@ -393,9 +394,8 @@ static void add_missing_files(struct manifest *official_manifest, struct list *f
 		}
 
 		/* install the new file (on miscompare + fix) */
-		ret = do_staging(file, official_manifest);
-		if (ret == 0) {
-			rename_staged_file_to_final(file);
+		if (staging_install_single_file(file, official_manifest) != SWUPD_OK) {
+			debug("staging_install_single_file for file %s failed", file->filename);
 		}
 
 		/* verify the hash again to judge success */
@@ -428,7 +428,6 @@ static void add_missing_files(struct manifest *official_manifest, struct list *f
 static void check_and_fix_one(struct file *file, struct manifest *official_manifest, bool repair)
 {
 	char *fullname;
-	int ret;
 
 	// Note: boot files not marked as deleted are candidates for verify/fix
 	if (file->is_deleted || ignore(file) || file->do_not_update) {
@@ -454,10 +453,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	}
 
 	/* install the new file (on miscompare + fix) */
-	ret = do_staging(file, official_manifest);
-	if (ret == 0) {
-		rename_staged_file_to_final(file);
-	}
+	staging_install_single_file(file, official_manifest);
 
 	/* at the end of all this, verify the hash again to judge success */
 	if (verify_file(file, fullname)) {

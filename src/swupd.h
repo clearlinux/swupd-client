@@ -237,10 +237,6 @@ extern int download_zero_packs(struct list *bundles, struct manifest *mom);
 extern void apply_deltas(struct manifest *current_manifest);
 extern int untar_full_download(void *data);
 
-extern enum swupd_code do_staging(struct file *file, struct manifest *manifest);
-extern enum swupd_code staging_install_all_files(struct list *files, struct manifest *mom);
-extern int rename_staged_file_to_final(struct file *file);
-
 extern int update_device_latest_version(int version);
 
 extern void free_subscriptions(struct list **subs);
@@ -291,7 +287,6 @@ enum swupd_code swupd_init(enum swupd_init_config config);
 void update_motd(int new_release);
 void delete_motd(void);
 extern int get_dirfd_path(const char *fullname);
-extern enum swupd_code verify_fix_path(char *targetpath, struct manifest *manifest);
 extern struct list *consolidate_files_from_bundles(struct list *bundles);
 extern struct list *files_from_bundles(struct list *bundles);
 extern bool version_files_consistent(void);
@@ -306,7 +301,6 @@ extern bool is_url_insecure(const char *url);
 extern void remove_trailing_slash(char *url);
 extern int link_or_copy(const char *orig, const char *dest);
 extern int link_or_copy_all(const char *orig, const char *dest);
-extern int remove_files_from_fs(struct list *files);
 extern void print_pattern(const char *pattern, int times);
 extern void print_header(const char *header);
 extern void prettify_size(long size_in_bytes, char **pretty_size);
@@ -401,6 +395,8 @@ extern int handle_mirror_if_stale(void);
 extern enum swupd_code clean_statedir(bool all, bool dry_run);
 
 extern void warn_nosigcheck(const char *file);
+
+extern void unlink_all_staged_content(struct file *file);
 
 /* Parameter parsing in global.c */
 extern struct global_const global;

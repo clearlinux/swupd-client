@@ -34,6 +34,7 @@
 
 #include "config.h"
 #include "signature.h"
+#include "staging.h"
 #include "swupd.h"
 
 #define FLAG_DOWNLOAD_ONLY 2000
@@ -101,7 +102,7 @@ static int update_loop(struct list *updates, struct manifest *server_manifest, e
 	}
 
 	progress_next_step("update_files", PROGRESS_BAR);
-	return staging_install_all_files(updates, server_manifest);
+	return staging_install_files(updates, server_manifest);
 }
 
 int add_included_manifests(struct manifest *mom, struct list **subs)

@@ -106,7 +106,7 @@ int rm_staging_dir_contents(const char *rel_path)
 	return ret;
 }
 
-static void unlink_all_staged_content(struct file *file)
+void unlink_all_staged_content(struct file *file)
 {
 	char *filename;
 
@@ -609,130 +609,6 @@ out:
 	return ret;
 }
 
-/* This function is meant to be called while staging file to fix any missing/incorrect paths.
- * While staging a file, if its parent directory is missing, this would try to create the path
- * by breaking it into sub-paths and fixing them top down.
- * Here, target_MoM is the consolidated manifest for the version you are trying to update/verify.
- */
-enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_MoM)
-{
-	struct list *path_list = NULL; /* path_list contains the subparts in the path */
-	char *path;
-	char *tmp = NULL, *target = NULL;
-	char *url = NULL;
-	struct stat sb;
-	int ret = SWUPD_OK;
-	struct file *file;
-	char *tar_dotfile = NULL;
-	struct list *list1 = NULL;
-
-	/* This shouldn't happen */
-	if (strcmp(targetpath, "/") == 0) {
-		return ret;
-	}
-
-	/* Removing trailing '/' from the path */
-	path = strdup_or_die(targetpath);
-	if (path[string_len(path) - 1] == '/') {
-		path[string_len(path) - 1] = '\0';
-	}
-
-	/* Breaking down the path into parts.
-	 * eg. Path /usr/bin/foo will be broken into /usr,/usr/bin and /usr/bin/foo
-	 */
-	while (strcmp(path, "/") != 0) {
-		path_list = list_prepend_data(path_list, strdup_or_die(path));
-		tmp = sys_dirname(path);
-		free_and_clear_pointer(&path);
-		path = tmp;
-	}
-	free_and_clear_pointer(&path);
-
-	list1 = list_head(path_list);
-	while (list1) {
-		path = list1->data;
-		list1 = list1->next;
-
-		free_and_clear_pointer(&target);
-		free_and_clear_pointer(&tar_dotfile);
-		free_and_clear_pointer(&url);
-
-		target = sys_path_join("%s/%s", globals.path_prefix, path);
-
-		/* Search for the file in the manifest, to get the hash for the file */
-		file = search_file_in_manifest(target_MoM, path);
-		if (file == NULL) {
-			error("Path %s not found in any of the subscribed manifests"
-			      "in verify_fix_path for path_prefix %s\n",
-			      path, globals.path_prefix);
-			ret = SWUPD_PATH_NOT_IN_MANIFEST;
-			goto end;
-		}
-
-		if (file->is_deleted) {
-			error("Path %s found deleted in verify_fix_path\n", path);
-			ret = SWUPD_UNEXPECTED_CONDITION;
-			goto end;
-		}
-
-		ret = stat(target, &sb);
-		if (ret == 0) {
-			if (verify_file(file, target)) {
-				/* this subpart of the path does exist, nothing to be done */
-				continue;
-			}
-			warn_unlabeled(" -> Corrupt directory: %s", target);
-		} else if (ret == -1 && errno == ENOENT) {
-			warn_unlabeled(" -> Missing directory: %s", target);
-		} else {
-			goto end;
-		}
-
-		/* In some circumstances (Docker using layers between updates/bundle adds,
-		 * corrupt staging content) we could have content which fails to stage.
-		 * In order to avoid this causing failure in verify_fix_path, remove the
-		 * staging content before proceeding. This also cleans up in case any prior
-		 * download failed in a partial state.
-		 */
-		unlink_all_staged_content(file);
-
-		/* download the fullfile for the missing path */
-		string_or_die(&tar_dotfile, "%s/download/.%s.tar", globals.state_dir, file->hash);
-		string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
-		ret = swupd_curl_get_file(url, tar_dotfile);
-		if (ret != 0) {
-			warn_unlabeled(" -> not fixed\n");
-			error("Failed to download file %s in verify_fix_path\n", file->filename);
-			ret = SWUPD_COULDNT_DOWNLOAD_FILE;
-			unlink(tar_dotfile);
-			goto end;
-		}
-
-		if (untar_full_download(file) != 0) {
-			warn_unlabeled(" -> not fixed\n");
-			error("Failed to untar file %s\n", file->filename);
-			ret = SWUPD_COULDNT_UNTAR_FILE;
-			goto end;
-		}
-
-		ret = do_staging(file, target_MoM);
-		if (ret != 0) {
-			/* do_staging returns a swupd_code on error,
-			* just propagate the error */
-			warn_unlabeled(" -> not fixed\n");
-			error("Path %s failed to stage in verify_fix_path\n", path);
-			goto end;
-		}
-		warn_unlabeled(" -> fixed\n");
-	}
-end:
-	free_and_clear_pointer(&target);
-	free_and_clear_pointer(&tar_dotfile);
-	free_and_clear_pointer(&url);
-	list_free_list_and_data(path_list, free);
-	return ret;
-}
-
 struct list *consolidate_files_from_bundles(struct list *bundles)
 {
 	/* bundles is a pointer to a list of manifests */
@@ -1108,37 +984,6 @@ fail:
 	fclose(file);
 	free_and_clear_pointer(&rel_path);
 	return ret;
-}
-
-/* Iterate the file list and remove from the file system each file/directory */
-int remove_files_from_fs(struct list *files)
-{
-	struct list *iter = NULL;
-	struct file *file = NULL;
-	char *fullfile = NULL;
-	int total = list_len(files);
-	int deleted = total;
-	int count = 0;
-
-	iter = list_head(files);
-	while (iter) {
-		file = iter->data;
-		iter = iter->next;
-		string_or_die(&fullfile, "%s/%s", globals.path_prefix, file->filename);
-		if (sys_rm_recursive(fullfile) == -1) {
-			/* if a -1 is returned it means there was an issue deleting the
-			 * file or directory, in that case decrease the counter of deleted
-			 * files.
-			 * Note: If a file didn't exist it will still be counted as deleted,
-			 * this is a limitation */
-			deleted--;
-		}
-		free_and_clear_pointer(&fullfile);
-		count++;
-		progress_report(count, total);
-	}
-
-	return deleted;
 }
 
 void print_pattern(const char *pattern, int times)

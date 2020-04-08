@@ -118,8 +118,6 @@ swupd_SOURCES = \
 	src/search_file.c \
 	src/signature.c \
 	src/signature.h \
-	src/staging.c \
-	src/staging.h \
 	src/stats.c \
 	src/subscriptions.c \
 	src/swupd_build_opts.h \
@@ -133,6 +131,8 @@ swupd_SOURCES = \
 	src/swupd_internal.h \
 	src/swupd_progress.c \
 	src/swupd_progress.h \
+	src/target_root.c \
+	src/target_root.h \
 	src/telemetry.c \
 	src/update.c \
 	src/verify.c \

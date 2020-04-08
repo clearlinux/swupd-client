@@ -503,8 +503,7 @@ static enum swupd_code stage_files(struct list *files, struct manifest *mom)
 	return SWUPD_OK;
 }
 
-
-enum swupd_code staging_install_single_file(struct file *file, struct manifest *mom)
+enum swupd_code target_root_install_single_file(struct file *file, struct manifest *mom)
 {
 	enum swupd_code ret;
 	int err;
@@ -522,7 +521,7 @@ enum swupd_code staging_install_single_file(struct file *file, struct manifest *
 	return SWUPD_OK;
 }
 
-enum swupd_code staging_install_files(struct list *files, struct manifest *mom)
+enum swupd_code target_root_install_files(struct list *files, struct manifest *mom)
 {
 	int ret = SWUPD_OK;
 
@@ -564,7 +563,7 @@ enum swupd_code staging_install_files(struct list *files, struct manifest *mom)
 }
 
 /* Iterate the file list and remove from the file system each file/directory */
-int staging_remove_files(struct list *files)
+int target_root_remove_files(struct list *files)
 {
 	struct list *iter = NULL;
 	struct file *file = NULL;

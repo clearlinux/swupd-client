@@ -261,76 +261,33 @@ error:
 
 bool signature_verify(const char *file, const char *sig_file, enum signature_flags flags)
 {
-	struct stat st;
-	char *errorstr = NULL;
 	bool result = false;
-
-	int data_fd = -1;
 	size_t data_len;
 	void *data = NULL;
-
-	int sig_fd = -1;
 	size_t sig_len;
 	void *sig = NULL;
 
 	/* get the signature */
-	sig_fd = open(sig_file, O_RDONLY);
-	if (sig_fd == -1) {
-		string_or_die(&errorstr, "Failed to open %s: %s", sig_file, strerror(errno));
+	sig = sys_mmap_file(sig_file, &sig_len);
+	if (!sig) {
 		goto error;
 	}
-	if (fstat(sig_fd, &st) != 0) {
-		string_or_die(&errorstr, "Failed to stat %s file", sig_file);
-		goto error;
-	}
-	sig_len = st.st_size;
-	sig = mmap(NULL, sig_len, PROT_READ, MAP_PRIVATE, sig_fd, 0);
-	if (sig == MAP_FAILED) {
-		string_or_die(&errorstr, "Failed to mmap %s signature", sig_file);
-		goto error;
-	}
-	/* get the data to be verified */
 
-	data_fd = open(file, O_RDONLY);
-	if (data_fd == -1) {
-		string_or_die(&errorstr, "Failed to open %s", file);
-		goto error;
-	}
-	if (fstat(data_fd, &st) != 0) {
-		string_or_die(&errorstr, "Failed to stat %s", file);
-		goto error;
-	}
-	data_len = st.st_size;
-	data = mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
-	if (data == MAP_FAILED) {
-		string_or_die(&errorstr, "Failed to mmap %s", file);
+	/* get the data to be verified */
+	data = sys_mmap_file(file, &data_len);
+	if (!data) {
 		goto error;
 	}
 
 	result = signature_verify_data(data, data_len, sig, sig_len, flags);
 
 error:
-	if (!result && flags & SIGNATURE_PRINT_ERRORS) {
-		if (errorstr) {
-			debug("%s\n", errorstr);
-		}
+	if (!result && (flags & SIGNATURE_PRINT_ERRORS)) {
 		warn("Signature check failed\n");
 	}
+	sys_mmap_free(sig, sig_len);
+	sys_mmap_free(data, data_len);
 
-	free_and_clear_pointer(&errorstr);
-
-	if (sig) {
-		munmap(sig, sig_len);
-	}
-	if (sig_fd >= 0) {
-		close(sig_fd);
-	}
-	if (data) {
-		munmap(data, data_len);
-	}
-	if (data_fd >= 0) {
-		close(data_fd);
-	}
 	return result;
 }
 

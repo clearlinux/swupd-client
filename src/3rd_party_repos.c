@@ -27,14 +27,6 @@
 
 #ifdef THIRDPARTY
 
-#define SCRIPT_TEMPLATE "#!/bin/bash\n\n"                              \
-			"export PATH=%s:$PATH\n"                       \
-			"export LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH\n" \
-			"export XDG_DATA_DIRS=%s:$XDG_DATA_DIRS\n"     \
-			"export XDG_CONF_DIRS=%s:$XDG_CONF_DIRS\n"     \
-			"\n"                                           \
-			"%s \"$@\"\n"
-
 char *third_party_get_bin_dir(void)
 {
 	return sys_path_join("%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BIN_DIR);
@@ -294,7 +286,7 @@ enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck)
 
 	/* set up swupd to use the certificate from the 3rd-party repository,
 	 * unless the user is specifying a path for the certificate to use */
-	string_or_die(&repo_cert_path, "%s%s/%s%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BUNDLES_DIR, repo->name, CERT_PATH);
+	repo_cert_path = sys_path_join("%s/%s/%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BUNDLES_DIR, repo->name, CERT_PATH);
 	if (!globals.user_defined_cert_path) {
 		/* the user did not specify a cert, use repo's default */
 		set_cert_path(repo_cert_path);
@@ -615,9 +607,33 @@ enum swupd_code third_party_remove_binary(struct file *file)
 	return ret_code;
 }
 
+static enum swupd_code third_party_bin_directory_exist(void)
+{
+	enum swupd_code ret_code = SWUPD_OK;
+	char *bin_directory = NULL;
+
+	bin_directory = third_party_get_bin_dir();
+
+	/* if the SWUPD_3RD_PARTY_BIN_DIR does not exist, attempt to create it */
+	if (mkdir_p(bin_directory)) {
+		error("The directory %s for 3rd-party content failed to be created\n", bin_directory);
+		ret_code = SWUPD_COULDNT_CREATE_DIR;
+		goto exit;
+	}
+
+	if (!sys_filelink_is_dir(bin_directory)) {
+		error("The path %s for 3rd-party content exists but is not a directory\n", bin_directory);
+		ret_code = SWUPD_COULDNT_CREATE_DIR;
+	}
+
+exit:
+	free_and_clear_pointer(&bin_directory);
+	return ret_code;
+}
+
 enum swupd_code third_party_create_wrapper_script(struct file *file)
 {
-	enum swupd_code ret_code = 0;
+	enum swupd_code ret_code = SWUPD_OK;
 	int fd;
 	FILE *fp = NULL;
 	char *bin_directory = NULL;
@@ -652,15 +668,9 @@ enum swupd_code third_party_create_wrapper_script(struct file *file)
 		goto close_and_exit;
 	}
 
-	/* if the SWUPD_3RD_PARTY_BIN_DIR does not exist, attempt to create it */
-	if (mkdir_p(bin_directory)) {
-		ret_code = SWUPD_COULDNT_CREATE_DIR;
-		goto close_and_exit;
-	}
-
-	if (!sys_filelink_is_dir(bin_directory)) {
-		error("The path %s for 3rd-party content exists but is not a directory\n", bin_directory);
-		ret_code = SWUPD_COULDNT_CREATE_DIR;
+	/* make sure the SWUPD_3RD_PARTY_BIN_DIR exist */
+	ret_code = third_party_bin_directory_exist();
+	if (ret_code) {
 		goto close_and_exit;
 	}
 

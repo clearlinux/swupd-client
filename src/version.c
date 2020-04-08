@@ -257,11 +257,11 @@ static bool get_osrelease_value(char *path_prefix, char *key, char *buff)
 	int keystring_len = 0;
 	bool keyfound = false;
 
-	string_or_die(&releasefile, "%s/usr/lib/os-release", path_prefix);
+	releasefile = sys_path_join("%s/usr/lib/os-release", path_prefix);
 	file = fopen(releasefile, "rm");
 	if (!file) {
 		free_and_clear_pointer(&releasefile);
-		string_or_die(&releasefile, "%s/etc/os-release", path_prefix);
+		releasefile = sys_path_join("%s/etc/os-release", path_prefix);
 		file = fopen(releasefile, "rm");
 		if (!file) {
 			free_and_clear_pointer(&releasefile);

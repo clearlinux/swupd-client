@@ -261,6 +261,29 @@ long sys_get_file_size(const char *filename);
  */
 int sys_dir_is_empty(const char *path);
 
+/**
+ * @brief Writes the specified content into a file
+ *
+ * @return 0 on success or a value < 0 on error
+ */
+int sys_write_file(char *file, void *content, size_t content_size);
+
+/**
+ * @brief Maps a file into memory.
+ *
+ * The function maps the file into a buffer and it also stores the length of the data
+ * in the file_length
+ *
+ * @return 0 on successfull mapping or an errno on error
+ */
+void *sys_mmap_file(const char *file, size_t *file_length);
+
+/**
+ * @brief Deletes the mapping for the specified address range
+ *
+ */
+void sys_mmap_free(void *buffer, size_t buffer_length);
+
 #ifdef __cplusplus
 }
 #endif

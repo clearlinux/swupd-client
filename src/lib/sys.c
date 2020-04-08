@@ -36,6 +36,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #include <sys/wait.h>
@@ -612,4 +613,62 @@ int sys_dir_is_empty(const char *path)
 exit:
 	closedir(dir);
 	return ret;
+}
+
+int sys_write_file(char *file, void *content, size_t content_size)
+{
+	FILE *fp = NULL;
+	int ret = 0;
+
+	fp = fopen(file, "w");
+	if (!fp) {
+		return -errno;
+	}
+
+	if (fwrite(content, content_size, 1, fp) <= 0) {
+		ret = -1;
+		error("There was an error writing to file %s\n", file);
+	}
+
+	fclose(fp);
+	return ret;
+}
+
+void *sys_mmap_file(const char *file, size_t *file_length)
+{
+	struct stat st;
+	int fd = -1;
+	void *buffer = NULL;
+
+	fd = open(file, O_RDONLY);
+	if (fd == -1) {
+		debug("Failed to open %s: %s", file, strerror(errno));
+		goto error;
+	}
+
+	if (fstat(fd, &st) != 0) {
+		debug("Failed to stat %s file", file);
+		goto error;
+	}
+	*file_length = st.st_size;
+
+	buffer = mmap(NULL, *file_length, PROT_READ, MAP_PRIVATE, fd, 0);
+	if (buffer == MAP_FAILED) {
+		buffer = NULL;
+		debug("Failed to mmap %s content", file);
+	}
+
+error:
+	if (fd >= 0) {
+		close(fd);
+	}
+
+	return buffer;
+}
+
+void sys_mmap_free(void *buffer, size_t buffer_length)
+{
+	if (buffer && buffer_length > 0) {
+		munmap(buffer, buffer_length);
+	}
 }

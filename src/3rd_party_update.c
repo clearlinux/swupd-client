@@ -195,6 +195,43 @@ static enum swupd_code validate_file_permissions(struct list *files_to_be_update
 	return ret_code;
 }
 
+static enum swupd_code regenerate_all_wrapper_scripts(UNUSED_PARAM char *unused)
+{
+	enum swupd_code ret_code;
+	struct list *current_subs = NULL;
+	struct manifest *current_mom = NULL;
+	int version;
+
+	/* get currently installed 3rd-party bundles */
+	read_subscriptions(&current_subs);
+
+	/* load the MoM */
+	version = get_current_version(globals.path_prefix);
+	current_mom = load_mom(version, NULL);
+	if (!current_mom) {
+		ret_code = SWUPD_COULDNT_LOAD_MOM;
+		goto exit;
+	}
+
+	/* get a list of all 3rd-party files installed */
+	current_mom->submanifests = recurse_manifest(current_mom, current_subs, NULL, false, NULL);
+	if (!current_mom->submanifests) {
+		ret_code = SWUPD_RECURSE_MANIFEST;
+		goto exit;
+	}
+	current_mom->files = consolidate_files_from_bundles(current_mom->submanifests);
+
+	ret_code = third_party_process_files(current_mom->files, "Regenerating scripts...\n", "update_binaries", third_party_update_wrapper_script);
+	if (ret_code == SWUPD_OK) {
+		info("Scripts regenerated successfully\n");
+	}
+
+exit:
+	manifest_free(current_mom);
+	free_subscriptions(&current_subs);
+	return ret_code;
+}
+
 static enum swupd_code update_exported_binaries(struct list *updated_files)
 {
 	return third_party_process_files(updated_files, "\nUpdating 3rd-party bundle binaries...\n", "update_binaries", third_party_update_wrapper_script);
@@ -217,7 +254,11 @@ static enum swupd_code update_repos(UNUSED_PARAM char *unused)
 enum swupd_code third_party_update_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
+	char *template_file = NULL;
+	char *template = NULL;
 	int steps_in_update;
+	int ret;
+	size_t template_len;
 
 	if (!parse_options(argc, argv)) {
 		print("\n");
@@ -260,7 +301,32 @@ enum swupd_code third_party_update_main(int argc, char **argv)
 
 	/* update 3rd-party bundles */
 	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, update_repos, SWUPD_NO, "update", steps_in_update);
+	if (ret_code) {
+		goto exit;
+	}
 
+	/* read the current template copy */
+	template_file = sys_path_join("%s/%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_DIR, SWUPD_3RD_PARTY_TEMPLATE_FILE);
+	template = sys_mmap_file(template_file, &template_len);
+
+	if (!template || strncmp(template, SCRIPT_TEMPLATE, template_len) != 0) {
+		/* there is no template file, or the template changed,
+		 * all scripts need to be recreated */
+		info("The scripts that export binaries from 3rd-party repositories need to be regenerated\n\n");
+		ret_code = third_party_run_operation_multirepo(NULL, regenerate_all_wrapper_scripts, SWUPD_OK, "regenerate_scripts", steps_in_update);
+
+		/* update the template */
+
+		ret = sys_write_file(template_file, SCRIPT_TEMPLATE, string_len(SCRIPT_TEMPLATE));
+		if (ret < 0) {
+			error("The wrapper scripts template file %s failed to be updated\n", template_file);
+			ret_code = SWUPD_COULDNT_WRITE_FILE;
+		}
+	}
+
+exit:
+	free_and_clear_pointer(&template_file);
+	sys_mmap_free(template, template_len);
 	swupd_deinit();
 	progress_finish_steps(ret_code);
 

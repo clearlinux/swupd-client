@@ -14,6 +14,15 @@ extern "C" {
 
 #ifdef THIRDPARTY
 
+/** Template used to generate wrapper scripts for 3rd-party binaries */
+#define SCRIPT_TEMPLATE "#!/bin/bash\n\n"                              \
+			"export PATH=%s:$PATH\n"                       \
+			"export LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH\n" \
+			"export XDG_DATA_DIRS=%s:$XDG_DATA_DIRS\n"     \
+			"export XDG_CONF_DIRS=%s:$XDG_CONF_DIRS\n"     \
+			"\n"                                           \
+			"%s \"$@\"\n"
+
 /** @brief Name of the directory where 3rd-party content and state should be stored */
 #define SWUPD_3RD_PARTY_DIRNAME "3rd-party"
 
@@ -25,6 +34,9 @@ extern "C" {
 
 /** @brief Full path to the directory where 3rd-party binaries are going to be installed */
 #define SWUPD_3RD_PARTY_BIN_DIR SWUPD_3RD_PARTY_DIR "/bin"
+
+/** @brief Name of the file that holds the copy of the current script template */
+#define SWUPD_3RD_PARTY_TEMPLATE_FILE "script.template"
 
 /** @brief Store information of a repository.  */
 struct repo {

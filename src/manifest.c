@@ -335,7 +335,7 @@ retry_load:
 		return NULL;
 	}
 
-	string_or_die(&filename, "%s/%i/Manifest.MoM", globals.state_dir, version);
+	filename = sys_path_join("%s/%i/Manifest.MoM", globals.state_dir, version);
 	string_or_die(&url, "%s/%i/Manifest.MoM", globals.content_url, version);
 
 	if (!globals.sigcheck) {

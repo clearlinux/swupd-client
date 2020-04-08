@@ -1565,6 +1565,7 @@ create_third_party_repo() { #swupd_function
 	debug_msg "3rd-party repo URL: $TPURL"
 
 	# if requested, add the new repo to the repo.ini file
+	# and the template file
 	sudo mkdir -p "$env_name"/testfs/target-dir/"$THIRD_PARTY_DIR"
 	if [ "$add" = true ]; then
 		{
@@ -1572,6 +1573,7 @@ create_third_party_repo() { #swupd_function
 			printf 'URL=%s\n\n' "file://$TPURL"
 			printf 'VERSION=%s\n\n' "$version"
 		} | sudo tee -a "$env_name"/testfs/target-dir/"$THIRD_PARTY_DIR"/repo.ini > /dev/null
+		write_to_protected_file "$env_name"/testfs/target-dir/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE" "$SCRIPT_TEMPLATE"
 	fi
 
 	# every 3rd-party repo needs to have at least the special os-core bundle,
@@ -1588,12 +1590,6 @@ create_third_party_repo() { #swupd_function
 		create_bundle -L -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$cert",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
 	else
 		create_bundle -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$cert",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
-	fi
-
-	# if requested, add the template file to the target system
-	if [ "$add" = true ]; then
-		sudo mkdir -p "$env_name"/testfs/target-dir/"$THIRD_PARTY_BIN_DIR"
-		write_to_protected_file "$env_name"/testfs/target-dir/"$THIRD_PARTY_BIN_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE" "$SCRIPT_TEMPLATE"
 	fi
 
 	if [ "$TEST_ENV_ONLY" = true ]; then
@@ -4639,6 +4635,10 @@ assert_equal() { # assertion
 	validate_param "$val2"
 
 	if [ "$val1" != "$val2" ]; then
+		echo "Assertion Failed"
+		echo "The two items being compared are not equal"
+		echo -e "Difference:\\n$sep"
+		diff -u <(echo "$val1") <(echo "$val2") || true
 		return 1
 	fi
 

@@ -119,6 +119,7 @@ swupd_SOURCES = \
 	src/signature.c \
 	src/signature.h \
 	src/staging.c \
+	src/staging.h \
 	src/stats.c \
 	src/subscriptions.c \
 	src/swupd_build_opts.h \

@@ -31,6 +31,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "staging.h"
 #include "swupd.h"
 
 #define VERIFY_PICKY 1
@@ -417,7 +418,7 @@ enum swupd_code execute_remove_bundles_extra(struct list *bundles, remove_extra_
 		if (list_len(files_to_remove) > 0) {
 			info("\nDeleting bundle files...\n");
 			progress_next_step("remove_files", PROGRESS_BAR);
-			int deleted = remove_files_from_fs(files_to_remove);
+			int deleted = staging_remove_files(files_to_remove);
 			info("Total deleted files: %i\n", deleted);
 		}
 	}

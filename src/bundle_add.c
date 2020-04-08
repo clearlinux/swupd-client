@@ -32,6 +32,7 @@
 #include <unistd.h>
 
 #include "alias.h"
+#include "staging.h"
 #include "swupd.h"
 
 #define MODE_RW_O (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
@@ -241,7 +242,7 @@ static enum swupd_code install_files(struct manifest *mom, struct list *to_insta
 
 	//TODO: Improve staging functions so we won't need this hack
 	globals.update_count = list_len(to_install_files) - globals.update_skip;
-	ret = staging_install_all_files(to_install_files, mom);
+	ret = staging_install_files(to_install_files, mom);
 	mom->files = NULL;
 	if (ret) {
 		error("Failed to install required files\n");

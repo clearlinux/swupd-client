@@ -1,6 +1,7 @@
 #ifndef __SWUPD_LOG__
 #define __SWUPD_LOG__
 
+#include <stdbool.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
@@ -16,6 +17,8 @@ extern "C" {
 #define LOG_ALWAYS 0
 /** @brief Only show messages printed error() and print(). */
 #define LOG_ERROR 2
+/** @brief Only show messages printed error() and print(). */
+#define LOG_QUIET LOG_ERROR
 /** @brief Only show messages printed warn(), error() and print(). */
 #define LOG_WARN 4
 /** @brief Only show messages printed info(), warn(), error() and print(). */
@@ -51,6 +54,11 @@ void log_set_level(int log_level);
  * set by log_set_level().
  */
 void log_full(int log_level, FILE *out, const char *file, int line, const char *label, const char *format, ...);
+
+/**
+ * @brief Check the log level to see if it is set to quiet.
+ */
+bool log_is_quiet(void);
 
 /** @brief Print messages using LOG_ALWAYS level. */
 #define print(_fmt, ...) log_full(LOG_ALWAYS, stdout, __FILE__, __LINE__, NULL, _fmt, ##__VA_ARGS__);

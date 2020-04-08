@@ -164,7 +164,7 @@ static void save_manifest(int version)
 	sys_rm(momfile);
 	mkdir_p(momdir);
 
-	copy(original, momfile);
+	link_or_copy(original, momfile);
 	free_and_clear_pointer(&momdir);
 	free_and_clear_pointer(&momfile);
 	free_and_clear_pointer(&original);

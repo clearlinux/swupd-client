@@ -65,7 +65,7 @@ static int create_staging_renamedir(char *rename_tmpdir)
 enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 {
 	char *statfile = NULL;
-	char *dir, *base, *rel_dir;
+	char *dir, *base;
 	char *tarcommand = NULL;
 	char *original = NULL;
 	char *target = NULL;
@@ -79,16 +79,11 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	dir = sys_dirname(file->filename);
 	base = sys_basename(file->filename);
 
-	rel_dir = dir;
-	if (*dir == '/') {
-		rel_dir = dir + 1;
-	}
-
 	original = sys_path_join("%s/staged/%s", globals.state_dir, file->hash);
 
 	/* make sure the directory where the file should be copied to exists
 	 * and is in deed a directory */
-	targetpath = sys_path_join("%s/%s", globals.path_prefix, rel_dir);
+	targetpath = sys_path_join("%s/%s", globals.path_prefix, dir);
 	if (!sys_filelink_exists(targetpath)) {
 		if (MoM) {
 			verify_fix_path(dir, MoM);
@@ -118,7 +113,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 	}
 
 	/* remove a pre-existing .update file in the destination if it exists */
-	target = sys_path_join("%s/%s/.update.%s", globals.path_prefix, rel_dir, base);
+	target = sys_path_join("%s/.update.%s", targetpath, base);
 	ret = sys_rm_recursive(target);
 	if (ret != 0 && ret != -ENOENT) {
 		ret = SWUPD_COULDNT_REMOVE_FILE;
@@ -172,8 +167,8 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 			ret = SWUPD_COULDNT_RENAME_DIR;
 			goto out;
 		}
-		string_or_die(&tarcommand, TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -cf - './%s' 2> /dev/null | " TAR_COMMAND " -C '%s%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-			      rename_tmpdir, base, globals.path_prefix, rel_dir);
+		string_or_die(&tarcommand, TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -cf - './%s' 2> /dev/null | " TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
+			      rename_tmpdir, base, targetpath);
 		ret = system(tarcommand);
 		if (ret == -1) {
 			ret = SWUPD_SUBPROCESS_ERROR;
@@ -212,8 +207,8 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 				ret = SWUPD_COULDNT_RENAME_FILE;
 				goto out;
 			}
-			string_or_die(&tarcommand, TAR_COMMAND " -C '%s/staged' " TAR_PERM_ATTR_ARGS " -cf - '.update.%s' 2> /dev/null | " TAR_COMMAND " -C '%s%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-				      globals.state_dir, base, globals.path_prefix, rel_dir);
+			string_or_die(&tarcommand, TAR_COMMAND " -C '%s/staged' " TAR_PERM_ATTR_ARGS " -cf - '.update.%s' 2> /dev/null | " TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
+				      globals.state_dir, base, targetpath);
 			ret = system(tarcommand);
 			if (ret == -1) {
 				ret = SWUPD_SUBPROCESS_ERROR;
@@ -230,7 +225,7 @@ enum swupd_code do_staging(struct file *file, struct manifest *MoM)
 		}
 
 		free_and_clear_pointer(&file->staging);
-		file->staging = sys_path_join("%s/%s/.update.%s", globals.path_prefix, rel_dir, base);
+		file->staging = sys_path_join("%s/.update.%s", targetpath, base);
 		if (!sys_file_exists(file->staging)) {
 			free_and_clear_pointer(&file->staging);
 			ret = SWUPD_COULDNT_CREATE_FILE;

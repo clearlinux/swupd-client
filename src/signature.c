@@ -38,7 +38,6 @@
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
 
-#include "config.h"
 #include "lib/log.h"
 #include "lib/macros.h"
 #include "signature.h"

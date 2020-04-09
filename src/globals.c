@@ -30,7 +30,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "lib/log.h"
 #include "swupd.h"
 

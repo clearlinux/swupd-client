@@ -31,7 +31,6 @@
 #include <unistd.h>
 
 #include "alias.h"
-#include "config.h"
 #include "swupd.h"
 
 #define MODE_RW_O (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)

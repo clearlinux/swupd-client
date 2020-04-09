@@ -33,7 +33,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "lib/hashmap.h"
 #include "lib/thread_pool.h"
 #include "swupd.h"

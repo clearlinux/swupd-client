@@ -30,7 +30,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "swupd.h"
 
 #define CLEAR_SERVICE_RESTART_SCRIPT "/usr/bin/clr-service-restart"

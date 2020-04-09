@@ -33,7 +33,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "signature.h"
 #include "swupd.h"
 #include "target_root.h"

@@ -43,7 +43,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "swupd.h"
 #include "swupd_curl_internal.h"
 

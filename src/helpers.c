@@ -35,7 +35,6 @@
 #include <sys/statvfs.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "signature.h"
 #include "swupd.h"
 #include "swupd_build_variant.h"

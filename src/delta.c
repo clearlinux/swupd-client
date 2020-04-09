@@ -33,7 +33,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "swupd.h"
 #include "xattrs.h"
 

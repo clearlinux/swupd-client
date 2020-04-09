@@ -20,7 +20,6 @@
  *         Jaime A. Garcia <jaime.garcia.naranjo@linux.intel.com>
  */
 
-#define _GNU_SOURCE
 #include <errno.h>
 #include <getopt.h>
 #include <string.h>

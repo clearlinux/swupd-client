@@ -21,7 +21,6 @@
  *
  */
 
-#define _GNU_SOURCE
 #include <bsdiff.h>
 #include <ctype.h>
 #include <errno.h>

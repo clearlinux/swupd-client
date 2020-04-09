@@ -17,7 +17,6 @@
  *
  */
 
-#define _GNU_SOURCE
 #include "lib/log.h"
 #include "swupd.h"
 

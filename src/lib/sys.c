@@ -17,8 +17,14 @@
  *
  */
 
-// Make sure we are getting the gnu version of basename
+/*
+ * We rely on the result of basename provided only when GNU_SOURCE
+ * is used. Making sure we are always going to have that implementation
+ * to be used by sys_basename().
+ */
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <libgen.h>
 #undef basename
 #include <string.h>

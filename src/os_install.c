@@ -17,8 +17,6 @@
  *
  */
 
-#define _GNU_SOURCE
-
 #include "swupd.h"
 
 #define FLAG_DOWNLOAD_ONLY 2000

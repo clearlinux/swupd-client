@@ -17,7 +17,6 @@
  *
  */
 
-#define _GNU_SOURCE
 #include "swupd.h"
 #include "swupd_internal.h"
 

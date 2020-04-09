@@ -19,7 +19,6 @@
  *         Icarus Sparry <icarus.w.sparry@intel.com>
  */
 
-#define _GNU_SOURCE
 #include <fcntl.h>
 #include <getopt.h>
 #include <stdio.h>

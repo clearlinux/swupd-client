@@ -17,8 +17,6 @@
  *
  */
 
-#define _GNU_SOURCE
-
 #include <string.h>
 
 #include "3rd_party_repos.h"

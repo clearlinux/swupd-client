@@ -17,8 +17,6 @@
  *
  */
 
-#define _GNU_SOURCE
-
 #include "swupd.h"
 
 #define is_from_global_section(_section) (strcmp(_section, "global") == 0)

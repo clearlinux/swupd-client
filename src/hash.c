@@ -21,7 +21,6 @@
  *
  */
 
-#define _GNU_SOURCE
 #include <errno.h>
 #include <openssl/hmac.h>
 #include <stdio.h>

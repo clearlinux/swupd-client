@@ -27,6 +27,7 @@ AC_CHECK_LIB([pthread], [pthread_create])
 
 # Program checks
 AC_CHECK_PROGS(TAR, tar)
+AC_DEFINE(_GNU_SOURCE, 1, [Use non standard gnu functions])]
 
 # Enable/Disable debug mode
 AC_ARG_ENABLE(

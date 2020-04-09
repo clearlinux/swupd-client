@@ -19,7 +19,6 @@
  *         Tudor Marcu <tudor.marcu@intel.com>
  *
  */
-#define _GNU_SOURCE
 #include "verifytime.h"
 
 #include "lib/log.h"

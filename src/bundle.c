@@ -21,7 +21,6 @@
 *
 */
 
-#define _GNU_SOURCE
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdio.h>

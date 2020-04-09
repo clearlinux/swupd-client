@@ -17,8 +17,6 @@
  *
  */
 
-#define _GNU_SOURCE
-
 #include <string.h>
 
 #include "comp_functions.h"

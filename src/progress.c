@@ -17,8 +17,6 @@
  *
  */
 
-#define _GNU_SOURCE
-
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>

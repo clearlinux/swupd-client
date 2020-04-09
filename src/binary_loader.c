@@ -17,8 +17,6 @@
  *
  */
 
-#define _GNU_SOURCE
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>

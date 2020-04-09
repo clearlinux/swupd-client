@@ -21,7 +21,6 @@
  *
  */
 
-#define _GNU_SOURCE
 #include <curl/curl.h>
 #include <errno.h>
 #include <fcntl.h>

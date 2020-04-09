@@ -17,7 +17,6 @@
  *
  */
 
-#define _GNU_SOURCE
 #include <getopt.h>
 #include <locale.h>
 #include <stdio.h>

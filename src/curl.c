@@ -33,7 +33,6 @@
  * use, you need to manage your own curl multi environment.
  */
 
-#define _GNU_SOURCE
 #include <curl/curl.h>
 #include <errno.h>
 #include <fcntl.h>

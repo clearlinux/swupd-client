@@ -17,7 +17,6 @@
  *
  */
 
-#define _GNU_SOURCE
 #include "3rd_party_repos.h"
 #include "swupd.h"
 

@@ -177,7 +177,7 @@ void signature_deinit(void)
 	CRYPTO_cleanup_all_ex_data();
 }
 
-bool signature_verify_data(const unsigned char *data, size_t data_len, const unsigned char *sig_data, size_t sig_data_len, enum signature_flags flags)
+bool signature_verify_data(const void *data, size_t data_len, const void *sig_data, size_t sig_data_len, enum signature_flags flags)
 
 {
 	bool result = false;
@@ -267,11 +267,11 @@ bool signature_verify(const char *file, const char *sig_file, enum signature_fla
 
 	int data_fd = -1;
 	size_t data_len;
-	unsigned char *data = NULL;
+	void *data = NULL;
 
 	int sig_fd = -1;
 	size_t sig_len;
-	unsigned char *sig = NULL;
+	void *sig = NULL;
 
 	/* get the signature */
 	sig_fd = open(sig_file, O_RDONLY);
@@ -590,7 +590,7 @@ void signature_print_info(const char UNUSED_PARAM *path)
 	return;
 }
 
-bool signature_verify_data(const unsigned char UNUSED_PARAM *data, size_t UNUSED_PARAM data_len, const unsigned char UNUSED_PARAM *sig_data, size_t UNUSED_PARAM sig_data_len, enum signature_flags UNUSED_PARAM flags)
+bool signature_verify_data(const void UNUSED_PARAM *data, size_t UNUSED_PARAM data_len, const void UNUSED_PARAM *sig_data, size_t UNUSED_PARAM sig_data_len, enum signature_flags UNUSED_PARAM flags)
 {
 	return true;
 }

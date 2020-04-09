@@ -138,10 +138,8 @@ static int verify_signature(char *url, struct curl_file_data *tmp_version)
 		goto out;
 	}
 
-	ret = signature_verify_data((const unsigned char *)tmp_version->data,
-				    tmp_version->len,
-				    (const unsigned char *)tmp_version_sig.data,
-				    tmp_version_sig.len,
+	ret = signature_verify_data(tmp_version->data, tmp_version->len,
+				    tmp_version_sig.data, tmp_version_sig.len,
 				    SIGNATURE_PRINT_ERRORS | SIGNATURE_IGNORE_EXPIRATION)
 		  ? 0
 		  : -SWUPD_ERROR_SIGNATURE_VERIFICATION;

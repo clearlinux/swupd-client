@@ -67,7 +67,7 @@ bool signature_verify(const char *file, const char *sig_file, enum signature_fla
  *
  * @return true if the file is signed with certificate used signature_init()
  */
-bool signature_verify_data(const unsigned char *data, size_t data_len, const unsigned char *sig_data, size_t sig_data_len, enum signature_flags flags);
+bool signature_verify_data(const void *data, size_t data_len, const void *sig_data, size_t sig_data_len, enum signature_flags flags);
 
 /**
  * Print extra information about the certificate pointed by PATH.

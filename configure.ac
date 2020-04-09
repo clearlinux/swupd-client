@@ -28,6 +28,16 @@ AC_CHECK_LIB([pthread], [pthread_create])
 # Program checks
 AC_CHECK_PROGS(TAR, tar)
 
+# Enable/Disable debug mode
+AC_ARG_ENABLE(
+  [debug],
+  [AS_HELP_STRING([--enable-debug], [Enable debug mode (disabled by default)])]
+)
+AS_IF(
+  [test "x$enable_debug" == "xyes"],
+  [AC_DEFINE(DEBUG_MODE, 1, [Debug enabled])]
+)
+
 
 # Enable/disable options
 AC_ARG_ENABLE(

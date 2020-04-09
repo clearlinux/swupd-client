@@ -27,7 +27,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "swupd.h"
 
 /* trailing slash is to indicate dir itself is expected to exist, but

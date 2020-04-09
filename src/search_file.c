@@ -32,7 +32,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "swupd.h"
 
 #define FLAG_REGEXP 2000

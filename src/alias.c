@@ -26,7 +26,6 @@
 #include <sys/types.h>
 
 #include "alias.h"
-#include "config.h"
 #include "swupd.h"
 
 struct alias_lookup {

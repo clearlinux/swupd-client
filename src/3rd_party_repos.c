@@ -18,7 +18,6 @@
  */
 
 #include "3rd_party_repos.h"
-#include "config.h"
 #include "signature.h"
 #include "swupd.h"
 

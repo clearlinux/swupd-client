@@ -25,7 +25,6 @@
 #include <getopt.h>
 #include <string.h>
 
-#include "config.h"
 #include "swupd.h"
 
 #define FLAG_DEPS 2000

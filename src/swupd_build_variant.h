@@ -4,7 +4,6 @@
 #include <dirent.h>
 #include <stdbool.h>
 
-#include "config.h"
 #include "lib/list.h"
 #include "swupd.h"
 

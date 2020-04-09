@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "swupd.h"
 
 #define RECORD_VERSION 2

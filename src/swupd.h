@@ -11,7 +11,6 @@
 #include <string.h>
 
 #include "bundle.h"
-#include "config.h"
 #include "config_loader.h"
 #include "globals.h"
 #include "lib/archives.h"

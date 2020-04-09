@@ -20,8 +20,6 @@
 #ifndef __INCLUDE_GUARD_SWUPD_BUILD_OPTS_H
 #define __INCLUDE_GUARD_SWUPD_BUILD_OPTS_H
 
-#include "config.h"
-
 #ifdef SWUPD_WITH_BZIP2
 #define OPT_BZIP2 "+BZIP2"
 #else

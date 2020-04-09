@@ -364,6 +364,9 @@ enum swupd_code mirror_main(int argc, char **argv)
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
+	if (!globals.path_prefix) {
+		set_default_path_prefix();
+	}
 
 	progress_init_steps("mirror", steps_in_mirror);
 

@@ -1531,7 +1531,7 @@ create_third_party_repo() { #swupd_function
 	if [ $# -eq 0 ]; then
 		cat <<-EOM
 			Usage:
-			    add_third_party_repo [-a] <environment_name> <new_version> [format] [repo_name]
+			    create_third_party_repo [-a] <environment_name> <new_version> [format] [repo_name]
 
 		    Options:
 		        -a    if the a flag is set (add), the 3rd-party repository is also added

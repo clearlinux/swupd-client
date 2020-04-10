@@ -42,7 +42,7 @@ test_setup() {
 		 -> Missing file: $PATH_PREFIX/foo/test-file1 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
-		Inspected 7 files
+		Inspected 9 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
 		    0 of 2 missing files were not replaced
@@ -94,7 +94,7 @@ test_setup() {
 		Repairing corrupt files
 		 -> Hash mismatch for file: $PATH_PREFIX/usr/share/clear/bundles/test-bundle1 -> fixed
 		Removing extraneous files
-		Inspected 4 files
+		Inspected 6 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
 		    0 of 2 missing files were not replaced
@@ -135,7 +135,7 @@ test_setup() {
 		 -> Hash mismatch for file: $PATH_PREFIX/usr/share/clear/bundles/test-bundle1 -> fixed
 		Removing extraneous files
 		 -> File that should be deleted: $PATH_PREFIX/foo/test-file1 -> deleted
-		Inspected 7 files
+		Inspected 9 files
 		  1 file did not match
 		    1 of 1 files were repaired
 		    0 of 1 files were not repaired
@@ -176,7 +176,7 @@ test_setup() {
 		 -> Missing file: $PATH_PREFIX/foo/test-file1 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
-		Inspected 4 files
+		Inspected 6 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
 		    0 of 2 missing files were not replaced

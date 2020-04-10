@@ -2460,6 +2460,7 @@ create_bundle() { # swupd_function
 	local repo_name
 	local content_dir
 	local third_party=false
+	local os_core_manifest
 
 	# If no parameters are received show help
 	if [ $# -eq 0 ]; then
@@ -2821,7 +2822,15 @@ create_bundle() { # swupd_function
 		done
 	fi
 
-	# 9) Add the bundle to the MoM (do not use -p option so the MoM's tar is created and signed)
+	# 9) if there is an os-core bundle, add it to the manifest as dependency
+	if [ "$bundle_name" != os-core ]; then
+		os_core_manifest=$(sudo find "$env_name"/"$content_dir"/ -name Manifest.os-core)
+		if [ -n "$os_core_manifest" ]; then
+			add_dependency_to_manifest "$manifest" os-core
+		fi
+	fi
+
+	# 10) Add the bundle to the MoM (do not use -p option so the MoM's tar is created and signed)
 	debug_msg "Adding bundle to the MoM"
 	if [ "$experimental" = true ]; then
 		add_to_manifest -e "$version_path"/Manifest.MoM "$manifest" "$bundle_name"
@@ -2829,19 +2838,19 @@ create_bundle() { # swupd_function
 		add_to_manifest "$version_path"/Manifest.MoM "$manifest" "$bundle_name"
 	fi
 
-	# 10) Create/renew manifest tars
+	# 11) Create/renew manifest tars
 	debug_msg "Creating the manifest tar"
 	sudo rm -f "$manifest".tar
 	create_tar "$manifest"
 
-	# 11) Create the subscription to the bundle if the local_bundle flag is enabled
+	# 12) Create the subscription to the bundle if the local_bundle flag is enabled
 	# all installed bundles in the system should have a file in this directory
 	if [ "$local_bundle" = true ]; then
 		debug_msg "Creating tracking file for bundle so it show as installed"
 		sudo touch "$target_path"/usr/share/clear/bundles/"$bundle_name"
 	fi
 
-	# 12) Create the tracking file for the bundle if the track_bundle flag is set
+	# 13) Create the tracking file for the bundle if the track_bundle flag is set
 	# all bundles specifically installed by a user should have a file in this directory
 	# bundles installed as dependencies should not have files here
 	if [ "$track_bundle" = true ]; then

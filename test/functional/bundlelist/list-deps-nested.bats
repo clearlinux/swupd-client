@@ -23,10 +23,11 @@ test_setup() {
 		Loading required manifests...
 
 		Bundles included by test-bundle1:
+		 - os-core
 		 - test-bundle2
 		 - test-bundle3
 
-		Total: 2
+		Total: 3
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
@@ -43,10 +44,13 @@ test_setup() {
 
 		Bundles included by test-bundle1:
 		  * test-bundle1
+		    |-- os-core
 		    |-- test-bundle2
+		        |-- os-core
 		        |-- test-bundle3
+		            |-- os-core
 
-		Total: 2
+		Total: 3
 	EOM
 	)
 	assert_is_output --identical "$expected_output"

@@ -64,18 +64,21 @@ global_setup() {
 		Bundle size:
 		 - Size of bundle: .* KB
 		 - Maximum amount of disk size the bundle will take if installed \\(includes dependencies\\): .* KB
-		Direct dependencies \\(1\\):
+		Direct dependencies \\(2\\):
+		 - os-core
 		 - test-bundle2
 		Files in bundle \\(includes dependencies\\):
 		 - /bar
 		 - /bar/file_4
+		 - /core
 		 - /file_1
 		 - /file_3
 		 - /foo
 		 - /foo/file_2
+		 - /usr/share/clear/bundles/os-core
 		 - /usr/share/clear/bundles/test-bundle1
 		 - /usr/share/clear/bundles/test-bundle2
-		Total files: 8
+		Total files: 10
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -98,19 +101,22 @@ global_setup() {
 		Bundle size:
 		 - Size of bundle: .* KB
 		 - Maximum amount of disk size the bundle will take if installed \\(includes dependencies\\): .* KB
-		Direct dependencies \\(1\\):
+		Direct dependencies \\(2\\):
+		 - os-core
 		 - test-bundle2
 		Files in bundle \\(includes dependencies\\):
 		 - /bar
 		 - /bar/file_4
+		 - /core
 		 - /file_1
 		 - /file_3
 		 - /file_5
 		 - /foo
 		 - /foo/file_2
+		 - /usr/share/clear/bundles/os-core
 		 - /usr/share/clear/bundles/test-bundle1
 		 - /usr/share/clear/bundles/test-bundle2
-		Total files: 9
+		Total files: 11
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

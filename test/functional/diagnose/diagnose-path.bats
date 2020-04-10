@@ -195,10 +195,11 @@ test_setup() {
 		 - /usr/share/clear/bundles
 		Checking for missing files
 		Checking for corrupt files
+		 -> Hash mismatch for file: $PATH_PREFIX/usr/share/clear/bundles/os-core
 		 -> Hash mismatch for file: $PATH_PREFIX/usr/share/clear/bundles/test-bundle1
 		Checking for extraneous files
-		Inspected 1 file
-		  1 file did not match
+		Inspected 3 files
+		  2 files did not match
 		Use "swupd repair" to correct the problems in the system
 		Diagnose successful
 	EOM

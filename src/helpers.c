@@ -870,7 +870,7 @@ char *get_printable_bundle_name(const char *bundle_name, bool is_experimental, b
 
 	if (is_experimental) {
 		if (status) {
-			string_or_die(&details, "experimental, %s", status);
+			string_or_die(&details, "%s, experimental", status);
 		} else {
 			string_or_die(&details, "%s", "experimental");
 		}
@@ -880,7 +880,11 @@ char *get_printable_bundle_name(const char *bundle_name, bool is_experimental, b
 	free_and_clear_pointer(&status);
 
 	if (details) {
-		string_or_die(&printable_name, "%s (%s)", bundle_name, details);
+		if (log_is_quiet()) {
+			string_or_die(&printable_name, "%s: %s", bundle_name, details);
+		} else {
+			string_or_die(&printable_name, "%s (%s)", bundle_name, details);
+		}
 	} else {
 		string_or_die(&printable_name, "%s", bundle_name);
 	}

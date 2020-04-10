@@ -39,7 +39,7 @@ test_setup() {
 		 -> Missing file: $PATH_PREFIX/foo/test-file1
 		Checking for corrupt files
 		Checking for extraneous files
-		Inspected 7 files
+		Inspected 9 files
 		  2 files were missing
 		Use "swupd repair" to correct the problems in the system
 		Diagnose successful
@@ -84,7 +84,7 @@ test_setup() {
 		 -> Missing file: $PATH_PREFIX/foo/test-file1
 		Checking for corrupt files
 		Checking for extraneous files
-		Inspected 4 files
+		Inspected 6 files
 		  2 files were missing
 		Use "swupd repair" to correct the problems in the system
 		Diagnose successful
@@ -115,7 +115,7 @@ test_setup() {
 		Checking for corrupt files
 		Checking for extraneous files
 		 -> File that should be deleted: $PATH_PREFIX/foo/test-file1
-		Inspected 7 files
+		Inspected 9 files
 		  1 file found which should be deleted
 		Use "swupd repair" to correct the problems in the system
 		Diagnose successful
@@ -161,7 +161,7 @@ test_setup() {
 		Checking for missing files
 		Checking for corrupt files
 		Checking for extraneous files
-		Inspected 4 files
+		Inspected 6 files
 		Diagnose successful
 	EOM
 	)

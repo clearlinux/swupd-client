@@ -35,11 +35,12 @@ global_setup() {
 		Loading required manifests...
 
 		Bundles included by test-bundle2:
+		 - os-core
 		 - test-bundle3
 		 - test-bundle4
 		 - test-bundle5
 
-		Total: 3
+		Total: 4
 	EOM
 	)
 	assert_is_output --identical "$expected_output"

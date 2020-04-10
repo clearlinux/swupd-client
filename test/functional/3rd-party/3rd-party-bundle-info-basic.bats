@@ -90,7 +90,8 @@ global_setup() {
 		Bundle size:
 		 - Size of bundle: .* KB
 		 - Size bundle takes on disk \\(includes dependencies\\): .* KB
-		Direct dependencies \\(1\\):
+		Direct dependencies \\(2\\):
+		 - os-core
 		 - test-bundle1
 		Files in bundle \\(includes dependencies\\):
 		 - /bar
@@ -98,12 +99,20 @@ global_setup() {
 		 - /foo
 		 - /foo/file_1A
 		 - /usr
+		 - /usr/lib
+		 - /usr/lib/os-release
 		 - /usr/share
 		 - /usr/share/clear
 		 - /usr/share/clear/bundles
+		 - /usr/share/clear/bundles/os-core
 		 - /usr/share/clear/bundles/test-bundle1
 		 - /usr/share/clear/bundles/test-bundle2
-		Total files: 10
+		 - /usr/share/clear/update-ca
+		 - /usr/share/clear/update-ca/Swupd_Root.pem
+		 - /usr/share/defaults
+		 - /usr/share/defaults/swupd
+		 - /usr/share/defaults/swupd/format
+		Total files: 18
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

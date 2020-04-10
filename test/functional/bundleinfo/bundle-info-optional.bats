@@ -33,7 +33,8 @@ global_setup() {
 		Bundle size:
 		 - Size of bundle: .* KB
 		 - Maximum amount of disk size the bundle will take if installed \\(includes dependencies\\): .* KB
-		Direct dependencies \\(2\\):
+		Direct dependencies \\(3\\):
+		 - os-core
 		 - test-bundle2
 		 - test-bundle3 \\(optional\\)
 		Indirect dependencies \\(2\\):
@@ -65,7 +66,8 @@ global_setup() {
 		Bundle size:
 		 - Size of bundle: .* KB
 		 - Size bundle takes on disk \\(includes dependencies\\): .* KB
-		Direct dependencies \\(2\\):
+		Direct dependencies \\(3\\):
+		 - os-core
 		 - test-bundle2
 		 - test-bundle3 \\(optional, not installed\\)
 		Indirect dependencies \\(2\\):

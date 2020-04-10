@@ -264,12 +264,13 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
+		 -> Hash mismatch for file: $PATH_PREFIX/usr/share/clear/bundles/os-core -> fixed
 		 -> Hash mismatch for file: $PATH_PREFIX/usr/share/clear/bundles/test-bundle1 -> fixed
 		Removing extraneous files
-		Inspected 1 file
-		  1 file did not match
-		    1 of 1 files were repaired
-		    0 of 1 files were not repaired
+		Inspected 3 files
+		  2 files did not match
+		    2 of 2 files were repaired
+		    0 of 2 files were not repaired
 		Calling post-update helper scripts
 		Repair successful
 	EOM

@@ -503,10 +503,10 @@ clean_curl:
 		}
 		if (!download_only) {
 			if (current_version < server_version) {
-				print("Update successful - System updated from version %d to version %d\n",
-				      current_version, server_version);
+				info("Update successful - System updated from version %d to version %d\n",
+				     current_version, server_version);
 			} else {
-				print("Update complete - System already up-to-date at version %d\n", current_version);
+				info("Update complete - System already up-to-date at version %d\n", current_version);
 			}
 		}
 	} else {

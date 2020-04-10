@@ -149,18 +149,18 @@ static void print_summary(int bundles_requested, int already_installed, int bund
 	/* print totals */
 	int bundles_failed = bundles_requested - bundles_installed - already_installed;
 	if (bundles_failed > 0) {
-		print("Failed to install %i of %i bundles\n", bundles_failed, bundles_requested - already_installed);
+		info("Failed to install %i of %i bundles\n", bundles_failed, bundles_requested - already_installed);
 	} else if (bundles_installed > 0) {
-		print("%snstalled %i bundle%s\n", (rc == SWUPD_OK ? "Successfully i" : "I"), bundles_installed, (bundles_installed > 1 ? "s" : ""));
+		info("%snstalled %i bundle%s\n", (rc == SWUPD_OK ? "Successfully i" : "I"), bundles_installed, (bundles_installed > 1 ? "s" : ""));
 	}
 	if (dependencies_installed > 0) {
-		print("%i bundle%s\n", dependencies_installed, (dependencies_installed > 1 ? "s were installed as dependencies" : " was installed as dependency"));
+		info("%i bundle%s\n", dependencies_installed, (dependencies_installed > 1 ? "s were installed as dependencies" : " was installed as dependency"));
 	}
 	if ((bundles_installed > 0 || dependencies_installed > 0) && rc != SWUPD_OK) {
-		print("Some files from the installed bundle%s may be missing\n", (bundles_installed + dependencies_installed > 1 ? "s" : ""));
+		info("Some files from the installed bundle%s may be missing\n", (bundles_installed + dependencies_installed > 1 ? "s" : ""));
 	}
 	if (already_installed > 0) {
-		print("%i bundle%s already installed\n", already_installed, (already_installed > 1 ? "s were" : " was"));
+		info("%i bundle%s already installed\n", already_installed, (already_installed > 1 ? "s were" : " was"));
 	}
 }
 

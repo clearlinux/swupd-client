@@ -176,7 +176,6 @@ static enum swupd_code list_local_bundles(int version)
 	struct manifest *MoM = NULL;
 	struct file *bundle_manifest = NULL;
 	int count = 0;
-	const bool DONT_SHOW = false;
 	bool quiet = (log_get_level() == LOG_ERROR);
 
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
@@ -206,7 +205,7 @@ static enum swupd_code list_local_bundles(int version)
 			bundle_manifest = mom_search_bundle(MoM, sys_basename((char *)item->data));
 		}
 		if (bundle_manifest && !quiet) {
-			name = get_printable_bundle_name(bundle_manifest->filename, bundle_manifest->is_experimental, DONT_SHOW, cmdline_option_status && is_tracked_bundle(bundle_manifest->filename));
+			name = get_printable_bundle_name(bundle_manifest->filename, bundle_manifest->is_experimental, cmdline_option_status && is_installed_bundle(bundle_manifest->filename), cmdline_option_status && is_tracked_bundle(bundle_manifest->filename));
 			info(" - ");
 			print("%s\n", name);
 			free(name);

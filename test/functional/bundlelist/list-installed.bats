@@ -41,8 +41,8 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Installed bundles:
-		 - os-core
-		 - test-bundle1
+		 - os-core (installed)
+		 - test-bundle1 (installed)
 		 - test-bundle2 (explicitly installed)
 
 		Total: 3

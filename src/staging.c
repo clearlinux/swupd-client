@@ -263,10 +263,7 @@ static enum swupd_code verify_fix_path(char *targetpath, struct manifest *target
 	}
 
 	/* Removing trailing '/' from the path */
-	path = strdup_or_die(targetpath);
-	if (path[string_len(path) - 1] == '/') {
-		path[string_len(path) - 1] = '\0';
-	}
+	path = sys_path_join("%s", targetpath);
 
 	/* Breaking down the path into parts.
 	 * eg. Path /usr/bin/foo will be broken into /usr,/usr/bin and /usr/bin/foo
@@ -328,8 +325,8 @@ static enum swupd_code verify_fix_path(char *targetpath, struct manifest *target
 		unlink_all_staged_content(file);
 
 		/* download the fullfile for the missing path */
-		string_or_die(&tar_dotfile, "%s/download/.%s.tar", globals.state_dir, file->hash);
-		string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
+		tar_dotfile = sys_path_join("%s/download/.%s.tar", globals.state_dir, file->hash);
+		url = sys_path_join("%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
 		ret = swupd_curl_get_file(url, tar_dotfile);
 		if (ret != 0) {
 			warn_unlabeled(" -> not fixed\n");
@@ -580,7 +577,7 @@ int staging_remove_files(struct list *files)
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
-		string_or_die(&fullfile, "%s/%s", globals.path_prefix, file->filename);
+		fullfile = sys_path_join("%s/%s", globals.path_prefix, file->filename);
 		if (sys_rm_recursive(fullfile) == -1) {
 			/* if a -1 is returned it means there was an issue deleting the
 			 * file or directory, in that case decrease the counter of deleted

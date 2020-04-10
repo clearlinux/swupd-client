@@ -48,7 +48,7 @@ install_bundles() {
 	[ "$1" = "-r" ] && { CMD="verify --fix"; shift ; }
 
 	if [ -z "$BUNDLE_LIST" ]; then
-		run sudo sh -c "$SWUPD bundle-list --all $SWUPD_OPTS_SHORT"
+		run sudo sh -c "$SWUPD bundle-list --all $SWUPD_OPTS_SHORT --quiet"
 		# shellcheck disable=SC2154
 		# SC2154: output is referenced but not assigned.
 		# the output variable is being assigned and exported by bats

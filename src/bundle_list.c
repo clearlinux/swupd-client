@@ -176,7 +176,6 @@ static enum swupd_code list_local_bundles(int version)
 	struct manifest *MoM = NULL;
 	struct file *bundle_manifest = NULL;
 	int count = 0;
-	bool quiet = (log_get_level() == LOG_ERROR);
 
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	if (version > 0) {
@@ -204,14 +203,14 @@ static enum swupd_code list_local_bundles(int version)
 		if (MoM) {
 			bundle_manifest = mom_search_bundle(MoM, sys_basename((char *)item->data));
 		}
-		if (bundle_manifest && !quiet) {
+		if (bundle_manifest) {
 			name = get_printable_bundle_name(bundle_manifest->filename, bundle_manifest->is_experimental, cmdline_option_status && is_installed_bundle(bundle_manifest->filename), cmdline_option_status && is_tracked_bundle(bundle_manifest->filename));
 			info(" - ");
 			print("%s\n", name);
 			free(name);
 		} else {
 			info(" - ");
-			print("%s\n", sys_basename((char *)item->data));
+			print("%s\n", sys_basename((char *)item->data))
 		}
 		count++;
 		item = item->next;
@@ -317,7 +316,6 @@ static enum swupd_code list_installable_bundles(int version)
 	struct file *file;
 	struct manifest *MoM = NULL;
 	int count = 0;
-	bool quiet = (log_get_level() == LOG_ERROR);
 
 	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
 	MoM = load_mom(version, NULL);
@@ -331,14 +329,10 @@ static enum swupd_code list_installable_bundles(int version)
 	while (list) {
 		file = list->data;
 		list = list->next;
-		if (!quiet) {
-			name = get_printable_bundle_name(file->filename, file->is_experimental, cmdline_option_status && is_installed_bundle(file->filename), cmdline_option_status && is_tracked_bundle(file->filename));
-			info(" - ");
-			print("%s\n", name);
-			free_and_clear_pointer(&name);
-		} else {
-			print("%s\n", file->filename);
-		}
+		name = get_printable_bundle_name(file->filename, file->is_experimental, cmdline_option_status && is_installed_bundle(file->filename), cmdline_option_status && is_tracked_bundle(file->filename));
+		info(" - ");
+		print("%s\n", name);
+		free_and_clear_pointer(&name);
 		count++;
 	}
 	info("\nTotal: %d\n", count);

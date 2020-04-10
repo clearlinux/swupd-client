@@ -91,7 +91,7 @@ global_setup() {
 	expected_output=$(cat <<-EOM
 		Installed bundles:
 		 - os-core (installed)
-		 - test-bundle1 (experimental, explicitly installed)
+		 - test-bundle1 (explicitly installed, experimental)
 
 		Total: 2
 	EOM

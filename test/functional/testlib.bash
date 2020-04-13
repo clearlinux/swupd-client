@@ -1271,7 +1271,7 @@ update_hashes_in_mom() { # swupd_function
 
 	IFS=$'\n'
 	if [ "$(basename "$manifest")" = Manifest.MoM ]; then
-		bundles=("$(sudo cat "$manifest" | grep -x "M\\.\\.\\..*" | awk '{ print $4 }')")
+		bundles=("$(sudo cat "$manifest" | grep -x "M.\\.\\..*" | awk '{ print $4 }')")
 		for bundle in ${bundles[*]}; do
 			# if the hash of the manifest changed, update it
 			bundle_old_hash=$(get_hash_from_manifest "$manifest" "$bundle")

@@ -403,7 +403,11 @@ enum swupd_code bundle_info(char *bundle)
 	} else if (installed) {
 		string_or_die(&status, "Installed");
 	}
-	info("Status: %s%s\n", status ? status : "Not installed", file->is_experimental ? " (experimental)" : "");
+	if (log_is_quiet() && !(cmdline_option_dependencies || cmdline_option_files)) {
+		print("%s%s\n", status ? status : "Not installed", file->is_experimental ? ", experimental" : "");
+	} else {
+		info("Status: %s%s\n", status ? status : "Not installed", file->is_experimental ? " (experimental)" : "");
+	}
 	free_and_clear_pointer(&status);
 
 	/* version info */
@@ -440,6 +444,10 @@ enum swupd_code bundle_info(char *bundle)
 	/* the --files flag was used */
 	if (cmdline_option_files) {
 
+		if (log_is_quiet() && cmdline_option_dependencies) {
+			/* leave a blank line between both lists */
+			print("\n");
+		}
 		struct list *bundle_files = NULL;
 		ret = get_bundle_files(manifest, mom, &bundle_files);
 		if (ret) {

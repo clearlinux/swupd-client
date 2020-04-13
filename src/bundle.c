@@ -44,7 +44,7 @@ bool is_installed_bundle(const char *bundle_name)
 	char *filename = NULL;
 	bool ret = true;
 
-	string_or_die(&filename, "%s/%s/%s", globals.path_prefix, BUNDLES_DIR, bundle_name);
+	filename = sys_path_join("%s/%s/%s", globals.path_prefix, BUNDLES_DIR, bundle_name);
 	ret = sys_file_exists(filename);
 	free_and_clear_pointer(&filename);
 
@@ -56,7 +56,7 @@ bool is_tracked_bundle(const char *bundle_name)
 	char *filename = NULL;
 	bool ret;
 
-	string_or_die(&filename, "%s/bundles/%s", globals.state_dir, bundle_name);
+	filename = sys_path_join("%s/bundles/%s", globals.state_dir, bundle_name);
 	ret = sys_file_exists(filename);
 	free_and_clear_pointer(&filename);
 

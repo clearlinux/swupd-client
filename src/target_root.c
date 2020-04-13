@@ -47,7 +47,7 @@ static int create_staging_renamedir(char *rename_tmpdir)
 		/* Not fatal but pretty scary, likely to really fail at the
 		 * next command too. Pass for now as printing may just cause
 		 * confusion */
-		;
+		UNEXPECTED();
 	}
 
 	ret = mkdir(rename_tmpdir, S_IRWXU);
@@ -526,6 +526,7 @@ enum swupd_code target_root_install_files(struct list *files, struct manifest *m
 	int ret = SWUPD_OK;
 
 	if (!list_is_sorted(files, cmp_file_filename_is_deleted)) {
+		UNEXPECTED();
 		debug("List of files to install is not sorted - fixing\n");
 		files = list_sort(files, cmp_file_filename_is_deleted);
 	}

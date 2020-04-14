@@ -19,7 +19,11 @@
 #define MAX(_a, _b) ((_a) > (_b) ? (_a) : (_b))
 
 #ifdef DEBUG_MODE
-#define UNEXPECTED() abort()
+#define UNEXPECTED()                                                                   \
+	do {                                                                           \
+		fprintf(stderr, "Unexpected condition (%s:%d)\n", __FILE__, __LINE__); \
+		abort();                                                               \
+	} while (0)
 #else
 /**
  * @brief To be used in all checks where we assume swupd should never get in to.

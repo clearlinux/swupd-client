@@ -278,7 +278,13 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 		if (!file->is_config && !file->is_state && !file->use_xattrs && !file->is_link) {
 			ret = link(fullfile_path, staged_file);
 		}
+
 		if (ret < 0) {
+			ret = copy(fullfile_path, staged_file);
+		}
+		if (ret < 0) {
+			// If file failed to link or copy
+			UNEXPECTED();
 			ret = install_file_using_tar(fullfile_path, target_path, target_basename);
 			if (ret) {
 				goto out;

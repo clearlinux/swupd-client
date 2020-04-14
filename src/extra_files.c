@@ -94,7 +94,8 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 			print(" -> deleted\n");
 		}
 	} else {
-		print(" -> Extra file: %s%s\n", temp, is_dir ? "/" : "");
+		info(" -> Extra file: ");
+		print("%s%s\n", temp, is_dir ? "/" : "");
 		ret = false;
 	}
 	free_and_clear_pointer(&temp);

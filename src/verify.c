@@ -382,7 +382,8 @@ static void add_missing_files(struct manifest *official_manifest, struct list *f
 			counts.missing++;
 			if (!repair || (repair && cmdline_option_install == false)) {
 				/* Log to stdout, so we can post-process */
-				print(" -> Missing file: %s%s", fullname, repair ? "" : "\n");
+				info(" -> Missing file: ");
+				print("%s%s", fullname, repair ? "" : "\n");
 			}
 		} else {
 			goto out;
@@ -444,7 +445,8 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	if (access(fullname, F_OK) == 0) {
 		counts.mismatch++;
 		/* Log to stdout, so we can post-process it */
-		print(" -> Hash mismatch for file: %s%s", fullname, repair ? "" : "\n");
+		info(" -> Hash mismatch for file: ");
+		print("%s%s", fullname, repair ? "" : "\n");
 	}
 
 	/* if not repairing, we're done */
@@ -544,7 +546,8 @@ static void remove_orphaned_files(struct list *files_to_verify, bool repair)
 		}
 
 		counts.extraneous++;
-		print(" -> File that should be deleted: %s%s", fullname, repair ? "" : "\n");
+		info(" -> File that should be deleted: ");
+		print("%s%s", fullname, repair ? "" : "\n");
 
 		/* if not repairing, we're done */
 		if (!repair) {

@@ -15,6 +15,8 @@ test_setup() {
 
 @test "UPD029: Update corrects a missing directory in the target system" {
 
+	assert_dir_not_exists "$TARGETDIR"/foo
+
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
 	assert_status_is 0
@@ -35,9 +37,6 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Installing files...
-		 -> Missing directory: $PATH_PREFIX/foo -> fixed
-		 -> Missing directory: $PATH_PREFIX/foo/bar -> fixed
-		 -> Missing directory: $PATH_PREFIX/foo/bar/baz -> fixed
 		Update was applied
 		Calling post-update helper scripts
 		1 files were not in a pack

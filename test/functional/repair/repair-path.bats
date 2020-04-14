@@ -102,8 +102,6 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing directory: $PATH_PREFIX/baz -> fixed
-		 -> Missing directory: $PATH_PREFIX/baz/testdir -> fixed
 		 -> Missing file: $PATH_PREFIX/baz/testdir/file_3 -> fixed
 		Repairing corrupt files
 		Removing extraneous files

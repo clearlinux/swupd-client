@@ -21,7 +21,10 @@ test_setup() {
 
 @test "ADD022: When adding a bundle and a path is missing on the fs, bundle-add fixes it" {
 
+	assert_dir_not_exists "$TARGETDIR"/foo/bar
+
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
+
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
@@ -29,7 +32,6 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Installing files...
-		 -> Missing directory: $PATH_PREFIX/foo/bar -> fixed
 		Calling post-update helper scripts
 		Successfully installed 1 bundle
 	EOM

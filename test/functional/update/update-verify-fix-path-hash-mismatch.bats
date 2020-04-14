@@ -18,6 +18,12 @@ test_setup() {
 
 @test "UPD030: Update corrects a directory that has a hash mismatch" {
 
+	# pre-test validations
+	assert_dir_not_exists "$TARGETDIR"/usr/foo
+	file_hash=$(sudo "$SWUPD" hashdump --quiet "$TARGETDIR"/usr)
+	good_hash=$(get_hash_from_manifest "$WEBDIR"/100/Manifest.test-bundle /usr)
+	assert_not_equal "$file_hash" "$good_hash"
+
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
 	assert_status_is 0
@@ -38,8 +44,6 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Installing files...
-		 -> Corrupt directory: $PATH_PREFIX/usr -> fixed
-		 -> Missing directory: $PATH_PREFIX/usr/foo -> fixed
 		Update was applied
 		Calling post-update helper scripts
 		1 files were not in a pack

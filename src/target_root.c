@@ -86,16 +86,21 @@ enum swupd_code stage_single_file(struct file *file, struct manifest *mom)
 	 * and is in deed a directory */
 	targetpath = sys_path_join("%s/%s", globals.path_prefix, dir);
 	if (!sys_filelink_exists(targetpath)) {
+		debug("Target directory does not exist: %s\n", targetpath);
 		if (mom) {
+			debug("Attempting to fix missing directory\n");
 			verify_fix_path(dir, mom);
 		} else {
-			debug("Target directory does not exist: %s. Auto-fix disabled\n", targetpath);
+			debug("Auto-fix of missing directory disabled\n");
 		}
 	} else if (!sys_filelink_is_dir(targetpath)) {
-		error("Target exists but is NOT a directory: %s\n", targetpath);
+		error("Target exists but is not a directory: %s\n", targetpath);
+		ret = SWUPD_COULDNT_CREATE_DIR;
+		goto out;
 	}
 
 	if (!sys_filelink_is_dir(targetpath)) {
+		error("Target directory does not exist and could not be created: %s\n", targetpath);
 		ret = SWUPD_COULDNT_CREATE_DIR;
 		goto out;
 	}
@@ -113,7 +118,7 @@ enum swupd_code stage_single_file(struct file *file, struct manifest *mom)
 	ret = sys_rm_recursive(target);
 	if (ret != 0 && ret != -ENOENT) {
 		ret = SWUPD_COULDNT_REMOVE_FILE;
-		error("Failed to remove %s\n", target);
+		error("Failed to remove staging file %s\n", target);
 		goto out;
 	}
 
@@ -127,12 +132,15 @@ enum swupd_code stage_single_file(struct file *file, struct manifest *mom)
 		    (file->is_link && !S_ISLNK(s.st_mode)) ||
 		    (file->is_file && !S_ISREG(s.st_mode))) {
 			// file type changed, move old out of the way for new
+			debug("The file type changed for file %s, removing old file\n", statfile);
 			ret = sys_rm_recursive(statfile);
-			free_and_clear_pointer(&statfile);
 			if (ret != 0 && ret != -ENOENT) {
+				error("Target has different file type but could not be removed: %s\n", statfile);
 				ret = SWUPD_COULDNT_REMOVE_FILE;
+				free_and_clear_pointer(&statfile);
 				goto out;
 			}
+			free_and_clear_pointer(&statfile);
 		}
 	}
 	free_and_clear_pointer(&statfile);
@@ -290,15 +298,14 @@ static enum swupd_code verify_fix_path(char *targetpath, struct manifest *target
 		/* Search for the file in the manifest, to get the hash for the file */
 		file = search_file_in_manifest(target_mom, path);
 		if (file == NULL) {
-			error("Path %s not found in any of the subscribed manifests"
-			      "in verify_fix_path for path_prefix %s\n",
+			error("Path %s not found in any of the subscribed manifests for target root %s\n",
 			      path, globals.path_prefix);
 			ret = SWUPD_PATH_NOT_IN_MANIFEST;
 			goto end;
 		}
 
 		if (file->is_deleted) {
-			error("Path %s found deleted in verify_fix_path\n", path);
+			error("Path %s marked as deleted in manifest\n", path);
 			ret = SWUPD_UNEXPECTED_CONDITION;
 			goto end;
 		}
@@ -309,9 +316,9 @@ static enum swupd_code verify_fix_path(char *targetpath, struct manifest *target
 				/* this subpart of the path does exist, nothing to be done */
 				continue;
 			}
-			warn_unlabeled(" -> Corrupt directory: %s", target);
+			debug("Corrupt directory: %s\n", target);
 		} else if (ret == -1 && errno == ENOENT) {
-			warn_unlabeled(" -> Missing directory: %s", target);
+			debug("Missing directory: %s\n", target);
 		} else {
 			goto end;
 		}
@@ -329,15 +336,13 @@ static enum swupd_code verify_fix_path(char *targetpath, struct manifest *target
 		url = sys_path_join("%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
 		ret = swupd_curl_get_file(url, tar_dotfile);
 		if (ret != 0) {
-			warn_unlabeled(" -> not fixed\n");
-			error("Failed to download file %s in verify_fix_path\n", file->filename);
+			error("Failed to download file %s\n", file->filename);
 			ret = SWUPD_COULDNT_DOWNLOAD_FILE;
 			unlink(tar_dotfile);
 			goto end;
 		}
 
 		if (untar_full_download(file) != 0) {
-			warn_unlabeled(" -> not fixed\n");
 			error("Failed to untar file %s\n", file->filename);
 			ret = SWUPD_COULDNT_UNTAR_FILE;
 			goto end;
@@ -347,11 +352,9 @@ static enum swupd_code verify_fix_path(char *targetpath, struct manifest *target
 		if (ret != 0) {
 			/* stage_single_file returns a swupd_code on error,
 			* just propagate the error */
-			warn_unlabeled(" -> not fixed\n");
-			error("Path %s failed to stage in verify_fix_path\n", path);
+			debug("Path %s failed to stage in verify_fix_path\n", path);
 			goto end;
 		}
-		warn_unlabeled(" -> fixed\n");
 	}
 end:
 	free_and_clear_pointer(&target);

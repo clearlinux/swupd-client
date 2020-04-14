@@ -36,7 +36,7 @@
 #include "swupd.h"
 #include "swupd_build_variant.h"
 
-static enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_mom);
+static enum swupd_code verify_fix_path(char *target_path, struct manifest *target_mom);
 
 /* clean then recreate temporary folder for tar renames */
 static int create_staging_renamedir(char *rename_tmpdir)
@@ -60,52 +60,138 @@ static int create_staging_renamedir(char *rename_tmpdir)
 	return ret;
 }
 
+static bool file_type_changed(const char *statfile, struct file *file)
+{
+	struct stat s = { 0 };
+	int ret;
+
+	ret = lstat(statfile, &s);
+
+	// File exists, but stat failed. Consider a file type change
+	// to ensure file is removed before updating
+	if (ret != 0 && errno != ENOENT && errno != ENOTDIR) {
+		UNEXPECTED();
+		return true;
+	}
+
+	return (ret == 0) &&				  // File exists
+	       ((file->is_dir && !S_ISDIR(s.st_mode)) ||  // Changed to dir
+		(file->is_link && !S_ISLNK(s.st_mode)) || // Changed to link
+		(file->is_file && !S_ISREG(s.st_mode)));  // Changed to file
+}
+
+static enum swupd_code install_dir_using_tar(const char *fullfile_path, const char *target_path, const char *target_basename)
+{
+	enum swupd_code ret = SWUPD_OK;
+	char *rename_tmpdir = NULL;
+	char *rename_target = NULL;
+	char *tarcommand = NULL;
+
+	rename_tmpdir = sys_path_join("%s/tmprenamedir", globals.state_dir);
+	rename_target = sys_path_join("%s/%s", rename_tmpdir, target_basename);
+
+	/* In order to avoid tar transforms with directories, rename
+	 * the directory before and after the tar command */
+	if (create_staging_renamedir(rename_tmpdir) != 0) {
+		ret = SWUPD_COULDNT_CREATE_DIR;
+		goto out;
+	}
+
+	if (rename(fullfile_path, rename_target) != 0) {
+		ret = SWUPD_COULDNT_RENAME_DIR;
+		goto out;
+	}
+
+	string_or_die(&tarcommand, TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -cf - './%s' 2> /dev/null | " TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null", rename_tmpdir, target_basename, target_path);
+
+	if (system(tarcommand) != 0) {
+		ret = SWUPD_SUBPROCESS_ERROR;
+	}
+
+	if (rename(rename_target, fullfile_path) != 0) {
+		ret = SWUPD_COULDNT_RENAME_DIR;
+	}
+
+out:
+	free(tarcommand);
+	free(rename_tmpdir);
+	free(rename_target);
+	return ret;
+}
+
+static enum swupd_code install_file_using_tar(const char *fullfile_path, const char *target_path, const char *target_basename)
+{
+	enum swupd_code ret = SWUPD_OK;
+	char *rename_tmpdir = NULL;
+	char *rename_target = NULL;
+	char *tarcommand = NULL;
+
+	rename_target = sys_path_join("%s/staged/.update.%s", globals.state_dir, target_basename);
+	if (rename(fullfile_path, rename_target) != 0) {
+		ret = SWUPD_COULDNT_RENAME_FILE;
+		goto out;
+	}
+	string_or_die(&tarcommand, TAR_COMMAND " -C '%s/staged' " TAR_PERM_ATTR_ARGS " -cf - '.update.%s' 2> /dev/null | " TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
+		      globals.state_dir, target_basename, target_path);
+	if (system(tarcommand) != 0) {
+		ret = SWUPD_SUBPROCESS_ERROR;
+	}
+
+	if (rename(rename_target, fullfile_path) != 0) {
+		ret = SWUPD_COULDNT_RENAME_FILE;
+	}
+
+out:
+	free(tarcommand);
+	free(rename_tmpdir);
+	free(rename_target);
+	return ret;
+}
+
 /* Do the staging of new files into the filesystem */
 //TODO: "stage_single_file is currently not able to be run in parallel"
 /* Consider adding a remove_leftovers() that runs in verify/fix in order to
  * allow this function to mkdtemp create folders for parallel build */
 static enum swupd_code stage_single_file(struct file *file, struct manifest *mom)
 {
-	char *statfile = NULL;
-	char *dir, *base;
-	char *tarcommand = NULL;
-	char *original = NULL;
-	char *target = NULL;
-	char *targetpath = NULL;
-	char *rename_target = NULL;
-	char *rename_tmpdir = NULL;
-	struct stat s;
+	char *target_file = NULL;
+	char *dir, *target_basename;
+	char *fullfile_path = NULL;
+	char *staged_file = NULL;
+	char *target_path = NULL;
 	int ret;
 
 	dir = sys_dirname(file->filename);
-	base = sys_basename(file->filename);
+	target_basename = sys_basename(file->filename);
 
-	original = sys_path_join("%s/staged/%s", globals.state_dir, file->hash);
+	fullfile_path = sys_path_join("%s/staged/%s", globals.state_dir, file->hash);
+	target_path = sys_path_join("%s/%s", globals.path_prefix, dir);
+	target_file = sys_path_join("%s/%s", globals.path_prefix, file->filename);
+	staged_file = sys_path_join("%s/.update.%s", target_path, target_basename);
 
 	/* make sure the directory where the file should be copied to exists
-	 * and is in deed a directory */
-	targetpath = sys_path_join("%s/%s", globals.path_prefix, dir);
-	if (!sys_filelink_exists(targetpath)) {
-		debug("Target directory does not exist: %s\n", targetpath);
+	 * and is indeed a directory */
+	if (!sys_filelink_exists(target_path)) {
+		debug("Target directory does not exist: %s\n", target_path);
 		if (mom) {
 			debug("Attempting to fix missing directory\n");
 			verify_fix_path(dir, mom);
 		} else {
 			debug("Auto-fix of missing directory disabled\n");
 		}
-	} else if (!sys_filelink_is_dir(targetpath)) {
-		error("Target exists but is not a directory: %s\n", targetpath);
+	} else if (!sys_filelink_is_dir(target_path)) {
+		error("Target exists but is not a directory: %s\n", target_path);
 		ret = SWUPD_COULDNT_CREATE_DIR;
 		goto out;
 	}
 
-	if (!sys_filelink_is_dir(targetpath)) {
-		error("Target directory does not exist and could not be created: %s\n", targetpath);
+	if (!sys_filelink_is_dir(target_path)) {
+		error("Target directory does not exist and could not be created: %s\n", target_path);
 		ret = SWUPD_COULDNT_CREATE_DIR;
 		goto out;
 	}
 
-	if (!sys_path_is_absolute(targetpath)) {
+	if (!sys_path_is_absolute(target_path)) {
 		/* This should never happen with Manifest generated by
 		 * mixer, but we are trying to make sure we are not going
 		 * to install any file that is pointed by a symlink */
@@ -114,83 +200,36 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 	}
 
 	/* remove a pre-existing .update file in the destination if it exists */
-	target = sys_path_join("%s/.update.%s", targetpath, base);
-	ret = sys_rm_recursive(target);
+	ret = sys_rm_recursive(staged_file);
 	if (ret != 0 && ret != -ENOENT) {
 		ret = SWUPD_COULDNT_REMOVE_FILE;
-		error("Failed to remove staging file %s\n", target);
+		error("Failed to remove staging file %s\n", staged_file);
 		goto out;
 	}
 
 	/* if the file already exists in the final destination, check to see
 	 * if it is of the same type */
-	statfile = sys_path_join("%s/%s", globals.path_prefix, file->filename);
-	memset(&s, 0, sizeof(struct stat));
-	ret = lstat(statfile, &s);
-	if (ret == 0) {
-		if ((file->is_dir && !S_ISDIR(s.st_mode)) ||
-		    (file->is_link && !S_ISLNK(s.st_mode)) ||
-		    (file->is_file && !S_ISREG(s.st_mode))) {
-			// file type changed, move old out of the way for new
-			debug("The file type changed for file %s, removing old file\n", statfile);
-			ret = sys_rm_recursive(statfile);
-			if (ret != 0 && ret != -ENOENT) {
-				error("Target has different file type but could not be removed: %s\n", statfile);
-				ret = SWUPD_COULDNT_REMOVE_FILE;
-				free_and_clear_pointer(&statfile);
-				goto out;
-			}
-			free_and_clear_pointer(&statfile);
+	if (file_type_changed(target_file, file)) {
+		// file type changed, move old out of the way for new
+		debug("The file type changed for file %s, removing old file\n", target_file);
+		ret = sys_rm_recursive(target_file);
+		if (ret != 0 && ret != -ENOENT) {
+			error("Target has different file type but could not be removed: %s\n", target_file);
+			ret = SWUPD_COULDNT_REMOVE_FILE;
+			goto out;
 		}
 	}
-	free_and_clear_pointer(&statfile);
 
 	/* copy the file/directory to its final destination, if it is a file
 	 * keep its name with a .update prefix for now like this .update.(file_name)
 	 * if it is a directory it will be renamed to its final name once copied */
-	if (file->is_dir || S_ISDIR(s.st_mode)) {
-		/* In the btrfs only scenario there was an implicit
-		 * "create_or_update_dir()" via un-tar-ing a directory.tar after
-		 * download and the untar happens in the staging subvolume which
-		 * then gets promoted to a "real" usable subvolume.  But for
-		 * a live rootfs the directory needs copied out of staged
-		 * and into the rootfs.  Tar is a way to copy with
-		 * attributes and it includes internal logic that does the
-		 * right thing to overlay a directory onto something
-		 * pre-existing: */
-		/* In order to avoid tar transforms with directories, rename
-		 * the directory before and after the tar command */
-		rename_tmpdir = sys_path_join("%s/tmprenamedir", globals.state_dir);
-		ret = create_staging_renamedir(rename_tmpdir);
+	if (file->is_dir) {
+		ret = install_dir_using_tar(fullfile_path, target_path, target_basename);
 		if (ret) {
-			ret = SWUPD_COULDNT_CREATE_DIR;
 			goto out;
 		}
-		rename_target = sys_path_join("%s/%s", rename_tmpdir, base);
-		if (rename(original, rename_target)) {
-			ret = SWUPD_COULDNT_RENAME_DIR;
-			goto out;
-		}
-		string_or_die(&tarcommand, TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -cf - './%s' 2> /dev/null | " TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-			      rename_tmpdir, base, targetpath);
-		ret = system(tarcommand);
-		if (ret == -1) {
-			ret = SWUPD_SUBPROCESS_ERROR;
-		}
-		if (WIFEXITED(ret)) {
-			ret = WEXITSTATUS(ret);
-		}
-		free_and_clear_pointer(&tarcommand);
-		if (rename(rename_target, original)) {
-			ret = SWUPD_COULDNT_RENAME_DIR;
-			goto out;
-		}
-		if (ret) {
-			ret = SWUPD_COULDNT_RENAME_DIR;
-			goto out;
-		}
-	} else { /* (!file->is_dir && !S_ISDIR(stat.st_mode)) */
-		/* can't naively hard link(): Non-read-only files with same hash must remain
+	} else { /* (!file->is_dir)
+		* can't naively hard link(): Non-read-only files with same hash must remain
 		 * separate copies otherwise modifications to one instance of the file
 		 * propagate to all instances of the file perhaps causing subtle data corruption from
 		 * a user's perspective.  In practice the rootfs is stateless and owned by us.
@@ -199,51 +238,31 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 		 * inefficient.  So prefer hardlink and fall back if needed: */
 		ret = -1;
 		if (!file->is_config && !file->is_state && !file->use_xattrs && !file->is_link) {
-			ret = link(original, target);
+			ret = link(fullfile_path, staged_file);
 		}
 		if (ret < 0) {
-			/* either the hardlink failed, or it was undesirable (config), do a tar-tar dance */
-			/* In order to avoid tar transforms, rename the file
-			 * before and after the tar command */
-			rename_target = sys_path_join("%s/staged/.update.%s", globals.state_dir, base);
-			ret = rename(original, rename_target);
+			ret = install_file_using_tar(fullfile_path, target_path, target_basename);
 			if (ret) {
-				ret = SWUPD_COULDNT_RENAME_FILE;
-				goto out;
-			}
-			string_or_die(&tarcommand, TAR_COMMAND " -C '%s/staged' " TAR_PERM_ATTR_ARGS " -cf - '.update.%s' 2> /dev/null | " TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-				      globals.state_dir, base, targetpath);
-			ret = system(tarcommand);
-			if (ret == -1) {
-				ret = SWUPD_SUBPROCESS_ERROR;
-			}
-			if (WIFEXITED(ret)) {
-				ret = WEXITSTATUS(ret);
-			}
-			free_and_clear_pointer(&tarcommand);
-			ret = rename(rename_target, original);
-			if (ret) {
-				ret = SWUPD_COULDNT_RENAME_FILE;
 				goto out;
 			}
 		}
 
-		free_and_clear_pointer(&file->staging);
-		file->staging = sys_path_join("%s/.update.%s", targetpath, base);
-		if (!sys_file_exists(file->staging)) {
-			free_and_clear_pointer(&file->staging);
+		if (!sys_file_exists(staged_file)) {
 			ret = SWUPD_COULDNT_CREATE_FILE;
 			goto out;
 		}
+
+		// Update staging reference in file structure
+		free_and_clear_pointer(&file->staging);
+		file->staging = strdup_or_die(staged_file);
 	}
 
 out:
 	free_and_clear_pointer(&dir);
-	free_and_clear_pointer(&target);
-	free_and_clear_pointer(&targetpath);
-	free_and_clear_pointer(&original);
-	free_and_clear_pointer(&rename_target);
-	free_and_clear_pointer(&rename_tmpdir);
+	free_and_clear_pointer(&target_file);
+	free_and_clear_pointer(&staged_file);
+	free_and_clear_pointer(&target_path);
+	free_and_clear_pointer(&fullfile_path);
 
 	return ret;
 }
@@ -253,7 +272,7 @@ out:
  * by breaking it into sub-paths and fixing them top down.
  * Here, target_mom is the consolidated manifest for the version you are trying to update/verify.
  */
-static enum swupd_code verify_fix_path(char *targetpath, struct manifest *target_mom)
+static enum swupd_code verify_fix_path(char *target_path, struct manifest *target_mom)
 {
 	struct list *path_list = NULL; /* path_list contains the subparts in the path */
 	char *path;
@@ -266,12 +285,12 @@ static enum swupd_code verify_fix_path(char *targetpath, struct manifest *target
 	struct list *list1 = NULL;
 
 	/* This shouldn't happen */
-	if (strcmp(targetpath, "/") == 0) {
+	if (strcmp(target_path, "/") == 0) {
 		return ret;
 	}
 
 	/* Removing trailing '/' from the path */
-	path = sys_path_join("%s", targetpath);
+	path = sys_path_join("%s", target_path);
 
 	/* Breaking down the path into parts.
 	 * eg. Path /usr/bin/foo will be broken into /usr,/usr/bin and /usr/bin/foo

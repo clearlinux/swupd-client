@@ -36,6 +36,8 @@
 #include "swupd.h"
 #include "swupd_build_variant.h"
 
+#define STAGE_FILE_PREFIX ".update."
+
 static enum swupd_code verify_fix_path(char *target_path, struct manifest *target_mom);
 
 /* clean then recreate temporary folder for tar renames */
@@ -126,13 +128,13 @@ static enum swupd_code install_file_using_tar(const char *fullfile_path, const c
 	char *rename_target = NULL;
 	char *tarcommand = NULL;
 
-	rename_target = sys_path_join("%s/staged/.update.%s", globals.state_dir, target_basename);
+	rename_target = sys_path_join("%s/staged/%s%s", globals.state_dir, STAGE_FILE_PREFIX, target_basename);
 	if (rename(fullfile_path, rename_target) != 0) {
 		ret = SWUPD_COULDNT_RENAME_FILE;
 		goto out;
 	}
-	string_or_die(&tarcommand, TAR_COMMAND " -C '%s/staged' " TAR_PERM_ATTR_ARGS " -cf - '.update.%s' 2> /dev/null | " TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-		      globals.state_dir, target_basename, target_path);
+	string_or_die(&tarcommand, TAR_COMMAND " -C '%s/staged' " TAR_PERM_ATTR_ARGS " -cf - '%s%s' 2> /dev/null | " TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
+		      globals.state_dir, STAGE_FILE_PREFIX, target_basename, target_path);
 	if (system(tarcommand) != 0) {
 		ret = SWUPD_SUBPROCESS_ERROR;
 	}
@@ -167,7 +169,7 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 	fullfile_path = sys_path_join("%s/staged/%s", globals.state_dir, file->hash);
 	target_path = sys_path_join("%s/%s", globals.path_prefix, dir);
 	target_file = sys_path_join("%s/%s", globals.path_prefix, file->filename);
-	staged_file = sys_path_join("%s/.update.%s", target_path, target_basename);
+	staged_file = sys_path_join("%s/%s%s", target_path, STAGE_FILE_PREFIX, target_basename);
 
 	/* make sure the directory where the file should be copied to exists
 	 * and is indeed a directory */

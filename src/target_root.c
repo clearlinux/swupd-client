@@ -35,6 +35,7 @@
 #include "config.h"
 #include "swupd.h"
 #include "swupd_build_variant.h"
+#include "xattrs.h"
 
 #define STAGE_FILE_PREFIX ".update."
 
@@ -150,6 +151,39 @@ out:
 	return ret;
 }
 
+int install_dir(const char *fullfile_path, const char *target_file)
+{
+	struct stat s;
+	int err;
+
+	err = lstat(fullfile_path, &s);
+	if (err < 0) {
+		return -errno;
+	}
+
+	err = mkdir(target_file, S_IRWXU);
+	if (err && errno != EEXIST) {
+		// We guarantee that if a file exists it is a directory
+		return -errno;
+	}
+
+	err = chmod(target_file, s.st_mode);
+	if (err) {
+		return -errno;
+	}
+
+	// Change owner and group
+	err = lchown(target_file, s.st_uid, s.st_gid);
+	if (err) {
+		return -errno;
+	}
+
+	// Copy xattrs
+	xattrs_copy(fullfile_path, target_file);
+
+	return 0;
+}
+
 /* Do the staging of new files into the filesystem */
 //TODO: "stage_single_file is currently not able to be run in parallel"
 /* Consider adding a remove_leftovers() that runs in verify/fix in order to
@@ -226,9 +260,11 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 	 * keep its name with a .update prefix for now like this .update.(file_name)
 	 * if it is a directory it will be renamed to its final name once copied */
 	if (file->is_dir) {
-		ret = install_dir_using_tar(fullfile_path, target_path, target_basename);
-		if (ret) {
-			goto out;
+		if (install_dir(fullfile_path, target_file) == 0) {
+			ret = SWUPD_OK;
+		} else {
+			UNEXPECTED();
+			ret = install_dir_using_tar(fullfile_path, target_path, target_basename);
 		}
 	} else { /* (!file->is_dir)
 		* can't naively hard link(): Non-read-only files with same hash must remain

@@ -284,7 +284,7 @@ static int get_required_files(struct manifest *official_manifest, struct list *r
 	}
 
 	progress_next_step("check_files_hash", PROGRESS_BAR);
-	print("\n");
+	info("\n");
 	if (check_files_hash(required_files)) {
 		/* we don't need to do these steps, we already have the files,
 		 * just complete the steps */
@@ -340,7 +340,7 @@ static void check_warn_freespace(const struct file *file)
 	}
 
 out:
-	info("\tContinuing operation...\n");
+	debug("There is enough space on disk for %s\n", original);
 	free_and_clear_pointer(&original);
 }
 
@@ -352,6 +352,14 @@ static void add_missing_files(struct manifest *official_manifest, struct list *f
 	struct list *iter;
 	int list_length = list_len(files_to_verify);
 	int complete = 0;
+
+	if (cmdline_option_install) {
+		info("Installing base OS and selected bundles\n");
+	} else if (cmdline_option_fix) {
+		info("Adding any missing files\n");
+	} else {
+		info("\nChecking for missing files\n");
+	}
 
 	iter = list_head(files_to_verify);
 	while (iter) {
@@ -396,7 +404,7 @@ static void add_missing_files(struct manifest *official_manifest, struct list *f
 
 		/* install the new file (on miscompare + fix) */
 		if (target_root_install_single_file(file, official_manifest) != SWUPD_OK) {
-			debug("target_root_install_single_file for file %s failed", file->filename);
+			debug("target_root_install_single_file for file %s failed\n", file->filename);
 		}
 
 		/* verify the hash again to judge success */
@@ -408,7 +416,8 @@ static void add_missing_files(struct manifest *official_manifest, struct list *f
 		}
 		if ((ret != 0) || hash_needs_work(file, local.hash)) {
 			counts.not_replaced++;
-			print(" -> not fixed\n");
+			info(" -> not fixed");
+			print("\n");
 
 			check_warn_freespace(file);
 
@@ -416,7 +425,8 @@ static void add_missing_files(struct manifest *official_manifest, struct list *f
 			counts.replaced++;
 			file->do_not_update = 1;
 			if (cmdline_option_install == false) {
-				print(" -> fixed\n");
+				info(" -> fixed");
+				print("\n");
 			}
 		}
 	out:
@@ -442,12 +452,14 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	}
 	// do not account for missing files at this point, they are
 	// accounted for in a different stage, only account for mismatch
-	if (access(fullname, F_OK) == 0) {
-		counts.mismatch++;
-		/* Log to stdout, so we can post-process it */
-		info(" -> Hash mismatch for file: ");
-		print("%s%s", fullname, repair ? "" : "\n");
+	if (access(fullname, F_OK) != 0) {
+		goto end;
 	}
+
+	counts.mismatch++;
+	/* Log to stdout, so we can post-process it */
+	info(" -> Hash mismatch for file: ");
+	print("%s%s", fullname, repair ? "" : "\n");
 
 	/* if not repairing, we're done */
 	if (!repair) {
@@ -460,11 +472,12 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	/* at the end of all this, verify the hash again to judge success */
 	if (verify_file(file, fullname)) {
 		counts.fixed++;
-		print(" -> fixed\n");
+		info(" -> fixed");
 	} else {
 		counts.not_fixed++;
-		print(" -> not fixed\n");
+		info(" -> not fixed");
 	}
+	print("\n");
 end:
 	free_and_clear_pointer(&fullname);
 }
@@ -597,27 +610,28 @@ static void remove_orphaned_files(struct list *files_to_verify, bool repair)
 		if (!sys_is_dir(fullname)) {
 			ret = unlinkat(fd, base, 0);
 			if (ret && errno != ENOENT) {
-				warn(" -> Failed to remove %s (%i: %s)\n", fullname, errno, strerror(errno));
+				info(" -> not deleted (%s)", strerror(errno));
 				counts.not_deleted++;
 			} else {
-				print(" -> deleted\n");
+				info(" -> deleted");
 				counts.deleted++;
 			}
+			print("\n");
 		} else {
 			ret = unlinkat(fd, base, AT_REMOVEDIR);
 			if (ret) {
 				counts.not_deleted++;
 				if (errno != ENOTEMPTY) {
-					warn(" -> Failed to remove empty folder %s (%i: %s)\n",
-					     fullname, errno, strerror(errno));
+					info(" -> not deleted (%s)", strerror(errno));
 				} else {
 					//FIXME: Add force removal option?
-					warn(" -> Couldn't remove directory containing untracked files: %s\n", fullname);
+					info(" -> not deleted (not empty)");
 				}
 			} else {
-				print(" -> deleted\n");
+				info(" -> deleted");
 				counts.deleted++;
 			}
+			print("\n");
 		}
 		close(fd);
 	out:
@@ -1210,13 +1224,6 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 	 */
 	timelist_timer_start(globals.global_times, "Add missing files");
 	progress_next_step("add_missing_files", PROGRESS_BAR);
-	if (cmdline_option_install) {
-		info("Installing base OS and selected bundles\n");
-	} else if (cmdline_option_fix) {
-		info("Adding any missing files\n");
-	} else {
-		info("\nChecking for missing files\n");
-	}
 	add_missing_files(official_manifest, files_to_verify, cmdline_option_fix || cmdline_option_install);
 	timelist_timer_stop(globals.global_times);
 
@@ -1237,6 +1244,8 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 	if ((counts.not_fixed == 0) && (counts.not_replaced == 0)) {
 		progress_next_step("remove_extraneous_files", PROGRESS_BAR);
 		remove_orphaned_files(files_to_verify, cmdline_option_fix);
+	} else {
+		info("The removal of extraneous files will be skipped due to the previous errors found repairing\n");
 	}
 	timelist_timer_stop(globals.global_times);
 
@@ -1408,14 +1417,14 @@ clean_and_exit:
 		}
 	} else {
 		if (cmdline_option_fix) {
-			print("\nRepair did not fully succeed\n");
+			info("\nRepair did not fully succeed\n");
 		} else if (cmdline_option_download) {
 			print("\nInstallation file downloads failed\n");
 		} else if (cmdline_option_install) {
 			print("\nInstallation failed\n");
 		} else {
 			/* This is just a verification */
-			print("\n%s did not fully succeed\n", cmdline_command_verify ? "Verify" : "Diagnose");
+			info("\n%s did not fully succeed\n", cmdline_command_verify ? "Verify" : "Diagnose");
 		}
 	}
 

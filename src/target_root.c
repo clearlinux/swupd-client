@@ -64,7 +64,7 @@ static int create_staging_renamedir(char *rename_tmpdir)
 //TODO: "stage_single_file is currently not able to be run in parallel"
 /* Consider adding a remove_leftovers() that runs in verify/fix in order to
  * allow this function to mkdtemp create folders for parallel build */
-enum swupd_code stage_single_file(struct file *file, struct manifest *mom)
+static enum swupd_code stage_single_file(struct file *file, struct manifest *mom)
 {
 	char *statfile = NULL;
 	char *dir, *base;

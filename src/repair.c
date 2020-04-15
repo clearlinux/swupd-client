@@ -127,9 +127,7 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case FLAG_FILE:
-		cmdline_option_file = strdup_or_die(optarg);
-		/* Remove trailing '/' at the end of file/dir if any */
-		remove_trailing_slash(cmdline_option_file);
+		cmdline_option_file = sys_path_join("%s", optarg);
 		return true;
 	default:
 		return false;

@@ -572,43 +572,6 @@ void delete_motd(void)
 	unlink(MOTD_FILE);
 }
 
-int get_dirfd_path(const char *fullname)
-{
-	int ret = -1;
-	int fd;
-	char *dir = NULL;
-	char *real_path = NULL;
-
-	dir = sys_dirname(fullname);
-
-	fd = open(dir, O_RDONLY);
-	if (fd < 0) {
-		error("Failed to open dir %s (%s)\n", dir, strerror(errno));
-		goto out;
-	}
-
-	real_path = realpath(dir, NULL);
-	if (!real_path) {
-		error("Failed to get real path of %s (%s)\n", dir, strerror(errno));
-		close(fd);
-		goto out;
-	}
-
-	if (strcmp(real_path, dir) != 0) {
-		/* The path to the file contains a symlink, skip the file,
-		 * because we cannot safely determine if it can be deleted. */
-		ret = -2;
-		close(fd);
-	} else {
-		ret = fd;
-	}
-
-	free_and_clear_pointer(&real_path);
-out:
-	free_and_clear_pointer(&dir);
-	return ret;
-}
-
 struct list *consolidate_files_from_bundles(struct list *bundles)
 {
 	/* bundles is a pointer to a list of manifests */

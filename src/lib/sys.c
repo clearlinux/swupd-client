@@ -672,3 +672,33 @@ void sys_mmap_free(void *buffer, size_t buffer_length)
 		munmap(buffer, buffer_length);
 	}
 }
+
+int link_or_rename(const char *orig, const char *dest)
+{
+	/* Try doing a regular rename if hardlink fails */
+	if (link(orig, dest) != 0) {
+		return rename(orig, dest);
+	}
+
+	return 0;
+}
+
+int link_or_copy(const char *orig, const char *dest)
+{
+	/* Try doing a copy if hardlink fails */
+	if (link(orig, dest) != 0) {
+		return copy(orig, dest);
+	}
+
+	return 0;
+}
+
+int link_or_copy_all(const char *orig, const char *dest)
+{
+	/* Try doing a copy if hardlink fails */
+	if (link(orig, dest) != 0) {
+		return copy_all(orig, dest);
+	}
+
+	return 0;
+}

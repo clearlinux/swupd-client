@@ -2918,7 +2918,7 @@ add_content_to_bundle() {
 			# the file is a file or symlink, copy it to the files directory
 			# (do not follow links)
 			debug_msg "Copying file/symlink $content_dir/$filename to $files_dir/$filehash..."
-			sudo cp -P "$content_dir"/"$filename" "$files_dir"/"$filehash"
+			sudo cp --preserve=all -P "$content_dir"/"$filename" "$files_dir"/"$filehash"
 		fi
 
 		# create the tar for each file, we need to skip validations since
@@ -3042,7 +3042,7 @@ create_bundle_from_content() { #swupd_function
 	# If the user chose to install the bundle, copy all files to the target directory
 	if [ "$local_bundle" = true ]; then
 		debug_msg "Installing $bundle_name in target $target_dir..."
-		sudo cp -r "$content_dir"/* "$target_dir"/
+		sudo cp --preserve=all -r "$content_dir"/* "$target_dir"/
 	fi
 
 	# If the user chose to track the bundle, create the tracking file for the bundle

@@ -286,7 +286,6 @@ extern void swupd_deinit(void);
 enum swupd_code swupd_init(enum swupd_init_config config);
 void update_motd(int new_release);
 void delete_motd(void);
-extern int get_dirfd_path(const char *fullname);
 extern struct list *consolidate_files_from_bundles(struct list *bundles);
 extern struct list *files_from_bundles(struct list *bundles);
 extern bool version_files_consistent(void);

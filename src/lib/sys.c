@@ -85,7 +85,6 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 {
 	int pid, ret, child_ret;
 	const char *cmd = params[0];
-	int null_fd;
 	int pipe_fds[2];
 
 	if (log_get_level() == LOG_DEBUG) {
@@ -97,7 +96,7 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 		return -1;
 	};
 
-	pid = fork();
+	pid = vfork();
 	if (pid < 0) {
 		error("run_command %s failed: %i (%s)\n", cmd, errno, strerror(errno));
 		return -errno;
@@ -129,10 +128,9 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 
 	// Child
 	close(pipe_fds[0]);
-
 	/* replace the stdin with /dev/null. the underlying commands should never be
 	 * run interactively. */
-	null_fd = open("/dev/null", O_RDONLY);
+	int null_fd = open("/dev/null", O_RDONLY);
 	if (null_fd < 0) {
 		goto error_child;
 	}
@@ -167,11 +165,11 @@ int run_command_full_params(const char *stdout_file, const char *stderr_file, ch
 		error("run_command %s failed: %i (%s)\n", cmd, errno, strerror(errno));
 	}
 
-	exit(EXIT_FAILURE); // execve nevers return on success
+	_exit(EXIT_FAILURE); // execve nevers return on success
 	return 0;
 
 error_child:
-	exit(255);
+	_exit(255);
 	return 0;
 }
 

@@ -284,6 +284,21 @@ void *sys_mmap_file(const char *file, size_t *file_length);
  */
 void sys_mmap_free(void *buffer, size_t buffer_length);
 
+/**
+ * @brief Try to link a file, if not possible, copy it
+ */
+int link_or_copy(const char *orig, const char *dest);
+
+/**
+ * @brief Try to link a file, if not possible, copy it using copy_all() function
+ */
+int link_or_copy_all(const char *orig, const char *dest);
+
+/**
+ * @brief Try to link a file, if not possible, move it using rename()
+ */
+int link_or_rename(const char *orig, const char *dest);
+
 #ifdef __cplusplus
 }
 #endif

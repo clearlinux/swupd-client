@@ -19,7 +19,7 @@ extern "C" {
 			"export PATH=%s:$PATH\n"                       \
 			"export LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH\n" \
 			"export XDG_DATA_DIRS=%s:$XDG_DATA_DIRS\n"     \
-			"export XDG_CONF_DIRS=%s:$XDG_CONF_DIRS\n"     \
+			"export XDG_CONFIG_DIRS=%s:$XDG_CONFIG_DIRS\n" \
 			"\n"                                           \
 			"%s \"$@\"\n"
 

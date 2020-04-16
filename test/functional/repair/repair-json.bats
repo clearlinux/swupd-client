@@ -137,7 +137,7 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 8, "totalSteps" : 10, "stepCompletion" : 88, "stepDescription" : "remove_extraneous_files" },
 		{ "type" : "progress", "currentStep" : 8, "totalSteps" : 10, "stepCompletion" : 94, "stepDescription" : "remove_extraneous_files" },
 		{ "type" : "progress", "currentStep" : 8, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "remove_extraneous_files" },
-		{ "type" : "progress", "currentStep" : 9, "totalSteps" : 10, "stepCompletion" : 0, "stepDescription" : "remove_extra_files" },
+		{ "type" : "progress", "currentStep" : 9, "totalSteps" : 10, "stepCompletion" : -1, "stepDescription" : "remove_extra_files" },
 		{ "type" : "info", "msg" : "Removing extra files under $PATH_PREFIX/usr" },
 		{ "type" : "info", "msg" : " -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl" },
 		{ "type" : "info", "msg" : " -> deleted" },

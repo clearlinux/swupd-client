@@ -801,6 +801,7 @@ static enum swupd_code deal_with_extra_files(struct manifest *manifest, bool fix
 	info("%s extra files under %s\n", fix ? "Removing" : "Checking for", start);
 	ret = walk_tree(manifest, start, fix, picky_whitelist, &counts);
 	free_and_clear_pointer(&start);
+	info("\n");
 
 	return ret;
 }
@@ -1208,7 +1209,7 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 extra_files:
 	if (cmdline_option_picky || cmdline_option_extra_files_only) {
 		timelist_timer_start(globals.global_times, "Removing extra files");
-		progress_next_step("remove_extra_files", PROGRESS_BAR);
+		progress_next_step("remove_extra_files", PROGRESS_UNDEFINED);
 		deal_with_extra_files(official_manifest, cmdline_option_fix);
 		timelist_timer_stop(globals.global_times);
 	}

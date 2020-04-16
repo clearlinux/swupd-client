@@ -3511,7 +3511,7 @@ update_bundle() { # swupd_function
 
 	# if the option received an existing file, parse it
 	if [[ "$fname" = *":"* ]]; then
-		existing_file="${fname#*:}"
+		existing_file="${fname##*:}"
 		fname="${fname%:*}"
 	fi
 

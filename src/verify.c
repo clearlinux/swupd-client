@@ -1419,9 +1419,9 @@ clean_and_exit:
 		if (cmdline_option_fix) {
 			info("\nRepair did not fully succeed\n");
 		} else if (cmdline_option_download) {
-			print("\nInstallation file downloads failed\n");
+			info("\nInstallation file downloads failed\n");
 		} else if (cmdline_option_install) {
-			print("\nInstallation failed\n");
+			info("\nInstallation failed\n");
 		} else {
 			/* This is just a verification */
 			info("\n%s did not fully succeed\n", cmdline_command_verify ? "Verify" : "Diagnose");

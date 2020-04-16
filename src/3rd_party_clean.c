@@ -101,9 +101,9 @@ static enum swupd_code clean_repos_state(UNUSED_PARAM char *unused)
 	ret = clean_statedir(cmdline_option_dry_run, cmdline_option_all);
 	files_removed = clean_get_stats();
 	if (cmdline_option_dry_run) {
-		print("Would remove %d files\n", files_removed);
+		info("Would remove %d files\n", files_removed);
 	} else {
-		print("%d files removed\n", files_removed);
+		info("%d files removed\n", files_removed);
 	}
 
 	return ret;

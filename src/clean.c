@@ -167,7 +167,7 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 		}
 
 		if (dry_run) {
-			info("%s\n", file);
+			print("%s\n", file);
 		} else {
 			ret = sys_rm(file);
 			if (ret != 0) {
@@ -417,11 +417,11 @@ enum swupd_code clean_main(int argc, char **argv)
 	/* TODO: Also print the bytes removed, need to take into account the hardlinks. */
 	prettify_size(stats.bytes_removed, &bytes_removed_pretty);
 	if (options.dry_run) {
-		print("Would remove %d files\n", stats.files_removed);
-		print("Aproximatelly %s would be freed\n", bytes_removed_pretty);
+		info("Would remove %d files\n", stats.files_removed);
+		info("Aproximatelly %s would be freed\n", bytes_removed_pretty);
 	} else {
-		print("%d files removed\n", stats.files_removed);
-		print("%s freed\n", bytes_removed_pretty);
+		info("%d files removed\n", stats.files_removed);
+		info("%s freed\n", bytes_removed_pretty);
 	}
 	free_and_clear_pointer(&bytes_removed_pretty);
 

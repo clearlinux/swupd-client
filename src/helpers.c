@@ -970,12 +970,12 @@ bool confirm_action(void)
 {
 	int response;
 
-	info("Do you want to continue? (y/N): ");
+	print("Do you want to continue? (y/N): ");
 	if (globals.user_interaction == INTERACTIVE) {
 		response = tolower(getchar());
-		info("\n");
+		print("\n");
 	} else {
-		info("%s\n", globals.user_interaction == NON_INTERACTIVE_ASSUME_YES ? "y" : "N");
+		print("%s\n", globals.user_interaction == NON_INTERACTIVE_ASSUME_YES ? "y" : "N");
 		info("The \"--assume=%s\" option was used\n", globals.user_interaction == NON_INTERACTIVE_ASSUME_YES ? "yes" : "no");
 		response = globals.user_interaction == NON_INTERACTIVE_ASSUME_YES ? 'y' : 'n';
 	}

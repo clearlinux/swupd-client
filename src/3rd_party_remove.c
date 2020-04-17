@@ -216,13 +216,13 @@ remove_repo:
 exit:
 	if (ret == SWUPD_OK) {
 		if (ret_partial == SWUPD_OK) {
-			print("\nRepository and its content removed successfully\n");
+			info("\nRepository and its content removed successfully\n");
 		} else {
-			print("\nRepository and its content partially removed\n");
+			info("\nRepository and its content partially removed\n");
 			ret = ret_partial;
 		}
 	} else {
-		print("\nFailed to remove repository\n");
+		info("\nFailed to remove repository\n");
 	}
 	manifest_free(mom);
 	free_and_clear_pointer(&repo_dir);

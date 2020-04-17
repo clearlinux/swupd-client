@@ -102,7 +102,7 @@ static bool confirm_certificate(const char *cert)
 	signature_print_info(cert);
 
 	info("\n");
-	info("To add the 3rd-party repository you need to accept this certificate\n");
+	print("To add the 3rd-party repository you need to accept this certificate\n");
 	return confirm_action();
 }
 
@@ -356,9 +356,9 @@ enum swupd_code third_party_add_main(int argc, char **argv)
 
 finish:
 	if (ret_code == SWUPD_OK) {
-		print("\nRepository added successfully\n");
+		info("\nRepository added successfully\n");
 	} else {
-		print("\nFailed to add repository\n");
+		info("\nFailed to add repository\n");
 	}
 
 	list_free_list_and_data(repos, repo_free_data);

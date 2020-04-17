@@ -490,7 +490,7 @@ static void dump_file(const char *path)
 			break;
 		}
 
-		info("%s", line)
+		print("%s", line)
 	}
 
 	fclose(f);
@@ -514,8 +514,8 @@ void signature_print_info(const char *path)
 
 	subj = X509_NAME_oneline(X509_get_subject_name(cert), NULL, 0);
 	issuer = X509_NAME_oneline(X509_get_issuer_name(cert), NULL, 0);
-	info("Issuer: %s\n", subj);
-	info("Subject: %s\n", subj);
+	print("Issuer: %s\n", subj);
+	print("Subject: %s\n", subj);
 	info("\n");
 
 	dump_file(path);

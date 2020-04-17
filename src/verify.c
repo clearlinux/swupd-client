@@ -1355,7 +1355,7 @@ clean_and_exit:
 	 * along with the official_manifest */
 	manifest_free(official_manifest);
 
-	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
+	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_MED,
 		  "verify",
 		  "fix=%d\nret=%d\n"
 		  "current_version=%d\n"

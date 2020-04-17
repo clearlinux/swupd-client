@@ -207,7 +207,6 @@ static void print_bundle(struct manifest *mom, struct manifest *m)
 	struct file *bundle_file;
 	bool is_experimental;
 	const bool DONT_SHOW_STATUS = false;
-	bool quiet = log_is_quiet();
 
 	if (csv_format) {
 		return;
@@ -217,7 +216,7 @@ static void print_bundle(struct manifest *mom, struct manifest *m)
 	is_experimental = bundle_file ? bundle_file->is_experimental : false;
 	installed = is_installed_bundle(m->component);
 
-	if (quiet) {
+	if (log_is_quiet()) {
 		print("[%s]\n", m->component);
 	} else {
 		name = get_printable_bundle_name(m->component, is_experimental, DONT_SHOW_STATUS, DONT_SHOW_STATUS);
@@ -232,9 +231,7 @@ static void print_bundle(struct manifest *mom, struct manifest *m)
 
 static void print_result(const char *bundle_name, const char *filename)
 {
-	bool quiet = log_is_quiet();
-
-	if (quiet) {
+	if (log_is_quiet()) {
 		print("%s\n", filename);
 	} else if (csv_format) {
 		info("%s,%s\n", filename, bundle_name);

@@ -165,7 +165,10 @@ used to modify the core behavior and resources that swupd uses.
 
 -  ``--quiet``
 
-   Print only important information and errors.
+   Sets `swupd` to print a minimal and more stable output that is easier to parse
+   for its commands. Only the most relevant information and errors are printed out.
+   Output displayed when using this option is rarely going to change, so this is
+   a good option to use when writing scripts that use `swupd`.
 
 -  ``--verbose``
 

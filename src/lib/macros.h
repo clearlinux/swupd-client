@@ -29,7 +29,11 @@
  * @brief To be used in all checks where we assume swupd should never get in to.
  * This macro aborts execution only when DEBUG_MODE is used.
  */
-#define UNEXPECTED()
+#define UNEXPECTED()                                                                                         \
+	do {                                                                                                 \
+		telemetry(TELEMETRY_CRIT, "unexpected-condition", "file=%s\nline=%d\n", __FILE__, __LINE__); \
+	} while (0)
+
 #endif
 
 #endif

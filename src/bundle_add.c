@@ -341,6 +341,7 @@ enum swupd_code bundle_add_extra(struct list *bundles_list, int version, extra_p
 	int bundles_installed = 0;
 	int dependencies_installed = 0;
 	int bundles_requested;
+	enum telemetry_severity level;
 
 	char *bundles_list_str = NULL;
 
@@ -473,7 +474,14 @@ clean_and_exit:
 
 	/* report command result to telemetry */
 	bundles_list_str = string_join(", ", bundles);
-	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_MED,
+	if (ret == 0) {
+		level = TELEMETRY_LOW;
+	} else if (ret == SWUPD_INVALID_BUNDLE) {
+		level = TELEMETRY_MED;
+	} else { // Errors occured on bundle-add
+		level = TELEMETRY_CRIT;
+	}
+	telemetry(level,
 		  "bundleadd",
 		  "bundles=%s\n"
 		  "current_version=%d\n"

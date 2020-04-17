@@ -462,7 +462,7 @@ clean_exit:
 clean_curl:
 	clock_gettime(CLOCK_MONOTONIC_RAW, &ts_stop);
 	delta = ts_stop.tv_sec - ts_start.tv_sec + ts_stop.tv_nsec / 1000000000.0 - ts_start.tv_nsec / 1000000000.0;
-	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_MED,
+	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_LOW,
 		  "update",
 		  "current_version=%d\n"
 		  "server_version=%d\n"

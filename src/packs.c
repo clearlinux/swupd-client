@@ -95,7 +95,7 @@ static bool download_error(enum download_status status, void *data)
 	}
 
 	if (status == DOWNLOAD_STATUS_NOT_FOUND) {
-		telemetry(TELEMETRY_WARN, "packmissing", "url=%s\n", pack_data->url);
+		telemetry(TELEMETRY_HIGH, "packmissing", "url=%s\n", pack_data->url);
 		return true;
 	}
 

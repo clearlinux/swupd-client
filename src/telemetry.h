@@ -14,14 +14,14 @@ extern "C" {
  * Severity of a telemetry record
  */
 enum telemetry_severity {
-	/** @brief Temetry severity DEBUG */
-	TELEMETRY_DEBG = 1,
-	/** @brief Temetry severity INFO */
-	TELEMETRY_INFO,
-	/** @brief Temetry severity WARN */
-	TELEMETRY_WARN,
-	/** @brief Temetry severity CRIT */
-	TELEMETRY_CRIT
+	/** @brief Temetry severity Low */
+	TELEMETRY_LOW = 1,
+	/** @brief Temetry severity Medium */
+	TELEMETRY_MED = 2,
+	/** @brief Temetry severity High */
+	TELEMETRY_HIGH = 3,
+	/** @brief Temetry severity Critical */
+	TELEMETRY_CRIT = 4,
 };
 
 /**

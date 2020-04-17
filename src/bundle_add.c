@@ -473,7 +473,7 @@ clean_and_exit:
 
 	/* report command result to telemetry */
 	bundles_list_str = string_join(", ", bundles);
-	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_INFO,
+	telemetry(ret ? TELEMETRY_CRIT : TELEMETRY_MED,
 		  "bundleadd",
 		  "bundles=%s\n"
 		  "current_version=%d\n"

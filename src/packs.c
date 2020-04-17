@@ -50,6 +50,7 @@ struct pack_data {
 	char *filename;
 	const char *module;
 	int newversion;
+	int oldversion;
 };
 
 static int finalize_pack_download(const char *module, int newversion, const char *filename)
@@ -95,7 +96,14 @@ static bool download_error(enum download_status status, void *data)
 	}
 
 	if (status == DOWNLOAD_STATUS_NOT_FOUND) {
-		telemetry(TELEMETRY_HIGH, "packmissing", "url=%s\n", pack_data->url);
+
+		enum telemetry_severity level = TELEMETRY_LOW;
+
+		// Missing zero packs is a critical problem
+		if (pack_data->oldversion == 0) {
+			level = TELEMETRY_CRIT;
+		}
+		telemetry(level, "packmissing", "url=%s\n", pack_data->url);
 		return true;
 	}
 
@@ -131,6 +139,7 @@ static int download_pack(struct swupd_curl_parallel_handle *download_handle, int
 	pack_data->filename = filename;
 	pack_data->module = module;
 	pack_data->newversion = newversion;
+	pack_data->oldversion = oldversion;
 
 	return swupd_curl_parallel_download_enqueue(download_handle, url, filename, NULL, pack_data);
 }

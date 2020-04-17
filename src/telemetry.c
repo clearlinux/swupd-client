@@ -32,6 +32,16 @@
 
 #define RECORD_VERSION 2
 
+#ifdef DEBUG_MODE
+/*
+ * Don't send telemetry reports when code built on debug mode
+ */
+void telemetry(enum telemetry_severity UNUSED_PARAM level, const char UNUSED_PARAM *class, const char UNUSED_PARAM *fmt, ...)
+{
+}
+
+#else
+
 void telemetry(enum telemetry_severity level, const char *class, const char *fmt, ...)
 {
 	va_list args;
@@ -77,3 +87,4 @@ void telemetry(enum telemetry_severity level, const char *class, const char *fmt
 error:
 	error("Failed to create error report for %s\n", filename);
 }
+#endif

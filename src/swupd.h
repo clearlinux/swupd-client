@@ -31,6 +31,7 @@
 #include "swupd_curl.h"
 #include "swupd_exit_codes.h"
 #include "swupd_progress.h"
+#include "telemetry.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -370,15 +371,6 @@ extern void bundle_list_set_option_status(bool opt);
 
 /* clean.c */
 extern int clean_get_stats(void);
-
-/* telemetry.c */
-typedef enum telem_prio_t {
-	TELEMETRY_DEBG = 1,
-	TELEMETRY_INFO,
-	TELEMETRY_WARN,
-	TELEMETRY_CRIT
-} telem_prio_t;
-extern void telemetry(telem_prio_t level, const char *class, const char *fmt, ...);
 
 extern struct file **manifest_files_to_array(struct manifest *manifest);
 extern int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize, int size);

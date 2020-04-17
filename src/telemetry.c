@@ -32,7 +32,7 @@
 
 #define RECORD_VERSION 2
 
-void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
+void telemetry(enum telemetry_severity level, const char *class, const char *fmt, ...)
 {
 	va_list args;
 	char *filename;
@@ -40,8 +40,8 @@ void telemetry(telem_prio_t level, const char *class, const char *fmt, ...)
 	char *newname;
 	int fd, ret;
 
-	string_or_die(&filename, "%s/%d.%s.%d.XXXXXX", globals.state_dir,
-		      RECORD_VERSION, class, level);
+	filename = sys_path_join("%s/%d.%s.%d.XXXXXX", globals.state_dir,
+				 RECORD_VERSION, class, level);
 
 	fd = mkostemp(filename, O_CREAT | O_RDONLY);
 	if (fd < 0) {

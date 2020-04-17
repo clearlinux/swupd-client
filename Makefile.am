@@ -134,6 +134,7 @@ swupd_SOURCES = \
 	src/target_root.c \
 	src/target_root.h \
 	src/telemetry.c \
+	src/telemetry.h \
 	src/update.c \
 	src/verify.c \
 	src/verifytime.c \

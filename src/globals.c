@@ -723,7 +723,7 @@ void global_print_help(void)
 	print("   -j, --json-output       Print all output as a JSON stream\n");
 	print("   -y, --yes               Assume yes as answer to all prompts and run non-interactively\n");
 	print("   --allow-insecure-http   Allow updates over insecure connections\n");
-	print("   --quiet                 Quiet output. Print only important information and errors\n");
+	print("   --quiet                 Sets a minimal and more stable output that is easier to parse for swupd commands\n");
 	print("   --verbose               Enable verbosity for commands\n");
 	print("   --debug                 Print extra information to help debugging problems\n");
 	print("   --no-progress           Don't print progress report\n");

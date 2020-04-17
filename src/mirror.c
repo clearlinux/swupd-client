@@ -365,6 +365,7 @@ enum swupd_code mirror_main(int argc, char **argv)
 		print_help();
 		return SWUPD_INVALID_OPTION;
 	}
+
 	if (!globals.path_prefix) {
 		set_default_path_prefix();
 	}
@@ -378,7 +379,7 @@ enum swupd_code mirror_main(int argc, char **argv)
 			error("Unable to set mirror url\n");
 			goto finish;
 		} else {
-			print("Mirror url set\n");
+			info("Mirror url set\n");
 		}
 	} else if (unset) {
 		check_root();
@@ -390,7 +391,7 @@ enum swupd_code mirror_main(int argc, char **argv)
 			ret = SWUPD_COULDNT_REMOVE_FILE;
 			error("Unable to remove mirror configuration\n");
 		} else { /* ret == 0 */
-			print("Mirror url configuration removed\n");
+			info("Mirror url configuration removed\n");
 		}
 	}
 
@@ -402,7 +403,16 @@ enum swupd_code mirror_main(int argc, char **argv)
 	}
 
 	/* print new configuration */
-	print_update_conf_info();
+	if (log_is_quiet()) {
+		if (!set && !unset) {
+			print("%s\n", globals.version_url);
+			if (strcmp(globals.version_url, globals.content_url) != 0) {
+				print("%s\n", globals.content_url);
+			}
+		}
+	} else {
+		print_update_conf_info();
+	}
 	swupd_deinit();
 
 finish:

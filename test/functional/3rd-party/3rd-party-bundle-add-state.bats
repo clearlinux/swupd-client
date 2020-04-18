@@ -45,3 +45,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo1/boot/file_4
 
 }
+#WEIGHT=5

@@ -56,3 +56,4 @@ test_setup() {
 	assert_is_output "1"
 
 }
+#WEIGHT=4

@@ -127,4 +127,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
 
 }
-#WEIGHT=11
+#WEIGHT=12

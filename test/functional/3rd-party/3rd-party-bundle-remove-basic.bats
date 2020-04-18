@@ -123,4 +123,4 @@ test_setup() {
 	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/usr/share/clear/bundles/test-bundle1
 
 }
-#WEIGHT=22
+#WEIGHT=24

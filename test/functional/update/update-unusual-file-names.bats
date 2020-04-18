@@ -82,3 +82,4 @@ test_setup() {
 	assert_symlink_exists "$TARGETDIR"'/usr/links/very_unusual_¹²³!@#$%^&*()_;[]{}\_link3'
 	assert_symlink_exists "$TARGETDIR""/usr/links/link:4"
 }
+#WEIGHT=10

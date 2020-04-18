@@ -50,4 +50,4 @@ test_setup() {
 	assert_file_not_exists "$TARGETDIR"/bar/test-file3
 
 }
-#WEIGHT=4
+#WEIGHT=5

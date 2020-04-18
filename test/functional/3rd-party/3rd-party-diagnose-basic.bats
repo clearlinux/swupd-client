@@ -217,4 +217,4 @@ global_setup() {
 	assert_is_output "$expected_output"
 
 }
-#WEIGHT=9
+#WEIGHT=10

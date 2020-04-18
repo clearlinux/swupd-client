@@ -49,7 +49,6 @@ test_setup() {
 	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file1
 
 }
-#WEIGHT=5
 
 @test "TPR070: Removing all third party bundles that exported a binary that is still needed but non-exported" {
 
@@ -120,3 +119,4 @@ test_setup() {
 	assert_file_exists "$TPTARGETDIR"/usr/bin/bin_file1
 
 }
+#WEIGHT=21

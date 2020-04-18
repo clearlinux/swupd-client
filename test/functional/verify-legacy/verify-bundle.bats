@@ -147,4 +147,4 @@ test_setup() {
 	assert_in_output "$expected_output"
 
 }
-#WEIGHT=9
+#WEIGHT=14

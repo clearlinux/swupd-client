@@ -58,4 +58,4 @@ global_setup() {
 
 }
 
-#WEIGHT=2
+#WEIGHT=3

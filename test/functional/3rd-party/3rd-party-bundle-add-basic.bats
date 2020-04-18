@@ -140,4 +140,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TPSTATEDIR"/bundles/test-bundle2
 }
-#WEIGHT=21
+#WEIGHT=24

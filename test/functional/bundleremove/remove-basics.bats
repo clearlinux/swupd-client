@@ -197,4 +197,4 @@ test_teardown() {
 	assert_is_output "$expected_output"
 
 }
-#WEIGHT=5
+#WEIGHT=6

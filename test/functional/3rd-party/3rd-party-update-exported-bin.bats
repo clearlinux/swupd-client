@@ -85,4 +85,4 @@ test_setup() {
 	sudo grep -vq "TEST_STRING" "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2 || exit 1
 
 }
-#WEIGHT=9
+#WEIGHT=14

@@ -97,3 +97,4 @@ test_teardown() {
 	assert_is_output "$expected_output"
 
 }
+#WEIGHT=17

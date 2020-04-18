@@ -53,4 +53,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/ftb3
 
 }
-#WEIGHT=9
+#WEIGHT=11

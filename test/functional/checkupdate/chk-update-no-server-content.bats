@@ -23,4 +23,4 @@ test_setup() {
 	assert_in_output "$expected_output"
 
 }
-#WEIGHT=1
+#WEIGHT=2

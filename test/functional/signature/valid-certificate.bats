@@ -29,4 +29,4 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 
 }
-#WEIGHT=4
+#WEIGHT=2

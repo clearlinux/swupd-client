@@ -41,4 +41,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/usr/lib/kernel/testfile
 
 }
-#WEIGHT=2
+#WEIGHT=3

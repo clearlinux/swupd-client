@@ -37,4 +37,4 @@ load "../testlib"
 	assert_in_output "Error: --extra-files-only and --picky options are mutually exclusive"
 
 }
-#WEIGHT=2
+#WEIGHT=1

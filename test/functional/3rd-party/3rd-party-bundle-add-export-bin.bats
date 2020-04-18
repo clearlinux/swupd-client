@@ -89,7 +89,6 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 }
-#WEIGHT=8
 
 @test "TPR068: Adding bundles that share a binary" {
 
@@ -202,3 +201,4 @@ test_setup() {
 	assert_regex_is_output "$expected_output"
 
 }
+#WEIGHT=22

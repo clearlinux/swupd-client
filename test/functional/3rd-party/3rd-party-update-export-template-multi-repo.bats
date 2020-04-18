@@ -219,3 +219,4 @@ test_setup() {
 	assert_equal "$template_file" "$template"
 
 }
+#WEIGHT=23

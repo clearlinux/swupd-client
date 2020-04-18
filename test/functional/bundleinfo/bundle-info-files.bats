@@ -122,4 +122,4 @@ global_setup() {
 	assert_regex_is_output "$expected_output"
 
 }
-#WEIGHT=4
+#WEIGHT=5

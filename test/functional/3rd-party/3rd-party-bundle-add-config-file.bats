@@ -69,4 +69,4 @@ test_setup() {
 	assert_file_not_exists "$TPSTATEDIR"/bundles/test-bundle3
 
 }
-#WEIGHT=6
+#WEIGHT=7

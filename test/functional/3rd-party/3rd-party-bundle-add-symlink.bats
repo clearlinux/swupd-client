@@ -45,3 +45,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/usr/share/clear/bundles/test-bundle1
 
 }
+#WEIGHT=5

@@ -50,4 +50,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/usr/share/defaults/swupd/contenturl
 
 }
-#WEIGHT=4
+#WEIGHT=5

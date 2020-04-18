@@ -78,4 +78,4 @@ global_setup() {
 	assert_regex_is_output "$expected_output"
 
 }
-#WEIGHT=5
+#WEIGHT=7

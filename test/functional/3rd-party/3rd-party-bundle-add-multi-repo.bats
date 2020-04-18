@@ -76,4 +76,4 @@ test_setup() {
 	assert_file_exists "$STATEDIR"/3rd-party/repo2/bundles/test-bundle1
 
 }
-#WEIGHT=13
+#WEIGHT=15

@@ -36,3 +36,4 @@ test_setup() {
 	assert_output_is_empty
 
 }
+#WEIGHT=3

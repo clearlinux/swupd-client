@@ -72,4 +72,4 @@ global_setup() {
 	)
 	assert_in_output "$expected_output"
 }
-#WEIGHT=72
+#WEIGHT=2

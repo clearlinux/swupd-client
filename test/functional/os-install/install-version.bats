@@ -112,4 +112,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/core
 
 }
-#WEIGHT=7
+#WEIGHT=8

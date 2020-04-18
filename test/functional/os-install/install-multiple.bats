@@ -105,4 +105,4 @@ test_setup() {
 	assert_file_not_exists "$TARGETDIR"/bar/file_4
 
 }
-#WEIGHT=4
+#WEIGHT=9

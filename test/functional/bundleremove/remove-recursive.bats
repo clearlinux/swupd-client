@@ -225,4 +225,4 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/test-file6
 
 }
-#WEIGHT=21
+#WEIGHT=29

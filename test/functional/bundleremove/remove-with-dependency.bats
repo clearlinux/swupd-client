@@ -39,4 +39,4 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 }
-#WEIGHT=2
+#WEIGHT=3

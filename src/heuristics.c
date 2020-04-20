@@ -118,11 +118,20 @@ static void boot_file_heuristics(struct file *file)
 	}
 }
 
+static void boot_manager_heuristics(struct file *file)
+{
+	if ((strcmp(file->filename, "/usr/bin/clr-boot-manager") == 0) ||
+	    (strcmp(file->filename, "/usr/share/syslinux/ldlinux.c32") == 0)) {
+		globals.need_update_bootloader = true;
+	}
+}
+
 void apply_heuristics(struct file *file)
 {
 	runtime_state_heuristics(file);
 	boot_file_heuristics(file);
 	config_file_heuristics(file);
+	boot_manager_heuristics(file);
 }
 
 /* Determines whether or not FILE should be ignored for this swupd action. Note

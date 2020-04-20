@@ -499,7 +499,7 @@ clean_curl:
 
 	if (ret == 0) {
 		if (nonpack > 0) {
-			info("%i files were not in a pack\n", nonpack);
+			info("%i file%s not in a pack\n", nonpack, nonpack != 1 ? "s were" : " was");
 		}
 		if (!download_only) {
 			if (current_version < server_version) {

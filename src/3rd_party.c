@@ -113,6 +113,7 @@ enum swupd_code third_party_main(int argc, char **argv)
 		return SWUPD_INVALID_OPTION;
 	}
 	optind = 0;
+	telemetry_disable();
 	ret = third_party_commands[index].mainfunc(argc - 1, argv + 1);
 
 	return ret;

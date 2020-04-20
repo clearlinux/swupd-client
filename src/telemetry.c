@@ -32,6 +32,13 @@
 
 #define RECORD_VERSION 2
 
+static bool telemetry_enabled = true;
+
+void telemetry_disable(void)
+{
+	telemetry_enabled = false;
+}
+
 #ifdef DEBUG_MODE
 /*
  * Don't send telemetry reports when code built on debug mode
@@ -49,6 +56,10 @@ void telemetry(enum telemetry_severity level, const char *class, const char *fmt
 	char *filename_n;
 	char *newname;
 	int fd, ret;
+
+	if (!telemetry_enabled) {
+		return;
+	}
 
 	filename = sys_path_join("%s/%d.%s.%d.XXXXXX", globals.state_dir,
 				 RECORD_VERSION, class, level);

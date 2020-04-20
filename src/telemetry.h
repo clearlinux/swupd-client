@@ -25,6 +25,11 @@ enum telemetry_severity {
 };
 
 /**
+ * @brief Disables telemetry reports.
+ */
+void telemetry_disable(void);
+
+/**
  * @brief Create a telemetry record to be reported if telemetrics is enabled.
  */
 void telemetry(enum telemetry_severity level, const char *class, const char *fmt, ...);

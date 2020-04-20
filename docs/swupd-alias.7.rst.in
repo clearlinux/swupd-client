@@ -50,8 +50,6 @@ create a symlink to /dev/null for the corresponding user file and the system
 alias file will not be used.
 
 SEE ALSO
---------
+========
 
-* ``swupd``\(1)
-* https://github.com/clearlinux/swupd-client/
-* https://clearlinux.org/documentation/
+| ``swupd``\(1)

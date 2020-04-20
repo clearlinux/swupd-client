@@ -51,165 +51,121 @@ OPTIONS
 The following options are applicable to most subcommands, and can be
 used to modify the core behavior and resources that swupd uses.
 
--  ``-h, --help``
+-h, --help    Display general help information. If put after a subcommand, it
+        will display help specific to that subcommand.
 
-   Display general help information. If put after a subcommand, it will
-   display help specific to that subcommand.
+-v, --version   Displays the version information of the swupd program, and exit.
+        It also displays compile options and copyright information.
 
--  ``-v, --version``
+-p <path>, --path=<path>   Optionally set the top-level directory for the
+        swupd-managed system. This can be used to point to a chroot installation
+        of the OS or a custom mount. If not specified this will default to ``/``.
 
-   Displays the version information of the swupd program, and exit. It also
-   displays compile options and copyright information.
+-u <url>, --url=<url>   Specify an RFC-3986 encoded url. The url will be used to
+        download version information and file content downloads.
 
--  ``-p, --path={path}``
+-P <port>, --port=<port>    Specify the port number of the server to connect to.
+        Applies to both version and file content url server connections.
 
-   Optionally set the top-level directory for the swupd-managed system.
-   This can be used to point to a chroot installation of the OS or a custom mount.
-   If not specified this will default to ``/``.
+-c <url>, --contenturl=<url>    Specify an RFC-3986 encoded url. The url will be
+        used for file content downloads only.
 
--  ``-u, --url={url}``
+-v <url>, --versionurl=<url>    Specify an RFC-3986 encoded url. The url will be
+        used to download version information.
 
-   Specify an RFC-3986 encoded url. The url will be used to download
-   version information and file content downloads.
+-F <formatstring>, --format=<formatstring>  Specify the format suffix for
+        version file downloads. Is usually one of ``1``, ``2``, ``3``, etc. or
+        ``staging``. Software update formats may change regularly and normally
+        you should consult the swupd server data for the appropriate latest
+        version available. If that version is not supported by your version of
+        ``swupd``, you should subtract ``1`` from the number and try again until
+        it succeeds.
 
--  ``-P, --port={port}``
+-S <path>, --statedir=<path>    Specify an alternate swupd state directory.
+        Normally ``swupd`` uses ``/var/lib/swupd``.
 
-   Specify the port number of the server to connect to. Applies to both
-   version and file content url server connections.
+-C <path>, --certpath=<cert>  Specify alternate path to swupd certificate store (pem file).
+        Default is /usr/share/clear/update-ca/Swupd_Root.pem
 
--  ``-c, --contenturl={url}``
+-W <n>, --max-parallel-downloads=<n>    Set the maximum number of parallel downloads.
 
-   Specify an RFC-3986 encoded url. The url will be used for file
-   content downloads only.
+-r <n>, --max-retries=<n>   Maximum number of retries for download failures.
 
--  ``-v, --versionurl={url}``
+-d <n>, --retry-delay=<n>  Initial delay in seconds between download retries, this will
+        be doubled for each retry until the download succeeds or the maximum
+        number of retries has been reached.
 
-   Specify an RFC-3986 encoded url. The url will be used to download
-   version information.
+-n, --nosigcheck    Do not attempt to enforce certificate or signature checking.
 
--  ``-F, --format={formatstring}``
+-n, --nosigcheck-latest     Do not attempt to enforce signature checking when
+        retrieving the latest version number.
 
-   Specify the format suffix for version file downloads. Is usually one
-   of ``1``, ``2``, ``3``, etc. or ``staging``. Software update formats
-   may change regularly and normally you should consult the swupd server
-   data for the appropriate latest version available. If that version is
-   not supported by your version of ``swupd``, you should subtract ``1``
-   from the number and try again until it succeeds.
+-I, --ignore-time   Ignore system/certificate time when validating signature.
 
--  ``-S, --statedir={path}``
+-t, --time  Show verbose time output for swupd operations.
 
-   Specify an alternate swupd state directory. Normally ``swupd`` uses
-   ``/var/lib/swupd``.
+-N, --no-scripts    Do not run the post-update scripts and boot update tool.
 
--  ``-C, --certpath``
+-b, --no-boot-update    Do not update the boot files using clr-boot-manager.
 
-   Specify alternate path to swupd certificate store (pem file).
-   Default is /usr/share/clear/update-ca/Swupd_Root.pem
+-j, --json-output   Prints the swupd output as a machine readable JSON stream.
 
--  ``-W, --max-parallel-downloads``
+-y, --yes   Assume yes as answer to all prompts and run non-interactively.
 
-   Set the maximum number of parallel downloads.
+--allow-insecure-http   For security reasons, swupd only allows system updates
+        using secure https connections by default. This option forces swupd
+        to allow updates over insecure http connections.
 
--  ``-r, --max-retries``
+        ``Warning``: although it is not recommended, if an http server is
+        set up as the upstream server, the `allow_insecure_http=true` option will
+        need to be setup in the swupd configuration file for the autoupdate
+        command to continue to work.
 
-   Maximum number of retries for download failures.
+--quiet    Sets `swupd` to print a minimal and more stable output that is easier
+        to parse for its commands. Only the most relevant information and errors
+        are printed out.
+        Output displayed when using this option is rarely going to change, so
+        this is a good option to use when writing scripts that use `swupd`.
 
--  ``-d, --retry-delay``
+--verbose   Enable verbosity for commands.
 
-   Initial delay in seconds between download retries, this will be
-   doubled for each retry until the download succeeds or the maximum
-   number of retries has been reached.
+--debug     Print extra information to help debugging problems.
 
--  ``-n, --nosigcheck``
+--no-progress   Don't print progress report on commands that informs the
+        percentage left in current operation.
 
-   Do not attempt to enforce certificate or signature checking.
+--wait-for-scripts  Wait for the post-update scripts to complete.
 
--  ``-n, --nosigcheck-latest``
-
-   Do not attempt to enforce signature checking when retrieving the latest version number.
-
--  ``-I, --ignore-time``
-
-   Ignore system/certificate time when validating signature.
-
--  ``-t, --time``
-
-   Show verbose time output for swupd operations.
-
--  ``-N, --no-scripts``
-
-   Do not run the post-update scripts and boot update tool.
-
--  ``-b, --no-boot-update``
-
-   Do not update the boot files using clr-boot-manager.
-
--  ``-j, --json-output``
-
-   Prints the swupd output as a machine readable JSON stream.
-
--  ``-y, --yes``
-
-   Assume yes as answer to all prompts and run non-interactively.
-
--  ``--allow-insecure-http``
-
-   For security reasons, swupd only allows system updates using
-   secure https connections by default. This option forces swupd
-   to allow updates over insecure http connections.
-
-   Important note: although it is not recommended, if an http server is
-   set up as the upstream server, the `allow_insecure_http=true` option will
-   need to be setup in the swupd configuration file for the autoupdate command
-   to continue to work.
-
--  ``--quiet``
-
-   Sets `swupd` to print a minimal and more stable output that is easier to parse
-   for its commands. Only the most relevant information and errors are printed out.
-   Output displayed when using this option is rarely going to change, so this is
-   a good option to use when writing scripts that use `swupd`.
-
--  ``--verbose``
-
-   Enable verbosity for commands.
-
--  ``--debug``
-
-   Print extra information to help debugging problems.
-
--  ``--no-progress``
-
-   Don't print progress report on commands that informs the percentage left in current operation.
-
--  ``--wait-for-scripts``
-
-   Wait for the post-update scripts to complete.
-
--  ``--assume={yes|no}``
-
-   Sets an automatic response to all prompts and run non-interactively.
+--assume=<yes|no>   Sets an automatic response to all prompts and run
+        non-interactively.
 
 
 SUBCOMMANDS
 ===========
 
-``info``
+info
+----
 
     Shows the current OS version and the URLs used for updates.
 
-``autoupdate [--enable|--disable]``
+autoupdate
+----------
 
     Enables or disables automatic updates, or reports current
     status. Enabling updates does not cause an immediate update -
     use ``swupd update`` to force one if desired.
 
-``check-update``
+--enable    Enable autoupdates
+--disable   Disable autoupdates
+
+check-update
+------------
 
     Checks whether an update is available and prints out the information
     if so. Does not download update content.
 
-``update``
+update
+------
 
     Performs a system software update.
 
@@ -227,32 +183,23 @@ SUBCOMMANDS
     post-update actions. These actions are triggered through `systemd(1)`
     and reside in the `update-triggers.target(4)` system target.
 
-    -  ``-V, --version``
+-V <version>, --version=<version>   Update to a specific version, also accepts 'latest' (default).
 
-       Update to a specific version, also accepts 'latest' (default).
+-s, --status    Do not perform an update, instead display whether an update is
+        available on the version url server, and what version number is
+        available. This is the same as running ``swupd check-update``.
 
-    -  ``-s, --status``
+-k, --keepcache     Do not delete the swupd state directory content after
+        updating the system.
 
-       Do not perform an update, instead display whether an update is
-       available on the version url server, and what version number is
-       available. This is the same as running ``swupd check-update``.
+--download      Do not perform an update, instead download all resources needed
+        to perform the update, and exit.
 
-    -  ``-k, --keepcache``
+--update-search-file-index  Update the index used by search-file to speed up
+        searches. Don't enable this if you have download or space restrictions.
 
-       Do not delete the swupd state directory content after updating the
-       system.
-
-    -  ``--download``
-
-       Do not perform an update, instead download all resources needed
-       to perform the update, and exit.
-
-    -  ``--update-search-file-index``
-
-       Update the index used by search-file to speed up searches. Don't
-       enable this if you have download or space restrictions.
-
-``bundle-add {bundles}``
+bundle-add <bundles>
+--------------------
 
     Installs new software bundles. Any bundle name listed after ``bundle-add``
     will be installed in the system. A list of all existing bundles can be
@@ -261,99 +208,85 @@ SUBCOMMANDS
     The names can also be aliases that are not actual bundles names but instead
     are names in an alias configuration file. See ``swupd-alias``\(7)
 
-    -  ``--skip-optional``
+--skip-optional     Do not install optional bundles (`also-add` flag in
+        Manifests).
+        A bundle may include other bundles that will also get installed
+        when installing the bundle that includes them. This included bundles
+        can be either optional, or mandatory. Optional bundles can be skipped
+        at install time by using this option.
 
-       Do not install optional bundles (`also-add` flag in Manifests).
-       A bundle may include other bundles that will also get installed
-       when installing the bundle that includes them. This included bundles
-       can be either optional, or mandatory. Optional bundles can be skipped
-       at install time by using this option.
+--skip-diskspace-check  Skip checking for available disk space before installing
+        a bundle.
+        By default, swupd attempts to determine if there is enough free
+        disk space to add the passed in bundle before attempting to install.
+        The current implementation will check free space in ``/usr/`` by default,
+        or it will check the passed in --path option with ``/usr/`` appended.
 
-    -  ``--skip-diskspace-check``
-
-       Skip checking for available disk space before installing a bundle.
-       By default, swupd attempts to determine if there is enough free
-       disk space to add the passed in bundle before attempting to install.
-       The current implementation will check free space in ``/usr/`` by default,
-       or it will check the passed in --path option with ``/usr/`` appended.
-
-``bundle-remove {bundles}``
+bundle-remove <bundles>
+-----------------------
 
     Removes software bundles. Any bundle name listed after ``bundle-remove``
     will be removed from the system. If the bundle is required by another
     bundle(s) on the system, a tree will be displayed to indicate which bundles
     are blocking removal.
 
-    -  ``-x, --force``
+-x, --force     Removes a bundle along with all the bundles that depend on it.
 
-       Removes a bundle along with all the bundles that depend on it.
+        ``Warning``: This operation is dangerous and must be used with care since
+        it can remove many unexpected bundles.
 
-       ``Warning``: This operation is dangerous and must be used with care since it
-       can remove many unexpected bundles.
+-R, --recursive Removes a bundle and its dependencies recursively, except for
+        bundle os-core.
 
-    -  ``-R, --recursive``
+        ``Warning``: This operation is dangerous and must be used with care since
+        it can remove many unexpected bundles.
 
-       Removes a bundle and its dependencies recursively, except for bundle
-       os-core.
-
-       ``Warning``: This operation is dangerous and must be used with care since it
-       can remove many unexpected bundles.
-
-``bundle-list``
+bundle-list
+-----------
 
     List all installed software bundles in the local system. Available bundles
     can be listed with the ``--all`` option.
 
-    -  ``-a, --all``
+-a, --all   Lists all available software bundles, either installed or not, that
+        are available.
 
-       Lists all available software bundles, either installed or not, that
-       are available.
+-D <bundle>, --has-dep=<bundle>     Displays a list of all bundles which include
+        the passed BUNDLE as a dependency. Combine with ``--all`` to report all
+        bundles including those not installed on the system. Combine with
+        ``--verbose`` to show a tree of those bundles.
 
-    -  ``-D, --has-dep={BUNDLE}``
+--status    Show the installation status of the listed bundles. Bundles
+        installation status can be; "explicitly installed", meaning that they
+        were specifically requested to be installed by the user, or they can be
+        "implicitly installed", meaning they were installed as a dependency of
+        another explicitly installed bundle.
 
-       Displays a list of all bundles which include the passed BUNDLE as a
-       dependency. Combine with ``--all`` to report all bundles including those
-       not installed on the system. Combine with ``--verbose`` to show a tree of
-       those bundles.
+--deps=<bundle>     Lists all bundle dependencies of the passed BUNDLE,
+        including recursively included bundles.
 
-    - ``--status``
-
-        Show the installation status of the listed bundles. Bundles installation
-        status can be; "explicitly installed", meaning that they were specifically
-        requested to be installed by the user, or they can be "implicitly installed",
-        meaning they were installed as a dependency of another explicitly installed
-        bundle.
-
-    -  ``--deps={BUNDLE}``
-
-       Lists all bundle dependencies of the passed BUNDLE, including
-       recursively included bundles.
-
-``bundle-info``
+bundle-info
+-----------
 
     Display detailed information about a bundle.
 
-    -  ``-V, --version={VERSION}``
+-V <version>, --version=<version>   Show the bundle info for the specified
+        version, it also accepts 'latest'.i It defaults to the current version
+        if no version is specified.
 
-       Show the bundle info for the specified VERSION, it also accepts 'latest'.
-       It defaults to the current version if no version is specified.
+--dependencies  Show the bundle's direct and indirect dependencies as well as if
+        they are optional or mandatory dependencies. Direct dependencies are
+        those that are specifically included by the bundle in question, while
+        indirect dependencies are those that are included by the bundles that
+        are a direct dependency of the bundle in question.
 
-    -  ``--dependencies``
+--files     Show the files directly included in this bundle, in other words it
+        shows the files included in the bundle's manifest. If this option is used
+        along with the ``--dependencies`` option, all files installed by the
+        bundle are listed, including those files installed by the dependencies
+        of the bundle.
 
-       Show the bundle's direct and indirect dependencies as well as if they are
-       optional or mandatory dependencies. Direct dependencies are those that are
-       specifically included by the bundle in question, while indirect dependencies
-       are those that are included by the bundles that are a direct dependency of
-       the bundle in question.
-
-    -  ``--files``
-
-       Show the files directly included in this bundle, in other words it shows
-       the files included in the bundle's manifest. If this option is used along
-       with the ``--dependencies`` option, all files installed by the bundle are
-       listed, including those files installed by the dependencies of the bundle.
-
-``search``
+search
+------
 
     Swupd search functionality is provided by the swupd-search binary, available
     on os-core-search bundle.
@@ -362,7 +295,8 @@ SUBCOMMANDS
 
     ``$ swupd search --help``
 
-``search-file {string}``
+search-file <string>
+--------------------
 
     Search for matching paths in manifest data. The specified `{string}`
     is matched in any part of the path listed in manifests, and all
@@ -376,38 +310,28 @@ SUBCOMMANDS
     download all manifests for bundles that are not installed, and may
     result in the download of several mega bytes of manifest data.
 
-    -  ``-V, --version={VERSION}``
+-V <version>, --version=<version>   Search for a match of the given file in the
+        specified version version.
 
-       Search for a match of the given file in the specified version VERSION.
+-l, --library   Restrict search to designated dynamic shared library paths.
 
-    -  ``-l, --library``
+-B, --binary    Restrict search to designated program binary paths.
 
-       Restrict search to designated dynamic shared library paths.
+-T <num_results>, --top=<num_results>   Only display the top specified number of
+        results for each bundle.
 
-    -  ``-B, --binary``
+-m, --csv   Output the search results in a machine readable CSV format.
 
-       Restrict search to designated program binary paths.
+-i, --init  Just perform the collection and download of all required manifest
+        resources needed to perform the search, then exit.
 
-    -  ``-T, --top={NUMBER OF RESULTS}``
+-o <order>, --order=<order>     Sort the output in one of two ways:
 
-       Only display the top specified number of results for each bundle.
+        -  Use 'alpha' to order alphabetically (default)
+        -  Use 'size' to order by bundle size (smaller to larger)
 
-    -  ``-m, --csv``
-
-       Output the search results in a machine readable CSV format.
-
-    -  ``-i, --init``
-
-       Just perform the collection and download of all required manifest
-       resources needed to perform the search, then exit.
-
-    -  ``-o, --order``
-
-       Sort the output in one of two ways:
-         -  Use 'alpha' to order alphabetically (default)
-         -  Use 'size' to order by bundle size (smaller to larger)	
-
-``diagnose``
+diagnose
+--------
 
     Perform system software installation verification. The program will
     obtain all the manifests needed from version url and content url to
@@ -418,162 +342,128 @@ SUBCOMMANDS
     control of the software update program are verified according to the
     manifest data
 
-    -  ``-V, --version={VERSION}``
+-V <version>, --version=<version>   Diagnose against the specified manifest VERSION.
 
-       Diagnose against the specified manifest VERSION.
+-x, --force     Attempt to proceed even if non-critical errors found.
 
-    -  ``-x, --force``
+-q, --quick     Omit checking hash values. Instead only looks for missing files
+        and directories and/or symlinks.
 
-       Attempt to proceed even if non-critical errors found.
+-B <bundles>, --bundles=<bundles>     Forces swupd to only diagnose the (comma separated) list of bundles provided.
 
-    -  ``-q, --quick``
+        Examples:
 
-       Omit checking hash values. Instead only looks for missing files
-       and directories and/or symlinks.
+            - ``--bundles xterm,vim``
 
-    -  ``--bundles={BUNDLES}``
+                Diagnoses only bundles `xterm` and `vim`.
 
-       Forces swupd to only diagnose the (comma separated) list of BUNDLES
-       provided.
+-Y, --picky     Also list files which should not exist. Only files listed in the
+         manifests should exist. By default swupd only looks for these
+         files at ``/usr``, this path can be changed using ``--picky-tree``.
+         Some paths at ``\usr`` are skipped by default:
+         ``/usr/lib/modules``, ``/usr/lib/kernel``, ``/usr/local``
+         and ``/usr/src``. These paths can be changed using
+         ``--picky-whitelist``.
 
-       Examples:
-
-         -  ``--bundles xterm,vim``
-
-            Diagnoses only bundles `xterm` and `vim`.
-
-    -  ``-Y, --picky``
-
-        Also list files which should not exist. Only files listed in the
-        manifests should exist. By default swupd only looks for these
-        files at ``/usr``, this path can be changed using ``--picky-tree``.
-        Some paths at ``\usr`` are skipped by default:
-        ``/usr/lib/modules``, ``/usr/lib/kernel``, ``/usr/local``
-        and ``/usr/src``. These paths can be changed using
-        ``--picky-whitelist``.
-
-    -  ``-X, --picky-tree={PATH}``
-
-        Changes the path where ``--picky`` and ``--extra-files-only``
-        looks for extra files. To be specified as absolute PATH.
-
+-X <path>, --picky-tree=<path>  Changes the path where ``--picky`` and
+        ``--extra-files-only`` looks for extra files. To be specified as
+        absolute PATH.
         The default path is ``/usr``.
 
-    -  ``-w, --picky-whitelist={REGEX}``
+-w <regex>, --picky-whitelist=<regex>   Any path matching the POSIX extended regular expression regex is ignored by ``--picky``. The given expression is always
+        wrapped in ``^(`` and ``)$`` and thus has to match the entire path.
+        Matched directories get skipped completely.
 
-       Any path matching the POSIX extended regular expression REGEX is
-       ignored by ``--picky``. The given expression is always wrapped
-       in ``^(`` and ``)$`` and thus has to match the entire path.
-       Matched directories get skipped completely.
+        The default is to ignore ``/usr/lib/kernel``,
+        ``/usr/lib/modules``, ``/usr/src`` and ``/usr/local``.
 
-       The default is to ignore ``/usr/lib/kernel``,
-       ``/usr/lib/modules``, ``/usr/src`` and ``/usr/local``.
+        Examples:
 
-       Examples:
+            - ``/var|/etc/machine-id``
 
-         -  ``/var|/etc/machine-id``
+                Ignores ``/var`` or ``/etc/machine-id``, regardless of
+                whether they are directories or something else. In the
+                usual case that ``/var`` is a directory, also everything
+                inside it is ignored because the directory gets skipped
+                while scanning the directory tree.
 
-            Ignores ``/var`` or ``/etc/machine-id``, regardless of
-            whether they are directories or something else. In the
-            usual case that ``/var`` is a directory, also everything
-            inside it is ignored because the directory gets skipped
-            while scanning the directory tree.
+            -  empty string or ``^$``
 
-         -  empty string or ``^$``
+                Matches nothing, because `paths` are never empty.
 
-            Matches nothing, because `paths` are never empty.
+--extra-files-only      Like ``--picky``, but it only looks for extra files.
+        It omits checking hash values, and for missing files, directories and/or
+        symlinks.
 
-    -  ``--extra-files-only``
+--file  Forces swupd to only diagnose the specified file or directory
+        (recursively).
 
-       Like ``--picky``, but it only looks for extra files. It omits checking
-       hash values, and for missing files, directories and/or symlinks.
-
-    -  ``--file``
-
-       Forces swupd to only diagnose the specified file or directory
-       (recursively).
-
-``repair``
+repair
+------
 
     Correct any issues found. This will overwrite incorrect file content,
     add missing files and do additional corrections, permissions, etc.
 
-    -  ``-V, --version={VERSION}``
+-V <version>, --version=<version>   Repair against the specified manifest
+        version.
 
-       Repair against the specified manifest VERSION.
+-x, --force     Attempt to proceed even if non-critical errors found.
 
-    -  ``-x, --force``
+-q, --quick     Omit repairing corrupt files. Instead only add missing files
+        and directories and/or symlinks.
 
-       Attempt to proceed even if non-critical errors found.
+-B <bundles>, --bundles=<bundles>     Forces swupd to only repair the (comma separated) list
+        of bundles provided.
 
-    -  ``-q, --quick``
+        Examples:
 
-       Omit repairing corrupt files. Instead only add missing files
-       and directories and/or symlinks.
+            - ``--bundles xterm,vim``
 
-    -  ``--bundles={BUNDLES}``
+                Repairs only bundles `xterm` and `vim`.
 
-       Forces swupd to only repair the (comma separated) list of BUNDLES
-       provided.
-
-       Examples:
-
-         -  ``--bundles xterm,vim``
-
-            Repairs only bundles `xterm` and `vim`.
-
-    -  ``-Y, --picky``
-
-        Also removes files which should not exist. Only files listed in the
-        manifests should exist. By default swupd only looks for these
+-Y, --picky     Also removes files which should not exist. Only files listed
+        in the manifests should exist. By default swupd only looks for these
         files at ``/usr``, this path can be changed using ``--picky-tree``.
         Some paths at ``\usr`` are skipped by default:
         ``/usr/lib/modules``, ``/usr/lib/kernel``, ``/usr/local``
         and ``/usr/src``. These paths can be changed using
         ``--picky-whitelist``.
 
-    -  ``-X, --picky-tree={PATH}``
+-X <path>, --picky-tree=<path>  Changes the path where ``--picky`` and
+        ``--extra-files-only`` looks for extra files. To be specified as
+        absolute PATH. The default path is ``/usr``.
 
-        Changes the path where ``--picky`` and ``--extra-files-only``
-        looks for extra files. To be specified as absolute PATH.
+-w <regex>, --picky-whitelist=<regex>   Any path matching the POSIX extended regular
+        expression regex is ignored by ``--picky``. The given expression is
+        always wrapped in ``^(`` and ``)$`` and thus has to match the entire
+        path. Matched directories get skipped completely.
 
-        The default path is ``/usr``.
+        The default is to ignore ``/usr/lib/kernel``,
+        ``/usr/lib/modules``, ``/usr/src`` and ``/usr/local``.
 
-    -  ``-w, --picky-whitelist={REGEX}``
+        Examples:
 
-       Any path matching the POSIX extended regular expression REGEX is
-       ignored by ``--picky``. The given expression is always wrapped
-       in ``^(`` and ``)$`` and thus has to match the entire path.
-       Matched directories get skipped completely.
+            - ``/var|/etc/machine-id``
 
-       The default is to ignore ``/usr/lib/kernel``,
-       ``/usr/lib/modules``, ``/usr/src`` and ``/usr/local``.
+               Ignores ``/var`` or ``/etc/machine-id``, regardless of
+               whether they are directories or something else. In the
+               usual case that ``/var`` is a directory, also everything
+               inside it is ignored because the directory gets skipped
+               while scanning the directory tree.
 
-       Examples:
+            -  empty string or ``^$``
 
-         -  ``/var|/etc/machine-id``
+                Matches nothing, because paths are never empty.
 
-            Ignores ``/var`` or ``/etc/machine-id``, regardless of
-            whether they are directories or something else. In the
-            usual case that ``/var`` is a directory, also everything
-            inside it is ignored because the directory gets skipped
-            while scanning the directory tree.
+--extra-files-only  Like ``--picky``, but it only removes extra files. It omits
+        repairing corrupt files, and adding missing files, directories and/or
+        symlinks.
 
-         -  empty string or ``^$``
+--file  Forces swupd to only repair the specified file or directory
+        (recursively).
 
-            Matches nothing, because paths are never empty.
-
-    -  ``--extra-files-only``
-
-       Like ``--picky``, but it only removes extra files. It omits repairing
-       corrupt files, and adding missing files, directories and/or symlinks.
-
-    -  ``--file``
-
-       Forces swupd to only repair the specified file or directory
-       (recursively).
-
-``os-install``
+os-install
+----------
 
     Perform system software installation in the specified location. Install
     all files into `{path}` as specified by the ``swupd os-install {path}``
@@ -581,59 +471,49 @@ SUBCOMMANDS
     be installed by default is ``os-core`` unless more bundles are specified
     with the ``--bundles`` option.
 
-    -  ``-V, --version={VERSION}``
+-V <version>, --version=<version>   Install the specified version of the OS.
 
-       Install the specified VERSION of the OS.
+-x, --force     Attempt to proceed even if non-critical errors found.
 
-    -  ``-x, --force``
+-B <bundles>, --bundles=<bundles>   Include the (comma separated) list of
+        bundles with the base OS install.
 
-       Attempt to proceed even if non-critical errors found.
+        Examples:
 
-    -  ``-B, --bundles={BUNDLES}``
+            - ``--bundles xterm,vim``
 
-       Include the (comma separated) list of BUNDLES with the base OS install.
+                Installs bundles `xterm` and `vim`, along with `os-core`
+                (installed by default).
 
-       Examples:
+-s <path>, --statedir-cache=<path>  After checking for content in the
+        `statedir`, check the `statedir-cache` before downloading it over the
+        network.
 
-         -  ``--bundles xterm,vim``
+--download      Do not perform an install, instead download all resources
+        needed to perform the install, and exit.
 
-            Installs bundles `xterm` and `vim`, along with `os-core` (installed by default).
+--skip-optional     Do not install optional bundles (`also-add` flag in
+        Manifests).
+        A bundle may include other bundles that will also get installed
+        when installing the bundle that includes them. This included bundles
+        can be either optional, or mandatory. Optional bundles can be skipped
+        at install time by using this option.
 
-    -  ``-s, --statedir-cache={PATH}``
-
-       After checking for content in the `statedir`, check the `statedir-cache` before
-       downloading it over the network.
-
-    -  ``--download``
-
-       Do not perform an install, instead download all resources needed
-       to perform the install, and exit.
-
-    -  ``--skip-optional``
-
-       Do not install optional bundles (`also-add` flag in Manifests).
-       A bundle may include other bundles that will also get installed
-       when installing the bundle that includes them. This included bundles
-       can be either optional, or mandatory. Optional bundles can be skipped
-       at install time by using this option.
-
-``mirror``
+mirror
+------
 
     Configure a `mirror URL` for swupd to use instead of the defaults on the
     system or compiled into the swupd binary.
 
-    -  ``-s, --set={URL}``
+-s <url>, --set=<url>     Set the `content` and `version URLs` to URL by adding
+        configuration files to ``<path>/etc/swupd/mirror_contenturl`` and
+        ``<path>/etc/swupd/mirror_versionurl``
 
-       Set the `content` and `version URLs` to URL by adding configuration files to
-       ``<path>/etc/swupd/mirror_contenturl`` and
-       ``<path>/etc/swupd/mirror_versionurl``
+-U, --unset     Remove the `content` and `version URL` configuration by removing
+        ``<path>/etc/swupd``
 
-    -  ``-U, --unset``
-
-       Remove the `content` and `version URL` configuration by removing
-       ``<path>/etc/swupd``
-
-``clean``
+clean
+-----
 
     Removes files cached by swupd.
 
@@ -641,28 +521,22 @@ SUBCOMMANDS
     it is used since it may need to download some files from the update server
     again.
 
-    -  ``--all``
+--all   | Removes all the content including recent metadata.
 
-       Removes all the content including recent metadata.
+--dry-run       Just prints files that would be removed.
 
-    -  ``--dry-run``
-
-       Just prints files that would be removed.
-
-``hashdump``
+hashdump
+--------
 
     Calculates and print the Manifest hash for a specific file on disk.
 
-    -  ``-n --no-xattrs``
+-n, --no-xattrs      Ignore extended attributes when calculating hash.
 
-       Ignore extended attributes when calculating hash.
+-p <path>, --path=<path>    Specify the PATH to use for operations. This can be
+        used to point to a chroot installation of the OS or a custom mount.
 
-    -  ``-p, --path={PATH}``
-
-       Specify the PATH to use for operations. This can be used to
-       point to a chroot installation of the OS or a custom mount.
-
-``3rd-party``
+3rd-party
+---------
 
     Manages 3rd-party repositories and content installed from them. A 3rd-party
     repository enables the distribution of user produced content.
@@ -697,7 +571,7 @@ SUBCOMMANDS
     supported to manage `3rd-party` content along with most of their options.
     To use these subcommands for 3rd-party content, it is necessary to use the
     ``3rd-party`` subcommand followed by the desired operation to be performed.
-    
+
     This is the syntax for 3rd-party operations to manage content:
 
     ``$ swupd 3rd-party <subcommand> [option(s)]``
@@ -830,51 +704,49 @@ files in the system.
 
 The non-zero return codes for other operations are listed here:
 
-- **2**: A required bundle was removed or was attempted to be removed
-- **3**: The specified bundle is invalid
-- **4**: Unable to download or read MoM manifest
-- **5**: Unable to delete a file
-- **6**: Unable to rename a directory
-- **7**: Unable to create a file
-- **8**: Unable to recursively load included manifests
-- **9**: Unable to obtain lock on state directory
-- **10**: Unable to rename a file
-- **11**: Unable to initialize curl agent
-- **12**: Initialization error
-- **13**: Bundle not tracked on system
-- **14**: Unable to load manifest into memory
-- **15**: Invalid command-line option
-- **16**: Unable to connect to update server
-- **17**: File download issue
-- **18**: Unable to untar a file
-- **19**: Unable to create required directory
-- **20**: Unable to determine current version of the OS
-- **21**: Unable to initialize signature verification
-- **22**: System time is off by a large margin
-- **23**: Pack download issue
-- **24**: Unable to verify server SSL certificate
-- **25**: There is not enough disk space left (or it cannot be determined)
-- **26**: The required path was not found in any manifest
-- **27**: Unexpected condition found
-- **28**: Unable to execute another program in a subprocess
-- **29**: Unable to list the content of a directory
-- **30**: An error occurred computing the hash of a file
-- **31**: Unable to get current system time
-- **32**: Unable to write a file
-- **34**: swupd ran out of memory
-- **35**: Unable to fix/replace/delete one or more files
-- **36**: Unable to execute binary, is either missing or invalid
-- **37**: Invalid 3rd-party repository (not found)
-- **38**: File is missing or invalid
+**2**     A required bundle was removed or was attempted to be removed
+
+| **3**     The specified bundle is invalid
+| **4**     Unable to download or read MoM manifest
+| **5**     Unable to delete a file
+| **6**     Unable to rename a directory
+| **7**     Unable to create a file
+| **8**     Unable to recursively load included manifests
+| **9**     Unable to obtain lock on state directory
+| **10**    Unable to rename a file
+| **11**    Unable to initialize curl agent
+| **12**    Initialization error
+| **13**    Bundle not tracked on system
+| **14**    Unable to load manifest into memory
+| **15**    Invalid command-line option
+| **16**    Unable to connect to update server
+| **17**    File download issue
+| **18**    Unable to untar a file
+| **19**    Unable to create required directory
+| **20**    Unable to determine current version of the OS
+| **21**    Unable to initialize signature verification
+| **22**    System time is off by a large margin
+| **23**    Pack download issue
+| **24**    Unable to verify server SSL certificate
+| **25**    There is not enough disk space left (or it cannot be determined)
+| **26**    The required path was not found in any manifest
+| **27**    Unexpected condition found
+| **28**    Unable to execute another program in a subprocess
+| **29**    Unable to list the content of a directory
+| **30**    An error occurred computing the hash of a file
+| **31**    Unable to get current system time
+| **32**    Unable to write a file
+| **34**    swupd ran out of memory
+| **35**    Unable to fix/replace/delete one or more files
+| **36**    Unable to execute binary, is either missing or invalid
+| **37**    Invalid 3rd-party repository (not found)
+| **38**    File is missing or invalid
 
 
 SEE ALSO
---------
+========
 
-- ``swupd-update.service``\(4)
-- ``swupd-update.timer``\(4)
-- ``update-triggers.target``\(4)
-- ``mixer``\(1)
-- ``os-format``\(7)
-- https://github.com/clearlinux/swupd-client/
-- https://clearlinux.org/documentation/
+| ``swupd-update.service``\(4),  ``swupd-update.timer``\(4),  ``update-triggers.target``\(4),  ``mixer``\(1),  ``os-format``\(7)
+
+| Official repository     https://github.com/clearlinux/swupd-client/
+| Official documentation  https://clearlinux.org/documentation/

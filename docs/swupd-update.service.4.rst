@@ -42,6 +42,5 @@ This unit is a ``systemd``\(1) unit file.
 SEE ALSO
 ========
 
-* ``swupd``\(1)
-* ``swupd-update.timer``\(4)
+``swupd``\(1),  ``swupd-update.timer``\(4)
 

@@ -54,7 +54,7 @@ main() {
 	export RUNNING_IN_CI=true
 	export JOB_COUNT
 	export BUILD_ONLY
-	local configure_args="--with-fallback-capaths=""$PWD""/swupd_test_certificates -with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path=""$PWD""/testconfig --with-contenturl=https://cdn.download.clearlinux.org/update/ --with-versionurl=https://cdn.download.clearlinux.org/update/ --with-formatid=30 --with-build-number=123"
+	local configure_args="--with-fallback-capaths=""$PWD""/swupd_test_certificates -with-systemdsystemunitdir=/usr/lib/systemd/system --with-config-file-path=""$PWD""/testconfig --with-contenturl=https://cdn.download.clearlinux.org/update/ --with-versionurl=https://cdn.download.clearlinux.org/update/ --with-formatid=30 --with-build-number=123 --enable-debug"
 
 	# Run tests without any security optimization and with address sanitizer
 	CFLAGS="-fsanitize=address -fno-omit-frame-pointer -Werror" run_build --disable-optimizations "$configure_args"

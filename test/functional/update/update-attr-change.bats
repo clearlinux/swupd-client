@@ -13,8 +13,11 @@ test_setup() {
 	# be used to create our test bundle
 	sudo mkdir -p "$TEST_NAME"/tmp/dir_mode
 	sudo mkdir -p "$TEST_NAME"/tmp/dir_owner
+	sudo mkdir -p "$TEST_NAME"/tmp/dir_sticky
 	write_to_protected_file "$TEST_NAME"/tmp/file_mode "$(generate_random_content)"
 	write_to_protected_file "$TEST_NAME"/tmp/file_owner "$(generate_random_content)"
+	write_to_protected_file "$TEST_NAME"/tmp/file_setuid "$(generate_random_content)"
+	write_to_protected_file "$TEST_NAME"/tmp/file_setgid "$(generate_random_content)"
 
 	sudo chown -R 5001:5002 "$TEST_NAME"/tmp/*_owner
 	sudo chmod -R 777 "$TEST_NAME"/tmp/*_mode
@@ -29,6 +32,9 @@ test_setup() {
 	# update file attributes
 	sudo chown -R 5003:5004 "$TEST_NAME"/tmp/*_owner
 	sudo chmod -R 707 "$TEST_NAME"/tmp/*_mode
+	sudo chmod -R 4755 "$TEST_NAME"/tmp/file_setuid
+	sudo chmod -R 2755 "$TEST_NAME"/tmp/file_setgid
+	sudo chmod -R 1755 "$TEST_NAME"/tmp/dir_sticky
 
 	# make different updates in the content
 	print "\nContent directory in version 20:\n\n $(tree "$TEST_NAME"/tmp)"
@@ -73,7 +79,7 @@ test_setup() {
 		    changed bundles   : 1
 		    new bundles       : 0
 		    deleted bundles   : 0
-		    changed files     : 4
+		    changed files     : 7
 		    new files         : 0
 		    deleted files     : 0
 		Validate downloaded files
@@ -81,7 +87,7 @@ test_setup() {
 		Installing files...
 		Update was applied
 		Calling post-update helper scripts
-		2 files were not in a pack
+		3 files were not in a pack
 		Update successful - System updated from version 10 to version 20
 	EOM
 	)
@@ -104,6 +110,14 @@ test_setup() {
 	[ "$output" -eq "707" ]
 	run stat --printf  "%a" "$TARGETDIR"/dir_mode
 	[ "$output" -eq "707" ]
+
+	# Check extra attribute bits
+	run stat --printf  "%a" "$TARGETDIR"/file_setuid
+	[ "$output" -eq "4755" ]
+	run stat --printf  "%a" "$TARGETDIR"/file_setgid
+	[ "$output" -eq "2755" ]
+	run stat --printf  "%a" "$TARGETDIR"/dir_sticky
+	[ "$output" -eq "1755" ]
 
 	show_target
 

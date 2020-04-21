@@ -520,12 +520,14 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, process_bu
 				 * keep the error */
 				ret_code = ret;
 			}
+
 			info("\n\n");
 		}
 	}
 
 	/* free data */
 clean_and_exit:
+	progress_finish_steps(ret_code);
 	list_free_list_and_data(repos, repo_free_data);
 	free_and_clear_pointer(&steps_title);
 

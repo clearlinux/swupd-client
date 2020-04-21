@@ -328,7 +328,6 @@ exit:
 	free_and_clear_pointer(&template_file);
 	sys_mmap_free(template, template_len);
 	swupd_deinit();
-	progress_finish_steps(ret_code);
 
 	return ret_code;
 }

@@ -253,7 +253,6 @@ enum swupd_code third_party_diagnose_main(int argc, char **argv)
 		picky_whitelist = NULL;
 	}
 	swupd_deinit();
-	progress_finish_steps(ret_code);
 
 	return ret_code;
 }

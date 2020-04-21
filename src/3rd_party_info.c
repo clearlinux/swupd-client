@@ -107,7 +107,6 @@ enum swupd_code third_party_info_main(int UNUSED_PARAM argc, char UNUSED_PARAM *
 	ret_code = third_party_run_operation_multirepo(cmdline_repo, show_repo_info, SWUPD_OK, "info", steps_in_third_party_info);
 
 	swupd_deinit();
-	progress_finish_steps(ret_code);
 
 	return ret_code;
 }

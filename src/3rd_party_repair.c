@@ -269,7 +269,6 @@ enum swupd_code third_party_repair_main(int argc, char **argv)
 		picky_whitelist = NULL;
 	}
 	swupd_deinit();
-	progress_finish_steps(ret_code);
 
 	return ret_code;
 }

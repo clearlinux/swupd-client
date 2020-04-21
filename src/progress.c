@@ -209,6 +209,11 @@ void progress_finish_steps(int status)
 	if (current_step != total_steps) {
 		debug("Warning: Less steps than expected were executed for the current operation: expected (%d), executed (%d)\n", current_step, total_steps);
 	}
+
+	/* reset value of static variables in case a new progress is used */
+	title = NULL;
+	total_steps = 0;
+	current_step = 0;
 }
 
 void progress_next_step(const char *step_title, enum progress_type type)

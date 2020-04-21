@@ -22,7 +22,8 @@ AM_CFLAGS = -fPIE -fPIC -g -fno-common -std=gnu99 \
 	-fno-strict-overflow \
 	-fno-delete-null-pointer-checks \
 	-fwrapv \
-	-include "config.h"
+	-include "config.h" \
+	-I$(top_srcdir)/src/
 
 if ENABLE_FORTIFY
 AM_CFLAGS += -D_FORTIFY_SOURCE=2

@@ -165,7 +165,6 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 	ret_code = third_party_run_operation_multirepo(cmdline_repo, list_repo_bundles, SWUPD_OK, "bundle-list", steps_in_bundlelist);
 
 	swupd_deinit();
-	progress_finish_steps(ret_code);
 
 	return ret_code;
 }

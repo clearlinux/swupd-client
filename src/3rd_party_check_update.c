@@ -102,7 +102,6 @@ enum swupd_code third_party_check_update_main(int argc, char **argv)
 	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, check_update_repo, SWUPD_NO, "check-update", steps_in_checkupdate);
 
 	swupd_deinit();
-	progress_finish_steps(ret_code);
 
 	return ret_code;
 }

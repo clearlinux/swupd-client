@@ -130,7 +130,6 @@ enum swupd_code third_party_clean_main(int argc, char **argv)
 	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, clean_repos_state, SWUPD_OK, "clean", steps_in_clean);
 
 	swupd_deinit();
-	progress_finish_steps(ret_code);
 
 	return ret_code;
 }

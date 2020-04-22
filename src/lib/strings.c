@@ -186,7 +186,7 @@ bool str_to_bool(const char *str)
 	bool ret = false;
 
 	str_lower = str_to_lower(str);
-	if (strcmp(str_lower, "true") == 0) {
+	if (str_cmp(str_lower, "true") == 0) {
 		ret = true;
 	}
 

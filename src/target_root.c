@@ -327,7 +327,7 @@ static enum swupd_code verify_fix_path(char *target_path, struct manifest *targe
 	struct list *list1 = NULL;
 
 	/* This shouldn't happen */
-	if (strcmp(target_path, "/") == 0) {
+	if (str_cmp(target_path, "/") == 0) {
 		return ret;
 	}
 
@@ -337,7 +337,7 @@ static enum swupd_code verify_fix_path(char *target_path, struct manifest *targe
 	/* Breaking down the path into parts.
 	 * eg. Path /usr/bin/foo will be broken into /usr,/usr/bin and /usr/bin/foo
 	 */
-	while (strcmp(path, "/") != 0) {
+	while (str_cmp(path, "/") != 0) {
 		path_list = list_prepend_data(path_list, strdup_or_die(path));
 		tmp = sys_dirname(path);
 		free_and_clear_pointer(&path);

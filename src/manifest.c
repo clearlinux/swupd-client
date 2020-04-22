@@ -81,12 +81,12 @@ static int try_manifest_delta_download(int from, int to, char *component)
 		return -1;
 	}
 
-	if (strcmp(component, "MoM") == 0) {
+	if (str_cmp(component, "MoM") == 0) {
 		// We don't do MoM deltas.
 		return -1;
 	}
 
-	if (strcmp(component, "full") == 0) {
+	if (str_cmp(component, "full") == 0) {
 		// We don't do full manifest deltas.
 		return -1;
 	}
@@ -444,7 +444,7 @@ void link_manifests(struct manifest *m1, struct manifest *m2)
 		file1 = list1->data;
 		file2 = list2->data;
 
-		ret = strcmp(file1->filename, file2->filename);
+		ret = str_cmp(file1->filename, file2->filename);
 		if (ret == 0) {
 			if (!file1->is_deleted || file2->is_deleted) {
 				file1->peer = file2;
@@ -504,7 +504,7 @@ void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *su
 		subbed1 = component_subscribed(subs1, file1->filename);
 		subbed2 = component_subscribed(subs2, file2->filename);
 
-		ret = strcmp(file1->filename, file2->filename);
+		ret = str_cmp(file1->filename, file2->filename);
 		if (ret == 0) {
 			file1->peer = file2;
 			file2->peer = file1;
@@ -571,7 +571,7 @@ struct list *recurse_manifest(struct manifest *manifest, struct list *subs, cons
 			continue;
 		}
 
-		if (component && !(strcmp(component, file->filename) == 0)) {
+		if (component && !(str_cmp(component, file->filename) == 0)) {
 			continue;
 		}
 
@@ -618,7 +618,7 @@ struct list *consolidate_files(struct list *files)
 		file2 = next->data;
 
 		/* If the filenames are different, nothing to consolidate, just move on. */
-		if (strcmp(file1->filename, file2->filename)) {
+		if (str_cmp(file1->filename, file2->filename)) {
 			list = next;
 			continue;
 		}
@@ -719,7 +719,7 @@ static struct list *list_common_files(struct list *list1, struct list *list2)
 		}
 		file1 = list->data;
 		file2 = list->next->data;
-		if (strcmp(file1->filename, file2->filename) == 0) {
+		if (str_cmp(file1->filename, file2->filename) == 0) {
 			common = list_prepend_data(common, file1);
 		}
 	}
@@ -783,7 +783,7 @@ struct list *filter_out_existing_files(struct list *to_install_files, struct lis
 		}
 		file1 = list->data;
 		file2 = list->next->data;
-		if (strcmp(file1->filename, file2->filename) == 0) { // maybe check also if the hash is the same????
+		if (str_cmp(file1->filename, file2->filename) == 0) { // maybe check also if the hash is the same????
 			/* this file is already in the system, remove both
 			 * from the list */
 			list = list_free_item(list->next, NULL); // returns a pointer to the previous item
@@ -902,7 +902,7 @@ void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2)
 		file2 = iter2->data;
 		cur_file = iter1;
 
-		ret = strcmp(file1->filename, file2->filename);
+		ret = str_cmp(file1->filename, file2->filename);
 		if (ret == 0) {
 			iter1 = iter1->next;
 			iter2 = iter2->next;
@@ -945,7 +945,7 @@ struct file *search_file_in_manifest(struct manifest *manifest, const char *file
 		file = iter->data;
 		iter = iter->next;
 
-		if (strcmp(file->filename, filename) == 0) {
+		if (str_cmp(file->filename, filename) == 0) {
 			return file;
 		}
 	}
@@ -987,15 +987,15 @@ void manifest_free_array(struct file **array)
 
 static bool is_version_data(const char *filename)
 {
-	if (strcmp(filename, "/usr/lib/os-release") == 0 ||
-	    strcmp(filename, "/usr/share/clear/version") == 0 ||
-	    strcmp(filename, "/usr/share/clear/versionstamp") == 0 ||
-	    strcmp(filename, DEFAULT_VERSION_URL_PATH) == 0 ||
-	    strcmp(filename, DEFAULT_CONTENT_URL_PATH) == 0 ||
-	    strcmp(filename, DEFAULT_FORMAT_PATH) == 0 ||
-	    strcmp(filename, "/usr/share/clear/update-ca/Swupd_Root.pem") == 0 ||
-	    strcmp(filename, "/usr/share/clear/os-core-update-index") == 0 ||
-	    strcmp(filename, "/usr/share/clear/allbundles/os-core") == 0) {
+	if (str_cmp(filename, "/usr/lib/os-release") == 0 ||
+	    str_cmp(filename, "/usr/share/clear/version") == 0 ||
+	    str_cmp(filename, "/usr/share/clear/versionstamp") == 0 ||
+	    str_cmp(filename, DEFAULT_VERSION_URL_PATH) == 0 ||
+	    str_cmp(filename, DEFAULT_CONTENT_URL_PATH) == 0 ||
+	    str_cmp(filename, DEFAULT_FORMAT_PATH) == 0 ||
+	    str_cmp(filename, "/usr/share/clear/update-ca/Swupd_Root.pem") == 0 ||
+	    str_cmp(filename, "/usr/share/clear/os-core-update-index") == 0 ||
+	    str_cmp(filename, "/usr/share/clear/allbundles/os-core") == 0) {
 		return true;
 	}
 	return false;

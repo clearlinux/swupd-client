@@ -13,8 +13,8 @@ static void validate_file(struct list *files, const char *filename, int version,
 
 	for (list = files; list; list = list->next) {
 		struct file *file = list->data;
-		if (strcmp(filename, file->filename) == 0) {
-			check(strcmp(file->hash, hash_str) == 0);
+		if (str_cmp(filename, file->filename) == 0) {
+			check(str_cmp(file->hash, hash_str) == 0);
 			check(file->is_dir == is_dir);
 			check(file->is_file == is_file);
 			check(file->is_link == is_link);

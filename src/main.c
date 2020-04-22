@@ -85,7 +85,7 @@ static void print_help(const char *name)
 	struct subcmd *entry = main_commands;
 
 	while (entry->name != NULL) {
-		if (strcmp(entry->name, "verify") != 0) {
+		if (str_cmp(entry->name, "verify") != 0) {
 			/* this command was superseded so it won't be shown in the help menu
 			 * anymore, but it needs to continue to work due to backwards compatibility */
 			print("   %-20s    %-30s\n", entry->name, entry->doc);

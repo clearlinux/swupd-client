@@ -405,7 +405,7 @@ enum swupd_code mirror_main(int argc, char **argv)
 	if (log_is_quiet()) {
 		if (!set && !unset) {
 			print("%s\n", globals.version_url);
-			if (strcmp(globals.version_url, globals.content_url) != 0) {
+			if (str_cmp(globals.version_url, globals.content_url) != 0) {
 				print("%s\n", globals.content_url);
 			}
 		}

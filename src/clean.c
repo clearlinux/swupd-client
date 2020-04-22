@@ -139,7 +139,7 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 			break;
 		}
 
-		if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) {
+		if (!str_cmp(entry->d_name, ".") || !str_cmp(entry->d_name, "..")) {
 			continue;
 		}
 
@@ -342,7 +342,7 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 		}
 
 		const char *name = entry->d_name;
-		if (!strcmp(name, ".") || !strcmp(name, "..")) {
+		if (!str_cmp(name, ".") || !str_cmp(name, "..")) {
 			continue;
 		}
 		if (!is_all_digits(name)) {

@@ -13,15 +13,15 @@ void test_list_sorted_deduplicate()
 	char *str;
 
 	// Deduplicating an empty list
-	list = list_sorted_deduplicate(NULL, strcmp_wrapper, NULL);
+	list = list_sorted_deduplicate(NULL, str_cmp_wrapper, NULL);
 	check(list == NULL);
 
 	// Deduplicating a list of a single element
 	list = list_prepend_data(list, "A");
-	list = list_sorted_deduplicate(list, strcmp_wrapper, NULL);
+	list = list_sorted_deduplicate(list, str_cmp_wrapper, NULL);
 
 	str = str_join(", ", list);
-	check(strcmp("A", str) == 0);
+	check(str_cmp("A", str) == 0);
 	free(str);
 
 	// Deduplicating a list of odd number of identical elements
@@ -38,10 +38,10 @@ void test_list_sorted_deduplicate()
 	list = list_append_data(list, "E");
 	list = list_append_data(list, "E");
 	list = list_head(list);
-	list = list_sorted_deduplicate(list, strcmp_wrapper, NULL);
+	list = list_sorted_deduplicate(list, str_cmp_wrapper, NULL);
 
 	str = str_join(", ", list);
-	check(strcmp("A, B, C, D, E", str) == 0);
+	check(str_cmp("A, B, C, D, E", str) == 0);
 	free(str);
 	list_free_list(list);
 
@@ -49,7 +49,7 @@ void test_list_sorted_deduplicate()
 
 static bool filterX(const void *data)
 {
-	return strcmp(data, "X") != 0;
+	return str_cmp(data, "X") != 0;
 }
 
 void test_list_filter_elements()
@@ -58,7 +58,7 @@ void test_list_filter_elements()
 	char *str;
 
 	// Filter empty list
-	list = list_sorted_deduplicate(NULL, strcmp_wrapper, NULL);
+	list = list_sorted_deduplicate(NULL, str_cmp_wrapper, NULL);
 	check(list == NULL);
 
 	// Don't remove element
@@ -66,7 +66,7 @@ void test_list_filter_elements()
 	list = list_filter_elements(list, filterX, NULL);
 
 	str = str_join(", ", list);
-	check(strcmp("A", str) == 0);
+	check(str_cmp("A", str) == 0);
 	free(str);
 	list_free_list(list);
 	list = NULL;
@@ -111,7 +111,7 @@ void test_list_filter_elements()
 	list = list_filter_elements(list, filterX, NULL);
 
 	str = str_join(", ", list);
-	check(strcmp("A, B, C, D, E, F", str) == 0);
+	check(str_cmp("A, B, C, D, E, F", str) == 0);
 	free(str);
 	list_free_list(list);
 }

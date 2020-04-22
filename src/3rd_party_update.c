@@ -64,7 +64,7 @@ static bool parse_opt(int opt, char *optarg)
 
 	switch (opt) {
 	case 'V':
-		if (strcmp("latest", optarg) == 0) {
+		if (str_cmp("latest", optarg) == 0) {
 			cmdline_option_version = -1;
 			return true;
 		}
@@ -307,7 +307,7 @@ enum swupd_code third_party_update_main(int argc, char **argv)
 	template_file = sys_path_join("%s/%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_DIR, SWUPD_3RD_PARTY_TEMPLATE_FILE);
 	template = sys_mmap_file(template_file, &template_len);
 
-	if (!template || strncmp(template, SCRIPT_TEMPLATE, template_len) != 0) {
+	if (!template || str_cmp(template, SCRIPT_TEMPLATE) != 0) {
 		/* there is no template file, or the template changed,
 		 * all scripts need to be recreated */
 		info("The scripts that export binaries from 3rd-party repositories need to be regenerated\n\n");

@@ -181,7 +181,7 @@ static int import_certificate_from_version(int version)
 
 	for (i = manifest->files; i; i = i->next) {
 		struct file *f = i->data;
-		if (strncmp(f->filename, CERT_PATH, sizeof(CERT_PATH)) == 0) {
+		if (str_cmp(f->filename, CERT_PATH) == 0) {
 			cert_file = f;
 			break;
 		}

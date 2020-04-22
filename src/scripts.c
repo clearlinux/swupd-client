@@ -49,11 +49,11 @@ static void update_boot(void)
 	char *scriptname;
 
 	/* Don't run clr-boot-manager update in a container on the rootfs */
-	if (strcmp("/", globals.path_prefix) == 0 && systemd_in_container()) {
+	if (str_cmp("/", globals.path_prefix) == 0 && systemd_in_container()) {
 		return;
 	}
 
-	if (strcmp("/", globals.path_prefix) == 0) {
+	if (str_cmp("/", globals.path_prefix) == 0) {
 		run_script_if_exists("/usr/bin/clr-boot-manager", "update", NULL);
 	} else {
 		scriptname = sys_path_join("%s/%s", globals.path_prefix, "/usr/bin/clr-boot-manager");
@@ -69,7 +69,7 @@ static void exec_post_update_script(bool reexec, bool block)
 	int i = 0;
 	bool has_path_prefix;
 
-	has_path_prefix = strcmp("/", globals.path_prefix) != 0;
+	has_path_prefix = str_cmp("/", globals.path_prefix) != 0;
 
 	params[i++] = str_or_die("%s%s", has_path_prefix ? globals.path_prefix : "",
 				 POST_UPDATE);
@@ -96,7 +96,7 @@ static void run_ldconfig(void)
 {
 	int err;
 
-	if (strcmp("/", globals.path_prefix) == 0) {
+	if (str_cmp("/", globals.path_prefix) == 0) {
 		err = run_command_quiet("/usr/bin/ldconfig", NULL);
 	} else {
 		err = run_command_quiet("/bin/chroot", globals.path_prefix, "/usr/bin/ldconfig", NULL);
@@ -112,7 +112,7 @@ static void update_triggers(bool block)
 	if (str_len(POST_UPDATE) == 0) {
 		/* fall back to systemd if path prefix is not the rootfs
 		 * and the POST_UPDATE trigger wasn't specified */
-		if (strcmp("/", globals.path_prefix) != 0) {
+		if (str_cmp("/", globals.path_prefix) != 0) {
 			return;
 		}
 
@@ -171,7 +171,7 @@ void scripts_run_post_update(bool block)
 
 static void exec_pre_update_script(const char *script)
 {
-	if (str_len(PRE_UPDATE) == 0 || strcmp("/", globals.path_prefix) == 0) {
+	if (str_len(PRE_UPDATE) == 0 || str_cmp("/", globals.path_prefix) == 0) {
 		run_script_if_exists(script, NULL);
 	} else {
 		run_script_if_exists(script, globals.path_prefix, NULL);
@@ -199,7 +199,7 @@ void scripts_run_pre_update(struct manifest *manifest)
 		file = iter->data;
 		iter = iter->prev;
 
-		if (strcmp(file->filename, script) != 0) {
+		if (str_cmp(file->filename, script) != 0) {
 			continue;
 		}
 

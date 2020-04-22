@@ -7,7 +7,7 @@
 	# There are some C functions that are tricky to use and it's prefered to
 	# avoid using them in swupd. If any function in this list is really needed
 	# we need to review the usage and add an exception here.
-	local functions="strcpy wcscpy strcat wcscat sprintf vsprintf strtok ato strlen wcslen alloca vscanf vsscanf vfscanf scanf sscanf fscanf strncat strsep toa memmove asctime getwd strlen gets"
+	local functions="strcpy wcscpy strcat wcscat sprintf vsprintf strtok ato strlen strcmp wcslen alloca vscanf vsscanf vfscanf scanf sscanf fscanf strncat strsep toa memmove asctime getwd gets"
 
 	local error=0
 	for func in $functions; do

@@ -60,7 +60,7 @@ static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 
 	switch (opt) {
 	case 'V':
-		if (strcmp("latest", optarg) == 0) {
+		if (str_cmp("latest", optarg) == 0) {
 			cmdline_option_version = -1;
 			return true;
 		}

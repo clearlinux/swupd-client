@@ -83,7 +83,7 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 		struct manifest *bundle = b->data;
 		b = b->next;
 
-		if (strcmp(bundle->component, bundle_name) == 0) {
+		if (str_cmp(bundle->component, bundle_name) == 0) {
 			/* circular dependencies are not allowed in manifests,
 			 * so we can skip checking for dependencies in the same bundle */
 			continue;
@@ -95,7 +95,7 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 			name = i->data;
 			i = i->next;
 
-			if (strcmp(name, bundle_name) == 0) {
+			if (str_cmp(name, bundle_name) == 0) {
 
 				/* this bundle has *bundle_name as a dependency */
 
@@ -103,7 +103,7 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 				 * then don't consider it as a dependency, the user added it to
 				 * the list of bundles to be removed too, but we DO want to
 				 * consider its list of includes */
-				if (!list_search(exclusions, bundle->component, strcmp_wrapper)) {
+				if (!list_search(exclusions, bundle->component, str_cmp_wrapper)) {
 
 					/* add bundle to list of dependencies */
 					char *bundle_str = NULL;
@@ -144,9 +144,9 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 				name = i->data;
 				i = i->next;
 
-				if (strcmp(name, bundle_name) == 0) {
+				if (str_cmp(name, bundle_name) == 0) {
 
-					if (!list_search(exclusions, bundle->component, strcmp_wrapper)) {
+					if (!list_search(exclusions, bundle->component, str_cmp_wrapper)) {
 
 						char *bundle_str = NULL;
 						string_or_die(&bundle_str, "%s (as optional)", bundle->component);
@@ -182,8 +182,8 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 
 	if (recursion == 1) {
 		/* get rid of duplicated dependencies */
-		*reqd_by = list_sort(*reqd_by, strcmp_wrapper);
-		*reqd_by = list_sorted_deduplicate(*reqd_by, strcmp_wrapper, free);
+		*reqd_by = list_sort(*reqd_by, str_cmp_wrapper);
+		*reqd_by = list_sorted_deduplicate(*reqd_by, str_cmp_wrapper, free);
 
 		/* if not using --verbose, we need to print the simplified
 		 * list of bundles that depend on *bundle_name */

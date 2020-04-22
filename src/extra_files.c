@@ -51,7 +51,7 @@ static int record_filename(const char *name, const struct stat *stat __attribute
 	/* Name as it would appear in manifest, f.i. /usr */
 	const char *relname = name + path_prefix_len - 1;
 
-	if (!relname[0] || !strcmp(relname, "/")) {
+	if (!relname[0] || !str_cmp(relname, "/")) {
 		/* Do not record root while descending into it. */
 		return 0;
 	}

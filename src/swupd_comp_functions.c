@@ -26,7 +26,7 @@
  * All functions in this file should match this type definition:
  * typedef int (*comparison_fn_t)(const void *a, const void *b);
  *
- * They should behave like this (similar to strcmp):
+ * They should behave like this (similar to str_cmp):
  * - return 0 if a is equal to b
  * - return any number "< 0" if a is lower than b
  * - return any number "> 0" if a is bigger than b
@@ -42,52 +42,52 @@
 
 int cmp_string_filerecord_filename(const void *a, const void *b)
 {
-	return strcmp(*(const char **)a, ((struct filerecord *)b)->filename);
+	return str_cmp(*(const char **)a, ((struct filerecord *)b)->filename);
 }
 
 int cmp_file_filename(const void *a, const void *b)
 {
-	return strcmp(((struct file *)a)->filename, ((struct file *)b)->filename);
+	return str_cmp(((struct file *)a)->filename, ((struct file *)b)->filename);
 }
 
 int cmp_file_filename_ptr(const void *a, const void *b)
 {
-	return strcmp((*(struct file **)a)->filename, (*(struct file **)b)->filename);
+	return str_cmp((*(struct file **)a)->filename, (*(struct file **)b)->filename);
 }
 
 int cmp_filerecord_filename(const void *a, const void *b)
 {
-	return strcmp(((struct filerecord *)a)->filename, ((struct filerecord *)b)->filename);
+	return str_cmp(((struct filerecord *)a)->filename, ((struct filerecord *)b)->filename);
 }
 
 int cmp_file_hash(const void *a, const void *b)
 {
-	return strcmp(((struct file *)a)->hash, ((struct file *)b)->hash);
+	return str_cmp(((struct file *)a)->hash, ((struct file *)b)->hash);
 }
 
 int cmp_manifest_component(const void *a, const void *b)
 {
-	return strcmp(((struct manifest *)a)->component, ((struct manifest *)b)->component);
+	return str_cmp(((struct manifest *)a)->component, ((struct manifest *)b)->component);
 }
 
 int cmp_subscription_component(const void *a, const void *b)
 {
-	return strcmp(((struct sub *)a)->component, ((struct sub *)b)->component);
+	return str_cmp(((struct sub *)a)->component, ((struct sub *)b)->component);
 }
 
 int cmp_manifest_component_string(const void *a, const void *b)
 {
-	return strcmp(((struct manifest *)a)->component, (const char *)b);
+	return str_cmp(((struct manifest *)a)->component, (const char *)b);
 }
 
 int cmp_file_filename_string(const void *a, const void *b)
 {
-	return strcmp(((struct file *)a)->filename, (const char *)b);
+	return str_cmp(((struct file *)a)->filename, (const char *)b);
 }
 
 int cmp_sub_component_string(const void *a, const void *b)
 {
-	return strcmp(((struct sub *)a)->component, (const char *)b);
+	return str_cmp(((struct sub *)a)->component, (const char *)b);
 }
 
 int cmp_file_filename_reverse(const void *a, const void *b)
@@ -104,7 +104,7 @@ int cmp_file_hash_last_change(const void *a, const void *b)
 	struct file *file2 = (struct file *)b;
 	int comp;
 
-	comp = strcmp(file1->hash, file2->hash);
+	comp = str_cmp(file1->hash, file2->hash);
 	if (comp != 0) {
 		return comp;
 	}
@@ -120,7 +120,7 @@ int cmp_file_filename_is_deleted(const void *a, const void *b)
 	A = (struct file *)a;
 	B = (struct file *)b;
 
-	ret = strcmp(A->filename, B->filename);
+	ret = str_cmp(A->filename, B->filename);
 	if (ret) {
 		return ret;
 	}
@@ -138,12 +138,12 @@ int cmp_file_filename_is_deleted(const void *a, const void *b)
 
 int cmp_repo_name_string(const void *a, const void *b)
 {
-	return strcmp(((struct repo *)a)->name, (const char *)b);
+	return str_cmp(((struct repo *)a)->name, (const char *)b);
 }
 
 int cmp_repo_url_string(const void *a, const void *b)
 {
-	return strcmp(((struct repo *)a)->url, (const char *)b);
+	return str_cmp(((struct repo *)a)->url, (const char *)b);
 }
 
 #endif

@@ -82,8 +82,8 @@ int rm_staging_dir_contents(const char *rel_path)
 			break;
 		}
 
-		if (!strcmp(entry->d_name, ".") ||
-		    !strcmp(entry->d_name, "..")) {
+		if (!str_cmp(entry->d_name, ".") ||
+		    !str_cmp(entry->d_name, "..")) {
 			continue;
 		}
 
@@ -312,7 +312,7 @@ static void get_mounted_directories(void)
 				/* The "4" assumes today's mountinfo form of:
 				* 16 36 0:3 / /proc rw,relatime master:7 - proc proc rw
 				* where the fifth field is the mountpoint. */
-				if (strcmp(mnt, "/") == 0) {
+				if (str_cmp(mnt, "/") == 0) {
 					break;
 				}
 
@@ -647,7 +647,7 @@ bool string_in_list(char *string_to_check, struct list *list_to_check)
  * never appears in a manifest, it is skipped. */
 bool is_compatible_format(int format_num)
 {
-	if (strcmp(globals.format_string, "staging") == 0) {
+	if (str_cmp(globals.format_string, "staging") == 0) {
 		return true;
 	}
 

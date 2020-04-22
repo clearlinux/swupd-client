@@ -272,7 +272,7 @@ static struct list *generate_bundles_to_install(struct list *bundles)
 		struct list *alias_bundles = get_alias_bundles(aliases, bundle);
 		char *alias_list_str = str_join(", ", alias_bundles);
 
-		if (strcmp(bundle, alias_list_str) != 0) {
+		if (str_cmp(bundle, alias_list_str) != 0) {
 			info("Alias %s will install bundle(s): %s\n", bundle, alias_list_str);
 		}
 		free_and_clear_pointer(&alias_list_str);
@@ -280,8 +280,8 @@ static struct list *generate_bundles_to_install(struct list *bundles)
 	}
 
 	list_free_list_and_data(aliases, free_alias_lookup);
-	bundles_list = list_sort(bundles_list, strcmp_wrapper);
-	bundles_list = list_sorted_deduplicate(bundles_list, strcmp_wrapper, free);
+	bundles_list = list_sort(bundles_list, str_cmp_wrapper);
+	bundles_list = list_sorted_deduplicate(bundles_list, str_cmp_wrapper, free);
 
 	return bundles_list;
 }

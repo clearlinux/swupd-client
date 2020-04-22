@@ -72,7 +72,7 @@ static void log_internal(FILE *out, const char *file, int line, const char *labe
 	}
 
 	/* if we don't have anything else to print, finish here */
-	if (strcmp(format, "") == 0) {
+	if (str_cmp(format, "") == 0) {
 		return;
 	}
 

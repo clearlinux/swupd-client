@@ -82,9 +82,9 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		____________________________
-		 3rd-Party Repo: test-repo1
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo1
+		__________________________________
 		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
 		Preparing to update from 10 to 20
@@ -106,9 +106,9 @@ test_setup() {
 		Updating 3rd-party bundle binaries...
 		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Update successful - System updated from version 10 to version 20
-		____________________________
-		 3rd-Party Repo: test-repo2
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo2
+		__________________________________
 		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
 		Version on server (10) is not newer than system version (10)
@@ -126,15 +126,15 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		____________________________
-		 3rd-Party Repo: test-repo1
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo1
+		__________________________________
 		Current OS version: 10
 		Latest server version: 20
 		There is a new OS version available: 20
-		____________________________
-		 3rd-Party Repo: test-repo2
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo2
+		__________________________________
 		Current OS version: 10
 		Latest server version: 10
 		There are no updates available

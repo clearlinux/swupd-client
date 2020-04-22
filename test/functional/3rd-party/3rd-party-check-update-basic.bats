@@ -26,18 +26,18 @@ global_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		____________________________
-		 3rd-Party Repo: test-repo1
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo1
+		__________________________________
 
 		Current OS version: 10
 		Latest server version: 20
 		There is a new OS version available: 20
 
 
-		____________________________
-		 3rd-Party Repo: test-repo2
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo2
+		__________________________________
 
 		Current OS version: 10
 		Latest server version: 10

@@ -39,9 +39,9 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
 		Preparing to update from 10 to 20
@@ -107,9 +107,9 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
 		Preparing to update from 10 to 20
@@ -133,9 +133,9 @@ test_setup() {
 		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Update successful - System updated from version 10 to version 20
 		The scripts that export binaries from 3rd-party repositories need to be regenerated
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 		Regenerating scripts...
 		Scripts regenerated successfully
 	EOM
@@ -181,9 +181,9 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
 		Preparing to update from 10 to 20
@@ -207,9 +207,9 @@ test_setup() {
 		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Update successful - System updated from version 10 to version 20
 		The scripts that export binaries from 3rd-party repositories need to be regenerated
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 		Regenerating scripts...
 		Scripts regenerated successfully
 	EOM

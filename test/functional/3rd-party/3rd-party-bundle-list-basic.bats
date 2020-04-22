@@ -30,9 +30,9 @@ global_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 
 		Installed bundles:
 		 - os-core
@@ -41,9 +41,9 @@ global_setup() {
 		Total: 2
 
 
-		_______________________
-		 3rd-Party Repo: repo2
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo2
+		_____________________________
 
 		Installed bundles:
 		 - os-core
@@ -65,9 +65,9 @@ global_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 
 		All available bundles:
 		 - os-core
@@ -77,9 +77,9 @@ global_setup() {
 		Total: 3
 
 
-		_______________________
-		 3rd-Party Repo: repo2
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo2
+		_____________________________
 
 		All available bundles:
 		 - os-core

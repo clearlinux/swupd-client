@@ -49,9 +49,9 @@ test_setup() {
 		Calling post-update helper scripts
 		Update successful - System updated from version 10 to version 20
 		Updating content from 3rd-party repositories
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
 		Preparing to update from 10 to 20
@@ -100,11 +100,9 @@ test_setup() {
 		]
 		[
 		{ "type" : "start", "section" : "3rd-party-update" },
-	EOM
-	)
-	assert_in_output "$expected_output"
-	expected_output=$(cat <<-EOM
-		{ "type" : "info", "msg" : " 3rd-Party Repo: repo1" },
+		{ "type" : "info", "msg" : "_____________________________" },
+		{ "type" : "info", "msg" : " 3rd-Party Repository: repo1" },
+		{ "type" : "info", "msg" : "_____________________________" },
 	EOM
 	)
 	assert_in_output "$expected_output"
@@ -128,9 +126,9 @@ test_setup() {
 		Latest server version: 20
 		There is a new OS version available: 20
 		Checking update status of content from 3rd-party repositories
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 		Current OS version: 10
 		Latest server version: 20
 		There is a new OS version available: 20
@@ -170,9 +168,9 @@ test_setup() {
 		Downloading all Clear Linux manifests...
 		Update successful - System updated from version 10 to version 20
 		Updating content from 3rd-party repositories
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
 		Preparing to update from 10 to 20

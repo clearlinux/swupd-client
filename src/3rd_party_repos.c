@@ -537,7 +537,7 @@ void third_party_repo_header(const char *repo_name)
 {
 	char *header = NULL;
 
-	string_or_die(&header, " 3rd-Party Repo: %s", repo_name);
+	string_or_die(&header, " 3rd-Party Repository: %s", repo_name);
 	print_header(header);
 	if (log_is_quiet()) {
 		print("[%s]\n", repo_name);

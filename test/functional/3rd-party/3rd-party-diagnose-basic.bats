@@ -38,9 +38,9 @@ global_setup() {
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		____________________________
-		 3rd-Party Repo: test-repo1
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo1
+		__________________________________
 		Diagnosing version 20
 		Downloading missing manifests...
 		Checking for missing files
@@ -57,9 +57,9 @@ global_setup() {
 		  1 file found which should be deleted
 		Use "swupd repair" to correct the problems in the system
 		Diagnose successful
-		____________________________
-		 3rd-Party Repo: test-repo2
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo2
+		__________________________________
 		Diagnosing version 10
 		Downloading missing manifests...
 		Checking for missing files
@@ -133,9 +133,9 @@ global_setup() {
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		____________________________
-		 3rd-Party Repo: test-repo1
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo1
+		__________________________________
 		Diagnosing version 20
 		Downloading missing manifests...
 		Checking for missing files
@@ -153,9 +153,9 @@ global_setup() {
 		  1 file found which should be deleted
 		Use "swupd repair" to correct the problems in the system
 		Diagnose successful
-		____________________________
-		 3rd-Party Repo: test-repo2
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo2
+		__________________________________
 		Diagnosing version 10
 		Downloading missing manifests...
 		Checking for missing files
@@ -179,9 +179,9 @@ global_setup() {
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		____________________________
-		 3rd-Party Repo: test-repo1
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo1
+		__________________________________
 		Diagnosing version 20
 		Downloading missing manifests...
 		Checking for missing files
@@ -201,9 +201,9 @@ global_setup() {
 		  3 files found which should be deleted
 		Use "swupd repair --picky" to correct the problems in the system
 		Diagnose successful
-		____________________________
-		 3rd-Party Repo: test-repo2
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo2
+		__________________________________
 		Diagnosing version 10
 		Downloading missing manifests...
 		Checking for missing files

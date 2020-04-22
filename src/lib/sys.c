@@ -444,8 +444,11 @@ char *sys_path_join(const char *fmt, ...)
 
 	/* remove all duplicated PATH_SEPARATOR from the path */
 	for (i = j = 0; i < len; i++) {
-		if (path[i] == PATH_SEPARATOR &&
-		    (path[i + 1] == PATH_SEPARATOR || path[i + 1] == '\0')) {
+		if (path[i] == PATH_SEPARATOR && // Is separator and
+		    // Next is also a separator or
+		    (path[i + 1] == PATH_SEPARATOR ||
+		     // Is a trailing separator, but not root
+		     (path[i + 1] == '\0' && i != 0))) {
 			/* duplicated PATH_SEPARATOR, throw it away */
 			continue;
 		}

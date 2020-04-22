@@ -882,14 +882,29 @@ static struct list *keep_matching_path(struct list *all_files)
 	struct list *matching_files = NULL;
 	struct list *iter = NULL;
 	struct file *file;
+	char *tmp_dir = NULL;
+
+	/* when considering the item as a directory, make sure the item
+	 * finishes with a forward slash so we can match items accuratelly,
+	 * oherwise we can end up with items that partially match */
+	tmp_dir = str_or_die("%s%s", cmdline_option_file, cmdline_option_file[str_len(cmdline_option_file)] == '/' ? "" : "/");
 
 	for (iter = all_files; iter; iter = iter->next) {
 		file = iter->data;
-		if (strncmp(cmdline_option_file, file->filename, str_len(cmdline_option_file)) == 0) {
+
+		/* if the item entered by the user is a file, the match should
+		 * be exact, so look for an exact match first, if there is none,
+		 * look for a match treating the item as directory */
+		if (str_cmp(cmdline_option_file, file->filename) == 0) {
+			/* preserving the order is important */
+			matching_files = list_append_data(matching_files, file);
+		} else if (strncmp(tmp_dir, file->filename, str_len(tmp_dir)) == 0) {
 			/* preserving the order is important */
 			matching_files = list_append_data(matching_files, file);
 		}
 	}
+
+	free_and_clear_pointer(&tmp_dir);
 
 	return list_head(matching_files);
 }

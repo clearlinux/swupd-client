@@ -24,11 +24,6 @@
 #include "swupd.h"
 
 #define MANIFEST_LINE_MAXLEN (PATH_MAX * 2)
-
-// strncmp helper to be used with consts
-#define str_len_const(_const) sizeof(_const) - 1
-#define strncmp_const(_str, _const) strncmp(_str, _const, str_len_const(_const))
-
 #define MANIFEST_HEADER "MANIFEST\t"
 
 struct manifest *manifest_parse(const char *component, const char *filename, bool header_only)
@@ -58,11 +53,11 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 		goto err_close;
 	}
 
-	if (strncmp_const(line, MANIFEST_HEADER) != 0) {
+	if (str_starts_with(line, MANIFEST_HEADER) != 0) {
 		goto err_close;
 	}
 
-	c = line + str_len_const(MANIFEST_HEADER);
+	c = line + str_len(MANIFEST_HEADER);
 	err = str_to_int(c, &manifest->manifest_version);
 
 	if (manifest->manifest_version <= 0 || err != 0) {
@@ -71,7 +66,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 	}
 
 	line[0] = 0;
-	while (strncmp_const(line, "\n") != 0) {
+	while (str_starts_with(line, "\n") != 0) {
 		/* read the header */
 		line[0] = 0;
 		if (fgets(line, MANIFEST_LINE_MAXLEN, infile) == NULL) {
@@ -97,13 +92,13 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			goto err_close;
 		}
 
-		if (strncmp_const(line, "version:\t") == 0) {
+		if (str_starts_with(line, "version:\t") == 0) {
 			err = str_to_int(c, &manifest->version);
 			if (err != 0) {
 				error("Invalid manifest version on %s\n", filename);
 				goto err_close;
 			}
-		} else if (strncmp_const(line, "filecount:\t") == 0) {
+		} else if (str_starts_with(line, "filecount:\t") == 0) {
 			errno = 0;
 			filecount = strtoull(c, NULL, 10);
 			if (filecount > 4000000) {
@@ -124,7 +119,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 				error("Loaded incompatible manifest filecount\n");
 				goto err_close;
 			}
-		} else if (strncmp_const(line, "contentsize:\t") == 0) {
+		} else if (str_starts_with(line, "contentsize:\t") == 0) {
 			errno = 0;
 			contentsize = strtoull(c, NULL, 10);
 			if (contentsize > 2000000000000UL) {
@@ -135,9 +130,9 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 				error("Loaded incompatible manifest contentsize\n");
 				goto err_close;
 			}
-		} else if (strncmp_const(line, "includes:\t") == 0) {
+		} else if (str_starts_with(line, "includes:\t") == 0) {
 			includes = list_prepend_data(includes, strdup_or_die(c));
-		} else if (strncmp_const(line, "also-add:\t") == 0) {
+		} else if (str_starts_with(line, "also-add:\t") == 0) {
 			optional = list_prepend_data(optional, strdup_or_die(c));
 		}
 	}

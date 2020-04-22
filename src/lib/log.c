@@ -55,7 +55,7 @@ static void log_internal(FILE *out, const char *file, int line, const char *labe
 {
 	/* do not print the carriage return found at the beginning of the message if
 	 * in debug mode or if printing to a file, that would mess up the output */
-	while (strncmp(format, "\r", 1) == 0) {
+	while (str_starts_with(format, "\r") == 0) {
 		if (cur_log_level != LOG_DEBUG && isatty(fileno(out))) {
 			fprintf(out, "%c", format[0]);
 		}
@@ -63,7 +63,7 @@ static void log_internal(FILE *out, const char *file, int line, const char *labe
 	}
 
 	/* print the line breaks found at the beginning of the message */
-	while (strncmp(format, "\n", 1) == 0) {
+	while (str_starts_with(format, "\n") == 0) {
 		if (cur_log_level == LOG_DEBUG) {
 			print_debug_info(out, file, line);
 		}

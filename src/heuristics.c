@@ -32,7 +32,7 @@
  * contents are ignored */
 static bool is_config(char *filename)
 {
-	if (strncmp(filename, "/etc/", 5) == 0) {
+	if (str_starts_with(filename, "/etc/") == 0) {
 		return true;
 	}
 	return false;
@@ -57,28 +57,28 @@ static bool is_state(char *filename)
 		return true;
 	}
 
-	if ((str_len(filename) == 14) && (strncmp(filename, "/usr/src/debug", 14) == 0)) {
+	if ((str_len(filename) == 14) && (str_starts_with(filename, "/usr/src/debug") == 0)) {
 		return false;
 	}
 
 	/* Compare the first part of the path, first all the entries inside
 	 * kernel directory, then only the kernel directory */
-	if ((strncmp(filename, "/usr/src/kernel/", 16) == 0) ||
-	    ((str_len(filename) == 15) && (strncmp(filename, "/usr/src/kernel", 15) == 0))) {
+	if ((str_starts_with(filename, "/usr/src/kernel/") == 0) ||
+	    ((str_len(filename) == 15) && (str_starts_with(filename, "/usr/src/kernel") == 0))) {
 		return false;
 	}
 
-	if ((strncmp(filename, "/data", 5) == 0) ||
-	    (strncmp(filename, "/dev/", 5) == 0) ||
-	    (strncmp(filename, "/home/", 6) == 0) ||
-	    (strncmp(filename, "/lost+found", 11) == 0) ||
-	    (strncmp(filename, "/proc/", 6) == 0) ||
-	    (strncmp(filename, "/root/", 6) == 0) ||
-	    (strncmp(filename, "/run/", 5) == 0) ||
-	    (strncmp(filename, "/sys/", 5) == 0) ||
-	    (strncmp(filename, "/tmp/", 5) == 0) ||
-	    (strncmp(filename, "/usr/src/", 9) == 0) ||
-	    (strncmp(filename, "/var/", 5) == 0)) {
+	if ((str_starts_with(filename, "/data") == 0) ||
+	    (str_starts_with(filename, "/dev/") == 0) ||
+	    (str_starts_with(filename, "/home/") == 0) ||
+	    (str_starts_with(filename, "/lost+found") == 0) ||
+	    (str_starts_with(filename, "/proc/") == 0) ||
+	    (str_starts_with(filename, "/root/") == 0) ||
+	    (str_starts_with(filename, "/run/") == 0) ||
+	    (str_starts_with(filename, "/sys/") == 0) ||
+	    (str_starts_with(filename, "/tmp/") == 0) ||
+	    (str_starts_with(filename, "/usr/src/") == 0) ||
+	    (str_starts_with(filename, "/var/") == 0)) {
 		return true;
 	}
 	return false;
@@ -93,12 +93,12 @@ static void runtime_state_heuristics(struct file *file)
 
 static void boot_file_heuristics(struct file *file)
 {
-	if ((strncmp(file->filename, "/boot/", 6) == 0) ||
-	    (strncmp(file->filename, "/usr/lib/modules/", 17) == 0)) {
+	if ((str_starts_with(file->filename, "/boot/") == 0) ||
+	    (str_starts_with(file->filename, "/usr/lib/modules/") == 0)) {
 		file->is_boot = 1;
 	}
 
-	if (strncmp(file->filename, "/usr/lib/kernel/", 16) == 0) {
+	if (str_starts_with(file->filename, "/usr/lib/kernel/") == 0) {
 		file->is_boot = 1;
 		globals.need_update_boot = true;
 	}
@@ -107,10 +107,10 @@ static void boot_file_heuristics(struct file *file)
 		globals.need_systemd_reexec = true;
 	}
 
-	if ((strncmp(file->filename, "/usr/lib/gummiboot", 18) == 0) ||
-	    (strncmp(file->filename, "/usr/bin/gummiboot", 18) == 0) ||
-	    (strncmp(file->filename, "/usr/bin/bootctl", 16) == 0) ||
-	    (strncmp(file->filename, "/usr/lib/systemd/boot", 21) == 0)) {
+	if ((str_cmp(file->filename, "/usr/lib/gummiboot") == 0) ||
+	    (str_cmp(file->filename, "/usr/bin/gummiboot") == 0) ||
+	    (str_cmp(file->filename, "/usr/bin/bootctl") == 0) ||
+	    (str_starts_with(file->filename, "/usr/lib/systemd/boot") == 0)) {
 		file->is_boot = 1;
 		globals.need_update_bootloader = true;
 	}

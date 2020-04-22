@@ -25,16 +25,16 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 		Distribution:      Swupd Test Distro
 		Installed version: 10 (format 1)
 		Version URL:       file://$URL1
 		Content URL:       file://$URL1
-		_______________________
-		 3rd-Party Repo: repo2
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo2
+		_____________________________
 		Distribution:      Swupd Test Distro
 		Installed version: 20 (format 5)
 		Version URL:       file://$URL2

@@ -28,9 +28,9 @@ global_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 
 		Loading required manifests...
 
@@ -53,9 +53,9 @@ global_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 
 		Loading required manifests...
 

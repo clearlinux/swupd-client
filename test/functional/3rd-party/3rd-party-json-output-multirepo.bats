@@ -72,30 +72,18 @@ global_setup() {
 	expected_output=$(cat <<-EOM
 		[
 		{ "type" : "start", "section" : "3rd-party-bundle-list" },
-	EOM
-	)
-	assert_in_output "$expected_output"
-	expected_output=$(cat <<-EOM
-		{ "type" : "info", "msg" : " 3rd-Party Repo: repo1" },
-	EOM
-	)
-	assert_in_output "$expected_output"
-	expected_output=$(cat <<-EOM
+		{ "type" : "info", "msg" : "_____________________________" },
+		{ "type" : "info", "msg" : " 3rd-Party Repository: repo1" },
+		{ "type" : "info", "msg" : "_____________________________" },
 		{ "type" : "info", "msg" : "Installed bundles:" },
 		{ "type" : "info", "msg" : " -" },
 		{ "type" : "info", "msg" : "os-core" },
 		{ "type" : "info", "msg" : " -" },
 		{ "type" : "info", "msg" : "test-bundle1" },
 		{ "type" : "info", "msg" : " Total: 2" },
-	EOM
-	)
-	assert_in_output "$expected_output"
-	expected_output=$(cat <<-EOM
-		{ "type" : "info", "msg" : " 3rd-Party Repo: repo2" },
-	EOM
-	)
-	assert_in_output "$expected_output"
-	expected_output=$(cat <<-EOM
+		{ "type" : "info", "msg" : "_____________________________" },
+		{ "type" : "info", "msg" : " 3rd-Party Repository: repo2" },
+		{ "type" : "info", "msg" : "_____________________________" },
 		{ "type" : "info", "msg" : "Installed bundles:" },
 		{ "type" : "info", "msg" : " -" },
 		{ "type" : "info", "msg" : "os-core" },
@@ -116,15 +104,9 @@ global_setup() {
 	expected_output=$(cat <<-EOM
 		[
 		{ "type" : "start", "section" : "3rd-party-bundle-list" },
-	EOM
-	)
-	assert_in_output "$expected_output"
-	expected_output=$(cat <<-EOM
-		{ "type" : "info", "msg" : " 3rd-Party Repo: repo1" },
-	EOM
-	)
-	assert_in_output "$expected_output"
-	expected_output=$(cat <<-EOM
+		{ "type" : "info", "msg" : "_____________________________" },
+		{ "type" : "info", "msg" : " 3rd-Party Repository: repo1" },
+		{ "type" : "info", "msg" : "_____________________________" },
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 4, "stepCompletion" : -1, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 4, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 4, "stepCompletion" : -1, "stepDescription" : "list_bundles" },
@@ -134,15 +116,9 @@ global_setup() {
 		{ "type" : "info", "msg" : " -" },
 		{ "type" : "info", "msg" : "test-bundle1" },
 		{ "type" : "info", "msg" : " Total: 2" },
-	EOM
-	)
-	assert_in_output "$expected_output"
-	expected_output=$(cat <<-EOM
-		{ "type" : "info", "msg" : " 3rd-Party Repo: repo2" },
-	EOM
-	)
-	assert_in_output "$expected_output"
-	expected_output=$(cat <<-EOM
+		{ "type" : "info", "msg" : "_____________________________" },
+		{ "type" : "info", "msg" : " 3rd-Party Repository: repo2" },
+		{ "type" : "info", "msg" : "_____________________________" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 4, "stepCompletion" : 100, "stepDescription" : "list_bundles" },
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 4, "stepCompletion" : -1, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 4, "stepCompletion" : 100, "stepDescription" : "load_manifests" },

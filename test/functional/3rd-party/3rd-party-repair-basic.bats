@@ -38,9 +38,9 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		____________________________
-		 3rd-Party Repo: test-repo1
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo1
+		__________________________________
 		Diagnosing version 20
 		Downloading missing manifests...
 		Checking for corrupt files
@@ -67,9 +67,9 @@ test_setup() {
 		Calling post-update helper scripts
 		Regenerating 3rd-party bundle binaries...
 		Repair successful
-		____________________________
-		 3rd-Party Repo: test-repo2
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo2
+		__________________________________
 		Diagnosing version 10
 		Downloading missing manifests...
 		Checking for corrupt files
@@ -143,9 +143,9 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		____________________________
-		 3rd-Party Repo: test-repo1
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo1
+		__________________________________
 		Diagnosing version 20
 		Downloading missing manifests...
 		Checking for corrupt files
@@ -173,9 +173,9 @@ test_setup() {
 		Calling post-update helper scripts
 		Regenerating 3rd-party bundle binaries...
 		Repair successful
-		____________________________
-		 3rd-Party Repo: test-repo2
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo2
+		__________________________________
 		Diagnosing version 10
 		Downloading missing manifests...
 		Checking for corrupt files
@@ -203,9 +203,9 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		____________________________
-		 3rd-Party Repo: test-repo1
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo1
+		__________________________________
 		Diagnosing version 20
 		Downloading missing manifests...
 		Checking for corrupt files
@@ -235,9 +235,9 @@ test_setup() {
 		Calling post-update helper scripts
 		Regenerating 3rd-party bundle binaries...
 		Repair successful
-		____________________________
-		 3rd-Party Repo: test-repo2
-		____________________________
+		__________________________________
+		 3rd-Party Repository: test-repo2
+		__________________________________
 		Diagnosing version 10
 		Downloading missing manifests...
 		Checking for corrupt files

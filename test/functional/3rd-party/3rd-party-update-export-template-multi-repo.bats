@@ -51,9 +51,9 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
 		Preparing to update from 10 to 20
@@ -76,22 +76,22 @@ test_setup() {
 		Updating 3rd-party bundle binaries...
 		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Update successful - System updated from version 10 to version 20
-		_______________________
-		 3rd-Party Repo: repo2
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo2
+		_____________________________
 		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
 		Version on server (10) is not newer than system version (10)
 		Update complete - System already up-to-date at version 10
 		The scripts that export binaries from 3rd-party repositories need to be regenerated
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 		Regenerating scripts...
 		Scripts regenerated successfully
-		_______________________
-		 3rd-Party Repo: repo2
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo2
+		_____________________________
 		Regenerating scripts...
 		Scripts regenerated successfully
 	EOM
@@ -173,14 +173,14 @@ test_setup() {
 		Warning: post-update helper scripts skipped due to --no-scripts argument
 		Update successful - System updated from version 10 to version 20
 		The scripts that export binaries from 3rd-party repositories need to be regenerated
-		_______________________
-		 3rd-Party Repo: repo1
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo1
+		_____________________________
 		Regenerating scripts...
 		Scripts regenerated successfully
-		_______________________
-		 3rd-Party Repo: repo2
-		_______________________
+		_____________________________
+		 3rd-Party Repository: repo2
+		_____________________________
 		Regenerating scripts...
 		Scripts regenerated successfully
 	EOM

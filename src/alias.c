@@ -53,7 +53,7 @@ struct list *get_alias_bundles(struct list *alias_definitions, char *alias)
 	while (iter) {
 		struct alias_lookup *lookup = (struct alias_lookup *)iter->data;
 		iter = iter->next;
-		if (strcmp(lookup->alias, alias) == 0) {
+		if (str_cmp(lookup->alias, alias) == 0) {
 			bundles = list_clone_deep(lookup->bundles, strdup_wrapper);
 			break;
 		}
@@ -176,7 +176,7 @@ struct list *get_alias_definitions(void)
 	iters = system_alias_files;
 	iteru = user_alias_files;
 	while (iters && iteru) {
-		int pivot = strcmp(sys_basename(iteru->data), sys_basename(iters->data));
+		int pivot = str_cmp(sys_basename(iteru->data), sys_basename(iters->data));
 		if (pivot == 0) {
 			if (iters == system_alias_files) {
 				system_alias_files = iters->next;

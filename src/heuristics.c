@@ -103,7 +103,7 @@ static void boot_file_heuristics(struct file *file)
 		globals.need_update_boot = true;
 	}
 
-	if (strcmp(file->filename, "/usr/lib/systemd/systemd") == 0) {
+	if (str_cmp(file->filename, "/usr/lib/systemd/systemd") == 0) {
 		globals.need_systemd_reexec = true;
 	}
 
@@ -118,8 +118,8 @@ static void boot_file_heuristics(struct file *file)
 
 static void boot_manager_heuristics(struct file *file)
 {
-	if ((strcmp(file->filename, "/usr/bin/clr-boot-manager") == 0) ||
-	    (strcmp(file->filename, "/usr/share/syslinux/ldlinux.c32") == 0)) {
+	if ((str_cmp(file->filename, "/usr/bin/clr-boot-manager") == 0) ||
+	    (str_cmp(file->filename, "/usr/share/syslinux/ldlinux.c32") == 0)) {
 		globals.need_update_bootloader = true;
 	}
 }

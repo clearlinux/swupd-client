@@ -122,7 +122,7 @@ void apply_deltas(struct manifest *current_manifest)
 
 	struct dirent *ent;
 	while ((ent = readdir(dir))) {
-		if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, "..")) {
+		if (!str_cmp(ent->d_name, ".") || !str_cmp(ent->d_name, "..")) {
 			continue;
 		}
 

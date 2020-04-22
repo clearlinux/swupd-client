@@ -115,7 +115,7 @@ static bool is_installed(const void *bundle_name)
 
 static bool is_deletable_dependency(const void *dependency)
 {
-	if (strcmp(dependency, "os-core") == 0) {
+	if (str_cmp(dependency, "os-core") == 0) {
 		return false;
 	}
 	if (!is_installed_bundle(dependency)) {
@@ -159,7 +159,7 @@ static int filter_file_to_delete(const void *a, const void *b)
 		return 0;
 	}
 
-	ret = strcmp(A->filename, B->filename);
+	ret = str_cmp(A->filename, B->filename);
 	if (ret) {
 		return ret;
 	}
@@ -181,7 +181,7 @@ static enum swupd_code validate_bundle(const char *bundle, struct manifest *mom,
 	const bool DONT_INCLUDE_OPTIONAL_DEPS = false;
 
 	/* os-core bundle not allowed to be removed */
-	if (strcmp(bundle, "os-core") == 0) {
+	if (str_cmp(bundle, "os-core") == 0) {
 		warn("\nBundle \"os-core\" not allowed to be removed, skipping it...\n");
 		return SWUPD_REQUIRED_BUNDLE_ERROR;
 	}

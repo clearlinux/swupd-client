@@ -67,7 +67,7 @@ static bool parse_opt(int opt, char *optarg)
 	case 'V':
 		/* even though the default version is "latest", allow users to
 		 * specify it as an option */
-		if (strcmp("latest", optarg) == 0) {
+		if (str_cmp("latest", optarg) == 0) {
 			return true;
 		}
 		err = str_to_int(optarg, &cmdline_option_version);

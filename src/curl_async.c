@@ -129,7 +129,7 @@ static bool file_hash_cmp(const void *a, const void *b)
 	const struct multi_curl_file *fb = b;
 
 	if (!fa->hash || !fb->hash) {
-		return strcmp(fa->file.path, fb->file.path) == 0;
+		return str_cmp(fa->file.path, fb->file.path) == 0;
 	}
 	return hash_equal(fa->hash, fb->hash);
 }

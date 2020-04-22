@@ -105,7 +105,7 @@ static int get_xattr_name_count(const char *names_list, ssize_t len)
 
 static int cmp_xattr_name_ptrs(const void *ptr1, const void *ptr2)
 {
-	return strcmp(*(char *const *)ptr1, *(char *const *)ptr2);
+	return str_cmp(*(char *const *)ptr1, *(char *const *)ptr2);
 }
 
 static const char **get_sorted_xattr_name_table(const char *names, int n)

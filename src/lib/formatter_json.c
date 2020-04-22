@@ -67,7 +67,7 @@ static void json_message(const char *msg_type, const char *msg, va_list args_lis
 	json_sanitize_string(full_msg);
 
 	/* add the JSON format and print immediately */
-	if (strcmp(full_msg, "") != 0) {
+	if (str_cmp(full_msg, "") != 0) {
 		fprintf(stdout, "{ \"type\" : \"%s\", \"msg\" : \"%s\" },\n", type ? type : "info", full_msg);
 		fflush(stdout);
 	}

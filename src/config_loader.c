@@ -19,8 +19,8 @@
 
 #include "swupd.h"
 
-#define is_from_global_section(_section) (strcmp(_section, "global") == 0)
-#define is_from_command_section(_section, _command) (strcmp(_section, _command) == 0)
+#define is_from_global_section(_section) (str_cmp(_section, "global") == 0)
+#define is_from_command_section(_section, _command) (str_cmp(_section, _command) == 0)
 
 bool config_loader_set_opt(char *section, char *opt, char *value, void *data)
 {
@@ -56,7 +56,7 @@ bool config_loader_set_opt(char *section, char *opt, char *value, void *data)
 
 	/* search the option from within the available options */
 	while (options->name != NULL) {
-		if (strcmp(flag, options->name) == 0) {
+		if (str_cmp(flag, options->name) == 0) {
 			/* if it was not a long option try looking at the global short
 			 * options first... */
 			ret = cl->parse_global_opt(options->val, value);

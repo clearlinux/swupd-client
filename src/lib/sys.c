@@ -277,7 +277,7 @@ struct list *get_dir_files_sorted(char *path)
 	}
 	(void)closedir(dir);
 
-	return list_sort(files, strcmp_wrapper);
+	return list_sort(files, str_cmp_wrapper);
 }
 
 bool sys_file_exists(const char *filename)
@@ -305,7 +305,7 @@ bool sys_path_is_absolute(const char *filename)
 		goto exit;
 	}
 
-	if (strcmp(abspath, filename) == 0) {
+	if (str_cmp(abspath, filename) == 0) {
 		ret = true;
 	}
 
@@ -533,8 +533,8 @@ static int sys_rm_dir_recursive(const char *path)
 			break;
 		}
 
-		if (!strcmp(entry->d_name, ".") ||
-		    !strcmp(entry->d_name, "..")) {
+		if (!str_cmp(entry->d_name, ".") ||
+		    !str_cmp(entry->d_name, "..")) {
 			continue;
 		}
 
@@ -607,8 +607,8 @@ int sys_dir_is_empty(const char *path)
 			break;
 		}
 
-		if (!strcmp(entry->d_name, ".") ||
-		    !strcmp(entry->d_name, "..")) {
+		if (!str_cmp(entry->d_name, ".") ||
+		    !str_cmp(entry->d_name, "..")) {
 			continue;
 		}
 

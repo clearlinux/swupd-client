@@ -6,7 +6,9 @@
  * @brief Basic string operations.
  */
 
+#include <stdarg.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "list.h"
 
@@ -18,6 +20,11 @@ extern "C" {
  * Helper to use strnlen() instead of strlen.
  */
 #define str_len(_str) strnlen(_str, INT64_MAX)
+
+/**
+ * helper to use strncmp() instead of str_cmp
+ */
+#define str_cmp(_str1, _str2) strncmp(_str1, _str2, INT64_MAX)
 
 /**
  * Return a new allocated string with the content printed from fmt and

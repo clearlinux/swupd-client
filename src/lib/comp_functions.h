@@ -16,9 +16,9 @@ extern "C" {
 typedef int (*comparison_fn_t)(const void *a, const void *b);
 
 /**
- * @brief strcmp wrapper casting void * to char *.
+ * @brief str_cmp wrapper casting void * to char *.
  */
-int strcmp_wrapper(const void *a, const void *b);
+int str_cmp_wrapper(const void *a, const void *b);
 
 #ifdef __cplusplus
 }

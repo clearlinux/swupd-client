@@ -572,7 +572,7 @@ static bool parse_opt(int opt, char *optarg)
 	switch (opt) {
 	case 'm':
 	case 'V':
-		if (strcmp("latest", optarg) == 0) {
+		if (str_cmp("latest", optarg) == 0) {
 			requested_version = -1;
 			return true;
 		}

@@ -526,7 +526,7 @@ static int get_dirfd_path(const char *fullname)
 		goto out;
 	}
 
-	if (strcmp(real_path, dir) != 0) {
+	if (str_cmp(real_path, dir) != 0) {
 		/* The path to the file contains a symlink, skip the file,
 		 * because we cannot safely determine if it can be deleted. */
 		ret = -2;
@@ -646,7 +646,7 @@ static bool parse_opt(int opt, char *optarg)
 	switch (opt) {
 	case 'm':
 	case 'V':
-		if (strcmp("latest", optarg) == 0) {
+		if (str_cmp("latest", optarg) == 0) {
 			version = -1;
 			return true;
 		}
@@ -861,7 +861,7 @@ static int filter_file_unsafe_to_delete(const void *a, const void *b)
 	A = (struct file *)a;
 	B = (struct file *)b;
 
-	ret = strcmp(A->filename, B->filename);
+	ret = str_cmp(A->filename, B->filename);
 	if (ret) {
 		return ret;
 	}

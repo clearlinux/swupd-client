@@ -75,7 +75,7 @@ void read_subscriptions(struct list **subs)
 					continue;
 				}
 
-				if (strcmp(ent->d_name, "os-core") == 0) {
+				if (str_cmp(ent->d_name, "os-core") == 0) {
 					have_os_core = true;
 				}
 
@@ -106,7 +106,7 @@ static bool set_subscription_obligation(struct list *subs, char *component, bool
 		sub = list->data;
 		list = list->next;
 
-		if (strcmp(sub->component, component) == 0) {
+		if (str_cmp(sub->component, component) == 0) {
 			sub->is_optional = is_optional;
 			return true;
 		}
@@ -125,7 +125,7 @@ bool component_subscribed(struct list *subs, char *component)
 		sub = list->data;
 		list = list->next;
 
-		if (strcmp(sub->component, component) == 0) {
+		if (str_cmp(sub->component, component) == 0) {
 			return true;
 		}
 	}

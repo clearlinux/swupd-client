@@ -149,8 +149,8 @@ bool list_longer_than(struct list *list, int count);
  * argument and 'item' as the second.
  * If one element is found it is returned. NULL is returned otherwise.
  *
- * @note You can use list_strcmp to search a string in a string list:
- *       list_search(list, "my_string", list_strcmp);
+ * @note You can use list_str_cmp to search a string in a string list:
+ *       list_search(list, "my_string", list_str_cmp);
  */
 void *list_search(struct list *list, const void *item, comparison_fn_t comparison_fn);
 

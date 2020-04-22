@@ -212,7 +212,7 @@ bool set_state_dir(char *path)
 	/* Prevent some disasters: since the state dir can be destroyed and
 	 * reconstructed, make sure we never set those by accident and nuke the
 	 * system. */
-	if (!strcmp(path, "/") || !strcmp(path, "/var") || !strcmp(path, "/usr")) {
+	if (!str_cmp(path, "/") || !str_cmp(path, "/var") || !str_cmp(path, "/usr")) {
 		error("Refusing to use '%s' as a state dir because it might be erased first\n", path);
 		return false;
 	}
@@ -241,7 +241,7 @@ bool set_state_dir_cache(char *path)
 	/* Prevent some disasters: since the statedir-cache can be destroyed and
 	 * reconstructed, make sure we never set those by accident and nuke the
 	 * system. */
-	if (!strcmp(path, "/") || !strcmp(path, "/var") || !strcmp(path, "/usr")) {
+	if (!str_cmp(path, "/") || !str_cmp(path, "/var") || !str_cmp(path, "/usr")) {
 		error("Refusing to use '%s' as a statedir-cache because it might be erased first\n", path);
 		return false;
 	}
@@ -266,7 +266,7 @@ static bool set_format_string(char *format)
 {
 	// allow "staging" as a format string
 	// or any positive integer
-	if (strcmp(format, "staging") != 0 &&
+	if (str_cmp(format, "staging") != 0 &&
 	    !is_valid_integer_format(format)) {
 		error("Invalid format '%s'\n", format);
 		return false;
@@ -422,10 +422,10 @@ static bool set_assume_option(char *option)
 
 	option_lower = str_to_lower(option);
 
-	if (strcmp(option_lower, "y") == 0 || strcmp(option_lower, "yes") == 0) {
+	if (str_cmp(option_lower, "y") == 0 || str_cmp(option_lower, "yes") == 0) {
 		globals.user_interaction = NON_INTERACTIVE_ASSUME_YES;
 		ret = true;
-	} else if (strcmp(option_lower, "n") == 0 || strcmp(option_lower, "no") == 0) {
+	} else if (str_cmp(option_lower, "n") == 0 || str_cmp(option_lower, "no") == 0) {
 		globals.user_interaction = NON_INTERACTIVE_ASSUME_NO;
 		ret = true;
 	} else {
@@ -749,7 +749,7 @@ static bool load_flags_in_config(char *command, struct option *opts_array, const
 	/* the command we get here can actually be a subcommand, if that
 	 * is the case we need to build the section name as "command-subcommand",
 	 * so we can distinguish it the config file */
-	if (strcmp(globals.swupd_argv[1], "3rd-party") == 0) {
+	if (str_cmp(globals.swupd_argv[1], "3rd-party") == 0) {
 		string_or_die(&full_command, "%s-%s", "3rd-party", command);
 	} else {
 		full_command = strdup_or_die(command);

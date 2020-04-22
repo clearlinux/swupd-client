@@ -79,14 +79,14 @@ static int bundle_cmp(const void *bundle, const void *bundle_name)
 {
 	const struct bundle_size *b = bundle;
 
-	return strcmp(b->bundle_name, bundle_name);
+	return str_cmp(b->bundle_name, bundle_name);
 }
 
 static int manifest_str_cmp(const void *manifest, const void *manifest_name)
 {
 	const struct manifest *m = manifest;
 
-	return strcmp(m->component, manifest_name);
+	return str_cmp(m->component, manifest_name);
 }
 
 static int process_full_include_list(struct manifest *m, struct list **include_list)
@@ -319,7 +319,7 @@ static int search_in_manifest(struct manifest *mom, struct manifest *manifest, c
 
 	// Sort and print results if postponed
 	if (sort == SORT_TYPE_ALPHA) {
-		files = list_sort(files, strcmp_wrapper);
+		files = list_sort(files, str_cmp_wrapper);
 		for (l = files; l; l = l->next) {
 			if (count > num_results) {
 				break;
@@ -431,9 +431,9 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'o':
-		if (!strcmp(optarg, "alpha")) {
+		if (!str_cmp(optarg, "alpha")) {
 			sort = SORT_TYPE_ALPHA;
-		} else if (!strcmp(optarg, "size")) {
+		} else if (!str_cmp(optarg, "size")) {
 			sort = SORT_TYPE_SIZE;
 		} else {
 			error("Invalid --order argument\n");

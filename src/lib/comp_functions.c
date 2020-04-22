@@ -20,18 +20,19 @@
 #include <string.h>
 
 #include "comp_functions.h"
+#include "strings.h"
 
 /**
  * All comparison functions in this file should match this type definition:
  * typedef int (*comparison_fn_t)(const void *a, const void *b);
  *
- * They should behave like this (similar to strcmp):
+ * They should behave like this (similar to str_cmp):
  * - return 0 if a is equal to b
  * - return any number "< 0" if a is lower than b
  * - return any number "> 0" if a is bigger than b
  */
 
-int strcmp_wrapper(const void *a, const void *b)
+int str_cmp_wrapper(const void *a, const void *b)
 {
-	return strcmp((const char *)a, (const char *)b);
+	return str_cmp((const char *)a, (const char *)b);
 }

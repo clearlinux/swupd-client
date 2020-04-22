@@ -266,7 +266,7 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 	/* the list of subscription include the bundle indicated by bundle_name and os-core,
 	 * if deps has only two bundles in it, no included bundles were found */
 	const int MINIMAL_SUBSCRIPTIONS = 2;
-	if (strcmp(bundle_name, "os-core") == 0 || list_len(subs) <= MINIMAL_SUBSCRIPTIONS) {
+	if (str_cmp(bundle_name, "os-core") == 0 || list_len(subs) <= MINIMAL_SUBSCRIPTIONS) {
 		info("\nNo included bundles\n");
 		goto out;
 	}
@@ -285,7 +285,7 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 			bundle_sub = iter->data;
 			iter = iter->next;
 			// subs include the requested bundle, skip it
-			if (strcmp(bundle_name, bundle_sub->component) == 0) {
+			if (str_cmp(bundle_name, bundle_sub->component) == 0) {
 				continue;
 			}
 			info(" - ");

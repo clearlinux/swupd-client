@@ -211,7 +211,7 @@ int get_latest_version(char *v_url)
 		return cached_version;
 	}
 
-	if (v_url == NULL || strcmp(v_url, "") == 0) {
+	if (v_url == NULL || str_cmp(v_url, "") == 0) {
 		v_url = globals.version_url;
 	}
 

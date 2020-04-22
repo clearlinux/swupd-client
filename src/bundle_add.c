@@ -239,8 +239,6 @@ static enum swupd_code install_files(struct manifest *mom, struct list *to_insta
 	timelist_timer_start(globals.global_times, "Installing bundle(s) files onto filesystem");
 	progress_next_step("install_files", PROGRESS_BAR);
 
-	//TODO: Improve staging functions so we won't need this hack
-	globals.update_count = list_len(to_install_files) - globals.update_skip;
 	ret = target_root_install_files(to_install_files, mom);
 	mom->files = NULL;
 	if (ret) {

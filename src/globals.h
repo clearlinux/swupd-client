@@ -53,9 +53,7 @@ extern struct globals {
 	int retry_delay;
 	int skip_diskspace_check;
 	int skip_optional_bundles;
-	int update_count;
 	int update_server_port;
-	int update_skip;
 	int user_interaction;
 	timelist *global_times;
 } globals;

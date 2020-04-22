@@ -147,7 +147,6 @@ bool ignore(struct file *file)
 	    (file->is_boot && file->is_deleted) ||
 	    (file->is_orphan) ||
 	    (file->is_ghosted)) {
-		globals.update_skip++;
 		file->do_not_update = 1;
 		return true;
 	}

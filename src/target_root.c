@@ -546,7 +546,7 @@ int rename_staged_file_to_final(struct file *file)
 
 static int rename_all_files_to_final(struct list *updates)
 {
-	int ret, update_errs = 0, update_good = 0, skip = 0;
+	int ret, update_errs = 0;
 	struct list *list;
 	int complete = 0;
 	int list_length = list_len(updates);
@@ -557,25 +557,18 @@ static int rename_all_files_to_final(struct list *updates)
 		file = list->data;
 		list = list->next;
 
+		if (!file->do_not_update) {
+			ret = rename_staged_file_to_final(file);
+			if (ret != 0) {
+				update_errs++;
+			}
+		}
+
 		complete++;
-		if (file->do_not_update) {
-			skip += 1;
-			goto progress;
-			;
-		}
-
-		ret = rename_staged_file_to_final(file);
-		if (ret != 0) {
-			update_errs += 1;
-		} else {
-			update_good += 1;
-		}
-
-	progress:
 		progress_report(list_length + complete, list_length * 2);
 	}
 
-	return globals.update_count - update_good - update_errs - (globals.update_skip - skip);
+	return -update_errs;
 }
 
 static enum swupd_code stage_files(struct list *files, struct manifest *mom)
@@ -658,7 +651,7 @@ enum swupd_code target_root_install_files(struct list *files, struct manifest *m
 
 	/* rename to apply update */
 	ret = rename_all_files_to_final(files);
-	if (ret != SWUPD_OK) {
+	if (ret != 0) {
 		ret = SWUPD_COULDNT_RENAME_FILE;
 		return ret;
 	}

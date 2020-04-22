@@ -337,7 +337,9 @@ extern enum swupd_code execute_update(void);
 extern enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_fn_t file_validation_fn);
 extern void update_set_option_version(int opt);
 extern void update_set_option_download_only(bool opt);
+extern bool update_get_option_download_only(void);
 extern void update_set_option_keepcache(bool opt);
+extern void update_set_option_update_search_file_index(bool opt);
 
 /* verify.c */
 extern enum swupd_code execute_verify(void);
@@ -369,6 +371,12 @@ extern void bundle_list_set_option_status(bool opt);
 
 /* clean.c */
 extern int clean_get_stats(void);
+
+/* 3rd_party_check_update.c */
+enum swupd_code third_party_execute_check_update(void);
+
+/* 3rd_party_update.c */
+enum swupd_code third_party_execute_update(void);
 
 extern struct file **manifest_files_to_array(struct manifest *manifest);
 extern int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize, int size);

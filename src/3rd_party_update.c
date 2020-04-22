@@ -249,31 +249,23 @@ static enum swupd_code update_repos(UNUSED_PARAM char *unused)
 	}
 }
 
-enum swupd_code third_party_update_main(int argc, char **argv)
+enum swupd_code third_party_execute_update(void)
 {
 	enum swupd_code ret_code = SWUPD_OK;
 	char *template_file = NULL;
 	char *template = NULL;
+	size_t template_len;
 	int steps_in_update;
 	int ret;
-	size_t template_len;
 
-	if (!parse_options(argc, argv)) {
-		print("\n");
-		print_help();
-		return SWUPD_INVALID_OPTION;
-	}
+	/* 3rd-party updates can be executed also from the update command
+	 * using the --3rd-party option, make sure a flag was not set in that
+	 * command before calculating steps */
+	cmdline_option_download_only |= update_get_option_download_only();
 
-	ret_code = swupd_init(SWUPD_ALL);
-	if (ret_code != SWUPD_OK) {
-		error("Failed swupd initialization, exiting now\n");
-		return ret_code;
-	}
-
-	/* set the command options */
-	update_set_option_version(cmdline_option_version);
-	update_set_option_download_only(cmdline_option_download_only);
-	update_set_option_keepcache(cmdline_option_keepcache);
+	/* the --update-search-file-index is not supported for 3rd-party
+	 * so set it to false in case it was set up to true by update */
+	update_set_option_update_search_file_index(false);
 
 	/*
 	 * Steps for update:
@@ -325,6 +317,33 @@ enum swupd_code third_party_update_main(int argc, char **argv)
 exit:
 	free_and_clear_pointer(&template_file);
 	sys_mmap_free(template, template_len);
+
+	return ret_code;
+}
+
+enum swupd_code third_party_update_main(int argc, char **argv)
+{
+	enum swupd_code ret_code = SWUPD_OK;
+
+	if (!parse_options(argc, argv)) {
+		print("\n");
+		print_help();
+		return SWUPD_INVALID_OPTION;
+	}
+
+	ret_code = swupd_init(SWUPD_ALL);
+	if (ret_code != SWUPD_OK) {
+		error("Failed swupd initialization, exiting now\n");
+		return ret_code;
+	}
+
+	/* set the command options */
+	update_set_option_version(cmdline_option_version);
+	update_set_option_download_only(cmdline_option_download_only);
+	update_set_option_keepcache(cmdline_option_keepcache);
+
+	ret_code = third_party_execute_update();
+
 	swupd_deinit();
 
 	return ret_code;

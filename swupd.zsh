@@ -252,6 +252,7 @@ if [[ -n "$state" ]]; then
                         '(help status)'{-V,--version=}'[Update to version V, also accepts "latest" (default)]:version:()'
                         + '(status)'
                         '(help options)'{-s,--status}'[Show current OS version and latest version available on server. Equivalent to "swupd check-update"]'
+                        '(help)--3rd-party[Also update content from 3rd-party repositories]'
                     )
                     _arguments $updates && ret=0
                     ;;

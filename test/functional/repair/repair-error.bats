@@ -50,7 +50,6 @@ test_teardown() {
 		Error: Target exists but is not a directory: $PATH_PREFIX/baz
 		 -> Missing file: $PATH_PREFIX/baz/bat -> not fixed
 		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
-		Error: Target directory does not exist and could not be created: $PATH_PREFIX/baz/bat
 		 -> Missing file: $PATH_PREFIX/baz/bat/file_3 -> not fixed
 		Repairing corrupt files
 		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz

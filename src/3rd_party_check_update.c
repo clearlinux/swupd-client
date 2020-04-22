@@ -80,10 +80,16 @@ static enum swupd_code check_update_repo(UNUSED_PARAM char *unused)
 	return check_update();
 }
 
+enum swupd_code third_party_execute_check_update(void)
+{
+	const int steps_in_checkupdate = 0;
+
+	return third_party_run_operation_multirepo(cmdline_option_repo, check_update_repo, SWUPD_NO, "check-update", steps_in_checkupdate);
+}
+
 enum swupd_code third_party_check_update_main(int argc, char **argv)
 {
 	enum swupd_code ret_code = SWUPD_OK;
-	const int steps_in_checkupdate = 0;
 
 	if (!parse_options(argc, argv)) {
 		print("\n");
@@ -97,7 +103,7 @@ enum swupd_code third_party_check_update_main(int argc, char **argv)
 	}
 
 	/* run check-update */
-	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, check_update_repo, SWUPD_NO, "check-update", steps_in_checkupdate);
+	ret_code = third_party_execute_check_update();
 
 	swupd_deinit();
 

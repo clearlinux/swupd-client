@@ -42,7 +42,7 @@ _swupd()
 		opts="$global "
 		break;;
 		("update")
-		opts="$global --download --status --force --keepcache --update-search-file-index "
+		opts="$global --download --status --force --keepcache --update-search-file-index --3rd-party "
 		break;;
 		("bundle-add")
 		opts="$global --skip-diskspace-check --skip-optional "

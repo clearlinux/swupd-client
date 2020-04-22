@@ -153,6 +153,9 @@
 # Update the index used by search-file to speed up searches (boolean value)
 #update_search_file_index=<true/false>
 
+# Also update content from 3rd-party repositories (boolean value)
+3rd_party=<true/false>
+
 
 [bundle-add]
 

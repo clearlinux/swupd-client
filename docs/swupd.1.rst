@@ -198,6 +198,10 @@ update
 --update-search-file-index  Update the index used by search-file to speed up
         searches. Don't enable this if you have download or space restrictions.
 
+--3rd-party     If update is successfull, also update content from 3rd-party
+        repositories.
+
+
 bundle-add <bundles>
 --------------------
 

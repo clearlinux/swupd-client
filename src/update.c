@@ -211,8 +211,6 @@ static struct list *create_update_list(struct manifest *server)
 	struct list *output = NULL;
 	struct list *list;
 
-	globals.update_count = 0;
-	globals.update_skip = 0;
 	list = list_head(server->files);
 	while (list) {
 		struct file *file;
@@ -254,7 +252,6 @@ static struct list *create_update_list(struct manifest *server)
 			continue;
 		}
 	}
-	globals.update_count = list_len(output) - globals.update_skip;
 
 	return output;
 }

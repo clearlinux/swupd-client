@@ -79,7 +79,6 @@ test_teardown() {
 		Error: Target exists but is not a directory: $PATH_PREFIX/baz
 		$PATH_PREFIX/baz/bat
 		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
-		Error: Target directory does not exist and could not be created: $PATH_PREFIX/baz/bat
 		$PATH_PREFIX/baz/bat/file_3
 		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
 		$PATH_PREFIX/baz

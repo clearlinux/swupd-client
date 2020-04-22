@@ -41,7 +41,7 @@
 #define TAR_CF_CMD TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -cf - '%s'" STDERR_QUIET
 #define TAR_XF_CMD TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -xf -" STDERR_QUIET
 
-static enum swupd_code verify_fix_path(char *target_path, struct manifest *target_mom);
+static bool verify_fix_path(char *dir, struct manifest *mom);
 
 /* clean then recreate temporary folder for tar renames */
 static int create_staging_renamedir(char *rename_tmpdir)
@@ -289,18 +289,17 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 		debug("Target directory does not exist: %s\n", target_path);
 		if (mom) {
 			debug("Attempting to fix missing directory\n");
-			verify_fix_path(dir, mom);
+			if (!verify_fix_path(dir, mom)) {
+				ret = SWUPD_COULDNT_CREATE_DIR;
+				goto out;
+			}
 		} else {
 			debug("Auto-fix of missing directory disabled\n");
+			ret = SWUPD_COULDNT_CREATE_DIR;
+			goto out;
 		}
 	} else if (!sys_filelink_is_dir(target_path)) {
 		error("Target exists but is not a directory: %s\n", target_path);
-		ret = SWUPD_COULDNT_CREATE_DIR;
-		goto out;
-	}
-
-	if (!sys_filelink_is_dir(target_path)) {
-		error("Target directory does not exist and could not be created: %s\n", target_path);
 		ret = SWUPD_COULDNT_CREATE_DIR;
 		goto out;
 	}
@@ -359,119 +358,114 @@ out:
 	return ret;
 }
 
+static bool verify_fix_single_directory(const char *path, struct manifest *mom)
+{
+	bool ret = false;
+	struct file *file = NULL;
+	char *target_path = NULL;
+	char *tar_dotfile = NULL;
+	char *url = NULL;
+
+	/* Search for the file in the manifest, to get the hash for the file */
+	file = search_file_in_manifest(mom, path);
+	if (file == NULL) {
+		error("Path %s not found in any of the subscribed manifests\n",
+		      path);
+		goto end;
+	}
+
+	if (file->is_deleted) {
+		error("Path %s marked as deleted in manifest\n", path);
+		goto end;
+	}
+
+	target_path = sys_path_join("%s/%s", globals.path_prefix, path);
+	if (sys_file_exists(target_path)) {
+		if (verify_file(file, target_path)) {
+			/* this subpart of the path does exist, nothing to be done */
+			ret = true;
+			goto end;
+		}
+		debug("Corrupt directory: %s\n", target_path);
+	} else {
+		debug("Missing directory: %s\n", target_path);
+	}
+
+	/* In some circumstances, like Docker using layers between updates/bundle adds,
+	 * corrupt staging content, we could have corrupted staged content.
+	 */
+	unlink_all_staged_content(file);
+
+	/* download the fullfile for the missing path */
+	tar_dotfile = sys_path_join("%s/download/.%s.tar", globals.state_dir, file->hash);
+	url = str_or_die("%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
+	ret = swupd_curl_get_file(url, tar_dotfile);
+	if (ret != 0) {
+		error("Failed to download file %s\n", file->filename);
+		unlink(tar_dotfile);
+		goto end;
+	}
+
+	if (untar_full_download(file) != 0) {
+		error("Failed to untar file %s\n", file->filename);
+		goto end;
+	}
+
+	if (stage_single_file(file, mom) == SWUPD_OK) {
+		ret = true;
+	} else {
+		debug("Path %s failed to stage in verify_fix_path\n", path);
+	}
+
+end:
+	free(url);
+	free(target_path);
+	free(tar_dotfile);
+	return ret;
+}
+
+static struct list *split_directories(const char *dir)
+{
+	struct list *list_dir = NULL;
+	char *path;
+
+	/* Removing trailing '/' from the path */
+	path = sys_path_join("%s", dir);
+	while (str_cmp(path, "/") != 0) {
+		list_dir = list_prepend_data(list_dir, path);
+		path = sys_dirname(path);
+	}
+
+	free(path);
+	return list_dir;
+}
+
 /* This function is meant to be called while staging file to fix any missing/incorrect paths.
  * While staging a file, if its parent directory is missing, this would try to create the path
  * by breaking it into sub-paths and fixing them top down.
- * Here, target_mom is the consolidated manifest for the version you are trying to update/verify.
+ * Here, mom is the consolidated manifest for the version you are trying to update/verify.
  */
-static enum swupd_code verify_fix_path(char *target_path, struct manifest *target_mom)
+static bool verify_fix_path(char *dir, struct manifest *mom)
 {
-	struct list *path_list = NULL; /* path_list contains the subparts in the path */
-	char *path;
-	char *tmp = NULL, *target = NULL;
-	char *url = NULL;
-	struct stat sb;
-	int ret = SWUPD_OK;
-	struct file *file;
-	char *tar_dotfile = NULL;
-	struct list *list1 = NULL;
+	bool ret = true;
+	char *cur_dir;
+	struct list *list_dir, *i;
 
-	/* This shouldn't happen */
-	if (str_cmp(target_path, "/") == 0) {
-		return ret;
-	}
+	list_dir = split_directories(dir);
 
-	/* Removing trailing '/' from the path */
-	path = sys_path_join("%s", target_path);
+	/* Loop parents */
+	for (i = list_dir; i; i = i->next) {
+		cur_dir = i->data;
 
-	/* Breaking down the path into parts.
-	 * eg. Path /usr/bin/foo will be broken into /usr,/usr/bin and /usr/bin/foo
-	 */
-	while (str_cmp(path, "/") != 0) {
-		path_list = list_prepend_data(path_list, strdup_or_die(path));
-		tmp = sys_dirname(path);
-		free_and_clear_pointer(&path);
-		path = tmp;
-	}
-	free_and_clear_pointer(&path);
-
-	list1 = list_head(path_list);
-	while (list1) {
-		path = list1->data;
-		list1 = list1->next;
-
-		free_and_clear_pointer(&target);
-		free_and_clear_pointer(&tar_dotfile);
-		free_and_clear_pointer(&url);
-
-		target = sys_path_join("%s/%s", globals.path_prefix, path);
-
-		/* Search for the file in the manifest, to get the hash for the file */
-		file = search_file_in_manifest(target_mom, path);
-		if (file == NULL) {
-			error("Path %s not found in any of the subscribed manifests for target root %s\n",
-			      path, globals.path_prefix);
-			ret = SWUPD_PATH_NOT_IN_MANIFEST;
-			goto end;
-		}
-
-		if (file->is_deleted) {
-			error("Path %s marked as deleted in manifest\n", path);
-			ret = SWUPD_UNEXPECTED_CONDITION;
-			goto end;
-		}
-
-		ret = stat(target, &sb);
-		if (ret == 0) {
-			if (verify_file(file, target)) {
-				/* this subpart of the path does exist, nothing to be done */
-				continue;
-			}
-			debug("Corrupt directory: %s\n", target);
-		} else if (ret == -1 && errno == ENOENT) {
-			debug("Missing directory: %s\n", target);
-		} else {
-			goto end;
-		}
-
-		/* In some circumstances (Docker using layers between updates/bundle adds,
-		 * corrupt staging content) we could have content which fails to stage.
-		 * In order to avoid this causing failure in verify_fix_path, remove the
-		 * staging content before proceeding. This also cleans up in case any prior
-		 * download failed in a partial state.
-		 */
-		unlink_all_staged_content(file);
-
-		/* download the fullfile for the missing path */
-		tar_dotfile = sys_path_join("%s/download/.%s.tar", globals.state_dir, file->hash);
-		url = sys_path_join("%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
-		ret = swupd_curl_get_file(url, tar_dotfile);
-		if (ret != 0) {
-			error("Failed to download file %s\n", file->filename);
-			ret = SWUPD_COULDNT_DOWNLOAD_FILE;
-			unlink(tar_dotfile);
-			goto end;
-		}
-
-		if (untar_full_download(file) != 0) {
-			error("Failed to untar file %s\n", file->filename);
-			ret = SWUPD_COULDNT_UNTAR_FILE;
-			goto end;
-		}
-
-		ret = stage_single_file(file, target_mom);
-		if (ret != 0) {
-			/* stage_single_file returns a swupd_code on error,
-			* just propagate the error */
-			debug("Path %s failed to stage in verify_fix_path\n", path);
-			goto end;
+		// Abort on first error
+		if (!verify_fix_single_directory(cur_dir, mom)) {
+			ret = false;
+			break;
 		}
 	}
-end:
-	free_and_clear_pointer(&target);
-	free_and_clear_pointer(&tar_dotfile);
-	free_and_clear_pointer(&url);
-	list_free_list_and_data(path_list, free);
+
+	list_free_list_and_data(list_dir, free);
+
 	return ret;
 }
 

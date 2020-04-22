@@ -207,4 +207,25 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 }
+
+@test "DIA028: Diagnose with --file doesn't consider partial matches" {
+
+	# when using "diagnose --file <ITEM>", swupd will match the ITEM with
+	# either the full name of a file or a directory (recursively), but won't
+	# use partial matches
+
+	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS --file /ba"
+
+	assert_status_is "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		Diagnosing version 20
+		Downloading missing manifests...
+		Inspected 0 files
+		Diagnose successful
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
 #WEIGHT=36

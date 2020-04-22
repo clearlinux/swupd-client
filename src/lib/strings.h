@@ -27,6 +27,17 @@ extern "C" {
 #define str_cmp(_str1, _str2) strncmp(_str1, _str2, INT64_MAX)
 
 /**
+ * Check if str starts with the prefix.
+ *
+ * @param _str The base string.
+ * @param _prefix The prefix to look for.
+ *
+ * @return an int that == 0 if str starts with prefix and != 0 if str doesn't
+ * starts with prefix.
+ */
+#define str_starts_with(_str, _prefix) strncmp(_str, _prefix, str_len(_prefix))
+
+/**
  * Return a new allocated string with the content printed from fmt and
  * parameters using vasprintf. Abort on memory allocation errors.
  *

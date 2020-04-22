@@ -225,9 +225,7 @@ static bool is_all_xdigits(const char *s)
 
 static bool is_manifest(const char UNUSED_PARAM *dir, const struct dirent *entry)
 {
-	static const char prefix[] = "Manifest.";
-	static const size_t prefix_len = sizeof(prefix) - 1;
-	return !strncmp(entry->d_name, prefix, prefix_len);
+	return !str_starts_with(entry->d_name, "Manifest.");
 }
 
 static bool is_hashed_manifest(const char UNUSED_PARAM *dir, const struct dirent *entry)
@@ -258,9 +256,7 @@ static bool is_hashed_manifest(const char UNUSED_PARAM *dir, const struct dirent
 
 static bool is_manifest_delta(const char UNUSED_PARAM *dir, const struct dirent *entry)
 {
-	static const char prefix[] = "Manifest-";
-	static const size_t prefix_len = sizeof(prefix) - 1;
-	return !strncmp(entry->d_name, prefix, prefix_len);
+	return !str_starts_with(entry->d_name, "Manifest-");
 }
 
 static char *read_mom_contents(int version)

@@ -778,7 +778,7 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_
 		}
 	}
 
-	if (strncmp(url, "https://", 8) == 0) {
+	if (str_starts_with(url, "https://") == 0) {
 		//TODO: Fix "SECURITY HOLE since we can't SSL pin arbitrary servers"
 		curl_ret = swupd_curl_set_security_opts(curl);
 		if (curl_ret != CURLE_OK) {
@@ -823,5 +823,5 @@ exit:
 
 bool curl_is_url_local(const char *url)
 {
-	return strncmp(url, "file://", 7) == 0;
+	return str_starts_with(url, "file://") == 0;
 }

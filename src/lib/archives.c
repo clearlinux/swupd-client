@@ -245,7 +245,7 @@ int archives_check_single_file_tarball(const char *tarfilename, const char *file
 
 	// Remove trailing '/'
 	file_entry = archive_entry_pathname(entry);
-	file_len = string_len(file_entry);
+	file_len = str_len(file_entry);
 	if (file_entry[file_len - 1] == '/') {
 		file_len--;
 	}

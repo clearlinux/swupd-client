@@ -577,7 +577,7 @@ static bool parse_opt(int opt, char *optarg)
 			return true;
 		}
 
-		err = strtoi_err(optarg, &requested_version);
+		err = str_to_int(optarg, &requested_version);
 		if (err < 0 || requested_version < 0) {
 			error("Invalid --version argument: %s\n\n", optarg);
 			return false;

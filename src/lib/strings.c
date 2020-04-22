@@ -75,7 +75,7 @@ char *str_or_die(const char *fmt, ...)
 	return str;
 }
 
-char *string_join(const char *separator, struct list *strings)
+char *str_join(const char *separator, struct list *strings)
 {
 	char *str, *ret;
 	size_t str_size = 1; // 1 for '\0'
@@ -85,10 +85,10 @@ char *string_join(const char *separator, struct list *strings)
 	if (!separator) {
 		separator = "";
 	}
-	sep_size = string_len(separator);
+	sep_size = str_len(separator);
 
 	for (i = strings; i; i = i->next) {
-		str_size += string_len(i->data);
+		str_size += str_len(i->data);
 		str_size += sep_size;
 	}
 
@@ -112,7 +112,7 @@ error:
 	return NULL;
 }
 
-struct list *string_split(const char *separator, const char *string_to_split)
+struct list *str_split(const char *separator, const char *string_to_split)
 {
 	char *ctx = NULL;
 	struct list *split = NULL;
@@ -126,7 +126,7 @@ struct list *string_split(const char *separator, const char *string_to_split)
 	return split;
 }
 
-int strtoi_err_endptr(const char *str, char **endptr, int *value)
+int str_to_int_endptr(const char *str, char **endptr, int *value)
 {
 	long num;
 	int err;
@@ -150,10 +150,10 @@ int strtoi_err_endptr(const char *str, char **endptr, int *value)
 	return err;
 }
 
-int strtoi_err(const char *str, int *value)
+int str_to_int(const char *str, int *value)
 {
 	char *endptr;
-	int err = strtoi_err_endptr(str, &endptr, value);
+	int err = str_to_int_endptr(str, &endptr, value);
 
 	if (err) {
 		return err;
@@ -166,26 +166,26 @@ int strtoi_err(const char *str, int *value)
 	return 0;
 }
 
-char *str_tolower(const char *str)
+char *str_to_lower(const char *str)
 {
-	char *str_lower = malloc(string_len(str) + 1);
+	char *str_lower = malloc(str_len(str) + 1);
 
 	ON_NULL_ABORT(str_lower);
 
 	for (int i = 0; str[i]; i++) {
 		str_lower[i] = tolower(str[i]);
 	}
-	str_lower[string_len(str)] = '\0';
+	str_lower[str_len(str)] = '\0';
 
 	return str_lower;
 }
 
-bool strtobool(const char *str)
+bool str_to_bool(const char *str)
 {
 	char *str_lower;
 	bool ret = false;
 
-	str_lower = str_tolower(str);
+	str_lower = str_to_lower(str);
 	if (strcmp(str_lower, "true") == 0) {
 		ret = true;
 	}

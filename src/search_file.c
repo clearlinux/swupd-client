@@ -243,7 +243,7 @@ static bool match_path_prefix(const char *path, const char *path_list[])
 	int i;
 
 	for (i = 0; path_list[i] != NULL; i++) {
-		if (strncmp(path, path_list[i], string_len(path_list[i])) == 0) {
+		if (strncmp(path, path_list[i], str_len(path_list[i])) == 0) {
 			return true;
 		}
 	}
@@ -424,7 +424,7 @@ static bool parse_opt(int opt, char *optarg)
 
 	switch (opt) {
 	case 'V':
-		err = strtoi_err(optarg, &cmdline_option_version);
+		err = str_to_int(optarg, &cmdline_option_version);
 		if (err < 0 || cmdline_option_version < 0) {
 			error("Invalid version argument: %s\n\n", optarg);
 			return false;
@@ -441,7 +441,7 @@ static bool parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'T':
-		err = strtoi_err(optarg, &num_results);
+		err = str_to_int(optarg, &num_results);
 		if (err != 0) {
 			error("Invalid --top argument\n");
 			return false;
@@ -493,7 +493,7 @@ static bool parse_options(int argc, char **argv)
 	search_string = optind < argc ? argv[optind] : "";
 
 	/* Arbitrary upper limit to ensure we aren't getting handed garbage */
-	if (string_len(search_string) > PATH_MAX) {
+	if (str_len(search_string) > PATH_MAX) {
 		error("Search string is too long\n");
 		return false;
 	}

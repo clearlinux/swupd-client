@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-#define optarg_to_bool(_optarg) (_optarg ? strtobool(_optarg) : true)
+#define optarg_to_bool(_optarg) (_optarg ? str_to_bool(_optarg) : true)
 
 enum user_interaction {
 	INTERACTIVE = 0,

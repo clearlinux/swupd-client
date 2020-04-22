@@ -15,9 +15,9 @@ extern "C" {
 #endif
 
 /**
- * helper to use strnlen() instead of strlen.
+ * Helper to use strnlen() instead of strlen.
  */
-#define string_len(_str) strnlen(_str, INT64_MAX)
+#define str_len(_str) strnlen(_str, INT64_MAX)
 
 /**
  * Return a new allocated string with the content printed from fmt and
@@ -50,12 +50,12 @@ char *strdup_or_die(const char *const str);
 /**
  * Join strings from string list separated by the separator.
  */
-char *string_join(const char *separator, struct list *string);
+char *str_join(const char *separator, struct list *string);
 
 /**
  * Split a string by separator.
  */
-struct list *string_split(const char *separator, const char *string_to_split);
+struct list *str_split(const char *separator, const char *string_to_split);
 
 /**
  * Safely convert string to integer avoiding overflows
@@ -69,7 +69,7 @@ struct list *string_split(const char *separator, const char *string_to_split);
  * -EINVAL is returned when the string isn't a valid number or has any invalid
  * trailing character.
  */
-int strtoi_err(const char *str, int *value);
+int str_to_int(const char *str, int *value);
 
 /**
  * Safely convert and string to integer avoiding overflows.
@@ -83,7 +83,7 @@ int strtoi_err(const char *str, int *value);
  *
  * endptr is set with the value of the first invalid character in the string.
  */
-int strtoi_err_endptr(const char *str, char **endptr, int *value);
+int str_to_int_endptr(const char *str, char **endptr, int *value);
 
 /**
  * Creates a new string converting all characters from the original string
@@ -93,7 +93,7 @@ int strtoi_err_endptr(const char *str, char **endptr, int *value);
  *
  * The memory of the new string has to be freed after using it.
  */
-char *str_tolower(const char *str);
+char *str_to_lower(const char *str);
 
 /**
  * Converts a string to a boolean. If the string is "true" then it is converted
@@ -101,7 +101,7 @@ char *str_tolower(const char *str);
 
  * @note Comparission to "true" is canse insensitive.
  */
-bool strtobool(const char *str);
+bool str_to_bool(const char *str);
 
 /**
  * Returns a copy of str with all chars c1 replaced with c2.

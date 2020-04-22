@@ -106,7 +106,7 @@ enum swupd_code check_update(void)
 
 	if (latest_version_in_format > 0) {
 		info_verbose("Latest version in format %s: %d", globals.format_string, latest_version_in_format);
-		if (strtoi_err(globals.format_string, &tmp_format) != 0 ||
+		if (str_to_int(globals.format_string, &tmp_format) != 0 ||
 		    tmp_format != format_in_format) {
 			print_format(format_in_format);
 		} else {

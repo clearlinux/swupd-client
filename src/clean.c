@@ -185,7 +185,7 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 
 static bool is_fullfile(const char UNUSED_PARAM *dir, const struct dirent *entry)
 {
-	return string_len(entry->d_name) == (SWUPD_HASH_LEN - 1);
+	return str_len(entry->d_name) == (SWUPD_HASH_LEN - 1);
 }
 
 static bool is_pack_indicator(const char UNUSED_PARAM *dir, const struct dirent *entry)
@@ -196,7 +196,7 @@ static bool is_pack_indicator(const char UNUSED_PARAM *dir, const struct dirent 
 	static const size_t suffix_len = sizeof(suffix) - 1;
 
 	const char *name = entry->d_name;
-	size_t len = string_len(name);
+	size_t len = str_len(name);
 	if (len < (prefix_len + suffix_len)) {
 		return false;
 	}

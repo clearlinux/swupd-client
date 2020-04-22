@@ -20,7 +20,7 @@ void test_list_sorted_deduplicate()
 	list = list_prepend_data(list, "A");
 	list = list_sorted_deduplicate(list, strcmp_wrapper, NULL);
 
-	str = string_join(", ", list);
+	str = str_join(", ", list);
 	check(strcmp("A", str) == 0);
 	free(str);
 
@@ -40,7 +40,7 @@ void test_list_sorted_deduplicate()
 	list = list_head(list);
 	list = list_sorted_deduplicate(list, strcmp_wrapper, NULL);
 
-	str = string_join(", ", list);
+	str = str_join(", ", list);
 	check(strcmp("A, B, C, D, E", str) == 0);
 	free(str);
 	list_free_list(list);
@@ -65,7 +65,7 @@ void test_list_filter_elements()
 	list = list_prepend_data(list, "A");
 	list = list_filter_elements(list, filterX, NULL);
 
-	str = string_join(", ", list);
+	str = str_join(", ", list);
 	check(strcmp("A", str) == 0);
 	free(str);
 	list_free_list(list);
@@ -110,7 +110,7 @@ void test_list_filter_elements()
 	list = list_head(list);
 	list = list_filter_elements(list, filterX, NULL);
 
-	str = string_join(", ", list);
+	str = str_join(", ", list);
 	check(strcmp("A, B, C, D, E, F", str) == 0);
 	free(str);
 	list_free_list(list);

@@ -651,7 +651,7 @@ static bool parse_opt(int opt, char *optarg)
 			return true;
 		}
 
-		err = strtoi_err(optarg, &version);
+		err = str_to_int(optarg, &version);
 		if (err < 0 || version < 0) {
 			error("Invalid --%s argument: %s\n\n", opt == 'V' ? "version" : "manifest", optarg);
 			return false;
@@ -703,7 +703,7 @@ static bool parse_opt(int opt, char *optarg)
 		 * a possible existing list parsed from a config file, we want to replace it, so
 		 * we need to delete the existing list first */
 		list_free_list(cmdline_option_bundles);
-		cmdline_option_bundles = string_split(",", optarg);
+		cmdline_option_bundles = str_split(",", optarg);
 		if (!cmdline_option_bundles) {
 			error("Missing required --bundles argument\n\n");
 			return false;
@@ -885,7 +885,7 @@ static struct list *keep_matching_path(struct list *all_files)
 
 	for (iter = all_files; iter; iter = iter->next) {
 		file = iter->data;
-		if (strncmp(cmdline_option_file, file->filename, string_len(cmdline_option_file)) == 0) {
+		if (strncmp(cmdline_option_file, file->filename, str_len(cmdline_option_file)) == 0) {
 			/* preserving the order is important */
 			matching_files = list_append_data(matching_files, file);
 		}

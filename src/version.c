@@ -47,7 +47,7 @@ int get_int_from_url(const char *url)
 	}
 
 	tmp_data.data[tmp_data.len] = '\0';
-	err = strtoi_err(tmp_data.data, &value);
+	err = str_to_int(tmp_data.data, &value);
 	if (err != 0) {
 		return -1;
 	}
@@ -80,7 +80,7 @@ int get_current_format(void)
 		goto out;
 	}
 
-	err = strtoi_err(temp_format_buffer, &ret);
+	err = str_to_int(temp_format_buffer, &ret);
 	if (err != 0) {
 		goto out;
 	}
@@ -167,7 +167,7 @@ static int get_version_from_url(char *url)
 		return ret;
 	} else {
 		tmp_version.data[tmp_version.len] = '\0';
-		err = strtoi_err(tmp_version.data, &ret);
+		err = str_to_int(tmp_version.data, &ret);
 		if (err != 0) {
 			return -1;
 		}
@@ -252,7 +252,7 @@ static bool get_osrelease_value(char *path_prefix, char *key, char *buff)
 	char *releasefile = NULL;
 	char *src = NULL, *dest = NULL;
 	char *keystr = NULL;
-	int keystring_len = 0;
+	int keystr_len = 0;
 	bool keyfound = false;
 
 	releasefile = sys_path_join("%s/usr/lib/os-release", path_prefix);
@@ -268,15 +268,15 @@ static bool get_osrelease_value(char *path_prefix, char *key, char *buff)
 	}
 
 	string_or_die(&keystr, "%s=", key);
-	keystring_len = string_len(keystr);
+	keystr_len = str_len(keystr);
 	while (!feof(file)) {
 		line[0] = 0x00;
 		if (fgets(line, LINE_MAX, file) == NULL) {
 			break;
 		}
-		if (strncmp(line, keystr, keystring_len) == 0) {
+		if (strncmp(line, keystr, keystr_len) == 0) {
 			keyfound = true;
-			src = &line[keystring_len];
+			src = &line[keystr_len];
 			/* Drop quotes and newline in value */
 			dest = buff;
 			while (*src) {
@@ -307,7 +307,7 @@ int get_current_version(char *path_prefix)
 	if (!get_osrelease_value(path_prefix, "VERSION_ID", buff)) {
 		return -1;
 	}
-	if (strtoi_err(buff, &v) != 0) {
+	if (str_to_int(buff, &v) != 0) {
 		return -1;
 	}
 

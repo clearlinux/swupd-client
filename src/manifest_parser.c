@@ -26,8 +26,8 @@
 #define MANIFEST_LINE_MAXLEN (PATH_MAX * 2)
 
 // strncmp helper to be used with consts
-#define string_len_const(_const) sizeof(_const) - 1
-#define strncmp_const(_str, _const) strncmp(_str, _const, string_len_const(_const))
+#define str_len_const(_const) sizeof(_const) - 1
+#define strncmp_const(_str, _const) strncmp(_str, _const, str_len_const(_const))
 
 #define MANIFEST_HEADER "MANIFEST\t"
 
@@ -62,8 +62,8 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 		goto err_close;
 	}
 
-	c = line + string_len_const(MANIFEST_HEADER);
-	err = strtoi_err(c, &manifest->manifest_version);
+	c = line + str_len_const(MANIFEST_HEADER);
+	err = str_to_int(c, &manifest->manifest_version);
 
 	if (manifest->manifest_version <= 0 || err != 0) {
 		error("Loaded incompatible manifest version\n");
@@ -98,7 +98,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 		}
 
 		if (strncmp_const(line, "version:\t") == 0) {
-			err = strtoi_err(c, &manifest->version);
+			err = str_to_int(c, &manifest->version);
 			if (err != 0) {
 				error("Invalid manifest version on %s\n", filename);
 				goto err_close;
@@ -235,7 +235,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			goto err_close;
 		}
 
-		err = strtoi_err(c, &file->last_change);
+		err = str_to_int(c, &file->last_change);
 		if (file->last_change <= 0 || err != 0) {
 			error("Loaded incompatible manifest last change\n");
 			free(file);

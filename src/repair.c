@@ -83,7 +83,7 @@ static bool parse_opt(int opt, char *optarg)
 	switch (opt) {
 	case 'm':
 	case 'V':
-		err = strtoi_err(optarg, &cmdline_option_version);
+		err = str_to_int(optarg, &cmdline_option_version);
 		if (err < 0 || cmdline_option_version < 0) {
 			error("Invalid --%s argument: %s\n\n", opt == 'V' ? "version" : "manifest", optarg);
 			return false;
@@ -118,7 +118,7 @@ static bool parse_opt(int opt, char *optarg)
 		 * we need to delete the existing list first */
 		list_free_list(cmdline_bundles);
 		cmdline_bundles = NULL;
-		cmdline_bundles = string_split(",", optarg);
+		cmdline_bundles = str_split(",", optarg);
 		if (!cmdline_bundles) {
 			error("Missing required --bundles argument\n\n");
 			return false;

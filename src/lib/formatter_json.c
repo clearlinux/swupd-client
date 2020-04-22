@@ -56,7 +56,7 @@ static void json_message(const char *msg_type, const char *msg, va_list args_lis
 
 	/* make sure the type is all lower case */
 	if (msg_type) {
-		type = str_tolower(msg_type);
+		type = str_to_lower(msg_type);
 	}
 
 	/* build the full message based on all the arguments */

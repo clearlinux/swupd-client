@@ -77,7 +77,7 @@ static bool parse_opt(int opt, char *optarg)
 
 	switch (opt) {
 	case 'V':
-		err = strtoi_err(optarg, &cmdline_option_version);
+		err = str_to_int(optarg, &cmdline_option_version);
 		if (err < 0 || cmdline_option_version < 0) {
 			error("Invalid --version argument: %s\n\n", optarg);
 			return false;
@@ -108,7 +108,7 @@ static bool parse_opt(int opt, char *optarg)
 		 * a possible existing list parsed from a config file, we want to replace it, so
 		 * we need to delete the existing list first */
 		list_free_list(cmdline_option_bundles);
-		cmdline_option_bundles = string_split(",", optarg);
+		cmdline_option_bundles = str_split(",", optarg);
 		if (!cmdline_option_bundles) {
 			error("Missing required --bundles argument\n\n");
 			return false;

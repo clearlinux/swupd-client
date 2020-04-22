@@ -270,7 +270,7 @@ static struct list *generate_bundles_to_install(struct list *bundles)
 		char *bundle = iter->data;
 
 		struct list *alias_bundles = get_alias_bundles(aliases, bundle);
-		char *alias_list_str = string_join(", ", alias_bundles);
+		char *alias_list_str = str_join(", ", alias_bundles);
 
 		if (strcmp(bundle, alias_list_str) != 0) {
 			info("Alias %s will install bundle(s): %s\n", bundle, alias_list_str);
@@ -472,7 +472,7 @@ clean_and_exit:
 	}
 
 	/* report command result to telemetry */
-	bundles_list_str = string_join(", ", bundles);
+	bundles_list_str = str_join(", ", bundles);
 	if (ret == 0) {
 		level = TELEMETRY_LOW;
 	} else if (ret == SWUPD_INVALID_BUNDLE) {

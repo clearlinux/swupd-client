@@ -442,7 +442,7 @@ out_subs:
 	manifest_free(current_mom);
 	free_subscriptions(&subs);
 out:
-	bundles_list_str = string_join(", ", bundles);
+	bundles_list_str = str_join(", ", bundles);
 	telemetry(TELEMETRY_CRIT,
 		  "bundleremove",
 		  "bundle=%s\n"

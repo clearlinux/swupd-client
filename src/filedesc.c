@@ -72,7 +72,7 @@ static void foreach_open_fd(void(pf)(int, void *), void *arg)
 			continue;
 		}
 
-		err = strtoi_err_endptr(entry->d_name, &ep, &n);
+		err = str_to_int_endptr(entry->d_name, &ep, &n);
 		if (err != 0) {
 			warn("invalid fd\n");
 		}

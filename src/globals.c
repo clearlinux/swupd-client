@@ -347,7 +347,7 @@ bool set_path_prefix(char *path)
 		goto error;
 	}
 
-	len = string_len(new_path);
+	len = str_len(new_path);
 	if (!len || (new_path[len - 1] != '/')) {
 		char *tmp;
 
@@ -420,7 +420,7 @@ static bool set_assume_option(char *option)
 		return false;
 	}
 
-	option_lower = str_tolower(option);
+	option_lower = str_to_lower(option);
 
 	if (strcmp(option_lower, "y") == 0 || strcmp(option_lower, "yes") == 0) {
 		globals.user_interaction = NON_INTERACTIVE_ASSUME_YES;
@@ -575,7 +575,7 @@ static bool global_parse_opt(int opt, char *optarg)
 		set_content_url(optarg);
 		return true;
 	case 'P':
-		err = strtoi_err(optarg, &globals.update_server_port);
+		err = str_to_int(optarg, &globals.update_server_port);
 		if (err < 0 || globals.update_server_port < 0) {
 			error("Invalid --port argument: %s\n\n", optarg);
 			return false;
@@ -619,21 +619,21 @@ static bool global_parse_opt(int opt, char *optarg)
 		globals.user_defined_cert_path = true;
 		return true;
 	case 'W':
-		err = strtoi_err(optarg, &max_parallel_downloads);
+		err = str_to_int(optarg, &max_parallel_downloads);
 		if (err < 0 || max_parallel_downloads <= 0) {
 			error("Invalid --max-parallel-downloads argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;
 	case 'r':
-		err = strtoi_err(optarg, &globals.max_retries);
+		err = str_to_int(optarg, &globals.max_retries);
 		if (err < 0 || globals.max_retries < 0) {
 			error("Invalid --max-retries argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;
 	case 'd':
-		err = strtoi_err(optarg, &globals.retry_delay);
+		err = str_to_int(optarg, &globals.retry_delay);
 		if (err < 0 || globals.retry_delay < 0 || globals.retry_delay > 60) {
 			error("Invalid --retry-delay argument: %s (should be between 0 - %d seconds)\n\n", optarg, MAX_DELAY);
 			return false;

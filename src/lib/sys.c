@@ -80,7 +80,7 @@ static void print_debug_run_command(char **params)
 	}
 
 	str = list_head(str);
-	output = string_join(" ", str);
+	output = str_join(" ", str);
 	list_free_list(str);
 
 	debug(output);
@@ -444,8 +444,8 @@ char *sys_path_join(const char *fmt, ...)
 	}
 	va_end(ap);
 
-	len = string_len(path);
-	char *pretty_path = malloc(string_len(path) + 1);
+	len = str_len(path);
+	char *pretty_path = malloc(str_len(path) + 1);
 	ON_NULL_ABORT(pretty_path);
 
 	/* remove all duplicated PATH_SEPARATOR from the path */

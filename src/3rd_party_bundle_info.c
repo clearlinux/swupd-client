@@ -64,7 +64,7 @@ static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 			cmdline_option_version = -1;
 			return true;
 		}
-		err = strtoi_err(optarg, &cmdline_option_version);
+		err = str_to_int(optarg, &cmdline_option_version);
 		if (err < 0 || cmdline_option_version < 0) {
 			error("Invalid --version argument: %s\n\n", optarg);
 			return false;

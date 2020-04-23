@@ -882,29 +882,21 @@ static struct list *keep_matching_path(struct list *all_files)
 	struct list *matching_files = NULL;
 	struct list *iter = NULL;
 	struct file *file;
-	char *tmp_dir = NULL;
-
-	/* when considering the item as a directory, make sure the item
-	 * finishes with a forward slash so we can match items accuratelly,
-	 * oherwise we can end up with items that partially match */
-	tmp_dir = str_or_die("%s%s", cmdline_option_file, cmdline_option_file[str_len(cmdline_option_file)] == '/' ? "" : "/");
+	int size;
 
 	for (iter = all_files; iter; iter = iter->next) {
 		file = iter->data;
 
-		/* if the item entered by the user is a file, the match should
-		 * be exact, so look for an exact match first, if there is none,
-		 * look for a match treating the item as directory */
-		if (str_cmp(cmdline_option_file, file->filename) == 0) {
-			/* preserving the order is important */
-			matching_files = list_append_data(matching_files, file);
-		} else if (strncmp(tmp_dir, file->filename, str_len(tmp_dir)) == 0) {
-			/* preserving the order is important */
-			matching_files = list_append_data(matching_files, file);
+		size = str_len(cmdline_option_file);
+		if (strncmp(cmdline_option_file, file->filename, size) == 0) {
+			/* if the item entered by the user is a file, the match should
+			 * be exact, so look for an exact match first, also look for matches
+			 * considering the item as directory */
+			if (file->filename[size] == '\0' || file->filename[size] == '/') {
+				matching_files = list_append_data(matching_files, file);
+			}
 		}
 	}
-
-	free_and_clear_pointer(&tmp_dir);
 
 	return list_head(matching_files);
 }
@@ -1174,16 +1166,16 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 	files_to_verify = official_manifest->files;
 	if (cmdline_option_file) {
 		/* the user specified a file or path to verify, use that instead */
+		char *file_path = sys_path_join("%s/%s", globals.path_prefix, cmdline_option_file);
+		info("\nLimiting diagnose to the following %s:\n", sys_filelink_is_dir(file_path) ? "directory (recursively)" : "file");
+		info(" - %s\n", cmdline_option_file);
+		free_and_clear_pointer(&file_path);
+
 		files_to_verify = keep_matching_path(official_manifest->files);
-		info("\n");
-		if (files_to_verify) {
-			char *file_path = sys_path_join("%s/%s", globals.path_prefix, cmdline_option_file);
-			info("Limiting diagnose to the following %s:\n", sys_filelink_is_dir(file_path) ? "directory (recursively)" : "file");
-			free_and_clear_pointer(&file_path);
-			info(" - %s\n", cmdline_option_file);
-		} else {
-			/* we are done, nothing to be done */
-			goto report_and_exit;
+		if (!files_to_verify) {
+			/* no tracked files found using the criteria,
+			 * just handle extra files */
+			goto extra_files;
 		}
 	}
 
@@ -1295,7 +1287,6 @@ brick_the_system_and_clean_curl:
 	}
 
 	/* report a summary of what we managed to do and not do */
-report_and_exit:
 	info("Inspected %i file%s\n", counts.checked, (counts.checked == 1 ? "" : "s"));
 
 	if (counts.missing) {

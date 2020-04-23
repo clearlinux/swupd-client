@@ -39,6 +39,16 @@ AS_IF(
   [AC_DEFINE(DEBUG_MODE, 1, [Debug enabled])]
 )
 
+# Enable/Disable force tartar installation
+AC_ARG_ENABLE(
+  [tartar],
+  [AS_HELP_STRING([--enable-force-tartar], [Force all files to be installed using tartar (disabled by default)])]
+)
+AS_IF(
+  [test "x$enable_force_tartar" == "xyes"],
+  [AC_DEFINE(FORCE_TARTAR, 1, [Force tartar enabled])]
+)
+
 
 # Enable/disable options
 AC_ARG_ENABLE(

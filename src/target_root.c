@@ -185,7 +185,38 @@ out:
 	return ret;
 }
 
-int install_dir(const char *fullfile_path, const char *target_file)
+static enum swupd_code install_staged_file(struct file *file, const char *staged_file, const char *fullfile_path, const char *target_file)
+{
+#ifndef FORCE_TARTAR
+	/* can't naively hard link(): Non-read-only files with same hash must remain
+	 * separate copies otherwise modifications to one instance of the file
+	 * propagate to all instances of the file perhaps causing subtle data corruption from
+	 * a user's perspective.  In practice the rootfs is stateless and owned by us.
+	 * Additionally cross-mount hardlinks fail and it's hard to know what an admin
+	 * might have for overlaid mounts.  The use of tar is a simple way to copy, but
+	 * inefficient.  So prefer hardlink and fall back if needed: */
+
+	if (!file->is_config && !file->is_state && !file->use_xattrs && !file->is_link) {
+		if (link(fullfile_path, staged_file) == 0) {
+			return SWUPD_OK;
+		}
+	}
+
+	if (copy(fullfile_path, staged_file) == 0) {
+		return SWUPD_OK;
+	}
+
+	// If file failed to link or copy
+	UNEXPECTED();
+#else
+	(void)file;
+	(void)staged_file;
+#endif
+	return install_file_using_tar(fullfile_path, target_file);
+}
+
+#ifndef FORCE_TARTAR
+static int install_dir_using_systools(const char *fullfile_path, const char *target_file)
 {
 	struct stat s;
 	int err;
@@ -216,6 +247,19 @@ int install_dir(const char *fullfile_path, const char *target_file)
 	xattrs_copy(fullfile_path, target_file);
 
 	return 0;
+}
+#endif
+
+static enum swupd_code install_dir(const char *fullfile_path, const char *target_file)
+{
+#ifndef FORCE_TARTAR
+	if (install_dir_using_systools(fullfile_path, target_file) == 0) {
+		return SWUPD_OK;
+	}
+
+	UNEXPECTED();
+#endif
+	return install_dir_using_tar(fullfile_path, target_file);
 }
 
 /* Do the staging of new files into the filesystem */
@@ -294,46 +338,15 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 	 * keep its name with a .update prefix for now like this .update.(file_name)
 	 * if it is a directory it will be renamed to its final name once copied */
 	if (file->is_dir) {
-		if (install_dir(fullfile_path, target_file) == 0) {
-			ret = SWUPD_OK;
-		} else {
-			UNEXPECTED();
-			ret = install_dir_using_tar(fullfile_path, target_file);
-		}
-	} else { /* (!file->is_dir)
-		* can't naively hard link(): Non-read-only files with same hash must remain
-		 * separate copies otherwise modifications to one instance of the file
-		 * propagate to all instances of the file perhaps causing subtle data corruption from
-		 * a user's perspective.  In practice the rootfs is stateless and owned by us.
-		 * Additionally cross-mount hardlinks fail and it's hard to know what an admin
-		 * might have for overlaid mounts.  The use of tar is a simple way to copy, but
-		 * inefficient.  So prefer hardlink and fall back if needed: */
-		ret = -1;
+		ret = install_dir(fullfile_path, target_file);
+	} else { /* (!file->is_dir) */
+		ret = install_staged_file(file, staged_file, fullfile_path, target_file);
 
-		if (!file->is_config && !file->is_state && !file->use_xattrs && !file->is_link) {
-			ret = link(fullfile_path, staged_file);
+		if (ret == SWUPD_OK) {
+			// Update staging reference in file structure
+			free_and_clear_pointer(&file->staging);
+			file->staging = strdup_or_die(staged_file);
 		}
-
-		if (ret < 0) {
-			ret = copy(fullfile_path, staged_file);
-		}
-		if (ret < 0) {
-			// If file failed to link or copy
-			UNEXPECTED();
-			ret = install_file_using_tar(fullfile_path, target_file);
-			if (ret) {
-				goto out;
-			}
-		}
-
-		if (!sys_file_exists(staged_file)) {
-			ret = SWUPD_COULDNT_CREATE_FILE;
-			goto out;
-		}
-
-		// Update staging reference in file structure
-		free_and_clear_pointer(&file->staging);
-		file->staging = strdup_or_die(staged_file);
 	}
 
 out:

@@ -22,7 +22,7 @@ extern "C" {
 #define str_len(_str) strnlen(_str, INT64_MAX)
 
 /**
- * helper to use strncmp() instead of str_cmp
+ * helper to use strncmp() instead of strcmp
  */
 #define str_cmp(_str1, _str2) strncmp(_str1, _str2, INT64_MAX)
 

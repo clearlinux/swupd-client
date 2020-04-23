@@ -1966,6 +1966,34 @@ destroy_test_environment() { # swupd_function
 
 }
 
+add_os_core_update_bundle() { # swupd_function
+
+	local env_name=$1
+	# If no parameters are received show usage
+	if [ $# -eq 0 ]; then
+		cat <<-EOM
+			Usage:
+			    add_os_core_update_bundle <environment_name>
+			EOM
+		return
+	fi
+	validate_path "$env_name"
+
+	# move the versionurl file to the content directory
+	versionurl_hash=$(sudo "$SWUPD" hashdump --quiet "$TARGETDIR"/usr/share/defaults/swupd/versionurl)
+	sudo cp "$TARGETDIR"/usr/share/defaults/swupd/versionurl "$WEBDIR"/10/files/"$versionurl_hash"
+	versionurl="$WEBDIR"/10/files/"$versionurl_hash"
+
+	# move the contenturl file to the content directory
+	contenturl_hash=$(sudo "$SWUPD" hashdump --quiet "$TARGETDIR"/usr/share/defaults/swupd/contenturl)
+	sudo cp "$TARGETDIR"/usr/share/defaults/swupd/contenturl "$WEBDIR"/10/files/"$contenturl_hash"
+	contenturl="$WEBDIR"/10/files/"$contenturl_hash"
+
+	# create the os-core-update bundle
+	create_bundle -L -n os-core-update -f /usr/share/defaults/swupd/versionurl:"$versionurl",/usr/share/defaults/swupd/contenturl:"$contenturl" "$env_name"
+
+}
+
 # Creates a test fiile system of a given size
 create_test_fs() { # swupd_function
 

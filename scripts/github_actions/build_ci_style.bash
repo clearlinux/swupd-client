@@ -14,6 +14,6 @@ sudo pip install coverxygen
 # Install new clang-format from llvm repository
 wget -O llvm.gpg.key https://apt.llvm.org/llvm-snapshot.gpg.key
 sudo apt-key add llvm.gpg.key
-sudo add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main"
+sudo add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
 sudo apt-get update
-sudo apt-get install -y clang-format-9
+sudo apt-get install -y clang-format-10

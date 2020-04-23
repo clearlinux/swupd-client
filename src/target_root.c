@@ -37,6 +37,10 @@
 
 #define STAGE_FILE_PREFIX ".update."
 
+#define STDERR_QUIET " 2> /dev/null"
+#define TAR_CF_CMD TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -cf - '%s'" STDERR_QUIET
+#define TAR_XF_CMD TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -xf -" STDERR_QUIET
+
 static enum swupd_code verify_fix_path(char *target_path, struct manifest *target_mom);
 
 /* clean then recreate temporary folder for tar renames */
@@ -81,13 +85,34 @@ static bool file_type_changed(const char *statfile, struct file *file)
 		(file->is_file && !S_ISREG(s.st_mode)));  // Changed to file
 }
 
-static enum swupd_code install_dir_using_tar(const char *fullfile_path, const char *target_path, const char *target_basename)
+static int tartar(const char *source_dir, const char *source_basename, const char *target_dir)
 {
+	char *tarcommand;
+	int err;
+
+	tarcommand = str_or_die(TAR_CF_CMD " | " TAR_XF_CMD,
+				source_dir, source_basename, target_dir);
+	debug("Executing tartar command: %s\n", tarcommand);
+
+	err = system(tarcommand);
+
+	free(tarcommand);
+	return err;
+}
+
+static enum swupd_code install_dir_using_tar(const char *fullfile_path, const char *target_file)
+{
+	int err;
 	enum swupd_code ret = SWUPD_OK;
 	char *rename_tmpdir = NULL;
 	char *rename_target = NULL;
-	char *tarcommand = NULL;
+	char *local_basename = NULL;
+	char *target_basename = NULL;
+	char *target_path = NULL;
 
+	target_basename = sys_basename(target_file);
+	local_basename = sys_path_join("./%s", target_basename);
+	target_path = sys_dirname(target_file);
 	rename_tmpdir = sys_path_join("%s/tmprenamedir", globals.state_dir);
 	rename_target = sys_path_join("%s/%s", rename_tmpdir, target_basename);
 
@@ -103,9 +128,8 @@ static enum swupd_code install_dir_using_tar(const char *fullfile_path, const ch
 		goto out;
 	}
 
-	string_or_die(&tarcommand, TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -cf - './%s' 2> /dev/null | " TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null", rename_tmpdir, target_basename, target_path);
-
-	if (system(tarcommand) != 0) {
+	err = tartar(rename_tmpdir, local_basename, target_path);
+	if (err) {
 		ret = SWUPD_SUBPROCESS_ERROR;
 	}
 
@@ -114,27 +138,37 @@ static enum swupd_code install_dir_using_tar(const char *fullfile_path, const ch
 	}
 
 out:
-	free(tarcommand);
 	free(rename_tmpdir);
 	free(rename_target);
+	free(local_basename);
+	free(target_path);
 	return ret;
 }
 
-static enum swupd_code install_file_using_tar(const char *fullfile_path, const char *target_path, const char *target_basename)
+static enum swupd_code install_file_using_tar(const char *fullfile_path, const char *target_file)
 {
+	int err;
 	enum swupd_code ret = SWUPD_OK;
 	char *rename_tmpdir = NULL;
 	char *rename_target = NULL;
-	char *tarcommand = NULL;
+	char *stage_dir = NULL;
+	char *staged_file = NULL;
+	char *target_basename = NULL;
+	char *target_path = NULL;
+
+	target_basename = sys_basename(target_file);
+	target_path = sys_dirname(target_file);
 
 	rename_target = sys_path_join("%s/staged/%s%s", globals.state_dir, STAGE_FILE_PREFIX, target_basename);
 	if (rename(fullfile_path, rename_target) != 0) {
 		ret = SWUPD_COULDNT_RENAME_FILE;
 		goto out;
 	}
-	string_or_die(&tarcommand, TAR_COMMAND " -C '%s/staged' " TAR_PERM_ATTR_ARGS " -cf - '%s%s' 2> /dev/null | " TAR_COMMAND " -C '%s' " TAR_PERM_ATTR_ARGS " -xf - 2> /dev/null",
-		      globals.state_dir, STAGE_FILE_PREFIX, target_basename, target_path);
-	if (system(tarcommand) != 0) {
+
+	stage_dir = sys_path_join("%s/staged", globals.state_dir);
+	staged_file = str_or_die("%s%s", STAGE_FILE_PREFIX, target_basename);
+	err = tartar(stage_dir, staged_file, target_path);
+	if (err) {
 		ret = SWUPD_SUBPROCESS_ERROR;
 	}
 
@@ -143,9 +177,11 @@ static enum swupd_code install_file_using_tar(const char *fullfile_path, const c
 	}
 
 out:
-	free(tarcommand);
 	free(rename_tmpdir);
 	free(rename_target);
+	free(staged_file);
+	free(stage_dir);
+	free(target_path);
 	return ret;
 }
 
@@ -262,7 +298,7 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 			ret = SWUPD_OK;
 		} else {
 			UNEXPECTED();
-			ret = install_dir_using_tar(fullfile_path, target_path, target_basename);
+			ret = install_dir_using_tar(fullfile_path, target_file);
 		}
 	} else { /* (!file->is_dir)
 		* can't naively hard link(): Non-read-only files with same hash must remain
@@ -273,6 +309,7 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 		 * might have for overlaid mounts.  The use of tar is a simple way to copy, but
 		 * inefficient.  So prefer hardlink and fall back if needed: */
 		ret = -1;
+
 		if (!file->is_config && !file->is_state && !file->use_xattrs && !file->is_link) {
 			ret = link(fullfile_path, staged_file);
 		}
@@ -283,7 +320,7 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 		if (ret < 0) {
 			// If file failed to link or copy
 			UNEXPECTED();
-			ret = install_file_using_tar(fullfile_path, target_path, target_basename);
+			ret = install_file_using_tar(fullfile_path, target_file);
 			if (ret) {
 				goto out;
 			}

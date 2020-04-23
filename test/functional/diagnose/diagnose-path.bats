@@ -8,6 +8,7 @@ load "../testlib"
 test_setup() {
 
 	create_test_environment -r "$TEST_NAME" 10 1
+	add_os_core_update_bundle "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /foo/file_1,/bar/file_2 "$TEST_NAME"
 	create_version "$TEST_NAME" 20 10 1
 	update_bundle -p "$TEST_NAME" test-bundle1 --update /foo/file_1
@@ -161,11 +162,9 @@ test_setup() {
 		 -> File that should be deleted: $PATH_PREFIX/bar/file_2
 		Checking for extra files under $PATH_PREFIX/usr
 		 -> Extra file: $PATH_PREFIX/usr/untracked_file3
-		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl
-		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/contenturl
-		Inspected 8 files
+		Inspected 6 files
 		  3 files were missing
-		  4 files found which should be deleted
+		  2 files found which should be deleted
 		Use "swupd repair --picky" to correct the problems in the system
 		Diagnose successful
 	EOM
@@ -220,7 +219,31 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Diagnosing version 20
 		Downloading missing manifests...
+		Limiting diagnose to the following file:
+		 - /ba
 		Inspected 0 files
+		Diagnose successful
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
+@test "DIA029: Diagnosing extra files only specifying an untracked file or directory" {
+
+	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS --extra-files-only --file /usr/untracked_file3"
+
+	assert_status_is "$SWUPD_NO"
+	expected_output=$(cat <<-EOM
+		Diagnosing version 20
+		Downloading missing manifests...
+		Limiting diagnose to the following file:
+		 - /usr/untracked_file3
+		Checking for extra files under $PATH_PREFIX/usr/untracked_file3
+		 -> Extra file: $PATH_PREFIX/usr/untracked_file3
+		Inspected 1 file
+		  1 file found which should be deleted
+		Use "swupd repair --picky" to correct the problems in the system
 		Diagnose successful
 	EOM
 	)

@@ -915,13 +915,14 @@ fail:
 	return ret;
 }
 
-void print_pattern(const char *pattern, int times)
+static void print_char(const char c, int times)
 {
-	while (times > 0) {
-		info("%s", pattern);
-		times--;
-	}
-	info("\n");
+	char *str;
+
+	str = calloc(1, times + 1);
+	memset(str, c, times);
+	info("%s\n", str);
+	free(str);
 }
 
 void print_header(const char *header)
@@ -929,9 +930,9 @@ void print_header(const char *header)
 	int header_length;
 
 	header_length = str_len(header);
-	print_pattern("_", header_length + 1);
+	print_char('_', header_length + 1);
 	info("%s\n", header);
-	print_pattern("_", header_length + 1);
+	print_char('_', header_length + 1);
 	info("\n");
 }
 

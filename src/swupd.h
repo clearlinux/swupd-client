@@ -298,7 +298,6 @@ extern void print_regexp_error(int errcode, regex_t *regexp);
 extern bool is_url_allowed(const char *url);
 extern bool is_url_insecure(const char *url);
 extern void remove_trailing_slash(char *url);
-extern void print_pattern(const char *pattern, int times);
 extern void print_header(const char *header);
 extern void prettify_size(long size_in_bytes, char **pretty_size);
 extern int create_state_dirs(const char *state_dir_path);

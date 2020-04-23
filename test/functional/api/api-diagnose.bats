@@ -8,13 +8,7 @@ load "../testlib"
 global_setup() {
 
 	create_test_environment -r "$TEST_NAME" 10 1
-	versionurl_hash=$(sudo "$SWUPD" hashdump --quiet "$TARGETDIR"/usr/share/defaults/swupd/versionurl)
-	sudo cp "$TARGETDIR"/usr/share/defaults/swupd/versionurl "$WEBDIR"/10/files/"$versionurl_hash"
-	versionurl="$WEBDIR"/10/files/"$versionurl_hash"
-	contenturl_hash=$(sudo "$SWUPD" hashdump --quiet "$TARGETDIR"/usr/share/defaults/swupd/contenturl)
-	sudo cp "$TARGETDIR"/usr/share/defaults/swupd/contenturl "$WEBDIR"/10/files/"$contenturl_hash"
-	contenturl="$WEBDIR"/10/files/"$contenturl_hash"
-	create_bundle -L -n os-core-update -f /usr/share/defaults/swupd/versionurl:"$versionurl",/usr/share/defaults/swupd/contenturl:"$contenturl" "$TEST_NAME"
+	add_os_core_update_bundle "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /foo/file_1,/bar/file_2 "$TEST_NAME"
 	create_version "$TEST_NAME" 20 10 1
 	update_bundle -p "$TEST_NAME" test-bundle1 --update /foo/file_1

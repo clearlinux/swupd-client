@@ -35,6 +35,20 @@ run_checks() {
 	make distcheck
 }
 
+run_checks_tartar() {
+	if [ -n "$BUILD_ONLY" ]; then
+		return
+	fi
+
+	# Tar tar doasnt support hardlinks
+	# There's a known bug in tar tar code that doesn't support unusual file names
+	FILES="$(find test/functional  -name "*.bats" \( ! -path "*only_in_ci_system*" \) | sort | grep -v install-hardlink-symlink.bats | grep -v update-unusual-file-names.bats)"
+
+	env TESTS="$FILES"  make -j "$JOB_COUNT" -e check
+	env TESTS="$(find ./test/functional/only_in_ci_system  -name "*.bats" | sort)" make -e -j1 check
+
+}
+
 main() {
 	# Parse parameters
 	while getopts :bj: opt; do
@@ -59,6 +73,10 @@ main() {
 	# Run tests without any security optimization and with address sanitizer
 	CFLAGS="-fsanitize=address -fno-omit-frame-pointer -Werror" run_build --disable-optimizations "$configure_args"
 	run_checks
+
+	# Run tests with --force-tartar
+	run_build --enable-force-tartar "$configure_args"
+	run_checks_tartar
 
 	# Run build with basic configurations
 	CFLAGS="-O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -Werror" run_build "$configure_args"

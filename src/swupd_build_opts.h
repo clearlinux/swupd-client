@@ -68,6 +68,18 @@
 #define OPT_STATELESS "-STATELESS"
 #endif
 
+#ifdef DEBUG_MODE
+#define OPT_DEBUG_MODE "+DEBUG_MODE"
+#else
+#define OPT_DEBUG_MODE "-DEBUG_MODE"
+#endif
+
+#ifdef FORCE_TARTAR
+#define OPT_FORCE_TAR "+FORCE_TARTAR"
+#else
+#define OPT_FORCE_TAR "-FORCE_TARTAR"
+#endif
+
 #ifdef CONTENTURL
 #define OPT_C_URL CONTENTURL
 #else
@@ -105,7 +117,7 @@
 #endif
 
 #define BUILD_OPTS \
-	OPT_BZIP2 " " OPT_SIGNATURES " " OPT_COVERAGE " " OPT_BSDTAR " " OPT_XATTRS " " OPT_SELINUX " " OPT_STATELESS " " OPT_THIRD_PARTY
+	OPT_BZIP2 " " OPT_SIGNATURES " " OPT_COVERAGE " " OPT_BSDTAR " " OPT_XATTRS " " OPT_SELINUX " " OPT_STATELESS " " OPT_THIRD_PARTY " " OPT_DEBUG_MODE " " OPT_FORCE_TAR
 
 #define BUILD_CONFIGURE                                          \
 	"mount point                  " MOUNT_POINT "\n"         \

@@ -49,7 +49,7 @@ global_setup() {
 
 }
 
-@test "API077: mirror --unset" {
+@test "API059: mirror --unset" {
 
 	run sudo sh -c "$SWUPD mirror $SWUPD_OPTS --unset --quiet"
 

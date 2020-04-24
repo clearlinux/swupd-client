@@ -76,4 +76,26 @@ test_teardown() {
 	assert_is_output "$expected_output"
 
 }
+
+@test "REP046: repair failure using --quiet" {
+
+	run sudo sh -c "$SWUPD repair $SWUPD_OPTS --picky --quiet"
+
+	assert_status_is_not "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		Error: Target exists but is not a directory: $PATH_PREFIX/baz
+		$PATH_PREFIX/baz/bat
+		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
+		$PATH_PREFIX/baz/bat/file_3
+		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
+		$PATH_PREFIX/baz
+		$PATH_PREFIX/foo/file_1
+		$PATH_PREFIX/usr/lib/os-release
+		$PATH_PREFIX/usr/untracked_file
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
 #WEIGHT=6

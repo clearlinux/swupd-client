@@ -87,6 +87,15 @@ export XDG_CONFIG_DIRS=%s:\$XDG_CONFIG_DIRS\n\
 \n\
 %s \"\$@\"\n"
 
+show_help() {
+
+	if [ "$2" == "-h" ] || [ "$2" == "--help" ]; then
+		echo "$1"
+		kill -INT $$
+	fi
+
+}
+
 generate_random_content() { # swupd_function
 
 	local bottom_range=${1:-5}

@@ -8,7 +8,7 @@ load "../testlib"
 test_setup() {
 
 	create_test_environment -e "$TEST_NAME" 10
-	create_bundle -n os-core -h /core,/core2,/core3 -H /symlink,/symlink2,/symlink3 "$TEST_NAME"
+	create_bundle -n os-core -a /core,/core2,/core3 -H /symlink,/symlink2,/symlink3 "$TEST_NAME"
 
 }
 

@@ -87,16 +87,15 @@ export XDG_CONFIG_DIRS=%s:\$XDG_CONFIG_DIRS\n\
 \n\
 %s \"\$@\"\n"
 
-show_help() {
-
-	if [ "$2" == "-h" ] || [ "$2" == "--help" ]; then
-		echo "$1"
-		kill -INT $$
-	fi
-
-}
-
 generate_random_content() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Generates random characters that can be used as content for test files.
+
+		Usage:
+		    generate_random_content
+	EOM
+	)" "$@"
 
 	local bottom_range=${1:-5}
 	local top_range=${2:-100}
@@ -109,6 +108,18 @@ generate_random_content() { # swupd_function
 
 generate_random_name() { # swupd_function
 
+	show_help "$(cat <<-EOM
+		Generates a random name for test resources. The name consists of
+		the prefix followed by 8 random alphanumeric characters.
+
+		Usage:
+		    generate_random_name [prefix]
+
+		Arguments:
+		    - prefix: the prefix to be used for the generated name (default: 'test-')
+	EOM
+	)" "$@"
+
 	local prefix=${1:-test-}
 	local uuid
 
@@ -118,24 +129,23 @@ generate_random_name() { # swupd_function
 
 }
 
-# Creates public and private key
-# Parameters:
-# - key_path: path to private key
-# - cert_path: path to public key
 generate_certificate() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Generates public and private keys.
+
+		Usage:
+		    generate_certificate <key_path> <cert_path>
+
+		Arguments:
+		    - key_path: path to private key
+		    - cert_path: path to public key
+	EOM
+	)" "$@"
 
 	local key_path=$1
 	local cert_path=$2
 	local config=$3
-
-	# If incorrect number of parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    generate_certificate <key_path> <cert_path>
-			EOM
-		return
-	fi
 	validate_param "$key_path"
 	validate_param "$cert_path"
 
@@ -159,23 +169,22 @@ generate_certificate() { # swupd_function
 
 }
 
-# Creates the trusted certificate store and adds one certificate
-# Parameters:
-# - cert_path: path of certificate to add to trust store
 create_trusted_cacert() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Creates the trusted certificate store and adds one certificate.
+
+		Usage:
+		    create_trusted_cacert <certificate_path>
+
+		Arguments:
+		    - certificate_path: path of certificate to add to trust store
+	EOM
+	)" "$@"
 
 	local cert_path=$1
 	local counter=0
 	local subj_hash
-
-	# If incorrect number of parameters are received show usage
-	if [ $# -ne 1 ]; then
-		cat <<-EOM
-			Usage:
-			    create_trusted_cacert <certificate_path>
-			EOM
-		return
-	fi
 
 	# only one test can use the trusted certificate store at the same time to
 	# avoid certificate contamination from other tests and race conditions.
@@ -198,8 +207,16 @@ create_trusted_cacert() { # swupd_function
 
 }
 
-# Deletes the trusted certificate store
+# shellcheck disable=SC2120
 destroy_trusted_cacert() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Deletes the trusted certificate store.
+
+		Usage:
+		    destroy_trusted_cacert
+	EOM
+	)" "$@"
 
 	# only the test that created CACERT_DIR can erase it which stops
 	# tests from erasing CACERT_DIR when they fail before creating it
@@ -209,34 +226,19 @@ destroy_trusted_cacert() { # swupd_function
 
 }
 
-print_stack() {
-
-	echo "An error occurred"
-	echo "Function stack (most recent on top):"
-	for func in ${FUNCNAME[*]}; do
-		if [ "$func" != "print_stack" ] && [ "$func" != "terminate" ]; then
-			echo -e "\\t$func"
-		fi
-	done
-
-}
-
-# when printing a message in a bats test, it is necessary
-# to use file descriptor 3, this wrapper function makes it
-# easier for users of the test library to print to screen
 print() { # swupd_function
 
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Prints a message from a test, the message will be displayed only when
-			running the test using the bats -t flag.
+	show_help "$(cat <<-EOM
+		Prints a message from a test, the message will be displayed only when
+		running the test using the bats -t flag.
 
-			Usage:
-			    print <msg>
-			EOM
-		return
-	fi
+		Usage:
+		    print <msg>
+
+		Arguments:
+		    - msg: the message to be printed
+	EOM
+	)" "$@"
 
 	local msg=$1
 	# if file descriptor 3 is not available (for example when sourcing the library
@@ -249,48 +251,34 @@ print() { # swupd_function
 
 }
 
+# shellcheck disable=SC2120
 show_target() { # swupd_function
 
-	local OPTIND
-	local opt
-
-	show_target_usage() {
-		cat <<-EOM
+	show_help "$(cat <<-EOM
 		Shows the file system of the target directory in a tree view.
 
 		Usage:
 		    show_target
-		EOM
-	}
-
-	while getopts : opt; do
-		case "$opt" in
-			*)	show_target_usage
-				return ;;
-		esac
-	done
+	EOM
+	)" "$@"
 
 	print "\n$(tree "$TARGETDIR")\n"
 
 }
 
-# sometimes it is useful to have extra information to debug
-# a test but you don't want to print all this extra info normally,
-# all messages printed with debug_msg will only be shown when the
-# user sets the environment variable DEBUG_TEST=true
 debug_msg() { #swupd_function
 
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Prints a debug message from a test, the message will be displayed only
-			when running the test using the bats -t flag and when the env variable
-			DEBUG_TEST is set to true.
+	show_help "$(cat <<-EOM
+		Messages printed with debug_msg will only be shown when the
+		user sets the environment variable DEBUG_TEST=true.
 
-			Usage:
-			    debug_msg <msg>
-			EOM
-		return
-	fi
+		Usage:
+		    debug_msg <msg>
+
+		Arguments:
+		    - msg: the message to be printed
+	EOM
+	)" "$@"
 
 	local msg=$1
 	if [ "$DEBUG_TEST" = true ]; then
@@ -306,6 +294,18 @@ debug_msg() { #swupd_function
 }
 
 terminate() {
+
+	show_help "$(cat <<-EOM
+		Exits if the function is called from a script, or forces an error to
+		stop execution if the function is called from an interactive shell.
+
+		Usage:
+		    terminate <msg>
+
+		Arguments:
+		    - msg: the message to be printed
+	EOM
+	)" "$@"
 
 	# since the library could be sourced and run from an interactive shell
 	# not only from a script, we cannot use exit in interactive shells since it
@@ -325,6 +325,18 @@ terminate() {
 
 validate_path() {
 
+	show_help "$(cat <<-EOM
+		Validates the existance of the path (directory), if it doesn't
+		exist, terminates execution.
+
+		Usage:
+		    validate_path <path>
+
+		Arguments:
+		    - path: the relative or absolute path to the directory
+	EOM
+	)" "$@"
+
 	local path=$1
 	if [ -z "$path" ] || [ ! -d "$path" ]; then
 		terminate "Please provide a valid path"
@@ -333,6 +345,18 @@ validate_path() {
 }
 
 validate_item() {
+
+	show_help "$(cat <<-EOM
+		Validates the existance of the file, symlink or directory, if it
+		doesn't exist, terminates execution.
+
+		Usage:
+		    validate_item <path>
+
+		Arguments:
+		    - path: the relative or absolute path to the file or directory
+	EOM
+	)" "$@"
 
 	local vfile=$1
 	if sudo sh -c "[ -z $vfile ] || [ ! -e $vfile ]"; then
@@ -343,6 +367,18 @@ validate_item() {
 
 validate_param() {
 
+	show_help "$(cat <<-EOM
+		Validates the presence of the parameter, if it is not present,
+		terminates execution.
+
+		Usage:
+		    validate_param <param>
+
+		Arguments:
+		    - param: parameter to be validated
+	EOM
+	)" "$@"
+
 	local param=$1
 	if [ -z "$param" ]; then
 		terminate "Mandatory parameter missing"
@@ -352,6 +388,17 @@ validate_param() {
 
 validate_number() {
 
+	show_help "$(cat <<-EOM
+		Validates the parameter is a valid number.
+
+		Usage:
+		    validate_number <param>
+
+		Arguments:
+		    - param: parameter to be validated
+	EOM
+	)" "$@"
+
 	local param=$1
 	if ! [[ $param =~ ^[0-9]+([.][0-9]+)?$ ]]; then
 		terminate "Bad parameter provided, expecting a number"
@@ -360,6 +407,18 @@ validate_number() {
 }
 
 wait_for_deletion() {
+
+	show_help "$(cat <<-EOM
+		Waits up to a specific timeout for a file or directory to be deleted. The
+		function returns as soon as the file no longer exists or the timeout is reached.
+
+		Usage:
+		    wait_for_deletion <path>
+
+		Arguments:
+		    - path: relative or absolute path to the file or directory to wait for
+	EOM
+	)" "$@"
 
 	local param=$1
 	local timeout=5  # arbitrary timeout
@@ -372,8 +431,18 @@ wait_for_deletion() {
 
 }
 
-# Gets the latest version that exists in the environment
 get_latest_version() {
+
+	show_help "$(cat <<-EOM
+		Gets the latest version of the update content in the test environment.
+
+		Usage:
+		    get_latest_version <content_dir>
+
+		Arguments:
+		    - content_dir: path to the content directory (e.g. webdir)
+	EOM
+	)" "$@"
 
 	local content_dir=$1
 
@@ -385,8 +454,18 @@ get_latest_version() {
 
 }
 
-# Gets the current version of the test environment
 get_system_version() {
+
+	show_help "$(cat <<-EOM
+		Gets the current version of content installed in the test target system.
+
+		Usage:
+		    get_system_version <env_name>
+
+		Arguments:
+		    - env_name: name of the test environment
+	EOM
+	)" "$@"
 
 	local env_name=$1
 
@@ -394,8 +473,21 @@ get_system_version() {
 
 }
 
-# Gets the previous version where a bundle manifest is found
 get_manifest_previous_version() {
+
+	show_help "$(cat <<-EOM
+		Gets the previous version where a bundle manifest is found.
+
+		Usage:
+		    get_manifest_previous_version <content_dir> <bundle_name> [init_version]
+
+		Arguments:
+		    - content_dir: the path to the content directory (e.g. webdir)
+		    - bundle_name: name of the bundle of the manifest to be found
+		    - init_version: the starting version that will be used to start looking
+		                    backwards (default: the latest version).
+	EOM
+	)" "$@"
 
 	local content_dir=$1
 	local bundle=$2
@@ -427,8 +519,21 @@ get_manifest_previous_version() {
 
 }
 
-# Copies a manifest from one version to another in a test environment
 copy_manifest() {
+
+	show_help "$(cat <<-EOM
+		Copies a manifest from one version to another in a test environment.
+
+		Usage:
+		    copy_manifest <content_dir> <bundle_name> <from_version> <to_version>
+
+		Arguments:
+		    - content_dir: the path to the content directory (e.g. webdir)
+		    - bundle_name: name of the bundle of the manifest to be copied
+		    - from_version: the version where the manifest will be copied from.
+		    - to_version: the version where the manifest will be copied to.
+	EOM
+	)" "$@"
 
 	local content_dir=$1
 	local bundle=$2
@@ -471,25 +576,23 @@ copy_manifest() {
 
 }
 
-# Writes to a file that is owned by root
-# Parameters:
-# - "-a": if set, the text will be appeneded to the file,
-#         otherwise will be overwritten
-# - FILE: the path to the file to write to
-# - STREAM: the content to be written
 write_to_protected_file() { # swupd_function
 
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    write_to_protected_file [-a] <file> <stream>
+	show_help "$(cat <<-EOM
+		Writes to a file that is owned by root.
 
-			Options:
-			    -a    If used the text will be appended to the file, otherwise it will be overwritten
-			EOM
-		return
-	fi
+		Usage:
+		    write_to_protected_file [-a] <file> <stream>
+
+		Options:
+		    -a    If used the text will be appended to the file, otherwise it will be overwritten
+
+		Arguments:
+		    - file: the path to the file to be written to
+		    - stream: the content to be written
+	EOM
+	)" "$@"
+
 	local arg
 	[ "$1" = "-a" ] && { arg=-a ; shift ; }
 	local file=${1?Missing output file in write_to_protected_file}
@@ -498,22 +601,22 @@ write_to_protected_file() { # swupd_function
 
 }
 
-# Exports environment variables that are dependent on the test environment
-# Parameters:
-# - ENV_NAME: the name of the test environment
 set_env_variables() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Exports the environment variables that are dependent on the test environment.
+
+		Usage:
+		    set_env_variables <env_name>
+
+		Arguments:
+		    - env_name: the name of the test environment
+	EOM
+	)" "$@"
 
 	local env_name=$1
 	local path
 	local testfs_path
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    set_env_variables <environment_name>
-			EOM
-		return
-	fi
 	validate_path "$env_name"
 	path=$(dirname "$(realpath "$env_name")")
 	testfs_path="$path"/"$env_name"/testfs
@@ -558,25 +661,23 @@ set_env_variables() { # swupd_function
 
 }
 
-# Creates a directory with a hashed name in the specified path, if a directory
-# already exists it returns the name
-# Parameters:
-# - PATH: the path where the directory will be created
 create_dir() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Creates a directory with a hashed name in the specified path, if a
+		directory already exists it returns the name.
+
+		Usage:
+		    create_dir <path>
+
+		Arguments:
+		    - path: the path where the directory will be created
+	EOM
+	)" "$@"
 
 	local path=$1
 	local hashed_name
 	local directory
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    create_dir <path>
-			EOM
-		return
-	fi
-	validate_path "$path"
 
 	# most directories have the same hash, so we only need one directory
 	# in the files directory, if there is already one just return the path/name
@@ -593,24 +694,25 @@ create_dir() { # swupd_function
 
 }
 
-# Generates a file with a hashed name in the specified path
-# Parameters:
-# - PATH: the path where the file will be created
-# - SIZE: the size of the file (in bytes), if nothing is specified the size
-#         will be random but fairly small
 create_file() { # swupd_function
 
-	create_file_usage() {
-		cat <<-EOM
+	show_help "$(cat <<-EOM
+		Creates a file with a hashed name in the specified path.
+
 		Usage:
-		    create_file [-x] [-u] [-g] <path> [size in bytes]
+		    create_file [-x] [-u] [-g] <path> [size]
 
 		Options:
 		    -x    If set, the file is created as executable
 		    -u    If set, the file is created with the SETUID flag
 		    -g    If set, the file is created with the SETGID flag
-		EOM
-	}
+
+		Arguments:
+		    - path: the path where the file will be created
+		    - size: the size of the file (in bytes), if nothing is specified
+		            the size will be random but fairly small
+	EOM
+	)" "$@"
 
 	local OPTIND
 	local opt
@@ -619,19 +721,12 @@ create_file() { # swupd_function
 	local setuid=false
 	local setgid=false
 
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		create_file_usage
-		return
-	fi
-
 	while getopts :xug opt; do
 		case "$opt" in
 			x)	executable=true ;;
 			u)	setuid=true ;;
 			g)	setgid=true ;;
-			*)	create_file_usage
-				return ;;
+			*)	return ;;
 		esac
 	done
 	shift $((OPTIND-1))
@@ -661,27 +756,29 @@ create_file() { # swupd_function
 
 }
 
-# Creates a symbolic link with a hashed name to the specified file in the specified path.
-# If no existing file is specified to point to, a new file will be created and pointed to
-# by the link.
-# If a file is provided but doesn't exist, then a dangling file will be created
 # Parameters:
 # - PATH: the path where the symbolic link will be created
 # - FILE: the path to the file to point to
 create_link() { # swupd_function
 
+	show_help "$(cat <<-EOM
+		Creates a symbolic link with a hashed name to the specified file
+		in the specified path. If no existing file is specified to point to,
+		a new file will be created and pointed to by the link. If a file is
+		provided but doesn't exist, then a dangling file will be created.
+
+		Usage:
+		    create_link <path> [file_to_point_to]
+
+		Arguments:
+		    - path: the path where the symbolic link will be created
+		    - file_to_point_to: the path to the file to point to
+	EOM
+	)" "$@"
+
 	local path=$1
 	local pfile=$2
 	local hashed_name
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    create_link <path> [file_to_point_to]
-			EOM
-		return
-	fi
 	validate_path "$path"
 
 	# if no file is specified, create one
@@ -696,27 +793,27 @@ create_link() { # swupd_function
 
 }
 
-# Creates a tar for the specified item in the same location
-# Parameters:
-# - --skip-validation: if this flag is set (as first parameter) the other parameter
-#                      is not validated, so use this option carefully
-# - ITEM: the relative path to the item (file, directory, link, manifest)
 create_tar() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Creates a tar for the specified item in the same location.
+
+		Usage:
+		    create_tar [--skip-validation] <path>
+
+		Options:
+		    --skip-validation    If set, the function parameters will not be validated
+
+		Arguments:
+		    - path: the path where the file will be created
+		    - size: the relative path to the item (file, directory, link, manifest)
+	EOM
+	)" "$@"
 
 	local path
 	local item_name
 	local skip_param_validation=false
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    create_tar [--skip-validation] <item>
 
-			Options:
-			    --skip-validation    If set, the function parameters will not be validated
-			EOM
-		return
-	fi
 	[ "$1" = "--skip-validation" ] && { skip_param_validation=true ; shift ; }
 	local item=$1
 
@@ -736,10 +833,18 @@ create_tar() { # swupd_function
 
 }
 
-# Sets an existing version as minversion.
-# Parameters:
-# - MINVERSION_PATH: the path of the version to be set as minversion
 set_as_minversion() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Sets an existing version as minversion.
+
+		Usage:
+		    set_as_minversion <version_path>
+
+		Arguments:
+		    - version_path: the path of the version to be set as minversion (e.g. webdir/10)
+	EOM
+	)" "$@"
 
 	local minversion_path=$1
 	local webdir_path
@@ -751,15 +856,6 @@ set_as_minversion() { # swupd_function
 	local manifest
 	local files
 	local bundle_file
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    set_as_minversion <version_path>
-			EOM
-		return
-	fi
 	validate_path "$minversion_path"
 
 	minversion="$(basename "$minversion_path")"
@@ -813,12 +909,21 @@ set_as_minversion() { # swupd_function
 
 }
 
-# Creates an empty manifest in the specified path
-# Parameters:
-# - PATH: the path where the manifest will be created
-# - BUNDLE_NAME: the name of the bundle which this manifest will be for
-# - FORMAT: the format of the manifest
 create_manifest() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Creates an empty manifest in the specified path.
+
+		Usage:
+		    create_manifest <path> <bundle_name> [format] [previous_version]
+
+		Arguments:
+		    - path: the path where the manifest will be created (e.g. webdir/10)
+		    - bundle_name: the name of the bundle which this manifest belongs to
+		    - format: the format of the manifest (default: 1)
+		    - previous_version: the previous version of the manifest (default: 0)
+	EOM
+	)" "$@"
 
 	local path=$1
 	local name=$2
@@ -826,15 +931,6 @@ create_manifest() { # swupd_function
 	local previous_version=${4:-0}
 	local minversion="0"
 	local version
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    create_manifest <path> <bundle_name> [format] [previous_version]
-			EOM
-		return
-	fi
 	validate_path "$path"
 	validate_param "$name"
 
@@ -857,20 +953,20 @@ create_manifest() { # swupd_function
 
 }
 
-# Re-creates a manifest's tar, updates the hashes in the MoM and signs it
-# Parameters:
-# - MANIFEST: the manifest file to have its tar re-created
 retar_manifest() { # swupd_function
 
+	show_help "$(cat <<-EOM
+		Regenerates a manifest's tar, updates the hashes in the MoM and signs it.
+
+		Usage:
+		    retar_manifest <manifest>
+
+		Arguments:
+		    - manifest: the path to the manifest file to have its tar regenerated
+	EOM
+	)" "$@"
+
 	local manifest=$1
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    retar_manifest <manifest>
-			EOM
-		return
-	fi
 	validate_item "$manifest"
 
 	sudo rm -f "$manifest".tar
@@ -886,15 +982,11 @@ retar_manifest() { # swupd_function
 
 }
 
-# Adds the specified item to an existing bundle manifest
-# Parameters:
-# - MANIFEST: the relative path to the manifest file
-# - ITEM: the relative path to the item (file, directory, symlink) to be added
-# - PATH_IN_FS: the absolute path of the item in the target system when installed
 add_to_manifest() { # swupd_function
 
-	add_to_manifest_usage() {
-		cat <<-EOM
+	show_help "$(cat <<-EOM
+		Adds the specified item to an existing bundle manifest.
+
 		Usage:
 		    add_to_manifest [-s] [-p] [-e] <manifest> <item> <item_path_in_fs>
 
@@ -906,8 +998,13 @@ add_to_manifest() { # swupd_function
 		          updates are to be done in the manifest to avoid extra processing
 		    -e    If set (experimental), the bundle will be added to the manifest as
 		          experimental. This should only be used when <manifest> is a MoM
-		EOM
-	}
+
+		Arguments:
+		    - manifest: the relative path to the manifest file (e.g. webdir/10/Manifest.test)
+		    - item: the relative path to the item (file, directory, symlink) to be added 
+		    - item_path_in_fs: the relative path of the item in the target system when installed
+	EOM
+	)" "$@"
 
 	local OPTIND
 	local opt
@@ -1004,14 +1101,30 @@ add_to_manifest() { # swupd_function
 
 }
 
-# Adds the specified bundle dependency to an existing bundle manifest
-# Parameters:
-# - -p: if the p (partial) flag is set the function skips updating the hashes
-#       in the MoM, and re-creating the tar, this is useful if more changes are
-#       to be done in order to reduce time
-# - MANIFEST: the relative path to the manifest file
-# - DEPENDENCY: the name of the bundle to be included as a dependency
 add_dependency_to_manifest() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Adds the specified bundle dependency to an existing bundle manifest.
+
+		Usage:
+		    add_dependency_to_manifest [-p] [-o] <manifest> <dependency>
+
+		Options:
+		    -p    If set (partial), the dependency will be added to the manifest,
+		          but the manifest's tar won't be re-created, nor the hash in the
+		          MoM will be updated either. This is useful if more updates are
+		          to be done in the manifest to avoid extra processing
+		    -o    If set (optional), the dependency will be added to the manifest
+		          as an optional dependency (also-add flag).
+
+		Arguments:
+		    - manifest: the relative path to the manifest file (e.g. webdir/10/Manifets.test)
+		    - dependency: the name of the bundle to be included as a dependency
+
+		Note: if both options -p and -o are to be used, they must be specified in that order or
+		      one option will be ignored.
+	EOM
+	)" "$@"
 
 	local partial=false
 	local flag=includes
@@ -1023,25 +1136,6 @@ add_dependency_to_manifest() { # swupd_function
 	local manifest_name
 	local version
 	local pre_version
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    add_dependency_to_manifest [-p] [-o] <manifest> <dependency>
-
-			Options:
-			    -p    If set (partial), the dependency will be added to the manifest,
-			          but the manifest's tar won't be re-created, nor the hash in the
-			          MoM will be updated either. This is useful if more updates are
-			          to be done in the manifest to avoid extra processing
-			    -o    If set (optional), the dependency will be added to the manifest
-			          as an optional dependency (also-add flag).
-
-			    Note: if both options -p and -o are to be used, they must be specified in that order or
-			      one option will be ignored.
-			EOM
-		return
-	fi
 	validate_item "$manifest"
 	validate_param "$dependency"
 
@@ -1072,14 +1166,25 @@ add_dependency_to_manifest() { # swupd_function
 
 }
 
-# Removes the specified item from an existing bundle manifest
-# Parameters:
-# - -p: if the p (partial) flag is set the function skips updating the hashes
-#       in the MoM, and re-creating the tar, this is useful if more changes are
-#       to be done in order to reduce time
-# - MANIFEST: the relative path to the manifest file
-# - ITEM: either the hash or filename of the item to be removed
 remove_from_manifest() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Removes the specified item from an existing bundle manifest.
+
+		Usage:
+		    remove_from_manifest <manifest> <item>
+
+		Options:
+		    -p    If set (partial), the item will be removed from the manifest,
+		          but the manifest's tar won't be re-created, nor the hash in
+		          the MoM will be updated either. This is useful if more updates
+		          are to be done in the manifest to avoid extra processing
+
+		Arguments:
+		    - manifest: the relative path to the manifest file (e.g. webdir/10 Manifest.test)
+		    - item: either the hash, or filename of the item to be removed
+	EOM
+	)" "$@"
 
 	local partial=false
 	[ "$1" = "-p" ] && { partial=true ; shift ; }
@@ -1089,20 +1194,6 @@ remove_from_manifest() { # swupd_function
 	local contentsize
 	local item_size
 	local item_hash
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    remove_from_manifest <manifest> <item>
-
-			Options:
-			    -p    If set (partial), the item will be removed from the manifest,
-			          but the manifest's tar won't be re-created, nor the hash in
-			          the MoM will be updated either. This is useful if more updates
-			          are to be done in the manifest to avoid extra processing
-			EOM
-		return
-	fi
 	validate_item "$manifest"
 	validate_param "$item"
 
@@ -1130,16 +1221,27 @@ remove_from_manifest() { # swupd_function
 
 }
 
-# Updates fields in an existing manifest
-# Parameters:
-# - -p: if the p (partial) flag is set the function skips updating the hashes
-#       in the MoM, this is useful if more changes are to be done in order to
-#       reduce time
-# - MANIFEST: the relative path to the manifest file
-# - KEY: the thing to be updated
-# - HASH/NAME: the file name or hash of the record to be updated (if applicable)
-# - VALUE: the value to be used for updating the record
 update_manifest() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Updates fields in an existing manifest.
+
+		Usage:
+		    update_manifest [-p] <manifest> <format | minversion | version | previous | filecount | timestamp | contentsize> <new_value>
+		    update_manifest [-p] <manifest> <file-status | file-hash | file-version | file-name> <hash_or_filename> <new_value>
+
+		Options:
+		    -p    if the p flag is set (partial), the function skips updating the MoM's hashes, creating
+		          a tar for the MoM and signing it. It also skips creating the tar for the modified manifest,
+		          this is useful if more updates are to be done in the manifest to avoid extra processing
+
+		Arguments:
+		    - manifest: the relative path to the manifest file (e.g. webdir/10/Manifest.test)
+		    - key: the element to be updated (e.g. format, minversion, file-status, etc.)
+		    - hash_or_filename: the file name or hash of the record to be updated (if applicable)
+		    - new_value: the value to be used for updating the record
+	EOM
+	)" "$@"
 
 	local partial=false
 	[ "$1" = "-p" ] && { partial=true ; shift ; }
@@ -1148,20 +1250,6 @@ update_manifest() { # swupd_function
 	local var=$3
 	local value=$4
 	local manifest_version
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    update_manifest [-p] <manifest> <format | minversion | version | previous | filecount | timestamp | contentsize> <new_value>
-			    update_manifest [-p] <manifest> <file-status | file-hash | file-version | file-name> <file_hash or file_name> <new_value>
-
-			Options:
-			    -p    if the p flag is set (partial), the function skips updating the MoM's hashes, creating
-			          a tar for the MoM and signing it. It also skips creating the tar for the modified manifest,
-			          this is useful if more updates are to be done in the manifest to avoid extra processing
-			EOM
-		return
-	fi
 	validate_item "$manifest"
 	validate_param "$key"
 	validate_param "$var"
@@ -1221,18 +1309,21 @@ update_manifest() { # swupd_function
 
 get_entry_from_manifest() { # swupd_function
 
+	show_help "$(cat <<-EOM
+		Retrieve an item from the content of a manifest.
+
+		Usage:
+		    get_entry_from_manifest <manifest> <hash_or_filename>
+
+		Arguments:
+		    - manifest: the relative path to the manifest file (e.g. webdir/10/Manifest.test)
+		    - hash_or_filename: the hash or the filename of the item to be retrieved
+	EOM
+	)" "$@"
+
 	local manifest=$1
 	local entry_key=$2
 	local value
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    get_entry_from_manifest <manifest> [file_hash or file_name]
-			EOM
-		return
-	fi
 	validate_item "$manifest"
 
 	# if no key is provided, return a list with all
@@ -1255,11 +1346,18 @@ get_entry_from_manifest() { # swupd_function
 
 }
 
-# Recalculate the hashes of the elements in the specified MoM and updates it
-# if there are changes in hashes.
-# Parameters:
-# - MANIFEST: the path to the MoM to be updated
 update_hashes_in_mom() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Recalculate the hashes of the elements in the specified MoM and updates with the new values.
+
+		Usage:
+		    update_hashes_in_mom <manifest>
+
+		Arguments:
+		    - manifest: the relative path to the MoM manifest file (e.g. webdir/10/Manifest.MoM)
+	EOM
+	)" "$@"
 
 	local manifest=$1
 	local path
@@ -1267,14 +1365,6 @@ update_hashes_in_mom() { # swupd_function
 	local bundle
 	local bundle_old_hash
 	local bundle_new_hash
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    update_hashes_in_mom <manifest>
-			EOM
-		return
-	fi
 	validate_item "$manifest"
 	path=$(dirname "$manifest")
 
@@ -1304,10 +1394,21 @@ update_hashes_in_mom() { # swupd_function
 
 }
 
-# Update all manifests after a format bump
-# Parameters:
-# ENVIRONMENT_NAME: the name of the test environment
 bump_format() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Updates all manifests after a format bump.
+
+		Usage:
+		    bump_format <env_name>
+
+		Arguments:
+		    - env_name: the name of the test environment
+
+		Note: bump_format can only be used in an environment that has the
+		      os-core bundle and release files (create_test_environment -r MY_ENV)
+	EOM
+	)" "$@"
 
 	local env_name=$1
 	local format
@@ -1319,18 +1420,7 @@ bump_format() { # swupd_function
 	local middle_version_path
 	local mom
 	local manifest
-	local bundles
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    bump_format <environment_name>
-
-			    Note: bump_format can only be used in an environment that has the
-			          os-core bundle and release files (create_test_environment -r MY_ENV)
-			EOM
-		return
-	fi
+	local bundles 
 	validate_path "$env_name"
 
 	# find the latest version and MoM
@@ -1388,21 +1478,20 @@ bump_format() { # swupd_function
 
 }
 
-# Signs a manifest with a PEM key and generates the signed manifest in the same location
-# Parameters:
-# - MANIFEST: the path to the manifest to be signed
 sign_manifest() { # swupd_function
 
-	local manifest=$1
+	show_help "$(cat <<-EOM
+		Signs a manifest with a PEM key and generates the signed manifest in the same location.
 
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    sign_manifest <manifest>
-			EOM
-		return
-	fi
+		Usage:
+		    sign_manifest <manifest>
+
+		Arguments:
+		    - manifest: the relative path to the manifest to be signed (e.g. webdir/10/Manifest.test)
+	EOM
+	)" "$@"
+
+	local manifest=$1
 	validate_item "$manifest"
 
 	sudo openssl smime -sign -binary -in "$manifest" \
@@ -1411,21 +1500,20 @@ sign_manifest() { # swupd_function
 	-outform DER -out "$(dirname "$manifest")"/Manifest.MoM.sig
 }
 
-# Signs the version file with a PEM key and generates the signature in the same location
-# Parameters:
-# - FILE: the path for version file to be signed
 sign_version() { # swupd_function
 
-	local version_file=$1
+	show_help "$(cat <<-EOM
+		Signs the version file with a PEM key and generates the signature in the same location.
 
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    sign_version <version_file>
-			EOM
-		return
-	fi
+		Usage:
+		    sign_version <version_file>
+
+		Arguments:
+		    - version_file: the relative path to the version file to be signed
+	EOM
+	)" "$@"
+
+	local version_file=$1
 	validate_item "$version_file"
 
 	sudo openssl smime -sign -binary -in "$version_file" \
@@ -1435,22 +1523,22 @@ sign_version() { # swupd_function
 
 }
 
-# Retrieves the hash value of a file or directory in a manifest
-# Parameters:
-# - MANIFEST: the manifest in which it will be looked at
-# - ITEM: the dir or file to look for in the manifest
 get_hash_from_manifest() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Retrieves the hash value of a file or directory in a manifest.
+
+		Usage:
+		    get_hash_from_manifest <manifest> <filename>
+
+		Arguments:
+		    - manifest: the relative path to the manifest file to be looked at (e.g. webdir/10/Manifest.test)
+		    - name_in_fs: the filename to look for in the manifest
+	EOM
+	)" "$@"
 
 	local manifest=$1
 	local item=$2
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    get_hash_from_manifest <manifest> <name_in_fs>
-			EOM
-		return
-	fi
 	validate_item "$manifest"
 	validate_param "$item"
 
@@ -1459,26 +1547,25 @@ get_hash_from_manifest() { # swupd_function
 
 }
 
-# Sets the current version of the target system to the desired version
-# Parameters:
-# - ENVIRONMENT_NAME: the name of the test environmnt to act upon
-# - NEW_VERSION: the version for the target to be set to
-# - REPO_NAME: the name of the 3rd-party repository (if any)
 set_current_version() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Sets the current version of the target system to the desired version.
+
+		Usage:
+		    set_current_version <environment_name> <new_version> [3rd_party_repo]
+
+		Arguments:
+		    - environment_name: the name of the test environmnt to act upon
+		    - new_version: the version for the target to be set to (e.g. 20)
+		    - 3rd_party_repo: the name of the 3rd-party repository (if applicable)
+	EOM
+	)" "$@"
 
 	local env_name=$1
 	local new_version=$2
 	local repo_name=$3
 	local os_release
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    set_current_version <environment_name> <new_version> <3rd-party repo>
-			EOM
-		return
-	fi
 	validate_path "$env_name"
 
 	if [ -n "$repo_name" ]; then
@@ -1491,23 +1578,22 @@ set_current_version() { # swupd_function
 
 }
 
-# Sets the latest version on the "server" to the desired version
-# Parameters:
-# - ENVIRONMENT_NAME: the name of the test environmnt to act upon
-# - NEW_VERSION: the version for the target to be set to
 set_latest_version() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Sets the latest version of the update content to the desired version.
+
+		Usage:
+		    set_latest_version <env_name> <new_version>
+
+		Arguments:
+		    - env_name: the name of the test environmnt to act upon
+		    - new_version: the version for the target to be set to (e.g. 20)
+	EOM
+	)" "$@"
 
 	local env_name=$1
 	local new_version=$2
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    set_latest_version <environment_name> <new_version>
-			EOM
-		return
-	fi
 	validate_path "$env_name"
 
 	write_to_protected_file "$env_name"/web-dir/version/formatstaging/latest "$new_version"
@@ -1515,16 +1601,25 @@ set_latest_version() { # swupd_function
 
 }
 
-# Creates a new version of the server side content in the
-# specified location to serve as a 3rd-party repository
-# Parameters:
-# - -a: if the a (add) flag is set the repository is also added to the
-#       repo.ini file
-# - ENVIRONMENT_NAME: the name of the test environment
-# - VERSION: the version of the server side content
-# - FORMAT: the format to use for the version
-# - REPO_NAME: the name of the 3rd-party repo, defaults to "test-repo"
 create_third_party_repo() { #swupd_function
+
+	show_help "$(cat <<-EOM
+		Creates a new version of the update content in the specified location to
+		serve as a 3rd-party repository.
+
+		Usage:
+		    create_third_party_repo [-a] <env_name> <new_version> [format] [repo_name]
+
+		Options:
+		    -a    if the a flag is set (add), the 3rd-party repository is also added
+		          to the repo.ini file as if a user already added it to swupd
+		Arguments:
+		    - env_name: the name of the test environment
+		    - new_version: the version of the server side content (e.g. 20)
+		    - format: the format to use for the new version (e.g. 1, default: staging)
+		    - repo_name: the name of the 3rd-party repo (default: test-repo)
+	EOM
+	)" "$@"
 
 	local add=false
 	[ "$1" = "-a" ] && { add=true ; shift ; }
@@ -1535,19 +1630,6 @@ create_third_party_repo() { #swupd_function
 	local path
 	local hashed_name
 	local cert
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    create_third_party_repo [-a] <environment_name> <new_version> [format] [repo_name]
-
-		    Options:
-		        -a    if the a flag is set (add), the 3rd-party repository is also added
-		              to the repo.ini file as if a user already added it to swupd
-			EOM
-		return
-	fi
 	validate_item "$env_name"
 	validate_param "$version"
 	path=$(dirname "$(realpath "$env_name")")
@@ -1611,19 +1693,32 @@ create_third_party_repo() { #swupd_function
 
 }
 
-# Creates a new version of the server side content
-# Parameters:
-# - -p: if the p flag is set (partial), the function skips creating the MoM's
-#       tar and signing it, this is useful if more changes are to be done in the
-#       version in order to avoid extra processing
-# - -r: if the r flag is set (release), the version is created with hashed os-release
-#       and format files that can be used for creating updates
-# - ENVIRONMENT_NAME: the name of the test environment
-# - VERSION: the version of the server side content
-# - FROM_VERSION: the previous version, if nothing is selected defaults to 0
-# - FORMAT: the format to use for the version
-# - CONTENT_DIR: the directory where all the content is to be created, defaults to "web-dir"
 create_version() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Creates a new version of the update content.
+
+		Usage:
+		    create_version [-p] [-r] <env_name> <new_version> [from_version] [format] [content_dir]
+
+		Options:
+		    -p    if the p flag is set (partial), the function skips creating the MoM's
+		          tar and signing it, this is useful if more changes are to be done in the
+		          new version in order to avoid extra processing
+		    -r    if the r flag is set (release), the version is created with hashed os-release
+		          and format files that can be used for creating updates
+
+		Arguments:
+		    - env_name: the name of the test environment
+		    - new_version: the new version of the server side content (e.g. 20)
+		    - from_version: the previous version (default: 0)
+		    - format: the format to use for the version (e.g. 1, default: staging)
+		    - content_dir: the directory where all the content is to be created (default: web-dir)
+
+		Note: if both options -p and -r are to be used, they must be specified in that order or
+		      one option will be ignored.
+	EOM
+	)" "$@"
 
 	local partial=false
 	local release_files=false
@@ -1640,24 +1735,6 @@ create_version() { # swupd_function
 	local mom
 	local hashed_name
 	local content_dir
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    create_version [-p] [-r] <environment_name> <new_version> [from_version] [format] [content_dir]
-
-			Options:
-			    -p    if the p flag is set (partial), the function skips creating the MoM's
-			          tar and signing it, this is useful if more changes are to be done in the
-			          new version in order to avoid extra processing
-			    -r    if the r flag is set (release), the version is created with hashed os-release
-			          and format files that can be used for creating updates
-
-			Note: if both options -p and -r are to be used, they must be specified in that order or
-			      one option will be ignored.
-			EOM
-		return
-	fi
 	validate_item "$env_name"
 	validate_param "$version"
 
@@ -1768,34 +1845,32 @@ create_version() { # swupd_function
 
 }
 
-# Creates a test environment with the basic directory structure needed to
-# validate the swupd client
-# Parameters:
-# - -e: if this option is set the test environment is created empty (withouth bundle os-core)
-# - -r: if this option is set the test environment is created with a more complete version of
-#       the os-core bundle that includes release files, it is useful for some tests like update tests
-# - ENVIRONMENT_NAME: the name of the test environment, this should be typically the test name
-# - VERSION: the version to use for the test environment, if not specified the default is 10
-# - FORMAT: the format number to use initially in the environment
 create_test_environment() { # swupd_function
 
-	cte_usage() {
-		cat <<-EOM
-			Usage:
-			    create_test_environment [-e|-r] [-s <size in MB>] <environment_name> [initial_version] [format]
+	show_help "$(cat <<-EOM
+		Creates a test environment with the basic directory structure needed to validate
+		the swupd client.
 
-			Options:
-			    -e    If set, the test environment is created empty, otherwise it will have
-			          bundle os-core in the web-dir and installed by default.
-			    -r    If set, the test environment is created with a more complete version of
-			          the os-core bundle, a version that includes the os-release and format
-			          files, so it is more useful for some tests, like update tests.
-			    -s    If used, specifies the maximum size the test environment has in MB, this
-			          can be useful when testing scenarios bound to the disk size.
+		Usage:
+		    create_test_environment [-e|-r] [-s <size in MB>] <env_name> [initial_version] [format]
 
-			Note: options -e and -r are mutually exclusive, so you can only use one at a time.
-		EOM
-	}
+		Options:
+		    -e    If set, the test environment is created empty, otherwise it will have
+		          bundle os-core in the web-dir and installed by default.
+		    -r    If set, the test environment is created with a more complete version of
+		          the os-core bundle, a version that includes the os-release and format
+		          files, so it is more useful for some tests, like update tests.
+		    -s    If used, specifies the maximum size the test environment has in MB, this
+		          can be useful when testing scenarios bound to the disk size.
+
+		Arguments:
+		    - env_name: the name of the test environment, this should be typically the test name
+		    - initial_version: the version to use for the test environment (default: 10)
+		    - format: the format number to use initially in the environment (e.g. 1, default: staging)
+
+		Note: options -e and -r are mutually exclusive, so you can only use one at a time.
+	EOM
+	)" "$@"
 
 	local OPTIND
 	local opt
@@ -1806,12 +1881,6 @@ create_test_environment() { # swupd_function
 	local targetdir
 	local statedir
 
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		create_test_environment -h
-		return
-	fi
-
 	while getopts :ers: opt; do
 		case "$opt" in
 			e)	empty=true
@@ -1819,8 +1888,7 @@ create_test_environment() { # swupd_function
 			r)	release_files=true
 				empty=false ;;
 			s)	size="$OPTARG" ;;
-			*)	cte_usage
-				return ;;
+			*)	return ;;
 		esac
 	done
 	shift $((OPTIND-1))
@@ -1904,27 +1972,26 @@ create_test_environment() { # swupd_function
 
 }
 
-# Destroys a test environment
-# Parameters:
-# - ENVIRONMENT_NAME: the name of the test environment to be deleted
 destroy_test_environment() { # swupd_function
 
+	show_help "$(cat <<-EOM
+		Destroys a test environment.
+
+		Usage:
+		    destroy_test_environment [--force] <env_name>
+
+		Options:
+		    --force    If set, the environment will be destroyed even if KEEP_ENV=true
+
+		Arguments:
+		    - env_name: the name of the test environment to be deleted
+
+		Note: if you want your test environment to be preserved for debugging
+		      purposes, set KEEP_ENV=true before running your test.
+	EOM
+	)" "$@"
+
 	local force=false
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    destroy_test_environment [--force] <environment_name>
-
-			Options:
-			    --force    If set, the environment will be destroyed even if KEEP_ENV=true
-
-			Note: if you want your test environment to be preserved for debugging
-			      purposes, set KEEP_ENV=true before running your test.
-			EOM
-		return
-	fi
 	[ "$1" = "--force" ] && { force=true ; shift ; }
 	local env_name=$1
 	validate_param "$env_name"
@@ -1937,7 +2004,9 @@ destroy_test_environment() { # swupd_function
 		debug_msg "The --force option was used"
 	fi
 
+	# shellcheck disable=SC2119
 	destroy_web_server
+	# shellcheck disable=SC2119
 	destroy_trusted_cacert
 
 	# if the test environment doesn't exist warn the user but don't terminate script
@@ -1977,15 +2046,18 @@ destroy_test_environment() { # swupd_function
 
 add_os_core_update_bundle() { # swupd_function
 
+	show_help "$(cat <<-EOM
+		Adds a test os-core-update bundle to the test environment (as installed).
+
+		Usage:
+		    add_os_core_update_bundle <env_name>
+
+		Arguments:
+		    - env_name: the name of the test environment
+	EOM
+	)" "$@"
+
 	local env_name=$1
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    add_os_core_update_bundle <environment_name>
-			EOM
-		return
-	fi
 	validate_path "$env_name"
 
 	# move the versionurl file to the content directory
@@ -2003,20 +2075,25 @@ add_os_core_update_bundle() { # swupd_function
 
 }
 
-# Creates a test fiile system of a given size
 create_test_fs() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Creates a test file system of a given size.
+
+		Usage:
+		    create_test_fs <env_name> <size>
+
+		Arguments:
+		    - env_name: the name of the test environment
+		    - size: the size in MB of the test filesystem to be created for the environment
+
+		Note: this filesystem has to be deleted using destroy_test_fs() once no longer required
+	EOM
+	)" "$@"
 
 	local env_name=$1
 	local size=$2
 	local fsfile
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    create_test_fs <environment_name> <size_in_MB>
-			EOM
-		return
-	fi
 	validate_path "$env_name"
 	validate_param "$size"
 	fsfile=/tmp/"$env_name"
@@ -2037,16 +2114,19 @@ create_test_fs() { # swupd_function
 
 destroy_test_fs() { # swupd_function
 
+	show_help "$(cat <<-EOM
+		Deletes the specified test file system.
+
+		Usage:
+		    destroy_test_fs <env_name>
+
+		Arguments:
+		    - env_name: the name of the test environment
+	EOM
+	)" "$@"
+
 	local env_name=$1
 	local fsfile
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    destroy_test_fs <environment_name>
-			EOM
-		return
-	fi
 	validate_path "$env_name"
 	fsfile=/tmp/"$env_name"
 
@@ -2057,6 +2137,14 @@ destroy_test_fs() { # swupd_function
 }
 
 create_config_file() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Creates an empty configuration file for swupd.
+
+		Usage:
+		    create_config_file
+	EOM
+	)" "$@"
 
 	if [ ! -d "$TEST_NAME" ]; then
 		terminate "The TEST_NAME needs to be specified to create a config file"
@@ -2074,6 +2162,7 @@ create_config_file() { # swupd_function
 
 	if [ -e "$SWUPD_CONFIG_FILE" ]; then
 		debug_msg "A config file already existed in that location, deleting it..."
+		# shellcheck disable=SC2119
 		destroy_config_file
 	fi
 
@@ -2083,7 +2172,18 @@ create_config_file() { # swupd_function
 
 }
 
+# shellcheck disable=SC2120
 destroy_config_file() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Deletes the test swupd configuration file.
+
+		Usage:
+		    destroy_config_file
+
+		Note: the configuration file to be deleted is the one at SWUPD_CONFIG_DIR
+	EOM
+	)" "$@"
 
 	if [ ! -d "$SWUPD_CONFIG_DIR" ]; then
 		print "There was no directory $SWUPD_CONFIG_DIR, nothing was deleted"
@@ -2102,19 +2202,22 @@ destroy_config_file() { # swupd_function
 
 add_option_to_config_file() { # swupd_function
 
+	show_help "$(cat <<-EOM
+		Add a key/value in the specified section of the swupd configuration file.
+
+		Usage:
+		    add_option_to_config_file <option> <value> <section>
+
+		Arguments:
+		    - option: the key to be added
+		    - value: the value to be added
+		    - section: the name of the section where the key/value will be added (e.g. bundle_add)
+	EOM
+	)" "$@"
+
 	local option=$1
 	local value=$2
 	local section=$3
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    add_option_to_config_file <option> <value> <section_name>
-			EOM
-		return
-	fi
-
 	validate_param "$option"
 	validate_param "$value"
 
@@ -2125,23 +2228,21 @@ add_option_to_config_file() { # swupd_function
 
 }
 
-
-# creates a mirror of whatever is in web-dir
-# Parameters:
-# - ENVIRONMENT_NAME: the name of the test environment where the mirror will be created
 create_mirror() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Creates a mirror of whatever is in web-dir.
+
+		Usage:
+		    create_mirror <env_name>
+
+		Arguments:
+		    - env_name: the name of the test environment where the mirror will be created
+	EOM
+	)" "$@"
 
 	local env_name=$1
 	local path
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    create_mirror <environment_name>
-			EOM
-		return
-	fi
 	validate_param "$env_name"
 	path=$(dirname "$(realpath "$env_name")")
 
@@ -2156,27 +2257,26 @@ create_mirror() { # swupd_function
 
 }
 
-# sets the url of where the version will be retrieved
-# Parameters:
-# - ENVIRONMENT_NAME: the name of the test environment
-# - VERSION_URL: the url from where the version will be retrieved. Examples:
-#        file://some_path/test_environment/web-dir
-#        http://some_server:port/some_path/test_environment/web-dir
 set_version_url() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Sets the url of where the version will be retrieved.
+
+		Usage:
+		    set_version_url <env_name> <version_url>
+
+		Arguments:
+		    - env_name: the name of the test environment
+		    - version_url: the url from where the version will be retrieved
+
+		Example:
+		    set_version_url $TEST_ENV http://server:port/path/web-dir
+		    set_version_url $TEST_ENV file://some_path/test_environment/web-dir
+	EOM
+	)" "$@"
 
 	local env_name=$1
 	local version_url=$2
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    set_version_url <environment_name> <version_url>
-
-			Example:
-			    set_version_url "\$TEST_ENVIRONMENT" http://server:port/path/web-dir
-			EOM
-		return
-	fi
 	validate_path "$env_name"
 	validate_param "$version_url"
 
@@ -2184,27 +2284,26 @@ set_version_url() { # swupd_function
 
 }
 
-# sets the url of where the content will be retrieved
-# Parameters:
-# - ENVIRONMENT_NAME: the name of the test environment
-# - VERSION_URL: the url from where the content will be retrieved. Examples:
-#        file://some_path/test_environment/web-dir
-#        http://some_server:port/some_path/test_environment/web-dir
 set_content_url() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Sets the url of where the content will be retrieved.
+
+		Usage:
+		    set_content_url <env_name> <content_url>
+
+		Arguments:
+		    - env_name: the name of the test environment
+		    - content_url: the url from where the content will be retrieved
+
+		Example:
+		    set_content_url $TEST_ENV http://server:port/path/web-dir
+		    set_content_url $TEST_ENV file://some_path/test_environment/web-dir
+	EOM
+	)" "$@"
 
 	local env_name=$1
 	local content_url=$2
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    set_content_url <environment_name> <content_url>
-
-			Example:
-			    set_content_url "\$TEST_ENVIRONMENT" http://server:port/path/web-dir
-			EOM
-		return
-	fi
 	validate_path "$env_name"
 	validate_param "$content_url"
 
@@ -2212,14 +2311,23 @@ set_content_url() { # swupd_function
 
 }
 
-# sets the url of the default upstream server
-# Parameters:
-# - ENVIRONMENT_NAME: the name of the test environment
-# - URL: the url of the default upstream server
-#   Examples:
-#        file://some_path/test_environment/web-dir
-#        http://some_server:port/some_path/test_environment/web-dir
 set_upstream_server() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Sets the url of the default update content.
+
+		Usage:
+		    set_upstream_server <env_name> <server_url>
+
+		Arguments:
+		    - env_name: the name of the test environment
+		    - server_url: the url of the default update content
+
+		Example:
+		    set_upstream_server $TEST_ENV http://server:port/path/web-dir
+		    set_upstream_server file://some_path/test_environment/web-dir
+	EOM
+	)" "$@"
 
 	local env_name=$1
 	local url=$2
@@ -2242,40 +2350,34 @@ set_upstream_server() { # swupd_function
 
 }
 
-# creates a web server to host fake swupd content with or without certifiates
 start_web_server() { # swupd_function
 
-	local OPTIND
-	local opt
-	local port
-	local server_args
-	local status
+	show_help "$(cat <<-EOM
+		Creates a web server to host fake swupd content.
 
-	web_server_usage() {
-		cat <<-EOF
 		Usage:
-		    start_web_server [-c] <client pub key> [-d] <file name> [-k] <server priv key> [-p] <server pub key>
-		                     [-s] [-H] [-t] <delay value> [-l] <chunk length> [-r] [-P] <port> [-D] <dir to server>
-		                     [-n] <number of normal requests> [-f] <HTTP code>
+		    start_web_server [-s] [-H] [-r] [-c <client_pub_key>] [-k <server_priv_key>] [-p <server_pub_key>] 
+		                     [-d <file_name>] [-t <delay_value>] [-l <chunk_length>] [-P <port>] [-D <dir_to_serve>]
+		                     [-n <number_of_normal_requests>] [-f <HTTP_code>]
 
 		Options:
-		    -c    Path to public key to be used for client certificate authentication
-		    -p    Path to server public key which enables SSL authentication
-		    -k    Path to server private key which must correspond to the provided server public key
-		    -P    If specified, the server will attempt to use the selected port
-		    -r    Reachable from other machines in the network
-		    -D    The relative path to the directory to serve. If not specified, the directory to
-		          serve is the current working directory
 		    -s    Use a slow server
-		    -n    The server will respond normally for the first N number of requests, and will start
-		          responding slowly / or hang after that
+		    -H    Hangs the server
+		    -r    Reachable from other machines in the network
+		    -c    Path to public key to be used for client certificate authentication
+		    -k    Path to server private key which must correspond to the provided server public key
+		    -p    Path to server public key which enables SSL authentication
+		    -d    File name that will be partially downloaded on the first attempt and successfully
+		          downloaded on the second attempt
 		    -t    Used to fine tune the slow server function. It sets the delay value (in miliseconds)
 		          used to sleep between reads
 		    -l    Used to fine tune the slow server function. It sets the length of the chunk of data
 		          read in each cycle by the server
-		    -H    Hangs the server
-		    -d    File name that will be partially downloaded on the first attempt and successfully
-		          downloaded on the second attempt
+		    -P    If specified, the server will attempt to use the selected port
+		    -D    The relative path to the directory to serve. If not specified, the directory to
+		          serve is the current working directory
+		    -n    The server will respond normally for the first N number of requests, and will start
+		          responding slowly / or hang after that
 		    -f    Forces the web server to respond with a specific code to any request
 
 		Notes:
@@ -2288,9 +2390,14 @@ start_web_server() { # swupd_function
 		    updates.
 
 		    start_web_server -k /private_key.pem -p /public_key.pem -s
+	EOM
+	)" "$@"
 
-		EOF
-	}
+	local OPTIND
+	local opt
+	local port
+	local server_args
+	local status
 
 	while getopts :c:d:k:p:st:rP:D:l:n:Hf: opt; do
 		case "$opt" in
@@ -2307,8 +2414,8 @@ start_web_server() { # swupd_function
 			n)	server_args="$server_args --after-requests $OPTARG" ;;
 			H)	server_args="$server_args --hang-server" ;;
 			f)	server_args="$server_args --force-response $OPTARG" ;;
-			*)	web_server_usage
-				return ;;
+			*)	echo "Invalid option"
+				return 1;;
 		esac
 	done
 
@@ -2364,20 +2471,27 @@ start_web_server() { # swupd_function
 
 }
 
-# gets the port used by the web server if found
 get_web_server_port() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Gets the port used by the web server if found.
+
+		Usage:
+		    get_web_server_port [env_name]
+
+		Arguments:
+		    - env_name: the name of the environment
+
+		Note:
+		    - the ENV_NAME does not need to be specified if the PORT_FILE env
+		      variable is set.
+		    - To delete this web server the destroy_web_server() has to be used.
+	EOM
+	)" "$@"
 
 	local env_name=$1
 
 	if [ -z "$PORT_FILE" ] && [ -z "$env_name" ]; then
-		cat <<-EOM
-			Usage:
-		        get_web_server_port [ENV_NAME]
-
-			Note: the ENV_NAME does not need to be specified if the PORT_FILE env
-			      variable is set.
-
-			EOM
 		terminate "No port file was found. Please specify a test environment"
 	fi
 
@@ -2393,8 +2507,19 @@ get_web_server_port() { # swupd_function
 
 }
 
-# kills the test web server and removes the files it creates
+# shellcheck disable=SC2120
 destroy_web_server() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Kills the test web server and removes the files it creates.
+
+		Usage:
+		    destroy_web_server
+
+		Note:
+		    - the process to be killed is that in SERVER_PID_FILE
+	EOM
+	)" "$@"
 
 	if [ -f "$SERVER_PID_FILE" ]; then
 		sudo kill "$(<"$SERVER_PID_FILE")"
@@ -2402,13 +2527,13 @@ destroy_web_server() { # swupd_function
 
 }
 
-# Creates a bundle in the test environment. The bundle can contain files, directories or symlinks.
 create_bundle() { # swupd_function
 
-	cb_usage() {
-		cat <<-EOM
+	show_help "$(cat <<-EOM
+		Creates a bundle in the test environment. The bundle can contain files, directories or symlinks.
+
 		Usage:
-		    create_bundle [-L] [-t] [-e] [-n] <bundle_name> [-v] <version> [-u] <3rd-party repo> [-d] <list of dirs> [-f] <list of files> [-l] <list of links> [-h] <list of hardlinks> [-H] <list of symlinks hardlinks> ENV_NAME
+		    create_bundle [-L] [-t] [-e] [-n <bundle_name>] [-v <version>] [-u <3rd-party repo>] [-d <list of dirs>] [-f <list of files>] [-l <list of links>] [-a <list of hardlinks>] [-H <list of symlinks hardlinks>] ENV_NAME
 
 		Options:
 		    -L    When the flag is selected the bundle will be 'installed' in the target-dir, otherwise it will only be created in content dir
@@ -2420,7 +2545,7 @@ create_bundle() { # swupd_function
 		    -d    Comma-separated list of directories to be included in the bundle
 		    -f    Comma-separated list of files to be created and included in the bundle
 		    -l    Comma-separated list of symlinks to files to be created and included in the bundle
-		    -h    Comma-separated list of hardlinks to be created and included in the bundle. All files in the list are hardlinks to the same file
+		    -a    Comma-separated list of hardlinks to be created and included in the bundle. All files in the list are hardlinks to the same file
 		    -H    Comma-separated list of symlink hardlinks to be created and included in the bundle. All symlink in the list are hardlinks to the same file and aren't broken
 		    -c    Comma-separated list of symlinks to directories to be created and included in the bundle
 		    -b    Comma-separated list of dangling (broken) symlinks to be created and included in the bundle
@@ -2440,9 +2565,8 @@ create_bundle() { # swupd_function
 		    be tarred. The manifest will be added to the MoM.
 
 		    create_bundle -n test-bundle -f /usr/bin/test-1,/usr/bin/test-2,/etc/systemd/test-3 -l /etc/test-link my_test_env
-
-		EOM
-	}
+	EOM
+	)" "$@"
 
 	add_dirs() {
 
@@ -2499,17 +2623,12 @@ create_bundle() { # swupd_function
 	local third_party=false
 	local os_core_manifest
 
-	# If no parameters are received show help
-	if [ $# -eq 0 ]; then
-		create_bundle -h
-		return
-	fi
 	set -f  # turn off globbing
-	while getopts :v:d:f:l:h:H:b:c:n:u:tLe opt; do
+	while getopts :v:d:f:l:a:H:b:c:n:u:tLe opt; do
 		case "$opt" in
 			d)	IFS=, read -r -a dir_list <<< "$OPTARG"  ;;
 			f)	IFS=, read -r -a file_list <<< "$OPTARG" ;;
-			h)	IFS=, read -r -a hardlink_list <<< "$OPTARG" ;;
+			a)	IFS=, read -r -a hardlink_list <<< "$OPTARG" ;;
 			H)	IFS=, read -r -a hardsymlink_list <<< "$OPTARG" ;;
 			l)	IFS=, read -r -a link_list <<< "$OPTARG" ;;
 			b)	IFS=, read -r -a dangling_link_list <<< "$OPTARG" ;;
@@ -2520,7 +2639,7 @@ create_bundle() { # swupd_function
 			t)	track_bundle=true ;;
 			L)	local_bundle=true ;;
 			e)	experimental=true ;;
-			*)	cb_usage
+			*)	echo "Invalid option"
 				return ;;
 		esac
 	done
@@ -2901,12 +3020,17 @@ create_bundle() { # swupd_function
 
 add_content_to_bundle() {
 
-	actb_usage() {
-		cat <<-EOM
+	show_help "$(cat <<-EOM
+		Adds the content from a directory into a manifest (recursively).
+
 		Usage:
-		    add_content_to_bundle <manifest> <content_directory>
-		EOM
-	}
+		    add_content_to_bundle <manifest> <content_dir>
+
+		Arguments:
+		    - manifest: the relative path to the manifest file (e.g. webdir/10/Manifest.test)
+		    - content_dir: the relative path to the directory that has the content to be added
+	EOM
+	)" "$@"
 
 	# user provided
 	local manifest=$1
@@ -2975,20 +3099,24 @@ add_content_to_bundle() {
 
 create_bundle_from_content() { #swupd_function
 
-	cbfc_usage() {
-		cat <<-EOM
+	show_help "$(cat <<-EOM
+		Creates a new bundle based on the content from a directory.
+
 		Usage:
-		    create_bundle_from_content [-L] [-t] [-e] [-n] <bundle_name> [-v] <version> -c <content_directory> <ENV_NAME>
+		    create_bundle_from_content [-L] [-t] [-e] [-n <bundle_name>] [-v <version>] -c <content_directory> <env_name>
 
 		Options:
-		    -c    The directory with the content that will be used to create the bundle
-		    -n    The name of the bundle to be created, if not specified a name will be autogenerated
-		    -v    The version for the bundle, if non selected, the bundle will be creted at the latest version found
 		    -L    The bundle will be 'installed' in the target-dir
 		    -t    The bundle will be 'installed' in the target-dir and 'tracked' in the tracking directory
 		    -e    The bundle will be marked as experimental
-		EOM
-	}
+		    -c    The directory with the content that will be used to create the bundle
+		    -n    The name of the bundle to be created, if not specified a name will be autogenerated
+		    -v    The version for the bundle, if non selected, the bundle will be creted at the latest version found
+
+		Arguments:
+		    - env_name: the name of the environment
+	EOM
+	)" "$@"
 
 	# variables required by getopts
 	local OPTIND
@@ -3008,11 +3136,6 @@ create_bundle_from_content() { #swupd_function
 	local target_dir
 	local state_dir
 
-	# If no parameters are received show help
-	if [ $# -eq 0 ]; then
-		cbfc_usage
-		return
-	fi
 	set -f  # turn off globbing
 	while getopts :n:c:v:tLe opt; do
 		case "$opt" in
@@ -3023,7 +3146,7 @@ create_bundle_from_content() { #swupd_function
 				local_bundle=true ;;
 			L)	local_bundle=true ;;
 			e)	experimental=true ;;
-			*)	cbfc_usage
+			*)	echo "Invalid option"
 				return ;;
 		esac
 	done
@@ -3095,12 +3218,19 @@ create_bundle_from_content() { #swupd_function
 
 update_content() {
 
-	uc_usage() {
-		cat <<-EOM
+	show_help "$(cat <<-EOM
+		Compares two manifests to find the updates from one to the other, and updates the new
+		manifest with the correct flags. It also creates the appropriate packs based on the
+		updated content.
+
 		Usage:
-		    update_content <old manifest> <new manifest>
-		EOM
-	}
+		    update_content <old_manifest> <new_manifest>
+
+		Arguments:
+		    - old_manifest: the path to the previous version of the manifest
+		    - new_manifest: the path to the new version of the manifest
+	EOM
+	)" "$@"
 
 	# user provided
 	local old_manifest=$1
@@ -3198,18 +3328,22 @@ update_content() {
 
 update_bundle_from_content() { #swupd_function
 
-	ubfc_usage() {
-		cat <<-EOM
+	show_help "$(cat <<-EOM
+		Creates an update for a bundle based on the content of a directory.
+
 		Usage:
-		    update_bundle_from_content -n <bundle_name> -c <content_directory> [-v] <version> <ENV_NAME>
+		    update_bundle_from_content -n <bundle_name> -c <content_directory> [-v <version>] <env_name>
 
 		Options:
 		    -n    The name of the bundle to be updated
 		    -c    The directory with the content that will be used to create the bundle's update
 		    -v    The version where the update will be creted, if no version is selected the update
 		          will be created at the latest version found
-		EOM
-	}
+
+		Arguments:
+		    - env_name: the name of the test environment
+	EOM
+	)" "$@"
 
 	# variables required by getopts
 	local OPTIND
@@ -3228,18 +3362,13 @@ update_bundle_from_content() { #swupd_function
 	local old_version
 	local old_version_dir
 
-	# If no parameters are received show help
-	if [ $# -eq 0 ]; then
-		ubfc_usage
-		return
-	fi
 	set -f  # turn off globbing
 	while getopts :n:c:v: opt; do
 		case "$opt" in
 			n)	bundle_name="$OPTARG" ;;
 			v)	version="$OPTARG" ;;
 			c)	content_dir="$OPTARG" ;;
-			*)	ubfc_usage
+			*)	echo "Invalid option"
 				return ;;
 		esac
 	done
@@ -3292,27 +3421,24 @@ update_bundle_from_content() { #swupd_function
 
 }
 
-# Removes a bundle from the target-dir and/or the content dir
-# Parameters
-# - -L: if this option is set the bundle is removed from the target-dir only,
-#       otherwise it is removed from target-dir and content dir
-# - BUNDLE_MANIFEST: the manifest of the bundle to be removed
-# - REPO_NAME: if the bundle is from a 3rd-party repo we need to specify the repo name
-#              since these bundles get installed in a different location
 remove_bundle() { # swupd_function
 
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    remove_bundle [-L] <bundle_manifest> [3rd-party repo name]
+	show_help "$(cat <<-EOM
+		Removes a bundle from the target system and/or from the update content.
 
-			Options:
-			    -L   If set, the bundle will be removed from the target-dir only,
-			         otherwise it is removed from both target-dir and content dir
-			EOM
-		return
-	fi
+		Usage:
+		    remove_bundle [-L] <manifest> [3rd_party_repo]
+
+		Options:
+		    -L   If set, the bundle will be removed from the target-dir only,
+	             otherwise it is removed from both target-dir and content dir
+
+		Arguments:
+		    - manifest: the path to the bundle's manifest (e.g. webdir/10/Manifest.test)
+		    - 3rd_party_repo: the name of the 3rd-party repository (if applicable)
+	EOM
+	)" "$@"
+
 	local remove_local=false
 	[ "$1" = "-L" ] && { remove_local=true ; shift ; }
 	local bundle_manifest=$1
@@ -3365,12 +3491,19 @@ remove_bundle() { # swupd_function
 
 }
 
-# Installs a bundle in target-dir
-# Parameters:
-# - BUNDLE_MANIFEST: the manifest of the bundle to be installed
-# - REPO_NAME: if the bundle is from a 3rd-party repo we need to specify the repo name
-#              since these bundles get installed in a different location
 install_bundle() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Installs a bundle in the target system.
+
+		Usage:
+		    install_bundle <manifest> [3rd_party_repo]
+
+		Arguments:
+		    - manifest: the relative path to the bundle's manifest (e.g. webdir/10/Manifest.test)
+		    - 3rd_party_repo: the name of the 3rd-party repository (if applicable)
+	EOM
+	)" "$@"
 
 	local bundle_manifest=$1
 	local repo_name=$2
@@ -3384,15 +3517,6 @@ install_bundle() { # swupd_function
 	local manifest_file
 	local bundle_name
 	local fname
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    install_bundle <bundle_manifest> [3rd-party repo name]
-			EOM
-		return
-	fi
 	validate_item "$bundle_manifest"
 	if [ -z "$repo_name" ]; then
 		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir
@@ -3436,18 +3560,33 @@ install_bundle() { # swupd_function
 
 }
 
-# Updates one file or directory from a bundle, the update will be created in whatever version
-# is the latest one (from content_dir/formatstaging/latest)
-# Parameters:
-# - -p: if the p (partial) flag is set the function skips updating the hashes
-#       in the MoM, and re-creating the bundle's tar, this is useful if more changes are to be done
-#       in order to reduce time
-# - ENVIRONMENT_NAME: the name of the test environment
-# - BUNDLE_NAME: the name of the bundle to be updated
-# - OPTION: the kind of update to be performed { --add, --add-dir, --delete, --ghost, --rename, --rename-legacy, --update }
-# - FILE_NAME: file or directory of the bundle to add or update
-# - REPO_NAME: the name of the 3rd-party repository where the bundle is (if any)
 update_bundle() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Updates one file or directory from a bundle, the update will be created in whatever version is the
+		latest one (from content_dir/formatstaging/latest).
+
+		Usage:
+		    update_bundle [-p] <env_name> <bundle_name> --add <file_name>[:<path_to_existing_file>] [repo_name]
+		    update_bundle [-p] <env_name> <bundle_name> --add-dir <directory_name> [repo_name]
+		    update_bundle [-p] <env_name> <bundle_name> --delete <file_name> [repo_name]
+		    update_bundle [-p] <env_name> <bundle_name> --ghost <file_name> [repo_name]
+		    update_bundle [-p] <env_name> <bundle_name> --update <file_name>[:<path_to_existing_file>] [repo_name]
+		    update_bundle [-p] <env_name> <bundle_name> --rename[-legacy] <file_name:new_name> [repo_name]
+		    update_bundle [-p] <env_name> <bundle_name> --header-only [repo_name]
+
+		Options:
+		    -p    If set (partial), the bundle will be updated, but the manifest's tar won't
+		          be re-created nor the hash will be updated in the MoM. Use this flag when more
+		          updates or changes will be done to the bundle to save time.
+
+		Arguments:
+		    - env_name: the name of the test environment
+		    - bundle_name: the name of the bundle to be updated
+		    - file_name: file or directory of the bundle to add or update
+		    -repo_name: the name of the 3rd-party repository where the bundle is (if applicable)
+	EOM
+	)" "$@"
 
 	local partial=false
 	[ "$1" = "-p" ] && { partial=true ; shift ; }
@@ -3479,26 +3618,6 @@ update_bundle() { # swupd_function
 	local pre_hash
 	local existing_file
 	local current_status
-
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    update_bundle [-p] <environment_name> <bundle_name> --add <file_name>[:<path_to_existing_file>] [REPO_NAME]
-			    update_bundle [-p] <environment_name> <bundle_name> --add-dir <directory_name> [REPO_NAME]
-			    update_bundle [-p] <environment_name> <bundle_name> --delete <file_name> [REPO_NAME]
-			    update_bundle [-p] <environment_name> <bundle_name> --ghost <file_name> [REPO_NAME]
-			    update_bundle [-p] <environment_name> <bundle_name> --update <file_name>[:<path_to_existing_file>] [REPO_NAME]
-			    update_bundle [-p] <environment_name> <bundle_name> --rename[-legacy] <file_name:new_name> [REPO_NAME]
-			    update_bundle [-p] <environment_name> <bundle_name> --header-only [REPO_NAME]
-
-			Options:
-			    -p    If set (partial), the bundle will be updated, but the manifest's tar won't
-			          be re-created nor the hash will be updated in the MoM. Use this flag when more
-			          updates or changes will be done to the bundle to save time.
-			EOM
-		return
-	fi
 
 	if [ "$option" = "--header-only" ]; then
 		# --header-only doesn't have the fname parameter
@@ -3868,48 +3987,48 @@ update_bundle() { # swupd_function
 
 }
 
-# Creates a manifest delta file for one bundle
-# is the latest one (from web-dir/formatstaging/latest)
-# Parameters:
-# - BUNDLE_NAME: the name of the bundle to be updated
-# - VERSION: the version of the server side content
-# - FROM_VERSION: the previous version, if nothing is selected defaults to 0
 create_delta_manifest() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Creates a manifest delta file for a bundle.
+
+		Usage:
+		    create_delta_manifest <bundle_name> <version> <from_version>
+
+		Arguments:
+		    - bundle_name: the name of the bundle to have the delta manifest created
+		    - version: the version where the delta will be created (e.g. webdir/20)
+		    - from_version: the previous version of the manifest (e.g.webdir/10)
+	EOM
+	)" "$@"
+
 	local bundle=$1
 	local version=$2
 	local from_version=$3
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    create_delta_manifest <bundle_name> <item> [from_version]
-			EOM
-		return
-	fi
 
 	sudo bsdiff "$WEBDIR/$from_version/Manifest.$bundle" "$WEBDIR/$version/Manifest.$bundle" "$WEBDIR/$version/Manifest-$bundle-delta-from-$from_version" || [ "$?" = 1 ] && true
 }
 
-# Adds the specified file to the zero or delta pack for the bundle
-# Parameters:
-# - BUNDLE: the name of the bundle
-# - ITEM: the file or directory to be added into the pack
-# - FROM_VERSION: the from version for the pack, if not specified a zero pack is asumed
 add_to_pack() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Adds the specified file to the zero or delta pack for the bundle.
+
+		Usage:
+		    add_to_pack <bundle_name> <item> [from_version]
+
+		Arguments:
+		    - bundle_name: the name of the bundle
+		    - item: the file or directory to be added into the pack
+		    - from_version: the from version for the pack (default: zero pack is asumed)
+	EOM
+	)" "$@"
 
 	local bundle=$1
 	local item=$2
 	local version=${3:-0}
 	local item_path
 	local version_path
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    add_to_pack <bundle_name> <item> [from_version]
-			EOM
-		return
-	fi
 
 	item_path=$(dirname "$item")
 	version_path=$(dirname "$item_path")
@@ -3929,22 +4048,22 @@ add_to_pack() { # swupd_function
 
 }
 
-# Cleans up the directories in the state dir
-# Parameters:
-# - ENV_NAME: the name of the test environment to have the state dir cleaned up
-# - REPO_NAME: if the state dir belongs to 3rd-party repo, the name should be specified here
 clean_state_dir() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Cleans up the directories in the state dir.
+
+		Usage:
+		    clean_state_dir <env_name> [3rd_party_repo]
+
+		Arguments:
+		    - env_name: the name of the test environment
+		    - 3rd_party_repo: the name of the 3rd-party repo (if applicable)
+	EOM
+	)" "$@"
 
 	local env_name=$1
 	local repo_name=$2
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    clean_state_dir <environment_name> [3rd-party repo]
-			EOM
-		return
-	fi
 	validate_path "$env_name"
 	if [ -z "$repo_name" ]; then
 		sudo rm -rf "$env_name"/testfs/state
@@ -3957,20 +4076,21 @@ clean_state_dir() { # swupd_function
 
 }
 
-# Creates the test environment of the specified test but do not executes the test
-# this is useful when someone wants to run the test manually for debugging a failure
-# - TEST_NAME: the path to a bats test
 create_test_environment_only() { # swupd_function
 
+	show_help "$(cat <<-EOM
+		Creates the test environment of the specified test but do not executes the test
+		this is useful when someone wants to run the test manually for debugging a failure.
+
+		Usage:
+		    create_test_environment_only <test_file>
+
+		Arguments:
+		    - test_file: the path to the bats test (e.g. test/functional/bundleadd/add-basic.bats)
+	EOM
+	)" "$@"
+
 	local test_name=$1
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    create_test_environment_only <test.bats>
-			EOM
-		return
-	fi
 	validate_item "$test_name"
 
 	echo -e "Creating test environment only: $test_name \n"
@@ -3978,28 +4098,26 @@ create_test_environment_only() { # swupd_function
 
 }
 
-# Creates a new test case based on a template
-# Parameters:
 # - NAME: the name (and path) of the test to be generated
 generate_test() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Creates a new test case based on a template.
+
+		Usage:
+		    generate_test <test_file>
+
+		Arguments:
+		    - test_file: the relative path to the test file to be created without
+		                 the .bats extension (e.g. test/functional/bundleadd/new_test)
+	EOM
+	)" "$@"
 
 	local name=$1
 	local path
 	local id
 	local git_name
 	local git_email
-
-	# If no parameters are received show usage
-	usage () {
-		cat <<-EOM
-			Usage:
-			    generate_test [relative_path]/<test_name>
-			EOM
-	}
-	if [ $# -eq 0 ]; then
-		usage
-		return
-	fi
 	validate_param "$name"
 
 	path=$(dirname "$(realpath "$name")")
@@ -4063,23 +4181,23 @@ generate_test() { # swupd_function
 
 }
 
-# Gets the next available ID for the specified test group
-# Parameters:
-# - GROUP_DIRECTORY: the path to the directory of the test group
 get_next_available_id() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Gets the next available ID for the specified test group.
+
+		Usage:
+		    get_next_available_id <test_dir>
+
+		Arguments:
+		    - test_dir: the path to the directory of the test group (e.g. test/functional/bundleadd)
+	EOM
+	)" "$@"
 
 	local test_dir=$1
 	local id=0
 	local group
 	local test_list
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    get_next_available_id <test_directory>
-			EOM
-		return
-	fi
 	validate_path "$test_dir"
 
 	# shellcheck disable=SC2126
@@ -4124,21 +4242,26 @@ get_next_available_id() { # swupd_function
 
 }
 
-# Prints the list of tests in a directory
 # Parameters:
 # - GROUP_DIRECTORY: the path to the directory of the test group
 list_tests() { # swupd_function
 
+	show_help "$(cat <<-EOM
+		Prints the list of tests in a directory.
+
+		Usage:
+		    list_tests [--all | test_dir]
+
+		Options:
+		    --all    Lists all the functional tests available
+
+		Arguments:
+		    - test_dir: the path to the directory of the test group to have the tests
+		                listed (e.g. test/functional/bundleadd)
+	EOM
+	)" "$@"
+
 	local test_dir=$1
-	# If no parameters are received show usage
-	if [ $# -eq 0 ]; then
-		cat <<-EOM
-			Usage:
-			    list_tests --all
-			    list_tests <test_directory>
-			EOM
-		return
-	fi
 
 	if [ "$test_dir" = --all ]; then
 		grep -rh --include="*.bats" "@test .* {" "$FUNC_DIR" | sed "s/@test \"//" | sed "s/\" {.*//" | sort
@@ -4159,6 +4282,27 @@ list_tests() { # swupd_function
 # The intention of these is to try reducing the amount of boilerplate included in
 # tests since all tests require at least the creation of a  test environment
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+show_help() {
+
+	if [ "$2" == "-h" ] || [ "$2" == "--help" ]; then
+		echo "$1"
+		kill -INT $$
+	fi
+
+}
+
+print_stack() {
+
+	echo "An error occurred"
+	echo "Function stack (most recent on top):"
+	for func in ${FUNCNAME[*]}; do
+		if [ "$func" != "print_stack" ] && [ "$func" != "terminate" ]; then
+			echo -e "\\t$func"
+		fi
+	done
+
+}
 
 setup() {
 
@@ -4225,6 +4369,7 @@ setup() {
 
 	if [ "$DEBUG_TEST" = true ] || [ "$SHOW_TARGET" = true ]; then
 		print "\nTarget system before the test:"
+		# shellcheck disable=SC2119
 		show_target
 	fi
 	if [ "$TEST_ENV_ONLY" = true ]; then
@@ -4258,6 +4403,7 @@ teardown() {
 
 	if [ "$DEBUG_TEST" = true ] || [ "$SHOW_TARGET" = true ]; then
 		print "\nTarget system after the test:"
+		# shellcheck disable=SC2119
 		show_target
 	fi
 

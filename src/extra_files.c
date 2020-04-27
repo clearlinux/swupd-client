@@ -87,12 +87,11 @@ static bool handle(const char *filename, bool is_dir, bool fix)
 		info(" -> Extra file: ");
 		print("%s%s", temp, is_dir ? "/" : "");
 		if (remove(temp)) {
-			info(" -> not deleted (%s)", strerror(errno));
+			print(" -> not deleted (%s)\n", strerror(errno));
 			ret = false;
 		} else {
-			info(" -> deleted");
+			print(" -> deleted\n");
 		}
-		print("\n");
 	} else {
 		info(" -> Extra file: ");
 		print("%s%s\n", temp, is_dir ? "/" : "");

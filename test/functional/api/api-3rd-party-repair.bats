@@ -32,12 +32,12 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		[repo1]
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/baz
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/baz/file_3
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/foo/file_1
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/usr/lib/os-release
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/bar/file_2
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/usr/untracked_file
+		$PATH_PREFIX/opt/3rd-party/bundles/repo1/baz -> fixed
+		$PATH_PREFIX/opt/3rd-party/bundles/repo1/baz/file_3 -> fixed
+		$PATH_PREFIX/opt/3rd-party/bundles/repo1/foo/file_1 -> fixed
+		$PATH_PREFIX/opt/3rd-party/bundles/repo1/usr/lib/os-release -> fixed
+		$PATH_PREFIX/opt/3rd-party/bundles/repo1/bar/file_2 -> deleted
+		$PATH_PREFIX/opt/3rd-party/bundles/repo1/usr/untracked_file -> deleted
 		[repo2]
 	EOM
 	)
@@ -51,12 +51,12 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/baz
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/baz/file_3
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/foo/file_1
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/usr/lib/os-release
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/bar/file_2
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/usr/untracked_file
+		$PATH_PREFIX/opt/3rd-party/bundles/repo1/baz -> fixed
+		$PATH_PREFIX/opt/3rd-party/bundles/repo1/baz/file_3 -> fixed
+		$PATH_PREFIX/opt/3rd-party/bundles/repo1/foo/file_1 -> fixed
+		$PATH_PREFIX/opt/3rd-party/bundles/repo1/usr/lib/os-release -> fixed
+		$PATH_PREFIX/opt/3rd-party/bundles/repo1/bar/file_2 -> deleted
+		$PATH_PREFIX/opt/3rd-party/bundles/repo1/usr/untracked_file -> deleted
 	EOM
 	)
 	assert_is_output "$expected_output"

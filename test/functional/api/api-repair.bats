@@ -48,13 +48,13 @@ test_teardown() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		$PATH_PREFIX/baz
-		$PATH_PREFIX/baz/bat
-		$PATH_PREFIX/baz/bat/file_3
-		$PATH_PREFIX/foo/file_1
-		$PATH_PREFIX/usr/lib/os-release
-		$PATH_PREFIX/bar/file_2
-		$PATH_PREFIX/usr/untracked_file
+		$PATH_PREFIX/baz -> fixed
+		$PATH_PREFIX/baz/bat -> fixed
+		$PATH_PREFIX/baz/bat/file_3 -> fixed
+		$PATH_PREFIX/foo/file_1 -> fixed
+		$PATH_PREFIX/usr/lib/os-release -> fixed
+		$PATH_PREFIX/bar/file_2 -> deleted
+		$PATH_PREFIX/usr/untracked_file -> deleted
 	EOM
 	)
 	assert_is_output --identical "$expected_output"

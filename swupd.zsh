@@ -25,6 +25,10 @@ local -A opt_args val_args
 # Custom variables shared between sub-functions
 # reutrn code
 local ret=1
+# use `_pick_variant` to test whether `swupd --help`, contains `3rd-party`,
+#    if true, `feature_thirdparty` flag is set to `1`; and `0` otherwise
+local feature_thirdparty=0
+_pick_variant thirdparty=3rd-party nothirdparty --help && feature_thirdparty=1
 # by default it's set but null; set to 1 for 3rd-party commands,
 # this is used with ZSH parameter expansion:
 #   `${thirdparty:=${FOO}}`   -- expands to $FOO when $thirdparty is null
@@ -56,8 +60,10 @@ local -a main_commands=(
   "mirror:Configure mirror url for swupd content"
   "clean:Clean cached files"
   "hashdump:Dump the HMAC hash of a file"
-  "3rd-party:Manage third party repositories"
 )
+(( $feature_thirdparty )) && main_commands+=(
+    "3rd-party:Manage third party repositories"
+  )
 # 3rd_party::third_party_commands
 local -a third_party_commands=(
   'add:Add third party repository'
@@ -278,11 +284,12 @@ local -a clean=(
     (( ! $#repos )) && repos=($(grep -oP '(?<=\[)(.*)(?=\])' /opt/3rd-party/repo.ini))
 
     if (( ! $#repos )); then
-      ret=1
       (( ! $#return_only )) && _message -r "No 3rd-party repo found"
     else
       (( ! $#return_only )) && _describe '3rd-party repos' repos && ret=0
     fi
+
+    return ret
   }
 
 # Return:
@@ -304,12 +311,12 @@ local -a clean=(
 
     # fail-fast
     if [ ! -r "$version_path" ]; then
-      _message -r "version number" && ret=1 && return
+      _message -r "version number" && return ret
     fi
 
     if [ -z $thirdparty ]; then
       # official repo
-        versions+=($(find "$version_path" -maxdepth 1 -type d -regex ".*[0-9]\'" -printf '%f '))
+      versions+=($(find "$version_path" -maxdepth 1 -type d -regex ".*[0-9]\'" -printf '%f '))
     else
       # 3rd-party repo
       # if -R or --repo is set, only show versions from that repo
@@ -318,14 +325,14 @@ local -a clean=(
       (( $#repos )) || _swupd_repos -r
 
       if (( ! $#repos )); then
-        ret=1 && return
+        return ret
       else
         for version_path in $version_path/3rd-party/${^repos}; do
           if [ -r "$version_path" ]; then
             # -mindepth is necessary in case the repo name ends with digits
             versions+=($(find "$version_path" -mindepth 1 -maxdepth 1 -type d -regex ".*[0-9]\'" -printf '%f '))
           else
-            ret=1 && return
+            return ret
           fi
         done
       fi
@@ -336,7 +343,10 @@ local -a clean=(
     else
       versions=(${(@u)versions})
     fi
-    _alternative "available bundles:available bundles: _values $separator 'versions' $versions" && ret=0
+    _alternative \
+      "available bundles:available bundles: _values $separator 'versions' $versions" && ret=0
+
+    return ret
   }
 
 # Return:
@@ -385,8 +395,7 @@ local -a clean=(
       (( $#repos )) || _swupd_repos -r
 
       if (( ! $#repos )); then
-        ret=1
-        (( $#return_only )) && _message -r "No 3rd-party repo found."
+        (( $#return_only )) && _message -r "No 3rd-party repo found." && return ret
       else
         for install_path in /opt/3rd-party/bundles/${^repos}$install_path; do
           installed[$repo]=${(s: :)"$(unset CDPATH; test -d "$install_path" && \
@@ -398,11 +407,13 @@ local -a clean=(
     if (( ! $#return_only )); then
       local -a installed=(${=installed})
       if (( ! $#installed )); then
-        _message -r "Cannot find installed bundles." && ret=1
+        _message -r "Cannot find installed bundles." && return ret
       else
         (( ! $#unique )) && installed=(${installed:|words})
         (( $#installed )) && \
-          _alternative "bundle:installed bundles: _values $separator 'installed bundles' $installed" && ret=0
+          _alternative \
+            "bundle:installed bundles: _values $separator 'installed bundles' $installed" && ret=0
+        return ret
       fi
     fi
   }
@@ -432,7 +443,7 @@ local -a clean=(
       MoM=/var/tmp/swupd/Manifest.MoM
       if [ ! -r $MoM ]; then
         [ -r "$version_path" ] && MoM=/var/lib/swupd/"$(cat $version_path)"/Manifest.MoM
-        [ ! -r "$MoM" ] && _message _r "Cannot read MoM file." && ret=1 && return
+        [ ! -r "$MoM" ] && _message _r "Cannot read MoM file." && return ret
       fi
       all_bundles[""]+=${$(sed '/^[^M]/d' "$MoM" | cut -f4):|words}
 
@@ -444,7 +455,7 @@ local -a clean=(
       (( $#repos )) || _swupd_repos -r
 
       if (( ! $#repos )); then
-        _message -r "No 3rd-party repo found." && ret=1 && return
+        _message -r "No 3rd-party repo found." && return ret
       else
         for repo in $repos; do
           local version=/opt/3rd-party/bundles/$repo$version_path
@@ -458,18 +469,19 @@ local -a clean=(
                 all_bundles[$repo]=${${all_bundles[$repo]}:|installed_repo}
               fi
             else
-              _message -r "Cannot read MoM file for repo $repo." && ret=1 && return
+              _message -r "Cannot read MoM file for repo $repo." && return ret
             fi
           else
-            _message -r "Cannot retrieve version for repo $repo." && ret=1 && return
+            _message -r "Cannot retrieve version for repo $repo." && return ret
           fi
         done
       fi
     fi
 
     (( $#all_bundles )) && \
-      _alternative "available bundles:available bundles: _values $separator 'bundles' $all_bundles" && ret=0
-    ret=1
+      _alternative \
+        "available bundles:available bundles: _values $separator 'bundles' $all_bundles" && ret=0
+    return ret
   }
 
 # Return:
@@ -490,6 +502,7 @@ local -a clean=(
     else
       _files && ret=0
     fi
+    return ret
   }
 
 # dispatcher for 3rd-party subcommands, including
@@ -616,8 +629,13 @@ case "$state" in
   args)
     case $line[1] in
       3rd-party)
-        thirdparty=1
-        _swupd_3rdparty && ret=0
+        # it shouldn't get here if `3rd-party` feature is not supported
+        if (( ! $feature_thirdparty )); then
+          _message -r "3rd-party is not supported." && ret=1
+        else
+          thirdparty=1
+          _swupd_3rdparty && ret=0
+        fi
         ;;
       autoupdate)
         _arguments $global_opts $autoupdate && ret=0

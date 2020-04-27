@@ -84,14 +84,14 @@ test_teardown() {
 	assert_status_is_not "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Error: Target exists but is not a directory: $PATH_PREFIX/baz
-		$PATH_PREFIX/baz/bat
+		$PATH_PREFIX/baz/bat -> not fixed
 		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
-		$PATH_PREFIX/baz/bat/file_3
+		$PATH_PREFIX/baz/bat/file_3 -> not fixed
 		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
-		$PATH_PREFIX/baz
-		$PATH_PREFIX/foo/file_1
-		$PATH_PREFIX/usr/lib/os-release
-		$PATH_PREFIX/usr/untracked_file
+		$PATH_PREFIX/baz -> not fixed
+		$PATH_PREFIX/foo/file_1 -> fixed
+		$PATH_PREFIX/usr/lib/os-release -> fixed
+		$PATH_PREFIX/usr/untracked_file -> not deleted (Operation not permitted)
 	EOM
 	)
 	assert_is_output "$expected_output"

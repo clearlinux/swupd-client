@@ -414,8 +414,7 @@ static void add_missing_files(struct manifest *official_manifest, struct list *f
 		}
 		if ((ret != 0) || hash_needs_work(file, local.hash)) {
 			counts.not_replaced++;
-			info(" -> not fixed");
-			print("\n");
+			print(" -> not fixed\n");
 
 			check_warn_freespace(file);
 
@@ -423,8 +422,7 @@ static void add_missing_files(struct manifest *official_manifest, struct list *f
 			counts.replaced++;
 			file->do_not_update = 1;
 			if (cmdline_option_install == false) {
-				info(" -> fixed");
-				print("\n");
+				print(" -> fixed\n");
 			}
 		}
 	out:
@@ -470,12 +468,11 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	/* at the end of all this, verify the hash again to judge success */
 	if (verify_file(file, fullname)) {
 		counts.fixed++;
-		info(" -> fixed");
+		print(" -> fixed\n");
 	} else {
 		counts.not_fixed++;
-		info(" -> not fixed");
+		print(" -> not fixed\n");
 	}
-	print("\n");
 end:
 	free_and_clear_pointer(&fullname);
 }
@@ -608,28 +605,26 @@ static void remove_orphaned_files(struct list *files_to_verify, bool repair)
 		if (!sys_is_dir(fullname)) {
 			ret = unlinkat(fd, base, 0);
 			if (ret && errno != ENOENT) {
-				info(" -> not deleted (%s)", strerror(errno));
+				print(" -> not deleted (%s)\n", strerror(errno));
 				counts.not_deleted++;
 			} else {
-				info(" -> deleted");
+				print(" -> deleted\n");
 				counts.deleted++;
 			}
-			print("\n");
 		} else {
 			ret = unlinkat(fd, base, AT_REMOVEDIR);
 			if (ret) {
 				counts.not_deleted++;
 				if (errno != ENOTEMPTY) {
-					info(" -> not deleted (%s)", strerror(errno));
+					print(" -> not deleted (%s)\n", strerror(errno));
 				} else {
 					//FIXME: Add force removal option?
-					info(" -> not deleted (not empty)");
+					print(" -> not deleted (not empty)\n");
 				}
 			} else {
-				info(" -> deleted");
+				print(" -> deleted\n");
 				counts.deleted++;
 			}
-			print("\n");
 		}
 		close(fd);
 	out:

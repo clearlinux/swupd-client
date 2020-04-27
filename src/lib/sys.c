@@ -454,7 +454,7 @@ char *sys_path_join(const char *fmt, ...)
 		    // Next is also a separator or
 		    (path[i + 1] == PATH_SEPARATOR ||
 		     // Is a trailing separator, but not root
-		     (path[i + 1] == '\0' && i != 0))) {
+		     (path[i + 1] == '\0' && j != 0))) {
 			/* duplicated PATH_SEPARATOR, throw it away */
 			continue;
 		}

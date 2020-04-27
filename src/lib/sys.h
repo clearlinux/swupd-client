@@ -44,6 +44,11 @@ long get_available_space(const char *path);
 #define run_command_params(_params) run_command_full_params(NULL, NULL, _params)
 
 /**
+ * @brief runs a command from params with standard and error output redirected to /dev/null.
+ */
+#define run_command_params_quiet(_params) run_command_full_params("/dev/null", "/dev/null", _params)
+
+/**
  * @brief Run command cmd with parameters informed in a NULL terminated list of strings.
  *
  * Return a negative number (-errno) if we are unable to create a new thread to
@@ -51,7 +56,7 @@ long get_available_space(const char *path);
  * If there's an error in the execution of the program 255 may also be returned
  *
  * Notes:
- * - This function doesn't execute on a shell like system() so we won't have any
+ * - This function doesn't execute on a shell like system () so we won't have any
  *   issue with parameters globbing.
  * - The full path to cmd is required.
  *

@@ -4629,6 +4629,30 @@ assert_symlink_not_exists() { # assertion
 
 }
 
+assert_regular_file_exists() { # assertion
+
+	local vfile=$1
+	validate_param "$vfile"
+
+	if sudo test ! -f "$vfile" || sudo test -L "$vfile"; then
+		print_assert_failure "File $vfile should exist, but it does not"
+		return 1
+	fi
+
+}
+
+assert_regular_file_not_exists() { # assertion
+
+	local vfile=$1
+	validate_param "$vfile"
+
+	if sudo test -f "$vfile" && sudo test ! -L "$vfile"; then
+		print_assert_failure "File $vfile should not exist, but it does"
+		return 1
+	fi
+
+}
+
 assert_file_exists() { # assertion
 
 	local vfile=$1

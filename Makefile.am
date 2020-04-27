@@ -197,7 +197,8 @@ TESTS = \
 	test/unit/test_list.test \
 	test/unit/test_manifest.test \
 	test/unit/test_signature.test \
-	test/unit/test_strings.test
+	test/unit/test_strings.test \
+	test/unit/test_sys.test
 
 EXTRA_DIST += test/unit/test_helper.h test/unit/data
 

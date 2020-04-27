@@ -44,7 +44,10 @@ static bool download_only = false;
 static bool update_search_file_index = false;
 static bool keepcache = false;
 static char swupd_binary[LINE_MAX] = { 0 };
+
+#ifdef THIRDPARTY
 static bool cmdline_option_3rd_party = false;
+#endif
 
 int nonpack;
 
@@ -556,7 +559,9 @@ static const struct option prog_opts[] = {
 	{ "manifest", required_argument, 0, 'm' },
 	{ "status", no_argument, 0, 's' },
 	{ "keepcache", no_argument, 0, 'k' },
+#ifdef THIRDPARTY
 	{ "3rd-party", no_argument, 0, FLAG_UPDATE_3RD_PARTY },
+#endif
 };
 
 static void print_help(void)
@@ -573,7 +578,9 @@ static void print_help(void)
 	print("   -k, --keepcache         Do not delete the swupd state directory content after updating the system\n");
 	print("   --download              Download all content, but do not actually install the update\n");
 	print("   --update-search-file-index Update the index used by search-file to speed up searches (Don't enable this if you have download or space restrictions)\n");
+#ifdef THIRDPARTY
 	print("   --3rd-party             Also update content from 3rd-party repositories\n");
+#endif
 	print("\n");
 }
 
@@ -607,9 +614,11 @@ static bool parse_opt(int opt, char *optarg)
 	case FLAG_UPDATE_SEARCH_FILE_INDEX:
 		update_search_file_index = optarg_to_bool(optarg);
 		return true;
+#ifdef THIRDPARTY
 	case FLAG_UPDATE_3RD_PARTY:
 		cmdline_option_3rd_party = optarg_to_bool(optarg);
 		return true;
+#endif
 	default:
 		return false;
 	}
@@ -689,14 +698,17 @@ enum swupd_code update_main(int argc, char **argv)
 	if (cmd_line_status) {
 		ret = check_update();
 
+#ifdef THIRDPARTY
 		if (cmdline_option_3rd_party) {
 			progress_finish_steps(ret);
 			info("\nChecking update status of content from 3rd-party repositories\n\n");
 			ret = third_party_execute_check_update();
 		}
+#endif
 	} else {
 		ret = execute_update();
 
+#ifdef THIRDPARTY
 		if (cmdline_option_3rd_party) {
 			if (ret == SWUPD_OK) {
 				progress_finish_steps(ret);
@@ -706,6 +718,7 @@ enum swupd_code update_main(int argc, char **argv)
 				warn("The update process was not successful, 3rd-party repositories won't be updated\n");
 			}
 		}
+#endif
 	}
 
 	swupd_deinit();

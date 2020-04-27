@@ -42,7 +42,7 @@ run_checks_tartar() {
 
 	# Tar tar doasnt support hardlinks
 	# There's a known bug in tar tar code that doesn't support unusual file names
-	FILES="$(find test/functional  -name "*.bats" \( ! -path "*only_in_ci_system*" \) | sort | grep -v install-hardlink-symlink.bats | grep -v update-unusual-file-names.bats)"
+	FILES="$(find test/functional  -name "*.bats" \( ! -path "*only_in_ci_system*" \) | sort | grep -v install-hardlink-symlink.bats)"
 
 	env TESTS="$FILES"  make -j "$JOB_COUNT" -e check
 	env TESTS="$(find ./test/functional/only_in_ci_system  -name "*.bats" | sort)" make -e -j1 check

@@ -65,8 +65,8 @@ static int record_filename(const char *name, const struct stat *stat __attribute
 		}
 	}
 
-	char *savedname = strdup_or_die(relname); /* Only store name relative to top of area */
-	F = realloc(F, (nF + 1) * sizeof(*F));	  /* TODO, check realloc is smart, so don't need to double myself */
+	char *savedname = strdup_or_die(relname);	    /* Only store name relative to top of area */
+	F = realloc(F, (int_to_uint(nF) + 1) * sizeof(*F)); /* TODO, check realloc is smart, so don't need to double myself */
 	ON_NULL_ABORT(F);
 
 	F[nF].filename = savedname;

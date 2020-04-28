@@ -967,7 +967,7 @@ struct file **manifest_files_to_array(struct manifest *manifest)
 
 	numfiles = manifest->filecount;
 
-	array = malloc_or_die(sizeof(struct file *) * numfiles);
+	array = malloc_or_die(sizeof(struct file *) * int_to_uint(numfiles));
 	iter = list_head(manifest->files);
 	while (iter) {
 		file = iter->data;

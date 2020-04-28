@@ -678,7 +678,7 @@ static bool global_parse_opt(int opt, char *optarg)
 static char *generate_optstring(struct option *opts, int num_opts)
 {
 	int i = 0;
-	char *optstring = malloc_or_die(num_opts * 2 + 1); // Space for each opt + ':'
+	char *optstring = malloc_or_die(int_to_uint(num_opts) * 2 + 1); // Space for each opt + ':'
 
 	while (opts->name) {
 		if (isalpha(opts->val)) {
@@ -792,7 +792,7 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 
 	// If there's extra options
 	num_global_opts = (sizeof(global_opts) / sizeof(struct option));
-	opts_array = malloc_or_die(sizeof(struct option) * (opts->longopts_len + num_global_opts));
+	opts_array = malloc_or_die(sizeof(struct option) * int_to_uint(opts->longopts_len + num_global_opts));
 
 	// Copy local and global options to opts
 	memcpy(opts_array, opts->longopts,

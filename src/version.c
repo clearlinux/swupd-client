@@ -104,7 +104,7 @@ static int get_sig_inmemory(char *url, struct curl_file_data *tmp_version_sig)
 
 	tmp_version_sig->capacity = ret;
 
-	tmp_version_sig->data = malloc_or_die(ret * sizeof(char));
+	tmp_version_sig->data = malloc_or_die(int_to_uint(ret) * sizeof(char));
 
 	ret = swupd_curl_get_file_memory(sig_fname, tmp_version_sig);
 	if (ret != 0) {

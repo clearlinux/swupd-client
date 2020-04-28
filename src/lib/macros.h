@@ -1,8 +1,10 @@
 #ifndef __INCLUDE_GUARD_MACROS_H
 #define __INCLUDE_GUARD_MACROS_H
 
+#include "swupd_lib/telemetry.h"
 #include <stdio.h>
 #include <stdlib.h>
+
 /**
  * @file
  * @brief General use macros

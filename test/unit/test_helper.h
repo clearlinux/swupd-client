@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #define print_error(_msg) printf("Test error(%s:%d): %s\n", __FILE__, __LINE__, _msg);
 

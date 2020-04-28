@@ -78,6 +78,8 @@ swupd_SOURCES = \
 	src/lib/formatter_json.h \
 	src/lib/hashmap.c \
 	src/lib/hashmap.h \
+	src/lib/int.c \
+	src/lib/int.h \
 	src/lib/list.c \
 	src/lib/list.h \
 	src/lib/log.c \
@@ -192,6 +194,7 @@ BATS_LOG_DRIVER = $(tap_driver)
 
 TESTS = \
 	test/unit/test_heuristics.test \
+	test/unit/test_int.test \
 	test/unit/test_list.test \
 	test/unit/test_manifest.test \
 	test/unit/test_signature.test \

@@ -22,6 +22,7 @@
  */
 
 #include <errno.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -144,8 +145,7 @@ static int download_pack(struct swupd_curl_parallel_handle *download_handle, int
 
 static double packs_query_total_download_size(struct list *subs, struct manifest *mom)
 {
-	long size = 0;
-	long total_size = 0;
+	double total_size = 0, size = 0;
 	struct sub *sub = NULL;
 	struct list *list = NULL;
 	struct file *bundle = NULL;

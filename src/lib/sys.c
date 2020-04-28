@@ -578,7 +578,7 @@ int sys_rm(const char *filename)
 	return sys_rmdir(filename);
 }
 
-long sys_get_file_size(const char *filename)
+ssize_t sys_get_file_size(const char *filename)
 {
 	static const int BLOCK_SIZE = 512;
 	struct stat st;

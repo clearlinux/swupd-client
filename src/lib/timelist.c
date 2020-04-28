@@ -151,7 +151,7 @@ void timelist_print_stats(timelist *head)
 	TAILQ_FOREACH_REVERSE(t, head, timelist, times)
 	{
 		if (t->complete == true) {
-			delta = (t->rawstop.tv_sec - t->rawstart.tv_sec) * 1000 + (t->rawstop.tv_nsec / 1000000.0) - (t->rawstart.tv_nsec / 1000000.0);
+			delta = (double)(t->rawstop.tv_sec - t->rawstart.tv_sec) * 1000 + ((double)t->rawstop.tv_nsec / 1000000.0) - ((double)t->rawstart.tv_nsec / 1000000.0);
 			info("%10.2f ms: %s\n", delta, t->name);
 		}
 	}
@@ -159,7 +159,7 @@ void timelist_print_stats(timelist *head)
 	TAILQ_FOREACH_REVERSE(t, head, timelist, times)
 	{
 		if (t->complete == true) {
-			delta = (t->procstop.tv_sec - t->procstart.tv_sec) * 1000 + (t->procstop.tv_nsec / 1000000.0) - (t->procstart.tv_nsec / 1000000.0);
+			delta = (double)(t->procstop.tv_sec - t->procstart.tv_sec) * 1000 + ((double)t->procstop.tv_nsec / 1000000.0) - ((double)t->procstart.tv_nsec / 1000000.0);
 			info("%10.2f ms: %s\n", delta, t->name);
 		}
 	}

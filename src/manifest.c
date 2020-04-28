@@ -1024,9 +1024,9 @@ int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize,
 	return ret; // If collisions were found, so manifest is purely additive
 }
 
-long get_manifest_list_contentsize(struct list *manifests)
+size_t get_manifest_list_contentsize(struct list *manifests)
 {
-	long total_size = 0;
+	size_t total_size = 0;
 
 	struct list *ptr = NULL;
 	for (ptr = list_head(manifests); ptr; ptr = ptr->next) {

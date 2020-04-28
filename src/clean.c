@@ -51,7 +51,7 @@ static struct {
 
 static struct {
 	int files_removed;
-	long bytes_removed;
+	size_t bytes_removed;
 } stats;
 
 int clean_get_stats(void)
@@ -114,7 +114,8 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 {
 	int ret = SWUPD_OK;
 	DIR *dir;
-	long size, hardlink_count;
+	size_t size;
+	long hardlink_count;
 
 	dir = opendir(path);
 	if (!dir) {
@@ -157,7 +158,7 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 			 * This also means that when doing dry-run we can only guess how
 			 * much space we would free since we cannot know what inodes will
 			 * have all their hardlinks removed */
-			size = sys_get_file_size(file);
+			size = ssize_to_size(sys_get_file_size(file));
 		} else {
 			size = 0;
 			if (hardlink_count < 0) {
@@ -261,6 +262,7 @@ static bool is_manifest_delta(const char UNUSED_PARAM *dir, const struct dirent 
 
 static char *read_mom_contents(int version)
 {
+	size_t size;
 	char *mom_path = NULL;
 	string_or_die(&mom_path, "%s/%d/Manifest.MoM", globals.state_dir, version);
 	FILE *f = fopen(mom_path, "r");
@@ -283,11 +285,15 @@ static char *read_mom_contents(int version)
 		goto end;
 	}
 
-	contents = malloc(stat.st_size + 1);
+	if (ssize_to_size_err(stat.st_size, &size) < 0) {
+		goto end;
+	}
+
+	contents = malloc(size + 1);
 	ON_NULL_ABORT(contents);
 
-	ret = fread(contents, stat.st_size, 1, f);
-	if (ret != 1) {
+	size_t ret_size = fread(contents, size, 1, f);
+	if (ret_size != 1) {
 		FREE(contents);
 		contents = NULL;
 	} else {
@@ -302,7 +308,7 @@ end:
 static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bool all)
 {
 	DIR *dir;
-	long size;
+	size_t size;
 
 	dir = opendir(path);
 	if (!dir) {
@@ -359,10 +365,7 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 		}
 
 		/* Remove empty dirs if possible. */
-		size = sys_get_file_size(version_dir);
-		if (size < 0) {
-			size = 0;
-		}
+		size = ssize_to_size(sys_get_file_size(version_dir));
 		if (!rmdir(version_dir) || (dry_run && all)) {
 			stats.bytes_removed += size;
 		}

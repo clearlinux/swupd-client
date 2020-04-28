@@ -105,7 +105,7 @@ static int check_disk_space_availability(struct list *to_install_bundles)
 {
 	char *filepath = NULL;
 	long fs_free = 0;
-	long bundle_size = 0;
+	double bundle_size = 0;
 
 	if (globals.skip_diskspace_check) {
 		return 0;
@@ -127,7 +127,7 @@ static int check_disk_space_availability(struct list *to_install_bundles)
 	/* Add 10% to bundle_size as a 'fudge factor' */
 	if (((bundle_size * 1.1) > fs_free) || fs_free < 0) {
 		if (fs_free > 0) {
-			error("Bundle too large by %ldM\n", (bundle_size - fs_free) / 1000 / 1000);
+			error("Bundle too large by %1.0fM\n", (bundle_size - fs_free) / 1000 / 1000);
 		} else {
 			error("Unable to determine free space on filesystem\n");
 		}

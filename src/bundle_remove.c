@@ -269,7 +269,7 @@ static void get_removable_dependencies(struct manifest *mom, struct list **bundl
 
 static void print_remove_summary(unsigned int requested, unsigned int bad, unsigned int total_removed)
 {
-	int deps_removed;
+	long int deps_removed;
 
 	if (bad > 0) {
 		info("\nFailed to remove %i of %i bundles\n", bad, requested);

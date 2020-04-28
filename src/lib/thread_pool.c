@@ -126,7 +126,7 @@ error:
 
 int tp_task_schedule(struct tp *tp, tp_task_run_t run, void *data)
 {
-	int r = -1;
+	ssize_t r = -1;
 	struct task task;
 
 	if (tp->num_threads == 0) {
@@ -148,7 +148,7 @@ int tp_task_schedule(struct tp *tp, tp_task_run_t run, void *data)
 			}
 			error("Thread pool task scheduling failed: %d - %s\n",
 			      errno, strerror(errno));
-			return r;
+			return -errno;
 		}
 	}
 

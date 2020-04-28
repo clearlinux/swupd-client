@@ -253,7 +253,7 @@ extern enum swupd_code compute_hash(struct file *file, char *filename) __attribu
 
 /* manifest.c */
 /* Calculate the total contentsize of a manifest list */
-extern long get_manifest_list_contentsize(struct list *manifests);
+extern size_t get_manifest_list_contentsize(struct list *manifests);
 extern struct list *recurse_manifest(struct manifest *manifest, struct list *subs, const char *component, bool server, int *err);
 extern struct list *consolidate_files(struct list *files);
 extern struct list *filter_out_deleted_files(struct list *files);
@@ -300,7 +300,7 @@ extern bool is_url_allowed(const char *url);
 extern bool is_url_insecure(const char *url);
 extern void remove_trailing_slash(char *url);
 extern void print_header(const char *header);
-extern void prettify_size(long size_in_bytes, char **pretty_size);
+extern void prettify_size(size_t size_in_bytes, char **pretty_size);
 extern int create_state_dirs(const char *state_dir_path);
 extern bool confirm_action(void);
 extern bool is_binary(const char *filename);

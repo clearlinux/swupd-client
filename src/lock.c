@@ -48,6 +48,7 @@ int p_lockfile(void)
 	}
 
 	int ret;
+	ssize_t ret_size;
 	pid_t pid = getpid();
 	struct flock fl = {
 		.l_type = F_WRLCK,
@@ -84,7 +85,10 @@ int p_lockfile(void)
 		/* speculatively dump our pid in the file,
 		 * that may be useful for debug */
 		ret = ftruncate(lock_fd, 0);
-		ret = write(lock_fd, &pid, sizeof(pid));
+		ret_size = write(lock_fd, &pid, sizeof(pid));
+		if (ret < 0 || ret_size < 0) {
+			debug("Failed to dump lock file\n");
+		}
 
 		/* our lock_fd represents the lock */
 		return lock_fd;

@@ -675,7 +675,7 @@ static bool global_parse_opt(int opt, char *optarg)
 }
 
 /* Generate the optstring required by getopt_long, based on options array */
-static char *generate_optstring(struct option *opts, int num_opts)
+static char *generate_optstring(struct option *opts, unsigned int num_opts)
 {
 	int i = 0;
 	char *optstring = malloc_or_die(num_opts * 2 + 1); // Space for each opt + ':'
@@ -781,7 +781,8 @@ static bool load_flags_in_config(char *command, struct option *opts_array, const
 int global_parse_options(int argc, char **argv, const struct global_options *opts)
 {
 	struct option *opts_array;
-	int num_global_opts, opt;
+	unsigned int num_global_opts;
+	int opt;
 	char *optstring;
 	int ret = 0;
 	bool config_found;

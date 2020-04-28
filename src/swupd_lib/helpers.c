@@ -898,7 +898,7 @@ static void print_char(const char c, int times)
 {
 	char *str;
 
-	str = malloc_or_die(times + 1);
+	str = malloc_or_die(int_to_uint(times) + 1);
 	memset(str, c, times);
 	info("%s\n", str);
 	FREE(str);

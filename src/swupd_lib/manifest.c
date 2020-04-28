@@ -957,15 +957,12 @@ struct file **manifest_files_to_array(struct manifest *manifest)
 	struct list *iter;
 	struct file *file;
 	int i = 0;
-	int numfiles;
 
 	if (!manifest) {
 		return NULL;
 	}
 
-	numfiles = manifest->filecount;
-
-	array = malloc_or_die(sizeof(struct file *) * numfiles);
+	array = malloc_or_die(sizeof(struct file *) * manifest->filecount);
 	iter = list_head(manifest->files);
 	while (iter) {
 		file = iter->data;

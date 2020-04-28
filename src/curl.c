@@ -540,6 +540,9 @@ restart_download:
 		} else {
 			curl_ret = swupd_download_file_create(&local);
 		}
+		if (curl_ret != CURLE_OK) {
+			goto exit;
+		}
 
 		curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void *)local_ptr);
 		if (curl_ret != CURLE_OK) {

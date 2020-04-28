@@ -600,7 +600,7 @@ static void remove_orphaned_files(struct list *files_to_verify, bool repair)
 			goto out;
 		}
 
-		base = basename(fullname);
+		base = sys_basename(fullname);
 
 		if (!sys_is_dir(fullname)) {
 			ret = unlinkat(fd, base, 0);

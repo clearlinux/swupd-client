@@ -521,7 +521,7 @@ int rename_staged_file_to_final(struct file *file)
 			}
 			free_and_clear_pointer(&lostnfound);
 
-			base = basename(file->filename);
+			base = sys_basename(file->filename);
 			lostnfound = sys_path_join("%s/lost+found/%s", globals.path_prefix, base);
 			/* this will fail if the directory was not already emptied */
 			ret = rename(target, lostnfound);

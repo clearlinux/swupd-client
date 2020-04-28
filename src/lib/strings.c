@@ -165,6 +165,45 @@ int str_to_int(const char *str, int *value)
 	return 0;
 }
 
+int str_to_uint_endptr(const char *str, char **endptr, unsigned int *value)
+{
+	long num;
+	int err;
+
+	errno = 0;
+	num = strtol(str, endptr, 10);
+	err = -errno;
+
+	/* When the return value of strtol overflows the int type, don't overflow
+	 * and return an overflow error code. */
+	if (num > UINT_MAX) {
+		num = UINT_MAX;
+		err = -ERANGE;
+	} else if (num < 0) {
+		num = 0;
+		err = -ERANGE;
+	}
+	*value = (unsigned int)num;
+
+	return err;
+}
+
+int str_to_uint(const char *str, unsigned int *value)
+{
+	char *endptr;
+	int err = str_to_uint_endptr(str, &endptr, value);
+
+	if (err) {
+		return err;
+	}
+
+	if (*endptr != '\0' && !isspace(*endptr)) {
+		return -EINVAL;
+	}
+
+	return 0;
+}
+
 char *str_to_lower(const char *str)
 {
 	char *str_lower = malloc_or_die(str_len(str) + 1);

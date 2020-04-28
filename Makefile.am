@@ -241,6 +241,7 @@ compliant:
 	test/code_analysis/compliant.bats
 	test/functional/check_ids.bash
 	test/code_analysis/warning_functions.bats
+	test/code_analysis/quiet_output.bats
 	scripts/flag_validator.bash
 
 # Ignore SC1008 because scripts are using an unsupported shebang

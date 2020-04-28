@@ -180,12 +180,12 @@ remove_repo:
 			info("Please be aware that this may leave exported files in %s\n", bin_dir);
 			ret_partial = ret;
 			ret = SWUPD_OK;
-			free_and_clear_pointer(&bin_dir);
+			FREE(bin_dir);
 		} else {
 			error("The 3rd-party repository %s is corrupt and cannot be removed cleanly\n", name);
 			info("To force the removal of the repository use the --force option\n");
 			info("Please be aware that this may leave exported files in %s\n", bin_dir);
-			free_and_clear_pointer(&bin_dir);
+			FREE(bin_dir);
 			goto exit;
 		}
 	}
@@ -224,7 +224,7 @@ exit:
 		info("\nFailed to remove repository\n");
 	}
 	manifest_free(mom);
-	free_and_clear_pointer(&repo_dir);
+	FREE(repo_dir);
 	list_free_list_and_data(repos, repo_free_data);
 	list_free_list_and_data(installed_bundles, free);
 	swupd_deinit();

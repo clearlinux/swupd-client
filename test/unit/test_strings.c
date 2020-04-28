@@ -5,6 +5,7 @@
 
 #include "../../src/lib/strings.h"
 #include "../../src/lib/list.h"
+#include "../../src/lib/macros.h"
 #include "test_helper.h"
 
 static void test_str_to_int()
@@ -227,32 +228,32 @@ void test_str_join()
 
 	joined = str_join(" long separator ", str_list);
 	check(str_cmp(joined, "") == 0);
-	free(joined);
+	FREE(joined);
 
 	str_list = list_prepend_data(str_list, "string3");
 
 	joined = str_join(" long separator ", str_list);
 	check(str_cmp(joined, "string3") == 0);
-	free(joined);
+	FREE(joined);
 
 	str_list = list_prepend_data(str_list, "string2");
 	str_list = list_prepend_data(str_list, "string1");
 
 	joined = str_join(",", str_list);
 	check(str_cmp(joined, "string1,string2,string3") == 0);
-	free(joined);
+	FREE(joined);
 
 	joined = str_join(" long separator ", str_list);
 	check(str_cmp(joined, "string1 long separator string2 long separator string3") == 0);
-	free(joined);
+	FREE(joined);
 
 	joined = str_join("", str_list);
 	check(str_cmp(joined, "string1string2string3") == 0);
-	free(joined);
+	FREE(joined);
 
 	joined = str_join(NULL, str_list);
 	check(str_cmp(joined, "string1string2string3") == 0);
-	free(joined);
+	FREE(joined);
 
 	list_free_list(str_list);
 }

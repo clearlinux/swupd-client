@@ -121,8 +121,8 @@ static int unset_mirror_url()
 	ret1 = sys_rm(content_path);
 	ret2 = sys_rm(version_path);
 
-	free_and_clear_pointer(&content_path);
-	free_and_clear_pointer(&version_path);
+	FREE(content_path);
+	FREE(version_path);
 
 	// No errors
 	if ((ret1 == -ENOENT && !ret2) ||
@@ -183,7 +183,7 @@ static enum swupd_code write_to_path(const char *content, const char *path)
 	}
 
 out:
-	free_and_clear_pointer(&dir);
+	FREE(dir);
 	return ret;
 }
 
@@ -203,7 +203,7 @@ static enum swupd_code set_new_url(const char *url, const char *url_path)
 
 	/* write url to path_prefix/MIRROR_VERSION_URL_PATH */
 	ret = write_to_path(url, path);
-	free(path);
+	FREE(path);
 
 	return ret;
 }
@@ -253,8 +253,8 @@ static bool mirror_is_set(void)
 	content_path = sys_path_join("%s/%s", globals.path_prefix, MIRROR_CONTENT_URL_PATH);
 	mirror_set = sys_filelink_exists(version_path) && sys_filelink_exists(content_path);
 
-	free_and_clear_pointer(&version_path);
-	free_and_clear_pointer(&content_path);
+	FREE(version_path);
+	FREE(content_path);
 
 	return mirror_set;
 }
@@ -274,8 +274,8 @@ int get_version_no_mirror(void)
 		version_url = strdup_or_die(VERSIONURL);
 #else
 		warn("No default upstream version url set\n");
-		free(fullpath);
-		free(version_url);
+		FREE(fullpath);
+		FREE(version_url);
 		return -1;
 #endif
 	}
@@ -294,8 +294,8 @@ out:
 		warn("Upstream server %s not responding, cannot determine upstream version\n", version_url);
 	}
 
-	free(fullpath);
-	free(version_url);
+	FREE(fullpath);
+	FREE(version_url);
 	return version;
 }
 

@@ -44,7 +44,7 @@ bool is_installed_bundle(const char *bundle_name)
 
 	filename = sys_path_join("%s/%s/%s", globals.path_prefix, BUNDLES_DIR, bundle_name);
 	ret = sys_file_exists(filename);
-	free_and_clear_pointer(&filename);
+	FREE(filename);
 
 	return ret;
 }
@@ -56,7 +56,7 @@ bool is_tracked_bundle(const char *bundle_name)
 
 	filename = sys_path_join("%s/bundles/%s", globals.state_dir, bundle_name);
 	ret = sys_file_exists(filename);
-	free_and_clear_pointer(&filename);
+	FREE(filename);
 
 	return ret;
 }
@@ -230,8 +230,8 @@ out:
 	if (ret) {
 		debug("Issue creating tracking file in %s for %s\n", tracking_dir, bundle_name);
 	}
-	free_and_clear_pointer(&tracking_dir);
-	free_and_clear_pointer(&tracking_file);
+	FREE(tracking_dir);
+	FREE(tracking_file);
 }
 
 void track_bundle(const char *bundle_name)

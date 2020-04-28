@@ -204,7 +204,7 @@ static void print_bundle_size(struct manifest *manifest, long size, bool bundle_
 	info("\nBundle size:\n");
 	prettify_size(manifest->contentsize, &pretty_size);
 	info(" - Size of bundle: %s\n", pretty_size);
-	free_and_clear_pointer(&pretty_size);
+	FREE(pretty_size);
 
 	prettify_size(size, &pretty_size);
 	if (bundle_installed) {
@@ -212,7 +212,7 @@ static void print_bundle_size(struct manifest *manifest, long size, bool bundle_
 	} else {
 		info(" - Maximum amount of disk size the bundle will take if installed (includes dependencies): %s\n", pretty_size);
 	}
-	free_and_clear_pointer(&pretty_size);
+	FREE(pretty_size);
 }
 
 static long get_bundle_size(struct manifest *mom, bool bundle_installed)
@@ -393,7 +393,7 @@ enum swupd_code bundle_info(char *bundle)
 	char *header = NULL;
 	string_or_die(&header, " Info for bundle: %s", bundle);
 	print_header(header);
-	free_and_clear_pointer(&header);
+	FREE(header);
 
 	/* status info */
 	char *status = NULL;
@@ -407,7 +407,7 @@ enum swupd_code bundle_info(char *bundle)
 	} else {
 		info("Status: %s%s\n", status ? status : "Not installed", file->is_experimental ? " (experimental)" : "");
 	}
-	free_and_clear_pointer(&status);
+	FREE(status);
 
 	/* version info */
 	if (installed) {

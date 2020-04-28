@@ -111,7 +111,7 @@ static void dump_file_descriptor_leaks_int(int n, void *a)
 			warn("Possible filedescriptor leak: fd_number=\"%d\",fd_details=\"%s\"\n", n, buffer);
 		}
 	}
-	free_and_clear_pointer(&filename);
+	FREE(filename);
 }
 
 void dump_file_descriptor_leaks(void)

@@ -36,4 +36,14 @@
 
 #endif
 
+/**
+ * @brief free() wrapper that always set the pointer to NULL after freeing.
+ * This macro should be used instead of free() to prevent invalid memory access
+ */
+#define FREE(_ptr)           \
+	do {                 \
+		free(_ptr);  \
+		_ptr = NULL; \
+	} while (0)
+
 #endif

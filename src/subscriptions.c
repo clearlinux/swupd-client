@@ -36,8 +36,8 @@ static void free_subscription_data(void *data)
 {
 	struct sub *sub = (struct sub *)data;
 
-	free_and_clear_pointer(&sub->component);
-	free(sub);
+	FREE(sub->component);
+	FREE(sub);
 }
 
 void free_subscriptions(struct list **subs)
@@ -86,7 +86,7 @@ void read_subscriptions(struct list **subs)
 		closedir(dir);
 	}
 
-	free_and_clear_pointer(&path);
+	FREE(path);
 
 	/* Always add os-core */
 	if (!have_os_core) {

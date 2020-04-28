@@ -78,9 +78,9 @@ enum swupd_code binary_loader_main(int argc, char **argv)
 	}
 
 end:
-	free(params);
-	free_and_clear_pointer(&binary_name);
-	free_and_clear_pointer(&full_binary_path);
+	FREE(params);
+	FREE(binary_name);
+	FREE(full_binary_path);
 
 	return ret;
 }

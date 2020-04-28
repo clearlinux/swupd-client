@@ -166,7 +166,7 @@ static void xattrs_do_action(xattrs_action_type_t action,
 			*blob_len = 0;
 			*blob = (void *)NULL_BLOB;
 		}
-		free(list);
+		FREE(list);
 		return; // no xattrs, this is OK
 	}
 
@@ -194,7 +194,7 @@ static void xattrs_do_action(xattrs_action_type_t action,
 		ret = xattr_get_value(src_filename, sorted_list[i], &value, &value_len,
 				      action);
 		if (ret < 0) {
-			free_and_clear_pointer(&value);
+			FREE(value);
 			value_len = 0;
 			break;
 		}
@@ -204,7 +204,7 @@ static void xattrs_do_action(xattrs_action_type_t action,
 			 * case. */
 			ret = lsetxattr(dst_filename, sorted_list[i],
 					value, value_len, 0);
-			free_and_clear_pointer(&value);
+			FREE(value);
 			if (ret < 0) {
 				break;
 			}
@@ -223,8 +223,8 @@ static void xattrs_do_action(xattrs_action_type_t action,
 		}
 	}
 
-	free(list);
-	free(sorted_list);
+	FREE(list);
+	FREE(sorted_list);
 
 	return;
 }
@@ -266,11 +266,11 @@ int xattrs_compare(const char *filename1, const char *filename2)
 	}
 out:
 	if (old_xattrs_len != 0) {
-		free_and_clear_pointer(&old_xattrs);
+		FREE(old_xattrs);
 	}
 
 	if (new_xattrs_len != 0) {
-		free_and_clear_pointer(&new_xattrs);
+		FREE(new_xattrs);
 	}
 
 	return ret;

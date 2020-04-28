@@ -72,8 +72,8 @@ static void json_message(const char *msg_type, const char *msg, va_list args_lis
 		fflush(stdout);
 	}
 
-	free(full_msg);
-	free(type);
+	FREE(full_msg);
+	FREE(type);
 }
 
 void json_start(const char *op)

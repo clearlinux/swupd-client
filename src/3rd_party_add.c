@@ -144,9 +144,9 @@ static int import_temp_certificate(int version, char *hash)
 out:
 	unlink(cert_tar);
 	unlink(cert);
-	free(cert);
-	free(cert_tar);
-	free(url);
+	FREE(cert);
+	FREE(cert_tar);
+	FREE(url);
 	return ret;
 }
 
@@ -198,9 +198,9 @@ out:
 	manifest_free(manifest);
 	unlink(os_core_tar);
 	unlink(os_core);
-	free(os_core);
-	free(os_core_tar);
-	free(url);
+	FREE(os_core);
+	FREE(os_core_tar);
+	FREE(url);
 	return ret;
 }
 
@@ -211,7 +211,7 @@ static int import_third_party_certificate(void)
 
 	url = str_or_die("%s/version/format%s/latest", globals.content_url, globals.format_string);
 	tmp_version = get_int_from_url(url);
-	free(url);
+	FREE(url);
 
 	if (tmp_version <= 0) {
 		return -1;
@@ -360,7 +360,7 @@ finish:
 	}
 
 	list_free_list_and_data(repos, repo_free_data);
-	free_and_clear_pointer(&repo_content_dir);
+	FREE(repo_content_dir);
 	swupd_deinit();
 	progress_finish_steps(ret_code);
 

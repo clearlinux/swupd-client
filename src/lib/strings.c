@@ -108,7 +108,7 @@ char *str_join(const char *separator, struct list *strings)
 
 	return ret;
 error:
-	free(ret);
+	FREE(ret);
 	return NULL;
 }
 
@@ -122,7 +122,7 @@ struct list *str_split(const char *separator, const char *string_to_split)
 		split = list_prepend_data(split, strdup_or_die(token));
 		token = strtok_r(NULL, separator, &ctx);
 	}
-	free(string_copy);
+	FREE(string_copy);
 	return split;
 }
 
@@ -191,7 +191,7 @@ bool str_to_bool(const char *str)
 	}
 
 	/* return false for everything else */
-	free(str_lower);
+	FREE(str_lower);
 	return ret;
 }
 

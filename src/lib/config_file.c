@@ -69,7 +69,7 @@ bool config_file_parse(const char *filename, parse_config_fn_t parse_config_fn, 
 		/* check the line to see if the line is a section */
 		if (line[0] == '[' && *(line_ptr - 1) == ']') {
 			*(line_ptr - 1) = '\0';
-			free(section);
+			FREE(section);
 			/* keys and sections in INI files are case insensitive,
 			 * so we should convert them to a lower case first */
 			section = str_to_lower(line + 1);
@@ -105,11 +105,11 @@ bool config_file_parse(const char *filename, parse_config_fn_t parse_config_fn, 
 		if (parse_config_fn && !parse_config_fn(section, lkey, value, data)) {
 			warn("Unrecognized option '%s=%s' from section [%s] in the configuration file\n", key, value, section);
 		}
-		free(lkey);
+		FREE(lkey);
 	}
 
 close_and_exit:
-	free(section);
+	FREE(section);
 	fclose(config_file);
 	return ret;
 }

@@ -29,6 +29,7 @@
 
 #include "archives.h"
 #include "log.h"
+#include "macros.h"
 #include "strings.h"
 
 /* _archive_check_err(ar, ret)
@@ -175,7 +176,7 @@ int archives_extract_to(const char *tarfile, const char *outputdir)
 		char *fullpath;
 		string_or_die(&fullpath, "%s/%s", outputdir, archive_entry_pathname(entry));
 		archive_entry_set_pathname(entry, fullpath);
-		free(fullpath);
+		FREE(fullpath);
 
 		/* A hardlink must point to a real file, so set its output directory too. */
 		const char *original_hardlink = archive_entry_hardlink(entry);
@@ -183,7 +184,7 @@ int archives_extract_to(const char *tarfile, const char *outputdir)
 			char *new_hardlink;
 			string_or_die(&new_hardlink, "%s/%s", outputdir, original_hardlink);
 			archive_entry_set_hardlink(entry, new_hardlink);
-			free(new_hardlink);
+			FREE(new_hardlink);
 		}
 
 		/* write archive header, if successful continue to copy data */

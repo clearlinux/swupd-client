@@ -123,7 +123,7 @@ static enum swupd_code remove_bundle_binaries(struct list *removed_files, struct
 			error("The script %s could not be removed\n\n", script);
 			ret_code = SWUPD_COULDNT_REMOVE_FILE;
 		}
-		free_and_clear_pointer(&script);
+		FREE(script);
 	}
 
 	return ret_code;

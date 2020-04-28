@@ -148,8 +148,8 @@ static void free_curl_file(struct swupd_curl_parallel_handle *h, struct multi_cu
 		h->free_cb(file->data);
 	}
 
-	free_and_clear_pointer(&file->url);
-	free_and_clear_pointer(&file->file.path);
+	FREE(file->url);
+	FREE(file->file.path);
 	if (curl != NULL) {
 		/* Must remove handle out of multi queue first!*/
 		curl_multi_remove_handle(h->mcurl, curl);
@@ -157,8 +157,8 @@ static void free_curl_file(struct swupd_curl_parallel_handle *h, struct multi_cu
 		file->curl = NULL;
 	}
 
-	free(file->progress);
-	free(file);
+	FREE(file->progress);
+	FREE(file);
 }
 
 static void reevaluate_number_of_parallel_downloads(struct swupd_curl_parallel_handle *h, int retry)
@@ -229,7 +229,7 @@ struct swupd_curl_parallel_handle *swupd_curl_parallel_download_start(size_t max
 
 	return h;
 error:
-	free(h);
+	FREE(h);
 	return NULL;
 }
 
@@ -541,7 +541,7 @@ static void swupd_curl_parallel_download_clear(struct swupd_curl_parallel_handle
 	}
 	hashmap_free(h->curl_hashmap);
 
-	free(h);
+	FREE(h);
 
 	if (num_downloads) {
 		*num_downloads = downloads;

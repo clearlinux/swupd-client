@@ -255,7 +255,7 @@ struct list *list_free_item(struct list *item, list_free_data_fn_t list_free_dat
 		list_free_data_fn(item->data);
 	}
 
-	free(item);
+	FREE(item);
 
 	return ret_item;
 }

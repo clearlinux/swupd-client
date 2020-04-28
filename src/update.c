@@ -179,9 +179,9 @@ static void save_manifest(int version)
 	mkdir_p(momdir);
 
 	link_or_copy(original, momfile);
-	free_and_clear_pointer(&momdir);
-	free_and_clear_pointer(&momfile);
-	free_and_clear_pointer(&original);
+	FREE(momdir);
+	FREE(momfile);
+	FREE(original);
 }
 
 /* Checks to see if the given file is installed under the path_prefix. */
@@ -196,10 +196,10 @@ static bool is_installed_and_verified(struct file *file)
 	char *fullname = sys_path_join("%s/%s", globals.path_prefix, file->filename);
 
 	if (verify_file(file, fullname)) {
-		free_and_clear_pointer(&fullname);
+		FREE(fullname);
 		return true;
 	}
-	free_and_clear_pointer(&fullname);
+	FREE(fullname);
 	return false;
 }
 

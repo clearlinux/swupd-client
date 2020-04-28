@@ -43,7 +43,7 @@ struct manifest *manifest_parse_test(const char *component, const char *dir, con
 
 	full_path = sys_path_join("%s/%s", dir, filename);
 	m = manifest_parse(component, full_path, header_only);
-	free(full_path);
+	FREE(full_path);
 
 	return m;
 }
@@ -103,7 +103,7 @@ static void test_manifest_parse()
 	manifest = manifest_parse_test("test", dir, "data/mom_invalid2", false);
 	check(manifest == NULL);
 
-	free(dir);
+	FREE(dir);
 }
 
 int main() {

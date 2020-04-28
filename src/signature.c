@@ -239,7 +239,7 @@ error:
 		}
 	}
 
-	free_and_clear_pointer(&errorstr);
+	FREE(errorstr);
 
 	if (sig_BIO) {
 		BIO_free(sig_BIO);

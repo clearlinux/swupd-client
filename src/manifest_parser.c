@@ -214,7 +214,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			*c2 = 0;
 			c2++;
 		} else {
-			free(file);
+			FREE(file);
 			goto err_close;
 		}
 
@@ -226,14 +226,14 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			*c2 = 0;
 			c2++;
 		} else {
-			free(file);
+			FREE(file);
 			goto err_close;
 		}
 
 		err = str_to_int(c, &file->last_change);
 		if (file->last_change <= 0 || err != 0) {
 			error("Loaded incompatible manifest last change\n");
-			free(file);
+			FREE(file);
 			goto err_close;
 		}
 
@@ -287,6 +287,6 @@ void manifest_free(struct manifest *manifest)
 	if (manifest->optional) {
 		list_free_list_and_data(manifest->optional, free);
 	}
-	free_and_clear_pointer(&manifest->component);
-	free(manifest);
+	FREE(manifest->component);
+	FREE(manifest);
 }

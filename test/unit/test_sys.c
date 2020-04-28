@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "../../src/lib/macros.h"
 #include "../../src/lib/sys.h"
 #include "../../src/lib/strings.h"
 #include "test_helper.h"
@@ -11,7 +12,7 @@ static void test_sys_path_join()
 
 	path = sys_path_join("%s/%s/%s", "/123", "456", "789");
 	check(str_cmp(path, "/123/456/789") == 0);
-	free(path);
+	FREE(path);
 
 	const char *tests[][2] = {{"", ""},
 				  {"/", "/"},
@@ -28,7 +29,7 @@ static void test_sys_path_join()
 		path = sys_path_join(tests[i][0]);
 		printf("test %s -> %s\n", tests[i][0], path);
 		check(str_cmp(path, tests[i][1]) == 0);
-		free(path);
+		FREE(path);
 	}
 }
 

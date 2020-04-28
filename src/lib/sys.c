@@ -84,7 +84,7 @@ static void print_debug_run_command(char **params)
 	list_free_list(str);
 
 	debug(output);
-	free(output);
+	FREE(output);
 }
 
 int run_command_full_params(const char *stdout_file, const char *stderr_file, char **params)
@@ -210,7 +210,7 @@ int run_command_full(const char *stdout_file, const char *stderr_file, const cha
 
 	ret = run_command_full_params(stdout_file, stderr_file, params);
 
-	free(params);
+	FREE(params);
 	return ret;
 }
 
@@ -310,7 +310,7 @@ bool sys_path_is_absolute(const char *filename)
 	}
 
 exit:
-	free(abspath);
+	FREE(abspath);
 	return ret;
 }
 
@@ -417,7 +417,7 @@ char *sys_dirname(const char *path)
 	}
 
 	dir = strdup_or_die(dir);
-	free(tmp);
+	FREE(tmp);
 	return dir;
 }
 
@@ -463,7 +463,7 @@ char *sys_path_join(const char *fmt, ...)
 	}
 	pretty_path[j] = '\0';
 
-	free(path);
+	FREE(path);
 
 	return pretty_path;
 }
@@ -538,7 +538,7 @@ static int sys_rm_dir_recursive(const char *path)
 			continue;
 		}
 
-		free(filename);
+		FREE(filename);
 		filename = str_or_die("%s/%s", path, entry->d_name);
 
 		ret = sys_rm_recursive(filename);
@@ -552,7 +552,7 @@ static int sys_rm_dir_recursive(const char *path)
 
 exit:
 	closedir(dir);
-	free(filename);
+	FREE(filename);
 	return ret;
 }
 

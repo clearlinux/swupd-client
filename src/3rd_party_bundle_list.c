@@ -34,12 +34,12 @@ static bool cmdline_option_status = false;
 
 static void free_has_dep(void)
 {
-	free_and_clear_pointer(&cmdline_option_has_dep);
+	FREE(cmdline_option_has_dep);
 }
 
 static void free_deps(void)
 {
-	free_and_clear_pointer(&cmdline_option_deps);
+	FREE(cmdline_option_deps);
 }
 
 static void print_help(void)

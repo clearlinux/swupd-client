@@ -86,8 +86,7 @@ static void hmac_sha256_for_data(char *hash,
 	}
 
 	digest_str_len = MAX((digest_len * 2) + 1, SWUPD_HASH_LEN);
-	digest_str = calloc(digest_str_len, sizeof(char));
-	ON_NULL_ABORT(digest_str);
+	digest_str = malloc_or_die(digest_str_len * sizeof(char));
 
 	for (i = 0; i < digest_len; i++) {
 		snprintf(&digest_str[i * 2], digest_str_len, "%02x", (unsigned int)digest[i]);

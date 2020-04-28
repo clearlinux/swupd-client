@@ -195,9 +195,7 @@ int run_command_full(const char *stdout_file, const char *stderr_file, const cha
 
 	// Create params array with space for all parameters,
 	// command basename and NULL terminator
-	params = malloc(sizeof(char *) * (args_count + 2));
-	ON_NULL_ABORT(params);
-
+	params = malloc_or_die(sizeof(char *) * (args_count + 2));
 	params[i++] = (char *)cmd;
 
 	va_start(ap, cmd);
@@ -445,8 +443,7 @@ char *sys_path_join(const char *fmt, ...)
 	va_end(ap);
 
 	len = str_len(path);
-	char *pretty_path = malloc(str_len(path) + 1);
-	ON_NULL_ABORT(pretty_path);
+	char *pretty_path = malloc_or_die(str_len(path) + 1);
 
 	/* remove all duplicated PATH_SEPARATOR from the path */
 	for (i = j = 0; i < len; i++) {

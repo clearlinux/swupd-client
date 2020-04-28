@@ -40,8 +40,7 @@ struct time {
 
 timelist *timelist_new(void)
 {
-	timelist *head = malloc(sizeof(timelist));
-	ON_NULL_ABORT(head);
+	timelist *head = malloc_or_die(sizeof(timelist));
 	TAILQ_INIT(head);
 
 	timelist_timer_start(head, "Total execution time");
@@ -51,10 +50,7 @@ timelist *timelist_new(void)
 
 static struct time *alloc_time()
 {
-	struct time *t = calloc(1, sizeof(struct time));
-	ON_NULL_ABORT(t);
-
-	return t;
+	return malloc_or_die(sizeof(struct time));
 }
 
 static bool timer_stop(struct time *t)

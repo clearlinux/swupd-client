@@ -825,8 +825,7 @@ void print_regexp_error(int errcode, regex_t *regexp)
 	char *error_buffer = NULL;
 
 	len = regerror(errcode, regexp, NULL, 0);
-	error_buffer = malloc(len);
-	ON_NULL_ABORT(error_buffer);
+	error_buffer = malloc_or_die(len);
 
 	regerror(errcode, regexp, error_buffer, len);
 	error("Invalid regular expression: %s\n", error_buffer)
@@ -919,9 +918,7 @@ static void print_char(const char c, int times)
 {
 	char *str;
 
-	str = calloc(1, times + 1);
-	ON_NULL_ABORT(str);
-
+	str = malloc_or_die(times + 1);
 	memset(str, c, times);
 	info("%s\n", str);
 	FREE(str);

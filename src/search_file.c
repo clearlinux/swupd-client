@@ -157,8 +157,7 @@ static long get_bundle_size(const char *bundle)
 		return b->size;
 	}
 
-	b = calloc(1, sizeof(struct bundle_size));
-	ON_NULL_ABORT(b);
+	b = malloc_or_die(sizeof(struct bundle_size));
 	b->bundle_name = bundle;
 	b->size = compute_bundle_size(bundle);
 	bundle_size_cache = list_prepend_data(bundle_size_cache, b);

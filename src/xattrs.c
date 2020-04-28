@@ -113,8 +113,7 @@ static const char **get_sorted_xattr_name_table(const char *names, int n)
 	const char **table;
 	int i;
 
-	table = calloc(1, n * sizeof(char *));
-	ON_NULL_ABORT(table);
+	table = malloc_or_die(n * sizeof(char *));
 
 	for (i = 0; i < n; i++) {
 		table[i] = names;
@@ -157,8 +156,7 @@ static void xattrs_do_action(xattrs_action_type_t action,
 		return; // no xattrs, this is OK
 	}
 
-	list = calloc(1, len);
-	ON_NULL_ABORT(list);
+	list = malloc_or_die(len);
 
 	len = llistxattr(src_filename, list, len);
 	if (len <= 0) {
@@ -174,8 +172,7 @@ static void xattrs_do_action(xattrs_action_type_t action,
 	sorted_list = get_sorted_xattr_name_table(list, count);
 
 	if (action == XATTRS_ACTION_GET_BLOB) {
-		value = calloc(1, len);
-		ON_NULL_ABORT(value);
+		value = malloc_or_die(len);
 
 		value_len = len;
 

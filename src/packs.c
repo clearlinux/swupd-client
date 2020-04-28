@@ -131,8 +131,7 @@ static int download_pack(struct swupd_curl_parallel_handle *download_handle, int
 
 	string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", globals.content_url, newversion, module, oldversion);
 
-	pack_data = calloc(1, sizeof(struct pack_data));
-	ON_NULL_ABORT(pack_data);
+	pack_data = malloc_or_die(sizeof(struct pack_data));
 
 	pack_data->url = url;
 	pack_data->filename = filename;
@@ -335,8 +334,7 @@ int download_zero_packs(struct list *bundles, struct manifest *mom)
 		struct manifest *m = iter->data;
 		struct sub *sub;
 
-		sub = calloc(1, sizeof(struct sub));
-		ON_NULL_ABORT(sub);
+		sub = malloc_or_die(sizeof(struct sub));
 		sub->component = m->component;
 		sub->version = m->version;
 

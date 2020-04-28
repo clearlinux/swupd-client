@@ -56,8 +56,7 @@ static struct list *list_alloc_item(void *data)
 {
 	struct list *item;
 
-	item = (struct list *)malloc(sizeof(struct list));
-	ON_NULL_ABORT(item);
+	item = malloc_or_die(sizeof(struct list));
 
 	item->data = data;
 	item->next = NULL;

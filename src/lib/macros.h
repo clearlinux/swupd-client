@@ -7,6 +7,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 /**
  * @file
  * @brief General use macros
@@ -58,5 +59,20 @@
 		free(_ptr);  \
 		_ptr = NULL; \
 	} while (0)
+
+/**
+ * @brief allocate memory of indicated size and zero it.
+ *
+ * Abort on out of memory errors.
+ */
+static inline void *malloc_or_die(size_t size)
+{
+	void *ptr;
+
+	ptr = calloc(1, (size_t)size);
+	ON_NULL_ABORT(ptr);
+
+	return ptr;
+}
 
 #endif

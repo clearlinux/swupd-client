@@ -167,11 +167,9 @@ static void create_new_subscription(struct list **subs, const char *component, b
 {
 	struct sub *sub;
 
-	sub = calloc(1, sizeof(struct sub));
-	ON_NULL_ABORT(sub);
+	sub = malloc_or_die(sizeof(struct sub));
 
 	sub->component = strdup_or_die(component);
-
 	sub->version = 0;
 	sub->oldversion = 0;
 	sub->is_optional = is_optional;

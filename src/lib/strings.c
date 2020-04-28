@@ -92,8 +92,7 @@ char *str_join(const char *separator, struct list *strings)
 		str_size += sep_size;
 	}
 
-	ret = str = malloc(str_size);
-	ON_NULL_ABORT(str);
+	ret = str = malloc_or_die(str_size);
 	str[0] = '\0';
 
 	for (i = strings; i; i = i->next) {
@@ -207,9 +206,7 @@ int str_to_uint(const char *str, unsigned int *value)
 
 char *str_to_lower(const char *str)
 {
-	char *str_lower = malloc(str_len(str) + 1);
-
-	ON_NULL_ABORT(str_lower);
+	char *str_lower = malloc_or_die(str_len(str) + 1);
 
 	for (int i = 0; str[i]; i++) {
 		str_lower[i] = tolower(str[i]);

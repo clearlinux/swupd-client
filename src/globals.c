@@ -626,15 +626,15 @@ static bool global_parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'r':
-		err = str_to_int(optarg, &globals.max_retries);
-		if (err < 0 || globals.max_retries < 0) {
+		err = str_to_uint(optarg, &globals.max_retries);
+		if (err < 0) {
 			error("Invalid --max-retries argument: %s\n\n", optarg);
 			return false;
 		}
 		return true;
 	case 'd':
-		err = str_to_int(optarg, &globals.retry_delay);
-		if (err < 0 || globals.retry_delay < 0 || globals.retry_delay > 60) {
+		err = str_to_uint(optarg, &globals.retry_delay);
+		if (err < 0 || globals.retry_delay > 60) {
 			error("Invalid --retry-delay argument: %s (should be between 0 - %d seconds)\n\n", optarg, MAX_DELAY);
 			return false;
 		}

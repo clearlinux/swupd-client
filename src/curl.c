@@ -624,8 +624,8 @@ enum retry_strategy determine_strategy(int status)
 static int retry_download_loop(const char *url, char *filename, struct curl_file_data *in_memory_file, bool resume_ok)
 {
 
-	int current_retry = 0;
-	int sleep_time = globals.retry_delay;
+	unsigned int current_retry = 0;
+	unsigned int sleep_time = globals.retry_delay;
 	int strategy;
 	int ret;
 

@@ -49,8 +49,8 @@ extern struct globals {
 	char *state_dir;
 	char *state_dir_cache;
 	char *version_url;
-	int max_retries;
-	int retry_delay;
+	unsigned int max_retries;
+	unsigned int retry_delay;
 	int skip_diskspace_check;
 	int skip_optional_bundles;
 	int update_server_port;

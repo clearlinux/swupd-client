@@ -79,10 +79,10 @@
 #define HASH_TO_KEY(hash) (HASH_VALUE(hash[0]) << 4 | HASH_VALUE(hash[1]))
 
 struct swupd_curl_parallel_handle {
-	int retry_delay;	     /* Retry delay */
+	unsigned int retry_delay;    /* Retry delay */
 	size_t mcurl_size, max_xfer; /* hysteresis parameters */
 	bool resume_failed;
-	int last_retry; /* keep the largest retry number so far */
+	unsigned int last_retry; /* keep the largest retry number so far */
 
 	CURLM *mcurl;			    /* Curl handle */
 	struct list *failed;		    /* List of failed downloads */
@@ -101,7 +101,7 @@ struct swupd_curl_parallel_handle {
 struct multi_curl_file {
 	struct curl_file file;		/* Curl file information */
 	enum download_status status;	/* status of last download try */
-	char retries;			/* Number of retried performed so far */
+	unsigned int retries;		/* Number of retried performed so far */
 	CURL *curl;			/* curl handle if downloading */
 	char *url;			/* The url to be downloaded from */
 	size_t hash_key;		/* hash_key of this file */
@@ -161,7 +161,7 @@ static void free_curl_file(struct swupd_curl_parallel_handle *h, struct multi_cu
 	FREE(file);
 }
 
-static void reevaluate_number_of_parallel_downloads(struct swupd_curl_parallel_handle *h, int retry)
+static void reevaluate_number_of_parallel_downloads(struct swupd_curl_parallel_handle *h, unsigned int retry)
 {
 	if (h->last_retry >= retry || h->max_xfer == 1) {
 		return;
@@ -257,7 +257,7 @@ void swupd_curl_parallel_download_set_progress_callback(struct swupd_curl_parall
 }
 
 // Try to process at most COUNT messages from the curl multi-stack.
-static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, int count)
+static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, size_t count)
 {
 	CURLMsg *msg;
 	CURLcode curl_ret;
@@ -417,7 +417,7 @@ static int poll_fewer_than(struct swupd_curl_parallel_handle *h, size_t xfer_que
 
 		// Instead of using "numfds" as a hint for how many transfers
 		// to process, try to drain the queue to the lower bound.
-		int remaining = h->mcurl_size - xfer_queue_low;
+		size_t remaining = h->mcurl_size - xfer_queue_low;
 
 		if (perform_curl_io_and_complete(h, remaining) != 0) {
 			return -1;

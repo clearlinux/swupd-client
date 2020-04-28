@@ -7,13 +7,14 @@
 	# There are some C functions that are tricky to use and it's prefered to
 	# avoid using them in swupd. If any function in this list is really needed
 	# we need to review the usage and add an exception here.
-	local functions="strcpy wcscpy strcat wcscat sprintf vsprintf strtok ato strlen strcmp wcslen alloca vscanf vsscanf vfscanf scanf sscanf fscanf strncat strsep toa memmove asctime getwd gets basename dirname free system"
+	local functions="strcpy wcscpy strcat wcscat sprintf vsprintf strtok ato strlen strcmp wcslen alloca vscanf vsscanf vfscanf scanf sscanf fscanf strncat strsep toa memmove asctime getwd gets basename dirname free system malloc calloc"
 
 	local exceptions
 	declare -A exceptions
 	exceptions["basename"]="sys.*"
 	exceptions["dirname"]="sys.*"
 	exceptions["free"]="macros.h,verifytime.c,verifytime_main.c"
+	exceptions["calloc"]="macros.h,verifytime.c"
 
 	local error=0
 	for func in $functions; do

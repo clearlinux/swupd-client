@@ -101,8 +101,7 @@ static struct list *parse_alias_file(char *fullpath)
 		*c = 0;
 		c++;
 
-		l = calloc(1, sizeof(struct alias_lookup));
-		ON_NULL_ABORT(l);
+		l = malloc_or_die(sizeof(struct alias_lookup));
 
 		/* get the bundles associated with the alias
 		 * note a file with multiple copies of the same

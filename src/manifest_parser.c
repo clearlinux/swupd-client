@@ -44,8 +44,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 		return NULL;
 	}
 
-	manifest = calloc(1, sizeof(struct manifest));
-	ON_NULL_ABORT(manifest);
+	manifest = malloc_or_die(sizeof(struct manifest));
 
 	/* line 1: MANIFEST\t<version> */
 	line[0] = 0;
@@ -171,8 +170,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			goto err_close;
 		}
 
-		file = calloc(1, sizeof(struct file));
-		ON_NULL_ABORT(file);
+		file = malloc_or_die(sizeof(struct file));
 
 		if (line[0] == 'F') {
 			file->is_file = 1;

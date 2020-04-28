@@ -104,6 +104,34 @@ int str_to_int(const char *str, int *value);
 int str_to_int_endptr(const char *str, char **endptr, int *value);
 
 /**
+ * Safely convert string to an unsigned integer avoiding overflows
+ *
+ * The strtol function is commonly used to convert a string to a number and
+ * the result is frequently stored in an int type, but type casting a long to
+ * an int can cause overflows.
+ *
+ * This function returns negative error codes based on the errno table:
+ * -ERANGE is returned when the string is out of range for int value
+ * -EINVAL is returned when the string isn't a valid number or has any invalid
+ * trailing character.
+ */
+int str_to_uint(const char *str, unsigned int *value);
+
+/**
+ * Safely convert and string to unsigned integer avoiding overflows.
+ *
+ * The strtol function is commonly used to convert a string to a number and
+ * the result is frequently stored in an int type, but type casting a long to
+ * an int can cause overflows.
+ *
+ * This function returns negative error codes based on the errno table:
+ * -ERANGE is returned when the string is out of range for int value
+ *
+ * endptr is set with the value of the first invalid character in the string.
+ */
+int str_to_uint_endptr(const char *str, char **endptr, unsigned int *value);
+
+/**
  * Creates a new string converting all characters from the original string
  * to its lower case values.
  *

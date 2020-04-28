@@ -103,7 +103,7 @@ static bool parse_opt(int opt, char *optarg)
 			error("--picky-tree must be an absolute path, for example /usr\n\n");
 			return false;
 		}
-		free_and_clear_pointer(&cmdline_option_picky_tree);
+		FREE(cmdline_option_picky_tree);
 		cmdline_option_picky_tree = strdup_or_die(optarg);
 		return true;
 	case 'w':
@@ -208,7 +208,7 @@ regex_t *compile_whitelist(const char *whitelist_pattern)
 	}
 
 done:
-	free_and_clear_pointer(&full_regex);
+	FREE(full_regex);
 	return picky_whitelist;
 }
 
@@ -278,9 +278,9 @@ enum swupd_code repair_main(int argc, char **argv)
 	ret = execute_verify();
 
 	if (cmdline_option_picky_tree != cmdline_option_file) {
-		free_and_clear_pointer(&cmdline_option_file);
+		FREE(cmdline_option_file);
 	}
-	free_and_clear_pointer(&cmdline_option_picky_tree);
+	FREE(cmdline_option_picky_tree);
 	if (picky_whitelist) {
 		regfree(picky_whitelist);
 		picky_whitelist = NULL;

@@ -90,7 +90,7 @@ static bool parse_opt(int opt, char *optarg)
 			cmdline_bundles = list_prepend_data(cmdline_bundles, strdup_or_die(token));
 			token = strtok_r(NULL, ",", &ctx);
 		}
-		free(arg_copy);
+		FREE(arg_copy);
 		if (!cmdline_bundles) {
 			error("Missing --bundles argument\n\n");
 			return false;
@@ -168,10 +168,10 @@ enum swupd_code install_main(int argc, char **argv)
 	char *new_os_state = sys_path_join("%s/%s", globals.path_prefix, "/var/lib/swupd");
 	if (create_state_dirs(new_os_state)) {
 		ret = SWUPD_COULDNT_CREATE_DIR;
-		free_and_clear_pointer(&new_os_state);
+		FREE(new_os_state);
 		return ret;
 	}
-	free_and_clear_pointer(&new_os_state);
+	FREE(new_os_state);
 
 	/* set options needed for the install in the verify command */
 	verify_set_option_quick(true);

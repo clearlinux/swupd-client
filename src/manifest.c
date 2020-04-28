@@ -51,7 +51,7 @@ static struct manifest *manifest_from_file(int version, char *component, bool he
 
 	string_or_die(&filename, "%s/%i/Manifest.%s", basedir, version, component);
 	manifest = manifest_parse(component, filename, header_only);
-	free(filename);
+	FREE(filename);
 
 	if (!manifest) {
 		return NULL;
@@ -99,7 +99,7 @@ static int try_manifest_delta_download(int from, int to, char *component)
 	if (!sys_file_exists(manifest_delta)) {
 		string_or_die(&url, "%s/%i/Manifest-%s-delta-from-%i", globals.content_url, to, component, from);
 		ret = swupd_curl_get_file(url, manifest_delta);
-		free_and_clear_pointer(&url);
+		FREE(url);
 		if (ret != 0) {
 			unlink(manifest_delta);
 			goto out;
@@ -122,10 +122,10 @@ static int try_manifest_delta_download(int from, int to, char *component)
 	}
 
 out:
-	free_and_clear_pointer(&to_manifest);
-	free_and_clear_pointer(&to_dir);
-	free_and_clear_pointer(&from_manifest);
-	free_and_clear_pointer(&manifest_delta);
+	FREE(to_manifest);
+	FREE(to_dir);
+	FREE(from_manifest);
+	FREE(manifest_delta);
 	return ret;
 }
 
@@ -164,7 +164,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 		ret = 0;
 		goto out;
 	}
-	free_and_clear_pointer(&filename);
+	FREE(filename);
 
 	string_or_die(&filename, "%s/%i/Manifest.%s.tar", globals.state_dir, version, component);
 	string_or_die(&url, "%s/%i/Manifest.%s.tar", globals.content_url, version, component);
@@ -183,10 +183,10 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 	}
 
 out:
-	free_and_clear_pointer(&dir);
-	free_and_clear_pointer(&filename);
-	free_and_clear_pointer(&filename_cache);
-	free_and_clear_pointer(&url);
+	FREE(dir);
+	FREE(filename);
+	FREE(filename_cache);
+	FREE(url);
 	return ret;
 }
 
@@ -225,17 +225,17 @@ static void remove_manifest_files(char *filename, int version, char *hash)
 
 		string_or_die(&file, "%s/%i/Manifest.%s", state_dirs[i], version, filename);
 		unlink(file);
-		free_and_clear_pointer(&file);
+		FREE(file);
 		string_or_die(&file, "%s/%i/Manifest.%s.tar", state_dirs[i], version, filename);
 		unlink(file);
-		free_and_clear_pointer(&file);
+		FREE(file);
 		string_or_die(&file, "%s/%i/Manifest.%s.sig", state_dirs[i], version, filename);
 		unlink(file);
-		free_and_clear_pointer(&file);
+		FREE(file);
 		if (hash != NULL) {
 			string_or_die(&file, "%s/%i/Manifest.%s.%s", state_dirs[i], version, filename, hash);
 			unlink(file);
-			free_and_clear_pointer(&file);
+			FREE(file);
 		}
 	}
 }
@@ -283,9 +283,9 @@ static bool mom_signature_verify(const char *data_url, const char *data_filename
 		result = false;
 	}
 out:
-	free_and_clear_pointer(&sig_filename);
-	free_and_clear_pointer(&sig_url);
-	free_and_clear_pointer(&sig_filename_cache);
+	FREE(sig_filename);
+	FREE(sig_url);
+	FREE(sig_filename_cache);
 	return result;
 }
 /* Loads the MoM (Manifest of Manifests) for VERSION.
@@ -344,16 +344,16 @@ retry_load:
 		if (!mom_signature_verify(url, filename, version)) {
 			/* cleanup and try one more time, statedir could have got corrupt/stale */
 			if (retried == false) {
-				free_and_clear_pointer(&filename);
-				free_and_clear_pointer(&url);
+				FREE(filename);
+				FREE(url);
 				manifest_free(manifest);
 				remove_manifest_files("MoM", version, NULL);
 				retried = true;
 				goto retry_load;
 			}
 			error("Signature verification failed for manifest version %d\n", version);
-			free_and_clear_pointer(&filename);
-			free_and_clear_pointer(&url);
+			FREE(filename);
+			FREE(url);
 			manifest_free(manifest);
 			if (err) {
 				*err = SWUPD_SIGNATURE_VERIFICATION_FAILED;
@@ -362,8 +362,8 @@ retry_load:
 		}
 	}
 
-	free_and_clear_pointer(&filename);
-	free_and_clear_pointer(&url);
+	FREE(filename);
+	FREE(url);
 	return manifest;
 }
 
@@ -864,7 +864,7 @@ void remove_files_in_manifest_from_fs(struct manifest *m)
 			 * this is a limitation */
 			count--;
 		}
-		free_and_clear_pointer(&fullfile);
+		FREE(fullfile);
 	}
 	info("Total deleted files: %i\n", count);
 }
@@ -982,7 +982,7 @@ struct file **manifest_files_to_array(struct manifest *manifest)
 
 void manifest_free_array(struct file **array)
 {
-	free(array);
+	FREE(array);
 }
 
 static bool is_version_data(const char *filename)

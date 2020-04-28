@@ -175,10 +175,10 @@ void timelist_free(timelist *head)
 
 	while (!TAILQ_EMPTY(head)) {
 		t = TAILQ_LAST(head, timelist);
-		free(t->name);
+		FREE(t->name);
 		TAILQ_REMOVE(head, t, times);
-		free(t);
+		FREE(t);
 	}
 
-	free(head);
+	FREE(head);
 }

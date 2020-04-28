@@ -96,7 +96,7 @@ static int tartar(const char *source_dir, const char *source_basename, const cha
 
 	err = system(tarcommand);
 
-	free(tarcommand);
+	FREE(tarcommand);
 	return err;
 }
 
@@ -138,10 +138,10 @@ static enum swupd_code install_dir_using_tar(const char *fullfile_path, const ch
 	}
 
 out:
-	free(rename_tmpdir);
-	free(rename_target);
-	free(local_basename);
-	free(target_path);
+	FREE(rename_tmpdir);
+	FREE(rename_target);
+	FREE(local_basename);
+	FREE(target_path);
 	return ret;
 }
 
@@ -177,11 +177,11 @@ static enum swupd_code install_file_using_tar(const char *fullfile_path, const c
 	}
 
 out:
-	free(rename_tmpdir);
-	free(rename_target);
-	free(staged_file);
-	free(stage_dir);
-	free(target_path);
+	FREE(rename_tmpdir);
+	FREE(rename_target);
+	FREE(staged_file);
+	FREE(stage_dir);
+	FREE(target_path);
 	return ret;
 }
 
@@ -343,17 +343,17 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 
 		if (ret == SWUPD_OK) {
 			// Update staging reference in file structure
-			free_and_clear_pointer(&file->staging);
+			FREE(file->staging);
 			file->staging = strdup_or_die(staged_file);
 		}
 	}
 
 out:
-	free_and_clear_pointer(&dir);
-	free_and_clear_pointer(&target_file);
-	free_and_clear_pointer(&staged_file);
-	free_and_clear_pointer(&target_path);
-	free_and_clear_pointer(&fullfile_path);
+	FREE(dir);
+	FREE(target_file);
+	FREE(staged_file);
+	FREE(target_path);
+	FREE(fullfile_path);
 
 	return ret;
 }
@@ -418,9 +418,9 @@ static bool verify_fix_single_directory(const char *path, struct manifest *mom)
 	}
 
 end:
-	free(url);
-	free(target_path);
-	free(tar_dotfile);
+	FREE(url);
+	FREE(target_path);
+	FREE(tar_dotfile);
 	return ret;
 }
 
@@ -436,7 +436,7 @@ static struct list *split_directories(const char *dir)
 		path = sys_dirname(path);
 	}
 
-	free(path);
+	FREE(path);
 	return list_dir;
 }
 
@@ -479,7 +479,7 @@ int rename_staged_file_to_final(struct file *file)
 	target = sys_path_join("%s/%s", globals.path_prefix, file->filename);
 
 	if (!file->staging && !file->is_deleted && !file->is_dir) {
-		free_and_clear_pointer(&target);
+		FREE(target);
 		return -1;
 	}
 
@@ -498,7 +498,7 @@ int rename_staged_file_to_final(struct file *file)
 				ret = 0;
 			}
 		}
-		free_and_clear_pointer(&target_path);
+		FREE(target_path);
 	} else if (file->is_dir || file->is_ghosted) {
 		ret = 0;
 	} else {
@@ -515,11 +515,11 @@ int rename_staged_file_to_final(struct file *file)
 			lostnfound = sys_path_join("%s/lost+found", globals.path_prefix);
 			ret = mkdir(lostnfound, S_IRWXU);
 			if ((ret != 0) && (errno != EEXIST)) {
-				free_and_clear_pointer(&lostnfound);
-				free_and_clear_pointer(&target);
+				FREE(lostnfound);
+				FREE(target);
 				return ret;
 			}
-			free_and_clear_pointer(&lostnfound);
+			FREE(lostnfound);
 
 			base = sys_basename(file->filename);
 			lostnfound = sys_path_join("%s/lost+found/%s", globals.path_prefix, base);
@@ -529,7 +529,7 @@ int rename_staged_file_to_final(struct file *file)
 				error("failed to move %s to lost+found: %s\n",
 				      base, strerror(errno));
 			}
-			free_and_clear_pointer(&lostnfound);
+			FREE(lostnfound);
 		} else {
 			ret = rename(file->staging, target);
 			if (ret < 0) {
@@ -540,7 +540,7 @@ int rename_staged_file_to_final(struct file *file)
 		}
 	}
 
-	free_and_clear_pointer(&target);
+	FREE(target);
 	return ret;
 }
 
@@ -687,7 +687,7 @@ int target_root_remove_files(struct list *files)
 			 * this is a limitation */
 			deleted--;
 		}
-		free_and_clear_pointer(&fullfile);
+		FREE(fullfile);
 		count++;
 		progress_report(count, total);
 	}

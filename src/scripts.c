@@ -58,7 +58,7 @@ static void update_boot(void)
 	} else {
 		scriptname = sys_path_join("%s/%s", globals.path_prefix, "/usr/bin/clr-boot-manager");
 		run_script_if_exists(scriptname, "update", "--path", globals.path_prefix, NULL);
-		free_and_clear_pointer(&scriptname);
+		FREE(scriptname);
 	}
 }
 
@@ -89,7 +89,7 @@ static void exec_post_update_script(bool reexec, bool block)
 	params[i++] = NULL;
 
 	run_command_params(params);
-	free(params[0]);
+	FREE(params[0]);
 }
 
 static void run_ldconfig(void)
@@ -212,5 +212,5 @@ void scripts_run_pre_update(struct manifest *manifest)
 	}
 
 end:
-	free_and_clear_pointer(&script);
+	FREE(script);
 }

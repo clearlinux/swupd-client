@@ -3,9 +3,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../../src/lib/macros.h"
+#include "../../src/lib/strings.h"
 #include "../../src/lib/sys.h"
 #include "../../src/signature.h"
-#include "../../src/lib/strings.h"
 #include "test_helper.h"
 
 static char test_dir[] = "./test_signature-XXXXXX";
@@ -73,7 +74,7 @@ static int test_sign(const char *private_key, const char *public_key, bool succe
 
 error:
 	signature_deinit();
-	free(sig);
+	FREE(sig);
 	return ret;
 }
 
@@ -165,12 +166,12 @@ static int test_signature()
 	result = 0;
 error:
 	// Release resources
-	free(private_key);
-	free(public_key);
-	free(dir);
-	free(config_ocsp);
-	free(config_ocsp_critical);
-	free(config_noocsp_critical);
+	FREE(private_key);
+	FREE(public_key);
+	FREE(dir);
+	FREE(config_ocsp);
+	FREE(config_ocsp_critical);
+	FREE(config_noocsp_critical);
 
 	return result;
 }

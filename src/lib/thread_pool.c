@@ -120,7 +120,7 @@ error_threads:
 	return NULL;
 
 error:
-	free(tp);
+	FREE(tp);
 	return NULL;
 }
 
@@ -176,7 +176,7 @@ void tp_complete(struct tp *tp)
 	close(tp->pipe_fds[0]);
 
 free_tp:
-	free(tp);
+	FREE(tp);
 }
 
 int tp_get_num_threads(struct tp *tp)

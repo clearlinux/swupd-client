@@ -81,7 +81,7 @@ static bool parse_key_values(char *section, char *key, char *value, void *data)
 
 	if (strcasecmp(key, "url") == 0) {
 		if (repo->url) {
-			free(repo->url);
+			FREE(repo->url);
 		}
 		repo->url = strdup_or_die(value);
 	}
@@ -100,7 +100,7 @@ struct list *third_party_get_repos(void)
 	}
 
 	repos = list_head(repos);
-	free_and_clear_pointer(&repo_config_file_path);
+	FREE(repo_config_file_path);
 
 	return repos;
 }
@@ -108,10 +108,10 @@ struct list *third_party_get_repos(void)
 void repo_free(struct repo *repo)
 {
 	if (repo) {
-		free(repo->name);
-		free(repo->url);
+		FREE(repo->name);
+		FREE(repo->url);
 	}
-	free(repo);
+	FREE(repo);
 }
 
 void repo_free_data(void *data)
@@ -164,8 +164,8 @@ exit:
 		fclose(fp);
 	}
 
-	free(repo_config_file);
-	free(repo_config_file_path);
+	FREE(repo_config_file);
+	FREE(repo_config_file_path);
 	list_free_list_and_data(repos, repo_free_data);
 	return ret;
 }
@@ -218,7 +218,7 @@ exit:
 	if (fp) {
 		fclose(fp);
 	}
-	free_and_clear_pointer(&repo_config_file_path);
+	FREE(repo_config_file_path);
 	return ret;
 }
 
@@ -261,7 +261,7 @@ int third_party_remove_repo_directory(const char *repo_name)
 		error("Failed to delete repository directory\n");
 		ret_code = ret;
 	}
-	free(repo_dir);
+	FREE(repo_dir);
 
 	repo_dir = get_repo_state_dir(repo_name);
 	ret = sys_rm_recursive(repo_dir);
@@ -269,7 +269,7 @@ int third_party_remove_repo_directory(const char *repo_name)
 		error("Failed to delete repository state directory\n");
 		ret_code = ret;
 	}
-	free(repo_dir);
+	FREE(repo_dir);
 
 	return ret_code;
 }
@@ -297,26 +297,26 @@ enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck)
 		if (!signature_init(globals.cert_path, NULL)) {
 			signature_deinit();
 			error("Unable to validate the certificate %s\n\n", repo_cert_path);
-			free_and_clear_pointer(&repo_cert_path);
+			FREE(repo_cert_path);
 			return SWUPD_SIGNATURE_VERIFICATION_FAILED;
 		}
 	}
-	free_and_clear_pointer(&repo_cert_path);
+	FREE(repo_cert_path);
 
 	repo_path_prefix = get_repo_content_path(repo->name);
 	set_path_prefix(repo_path_prefix);
-	free_and_clear_pointer(&repo_path_prefix);
+	FREE(repo_path_prefix);
 
 	/* make sure there are state directories for the 3rd-party
 	 * repo if not there already */
 	repo_state_dir = get_repo_state_dir(repo->name);
 	if (create_state_dirs(repo_state_dir)) {
-		free_and_clear_pointer(&repo_state_dir);
+		FREE(repo_state_dir);
 		error("Unable to create the state directories for repository %s\n\n", repo->name);
 		return SWUPD_COULDNT_CREATE_DIR;
 	}
 	set_state_dir(repo_state_dir);
-	free_and_clear_pointer(&repo_state_dir);
+	FREE(repo_state_dir);
 
 	return SWUPD_OK;
 }
@@ -528,7 +528,7 @@ enum swupd_code third_party_run_operation_multirepo(const char *repo, process_bu
 clean_and_exit:
 	progress_finish_steps(ret_code);
 	list_free_list_and_data(repos, repo_free_data);
-	free_and_clear_pointer(&steps_title);
+	FREE(steps_title);
 
 	return ret_code;
 }
@@ -542,7 +542,7 @@ void third_party_repo_header(const char *repo_name)
 	if (log_is_quiet()) {
 		print("[%s]\n", repo_name);
 	}
-	free_and_clear_pointer(&header);
+	FREE(header);
 }
 
 bool third_party_file_is_binary(struct file *file)
@@ -602,8 +602,8 @@ enum swupd_code third_party_remove_binary(struct file *file)
 		}
 	}
 
-	free_and_clear_pointer(&script);
-	free_and_clear_pointer(&binary);
+	FREE(script);
+	FREE(binary);
 
 	return ret_code;
 }
@@ -628,7 +628,7 @@ static enum swupd_code third_party_bin_directory_exist(void)
 	}
 
 exit:
-	free_and_clear_pointer(&bin_directory);
+	FREE(bin_directory);
 	return ret_code;
 }
 
@@ -701,13 +701,13 @@ close_and_exit:
 	if (fp) {
 		fclose(fp);
 	}
-	free_and_clear_pointer(&binary);
-	free_and_clear_pointer(&script);
-	free_and_clear_pointer(&bin_directory);
-	free_and_clear_pointer(&third_party_bin_path);
-	free_and_clear_pointer(&third_party_ld_path);
-	free_and_clear_pointer(&third_party_xdg_data_path);
-	free_and_clear_pointer(&third_party_xdg_conf_path);
+	FREE(binary);
+	FREE(script);
+	FREE(bin_directory);
+	FREE(third_party_bin_path);
+	FREE(third_party_ld_path);
+	FREE(third_party_xdg_data_path);
+	FREE(third_party_xdg_conf_path);
 
 	return ret_code;
 }
@@ -753,9 +753,9 @@ enum swupd_code third_party_update_wrapper_script(struct file *file)
 	}
 
 close_and_exit:
-	free_and_clear_pointer(&binary);
-	free_and_clear_pointer(&script);
-	free_and_clear_pointer(&bin_directory);
+	FREE(binary);
+	FREE(script);
+	FREE(bin_directory);
 
 	return ret_code;
 }

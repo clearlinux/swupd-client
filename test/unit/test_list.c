@@ -5,6 +5,7 @@
 
 #include "../../src/lib/strings.h"
 #include "../../src/lib/list.h"
+#include "../../src/lib/macros.h"
 #include "test_helper.h"
 
 void test_list_sorted_deduplicate()
@@ -22,7 +23,7 @@ void test_list_sorted_deduplicate()
 
 	str = str_join(", ", list);
 	check(str_cmp("A", str) == 0);
-	free(str);
+	FREE(str);
 
 	// Deduplicating a list of odd number of identical elements
 	list = list_append_data(list, "A");
@@ -42,7 +43,7 @@ void test_list_sorted_deduplicate()
 
 	str = str_join(", ", list);
 	check(str_cmp("A, B, C, D, E", str) == 0);
-	free(str);
+	FREE(str);
 	list_free_list(list);
 
 }
@@ -67,7 +68,7 @@ void test_list_filter_elements()
 
 	str = str_join(", ", list);
 	check(str_cmp("A", str) == 0);
-	free(str);
+	FREE(str);
 	list_free_list(list);
 	list = NULL;
 
@@ -112,7 +113,7 @@ void test_list_filter_elements()
 
 	str = str_join(", ", list);
 	check(str_cmp("A, B, C, D, E, F", str) == 0);
-	free(str);
+	FREE(str);
 	list_free_list(list);
 }
 

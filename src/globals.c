@@ -83,7 +83,7 @@ static void set_json_format(bool on)
 void set_content_url(char *url)
 {
 	if (globals.content_url) {
-		free_and_clear_pointer(&globals.content_url);
+		FREE(globals.content_url);
 	}
 
 	globals.content_url = strdup_or_die(url);
@@ -125,7 +125,7 @@ static bool set_default_content_url(void)
 
 found:
 	set_content_url(new_content_url);
-	free_and_clear_pointer(&new_content_url);
+	FREE(new_content_url);
 	return true;
 }
 
@@ -133,7 +133,7 @@ found:
 void set_version_url(char *url)
 {
 	if (globals.version_url) {
-		free_and_clear_pointer(&globals.version_url);
+		FREE(globals.version_url);
 	}
 
 	globals.version_url = strdup_or_die(url);
@@ -175,7 +175,7 @@ static bool set_default_version_url(void)
 
 found:
 	set_version_url(new_version_url);
-	free_and_clear_pointer(&new_version_url);
+	FREE(new_version_url);
 	return true;
 }
 
@@ -217,7 +217,7 @@ bool set_state_dir(char *path)
 		return false;
 	}
 
-	free_and_clear_pointer(&globals.state_dir);
+	FREE(globals.state_dir);
 	string_or_die(&globals.state_dir, "%s", path);
 
 	return true;
@@ -246,7 +246,7 @@ bool set_state_dir_cache(char *path)
 		return false;
 	}
 
-	free_and_clear_pointer(&globals.state_dir_cache);
+	FREE(globals.state_dir_cache);
 	string_or_die(&globals.state_dir_cache, "%s", path);
 
 	return true;
@@ -273,7 +273,7 @@ static bool set_format_string(char *format)
 	}
 
 	if (globals.format_string) {
-		free_and_clear_pointer(&globals.format_string);
+		FREE(globals.format_string);
 	}
 
 	globals.format_string = strdup_or_die(format);
@@ -307,7 +307,7 @@ static bool set_default_format_string()
 
 found:
 	result = set_format_string(new_format_string);
-	free_and_clear_pointer(&new_format_string);
+	FREE(new_format_string);
 	return result;
 }
 
@@ -353,30 +353,30 @@ bool set_path_prefix(char *path)
 
 		tmp = new_path;
 		new_path = str_or_die("%s/", new_path);
-		free(tmp);
+		FREE(tmp);
 	}
 
-	free(globals.path_prefix);
+	FREE(globals.path_prefix);
 	globals.path_prefix = new_path;
 	return true;
 
 error:
 	error("Bad path_prefix %s (%s), cannot continue\n",
 	      globals.path_prefix, strerror(errno));
-	free(new_path);
+	FREE(new_path);
 	return false;
 }
 
 void set_default_path_prefix()
 {
-	free(globals.path_prefix);
+	FREE(globals.path_prefix);
 	globals.path_prefix = strdup_or_die("/");
 }
 
 void set_cert_path(char *path)
 {
 	if (globals.cert_path) {
-		free_and_clear_pointer(&globals.cert_path);
+		FREE(globals.cert_path);
 	}
 
 	globals.cert_path = realpath(path, NULL);
@@ -392,8 +392,8 @@ bool set_default_urls()
 {
 	/* we need to also unset the mirror urls from the cache and set it to
 	 * the central version */
-	free_and_clear_pointer(&globals.version_url);
-	free_and_clear_pointer(&globals.content_url);
+	FREE(globals.version_url);
+	FREE(globals.content_url);
 	if (!set_default_version_url()) {
 		return false;
 	}
@@ -433,7 +433,7 @@ static bool set_assume_option(char *option)
 		ret = false;
 	}
 
-	free_and_clear_pointer(&option_lower);
+	FREE(option_lower);
 
 	return ret;
 }
@@ -493,22 +493,22 @@ bool globals_init(void)
 
 void globals_deinit(void)
 {
-	/* freeing all globals and set ALL them to NULL (via free_and_clear_pointer)
+	/* freeing all globals and set ALL them to NULL
 	 * to avoid memory corruption on multiple calls
 	 * to swupd_init() */
-	free_and_clear_pointer(&globals.content_url);
-	free_and_clear_pointer(&globals.version_url);
-	free_and_clear_pointer(&globals.path_prefix);
-	free_and_clear_pointer(&globals.format_string);
-	free_and_clear_pointer(&globals.mounted_dirs);
-	free_and_clear_pointer(&globals.state_dir);
-	free_and_clear_pointer(&globals.state_dir_cache);
+	FREE(globals.content_url);
+	FREE(globals.version_url);
+	FREE(globals.path_prefix);
+	FREE(globals.format_string);
+	FREE(globals.mounted_dirs);
+	FREE(globals.state_dir);
+	FREE(globals.state_dir_cache);
 	timelist_free(globals.global_times);
 	globals.global_times = NULL;
-	free_and_clear_pointer(&globals_bkp.path_prefix);
-	free_and_clear_pointer(&globals_bkp.state_dir);
-	free_and_clear_pointer(&globals_bkp.version_url);
-	free_and_clear_pointer(&globals_bkp.content_url);
+	FREE(globals_bkp.path_prefix);
+	FREE(globals_bkp.state_dir);
+	FREE(globals_bkp.version_url);
+	FREE(globals_bkp.content_url);
 }
 
 void save_cmd(char **argv)
@@ -770,11 +770,11 @@ static bool load_flags_in_config(char *command, struct option *opts_array, const
 		if (config_file_parse(config_file, config_loader_set_opt, &loader_data)) {
 			config_found = true;
 		}
-		free_and_clear_pointer(&config_file);
+		FREE(config_file);
 	}
 
-	free_and_clear_pointer(&full_command);
-	free_and_clear_pointer(&str);
+	FREE(full_command);
+	FREE(str);
 #endif
 	return config_found;
 }
@@ -844,7 +844,7 @@ int global_parse_options(int argc, char **argv, const struct global_options *opt
 	}
 
 end:
-	free(optstring);
-	free(opts_array);
+	FREE(optstring);
+	FREE(opts_array);
 	return ret ? ret : optind;
 }

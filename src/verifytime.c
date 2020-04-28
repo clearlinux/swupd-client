@@ -22,6 +22,7 @@
 #include "verifytime.h"
 
 #include "lib/log.h"
+#include "lib/macros.h"
 #include "lib/sys.h"
 
 #include <errno.h>
@@ -70,7 +71,7 @@ static unsigned long int get_versionstamp(char *path_prefix)
 close_and_exit:
 	fclose(fp);
 exit:
-	free(filename);
+	FREE(filename);
 	return version_num;
 }
 

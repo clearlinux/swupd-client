@@ -37,8 +37,8 @@ static int download_file(struct swupd_curl_parallel_handle *download_handle, str
 	string_or_die(&filename, "%s/download/.%s.tar", globals.state_dir, file->hash);
 	string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
 	ret = swupd_curl_parallel_download_enqueue(download_handle, url, filename, file->hash, file);
-	free_and_clear_pointer(&url);
-	free_and_clear_pointer(&filename);
+	FREE(url);
+	FREE(filename);
 
 	return ret;
 }
@@ -74,13 +74,13 @@ static double fullfile_query_total_download_size(struct list *files)
 			total_size += size;
 		} else {
 			debug("The header for file %s could not be downloaded\n", file->filename);
-			free_and_clear_pointer(&url);
+			FREE(url);
 			return -SWUPD_COULDNT_DOWNLOAD_FILE;
 		}
 
 		count++;
 		debug("File: %s (%.2lf MB)\n", url, (double)size / 1000000);
-		free_and_clear_pointer(&url);
+		FREE(url);
 	}
 
 	debug("Number of files to download: %d\n", count);
@@ -108,10 +108,10 @@ static int get_cached_fullfile(struct file *file)
 					ret = 0;
 				}
 			}
-			free_and_clear_pointer(&targetfile_cache);
+			FREE(targetfile_cache);
 		}
 	}
-	free_and_clear_pointer(&targetfile);
+	FREE(targetfile);
 
 	return ret;
 }

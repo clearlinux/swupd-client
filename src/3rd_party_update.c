@@ -166,8 +166,8 @@ static enum swupd_code validate_permissions(struct file *file)
 		ret_code = SWUPD_INVALID_FILE;
 	}
 
-	free_and_clear_pointer(&staged_file);
-	free_and_clear_pointer(&original_file);
+	FREE(staged_file);
+	FREE(original_file);
 
 	return ret_code;
 }
@@ -315,7 +315,7 @@ enum swupd_code third_party_execute_update(void)
 	}
 
 exit:
-	free_and_clear_pointer(&template_file);
+	FREE(template_file);
 	sys_mmap_free(template, template_len);
 
 	return ret_code;

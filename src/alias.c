@@ -35,9 +35,9 @@ struct alias_lookup {
 void free_alias_lookup(void *lookup)
 {
 	struct alias_lookup *l = (struct alias_lookup *)lookup;
-	free(l->alias);
+	FREE(l->alias);
 	list_free_list_and_data(l->bundles, free);
-	free(l);
+	FREE(l);
 }
 
 static void *strdup_wrapper(const void *data)
@@ -124,7 +124,7 @@ static struct list *parse_alias_file(char *fullpath)
 			c = next;
 		}
 		if (!l->bundles) {
-			free(l);
+			FREE(l);
 			continue;
 		}
 		l->alias = strdup_or_die(line);
@@ -138,7 +138,7 @@ static struct list *parse_alias_file(char *fullpath)
 	(void)fclose(afile);
 
 	if (line) {
-		free(line);
+		FREE(line);
 	}
 	return alias_content;
 }
@@ -166,11 +166,11 @@ struct list *get_alias_definitions(void)
 	/* get sorted system and user filenames */
 	string_or_die(&path, "%s/%s", globals.path_prefix, SYSTEM_ALIAS_PATH);
 	system_alias_files = get_dir_files_sorted(path);
-	free(path);
+	FREE(path);
 
 	string_or_die(&path, "%s/%s", globals.path_prefix, USER_ALIAS_PATH);
 	user_alias_files = get_dir_files_sorted(path);
-	free(path);
+	FREE(path);
 
 	/* get a combined list with user files overriding system files */
 	iters = system_alias_files;

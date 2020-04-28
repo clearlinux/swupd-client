@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #include "log.h"
+#include "macros.h"
 #include "strings.h"
 
 #define DEBUG_HEADER_SIZE 50
@@ -99,7 +100,7 @@ static void log_internal(FILE *out, const char *file, int line, const char *labe
 		if (msg[str_len(msg) - 1] != '\n') {
 			fprintf(out, "\n");
 		}
-		free(msg);
+		FREE(msg);
 	} else {
 		vfprintf(out, format, args_list);
 	}

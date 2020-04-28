@@ -90,7 +90,7 @@ void hashmap_free_hash_and_data(struct hashmap *hashmap, free_data_fn_t free_dat
 		list_free_list_and_data(hashmap->map[i], free_data);
 	}
 
-	free(hashmap);
+	FREE(hashmap);
 }
 
 void hashmap_free(struct hashmap *hashmap)

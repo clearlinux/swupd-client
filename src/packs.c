@@ -80,9 +80,9 @@ static void download_free_data(void *data)
 		return;
 	}
 
-	free_and_clear_pointer(&pack_data->url);
-	free_and_clear_pointer(&pack_data->filename);
-	free(pack_data);
+	FREE(pack_data->url);
+	FREE(pack_data->filename);
+	FREE(pack_data);
 }
 
 static bool download_error(enum download_status status, void *data)
@@ -167,13 +167,13 @@ static double packs_query_total_download_size(struct list *subs, struct manifest
 			total_size += size;
 		} else {
 			debug("The pack header for bundle %s could not be downloaded\n", sub->component);
-			free_and_clear_pointer(&url);
+			FREE(url);
 			return -SWUPD_COULDNT_DOWNLOAD_FILE;
 		}
 
 		count++;
 		debug("Pack: %s (%.2lf MB)\n", url, (double)size / 1000000);
-		free_and_clear_pointer(&url);
+		FREE(url);
 	}
 
 	debug("Number of packs to download: %d\n", count);
@@ -201,10 +201,10 @@ static int get_cached_packs(struct sub *sub)
 					ret = 0;
 				}
 			}
-			free_and_clear_pointer(&targetfile_cache);
+			FREE(targetfile_cache);
 		}
 	}
-	free_and_clear_pointer(&targetfile);
+	FREE(targetfile);
 
 	return ret;
 }
@@ -281,7 +281,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	/* show the packs size only if > 1 MB */
 	string_or_die(&packs_size, "(%.2lf MB) ", (double)download_progress.total_download_size / 1000000);
 	info("Downloading packs %sfor:\n", ((double)download_progress.total_download_size / 1000000) > 1 ? packs_size : "");
-	free_and_clear_pointer(&packs_size);
+	FREE(packs_size);
 	for (iter = list_head(need_download); iter; iter = iter->next) {
 		sub = iter->data;
 

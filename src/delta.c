@@ -166,7 +166,7 @@ void apply_deltas(struct manifest *current_manifest)
 			string_or_die(&filename, "%s/%s", globals.path_prefix, file->filename);
 
 			if (!compute_hash_from_file(filename, hash) || !hash_equal(file->hash, hash)) {
-				free_and_clear_pointer(&filename);
+				FREE(filename);
 				bad_on_sys = true;
 				continue;
 			}
@@ -185,16 +185,16 @@ void apply_deltas(struct manifest *current_manifest)
 		}
 
 		apply_one_delta(found, to_staged, delta_file, to);
-		free_and_clear_pointer(&found);
+		FREE(found);
 
 	next:
 		/* Always remove delta files. Once applied the full staged file will be
 		 * available, so no need to keep the delta around. */
 		sys_rm(delta_file);
-		free_and_clear_pointer(&delta_file);
-		free_and_clear_pointer(&to_staged);
+		FREE(delta_file);
+		FREE(to_staged);
 	}
 
 	closedir(dir);
-	free_and_clear_pointer(&delta_dir);
+	FREE(delta_dir);
 }

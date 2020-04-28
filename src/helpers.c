@@ -66,7 +66,7 @@ int rm_staging_dir_contents(const char *rel_path)
 
 	dir = opendir(abs_path);
 	if (dir == NULL) {
-		free_and_clear_pointer(&abs_path);
+		FREE(abs_path);
 		return -1;
 	}
 
@@ -92,13 +92,13 @@ int rm_staging_dir_contents(const char *rel_path)
 		ret = remove(filename);
 		if (ret != 0) {
 			debug("Failed to remove file %s\n", filename);
-			free_and_clear_pointer(&filename);
+			FREE(filename);
 			break;
 		}
-		free_and_clear_pointer(&filename);
+		FREE(filename);
 	}
 
-	free_and_clear_pointer(&abs_path);
+	FREE(abs_path);
 	closedir(dir);
 
 	return ret;
@@ -111,15 +111,15 @@ void unlink_all_staged_content(struct file *file)
 	/* downloaded tar file */
 	string_or_die(&filename, "%s/download/%s.tar", globals.state_dir, file->hash);
 	unlink(filename);
-	free_and_clear_pointer(&filename);
+	FREE(filename);
 	string_or_die(&filename, "%s/download/.%s.tar", globals.state_dir, file->hash);
 	unlink(filename);
-	free_and_clear_pointer(&filename);
+	FREE(filename);
 
 	/* downloaded and un-tar'd file */
 	string_or_die(&filename, "%s/staged/%s", globals.state_dir, file->hash);
 	(void)remove(filename);
-	free_and_clear_pointer(&filename);
+	FREE(filename);
 }
 
 /* Ensure that a directory either doesn't exist
@@ -191,8 +191,8 @@ static bool validate_tracking_dir(const char *state_dir)
 
 		if (!sys_file_exists(src)) {
 			/* there is no bundles directory to copy from */
-			free_and_clear_pointer(&src);
-			free_and_clear_pointer(&tracking_dir);
+			FREE(src);
+			FREE(tracking_dir);
 			return false;
 		}
 
@@ -213,14 +213,14 @@ static bool validate_tracking_dir(const char *state_dir)
 		/* remove uglies that live in the system tracking directory */
 		rmfile = sys_path_join("%s/%s", tracking_dir, ".MoM");
 		(void)unlink(rmfile);
-		free_and_clear_pointer(&rmfile);
+		FREE(rmfile);
 
 		/* set perms on the directory correctly */
 		ret = chmod(tracking_dir, S_IRWXU);
 	}
 out:
-	free_and_clear_pointer(&tracking_dir);
-	free_and_clear_pointer(&src);
+	FREE(tracking_dir);
+	FREE(src);
 	if (ret) {
 		return false;
 	}
@@ -251,11 +251,11 @@ int create_state_dirs(const char *state_dir_path)
 			ret = mkdir(dir, S_IRWXU);
 			if (ret) {
 				error("failed to create %s\n", dir);
-				free_and_clear_pointer(&dir);
+				FREE(dir);
 				return -1;
 			}
 		}
-		free_and_clear_pointer(&dir);
+		FREE(dir);
 	}
 	/* Do a final check to make sure that the top level dir wasn't
 	 * tampered with whilst we were creating the dirs */
@@ -321,15 +321,15 @@ static void get_mounted_directories(void)
 				}
 				tmp = globals.mounted_dirs;
 				string_or_die(&globals.mounted_dirs, "%s%s:", tmp, mnt);
-				free_and_clear_pointer(&tmp);
+				FREE(tmp);
 				break;
 			}
 			n++;
 			mnt = strtok_r(NULL, " ", &ctx);
 		}
-		free_and_clear_pointer(&line);
+		FREE(line);
 	}
-	free_and_clear_pointer(&line);
+	FREE(line);
 	fclose(file);
 }
 
@@ -342,7 +342,7 @@ static int get_version_from_path(const char *abs_path)
 	ret = get_value_from_path(&ret_str, abs_path, true);
 	if (ret == 0) {
 		int err = str_to_int(ret_str, &val);
-		free_and_clear_pointer(&ret_str);
+		FREE(ret_str);
 
 		if (err != 0) {
 			error("Invalid version\n");
@@ -367,13 +367,13 @@ bool is_directory_mounted(const char *filename)
 
 	tmp = sys_path_join("%s/%s", globals.path_prefix, filename);
 	string_or_die(&fname, ":%s:", tmp);
-	free_and_clear_pointer(&tmp);
+	FREE(tmp);
 
 	if (strstr(globals.mounted_dirs, fname)) {
 		ret = true;
 	}
 
-	free_and_clear_pointer(&fname);
+	FREE(fname);
 
 	return ret;
 }
@@ -402,22 +402,22 @@ bool is_under_mounted_directory(const char *filename)
 
 		tmp = sys_path_join("%s/%s", globals.path_prefix, filename);
 		string_or_die(&fname, ":%s:", tmp);
-		free_and_clear_pointer(&tmp);
+		FREE(tmp);
 
 		err = strncmp(fname, mountpoint, str_len(mountpoint));
-		free_and_clear_pointer(&fname);
+		FREE(fname);
 		if (err == 0) {
-			free_and_clear_pointer(&mountpoint);
+			FREE(mountpoint);
 			ret = true;
 			break;
 		}
 
 		token = strtok_r(NULL, ":", &ctx);
 
-		free_and_clear_pointer(&mountpoint);
+		FREE(mountpoint);
 	}
 
-	free_and_clear_pointer(&dir);
+	FREE(dir);
 
 	return ret;
 }
@@ -432,14 +432,14 @@ void free_file_data(void *data)
 
 	/* peer is a pointer to file contained
 	 * in another list and must not be disposed */
-	free_and_clear_pointer(&file->filename);
-	free_and_clear_pointer(&file->staging);
+	FREE(file->filename);
+	FREE(file->staging);
 
 	if (file->header) {
-		free(file->header);
+		FREE(file->header);
 	}
 
-	free(file);
+	FREE(file);
 }
 
 void swupd_deinit(void)
@@ -616,7 +616,7 @@ bool version_files_consistent(void)
 	string_or_die(&state_v_path, "%s/version", globals.state_dir);
 	os_release_v = get_current_version(globals.path_prefix);
 	state_v = get_version_from_path(state_v_path);
-	free_and_clear_pointer(&state_v_path);
+	FREE(state_v_path);
 
 	// -1 returns indicate failures
 	if (os_release_v < 0 || state_v < 0) {
@@ -663,7 +663,7 @@ bool is_compatible_format(int format_num)
 		ret = false;
 	}
 
-	free_and_clear_pointer(&format_manifest);
+	FREE(format_manifest);
 	return ret;
 }
 
@@ -692,7 +692,7 @@ bool on_new_format(void)
 	}
 
 	err = str_to_int(ret_str, &res);
-	free_and_clear_pointer(&ret_str);
+	FREE(ret_str);
 
 	if (err != 0) {
 		return false;
@@ -726,9 +726,9 @@ int untar_full_download(void *data)
 	if (verify_file(file, targetfile)) {
 		unlink(tar_dotfile);
 		unlink(tarfile);
-		free_and_clear_pointer(&tar_dotfile);
-		free_and_clear_pointer(&tarfile);
-		free_and_clear_pointer(&targetfile);
+		FREE(tar_dotfile);
+		FREE(tarfile);
+		FREE(targetfile);
 		return 0;
 	}
 
@@ -737,10 +737,10 @@ int untar_full_download(void *data)
 
 	err = rename(tar_dotfile, tarfile);
 	if (err) {
-		free_and_clear_pointer(&tar_dotfile);
+		FREE(tar_dotfile);
 		goto exit;
 	}
-	free_and_clear_pointer(&tar_dotfile);
+	FREE(tar_dotfile);
 
 	err = archives_check_single_file_tarball(tarfile, file->hash);
 	if (err) {
@@ -751,7 +751,7 @@ int untar_full_download(void *data)
 	char *outputdir;
 	string_or_die(&outputdir, "%s/staged", globals.state_dir);
 	err = archives_extract_to(tarfile, outputdir);
-	free_and_clear_pointer(&outputdir);
+	FREE(outputdir);
 	if (err) {
 		warn("ignoring tar extract failure for fullfile %s.tar (ret %d)\n",
 		     file->hash, err);
@@ -774,8 +774,8 @@ int untar_full_download(void *data)
 	}
 
 exit:
-	free_and_clear_pointer(&tarfile);
-	free_and_clear_pointer(&targetfile);
+	FREE(tarfile);
+	FREE(targetfile);
 	if (err) {
 		unlink_all_staged_content(file);
 	}
@@ -802,7 +802,7 @@ char *get_printable_bundle_name(const char *bundle_name, bool is_experimental, b
 	} else if (status) {
 		string_or_die(&details, "%s", status);
 	}
-	free_and_clear_pointer(&status);
+	FREE(status);
 
 	if (details) {
 		if (log_is_quiet()) {
@@ -813,7 +813,7 @@ char *get_printable_bundle_name(const char *bundle_name, bool is_experimental, b
 	} else {
 		string_or_die(&printable_name, "%s", bundle_name);
 	}
-	free_and_clear_pointer(&details);
+	FREE(details);
 
 	return printable_name;
 }
@@ -831,7 +831,7 @@ void print_regexp_error(int errcode, regex_t *regexp)
 	regerror(errcode, regexp, error_buffer, len);
 	error("Invalid regular expression: %s\n", error_buffer)
 
-	    free(error_buffer);
+	    FREE(error_buffer);
 }
 
 bool is_url_insecure(const char *url)
@@ -886,7 +886,7 @@ int get_value_from_path(char **contents, const char *path, bool is_abs_path)
 
 	file = fopen(rel_path, "r");
 	if (!file) {
-		free_and_clear_pointer(&rel_path);
+		FREE(rel_path);
 		return ret;
 	}
 
@@ -911,7 +911,7 @@ int get_value_from_path(char **contents, const char *path, bool is_abs_path)
 	ret = 0;
 fail:
 	fclose(file);
-	free_and_clear_pointer(&rel_path);
+	FREE(rel_path);
 	return ret;
 }
 
@@ -924,7 +924,7 @@ static void print_char(const char c, int times)
 
 	memset(str, c, times);
 	info("%s\n", str);
-	free(str);
+	FREE(str);
 }
 
 void print_header(const char *header)
@@ -999,14 +999,6 @@ bool is_binary(const char *filename)
 	return false;
 }
 
-void free_and_clear_pointer(char **s)
-{
-	if (s) {
-		free(*s);
-		*s = NULL;
-	}
-}
-
 void warn_nosigcheck(const char *file)
 {
 	static bool first_time = true;
@@ -1019,7 +1011,7 @@ void warn_nosigcheck(const char *file)
 		journal_msg = str_or_die("swupd security notice: %s used to bypass MoM signature verification", flag);
 
 		journal_log_error(journal_msg);
-		free(journal_msg);
+		FREE(journal_msg);
 
 		first_time = false;
 	}

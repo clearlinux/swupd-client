@@ -920,9 +920,14 @@ static void print_char(const char c, int times)
 	char *str;
 
 	str = calloc(1, times + 1);
-	memset(str, c, times);
-	info("%s\n", str);
-	free(str);
+	if (str) {
+		memset(str, c, times);
+		info("%s\n", str);
+		free(str);
+	} else {
+		debug("Couldn't allocate memory\n");
+		UNEXPECTED();
+	}
 }
 
 void print_header(const char *header)

@@ -70,7 +70,7 @@ extern struct globals_bkp {
 
 struct global_options {
 	const struct option *longopts;
-	const int longopts_len;
+	const unsigned int longopts_len;
 	bool (*parse_opt)(int opt, char *optarg);
 	void (*print_help)(void);
 };

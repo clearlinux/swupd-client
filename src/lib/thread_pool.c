@@ -27,6 +27,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "int.h"
 #include "log.h"
 #include "macros.h"
 #include "thread_pool.h"
@@ -84,12 +85,12 @@ struct tp *tp_start(int num_threads)
 	int i;
 	struct tp *tp;
 
-	if (num_threads < 0) {
-		error("Number of threads (%d) shouldn't be negative\n", num_threads);
+	if (num_threads <= 0) {
+		error("Number of threads (%d) should be a positive integer\n", num_threads);
 		return NULL;
 	}
 
-	tp = malloc_or_die(sizeof(struct tp) + num_threads * sizeof(pthread_t *));
+	tp = malloc_or_die(sizeof(struct tp) + int_to_uint(num_threads) * sizeof(pthread_t *));
 
 	tp->num_threads = num_threads;
 	if (num_threads == 0) {

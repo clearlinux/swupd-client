@@ -29,6 +29,7 @@
 #undef basename
 #include <string.h>
 
+#include "int.h"
 #include "list.h"
 #include "log.h"
 #include "macros.h"
@@ -195,7 +196,7 @@ int run_command_full(const char *stdout_file, const char *stderr_file, const cha
 
 	// Create params array with space for all parameters,
 	// command basename and NULL terminator
-	params = malloc_or_die(sizeof(char *) * (args_count + 2));
+	params = malloc_or_die(sizeof(char *) * (int_to_uint(args_count) + 2));
 	params[i++] = (char *)cmd;
 
 	va_start(ap, cmd);

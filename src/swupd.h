@@ -17,6 +17,7 @@
 #include "lib/comp_functions.h"
 #include "lib/config_file.h"
 #include "lib/formatter_json.h"
+#include "lib/int.h"
 #include "lib/list.h"
 #include "lib/log.h"
 #include "lib/macros.h"

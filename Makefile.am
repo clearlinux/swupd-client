@@ -90,6 +90,8 @@ swupd_SOURCES = \
 	src/lib/formatter_json.h \
 	src/lib/hashmap.c \
 	src/lib/hashmap.h \
+	src/lib/int.c \
+	src/lib/int.h \
 	src/lib/list.c \
 	src/lib/list.h \
 	src/lib/log.c \
@@ -154,18 +156,21 @@ swupd_LDADD = \
 	$(pthread_LIBS)
 
 verifytime_CFLAGS = -DNO_SWUPD
-verifytime_SOURCES = src/verifytime.h \
-	src/verifytime.c \
-	src/verifytime_main.c \
-	src/lib/log.c \
-	src/lib/log.h \
+verifytime_SOURCES = \
+	src/lib/comp_functions.c \
+	src/lib/int.c \
+	src/lib/int.h \
 	src/lib/list.c \
 	src/lib/list.h \
+	src/lib/log.c \
+	src/lib/log.h \
 	src/lib/strings.c \
 	src/lib/strings.h \
-	src/lib/comp_functions.c \
 	src/lib/sys.c \
-	src/lib/sys.h
+	src/lib/sys.h \
+	src/verifytime.c \
+	src/verifytime.h \
+	src/verifytime_main.c
 
 verifytime_LDADD =
 
@@ -195,6 +200,7 @@ tap_driver = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 BATS_LOG_DRIVER = $(tap_driver)
 
 TESTS = \
+	test/unit/test_int.test \
 	test/unit/test_list.test \
 	test/unit/test_manifest.test \
 	test/unit/test_signature.test \

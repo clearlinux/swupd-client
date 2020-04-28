@@ -36,9 +36,7 @@ static char **create_params_list(char *binary_name, int argc, char **argv)
 	char **params;
 	int i;
 
-	params = malloc(sizeof(char *) * (argc + 2));
-	ON_NULL_ABORT(params);
-
+	params = malloc_or_die(sizeof(char *) * (argc + 2));
 	params[0] = binary_name;
 	for (i = 0; i < argc; i++) {
 		params[i + 1] = argv[i];

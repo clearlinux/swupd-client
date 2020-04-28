@@ -52,7 +52,7 @@ static char *sys_path_join(const char *fmt, ...)
 	va_end(ap);
 
 	len = str_len(path);
-	char *pretty_path = malloc(str_len(path) + 1);
+	char *pretty_path = calloc(1, str_len(path) + 1);
 	if (!pretty_path) {
 		abort();
 	}

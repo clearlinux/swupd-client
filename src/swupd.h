@@ -76,7 +76,7 @@ struct sub {
 	 *   -1       -> error, local bundle do not match any bundle on MoM */
 	int version;
 
-	/* oldversion: set to 0 by calloc(), possibly overridden by MoM read */
+	/* oldversion: set to 0 by calloc, possibly overridden by MoM read */
 	int oldversion;
 
 	/* is_optional: true if the subscription referred to by this struct is optional,

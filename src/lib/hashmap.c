@@ -72,9 +72,7 @@ struct hashmap *hashmap_new(size_t capacity, hash_equal_fn_t equal, hash_fn_t ha
 	unsigned int mask_bits = calc_bits(capacity);
 	size_t real_capacity = HASH_SIZE(mask_bits);
 
-	hashmap = calloc(1, sizeof(struct hashmap) + real_capacity * sizeof(struct list *));
-	ON_NULL_ABORT(hashmap);
-
+	hashmap = malloc_or_die(sizeof(struct hashmap) + real_capacity * sizeof(struct list *));
 	hashmap->mask_bits = mask_bits;
 	hashmap->hash = hash;
 	hashmap->equal = equal;

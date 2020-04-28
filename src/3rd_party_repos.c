@@ -73,8 +73,7 @@ static bool parse_key_values(char *section, char *key, char *value, void *data)
 
 	repo = list_search(*repos, section, cmp_repo_name_string);
 	if (!repo) {
-		repo = calloc(1, sizeof(struct repo));
-		ON_NULL_ABORT(repo);
+		repo = malloc_or_die(sizeof(struct repo));
 		repo->name = strdup_or_die(section);
 		*repos = list_append_data(*repos, repo);
 	}

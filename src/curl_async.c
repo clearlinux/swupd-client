@@ -199,9 +199,7 @@ struct swupd_curl_parallel_handle *swupd_curl_parallel_download_start(size_t max
 		return NULL;
 	}
 
-	h = calloc(1, sizeof(struct swupd_curl_parallel_handle));
-	ON_NULL_ABORT(h);
-
+	h = malloc_or_die(sizeof(struct swupd_curl_parallel_handle));
 	h->mcurl = curl_multi_init();
 	if (h->mcurl == NULL) {
 		goto error;
@@ -558,9 +556,7 @@ int swupd_curl_parallel_download_enqueue(struct swupd_curl_parallel_handle *h, c
 		return -EINVAL;
 	}
 
-	file = calloc(1, sizeof(struct multi_curl_file));
-	ON_NULL_ABORT(file);
-
+	file = malloc_or_die(sizeof(struct multi_curl_file));
 	file->file.path = strdup_or_die(filename);
 	file->url = strdup_or_die(url);
 	file->data = data;
@@ -579,8 +575,7 @@ int swupd_curl_parallel_download_enqueue(struct swupd_curl_parallel_handle *h, c
 
 	unlink(file->file.path);
 
-	progress = calloc(1, sizeof(struct file_progress));
-	ON_NULL_ABORT(progress);
+	progress = malloc_or_die(sizeof(struct file_progress));
 	progress->overall_progress = h->data;
 	file->progress = progress;
 

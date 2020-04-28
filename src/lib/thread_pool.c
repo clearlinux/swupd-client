@@ -89,8 +89,7 @@ struct tp *tp_start(int num_threads)
 		return NULL;
 	}
 
-	tp = calloc(1, sizeof(struct tp) + num_threads * sizeof(pthread_t *));
-	ON_NULL_ABORT(tp);
+	tp = malloc_or_die(sizeof(struct tp) + num_threads * sizeof(pthread_t *));
 
 	tp->num_threads = num_threads;
 	if (num_threads == 0) {

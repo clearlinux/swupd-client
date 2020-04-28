@@ -283,8 +283,7 @@ static char *read_mom_contents(int version)
 		goto end;
 	}
 
-	contents = malloc(stat.st_size + 1);
-	ON_NULL_ABORT(contents);
+	contents = malloc_or_die(stat.st_size + 1);
 
 	ret = fread(contents, stat.st_size, 1, f);
 	if (ret != 1) {

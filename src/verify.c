@@ -257,6 +257,7 @@ static int check_files_hash(struct list *files)
 		}
 
 		fullname = sys_path_join("%s/%s", globals.path_prefix, f->filename);
+		debug("Verify file - %s\n", f->filename);
 		valid = cmdline_option_quick ? verify_file_lazy(fullname) : verify_file(f, fullname);
 		FREE(fullname);
 		if (valid) {
@@ -374,6 +375,7 @@ static void add_missing_files(struct manifest *official_manifest, struct list *f
 		}
 
 		fullname = sys_path_join("%s/%s", globals.path_prefix, file->filename);
+		debug("Verify file - %s\n", file->filename);
 		memset(&local, 0, sizeof(struct file));
 		local.filename = file->filename;
 		populate_file_struct(&local, fullname);
@@ -441,6 +443,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 		return;
 	}
 
+	debug("Verify file - %s\n", file->filename);
 	/* compare the hash and report mismatch */
 	fullname = sys_path_join("%s/%s", globals.path_prefix, file->filename);
 	if (verify_file(file, fullname)) {

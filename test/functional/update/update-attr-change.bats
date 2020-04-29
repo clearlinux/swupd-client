@@ -119,6 +119,7 @@ test_setup() {
 	run stat --printf  "%a" "$TARGETDIR"/dir_sticky
 	[ "$output" -eq "1755" ]
 
+	# shellcheck disable=SC2119
 	show_target
 
 }

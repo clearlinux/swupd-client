@@ -11,9 +11,7 @@
 	for i in $TESTS; do
 		echo checking "$i" >&3
 
-		run sh -c "sed 's/^@.*/func() {/' $i |
-		sed 's/^load.*/source test\/functional\/testlib.bash/' |
-		shellcheck -s bash -x -e SC1008 /dev/stdin"
+		run "$BATS_TEST_DIRNAME"/../../scripts/shellcheck.bash "$i"
 		echo "Result: $status" >&3
 		if [ ! "$status" -eq "0" ]; then
 			echo "$output" >&3

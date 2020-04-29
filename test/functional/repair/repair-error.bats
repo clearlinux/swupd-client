@@ -47,7 +47,7 @@ test_teardown() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Error: Target exists but is not a directory: $PATH_PREFIX/baz
+		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
 		 -> Missing file: $PATH_PREFIX/baz/bat -> not fixed
 		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
 		 -> Missing file: $PATH_PREFIX/baz/bat/file_3 -> not fixed
@@ -83,7 +83,7 @@ test_teardown() {
 
 	assert_status_is_not "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Error: Target exists but is not a directory: $PATH_PREFIX/baz
+		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
 		$PATH_PREFIX/baz/bat -> not fixed
 		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
 		$PATH_PREFIX/baz/bat/file_3 -> not fixed

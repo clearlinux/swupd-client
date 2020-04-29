@@ -285,8 +285,8 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 
 	/* make sure the directory where the file should be copied to exists
 	 * and is indeed a directory */
-	if (!sys_filelink_exists(target_path)) {
-		debug("Target directory does not exist: %s\n", target_path);
+	if (!sys_filelink_is_dir(target_path)) {
+		debug("Target directory is incorect: %s\n", target_path);
 		if (mom) {
 			debug("Attempting to fix missing directory\n");
 			if (!verify_fix_path(dir, mom)) {
@@ -294,14 +294,10 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 				goto out;
 			}
 		} else {
-			debug("Auto-fix of missing directory disabled\n");
+			debug("Auto-fix of incorrect directory disabled\n");
 			ret = SWUPD_COULDNT_CREATE_DIR;
 			goto out;
 		}
-	} else if (!sys_filelink_is_dir(target_path)) {
-		error("Target exists but is not a directory: %s\n", target_path);
-		ret = SWUPD_COULDNT_CREATE_DIR;
-		goto out;
 	}
 
 	if (!sys_path_is_absolute(target_path)) {

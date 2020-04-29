@@ -451,7 +451,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	}
 	// do not account for missing files at this point, they are
 	// accounted for in a different stage, only account for mismatch
-	if (access(fullname, F_OK) != 0) {
+	if (!sys_file_exists(fullname) != 0) {
 		goto end;
 	}
 

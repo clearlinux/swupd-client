@@ -1,6 +1,12 @@
 #ifndef __INCLUDE_GUARD_MACROS_H
 #define __INCLUDE_GUARD_MACROS_H
 
+/* Only include telemetry reports on swupd. Not on verify_time */
+#ifndef NO_SWUPD
+#include "../telemetry.h"
+#endif
+
+#include <stdio.h>
 /**
  * @file
  * @brief General use macros
@@ -19,6 +25,7 @@
 #define MAX(_a, _b) ((_a) > (_b) ? (_a) : (_b))
 
 #ifdef DEBUG_MODE
+/* Debug move on */
 #define UNEXPECTED()                                                                   \
 	do {                                                                           \
 		fprintf(stderr, "Unexpected condition (%s:%d)\n", __FILE__, __LINE__); \
@@ -27,14 +34,20 @@
 #else
 /**
  * @brief To be used in all checks where we assume swupd should never get in to.
- * This macro aborts execution only when DEBUG_MODE is used.
+ * This macro aborts execution only when DEBUG_MODE is used. If not, it creates a
+ * telemetry record on swupd or ignore on verify_time.
  */
+#ifndef NO_SWUPD
+/* Debug move off and on swupd */
 #define UNEXPECTED()                                                                                         \
 	do {                                                                                                 \
 		telemetry(TELEMETRY_CRIT, "unexpected-condition", "file=%s\nline=%d\n", __FILE__, __LINE__); \
 	} while (0)
-
-#endif
+#else
+/* Debug move off and on verify_time */
+#define UNEXPECTED()
+#endif /* SWUPD */
+#endif /* DEBUG_MODE */
 
 /**
  * @brief free() wrapper that always set the pointer to NULL after freeing.

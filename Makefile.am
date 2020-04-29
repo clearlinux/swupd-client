@@ -153,6 +153,7 @@ swupd_LDADD = \
 	$(libarchive_LIBS) \
 	$(pthread_LIBS)
 
+verifytime_CFLAGS = -DNO_SWUPD
 verifytime_SOURCES = src/verifytime.h \
 	src/verifytime.c \
 	src/verifytime_main.c \

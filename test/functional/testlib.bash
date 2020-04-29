@@ -2004,9 +2004,7 @@ destroy_test_environment() { # swupd_function
 		debug_msg "The --force option was used"
 	fi
 
-	# shellcheck disable=SC2119
 	destroy_web_server
-	# shellcheck disable=SC2119
 	destroy_trusted_cacert
 
 	# if the test environment doesn't exist warn the user but don't terminate script
@@ -2162,7 +2160,6 @@ create_config_file() { # swupd_function
 
 	if [ -e "$SWUPD_CONFIG_FILE" ]; then
 		debug_msg "A config file already existed in that location, deleting it..."
-		# shellcheck disable=SC2119
 		destroy_config_file
 	fi
 
@@ -4369,7 +4366,6 @@ setup() {
 
 	if [ "$DEBUG_TEST" = true ] || [ "$SHOW_TARGET" = true ]; then
 		print "\nTarget system before the test:"
-		# shellcheck disable=SC2119
 		show_target
 	fi
 	if [ "$TEST_ENV_ONLY" = true ]; then
@@ -4403,7 +4399,6 @@ teardown() {
 
 	if [ "$DEBUG_TEST" = true ] || [ "$SHOW_TARGET" = true ]; then
 		print "\nTarget system after the test:"
-		# shellcheck disable=SC2119
 		show_target
 	fi
 

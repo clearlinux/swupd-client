@@ -80,7 +80,6 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/dir1/dir2/file2
 	assert_file_exists "$TARGETDIR"/file3
 	assert_file_exists "$TARGETDIR"/file4
-	# shellcheck disable=SC2119
 	show_target
 
 }

@@ -59,7 +59,6 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	# shellcheck disable=SC2119
 	show_target
 
 }

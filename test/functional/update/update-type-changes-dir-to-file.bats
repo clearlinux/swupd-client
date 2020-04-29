@@ -76,7 +76,6 @@ test_setup() {
 	assert_dir_not_exists "$TARGETDIR"/dir1
 	assert_file_exists "$TARGETDIR"/dir1
 	assert_file_exists "$TARGETDIR"/common_file
-	# shellcheck disable=SC2119
 	show_target
 
 }

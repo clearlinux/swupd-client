@@ -72,14 +72,9 @@ static inline int subcmd_index(char *arg, struct subcmd *commands)
 {
 	struct subcmd *entry = commands;
 	int i = 0;
-	size_t input_len;
-	size_t cmd_len;
-
-	input_len = str_len(arg);
 
 	while (entry->name != NULL) {
-		cmd_len = str_len(entry->name);
-		if (cmd_len == input_len && str_cmp(arg, entry->name) == 0) {
+		if (str_cmp(arg, entry->name) == 0) {
 			return i;
 		}
 		entry++;

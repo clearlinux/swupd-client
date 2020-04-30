@@ -53,7 +53,7 @@ Swupd_Root.pem
 private.pem
 test/**/*.log
 test/unit/test_*.test
-verifytime
+/verifytime
 unit_tests.log
 html/
 xml/

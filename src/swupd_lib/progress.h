@@ -6,7 +6,7 @@
  * @brief Swupd progress bar.
  */
 
-#include "src/swupd_curl.h"
+#include "swupd_lib/swupd_curl.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus

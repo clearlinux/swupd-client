@@ -29,7 +29,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "alias.h"
+#include "swupd_lib/alias.h"
 #include "swupd.h"
 
 #define MODE_RW_O (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)

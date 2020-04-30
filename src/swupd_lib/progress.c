@@ -24,7 +24,6 @@
 #include "lib/log.h"
 #include "lib/macros.h"
 #include "progress.h"
-#include "swupd_exit_codes.h"
 
 #define PERCENTAGE_UNDEFINED -1
 #define PERCENTAGE_OFF -2

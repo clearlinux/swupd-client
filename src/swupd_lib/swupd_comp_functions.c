@@ -19,7 +19,7 @@
 
 #include <string.h>
 
-#include "3rd_party_repos.h"
+#include "3rd_party/3rd_party_repos.h"
 #include "swupd.h"
 
 /**

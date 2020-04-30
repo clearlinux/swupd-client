@@ -1,8 +1,10 @@
-#ifndef __SWUPD_INTERNAL__
-#define __SWUPD_INTERNAL__
+#ifndef __SWUPD_CMDS__
+#define __SWUPD_CMDS__
 
 #include <stddef.h>
 #include <string.h>
+
+#include "lib/strings.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -32,9 +32,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "signature.h"
 #include "swupd.h"
-#include "target_root.h"
+#include "swupd_lib/signature.h"
+#include "swupd_lib/target_root.h"
 
 #define FLAG_EXTRA_FILES_ONLY 2000
 #define FLAG_FILE 2001

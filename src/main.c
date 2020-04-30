@@ -23,9 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cmds/swupd_cmds.h"
 #include "swupd.h"
 #include "swupd_build_opts.h"
-#include "swupd_internal.h"
 
 static enum swupd_code external_search_main(int argc, char **argv)
 {

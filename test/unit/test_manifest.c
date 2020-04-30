@@ -19,8 +19,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../src/manifest.h"
-#include "../../src/swupd.h"
+#include "swupd_lib/manifest.h"
+#include "swupd.h"
 #include "test_helper.h"
 
 static void validate_file(struct list *files, const char *filename, int version, int hash, int is_dir, int is_file, int is_link, int is_deleted, int is_ghosted, int is_manifest, int is_config, int is_state, int is_boot, int is_experimental)

@@ -31,9 +31,9 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "signature.h"
 #include "swupd.h"
-#include "target_root.h"
+#include "swupd_lib/signature.h"
+#include "swupd_lib/target_root.h"
 
 #define FLAG_DOWNLOAD_ONLY 2000
 #define FLAG_UPDATE_SEARCH_FILE_INDEX 2001

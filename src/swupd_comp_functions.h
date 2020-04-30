@@ -40,6 +40,9 @@ int cmp_sub_component_string(const void *a, const void *b);
 /** @brief compare a string with filerecord->filename */
 int cmp_string_filerecord_filename(const void *a, const void *b);
 
+/** @brief compare a string with sub->component */
+int cmp_string_sub_component(const void *a, const void *b);
+
 /**
  * @brief compare file->filename with file->filename
  * @returns an inverse result

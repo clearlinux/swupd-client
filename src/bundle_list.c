@@ -28,12 +28,14 @@
 
 #define FLAG_DEPS 2000
 #define FLAG_STATUS 2001
+#define FLAG_ORPHANS 2002
 
 static bool cmdline_option_all = false;
 static char *cmdline_option_has_dep = NULL;
 static char *cmdline_option_deps = NULL;
 static bool cmdline_local = true;
 static bool cmdline_option_status = false;
+static bool cmdline_option_orphans = false;
 
 void bundle_list_set_option_all(bool opt)
 {
@@ -66,6 +68,11 @@ void bundle_list_set_option_status(bool opt)
 	cmdline_option_status = opt;
 }
 
+void bundle_list_set_option_orphans(bool opt)
+{
+	cmdline_option_orphans = opt;
+}
+
 static void free_has_dep(void)
 {
 	FREE(cmdline_option_has_dep);
@@ -89,6 +96,7 @@ static void print_help(void)
 	print("   -D, --has-dep=[BUNDLE]  List all bundles which have BUNDLE as a dependency (use --verbose for tree view)\n");
 	print("   --deps=[BUNDLE]         List BUNDLE dependencies (use --verbose for tree view)\n");
 	print("   --status                Show the installation status of the listed bundles\n");
+	print("   --orphans               List orphaned bundles\n");
 	print("\n");
 }
 
@@ -97,6 +105,7 @@ static const struct option prog_opts[] = {
 	{ "deps", required_argument, 0, FLAG_DEPS },
 	{ "has-dep", required_argument, 0, 'D' },
 	{ "status", no_argument, 0, FLAG_STATUS },
+	{ "orphans", no_argument, 0, FLAG_ORPHANS },
 };
 
 static bool parse_opt(int opt, char *optarg)
@@ -118,6 +127,10 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case FLAG_STATUS:
 		cmdline_option_status = optarg_to_bool(optarg);
+		return true;
+	case FLAG_ORPHANS:
+		cmdline_local = false;
+		cmdline_option_orphans = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;
@@ -153,6 +166,21 @@ static bool parse_options(int argc, char **argv)
 		}
 		if (cmdline_option_has_dep) {
 			error("--status and --has-dep options are mutually exclusive\n");
+			return false;
+		}
+	}
+
+	if (cmdline_option_orphans) {
+		if (cmdline_option_all) {
+			error("--orphans and --all options are mutually exclusive\n");
+			return false;
+		}
+		if (cmdline_option_deps) {
+			error("--orphans and --deps options are mutually exclusive\n");
+			return false;
+		}
+		if (cmdline_option_has_dep) {
+			error("--orphans and --has-dep options are mutually exclusive\n");
 			return false;
 		}
 	}
@@ -415,6 +443,89 @@ out:
 	return ret;
 }
 
+static enum swupd_code list_orphaned_bundles(int version)
+{
+	enum swupd_code ret_code = SWUPD_OK;
+	struct list *tracked_bundles = NULL;
+	struct list *bundles = NULL;
+	struct list *subs = NULL;
+	struct list *iter = NULL;
+	struct manifest *mom = NULL;
+	struct file *bundle_manifest = NULL;
+	char *name = NULL;
+	int count = 0;
+	int ret;
+
+	progress_next_step("load_manifests", PROGRESS_UNDEFINED);
+	info("Loading required manifests...\n");
+	mom = load_mom(version, NULL);
+	if (!mom) {
+		error("Cannot load official manifest MoM for version %i\n\n", version);
+		return SWUPD_COULDNT_LOAD_MOM;
+	}
+
+	// start with a list of the tracked bundles
+	// (bundles specifically installed by the user)
+	tracked_bundles = bundle_list_tracked();
+	if (!tracked_bundles) {
+		// this should never happen, swupd_init makes sure of it
+		ret_code = SWUPD_COULDNT_LIST_DIR;
+		goto out;
+	}
+
+	// create the list of required bundles by using tracked bundles as base
+	// and adding the dependencies of each tracked bundles to the list
+	ret = add_subscriptions(tracked_bundles, &subs, mom, true, 0);
+	if (ret != add_sub_NEW) {
+		// something went wrong or there were no includes, print a message and exit
+		if (ret & add_sub_ERR) {
+			error("Cannot load included bundles\n\n");
+			ret_code = SWUPD_COULDNT_LOAD_MANIFEST;
+		} else {
+			error("Unknown error\n\n");
+			ret_code = SWUPD_UNEXPECTED_CONDITION;
+		}
+		goto out;
+	}
+
+	progress_next_step("list_bundles", PROGRESS_UNDEFINED);
+	// create a list with all bundles installed in the system
+	bundles = bundle_list_installed();
+
+	// sort the lists
+	subs = list_sort(subs, cmp_subscription_component);
+	bundles = list_sort(bundles, str_cmp_wrapper);
+
+	// remove the bundles in the list of subscribed bundles from
+	// the list of all bundles
+	bundles = list_sorted_filter_common_elements(bundles, subs, cmp_string_sub_component, free);
+
+	// print the list
+	info("Orphan bundles:\n");
+	for (iter = bundles; iter; iter = iter->next) {
+		bundle_manifest = mom_search_bundle(mom, (char *)iter->data);
+		if (bundle_manifest) {
+			name = get_printable_bundle_name(bundle_manifest->filename, bundle_manifest->is_experimental, cmdline_option_status && is_installed_bundle(bundle_manifest->filename), cmdline_option_status && is_tracked_bundle(bundle_manifest->filename));
+			info(" - ");
+			print("%s\n", name);
+			FREE(name);
+		} else {
+			UNEXPECTED();
+			debug("the manifest for bundle %s was not found in the MoM\n", (char *)iter->data);
+		}
+		count++;
+	}
+	info("\nTotal: %d\n", count);
+
+out:
+	manifest_free(mom);
+	list_free_list_and_data(tracked_bundles, free);
+	list_free_list_and_data(bundles, free);
+	free_subscriptions(&subs);
+
+	return ret_code;
+}
+
 enum swupd_code list_bundles(void)
 {
 	enum swupd_code ret;
@@ -435,6 +546,8 @@ enum swupd_code list_bundles(void)
 		ret = show_included_bundles(cmdline_option_deps, version);
 	} else if (cmdline_option_has_dep != NULL) {
 		ret = show_bundle_reqd_by(cmdline_option_has_dep, cmdline_option_all, version);
+	} else if (cmdline_option_orphans) {
+		ret = list_orphaned_bundles(version);
 	} else {
 		ret = list_installable_bundles(version);
 	}
@@ -472,6 +585,9 @@ enum swupd_code bundle_list_main(int argc, char **argv)
 	progress_init_steps("bundle-list", steps_in_bundlelist);
 
 	ret = list_bundles();
+	if (ret == SWUPD_OK && cmdline_option_orphans) {
+		info("\nUse \"swupd bundle-add BUNDLE\" to no longer list BUNDLE and its dependencies as orphaned\n");
+	}
 
 	swupd_deinit();
 	progress_finish_steps(ret);

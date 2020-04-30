@@ -100,7 +100,7 @@ _swupd() {
     return 1
   fi
 
-	# Ignore SC2207 because that's the standard way to fill COMPREPLY
+  # Ignore SC2207 because that's the standard way to fill COMPREPLY
   # shellcheck disable=SC2207
   COMPREPLY=($(compgen -W "$opts" -- "$cur"));
   # Ignore SC2128 because only when there's one candidate it's completed on `Tab`

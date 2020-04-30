@@ -37,10 +37,14 @@ static bool cmdline_local = true;
 static bool cmdline_option_status = false;
 static bool cmdline_option_orphans = false;
 
+void bundle_list_set_option_local(bool opt)
+{
+	cmdline_local = opt;
+}
+
 void bundle_list_set_option_all(bool opt)
 {
 	cmdline_option_all = opt;
-	cmdline_local = !cmdline_option_all;
 }
 
 void bundle_list_set_option_has_dep(char *bundle)
@@ -50,7 +54,6 @@ void bundle_list_set_option_has_dep(char *bundle)
 	}
 	FREE(cmdline_option_has_dep);
 	cmdline_option_has_dep = bundle;
-	cmdline_local = false;
 }
 
 void bundle_list_set_option_deps(char *bundle)
@@ -60,7 +63,6 @@ void bundle_list_set_option_deps(char *bundle)
 	}
 	FREE(cmdline_option_deps);
 	cmdline_option_deps = bundle;
-	cmdline_local = false;
 }
 
 void bundle_list_set_option_status(bool opt)

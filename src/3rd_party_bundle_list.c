@@ -24,6 +24,7 @@
 
 #define FLAG_DEPS 2000
 #define FLAG_STATUS 2001
+#define FLAG_ORPHANS 2002
 
 static bool cmdline_local = true;
 static bool cmdline_option_all = false;
@@ -31,6 +32,7 @@ static char *cmdline_option_has_dep = NULL;
 static char *cmdline_option_deps = NULL;
 static char *cmdline_repo = NULL;
 static bool cmdline_option_status = false;
+static bool cmdline_option_orphans = false;
 
 static void free_has_dep(void)
 {
@@ -56,6 +58,7 @@ static void print_help(void)
 	print("   -D, --has-dep=[BUNDLE]  List all bundles which have BUNDLE as a dependency (use --verbose for tree view)\n");
 	print("   --deps=[BUNDLE]         List BUNDLE dependencies (use --verbose for tree view)\n");
 	print("   --status                Show the installation status of the listed bundles\n");
+	print("   --orphans               List orphaned bundles\n");
 	print("\n");
 }
 
@@ -65,6 +68,7 @@ static const struct option prog_opts[] = {
 	{ "has-dep", required_argument, 0, 'D' },
 	{ "status", no_argument, 0, FLAG_STATUS },
 	{ "repo", required_argument, 0, 'R' },
+	{ "orphans", no_argument, 0, FLAG_ORPHANS },
 };
 
 static bool parse_opt(int opt, char *optarg)
@@ -89,6 +93,10 @@ static bool parse_opt(int opt, char *optarg)
 		return true;
 	case FLAG_STATUS:
 		cmdline_option_status = optarg_to_bool(optarg);
+		return true;
+	case FLAG_ORPHANS:
+		cmdline_local = false;
+		cmdline_option_orphans = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;
@@ -116,6 +124,22 @@ static bool parse_options(int argc, char **argv)
 		return false;
 	}
 
+	/* flag restrictions */
+	if (cmdline_option_orphans) {
+		if (cmdline_option_all) {
+			error("--orphans and --all options are mutually exclusive\n");
+			return false;
+		}
+		if (cmdline_option_deps) {
+			error("--orphans and --deps options are mutually exclusive\n");
+			return false;
+		}
+		if (cmdline_option_has_dep) {
+			error("--orphans and --has-dep options are mutually exclusive\n");
+			return false;
+		}
+	}
+
 	return true;
 }
 
@@ -125,6 +149,9 @@ static enum swupd_code list_repo_bundles(UNUSED_PARAM char *unused)
 	int ret;
 
 	ret = list_bundles();
+	if (ret == SWUPD_OK && cmdline_option_orphans) {
+		info("\nUse \"swupd 3rd-party bundle-add BUNDLE\" to no longer list BUNDLE and its dependencies as orphaned\n");
+	}
 
 	/* When using the --deps or --has-dep flags which take a BUNDLE as argument,
 	 * one or more repositories may not have BUNDLE, but we should not propagate
@@ -154,10 +181,12 @@ enum swupd_code third_party_bundle_list_main(int argc, char **argv)
 	}
 
 	/* set the command options */
+	bundle_list_set_option_local(cmdline_local);
 	bundle_list_set_option_all(cmdline_option_all);
 	bundle_list_set_option_has_dep(cmdline_option_has_dep);
 	bundle_list_set_option_deps(cmdline_option_deps);
 	bundle_list_set_option_status(cmdline_option_status);
+	bundle_list_set_option_orphans(cmdline_option_orphans);
 
 	/* list the bundles */
 	ret_code = third_party_run_operation_multirepo(cmdline_repo, list_repo_bundles, SWUPD_OK, "bundle-list", steps_in_bundlelist);

@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-test_setup() {
+global_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -L    -n test-bundle1 -f /file_1 "$TEST_NAME"

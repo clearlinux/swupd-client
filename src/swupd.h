@@ -10,9 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "bundle.h"
-#include "config_loader.h"
-#include "globals.h"
 #include "lib/archives.h"
 #include "lib/comp_functions.h"
 #include "lib/config_file.h"
@@ -23,14 +20,17 @@
 #include "lib/strings.h"
 #include "lib/sys.h"
 #include "lib/timelist.h"
-#include "manifest.h"
-#include "progress.h"
-#include "scripts.h"
-#include "swupd_comp_functions.h"
-#include "swupd_curl.h"
 #include "swupd_exit_codes.h"
-#include "swupd_progress.h"
-#include "telemetry.h"
+#include "swupd_lib/bundle.h"
+#include "swupd_lib/config_loader.h"
+#include "swupd_lib/globals.h"
+#include "swupd_lib/manifest.h"
+#include "swupd_lib/progress.h"
+#include "swupd_lib/scripts.h"
+#include "swupd_lib/swupd_comp_functions.h"
+#include "swupd_lib/swupd_curl.h"
+#include "swupd_lib/swupd_progress.h"
+#include "swupd_lib/telemetry.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -30,9 +30,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "alias.h"
+#include "swupd_lib/alias.h"
 #include "swupd.h"
-#include "target_root.h"
+#include "swupd_lib/target_root.h"
 
 #define MODE_RW_O (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 #define VERIFY_NOPICKY 0

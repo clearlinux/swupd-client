@@ -21,10 +21,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../src/lib/macros.h"
-#include "../../src/lib/strings.h"
-#include "../../src/lib/sys.h"
-#include "../../src/signature.h"
+#include "lib/macros.h"
+#include "lib/strings.h"
+#include "lib/sys.h"
+#include "swupd_lib/signature.h"
 #include "test_helper.h"
 
 static char test_dir[] = "./test_signature-XXXXXX";

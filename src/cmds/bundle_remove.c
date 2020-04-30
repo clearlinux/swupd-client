@@ -31,7 +31,7 @@
 #include <unistd.h>
 
 #include "swupd.h"
-#include "target_root.h"
+#include "swupd_lib/target_root.h"
 
 #define VERIFY_PICKY 1
 

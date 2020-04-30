@@ -29,7 +29,7 @@
 
 #include "lib/log.h"
 #include "swupd.h"
-#include "verifytime.h"
+#include "verifytime/verifytime.h"
 
 static void print_help(void)
 {

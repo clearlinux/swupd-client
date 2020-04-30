@@ -13,14 +13,19 @@
 	declare -A exceptions
 	exceptions["basename"]="sys.*"
 	exceptions["dirname"]="sys.*"
-	exceptions["free"]="macros.h"
+	exceptions["free"]="macros.h,verifytime.c,verifytime_main.c"
 
 	local error=0
 	for func in $functions; do
+		local base_grep_cmd="grep \"\<$func(\" src --include \"*.c\" --include \"*.h\" -R"
 		if [ -z "${exceptions[$func]}" ]; then
-			run grep "\<$func(" src --include "*.c" --include "*.h" -R
+			run eval "$base_grep_cmd"
 		else
-			run grep "\<$func(" src --include "*.c" --include "*.h" -R --exclude "${exceptions[$func]}"
+			filters=$(echo "${exceptions[$func]}" | tr "," "\n")
+			for i in $filters; do
+				base_grep_cmd="$base_grep_cmd --exclude \"$i\""
+			done
+			run eval "$base_grep_cmd"
 		fi
 
 		# shellcheck disable=SC2154

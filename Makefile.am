@@ -271,7 +271,7 @@ functional-check:
 
 docs-coverage:
 	doxygen docs/Doxyfile || die; \
-	python -m coverxygen --xml-dir xml/ --src-dir ./ --output doc-coverage.info --exclude ".*/src/swupd_lib/globals.h" --exclude ".*/src/swupd_build_opts.h" --exclude ".*/src/swupd_build_variant.h" --exclude ".*/src/swupd_exit_codes.h" --exclude ".*/src/swupd.h" --exclude ".*/src/swupd_lib/manifest.h" --exclude ".*/src/swupd_lib/swupd_curl_internal.h" --exclude ".*/src/swupd_lib/swupd_curl.h" --format json || die; \
+	python -m coverxygen --xml-dir xml/ --src-dir ./ --output doc-coverage.info --exclude ".*/src/swupd_lib/globals.h" --exclude ".*/src/swupd_build_opts.h" --exclude ".*/src/swupd_build_variant.h" --exclude ".*/src/swupd.h" --exclude ".*/src/swupd_lib/manifest.h" --exclude ".*/src/swupd_lib/swupd_curl_internal.h" --exclude ".*/src/swupd_lib/swupd_curl.h" --format json || die; \
 	if [ "$$(cat doc-coverage.info | grep documented.*false | wc -l)" -gt "0" ]; then \
 		echo "Public functions or data added on headers but not documented on src/lib "; \
 		exit 1; \

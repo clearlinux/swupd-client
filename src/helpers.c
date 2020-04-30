@@ -461,6 +461,48 @@ void remove_trailing_slash(char *url)
 	}
 }
 
+static bool adjust_system_time()
+{
+	int err;
+	time_t clear_time, system_time;
+	char *system_time_str;
+	char *clear_time_str;
+
+	err = verify_time(globals.path_prefix, &system_time, &clear_time);
+	if (err == -ENOENT) {
+		/* in the case we are doing an installation to an empty directory
+	/	 * using swupd verify --install, we won't have a valid versionstamp
+		 * in path_prefix, so try searching without the path_prefix */
+		err = verify_time(NULL, &system_time, &clear_time);
+	}
+
+	if (err == 0) {
+		// System time is correct
+		return true;
+	}
+
+	if (err == -ENOENT) {
+		error("Failed to read system timestamp file\n");
+	}
+
+	system_time_str = time_to_string(system_time);
+	clear_time_str = time_to_string(clear_time);
+	if (system_time_str && clear_time_str) {
+		info("Fixing outdated system time from %s to %s\n", system_time_str, clear_time_str);
+	}
+	FREE(system_time_str);
+	FREE(clear_time_str);
+
+	if (set_time(clear_time)) {
+		// System time has been fixed
+		return true;
+	}
+
+	// System time is wrong
+	error("Failed to update system time\n");
+	return false;
+}
+
 /* this function is intended to encapsulate the basic swupd
 * initializations for the majority of commands, that is:
 * 	- Make sure root is the user running the code
@@ -499,14 +541,9 @@ enum swupd_code swupd_init(enum swupd_init_config config)
 		/* Check that our system time is reasonably valid before continuing,
 		 * or the certificate verification will fail with invalid time */
 		if ((config & SWUPD_NO_TIMECHECK) == 0 && globals.timecheck) {
-			if (!verify_time(globals.path_prefix)) {
-				/* in the case we are doing an installation to an empty directory
-				 * using swupd verify --install, we won't have a valid versionstamp
-				 * in path_prefix, so try searching without the path_prefix */
-				if (!verify_time(NULL)) {
-					ret = SWUPD_BAD_TIME;
-					goto out_fds;
-				}
+			if (!adjust_system_time()) {
+				ret = SWUPD_BAD_TIME;
+				goto out_fds;
 			}
 		}
 

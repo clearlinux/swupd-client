@@ -21,19 +21,61 @@
  */
 #include "verifytime.h"
 
-#include "lib/log.h"
-#include "lib/macros.h"
-#include "lib/sys.h"
-
 #include <errno.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <time.h>
 
 #define DAY_SECONDS 86400
+
+/*
+ * Functions and macros copied from sys.c and string.h to maintain compatibility
+ * without adding more dependencies.
+ */
+#define PATH_SEPARATOR '/'
+#define str_len(_str) strnlen(_str, INT64_MAX)
+static char *sys_path_join(const char *fmt, ...)
+{
+	char *path;
+	va_list ap;
+	int len;
+	int i, j;
+
+	/* merge arguments into one path */
+	va_start(ap, fmt);
+	if (vasprintf(&path, fmt, ap) < 0) {
+		abort();
+	}
+	va_end(ap);
+
+	len = str_len(path);
+	char *pretty_path = malloc(str_len(path) + 1);
+	if (!pretty_path) {
+		abort();
+	}
+
+	/* remove all duplicated PATH_SEPARATOR from the path */
+	for (i = j = 0; i < len; i++) {
+		if (path[i] == PATH_SEPARATOR && // Is separator and
+		    // Next is also a separator or
+		    (path[i + 1] == PATH_SEPARATOR ||
+		     // Is a trailing separator, but not root
+		     (path[i + 1] == '\0' && j != 0))) {
+			/* duplicated PATH_SEPARATOR, throw it away */
+			continue;
+		}
+		pretty_path[j] = path[i];
+		j++;
+	}
+	pretty_path[j] = '\0';
+
+	free(path);
+
+	return pretty_path;
+}
 
 static int get_versionstamp(char *path_prefix, time_t *timestamp)
 {
@@ -68,11 +110,11 @@ static int get_versionstamp(char *path_prefix, time_t *timestamp)
 close_and_exit:
 	fclose(fp);
 exit:
-	FREE(filename);
+	free(filename);
 	return err;
 }
 
-static bool set_time(time_t mtime)
+bool set_time(time_t mtime)
 {
 	struct timespec clock_time = {
 		.tv_sec = mtime,
@@ -80,42 +122,53 @@ static bool set_time(time_t mtime)
 	};
 
 	if (clock_settime(CLOCK_REALTIME, &clock_time) < 0) {
-		error("Failed to set system time\n");
 		return false;
 	}
 
-	info("Set system time to %s\n", ctime(&mtime));
 	return true;
 }
 
-bool verify_time(char *path_prefix)
+char *time_to_string(time_t t)
+{
+	struct tm *timeinfo;
+	char time_str[50] = { 0 };
+
+	timeinfo = localtime(&t);
+	if (!timeinfo) {
+		return NULL;
+	}
+
+	strftime(time_str, sizeof(time_str), "%a %b %d %H:%M:%S %Y", timeinfo);
+
+	return strdup(time_str);
+}
+
+/* TODO: Get even better time than the versionstamp using a collection of servers,
+ * and fallback to using versionstamp time if it does not work or seem reasonable.
+ * The system time wasn't sane, so set it here and try again */
+int verify_time(char *path_prefix, time_t *system_time, time_t *clear_time)
 {
 	time_t currtime;
-	struct tm *timeinfo;
 	time_t versiontime;
 	int err;
 
 	time(&currtime);
-	timeinfo = localtime(&currtime);
+	if (system_time) {
+		*system_time = currtime;
+	}
 
 	err = get_versionstamp(path_prefix, &versiontime);
 	if (err || versiontime == 0) {
-		return false;
+		return -ENOENT;
+	}
+	if (clear_time) {
+		*clear_time = versiontime;
 	}
 
 	/* Give it a day's worth of tolerance */
 	if (currtime < (versiontime - DAY_SECONDS)) {
-		/* TODO: Get even better time than the versionstamp using a collection of servers,
-		 * and fallback to using versionstamp time if it does not work or seem reasonable.
-		 * The system time wasn't sane, so set it here and try again */
-		char time_str[50];
-
-		strftime(time_str, sizeof(time_str), "%a %b %d %H:%M:%S %Y", timeinfo);
-		warn("Current time is %s\nAttempting to fix...", time_str);
-		if (set_time(versiontime) == false) {
-			return false;
-		}
+		return -ETIME;
 	}
 
-	return true;
+	return 0;
 }

@@ -18,13 +18,38 @@
  */
 #include "verifytime.h"
 
+#include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 int main()
 {
-	if (verify_time(NULL)) {
+	time_t clear_time, system_time;
+	int err;
+	char *system_time_str;
+	char *clear_time_str;
+
+	err = verify_time(NULL, &system_time, &clear_time);
+	if (err == 0) {
 		return 0; // Success
 	}
 
+	if (err == -ENOENT) {
+		fprintf(stderr, "Failed to read system timestamp file\n");
+	}
+
+	system_time_str = time_to_string(system_time);
+	clear_time_str = time_to_string(clear_time);
+	if (system_time_str && clear_time_str) {
+		printf("Fixing outdated system time from '%s' to '%s'\n", system_time_str, clear_time_str);
+	}
+	free(system_time_str);
+	free(clear_time_str);
+
+	if (set_time(clear_time)) {
+		return 0; // Success
+	}
+
+	fprintf(stderr, "Failed to update system time\n");
 	return 1; // Error
 }

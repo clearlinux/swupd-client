@@ -12,6 +12,7 @@ global_setup() {
 	create_bundle -n test-bundle2 -f /file_2 "$TEST_NAME"
 	create_bundle -L -t -n test-bundle3 -f /file_3 "$TEST_NAME"
 	create_bundle -L -e -n test-bundle4 -f /file_4 "$TEST_NAME"
+	create_bundle -L    -n test-bundle5 -f /file_5 "$TEST_NAME"
 	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle3 test-bundle4
 
 }
@@ -25,6 +26,7 @@ global_setup() {
 		os-core
 		test-bundle3
 		test-bundle4: experimental
+		test-bundle5
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -42,6 +44,7 @@ global_setup() {
 		test-bundle2
 		test-bundle3
 		test-bundle4: experimental
+		test-bundle5
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -84,6 +87,7 @@ global_setup() {
 		os-core: installed
 		test-bundle3: explicitly installed
 		test-bundle4: installed, experimental
+		test-bundle5: installed
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -101,6 +105,20 @@ global_setup() {
 		test-bundle2
 		test-bundle3: explicitly installed
 		test-bundle4: installed, experimental
+		test-bundle5: installed
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
+@test "API077: bundle-list --orphans" {
+
+	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS --orphans --quiet"
+
+	assert_status_is "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		test-bundle5
 	EOM
 	)
 	assert_is_output "$expected_output"

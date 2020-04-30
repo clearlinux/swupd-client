@@ -45,6 +45,11 @@ int cmp_string_filerecord_filename(const void *a, const void *b)
 	return str_cmp(*(const char **)a, ((struct filerecord *)b)->filename);
 }
 
+int cmp_string_sub_component(const void *a, const void *b)
+{
+	return str_cmp((const char *)a, ((struct sub *)b)->component);
+}
+
 int cmp_file_filename(const void *a, const void *b)
 {
 	return str_cmp(((struct file *)a)->filename, ((struct file *)b)->filename);

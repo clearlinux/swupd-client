@@ -203,6 +203,9 @@
 # Show the installation status of the listed bundles (boolean value)
 #status=<true/false>
 
+# List orphaned bundles (boolean value)
+#orphans=<true/false>
+
 
 [bundle-info]
 

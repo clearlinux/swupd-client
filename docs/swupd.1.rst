@@ -268,6 +268,9 @@ bundle-list
 --deps=<bundle>     Lists all bundle dependencies of the passed BUNDLE,
         including recursively included bundles.
 
+--orphans    List orphaned bundles. Orphan bundles are those that are installed
+         but no longer required by any tracked bundle.
+
 bundle-info
 -----------
 

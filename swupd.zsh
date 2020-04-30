@@ -223,6 +223,7 @@ local -a bundle_list=(
   '(help -a --all -D --has-dep --deps --status)'{-D,--has-dep=}'[List all bundles which have BUNDLE as a dependency]:has-dep: _swupd_installed_bundles -u'
   '(help -a --all -D --has-dep --deps --status)--deps=[List bundles included by BUNDLE]:deps: _swupd_installed_bundles -u'
   '(help -D --has-dep --deps)--status[Show the installation status of the listed bundles]'
+  '(help -a --all -D --has-dep --deps --status --orphans)--orphans[List orphaned bundles]'
 )
 
 local -a bundle_info=(

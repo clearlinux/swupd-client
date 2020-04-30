@@ -364,10 +364,12 @@ extern regex_t *compile_whitelist(const char *whitelist_pattern);
 
 /* bundle_list.c*/
 extern enum swupd_code list_bundles(void);
+extern void bundle_list_set_option_local(bool opt);
 extern void bundle_list_set_option_all(bool opt);
 extern void bundle_list_set_option_has_dep(char *bundle);
 extern void bundle_list_set_option_deps(char *bundle);
 extern void bundle_list_set_option_status(bool opt);
+extern void bundle_list_set_option_orphans(bool opt);
 
 /* clean.c */
 extern int clean_get_stats(void);

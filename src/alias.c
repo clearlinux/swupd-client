@@ -162,14 +162,25 @@ struct list *get_alias_definitions(void)
 	struct list *iteru = NULL;
 	struct list *system_alias_files = NULL;
 	struct list *user_alias_files = NULL;
+	struct list *tmp_list = NULL;
 
 	/* get sorted system and user filenames */
-	string_or_die(&path, "%s/%s", globals.path_prefix, SYSTEM_ALIAS_PATH);
-	system_alias_files = get_dir_files_sorted(path);
+	path = sys_path_join("%s/%s", globals.path_prefix, SYSTEM_ALIAS_PATH);
+	tmp_list = sys_ls(path);
+	for (iters = tmp_list; iters; iters = iters->next) {
+		system_alias_files = list_prepend_data(system_alias_files, str_or_die("%s/%s", path, (char *)iters->data));
+	}
+	system_alias_files = list_sort(system_alias_files, str_cmp_wrapper);
+	list_free_list_and_data(tmp_list, free);
 	FREE(path);
 
-	string_or_die(&path, "%s/%s", globals.path_prefix, USER_ALIAS_PATH);
-	user_alias_files = get_dir_files_sorted(path);
+	path = sys_path_join("%s/%s", globals.path_prefix, USER_ALIAS_PATH);
+	tmp_list = sys_ls(path);
+	for (iters = tmp_list; iters; iters = iters->next) {
+		user_alias_files = list_prepend_data(user_alias_files, str_or_die("%s/%s", path, (char *)iters->data));
+	}
+	user_alias_files = list_sort(user_alias_files, str_cmp_wrapper);
+	list_free_list_and_data(tmp_list, free);
 	FREE(path);
 
 	/* get a combined list with user files overriding system files */

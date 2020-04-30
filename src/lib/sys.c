@@ -245,11 +245,7 @@ int rm_rf(const char *file)
 	return run_command_quiet("/bin/rm", "-rf", file, NULL);
 }
 
-/* Get a list of files in a directory sorted by filename
- * with their fullpath, returns NULL on error (errno set by
- * opendir).
- */
-struct list *get_dir_files_sorted(char *path)
+struct list *sys_ls(char *path)
 {
 	DIR *dir = NULL;
 	struct dirent *ent = NULL;
@@ -267,7 +263,7 @@ struct list *get_dir_files_sorted(char *path)
 		if (ent->d_name[0] == '.') {
 			continue;
 		}
-		string_or_die(&name, "%s/%s", path, ent->d_name);
+		string_or_die(&name, "%s", ent->d_name);
 		files = list_prepend_data(files, name);
 	}
 
@@ -277,7 +273,7 @@ struct list *get_dir_files_sorted(char *path)
 	}
 	(void)closedir(dir);
 
-	return list_sort(files, str_cmp_wrapper);
+	return files;
 }
 
 bool sys_file_exists(const char *filename)

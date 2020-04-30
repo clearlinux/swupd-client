@@ -89,10 +89,8 @@ int mkdir_p(const char *dir);
  */
 int rm_rf(const char *file);
 
-/**
- * @brief Return a list of all files in a directory, sorted lexicographically
- */
-struct list *get_dir_files_sorted(char *path);
+/* @brief Return a list of files in a directory */
+struct list *sys_ls(char *path);
 
 /**
  * @brief Checks if a file exists in the filesystem.

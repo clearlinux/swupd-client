@@ -238,3 +238,30 @@ void track_bundle(const char *bundle_name)
 {
 	track_bundle_in_statedir(bundle_name, globals.state_dir);
 }
+
+static char *get_bundles_dir(void)
+{
+	return sys_path_join("%s/%s", globals.path_prefix, BUNDLES_DIR);
+}
+
+struct list *bundle_list_tracked(void)
+{
+	struct list *bundles = NULL;
+	char *tracking_dir = get_tracking_dir();
+
+	bundles = sys_ls(tracking_dir);
+	FREE(tracking_dir);
+
+	return bundles;
+}
+
+struct list *bundle_list_installed(void)
+{
+	struct list *bundles = NULL;
+	char *bundles_dir = get_bundles_dir();
+
+	bundles = sys_ls(bundles_dir);
+	FREE(bundles_dir);
+
+	return bundles;
+}

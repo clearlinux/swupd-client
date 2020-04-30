@@ -167,8 +167,8 @@ static bool parse_options(int argc, char **argv)
  */
 static enum swupd_code list_local_bundles(int version)
 {
+	enum swupd_code ret_code = SWUPD_OK;
 	char *name;
-	char *path = NULL;
 	struct list *bundles = NULL;
 	struct list *item = NULL;
 	struct manifest *MoM = NULL;
@@ -183,23 +183,19 @@ static enum swupd_code list_local_bundles(int version)
 		}
 	}
 
-	string_or_die(&path, "%s/%s", globals.path_prefix, BUNDLES_DIR);
-
-	errno = 0;
-	bundles = get_dir_files_sorted(path);
-	if (!bundles && errno) {
-		error("couldn't open bundles directory");
-		FREE(path);
-		return SWUPD_COULDNT_LIST_DIR;
+	bundles = bundle_list_installed();
+	if (!bundles) {
+		ret_code = SWUPD_COULDNT_LIST_DIR;
+		goto out;
 	}
+	bundles = list_sort(bundles, str_cmp_wrapper);
 
 	progress_next_step("list_bundles", PROGRESS_UNDEFINED);
-
 	info("Installed bundles:\n");
 	item = bundles;
 	while (item) {
 		if (MoM) {
-			bundle_manifest = mom_search_bundle(MoM, sys_basename((char *)item->data));
+			bundle_manifest = mom_search_bundle(MoM, (char *)item->data);
 		}
 		if (bundle_manifest) {
 			name = get_printable_bundle_name(bundle_manifest->filename, bundle_manifest->is_experimental, cmdline_option_status && is_installed_bundle(bundle_manifest->filename), cmdline_option_status && is_tracked_bundle(bundle_manifest->filename));
@@ -208,7 +204,7 @@ static enum swupd_code list_local_bundles(int version)
 			FREE(name);
 		} else {
 			info(" - ");
-			print("%s\n", sys_basename((char *)item->data))
+			print("%s\n", (char *)item->data);
 		}
 		count++;
 		item = item->next;
@@ -217,10 +213,10 @@ static enum swupd_code list_local_bundles(int version)
 
 	list_free_list_and_data(bundles, free);
 
-	FREE(path);
+out:
 	manifest_free(MoM);
 
-	return SWUPD_OK;
+	return ret_code;
 }
 
 /* Return recursive list of included bundles */

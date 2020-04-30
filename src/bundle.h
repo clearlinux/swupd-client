@@ -62,6 +62,16 @@ void track_bundle_in_statedir(const char *bundle_name, const char *state_dir);
  */
 void track_bundle(const char *bundle_name);
 
+/**
+ * @brief Returns the list of tracked bundles.
+ */
+struct list *bundle_list_tracked(void);
+
+/**
+ * @brief Returns the list of installed bundles.
+ */
+struct list *bundle_list_installed(void);
+
 #ifdef __cplusplus
 }
 #endif

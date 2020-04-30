@@ -35,44 +35,41 @@
 
 #define DAY_SECONDS 86400
 
-static unsigned long int get_versionstamp(char *path_prefix)
+static int get_versionstamp(char *path_prefix, time_t *timestamp)
 {
 	FILE *fp = NULL;
 	char data[11];
 	char *filename;
-	unsigned long int version_num;
+	int err = 0;
 
 	filename = sys_path_join("%s/usr/share/clear/versionstamp", path_prefix ? path_prefix : "");
 
 	errno = 0;
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
-		if (errno == ENOENT) {
-			warn("%s does not exist!\n", filename);
-		} else {
-			error("Failed to open %s\n", filename);
-		}
-		version_num = 0;
+		err = -errno;
+		*timestamp = 0;
 		goto exit;
 	}
 
 	if (fgets(data, 11, fp) == NULL) {
-		error("Failed to read %s\n", filename);
-		version_num = 0;
+		err = -EIO;
+		*timestamp = 0;
 		goto close_and_exit;
 	}
 
 	/* If we read a 0 the versionstamp is wrong/corrupt */
 	errno = 0;
-	version_num = strtoul(data, NULL, 10);
+	*timestamp = strtol(data, NULL, 10);
 	if (errno != 0) {
-		version_num = 0;
+		err = -errno;
+		*timestamp = 0;
 	}
 close_and_exit:
 	fclose(fp);
 exit:
 	FREE(filename);
-	return version_num;
+	return err;
 }
 
 static bool set_time(time_t mtime)
@@ -95,19 +92,19 @@ bool verify_time(char *path_prefix)
 {
 	time_t currtime;
 	struct tm *timeinfo;
-	unsigned long int versionstamp;
+	time_t versiontime;
+	int err;
 
 	time(&currtime);
 	timeinfo = localtime(&currtime);
 
-	versionstamp = get_versionstamp(path_prefix);
-	if (versionstamp == 0) {
+	err = get_versionstamp(path_prefix, &versiontime);
+	if (err || versiontime == 0) {
 		return false;
 	}
-	time_t versiontime = (time_t)versionstamp;
 
 	/* Give it a day's worth of tolerance */
-	if ((unsigned long int)currtime < (versionstamp - DAY_SECONDS)) {
+	if (currtime < (versiontime - DAY_SECONDS)) {
 		/* TODO: Get even better time than the versionstamp using a collection of servers,
 		 * and fallback to using versionstamp time if it does not work or seem reasonable.
 		 * The system time wasn't sane, so set it here and try again */

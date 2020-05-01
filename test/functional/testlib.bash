@@ -4095,36 +4095,62 @@ create_test_environment_only() { # swupd_function
 
 }
 
-# - NAME: the name (and path) of the test to be generated
 generate_test() { # swupd_function
 
 	show_help "$(cat <<-EOM
 		Creates a new test case based on a template.
 
 		Usage:
-		    generate_test <test_file>
+		    generate_test <group_id> <test_file>
 
 		Arguments:
+		    - group_id: the ID of the test group the test belongs to
 		    - test_file: the relative path to the test file to be created without
 		                 the .bats extension (e.g. test/functional/bundleadd/new_test)
+
+		Test groups:
+		    - 3rd-party: TPR
+		    - api: API
+		    - autoupdate: AUT
+		    - bundleadd: ADD
+		    - bundleremove: REM
+		    - bundlelist: LST
+		    - bundleinfo: BIN
+		    - diagnose: DIA
+		    - update: UPD
+		    - checkupdate: CHK
+		    - search: SRH
+		    - hashdump: HSD
+		    - mirror: MIR
+		    - completion: USA
+		    - usability: USA
+		    - signature: SIG
+		    - info: INF
+		    - clean: CLN
+		    - os-install: INS
+		    - repair: REP
+		    - verify-legacy: VER
 	EOM
 	)" "$@"
 
-	local name=$1
+	local group_id=$1
+	local name=$2
 	local path
 	local id
 	local git_name
 	local git_email
+	validate_param "$group_id"
 	validate_param "$name"
+
+	group_id=${group_id^^}
 
 	path=$(dirname "$(realpath "$name")")
 	if [[ "$path" != *swupd-client/test/functional/* ]]; then
 		echo -e "All functional tests should be grouped within a directory in swupd-client/test/functional/<group_dir>/\\n"
-		usage
 		return 1
 	fi
-	name=$(basename "$name")
-	id=$(get_next_available_id "$path")
+
+	id=$(get_next_available_id "$group_id")
 	if [ $? == 1 ]; then
 		id="<test ID>"
 	fi
@@ -4172,9 +4198,8 @@ generate_test() { # swupd_function
 		# shellcheck disable=SC2016
 		printf '\t# assert_is_output "$expected_output"\n\n'
 		printf '}\n'
-	} > "$path"/"$name".bats
-	# make the test script executable
-	chmod +x "$path"/"$name".bats
+	} > "$path"/"$(basename "$name")".bats
+	chmod +x "$path"/"$(basename "$name")".bats
 
 }
 
@@ -4184,92 +4209,105 @@ get_next_available_id() { # swupd_function
 		Gets the next available ID for the specified test group.
 
 		Usage:
-		    get_next_available_id <test_dir>
+		    get_next_available_id <group_id>
 
 		Arguments:
-		    - test_dir: the path to the directory of the test group (e.g. test/functional/bundleadd)
+		    - group_id: the ID of the test group
+
+		Test groups:
+		    - 3rd-party: TPR
+		    - api: API
+		    - autoupdate: AUT
+		    - bundleadd: ADD
+		    - bundleremove: REM
+		    - bundlelist: LST
+		    - bundleinfo: BIN
+		    - diagnose: DIA
+		    - update: UPD
+		    - checkupdate: CHK
+		    - search: SRH
+		    - hashdump: HSD
+		    - mirror: MIR
+		    - completion: USA
+		    - usability: USA
+		    - signature: SIG
+		    - info: INF
+		    - clean: CLN
+		    - os-install: INS
+		    - repair: REP
+		    - verify-legacy: VER
 	EOM
 	)" "$@"
 
-	local test_dir=$1
-	local id=0
-	local group
-	local test_list
-	validate_path "$test_dir"
+	local test_group=$1
+	local test_num
+	local id
+	validate_param "$test_group"
 
-	# shellcheck disable=SC2126
-	id=$(grep -r --include="*.bats" "@test .* {" "$test_dir" | wc -l)
-	id=$((id+1))
-	test_dir=$(basename "$(realpath "$test_dir")")
-	case "$test_dir" in
-		3rd-party) group=TPR;;
-		api) group=API;;
-		autoupdate) group=AUT;;
-		bundleadd) group=ADD;;
-		bundleremove) group=REM;;
-		bundlelist) group=LST;;
-		bundleinfo) group=BIN;;
-		diagnose) group=DIA;;
-		update) group=UPD;;
-		checkupdate) group=CHK;;
-		search) group=SRH;;
-		hashdump) group=HSD;;
-		mirror) group=MIR;;
-		completion) group=USA;;
-		usability) group=USA;;
-		signature) group=SIG;;
-		info) group=INF;;
-		clean) group=CLN;;
-		os-install) group=INS;;
-		repair) group=REP;;
-		verify-legacy) group=VER;;
-		*) group=UNKNOWN;;
-	esac
-	id=$(printf "$group%03d\\n" $id)
-	test_list="$(list_tests "$test_dir")"
-	# if the next available ID is not really available it means the list is messed up
-	if [ "${test_list/$id}" != "$test_list" ]; then
-		echo -e "There is a problem with the current IDs, one ID seems to be missing from the list:\\n"
-		echo "$test_list"
+	test_group=${test_group^^}
+	test_num=$(( "$(list_tests "$test_group" | wc -l)" + 1))
+	id=$(printf "$test_group%03d\\n" "$test_num")
+
+	# check for consistencies
+	if list_tests "$test_group" | grep --quiet "$id"; then
+		echo -e "There is a problem with the current IDs, the ID sequense seems to be incorrect:\\n"
+		list_tests "$test_group"
 		echo -e "\\nPlease fix the IDs as appropriate and try running the command again\\n"
 		return 1
-	else
-		echo "$id"
 	fi
+
+	echo "$id"
 
 }
 
-# Parameters:
-# - GROUP_DIRECTORY: the path to the directory of the test group
 list_tests() { # swupd_function
 
 	show_help "$(cat <<-EOM
-		Prints the list of tests in a directory.
+		Prints the list of tests in a group.
 
 		Usage:
-		    list_tests [--all | test_dir]
+		    list_tests [--all | group_id]
 
 		Options:
 		    --all    Lists all the functional tests available
 
 		Arguments:
-		    - test_dir: the path to the directory of the test group to have the tests
-		                listed (e.g. test/functional/bundleadd)
+		    - group_id: the ID of the test group
+
+		Test groups:
+		    - 3rd-party: TPR
+		    - api: API
+		    - autoupdate: AUT
+		    - bundleadd: ADD
+		    - bundleremove: REM
+		    - bundlelist: LST
+		    - bundleinfo: BIN
+		    - diagnose: DIA
+		    - update: UPD
+		    - checkupdate: CHK
+		    - search: SRH
+		    - hashdump: HSD
+		    - mirror: MIR
+		    - completion: USA
+		    - usability: USA
+		    - signature: SIG
+		    - info: INF
+		    - clean: CLN
+		    - os-install: INS
+		    - repair: REP
+		    - verify-legacy: VER
 	EOM
 	)" "$@"
 
-	local test_dir=$1
+	local group_id=$1
 
-	if [ "$test_dir" = --all ]; then
-		grep -rh --include="*.bats" "@test .* {" "$FUNC_DIR" | sed "s/@test \"//" | sed "s/\" {.*//" | sort
+	if [ "$group_id" = --all ]; then
+		group_id=.
 	else
-		if [[ "$(dirname "$(realpath "$test_dir")")" != *swupd-client/test/functional ]]; then
-			echo "Invalid test group directory"
-			return 1
-		fi
-		ls "$test_dir"/*.bats >/dev/null 2>&1 || return 0
-		grep -rh --include="*.bats" "@test .* {" "$test_dir" | sed "s/@test \"//" | sed "s/\" {.*//" | sort
+		group_id=${group_id^^}
 	fi
+
+	grep -rh --include="*.bats" "@test \"$group_id" "$FUNC_DIR" | sed "s/@test \"//" | sed "s/\" {.*//" | sort
 
 }
 

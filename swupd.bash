@@ -18,167 +18,94 @@
 
 
 #declares the completion function
-_swupd()
-{
-	# $1 is the command being completed, $2 is the current word being expanded
-	local opts IFS=$' \t\n'
-	local -i i installed
-	local global="--help --url --contenturl --versionurl --port --path --format --nosigcheck --nosigcheck-latest --ignore-time --statedir --certpath  --time --no-scripts --no-boot-update --max-parallel-downloads --max-retries --retry-delay --json-output  --allow-insecure-http --debug --verbose --quiet --no-progress --wait-for-scripts --assume --yes"
-	COMPREPLY=()
-	for ((i=COMP_CWORD-1;i>=0;i--))
-	do case "${COMP_WORDS[$i]}" in
-		("$1")
-		opts="--help --version autoupdate bundle-add bundle-remove
-		bundle-list bundle-info hashdump update diagnose check-update search
-		search-file info clean mirror os-install repair 3rd-party"
-		break;;
-		("info")
-		opts="$global "
-		break;;
-		("autoupdate")
-		opts="$global --help --enable --disable "
-		break;;
-		("check-update")
-		opts="$global "
-		break;;
-		("update")
-		opts="$global --download --status --force --keepcache --update-search-file-index --3rd-party "
-		break;;
-		("bundle-add")
-		opts="$global --skip-diskspace-check --skip-optional "
-		break;;
-		("bundle-remove")
-		opts="$global --force --recursive "
-		break;;
-		("bundle-list")
-		opts="$global --all --deps --has-dep --status "
-		break;;
-		("bundle-info")
-		opts="$global --dependencies --files --version "
-		break;;
-		("search")
-		opts="--help --all --quiet --verbose "
-		break;;
-		("search-file")
-		opts="$global --version --library --binary --top --csv --init --order "
-		break;;
-		("diagnose")
-		opts="$global --version --picky --picky-tree --picky-whitelist --quick --force --extra-files-only --bundles --file "
-		break;;
-		("repair")
-		opts="$global --version --picky --picky-tree --picky-whitelist --quick --force --extra-files-only --bundles --file "
-		break;;
-		("os-install")
-		opts="$global --version --force --bundles --statedir-cache --download --skip-optional"
-		break;;
-		("mirror")
-		opts="$global --set --unset "
-		break;;
-		("clean")
-		opts="$global --all --dry-run "
-		break;;
-		("hashdump")
-		opts="--help --no-xattrs --path --debug --quiet "
-		break;;
-		("3rd-party")
-		opts="$global add remove list bundle-add bundle-list bundle-remove bundle-info update diagnose repair check-update clean info "
-		break;;
-		("add")
-		opts="$global --repo --force"
-		break;;
-		("remove")
-		opts="$global --repo --force"
-		break;;
-	esac
-	done
-	# Add in additional completion options if we need to
-	if (( i >= 0 ))
-	then
-	case "${COMP_WORDS[$i]}" in
-		("bundle-add")
-		# only show the list of upstream bundles if not using "3rd-party bundle-add"
-		if [ "${COMP_WORDS[$i - 1]}" != "3rd-party" ]; then
-			MoM=""
-			if [ -r /var/tmp/swupd/Manifest.MoM ]
-			then MoM=/var/tmp/swupd/Manifest.MoM
-			elif [ -r /var/lib/swupd/version ] &&
-				   installed=$(</var/lib/swupd/version) &&
-				   [ -r "/var/lib/swupd/$installed/Manifest.MoM" ]
-			then
-				MoM=/var/lib/swupd/$installed/Manifest.MoM
-			fi
-			if [ -n "$MoM" ]
-			then
-				opts+="$( sed '/^[^M]/d' "$MoM" | cut -f4 | LC_ALL=C sort )"
-			fi
-		else
-			opts+="--repo"
-		fi
-		;;
-		("bundle-remove")
-		#
-		if [ "${COMP_WORDS[$i - 1]}" != "3rd-party" ]; then
-			opts+=" $(unset CDPATH; test -d /usr/share/clear/bundles && \
-				find /usr/share/clear/bundles/ -maxdepth 1 -type f ! -name os-core -printf '%f ')"
-		else
-			opts+="--repo"
-		fi
-		;;
-		("info")
-		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
-			opts+="--repo"
-		fi
-		;;
-		("bundle-list")
-		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
-			opts+="--repo"
-		fi
-		;;
-		("bundle-info")
-		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
-			opts+="--repo"
-		fi
-		;;
-		("update")
-		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
-			opts+="--repo"
-		fi
-		;;
-		("diagnose")
-		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
-			opts+="--repo"
-		fi
-		;;
-		("repair")
-		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
-			opts+="--repo"
-		fi
-		;;
-		("check-update")
-		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
-			opts+="--repo"
-		fi
-		;;
-		("clean")
-		if [ "${COMP_WORDS[$i - 1]}" = "3rd-party" ]; then
-			opts+="--repo"
-		fi
-		;;
-		("hashdump")
-		# Add in filenames. TODO add in directory completion
-		opts+=" $( compgen -f -- "$2" )"
-		;;
-	esac
-	fi
+_swupd() {
+  local cur prev words subcmds third_subcmds opts IFS=$' \t\n'
+
+  # Assign the following variables
+  #   $cur   current command being completed, $cur==$2
+  #   $prev  the previous word, $prev==$3
+  #   $words the current line, where $words[0]==$1
+  #   $cword the index of current word, $cword=$COMP_CWORD
+  _init_completion -s || return
+
+  subcmds=$(swupd -h | sed -n -E \
+            -e '
+            /Subcommands:/,${
+            s/^([[:blank:]]+)([[:alnum:]][-[:alnum:]]*)(.*)/\2/p;
+          }')
+
+  if [[ ${words[1]} == "3rd-party" ]]; then
+    grep -q 3rd-party <(swupd -h) || return 1
+
+    third_subcmds=$(swupd 3rd-party -h | sed -n -E \
+                                             -e '
+                          /Subcommands:/,${
+                          s/^([[:blank:]]+)([[:alnum:]][-[:alnum:]]*)(.*)/\2/p;
+                        }')
+    if [[ $prev == "3rd-party" ]]; then
+      if [[ $cur == -* ]]; then
+        opts=$(_parse_help swupd "3rd-party -h")
+      else
+        opts=$third_subcmds
+      fi
+    elif grep -q "${words[2]}" <<<"$third_subcmds"; then
+      if [[ $cur == -* ]]; then
+        opts=$(_parse_help swupd "3rd-party ${words[2]} -h")
+      fi
+    else
+      return 1
+    fi
+  elif [[ $prev == "swupd" ]]; then
+    if [[ $cur == -* ]]; then
+      opts=$(_parse_help swupd)
+    else
+      opts="$subcmds"
+    fi
+  elif grep -q "${words[1]}" <<<"$subcmds"; then
+    if [[ $cur == -* ]]; then
+      # [[ $cur == -- ]] && printf "%s" "$prev"
+      opts=$(_parse_help swupd "${words[1]} -h")
+    else
+      case "${words[1]}" in
+        # Add additional completions here
+        ("bundle-add")
+          # only show the list of upstream bundles if not using "3rd-party bundle-add"
+          local MoM version
+
+          if [ -r /var/tmp/swupd/Manifest.MoM ]; then
+            MoM=/var/tmp/swupd/Manifest.MoM
+          else
+            version=$(swupd info --quiet)
+            [ -r "/var/lib/swupd/$version/Manifest.MoM" ] && MoM=/var/lib/swupd/$version/Manifest.MoM
+          fi
+
+          if [ -n "$MoM" ]; then
+            opts="$( sed '/^[^M]/d' "$MoM" | cut -f4 | LC_ALL=C sort )"
+          else
+            return 1
+          fi
+          ;;
+        ("bundle-remove")
+          # only show the list of installed bundles if not using "3rd-party bundle-remove"
+          opts="$(unset CDPATH; test -d /usr/share/clear/bundles && \
+                  find /usr/share/clear/bundles/ -maxdepth 1 -type f ! -name os-core -printf '%f ')"
+          ;;
+        ("hashdump")
+          # Add in filenames. TODO add in directory completion
+          opts="$( compgen -f -- "$cur" )"
+          ;;
+      esac
+    fi
+  else
+    return 1
+  fi
 
 	# Ignore SC2207 because that's the standard way to fill COMPREPLY
-	# shellcheck disable=SC2207
-	COMPREPLY=($(compgen -W "${opts}" -- "${2}"));
-	return 0
+  # shellcheck disable=SC2207
+  COMPREPLY=($(compgen -W "$opts" -- "$cur"));
+  # Ignore SC2128 because only when there's one candidate it's completed on `Tab`
+  # shellcheck disable=SC2128
+  [[ $COMPREPLY == *= ]] && compopt -o nospace
 }
-if [ "${BASH_VERSINFO[0]}" -gt 4 ] || { [ "${BASH_VERSINFO[0]}" -eq 4 ] && [ "${BASH_VERSINFO[1]}" -ge 4 ]; }
-then
-	complete -F _swupd -o nosort swupd
-else
-	complete -F _swupd swupd
-fi
+
+complete -o nosort -F _swupd swupd

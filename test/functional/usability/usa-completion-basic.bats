@@ -16,13 +16,13 @@ load "../testlib"
 
 @test "USA003: Autocomplete has autoupdate" {
 
-	grep -q  '("autoupdate")' "$SWUPD_DIR"/swupd.bash
+	grep -q  '("bundle-add")' "$SWUPD_DIR"/swupd.bash
 
 }
 
-@test "USA004: Autocomplete has expected hashdump opts" {
+@test "USA004: Autocomplete has expected hashdump" {
 
-	grep -q  'opts="--help --no-xattrs --path --debug --quiet "' "$SWUPD_DIR"/swupd.bash
+	grep -q  '("hashdump")' "$SWUPD_DIR"/swupd.bash
 
 }
 #WEIGHT=1

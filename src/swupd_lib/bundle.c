@@ -265,3 +265,51 @@ struct list *bundle_list_installed(void)
 
 	return bundles;
 }
+
+enum swupd_code bundle_list_orphans(struct manifest *mom, struct list **bundles)
+{
+	struct list *tracked_bundles = NULL;
+	struct list *subs = NULL;
+	enum swupd_code ret_code = SWUPD_OK;
+	int ret;
+
+	// start with a list of the tracked bundles
+	// (bundles specifically installed by the user)
+	tracked_bundles = bundle_list_tracked();
+	if (!tracked_bundles) {
+		// this should never happen, swupd_init makes sure of it
+		ret_code = SWUPD_COULDNT_LIST_DIR;
+		goto out;
+	}
+
+	// create the list of required bundles by using tracked bundles as base
+	// and adding the dependencies of each tracked bundles to the list
+	ret = add_subscriptions(tracked_bundles, &subs, mom, true, 0);
+	if (ret != add_sub_NEW) {
+		// something went wrong or there were no includes
+		if (ret & add_sub_ERR) {
+			error("Cannot load included bundles\n\n");
+			ret_code = SWUPD_COULDNT_LOAD_MANIFEST;
+		} else {
+			error("Unknown error\n\n");
+			ret_code = SWUPD_UNEXPECTED_CONDITION;
+		}
+		goto out;
+	}
+
+	// create a list with all bundles installed in the system
+	*bundles = bundle_list_installed();
+
+	// sort the lists
+	subs = list_sort(subs, cmp_subscription_component);
+	*bundles = list_sort(*bundles, str_cmp_wrapper);
+
+	// remove the bundles in the list of subscribed bundles from
+	// the list of all bundles
+	*bundles = list_sorted_filter_common_elements(*bundles, subs, cmp_string_sub_component, free);
+
+out:
+	list_free_list_and_data(tracked_bundles, free);
+	free_subscriptions(&subs);
+	return ret_code;
+}

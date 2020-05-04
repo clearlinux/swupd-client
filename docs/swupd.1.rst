@@ -245,6 +245,12 @@ bundle-remove <bundles>
         ``Warning``: This operation is dangerous and must be used with care since
         it can remove many unexpected bundles.
 
+--orphans       Removes all orphaned bundles. Orphan bundles are those that are no
+        longer required by any of the tracked bundles.
+
+        ``Warning``: This operation is dangerous and must be used with care since
+        it can remove many unexpected bundles.
+
 bundle-list
 -----------
 

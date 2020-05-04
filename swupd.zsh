@@ -212,6 +212,7 @@ local -a bundle_add=(
 local -a bundle_remove=(
   '(help -x --force)'{-x,--force}'[Removes a bundle along with all the bundles that depend on it]'
   '(help -R --recursive)'{-R,--recursive}'[Removes a bundle and its dependencies recursively]'
+  '(help --orphans)--orphans[Removes all orphaned bundles]'
   '*:bundle-remove: _swupd_installed_bundles'
 )
 local -a bundle_remove_thirdparty=(

@@ -35,9 +35,12 @@
 
 #define VERIFY_PICKY 1
 
+#define FLAG_ORPHANS 2000
+
 static char **param_bundles;
 static bool cmdline_option_force = false;
 static bool cmdline_option_recursive = false;
+static bool cmdline_option_orphans = false;
 
 void bundle_remove_set_option_force(bool opt)
 {
@@ -47,6 +50,11 @@ void bundle_remove_set_option_force(bool opt)
 void bundle_remove_set_option_recursive(bool opt)
 {
 	cmdline_option_recursive = opt;
+}
+
+void bundle_remove_set_option_orphans(bool opt)
+{
+	cmdline_option_orphans = opt;
 }
 
 static void print_help(void)
@@ -60,12 +68,14 @@ static void print_help(void)
 	print("Options:\n");
 	print("   -x, --force            Removes a bundle along with all the bundles that depend on it\n");
 	print("   -R, --recursive        Removes a bundle and its dependencies recursively\n");
+	print("   --orphans              Removes all orphaned bundles\n");
 	print("\n");
 }
 
 static const struct option prog_opts[] = {
 	{ "force", no_argument, 0, 'x' },
 	{ "recursive", no_argument, 0, 'R' },
+	{ "orphans", no_argument, 0, FLAG_ORPHANS },
 };
 
 static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
@@ -76,6 +86,9 @@ static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 		return true;
 	case 'R':
 		cmdline_option_recursive = optarg_to_bool(optarg);
+		return true;
+	case FLAG_ORPHANS:
+		cmdline_option_orphans = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;
@@ -98,12 +111,30 @@ static bool parse_options(int argc, char **argv)
 		return false;
 	}
 
-	if (argc <= ind) {
-		error("missing bundle(s) to be removed\n\n");
-		return false;
+	if (cmdline_option_orphans) {
+		if (argc > ind) {
+			error("you cannot specify bundles to remove when using --orphans\n\n");
+			return false;
+		}
+	} else {
+		if (argc <= ind) {
+			error("missing bundle(s) to be removed\n\n");
+			return false;
+		}
+		param_bundles = argv + ind;
 	}
 
-	param_bundles = argv + ind;
+	// Flag conflicts
+	if (cmdline_option_orphans) {
+		if (cmdline_option_recursive) {
+			error("--orphans and --recursive options are mutually exclusive\n");
+			return false;
+		}
+		if (cmdline_option_force) {
+			error("--orphans and --force options are mutually exclusive\n");
+			return false;
+		}
+	}
 
 	return true;
 }
@@ -271,18 +302,28 @@ static void print_remove_summary(unsigned int requested, unsigned int bad, unsig
 {
 	int deps_removed;
 
-	if (bad > 0) {
-		info("\nFailed to remove %i of %i bundles\n", bad, requested);
-	} else {
-		info("\nSuccessfully removed %i bundle%s\n", requested, (requested > 1 ? "s" : ""));
-	}
-
-	deps_removed = total_removed + bad - requested;
-	if (deps_removed > 0) {
-		if (cmdline_option_force) {
-			info("%i bundle%s\n", deps_removed, deps_removed > 1 ? "s that depended on the specified bundle(s) were removed" : " that depended on the specified bundle(s) was removed");
+	if (cmdline_option_orphans) {
+		if (bad > 0) {
+			info("\nFailed to remove %i of %i bundles\n", bad, total_removed);
+		} else if (total_removed == 0) {
+			info("\nNo orphaned bundles found, nothing was removed\n");
 		} else {
-			info("%i bundle%s\n", deps_removed, deps_removed > 1 ? "s that were installed as a dependency were removed" : " that was installed as a dependency was removed");
+			info("\nSuccessfully removed %i bundle%s\n", total_removed, (total_removed > 1 ? "s" : ""));
+		}
+	} else {
+		if (bad > 0) {
+			info("\nFailed to remove %i of %i bundles\n", bad, requested);
+		} else {
+			info("\nSuccessfully removed %i bundle%s\n", requested, (requested > 1 ? "s" : ""));
+		}
+
+		deps_removed = total_removed + bad - requested;
+		if (deps_removed > 0) {
+			if (cmdline_option_force) {
+				info("%i bundle%s\n", deps_removed, deps_removed > 1 ? "s that depended on the specified bundle(s) were removed" : " that depended on the specified bundle(s) was removed");
+			} else {
+				info("%i bundle%s\n", deps_removed, deps_removed > 1 ? "s that were installed as a dependency were removed" : " that was installed as a dependency was removed");
+			}
 		}
 	}
 }
@@ -303,6 +344,7 @@ enum swupd_code execute_remove_bundles_extra(struct list *bundles, remove_extra_
 	struct list *common_files = NULL;
 	struct list *files_to_remove = NULL;
 	struct list *iter = NULL;
+	struct list *bundles_iter = NULL;
 	char *bundles_list_str = NULL;
 
 	current_version = get_current_version(globals.path_prefix);
@@ -345,10 +387,18 @@ enum swupd_code execute_remove_bundles_extra(struct list *bundles, remove_extra_
 		     total > 1 ? "their" : "its");
 	}
 
-	for (; bundles; bundles = bundles->next, total++) {
+	if (cmdline_option_orphans) {
+		ret_code = bundle_list_orphans(current_mom, &bundles);
+		if (ret_code != SWUPD_OK) {
+			goto out;
+		}
+	}
 
-		char *bundle = bundles->data;
+	for (bundles_iter = bundles; bundles_iter; bundles_iter = bundles_iter->next) {
+
+		char *bundle = bundles_iter->data;
 		struct list *reqd_by = NULL;
+		total++;
 
 		/* check if the bundle is allowed to be removed */
 		ret = validate_bundle(bundle, current_mom, bundles, &reqd_by);
@@ -430,6 +480,9 @@ enum swupd_code execute_remove_bundles_extra(struct list *bundles, remove_extra_
 	print_remove_summary(total, bad, list_len(bundles_to_remove));
 
 	/* cleanup */
+	if (cmdline_option_orphans) {
+		list_free_list_and_data(bundles, free);
+	}
 	list_free_list(common_files);
 	list_free_list(files_to_remove);
 	list_free_list_and_data(bundles_to_remove, manifest_free_data);
@@ -485,11 +538,13 @@ enum swupd_code bundle_remove_main(int argc, char **argv)
 
 	/* move the bundles provided in the command line into a
 	 * list so it is easier to handle them */
-	for (; *param_bundles; ++param_bundles) {
-		char *bundle = *param_bundles;
-		bundles_list = list_append_data(bundles_list, bundle);
+	if (!cmdline_option_orphans) {
+		for (; *param_bundles; ++param_bundles) {
+			char *bundle = *param_bundles;
+			bundles_list = list_append_data(bundles_list, bundle);
+		}
+		bundles_list = list_head(bundles_list);
 	}
-	bundles_list = list_head(bundles_list);
 
 	/*
 	 * Steps for bundle-remove:

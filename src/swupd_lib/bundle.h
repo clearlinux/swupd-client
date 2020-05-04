@@ -72,6 +72,15 @@ struct list *bundle_list_tracked(void);
  */
 struct list *bundle_list_installed(void);
 
+/**
+ * @brief Creates a list of orphaned bundles.
+ * @param mom The MoM manifest
+ * @bundles A list struct where the orphaned bundles will be added
+ *
+ * @return SWUPD_Ok if the list was created successfully, and an error code otherwise
+ */
+enum swupd_code bundle_list_orphans(struct manifest *mom, struct list **bundles);
+
 #ifdef __cplusplus
 }
 #endif

@@ -182,6 +182,9 @@
 # Removes a bundle and its dependencies recursively (boolean value)
 #recursive=<true/false>
 
+# Removes all orphaned bundles
+#orphans=<true/false>
+
 
 [bundle-list]
 

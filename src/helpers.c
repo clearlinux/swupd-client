@@ -483,6 +483,7 @@ static bool adjust_system_time()
 
 	if (err == -ENOENT) {
 		error("Failed to read system timestamp file\n");
+		return false;
 	}
 
 	system_time_str = time_to_string(system_time);

@@ -36,6 +36,7 @@ int main()
 
 	if (err == -ENOENT) {
 		fprintf(stderr, "Failed to read system timestamp file\n");
+		return 1; // Error
 	}
 
 	system_time_str = time_to_string(system_time);

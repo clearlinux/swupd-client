@@ -739,7 +739,7 @@ static bool load_flags_in_config(char *command, struct option *opts_array, const
 	struct stat st;
 	char *ctx = NULL;
 	char *config_file = NULL;
-	char *str = realpath(CONFIG_FILE_PATH, NULL);
+	char *str = strdup_or_die(CONFIG_FILE_PATH);
 	char *full_command = NULL;
 
 	if (!str) {

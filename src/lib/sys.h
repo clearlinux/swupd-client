@@ -94,7 +94,9 @@ int mkdir_p(const char *dir);
  */
 int rm_rf(const char *file);
 
-/* @brief Return a list of files in a directory */
+/**
+ * @brief Return a list of files in a directory
+ */
 struct list *sys_ls(char *path);
 
 /**

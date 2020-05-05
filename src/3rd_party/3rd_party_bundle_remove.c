@@ -24,10 +24,13 @@
 
 #ifdef THIRDPARTY
 
+#define FLAG_ORPHANS 2000
+
 static char **cmdline_bundles;
 static char *cmdline_option_repo = NULL;
 static bool cmdline_option_force = false;
 static bool cmdline_option_recursive = false;
+static bool cmdline_option_orphans = false;
 
 static void print_help(void)
 {
@@ -41,6 +44,7 @@ static void print_help(void)
 	print("   -e, --repo             Specify the 3rd-party repository to use\n");
 	print("   -x, --force            Removes a bundle along with all the bundles that depend on it\n");
 	print("   -R, --recursive        Removes a bundle and its dependencies recursively\n");
+	print("   --orphans              Removes all orphaned bundles\n");
 	print("\n");
 }
 
@@ -48,6 +52,7 @@ static const struct option prog_opts[] = {
 	{ "force", no_argument, 0, 'x' },
 	{ "recursive", no_argument, 0, 'R' },
 	{ "repo", required_argument, 0, 'e' },
+	{ "orphans", no_argument, 0, FLAG_ORPHANS },
 };
 
 static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
@@ -61,6 +66,9 @@ static bool parse_opt(int opt, UNUSED_PARAM char *optarg)
 		return true;
 	case 'e':
 		cmdline_option_repo = strdup_or_die(optarg);
+		return true;
+	case FLAG_ORPHANS:
+		cmdline_option_orphans = optarg_to_bool(optarg);
 		return true;
 	default:
 		return false;
@@ -83,12 +91,30 @@ static bool parse_options(int argc, char **argv)
 		return false;
 	}
 
-	if (argc <= ind) {
-		error("missing bundle(s) to be removed\n\n");
-		return false;
+	if (cmdline_option_orphans) {
+		if (argc > ind) {
+			error("you cannot specify bundles to remove when using --orphans\n\n");
+			return false;
+		}
+	} else {
+		if (argc <= ind) {
+			error("missing bundle(s) to be removed\n\n");
+			return false;
+		}
+		cmdline_bundles = argv + ind;
 	}
 
-	cmdline_bundles = argv + ind;
+	// Flag conflicts
+	if (cmdline_option_orphans) {
+		if (cmdline_option_recursive) {
+			error("--orphans and --recursive options are mutually exclusive\n");
+			return false;
+		}
+		if (cmdline_option_force) {
+			error("--orphans and --force options are mutually exclusive\n");
+			return false;
+		}
+	}
 
 	return true;
 }
@@ -164,15 +190,18 @@ enum swupd_code third_party_bundle_remove_main(int argc, char **argv)
 
 	/* move the bundles provided in the command line into a
 	 * list so it is easier to handle them */
-	for (; *cmdline_bundles; ++cmdline_bundles) {
-		char *bundle = *cmdline_bundles;
-		bundles = list_append_data(bundles, bundle);
+	if (!cmdline_option_orphans) {
+		for (; *cmdline_bundles; ++cmdline_bundles) {
+			char *bundle = *cmdline_bundles;
+			bundles = list_append_data(bundles, bundle);
+		}
+		bundles = list_head(bundles);
 	}
-	bundles = list_head(bundles);
 
 	/* set the command options */
 	bundle_remove_set_option_force(cmdline_option_force);
 	bundle_remove_set_option_recursive(cmdline_option_recursive);
+	bundle_remove_set_option_orphans(cmdline_option_orphans);
 
 	/*
 	 * Steps for bundle-remove:
@@ -180,10 +209,14 @@ enum swupd_code third_party_bundle_remove_main(int argc, char **argv)
 	 *  2) remove_files
 	 *  3) remove_binaries
 	 */
-	progress_init_steps("3rd-party-bundle-remove", steps_in_bundle_remove);
 
 	/* try removing bundles one by one */
-	ret_code = third_party_run_operation(bundles, cmdline_option_repo, remove_bundle);
+	if (cmdline_option_orphans) {
+		ret_code = third_party_run_operation_multirepo(cmdline_option_repo, remove_bundle, SWUPD_OK, "3rd-party-bundle-remove", steps_in_bundle_remove);
+	} else {
+		progress_init_steps("3rd-party-bundle-remove", steps_in_bundle_remove);
+		ret_code = third_party_run_operation(bundles, cmdline_option_repo, remove_bundle);
+	}
 
 	list_free_list(bundles);
 	swupd_deinit();

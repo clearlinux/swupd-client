@@ -11,6 +11,7 @@ test_setup() {
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo2
 	create_bundle -L -t -n test-bundle1 -f /file_1 -u repo1 "$TEST_NAME"
+	create_bundle -L    -n test-bundle2 -f /file_2 -u repo1 "$TEST_NAME"
 
 }
 
@@ -31,4 +32,28 @@ test_setup() {
 	assert_output_is_empty
 
 }
+
+@test "API081: 3rd-party bundle-remove --orphans" {
+
+	run sudo sh -c "$SWUPD 3rd-party bundle-remove $SWUPD_OPTS --orphans --quiet"
+
+	assert_status_is "$SWUPD_OK"
+	expected_output=$(cat <<-EOM
+		[repo1]
+		[repo2]
+	EOM
+	)
+	assert_is_output "$expected_output"
+
+}
+
+@test "API082: 3rd-party bundle-remove --orphans --repo REPOSITORY" {
+
+	run sudo sh -c "$SWUPD 3rd-party bundle-remove $SWUPD_OPTS --orphans --repo repo1 --quiet"
+
+	assert_status_is "$SWUPD_OK"
+	assert_output_is_empty
+
+}
+
 #WEIGHT=10

@@ -120,7 +120,7 @@ static long compute_bundle_size(const char *bundle_name)
 	struct manifest *m;
 	struct list *include_list = NULL;
 	struct list *l;
-	long size;
+	unsigned long size;
 	bool is_installed;
 
 	m = list_search(manifest_list, bundle_name, manifest_str_cmp);
@@ -145,7 +145,7 @@ static long compute_bundle_size(const char *bundle_name)
 
 	list_free_list(include_list);
 
-	return size;
+	return ulong_to_long(size);
 }
 
 static long get_bundle_size(const char *bundle)

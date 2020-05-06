@@ -51,7 +51,7 @@ static struct {
 
 static struct {
 	int files_removed;
-	long bytes_removed;
+	size_t bytes_removed;
 } stats;
 
 int clean_get_stats(void)
@@ -175,7 +175,7 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 		}
 		if (ret == 0) {
 			stats.files_removed++;
-			stats.bytes_removed += size;
+			stats.bytes_removed += long_to_ulong(size);
 		}
 	}
 
@@ -280,14 +280,14 @@ static char *read_mom_contents(int version)
 	int ret;
 	struct stat stat;
 	ret = fstat(fd, &stat);
-	if (ret != 0) {
+	if (ret != 0 || stat.st_size <= 0) {
 		goto end;
 	}
 
-	contents = malloc_or_die(stat.st_size + 1);
+	contents = malloc_or_die(long_to_ulong(stat.st_size) + 1);
 
-	ret = fread(contents, stat.st_size, 1, f);
-	if (ret != 1) {
+	size_t read = fread(contents, long_to_ulong(stat.st_size), 1, f);
+	if (read != 1) {
 		FREE(contents);
 		contents = NULL;
 	} else {
@@ -364,7 +364,7 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 			size = 0;
 		}
 		if (!rmdir(version_dir) || (dry_run && all)) {
-			stats.bytes_removed += size;
+			stats.bytes_removed += long_to_ulong(size);
 		}
 
 		FREE(version_dir);

@@ -814,7 +814,7 @@ void populate_file_struct(struct file *file, char *filename)
 	file->stat.st_uid = stat.st_uid;
 	file->stat.st_gid = stat.st_gid;
 	file->stat.st_rdev = stat.st_rdev;
-	file->stat.st_size = stat.st_size;
+	file->stat.st_size = long_to_ulong(stat.st_size);
 
 	if (S_ISLNK(stat.st_mode)) {
 		file->is_file = 0;
@@ -978,9 +978,9 @@ void manifest_free_array(struct file **array)
 	FREE(array);
 }
 
-long get_manifest_list_contentsize(struct list *manifests)
+unsigned long get_manifest_list_contentsize(struct list *manifests)
 {
-	long total_size = 0;
+	unsigned long total_size = 0;
 
 	struct list *ptr = NULL;
 	for (ptr = list_head(manifests); ptr; ptr = ptr->next) {

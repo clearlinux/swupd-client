@@ -26,6 +26,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "int.h"
 #include "list.h"
 #include "macros.h"
 #include "strings.h"
@@ -194,7 +195,7 @@ struct list *list_sort(struct list *list, comparison_fn_t comparison_fn)
 {
 	list = list_head(list);
 	int len = list_len(list);
-	return list_merge_sort(list, len, comparison_fn);
+	return list_merge_sort(list, int_to_uint(len), comparison_fn);
 }
 
 bool list_is_sorted(struct list *list, comparison_fn_t comparison_fn)

@@ -81,7 +81,7 @@ static void save_swupd_binary_path()
 {
 	/* we need to resolve the whole path to swupd first, proc/self/exe
 		 * is a symbolic link to the executable that is running the current process */
-	int path_length;
+	ssize_t path_length;
 	path_length = readlink("/proc/self/exe", swupd_binary, sizeof(swupd_binary));
 	if (path_length <= 0 || path_length >= LINE_MAX) {
 		// On errors fallback to default location

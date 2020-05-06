@@ -197,7 +197,7 @@ static void print_bundle_files(struct list *files)
 	info("\nTotal files: %ld\n", count);
 }
 
-static void print_bundle_size(struct manifest *manifest, long size, bool bundle_installed)
+static void print_bundle_size(struct manifest *manifest, size_t size, bool bundle_installed)
 {
 	char *pretty_size;
 
@@ -215,9 +215,9 @@ static void print_bundle_size(struct manifest *manifest, long size, bool bundle_
 	FREE(pretty_size);
 }
 
-static long get_bundle_size(struct manifest *mom, bool bundle_installed)
+static size_t get_bundle_size(struct manifest *mom, bool bundle_installed)
 {
-	long bundle_size;
+	size_t bundle_size;
 	struct list *bundles_not_installed = NULL;
 	struct list *iter;
 	struct manifest *manifest;
@@ -298,7 +298,7 @@ enum swupd_code bundle_info(char *bundle)
 	struct manifest *latest_manifest = NULL;
 	struct file *file = NULL;
 	struct list *subs = NULL;
-	long bundle_size;
+	size_t bundle_size;
 	bool installed = is_installed_bundle(bundle);
 	bool tracked = is_tracked_bundle(bundle);
 

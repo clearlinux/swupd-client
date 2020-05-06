@@ -37,7 +37,7 @@ size_t hashmap_hash_from_string(const char *key)
 	size_t hash = 0;
 
 	while (*key) {
-		hash = hash * 29 /* a prime number */ + *key;
+		hash = hash * 29 /* a prime number */ + (unsigned char)*key;
 		key++;
 	}
 
@@ -46,7 +46,8 @@ size_t hashmap_hash_from_string(const char *key)
 
 static inline struct list **get_hashmap_list(struct hashmap *hashmap, const void *data)
 {
-	return &hashmap->map[hashmap->hash(data) & HASH_MASK(hashmap->mask_bits)];
+	int mask = HASH_MASK(hashmap->mask_bits);
+	return &hashmap->map[hashmap->hash(data) & (size_t)mask];
 }
 
 static unsigned int calc_bits(size_t capacity)
@@ -70,7 +71,7 @@ struct hashmap *hashmap_new(size_t capacity, hash_equal_fn_t equal, hash_fn_t ha
 {
 	struct hashmap *hashmap;
 	unsigned int mask_bits = calc_bits(capacity);
-	size_t real_capacity = HASH_SIZE(mask_bits);
+	size_t real_capacity = (size_t)HASH_SIZE(mask_bits);
 
 	hashmap = malloc_or_die(sizeof(struct hashmap) + real_capacity * sizeof(struct list *));
 	hashmap->mask_bits = mask_bits;

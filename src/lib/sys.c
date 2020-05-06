@@ -218,10 +218,10 @@ long get_available_space(const char *path)
 	struct statvfs stat;
 
 	if (statvfs(path, &stat) != 0) {
-		return -1;
+		return -ENOENT;
 	}
 
-	return stat.f_bsize * stat.f_bavail;
+	return ulong_to_long(stat.f_bsize * stat.f_bavail);
 }
 
 int copy_all(const char *src, const char *dst)
@@ -346,7 +346,7 @@ long sys_file_hardlink_count(const char *file)
 		return -errno;
 	}
 
-	return st.st_nlink;
+	return ulong_to_long(st.st_nlink);
 }
 
 void journal_log_error(const char *message)
@@ -429,8 +429,7 @@ char *sys_path_join(const char *fmt, ...)
 {
 	char *path;
 	va_list ap;
-	int len;
-	int i, j;
+	size_t len, i, j;
 
 	/* merge arguments into one path */
 	va_start(ap, fmt);
@@ -651,7 +650,7 @@ void *sys_mmap_file(const char *file, size_t *file_length)
 		debug("Failed to stat %s file", file);
 		goto error;
 	}
-	*file_length = st.st_size;
+	*file_length = long_to_ulong(st.st_size);
 
 	buffer = mmap(NULL, *file_length, PROT_READ, MAP_PRIVATE, fd, 0);
 	if (buffer == MAP_FAILED) {

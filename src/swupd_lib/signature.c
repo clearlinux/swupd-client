@@ -186,8 +186,19 @@ bool signature_verify_data(const void *data, size_t data_len, const void *sig_da
 	BIO *verify_BIO = NULL;
 	char *errorstr = NULL;
 	PKCS7 *p7 = NULL;
+	int sig_data_len_int, data_len_int;
 
-	sig_BIO = BIO_new_mem_buf(sig_data, sig_data_len);
+	if (ulong_to_int_err(sig_data_len, &sig_data_len_int) != 0) {
+		error("Data to big to be a signature file (size = %ld)\n", sig_data_len);
+		goto error;
+	}
+
+	if (ulong_to_int_err(data_len, &data_len_int) != 0) {
+		error("Data to big to verify signature (size = %ld)\n", data_len);
+		goto error;
+	}
+
+	sig_BIO = BIO_new_mem_buf(sig_data, sig_data_len_int);
 	if (!sig_BIO) {
 		string_or_die(&errorstr, "Unable to load signature data into BIO");
 		goto error;
@@ -200,7 +211,7 @@ bool signature_verify_data(const void *data, size_t data_len, const void *sig_da
 		goto error;
 	}
 
-	data_BIO = BIO_new_mem_buf(data, data_len);
+	data_BIO = BIO_new_mem_buf(data, data_len_int);
 	if (!data_BIO) {
 		string_or_die(&errorstr, "Unable to load data into BIO");
 		goto error;

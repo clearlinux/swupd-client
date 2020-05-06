@@ -12,6 +12,7 @@ AM_CFLAGS = -fPIE -fPIC -g -fno-common -std=gnu99 \
 	-Wunreachable-code \
 	-Wswitch-default \
 	-Wcast-align \
+	-Wshadow \
 	-Wbad-function-cast \
 	-Winline \
 	-Wundef \

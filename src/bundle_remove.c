@@ -35,7 +35,7 @@
 
 #define VERIFY_PICKY 1
 
-static char **bundles;
+static char **param_bundles;
 static bool cmdline_option_force = false;
 static bool cmdline_option_recursive = false;
 
@@ -103,7 +103,7 @@ static bool parse_options(int argc, char **argv)
 		return false;
 	}
 
-	bundles = argv + ind;
+	param_bundles = argv + ind;
 
 	return true;
 }
@@ -485,8 +485,8 @@ enum swupd_code bundle_remove_main(int argc, char **argv)
 
 	/* move the bundles provided in the command line into a
 	 * list so it is easier to handle them */
-	for (; *bundles; ++bundles) {
-		char *bundle = *bundles;
+	for (; *param_bundles; ++param_bundles) {
+		char *bundle = *param_bundles;
 		bundles_list = list_append_data(bundles_list, bundle);
 	}
 	bundles_list = list_head(bundles_list);

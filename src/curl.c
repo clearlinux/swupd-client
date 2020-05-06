@@ -49,7 +49,7 @@
 #define SWUPD_CURL_CONNECT_TIMEOUT 30
 #define SWUPD_CURL_RCV_TIMEOUT 120
 
-static CURL *curl = NULL;
+static CURL *curl_main = NULL;
 
 uint64_t total_curl_sz = 0;
 
@@ -124,7 +124,7 @@ exit:
 	return curl_ret;
 }
 
-static int check_connection_capath(const char *test_capath, const char *url)
+static int check_connection_capath(CURL *curl, const char *test_capath, const char *url)
 {
 	CURLcode curl_ret;
 	long response = 0;
@@ -186,11 +186,11 @@ static int check_connection_capath(const char *test_capath, const char *url)
 
 int check_connection(char *url)
 {
-	if (!curl) {
+	if (!curl_main) {
 		return swupd_curl_init(url) ? 0 : -1;
 	}
 
-	return check_connection_capath(NULL, url);
+	return check_connection_capath(curl_main, NULL, url);
 }
 
 static bool perform_curl_init(const char *url)
@@ -209,14 +209,14 @@ static bool perform_curl_init(const char *url)
 		return false;
 	}
 
-	curl = curl_easy_init();
-	if (curl == NULL) {
+	curl_main = curl_easy_init();
+	if (curl_main == NULL) {
 		error("Curl - Failed to initialize session\n");
 		curl_global_cleanup();
 		return false;
 	}
 
-	ret = check_connection_capath(NULL, url);
+	ret = check_connection_capath(curl_main, NULL, url);
 	if (ret == 0) {
 		return true;
 	} else if (ret == -CURLE_OPERATION_TIMEDOUT) {
@@ -236,7 +236,7 @@ static bool perform_curl_init(const char *url)
 			}
 
 			debug("Curl - Trying fallback CA path %s\n", tok);
-			ret = check_connection_capath(tok, url);
+			ret = check_connection_capath(curl_main, tok, url);
 			if (ret == 0) {
 				capath = strdup_or_die(tok);
 				break;
@@ -266,7 +266,7 @@ bool swupd_curl_init(const char *url)
 	static bool initialized = false;
 
 	if (initialized) {
-		return curl != NULL;
+		return curl_main != NULL;
 	}
 
 	initialized = true;
@@ -275,12 +275,12 @@ bool swupd_curl_init(const char *url)
 
 void swupd_curl_cleanup(void)
 {
-	if (!curl) {
+	if (!curl_main) {
 		return;
 	}
 
-	curl_easy_cleanup(curl);
-	curl = NULL;
+	curl_easy_cleanup(curl_main);
+	curl_main = NULL;
 	FREE(capath);
 	curl_global_cleanup();
 }
@@ -301,35 +301,35 @@ double swupd_curl_query_content_size(char *url)
 		return -1;
 	}
 
-	curl_easy_reset(curl);
+	curl_easy_reset(curl_main);
 
-	curl_ret = swupd_curl_set_basic_options(curl, url, true);
+	curl_ret = swupd_curl_set_basic_options(curl_main, url, true);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
 
 	/* Set buffer for error string */
-	curl_ret = curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+	curl_ret = curl_easy_setopt(curl_main, CURLOPT_NOBODY, 1L);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
 
-	curl_ret = curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, dummy_write_cb);
+	curl_ret = curl_easy_setopt(curl_main, CURLOPT_HEADERFUNCTION, dummy_write_cb);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
 
-	curl_ret = curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+	curl_ret = curl_easy_setopt(curl_main, CURLOPT_HEADER, 0L);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
 
-	curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, dummy_write_cb);
+	curl_ret = curl_easy_setopt(curl_main, CURLOPT_WRITEFUNCTION, dummy_write_cb);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
 
-	curl_ret = curl_easy_perform(curl);
+	curl_ret = curl_easy_perform(curl_main);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
@@ -339,7 +339,7 @@ double swupd_curl_query_content_size(char *url)
 	 * NGINX which is the default content server used by clear). So if the file is
 	 * not found we need to return a size of 0 instead, otherwise the download size
 	 * calculation will be wrong */
-	curl_ret = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
+	curl_ret = curl_easy_getinfo(curl_main, CURLINFO_RESPONSE_CODE, &response);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
@@ -353,7 +353,7 @@ double swupd_curl_query_content_size(char *url)
 		return -1;
 	}
 
-	curl_ret = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &content_size);
+	curl_ret = curl_easy_getinfo(curl_main, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &content_size);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}
@@ -521,7 +521,7 @@ static enum download_status swupd_curl_get_file_full(const char *url, char *file
 	void *local_ptr = &local;
 
 restart_download:
-	curl_easy_reset(curl);
+	curl_easy_reset(curl_main);
 
 	if (!in_memory_file) {
 		// normal file download
@@ -531,7 +531,7 @@ restart_download:
 
 		if (resume_ok && resume_download_supported && lstat(filename, &stat) == 0) {
 			info("Curl - Resuming download for '%s'\n", url);
-			curl_ret = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
+			curl_ret = curl_easy_setopt(curl_main, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)stat.st_size);
 			if (curl_ret != CURLE_OK) {
 				goto exit;
 			}
@@ -544,43 +544,43 @@ restart_download:
 			goto exit;
 		}
 
-		curl_ret = curl_easy_setopt(curl, CURLOPT_PRIVATE, (void *)local_ptr);
+		curl_ret = curl_easy_setopt(curl_main, CURLOPT_PRIVATE, (void *)local_ptr);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
-		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)local.fh);
+		curl_ret = curl_easy_setopt(curl_main, CURLOPT_WRITEDATA, (void *)local.fh);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
 	} else {
-		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, swupd_download_file_to_memory);
+		curl_ret = curl_easy_setopt(curl_main, CURLOPT_WRITEFUNCTION, swupd_download_file_to_memory);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
-		curl_ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)in_memory_file);
+		curl_ret = curl_easy_setopt(curl_main, CURLOPT_WRITEDATA, (void *)in_memory_file);
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
-		curl_ret = curl_easy_setopt(curl, CURLOPT_COOKIE, "request=uncached");
+		curl_ret = curl_easy_setopt(curl_main, CURLOPT_COOKIE, "request=uncached");
 		if (curl_ret != CURLE_OK) {
 			goto exit;
 		}
 	}
 
-	curl_ret = swupd_curl_set_basic_options(curl, url, true);
+	curl_ret = swupd_curl_set_basic_options(curl_main, url, true);
 	if (curl_ret != CURLE_OK) {
 		goto exit;
 	}
 
 	debug("Curl - Start sync download: %s -> %s\n", url, in_memory_file ? "<memory>" : filename);
-	curl_ret = curl_easy_perform(curl);
+	curl_ret = curl_easy_perform(curl_main);
 
 exit:
 	if (!in_memory_file) {
 		curl_ret = swupd_download_file_close(curl_ret, &local);
 	}
 
-	status = process_curl_error_codes(curl_ret, curl);
+	status = process_curl_error_codes(curl_ret, curl_main);
 	debug("Curl - Complete sync download: %s -> %s, status=%d\n", url, in_memory_file ? "<memory>" : filename, status);
 	if (status == DOWNLOAD_STATUS_RANGE_ERROR) {
 		// Reset variable

@@ -30,8 +30,6 @@
 
 #include "swupd.h"
 
-struct list *subs;
-
 static void free_subscription_data(void *data)
 {
 	struct sub *sub = (struct sub *)data;

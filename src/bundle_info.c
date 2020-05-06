@@ -30,7 +30,7 @@
 static bool cmdline_option_dependencies = false;
 static bool cmdline_option_files = false;
 static int cmdline_option_version = 0;
-static char *bundle;
+static char *param_bundle;
 
 void bundle_info_set_option_version(int opt)
 {
@@ -121,7 +121,7 @@ static bool parse_options(int argc, char **argv)
 		return false;
 	}
 
-	bundle = *(argv + optind);
+	param_bundle = *(argv + optind);
 
 	return true;
 }
@@ -489,7 +489,7 @@ enum swupd_code bundle_info_main(int argc, char **argv)
 
 	progress_init_steps("bundle-info", steps_in_bundleinfo);
 
-	ret = bundle_info(bundle);
+	ret = bundle_info(param_bundle);
 
 	swupd_deinit();
 	progress_finish_steps(ret);

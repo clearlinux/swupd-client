@@ -41,8 +41,7 @@ static char *sys_path_join(const char *fmt, ...)
 {
 	char *path;
 	va_list ap;
-	int len;
-	int i, j;
+	size_t i, j, len;
 
 	/* merge arguments into one path */
 	va_start(ap, fmt);

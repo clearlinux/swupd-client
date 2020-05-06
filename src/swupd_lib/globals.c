@@ -517,10 +517,10 @@ void save_cmd(char **argv)
 	globals.swupd_argv = argv;
 }
 
-size_t get_max_xfer(size_t default_max_xfer)
+unsigned int get_max_xfer(unsigned int default_max_xfer)
 {
 	if (max_parallel_downloads > 0) {
-		return max_parallel_downloads;
+		return int_to_uint(max_parallel_downloads);
 	}
 
 	return default_max_xfer;
@@ -683,7 +683,7 @@ static char *generate_optstring(struct option *opts, unsigned int num_opts)
 
 	while (opts->name) {
 		if (isalpha(opts->val)) {
-			optstring[i++] = opts->val;
+			optstring[i++] = (char)opts->val;
 			if (opts->has_arg) {
 				optstring[i++] = ':';
 			}

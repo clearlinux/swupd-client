@@ -101,7 +101,7 @@ struct swupd_curl_parallel_handle {
 struct multi_curl_file {
 	struct curl_file file;		/* Curl file information */
 	enum download_status status;	/* status of last download try */
-	char retries;			/* Number of retried performed so far */
+	int retries;			/* Number of retried performed so far */
 	CURL *curl;			/* curl handle if downloading */
 	char *url;			/* The url to be downloaded from */
 	size_t hash_key;		/* hash_key of this file */
@@ -255,7 +255,7 @@ void swupd_curl_parallel_download_set_progress_callback(struct swupd_curl_parall
 }
 
 // Try to process at most COUNT messages from the curl multi-stack.
-static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, int count)
+static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, size_t count)
 {
 	CURLMsg *msg;
 	CURLcode curl_ret;
@@ -415,8 +415,7 @@ static int poll_fewer_than(struct swupd_curl_parallel_handle *h, size_t xfer_que
 
 		// Instead of using "numfds" as a hint for how many transfers
 		// to process, try to drain the queue to the lower bound.
-		int remaining = h->mcurl_size - xfer_queue_low;
-
+		size_t remaining = h->mcurl_size - xfer_queue_low;
 		if (perform_curl_io_and_complete(h, remaining) != 0) {
 			return -1;
 		}
@@ -562,7 +561,7 @@ int swupd_curl_parallel_download_enqueue(struct swupd_curl_parallel_handle *h, c
 	file->data = data;
 	if (hash) {
 		file->hash = hash;
-		file->hash_key = HASH_TO_KEY(hash);
+		file->hash_key = (size_t)HASH_TO_KEY(hash);
 	} else {
 		file->hash_key = hashmap_hash_from_string(filename);
 	}
@@ -644,7 +643,7 @@ int swupd_curl_parallel_download_end(struct swupd_curl_parallel_handle *h, int *
 			l = l->next;
 		}
 		if (retry) {
-			sleep(h->retry_delay);
+			sleep(int_to_uint(h->retry_delay));
 			h->retry_delay = (h->retry_delay * DELAY_MULTIPLIER) > MAX_DELAY ? MAX_DELAY : (h->retry_delay * DELAY_MULTIPLIER);
 		}
 	}

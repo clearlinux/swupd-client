@@ -90,7 +90,7 @@ bool globals_init(void);
 void globals_deinit(void);
 void global_print_help(void);
 
-size_t get_max_xfer(size_t default_max_xfer);
+unsigned int get_max_xfer(unsigned int default_max_xfer);
 void save_cmd(char **argv);
 
 bool set_path_prefix(char *path);

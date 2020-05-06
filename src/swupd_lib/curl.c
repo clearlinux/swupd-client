@@ -425,7 +425,7 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 	 */
 	curl_off_t curl_sz = 0;
 	if (curl_easy_getinfo(curl_handle, CURLINFO_SIZE_DOWNLOAD_T, &curl_sz) == CURLE_OK) {
-		total_curl_sz += curl_sz;
+		total_curl_sz += long_to_ulong(curl_sz);
 	}
 
 	if (curl_ret == CURLE_OK || curl_ret == CURLE_HTTP_RETURNED_ERROR) {
@@ -661,7 +661,7 @@ static int retry_download_loop(const char *url, char *filename, struct curl_file
 				if (sleep_time) {
 					info("Waiting %d seconds before retrying the download\n", sleep_time);
 				}
-				sleep(sleep_time);
+				sleep(int_to_uint(sleep_time));
 				sleep_time = (sleep_time * DELAY_MULTIPLIER) > MAX_DELAY ? MAX_DELAY : (sleep_time * DELAY_MULTIPLIER);
 				info("Retry #%d downloading from %s\n", current_retry, url);
 				continue;

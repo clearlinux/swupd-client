@@ -106,7 +106,7 @@ static int check_disk_space_availability(struct list *to_install_bundles)
 {
 	char *filepath = NULL;
 	long fs_free = 0;
-	long bundle_size = 0;
+	size_t bundle_size = 0;
 
 	if (globals.skip_diskspace_check) {
 		return 0;

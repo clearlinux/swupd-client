@@ -80,7 +80,7 @@ static void hmac_sha256_for_data(char *hash,
 		return;
 	}
 
-	if (HMAC(EVP_sha256(), (const void *)key, key_len, data, data_len, digest, &digest_len) == NULL) {
+	if (HMAC(EVP_sha256(), (const void *)key, ulong_to_int(key_len), data, data_len, digest, &digest_len) == NULL) {
 		hash_set_zeros(hash);
 		return;
 	}
@@ -157,7 +157,7 @@ int compute_hash_lazy(struct file *file, char *filename)
 /* TODO: how should we properly handle compute_hash() failures? */
 enum swupd_code compute_hash(struct file *file, char *filename)
 {
-	int ret;
+	ssize_t ret;
 	char key[SWUPD_HASH_LEN];
 	size_t key_len;
 	unsigned char *blob;

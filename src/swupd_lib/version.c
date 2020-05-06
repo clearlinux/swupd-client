@@ -102,7 +102,7 @@ static int get_sig_inmemory(char *url, struct curl_file_data *tmp_version_sig)
 		ret = sig_size;
 	}
 
-	tmp_version_sig->capacity = ret;
+	tmp_version_sig->capacity = int_to_uint(ret);
 
 	tmp_version_sig->data = malloc_or_die(int_to_uint(ret) * sizeof(char));
 

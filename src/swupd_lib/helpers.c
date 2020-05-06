@@ -897,7 +897,7 @@ void print_header(const char *header)
 	info("\n");
 }
 
-void prettify_size(long size_in_bytes, char **pretty_size)
+void prettify_size(size_t size_in_bytes, char **pretty_size)
 {
 	double size;
 

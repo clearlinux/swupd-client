@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "int.h"
 #include "macros.h"
 #include "strings.h"
 
@@ -79,7 +80,8 @@ char *str_join(const char *separator, struct list *strings)
 {
 	char *str, *ret;
 	size_t str_size = 1; // 1 for '\0'
-	size_t sep_size, printed;
+	size_t sep_size;
+	int printed;
 	struct list *i;
 
 	if (!separator) {
@@ -98,11 +100,11 @@ char *str_join(const char *separator, struct list *strings)
 	for (i = strings; i; i = i->next) {
 		printed = snprintf(str, str_size, "%s%s",
 				   i == strings ? "" : separator, (char *)i->data);
-		if (printed >= str_size) {
+		if (printed < 0 || int_to_uint(printed) >= str_size) {
 			goto error; //shouldn't happen
 		}
-		str_size -= printed;
-		str += printed;
+		str_size -= int_to_uint(printed);
+		str += int_to_uint(printed);
 	}
 
 	return ret;
@@ -209,7 +211,7 @@ char *str_to_lower(const char *str)
 	char *str_lower = malloc_or_die(str_len(str) + 1);
 
 	for (int i = 0; str[i]; i++) {
-		str_lower[i] = tolower(str[i]);
+		str_lower[i] = (char)tolower(str[i]);
 	}
 	str_lower[str_len(str)] = '\0';
 

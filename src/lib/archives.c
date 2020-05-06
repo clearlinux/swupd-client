@@ -28,6 +28,7 @@
 #include <sys/errno.h>
 
 #include "archives.h"
+#include "int.h"
 #include "log.h"
 #include "macros.h"
 #include "strings.h"
@@ -67,6 +68,7 @@ static int _archive_check_err(struct archive *ar, int ret)
 static int copy_data(struct archive *ar, struct archive *aw)
 {
 	int r;
+	long bytes;
 	const void *buffer;
 	size_t size;
 	off_t offset;
@@ -79,9 +81,9 @@ static int copy_data(struct archive *ar, struct archive *aw)
 			return r;
 		}
 
-		r = archive_write_data_block(aw, buffer, size, offset);
-		if (r < ARCHIVE_OK) {
-			return r;
+		bytes = archive_write_data_block(aw, buffer, size, offset);
+		if (bytes < ARCHIVE_OK) {
+			return long_to_int(bytes);
 		}
 	}
 	return 0;

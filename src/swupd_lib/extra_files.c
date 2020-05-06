@@ -121,7 +121,7 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 		}
 		goto tidy; /* Already printed out of memory */
 	}
-	qsort(F, nF, sizeof(*F), &cmp_filerecord_filename);
+	qsort(F, long_to_ulong(nF), sizeof(*F), &cmp_filerecord_filename);
 	/* Interesting question, would it be faster to sort this linked list,
 	 * or convert it to an array of pointers, or just pull them off one
 	 * at a time? Try one at a time first.
@@ -137,7 +137,7 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 		if (file->is_deleted && !file->is_ghosted) {
 			continue;
 		}
-		found = bsearch(&file->filename, F, nF, sizeof(*F), &cmp_string_filerecord_filename);
+		found = bsearch(&file->filename, F, long_to_ulong(nF), sizeof(*F), &cmp_string_filerecord_filename);
 		if (found) {
 			found->in_manifest = true;
 		}

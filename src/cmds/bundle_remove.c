@@ -296,9 +296,9 @@ static void get_removable_dependencies(struct manifest *mom, struct list **bundl
 	list_free_list_and_data(required_bundles, manifest_free_data);
 }
 
-static void print_remove_summary(unsigned int requested, unsigned int bad, unsigned int total_removed)
+static void print_remove_summary(int requested, int bad, int total_removed)
 {
-	int deps_removed;
+	long deps_removed;
 
 	if (cmdline_option_orphans) {
 		if (bad > 0) {
@@ -333,8 +333,8 @@ enum swupd_code execute_remove_bundles_extra(struct list *bundles, remove_extra_
 {
 	enum swupd_code ret_code = SWUPD_OK;
 	enum swupd_code ret = SWUPD_OK;
-	unsigned int bad = 0;
-	unsigned int total = 0;
+	int bad = 0;
+	int total = 0;
 	int current_version = CURRENT_OS_VERSION;
 	struct manifest *current_mom = NULL;
 	struct list *subs = NULL;

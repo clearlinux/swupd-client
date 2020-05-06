@@ -48,6 +48,7 @@ int p_lockfile(void)
 	}
 
 	int ret;
+	ssize_t bytes;
 	pid_t pid = getpid();
 	struct flock fl = {
 		.l_type = F_WRLCK,
@@ -84,7 +85,10 @@ int p_lockfile(void)
 		/* speculatively dump our pid in the file,
 		 * that may be useful for debug */
 		ret = ftruncate(lock_fd, 0);
-		ret = write(lock_fd, &pid, sizeof(pid));
+		bytes = write(lock_fd, &pid, sizeof(pid));
+		if (ret < 0 || bytes < 0) {
+			debug("Problem writing PID on lock file\n");
+		}
 
 		/* our lock_fd represents the lock */
 		return lock_fd;

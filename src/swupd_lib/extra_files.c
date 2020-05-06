@@ -44,7 +44,7 @@ static struct filerecord *F = NULL; /* Array of filerecords */
 static int nF = 0;		    /* Number of filerecords */
 
 static const regex_t *path_whitelist;
-static int path_prefix_len;
+static size_t path_prefix_len;
 
 static int record_filename(const char *name, const struct stat *stat __attribute__((unused)), int type, struct FTW *ftw __attribute__((unused)))
 {
@@ -143,7 +143,7 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 		}
 	}
 
-	int skip_len = 0; /* Length of directory name we are skipping
+	size_t skip_len = 0; /* Length of directory name we are skipping
 			   * could have used str_len(skip_dir), but speed! */
 	/* list files/directories which are extra.
 	 * This is reverse so that files are removed before their parent dirs */

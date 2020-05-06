@@ -877,7 +877,7 @@ static struct list *keep_matching_path(struct list *all_files)
 	struct list *matching_files = NULL;
 	struct list *iter = NULL;
 	struct file *file;
-	int size;
+	size_t size;
 
 	for (iter = all_files; iter; iter = iter->next) {
 		file = iter->data;

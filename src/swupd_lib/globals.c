@@ -319,7 +319,8 @@ found:
 bool set_path_prefix(char *path)
 {
 	struct stat statbuf;
-	int ret, len;
+	int ret;
+	size_t len;
 	char *new_path = NULL;
 
 	if (!path) {

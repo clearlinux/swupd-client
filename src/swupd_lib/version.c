@@ -251,7 +251,7 @@ static bool get_osrelease_value(char *path_prefix, char *key, char *buff)
 	char *releasefile = NULL;
 	char *src = NULL, *dest = NULL;
 	char *keystr = NULL;
-	int keystr_len = 0;
+	size_t keystr_len = 0;
 	bool keyfound = false;
 
 	releasefile = sys_path_join("%s/usr/lib/os-release", path_prefix);

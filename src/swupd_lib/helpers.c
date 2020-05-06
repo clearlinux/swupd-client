@@ -390,7 +390,7 @@ void swupd_deinit(void)
 
 void remove_trailing_slash(char *url)
 {
-	int len = str_len(url);
+	size_t len = str_len(url);
 
 	while (len > 0 && url[len - 1] == '/') {
 		len--;
@@ -894,11 +894,11 @@ fail:
 	return ret;
 }
 
-static void print_char(const char c, int times)
+static void print_char(const char c, size_t times)
 {
 	char *str;
 
-	str = malloc_or_die(int_to_uint(times) + 1);
+	str = malloc_or_die(times + 1);
 	memset(str, c, times);
 	info("%s\n", str);
 	FREE(str);
@@ -906,7 +906,7 @@ static void print_char(const char c, int times)
 
 void print_header(const char *header)
 {
-	int header_length;
+	size_t header_length;
 
 	header_length = str_len(header);
 	print_char('_', header_length + 1);

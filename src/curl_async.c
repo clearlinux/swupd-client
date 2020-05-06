@@ -617,7 +617,7 @@ int swupd_curl_parallel_download_end(struct swupd_curl_parallel_handle *h, int *
 
 		//Retry failed downloads
 		for (l = h->failed; l;) {
-			struct multi_curl_file *file = l->data;
+			file = l->data;
 
 			if (file->retries < globals.max_retries &&
 			    file->status != DOWNLOAD_STATUS_WRITE_ERROR) {

@@ -141,7 +141,7 @@ int add_included_manifests(struct manifest *mom, struct list **subs)
 	return 0;
 }
 
-static enum swupd_code check_versions(int *current_version, int *server_version, int requested_version, char *path_prefix)
+static enum swupd_code check_versions(int *current_version, int *server_version, int req_version, char *path_prefix)
 {
 	int ret;
 
@@ -153,14 +153,14 @@ static enum swupd_code check_versions(int *current_version, int *server_version,
 		error("Update from version 0 not supported yet\n");
 		return SWUPD_INVALID_OPTION;
 	}
-	if (requested_version != -1) {
-		if (requested_version < *current_version) {
+	if (req_version != -1) {
+		if (req_version < *current_version) {
 			error("Requested version for update (%d) must be greater than current version (%d)\n",
-			      requested_version, *current_version);
+			      req_version, *current_version);
 			return SWUPD_INVALID_OPTION;
 		}
-		if (requested_version < *server_version) {
-			*server_version = requested_version;
+		if (req_version < *server_version) {
+			*server_version = req_version;
 		}
 	}
 

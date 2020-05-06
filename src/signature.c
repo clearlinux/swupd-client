@@ -50,12 +50,12 @@ static X509 *get_cert_from_path(const char *certificate_path);
 static X509_STORE *store = NULL;
 static STACK_OF(X509) *x509_stack = NULL;
 
-static int verify_callback_ignore_expiration(int ok, X509_STORE_CTX *store)
+static int verify_callback_ignore_expiration(int ok, X509_STORE_CTX *local_store)
 {
 	int error;
 
 	if (!ok) {
-		error = X509_STORE_CTX_get_error(store);
+		error = X509_STORE_CTX_get_error(local_store);
 		debug("Certificate verification error - %s\n",
 		      X509_verify_cert_error_string(error));
 		if (error == X509_V_ERR_CERT_HAS_EXPIRED) {
@@ -67,12 +67,12 @@ static int verify_callback_ignore_expiration(int ok, X509_STORE_CTX *store)
 	return ok;
 }
 
-static int verify_callback(int ok, X509_STORE_CTX *store)
+static int verify_callback(int ok, X509_STORE_CTX *local_store)
 {
 	int error;
 
 	if (!ok) {
-		error = X509_STORE_CTX_get_error(store);
+		error = X509_STORE_CTX_get_error(local_store);
 		debug("Certificate verification error - %s\n",
 		      X509_verify_cert_error_string(error));
 	}

@@ -464,7 +464,7 @@ void remove_trailing_slash(char *url)
 static bool adjust_system_time()
 {
 	int err;
-	time_t clear_time, system_time;
+	time_t clear_time = 0, system_time = 0;
 	char *system_time_str;
 	char *clear_time_str;
 

@@ -24,7 +24,7 @@
 
 int main()
 {
-	time_t clear_time, system_time;
+	time_t clear_time = 0, system_time = 0;
 	int err;
 	char *system_time_str;
 	char *clear_time_str;

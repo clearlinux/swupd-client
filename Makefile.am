@@ -115,6 +115,7 @@ swupd_SOURCES = \
 	src/swupd_lib/hashdump.c \
 	src/swupd_lib/helpers.c \
 	src/swupd_lib/heuristics.c \
+	src/swupd_lib/heuristics.h \
 	src/swupd_lib/lock.c \
 	src/swupd_lib/manifest.c \
 	src/swupd_lib/manifest.h \

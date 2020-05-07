@@ -34,6 +34,7 @@
 #include "swupd.h"
 #include "swupd_lib/signature.h"
 #include "swupd_lib/target_root.h"
+#include "swupd_lib/heuristics.h"
 
 #define FLAG_DOWNLOAD_ONLY 2000
 #define FLAG_UPDATE_SEARCH_FILE_INDEX 2001
@@ -243,11 +244,6 @@ static struct list *create_update_list(struct manifest *server)
 		 * files, so they will not have a peer. */
 		if (!file->peer ||
 		    (file->peer && file->last_change > file->peer->last_change)) {
-			/* check and if needed mark as do_not_update */
-			(void)ignore(file);
-			/* check if we need to run scripts/update the bootloader/etc */
-			apply_heuristics(file);
-
 			output = list_prepend_data(output, file);
 			continue;
 		}
@@ -415,6 +411,9 @@ enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_
 	print_statistics(current_version, server_version);
 	timelist_timer_stop(globals.global_times); // closing: Create update list
 
+	timelist_timer_start(globals.global_times, "Applying heuristics");
+	heuristics_apply(updates);
+	timelist_timer_stop(globals.global_times); // closing: Applying heuristics
 	/* downloading and applying updates */
 	/* need update list in filename order to insure directories are
 	 * created before their contents */

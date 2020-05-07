@@ -33,6 +33,7 @@
 #include "swupd_lib/alias.h"
 #include "swupd.h"
 #include "swupd_lib/target_root.h"
+#include "swupd_lib/heuristics.h"
 
 #define MODE_RW_O (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 #define VERIFY_NOPICKY 0
@@ -217,15 +218,8 @@ static int compute_bundle_dependecies(struct manifest *mom, struct list *bundles
 
 static enum swupd_code apply_heuristics_for_new_files(struct list *files)
 {
-	struct list *iter;
-	struct file *file;
-
 	timelist_timer_start(globals.global_times, "Applying heuristics");
-	for (iter = files; iter; iter = iter->next) {
-		file = iter->data;
-		(void)ignore(file);
-		apply_heuristics(file);
-	}
+	heuristics_apply(files);
 	timelist_timer_stop(globals.global_times);
 
 	return SWUPD_OK;

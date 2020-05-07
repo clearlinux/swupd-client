@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include "swupd.h"
+#include "heuristics.h"
 
 /* trailing slash is to indicate dir itself is expected to exist, but
  * contents are ignored */
@@ -124,21 +125,13 @@ static void boot_manager_heuristics(struct file *file)
 	}
 }
 
-void apply_heuristics(struct file *file)
-{
-	runtime_state_heuristics(file);
-	boot_file_heuristics(file);
-	config_file_heuristics(file);
-	boot_manager_heuristics(file);
-}
-
 /* Determines whether or not FILE should be ignored for this swupd action. Note
  * that boot files are ignored only if they are marked as deleted; this does
  * not happen in current manifests produced by swupd-server, but this check is
  * enabled in case swupd-server ever allows for deleted boot files in manifests
  * in the future.
  */
-bool ignore(struct file *file)
+static void check_ignore_file(struct file *file)
 {
 	if ((OS_IS_STATELESS && file->is_config) ||
 	    (OS_IS_STATELESS && is_config(file->filename)) || // ideally we trust the manifest but short term reapply check here
@@ -148,8 +141,25 @@ bool ignore(struct file *file)
 	    (file->is_orphan) ||
 	    (file->is_ghosted)) {
 		file->do_not_update = 1;
-		return true;
 	}
+}
 
-	return false;
+static void apply_heuristics_for_file(struct file *file)
+{
+	runtime_state_heuristics(file);
+	boot_file_heuristics(file);
+	config_file_heuristics(file);
+	boot_manager_heuristics(file);
+	check_ignore_file(file);
+}
+
+void heuristics_apply(struct list *files)
+{
+	struct list *iter;
+	struct file *file;
+
+	for (iter = files; iter; iter = iter->next) {
+		file = iter->data;
+		apply_heuristics_for_file(file);
+	}
 }

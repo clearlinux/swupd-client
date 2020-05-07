@@ -169,9 +169,6 @@ extern bool get_distribution_string(char *path_prefix, char *dist);
 extern int get_current_format(void);
 extern int get_server_format(int server_version);
 
-extern bool ignore(struct file *file);
-extern void apply_heuristics(struct file *file);
-
 extern struct manifest *load_mom(int version, int *err);
 extern struct manifest *load_manifest(int version, struct file *file, struct manifest *mom, bool header_only, int *err);
 extern void link_manifests(struct manifest *m1, struct manifest *m2);

@@ -100,7 +100,7 @@ static void boot_file_heuristics(struct file *file)
 
 	if (str_starts_with(file->filename, "/usr/lib/kernel/") == 0) {
 		file->is_boot = 1;
-		globals.need_update_boot = true;
+		globals.need_update_bootmanager = true;
 	}
 
 	if (str_cmp(file->filename, "/usr/lib/systemd/systemd") == 0) {
@@ -112,7 +112,7 @@ static void boot_file_heuristics(struct file *file)
 	    (str_cmp(file->filename, "/usr/bin/bootctl") == 0) ||
 	    (str_starts_with(file->filename, "/usr/lib/systemd/boot") == 0)) {
 		file->is_boot = 1;
-		globals.need_update_bootloader = true;
+		globals.need_update_bootmanager = true;
 	}
 }
 
@@ -120,7 +120,7 @@ static void boot_manager_heuristics(struct file *file)
 {
 	if ((str_cmp(file->filename, "/usr/bin/clr-boot-manager") == 0) ||
 	    (str_cmp(file->filename, "/usr/share/syslinux/ldlinux.c32") == 0)) {
-		globals.need_update_bootloader = true;
+		globals.need_update_bootmanager = true;
 	}
 }
 

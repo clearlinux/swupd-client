@@ -1314,8 +1314,7 @@ brick_the_system_and_clean_curl:
 	if (cmdline_option_fix || cmdline_option_install) {
 		progress_next_step("run_postupdate_scripts", PROGRESS_UNDEFINED);
 		// always run in a fix or install case
-		globals.need_update_boot = true;
-		globals.need_update_bootloader = true;
+		globals.need_update_bootmanager = true;
 		timelist_timer_start(globals.global_times, "Run Scripts");
 		info("\n");
 		scripts_run_post_update(globals.wait_for_scripts);

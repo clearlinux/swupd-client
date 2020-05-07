@@ -156,7 +156,7 @@ void scripts_run_post_update(bool block)
 
 	info("Calling post-update helper scripts\n");
 
-	if (globals.need_update_boot || globals.need_update_bootloader) {
+	if (globals.need_update_bootmanager) {
 		if (globals.no_boot_update) {
 			warn("boot files update skipped due to "
 			     "--no-boot-update argument\n");

@@ -232,7 +232,7 @@ static enum swupd_code install_file_using_tar(const char *fullfile_path, const c
 		goto out;
 	}
 
-	stage_dir = sys_path_join("%s/staged", globals.state_dir);
+	stage_dir = statedir_get_staged_dir();
 	staged_file = str_or_die("%s%s", STAGE_FILE_PREFIX, target_basename);
 	err = tartar(stage_dir, staged_file, target_path);
 	if (err) {
@@ -345,7 +345,7 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 	dir = sys_dirname(file->filename);
 	target_basename = sys_basename(file->filename);
 
-	fullfile_path = sys_path_join("%s/staged/%s", globals.state_dir, file->hash);
+	fullfile_path = statedir_get_staged_file(file->hash);
 	target_path = sys_path_join("%s/%s", globals.path_prefix, dir);
 	target_file = sys_path_join("%s/%s", globals.path_prefix, file->filename);
 	staged_file = sys_path_join("%s/%s%s", target_path, STAGE_FILE_PREFIX, target_basename);

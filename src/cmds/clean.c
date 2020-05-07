@@ -441,7 +441,7 @@ enum swupd_code clean_statedir(bool dry_run, bool all)
 		}
 	}
 
-	staged_dir = sys_path_join("%s/%s", globals.state_dir, "staged");
+	staged_dir = statedir_get_staged_dir();
 	ret = remove_if(staged_dir, dry_run, is_fullfile);
 	FREE(staged_dir);
 	if (ret != SWUPD_OK) {

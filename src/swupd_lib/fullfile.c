@@ -97,7 +97,7 @@ static int get_cached_fullfile(struct file *file)
 
 	/* Check the statedir and statedir-cache for the expected fullfile. When the
 	 * fullfile exists in the statedir-cache, it is copied to the statedir. */
-	string_or_die(&targetfile, "%s/staged/%s", globals.state_dir, file->hash);
+	targetfile = statedir_get_staged_file(file->hash);
 	if (lstat(targetfile, &stat) != 0 || !verify_file(file, targetfile)) {
 		ret = 1;
 

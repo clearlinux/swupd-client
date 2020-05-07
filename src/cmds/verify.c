@@ -306,7 +306,7 @@ static int get_required_files(struct manifest *official_manifest, struct list *r
  * If a low-space warning has been printed, don't check again,
  * but just warn the user and return.
 */
-static void check_warn_freespace(const struct file *file)
+static void check_warn_freespace(struct file *file)
 {
 	long fs_free;
 	char *original = NULL;
@@ -324,7 +324,7 @@ static void check_warn_freespace(const struct file *file)
 		goto out;
 	}
 
-	string_or_die(&original, "%s/staged/%s", globals.state_dir, file->hash);
+	original = statedir_get_staged_file(file->hash);
 	fs_free = get_available_space(globals.path_prefix);
 	if (fs_free < 0 || stat(original, &st) != 0) {
 		warn("Unable to determine free space on filesystem\n");

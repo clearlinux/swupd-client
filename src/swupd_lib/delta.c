@@ -139,7 +139,7 @@ void apply_deltas(struct manifest *current_manifest)
 			goto next;
 		}
 
-		string_or_die(&to_staged, "%s/staged/%s", globals.state_dir, to);
+		to_staged = statedir_get_staged_file(to);
 
 		/* If 'to' file already exists, no need to apply delta. */
 		struct stat stat;

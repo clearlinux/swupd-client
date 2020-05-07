@@ -117,7 +117,7 @@ void unlink_all_staged_content(struct file *file)
 	FREE(filename);
 
 	/* downloaded and un-tar'd file */
-	string_or_die(&filename, "%s/staged/%s", globals.state_dir, file->hash);
+	filename = statedir_get_staged_file(file->hash);
 	(void)remove(filename);
 	FREE(filename);
 }
@@ -756,7 +756,7 @@ int untar_full_download(void *data)
 
 	string_or_die(&tar_dotfile, "%s/download/.%s.tar", globals.state_dir, file->hash);
 	string_or_die(&tarfile, "%s/download/%s.tar", globals.state_dir, file->hash);
-	string_or_die(&targetfile, "%s/staged/%s", globals.state_dir, file->hash);
+	targetfile = statedir_get_staged_file(file->hash);
 
 	/* If valid target file already exists, we're done.
 	 * NOTE: this should NEVER happen given the checking that happens
@@ -786,8 +786,7 @@ int untar_full_download(void *data)
 	}
 
 	/* modern tar will automatically determine the compression type used */
-	char *outputdir;
-	string_or_die(&outputdir, "%s/staged", globals.state_dir);
+	char *outputdir = statedir_get_staged_dir();
 	err = archives_extract_to(tarfile, outputdir);
 	FREE(outputdir);
 	if (err) {

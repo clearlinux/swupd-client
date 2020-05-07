@@ -22,6 +22,9 @@
 /* Name of the tracking directory */
 #define TRACKING_DIR "bundles"
 
+/* Name of the staged directory */
+#define STAGED_DIR "staged"
+
 char *statedir_get_tracking_dir(void)
 {
 	return sys_path_join("%s/%s", globals.state_dir, TRACKING_DIR);
@@ -30,4 +33,14 @@ char *statedir_get_tracking_dir(void)
 char *statedir_get_tracking_file(const char *bundle_name)
 {
 	return sys_path_join("%s/%s/%s", globals.state_dir, TRACKING_DIR, bundle_name);
+}
+
+char *statedir_get_staged_dir(void)
+{
+	return sys_path_join("%s/%s", globals.state_dir, STAGED_DIR);
+}
+
+char *statedir_get_staged_file(char *file_hash)
+{
+	return sys_path_join("%s/%s/%s", globals.state_dir, STAGED_DIR, file_hash);
 }

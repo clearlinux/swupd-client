@@ -22,6 +22,18 @@ char *statedir_get_tracking_dir(void);
  */
 char *statedir_get_tracking_file(const char *bundle_name);
 
+/**
+  * @brief Gets the path to the staged directory in the statedir.
+  */
+char *statedir_get_staged_dir(void);
+
+/**
+ * @brief Gets the path to a file in the staged directory in the statedir.
+ *
+ * @param file_hash, the hash of the file
+ */
+char *statedir_get_staged_file(char *file_hash);
+
 #ifdef __cplusplus
 }
 #endif

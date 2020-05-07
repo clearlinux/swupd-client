@@ -27,6 +27,7 @@
 #include "swupd_lib/manifest.h"
 #include "swupd_lib/progress.h"
 #include "swupd_lib/scripts.h"
+#include "swupd_lib/statedir.h"
 #include "swupd_lib/swupd_comp_functions.h"
 #include "swupd_lib/swupd_curl.h"
 #include "swupd_lib/swupd_progress.h"
@@ -308,7 +309,6 @@ extern bool is_binary(const char *filename);
 typedef bool (*subs_fn_t)(struct list **subs, const char *component, int recursion, bool is_optional);
 struct list *free_list_file(struct list *item);
 extern void create_and_append_subscription(struct list **subs, const char *component);
-extern char *get_tracking_dir(void);
 extern int add_subscriptions(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
 extern int subscription_get_tree(struct list *bundles, struct list **subs, struct manifest *mom, bool find_all, int recursion);
 

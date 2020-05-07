@@ -128,6 +128,8 @@ swupd_SOURCES = \
 	src/swupd_lib/search_file.c \
 	src/swupd_lib/signature.c \
 	src/swupd_lib/signature.h \
+	src/swupd_lib/statedir.c \
+	src/swupd_lib/statedir.h \
 	src/swupd_lib/stats.c \
 	src/swupd_lib/subscriptions.c \
 	src/swupd_lib/swupd_comp_functions.c \

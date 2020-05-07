@@ -127,7 +127,7 @@ void unlink_all_staged_content(struct file *file)
  * If it exists, but is not a directory or belonging to root, remove it
  * returns true if it doesn't exist
  */
-static int ensure_root_owned_dir(const char *dirname)
+int ensure_root_owned_dir(const char *dirname)
 {
 	struct stat sb;
 	int ret = stat(dirname, &sb);
@@ -154,26 +154,7 @@ static int ensure_root_owned_dir(const char *dirname)
 	return true; /* doesn't exist now */
 }
 
-static bool is_populated_dir(const char *dirname)
-{
-	int n = 0;
-	struct dirent *d;
-	DIR *dir = opendir(dirname);
-	if (dir == NULL) {
-		return false;
-	}
-	while ((d = readdir(dir)) != NULL) {
-		/* account for '.' and '..' */
-		if (++n > 2) {
-			closedir(dir);
-			return true;
-		}
-	}
-	closedir(dir);
-	return false;
-}
-
-static bool validate_tracking_dir(const char *state_dir)
+bool safeguard_tracking_dir(const char *state_dir)
 {
 	int ret = 0;
 	char *src = NULL;
@@ -186,7 +167,7 @@ static bool validate_tracking_dir(const char *state_dir)
 	 * the first time tracking installed bundles. Since we don't know what the
 	 * user installed themselves just copy the entire system tracking directory
 	 * into the state tracking directory. */
-	if (!is_populated_dir(tracking_dir)) {
+	if (sys_dir_is_empty(tracking_dir)) {
 		src = sys_path_join("%s/%s", globals.path_prefix, "/usr/share/clear/bundles");
 
 		if (!sys_file_exists(src)) {
@@ -225,51 +206,6 @@ out:
 		return false;
 	}
 	return true;
-}
-
-int create_state_dirs(const char *state_dir_path)
-{
-	int ret = 0;
-	unsigned int i;
-	char *dir;
-#define STATE_DIR_COUNT (sizeof(state_dirs) / sizeof(state_dirs[0]))
-	const char *state_dirs[] = { "delta", "staged", "download", "telemetry", "bundles", "3rd-party" };
-
-	// check for existence
-	if (ensure_root_owned_dir(state_dir_path)) {
-		// state dir doesn't exist
-		if (mkdir_p(state_dir_path) != 0 || chmod(state_dir_path, S_IRWXU) != 0) {
-			error("failed to create %s\n", state_dir_path);
-			return -1;
-		}
-	}
-
-	for (i = 0; i < STATE_DIR_COUNT; i++) {
-		string_or_die(&dir, "%s/%s", state_dir_path, state_dirs[i]);
-		ret = ensure_root_owned_dir(dir);
-		if (ret) {
-			ret = mkdir(dir, S_IRWXU);
-			if (ret) {
-				error("failed to create %s\n", dir);
-				FREE(dir);
-				return -1;
-			}
-		}
-		FREE(dir);
-	}
-	/* Do a final check to make sure that the top level dir wasn't
-	 * tampered with whilst we were creating the dirs */
-	if (ensure_root_owned_dir(state_dir_path)) {
-		return -1;
-	}
-
-	/* make sure the tracking directory is not empty, if it is,
-	 * mark all installed bundles as tracked */
-	if (!validate_tracking_dir(state_dir_path)) {
-		debug("There was an error accessing the tracking directory %s/bundles\n", state_dir_path);
-	}
-
-	return ret;
 }
 
 /**
@@ -548,13 +484,13 @@ enum swupd_code swupd_init(enum swupd_init_config config)
 			}
 		}
 
-		if (create_state_dirs(globals.state_dir)) {
+		if (statedir_create_dirs(globals.state_dir)) {
 			ret = SWUPD_COULDNT_CREATE_DIR;
 			goto out_fds;
 		}
 
 		if (globals.state_dir_cache != NULL) {
-			if (create_state_dirs(globals.state_dir_cache)) {
+			if (statedir_create_dirs(globals.state_dir_cache)) {
 				ret = SWUPD_COULDNT_CREATE_DIR;
 				goto out_fds;
 			}

@@ -35,6 +35,7 @@
 #include "swupd.h"
 #include "swupd_lib/signature.h"
 #include "swupd_lib/target_root.h"
+#include "swupd_lib/heuristics.h"
 
 #define FLAG_EXTRA_FILES_ONLY 2000
 #define FLAG_FILE 2001
@@ -369,8 +370,7 @@ static void add_missing_files(struct manifest *official_manifest, struct list *f
 		iter = iter->next;
 		complete++;
 
-		if ((file->is_deleted) ||
-		    (file->do_not_update)) {
+		if (file->is_deleted || file->do_not_update) {
 			goto progress;
 		}
 
@@ -439,7 +439,7 @@ static void check_and_fix_one(struct file *file, struct manifest *official_manif
 	char *fullname;
 
 	// Note: boot files not marked as deleted are candidates for verify/fix
-	if (file->is_deleted || ignore(file) || file->do_not_update) {
+	if (file->is_deleted || file->do_not_update) {
 		return;
 	}
 
@@ -563,17 +563,14 @@ static void remove_orphaned_files(struct list *files_to_verify, bool repair)
 		iter = iter->next;
 		complete++;
 
-		/* Do not remove files that have not been deleted, are config files, or
-		 * are marked as ghosted */
-		if (!file->is_deleted || file->is_config || file->is_ghosted) {
-			goto progress;
-		}
-
-		/* Note: boot files marked as deleted should not be deleted by
-		 * verify/fix; this task is delegated to an external program
-		 * (currently /usr/bin/clr-boot-manager).
+		/*
+		 * Don't remove files set as do_not_update, like:
+		 *  - Config files
+		 *  - ghosted files
+		 *  - boot files, that should be managed by the external tool
+		 *    clr-boot-manager
 		 */
-		if (ignore(file)) {
+		if (!file->is_deleted || file->do_not_update) {
 			goto progress;
 		}
 
@@ -899,6 +896,15 @@ static struct list *keep_matching_path(struct list *all_files)
 	return list_head(matching_files);
 }
 
+static enum swupd_code apply_heuristics_for_files(struct list *files)
+{
+	timelist_timer_start(globals.global_times, "Applying heuristics");
+	heuristics_apply(files);
+	timelist_timer_stop(globals.global_times);
+
+	return SWUPD_OK;
+}
+
 /* This function does a simple verification of files listed in the
  * subscribed bundle manifests.  If the optional "fix" or "install" parameter
  * is specified, the disk will be modified at each point during the
@@ -1176,6 +1182,7 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 			goto extra_files;
 		}
 	}
+	apply_heuristics_for_files(files_to_verify);
 
 	if (cmdline_option_extra_files_only) {
 		/* user wants to deal only with the extra files, so skip everything else */

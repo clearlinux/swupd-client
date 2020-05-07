@@ -16,6 +16,7 @@ AM_CFLAGS = -fPIE -fPIC -g -fno-common -std=gnu99 \
 	-Wbad-function-cast \
 	-Winline \
 	-Wundef \
+	-Wconversion \
 	-Wnested-externs \
 	-Wredundant-decls \
 	-fstack-protector-strong \

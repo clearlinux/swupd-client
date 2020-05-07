@@ -17,6 +17,9 @@
  *
  */
 
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "swupd.h"
 
 /* Name of the tracking directory */
@@ -43,4 +46,49 @@ char *statedir_get_staged_dir(void)
 char *statedir_get_staged_file(char *file_hash)
 {
 	return sys_path_join("%s/%s/%s", globals.state_dir, STAGED_DIR, file_hash);
+}
+
+int statedir_create_dirs(const char *path)
+{
+	int ret = 0;
+	unsigned int i;
+	char *dir;
+#define STATE_DIR_COUNT (sizeof(state_dirs) / sizeof(state_dirs[0]))
+	const char *state_dirs[] = { "delta", "staged", "download", "telemetry", "bundles", "3rd-party" };
+
+	// check for existence
+	if (ensure_root_owned_dir(path)) {
+		// state dir doesn't exist
+		if (mkdir_p(path) != 0 || chmod(path, S_IRWXU) != 0) {
+			error("failed to create %s\n", path);
+			return -1;
+		}
+	}
+
+	for (i = 0; i < STATE_DIR_COUNT; i++) {
+		string_or_die(&dir, "%s/%s", path, state_dirs[i]);
+		ret = ensure_root_owned_dir(dir);
+		if (ret) {
+			ret = mkdir(dir, S_IRWXU);
+			if (ret) {
+				error("failed to create %s\n", dir);
+				FREE(dir);
+				return -1;
+			}
+		}
+		FREE(dir);
+	}
+	/* Do a final check to make sure that the top level dir wasn't
+	 * tampered with whilst we were creating the dirs */
+	if (ensure_root_owned_dir(path)) {
+		return -1;
+	}
+
+	/* make sure the tracking directory is not empty, if it is,
+	 * mark all installed bundles as tracked */
+	if (!safeguard_tracking_dir(path)) {
+		debug("There was an error accessing the tracking directory %s/bundles\n", path);
+	}
+
+	return ret;
 }

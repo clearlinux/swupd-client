@@ -301,9 +301,11 @@ extern bool is_url_insecure(const char *url);
 extern void remove_trailing_slash(char *url);
 extern void print_header(const char *header);
 extern void prettify_size(long size_in_bytes, char **pretty_size);
-extern int create_state_dirs(const char *state_dir_path);
 extern bool confirm_action(void);
 extern bool is_binary(const char *filename);
+extern int ensure_root_owned_dir(const char *dirname);
+extern void unlink_all_staged_content(struct file *file);
+extern bool safeguard_tracking_dir(const char *state_dir);
 
 /* subscription.c */
 typedef bool (*subs_fn_t)(struct list **subs, const char *component, int recursion, bool is_optional);
@@ -391,8 +393,6 @@ extern int handle_mirror_if_stale(void);
 extern enum swupd_code clean_statedir(bool all, bool dry_run);
 
 extern void warn_nosigcheck(const char *file);
-
-extern void unlink_all_staged_content(struct file *file);
 
 /* Parameter parsing in global.c */
 extern struct global_const global;

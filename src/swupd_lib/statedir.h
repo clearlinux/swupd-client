@@ -34,6 +34,13 @@ char *statedir_get_staged_dir(void);
  */
 char *statedir_get_staged_file(char *file_hash);
 
+/**
+ * @brief Creates the required directories in the statedir.
+ *
+ * @param path The path of the statedir
+ */
+int statedir_create_dirs(const char *path);
+
 #ifdef __cplusplus
 }
 #endif

@@ -381,7 +381,6 @@ enum swupd_code third_party_execute_check_update(void);
 enum swupd_code third_party_execute_update(void);
 
 extern struct file **manifest_files_to_array(struct manifest *manifest);
-extern int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize, int size);
 extern void manifest_free_array(struct file **array);
 
 extern enum swupd_code print_update_conf_info(void);

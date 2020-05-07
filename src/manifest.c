@@ -983,45 +983,6 @@ void manifest_free_array(struct file **array)
 	FREE(array);
 }
 
-static bool is_version_data(const char *filename)
-{
-	if (str_cmp(filename, "/usr/lib/os-release") == 0 ||
-	    str_cmp(filename, "/usr/share/clear/version") == 0 ||
-	    str_cmp(filename, "/usr/share/clear/versionstamp") == 0 ||
-	    str_cmp(filename, DEFAULT_VERSION_URL_PATH) == 0 ||
-	    str_cmp(filename, DEFAULT_CONTENT_URL_PATH) == 0 ||
-	    str_cmp(filename, DEFAULT_FORMAT_PATH) == 0 ||
-	    str_cmp(filename, "/usr/share/clear/update-ca/Swupd_Root.pem") == 0 ||
-	    str_cmp(filename, "/usr/share/clear/os-core-update-index") == 0 ||
-	    str_cmp(filename, "/usr/share/clear/allbundles/os-core") == 0) {
-		return true;
-	}
-	return false;
-}
-
-int enforce_compliant_manifest(struct file **a, struct file **b, int searchsize, int size)
-{
-	struct file **found;
-	int ret = 0;
-
-	qsort(b, size, sizeof(struct file *), cmp_file_filename_ptr);
-	info("Checking manifest uniqueness...\n");
-	for (int i = 0; i < searchsize; i++) {
-		found = bsearch(a[i], b, size, sizeof(struct file *), bsearch_file_helper);
-		if (found) {
-			if (is_version_data(a[i]->filename)) {
-				continue;
-			}
-			if (hash_equal(a[i]->hash, (*found)->hash)) {
-				continue;
-			}
-			error("Conflict found for file: %s\n", a[i]->filename);
-			ret++;
-		}
-	}
-	return ret; // If collisions were found, so manifest is purely additive
-}
-
 long get_manifest_list_contentsize(struct list *manifests)
 {
 	long total_size = 0;

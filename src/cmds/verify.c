@@ -1278,7 +1278,14 @@ brick_the_system_and_clean_curl:
 			/* make sure the bundle was in fact valid and will
 			 * be installed before creating the tracking file */
 			if (list_search(bundles_subs, bundle, cmp_sub_component_string)) {
-				track_bundle_in_statedir(bundle, new_os_statedir);
+				char *tracking_file = sys_path_join("%s/bundles/%s", new_os_statedir, bundle);
+				int fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+				if (fd) {
+					close(fd);
+				} else {
+					debug("The tracking file %s failed to be created\n", tracking_file);
+				}
+				FREE(tracking_file);
 			}
 		}
 		FREE(new_os_statedir);

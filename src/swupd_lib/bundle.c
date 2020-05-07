@@ -208,17 +208,14 @@ int required_by(struct list **reqd_by, const char *bundle_name, struct manifest 
 	return count;
 }
 
-void track_bundle_in_statedir(const char *bundle_name, const char *state_dir)
+void track_bundle(const char *bundle_name)
 {
 	int ret = 0;
 	int fd;
-	char *tracking_dir;
 	char *tracking_file;
 
-	tracking_dir = sys_path_join("%s/%s", state_dir, "bundles");
-	tracking_file = sys_path_join("%s/%s", tracking_dir, bundle_name);
-
 	/* touch a tracking file */
+	tracking_file = statedir_get_tracking_file(bundle_name);
 	fd = open(tracking_file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 	if (fd < 0) {
 		ret = -1;
@@ -228,15 +225,9 @@ void track_bundle_in_statedir(const char *bundle_name, const char *state_dir)
 
 out:
 	if (ret) {
-		debug("Issue creating tracking file in %s for %s\n", tracking_dir, bundle_name);
+		debug("Issue creating tracking file %s for %s\n", tracking_file, bundle_name);
 	}
-	FREE(tracking_dir);
 	FREE(tracking_file);
-}
-
-void track_bundle(const char *bundle_name)
-{
-	track_bundle_in_statedir(bundle_name, globals.state_dir);
 }
 
 static char *get_bundles_dir(void)

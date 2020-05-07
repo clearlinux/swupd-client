@@ -10,6 +10,8 @@
  * swupd, as well as functions to handle them.
  */
 
+#include <stdbool.h>
+
 #include "lib/timelist.h"
 
 #ifdef __cplusplus

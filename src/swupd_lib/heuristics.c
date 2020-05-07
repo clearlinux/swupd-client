@@ -99,7 +99,8 @@ static void boot_file_heuristics(struct file *file)
 		file->is_boot = 1;
 	}
 
-	if (str_starts_with(file->filename, "/usr/lib/kernel/") == 0) {
+	if (str_starts_with(file->filename, "/usr/lib/kernel/") == 0 ||
+	    str_starts_with(file->filename, "/usr/lib/systemd/boot") == 0) {
 		file->is_boot = 1;
 		globals.need_update_bootmanager = true;
 	}
@@ -108,19 +109,11 @@ static void boot_file_heuristics(struct file *file)
 		globals.need_systemd_reexec = true;
 	}
 
-	if ((str_cmp(file->filename, "/usr/lib/gummiboot") == 0) ||
-	    (str_cmp(file->filename, "/usr/bin/gummiboot") == 0) ||
-	    (str_cmp(file->filename, "/usr/bin/bootctl") == 0) ||
-	    (str_starts_with(file->filename, "/usr/lib/systemd/boot") == 0)) {
-		file->is_boot = 1;
-		globals.need_update_bootmanager = true;
-	}
-}
-
-static void boot_manager_heuristics(struct file *file)
-{
-	if ((str_cmp(file->filename, "/usr/bin/clr-boot-manager") == 0) ||
-	    (str_cmp(file->filename, "/usr/share/syslinux/ldlinux.c32") == 0)) {
+	if (str_cmp(file->filename, "/usr/lib/gummiboot") == 0 ||
+	    str_cmp(file->filename, "/usr/bin/gummiboot") == 0 ||
+	    str_cmp(file->filename, "/usr/bin/bootctl") == 0 ||
+	    str_cmp(file->filename, "/usr/bin/clr-boot-manager") == 0 ||
+	    str_cmp(file->filename, "/usr/share/syslinux/ldlinux.c32") == 0) {
 		globals.need_update_bootmanager = true;
 	}
 }
@@ -149,7 +142,6 @@ static void apply_heuristics_for_file(struct file *file)
 	runtime_state_heuristics(file);
 	boot_file_heuristics(file);
 	config_file_heuristics(file);
-	boot_manager_heuristics(file);
 	check_ignore_file(file);
 }
 

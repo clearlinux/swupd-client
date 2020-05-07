@@ -54,7 +54,7 @@ bool is_tracked_bundle(const char *bundle_name)
 	char *filename = NULL;
 	bool ret;
 
-	filename = sys_path_join("%s/bundles/%s", globals.state_dir, bundle_name);
+	filename = statedir_get_tracking_file(bundle_name);
 	ret = sys_file_exists(filename);
 	FREE(filename);
 
@@ -247,7 +247,7 @@ static char *get_bundles_dir(void)
 struct list *bundle_list_tracked(void)
 {
 	struct list *bundles = NULL;
-	char *tracking_dir = get_tracking_dir();
+	char *tracking_dir = statedir_get_tracking_dir();
 
 	bundles = sys_ls(tracking_dir);
 	FREE(tracking_dir);

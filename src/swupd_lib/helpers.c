@@ -997,11 +997,6 @@ void prettify_size(long size_in_bytes, char **pretty_size)
 	string_or_die(pretty_size, "%.2lf GB", size);
 }
 
-char *get_tracking_dir(void)
-{
-	return sys_path_join("%s/%s", globals.state_dir, "bundles");
-}
-
 bool confirm_action(void)
 {
 	int response;

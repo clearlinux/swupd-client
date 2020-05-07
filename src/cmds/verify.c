@@ -332,7 +332,7 @@ static void check_warn_freespace(struct file *file)
 		goto out;
 	}
 
-	if (fs_free < st.st_size * 1.1) {
+	if (fs_free < (double)st.st_size * 1.1) {
 		warn("File to install (%s) too large by %ldK\n",
 		     file->filename, (st.st_size - fs_free) / 1000);
 		/* set flag to skip checking space on the second failure, assume we're still out of space */

@@ -143,8 +143,8 @@ static int download_pack(struct swupd_curl_parallel_handle *download_handle, int
 
 static double packs_query_total_download_size(struct list *subs, struct manifest *mom)
 {
-	long size = 0;
-	long total_size = 0;
+	double size = 0;
+	double total_size = 0;
 	struct sub *sub = NULL;
 	struct list *list = NULL;
 	struct file *bundle = NULL;
@@ -171,12 +171,12 @@ static double packs_query_total_download_size(struct list *subs, struct manifest
 		}
 
 		count++;
-		debug("Pack: %s (%.2lf MB)\n", url, (double)size / 1000000);
+		debug("Pack: %s (%.2lf MB)\n", url, size / 1000000);
 		FREE(url);
 	}
 
 	debug("Number of packs to download: %d\n", count);
-	debug("Total size of packs to be downloaded: %.2lf MB\n", (double)total_size / 1000000);
+	debug("Total size of packs to be downloaded: %.2lf MB\n", total_size / 1000000);
 	return total_size;
 }
 
@@ -278,8 +278,8 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	}
 
 	/* show the packs size only if > 1 MB */
-	string_or_die(&packs_size, "(%.2lf MB) ", (double)download_progress.total_download_size / 1000000);
-	info("Downloading packs %sfor:\n", ((double)download_progress.total_download_size / 1000000) > 1 ? packs_size : "");
+	string_or_die(&packs_size, "(%.2lf MB) ", download_progress.total_download_size / 1000000);
+	info("Downloading packs %sfor:\n", (download_progress.total_download_size / 1000000) > 1 ? packs_size : "");
 	FREE(packs_size);
 	for (iter = list_head(need_download); iter; iter = iter->next) {
 		sub = iter->data;

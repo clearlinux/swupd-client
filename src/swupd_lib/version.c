@@ -92,19 +92,20 @@ out:
 
 static int get_sig_inmemory(char *url, struct curl_file_data *tmp_version_sig)
 {
-	static const int sig_size = 4096;
+	static const size_t default_sig_size = 4096;
 	int ret = -1;
+	double file_size;
 	char *sig_fname;
 	string_or_die(&sig_fname, "%s.sig", url);
-	ret = swupd_curl_query_content_size(sig_fname);
-	if (ret <= 0) {
-		debug("Failed to retrieve size for signature file: %s - assuming %d\n", sig_fname, sig_size);
-		ret = sig_size;
+	file_size = swupd_curl_query_content_size(sig_fname);
+	if (file_size <= 0) {
+		debug("Failed to retrieve size for signature file: %s - assuming %d\n", sig_fname, default_sig_size);
+		tmp_version_sig->capacity = default_sig_size;
+	} else {
+		tmp_version_sig->capacity = (size_t)file_size;
 	}
 
-	tmp_version_sig->capacity = int_to_uint(ret);
-
-	tmp_version_sig->data = malloc_or_die(int_to_uint(ret) * sizeof(char));
+	tmp_version_sig->data = malloc_or_die(tmp_version_sig->capacity * sizeof(char));
 
 	ret = swupd_curl_get_file_memory(sig_fname, tmp_version_sig);
 	if (ret != 0) {

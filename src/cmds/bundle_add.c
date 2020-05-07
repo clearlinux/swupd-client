@@ -126,9 +126,9 @@ static int check_disk_space_availability(struct list *to_install_bundles)
 	timelist_timer_stop(globals.global_times); // closing: Check disk space availability
 
 	/* Add 10% to bundle_size as a 'fudge factor' */
-	if (((bundle_size * 1.1) > fs_free) || fs_free < 0) {
+	if ((((double)bundle_size * 1.1) > fs_free) || fs_free < 0) {
 		if (fs_free > 0) {
-			error("Bundle too large by %ldM\n", (bundle_size - fs_free) / 1000 / 1000);
+			error("Bundle too large by %ldM\n", (bundle_size - long_to_ulong(fs_free)) / 1000 / 1000);
 		} else {
 			error("Unable to determine free space on filesystem\n");
 		}

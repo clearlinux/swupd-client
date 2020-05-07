@@ -58,8 +58,8 @@ static bool download_successful(void *data)
 
 static double fullfile_query_total_download_size(struct list *files)
 {
-	long size = 0;
-	long total_size = 0;
+	double size = 0;
+	double total_size = 0;
 	struct file *file = NULL;
 	struct list *list = NULL;
 	char *url = NULL;
@@ -70,7 +70,7 @@ static double fullfile_query_total_download_size(struct list *files)
 
 		string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
 		size = swupd_curl_query_content_size(url);
-		if (size != -1) {
+		if (size > 0) {
 			total_size += size;
 		} else {
 			debug("The header for file %s could not be downloaded\n", file->filename);
@@ -79,12 +79,12 @@ static double fullfile_query_total_download_size(struct list *files)
 		}
 
 		count++;
-		debug("File: %s (%.2lf MB)\n", url, (double)size / 1000000);
+		debug("File: %s (%.2lf MB)\n", url, size / 1000000);
 		FREE(url);
 	}
 
 	debug("Number of files to download: %d\n", count);
-	debug("Total size of files to be downloaded: %.2lf MB\n", (double)total_size / 1000000);
+	debug("Total size of files to be downloaded: %.2lf MB\n", total_size / 1000000);
 	return total_size;
 }
 

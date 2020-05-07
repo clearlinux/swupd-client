@@ -31,8 +31,7 @@ extern struct globals {
 	bool allow_insecure_http;
 	bool content_url_is_local;
 	bool need_systemd_reexec;
-	bool need_update_boot;
-	bool need_update_bootloader;
+	bool need_update_bootmanager;
 	bool no_boot_update;
 	bool no_scripts;
 	bool sigcheck;

@@ -189,6 +189,7 @@ tap_driver = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 BATS_LOG_DRIVER = $(tap_driver)
 
 TESTS = \
+	test/unit/test_heuristics.test \
 	test/unit/test_list.test \
 	test/unit/test_manifest.test \
 	test/unit/test_signature.test \

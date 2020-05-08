@@ -103,6 +103,7 @@ void test_heuristics()
 
 	int i;
 
+	// Test heuristics on files one by one
 	for (i = 0; test_files[i].filename; i++) {
 		struct list *files;
 		struct file *f;
@@ -123,6 +124,32 @@ void test_heuristics()
 
 		list_free_list_and_data(files, free);
 	}
+
+
+	// Test if no heuristic is ignore when running on a list of all files
+	struct list *files = NULL;
+	for (i = 0; test_files[i].filename; i++) {
+		struct file *f;
+
+		f = new_file(strdup_or_die(test_files[i].filename));
+		files = list_prepend_data(files, f);
+	}
+	files = list_sort(files, cmp_file_filename_is_deleted);
+	heuristics_apply(files);
+	for (i = 0; test_files[i].filename; i++) {
+		struct list *iter;
+		for (iter = files; iter; iter = iter->next) {
+			struct file *f = iter->data;
+			if (str_cmp(f->filename, test_files[i].filename) == 0) {
+				check(f->is_boot == test_files[i].is_boot);
+				check(f->is_state == test_files[i].is_state);
+				check(f->is_config == test_files[i].is_config);
+				check(f->do_not_update == test_files[i].do_not_update);
+				break;
+			}
+		}
+	}
+	list_free_list_and_data(files, free_file_data);
 }
 
 int main() {

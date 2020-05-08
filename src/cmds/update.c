@@ -175,7 +175,7 @@ static void save_manifest(int version)
 
 	string_or_die(&momdir, "%s/var/tmp/swupd", globals.path_prefix);
 	string_or_die(&momfile, "%s/Manifest.MoM", momdir);
-	string_or_die(&original, "%s/%i/Manifest.MoM", globals.state_dir, version);
+	original = statedir_get_manifest(version, "MoM");
 	sys_rm(momfile);
 	mkdir_p(momdir);
 

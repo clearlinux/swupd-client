@@ -52,6 +52,34 @@ char *statedir_get_download_dir(void);
 char *statedir_get_fullfile_tar(char *file_hash);
 
 /**
+ * @brief Gets the path to the downloaded manifest tar of the specified
+ * component at a certain version in the statedir.
+ *
+ * @param version, the version of the manifest
+ * @param component, either MoM or the name of a bundle
+ */
+char *statedir_get_manifest_tar(int version, char *component);
+
+/**
+ * @brief Gets the path to the manifest of the specified component at a
+ * certain version in the statedir.
+ *
+ * @param version, the version of the manifest
+ * @param component, either MoM or the name of a bundle
+ */
+char *statedir_get_manifest(int version, char *component);
+
+/**
+ * @brief Gets the path to the manifest that contains its own hash
+ * of the specified component at a certain version in the statedir.
+ *
+ * @param version, the version of the manifest
+ * @param component, either MoM or the name of a bundle
+ * @param manifest_hash, the hash of the manifest
+ */
+char *statedir_get_hashed_manifest(int version, char *component, char *manifest_hash);
+
+/**
  * @brief Gets the path to the temporary name given to a downloaded
  * fullfile tar while being untarred in the statedir.
  *

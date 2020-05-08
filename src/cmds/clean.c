@@ -262,7 +262,8 @@ static bool is_manifest_delta(const char UNUSED_PARAM *dir, const struct dirent 
 static char *read_mom_contents(int version)
 {
 	char *mom_path = NULL;
-	string_or_die(&mom_path, "%s/%d/Manifest.MoM", globals.state_dir, version);
+
+	mom_path = statedir_get_manifest(version, "MoM");
 	FILE *f = fopen(mom_path, "r");
 	FREE(mom_path);
 	if (!f) {

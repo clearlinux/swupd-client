@@ -44,12 +44,9 @@
 static struct manifest *manifest_from_file(int version, char *component, bool header_only)
 {
 	char *filename;
-	char *basedir;
 	struct manifest *manifest;
 
-	basedir = globals.state_dir;
-
-	string_or_die(&filename, "%s/%i/Manifest.%s", basedir, version, component);
+	filename = statedir_get_manifest(version, component);
 	manifest = manifest_parse(component, filename, header_only);
 	FREE(filename);
 
@@ -91,8 +88,9 @@ static int try_manifest_delta_download(int from, int to, char *component)
 		return -1;
 	}
 
-	string_or_die(&from_manifest, "%s/%i/Manifest.%s", globals.state_dir, from, component);
-	string_or_die(&to_manifest, "%s/%i/Manifest.%s", globals.state_dir, to, component);
+	from_manifest = statedir_get_manifest(from, component);
+	to_manifest = statedir_get_manifest(to, component);
+
 	string_or_die(&manifest_delta, "%s/Manifest-%s-delta-from-%i-to-%i", globals.state_dir, component, from, to);
 	string_or_die(&to_dir, "%s/%i", globals.state_dir, to);
 
@@ -139,7 +137,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 	int ret = 0;
 
 	/* Check for fullfile only, we will not be keeping the .tar around */
-	string_or_die(&filename, "%s/%i/Manifest.%s", globals.state_dir, version, component);
+	filename = statedir_get_manifest(version, component);
 	if (sys_file_exists(filename)) {
 		ret = 0;
 		goto out;
@@ -166,7 +164,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 	}
 	FREE(filename);
 
-	string_or_die(&filename, "%s/%i/Manifest.%s.tar", globals.state_dir, version, component);
+	filename = statedir_get_manifest_tar(version, component);
 	string_or_die(&url, "%s/%i/Manifest.%s.tar", globals.content_url, version, component);
 
 	ret = swupd_curl_get_file(url, filename);
@@ -333,7 +331,7 @@ retry_load:
 		return NULL;
 	}
 
-	filename = sys_path_join("%s/%i/Manifest.MoM", globals.state_dir, version);
+	filename = statedir_get_manifest(version, "MoM");
 	string_or_die(&url, "%s/%i/Manifest.MoM", globals.content_url, version);
 
 	if (!globals.sigcheck) {

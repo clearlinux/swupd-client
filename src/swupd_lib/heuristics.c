@@ -127,9 +127,7 @@ static void boot_file_heuristics(struct file *file)
 static void check_ignore_file(struct file *file)
 {
 	if ((OS_IS_STATELESS && file->is_config) ||
-	    (OS_IS_STATELESS && is_config(file->filename)) || // ideally we trust the manifest but short term reapply check here
 	    (file->is_state) ||
-	    is_state(file->filename) || // ideally we trust the manifest but short term reapply check here
 	    (file->is_boot && file->is_deleted) ||
 	    (file->is_orphan) ||
 	    (file->is_ghosted)) {

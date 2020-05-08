@@ -112,8 +112,8 @@ static bool check_delta_filename(const char *delta_name, char *from, char *to)
 void apply_deltas(struct manifest *current_manifest)
 {
 	char *delta_dir;
-	string_or_die(&delta_dir, "%s/delta", globals.state_dir);
 
+	delta_dir = statedir_get_delta_dir();
 	DIR *dir = opendir(delta_dir);
 	if (!dir) {
 		/* No deltas available to apply. */

@@ -35,6 +35,11 @@ char *statedir_get_staged_dir(void);
 char *statedir_get_staged_file(char *file_hash);
 
 /**
+  * @brief Gets the path to the delta directory in the statedir.
+  */
+char *statedir_get_delta_dir(void);
+
+/**
  * @brief Creates the required directories in the statedir.
  *
  * @param path The path of the statedir

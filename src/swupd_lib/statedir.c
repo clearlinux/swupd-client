@@ -31,6 +31,9 @@
 /* Name of the delta directory */
 #define DELTA_DIR "delta"
 
+/* Name of the download directory */
+#define DOWNLOAD_DIR "download"
+
 char *statedir_get_tracking_dir(void)
 {
 	return sys_path_join("%s/%s", globals.state_dir, TRACKING_DIR);
@@ -54,6 +57,21 @@ char *statedir_get_staged_file(char *file_hash)
 char *statedir_get_delta_dir(void)
 {
 	return sys_path_join("%s/%s", globals.state_dir, DELTA_DIR);
+}
+
+char *statedir_get_download_dir(void)
+{
+	return sys_path_join("%s/%s", globals.state_dir, DOWNLOAD_DIR);
+}
+
+char *statedir_get_fullfile_tar(char *file_hash)
+{
+	return sys_path_join("%s/%s/.%s.tar", globals.state_dir, DOWNLOAD_DIR, file_hash);
+}
+
+char *statedir_get_fullfile_renamed_tar(char *file_hash)
+{
+	return sys_path_join("%s/%s/%s.tar", globals.state_dir, DOWNLOAD_DIR, file_hash);
 }
 
 int statedir_create_dirs(const char *path)

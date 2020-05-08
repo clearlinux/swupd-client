@@ -40,6 +40,26 @@ char *statedir_get_staged_file(char *file_hash);
 char *statedir_get_delta_dir(void);
 
 /**
+  * @brief Gets the path to the download directory in the statedir.
+  */
+char *statedir_get_download_dir(void);
+
+/**
+ * @brief Gets the path to the downloaded fullfile tar in the statedir.
+ *
+ * @param file_hash, the hash of the file
+ */
+char *statedir_get_fullfile_tar(char *file_hash);
+
+/**
+ * @brief Gets the path to the temporary name given to a downloaded
+ * fullfile tar while being untarred in the statedir.
+ *
+ * @param file_hash, the hash of the file
+ */
+char *statedir_get_fullfile_renamed_tar(char *file_hash);
+
+/**
  * @brief Creates the required directories in the statedir.
  *
  * @param path The path of the statedir

@@ -34,7 +34,7 @@ static int download_file(struct swupd_curl_parallel_handle *download_handle, str
 	int ret = -1;
 	char *url, *filename;
 
-	string_or_die(&filename, "%s/download/.%s.tar", globals.state_dir, file->hash);
+	filename = statedir_get_fullfile_tar(file->hash);
 	string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
 	ret = swupd_curl_parallel_download_enqueue(download_handle, url, filename, file->hash, file);
 	FREE(url);

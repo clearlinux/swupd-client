@@ -426,7 +426,7 @@ static bool verify_fix_single_directory(const char *path, struct manifest *mom)
 	bool ret = false;
 	struct file *file = NULL;
 	char *target_path = NULL;
-	char *tar_dotfile = NULL;
+	char *tarfile = NULL;
 	char *url = NULL;
 
 	/* Search for the file in the manifest, to get the hash for the file */
@@ -460,12 +460,12 @@ static bool verify_fix_single_directory(const char *path, struct manifest *mom)
 	unlink_all_staged_content(file);
 
 	/* download the fullfile for the missing path */
-	tar_dotfile = sys_path_join("%s/download/.%s.tar", globals.state_dir, file->hash);
+	tarfile = statedir_get_fullfile_tar(file->hash);
 	url = str_or_die("%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
-	ret = swupd_curl_get_file(url, tar_dotfile);
+	ret = swupd_curl_get_file(url, tarfile);
 	if (ret != 0) {
 		error("Failed to download file %s\n", file->filename);
-		unlink(tar_dotfile);
+		unlink(tarfile);
 		goto end;
 	}
 
@@ -483,7 +483,7 @@ static bool verify_fix_single_directory(const char *path, struct manifest *mom)
 end:
 	FREE(url);
 	FREE(target_path);
-	FREE(tar_dotfile);
+	FREE(tarfile);
 	return ret;
 }
 

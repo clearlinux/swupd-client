@@ -108,15 +108,16 @@ void unlink_all_staged_content(struct file *file)
 {
 	char *filename;
 
-	/* downloaded tar file */
-	string_or_die(&filename, "%s/download/%s.tar", globals.state_dir, file->hash);
+	/* remove the downloaded tar file and the
+	 * renamed tar created while un-tarring */
+	filename = statedir_get_fullfile_tar(file->hash);
 	unlink(filename);
 	FREE(filename);
-	string_or_die(&filename, "%s/download/.%s.tar", globals.state_dir, file->hash);
+	filename = statedir_get_fullfile_renamed_tar(file->hash);
 	unlink(filename);
 	FREE(filename);
 
-	/* downloaded and un-tar'd file */
+	/* remove the un-tar'd file */
 	filename = statedir_get_staged_file(file->hash);
 	(void)remove(filename);
 	FREE(filename);
@@ -684,47 +685,53 @@ bool on_new_format(void)
 int untar_full_download(void *data)
 {
 	struct file *file = data;
+	char *renamed_tarfile;
 	char *tarfile;
-	char *tar_dotfile;
 	char *targetfile;
 	struct stat stat;
 	int err;
 
-	string_or_die(&tar_dotfile, "%s/download/.%s.tar", globals.state_dir, file->hash);
-	string_or_die(&tarfile, "%s/download/%s.tar", globals.state_dir, file->hash);
+	// This is the downloaded fullfile tar
+	tarfile = statedir_get_fullfile_tar(file->hash);
+
+	// The tar will be renamed during the untarring process so in case
+	// the untarring fails we can later look at the processed tar file
+	renamed_tarfile = statedir_get_fullfile_renamed_tar(file->hash);
+
+	// the target where the tar file will be untarred
 	targetfile = statedir_get_staged_file(file->hash);
 
 	/* If valid target file already exists, we're done.
 	 * NOTE: this should NEVER happen given the checking that happens
 	 *       ahead of queueing a download.  But... */
 	if (verify_file(file, targetfile)) {
-		unlink(tar_dotfile);
 		unlink(tarfile);
-		FREE(tar_dotfile);
+		unlink(renamed_tarfile);
 		FREE(tarfile);
+		FREE(renamed_tarfile);
 		FREE(targetfile);
 		return 0;
 	}
 
-	unlink(tarfile);
+	unlink(renamed_tarfile);
 	unlink(targetfile);
 
-	err = rename(tar_dotfile, tarfile);
+	err = rename(tarfile, renamed_tarfile);
 	if (err) {
-		FREE(tar_dotfile);
+		FREE(tarfile);
 		goto exit;
 	}
-	FREE(tar_dotfile);
+	FREE(tarfile);
 
-	err = archives_check_single_file_tarball(tarfile, file->hash);
+	err = archives_check_single_file_tarball(renamed_tarfile, file->hash);
 	if (err) {
 		goto exit;
 	}
 
 	/* modern tar will automatically determine the compression type used */
-	char *outputdir = statedir_get_staged_dir();
-	err = archives_extract_to(tarfile, outputdir);
-	FREE(outputdir);
+	char *staged_dir = statedir_get_staged_dir();
+	err = archives_extract_to(renamed_tarfile, staged_dir);
+	FREE(staged_dir);
 	if (err) {
 		warn("ignoring tar extract failure for fullfile %s.tar (ret %d)\n",
 		     file->hash, err);
@@ -736,7 +743,7 @@ int untar_full_download(void *data)
 	} else {
 		/* Only unlink when tar succeeded, so we can examine the tar file
 		 * in the failure case. */
-		unlink(tarfile);
+		unlink(renamed_tarfile);
 	}
 
 	err = lstat(targetfile, &stat);
@@ -747,7 +754,7 @@ int untar_full_download(void *data)
 	}
 
 exit:
-	FREE(tarfile);
+	FREE(renamed_tarfile);
 	FREE(targetfile);
 	if (err) {
 		unlink_all_staged_content(file);

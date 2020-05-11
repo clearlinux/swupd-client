@@ -978,7 +978,9 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 	 * certificate is hosed and the admin knows it and wants to recover.
 	 */
 	timelist_timer_start(globals.global_times, "Clean up download directory");
-	ret = rm_staging_dir_contents("download");
+	char *download_dir = statedir_get_download_dir();
+	ret = sys_rm_dir_contents(download_dir);
+	FREE(download_dir);
 	if (ret != 0) {
 		warn("Failed to remove prior downloads, carrying on anyway\n");
 	}

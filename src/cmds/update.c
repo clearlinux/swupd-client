@@ -306,11 +306,14 @@ enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_
 
 	/* housekeeping */
 	timelist_timer_start(globals.global_times, "Clean up download directory");
-	if (rm_staging_dir_contents("download")) {
+	char *download_dir = statedir_get_download_dir();
+	if (sys_rm_dir_contents(download_dir)) {
+		FREE(download_dir);
 		error("There was a problem cleaning download directory\n");
 		ret = SWUPD_COULDNT_REMOVE_FILE;
 		goto clean_curl;
 	}
+	FREE(download_dir);
 	timelist_timer_stop(globals.global_times); // closing: Clean up download directory
 
 	/* setup manifests */

@@ -215,6 +215,13 @@ bool sys_is_dir(const char *path);
 bool sys_filelink_is_dir(const char *path);
 
 /**
+ * @brief Remove the content of a directory without removing the directory itself.
+ *
+ * @return 0 on success, negative value on errors
+ */
+int sys_rm_dir_contents(const char *path);
+
+/**
  * @brief Remove file or directory.
  *
  * If filename is a directory, removes all files and directories recursively.

@@ -193,65 +193,6 @@ static bool is_valid_integer_format(char *str)
 	return true;
 }
 
-/* Initializes the state_dir global variable. If the path parameter is not
- * NULL, state_dir will be set to its value. Otherwise, the value is the
- * build-time default (STATE_DIR).
- */
-bool set_state_dir(char *path)
-{
-	if (!path) {
-		error("Statedir shouldn't be NULL\n");
-		return false;
-	}
-
-	if (path[0] != '/') {
-		error("State dir must be a full path starting with '/', not '%c'\n", path[0]);
-		return false;
-	}
-
-	/* Prevent some disasters: since the state dir can be destroyed and
-	 * reconstructed, make sure we never set those by accident and nuke the
-	 * system. */
-	if (!str_cmp(path, "/") || !str_cmp(path, "/var") || !str_cmp(path, "/usr")) {
-		error("Refusing to use '%s' as a state dir because it might be erased first\n", path);
-		return false;
-	}
-
-	FREE(globals.state_dir);
-	string_or_die(&globals.state_dir, "%s", path);
-
-	return true;
-}
-
-/* Sets the state_dir_cache global variable. If the path parameter is not
- * NULL, state_dir_cache will be set to its value.
- */
-bool set_state_dir_cache(char *path)
-{
-	if (!path) {
-		error("Statedir-cache shouldn't be set to NULL\n");
-		return false;
-	}
-
-	if (path[0] != '/') {
-		error("Statedir-cache must be a full path starting with '/', not '%c'\n", path[0]);
-		return false;
-	}
-
-	/* Prevent some disasters: since the statedir-cache can be destroyed and
-	 * reconstructed, make sure we never set those by accident and nuke the
-	 * system. */
-	if (!str_cmp(path, "/") || !str_cmp(path, "/var") || !str_cmp(path, "/usr")) {
-		error("Refusing to use '%s' as a statedir-cache because it might be erased first\n", path);
-		return false;
-	}
-
-	FREE(globals.state_dir_cache);
-	string_or_die(&globals.state_dir_cache, "%s", path);
-
-	return true;
-}
-
 static void set_default_state_dir(void)
 {
 	string_or_die(&globals.state_dir, "%s", STATE_DIR);
@@ -595,7 +536,7 @@ static bool global_parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'S':
-		if (!set_state_dir(optarg)) {
+		if (!statedir_set_path(optarg)) {
 			error("Invalid --statedir argument\n\n");
 			return false;
 		}

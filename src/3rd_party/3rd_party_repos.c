@@ -314,7 +314,7 @@ enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck)
 		error("Unable to create the state directories for repository %s\n\n", repo->name);
 		return SWUPD_COULDNT_CREATE_DIR;
 	}
-	set_state_dir(repo_state_dir);
+	statedir_set_path(repo_state_dir);
 	FREE(repo_state_dir);
 
 	return SWUPD_OK;
@@ -379,7 +379,7 @@ static enum swupd_code third_party_find_bundle(const char *bundle, struct list *
 
 clean_and_exit:
 	set_path_prefix(globals_bkp.path_prefix);
-	set_state_dir(globals_bkp.state_dir);
+	statedir_set_path(globals_bkp.state_dir);
 	set_content_url(globals_bkp.content_url);
 	set_version_url(globals_bkp.version_url);
 
@@ -444,7 +444,7 @@ enum swupd_code third_party_run_operation(struct list *bundles, const char *repo
 			/* return the global variables to the original values */
 		next:
 			set_path_prefix(globals_bkp.path_prefix);
-			set_state_dir(globals_bkp.state_dir);
+			statedir_set_path(globals_bkp.state_dir);
 			set_content_url(globals_bkp.content_url);
 			set_version_url(globals_bkp.version_url);
 		}

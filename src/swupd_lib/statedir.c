@@ -172,3 +172,39 @@ int statedir_create_dirs(const char *path)
 
 	return ret;
 }
+
+static bool set_state_path(char** state, char *path)
+{
+	if (!path) {
+		error("Statedir shouldn't be NULL\n");
+		return false;
+	}
+
+	if (path[0] != '/') {
+		error("State dir must be a full path starting with '/', not '%c'\n", path[0]);
+		return false;
+	}
+
+	/* Prevent some disasters: since the state dir can be destroyed and
+	 * reconstructed, make sure we never set those by accident and nuke the
+	 * system. */
+	if (!str_cmp(path, "/") || !str_cmp(path, "/var") || !str_cmp(path, "/usr")) {
+		error("Refusing to use '%s' as a state dir because it might be erased first\n", path);
+		return false;
+	}
+
+	FREE(*state);
+	*state = sys_path_join("%s", path);
+
+	return true;
+}
+
+bool statedir_set_path(char *path)
+{
+	return set_state_path(&globals.state_dir, path);
+}
+
+bool statedir_dup_set_path(char *path)
+{
+	return set_state_path(&globals.state_dir_cache, path);
+}

@@ -83,7 +83,7 @@ void telemetry(enum telemetry_severity level, const char *class, const char *fmt
 		goto error;
 	}
 
-	string_or_die(&newname, "%s/telemetry/%s", globals.state_dir, filename_n);
+	newname = statedir_get_telemetry_record(filename_n);
 
 	ret = rename(filename, newname);
 	FREE(filename);

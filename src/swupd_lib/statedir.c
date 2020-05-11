@@ -34,6 +34,9 @@
 /* Name of the download directory */
 #define DOWNLOAD_DIR "download"
 
+/* Name of the telemetry directory */
+#define TELEMETRY_DIR "telemetry"
+
 char *statedir_get_tracking_dir(void)
 {
 	return sys_path_join("%s/%s", globals.state_dir, TRACKING_DIR);
@@ -87,6 +90,11 @@ char *statedir_get_manifest(int version, char *component)
 char *statedir_get_hashed_manifest(int version, char *component, char *manifest_hash)
 {
 	return sys_path_join("%s/%i/Manifest.%s.%s", globals.state_dir, version, component, manifest_hash);
+}
+
+char *statedir_get_telemetry_record(char *record)
+{
+	return sys_path_join("%s/%s/%s", globals.state_dir, TELEMETRY_DIR, record);
 }
 
 int statedir_create_dirs(const char *path)

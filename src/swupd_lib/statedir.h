@@ -88,6 +88,13 @@ char *statedir_get_hashed_manifest(int version, char *component, char *manifest_
 char *statedir_get_fullfile_renamed_tar(char *file_hash);
 
 /**
+ * @brief Gets the path to the telemetry record in the statedir.
+ *
+ * @param record, the name of the telemetry record
+ */
+char *statedir_get_telemetry_record(char *record);
+
+/**
  * @brief Creates the required directories in the statedir.
  *
  * @param path The path of the statedir

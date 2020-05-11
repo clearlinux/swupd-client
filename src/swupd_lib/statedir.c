@@ -37,6 +37,9 @@
 /* Name of the telemetry directory */
 #define TELEMETRY_DIR "telemetry"
 
+/* Name of the swupd lock file */
+#define LOCK "swupd_lock"
+
 char *statedir_get_tracking_dir(void)
 {
 	return sys_path_join("%s/%s", globals.state_dir, TRACKING_DIR);
@@ -95,6 +98,11 @@ char *statedir_get_hashed_manifest(int version, char *component, char *manifest_
 char *statedir_get_telemetry_record(char *record)
 {
 	return sys_path_join("%s/%s/%s", globals.state_dir, TELEMETRY_DIR, record);
+}
+
+char *statedir_get_swupd_lock(void)
+{
+	return sys_path_join("%s/%s", globals.state_dir, LOCK);
 }
 
 int statedir_create_dirs(const char *path)

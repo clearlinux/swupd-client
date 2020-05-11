@@ -95,6 +95,11 @@ char *statedir_get_fullfile_renamed_tar(char *file_hash);
 char *statedir_get_telemetry_record(char *record);
 
 /**
+ * @brief Gets the path to the swupd lock file in the statedir.
+ */
+char *statedir_get_swupd_lock(void);
+
+/**
  * @brief Creates the required directories in the statedir.
  *
  * @param path The path of the statedir

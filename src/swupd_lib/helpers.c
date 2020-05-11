@@ -47,63 +47,6 @@ void check_root(void)
 	}
 }
 
-/* Remove the contents of a staging directory (eg: /mnt/swupd/update/780 or
- * /mnt/swupd/update/delta) which are not supposed to contain
- * subdirectories containing files, ie: no need for true recursive removal.
- * Just the relative path (et: "780" or "delta" is passed as a parameter).
- *
- * return: 0 on success, non-zero on error
- */
-int rm_staging_dir_contents(const char *rel_path)
-{
-	DIR *dir;
-	struct dirent *entry;
-	char *filename;
-	char *abs_path;
-	int ret = 0;
-
-	string_or_die(&abs_path, "%s/%s", globals.state_dir, rel_path);
-
-	dir = opendir(abs_path);
-	if (dir == NULL) {
-		FREE(abs_path);
-		return -1;
-	}
-
-	while (true) {
-		errno = 0;
-		entry = readdir(dir);
-		if (!entry) {
-			/* readdir returns NULL on the end of a directory stream, we only
-			 * want to set ret if errno is also set, indicating a failure */
-			if (errno) {
-				ret = errno;
-			}
-			break;
-		}
-
-		if (!str_cmp(entry->d_name, ".") ||
-		    !str_cmp(entry->d_name, "..")) {
-			continue;
-		}
-
-		string_or_die(&filename, "%s/%s", abs_path, entry->d_name);
-
-		ret = remove(filename);
-		if (ret != 0) {
-			debug("Failed to remove file %s\n", filename);
-			FREE(filename);
-			break;
-		}
-		FREE(filename);
-	}
-
-	FREE(abs_path);
-	closedir(dir);
-
-	return ret;
-}
-
 void unlink_all_staged_content(struct file *file)
 {
 	char *filename;

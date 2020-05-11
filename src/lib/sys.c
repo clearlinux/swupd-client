@@ -506,7 +506,7 @@ static int sys_rmdir(const char *path)
 	return 0;
 }
 
-static int sys_rm_dir_recursive(const char *path)
+int sys_rm_dir_contents(const char *path)
 {
 	DIR *dir;
 	struct dirent *entry;
@@ -515,8 +515,7 @@ static int sys_rm_dir_recursive(const char *path)
 
 	dir = opendir(path);
 	if (dir == NULL) {
-		ret = -errno;
-		goto exit;
+		return -errno;
 	}
 
 	while (true) {
@@ -531,21 +530,34 @@ static int sys_rm_dir_recursive(const char *path)
 			continue;
 		}
 
-		FREE(filename);
-		filename = str_or_die("%s/%s", path, entry->d_name);
-
+		filename = sys_path_join("%s/%s", path, entry->d_name);
 		ret = sys_rm_recursive(filename);
 		if (ret) {
+			FREE(filename);
 			goto exit;
 		}
+		FREE(filename);
+	}
+
+exit:
+	closedir(dir);
+	return ret;
+}
+
+static int sys_rm_dir_recursive(const char *path)
+{
+	int ret = 0;
+
+	/* Delete directories content first */
+	ret = sys_rm_dir_contents(path);
+	if (ret) {
+		goto exit;
 	}
 
 	/* Delete directory once it's empty */
 	ret = sys_rmdir(path);
 
 exit:
-	closedir(dir);
-	FREE(filename);
 	return ret;
 }
 

@@ -261,7 +261,6 @@ extern void populate_file_struct(struct file *file, char *filename);
 extern bool verify_file(struct file *file, char *filename);
 extern bool verify_file_lazy(char *filename);
 extern int verify_bundle_hash(struct manifest *manifest, struct file *bundle);
-extern int rm_staging_dir_contents(const char *rel_path);
 void free_file_data(void *data);
 void remove_files_in_manifest_from_fs(struct manifest *m);
 void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2);

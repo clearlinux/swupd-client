@@ -117,6 +117,16 @@ char *statedir_get_telemetry_record(char *record);
 char *statedir_get_swupd_lock(void);
 
 /**
+ * @brief Gets the path to the delta pack tar of the specified bundle
+ * going from one version to another version in the statedir.
+ *
+ * @param bundle, the name of a bundle
+ * @param from_version, the from version for the delta
+ * @param to_version, the to version for the delta
+ */
+char *statedir_get_delta_pack(char *bundle, int from_version, int to_version);
+
+/**
  * @brief Creates the required directories in the statedir.
  *
  * @param path The path of the statedir

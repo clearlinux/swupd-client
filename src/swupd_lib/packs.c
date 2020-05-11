@@ -124,7 +124,7 @@ static int download_pack(struct swupd_curl_parallel_handle *download_handle, int
 	char *url = NULL;
 	char *filename;
 
-	string_or_die(&filename, "%s/pack-%s-from-%i-to-%i.tar", globals.state_dir, module, oldversion, newversion);
+	filename = statedir_get_delta_pack(module, oldversion, newversion);
 
 	struct pack_data *pack_data;
 
@@ -189,7 +189,7 @@ static int get_cached_packs(struct sub *sub)
 
 	/* Check the statedir and statedir-cache for the expected pack. When the
 	 * pack exists in the statedir-cache, it is copied to the statedir. */
-	string_or_die(&targetfile, "%s/pack-%s-from-%i-to-%i.tar", globals.state_dir, sub->component, sub->oldversion, sub->version);
+	targetfile = statedir_get_delta_pack(sub->component, sub->oldversion, sub->version);
 	if (lstat(targetfile, &stat) != 0 || stat.st_size != 0) {
 		ret = 1;
 

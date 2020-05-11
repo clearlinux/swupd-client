@@ -355,7 +355,7 @@ int update_device_latest_version(int version)
 	FILE *file = NULL;
 	char *path = NULL;
 
-	string_or_die(&path, "%s/version", globals.state_dir);
+	path = statedir_get_version();
 	file = fopen(path, "w");
 	if (!file) {
 		FREE(path);

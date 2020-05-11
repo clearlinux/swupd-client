@@ -40,6 +40,9 @@
 /* Name of the swupd lock file */
 #define LOCK "swupd_lock"
 
+/* Name of the version file */
+#define VERSION_FILE "version"
+
 char *statedir_get_tracking_dir(void)
 {
 	return sys_path_join("%s/%s", globals.state_dir, TRACKING_DIR);
@@ -118,6 +121,11 @@ char *statedir_get_swupd_lock(void)
 char *statedir_get_delta_pack(char *bundle, int from_version, int to_version)
 {
 	return sys_path_join("%s/pack-%s-from-%i-to-%i.tar", globals.state_dir, bundle, from_version, to_version);
+}
+
+char *statedir_get_version(void)
+{
+	return sys_path_join("%s/%s", globals.state_dir, VERSION_FILE);
 }
 
 int statedir_create_dirs(const char *path)

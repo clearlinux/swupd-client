@@ -125,6 +125,10 @@ char *statedir_get_swupd_lock(void);
  * @param to_version, the to version for the delta
  */
 char *statedir_get_delta_pack(char *bundle, int from_version, int to_version);
+/**
+ * @brief Gets the path to the version file in the statedir.
+ */
+char *statedir_get_version(void);
 
 /**
  * @brief Creates the required directories in the statedir.

@@ -570,7 +570,7 @@ bool version_files_consistent(void)
 	int state_v = -1;
 	char *state_v_path;
 
-	string_or_die(&state_v_path, "%s/version", globals.state_dir);
+	state_v_path = statedir_get_version();
 	os_release_v = get_current_version(globals.path_prefix);
 	state_v = get_version_from_path(state_v_path);
 	FREE(state_v_path);

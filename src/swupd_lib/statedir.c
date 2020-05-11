@@ -115,6 +115,11 @@ char *statedir_get_swupd_lock(void)
 	return sys_path_join("%s/%s", globals.state_dir, LOCK);
 }
 
+char *statedir_get_delta_pack(char *bundle, int from_version, int to_version)
+{
+	return sys_path_join("%s/pack-%s-from-%i-to-%i.tar", globals.state_dir, bundle, from_version, to_version);
+}
+
 int statedir_create_dirs(const char *path)
 {
 	int ret = 0;

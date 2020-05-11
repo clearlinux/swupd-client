@@ -91,8 +91,8 @@ static int try_manifest_delta_download(int from, int to, char *component)
 	from_manifest = statedir_get_manifest(from, component);
 	to_manifest = statedir_get_manifest(to, component);
 
-	string_or_die(&manifest_delta, "%s/Manifest-%s-delta-from-%i-to-%i", globals.state_dir, component, from, to);
-	string_or_die(&to_dir, "%s/%i", globals.state_dir, to);
+	manifest_delta = statedir_get_manifest_delta(component, from, to);
+	to_dir = statedir_get_manifest_dir(to);
 
 	if (!sys_file_exists(manifest_delta)) {
 		string_or_die(&url, "%s/%i/Manifest-%s-delta-from-%i", globals.content_url, to, component, from);
@@ -143,7 +143,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 		goto out;
 	}
 
-	string_or_die(&dir, "%s/%i", globals.state_dir, version);
+	dir = statedir_get_manifest_dir(version);
 	ret = mkdir(dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if ((ret != 0) && (errno != EEXIST)) {
 		goto out;

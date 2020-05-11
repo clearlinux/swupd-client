@@ -80,6 +80,11 @@ char *statedir_get_fullfile_renamed_tar(char *file_hash)
 	return sys_path_join("%s/%s/%s.tar", globals.state_dir, DOWNLOAD_DIR, file_hash);
 }
 
+char *statedir_get_manifest_dir(int version)
+{
+	return sys_path_join("%s/%i", globals.state_dir, version);
+}
+
 char *statedir_get_manifest_tar(int version, char *component)
 {
 	return sys_path_join("%s/%i/Manifest.%s.tar", globals.state_dir, version, component);
@@ -93,6 +98,11 @@ char *statedir_get_manifest(int version, char *component)
 char *statedir_get_hashed_manifest(int version, char *component, char *manifest_hash)
 {
 	return sys_path_join("%s/%i/Manifest.%s.%s", globals.state_dir, version, component, manifest_hash);
+}
+
+char *statedir_get_manifest_delta(char *bundle, int from_version, int to_version)
+{
+	return sys_path_join("%s/Manifest-%s-delta-from-%i-to-%i", globals.state_dir, bundle, from_version, to_version);
 }
 
 char *statedir_get_telemetry_record(char *record)

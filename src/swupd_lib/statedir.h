@@ -137,6 +137,20 @@ char *statedir_get_version(void);
  */
 int statedir_create_dirs(const char *path);
 
+/**
+ * @brief Sets the path to the statedir.
+ *
+ * @param path The path of the statedir
+ */
+bool statedir_set_path(char *path);
+
+/**
+ * @brief Sets the path to the duplicate (cache) of the statedir.
+ *
+ * @param path The path of the statedir duplicate
+ */
+bool statedir_dup_set_path(char *path);
+
 #ifdef __cplusplus
 }
 #endif

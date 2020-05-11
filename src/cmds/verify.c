@@ -929,7 +929,7 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 	bool invalid_bundle = false;
 
 	if (cmdline_option_statedir_cache != NULL) {
-		ret = set_state_dir_cache(cmdline_option_statedir_cache);
+		ret = statedir_dup_set_path(cmdline_option_statedir_cache);
 		if (ret != true) {
 			error("Failed to set statedir-cache\n");
 			goto clean_args_and_exit;

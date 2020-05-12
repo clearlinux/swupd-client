@@ -282,8 +282,6 @@ void v_lockfile(void);
 extern void print_manifest_files(struct manifest *m);
 extern void swupd_deinit(void);
 enum swupd_code swupd_init(enum swupd_init_config config);
-void update_motd(int new_release);
-void delete_motd(void);
 extern struct list *consolidate_files_from_bundles(struct list *bundles);
 extern struct list *files_from_bundles(struct list *bundles);
 extern bool version_files_consistent(void);

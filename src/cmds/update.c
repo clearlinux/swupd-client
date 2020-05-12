@@ -432,7 +432,6 @@ enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_
 		goto clean_exit;
 	}
 
-	delete_motd();
 	timelist_timer_stop(globals.global_times); // closing: Update loop
 
 	if (!download_only) {

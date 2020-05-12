@@ -64,6 +64,7 @@ enum swupd_code hashdump_main(int argc, char **argv)
 {
 	struct file file = { 0 };
 	char *fullname = NULL;
+	struct list *mounted_dirs;
 	int ret;
 
 	file.use_xattrs = true;
@@ -112,12 +113,13 @@ enum swupd_code hashdump_main(int argc, char **argv)
 		set_default_path_prefix();
 	}
 
+	mounted_dirs = sys_get_mounted_directories();
 	file.filename = strdup_or_die(argv[optind]);
 	// Accept relative paths if no path_prefix set on command line
 	if (use_prefix) {
 		fullname = sys_path_join("%s/%s", globals.path_prefix, file.filename);
 	} else {
-		fullname = strdup_or_die(file.filename);
+		fullname = sys_path_join("%s", file.filename);
 	}
 
 	info("Calculating hash %s xattrs for: %s\n",
@@ -129,7 +131,7 @@ enum swupd_code hashdump_main(int argc, char **argv)
 		warn("compute_hash() failed\n");
 	} else {
 		print("%s\n", file.hash);
-		if (file.is_dir && is_directory_mounted(fullname)) {
+		if (file.is_dir && list_search(mounted_dirs, fullname, str_cmp_wrapper)) {
 			warn("!! dumped hash might not match a manifest "
 			     "hash because a mount is active\n");
 		}
@@ -137,5 +139,6 @@ enum swupd_code hashdump_main(int argc, char **argv)
 
 	FREE(fullname);
 	FREE(file.filename);
+	list_free_list_and_data(mounted_dirs, free);
 	return SWUPD_OK;
 }

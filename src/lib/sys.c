@@ -714,3 +714,54 @@ int link_or_copy_all(const char *orig, const char *dest)
 
 	return 0;
 }
+
+struct list *sys_get_mounted_directories(void)
+{
+	FILE *file;
+	char *line = NULL;
+	char *mnt;
+	ssize_t ret;
+	char *c;
+	size_t n;
+	char *ctx = NULL;
+	struct list *mounted = NULL;
+
+	file = fopen("/proc/self/mountinfo", "r");
+	if (!file) {
+		return NULL;
+	}
+
+	while (!feof(file)) {
+		ret = getline(&line, &n, file);
+		if ((ret < 0) || (line == NULL)) {
+			break;
+		}
+
+		c = strchr(line, '\n');
+		if (c) {
+			*c = 0;
+		}
+
+		n = 0;
+		mnt = strtok_r(line, " ", &ctx);
+		while (mnt != NULL) {
+			if (n == 4) {
+				/* The "4" assumes today's mountinfo form of:
+				* 16 36 0:3 / /proc rw,relatime master:7 - proc proc rw
+				* where the fifth field is the mountpoint. */
+				if (str_cmp(mnt, "/") != 0) {
+					mounted = list_append_data(mounted, sys_path_join("%s", mnt));
+				}
+
+				break;
+			}
+			n++;
+			mnt = strtok_r(NULL, " ", &ctx);
+		}
+		FREE(line);
+	}
+	FREE(line);
+	fclose(file);
+
+	return list_head(mounted);
+}

@@ -85,8 +85,8 @@ struct tp *tp_start(int num_threads)
 	int i;
 	struct tp *tp;
 
-	if (num_threads <= 0) {
-		error("Number of threads (%d) should be a positive integer\n", num_threads);
+	if (num_threads < 0) {
+		error("Number of threads (%d) shouldn't be negative\n", num_threads);
 		return NULL;
 	}
 

@@ -285,7 +285,7 @@ int verify_bundle_hash(struct manifest *mom, struct file *bundle)
 		ret = -1;
 	} else {
 		if (link(local, cached) < 0) {
-			debug("Failed to link cache %s manifest", local);
+			debug("Failed to link cache %s manifest\n", local);
 		}
 	}
 

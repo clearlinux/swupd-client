@@ -399,7 +399,7 @@ static enum swupd_code show_bundle_reqd_by(const char *bundle_name, bool server,
 	if (server) {
 		ret = add_included_manifests(current_manifest, &subs);
 		if (ret) {
-			error("Unable to load server manifest");
+			error("Unable to load server manifest\n");
 			ret = SWUPD_COULDNT_LOAD_MANIFEST;
 			goto out;
 		}

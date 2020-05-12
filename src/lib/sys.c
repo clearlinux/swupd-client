@@ -83,7 +83,7 @@ static void print_debug_run_command(char **params)
 	output = str_join(" ", str);
 	list_free_list(str);
 
-	debug(output);
+	debug("%s\n", output);
 	FREE(output);
 }
 
@@ -642,12 +642,12 @@ void *sys_mmap_file(const char *file, size_t *file_length)
 
 	fd = open(file, O_RDONLY);
 	if (fd == -1) {
-		debug("Failed to open %s: %s", file, strerror(errno));
+		debug("Failed to open %s: %s\n", file, strerror(errno));
 		goto error;
 	}
 
 	if (fstat(fd, &st) != 0) {
-		debug("Failed to stat %s file", file);
+		debug("Failed to stat %s file\n", file);
 		goto error;
 	}
 	*file_length = st.st_size;
@@ -655,7 +655,7 @@ void *sys_mmap_file(const char *file, size_t *file_length)
 	buffer = mmap(NULL, *file_length, PROT_READ, MAP_PRIVATE, fd, 0);
 	if (buffer == MAP_FAILED) {
 		buffer = NULL;
-		debug("Failed to mmap %s content", file);
+		debug("Failed to mmap %s content\n", file);
 	}
 
 error:

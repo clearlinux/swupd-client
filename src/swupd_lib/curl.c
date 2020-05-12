@@ -770,7 +770,7 @@ CURLcode swupd_curl_set_basic_options(CURL *curl, const char *url, bool fail_on_
 
 	curl_ret = curl_easy_setopt(curl, CURLOPT_USERAGENT, PACKAGE "/" VERSION);
 	if (curl_ret != CURLE_OK && curl_ret != CURLE_UNKNOWN_OPTION) {
-		debug("Curl - User agent not set");
+		debug("Curl - User agent not set\n");
 		// Don't abort operation because this isn't a critical information
 	}
 

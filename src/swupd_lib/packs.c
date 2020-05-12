@@ -156,7 +156,7 @@ static double packs_query_total_download_size(struct list *subs, struct manifest
 
 		bundle = mom_search_bundle(mom, sub->component);
 		if (!bundle) {
-			debug("The manifest for bundle %s was not found in the MoM", sub->component);
+			debug("The manifest for bundle %s was not found in the MoM\n", sub->component);
 			return -SWUPD_INVALID_BUNDLE;
 		}
 
@@ -293,7 +293,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 
 		bundle = mom_search_bundle(mom, sub->component);
 		if (!bundle) {
-			debug("The manifest for bundle %s was not found in the MoM", sub->component);
+			debug("The manifest for bundle %s was not found in the MoM\n", sub->component);
 			swupd_curl_parallel_download_cancel(download_handle);
 
 			ret = -SWUPD_INVALID_BUNDLE;

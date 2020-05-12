@@ -286,7 +286,7 @@ static enum swupd_code download_content(struct manifest *mom, struct list *to_in
 	timelist_timer_start(globals.global_times, "Download packs");
 
 	if (rm_staging_dir_contents("download") < 0) {
-		debug("rm_staging_dir_contents failed - resuming operation");
+		debug("rm_staging_dir_contents failed - resuming operation\n");
 	}
 
 	if (list_longer_than(to_install_files, 10 * list_len(to_install_bundles))) {

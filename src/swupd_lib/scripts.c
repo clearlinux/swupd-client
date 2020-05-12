@@ -205,7 +205,7 @@ void scripts_run_pre_update(struct manifest *manifest)
 
 		/* Check that system file matches file in manifest */
 		if (verify_file(file, script)) {
-			debug("Running pre-update script: %s", script);
+			debug("Running pre-update script: %s\n", script);
 			exec_pre_update_script(script);
 			break;
 		}

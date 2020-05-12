@@ -211,7 +211,7 @@ struct swupd_curl_parallel_handle *swupd_curl_parallel_download_start(size_t max
 	if (!h->thpool) {
 		h->thpool = tp_start(0);
 		if (!h->thpool) {
-			error("Unable to create a thread pool");
+			error("Unable to create a thread pool\n");
 			goto error;
 		}
 

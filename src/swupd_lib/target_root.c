@@ -134,7 +134,7 @@ static int tartar(const char *source_dir, const char *source_basename, const cha
 
 	rm_err = sys_rm_recursive(tmp_archive);
 	if (rm_err && rm_err != -ENOENT) {
-		debug("Failed to remove archive file %s %d", tmp_archive, rm_err);
+		debug("Failed to remove archive file %s %d\n", tmp_archive, rm_err);
 		UNEXPECTED();
 		// Removing archive fail. Trying anyway, because if it has the
 		// same type it will work
@@ -143,7 +143,7 @@ static int tartar(const char *source_dir, const char *source_basename, const cha
 	// Create tarball
 	err = run_tar_cmd_params(create, source_dir, tmp_archive, source_basename);
 	if (err) {
-		debug("Failed to create tarball to copy file %s %d",
+		debug("Failed to create tarball to copy file %s %d\n",
 		      tmp_archive, err);
 		goto cleanup;
 	}
@@ -151,7 +151,7 @@ static int tartar(const char *source_dir, const char *source_basename, const cha
 	// Extract tarball
 	err = run_tar_cmd_params(extract, target_dir, tmp_archive, NULL);
 	if (err) {
-		debug("Failed to extract tarball to copy file %s %d",
+		debug("Failed to extract tarball to copy file %s %d\n",
 		      tmp_archive, err);
 	}
 
@@ -159,7 +159,7 @@ cleanup:
 
 	rm_err = sys_rm_recursive(tmp_archive);
 	if (rm_err && rm_err != -ENOENT) {
-		debug("Failed to remove archive file %s %d", tmp_archive, rm_err);
+		debug("Failed to remove archive file %s %d\n", tmp_archive, rm_err);
 		UNEXPECTED();
 	}
 

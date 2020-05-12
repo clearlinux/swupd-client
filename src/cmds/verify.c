@@ -1184,7 +1184,6 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 			goto extra_files;
 		}
 	}
-	apply_heuristics_for_files(files_to_verify);
 
 	if (cmdline_option_extra_files_only) {
 		/* user wants to deal only with the extra files, so skip everything else */
@@ -1243,6 +1242,9 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 		/* quick only replaces missing files, so it is done here */
 		goto brick_the_system_and_clean_curl;
 	}
+
+	/* Apply heuristics to list of files */
+	apply_heuristics_for_files(files_to_verify);
 
 	/* repair corrupt files */
 	timelist_timer_start(globals.global_times, "Fixing modified files");

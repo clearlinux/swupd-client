@@ -527,24 +527,6 @@ out_fds:
 	return ret;
 }
 
-void update_motd(int new_release)
-{
-	FILE *motd_fp = NULL;
-
-	motd_fp = fopen(MOTD_FILE, "w");
-
-	if (motd_fp != NULL) {
-		fprintf(motd_fp, "There is a new OS version available: %d\n", new_release);
-		fprintf(motd_fp, "Upgrade to the latest version using 'swupd update'\n");
-		fclose(motd_fp);
-	}
-}
-
-void delete_motd(void)
-{
-	unlink(MOTD_FILE);
-}
-
 struct list *consolidate_files_from_bundles(struct list *bundles)
 {
 	/* bundles is a pointer to a list of manifests */

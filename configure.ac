@@ -391,7 +391,6 @@ AH_TEMPLATE([STATE_DIR], [The state directory for swupd content])
 AH_TEMPLATE([LOG_DIR], [Directory for swupd log files])
 AH_TEMPLATE([BUNDLES_DIR], [Directory to use for bundles])
 AH_TEMPLATE([CERT_PATH], [Location of update certificate])
-AH_TEMPLATE([MOTD_FILE], [motd file path])
 
 AS_IF(
   [test "$enable_linux_rootfs_build" = "yes"],
@@ -400,8 +399,7 @@ AS_IF(
      AC_DEFINE([STATE_DIR], ["/var/lib/swupd"])
      AC_DEFINE([LOG_DIR], ["/var/log/swupd"])
      AC_DEFINE([BUNDLES_DIR], ["/usr/share/clear/bundles"])
-     AC_DEFINE_UNQUOTED([CERT_PATH], ["$cert_path"])
-     AC_DEFINE([MOTD_FILE], ["/usr/lib/motd.d/001-new-release"])],
+     AC_DEFINE_UNQUOTED([CERT_PATH], ["$cert_path"])],
   [AC_MSG_ERROR([Unknown build variant])]
 )
 

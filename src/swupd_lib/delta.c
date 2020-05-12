@@ -117,6 +117,7 @@ void apply_deltas(struct manifest *current_manifest)
 	DIR *dir = opendir(delta_dir);
 	if (!dir) {
 		/* No deltas available to apply. */
+		FREE(delta_dir);
 		return;
 	}
 

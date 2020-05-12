@@ -311,6 +311,11 @@ int link_or_copy_all(const char *orig, const char *dest);
  */
 int link_or_rename(const char *orig, const char *dest);
 
+/**
+ * @brief Return a list of all current mounted directories.
+ */
+struct list *sys_get_mounted_directories(void);
+
 #ifdef __cplusplus
 }
 #endif

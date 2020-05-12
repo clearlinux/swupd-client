@@ -103,6 +103,7 @@ void test_heuristics()
 
 	int i;
 
+	globals.path_prefix = "/empty";
 	// Test heuristics on files one by one
 	for (i = 0; test_files[i].filename; i++) {
 		struct list *files;

@@ -152,67 +152,6 @@ out:
 	return true;
 }
 
-/**
- * store a colon separated list of current mountpoint into
- * variable globals.mounted_dirs, this function do not return a value.
- *
- * e.g: :/proc:/mnt/acct:
- */
-static void get_mounted_directories(void)
-{
-	FILE *file;
-	char *line = NULL;
-	char *mnt;
-	char *tmp;
-	ssize_t ret;
-	char *c;
-	size_t n;
-	char *ctx = NULL;
-
-	file = fopen("/proc/self/mountinfo", "r");
-	if (!file) {
-		return;
-	}
-
-	while (!feof(file)) {
-		ret = getline(&line, &n, file);
-		if ((ret < 0) || (line == NULL)) {
-			break;
-		}
-
-		c = strchr(line, '\n');
-		if (c) {
-			*c = 0;
-		}
-
-		n = 0;
-		mnt = strtok_r(line, " ", &ctx);
-		while (mnt != NULL) {
-			if (n == 4) {
-				/* The "4" assumes today's mountinfo form of:
-				* 16 36 0:3 / /proc rw,relatime master:7 - proc proc rw
-				* where the fifth field is the mountpoint. */
-				if (str_cmp(mnt, "/") == 0) {
-					break;
-				}
-
-				if (globals.mounted_dirs == NULL) {
-					string_or_die(&globals.mounted_dirs, "%s", ":");
-				}
-				tmp = globals.mounted_dirs;
-				string_or_die(&globals.mounted_dirs, "%s%s:", tmp, mnt);
-				FREE(tmp);
-				break;
-			}
-			n++;
-			mnt = strtok_r(NULL, " ", &ctx);
-		}
-		FREE(line);
-	}
-	FREE(line);
-	fclose(file);
-}
-
 static int get_version_from_path(const char *abs_path)
 {
 	int ret = -1;
@@ -232,30 +171,6 @@ static int get_version_from_path(const char *abs_path)
 	}
 
 	return -1;
-}
-
-// expects filename w/o path_prefix prepended
-bool is_directory_mounted(const char *filename)
-{
-	char *fname;
-	bool ret = false;
-	char *tmp;
-
-	if (globals.mounted_dirs == NULL) {
-		return false;
-	}
-
-	tmp = sys_path_join("%s/%s", globals.path_prefix, filename);
-	string_or_die(&fname, ":%s:", tmp);
-	FREE(tmp);
-
-	if (strstr(globals.mounted_dirs, fname)) {
-		ret = true;
-	}
-
-	FREE(fname);
-
-	return ret;
 }
 
 void free_file_data(void *data)
@@ -369,8 +284,6 @@ enum swupd_code swupd_init(enum swupd_init_config config)
 	if (chdir(globals.path_prefix)) {
 		debug("chdir() to '%s' failed -  running swupd in current directory\n", globals.path_prefix);
 	}
-
-	get_mounted_directories();
 
 	if ((config & SWUPD_NO_ROOT) == 0) {
 		check_root();

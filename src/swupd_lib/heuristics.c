@@ -29,6 +29,7 @@
 #include "swupd.h"
 #include "heuristics.h"
 
+static struct list *mounted_dirs;
 typedef int (*compare_fn_t)(const char *s1, const char *s2);
 typedef void (*apply_fn_t)(struct file *f);
 
@@ -131,20 +132,16 @@ static const struct rule heuristic_rules[] = {
 	{ 0 }
 };
 
-static bool check_in_mounted_directory(char *filename)
-{
-	if (is_directory_mounted(filename)) {
-		return true;
-	}
-
-	return false;
-}
-
 static void runtime_state_heuristics(struct file *file)
 {
-	if (check_in_mounted_directory(file->filename)) {
+	char * path;
+
+	path = sys_path_join("%s/%s", globals.path_prefix, file->filename);
+	if (list_search(mounted_dirs, path, str_cmp_wrapper)) {
 		file->is_state = 1;
 	}
+
+	FREE(path);
 }
 
 /* Determines whether or not FILE should be ignored for this swupd action. Note
@@ -204,10 +201,13 @@ void heuristics_apply(struct list *files)
 	}
 
 	// Apply the rules
+	mounted_dirs = sys_get_mounted_directories();
 	for (iter = files; iter; iter = iter->next) {
 		file = iter->data;
 		apply_heuristics_for_file(rules, file);
 	}
 
 	list_free_list_and_data(rules, free);
+	list_free_list_and_data(mounted_dirs, free);
+	mounted_dirs = NULL;
 }

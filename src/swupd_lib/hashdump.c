@@ -31,7 +31,6 @@
 
 /* outputs the hash of a file */
 
-static bool use_prefix = false;
 static int log_level = LOG_INFO;
 
 static struct option opts[] = {
@@ -92,7 +91,6 @@ enum swupd_code hashdump_main(int argc, char **argv)
 				error("Invalid --path/-p argument\n\n");
 				return SWUPD_INVALID_OPTION;
 			}
-			use_prefix = true;
 			break;
 		case 'h':
 			usage(argv[0]);
@@ -114,11 +112,7 @@ enum swupd_code hashdump_main(int argc, char **argv)
 
 	file.filename = strdup_or_die(argv[optind]);
 	// Accept relative paths if no path_prefix set on command line
-	if (use_prefix) {
-		fullname = sys_path_join("%s/%s", globals.path_prefix, file.filename);
-	} else {
-		fullname = strdup_or_die(file.filename);
-	}
+	fullname = sys_path_join("%s/%s", globals.path_prefix, file.filename);
 
 	info("Calculating hash %s xattrs for: %s\n",
 	     (file.use_xattrs ? "with" : "without"), fullname);

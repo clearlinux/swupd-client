@@ -258,50 +258,6 @@ bool is_directory_mounted(const char *filename)
 	return ret;
 }
 
-// expects filename w/o path_prefix prepended
-bool is_under_mounted_directory(const char *filename)
-{
-	bool ret = false;
-	int err;
-	char *token;
-	char *mountpoint;
-	char *dir;
-	char *fname;
-	char *tmp;
-	char *ctx = NULL;
-
-	if (globals.mounted_dirs == NULL) {
-		return false;
-	}
-
-	dir = strdup_or_die(globals.mounted_dirs);
-
-	token = strtok_r(dir + 1, ":", &ctx);
-	while (token != NULL) {
-		string_or_die(&mountpoint, "%s/", token);
-
-		tmp = sys_path_join("%s/%s", globals.path_prefix, filename);
-		string_or_die(&fname, ":%s:", tmp);
-		FREE(tmp);
-
-		err = strncmp(fname, mountpoint, str_len(mountpoint));
-		FREE(fname);
-		if (err == 0) {
-			FREE(mountpoint);
-			ret = true;
-			break;
-		}
-
-		token = strtok_r(NULL, ":", &ctx);
-
-		FREE(mountpoint);
-	}
-
-	FREE(dir);
-
-	return ret;
-}
-
 void free_file_data(void *data)
 {
 	struct file *file = (struct file *)data;

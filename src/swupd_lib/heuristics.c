@@ -54,10 +54,6 @@ static bool is_state(char *filename)
 		return true;
 	}
 
-	if (is_under_mounted_directory(filename)) {
-		return true;
-	}
-
 	if ((str_len(filename) == 14) && (str_starts_with(filename, "/usr/src/debug") == 0)) {
 		return false;
 	}

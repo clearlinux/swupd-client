@@ -2,6 +2,7 @@
 
 # Author: Otavio Pontes
 # Email: otavio.pontes@intel.com
+
 @test "ANL004: Functions to avoid" {
 
 	# There are some C functions that are tricky to use and it's prefered to
@@ -34,6 +35,36 @@
 		if [ "$status" -eq "0" ]; then
 			echo "Found $func on files:"
 			echo "$output"
+			error=1
+		fi
+	done
+
+	[ "$error" -eq "0" ]
+}
+
+@test "ANL005: Don't forget \n on log messages" {
+
+	# Looking for missing \n on log messages calls.
+	# We don't check for info() and print() calls because there
+	# are multiple cases where they are called without line breaks on purpose.
+	# One limitation of this check is that it only looks for calls that are one
+	# liners.
+	local functions="error warn debug"
+
+	local exceptions
+	declare -A exceptions
+
+	local error=0
+	for func in $functions; do
+		local base_grep_cmd="grep \"\<$func(\" src --include \"*.c\" --include \"*.h\" --exclude \"log.h\" -R | grep \")\" | grep -v \"\\\\\\n\" "
+		run eval "$base_grep_cmd"
+
+		# shellcheck disable=SC2154
+		# SC2154: var is referenced but not assigned
+		if [ "$status" -eq "0" ]; then
+			echo "line break not found on call to $func on files:"
+			echo "$output"
+			echo
 			error=1
 		fi
 	done

@@ -195,7 +195,7 @@ static bool is_valid_integer_format(char *str)
 
 static void set_default_state_dir(void)
 {
-	string_or_die(&globals.state_dir, "%s", STATE_DIR);
+	(void)statedir_set_path(STATE_DIR);
 }
 
 static void set_default_state_dir_cache(void)

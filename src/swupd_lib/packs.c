@@ -54,10 +54,12 @@ struct pack_data {
 static int finalize_pack_download(const char *module, int newversion, const char *filename)
 {
 	FILE *tarfile = NULL;
+	char *delta_pack_dir = NULL;
 	int err;
 
+	delta_pack_dir = statedir_get_delta_pack_dir();
 	debug("\nExtracting %s pack for version %i\n", module, newversion);
-	err = archives_extract_to(filename, globals.state_dir);
+	err = archives_extract_to(filename, delta_pack_dir);
 
 	unlink(filename);
 
@@ -68,6 +70,8 @@ static int finalize_pack_download(const char *module, int newversion, const char
 			fclose(tarfile);
 		}
 	}
+
+	FREE(delta_pack_dir);
 
 	return err;
 }

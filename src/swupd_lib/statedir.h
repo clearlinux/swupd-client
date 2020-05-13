@@ -59,6 +59,14 @@ char *statedir_get_fullfile_tar(char *file_hash);
 char *statedir_get_manifest_dir(int version);
 
 /**
+ * @brief Gets the path to the directory where manifests are stored in the statedir
+ * duplicate (also known as statedir_cache).
+ *
+ * @param version, the version of the manifests directory
+ */
+char *statedir_dup_get_manifest_dir(int version);
+
+/**
  * @brief Gets the path to the downloaded manifest tar of the specified
  * component at a certain version in the statedir.
  *
@@ -85,6 +93,11 @@ char *statedir_get_manifest(int version, char *component);
  * @param manifest_hash, the hash of the manifest
  */
 char *statedir_get_hashed_manifest(int version, char *component, char *manifest_hash);
+
+/**
+  * @brief Gets the path to the manifest delta directory in the statedir.
+  */
+char *statedir_get_manifest_delta_dir(void);
 
 /**
  * @brief Gets the path to the manifest delta of the specified bundle
@@ -115,6 +128,11 @@ char *statedir_get_telemetry_record(char *record);
  * @brief Gets the path to the swupd lock file in the statedir.
  */
 char *statedir_get_swupd_lock(void);
+
+/**
+ * @brief Gets the path to the directory where delta-packs are stored in the statedir.
+ */
+char *statedir_get_delta_pack_dir(void);
 
 /**
  * @brief Gets the path to the delta pack tar of the specified bundle

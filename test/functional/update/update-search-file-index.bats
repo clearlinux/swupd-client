@@ -39,7 +39,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$STATEDIR"/10/Manifest.test-bundle1
+	assert_file_exists "$STATEDIR"/manifest/10/Manifest.test-bundle1
 }
 
 @test "UPD060: Don't download search-file index on update" {
@@ -69,7 +69,7 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_file_not_exists "$STATEDIR"/10/Manifest.test-bundle1
+	assert_file_not_exists "$STATEDIR"/manifest/10/Manifest.test-bundle1
 }
 
 #WEIGHT=5

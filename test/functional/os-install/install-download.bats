@@ -33,10 +33,10 @@ test_setup() {
 	assert_is_output "$expected_output"
 	assert_file_not_exists "$TARGETDIR"/core
 
-	assert_file_exists "$STATEDIR"/10/Manifest.MoM
-	assert_file_exists "$STATEDIR"/10/Manifest.os-core
+	assert_file_exists "$STATEDIR"/manifest/10/Manifest.MoM
+	assert_file_exists "$STATEDIR"/manifest/10/Manifest.os-core
 
-	core_hash=$(get_hash_from_manifest "$STATEDIR"/10/Manifest.os-core "/core")
+	core_hash=$(get_hash_from_manifest "$STATEDIR"/manifest/10/Manifest.os-core "/core")
 	assert_file_exists "$STATEDIR"/staged/"$core_hash"
 
 }

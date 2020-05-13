@@ -1949,7 +1949,7 @@ create_test_environment() { # swupd_function
 
 	# state files & dirs
 	debug_msg "Creating a state dir"
-	sudo mkdir -p "$statedir"/{staged,download,delta,telemetry,bundles,3rd-party}
+	sudo mkdir -p "$statedir"/{staged,download,delta,telemetry,bundles,manifest,3rd-party}
 	sudo chmod -R 0700 "$statedir"
 
 	# every environment needs to have at least the os-core bundle so this should be
@@ -4064,10 +4064,10 @@ clean_state_dir() { # swupd_function
 	validate_path "$env_name"
 	if [ -z "$repo_name" ]; then
 		sudo rm -rf "$env_name"/testfs/state
-		sudo mkdir -p "$env_name"/testfs/state/{staged,download,delta,telemetry}
+		sudo mkdir -p "$env_name"/testfs/state/{staged,download,delta,telemetry,manifest}
 	else
 		sudo rm -rf "$env_name"/testfs/state/3rd-party/"$repo_name"
-		sudo mkdir -p "$env_name"/testfs/state/3rd-party/"$repo_name"/{staged,download,delta,telemetry,bundles}
+		sudo mkdir -p "$env_name"/testfs/state/3rd-party/"$repo_name"/{staged,download,delta,telemetry,bundles,manifest}
 	fi
 	sudo chmod -R 0700 "$env_name"/testfs/state
 

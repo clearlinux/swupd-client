@@ -205,36 +205,44 @@ static void set_untracked_manifest_files(struct manifest *manifest)
 	}
 }
 
+static void remove_manifest(char *path, char *filename, char *hash)
+{
+	char *file = NULL;
+
+	file = sys_path_join("%s/Manifest.%s", path, filename);
+	unlink(file);
+	FREE(file);
+	file = sys_path_join("%s/Manifest.%s.tar", path, filename);
+	unlink(file);
+	FREE(file);
+	file = sys_path_join("%s/Manifest.%s.sig", path, filename);
+	unlink(file);
+	FREE(file);
+	if (hash != NULL) {
+		file = sys_path_join("%s/Manifest.%s.%s", path, filename, hash);
+		unlink(file);
+		FREE(file);
+	}
+}
+
 /* Removes the extracted Manifest.<bundle> and accompanying tar file, cache file, and
  * the signature file from the statedir and statedir-cache */
 static void remove_manifest_files(char *filename, int version, char *hash)
 {
-	char *file;
-	char *state_dirs[] = { globals.state_dir, globals.state_dir_cache };
-	int num_state_dirs = sizeof(state_dirs) / sizeof(state_dirs[0]);
-	int i;
+	char *manifest_dir = NULL;
 
 	warn("Removing corrupt Manifest.%s artifacts and re-downloading...\n", filename);
 
-	for (i = 0; i < num_state_dirs; i++) {
-		if (state_dirs[i] == NULL) {
-			continue;
-		}
+	// remove the manifest from the statedir first
+	manifest_dir = statedir_get_manifest_dir(version);
+	remove_manifest(manifest_dir, filename, hash);
+	FREE(manifest_dir);
 
-		string_or_die(&file, "%s/%i/Manifest.%s", state_dirs[i], version, filename);
-		unlink(file);
-		FREE(file);
-		string_or_die(&file, "%s/%i/Manifest.%s.tar", state_dirs[i], version, filename);
-		unlink(file);
-		FREE(file);
-		string_or_die(&file, "%s/%i/Manifest.%s.sig", state_dirs[i], version, filename);
-		unlink(file);
-		FREE(file);
-		if (hash != NULL) {
-			string_or_die(&file, "%s/%i/Manifest.%s.%s", state_dirs[i], version, filename, hash);
-			unlink(file);
-			FREE(file);
-		}
+	// if there is a statedir cache (duplicate), then remove it from there too
+	if (globals.state_dir_cache) {
+		manifest_dir = statedir_dup_get_manifest_dir(version);
+		remove_manifest(manifest_dir, filename, hash);
+		FREE(manifest_dir);
 	}
 }
 

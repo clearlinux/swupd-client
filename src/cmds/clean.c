@@ -345,7 +345,7 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 			continue;
 		}
 
-		char *version_dir = sys_path_join("%s/%s", globals.state_dir, name);
+		char *version_dir = sys_path_join("%s/%s", path, name);
 
 		/* This is not precise: it may keep Manifest files that we don't use, and
 		 * also will keep the previous version. If that extra precision is
@@ -433,7 +433,7 @@ enum swupd_code clean_main(int argc, char **argv)
 enum swupd_code clean_statedir(bool dry_run, bool all)
 {
 	enum swupd_code ret;
-	char *staged_dir = NULL;
+	char *path = NULL;
 
 	if (!all) {
 		if (clock_gettime(CLOCK_REALTIME, &now)) {
@@ -442,21 +442,25 @@ enum swupd_code clean_statedir(bool dry_run, bool all)
 		}
 	}
 
-	staged_dir = statedir_get_staged_dir();
-	ret = remove_if(staged_dir, dry_run, is_fullfile);
-	FREE(staged_dir);
+	path = statedir_get_staged_dir();
+	ret = remove_if(path, dry_run, is_fullfile);
+	FREE(path);
 	if (ret != SWUPD_OK) {
 		return ret;
 	}
 
 	/* Pack presence indicator files. */
-	ret = remove_if(globals.state_dir, dry_run, is_pack_indicator);
+	path = statedir_get_delta_pack_dir();
+	ret = remove_if(path, dry_run, is_pack_indicator);
+	FREE(path);
 	if (ret != SWUPD_OK) {
 		return ret;
 	}
 
 	/* Manifest delta files. */
-	ret = remove_if(globals.state_dir, dry_run, is_manifest_delta);
+	path = statedir_get_manifest_delta_dir();
+	ret = remove_if(path, dry_run, is_manifest_delta);
+	FREE(path);
 	if (ret != SWUPD_OK) {
 		return ret;
 	}

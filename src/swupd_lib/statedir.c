@@ -83,9 +83,19 @@ char *statedir_get_fullfile_renamed_tar(char *file_hash)
 	return sys_path_join("%s/%s/%s.tar", globals.state_dir, DOWNLOAD_DIR, file_hash);
 }
 
+static char *get_manifest_dir(char *state, int version)
+{
+	return sys_path_join("%s/%i", state, version);
+}
+
 char *statedir_get_manifest_dir(int version)
 {
-	return sys_path_join("%s/%i", globals.state_dir, version);
+	return get_manifest_dir(globals.state_dir, version);
+}
+
+char *statedir_dup_get_manifest_dir(int version)
+{
+	return get_manifest_dir(globals.state_dir_cache, version);
 }
 
 char *statedir_get_manifest_tar(int version, char *component)
@@ -103,6 +113,11 @@ char *statedir_get_hashed_manifest(int version, char *component, char *manifest_
 	return sys_path_join("%s/%i/Manifest.%s.%s", globals.state_dir, version, component, manifest_hash);
 }
 
+char *statedir_get_manifest_delta_dir(void)
+{
+	return sys_path_join("%s", globals.state_dir);
+}
+
 char *statedir_get_manifest_delta(char *bundle, int from_version, int to_version)
 {
 	return sys_path_join("%s/Manifest-%s-delta-from-%i-to-%i", globals.state_dir, bundle, from_version, to_version);
@@ -116,6 +131,11 @@ char *statedir_get_telemetry_record(char *record)
 char *statedir_get_swupd_lock(void)
 {
 	return sys_path_join("%s/%s", globals.state_dir, LOCK);
+}
+
+char *statedir_get_delta_pack_dir(void)
+{
+	return sys_path_join("%s", globals.state_dir);
 }
 
 char *statedir_get_delta_pack(char *bundle, int from_version, int to_version)

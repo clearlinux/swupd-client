@@ -218,7 +218,7 @@ static enum swupd_code install_file_using_tar(const char *fullfile_path, const c
 	enum swupd_code ret = SWUPD_OK;
 	char *rename_tmpdir = NULL;
 	char *rename_target = NULL;
-	char *stage_dir = NULL;
+	char *staged_dir = NULL;
 	char *staged_file = NULL;
 	char *target_basename = NULL;
 	char *target_path = NULL;
@@ -226,15 +226,16 @@ static enum swupd_code install_file_using_tar(const char *fullfile_path, const c
 	target_basename = sys_basename(target_file);
 	target_path = sys_dirname(target_file);
 
-	rename_target = sys_path_join("%s/staged/%s%s", globals.state_dir, STAGE_FILE_PREFIX, target_basename);
+	staged_dir = statedir_get_staged_dir();
+	staged_file = str_or_die("%s%s", STAGE_FILE_PREFIX, target_basename);
+
+	rename_target = sys_path_join("%s/%s", staged_dir, staged_file);
 	if (rename(fullfile_path, rename_target) != 0) {
 		ret = SWUPD_COULDNT_RENAME_FILE;
 		goto out;
 	}
 
-	stage_dir = statedir_get_staged_dir();
-	staged_file = str_or_die("%s%s", STAGE_FILE_PREFIX, target_basename);
-	err = tartar(stage_dir, staged_file, target_path);
+	err = tartar(staged_dir, staged_file, target_path);
 	if (err) {
 		ret = SWUPD_SUBPROCESS_ERROR;
 	}
@@ -247,7 +248,7 @@ out:
 	FREE(rename_tmpdir);
 	FREE(rename_target);
 	FREE(staged_file);
-	FREE(stage_dir);
+	FREE(staged_dir);
 	FREE(target_path);
 	return ret;
 }

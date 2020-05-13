@@ -133,12 +133,12 @@ char *statedir_get_hashed_manifest(int version, char *component, char *manifest_
 
 char *statedir_get_manifest_delta_dir(void)
 {
-	return sys_path_join("%s", globals.state_dir);
+	return sys_path_join("%s/%s", globals.state_dir, MANIFEST_DIR);
 }
 
 char *statedir_get_manifest_delta(char *bundle, int from_version, int to_version)
 {
-	return sys_path_join("%s/Manifest-%s-delta-from-%i-to-%i", globals.state_dir, bundle, from_version, to_version);
+	return sys_path_join("%s/%s/Manifest-%s-delta-from-%i-to-%i", globals.state_dir, MANIFEST_DIR, bundle, from_version, to_version);
 }
 
 char *statedir_get_telemetry_record(char *record)

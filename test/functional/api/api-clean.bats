@@ -8,8 +8,8 @@ load "../testlib"
 test_setup() {
 
 	create_test_environment "$TEST_NAME"
-	sudo mkdir "$STATEDIR"/10
-	sudo touch "$STATEDIR"/10/Manifest.test{1..3}
+	sudo mkdir "$STATEDIR"/manifest/10
+	sudo touch "$STATEDIR"/manifest/10/Manifest.test{1..3}
 	sudo touch "$STATEDIR"/pack-test{1..2}-from-0.tar
 
 }
@@ -31,9 +31,9 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		$TEST_ROOT_DIR/$STATEDIR/pack-test.-from-0.tar
 		$TEST_ROOT_DIR/$STATEDIR/pack-test.-from-0.tar
-		$TEST_ROOT_DIR/$STATEDIR/10/Manifest.test.
-		$TEST_ROOT_DIR/$STATEDIR/10/Manifest.test.
-		$TEST_ROOT_DIR/$STATEDIR/10/Manifest.test.
+		$TEST_ROOT_DIR/$STATEDIR/manifest/10/Manifest.test.
+		$TEST_ROOT_DIR/$STATEDIR/manifest/10/Manifest.test.
+		$TEST_ROOT_DIR/$STATEDIR/manifest/10/Manifest.test.
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

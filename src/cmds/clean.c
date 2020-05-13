@@ -466,5 +466,9 @@ enum swupd_code clean_statedir(bool dry_run, bool all)
 	}
 
 	/* NOTE: do not clean the state_dir/bundles directory */
-	return clean_staged_manifests(globals.state_dir, dry_run, all);
+	path = statedir_get_manifest_root_dir();
+	ret = clean_staged_manifests(path, dry_run, all);
+	FREE(path);
+
+	return ret;
 }

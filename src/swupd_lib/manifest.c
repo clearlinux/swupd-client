@@ -151,7 +151,7 @@ static int retrieve_manifest(int previous_version, int version, char *component,
 
 	/* Check statedir-cache */
 	if (globals.state_dir_cache != NULL) {
-		string_or_die(&filename_cache, "%s/%i/Manifest.%s", globals.state_dir_cache, version, component);
+		filename_cache = statedir_dup_get_manifest(version, component);
 		if (link_or_copy(filename_cache, filename) == 0) {
 			ret = 0;
 			goto out;
@@ -271,7 +271,7 @@ static bool mom_signature_verify(const char *data_url, const char *data_filename
 
 	// Check statedir-cache
 	if (globals.state_dir_cache != NULL) {
-		string_or_die(&sig_filename_cache, "%s/%i/Manifest.MoM.sig", globals.state_dir_cache, version);
+		sig_filename_cache = statedir_dup_get_manifest(version, "MoM.sig");
 		if (link_or_copy(sig_filename_cache, sig_filename) == 0) {
 			result = signature_verify(data_filename, sig_filename, SIGNATURE_DEFAULT);
 

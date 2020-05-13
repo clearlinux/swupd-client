@@ -15,7 +15,7 @@ test_setup() {
 	create_bundle -n test-bundle2 -f /file_2 "$TEST_NAME"
 
 	# create the state version dirs ahead of time
-	sudo mkdir "$TEST_NAME"/testfs/state/10
+	sudo mkdir "$TEST_NAME"/testfs/state/manifest/10
 
 }
 

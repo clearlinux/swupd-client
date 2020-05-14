@@ -414,15 +414,15 @@ enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_
 	print_statistics(current_version, server_version);
 	timelist_timer_stop(globals.global_times); // closing: Create update list
 
-	timelist_timer_start(globals.global_times, "Applying heuristics");
-	heuristics_apply(updates);
-	timelist_timer_stop(globals.global_times); // closing: Applying heuristics
 	/* downloading and applying updates */
 	/* need update list in filename order to insure directories are
 	 * created before their contents */
 	timelist_timer_start(globals.global_times, "Update loop");
 	updates = list_sort(updates, cmp_file_filename_is_deleted);
 
+	timelist_timer_start(globals.global_times, "Applying heuristics");
+	heuristics_apply(updates);
+	timelist_timer_stop(globals.global_times); // closing: Applying heuristics
 	ret = update_loop(updates, server_manifest, file_validation_fn);
 	if (ret == 0 && !download_only) {
 		/* Failure to write the version file in the state directory

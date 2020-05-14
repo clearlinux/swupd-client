@@ -200,6 +200,16 @@ char *sys_basename(const char *path);
 char *sys_path_join(const char *fmt, ...);
 
 /**
+ * @brief Append a separator at the end of the path, if needed.
+ *
+ * In some exceptional cases we want a separator after the path and as
+ * sys_path_join() removes that we need to add it back.
+ *
+ * One case where this is useful is to know if one file is inside a directory.
+ */
+char *sys_path_append_separator(const char *path);
+
+/**
  * @brief Check if current user is root.
  */
 bool is_root(void);

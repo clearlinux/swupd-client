@@ -252,6 +252,7 @@ static enum swupd_code update_repos(UNUSED_PARAM char *unused)
 enum swupd_code third_party_execute_update(void)
 {
 	enum swupd_code ret_code = SWUPD_OK;
+	struct list *repos = NULL;
 	char *template_file = NULL;
 	char *template = NULL;
 	size_t template_len;
@@ -295,6 +296,12 @@ enum swupd_code third_party_execute_update(void)
 		goto exit;
 	}
 
+	/* if there are no 3rd-party repos we are done */
+	repos = third_party_get_repos();
+	if (!repos) {
+		goto exit;
+	}
+
 	/* read the current template copy */
 	template_file = sys_path_join("%s/%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_DIR, SWUPD_3RD_PARTY_TEMPLATE_FILE);
 	template = sys_mmap_file(template_file, &template_len);
@@ -315,6 +322,7 @@ enum swupd_code third_party_execute_update(void)
 	}
 
 exit:
+	list_free_list_and_data(repos, repo_free_data);
 	FREE(template_file);
 	sys_mmap_free(template, template_len);
 

@@ -243,7 +243,6 @@ compliant:
 	test/code_analysis/compliant.bats
 	test/functional/check_ids.bash
 	test/code_analysis/warning_functions.bats
-	test/code_analysis/quiet_output.bats
 	scripts/flag_validator.bash
 
 shellcheck:

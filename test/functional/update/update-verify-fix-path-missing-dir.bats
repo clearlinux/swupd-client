@@ -26,7 +26,9 @@ test_setup() {
 		Downloading packs for:
 		 - test-bundle
 		Finishing packs extraction...
-		Warning: Couldn.t use delta file .*
+		Warning: File "/foo/bar/baz/test-file" is missing or corrupted
+		Warning: Couldn't use delta file because original file is corrupted or missing
+		Consider running "swupd repair" to fix the issue
 		Statistics for going from version 10 to version 100:
 		    changed bundles   : 1
 		    new bundles       : 0
@@ -43,7 +45,7 @@ test_setup() {
 		Update successful - System updated from version 10 to version 100
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_is_output "$expected_output"
 	assert_dir_exists "$TARGETDIR"/foo/bar/baz
 	assert_file_exists "$TARGETDIR"/foo/bar/baz/test-file
 

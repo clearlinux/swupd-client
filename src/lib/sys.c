@@ -765,3 +765,19 @@ struct list *sys_get_mounted_directories(void)
 
 	return list_head(mounted);
 }
+
+char *sys_path_append_separator(const char *path)
+{
+	size_t len;
+
+	if (!path) {
+		return NULL;
+	}
+
+	len = str_len(path);
+	if (len == 0 || path[len - 1] == '/') {
+		return strdup_or_die(path);
+	}
+
+	return str_or_die("%s%c", path, PATH_SEPARATOR);
+}

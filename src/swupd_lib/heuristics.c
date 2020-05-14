@@ -29,7 +29,6 @@
 #include "swupd.h"
 #include "heuristics.h"
 
-static struct list *mounted_dirs;
 typedef int (*compare_fn_t)(const char *s1, const char *s2);
 typedef void (*apply_fn_t)(struct file *f);
 
@@ -37,6 +36,7 @@ struct rule {
 	char *str;
 	compare_fn_t cmp;
 	apply_fn_t apply;
+	bool is_mounted;
 };
 
 static void apply_config(struct file *f)
@@ -95,54 +95,42 @@ static int h_strcmp(const char *s1, const char *s2)
 
 static const struct rule heuristic_rules[] = {
 	// Boot Files
-	{"/boot/", h_starts_with, apply_boot },
-	{"/usr/lib/modules/", h_starts_with, apply_boot },
+	{"/boot/", h_starts_with, apply_boot, false },
+	{"/usr/lib/modules/", h_starts_with, apply_boot, false },
 
 	// State files
-	{"/data", h_starts_with, apply_state },
-	{"/dev/", h_starts_with, apply_state },
-	{"/home/", h_starts_with, apply_state },
-	{"/lost+found", h_starts_with, apply_state },
-	{"/proc/", h_starts_with, apply_state },
-	{"/root/", h_starts_with, apply_state },
-	{"/run/", h_starts_with, apply_state },
-	{"/sys/", h_starts_with, apply_state },
-	{"/tmp/", h_starts_with, apply_state },
-	{"/var/", h_starts_with, apply_state },
+	{"/data", h_starts_with, apply_state, false },
+	{"/dev/", h_starts_with, apply_state, false },
+	{"/home/", h_starts_with, apply_state, false },
+	{"/lost+found", h_starts_with, apply_state, false },
+	{"/proc/", h_starts_with, apply_state, false },
+	{"/root/", h_starts_with, apply_state, false },
+	{"/run/", h_starts_with, apply_state, false },
+	{"/sys/", h_starts_with, apply_state, false },
+	{"/tmp/", h_starts_with, apply_state, false },
+	{"/var/", h_starts_with, apply_state, false },
 
 	// Filtered state on /usr/src
-	{"/usr/src/", h_starts_with, apply_src_state },
+	{"/usr/src/", h_starts_with, apply_src_state, false },
 
 	// Config files
-	{"/etc/", h_starts_with, apply_config },
+	{"/etc/", h_starts_with, apply_config, false },
 
 	// Boot managers
-	{"/usr/bin/bootctl", h_strcmp, apply_bootmanager },
-	{"/usr/bin/clr-boot-manager", h_strcmp, apply_bootmanager },
-	{"/usr/bin/gummiboot", h_strcmp, apply_bootmanager },
-	{"/usr/lib/gummiboot", h_strcmp, apply_bootmanager },
-	{"/usr/share/syslinux/ldlinux.c32", h_strcmp, apply_bootmanager },
+	{"/usr/bin/bootctl", h_strcmp, apply_bootmanager, false },
+	{"/usr/bin/clr-boot-manager", h_strcmp, apply_bootmanager, false },
+	{"/usr/bin/gummiboot", h_strcmp, apply_bootmanager, false },
+	{"/usr/lib/gummiboot", h_strcmp, apply_bootmanager, false },
+	{"/usr/share/syslinux/ldlinux.c32", h_strcmp, apply_bootmanager, false },
 
-	{"/usr/lib/kernel/", h_starts_with, apply_boot_and_bootmanager },
-	{"/usr/lib/systemd/boot", h_starts_with, apply_boot_and_bootmanager },
+	{"/usr/lib/kernel/", h_starts_with, apply_boot_and_bootmanager, false },
+	{"/usr/lib/systemd/boot", h_starts_with, apply_boot_and_bootmanager, false },
 
 	// Systemd
-	{"/usr/lib/systemd/systemd", h_strcmp, apply_systemd},
+	{"/usr/lib/systemd/systemd", h_strcmp, apply_systemd, false},
 
 	{ 0 }
 };
-
-static void runtime_state_heuristics(struct file *file)
-{
-	char * path;
-
-	path = sys_path_join("%s/%s", globals.path_prefix, file->filename);
-	if (list_search(mounted_dirs, path, str_cmp_wrapper)) {
-		file->is_state = 1;
-	}
-
-	FREE(path);
-}
 
 /* Determines whether or not FILE should be ignored for this swupd action. Note
  * that boot files are ignored only if they are marked as deleted; this does
@@ -172,42 +160,136 @@ static struct rule *dup_rule(const struct rule *r)
 	return rule;
 }
 
-static void apply_heuristics_for_file(struct list *rules, struct file *file)
+static struct rule *create_rule(char *str, compare_fn_t cmp, apply_fn_t apply)
 {
+	struct rule * rule;
+
+	rule = malloc_or_die(sizeof(struct rule));
+
+	rule->str = str;
+	rule->cmp = cmp;
+	rule->apply = apply;
+	rule->is_mounted = true;
+
+	return rule;
+}
+
+static struct list *create_rules_from_mounted_dirs(void)
+{
+	struct list *rules = NULL;
+	struct list *mounted_dirs = NULL;
+	char *path_prefix, *filename;
+	size_t path_prefix_len;
 	struct list *iter;
 
-	// Apply all rules
-	for (iter = rules; iter; iter = iter->next) {
-		const struct rule *rule = iter->data;
-		if (rule->cmp(file->filename, rule->str) == 0) {
-			rule->apply(file);
+	path_prefix = sys_path_append_separator(globals.path_prefix);
+	path_prefix_len = str_len(path_prefix);
+	mounted_dirs = sys_get_mounted_directories();
+
+	// Only create rules for mounted directories inside path_prefix
+	// And rule should be relative to the path_prefix we are working on
+	for (iter = mounted_dirs; iter; iter = iter->next) {
+		if (str_starts_with(iter->data, path_prefix) == 0) {
+			// Get the filename of the directory inside the chroot
+			// sed s/^path_prefix/\//
+			filename = sys_path_join("/%s", iter->data + path_prefix_len);
+			rules = list_prepend_data(rules,
+				create_rule(filename, h_strcmp, apply_state));
 		}
 	}
 
-	runtime_state_heuristics(file);
-	check_ignore_file(file);
+	list_free_list_and_data(mounted_dirs, free);
+	FREE(path_prefix);
+
+	return rules;
+}
+
+static void free_rule(void *data)
+{
+	struct rule *r = data;
+
+	if (r->is_mounted) {
+		FREE(r->str);
+	}
+	FREE(r);
+}
+
+static int rule_cmp(const void *d1, const void *d2)
+{
+	int ret;
+	const struct rule *r1 = d1;
+	const struct rule *r2 = d2;
+
+	ret = str_cmp(r1->str, r2->str);
+	if (ret != 0) {
+		return ret;
+	}
+
+	// Place is_mounted rules after static rules
+	if (r1->is_mounted == r2->is_mounted) {
+		return 0;
+	}
+
+	if (r2->is_mounted) {
+		return -1;
+	}
+
+	return 1;
+}
+
+static void apply_rules_to_files(struct list *rules, struct list *files)
+{
+	// Loop all files
+	while (files && rules) {
+		struct file *file = files->data;
+		const struct rule *r = rules->data;
+		int comparison;
+
+		comparison = r->cmp(file->filename, r->str);
+
+		// If matches, apply rule
+		if (comparison == 0) {
+			r->apply(file);
+		}
+
+		if (comparison > 0) {
+			// Move to next rule or next element in the list
+			rules = rules->next;
+		} else {
+			// Move to next file
+			files = files->next;
+		}
+	}
 }
 
 void heuristics_apply(struct list *files)
 {
 	struct list *rules = NULL;
 	struct list *iter;
-	struct file *file;
 	int i;
 
-	// Create the rules list
+	// Make sure list is sorted
+	if (!list_is_sorted(files, cmp_file_filename_is_deleted)) {
+		UNEXPECTED();
+		debug("List of files to apply heuristics is not sorted - fixing\n");
+		files = list_sort(files, cmp_file_filename_is_deleted);
+	}
+
+	// Apply static rules
 	for (i = 0; heuristic_rules[i].str; i++) {
 		rules = list_prepend_data(rules, dup_rule(&heuristic_rules[i]));
 	}
+	rules = list_sort(rules, rule_cmp);
+	apply_rules_to_files(rules, files);
+	list_free_list_and_data(rules, free_rule);
 
-	// Apply the rules
-	mounted_dirs = sys_get_mounted_directories();
+	// Apply mounted dirs rules
+	rules = list_sort(create_rules_from_mounted_dirs(), rule_cmp);
+	apply_rules_to_files(rules, files);
+	list_free_list_and_data(rules, free_rule);
+
+	// Apply ignore rules to all files
 	for (iter = files; iter; iter = iter->next) {
-		file = iter->data;
-		apply_heuristics_for_file(rules, file);
+		check_ignore_file(iter->data);
 	}
-
-	list_free_list_and_data(rules, free);
-	list_free_list_and_data(mounted_dirs, free);
-	mounted_dirs = NULL;
 }

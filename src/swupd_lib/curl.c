@@ -380,7 +380,7 @@ CURLcode swupd_download_file_create(struct curl_file *file)
 {
 	file->fh = fopen(file->path, "w");
 	if (!file->fh) {
-		error("Curl - Cannot open file for write \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
+		error("Curl - Cannot open file '%s' for writing - '%s'\n",
 		      file->path, strerror(errno));
 		return CURLE_WRITE_ERROR;
 	}
@@ -391,7 +391,7 @@ CURLcode swupd_download_file_append(struct curl_file *file)
 {
 	file->fh = fopen(file->path, "a");
 	if (!file->fh) {
-		error("Curl - Cannot open file for append \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
+		error("Curl - Cannot open file '%s' for appending - '%s'\n",
 		      file->path, strerror(errno));
 		return CURLE_WRITE_ERROR;
 	}
@@ -402,7 +402,7 @@ CURLcode swupd_download_file_close(CURLcode curl_ret, struct curl_file *file)
 {
 	if (file->fh) {
 		if (fclose(file->fh)) {
-			error("Curl - Cannot close file after write \\*outfile=\"%s\",strerror=\"%s\"*\\\n",
+			error("Curl - Cannot close file '%s' after writing - '%s'\n",
 			      file->path, strerror(errno));
 			if (curl_ret == CURLE_OK) {
 				curl_ret = CURLE_WRITE_ERROR;

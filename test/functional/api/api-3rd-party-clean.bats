@@ -10,8 +10,8 @@ test_setup() {
 	create_test_environment "$TEST_NAME" 10 1
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
 	STATE1="$TPSTATEDIR"
-	sudo mkdir -p "$STATE1"/manifest/10
-	sudo touch "$STATE1"/manifest/10/Manifest.test{1..3}
+	sudo mkdir "$STATE1"/10
+	sudo touch "$STATE1"/10/Manifest.test{1..3}
 	sudo touch "$STATE1"/pack-test{1..2}-from-0.tar
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo2
 	STATE2="$TPSTATEDIR"
@@ -43,9 +43,9 @@ test_setup() {
 		\\[repo1\\]
 		$TEST_ROOT_DIR/$STATE1/pack-test.-from-0.tar
 		$TEST_ROOT_DIR/$STATE1/pack-test.-from-0.tar
-		$TEST_ROOT_DIR/$STATE1/manifest/10/Manifest.test.
-		$TEST_ROOT_DIR/$STATE1/manifest/10/Manifest.test.
-		$TEST_ROOT_DIR/$STATE1/manifest/10/Manifest.test.
+		$TEST_ROOT_DIR/$STATE1/10/Manifest.test.
+		$TEST_ROOT_DIR/$STATE1/10/Manifest.test.
+		$TEST_ROOT_DIR/$STATE1/10/Manifest.test.
 		\\[repo2\\]
 		$TEST_ROOT_DIR/$STATE2/pack-test3-from-0.tar
 	EOM
@@ -62,9 +62,9 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		$TEST_ROOT_DIR/$STATE1/pack-test.-from-0.tar
 		$TEST_ROOT_DIR/$STATE1/pack-test.-from-0.tar
-		$TEST_ROOT_DIR/$STATE1/manifest/10/Manifest.test.
-		$TEST_ROOT_DIR/$STATE1/manifest/10/Manifest.test.
-		$TEST_ROOT_DIR/$STATE1/manifest/10/Manifest.test.
+		$TEST_ROOT_DIR/$STATE1/10/Manifest.test.
+		$TEST_ROOT_DIR/$STATE1/10/Manifest.test.
+		$TEST_ROOT_DIR/$STATE1/10/Manifest.test.
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

@@ -23,8 +23,8 @@ test_setup() {
 	update_bundle "$TEST_NAME" test-bundle --add "$file1"
 
 	# create the state version dirs ahead of time
-	sudo mkdir "$TEST_NAME"/testfs/state/manifest/10
-	sudo mkdir "$TEST_NAME"/testfs/state/manifest/20
+	sudo mkdir "$TEST_NAME"/testfs/state/10
+	sudo mkdir "$TEST_NAME"/testfs/state/20
 
 }
 

@@ -37,9 +37,6 @@
 /* Name of the telemetry directory */
 #define TELEMETRY_DIR "telemetry"
 
-/* Name of the manifest directory */
-#define MANIFEST_DIR "manifest"
-
 /* Name of the swupd lock file */
 #define LOCK "swupd_lock"
 
@@ -86,14 +83,9 @@ char *statedir_get_fullfile_renamed_tar(char *file_hash)
 	return sys_path_join("%s/%s/%s.tar", globals.state_dir, DOWNLOAD_DIR, file_hash);
 }
 
-char *statedir_get_manifest_root_dir(void)
-{
-	return sys_path_join("%s/%s", globals.state_dir, MANIFEST_DIR);
-}
-
 static char *get_manifest_dir(char *state, int version)
 {
-	return sys_path_join("%s/%s/%i", state, MANIFEST_DIR, version);
+	return sys_path_join("%s/%i", state, version);
 }
 
 char *statedir_get_manifest_dir(int version)
@@ -108,27 +100,17 @@ char *statedir_dup_get_manifest_dir(int version)
 
 char *statedir_get_manifest_tar(int version, char *component)
 {
-	return sys_path_join("%s/%s/%i/Manifest.%s.tar", globals.state_dir, MANIFEST_DIR, version, component);
-}
-
-static char *get_manifest(char *state, int version, char *component)
-{
-	return sys_path_join("%s/%s/%i/Manifest.%s", state, MANIFEST_DIR, version, component);
+	return sys_path_join("%s/%i/Manifest.%s.tar", globals.state_dir, version, component);
 }
 
 char *statedir_get_manifest(int version, char *component)
 {
-	return get_manifest(globals.state_dir, version, component);
-}
-
-char *statedir_dup_get_manifest(int version, char *component)
-{
-	return get_manifest(globals.state_dir_cache, version, component);
+	return sys_path_join("%s/%i/Manifest.%s", globals.state_dir, version, component);
 }
 
 char *statedir_get_hashed_manifest(int version, char *component, char *manifest_hash)
 {
-	return sys_path_join("%s/%s/%i/Manifest.%s.%s", globals.state_dir, MANIFEST_DIR, version, component, manifest_hash);
+	return sys_path_join("%s/%i/Manifest.%s.%s", globals.state_dir, version, component, manifest_hash);
 }
 
 char *statedir_get_manifest_delta_dir(void)
@@ -172,7 +154,7 @@ int statedir_create_dirs(const char *path)
 	unsigned int i;
 	char *dir;
 #define STATE_DIR_COUNT (sizeof(state_dirs) / sizeof(state_dirs[0]))
-	const char *state_dirs[] = { DELTA_DIR, STAGED_DIR, DOWNLOAD_DIR, TELEMETRY_DIR, TRACKING_DIR, MANIFEST_DIR, "3rd-party" };
+	const char *state_dirs[] = { "delta", "staged", "download", "telemetry", "bundles", "3rd-party" };
 
 	// check for existence
 	if (ensure_root_owned_dir(path)) {

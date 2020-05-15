@@ -102,7 +102,7 @@ static int get_cached_fullfile(struct file *file)
 		ret = 1;
 
 		if (globals.state_dir_cache != NULL) {
-			string_or_die(&targetfile_cache, "%s/staged/%s", globals.state_dir_cache, file->hash);
+			targetfile_cache = statedir_dup_get_staged_file(file->hash);
 			if (lstat(targetfile_cache, &stat) == 0 && verify_file(file, targetfile_cache)) {
 				if (link_or_copy_all(targetfile_cache, targetfile) == 0) {
 					ret = 0;

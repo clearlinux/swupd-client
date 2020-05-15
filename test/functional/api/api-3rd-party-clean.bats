@@ -9,13 +9,13 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME" 10 1
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
-	STATE1="$TPSTATEDIR"
-	sudo mkdir -p "$STATE1"/manifest/10
-	sudo touch "$STATE1"/manifest/10/Manifest.test{1..3}
-	sudo touch "$STATE1"/pack-test{1..2}-from-0.tar
+	STATE1="$TPSTATEDIR_ABS"
+	sudo mkdir -p "$TPSTATEDIR_MANIFEST"/10
+	sudo touch "$TPSTATEDIR_MANIFEST"/10/Manifest.test{1..3}
+	sudo touch "$TPSTATEDIR_CACHE"/pack-test{1..2}-from-0.tar
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo2
-	STATE2="$TPSTATEDIR"
-	sudo touch "$STATE2"/pack-test3-from-0.tar
+	STATE2="$TPSTATEDIR_ABS"
+	sudo touch "$TPSTATEDIR_CACHE"/pack-test3-from-0.tar
 
 }
 
@@ -41,13 +41,13 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		\\[repo1\\]
-		$TEST_ROOT_DIR/$STATE1/pack-test.-from-0.tar
-		$TEST_ROOT_DIR/$STATE1/pack-test.-from-0.tar
-		$TEST_ROOT_DIR/$STATE1/manifest/10/Manifest.test.
-		$TEST_ROOT_DIR/$STATE1/manifest/10/Manifest.test.
-		$TEST_ROOT_DIR/$STATE1/manifest/10/Manifest.test.
+		$STATE1/cache/pack-test.-from-0.tar
+		$STATE1/cache/pack-test.-from-0.tar
+		$STATE1/cache/manifest/10/Manifest.test.
+		$STATE1/cache/manifest/10/Manifest.test.
+		$STATE1/cache/manifest/10/Manifest.test.
 		\\[repo2\\]
-		$TEST_ROOT_DIR/$STATE2/pack-test3-from-0.tar
+		$STATE2/cache/pack-test3-from-0.tar
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -60,11 +60,11 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		$TEST_ROOT_DIR/$STATE1/pack-test.-from-0.tar
-		$TEST_ROOT_DIR/$STATE1/pack-test.-from-0.tar
-		$TEST_ROOT_DIR/$STATE1/manifest/10/Manifest.test.
-		$TEST_ROOT_DIR/$STATE1/manifest/10/Manifest.test.
-		$TEST_ROOT_DIR/$STATE1/manifest/10/Manifest.test.
+		$STATE1/cache/pack-test.-from-0.tar
+		$STATE1/cache/pack-test.-from-0.tar
+		$STATE1/cache/manifest/10/Manifest.test.
+		$STATE1/cache/manifest/10/Manifest.test.
+		$STATE1/cache/manifest/10/Manifest.test.
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

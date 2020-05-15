@@ -35,6 +35,14 @@ char *statedir_get_staged_dir(void);
 char *statedir_get_staged_file(char *file_hash);
 
 /**
+ * @brief Gets the path to a file in the staged directory in the
+ * statedir duplicate (also known as statedir_cache).
+ *
+ * @param file_hash, the hash of the file
+ */
+char *statedir_dup_get_staged_file(char *file_hash);
+
+/**
   * @brief Gets the path to the delta directory in the statedir.
   */
 char *statedir_get_delta_dir(void);
@@ -158,6 +166,18 @@ char *statedir_get_delta_pack_dir(void);
  * @param to_version, the to version for the delta
  */
 char *statedir_get_delta_pack(char *bundle, int from_version, int to_version);
+
+/**
+ * @brief Gets the path to the delta pack tar of the specified bundle
+ * going from one version to another version in the statedir duplicate
+ * (also known as statedir_cache).
+ *
+ * @param bundle, the name of a bundle
+ * @param from_version, the from version for the delta
+ * @param to_version, the to version for the delta
+ */
+char *statedir_dup_get_delta_pack(char *bundle, int from_version, int to_version);
+
 /**
  * @brief Gets the path to the version file in the statedir.
  */

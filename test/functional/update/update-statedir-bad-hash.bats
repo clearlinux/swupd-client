@@ -9,8 +9,8 @@ test_setup() {
 	update_bundle "$TEST_NAME" os-core --add /test-file
 	file_hash=$(get_hash_from_manifest "$TEST_NAME"/web-dir/100/Manifest.os-core /test-file)
 	# copy the file from the files directory to state/staged and modify it
-	sudo cp "$WEBDIR"/100/files/"$file_hash" "$STATEDIR"/staged/
-	write_to_protected_file -a "$STATEDIR"/staged/"$file_hash" "extra string"
+	sudo cp "$WEBDIR"/100/files/"$file_hash" "$STATEDIR_STAGED"
+	write_to_protected_file -a "$STATEDIR_STAGED"/"$file_hash" "extra string"
 
 }
 

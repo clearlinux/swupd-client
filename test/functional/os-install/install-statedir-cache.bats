@@ -10,17 +10,17 @@ test_setup() {
 	create_test_environment -e "$TEST_NAME" 10
 	create_bundle -n os-core -f /core "$TEST_NAME"
 
-	statedir_cache_path="${TEST_DIRNAME}/testfs/statedir-cache"
+	statedir_cache_path="$TEST_DIRNAME"/testfs/statedir-cache
 
 	# Populate statedir-cache
 	sudo mkdir -m 700 -p "$statedir_cache_path"
-	sudo mkdir -m 700 "$statedir_cache_path"/staged
-	sudo mkdir -m 755 -p "$statedir_cache_path"/manifest/10
-	sudo cp "$WEBDIR"/10/Manifest.MoM "$statedir_cache_path"/manifest/10
-	sudo cp "$WEBDIR"/10/Manifest.MoM.sig "$statedir_cache_path"/manifest/10
-	sudo cp "$WEBDIR"/10/Manifest.os-core "$statedir_cache_path"/manifest/10
-	sudo touch "$statedir_cache_path"/pack-os-core-from-0-to-10.tar
-	sudo rsync -r "$WEBDIR"/10/files/* "$statedir_cache_path"/staged --exclude="*.tar"
+	sudo mkdir -m 700 -p "$statedir_cache_path"/cache/staged
+	sudo mkdir -m 755 -p "$statedir_cache_path"/cache/manifest/10
+	sudo cp "$WEBDIR"/10/Manifest.MoM "$statedir_cache_path"/cache/manifest/10
+	sudo cp "$WEBDIR"/10/Manifest.MoM.sig "$statedir_cache_path"/cache/manifest/10
+	sudo cp "$WEBDIR"/10/Manifest.os-core "$statedir_cache_path"/cache/manifest/10
+	sudo touch "$statedir_cache_path"/cache/pack-os-core-from-0-to-10.tar
+	sudo rsync -r "$WEBDIR"/10/files/* "$statedir_cache_path"/cache/staged --exclude="*.tar"
 
 }
 
@@ -59,9 +59,9 @@ test_setup() {
 	# The statedir-cache will have no update content, so the network must be used
 	# as a fallback.
 
-	sudo rm "$statedir_cache_path"/manifest/10/Manifest.os-core
-	sudo rm "$statedir_cache_path"/pack-os-core-from-0-to-10.tar
-	sudo rm -r "$statedir_cache_path"/staged
+	sudo rm "$statedir_cache_path"/cache/manifest/10/Manifest.os-core
+	sudo rm "$statedir_cache_path"/cache/pack-os-core-from-0-to-10.tar
+	sudo rm -r "$statedir_cache_path"/cache/staged
 	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --statedir-cache $statedir_cache_path"
 
 	assert_status_is "$SWUPD_OK"
@@ -96,7 +96,7 @@ test_setup() {
 	# missing fullfiles in the statedir-cache will fallback to network downloads, so packs
 	# must not be used to populate the staged directory with fullfiles.
 
-	sudo rm -r "$statedir_cache_path"/staged
+	sudo rm -r "$statedir_cache_path"/cache/staged
 	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --statedir-cache $statedir_cache_path"
 
 	assert_status_is "$SWUPD_OK"
@@ -127,7 +127,7 @@ test_setup() {
 	# Swupd should fallback to network downloads when the statedir-cache contains
 	# corrupt manifests.
 
-	sudo sh -c "echo invalid > ${statedir_cache_path}/manifest/10/Manifest.os-core"
+	sudo sh -c "echo invalid > ${statedir_cache_path}/cache/manifest/10/Manifest.os-core"
 	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --statedir-cache $statedir_cache_path"
 
 	assert_status_is "$SWUPD_OK"

@@ -622,16 +622,31 @@ set_env_variables() { # swupd_function
 	testfs_path="$path"/"$env_name"/testfs
 
 	debug_msg "Exporting environment variables for $env_name"
-	export TEST_DIRNAME="$path"/"$env_name"
-	debug_msg "TEST_DIRNAME: $TEST_DIRNAME"
+	# relevant relative paths
 	export WEBDIR="$env_name"/web-dir
 	debug_msg "WEBDIR: $WEBDIR"
 	export TARGETDIR="$env_name"/testfs/target-dir
 	debug_msg "TARGETDIR: $TARGETDIR"
 	export STATEDIR="$env_name"/testfs/state
 	debug_msg "STATEDIR: $STATEDIR"
+
+	# relevant absolute paths
+	export TEST_DIRNAME="$path"/"$env_name"
+	debug_msg "TEST_DIRNAME: $TEST_DIRNAME"
 	export PATH_PREFIX="$TEST_DIRNAME"/testfs/target-dir
 	debug_msg "PATH_PREFIX: $PATH_PREFIX"
+	export STATEDIR_TRACKING="$TEST_DIRNAME"/testfs/state/bundles
+	debug_msg "STATEDIR_TRACKING: $STATEDIR_TRACKING"
+	export STATEDIR_CACHE="$TEST_DIRNAME"/testfs/state/cache
+	debug_msg "STATEDIR_CACHE: $STATEDIR_CACHE"
+	export STATEDIR_DELTA="$TEST_DIRNAME"/testfs/state/cache/delta
+	debug_msg "STATEDIR_DELTA: $STATEDIR_DELTA"
+	export STATEDIR_DOWNLOAD="$TEST_DIRNAME"/testfs/state/cache/download
+	debug_msg "STATEDIR_DOWNLOAD: $STATEDIR_DOWNLOAD"
+	export STATEDIR_MANIFEST="$TEST_DIRNAME"/testfs/state/cache/manifest
+	debug_msg "STATEDIR_MANIFEST: $STATEDIR_MANIFEST"
+	export STATEDIR_STAGED="$TEST_DIRNAME"/testfs/state/cache/staged
+	debug_msg "STATEDIR_STAGED: $STATEDIR_STAGED"
 
 	# different options for swupd
 	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $TEST_DIRNAME/Swupd_Root.pem -I --no-progress"
@@ -1639,21 +1654,38 @@ create_third_party_repo() { #swupd_function
 	# create the state dir for the 3rd-party repo
 	TPSTATEDIR="$STATEDIR"/3rd-party/"$repo_name"
 	debug_msg "Creating a state directory for repo $repo_name at $TPSTATEDIR..."
-	sudo mkdir -p "$TPSTATEDIR"/{staged,download,delta,telemetry,bundles}
+	sudo mkdir -p "$TPSTATEDIR"/{bundles,cache}
+	sudo mkdir -p "$TPSTATEDIR"/cache/{staged,download,delta,manifest}
 	sudo chmod -R 0700 "$STATEDIR"
 
 	# create the basic content for the 3rd-party repo
 	create_version -r "$env_name" "$version" 0 "$format" "$repo_name"
 	debug_msg "3rd-party repo $repo_name created successfully"
 
-	export TPSTATEDIR
+	# relevant relative paths
 	export TPWEBDIR="$env_name"/3rd-party/"$repo_name"
-	export TPTARGETDIR="$env_name"/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
-	export TPURL="$path"/"$env_name"/3rd-party/"$repo_name"
-	debug_msg "3rd-party repo state dir: $TPSTATEDIR"
 	debug_msg "3rd-party repo content dir: $TPWEBDIR"
+	export TPTARGETDIR="$env_name"/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
 	debug_msg "3rd-party repo target dir: $TPTARGETDIR"
+	export TPSTATEDIR
+	debug_msg "3rd-party repo state dir: $TPSTATEDIR"
+
+	# relevant absolute paths
+	export TPURL="$path"/"$env_name"/3rd-party/"$repo_name"
 	debug_msg "3rd-party repo URL: $TPURL"
+	export TPSTATEDIR_ABS="$path"/"$TPSTATEDIR"
+	export TPSTATEDIR_TRACKING="$TPSTATEDIR_ABS"/bundles
+	debug_msg "3rd-party repo statedir tracking dir: $TPSTATEDIR_TRACKING"
+	export TPSTATEDIR_CACHE="$TPSTATEDIR_ABS"/cache
+	debug_msg "3rd-party repo statedir cache dir: $TPSTATEDIR_CACHE"
+	export TPSTATEDIR_DELTA="$TPSTATEDIR_ABS"/cache/delta
+	debug_msg "3rd-party repo statedir delta dir: $TPSTATEDIR_DELTA"
+	export TPSTATEDIR_DOWNLOAD="$TPSTATEDIR_ABS"/cache/download
+	debug_msg "3rd-party repo statedir download dir: $TPSTATEDIR_DOWNLOAD"
+	export TPSTATEDIR_MANIFEST="$TPSTATEDIR_ABS"/cache/manifest
+	debug_msg "3rd-party repo statedir manifest dir: $TPSTATEDIR_MANIFEST"
+	export TPSTATEDIR_STAGED="$TPSTATEDIR_ABS"/cache/staged
+	debug_msg "3rd-party repo statedir staged dir: $TPSTATEDIR_STAGED"
 
 	# if requested, add the new repo to the repo.ini file
 	# and the template file
@@ -1949,7 +1981,8 @@ create_test_environment() { # swupd_function
 
 	# state files & dirs
 	debug_msg "Creating a state dir"
-	sudo mkdir -p "$statedir"/{staged,download,delta,telemetry,bundles,manifest,3rd-party}
+	sudo mkdir -p "$statedir"/{telemetry,bundles,3rd-party,cache}
+	sudo mkdir -p "$statedir"/cache/{staged,download,delta,manifest}
 	sudo chmod -R 0700 "$statedir"
 
 	# every environment needs to have at least the os-core bundle so this should be

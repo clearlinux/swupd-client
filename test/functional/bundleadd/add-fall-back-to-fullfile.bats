@@ -41,9 +41,9 @@ test_setup() {
 	assert_file_exists "$TARGETDIR"/file11
 	assert_file_exists "$TARGETDIR"/file12
 	# validate zero pack was downloaded
-	assert_file_exists "$STATEDIR"/pack-test-bundle1-from-0-to-10.tar
+	assert_file_exists "$STATEDIR_CACHE"/pack-test-bundle1-from-0-to-10.tar
 	# validate the file missing from the zero pack was downloaded
-	assert_file_exists "$STATEDIR"/staged/"$removed_file"
+	assert_file_exists "$STATEDIR_STAGED"/"$removed_file"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		Downloading packs for:

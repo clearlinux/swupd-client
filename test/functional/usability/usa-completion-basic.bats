@@ -10,7 +10,7 @@ load "../testlib"
 
 @test "USA002: Verify the autocomplete syntax" {
 
-	bash "$SWUPD_DIR"/swupd.bash
+	bash --posix "$SWUPD_DIR"/swupd.bash
 
 }
 

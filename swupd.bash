@@ -35,7 +35,7 @@ _swupd() {
           }')
 
   if [[ ${words[1]} == "3rd-party" ]]; then
-    grep -q 3rd-party <(swupd -h) || return 1
+    swupd -h | grep -q 3rd-party || return 1
 
     third_subcmds=$(swupd 3rd-party -h | sed -n -E \
                                              -e '

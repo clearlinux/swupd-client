@@ -8,14 +8,16 @@ load "../testlib"
 test_setup() {
 
 	create_test_environment "$TEST_NAME" 10 1
+
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
-	STATE1="$TPSTATEDIR_ABS"
+	CACHE1="$TPSTATEDIR_CACHE"
 	sudo mkdir -p "$TPSTATEDIR_MANIFEST"/10
 	sudo touch "$TPSTATEDIR_MANIFEST"/10/Manifest.test{1..3}
-	sudo touch "$TPSTATEDIR_CACHE"/pack-test{1..2}-from-0.tar
+	sudo touch "$CACHE1"/pack-test{1..2}-from-0.tar
+
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo2
-	STATE2="$TPSTATEDIR_ABS"
-	sudo touch "$TPSTATEDIR_CACHE"/pack-test3-from-0.tar
+	CACHE2="$TPSTATEDIR_CACHE"
+	sudo touch "$CACHE2"/pack-test3-from-0.tar
 
 }
 
@@ -41,13 +43,13 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		\\[repo1\\]
-		$STATE1/cache/pack-test.-from-0.tar
-		$STATE1/cache/pack-test.-from-0.tar
-		$STATE1/cache/manifest/10/Manifest.test.
-		$STATE1/cache/manifest/10/Manifest.test.
-		$STATE1/cache/manifest/10/Manifest.test.
+		$CACHE1/pack-test.-from-0.tar
+		$CACHE1/pack-test.-from-0.tar
+		$CACHE1/manifest/10/Manifest.test.
+		$CACHE1/manifest/10/Manifest.test.
+		$CACHE1/manifest/10/Manifest.test.
 		\\[repo2\\]
-		$STATE2/cache/pack-test3-from-0.tar
+		$CACHE2/pack-test3-from-0.tar
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -60,11 +62,11 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		$STATE1/cache/pack-test.-from-0.tar
-		$STATE1/cache/pack-test.-from-0.tar
-		$STATE1/cache/manifest/10/Manifest.test.
-		$STATE1/cache/manifest/10/Manifest.test.
-		$STATE1/cache/manifest/10/Manifest.test.
+		$CACHE1/pack-test.-from-0.tar
+		$CACHE1/pack-test.-from-0.tar
+		$CACHE1/manifest/10/Manifest.test.
+		$CACHE1/manifest/10/Manifest.test.
+		$CACHE1/manifest/10/Manifest.test.
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

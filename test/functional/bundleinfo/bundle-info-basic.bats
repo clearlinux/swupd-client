@@ -18,7 +18,7 @@ global_setup() {
 	# when swupd initializes, if the tracking directory is empty, it will
 	# mark all installed bundles as tracked, to avoid this, let's add a dummy
 	# value to the tracking directory
-	sudo touch "$STATEDIR"/bundles/dummy
+	sudo touch "$STATEDIR_TRACKING"/dummy
 
 }
 

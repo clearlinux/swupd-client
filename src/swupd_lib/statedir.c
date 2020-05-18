@@ -82,14 +82,45 @@ char *statedir_get_version(void)
 /* Cache section */
 /* ************* */
 
+static char *get_url(void)
+{
+	size_t i, j = 0;
+	char *url = strdup_or_die(globals.content_url);
+	char *converted_url = malloc_or_die(str_len(url) + 1);
+
+	// replace ':' and '/' with '_', but do not allow
+	// multiple '_' in a row
+	for (i = 0; i < str_len(url); i++) {
+		if (url[i] != ':' && url[i] != '/') {
+			converted_url[j] = url[i];
+			j++;
+		} else if (j > 0 && converted_url[j - 1] != '_') {
+			converted_url[j] = '_';
+			j++;
+		}
+	}
+	converted_url[j] = '\0';
+	FREE(url);
+
+	return converted_url;
+}
+
 char *statedir_get_staged_dir(void)
 {
-	return sys_path_join("%s/%s/%s", globals.state_dir, CACHE_DIR, STAGED_DIR);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s/%s", globals.state_dir, CACHE_DIR, url, STAGED_DIR);
+	FREE(url);
+
+	return dir;
 }
 
 static char *get_staged_file(char *state, char *file_hash)
 {
-	return sys_path_join("%s/%s/%s/%s", state, CACHE_DIR, STAGED_DIR, file_hash);
+	char *url = get_url();
+	char *dir =  sys_path_join("%s/%s/%s/%s/%s", state, CACHE_DIR, url, STAGED_DIR, file_hash);
+	FREE(url);
+
+	return dir;
 }
 
 char *statedir_get_staged_file(char *file_hash)
@@ -104,32 +135,56 @@ char *statedir_dup_get_staged_file(char *file_hash)
 
 char *statedir_get_delta_dir(void)
 {
-	return sys_path_join("%s/%s/%s", globals.state_dir, CACHE_DIR, DELTA_DIR);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s/%s", globals.state_dir, CACHE_DIR, url, DELTA_DIR);
+	FREE(url);
+
+	return dir;
 }
 
 char *statedir_get_download_dir(void)
 {
-	return sys_path_join("%s/%s/%s", globals.state_dir, CACHE_DIR, DOWNLOAD_DIR);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s/%s", globals.state_dir, CACHE_DIR, url, DOWNLOAD_DIR);
+	FREE(url);
+
+	return dir;
 }
 
 char *statedir_get_fullfile_tar(char *file_hash)
 {
-	return sys_path_join("%s/%s/%s/.%s.tar", globals.state_dir, CACHE_DIR, DOWNLOAD_DIR, file_hash);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s/%s/.%s.tar", globals.state_dir, CACHE_DIR, url, DOWNLOAD_DIR, file_hash);
+	FREE(url);
+
+	return dir;
 }
 
 char *statedir_get_fullfile_renamed_tar(char *file_hash)
 {
-	return sys_path_join("%s/%s/%s/%s.tar", globals.state_dir, CACHE_DIR, DOWNLOAD_DIR, file_hash);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s/%s/%s.tar", globals.state_dir, CACHE_DIR, url, DOWNLOAD_DIR, file_hash);
+	FREE(url);
+
+	return dir;
 }
 
 char *statedir_get_manifest_root_dir(void)
 {
-	return sys_path_join("%s/%s/%s", globals.state_dir, CACHE_DIR, MANIFEST_DIR);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s/%s", globals.state_dir, CACHE_DIR, url, MANIFEST_DIR);
+	FREE(url);
+
+	return dir;
 }
 
 static char *get_manifest_dir(char *state, int version)
 {
-	return sys_path_join("%s/%s/%s/%i", state, CACHE_DIR, MANIFEST_DIR, version);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s/%s/%i", state, CACHE_DIR, url, MANIFEST_DIR, version);
+	FREE(url);
+
+	return dir;
 }
 
 char *statedir_get_manifest_dir(int version)
@@ -144,12 +199,20 @@ char *statedir_dup_get_manifest_dir(int version)
 
 char *statedir_get_manifest_tar(int version, char *component)
 {
-	return sys_path_join("%s/%s/%s/%i/Manifest.%s.tar", globals.state_dir, CACHE_DIR, MANIFEST_DIR, version, component);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s/%s/%i/Manifest.%s.tar", globals.state_dir, CACHE_DIR, url, MANIFEST_DIR, version, component);
+	FREE(url);
+
+	return dir;
 }
 
 static char *get_manifest(char *state, int version, char *component)
 {
-	return sys_path_join("%s/%s/%s/%i/Manifest.%s", state, CACHE_DIR, MANIFEST_DIR, version, component);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s/%s/%i/Manifest.%s", state, CACHE_DIR, url, MANIFEST_DIR, version, component);
+	FREE(url);
+
+	return dir;
 }
 
 char *statedir_get_manifest(int version, char *component)
@@ -164,27 +227,47 @@ char *statedir_dup_get_manifest(int version, char *component)
 
 char *statedir_get_hashed_manifest(int version, char *component, char *manifest_hash)
 {
-	return sys_path_join("%s/%s/%s/%i/Manifest.%s.%s", globals.state_dir, CACHE_DIR, MANIFEST_DIR, version, component, manifest_hash);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s/%s/%i/Manifest.%s.%s", globals.state_dir, CACHE_DIR, url, MANIFEST_DIR, version, component, manifest_hash);
+	FREE(url);
+
+	return dir;
 }
 
 char *statedir_get_manifest_delta_dir(void)
 {
-	return sys_path_join("%s/%s/%s", globals.state_dir, CACHE_DIR, MANIFEST_DIR);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s/%s", globals.state_dir, CACHE_DIR, url, MANIFEST_DIR);
+	FREE(url);
+
+	return dir;
 }
 
 char *statedir_get_manifest_delta(char *bundle, int from_version, int to_version)
 {
-	return sys_path_join("%s/%s/%s/Manifest-%s-delta-from-%i-to-%i", globals.state_dir, CACHE_DIR, MANIFEST_DIR, bundle, from_version, to_version);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s/%s/Manifest-%s-delta-from-%i-to-%i", globals.state_dir, CACHE_DIR, url, MANIFEST_DIR, bundle, from_version, to_version);
+	FREE(url);
+
+	return dir;
 }
 
 char *statedir_get_delta_pack_dir(void)
 {
-	return sys_path_join("%s/%s", globals.state_dir, CACHE_DIR);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s", globals.state_dir, CACHE_DIR, url);
+	FREE(url);
+
+	return dir;
 }
 
 static char *get_delta_pack(char *state, char *bundle, int from_version, int to_version)
 {
-	return sys_path_join("%s/%s/pack-%s-from-%i-to-%i.tar", state, CACHE_DIR, bundle, from_version, to_version);
+	char *url = get_url();
+	char *dir = sys_path_join("%s/%s/%s/pack-%s-from-%i-to-%i.tar", state, CACHE_DIR, url, bundle, from_version, to_version);
+	FREE(url);
+
+	return dir;
 }
 
 char *statedir_get_delta_pack(char *bundle, int from_version, int to_version)
@@ -225,10 +308,13 @@ int statedir_create_dirs(const char *path)
 {
 	int ret = 0;
 	char *sub_path = NULL;
+	char *url = get_url();
 	const char *state_root_dirs[] = { CACHE_DIR, TRACKING_DIR, TELEMETRY_DIR, "3rd-party" };
-	const char *cache_dirs[] = { DELTA_DIR, STAGED_DIR, DOWNLOAD_DIR, MANIFEST_DIR};
+	const char *cache_dirs[] = { url };
+	const char *url_dirs[] = { DELTA_DIR, STAGED_DIR, DOWNLOAD_DIR, MANIFEST_DIR};
 #define STATE_ROOT_DIR_COUNT (sizeof(state_root_dirs) / sizeof(state_root_dirs[0]))
 #define CACHE_DIR_COUNT (sizeof(cache_dirs) / sizeof(cache_dirs[0]))
+#define URL_DIR_COUNT (sizeof(url_dirs) / sizeof(url_dirs[0]))
 
 	// check for existence
 	if (ensure_root_owned_dir(path)) {
@@ -241,20 +327,27 @@ int statedir_create_dirs(const char *path)
 
 	ret = create_root_owned_dirs(path, state_root_dirs, STATE_ROOT_DIR_COUNT);
 	if (ret) {
-		return ret;
+		goto exit;
 	}
 
 	sub_path = sys_path_join("%s/%s", path, CACHE_DIR);
 	ret = create_root_owned_dirs(sub_path, cache_dirs, CACHE_DIR_COUNT);
-	FREE(sub_path);
 	if (ret) {
-		return ret;
+		goto exit;
+	}
+	FREE(sub_path);
+
+	sub_path = sys_path_join("%s/%s/%s", path, CACHE_DIR, url);
+	ret = create_root_owned_dirs(sub_path, url_dirs, URL_DIR_COUNT);
+	if (ret) {
+		goto exit;
 	}
 
 	/* Do a final check to make sure that the top level dir wasn't
 	 * tampered with whilst we were creating the dirs */
 	if (ensure_root_owned_dir(path)) {
-		return -1;
+		ret = -1;
+		goto exit;
 	}
 
 	/* make sure the tracking directory is not empty, if it is,
@@ -263,6 +356,9 @@ int statedir_create_dirs(const char *path)
 		debug("There was an error accessing the tracking directory %s/bundles\n", path);
 	}
 
+exit:
+	FREE(sub_path);
+	FREE(url);
 	return ret;
 }
 

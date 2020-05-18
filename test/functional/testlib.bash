@@ -617,6 +617,7 @@ set_env_variables() { # swupd_function
 	local env_name=$1
 	local path
 	local testfs_path
+	local converted_url
 	validate_path "$env_name"
 	path=$(dirname "$(realpath "$env_name")")
 	testfs_path="$path"/"$env_name"/testfs
@@ -635,17 +636,20 @@ set_env_variables() { # swupd_function
 	debug_msg "TEST_DIRNAME: $TEST_DIRNAME"
 	export PATH_PREFIX="$TEST_DIRNAME"/testfs/target-dir
 	debug_msg "PATH_PREFIX: $PATH_PREFIX"
-	export STATEDIR_TRACKING="$TEST_DIRNAME"/testfs/state/bundles
+	export STATEDIR_ABS="$TEST_DIRNAME"/testfs/state
+	debug_msg "STATEDIR_ABS: $STATEDIR_ABS"
+	export STATEDIR_TRACKING="$STATEDIR_ABS"/bundles
 	debug_msg "STATEDIR_TRACKING: $STATEDIR_TRACKING"
-	export STATEDIR_CACHE="$TEST_DIRNAME"/testfs/state/cache
+	converted_url=file"$(echo "$path" | tr / _)"_"$env_name"_web-dir
+	export STATEDIR_CACHE="$STATEDIR_ABS"/cache/"$converted_url"
 	debug_msg "STATEDIR_CACHE: $STATEDIR_CACHE"
-	export STATEDIR_DELTA="$TEST_DIRNAME"/testfs/state/cache/delta
+	export STATEDIR_DELTA="$STATEDIR_ABS"/cache/"$converted_url"/delta
 	debug_msg "STATEDIR_DELTA: $STATEDIR_DELTA"
-	export STATEDIR_DOWNLOAD="$TEST_DIRNAME"/testfs/state/cache/download
+	export STATEDIR_DOWNLOAD="$STATEDIR_ABS"/cache/"$converted_url"/download
 	debug_msg "STATEDIR_DOWNLOAD: $STATEDIR_DOWNLOAD"
-	export STATEDIR_MANIFEST="$TEST_DIRNAME"/testfs/state/cache/manifest
+	export STATEDIR_MANIFEST="$STATEDIR_ABS"/cache/"$converted_url"/manifest
 	debug_msg "STATEDIR_MANIFEST: $STATEDIR_MANIFEST"
-	export STATEDIR_STAGED="$TEST_DIRNAME"/testfs/state/cache/staged
+	export STATEDIR_STAGED="$STATEDIR_ABS"/cache/"$converted_url"/staged
 	debug_msg "STATEDIR_STAGED: $STATEDIR_STAGED"
 
 	# different options for swupd
@@ -1350,7 +1354,7 @@ get_entry_from_manifest() { # swupd_function
 
 	# a key was provided, try with the key as a file
 	# path first which should be unique in a Manifest
-	value=$(sudo cat "$manifest" | grep "$entry_key"$)
+	value=$(sudo cat "$manifest" | grep "$entry_key$")
 
 	# if an entry was not found using the file path, try with the hash next
 	if [ -z "$value" ]; then
@@ -1645,6 +1649,7 @@ create_third_party_repo() { #swupd_function
 	local path
 	local hashed_name
 	local cert
+	local url
 	validate_item "$env_name"
 	validate_param "$version"
 	path=$(dirname "$(realpath "$env_name")")
@@ -1653,9 +1658,11 @@ create_third_party_repo() { #swupd_function
 
 	# create the state dir for the 3rd-party repo
 	TPSTATEDIR="$STATEDIR"/3rd-party/"$repo_name"
+	TPURL="$path"/"$env_name"/3rd-party/"$repo_name"
+	url=file"$(echo "$TPURL" | tr / _)"
 	debug_msg "Creating a state directory for repo $repo_name at $TPSTATEDIR..."
-	sudo mkdir -p "$TPSTATEDIR"/{bundles,cache}
-	sudo mkdir -p "$TPSTATEDIR"/cache/{staged,download,delta,manifest}
+	sudo mkdir -p "$TPSTATEDIR"/{bundles,cache,telemetry,3rd-party}
+	sudo mkdir -p "$TPSTATEDIR"/cache/"$url"/{staged,download,delta,manifest}
 	sudo chmod -R 0700 "$STATEDIR"
 
 	# create the basic content for the 3rd-party repo
@@ -1671,20 +1678,20 @@ create_third_party_repo() { #swupd_function
 	debug_msg "3rd-party repo state dir: $TPSTATEDIR"
 
 	# relevant absolute paths
-	export TPURL="$path"/"$env_name"/3rd-party/"$repo_name"
+	export TPURL
 	debug_msg "3rd-party repo URL: $TPURL"
 	export TPSTATEDIR_ABS="$path"/"$TPSTATEDIR"
 	export TPSTATEDIR_TRACKING="$TPSTATEDIR_ABS"/bundles
 	debug_msg "3rd-party repo statedir tracking dir: $TPSTATEDIR_TRACKING"
-	export TPSTATEDIR_CACHE="$TPSTATEDIR_ABS"/cache
+	export TPSTATEDIR_CACHE="$TPSTATEDIR_ABS"/cache/"$url"
 	debug_msg "3rd-party repo statedir cache dir: $TPSTATEDIR_CACHE"
-	export TPSTATEDIR_DELTA="$TPSTATEDIR_ABS"/cache/delta
+	export TPSTATEDIR_DELTA="$TPSTATEDIR_ABS"/cache/"$url"/delta
 	debug_msg "3rd-party repo statedir delta dir: $TPSTATEDIR_DELTA"
-	export TPSTATEDIR_DOWNLOAD="$TPSTATEDIR_ABS"/cache/download
+	export TPSTATEDIR_DOWNLOAD="$TPSTATEDIR_ABS"/cache/"$url"/download
 	debug_msg "3rd-party repo statedir download dir: $TPSTATEDIR_DOWNLOAD"
-	export TPSTATEDIR_MANIFEST="$TPSTATEDIR_ABS"/cache/manifest
+	export TPSTATEDIR_MANIFEST="$TPSTATEDIR_ABS"/cache/"$url"/manifest
 	debug_msg "3rd-party repo statedir manifest dir: $TPSTATEDIR_MANIFEST"
-	export TPSTATEDIR_STAGED="$TPSTATEDIR_ABS"/cache/staged
+	export TPSTATEDIR_STAGED="$TPSTATEDIR_ABS"/cache/"$url"/staged
 	debug_msg "3rd-party repo statedir staged dir: $TPSTATEDIR_STAGED"
 
 	# if requested, add the new repo to the repo.ini file
@@ -1982,7 +1989,7 @@ create_test_environment() { # swupd_function
 	# state files & dirs
 	debug_msg "Creating a state dir"
 	sudo mkdir -p "$statedir"/{telemetry,bundles,3rd-party,cache}
-	sudo mkdir -p "$statedir"/cache/{staged,download,delta,manifest}
+	sudo mkdir -p "$statedir"/cache/file"$(echo "$path" | tr / _)"_"$env_name"_web-dir/{staged,download,delta,manifest}
 	sudo chmod -R 0700 "$statedir"
 
 	# every environment needs to have at least the os-core bundle so this should be
@@ -2475,9 +2482,9 @@ start_web_server() { # swupd_function
 				# to avoid hanging the server while testing for the connection to be ready
 				# when the -H (hang server) option is set, we need to use the special url
 				# "/test-connection"
-				curl https://localhost:"$port"/test-connection > /dev/null --silent || status=$?
+				curl --silent https://localhost:"$port"/test-connection > /dev/null || status=$?
 			else
-				curl http://localhost:"$port"/test-connection > /dev/null --silent || status=$?
+				curl --silent http://localhost:"$port"/test-connection > /dev/null || status=$?
 			fi
 
 			# the web server is ready for connections when 0 or 60 is returned. When using

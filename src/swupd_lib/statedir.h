@@ -187,8 +187,11 @@ char *statedir_get_version(void);
  * @brief Creates the required directories in the statedir.
  *
  * @param path The path of the statedir
+ * @param include_all If set to true, all directories normally used
+ * for upstream content will be included in the statedir, otherwise
+ * a subset will be used
  */
-int statedir_create_dirs(const char *path);
+int statedir_create_dirs(const char *path, bool include_all);
 
 /**
  * @brief Sets the path to the statedir.

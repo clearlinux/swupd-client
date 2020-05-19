@@ -278,6 +278,7 @@ enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck)
 	char *repo_state_dir;
 	char *repo_path_prefix;
 	char *repo_cert_path;
+#define INCLUDE_STATE_DIRS_FOR_THIRD_PARTY_ONLY false
 
 	set_content_url(repo->url);
 	set_version_url(repo->url);
@@ -309,7 +310,7 @@ enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck)
 	/* make sure there are state directories for the 3rd-party
 	 * repo if not there already */
 	repo_state_dir = get_repo_state_dir(repo->name);
-	if (statedir_create_dirs(repo_state_dir)) {
+	if (statedir_create_dirs(repo_state_dir, INCLUDE_STATE_DIRS_FOR_THIRD_PARTY_ONLY)) {
 		FREE(repo_state_dir);
 		error("Unable to create the state directories for repository %s\n\n", repo->name);
 		return SWUPD_COULDNT_CREATE_DIR;

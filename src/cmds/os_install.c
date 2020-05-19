@@ -151,6 +151,7 @@ enum swupd_code install_main(int argc, char **argv)
 {
 	enum swupd_code ret = SWUPD_OK;
 	int steps_in_os_install;
+#define INCLUDE_ALL_STATE_DIRS true
 
 	if (!parse_options(argc, argv)) {
 		print("\n");
@@ -166,7 +167,7 @@ enum swupd_code install_main(int argc, char **argv)
 
 	/* Initialize the default state dir of the system to be installed */
 	char *new_os_state = sys_path_join("%s/%s", globals.path_prefix, "/var/lib/swupd");
-	if (statedir_create_dirs(new_os_state)) {
+	if (statedir_create_dirs(new_os_state, INCLUDE_ALL_STATE_DIRS)) {
 		ret = SWUPD_COULDNT_CREATE_DIR;
 		FREE(new_os_state);
 		return ret;

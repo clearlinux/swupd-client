@@ -397,6 +397,7 @@ static bool adjust_system_time()
 enum swupd_code swupd_init(enum swupd_init_config config)
 {
 	enum swupd_code ret = SWUPD_OK;
+#define INCLUDE_ALL_STATE_DIRS true
 
 	record_fds();
 
@@ -428,13 +429,13 @@ enum swupd_code swupd_init(enum swupd_init_config config)
 			}
 		}
 
-		if (statedir_create_dirs(globals.state_dir)) {
+		if (statedir_create_dirs(globals.state_dir, INCLUDE_ALL_STATE_DIRS)) {
 			ret = SWUPD_COULDNT_CREATE_DIR;
 			goto out_fds;
 		}
 
 		if (globals.state_dir_cache != NULL) {
-			if (statedir_create_dirs(globals.state_dir_cache)) {
+			if (statedir_create_dirs(globals.state_dir_cache, INCLUDE_ALL_STATE_DIRS)) {
 				ret = SWUPD_COULDNT_CREATE_DIR;
 				goto out_fds;
 			}

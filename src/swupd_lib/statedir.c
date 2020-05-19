@@ -49,6 +49,9 @@
 /* Name of the directory that contains all the cache */
 #define CACHE_DIR "cache"
 
+/* Name of the directory that contains statedir of a 3rd-party repo */
+#define THIRD_PARTY_DIR "3rd-party"
+
 
 /* ************* */
 /* State section */
@@ -304,17 +307,16 @@ static int create_root_owned_dirs(const char *path, const char **dirs, unsigned 
 	return 0;
 }
 
-int statedir_create_dirs(const char *path)
+int statedir_create_dirs(const char *path, bool include_all)
 {
 	int ret = 0;
 	char *sub_path = NULL;
 	char *url = get_url();
-	const char *state_root_dirs[] = { CACHE_DIR, TRACKING_DIR, TELEMETRY_DIR, "3rd-party" };
+	unsigned int count = include_all ? 4 : 2;
+
+	const char *state_root_dirs[] = { CACHE_DIR, TRACKING_DIR, TELEMETRY_DIR, THIRD_PARTY_DIR };
 	const char *cache_dirs[] = { url };
 	const char *url_dirs[] = { DELTA_DIR, STAGED_DIR, DOWNLOAD_DIR, MANIFEST_DIR};
-#define STATE_ROOT_DIR_COUNT (sizeof(state_root_dirs) / sizeof(state_root_dirs[0]))
-#define CACHE_DIR_COUNT (sizeof(cache_dirs) / sizeof(cache_dirs[0]))
-#define URL_DIR_COUNT (sizeof(url_dirs) / sizeof(url_dirs[0]))
 
 	// check for existence
 	if (ensure_root_owned_dir(path)) {
@@ -325,20 +327,22 @@ int statedir_create_dirs(const char *path)
 		}
 	}
 
-	ret = create_root_owned_dirs(path, state_root_dirs, STATE_ROOT_DIR_COUNT);
+	ret = create_root_owned_dirs(path, state_root_dirs, count);
 	if (ret) {
 		goto exit;
 	}
 
 	sub_path = sys_path_join("%s/%s", path, CACHE_DIR);
-	ret = create_root_owned_dirs(sub_path, cache_dirs, CACHE_DIR_COUNT);
+	count = sizeof(cache_dirs) / sizeof(cache_dirs[0]);
+	ret = create_root_owned_dirs(sub_path, cache_dirs, count);
 	if (ret) {
 		goto exit;
 	}
 	FREE(sub_path);
 
 	sub_path = sys_path_join("%s/%s/%s", path, CACHE_DIR, url);
-	ret = create_root_owned_dirs(sub_path, url_dirs, URL_DIR_COUNT);
+	count = sizeof(url_dirs) / sizeof(url_dirs[0]);
+	ret = create_root_owned_dirs(sub_path, url_dirs, count);
 	if (ret) {
 		goto exit;
 	}

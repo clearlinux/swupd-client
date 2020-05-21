@@ -59,8 +59,6 @@ int clean_get_stats(void)
 	return stats.files_removed;
 }
 
-static struct timespec now;
-
 static const struct option prog_opts[] = {
 	{ "help", no_argument, 0, 'h' },
 	{ "all", no_argument, 0, FLAG_ALL },
@@ -434,13 +432,6 @@ enum swupd_code clean_statedir(bool dry_run, bool all)
 {
 	enum swupd_code ret;
 	char *path = NULL;
-
-	if (!all) {
-		if (clock_gettime(CLOCK_REALTIME, &now)) {
-			error("couldn't read current time to decide what files to clean\n\n");
-			return SWUPD_TIME_UNKNOWN;
-		}
-	}
 
 	path = statedir_get_staged_dir();
 	ret = remove_if(path, dry_run, is_fullfile);

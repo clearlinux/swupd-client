@@ -50,7 +50,6 @@ static bool cmdline_command_verify = false;
 static bool cmdline_option_force = false;
 static bool cmdline_option_fix = false;
 static bool cmdline_option_picky = false;
-static char *cmdline_option_statedir_cache = NULL;
 static char *cmdline_option_picky_tree = NULL;
 static char *cmdline_option_file = NULL;
 static const char *cmdline_option_picky_whitelist = picky_whitelist_default;
@@ -122,12 +121,6 @@ void verify_set_option_bundles(struct list *opt_bundles)
 void verify_set_option_version(int ver)
 {
 	version = ver;
-}
-
-void verify_set_option_statedir_cache(char *path)
-{
-	FREE(cmdline_option_statedir_cache);
-	cmdline_option_statedir_cache = path;
 }
 
 void verify_set_option_fix(bool opt)
@@ -928,14 +921,6 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 	bool use_latest = false;
 	bool invalid_bundle = false;
 
-	if (cmdline_option_statedir_cache != NULL) {
-		ret = statedir_dup_set_path(cmdline_option_statedir_cache);
-		if (ret != true) {
-			error("Failed to set statedir-cache\n");
-			goto clean_args_and_exit;
-		}
-	}
-
 	/* Unless we are installing a new bundle and the --skip-optional flag is not
 	* set we shoudn't include optional bundles to the bundle list */
 	if (!cmdline_option_install || cmdline_option_skip_optional) {
@@ -1448,8 +1433,6 @@ clean_and_exit:
 	}
 
 	timelist_print_stats(globals.global_times);
-
-clean_args_and_exit:
 	list_free_list_and_data(cmdline_option_bundles, free);
 
 	/* rest counters */

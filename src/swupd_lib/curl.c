@@ -477,7 +477,7 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 			return DOWNLOAD_STATUS_ERROR;
 		case CURLE_WRITE_ERROR:
 			error("Curl - Error downloading to local file - '%s'\n", url);
-			error("Curl - Check free space for %s?\n", globals.state_dir);
+			error("Curl - Check free space for %s?\n", globals.cache_dir);
 			return DOWNLOAD_STATUS_WRITE_ERROR;
 		case CURLE_OPERATION_TIMEDOUT:
 			error("Curl - Communicating with server timed out - '%s'\n", url);

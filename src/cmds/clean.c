@@ -466,7 +466,7 @@ enum swupd_code clean_statedir(bool dry_run, bool all)
 
 	// TODO: Remove after format bump to format 31
 	// Clean all manifests outside of the new manifests folder
-	ret = clean_staged_manifests(globals.state_dir, dry_run, true);
+	ret = clean_staged_manifests(globals.cache_dir, dry_run, true);
 
 	return ret;
 }

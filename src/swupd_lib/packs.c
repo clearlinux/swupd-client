@@ -198,7 +198,7 @@ static int get_cached_packs(struct sub *sub)
 		ret = 1;
 
 		if (globals.state_dir_cache != NULL) {
-			string_or_die(&targetfile_cache, "%s/pack-%s-from-%i-to-%i.tar", globals.state_dir_cache, sub->component, sub->oldversion, sub->version);
+			targetfile_cache = statedir_dup_get_delta_pack(sub->component, sub->oldversion, sub->version);
 			if (lstat(targetfile_cache, &stat) == 0 && stat.st_size == 0) {
 				if (link_or_copy(targetfile_cache, targetfile) == 0) {
 					ret = 0;

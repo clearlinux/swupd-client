@@ -33,7 +33,7 @@
 # 1,2,3...                            (integer value)
 #format=<FORMAT>
 
-# Specify alternate swupd state directory (string value)
+# Specify alternate path for swupd cache and data directory (string value)
 #statedir=<PATH>
 
 # Specify alternate path to swupd certificates (string value)

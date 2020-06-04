@@ -300,7 +300,7 @@ extern bool confirm_action(void);
 extern bool is_binary(const char *filename);
 extern int ensure_root_owned_dir(const char *dirname);
 extern void unlink_all_staged_content(struct file *file);
-extern bool safeguard_tracking_dir(const char *state_dir);
+extern bool safeguard_tracking_dir(const char *state_dir, mode_t mode);
 
 /* subscription.c */
 typedef bool (*subs_fn_t)(struct list **subs, const char *component, int recursion, bool is_optional);
@@ -346,7 +346,6 @@ extern void verify_set_option_download(bool opt);
 extern void verify_set_option_skip_optional(bool opt);
 extern void verify_set_option_force(bool opt);
 extern void verify_set_option_install(bool opt);
-extern void verify_set_option_statedir_cache(char *opt);
 extern void verify_set_option_quick(bool opt);
 extern void verify_set_option_bundles(struct list *opt_bundles);
 extern void verify_set_option_version(int ver);

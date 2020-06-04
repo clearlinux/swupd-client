@@ -215,6 +215,11 @@ char *sys_path_append_separator(const char *path);
 bool is_root(void);
 
 /**
+ * @brief Check if the provided path has the provided permissions
+ */
+bool sys_is_mode(const char *path, mode_t mode);
+
+/**
  * @brief Check if the provided path is a directory
  */
 bool sys_is_dir(const char *path);

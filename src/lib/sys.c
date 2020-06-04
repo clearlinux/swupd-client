@@ -466,6 +466,17 @@ bool is_root(void)
 	return getuid() == 0;
 }
 
+bool sys_is_mode(const char *path, mode_t mode)
+{
+	struct stat st;
+
+	if (lstat(path, &st)) {
+		return false;
+	}
+
+	return ((st.st_mode & 0777) == mode);
+}
+
 bool sys_is_dir(const char *path)
 {
 	struct stat st;

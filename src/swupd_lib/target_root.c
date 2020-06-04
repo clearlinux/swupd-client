@@ -130,7 +130,7 @@ static int tartar(const char *source_dir, const char *source_basename, const cha
 	char *tmp_archive;
 	int err = 0, rm_err;
 
-	tmp_archive = sys_path_join("%s/tmparchive.tar", globals.state_dir);
+	tmp_archive = statedir_get_temp_file("tmparchive.tar");
 
 	rm_err = sys_rm_recursive(tmp_archive);
 	if (rm_err && rm_err != -ENOENT) {
@@ -180,7 +180,7 @@ static enum swupd_code install_dir_using_tar(const char *fullfile_path, const ch
 	target_basename = sys_basename(target_file);
 	local_basename = sys_path_join("./%s", target_basename);
 	target_path = sys_dirname(target_file);
-	rename_tmpdir = sys_path_join("%s/tmprenamedir", globals.state_dir);
+	rename_tmpdir = statedir_get_temp_file("tmprenamedir");
 	rename_target = sys_path_join("%s/%s", rename_tmpdir, target_basename);
 
 	/* In order to avoid tar transforms with directories, rename

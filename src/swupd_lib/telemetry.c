@@ -59,7 +59,7 @@ void telemetry(enum telemetry_severity level, const char *class, const char *fmt
 		return;
 	}
 
-	filename = sys_path_join("%s/%d.%s.%d.XXXXXX", globals.state_dir,
+	filename = sys_path_join("%s/%d.%s.%d.XXXXXX", globals.data_dir,
 				 RECORD_VERSION, class, level);
 
 	fd = mkostemp(filename, O_CREAT | O_RDONLY);

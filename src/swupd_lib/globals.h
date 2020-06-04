@@ -47,8 +47,9 @@ extern struct globals {
 	char *format_string;
 	char *mounted_dirs;
 	char *path_prefix;
-	char *state_dir;
 	char *state_dir_cache;
+	char *cache_dir;
+	char *data_dir;
 	char *version_url;
 	int max_retries;
 	int retry_delay;
@@ -63,9 +64,10 @@ extern struct globals {
  * useful to recover the values after modifying them */
 extern struct globals_bkp {
 	char *path_prefix;
-	char *state_dir;
 	char *version_url;
 	char *content_url;
+	char *cache_dir;
+	char *data_dir;
 } globals_bkp;
 
 struct global_options {

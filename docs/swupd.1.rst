@@ -81,7 +81,7 @@ used to modify the core behavior and resources that swupd uses.
         ``swupd``, you should subtract ``1`` from the number and try again until
         it succeeds.
 
--S <path>, --statedir=<path>    Specify an alternate swupd state directory.
+-S <path>, --statedir=<path>    Specify an alternate path for swupd cache and data directory.
         Normally ``swupd`` uses ``/var/lib/swupd``.
 
 -C <path>, --certpath=<cert>  Specify alternate path to swupd certificate store (pem file).

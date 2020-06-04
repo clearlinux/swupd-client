@@ -19,6 +19,7 @@
 
 #include "swupd.h"
 
+#define INCLUDE_ALL_STATE_DIRS true
 #define FLAG_DOWNLOAD_ONLY 2000
 #define FLAG_SKIP_OPTIONAL 2001
 
@@ -28,7 +29,6 @@ static bool cmdline_option_skip_optional = false;
 static struct list *cmdline_bundles = NULL;
 static char *path;
 static int cmdline_option_version = -1;
-static char *cmdline_option_statedir_cache = NULL;
 
 static const struct option prog_opts[] = {
 	{ "force", no_argument, 0, 'x' },
@@ -80,7 +80,10 @@ static bool parse_opt(int opt, char *optarg)
 		cmdline_option_force = optarg_to_bool(optarg);
 		return true;
 	case 's':
-		cmdline_option_statedir_cache = strdup_or_die(optarg);
+		if (!statedir_dup_set_path(optarg)) {
+			error("Invalid --statedir-cache argument\n\n");
+			return false;
+		}
 		return true;
 	case 'B': {
 		char *ctx = NULL;
@@ -165,18 +168,19 @@ enum swupd_code install_main(int argc, char **argv)
 	}
 
 	/* Initialize the default state dir of the system to be installed */
-	char *new_os_state = sys_path_join("%s/%s", globals.path_prefix, "/var/lib/swupd");
-	if (statedir_create_dirs(new_os_state)) {
+	char *new_os_data = sys_path_join("%s/%s", globals.path_prefix, STATE_DIR);
+	statedir_set_data_path(new_os_data);
+	if (statedir_create_dirs(INCLUDE_ALL_STATE_DIRS)) {
 		ret = SWUPD_COULDNT_CREATE_DIR;
-		FREE(new_os_state);
+		FREE(new_os_data);
 		return ret;
 	}
-	FREE(new_os_state);
+	FREE(new_os_data);
+	statedir_set_data_path(globals_bkp.data_dir);
 
 	/* set options needed for the install in the verify command */
 	verify_set_option_quick(true);
 	verify_set_option_install(true);
-	verify_set_option_statedir_cache(cmdline_option_statedir_cache);
 	verify_set_option_download(cmdline_option_download);
 	verify_set_option_skip_optional(cmdline_option_skip_optional);
 	verify_set_option_force(cmdline_option_force);

@@ -270,7 +270,7 @@ int verify_bundle_hash(struct manifest *mom, struct file *bundle)
 	}
 
 	local = statedir_get_manifest(current->last_change, current->filename);
-	cached = statedir_get_hashed_manifest(current->last_change, current->filename, bundle->hash);
+	cached = statedir_get_manifest_with_hash(current->last_change, current->filename, bundle->hash);
 
 	/* *NOTE* If the file is changed after being hardlinked, the hash will be different,
 	 * but the inode will not change making swupd skip hash check thinking they still match */

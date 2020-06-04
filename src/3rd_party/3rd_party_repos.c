@@ -26,6 +26,8 @@
 
 #ifdef THIRDPARTY
 
+#define INCLUDE_STATE_DIRS_FOR_THIRD_PARTY_ONLY false
+
 char *third_party_get_bin_dir(void)
 {
 	return sys_path_join("%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BIN_DIR);
@@ -46,9 +48,14 @@ char *get_repo_content_path(const char *repo_name)
 	return sys_path_join("%s/%s/%s", globals_bkp.path_prefix, SWUPD_3RD_PARTY_BUNDLES_DIR, repo_name);
 }
 
-static char *get_repo_state_dir(const char *repo_name)
+static char *get_repo_data_dir(const char *repo_name)
 {
-	return sys_path_join("%s/%s/%s", globals_bkp.state_dir, SWUPD_3RD_PARTY_DIRNAME, repo_name);
+	return sys_path_join("%s/%s/%s", globals_bkp.data_dir, SWUPD_3RD_PARTY_DIRNAME, repo_name);
+}
+
+static char *get_repo_cache_dir(const char *repo_name)
+{
+	return sys_path_join("%s/%s/%s", globals_bkp.cache_dir, SWUPD_3RD_PARTY_DIRNAME, repo_name);
 }
 
 /**
@@ -262,10 +269,18 @@ int third_party_remove_repo_directory(const char *repo_name)
 	}
 	FREE(repo_dir);
 
-	repo_dir = get_repo_state_dir(repo_name);
+	repo_dir = get_repo_data_dir(repo_name);
 	ret = sys_rm_recursive(repo_dir);
 	if (ret < 0 && ret != -ENOENT) {
-		error("Failed to delete repository state directory\n");
+		error("Failed to delete repository data directory\n");
+		ret_code = ret;
+	}
+	FREE(repo_dir);
+
+	repo_dir = get_repo_cache_dir(repo_name);
+	ret = sys_rm_recursive(repo_dir);
+	if (ret < 0 && ret != -ENOENT) {
+		error("Failed to delete repository cache directory\n");
 		ret_code = ret;
 	}
 	FREE(repo_dir);
@@ -275,7 +290,8 @@ int third_party_remove_repo_directory(const char *repo_name)
 
 enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck)
 {
-	char *repo_state_dir;
+	char *repo_data_dir;
+	char *repo_cache_dir;
 	char *repo_path_prefix;
 	char *repo_cert_path;
 
@@ -308,14 +324,18 @@ enum swupd_code third_party_set_repo(struct repo *repo, bool sigcheck)
 
 	/* make sure there are state directories for the 3rd-party
 	 * repo if not there already */
-	repo_state_dir = get_repo_state_dir(repo->name);
-	if (statedir_create_dirs(repo_state_dir)) {
-		FREE(repo_state_dir);
-		error("Unable to create the state directories for repository %s\n\n", repo->name);
+	repo_data_dir = get_repo_data_dir(repo->name);
+	statedir_set_data_path(repo_data_dir);
+	repo_cache_dir = get_repo_cache_dir(repo->name);
+	statedir_set_cache_path(repo_cache_dir);
+	if (statedir_create_dirs(INCLUDE_STATE_DIRS_FOR_THIRD_PARTY_ONLY)) {
+		FREE(repo_data_dir);
+		FREE(repo_cache_dir);
+		error("Unable to create the data and cache directories for repository %s\n\n", repo->name);
 		return SWUPD_COULDNT_CREATE_DIR;
 	}
-	statedir_set_path(repo_state_dir);
-	FREE(repo_state_dir);
+	FREE(repo_data_dir);
+	FREE(repo_cache_dir);
 
 	return SWUPD_OK;
 }
@@ -379,7 +399,8 @@ static enum swupd_code third_party_find_bundle(const char *bundle, struct list *
 
 clean_and_exit:
 	set_path_prefix(globals_bkp.path_prefix);
-	statedir_set_path(globals_bkp.state_dir);
+	statedir_set_cache_path(globals_bkp.cache_dir);
+	statedir_set_data_path(globals_bkp.data_dir);
 	set_content_url(globals_bkp.content_url);
 	set_version_url(globals_bkp.version_url);
 
@@ -444,7 +465,8 @@ enum swupd_code third_party_run_operation(struct list *bundles, const char *repo
 			/* return the global variables to the original values */
 		next:
 			set_path_prefix(globals_bkp.path_prefix);
-			statedir_set_path(globals_bkp.state_dir);
+			statedir_set_cache_path(globals_bkp.cache_dir);
+			statedir_set_data_path(globals_bkp.data_dir);
 			set_content_url(globals_bkp.content_url);
 			set_version_url(globals_bkp.version_url);
 		}

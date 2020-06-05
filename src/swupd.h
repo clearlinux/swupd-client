@@ -369,7 +369,12 @@ extern void bundle_list_set_option_status(bool opt);
 extern void bundle_list_set_option_orphans(bool opt);
 
 /* clean.c */
-extern int clean_get_stats(void);
+extern void clean_set_option_all(bool opt);
+extern void clean_set_option_dry_run(bool opt);
+extern int clean_get_file_stats(void);
+extern size_t clean_get_byte_stats(void);
+extern void clean_reset_stats(void);
+extern enum swupd_code clean_cachedir(void);
 
 /* 3rd_party_check_update.c */
 enum swupd_code third_party_execute_check_update(void);
@@ -383,8 +388,6 @@ extern void manifest_free_array(struct file **array);
 extern enum swupd_code print_update_conf_info(void);
 
 extern int handle_mirror_if_stale(void);
-
-extern enum swupd_code clean_statedir(bool all, bool dry_run);
 
 extern void warn_nosigcheck(const char *file);
 

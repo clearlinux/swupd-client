@@ -71,6 +71,11 @@ test_setup() {
 	assert_status_is 0
 	assert_in_output "700"
 
+	# staged directory should only be accesible by root
+	run sudo sh -c "stat -c '%a' $STATEDIR_STAGED"
+	assert_status_is 0
+	assert_in_output "700"
+
 }
 
 @test "SIG028: Check if state dir permissions are correct after execution even if they are wrong before" {

@@ -95,14 +95,23 @@ static enum swupd_code clean_repos_state(UNUSED_PARAM char *unused)
 {
 	enum swupd_code ret;
 	int files_removed;
+	size_t bytes_removed;
+	char *bytes_removed_pretty = NULL;
 
-	ret = clean_statedir(cmdline_option_dry_run, cmdline_option_all);
-	files_removed = clean_get_stats();
+	clean_reset_stats();
+	ret = clean_cachedir();
+
+	files_removed = clean_get_file_stats();
+	bytes_removed = clean_get_byte_stats();
+	prettify_size(bytes_removed, &bytes_removed_pretty);
 	if (cmdline_option_dry_run) {
 		info("Would remove %d files\n", files_removed);
+		info("Aproximatelly %s would be freed\n", bytes_removed_pretty);
 	} else {
 		info("%d files removed\n", files_removed);
+		info("%s freed\n", bytes_removed_pretty);
 	}
+	FREE(bytes_removed_pretty);
 
 	return ret;
 }
@@ -123,6 +132,10 @@ enum swupd_code third_party_clean_main(int argc, char **argv)
 		error("Failed swupd initialization, exiting now\n");
 		return ret_code;
 	}
+
+	/* set the command options */
+	clean_set_option_all(cmdline_option_all);
+	clean_set_option_dry_run(cmdline_option_dry_run);
 
 	/* clean the cache */
 	ret_code = third_party_run_operation_multirepo(cmdline_option_repo, clean_repos_state, SWUPD_OK, "clean", steps_in_clean);

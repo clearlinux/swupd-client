@@ -19,6 +19,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <ftw.h>
 #include <getopt.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -28,6 +29,42 @@
 
 #define FLAG_ALL 2000
 #define FLAG_DRY_RUN 2001
+
+static struct {
+	int all;
+	int dry_run;
+} options;
+
+static struct {
+	int files_removed;
+	size_t bytes_removed;
+} stats;
+
+void clean_set_option_all(bool opt)
+{
+	options.all = opt;
+}
+
+void clean_set_option_dry_run(bool opt)
+{
+	options.dry_run = opt;
+}
+
+int clean_get_file_stats(void)
+{
+	return stats.files_removed;
+}
+
+size_t clean_get_byte_stats(void)
+{
+	return stats.bytes_removed;
+}
+
+void clean_reset_stats(void)
+{
+	stats.files_removed = 0;
+	stats.bytes_removed = 0;
+}
 
 static void print_help(void)
 {
@@ -42,21 +79,6 @@ static void print_help(void)
 	    "   --all                   Remove all the content including recent metadata\n"
 	    "   --dry-run               Just print files that would be removed\n"
 	    "\n");
-}
-
-static struct {
-	int all;
-	int dry_run;
-} options;
-
-static struct {
-	int files_removed;
-	size_t bytes_removed;
-} stats;
-
-int clean_get_stats(void)
-{
-	return stats.files_removed;
 }
 
 static const struct option prog_opts[] = {
@@ -179,11 +201,6 @@ static enum swupd_code remove_if(const char *path, bool dry_run, remove_predicat
 
 	closedir(dir);
 	return ret;
-}
-
-static bool is_fullfile(const char UNUSED_PARAM *dir, const struct dirent *entry)
-{
-	return str_len(entry->d_name) == (SWUPD_HASH_LEN - 1);
 }
 
 static bool is_pack_indicator(const char UNUSED_PARAM *dir, const struct dirent *entry)
@@ -361,7 +378,15 @@ static enum swupd_code clean_staged_manifests(const char *path, bool dry_run, bo
 		if (size < 0) {
 			size = 0;
 		}
+
+		// when doing a dry run, if --all was selcted we can assume the
+		// directory will also get deleted since it should be empty by now
+		if (dry_run && all) {
+			print("%s\n", version_dir);
+		}
+
 		if (!rmdir(version_dir) || (dry_run && all)) {
+			stats.files_removed++;
 			stats.bytes_removed += long_to_ulong(size);
 		}
 
@@ -405,7 +430,7 @@ enum swupd_code clean_main(int argc, char **argv)
 	 * and keeping all the staged files of the current version. This helps recovering the
 	 * current version. Or do it for the previous version to allow a rollback. */
 
-	ret = clean_statedir(options.dry_run, options.all);
+	ret = clean_cachedir();
 
 	/* TODO: Also print the bytes removed, need to take into account the hardlinks. */
 	prettify_size(stats.bytes_removed, &bytes_removed_pretty);
@@ -424,49 +449,251 @@ enum swupd_code clean_main(int argc, char **argv)
 	return ret;
 }
 
-/* clean_statedir will clean the state directory used by swupd (default to
- * /var/lib/swupd). It will remove all files except relevant manifests unless
- * all is set to true. Setting dry_run to true will print the files that would
- * be removed but will not actually remove them. */
-enum swupd_code clean_statedir(bool dry_run, bool all)
+static int remove_irrelevant_file(const char *filename, const struct stat *st, int type __attribute__((unused)), struct FTW *ftw __attribute__((unused)))
+{
+	int ret;
+	char *root_cache_path = NULL;
+	char *relevant_path = NULL;
+
+	// skip the starting directory of the walk
+	root_cache_path = statedir_get_cache_dir();
+	ret = strncmp(filename, root_cache_path, str_len(filename));
+	FREE(root_cache_path);
+	if (ret == 0) {
+		return 0;
+	}
+
+	// if the file is from the current mirror, it
+	// is still relevant, skip it
+	relevant_path = statedir_get_cache_url_dir();
+	ret = str_starts_with(filename, relevant_path);
+	FREE(relevant_path);
+	if (ret == 0){
+		return 0;
+	}
+
+	// if we got here, the file is irrelevant to the current mirror
+	if (options.dry_run) {
+		print("%s\n", filename);
+	} else {
+		ret = sys_rm(filename);
+		if (ret) {
+			return ret;
+		}
+	}
+	stats.files_removed++;
+	stats.bytes_removed+=long_to_ulong(st->st_size);
+
+	return 0;
+}
+
+static int count_file(const char *filename, const struct stat *st, int type __attribute__((unused)), struct FTW *ftw __attribute__((unused)))
+{
+	if (options.dry_run) {
+		print("%s\n", filename);
+	}
+	stats.files_removed++;
+	stats.bytes_removed+=long_to_ulong(st->st_size);
+
+	return 0;
+}
+
+static enum swupd_code count_dir_contents(const char *path)
+{
+	int ret;
+
+	ret = nftw(path, &count_file, 0, FTW_DEPTH | FTW_PHYS | FTW_MOUNT);
+	if (ret) {
+		return SWUPD_COULDNT_REMOVE_FILE;
+	}
+
+	return SWUPD_OK;
+}
+
+static enum swupd_code clean_irrelevant_cache(void)
+{
+	int ret;
+	char *dir = NULL;
+
+	dir = statedir_get_cache_dir();
+	ret = nftw(dir, &remove_irrelevant_file, 0, FTW_DEPTH | FTW_PHYS | FTW_MOUNT);
+	FREE(dir);
+	if (ret) {
+		if (errno == ENOENT) {
+			return SWUPD_COULDNT_LIST_DIR;
+		} else {
+			return SWUPD_OUT_OF_MEMORY_ERROR;
+		}
+	}
+
+	return SWUPD_OK;
+}
+
+static enum swupd_code remove_cache_directory(const char *dir)
+{
+	enum swupd_code ret_code;
+	int ret;
+
+	if (!sys_is_dir(dir)){
+		return SWUPD_OK;
+	}
+
+	ret_code = count_dir_contents(dir);
+	if (ret_code) {
+		return ret_code;
+	}
+
+	if (!options.dry_run) {
+		ret = sys_rm_recursive(dir);
+		if (ret < 0 && ret != -ENOENT) {
+			return SWUPD_COULDNT_REMOVE_FILE;
+		}
+	}
+
+	return SWUPD_OK;
+}
+
+/* TODO: Remove after format bump to format 31
+ * clean_statedir will clean the old statedir location used by swupd.
+ */
+static enum swupd_code clean_former_statedir(void)
 {
 	enum swupd_code ret;
 	char *path = NULL;
 
-	path = statedir_get_staged_dir();
-	ret = remove_if(path, dry_run, is_fullfile);
-	FREE(path);
-	if (ret != SWUPD_OK) {
-		return ret;
-	}
-
 	/* Pack presence indicator files. */
-	path = statedir_get_delta_pack_dir();
-	ret = remove_if(path, dry_run, is_pack_indicator);
-	FREE(path);
+	ret = remove_if(globals.cache_dir, options.dry_run, is_pack_indicator);
 	if (ret != SWUPD_OK) {
 		return ret;
 	}
 
 	/* Manifest delta files. */
-	path = statedir_get_manifest_delta_dir();
-	ret = remove_if(path, dry_run, is_manifest_delta);
+	ret = remove_if(globals.cache_dir, options.dry_run, is_manifest_delta);
+	if (ret != SWUPD_OK) {
+		return ret;
+	}
+
+	path = sys_path_join("%s/%s", globals.cache_dir, "staged");
+	ret = remove_cache_directory(path);
 	FREE(path);
 	if (ret != SWUPD_OK) {
 		return ret;
 	}
 
-	/* NOTE: do not clean the state_dir/bundles directory */
-	path = statedir_get_manifest_root_dir();
-	ret = clean_staged_manifests(path, dry_run, all);
+	path = sys_path_join("%s/%s", globals.cache_dir, "manifest");
+	ret = remove_cache_directory(path);
 	FREE(path);
 	if (ret != SWUPD_OK) {
 		return ret;
+	}
+
+	path = sys_path_join("%s/%s", globals.cache_dir, "delta");
+	ret = remove_cache_directory(path);
+	FREE(path);
+	if (ret != SWUPD_OK) {
+		return ret;
+	}
+
+	path = sys_path_join("%s/%s", globals.cache_dir, "download");
+	ret = remove_cache_directory(path);
+	FREE(path);
+	if (ret != SWUPD_OK) {
+		return ret;
+	}
+
+	// Manifest files from old location.
+	ret = clean_staged_manifests(globals.cache_dir, options.dry_run, true);
+
+	return ret;
+}
+
+/* clean_cachedir will clean the cache directory used by swupd (default to
+ * /var/lib/swupd/cache). It will remove all files except relevant manifests from
+ * the cache asociated to the current mirror being used unless all is set to true.
+ * Setting options.dry_run to true will print the files that would be removed but
+ * will not actually remove them. */
+enum swupd_code clean_cachedir(void)
+{
+	enum swupd_code ret_code = SWUPD_OK;
+	char *dir = NULL;
+
+	if (options.all) {
+		// remove the whole cache directory, it will be regenerated
+		// from scratch the next time swupd initializes
+		dir = statedir_get_cache_dir();
+		ret_code = remove_cache_directory(dir);
+		FREE(dir);
+		if (ret_code) {
+			return ret_code;
+		}
+	} else {
+		// remove everything from the cache directory except
+		// relevant manifests
+		dir = statedir_get_cache_url_dir();
+		ret_code = remove_if(dir, options.dry_run, is_pack_indicator);
+		FREE(dir);
+		if (ret_code) {
+			return ret_code;
+		}
+
+		dir = statedir_get_delta_dir();
+		ret_code = remove_cache_directory(dir);
+		FREE(dir);
+		if (ret_code) {
+			return ret_code;
+		}
+
+		dir = statedir_get_download_dir();
+		ret_code = remove_cache_directory(dir);
+		FREE(dir);
+		if (ret_code) {
+			return ret_code;
+		}
+
+		dir = statedir_get_staged_dir();
+		ret_code = remove_cache_directory(dir);
+		FREE(dir);
+		if (ret_code) {
+			return ret_code;
+		}
+
+		dir = statedir_get_temp_dir();
+		ret_code = remove_cache_directory(dir);
+		FREE(dir);
+		if (ret_code) {
+			return ret_code;
+		}
+
+		// clean manifests that are not relevant to the current version
+		// these include:
+		// - manifests from very old versions (versions no longer included in the current mom)
+		// - manifests from versions newer than the current version
+		// - manifests with hashes (e.g. Manifest.vim.<manifest_hash>)
+		dir = statedir_get_manifest_root_dir();
+		/* Manifest delta files. */
+		ret_code = remove_if(dir, options.dry_run, is_manifest_delta);
+		if (ret_code != SWUPD_OK) {
+			FREE(dir);
+			return ret_code;
+		}
+		ret_code = clean_staged_manifests(dir, options.dry_run, false);
+		FREE(dir);
+		if(ret_code) {
+			return ret_code;
+		}
+
+		// remove all cache from other mirror URLs
+		ret_code = clean_irrelevant_cache();
+		if(ret_code) {
+			return ret_code;
+		}
 	}
 
 	// TODO: Remove after format bump to format 31
-	// Clean all manifests outside of the new manifests folder
-	ret = clean_staged_manifests(globals.cache_dir, dry_run, true);
+	// We need to clean everything in the old statedir locations
+	// regardless of if --all was used, manifests in old locations
+	// will no longer be used
+	ret_code = clean_former_statedir();
 
-	return ret;
+	return ret_code;
 }

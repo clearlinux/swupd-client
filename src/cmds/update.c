@@ -504,7 +504,7 @@ clean_curl:
 	/* clean up our cached content from the update. It is likely much more than
 	 * we need and the clean helps us prevent cache bloat. */
 	if (!keepcache) {
-		clean_statedir(false, false);
+		clean_cachedir();
 	}
 	free_subscriptions(&latest_subs);
 

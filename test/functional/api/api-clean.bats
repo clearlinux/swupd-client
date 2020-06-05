@@ -8,9 +8,9 @@ load "../testlib"
 test_setup() {
 
 	create_test_environment "$TEST_NAME"
-	sudo mkdir "$STATEDIR"/manifest/10
-	sudo touch "$STATEDIR"/manifest/10/Manifest.test{1..3}
-	sudo touch "$STATEDIR"/pack-test{1..2}-from-0.tar
+	sudo mkdir "$STATEDIR_MANIFEST"/10
+	sudo touch "$STATEDIR_MANIFEST"/10/Manifest.test{1..3}
+	sudo touch "$STATEDIR_CACHE"/pack-test{1..2}-from-0.tar
 
 }
 
@@ -29,11 +29,15 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		$TEST_ROOT_DIR/$STATEDIR/pack-test.-from-0.tar
-		$TEST_ROOT_DIR/$STATEDIR/pack-test.-from-0.tar
-		$TEST_ROOT_DIR/$STATEDIR/manifest/10/Manifest.test.
-		$TEST_ROOT_DIR/$STATEDIR/manifest/10/Manifest.test.
-		$TEST_ROOT_DIR/$STATEDIR/manifest/10/Manifest.test.
+		$STATEDIR_CACHE/pack-test.-from-0.tar
+		$STATEDIR_CACHE/pack-test.-from-0.tar
+		$STATEDIR_DELTA
+		$STATEDIR_DOWNLOAD
+		$STATEDIR_STAGED
+		$STATEDIR_TEMP
+		$STATEDIR_MANIFEST/10/Manifest.test.
+		$STATEDIR_MANIFEST/10/Manifest.test.
+		$STATEDIR_MANIFEST/10/Manifest.test.
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

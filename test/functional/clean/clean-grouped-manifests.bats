@@ -110,32 +110,38 @@ test_setup() {
 	run sudo sh -c "$SWUPD clean $SWUPD_OPTS --dry-run"
 
 	assert_status_is "$SWUPD_OK"
+
 	expected_output=$(cat <<-EOM
-		$STATEDIR_DELTA
-		$STATEDIR_DOWNLOAD
-		$STATEDIR_STAGED
-		$STATEDIR_TEMP
-		$STATEDIR_ABS/pack-vim-from-32800-to-32900.tar
-		$STATEDIR_ABS/staged/.*
-		$STATEDIR_ABS/staged/.*
-		$STATEDIR_ABS/staged
 		$STATEDIR_ABS/manifest/Manifest-emacs-delta-from-32900-to-33000
+	EOM
+	)
+	assert_regex_in_output "$expected_output"
+
+	expected_output=$(cat <<-EOM
 		$STATEDIR_ABS/manifest/32900/Manifest\\..*
 		$STATEDIR_ABS/manifest/32900/Manifest\\..*
 		$STATEDIR_ABS/manifest/32900
+	EOM
+	)
+	assert_regex_in_output "$expected_output"
+
+	expected_output=$(cat <<-EOM
 		$STATEDIR_ABS/manifest/33000/Manifest\\..*
 		$STATEDIR_ABS/manifest/33000/Manifest\\..*
 		$STATEDIR_ABS/manifest/33000/Manifest\\..*
 		$STATEDIR_ABS/manifest/33000/Manifest\\..*
 		$STATEDIR_ABS/manifest/33000
 		$STATEDIR_ABS/manifest
-		$STATEDIR_ABS/delta
-		$STATEDIR_ABS/download
+	EOM
+	)
+	assert_regex_in_output "$expected_output"
+
+	expected_output=$(cat <<-EOM
 		Would remove 20 files
 		Aproximatelly .* KB would be freed
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_in_output "$expected_output"
 
 	# non of the files should be removed since it was just a dry run
 	assert_file_exists "$MOM"

@@ -32,6 +32,7 @@
 #include "log.h"
 #include "macros.h"
 #include "strings.h"
+#include "sys.h"
 
 /* _archive_check_err(ar, ret)
  *
@@ -176,7 +177,7 @@ int archives_extract_to(const char *tarfile, const char *outputdir)
 
 		/* set output directory */
 		char *fullpath;
-		string_or_die(&fullpath, "%s/%s", outputdir, archive_entry_pathname(entry));
+		fullpath = sys_path_join("%s/%s", outputdir, archive_entry_pathname(entry));
 		archive_entry_set_pathname(entry, fullpath);
 		FREE(fullpath);
 
@@ -184,7 +185,7 @@ int archives_extract_to(const char *tarfile, const char *outputdir)
 		const char *original_hardlink = archive_entry_hardlink(entry);
 		if (original_hardlink) {
 			char *new_hardlink;
-			string_or_die(&new_hardlink, "%s/%s", outputdir, original_hardlink);
+			new_hardlink = sys_path_join("%s/%s", outputdir, original_hardlink);
 			archive_entry_set_hardlink(entry, new_hardlink);
 			FREE(new_hardlink);
 		}
@@ -221,6 +222,7 @@ out:
 	archive_write_free(ext);
 	archive_read_close(a);
 	archive_read_free(a);
+
 	return r;
 }
 

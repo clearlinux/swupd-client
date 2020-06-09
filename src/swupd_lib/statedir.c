@@ -480,6 +480,10 @@ int statedir_create_dirs(bool include_all)
 
 static bool set_state_path(char** state, char *path)
 {
+	struct stat statbuf;
+	int ret;
+	char *new_path = NULL;
+
 	if (!path) {
 		error("Statedir shouldn't be NULL\n");
 		return false;
@@ -490,18 +494,43 @@ static bool set_state_path(char** state, char *path)
 		return false;
 	}
 
+	new_path = realpath(path, NULL);
+	if (!new_path) {
+		// If path doesn't exit tries to create it
+		if (mkdir_p(path) < 0) {
+			goto error;
+		}
+		new_path = realpath(path, NULL);
+		if (!new_path) {
+			goto error;
+		}
+	}
+
+	ret = stat(new_path, &statbuf);
+	if (ret < 0 && errno == ENOENT) {
+		goto error;
+	}
+	if (!S_ISDIR(statbuf.st_mode)) {
+		goto error;
+	}
+
 	/* Prevent some disasters: since the state dir can be destroyed and
 	 * reconstructed, make sure we never set those by accident and nuke the
 	 * system. */
-	if (!str_cmp(path, "/") || !str_cmp(path, "/var") || !str_cmp(path, "/usr")) {
-		error("Refusing to use '%s' as a state dir because it might be erased first\n", path);
+	if (!str_cmp(new_path, "/") || !str_cmp(new_path, "/var") || !str_cmp(new_path, "/usr")) {
+		error("Refusing to use '%s' as a state dir because it might be erased first\n", new_path);
 		return false;
 	}
 
 	FREE(*state);
-	*state = sys_path_join("%s", path);
+	*state = sys_path_join("%s", new_path);
 
+	FREE(new_path);
 	return true;
+
+error:
+	FREE(new_path);
+	return false;
 }
 
 bool statedir_dup_set_path(char *path)

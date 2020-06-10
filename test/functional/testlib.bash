@@ -1731,7 +1731,7 @@ create_third_party_repo() { #swupd_function
 		create_bundle -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$cert",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
 	fi
 
-	if [ "$TEST_ENV_ONLY" = true ]; then
+	if [ "$ENV_ONLY" = true ]; then
 		print "\nVariables for 3rd-party repo $repo_name:\n"
 		print "TPURL=$TPURL"
 		print "TPWEBDIR=$TPWEBDIR"
@@ -4149,7 +4149,7 @@ create_test_environment_only() { # swupd_function
 	validate_item "$test_name"
 
 	echo -e "Creating test environment only: $test_name \n"
-	TEST_ENV_ONLY=true bats -t "$test_name" || true
+	ENV_ONLY=true bats -t "$test_name" || true
 
 }
 
@@ -4464,7 +4464,7 @@ setup() {
 		print "\nTarget system before the test:"
 		show_target
 	fi
-	if [ "$TEST_ENV_ONLY" = true ]; then
+	if [ "$ENV_ONLY" = true ]; then
 		print "Test setup complete"
 		terminate "Test environment only"
 	fi
@@ -4481,7 +4481,7 @@ teardown() {
 		cd "$TESTLIB_WD" || terminate "there was an error going back to the original working directory"
 	fi
 
-	if [ "$TEST_ENV_ONLY" = true ]; then
+	if [ "$ENV_ONLY" = true ]; then
 		print "Test environment created successfully"
 		print "\nTest variables:\n"
 		print "SWUPD_OPTS=\"$SWUPD_OPTS\"\n"
@@ -5000,6 +5000,17 @@ assert_files_not_equal() { # assertion
 # - keyword: a word that could be used to filter functions
 testlib() {
 
+	show_help "$(cat <<-EOM
+		List the functions provided by the swupd's test library.
+
+		Usage:
+		    testlib [filter]
+
+		Arguments:
+		    - filter: A keyword that can be used to filter the list of functions
+	EOM
+	)" "$@"
+
 	local keyword=$1
 	local funcs
 	local assertions
@@ -5030,5 +5041,25 @@ testlib() {
 		echo "$assertions"
 	fi
 	echo ""
+
+	if [ -z "$keyword" ]; then
+		echo ""
+		echo "------------------------------------------------------"
+		echo "|                Environment Variables               |"
+		echo "------------------------------------------------------"
+		echo -e "\\nThese environment variables can be used to modify the way tests are run\\n"
+		echo "DEBUG_TEST: If set to 'true', the test will run with verbose output. Note that"
+		echo "            the -t flag also needs to be used or nothing will be printed."
+		echo "            Example: DEBUG_TEST=true bats -t my_test.bats"
+		echo ""
+		echo "KEEP_ENV:   If set to 'true', the test will not destroy its test environment after"
+		echo "            running. This can be useful to debug a test or confirm behavior."
+		echo "            Example: KEEP_ENV=true bats my_test.bats"
+		echo ""
+		echo "ENV_ONLY:   If set to 'true', the test setup will be run to create the test environment"
+		echo "            but the test won't be executed. This is useful to manually run a test step"
+		echo "            by step (Alternatively you can use the create_test_environment_only function)."
+		echo "            Example: ENV_ONLY=true bats my_test.bats"
+	fi
 
 }

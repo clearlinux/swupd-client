@@ -5069,6 +5069,9 @@ testlib() {
 		echo "            but the test won't be executed. This is useful to manually run a test step"
 		echo "            by step (Alternatively you can use the create_test_environment_only function)."
 		echo "            Example: ENV_ONLY=true bats my_test.bats"
+		echo "SHOW_TARGET: If set to 'true', the tree view of the filesystem in the target system before"
+		echo "            and after the test will be printed. Note that the -t flag is needed as well."
+		echo "            Example: SHOW_TARGET=tru bats my_test.bats"
 	fi
 
 }

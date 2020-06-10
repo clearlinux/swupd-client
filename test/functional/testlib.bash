@@ -1,5 +1,14 @@
 #!/usr/bin/bash
 
+# Environment variables provided by BATS
+# $BATS_TEST_FILENAME is the fully expanded path to the Bats test file.
+# $BATS_TEST_DIRNAME is the directory in which the Bats test file is located.
+# $BATS_TEST_NAMES is an array of function names for each test case.
+# $BATS_TEST_NAME is the name of the function containing the current test case.
+# $BATS_TEST_DESCRIPTION is the description of the current test case.
+# $BATS_TEST_NUMBER is the (1-based) index of the current test case in the test file.
+# $BATS_TMPDIR is the location to a directory that may be used to store temporary files.
+
 # global variables
 FUNC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export FUNC_DIR

@@ -31,7 +31,6 @@ export THIRD_PARTY_SCRIPT_TEMPLATE="script.template"
 export SPACE=" "
 export TAB="	"
 
-
 # detect where the swupd binary is
 if [ -e "$SWUPD" ]; then
 	# nothing to be done, variable already set up
@@ -86,7 +85,7 @@ export SWUPD_INVALID_REPOSITORY=37  # the specified 3rd-party repository is inva
 export SWUPD_INVALID_FILE=38  # file is missing or invalid
 
 # global constant
-export zero_hash="0000000000000000000000000000000000000000000000000000000000000000"
+export ZERO_HASH="0000000000000000000000000000000000000000000000000000000000000000"
 export SCRIPT_TEMPLATE="\
 #!/bin/bash\n\n\
 export PATH=%s:\$PATH\n\
@@ -1406,7 +1405,7 @@ update_hashes_in_mom() { # swupd_function
 			# if the hash of the manifest changed, update it
 			bundle_old_hash=$(get_hash_from_manifest "$manifest" "$bundle")
 			bundle_new_hash=$(sudo "$SWUPD" hashdump --quiet "$path"/Manifest."$bundle")
-			if [ "$bundle_old_hash" != "$bundle_new_hash" ] && [ "$bundle_new_hash" != "$zero_hash" ]; then
+			if [ "$bundle_old_hash" != "$bundle_new_hash" ] && [ "$bundle_new_hash" != "$ZERO_HASH" ]; then
 				# replace old hash with new hash
 				sudo sed -i "/\\t$bundle_old_hash\\t/s/\\(....\\t\\).*\\(\\t.*\\t\\)/\\1$bundle_new_hash\\2/g" "$manifest"
 				# replace old version with new version
@@ -3347,7 +3346,7 @@ update_content() {
 			# in the new version, it needs to be added to the new manifest as deleted
 			debug_msg "File $filename was deleted in the latest version"
 			entry=$(get_entry_from_manifest "$old_manifest" "$filename")
-			write_to_protected_file -a "$new_manifest" "${entry:0:1}d${entry:2:2}\\t$zero_hash\\t$new_version${entry:72}\\n"
+			write_to_protected_file -a "$new_manifest" "${entry:0:1}d${entry:2:2}\\t$ZERO_HASH\\t$new_version${entry:72}\\n"
 		else
 			# the file in new version is different from old version, the file was updated,
 			# it needs to have a delta created and added to the pack
@@ -3860,7 +3859,7 @@ update_bundle() { # swupd_function
 		fi
 
 		# replace the hash with 0s
-		update_manifest -p "$bundle_manifest" file-hash "$fname" "$zero_hash"
+		update_manifest -p "$bundle_manifest" file-hash "$fname" "$ZERO_HASH"
 
 		# calculate new contentsize (NOTE: filecount is not decreased)
 		contentsize=$((contentsize - fsize))
@@ -3979,7 +3978,7 @@ update_bundle() { # swupd_function
 		add_to_manifest -p "$bundle_manifest" "$oldversion_path"/files/"$fhash" "$new_name"
 		if [ "$option" = "--rename" ]; then
 			# replace the hash of the old record with 0s
-			update_manifest -p "$bundle_manifest" file-hash "$fname" "$zero_hash"
+			update_manifest -p "$bundle_manifest" file-hash "$fname" "$ZERO_HASH"
 		else
 			# replace the fourth character of the old record with "r"
 			sudo sed -i "/\\t$filename$/s/./r/4" "$bundle_manifest"

@@ -9,9 +9,9 @@ test_setup() {
 	update_manifest -p "$WEBDIR"/10/Manifest.os-core file-status /testdir1/testdir2/testfile .d..
 	update_manifest -p "$WEBDIR"/10/Manifest.os-core file-status /testdir1/testdir2 .d..
 	update_manifest -p "$WEBDIR"/10/Manifest.os-core file-status /testdir1 .d..
-	update_manifest -p "$WEBDIR"/10/Manifest.os-core file-hash /testdir1/testdir2/testfile "$zero_hash"
-	update_manifest -p "$WEBDIR"/10/Manifest.os-core file-hash /testdir1/testdir2 "$zero_hash"
-	update_manifest "$WEBDIR"/10/Manifest.os-core file-hash /testdir1 "$zero_hash"
+	update_manifest -p "$WEBDIR"/10/Manifest.os-core file-hash /testdir1/testdir2/testfile "$ZERO_HASH"
+	update_manifest -p "$WEBDIR"/10/Manifest.os-core file-hash /testdir1/testdir2 "$ZERO_HASH"
+	update_manifest "$WEBDIR"/10/Manifest.os-core file-hash /testdir1 "$ZERO_HASH"
 
 }
 

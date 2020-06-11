@@ -732,6 +732,90 @@ set_env_variables() { # swupd_function
 
 }
 
+set_env_variables_third_party() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Exports the environment variables for third party that are dependent
+		on the test environment.
+
+		Usage:
+		    set_env_variables_third_party <env_name> <repo_name>
+
+		Arguments:
+		    - env_name: the name of the test environment
+		    - repo_name: the name of the third party repo
+	EOM
+	)" "$@"
+
+	local env_name=$1
+	local repo_name=$2
+	validate_path "$env_name"
+	validate_param "$repo_name"
+
+	local url
+	local converted_url
+
+	url="$ABS_TESTLIB_WD"/"$env_name"/3rd-party/"$repo_name"
+	converted_url=file___"$(echo "$url" | tr / _)"
+
+	# relevant relative paths
+	export TP_STATE_DIR="$STATE_DIR"/3rd-party/"$repo_name"
+	debug_msg "TP_STATE_DIR: $TP_STATE_DIR"
+	export TP_WEB_DIR="$env_name"/3rd-party/"$repo_name"
+	debug_msg "TP_WEB_DIR: $TP_WEB_DIR"
+	export TP_TARGET_DIR="$env_name"/testfs/target-dir/"$TP_BUNDLES_DIR"/"$repo_name"
+	debug_msg "TP_TARGET_DIR: $TP_TARGET_DIR"
+
+	# relevant absolute paths
+	export ABS_TP_URL="$url"
+	debug_msg "ABS_TP_URL: $ABS_TP_URL"
+	export ABS_TP_STATE_DIR="$ABS_TESTLIB_WD"/"$TP_STATE_DIR"
+	debug_msg "ABS_TP_STATE_DIR: $ABS_TP_STATE_DIR"
+	export ABS_TP_TRACKING_DIR="$ABS_TP_STATE_DIR"/bundles
+	debug_msg "ABS_TP_TRACKING_DIR: $ABS_TP_TRACKING_DIR"
+	export ABS_TP_CACHE_DIR="$ABS_TP_STATE_DIR"/cache/"$converted_url"
+	debug_msg "ABS_TP_CACHE_DIR: $ABS_TP_CACHE_DIR"
+	export ABS_TP_DELTA_DIR="$ABS_TP_STATE_DIR"/cache/"$converted_url"/delta
+	debug_msg "ABS_TP_DELTA_DIR: $ABS_TP_DELTA_DIR"
+	export ABS_TP_DOWNLOAD_DIR="$ABS_TP_STATE_DIR"/cache/"$converted_url"/download
+	debug_msg "ABS_TP_DOWNLOAD_DIR: $ABS_TP_DOWNLOAD_DIR"
+	export ABS_TP_MANIFEST_DIR="$ABS_TP_STATE_DIR"/cache/"$converted_url"/manifest
+	debug_msg "ABS_TP_MANIFEST_DIR: $ABS_TP_MANIFEST_DIR"
+	export ABS_TP_STAGED_DIR="$ABS_TP_STATE_DIR"/cache/"$converted_url"/staged
+	debug_msg "ABS_TP_STAGED_DIR: $ABS_TP_STAGED_DIR"
+	export ABS_TP_TEMP_DIR="$ABS_TP_STATE_DIR"/cache/"$converted_url"/temp
+	debug_msg "ABS_TP_TEMP_DIR: $ABS_TP_TEMP_DIR"
+
+}
+
+set_env_variables_content() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Exports the environment variables related to the update content of a particular
+		test environment.
+
+		Usage:
+		    set_env_variables_content <content_dir> <version>
+
+		Arguments:
+			- content_dir: the relative path to the content directory
+		    - version: the version of the content we want to set
+	EOM
+	)" "$@"
+
+	local content_dir=$1
+	validate_path "$content_dir"
+
+	local hashed_name
+
+	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$content_dir"/"$version"/os-release)
+	export OS_RELEASE_FILE="$content_dir"/"$version"/files/"$hashed_name"
+
+	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$content_dir"/"$version"/format)
+	export FORMAT_FILE="$content_dir"/"$version"/files/"$hashed_name"
+
+}
+
 create_dir() { # swupd_function
 
 	show_help "$(cat <<-EOM
@@ -1698,60 +1782,32 @@ create_third_party_repo() { #swupd_function
 	local version=$2
 	local format=${3:-staging}
 	local repo_name=${4:-test-repo}
-	local path
-	local hashed_name
-	local cert
-	local url
 	validate_item "$env_name"
 	validate_param "$version"
-	path=$(dirname "$(realpath "$env_name")")
+
+	local hashed_name
+	local cert
+	local converted_url
+
+	set_env_variables_third_party "$env_name" "$repo_name"
+	converted_url=file___"$(echo "$ABS_TP_URL" | tr / _)"
 
 	debug_msg "Creating 3rd-party repo $repo_name..."
 
 	# create the state dir for the 3rd-party repo
-	TP_STATE_DIR="$STATE_DIR"/3rd-party/"$repo_name"
-	ABS_TP_URL="$path"/"$env_name"/3rd-party/"$repo_name"
-	url=file___"$(echo "$ABS_TP_URL" | tr / _)"
 	debug_msg "Creating a data/cache directory for repo $repo_name at $TP_STATE_DIR..."
-	sudo mkdir -p "$TP_STATE_DIR"/bundles
-	sudo mkdir -p "$TP_STATE_DIR"/cache/"$url"/{staged,download,delta,manifest,temp}
-
-	sudo chmod -R 0700 "$TP_STATE_DIR"/cache/"$url"/staged
-	sudo chmod -R 0700 "$TP_STATE_DIR"/cache/"$url"/download
-	sudo chmod -R 0700 "$TP_STATE_DIR"/cache/"$url"/delta
-	sudo chmod -R 0700 "$TP_STATE_DIR"/cache/"$url"/temp
-	sudo chmod -R 0755 "$TP_STATE_DIR"/cache/"$url"/manifest
+	sudo mkdir -p "$ABS_TP_TRACKING_DIR"
+	sudo mkdir -p "$TP_STATE_DIR"/cache/"$converted_url"/{staged,download,delta,manifest,temp}
+	sudo chmod -R 0700 "$ABS_TP_STAGED_DIR"
+	sudo chmod -R 0700 "$ABS_TP_DOWNLOAD_DIR"
+	sudo chmod -R 0700 "$ABS_TP_DELTA_DIR"
+	sudo chmod -R 0700 "$ABS_TP_TEMP_DIR"
+	sudo chmod -R 0755 "$ABS_TP_MANIFEST_DIR"
 
 	# create the basic content for the 3rd-party repo
 	create_version -r "$env_name" "$version" 0 "$format" "$repo_name"
+
 	debug_msg "3rd-party repo $repo_name created successfully"
-
-	# relevant relative paths
-	export TP_WEB_DIR="$env_name"/3rd-party/"$repo_name"
-	debug_msg "3rd-party repo content dir: $TP_WEB_DIR"
-	export TP_TARGET_DIR="$env_name"/testfs/target-dir/"$TP_BUNDLES_DIR"/"$repo_name"
-	debug_msg "3rd-party repo target dir: $TP_TARGET_DIR"
-	export TP_STATE_DIR
-	debug_msg "3rd-party repo state dir: $TP_STATE_DIR"
-
-	# relevant absolute paths
-	export ABS_TP_URL
-	debug_msg "3rd-party repo URL: $ABS_TP_URL"
-	export ABS_TP_STATE_DIR="$path"/"$TP_STATE_DIR"
-	export ABS_TP_TRACKING_DIR="$ABS_TP_STATE_DIR"/bundles
-	debug_msg "3rd-party repo statedir tracking dir: $ABS_TP_TRACKING_DIR"
-	export ABS_TP_CACHE_DIR="$ABS_TP_STATE_DIR"/cache/"$url"
-	debug_msg "3rd-party repo statedir cache dir: $ABS_TP_CACHE_DIR"
-	export ABS_TP_DELTA_DIR="$ABS_TP_STATE_DIR"/cache/"$url"/delta
-	debug_msg "3rd-party repo statedir delta dir: $ABS_TP_DELTA_DIR"
-	export ABS_TP_DOWNLOAD_DIR="$ABS_TP_STATE_DIR"/cache/"$url"/download
-	debug_msg "3rd-party repo statedir download dir: $ABS_TP_DOWNLOAD_DIR"
-	export ABS_TP_MANIFEST_DIR="$ABS_TP_STATE_DIR"/cache/"$url"/manifest
-	debug_msg "3rd-party repo statedir manifest dir: $ABS_TP_MANIFEST_DIR"
-	export ABS_TP_STAGED_DIR="$ABS_TP_STATE_DIR"/cache/"$url"/staged
-	debug_msg "3rd-party repo statedir staged dir: $ABS_TP_STAGED_DIR"
-	export ABS_TP_TEMP_DIR="$ABS_TP_STATE_DIR"/cache/"$url"/temp
-	debug_msg "3rd-party repo statedir temp dir: $ABS_TP_TEMP_DIR"
 
 	# if requested, add the new repo to the repo.ini file
 	# and the template file
@@ -1832,7 +1888,6 @@ create_version() { # swupd_function
 	local format=${4:-staging}
 	local repo_name=$5
 	local mom
-	local hashed_name
 	local content_dir
 	validate_item "$env_name"
 	validate_param "$version"
@@ -1874,20 +1929,20 @@ create_version() { # swupd_function
 		printf 'SUPPORT_URL="https://clearlinux.org"\n'
 		printf 'BUG_REPORT_URL="https://bugs.clearlinux.org/jira"\n'
 	} | sudo tee "$env_name"/"$content_dir"/"$version"/os-release > /dev/null
+
 	# copy hashed versions of os-release and format to the files directory
 	if [ "$release_files" = true ]; then
+
+		set_env_variables_content "$env_name"/"$content_dir" "$version"
+
 		debug_msg "Creating release files"
-		hashed_name=$(sudo "$SWUPD" hashdump --quiet "$env_name"/"$content_dir"/"$version"/os-release)
-		sudo cp "$env_name"/"$content_dir"/"$version"/os-release "$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
-		create_tar "$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
-		OS_RELEASE_FILE="$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
-		export OS_RELEASE_FILE
-		hashed_name=$(sudo "$SWUPD" hashdump --quiet "$env_name"/"$content_dir"/"$version"/format)
-		sudo cp "$env_name"/"$content_dir"/"$version"/format "$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
-		create_tar "$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
-		FORMAT_FILE="$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
-		export FORMAT_FILE
+		sudo cp "$env_name"/"$content_dir"/"$version"/os-release "$OS_RELEASE_FILE"
+		create_tar "$OS_RELEASE_FILE"
+		sudo cp "$env_name"/"$content_dir"/"$version"/format "$FORMAT_FILE"
+		create_tar "$FORMAT_FILE"
+
 	fi
+
 	# if the previous version is 0 then create a new MoM, otherwise copy the MoM
 	# from the previous version
 	if [ "$from_version" = 0 ]; then
@@ -2009,7 +2064,7 @@ create_test_environment() { # swupd_function
 	mkdir -p "$env_name"
 	touch "$env_name"/.test_env
 
-	# export environment variables that are dependent of the test env
+	# set environment variables that are dependent of the test env
 	set_env_variables "$env_name"
 
 	# Generate certificates

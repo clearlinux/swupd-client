@@ -672,6 +672,10 @@ set_env_variables() { # swupd_function
 	debug_msg "TARGET_DIR: $TARGET_DIR"
 	export STATE_DIR="$env_name"/testfs/state
 	debug_msg "STATE_DIR: $STATE_DIR"
+	export SWUPD_CONFIG_DIR="$env_name"/testconfig
+	debug_msg "SWUPD_CONFIG_DIR: $SWUPD_CONFIG_DIR"
+	export SWUPD_CONFIG_FILE="$SWUPD_CONFIG_DIR"/config
+	debug_msg "SWUPD_CONFIG_FILE: $SWUPD_CONFIG_FILE"
 
 	# relevant absolute paths
 	export ABS_TEST_DIR="$path"/"$env_name"
@@ -697,6 +701,8 @@ set_env_variables() { # swupd_function
 	debug_msg "ABS_TEMP_DIR: $ABS_TEMP_DIR"
 	export ABS_CLIENT_CERT_DIR="$testfs_path/target-dir/etc/swupd"
 	debug_msg "ABS_CLIENT_CERT_DIR: $ABS_CLIENT_CERT_DIR"
+	export ABS_MIRROR_DIR="$ABS_TESTLIB_WD"/"$env_name"/mirror/web-dir
+	debug_msg "ABS_MIRROR_DIR: $ABS_MIRROR_DIR"
 
 	# different options for swupd
 	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $ABS_TEST_DIR/Swupd_Root.pem -I --no-progress"
@@ -2250,10 +2256,6 @@ create_config_file() { # swupd_function
 		terminate "The TEST_NAME needs to be specified to create a config file"
 	fi
 
-	# these values have to be exported in this function because the
-	# TEST_NAME changes during the setup
-	export SWUPD_CONFIG_DIR="$TEST_NAME"/testconfig
-	export SWUPD_CONFIG_FILE="$SWUPD_CONFIG_DIR"/config
 	debug_msg "Creating config file $SWUPD_CONFIG_FILE..."
 
 	if [ "$("$SWUPD" --version | grep "config file path" | awk '{print $4}')" != "./testconfig" ]; then
@@ -2344,9 +2346,8 @@ create_mirror() { # swupd_function
 	validate_param "$env_name"
 
 	# create the mirror
-	sudo mkdir "$env_name"/mirror
-	sudo cp -r "$env_name"/web-dir "$env_name"/mirror
-	export ABS_MIRROR_DIR="$ABS_TESTLIB_WD"/"$env_name"/mirror/web-dir
+	sudo mkdir -p "$ABS_MIRROR_DIR"
+	sudo cp -r "$env_name"/web-dir/* "$ABS_MIRROR_DIR"/
 
 	# set the mirror in the target-dir
 	write_to_protected_file "$env_name"/testfs/target-dir/etc/swupd/mirror_versionurl "file://$ABS_MIRROR_DIR"

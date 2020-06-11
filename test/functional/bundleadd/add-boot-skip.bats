@@ -15,7 +15,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD bundle-add -b $SWUPD_OPTS test-bundle"
 
 	assert_status_is 0
-	assert_file_exists "$TARGETDIR/usr/lib/kernel/test-file"
+	assert_file_exists "$TARGET_DIR/usr/lib/kernel/test-file"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		No packs need to be downloaded

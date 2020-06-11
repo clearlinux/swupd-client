@@ -13,7 +13,7 @@ test_setup() {
 	update_bundle "$TEST_NAME" os-core --header-only
 	set_current_version "$TEST_NAME" 20
 	# remove /usr/bin so it is missing in the target system
-	sudo rm -rf "$TARGETDIR"/usr/bin
+	sudo rm -rf "$TARGET_DIR"/usr/bin
 
 }
 
@@ -30,7 +30,7 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/usr/bin -> fixed
+		 -> Missing file: $ABS_TEST_DIR/testfs/target-dir/usr/bin -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 3 files

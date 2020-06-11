@@ -10,7 +10,7 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /file_1 "$TEST_NAME"
 	create_bundle -L -n test-bundle2 -f /file_2 "$TEST_NAME"
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle2
 
 }
 
@@ -23,11 +23,11 @@ test_setup() {
 
 	assert_status_is 0
 	# test-bundle1 is deleted
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/file_1
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/file_1
 	# test-bundle2 is not deleted
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/file_2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/file_2
 	expected_output=$(cat <<-EOM
 		The following bundles are being removed:
 		 - test-bundle1

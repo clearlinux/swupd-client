@@ -11,15 +11,15 @@ test_setup() {
 	create_bundle -n os-core -f /core "$TEST_NAME"
 
 	# Populate statedir-cache
-	statedir_cache_path="$TEST_DIRNAME"/testfs/statedir-cache
-	sudo cp -r "$STATEDIR_ABS" "$statedir_cache_path"
-	cache_url=$(basename "$STATEDIR_CACHE")
+	statedir_cache_path="$ABS_TEST_DIR"/testfs/statedir-cache
+	sudo cp -r "$ABS_STATE_DIR" "$statedir_cache_path"
+	cache_url=$(basename "$ABS_CACHE_DIR")
 	sudo mkdir -m 755 -p "$statedir_cache_path"/cache/"$cache_url"/manifest/10
-	sudo cp "$WEBDIR"/10/Manifest.MoM "$statedir_cache_path"/cache/"$cache_url"/manifest/10
-	sudo cp "$WEBDIR"/10/Manifest.MoM.sig "$statedir_cache_path"/cache/"$cache_url"/manifest/10
-	sudo cp "$WEBDIR"/10/Manifest.os-core "$statedir_cache_path"/cache/"$cache_url"/manifest/10
+	sudo cp "$WEB_DIR"/10/Manifest.MoM "$statedir_cache_path"/cache/"$cache_url"/manifest/10
+	sudo cp "$WEB_DIR"/10/Manifest.MoM.sig "$statedir_cache_path"/cache/"$cache_url"/manifest/10
+	sudo cp "$WEB_DIR"/10/Manifest.os-core "$statedir_cache_path"/cache/"$cache_url"/manifest/10
 	sudo touch "$statedir_cache_path"/cache/"$cache_url"/pack-os-core-from-0-to-10.tar
-	sudo rsync -r "$WEBDIR"/10/files/* "$statedir_cache_path"/cache/"$cache_url"/staged --exclude="*.tar"
+	sudo rsync -r "$WEB_DIR"/10/files/* "$statedir_cache_path"/cache/"$cache_url"/staged --exclude="*.tar"
 
 }
 
@@ -28,7 +28,7 @@ test_setup() {
 	# The statedir-cache should be used for all update content, so the
 	# network should be unused.
 
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --statedir-cache $statedir_cache_path"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGET_DIR --statedir-cache $statedir_cache_path"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -48,8 +48,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 
@@ -61,7 +61,7 @@ test_setup() {
 	sudo rm "$statedir_cache_path"/cache/"$cache_url"/manifest/10/Manifest.os-core
 	sudo rm "$statedir_cache_path"/cache/"$cache_url"/pack-os-core-from-0-to-10.tar
 	sudo rm -r "$statedir_cache_path"/cache/"$cache_url"/staged
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --statedir-cache $statedir_cache_path"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGET_DIR --statedir-cache $statedir_cache_path"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -83,8 +83,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 
@@ -96,7 +96,7 @@ test_setup() {
 	# must not be used to populate the staged directory with fullfiles.
 
 	sudo rm -r "$statedir_cache_path"/cache/"$cache_url"/staged
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --statedir-cache $statedir_cache_path"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGET_DIR --statedir-cache $statedir_cache_path"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -116,8 +116,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 
@@ -127,7 +127,7 @@ test_setup() {
 	# corrupt manifests.
 
 	sudo sh -c "echo invalid > ${statedir_cache_path}/cache/$cache_url/manifest/10/Manifest.os-core"
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --statedir-cache $statedir_cache_path"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGET_DIR --statedir-cache $statedir_cache_path"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -149,8 +149,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 #WEIGHT=4

@@ -21,7 +21,7 @@ global_setup() {
 
 	create_bundle -n test-bundle -f /usr/bin/test-file "$TEST_NAME"
 
-	sudo mkdir -p "$CLIENT_CERT_DIR"
+	sudo mkdir -p "$ABS_CLIENT_CERT_DIR"
 
 	# create client/server certificates
 	generate_certificate "$client_key" "$client_pub"
@@ -47,8 +47,8 @@ test_setup() {
 	set_current_version "$TEST_NAME" 10
 
 	# create client certificate in expected directory
-	sudo cp "$client_key" "$CLIENT_CERT"
-	sudo sh -c "cat $client_pub >> $CLIENT_CERT"
+	sudo cp "$client_key" "$CLIENT_CERT_FILE"
+	sudo sh -c "cat $client_pub >> $CLIENT_CERT_FILE"
 }
 
 test_teardown() {
@@ -57,7 +57,7 @@ test_teardown() {
 		return
 	fi
 
-	sudo rm -f "$CLIENT_CERT"
+	sudo rm -f "$CLIENT_CERT_FILE"
 	clean_state_dir "$TEST_NAME"
 }
 
@@ -71,7 +71,7 @@ test_teardown() {
 @test "UPD017: Try updating a system over HTTPS with no client certificate" {
 
 	# remove client certificate
-	sudo rm "$CLIENT_CERT"
+	sudo rm "$CLIENT_CERT_FILE"
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS --debug"
 	assert_status_is "$SWUPD_SERVER_CONNECTION_ERROR"
@@ -86,7 +86,7 @@ test_teardown() {
 @test "UPD018: Try updating a system over HTTPS with an invalid client certificate" {
 
 	# make client certificate invalid
-	sudo sh -c "echo foo > $CLIENT_CERT"
+	sudo sh -c "echo foo > $CLIENT_CERT_FILE"
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS --debug"
 	assert_status_is "$SWUPD_SERVER_CONNECTION_ERROR"

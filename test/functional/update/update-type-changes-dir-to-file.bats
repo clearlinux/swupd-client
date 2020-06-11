@@ -41,9 +41,9 @@ test_setup() {
 	# this test covers the type change directory -> file
 	# this test covers the type change file -> directory
 
-	assert_file_exists "$TARGETDIR"/file1
-	assert_file_exists "$TARGETDIR"/common_file
-	assert_dir_exists "$TARGETDIR"/dir1
+	assert_file_exists "$TARGET_DIR"/file1
+	assert_file_exists "$TARGET_DIR"/common_file
+	assert_dir_exists "$TARGET_DIR"/dir1
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
@@ -72,10 +72,10 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	assert_dir_exists "$TARGETDIR"/file1
-	assert_dir_not_exists "$TARGETDIR"/dir1
-	assert_file_exists "$TARGETDIR"/dir1
-	assert_file_exists "$TARGETDIR"/common_file
+	assert_dir_exists "$TARGET_DIR"/file1
+	assert_dir_not_exists "$TARGET_DIR"/dir1
+	assert_file_exists "$TARGET_DIR"/dir1
+	assert_file_exists "$TARGET_DIR"/common_file
 	show_target
 
 }

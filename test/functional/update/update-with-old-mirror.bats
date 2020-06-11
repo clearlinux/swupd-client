@@ -57,8 +57,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/file_2
-	assert_file_exists "$TARGETDIR"/file_3
+	assert_file_exists "$TARGET_DIR"/file_2
+	assert_file_exists "$TARGET_DIR"/file_3
 
 }
 #WEIGHT=4

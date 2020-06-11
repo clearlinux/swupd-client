@@ -24,7 +24,7 @@ test_setup() {
 	update_bundle "$TEST_NAME" os-core --add /test_file1
 
 	# start the web server (the server will hang)
-	start_web_server -r -H -D "$WEBDIR"
+	start_web_server -r -H -D "$WEB_DIR"
 	port=$(get_web_server_port "$TEST_NAME")
 
 	# set the versionurl and contenturl to point to the web server
@@ -56,7 +56,7 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/test_file1
+	assert_file_not_exists "$TARGET_DIR"/test_file1
 
 }
 
@@ -66,8 +66,8 @@ test_setup() {
 	# timeout with a useful message
 
 	# Extra setup: set the mirror in the test environment to point to the web server
-	write_to_protected_file "$TARGETDIR"/etc/swupd/mirror_versionurl http://localhost:"$port"/
-	write_to_protected_file "$TARGETDIR"/etc/swupd/mirror_contenturl http://localhost:"$port"/
+	write_to_protected_file "$TARGET_DIR"/etc/swupd/mirror_versionurl http://localhost:"$port"/
+	write_to_protected_file "$TARGET_DIR"/etc/swupd/mirror_contenturl http://localhost:"$port"/
 
 	run sudo sh -c "$SWUPD update --allow-insecure-http $SWUPD_OPTS"
 
@@ -91,7 +91,7 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/test_file1
+	assert_file_not_exists "$TARGET_DIR"/test_file1
 
 }
 
@@ -132,7 +132,7 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/test_file1
+	assert_file_exists "$TARGET_DIR"/test_file1
 
 }
 #WEIGHT=40

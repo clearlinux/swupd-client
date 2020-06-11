@@ -10,8 +10,8 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /foo/test-file1 "$TEST_NAME"
 	create_bundle -L -n test-bundle2 -f /bar/test-file2 "$TEST_NAME"
-	sudo rm -f "$TARGETDIR"/foo/test-file1
-	sudo rm -f "$TARGETDIR"/bar/test-file2
+	sudo rm -f "$TARGET_DIR"/foo/test-file1
+	sudo rm -f "$TARGET_DIR"/bar/test-file2
 
 }
 
@@ -31,7 +31,7 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/bar/test-file2 -> fixed
+		 -> Missing file: $ABS_TEST_DIR/testfs/target-dir/bar/test-file2 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 5 files
@@ -43,9 +43,9 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/core
-	assert_file_not_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/bar/test-file2
+	assert_file_exists "$TARGET_DIR"/core
+	assert_file_not_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/bar/test-file2
 
 }
 
@@ -66,9 +66,9 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/baz -> fixed
-		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/baz/test-file3 -> fixed
-		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/usr/share/clear/bundles/test-bundle3 -> fixed
+		 -> Missing file: $ABS_TEST_DIR/testfs/target-dir/baz -> fixed
+		 -> Missing file: $ABS_TEST_DIR/testfs/target-dir/baz/test-file3 -> fixed
+		 -> Missing file: $ABS_TEST_DIR/testfs/target-dir/usr/share/clear/bundles/test-bundle3 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 5 files
@@ -80,10 +80,10 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/core
-	assert_file_not_exists "$TARGETDIR"/foo/test-file1
-	assert_file_not_exists "$TARGETDIR"/bar/test-file2
-	assert_file_exists "$TARGETDIR"/baz/test-file3
+	assert_file_exists "$TARGET_DIR"/core
+	assert_file_not_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_not_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_exists "$TARGET_DIR"/baz/test-file3
 
 }
 
@@ -103,8 +103,8 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/bar/test-file2 -> fixed
-		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/foo/test-file1 -> fixed
+		 -> Missing file: $ABS_TEST_DIR/testfs/target-dir/bar/test-file2 -> fixed
+		 -> Missing file: $ABS_TEST_DIR/testfs/target-dir/foo/test-file1 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 8 files
@@ -116,9 +116,9 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/core
-	assert_file_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/bar/test-file2
+	assert_file_exists "$TARGET_DIR"/core
+	assert_file_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/bar/test-file2
 
 }
 

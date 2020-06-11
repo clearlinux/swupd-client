@@ -8,10 +8,10 @@ test_setup() {
 	bump_format "$TEST_NAME"
 	create_version -r "$TEST_NAME" 40 30 2
 	# remove the os-release file from all manifests
-	remove_from_manifest "$WEBDIR"/10/Manifest.os-core /usr/lib/os-release
-	remove_from_manifest "$WEBDIR"/20/Manifest.os-core /usr/lib/os-release
-	remove_from_manifest "$WEBDIR"/30/Manifest.os-core /usr/lib/os-release
-	remove_from_manifest "$WEBDIR"/40/Manifest.os-core /usr/lib/os-release
+	remove_from_manifest "$WEB_DIR"/10/Manifest.os-core /usr/lib/os-release
+	remove_from_manifest "$WEB_DIR"/20/Manifest.os-core /usr/lib/os-release
+	remove_from_manifest "$WEB_DIR"/30/Manifest.os-core /usr/lib/os-release
+	remove_from_manifest "$WEB_DIR"/40/Manifest.os-core /usr/lib/os-release
 
 }
 
@@ -43,7 +43,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 #WEIGHT=8

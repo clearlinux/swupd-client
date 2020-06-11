@@ -16,10 +16,10 @@ test_setup() {
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle2"
 
 	assert_status_is 0
-	assert_dir_exists "$TARGETDIR/usr/bin"
-	assert_dir_exists "$TARGETDIR/media/lib"
-	assert_file_exists "$TARGETDIR/usr/bin/10"
-	assert_file_exists "$TARGETDIR/media/lib/file2"
+	assert_dir_exists "$TARGET_DIR/usr/bin"
+	assert_dir_exists "$TARGET_DIR/media/lib"
+	assert_file_exists "$TARGET_DIR/usr/bin/10"
+	assert_file_exists "$TARGET_DIR/media/lib/file2"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		No packs need to be downloaded

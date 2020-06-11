@@ -18,7 +18,7 @@ test_setup() {
 	# /var is filtered by heuristics, but on install time we want
 	# to create them.
 
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGET_DIR"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -40,7 +40,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/var/file
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/var/file
 
 }

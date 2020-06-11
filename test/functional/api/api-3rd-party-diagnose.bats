@@ -16,7 +16,7 @@ global_setup() {
 	update_bundle -p "$TEST_NAME" test-bundle1 --update /foo/file_1 repo1
 	update_bundle -p "$TEST_NAME" test-bundle1 --delete /bar/file_2 repo1
 	update_bundle    "$TEST_NAME" test-bundle1 --add    /baz/file_3 repo1
-	sudo touch "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo1/usr/untracked_file
+	sudo touch "$TARGET_DIR"/"$TP_BUNDLES_DIR"/repo1/usr/untracked_file
 	set_current_version "$TEST_NAME" 20 repo1
 
 	# add another 3rd-party repo that has nothing to get fixed
@@ -32,12 +32,12 @@ global_setup() {
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
 		[repo1]
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/baz
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/baz/file_3
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/foo/file_1
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/usr/lib/os-release
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/bar/file_2
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/usr/untracked_file
+		$ABS_TARGET_DIR/opt/3rd-party/bundles/repo1/baz
+		$ABS_TARGET_DIR/opt/3rd-party/bundles/repo1/baz/file_3
+		$ABS_TARGET_DIR/opt/3rd-party/bundles/repo1/foo/file_1
+		$ABS_TARGET_DIR/opt/3rd-party/bundles/repo1/usr/lib/os-release
+		$ABS_TARGET_DIR/opt/3rd-party/bundles/repo1/bar/file_2
+		$ABS_TARGET_DIR/opt/3rd-party/bundles/repo1/usr/untracked_file
 		[repo2]
 	EOM
 	)
@@ -51,12 +51,12 @@ global_setup() {
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/baz
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/baz/file_3
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/foo/file_1
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/usr/lib/os-release
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/bar/file_2
-		$PATH_PREFIX/opt/3rd-party/bundles/repo1/usr/untracked_file
+		$ABS_TARGET_DIR/opt/3rd-party/bundles/repo1/baz
+		$ABS_TARGET_DIR/opt/3rd-party/bundles/repo1/baz/file_3
+		$ABS_TARGET_DIR/opt/3rd-party/bundles/repo1/foo/file_1
+		$ABS_TARGET_DIR/opt/3rd-party/bundles/repo1/usr/lib/os-release
+		$ABS_TARGET_DIR/opt/3rd-party/bundles/repo1/bar/file_2
+		$ABS_TARGET_DIR/opt/3rd-party/bundles/repo1/usr/untracked_file
 	EOM
 	)
 	assert_is_output "$expected_output"

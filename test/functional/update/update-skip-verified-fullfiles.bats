@@ -7,16 +7,16 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle -f /foo "$TEST_NAME"
 	create_version "$TEST_NAME" 100 10
-	filehash=$(get_hash_from_manifest "$WEBDIR"/10/Manifest.test-bundle /foo)
+	filehash=$(get_hash_from_manifest "$WEB_DIR"/10/Manifest.test-bundle /foo)
 	update_bundle "$TEST_NAME" test-bundle --update /foo
 	# restore the hash for /foo in the manifest to the original one so it no longer matches
-	manifest="$WEBDIR"/100/Manifest.test-bundle
+	manifest="$WEB_DIR"/100/Manifest.test-bundle
 	update_manifest "$manifest" file-hash /foo "$filehash"
 	# to make sure they are not used, remove packs and fullfiles
-	sudo rm "$WEBDIR"/100/pack-test-bundle-from-0.tar
-	sudo rm "$WEBDIR"/100/pack-test-bundle-from-10.tar
-	sudo rm "$WEBDIR"/100/delta/*
-	sudo rm -rf "$WEBDIR"/100/files/*
+	sudo rm "$WEB_DIR"/100/pack-test-bundle-from-0.tar
+	sudo rm "$WEB_DIR"/100/pack-test-bundle-from-10.tar
+	sudo rm "$WEB_DIR"/100/delta/*
+	sudo rm -rf "$WEB_DIR"/100/files/*
 
 }
 
@@ -46,7 +46,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/foo
+	assert_file_exists "$TARGET_DIR"/foo
 
 }
 #WEIGHT=3

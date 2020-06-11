@@ -14,8 +14,8 @@ global_setup() {
 test_teardown() {
 
 	# reinstall test-bundle1 and test-bundle2
-	install_bundle "$WEBDIR"/10/Manifest.test-bundle1
-	install_bundle "$WEBDIR"/10/Manifest.test-bundle2
+	install_bundle "$WEB_DIR"/10/Manifest.test-bundle1
+	install_bundle "$WEB_DIR"/10/Manifest.test-bundle2
 
 }
 
@@ -29,18 +29,18 @@ test_teardown() {
 
 	assert_status_is 0
 	# bundle1 was removed
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/test-file1
-	assert_file_not_exists "$TARGETDIR"/bar/test-file2
-	assert_file_not_exists "$TARGETDIR"/bat/test-file3
-	assert_dir_not_exists "$TARGETDIR"/foo
-	assert_dir_not_exists "$TARGETDIR"/bar
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/test-file1
+	assert_file_not_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_not_exists "$TARGET_DIR"/bat/test-file3
+	assert_dir_not_exists "$TARGET_DIR"/foo
+	assert_dir_not_exists "$TARGET_DIR"/bar
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle1
 	# bundle2 was not removed
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/bat/test-file4
-	assert_file_exists "$TARGETDIR"/bat/common
-	assert_file_exists "$STATEDIR"/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/bat/test-file4
+	assert_file_exists "$TARGET_DIR"/bat/common
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle2
 	expected_output=$(cat <<-EOM
 		The following bundles are being removed:
 		 - test-bundle1
@@ -59,18 +59,18 @@ test_teardown() {
 
 	assert_status_is 0
 	# bundle1 and 2 were removed
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_not_exists "$TARGETDIR"/test-file1
-	assert_file_not_exists "$TARGETDIR"/bar/test-file2
-	assert_file_not_exists "$TARGETDIR"/bat/test-file3
-	assert_file_not_exists "$TARGETDIR"/bat/test-file4
-	assert_file_not_exists "$TARGETDIR"/bat/common
-	assert_dir_not_exists "$TARGETDIR"/foo
-	assert_dir_not_exists "$TARGETDIR"/bar
-	assert_dir_not_exists "$TARGETDIR"/bat
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle2
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$TARGET_DIR"/test-file1
+	assert_file_not_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_not_exists "$TARGET_DIR"/bat/test-file3
+	assert_file_not_exists "$TARGET_DIR"/bat/test-file4
+	assert_file_not_exists "$TARGET_DIR"/bat/common
+	assert_dir_not_exists "$TARGET_DIR"/foo
+	assert_dir_not_exists "$TARGET_DIR"/bar
+	assert_dir_not_exists "$TARGET_DIR"/bat
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle1
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle2
 	expected_output=$(cat <<-EOM
 		The following bundles are being removed:
 		 - test-bundle2
@@ -147,16 +147,16 @@ test_teardown() {
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle3 test-bundle1"
 
 	assert_status_is "$SWUPD_BUNDLE_NOT_TRACKED"
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/test-file1
-	assert_file_not_exists "$TARGETDIR"/bar/test-file2
-	assert_file_not_exists "$TARGETDIR"/bat/test-file3
-	assert_dir_not_exists "$TARGETDIR"/foo
-	assert_dir_not_exists "$TARGETDIR"/bar
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/test-file1
+	assert_file_not_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_not_exists "$TARGET_DIR"/bat/test-file3
+	assert_dir_not_exists "$TARGET_DIR"/foo
+	assert_dir_not_exists "$TARGET_DIR"/bar
 	# bundle2 was not removed
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/bat/test-file4
-	assert_file_exists "$TARGETDIR"/bat/common
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/bat/test-file4
+	assert_file_exists "$TARGET_DIR"/bat/common
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "test-bundle3" is not installed, skipping it...
 		The following bundles are being removed:
@@ -175,16 +175,16 @@ test_teardown() {
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS fake-bundle test-bundle1"
 
 	assert_status_is "$SWUPD_INVALID_BUNDLE"
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/test-file1
-	assert_file_not_exists "$TARGETDIR"/bar/test-file2
-	assert_file_not_exists "$TARGETDIR"/bat/test-file3
-	assert_dir_not_exists "$TARGETDIR"/foo
-	assert_dir_not_exists "$TARGETDIR"/bar
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/test-file1
+	assert_file_not_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_not_exists "$TARGET_DIR"/bat/test-file3
+	assert_dir_not_exists "$TARGET_DIR"/foo
+	assert_dir_not_exists "$TARGET_DIR"/bar
 	# bundle2 was not removed
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/bat/test-file4
-	assert_file_exists "$TARGETDIR"/bat/common
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/bat/test-file4
+	assert_file_exists "$TARGET_DIR"/bat/common
 	expected_output=$(cat <<-EOM
 		Warning: Bundle "fake-bundle" is invalid, skipping it...
 		The following bundles are being removed:

@@ -14,20 +14,20 @@ test_setup() {
 
 @test "INS027: Check if hardlinks are preserved" {
 
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS --path $TARGETDIR"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS --path $TARGET_DIR"
 	assert_status_is "$SWUPD_OK"
-	run sudo sh -c "$SWUPD clean --all $SWUPD_OPTS --path $TARGETDIR"
+	run sudo sh -c "$SWUPD clean --all $SWUPD_OPTS --path $TARGET_DIR"
 	assert_status_is "$SWUPD_OK"
 
-	run stat --printf=%h "$TARGETDIR"/core
+	run stat --printf=%h "$TARGET_DIR"/core
 	assert_status_is "0"
 	assert_is_output "3"
 
-	run stat --printf=%h "$TARGETDIR"/core2
+	run stat --printf=%h "$TARGET_DIR"/core2
 	assert_status_is "0"
 	assert_is_output "3"
 
-	run stat --printf=%h "$TARGETDIR"/core3
+	run stat --printf=%h "$TARGET_DIR"/core3
 	assert_status_is "0"
 	assert_is_output "3"
 
@@ -38,20 +38,20 @@ test_setup() {
 	# There are known bugs on bsdtar to extract hardlink to symlinks,
 	# so we avoid to have them on swupd.
 
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS --path $TARGETDIR"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS --path $TARGET_DIR"
 	assert_status_is "$SWUPD_OK"
-	run sudo sh -c "$SWUPD clean --all $SWUPD_OPTS --path $TARGETDIR"
+	run sudo sh -c "$SWUPD clean --all $SWUPD_OPTS --path $TARGET_DIR"
 	assert_status_is "$SWUPD_OK"
 
-	run stat --printf=%h "$TARGETDIR"/symlink
+	run stat --printf=%h "$TARGET_DIR"/symlink
 	assert_status_is "0"
 	assert_is_output "1"
 
-	run stat --printf=%h "$TARGETDIR"/symlink2
+	run stat --printf=%h "$TARGET_DIR"/symlink2
 	assert_status_is "0"
 	assert_is_output "1"
 
-	run stat --printf=%h "$TARGETDIR"/symlink3
+	run stat --printf=%h "$TARGET_DIR"/symlink3
 	assert_status_is "0"
 	assert_is_output "1"
 

@@ -35,7 +35,7 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 	# this should exist at the end, even if the scripts are not run
-	assert_file_exists "$TARGETDIR"/usr/lib/kernel/testfile
+	assert_file_exists "$TARGET_DIR"/usr/lib/kernel/testfile
 
 }
 #WEIGHT=4

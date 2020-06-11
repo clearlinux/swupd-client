@@ -25,13 +25,13 @@ test_setup() {
 	# downloaded fullfile had a bad hash - immediately fatal with a 1 return code
 	assert_status_is 1
 	# the bad hash file should not exist on the system
-	assert_file_not_exists "$TARGETDIR"/usr/bin/file1
+	assert_file_not_exists "$TARGET_DIR"/usr/bin/file1
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		No packs need to be downloaded
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
-		Error: File content hash mismatch for $STATEDIR_STAGED/e6d85023c5e619eb43d5cfbfdbdec784afef5a82ffa54e8c93bda3e0883360a3 (bad server data?)
+		Error: File content hash mismatch for $ABS_STAGED_DIR/e6d85023c5e619eb43d5cfbfdbdec784afef5a82ffa54e8c93bda3e0883360a3 (bad server data?)
 	EOM
 	)
 	assert_is_output "$expected_output"

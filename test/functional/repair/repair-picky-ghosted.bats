@@ -9,7 +9,7 @@ test_setup() {
 
 	create_test_environment -r "$TEST_NAME"
 	create_bundle -L -n test-bundle -f /usr/foo -d/usr/share/clear/bundles "$TEST_NAME"
-	update_manifest "$WEBDIR"/10/Manifest.test-bundle file-status /usr/foo .g..
+	update_manifest "$WEB_DIR"/10/Manifest.test-bundle file-status /usr/foo .g..
 
 }
 
@@ -25,9 +25,9 @@ test_setup() {
 		Adding any missing files
 		Repairing corrupt files
 		Removing extraneous files
-		Removing extra files under $PATH_PREFIX/usr
-		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl -> deleted
-		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/contenturl -> deleted
+		Removing extra files under $ABS_TARGET_DIR/usr
+		 -> Extra file: $ABS_TARGET_DIR/usr/share/defaults/swupd/versionurl -> deleted
+		 -> Extra file: $ABS_TARGET_DIR/usr/share/defaults/swupd/contenturl -> deleted
 		Inspected 15 files
 		  2 files found which should be deleted
 		    2 of 2 files were deleted
@@ -40,7 +40,7 @@ test_setup() {
 	# this should exist at the end, despite being marked as "ghosted" in the
 	# Manifest. With the ghosted file existing under /usr this test is to make
 	# sure the ghosted files aren't removed during the --picky flow.
-	assert_file_exists "$TARGETDIR"/usr/foo
+	assert_file_exists "$TARGET_DIR"/usr/foo
 
 }
 #WEIGHT=4

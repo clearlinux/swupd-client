@@ -9,7 +9,7 @@ global_setup() {
 
 	create_test_environment "$TEST_NAME" 10 1
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
-	REPO1="$TPWEBDIR"
+	REPO1="$TP_WEB_DIR"
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo2
 	create_bundle -L -t -n test-bundle1 -f /file_1 -u repo1 "$TEST_NAME"
 	create_bundle -L -t -n test-bundle2 -f /file_2 -u repo1 "$TEST_NAME"

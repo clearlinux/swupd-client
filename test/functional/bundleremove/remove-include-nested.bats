@@ -11,11 +11,11 @@ test_setup() {
 	create_bundle -L -n test-bundle2 -f /test-file2 "$TEST_NAME"
 	create_bundle -L -n test-bundle3 -f /test-file3 "$TEST_NAME"
 	# add dependencies
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle2 test-bundle1
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle3 test-bundle2
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle2 test-bundle1
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle3 test-bundle2
 	# collect info from the common file
-	file_hash=$(get_hash_from_manifest "$WEBDIR"/10/Manifest.test-bundle1 /common)
-	file_path="$WEBDIR"/10/files/"$file_hash"
+	file_hash=$(get_hash_from_manifest "$WEB_DIR"/10/Manifest.test-bundle1 /common)
+	file_path="$WEB_DIR"/10/files/"$file_hash"
 
 }
 
@@ -34,13 +34,13 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
-	assert_file_exists "$TARGETDIR"/test-file1
-	assert_file_exists "$TARGETDIR"/test-file2
-	assert_file_exists "$TARGETDIR"/test-file3
-	assert_file_exists "$TARGETDIR"/common
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/test-file1
+	assert_file_exists "$TARGET_DIR"/test-file2
+	assert_file_exists "$TARGET_DIR"/test-file3
+	assert_file_exists "$TARGET_DIR"/common
 
 }
 
@@ -48,20 +48,20 @@ test_setup() {
 
 	create_bundle -L -n test-bundle4 -f /test-file4,/common:"$file_path" "$TEST_NAME"
 	create_bundle -L -n test-bundle5 -f /test-file5,/common:"$file_path" "$TEST_NAME"
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle3 test-bundle4
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle2 test-bundle5
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle3 test-bundle4
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle2 test-bundle5
 
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle4
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle5
-	assert_file_exists "$TARGETDIR"/test-file1
-	assert_file_exists "$TARGETDIR"/test-file2
-	assert_file_exists "$TARGETDIR"/test-file3
-	assert_file_exists "$TARGETDIR"/test-file4
-	assert_file_exists "$TARGETDIR"/test-file5
-	assert_file_exists "$TARGETDIR"/common
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle4
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle5
+	assert_file_exists "$TARGET_DIR"/test-file1
+	assert_file_exists "$TARGET_DIR"/test-file2
+	assert_file_exists "$TARGET_DIR"/test-file3
+	assert_file_exists "$TARGET_DIR"/test-file4
+	assert_file_exists "$TARGET_DIR"/test-file5
+	assert_file_exists "$TARGET_DIR"/common
 
 	# When removing a bundle that is required by other bundles, if the --force
 	# option is used, it should be allowed, the specified bundle should be deleted
@@ -86,17 +86,17 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle4
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle5
-	assert_file_not_exists "$TARGETDIR"/test-file1
-	assert_file_not_exists "$TARGETDIR"/test-file2
-	assert_file_not_exists "$TARGETDIR"/test-file3
-	assert_file_exists "$TARGETDIR"/test-file4
-	assert_file_exists "$TARGETDIR"/test-file5
-	assert_file_exists "$TARGETDIR"/common
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle4
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle5
+	assert_file_not_exists "$TARGET_DIR"/test-file1
+	assert_file_not_exists "$TARGET_DIR"/test-file2
+	assert_file_not_exists "$TARGET_DIR"/test-file3
+	assert_file_exists "$TARGET_DIR"/test-file4
+	assert_file_exists "$TARGET_DIR"/test-file5
+	assert_file_exists "$TARGET_DIR"/common
 
 }
 
@@ -106,9 +106,9 @@ test_setup() {
 	# be considered for the overall removal operation regardless of the
 	# order of the bundles
 
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle1 test-bundle2"
 
@@ -127,9 +127,9 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
 
 	# re-try the test inverting the order of the bundles
 
@@ -150,9 +150,9 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
 
 }
 
@@ -162,9 +162,9 @@ test_setup() {
 	# be considered for the overall removal operation regardless of the
 	# order of the bundles
 
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle2 test-bundle1 test-bundle3"
 
@@ -181,20 +181,20 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
 
 	# reinstall the bundles
-	install_bundle "$WEBDIR"/10/Manifest.test-bundle1
-	install_bundle "$WEBDIR"/10/Manifest.test-bundle2
-	install_bundle "$WEBDIR"/10/Manifest.test-bundle3
+	install_bundle "$WEB_DIR"/10/Manifest.test-bundle1
+	install_bundle "$WEB_DIR"/10/Manifest.test-bundle2
+	install_bundle "$WEB_DIR"/10/Manifest.test-bundle3
 
 	# re-try again using a different order in the bundles
 
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle1 test-bundle3 test-bundle2"
 
@@ -211,9 +211,9 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
 
 }
 
@@ -237,13 +237,13 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
-	assert_file_exists "$TARGETDIR"/test-file1
-	assert_file_exists "$TARGETDIR"/test-file2
-	assert_file_exists "$TARGETDIR"/test-file3
-	assert_file_exists "$TARGETDIR"/common
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/test-file1
+	assert_file_exists "$TARGET_DIR"/test-file2
+	assert_file_exists "$TARGET_DIR"/test-file3
+	assert_file_exists "$TARGET_DIR"/common
 
 }
 #WEIGHT=22

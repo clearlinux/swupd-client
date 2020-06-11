@@ -39,10 +39,10 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo1/foo/file_1
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo1/home/testdir/file_2
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo1/etc/file_3
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo1/boot/file_4
+	assert_file_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/repo1/foo/file_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/repo1/home/testdir/file_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/repo1/etc/file_3
+	assert_file_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/repo1/boot/file_4
 
 }
 #WEIGHT=5

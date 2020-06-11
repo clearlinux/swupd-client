@@ -49,20 +49,20 @@ test_setup() {
 	# ├── swupd_lock
 	# └── version
 
-	sudo mkdir -p "$STATEDIR_ABS"/{32900,33000,delta,download,staged}
+	sudo mkdir -p "$ABS_STATE_DIR"/{32900,33000,delta,download,staged}
 
-	MOM="$STATEDIR_ABS"/33000/Manifest.MoM ; sudo touch "$MOM"
-	MOM_SIG="$STATEDIR_ABS"/33000/Manifest.MoM.sig ; sudo touch "$MOM_SIG"
-	FILE1="$STATEDIR_ABS"/32900/Manifest.p11-kit ; sudo touch "$FILE1"
-	FILE2="$STATEDIR_ABS"/32900/Manifest.p11-kit.dfd541b1ac9256982044848f2128f51e23ddbb72f68e9de43adaf8f7ead93657 ; sudo touch "$FILE2"
-	FILE3="$STATEDIR_ABS"/33000/Manifest.emacs ; sudo touch "$FILE3"
-	FILE4="$STATEDIR_ABS"/33000/Manifest.emacs.7414710480607fa89c307ad11d145d8bb0cbdbdf3c0692f940d906b670f6fd5d ; sudo touch "$FILE4"
-	FILE5="$STATEDIR_ABS"/Manifest-emacs-delta-from-32900-to-33000 ; sudo touch "$FILE5"
-	FILE6="$STATEDIR_ABS"/pack-vim-from-32800-to-32900.tar ; sudo touch "$FILE6"
-	FILE7="$STATEDIR_ABS"/staged/00004ead4b4eb1cef1ebbe13849f6c47c21d325182f98cf8f5333e9a76d2e2df ; sudo touch "$FILE7"
-	FILE8="$STATEDIR_ABS"/staged/fffe891980af628e498b16a364b5b4d00377485370ccc4d09ac0fc072e85b31d ; sudo touch "$FILE8"
+	MOM="$ABS_STATE_DIR"/33000/Manifest.MoM ; sudo touch "$MOM"
+	MOM_SIG="$ABS_STATE_DIR"/33000/Manifest.MoM.sig ; sudo touch "$MOM_SIG"
+	FILE1="$ABS_STATE_DIR"/32900/Manifest.p11-kit ; sudo touch "$FILE1"
+	FILE2="$ABS_STATE_DIR"/32900/Manifest.p11-kit.dfd541b1ac9256982044848f2128f51e23ddbb72f68e9de43adaf8f7ead93657 ; sudo touch "$FILE2"
+	FILE3="$ABS_STATE_DIR"/33000/Manifest.emacs ; sudo touch "$FILE3"
+	FILE4="$ABS_STATE_DIR"/33000/Manifest.emacs.7414710480607fa89c307ad11d145d8bb0cbdbdf3c0692f940d906b670f6fd5d ; sudo touch "$FILE4"
+	FILE5="$ABS_STATE_DIR"/Manifest-emacs-delta-from-32900-to-33000 ; sudo touch "$FILE5"
+	FILE6="$ABS_STATE_DIR"/pack-vim-from-32800-to-32900.tar ; sudo touch "$FILE6"
+	FILE7="$ABS_STATE_DIR"/staged/00004ead4b4eb1cef1ebbe13849f6c47c21d325182f98cf8f5333e9a76d2e2df ; sudo touch "$FILE7"
+	FILE8="$ABS_STATE_DIR"/staged/fffe891980af628e498b16a364b5b4d00377485370ccc4d09ac0fc072e85b31d ; sudo touch "$FILE8"
 
-	sudo chmod -R 0700 "$STATEDIR_ABS"
+	sudo chmod -R 0700 "$ABS_STATE_DIR"
 
 }
 
@@ -85,15 +85,15 @@ test_setup() {
 	assert_regex_is_output "$expected_output"
 
 	# these old directories should be removed since are no longer used
-	assert_dir_not_exists "$STATEDIR_ABS"/delta
-	assert_dir_not_exists "$STATEDIR_ABS"/download
-	assert_dir_not_exists "$STATEDIR_ABS"/staged
-	assert_dir_not_exists "$STATEDIR_ABS"/32900
-	assert_dir_not_exists "$STATEDIR_ABS"/33000
+	assert_dir_not_exists "$ABS_STATE_DIR"/delta
+	assert_dir_not_exists "$ABS_STATE_DIR"/download
+	assert_dir_not_exists "$ABS_STATE_DIR"/staged
+	assert_dir_not_exists "$ABS_STATE_DIR"/32900
+	assert_dir_not_exists "$ABS_STATE_DIR"/33000
 
 	# files in the old structure should no longer be there either
-	assert_file_not_exists "$STATEDIR_ABS"/Manifest-emacs-delta-from-32900-to-33000
-	assert_file_not_exists "$STATEDIR_ABS"/pack-vim-from-32800-to-32900.tar
+	assert_file_not_exists "$ABS_STATE_DIR"/Manifest-emacs-delta-from-32900-to-33000
+	assert_file_not_exists "$ABS_STATE_DIR"/pack-vim-from-32800-to-32900.tar
 
 }
 
@@ -107,25 +107,25 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		$STATEDIR_DELTA
-		$STATEDIR_DOWNLOAD
-		$STATEDIR_STAGED
-		$STATEDIR_TEMP
-		$STATEDIR_ABS/pack-vim-from-32800-to-32900.tar
-		$STATEDIR_ABS/Manifest-emacs-delta-from-32900-to-33000
-		$STATEDIR_ABS/staged/.*
-		$STATEDIR_ABS/staged/.*
-		$STATEDIR_ABS/staged
-		$STATEDIR_ABS/delta
-		$STATEDIR_ABS/download
-		$STATEDIR_ABS/32900/Manifest\\..*
-		$STATEDIR_ABS/32900/Manifest\\..*
-		$STATEDIR_ABS/32900
-		$STATEDIR_ABS/33000/Manifest\\..*
-		$STATEDIR_ABS/33000/Manifest\\..*
-		$STATEDIR_ABS/33000/Manifest\\..*
-		$STATEDIR_ABS/33000/Manifest\\..*
-		$STATEDIR_ABS/33000
+		$ABS_DELTA_DIR
+		$ABS_DOWNLOAD_DIR
+		$ABS_STAGED_DIR
+		$ABS_TEMP_DIR
+		$ABS_STATE_DIR/pack-vim-from-32800-to-32900.tar
+		$ABS_STATE_DIR/Manifest-emacs-delta-from-32900-to-33000
+		$ABS_STATE_DIR/staged/.*
+		$ABS_STATE_DIR/staged/.*
+		$ABS_STATE_DIR/staged
+		$ABS_STATE_DIR/delta
+		$ABS_STATE_DIR/download
+		$ABS_STATE_DIR/32900/Manifest\\..*
+		$ABS_STATE_DIR/32900/Manifest\\..*
+		$ABS_STATE_DIR/32900
+		$ABS_STATE_DIR/33000/Manifest\\..*
+		$ABS_STATE_DIR/33000/Manifest\\..*
+		$ABS_STATE_DIR/33000/Manifest\\..*
+		$ABS_STATE_DIR/33000/Manifest\\..*
+		$ABS_STATE_DIR/33000
 		Would remove 19 files
 		Aproximatelly .* KB would be freed
 	EOM

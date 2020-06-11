@@ -18,12 +18,12 @@ test_setup() {
 
 	if [ ! -f /usr/share/clear/update-ca/Swupd_Root.pem ]; then
 		sudo mkdir -p /usr/share/clear/update-ca
-		sudo cp "$TEST_DIRNAME"/Swupd_Root.pem /usr/share/clear/update-ca
+		sudo cp "$ABS_TEST_DIR"/Swupd_Root.pem /usr/share/clear/update-ca
 		export CERT_WAS_INSTALLED=1
 	fi
 
 	create_third_party_repo "$TEST_NAME" 10 staging repo1
-	export repo1="$TPURL"
+	export repo1="$ABS_TP_URL"
 
 }
 

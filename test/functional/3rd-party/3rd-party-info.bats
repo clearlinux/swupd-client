@@ -11,11 +11,11 @@ test_setup() {
 
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
 	create_bundle -n test-bundle1 -f /foo/file_1 -u repo1 "$TEST_NAME"
-	URL1=$TPURL
+	URL1=$ABS_TP_URL
 
 	create_third_party_repo -a "$TEST_NAME" 20 5 repo2
 	create_bundle -n test-bundle2 -f /foo/file_2 -u repo2 "$TEST_NAME"
-	URL2=$TPURL
+	URL2=$ABS_TP_URL
 
 }
 

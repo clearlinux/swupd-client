@@ -6,7 +6,7 @@ test_setup() {
 
 	create_test_environment -e "$TEST_NAME"
 	create_version "$TEST_NAME" 100
-	sudo rm -f "$TARGETDIR"/usr/lib/os-release
+	sudo rm -f "$TARGET_DIR"/usr/lib/os-release
 
 }
 

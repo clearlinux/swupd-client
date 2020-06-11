@@ -12,12 +12,12 @@ test_setup() {
 
 	# create a file with a size of 20 MB and create a bundle
 	# that uses that file and 10 other files (to force pack download)
-	file1=/test-file:"$(create_file "$WEBDIR"/10/files 20MB)"
+	file1=/test-file:"$(create_file "$WEB_DIR"/10/files 20MB)"
 	bfiles="/file1,/file2,/file3,/file4,/file5,/file6,/file7,/file8,/file9,/file10"
 	create_bundle -n test-bundle -f "$bfiles","$file1" "$TEST_NAME"
 
 	# create the state dirs ahead of time (there will be no disk space later)
-	sudo mkdir -p "$STATEDIR_MANIFEST"/10
+	sudo mkdir -p "$ABS_MANIFEST_DIR"/10
 
 }
 
@@ -33,8 +33,8 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/10/Manifest.MoM.tar'
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Failed to retrieve 10 MoM manifest
 		Error: Cannot load official manifest MoM for version 10
 		Failed to install 1 of 1 bundles
@@ -51,20 +51,20 @@ test_setup() {
 
 	# let's replace the bundle Manifest tar with a much larger file that will exceed
 	# the available space on disk
-	sudo rm "$WEBDIR"/10/Manifest.test-bundle
-	sudo rm "$WEBDIR"/10/Manifest.test-bundle.tar
-	fake_manifest=$(create_file "$WEBDIR"/10 15MB)
+	sudo rm "$WEB_DIR"/10/Manifest.test-bundle
+	sudo rm "$WEB_DIR"/10/Manifest.test-bundle.tar
+	fake_manifest=$(create_file "$WEB_DIR"/10 15MB)
 	manifest_name=$(basename "$fake_manifest")
-	sudo mv "$WEBDIR"/10/"$manifest_name" "$WEBDIR"/10/Manifest.test-bundle
-	sudo mv "$WEBDIR"/10/"$manifest_name".tar "$WEBDIR"/10/Manifest.test-bundle.tar
+	sudo mv "$WEB_DIR"/10/"$manifest_name" "$WEB_DIR"/10/Manifest.test-bundle
+	sudo mv "$WEB_DIR"/10/"$manifest_name".tar "$WEB_DIR"/10/Manifest.test-bundle.tar
 
 	run sudo sh -c "timeout 30 $SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
 	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
-		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/10/Manifest.test-bundle.tar'
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Failed to retrieve 10 test-bundle manifest
 		Failed to install 1 of 1 bundles
 	EOM
@@ -116,32 +116,32 @@ test_setup() {
 		Downloading packs \\(.* MB\\) for:
 		 - test-bundle
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/pack-test-bundle-from-0.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Finishing packs extraction...
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Could not download some files from bundles, aborting bundle installation
 		Failed to install 1 of 1 bundles
 	EOM

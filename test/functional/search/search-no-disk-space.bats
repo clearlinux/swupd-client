@@ -15,7 +15,7 @@ test_setup() {
 	create_bundle -n test-bundle2 -f /file_2 "$TEST_NAME"
 
 	# create the state version dirs ahead of time
-	sudo mkdir -p "$STATEDIR_MANIFEST"/10
+	sudo mkdir -p "$ABS_MANIFEST_DIR"/10
 
 }
 
@@ -31,8 +31,8 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/10/Manifest.MoM.tar'
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Failed to retrieve 10 MoM manifest
 		Error: Cannot load official manifest MoM for version 10
 	EOM
@@ -48,19 +48,19 @@ test_setup() {
 
 	# let's replace the Manifest tar from the bundle with a much larger file that will exceed
 	# the available space on disk
-	sudo rm "$WEBDIR"/10/Manifest.test-bundle1
-	sudo rm "$WEBDIR"/10/Manifest.test-bundle1.tar
-	big_manifest=$(create_file "$WEBDIR"/10 3MB)
-	sudo mv "$big_manifest" "$WEBDIR"/10/Manifest.test-bundle1
-	sudo mv "$big_manifest".tar "$WEBDIR"/10/Manifest.test-bundle1.tar
+	sudo rm "$WEB_DIR"/10/Manifest.test-bundle1
+	sudo rm "$WEB_DIR"/10/Manifest.test-bundle1.tar
+	big_manifest=$(create_file "$WEB_DIR"/10 3MB)
+	sudo mv "$big_manifest" "$WEB_DIR"/10/Manifest.test-bundle1
+	sudo mv "$big_manifest".tar "$WEB_DIR"/10/Manifest.test-bundle1.tar
 
 	run sudo sh -c "$SWUPD search-file $SWUPD_OPTS test-bundle2"
 
 	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Downloading all Clear Linux manifests
-		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle1.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state\\?
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/10/Manifest.test-bundle1.tar'
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Failed to retrieve 10 test-bundle1 manifest
 		Error: Cannot load test-bundle1 manifest for version 10
 		Warning: Failed to download 1 manifest - search results will be partial

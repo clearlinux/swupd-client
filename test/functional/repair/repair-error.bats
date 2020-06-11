@@ -17,19 +17,19 @@ test_setup() {
 
 	# force some repairs in the target system
 	set_current_version "$TEST_NAME" 20
-	sudo touch "$TARGETDIR"/usr/untracked_file
+	sudo touch "$TARGET_DIR"/usr/untracked_file
 
 	# force failures while repairing
-	sudo touch "$TARGETDIR"/baz
-	sudo chattr +i "$TARGETDIR"/baz
-	sudo chattr +i "$TARGETDIR"/usr/untracked_file
+	sudo touch "$TARGET_DIR"/baz
+	sudo chattr +i "$TARGET_DIR"/baz
+	sudo chattr +i "$TARGET_DIR"/usr/untracked_file
 
 }
 
 test_teardown() {
 
-	sudo chattr -i "$TARGETDIR"/usr/untracked_file
-	sudo chattr -i "$TARGETDIR"/baz
+	sudo chattr -i "$TARGET_DIR"/usr/untracked_file
+	sudo chattr -i "$TARGET_DIR"/baz
 
 }
 
@@ -47,18 +47,18 @@ test_teardown() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
-		 -> Missing file: $PATH_PREFIX/baz/bat -> not fixed
-		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
-		 -> Missing file: $PATH_PREFIX/baz/bat/file_3 -> not fixed
+		Error: Target has different file type but could not be removed: $ABS_TARGET_DIR/baz
+		 -> Missing file: $ABS_TARGET_DIR/baz/bat -> not fixed
+		Error: Target has different file type but could not be removed: $ABS_TARGET_DIR/baz
+		 -> Missing file: $ABS_TARGET_DIR/baz/bat/file_3 -> not fixed
 		Repairing corrupt files
-		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
-		 -> Hash mismatch for file: $PATH_PREFIX/baz -> not fixed
-		 -> Hash mismatch for file: $PATH_PREFIX/foo/file_1 -> fixed
-		 -> Hash mismatch for file: $PATH_PREFIX/usr/lib/os-release -> fixed
+		Error: Target has different file type but could not be removed: $ABS_TARGET_DIR/baz
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/baz -> not fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/foo/file_1 -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/usr/lib/os-release -> fixed
 		The removal of extraneous files will be skipped due to the previous errors found repairing
-		Removing extra files under $PATH_PREFIX/usr
-		 -> Extra file: $PATH_PREFIX/usr/untracked_file -> not deleted (Operation not permitted)
+		Removing extra files under $ABS_TARGET_DIR/usr
+		 -> Extra file: $ABS_TARGET_DIR/usr/untracked_file -> not deleted (Operation not permitted)
 		Inspected 23 files
 		  2 files were missing
 		    0 of 2 missing files were replaced
@@ -83,15 +83,15 @@ test_teardown() {
 
 	assert_status_is_not "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
-		$PATH_PREFIX/baz/bat -> not fixed
-		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
-		$PATH_PREFIX/baz/bat/file_3 -> not fixed
-		Error: Target has different file type but could not be removed: $PATH_PREFIX/baz
-		$PATH_PREFIX/baz -> not fixed
-		$PATH_PREFIX/foo/file_1 -> fixed
-		$PATH_PREFIX/usr/lib/os-release -> fixed
-		$PATH_PREFIX/usr/untracked_file -> not deleted (Operation not permitted)
+		Error: Target has different file type but could not be removed: $ABS_TARGET_DIR/baz
+		$ABS_TARGET_DIR/baz/bat -> not fixed
+		Error: Target has different file type but could not be removed: $ABS_TARGET_DIR/baz
+		$ABS_TARGET_DIR/baz/bat/file_3 -> not fixed
+		Error: Target has different file type but could not be removed: $ABS_TARGET_DIR/baz
+		$ABS_TARGET_DIR/baz -> not fixed
+		$ABS_TARGET_DIR/foo/file_1 -> fixed
+		$ABS_TARGET_DIR/usr/lib/os-release -> fixed
+		$ABS_TARGET_DIR/usr/untracked_file -> not deleted (Operation not permitted)
 	EOM
 	)
 	assert_is_output "$expected_output"

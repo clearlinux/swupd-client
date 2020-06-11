@@ -11,8 +11,8 @@ test_setup() {
 	create_bundle -L -n test-bundle1 -f /foo/test-file1 "$TEST_NAME"
 	create_bundle -n test-bundle2 -f /bar/test-file2 "$TEST_NAME"
 	# add test-bundle2 and os-core as dependency of test-bundle1
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle1 os-core
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle1 os-core
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle2
 
 }
 
@@ -44,9 +44,9 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/core
-	assert_file_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/bar/test-file2
+	assert_file_exists "$TARGET_DIR"/core
+	assert_file_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/bar/test-file2
 
 }
 #WEIGHT=3

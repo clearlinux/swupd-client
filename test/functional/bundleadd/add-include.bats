@@ -9,7 +9,7 @@ test_setup() {
 	create_bundle -n test-bundle2 -f /bar/test-file2 "$TEST_NAME"
 	create_bundle -n test-bundle3 -f /bar/test-file3 "$TEST_NAME"
 	# add test-bundle2 as a dependency of test-bundle1
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle2
 
 }
 
@@ -21,11 +21,11 @@ test_setup() {
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 
 	assert_status_is "$SWUPD_OK"
-	assert_file_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/bar/test-file2
-	assert_file_exists "$STATEDIR"/bundles/test-bundle1
-	assert_file_exists "$STATEDIR"/bundles/test-bundle3
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle1
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle3
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle2
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		No packs need to be downloaded
@@ -44,17 +44,17 @@ test_setup() {
 @test "ADD048: Adding a bundle that includes another bundle (no tracking state)" {
 
 	# simulate as if test-bundle3 is already installed
-	sudo touch "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
+	sudo touch "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 
 	assert_status_is "$SWUPD_OK"
-	assert_file_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/bar/test-file2
-	assert_file_exists "$STATEDIR"/bundles/test-bundle1
-	assert_file_exists "$STATEDIR"/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle1
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle3
 	# When no tracking directly previously existed, all currently installed
 	# bundles are added to the tracked state.
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle2
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle2
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		No packs need to be downloaded
@@ -77,22 +77,22 @@ test_setup() {
 	# count the bundle as dependency if it was not directly added by the user
 	# regardless of the order of the bundles requested
 
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/foo/test-file1
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle2
-	assert_file_not_exists "$TARGETDIR"/bar/test-file2
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle2
+	assert_file_not_exists "$TARGET_DIR"/bar/test-file2
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle2 test-bundle1"
 
 	assert_status_is "$SWUPD_OK"
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$STATEDIR"/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$STATEDIR"/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/bar/test-file2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/bar/test-file2
 
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
@@ -110,22 +110,22 @@ test_setup() {
 	remove_bundle -L "$TEST_NAME"/web-dir/10/Manifest.test-bundle2
 	clean_state_dir "$TEST_NAME"
 
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/foo/test-file1
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle2
-	assert_file_not_exists "$TARGETDIR"/bar/test-file2
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle2
+	assert_file_not_exists "$TARGET_DIR"/bar/test-file2
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1 test-bundle2"
 
 	assert_status_is "$SWUPD_OK"
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$STATEDIR"/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$STATEDIR"/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/bar/test-file2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/bar/test-file2
 
 	expected_output=$(cat <<-EOM
 		Loading required manifests...

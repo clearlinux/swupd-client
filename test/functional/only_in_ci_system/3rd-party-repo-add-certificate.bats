@@ -20,14 +20,14 @@ test_setup() {
 
 	if [ ! -f /usr/share/clear/update-ca/Swupd_Root.pem ]; then
 		sudo mkdir -p /usr/share/clear/update-ca
-		sudo cp "$TEST_DIRNAME"/Swupd_Root.pem /usr/share/clear/update-ca
+		sudo cp "$ABS_TEST_DIR"/Swupd_Root.pem /usr/share/clear/update-ca
 		export CERT_WAS_INSTALLED=1
 	fi
 
 	create_third_party_repo "$TEST_NAME" 10 staging test-repo1
-	repo1="$TPURL"
+	repo1="$ABS_TP_URL"
 	create_third_party_repo "$TEST_NAME" 10 staging test-repo2
-	repo2="$TPURL"
+	repo2="$ABS_TP_URL"
 }
 
 test_teardown() {
@@ -67,7 +67,7 @@ test_teardown() {
 	)
 	assert_regex_is_output "$expected_output"
 
-	run sudo sh -c "cat $PATH_PREFIX/$THIRD_PARTY_DIR/repo.ini"
+	run sudo sh -c "cat $ABS_TARGET_DIR/$TP_ROOT_DIR/repo.ini"
 	expected_output=$(cat <<-EOM
 			[test-repo1]
 			url=file://$repo1
@@ -76,8 +76,8 @@ test_teardown() {
 	assert_is_output "$expected_output"
 
 	# make sure the os-core bundle of the repo is installed in the appropriate place
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/usr/lib/os-release
+	assert_file_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo1/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo1/usr/lib/os-release
 
 }
 

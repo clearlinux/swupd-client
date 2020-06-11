@@ -6,7 +6,7 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	# remove os-release file from target-dir so no current version can be determined
-	sudo rm "$TARGETDIR"/usr/lib/os-release
+	sudo rm "$TARGET_DIR"/usr/lib/os-release
 
 }
 

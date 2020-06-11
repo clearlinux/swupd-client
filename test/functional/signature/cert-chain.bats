@@ -19,9 +19,9 @@ test_setup() {
 			# Create a self signed certificate for intermediate
 			openssl req -days 1 -new -x509 -key "$TEST_NAME/intermediate.key" -out "$TEST_NAME/intermediate_self_signed.pem" -set_serial 0x1 -subj '/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=intermediate'
 			# Sign the MoM with intermediate cert
-			openssl smime -sign -binary -in "$WEBDIR"/10/Manifest.MoM -signer "$TEST_NAME/intermediate.pem" -inkey "$TEST_NAME/intermediate.key" -out "$WEBDIR"/10/Manifest.MoM.sig -outform DER
+			openssl smime -sign -binary -in "$WEB_DIR"/10/Manifest.MoM -signer "$TEST_NAME/intermediate.pem" -inkey "$TEST_NAME/intermediate.key" -out "$WEB_DIR"/10/Manifest.MoM.sig -outform DER
 			# Sign the MoM with self signed intermediate cert
-			openssl smime -sign -binary -in "$WEBDIR"/10/Manifest.MoM -signer "$TEST_NAME/intermediate_self_signed.pem" -inkey "$TEST_NAME/intermediate.key" -out "$WEBDIR"/10/Manifest.MoM.sig_self_signed -outform DER
+			openssl smime -sign -binary -in "$WEB_DIR"/10/Manifest.MoM -signer "$TEST_NAME/intermediate_self_signed.pem" -inkey "$TEST_NAME/intermediate.key" -out "$WEB_DIR"/10/Manifest.MoM.sig_self_signed -outform DER
 			# Create a certificate store with both root and self signed intermediate
 			cat "$TEST_NAME/root.pem" > "$TEST_NAME/trust.pem"
 			cat "$TEST_NAME/intermediate_self_signed.pem" >> "$TEST_NAME/trust.pem"
@@ -47,7 +47,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/test-file
+	assert_file_not_exists "$TARGET_DIR"/test-file
 
 }
 
@@ -67,14 +67,14 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/test-file
+	assert_file_exists "$TARGET_DIR"/test-file
 
 }
 
 @test "SIG012: MoM signed with self-signed cert, but using root to validate" {
 
 	# replace sig file to one signed with intermediate_self_signed.pem
-	sudo sh -c "cp $WEBDIR/10/Manifest.MoM.sig_self_signed $WEBDIR/10/Manifest.MoM.sig"
+	sudo sh -c "cp $WEB_DIR/10/Manifest.MoM.sig_self_signed $WEB_DIR/10/Manifest.MoM.sig"
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS_NO_CERT -C $TEST_NAME/root.pem test-bundle"
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
@@ -88,14 +88,14 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/test-file
+	assert_file_not_exists "$TARGET_DIR"/test-file
 
 }
 
 @test "SIG013: MoM signed with self_signed and using correct cert to validate" {
 
 	# replace sig file to one signed with intermediate_self_signed.pem
-	sudo sh -c "cp $WEBDIR/10/Manifest.MoM.sig_self_signed $WEBDIR/10/Manifest.MoM.sig"
+	sudo sh -c "cp $WEB_DIR/10/Manifest.MoM.sig_self_signed $WEB_DIR/10/Manifest.MoM.sig"
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS_NO_CERT -C $TEST_NAME/intermediate_self_signed.pem test-bundle"
 
 	assert_status_is "$SWUPD_OK"
@@ -110,7 +110,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/test-file
+	assert_file_exists "$TARGET_DIR"/test-file
 
 }
 
@@ -129,7 +129,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/test-file
+	assert_file_not_exists "$TARGET_DIR"/test-file
 
 }
 
@@ -149,14 +149,14 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/test-file
+	assert_file_exists "$TARGET_DIR"/test-file
 
 }
 
 @test "SIG016: MoM is signed with self signed certificate and trust store is used" {
 
 	# replace signature with self signed certificate
-	sudo sh -c "cp $WEBDIR/10/Manifest.MoM.sig_self_signed $WEBDIR/10/Manifest.MoM.sig"
+	sudo sh -c "cp $WEB_DIR/10/Manifest.MoM.sig_self_signed $WEB_DIR/10/Manifest.MoM.sig"
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS_NO_CERT -C $TEST_NAME/trust.pem test-bundle"
 
 	assert_status_is "$SWUPD_OK"
@@ -171,7 +171,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/test-file
+	assert_file_exists "$TARGET_DIR"/test-file
 
 }
 #WEIGHT=17

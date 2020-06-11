@@ -16,19 +16,19 @@ test_setup() {
 
 	assert_status_is 0
 	# validate files are installed in target
-	assert_file_exists "$TARGETDIR"/file1
-	assert_file_exists "$TARGETDIR"/file2
-	assert_file_exists "$TARGETDIR"/file3
-	assert_file_exists "$TARGETDIR"/file4
-	assert_file_exists "$TARGETDIR"/file5
-	assert_file_exists "$TARGETDIR"/file6
-	assert_file_exists "$TARGETDIR"/file7
-	assert_file_exists "$TARGETDIR"/file8
-	assert_file_exists "$TARGETDIR"/file9
-	assert_file_exists "$TARGETDIR"/file10
-	assert_file_exists "$TARGETDIR"/file11
+	assert_file_exists "$TARGET_DIR"/file1
+	assert_file_exists "$TARGET_DIR"/file2
+	assert_file_exists "$TARGET_DIR"/file3
+	assert_file_exists "$TARGET_DIR"/file4
+	assert_file_exists "$TARGET_DIR"/file5
+	assert_file_exists "$TARGET_DIR"/file6
+	assert_file_exists "$TARGET_DIR"/file7
+	assert_file_exists "$TARGET_DIR"/file8
+	assert_file_exists "$TARGET_DIR"/file9
+	assert_file_exists "$TARGET_DIR"/file10
+	assert_file_exists "$TARGET_DIR"/file11
 	# validate zero pack was downloaded
-	assert_file_exists "$STATEDIR_CACHE"/pack-test-bundle1-from-0-to-10.tar
+	assert_file_exists "$ABS_CACHE_DIR"/pack-test-bundle1-from-0-to-10.tar
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		Downloading packs for:

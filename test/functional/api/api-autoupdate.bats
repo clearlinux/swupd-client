@@ -8,7 +8,7 @@ load "../testlib"
 test_setup() {
 
 	create_test_environment "$TEST_NAME"
-	sudo mkdir -p "$PATH_PREFIX"/etc/systemd/system
+	sudo mkdir -p "$ABS_TARGET_DIR"/etc/systemd/system
 
 }
 
@@ -24,16 +24,16 @@ test_setup() {
 @test "API005: autoupdate --enable" {
 
 	# create mask files manually
-	sudo ln -s /dev/null "$PATH_PREFIX"/etc/systemd/system/swupd-update.service
-	sudo ln -s /dev/null "$PATH_PREFIX"/etc/systemd/system/swupd-update.timer
+	sudo ln -s /dev/null "$ABS_TARGET_DIR"/etc/systemd/system/swupd-update.service
+	sudo ln -s /dev/null "$ABS_TARGET_DIR"/etc/systemd/system/swupd-update.timer
 
 	run sudo sh -c "$SWUPD autoupdate $SWUPD_OPTS --enable --quiet"
 
 	assert_status_is "$SWUPD_OK"
 	assert_output_is_empty
 	# check mask files don't exist
-	assert_file_not_exists "$PATH_PREFIX"/etc/systemd/system/swupd-update.service
-	assert_file_not_exists "$PATH_PREFIX"/etc/systemd/system/swupd-update.timer
+	assert_file_not_exists "$ABS_TARGET_DIR"/etc/systemd/system/swupd-update.service
+	assert_file_not_exists "$ABS_TARGET_DIR"/etc/systemd/system/swupd-update.timer
 
 }
 
@@ -44,8 +44,8 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	assert_output_is_empty
 	# check mask files don't exist
-	assert_symlink_exists "$PATH_PREFIX"/etc/systemd/system/swupd-update.service
-	assert_symlink_exists "$PATH_PREFIX"/etc/systemd/system/swupd-update.timer
+	assert_symlink_exists "$ABS_TARGET_DIR"/etc/systemd/system/swupd-update.service
+	assert_symlink_exists "$ABS_TARGET_DIR"/etc/systemd/system/swupd-update.timer
 
 }
 

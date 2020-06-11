@@ -9,8 +9,8 @@ test_setup() {
 
 	create_test_environment -e "$TEST_NAME"
 	create_bundle -L -n os-core -d /testdir "$TEST_NAME"
-	update_manifest "$WEBDIR"/10/Manifest.os-core file-status /testdir .d..
-	update_manifest "$WEBDIR"/10/Manifest.os-core file-hash /testdir "$ZERO_HASH"
+	update_manifest "$WEB_DIR"/10/Manifest.os-core file-status /testdir .d..
+	update_manifest "$WEB_DIR"/10/Manifest.os-core file-hash /testdir "$ZERO_HASH"
 
 }
 
@@ -36,7 +36,7 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_dir_not_exists "$TARGETDIR"/testdir
+	assert_dir_not_exists "$TARGET_DIR"/testdir
 
 }
 #WEIGHT=2

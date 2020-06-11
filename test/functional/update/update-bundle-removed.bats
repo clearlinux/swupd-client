@@ -10,7 +10,7 @@ test_setup() {
 	create_test_environment -r "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /file_1 "$TEST_NAME"
 	create_version -r "$TEST_NAME" 20 10
-	remove_from_manifest "$WEBDIR"/20/Manifest.MoM test-bundle1
+	remove_from_manifest "$WEB_DIR"/20/Manifest.MoM test-bundle1
 
 }
 
@@ -49,8 +49,8 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 	# bundle should not be removed
-	assert_file_exists "$TARGETDIR"/file_1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/file_1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
 
 }
 #WEIGHT=5

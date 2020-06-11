@@ -33,8 +33,8 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# check for files(should exist and point to /dev/null)
-	assert_file_exists "$PATH_PREFIX/etc/systemd/system/swupd-update.service"
-	assert_file_exists "$PATH_PREFIX/etc/systemd/system/swupd-update.timer"
+	assert_file_exists "$ABS_TARGET_DIR/etc/systemd/system/swupd-update.service"
+	assert_file_exists "$ABS_TARGET_DIR/etc/systemd/system/swupd-update.timer"
 
 	# perform autoupdate enable
 	run sudo sh -c "$SWUPD autoupdate --enable $SWUPD_OPTS"
@@ -60,8 +60,8 @@ test_setup() {
 
 
 	# check for files(should not exist)
-	assert_file_not_exists "$PATH_PREFIX/etc/systemd/system/swupd-update.service"
-	assert_file_not_exists "$PATH_PREFIX/etc/systemd/system/swupd-update.timer"
+	assert_file_not_exists "$ABS_TARGET_DIR/etc/systemd/system/swupd-update.service"
+	assert_file_not_exists "$ABS_TARGET_DIR/etc/systemd/system/swupd-update.timer"
 
 }
 #WEIGHT=2

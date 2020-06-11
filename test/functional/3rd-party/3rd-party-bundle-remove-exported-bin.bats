@@ -10,12 +10,12 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
 	# create 3rd-party bundles that share a binary
-	bin_file1=$(create_file -x "$TPWEBDIR"/10/files)
+	bin_file1=$(create_file -x "$TP_WEB_DIR"/10/files)
 	create_bundle -L -n test-bundle1 -f /file1,/foo/file2,/usr/bin/bin_file1:"$bin_file1",/bin/bin_file2 -u repo1 "$TEST_NAME"
 	create_bundle -L -n test-bundle2 -f /file3,/usr/bin/bin_file1:"$bin_file1"                           -u repo1 "$TEST_NAME"
 	create_bundle -L -n test-bundle3 -f /file1,/usr/bin/bin_file1:"$bin_file1"                           -u repo1 "$TEST_NAME"
 	# let's make test-bundle3 contain /usr/bin/bin_file1 but not export it
-	update_manifest "$TPWEBDIR"/10/Manifest.test-bundle3 file-status /usr/bin/bin_file1 F...
+	update_manifest "$TP_WEB_DIR"/10/Manifest.test-bundle3 file-status /usr/bin/bin_file1 F...
 
 }
 
@@ -23,8 +23,8 @@ test_setup() {
 
 	# when deleting a 3rd-party bundle, all the binaries exported by the
 	# bundle should be removed as well
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file1
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file2
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/bin_file1
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/bin_file2
 
 	run sudo sh -c "$SWUPD 3rd-party bundle-remove $SWUPD_OPTS test-bundle1"
 
@@ -43,10 +43,10 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# non-confilcting binary scripts should have been removed
-	assert_file_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file2
+	assert_file_not_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/bin_file2
 
 	# script that are still being used by other bundles should not be removed
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file1
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/bin_file1
 
 }
 
@@ -56,8 +56,8 @@ test_setup() {
 	# the binary but it did not export that binary, then the file should not be removed
 	# from the system but the script that exports the binary should
 
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file1
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file2
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/bin_file1
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/bin_file2
 
 	run sudo sh -c "$SWUPD 3rd-party bundle-remove $SWUPD_OPTS test-bundle1 test-bundle2"
 
@@ -84,9 +84,9 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# non-confilcting scripts to binaries should have been removed
-	assert_file_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file1
-	assert_file_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file2
-	assert_file_exists "$TPTARGETDIR"/usr/bin/bin_file1
+	assert_file_not_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/bin_file1
+	assert_file_not_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/bin_file2
+	assert_file_exists "$TP_TARGET_DIR"/usr/bin/bin_file1
 
 }
 
@@ -95,8 +95,8 @@ test_setup() {
 	# when deleting a 3rd-party bundle that has an non-exported binary,
 	# if another bundle needsthe binary, then the file should not be removed
 
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file1
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file2
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/bin_file1
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/bin_file2
 
 	run sudo sh -c "$SWUPD 3rd-party bundle-remove $SWUPD_OPTS test-bundle3"
 
@@ -114,9 +114,9 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file1
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/bin_file2
-	assert_file_exists "$TPTARGETDIR"/usr/bin/bin_file1
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/bin_file1
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/bin_file2
+	assert_file_exists "$TP_TARGET_DIR"/usr/bin/bin_file1
 
 }
 #WEIGHT=21

@@ -18,10 +18,10 @@ test_setup() {
 	create_delta_manifest test-bundle1 20 10
 	create_delta_manifest test-bundle2 30 10
 
-	sudo rm "$WEBDIR/20/Manifest.test-bundle1"
-	sudo rm "$WEBDIR/20/Manifest.test-bundle1.tar"
-	sudo rm "$WEBDIR/30/Manifest.test-bundle2"
-	sudo rm "$WEBDIR/30/Manifest.test-bundle2.tar"
+	sudo rm "$WEB_DIR/20/Manifest.test-bundle1"
+	sudo rm "$WEB_DIR/20/Manifest.test-bundle1.tar"
+	sudo rm "$WEB_DIR/30/Manifest.test-bundle2"
+	sudo rm "$WEB_DIR/30/Manifest.test-bundle2.tar"
 
 }
 
@@ -97,7 +97,7 @@ test_setup() {
 	# Updating fails when there's no Manifests for 20 and 30 and delta
 	# Manifests are valid but generating and incorect Manifest.
 
-	sudo mv "$WEBDIR"/20/Manifest-test-bundle1-delta-from-10 "$WEBDIR"/30/Manifest-test-bundle2-delta-from-10
+	sudo mv "$WEB_DIR"/20/Manifest-test-bundle1-delta-from-10 "$WEB_DIR"/30/Manifest-test-bundle2-delta-from-10
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS -V 30"
 

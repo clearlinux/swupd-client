@@ -9,31 +9,31 @@ test_setup() {
 
 	create_test_environment -r "$TEST_NAME" 10 1
 	export CERT_PATH="/usr/share/clear/update-ca/Swupd_Root.pem"
-	export SWUPD_OPTS_EXTRA="$SWUPD_OPTS_NO_FMT_NO_CERT -C $TARGETDIR$CERT_PATH"
+	export SWUPD_OPTS_EXTRA="$SWUPD_OPTS_NO_FMT_NO_CERT -C $TARGET_DIR$CERT_PATH"
 
 	create_version -r "$TEST_NAME" 20 10
-	update_bundle "$TEST_NAME" os-core --add "$CERT_PATH":"$TEST_DIRNAME"/Swupd_Root.pem
+	update_bundle "$TEST_NAME" os-core --add "$CERT_PATH":"$ABS_TEST_DIR"/Swupd_Root.pem
 	bump_format "$TEST_NAME"
 
 	# Rotate the key inside the content. We need to sign release 30 using old root key and sign the release 40 and 50 using the new key. And include the new key in releases 30, 40 and 50.
 	generate_certificate "$TEST_NAME/new_root.key" "$TEST_NAME/new_root.pem"
-	sudo sh -c "mv $WEBDIR/40 $WEBDIR/000"
-	sudo sh -c "sed -i '/Swupd_Root.pem/d' $WEBDIR/30/Manifest.os-core"
+	sudo sh -c "mv $WEB_DIR/40 $WEB_DIR/000"
+	sudo sh -c "sed -i '/Swupd_Root.pem/d' $WEB_DIR/30/Manifest.os-core"
 
 	update_bundle "$TEST_NAME" os-core --add "$CERT_PATH":"$TEST_NAME"/new_root.pem
 
-	sudo sh -c "mv $WEBDIR/000 $WEBDIR/40"
-	sudo sh -c "sed -i '/Swupd_Root.pem/d' $WEBDIR/40/Manifest.os-core"
-	sudo sh -c "grep 'Swupd_Root.pem' $WEBDIR/30/Manifest.os-core >> $WEBDIR/40/Manifest.os-core"
-	sudo sh -c "sed -i 's/\t30\t/\t40\t/' $WEBDIR/40/Manifest.os-core"
+	sudo sh -c "mv $WEB_DIR/000 $WEB_DIR/40"
+	sudo sh -c "sed -i '/Swupd_Root.pem/d' $WEB_DIR/40/Manifest.os-core"
+	sudo sh -c "grep 'Swupd_Root.pem' $WEB_DIR/30/Manifest.os-core >> $WEB_DIR/40/Manifest.os-core"
+	sudo sh -c "sed -i 's/\t30\t/\t40\t/' $WEB_DIR/40/Manifest.os-core"
 
 	create_version -r "$TEST_NAME" 50 40 2
 
 	# Create the key to rotate and re-sign content after the bump
 	sign_cmd=$(cat <<-EOM
 			# Sign the MoM with self signed intermediate cert
-			openssl smime -sign -binary -in "$WEBDIR"/40/Manifest.MoM -signer "$TEST_NAME/new_root.pem" -inkey "$TEST_NAME/new_root.key" -out "$WEBDIR"/40/Manifest.MoM.sig -outform DER
-			openssl smime -sign -binary -in "$WEBDIR"/50/Manifest.MoM -signer "$TEST_NAME/new_root.pem" -inkey "$TEST_NAME/new_root.key" -out "$WEBDIR"/50/Manifest.MoM.sig -outform DER
+			openssl smime -sign -binary -in "$WEB_DIR"/40/Manifest.MoM -signer "$TEST_NAME/new_root.pem" -inkey "$TEST_NAME/new_root.key" -out "$WEB_DIR"/40/Manifest.MoM.sig -outform DER
+			openssl smime -sign -binary -in "$WEB_DIR"/50/Manifest.MoM -signer "$TEST_NAME/new_root.pem" -inkey "$TEST_NAME/new_root.key" -out "$WEB_DIR"/50/Manifest.MoM.sig -outform DER
 	EOM
 	)
 
@@ -43,14 +43,14 @@ test_setup() {
 
 @test "SIG017: Key rotation" {
 
-	sudo openssl smime -sign -binary -in "$WEBDIR"/version/latest_version -signer "$TEST_NAME/new_root.pem" -inkey "$TEST_NAME/new_root.key" -out "$WEBDIR"/version/latest_version.sig -outform DER
+	sudo openssl smime -sign -binary -in "$WEB_DIR"/version/latest_version -signer "$TEST_NAME/new_root.pem" -inkey "$TEST_NAME/new_root.key" -out "$WEB_DIR"/version/latest_version.sig -outform DER
 
-	sudo openssl smime -sign -binary -in "$WEBDIR"/version/format2/latest -signer "$TEST_NAME/new_root.pem" -inkey "$TEST_NAME/new_root.key" -out "$WEBDIR"/version/format2/latest.sig -outform DER
+	sudo openssl smime -sign -binary -in "$WEB_DIR"/version/format2/latest -signer "$TEST_NAME/new_root.pem" -inkey "$TEST_NAME/new_root.key" -out "$WEB_DIR"/version/format2/latest.sig -outform DER
 
 	run sudo sh -c "$SWUPD update -V 20 $SWUPD_OPTS_NO_FMT"
 	assert_status_is "$SWUPD_OK"
 
-	assert_file_exists "$TARGETDIR""$CERT_PATH"
+	assert_file_exists "$TARGET_DIR""$CERT_PATH"
 	run sudo sh -c "$SWUPD update -V 30 $SWUPD_OPTS_EXTRA"
 
 	assert_status_is "$SWUPD_OK"
@@ -76,7 +76,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/core
 
 	run sudo sh -c "$SWUPD update -V 50 $SWUPD_OPTS_EXTRA"
 
@@ -103,7 +103,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 
@@ -111,7 +111,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD update -V 20 $SWUPD_OPTS_NO_FMT"
 	assert_status_is "$SWUPD_OK"
-	assert_file_exists "$TARGETDIR""$CERT_PATH"
+	assert_file_exists "$TARGET_DIR""$CERT_PATH"
 
 	run sudo sh -c "$SWUPD update -V 30 $SWUPD_OPTS_NO_FMT"
 	assert_status_is "$SWUPD_OK"
@@ -137,7 +137,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/core
 
 	run sudo sh -c "$SWUPD update -V 50 $SWUPD_OPTS_NO_FMT"
 
@@ -153,7 +153,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 #WEIGHT=20

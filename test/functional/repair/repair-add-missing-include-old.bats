@@ -12,7 +12,7 @@ test_setup() {
 	create_bundle -n test-bundle2 -f /test-file2 "$TEST_NAME"
 	create_version "$TEST_NAME" 100 10
 	update_bundle "$TEST_NAME" test-bundle1 --header-only
-	add_dependency_to_manifest "$WEBDIR"/100/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest "$WEB_DIR"/100/Manifest.test-bundle1 test-bundle2
 	set_current_version "$TEST_NAME" 100
 
 }
@@ -44,9 +44,9 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/core
-	assert_file_exists "$TARGETDIR"/test-file1
-	assert_file_exists "$TARGETDIR"/test-file2
+	assert_file_exists "$TARGET_DIR"/core
+	assert_file_exists "$TARGET_DIR"/test-file1
+	assert_file_exists "$TARGET_DIR"/test-file2
 
 }
 #WEIGHT=4

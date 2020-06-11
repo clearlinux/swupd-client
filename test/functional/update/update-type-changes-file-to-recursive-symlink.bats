@@ -45,15 +45,15 @@ test_setup() {
 	# swupd should still update correctly.
 	# Reference issue https://github.com/clearlinux/swupd-client/issues/890
 
-	assert_file_exists "$TARGETDIR"/bits/f1
-	assert_file_exists "$TARGETDIR"/bits/f2
-	assert_file_exists "$TARGETDIR"/bits/f3
-	assert_file_exists "$TARGETDIR"/ext/f4
-	assert_file_exists "$TARGETDIR"/32/bits/f1
-	assert_file_exists "$TARGETDIR"/32/bits/f2
-	assert_file_exists "$TARGETDIR"/32/bits/f3
-	assert_file_exists "$TARGETDIR"/32/ext/f4
-	assert_symlink_not_exists "$TARGETDIR"/32
+	assert_file_exists "$TARGET_DIR"/bits/f1
+	assert_file_exists "$TARGET_DIR"/bits/f2
+	assert_file_exists "$TARGET_DIR"/bits/f3
+	assert_file_exists "$TARGET_DIR"/ext/f4
+	assert_file_exists "$TARGET_DIR"/32/bits/f1
+	assert_file_exists "$TARGET_DIR"/32/bits/f2
+	assert_file_exists "$TARGET_DIR"/32/bits/f3
+	assert_file_exists "$TARGET_DIR"/32/ext/f4
+	assert_symlink_not_exists "$TARGET_DIR"/32
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
@@ -83,15 +83,15 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_exists "$TARGETDIR"/bits/f1
-	assert_file_exists "$TARGETDIR"/bits/f2
-	assert_file_exists "$TARGETDIR"/bits/f3
-	assert_file_exists "$TARGETDIR"/ext/f4
-	assert_symlink_exists "$TARGETDIR"/32
-	assert_file_exists "$TARGETDIR"/32/bits/f1
-	assert_file_exists "$TARGETDIR"/32/bits/f2
-	assert_file_exists "$TARGETDIR"/32/bits/f3
-	assert_file_exists "$TARGETDIR"/32/ext/f4
+	assert_file_exists "$TARGET_DIR"/bits/f1
+	assert_file_exists "$TARGET_DIR"/bits/f2
+	assert_file_exists "$TARGET_DIR"/bits/f3
+	assert_file_exists "$TARGET_DIR"/ext/f4
+	assert_symlink_exists "$TARGET_DIR"/32
+	assert_file_exists "$TARGET_DIR"/32/bits/f1
+	assert_file_exists "$TARGET_DIR"/32/bits/f2
+	assert_file_exists "$TARGET_DIR"/32/bits/f3
+	assert_file_exists "$TARGET_DIR"/32/ext/f4
 
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
 	assert_status_is "$SWUPD_OK"

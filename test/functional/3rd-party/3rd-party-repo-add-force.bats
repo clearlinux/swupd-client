@@ -10,7 +10,7 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo "$TEST_NAME" 10 staging repo1
 	# create an empty content directory that matches the repo name
-	sudo mkdir -p "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo1
+	sudo mkdir -p "$TARGET_DIR"/"$TP_BUNDLES_DIR"/repo1
 
 }
 
@@ -20,7 +20,7 @@ test_setup() {
 	# and is not empty, swupd should warn the user and abort unless the --force option is used
 	# if the directory exists, but is empty, the process should continue business as usual
 
-	run sudo sh -c "$SWUPD 3rd-party add repo1 file://$TPURL $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD 3rd-party add repo1 file://$ABS_TP_URL $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -49,13 +49,13 @@ test_setup() {
 	# and is not empty, swupd should warn the user and abort unless the --force option is used
 	# if the directory exists, but is empty, the process should continue business as usual
 
-	sudo touch "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo1/leftover
+	sudo touch "$TARGET_DIR"/"$TP_BUNDLES_DIR"/repo1/leftover
 
-	run sudo sh -c "$SWUPD 3rd-party add repo1 file://$TPURL $SWUPD_OPTS"
+	run sudo sh -c "$SWUPD 3rd-party add repo1 file://$ABS_TP_URL $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_INVALID_REPOSITORY"
 	expected_output=$(cat <<-EOM
-		Error: A content directory for a 3rd-party repository called "repo1" already exists at $PATH_PREFIX/opt/3rd-party/bundles/repo1, aborting...
+		Error: A content directory for a 3rd-party repository called "repo1" already exists at $ABS_TARGET_DIR/opt/3rd-party/bundles/repo1, aborting...
 		To force the removal of the directory and continue adding the repository use the --force option
 		Failed to add repository
 	EOM
@@ -70,13 +70,13 @@ test_setup() {
 	# and is not empty, swupd should warn the user and abort unless the --force option is used
 	# if the directory exists, but is empty, the process should continue business as usual
 
-	sudo touch "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/repo1/leftover
+	sudo touch "$TARGET_DIR"/"$TP_BUNDLES_DIR"/repo1/leftover
 
-	run sudo sh -c "$SWUPD 3rd-party add repo1 file://$TPURL $SWUPD_OPTS --force"
+	run sudo sh -c "$SWUPD 3rd-party add repo1 file://$ABS_TP_URL $SWUPD_OPTS --force"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Warning: A content directory for a 3rd-party repository called "repo1" already exists at $PATH_PREFIX/opt/3rd-party/bundles/repo1
+		Warning: A content directory for a 3rd-party repository called "repo1" already exists at $ABS_TARGET_DIR/opt/3rd-party/bundles/repo1
 		The --force option was used; forcing the removal of the directory
 		Adding 3rd-party repository repo1...
 		Installing the required bundle 'os-core' from the repository...

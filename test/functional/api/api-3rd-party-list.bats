@@ -9,9 +9,9 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
-	export repo1="$TPURL"
+	export repo1="$ABS_TP_URL"
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo2
-	export repo2="$TPURL"
+	export repo2="$ABS_TP_URL"
 
 }
 

@@ -15,12 +15,12 @@ test_setup() {
 	update_bundle "$TEST_NAME" test-bundle1 --add /baz/file_3
 	set_current_version "$TEST_NAME" 20
 	# adding an untracked files into an untracked directory (/bat)
-	sudo mkdir "$TARGETDIR"/bat
-	sudo touch "$TARGETDIR"/bat/untracked_file1
+	sudo mkdir "$TARGET_DIR"/bat
+	sudo touch "$TARGET_DIR"/bat/untracked_file1
 	# adding an untracked file into tracked directory (/bar)
-	sudo touch "$TARGETDIR"/bar/untracked_file2
+	sudo touch "$TARGET_DIR"/bar/untracked_file2
 	# adding an untracked file into /usr
-	sudo touch "$TARGETDIR"/usr/untracked_file3
+	sudo touch "$TARGET_DIR"/usr/untracked_file3
 
 }
 
@@ -41,13 +41,13 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $PATH_PREFIX/baz -> fixed
-		 -> Missing file: $PATH_PREFIX/baz/file_3 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/baz -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/baz/file_3 -> fixed
 		Repairing corrupt files
-		 -> Hash mismatch for file: $PATH_PREFIX/foo/file_1 -> fixed
-		 -> Hash mismatch for file: $PATH_PREFIX/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/foo/file_1 -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/usr/lib/os-release -> fixed
 		Removing extraneous files
-		 -> File that should be deleted: $PATH_PREFIX/bar/file_2 -> deleted
+		 -> File that should be deleted: $ABS_TARGET_DIR/bar/file_2 -> deleted
 		Inspected 18 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
@@ -64,13 +64,13 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 	# tracked files
-	assert_file_exists "$TARGETDIR"/foo/file_1
-	assert_file_not_exists "$TARGETDIR"/bar/file_2
-	assert_file_exists "$TARGETDIR"/baz/file_3
+	assert_file_exists "$TARGET_DIR"/foo/file_1
+	assert_file_not_exists "$TARGET_DIR"/bar/file_2
+	assert_file_exists "$TARGET_DIR"/baz/file_3
 	# untracked files
-	assert_file_exists "$TARGETDIR"/bat/untracked_file1
-	assert_file_exists "$TARGETDIR"/bar/untracked_file2
-	assert_file_exists "$TARGETDIR"/usr/untracked_file3
+	assert_file_exists "$TARGET_DIR"/bat/untracked_file1
+	assert_file_exists "$TARGET_DIR"/bar/untracked_file2
+	assert_file_exists "$TARGET_DIR"/usr/untracked_file3
 
 }
 
@@ -91,17 +91,17 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $PATH_PREFIX/baz -> fixed
-		 -> Missing file: $PATH_PREFIX/baz/file_3 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/baz -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/baz/file_3 -> fixed
 		Repairing corrupt files
-		 -> Hash mismatch for file: $PATH_PREFIX/foo/file_1 -> fixed
-		 -> Hash mismatch for file: $PATH_PREFIX/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/foo/file_1 -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/usr/lib/os-release -> fixed
 		Removing extraneous files
-		 -> File that should be deleted: $PATH_PREFIX/bar/file_2 -> deleted
-		Removing extra files under $PATH_PREFIX/usr
-		 -> Extra file: $PATH_PREFIX/usr/untracked_file3 -> deleted
-		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl -> deleted
-		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/contenturl -> deleted
+		 -> File that should be deleted: $ABS_TARGET_DIR/bar/file_2 -> deleted
+		Removing extra files under $ABS_TARGET_DIR/usr
+		 -> Extra file: $ABS_TARGET_DIR/usr/untracked_file3 -> deleted
+		 -> Extra file: $ABS_TARGET_DIR/usr/share/defaults/swupd/versionurl -> deleted
+		 -> Extra file: $ABS_TARGET_DIR/usr/share/defaults/swupd/contenturl -> deleted
 		Inspected 21 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
@@ -118,15 +118,15 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 	# tracked files
-	assert_file_exists "$TARGETDIR"/foo/file_1
-	assert_file_not_exists "$TARGETDIR"/bar/file_2
-	assert_file_exists "$TARGETDIR"/baz/file_3
+	assert_file_exists "$TARGET_DIR"/foo/file_1
+	assert_file_not_exists "$TARGET_DIR"/bar/file_2
+	assert_file_exists "$TARGET_DIR"/baz/file_3
 	# untracked files
-	assert_file_exists "$TARGETDIR"/bat/untracked_file1
-	assert_file_exists "$TARGETDIR"/bar/untracked_file2
-	assert_file_not_exists "$TARGETDIR"/usr/untracked_file3
-	assert_file_not_exists "$TARGETDIR"/usr/share/defaults/swupd/versionurl
-	assert_file_not_exists "$TARGETDIR"/usr/share/defaults/swupd/contenturl
+	assert_file_exists "$TARGET_DIR"/bat/untracked_file1
+	assert_file_exists "$TARGET_DIR"/bar/untracked_file2
+	assert_file_not_exists "$TARGET_DIR"/usr/untracked_file3
+	assert_file_not_exists "$TARGET_DIR"/usr/share/defaults/swupd/versionurl
+	assert_file_not_exists "$TARGET_DIR"/usr/share/defaults/swupd/contenturl
 
 }
 
@@ -147,16 +147,16 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $PATH_PREFIX/baz -> fixed
-		 -> Missing file: $PATH_PREFIX/baz/file_3 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/baz -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/baz/file_3 -> fixed
 		Repairing corrupt files
-		 -> Hash mismatch for file: $PATH_PREFIX/foo/file_1 -> fixed
-		 -> Hash mismatch for file: $PATH_PREFIX/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/foo/file_1 -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/usr/lib/os-release -> fixed
 		Removing extraneous files
-		 -> File that should be deleted: $PATH_PREFIX/bar/file_2 -> deleted
-		Removing extra files under $PATH_PREFIX/bat
-		 -> Extra file: $PATH_PREFIX/bat/untracked_file1 -> deleted
-		 -> Extra file: $PATH_PREFIX/bat/ -> deleted
+		 -> File that should be deleted: $ABS_TARGET_DIR/bar/file_2 -> deleted
+		Removing extra files under $ABS_TARGET_DIR/bat
+		 -> Extra file: $ABS_TARGET_DIR/bat/untracked_file1 -> deleted
+		 -> Extra file: $ABS_TARGET_DIR/bat/ -> deleted
 		Inspected 20 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
@@ -173,13 +173,13 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 	# tracked files
-	assert_file_exists "$TARGETDIR"/foo/file_1
-	assert_file_not_exists "$TARGETDIR"/bar/file_2
-	assert_file_exists "$TARGETDIR"/baz/file_3
+	assert_file_exists "$TARGET_DIR"/foo/file_1
+	assert_file_not_exists "$TARGET_DIR"/bar/file_2
+	assert_file_exists "$TARGET_DIR"/baz/file_3
 	# untracked files
-	assert_file_not_exists "$TARGETDIR"/bat/untracked_file1
-	assert_file_exists "$TARGETDIR"/bar/untracked_file2
-	assert_file_exists "$TARGETDIR"/usr/untracked_file3
+	assert_file_not_exists "$TARGET_DIR"/bat/untracked_file1
+	assert_file_exists "$TARGET_DIR"/bar/untracked_file2
+	assert_file_exists "$TARGET_DIR"/usr/untracked_file3
 
 }
 #WEIGHT=18

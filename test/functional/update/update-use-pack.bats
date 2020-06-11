@@ -36,10 +36,10 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/core
 	# make sure the file was updated correctly
-	fhash=$(get_hash_from_manifest "$WEBDIR"/100/Manifest.os-core /core)
-	assert_files_equal "$TARGETDIR"/core "$TEST_NAME"/web-dir/100/files/"$fhash"
+	fhash=$(get_hash_from_manifest "$WEB_DIR"/100/Manifest.os-core /core)
+	assert_files_equal "$TARGET_DIR"/core "$TEST_NAME"/web-dir/100/files/"$fhash"
 
 }
 #WEIGHT=2

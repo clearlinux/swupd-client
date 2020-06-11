@@ -8,8 +8,8 @@ test_setup() {
 	create_version "$TEST_NAME" 100 10
 	update_bundle "$TEST_NAME" os-core --update /core
 	# remove packs so full file is used
-	sudo rm -rf "$WEBDIR"/100/pack-*
-	sudo rm -f "$WEBDIR"/100/delta/*
+	sudo rm -rf "$WEB_DIR"/100/pack-*
+	sudo rm -f "$WEB_DIR"/100/delta/*
 
 }
 
@@ -41,7 +41,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 #WEIGHT=2

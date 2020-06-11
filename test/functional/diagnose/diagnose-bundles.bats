@@ -9,8 +9,8 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /foo/test-file1,/common "$TEST_NAME"
-	file_hash=$(get_hash_from_manifest "$WEBDIR"/10/Manifest.test-bundle1 /common)
-	file_path="$WEBDIR"/10/files/"$file_hash"
+	file_hash=$(get_hash_from_manifest "$WEB_DIR"/10/Manifest.test-bundle1 /common)
+	file_path="$WEB_DIR"/10/files/"$file_hash"
 	create_bundle -L -n test-bundle2 -f /bar/test-file2,/common:"$file_path" "$TEST_NAME"
 	create_bundle -L -n test-bundle3 -f /baz/test-file3,/common:"$file_path" "$TEST_NAME"
 	create_bundle -n test-bundle4 -f /bat/test-file4,/common:"$file_path" "$TEST_NAME"
@@ -19,9 +19,9 @@ test_setup() {
 
 @test "DIA017: Diagnose bundles only checks specified bundles" {
 
-	sudo rm -f "$TARGETDIR"/foo/test-file1
-	sudo rm -f "$TARGETDIR"/common
-	sudo rm -f "$TARGETDIR"/foo/test-file3
+	sudo rm -f "$TARGET_DIR"/foo/test-file1
+	sudo rm -f "$TARGET_DIR"/common
+	sudo rm -f "$TARGET_DIR"/foo/test-file3
 
 	# users can diagnose only specific bundles
 
@@ -35,8 +35,8 @@ test_setup() {
 		 - test-bundle2
 		Downloading missing manifests...
 		Checking for missing files
-		 -> Missing file: $PATH_PREFIX/common
-		 -> Missing file: $PATH_PREFIX/foo/test-file1
+		 -> Missing file: $ABS_TARGET_DIR/common
+		 -> Missing file: $ABS_TARGET_DIR/foo/test-file1
 		Checking for corrupt files
 		Checking for extraneous files
 		Inspected 9 files
@@ -51,8 +51,8 @@ test_setup() {
 
 @test "DIA018: Diagnose bundles requires --force to continue when there is an invalid bundle" {
 
-	sudo rm -f "$TARGETDIR"/foo/test-file1
-	sudo rm -f "$TARGETDIR"/common
+	sudo rm -f "$TARGET_DIR"/foo/test-file1
+	sudo rm -f "$TARGET_DIR"/common
 
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS --bundles bad-name,test-bundle1"
 
@@ -80,8 +80,8 @@ test_setup() {
 		 - test-bundle1
 		Downloading missing manifests...
 		Checking for missing files
-		 -> Missing file: $PATH_PREFIX/common
-		 -> Missing file: $PATH_PREFIX/foo/test-file1
+		 -> Missing file: $ABS_TARGET_DIR/common
+		 -> Missing file: $ABS_TARGET_DIR/foo/test-file1
 		Checking for corrupt files
 		Checking for extraneous files
 		Inspected 6 files
@@ -96,8 +96,8 @@ test_setup() {
 
 @test "DIA019: Diagnose bundles do not report deleted files needed by other bundles" {
 
-	update_manifest "$WEBDIR"/10/Manifest.test-bundle1 file-status /foo/test-file1 .d..
-	update_manifest "$WEBDIR"/10/Manifest.test-bundle1 file-status /common .d..
+	update_manifest "$WEB_DIR"/10/Manifest.test-bundle1 file-status /foo/test-file1 .d..
+	update_manifest "$WEB_DIR"/10/Manifest.test-bundle1 file-status /common .d..
 
 	# if a file is marked as deleted in a bundle being diagnosed in isolation
 	# but another bundle needs that file, it should not be reported as extraneous
@@ -114,7 +114,7 @@ test_setup() {
 		Checking for missing files
 		Checking for corrupt files
 		Checking for extraneous files
-		 -> File that should be deleted: $PATH_PREFIX/foo/test-file1
+		 -> File that should be deleted: $ABS_TARGET_DIR/foo/test-file1
 		Inspected 9 files
 		  1 file found which should be deleted
 		Use "swupd repair" to correct the problems in the system

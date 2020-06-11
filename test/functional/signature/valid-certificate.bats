@@ -11,12 +11,12 @@ test_setup() {
 	create_bundle -n test-bundle -f /test-file "$TEST_NAME"
 
 	# Resign release
-	sudo rm "$WEBDIR"/version/latest_version.sig
-	sudo rm "$WEBDIR"/version/formatstaging/latest.sig
-	sudo rm "$WEBDIR"/10/Manifest.MoM.sig
+	sudo rm "$WEB_DIR"/version/latest_version.sig
+	sudo rm "$WEB_DIR"/version/formatstaging/latest.sig
+	sudo rm "$WEB_DIR"/10/Manifest.MoM.sig
 
 	sudo sh -c "openssl req -x509 -sha512 -days 1 -newkey rsa:4096  -keyout $TEST_NAME/root.key -out $TEST_NAME/root.pem -nodes -subj '/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost'"
-	sudo sh -c "openssl smime -sign -binary -in $WEBDIR/10/Manifest.MoM -signer $TEST_NAME/root.pem -inkey $TEST_NAME/root.key -out $WEBDIR/10/Manifest.MoM.sig -outform DER"
+	sudo sh -c "openssl smime -sign -binary -in $WEB_DIR/10/Manifest.MoM -signer $TEST_NAME/root.pem -inkey $TEST_NAME/root.key -out $WEB_DIR/10/Manifest.MoM.sig -outform DER"
 
 }
 

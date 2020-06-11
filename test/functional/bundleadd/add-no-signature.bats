@@ -6,7 +6,7 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle -f /test-file "$TEST_NAME"
-	sudo rm "$WEBDIR"/10/Manifest.MoM.sig
+	sudo rm "$WEB_DIR"/10/Manifest.MoM.sig
 
 }
 
@@ -23,7 +23,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/test-file
+	assert_file_not_exists "$TARGET_DIR"/test-file
 
 }
 
@@ -34,7 +34,7 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Warning: The --nosigcheck flag was used and this compromises the system security
-		Warning: THE SIGNATURE OF file://$TEST_DIRNAME/web-dir/10/Manifest.MoM WILL NOT BE VERIFIED
+		Warning: THE SIGNATURE OF file://$ABS_TEST_DIR/web-dir/10/Manifest.MoM WILL NOT BE VERIFIED
 		Loading required manifests...
 		No packs need to be downloaded
 		Validate downloaded files
@@ -45,7 +45,7 @@ test_setup() {
 	EOM
 	)
 	assert_in_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/test-file
+	assert_file_exists "$TARGET_DIR"/test-file
 
 }
 #WEIGHT=4

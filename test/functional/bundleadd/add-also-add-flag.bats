@@ -13,11 +13,11 @@ test_setup() {
 	create_bundle -n test-bundle3 -f /baz/test-file3 "$TEST_NAME"
 	create_bundle -n test-bundle4 -f /bat/test-file4 "$TEST_NAME"
 	# add test-bundle2 as a dependency of test-bundle1 and test-bundle3 as optional
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle1 test-bundle2
-	add_dependency_to_manifest -o "$WEBDIR"/10/Manifest.test-bundle1 test-bundle3
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest -o "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle3
 	# add circular dependency for also-add
-	add_dependency_to_manifest -o "$WEBDIR"/10/Manifest.test-bundle3 test-bundle4
-	add_dependency_to_manifest -o "$WEBDIR"/10/Manifest.test-bundle4 test-bundle3
+	add_dependency_to_manifest -o "$WEB_DIR"/10/Manifest.test-bundle3 test-bundle4
+	add_dependency_to_manifest -o "$WEB_DIR"/10/Manifest.test-bundle4 test-bundle3
 
 }
 
@@ -43,12 +43,12 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/bar/test-file2
-	assert_file_exists "$TARGETDIR"/baz/test-file3
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_exists "$TARGET_DIR"/baz/test-file3
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
 
 }
 
@@ -73,12 +73,12 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/bar/test-file2
-	assert_file_not_exists "$TARGETDIR"/baz/test-file3
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_not_exists "$TARGET_DIR"/baz/test-file3
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
 
 }
 #WEIGHT=11

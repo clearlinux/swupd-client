@@ -15,12 +15,12 @@ test_setup() {
 	update_bundle "$TEST_NAME" test-bundle1 --add /baz/file_3
 	set_current_version "$TEST_NAME" 20
 	# adding an untracked files into an untracked directory (/bat)
-	sudo mkdir "$TARGETDIR"/bat
-	sudo touch "$TARGETDIR"/bat/untracked_file1
+	sudo mkdir "$TARGET_DIR"/bat
+	sudo touch "$TARGET_DIR"/bat/untracked_file1
 	# adding an untracked file into tracked directory (/bar)
-	sudo touch "$TARGETDIR"/bar/untracked_file2
+	sudo touch "$TARGET_DIR"/bar/untracked_file2
 	# adding an untracked file into /usr
-	sudo touch "$TARGETDIR"/usr/untracked_file3
+	sudo touch "$TARGET_DIR"/usr/untracked_file3
 
 }
 
@@ -55,13 +55,13 @@ test_setup() {
 	)
 	assert_regex_is_output "$expected_output"
 	# tracked files
-	assert_file_exists "$TARGETDIR"/foo/file_1
-	assert_file_exists "$TARGETDIR"/bar/file_2
-	assert_file_not_exists "$TARGETDIR"/baz/file_3
+	assert_file_exists "$TARGET_DIR"/foo/file_1
+	assert_file_exists "$TARGET_DIR"/bar/file_2
+	assert_file_not_exists "$TARGET_DIR"/baz/file_3
 	# untracked files
-	assert_file_exists "$TARGETDIR"/bat/untracked_file1
-	assert_file_exists "$TARGETDIR"/bar/untracked_file2
-	assert_file_exists "$TARGETDIR"/usr/untracked_file3
+	assert_file_exists "$TARGET_DIR"/bat/untracked_file1
+	assert_file_exists "$TARGET_DIR"/bar/untracked_file2
+	assert_file_exists "$TARGET_DIR"/usr/untracked_file3
 
 }
 #WEIGHT=5

@@ -5,13 +5,13 @@ load "../testlib"
 global_setup() {
 
 	create_test_environment "$TEST_NAME"
-	printf "test-data" | sudo tee "$TARGETDIR"/test-hash > /dev/null
+	printf "test-data" | sudo tee "$TARGET_DIR"/test-hash > /dev/null
 
 }
 
 @test "HSD001: Calculate the hash of a file" {
 
-	run sudo sh -c "$SWUPD hashdump $TARGETDIR/test-hash"
+	run sudo sh -c "$SWUPD hashdump $TARGET_DIR/test-hash"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -28,7 +28,7 @@ global_setup() {
 	# attempting to calculate the hash from a non existent file should still
 	# succeed but should return a hash of all zeros
 
-	run sudo sh -c "$SWUPD hashdump $TARGETDIR/fake-file"
+	run sudo sh -c "$SWUPD hashdump $TARGET_DIR/fake-file"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -42,7 +42,7 @@ global_setup() {
 
 @test "HSD003: Calculate the hash of a file specifying its path separatelly" {
 
-	run sudo sh -c "$SWUPD hashdump --path=$TARGETDIR test-hash"
+	run sudo sh -c "$SWUPD hashdump --path=$TARGET_DIR test-hash"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM

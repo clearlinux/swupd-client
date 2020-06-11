@@ -49,21 +49,21 @@ test_setup() {
 	# updates should change all attributes of files, including mode and owner
 
 	# Check user ID
-	run stat --printf  "%u" "$TARGETDIR"/dir_owner
+	run stat --printf  "%u" "$TARGET_DIR"/dir_owner
 	[ "$output" -eq "5001" ]
-	run stat --printf  "%u" "$TARGETDIR"/dir_owner
+	run stat --printf  "%u" "$TARGET_DIR"/dir_owner
 	[ "$output" -eq "5001" ]
 
 	# Check group ID
-	run stat --printf  "%g" "$TARGETDIR"/dir_owner
+	run stat --printf  "%g" "$TARGET_DIR"/dir_owner
 	[ "$output" -eq "5002" ]
-	run stat --printf  "%g" "$TARGETDIR"/dir_owner
+	run stat --printf  "%g" "$TARGET_DIR"/dir_owner
 	[ "$output" -eq "5002" ]
 
 	# Check mode
-	run stat --printf  "%a" "$TARGETDIR"/dir_mode
+	run stat --printf  "%a" "$TARGET_DIR"/dir_mode
 	[ "$output" -eq "777" ]
-	run stat --printf  "%a" "$TARGETDIR"/dir_mode
+	run stat --printf  "%a" "$TARGET_DIR"/dir_mode
 	[ "$output" -eq "777" ]
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
@@ -94,29 +94,29 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# Check user
-	run stat --printf  "%u" "$TARGETDIR"/dir_owner
+	run stat --printf  "%u" "$TARGET_DIR"/dir_owner
 	[ "$output" -eq "5003" ]
-	run stat --printf  "%u" "$TARGETDIR"/dir_owner
+	run stat --printf  "%u" "$TARGET_DIR"/dir_owner
 	[ "$output" -eq "5003" ]
 
 	# Check group
-	run stat --printf  "%g" "$TARGETDIR"/dir_owner
+	run stat --printf  "%g" "$TARGET_DIR"/dir_owner
 	[ "$output" -eq "5004" ]
-	run stat --printf  "%g" "$TARGETDIR"/dir_owner
+	run stat --printf  "%g" "$TARGET_DIR"/dir_owner
 	[ "$output" -eq "5004" ]
 
 	# Check mode
-	run stat --printf  "%a" "$TARGETDIR"/dir_mode
+	run stat --printf  "%a" "$TARGET_DIR"/dir_mode
 	[ "$output" -eq "707" ]
-	run stat --printf  "%a" "$TARGETDIR"/dir_mode
+	run stat --printf  "%a" "$TARGET_DIR"/dir_mode
 	[ "$output" -eq "707" ]
 
 	# Check extra attribute bits
-	run stat --printf  "%a" "$TARGETDIR"/file_setuid
+	run stat --printf  "%a" "$TARGET_DIR"/file_setuid
 	[ "$output" -eq "4755" ]
-	run stat --printf  "%a" "$TARGETDIR"/file_setgid
+	run stat --printf  "%a" "$TARGET_DIR"/file_setgid
 	[ "$output" -eq "2755" ]
-	run stat --printf  "%a" "$TARGETDIR"/dir_sticky
+	run stat --printf  "%a" "$TARGET_DIR"/dir_sticky
 	[ "$output" -eq "1755" ]
 
 	show_target

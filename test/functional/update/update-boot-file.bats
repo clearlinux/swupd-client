@@ -32,12 +32,12 @@ test_setup() {
 		Installing files...
 		Update was applied
 		Calling post-update helper scripts
-		Warning: helper script ($TEST_DIRNAME/testfs/target-dir/usr/bin/clr-boot-manager) not found, it will be skipped
+		Warning: helper script ($ABS_TEST_DIR/testfs/target-dir/usr/bin/clr-boot-manager) not found, it will be skipped
 		Update successful - System updated from version 10 to version 100
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/usr/lib/kernel/testfile
+	assert_file_exists "$TARGET_DIR"/usr/lib/kernel/testfile
 
 }
 #WEIGHT=2

@@ -14,7 +14,7 @@ global_setup() {
 
 @test "API062: os-install" {
 
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR --quiet"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGET_DIR --quiet"
 
 	assert_status_is "$SWUPD_OK"
 	assert_output_is_empty

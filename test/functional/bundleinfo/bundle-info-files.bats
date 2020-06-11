@@ -11,7 +11,7 @@ global_setup() {
 	create_bundle -n test-bundle1 -f /file_1,/foo/file_2 "$TEST_NAME"
 	create_bundle -n test-bundle2 -f /file_3,/bar/file_4 "$TEST_NAME"
 	# add test-bundle2 as a dependency of test-bundle1
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle2
 	create_version "$TEST_NAME" 20 10
 	update_bundle "$TEST_NAME" test-bundle1 --header-only
 	update_bundle "$TEST_NAME" test-bundle2 --add /file_5

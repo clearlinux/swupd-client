@@ -10,13 +10,13 @@ test_setup() {
 	create_test_environment "$TEST_NAME" 10 1
 
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
-	CACHE1="$TPSTATEDIR_CACHE"
-	sudo mkdir -p "$TPSTATEDIR_MANIFEST"/10
-	sudo touch "$TPSTATEDIR_MANIFEST"/10/Manifest.test{1..3}
+	CACHE1="$ABS_TP_CACHE_DIR"
+	sudo mkdir -p "$ABS_TP_MANIFEST_DIR"/10
+	sudo touch "$ABS_TP_MANIFEST_DIR"/10/Manifest.test{1..3}
 	sudo touch "$CACHE1"/pack-test{1..2}-from-0.tar
 
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo2
-	CACHE2="$TPSTATEDIR_CACHE"
+	CACHE2="$ABS_TP_CACHE_DIR"
 	sudo touch "$CACHE2"/pack-test3-from-0.tar
 
 }

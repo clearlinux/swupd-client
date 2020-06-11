@@ -17,12 +17,12 @@ test_setup() {
 	update_bundle "$TEST_NAME" test-bundle1 --add /bar/bat/file_5
 	set_current_version "$TEST_NAME" 20
 	# adding an untracked files into an untracked directory (/bat)
-	sudo mkdir "$TARGETDIR"/bat
-	sudo touch "$TARGETDIR"/bat/untracked_file1
+	sudo mkdir "$TARGET_DIR"/bat
+	sudo touch "$TARGET_DIR"/bat/untracked_file1
 	# adding an untracked file into tracked directory (/bar)
-	sudo touch "$TARGETDIR"/bar/untracked_file2
+	sudo touch "$TARGET_DIR"/bar/untracked_file2
 	# adding an untracked file into /usr
-	sudo touch "$TARGETDIR"/usr/untracked_file3
+	sudo touch "$TARGET_DIR"/usr/untracked_file3
 
 }
 
@@ -43,7 +43,7 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $PATH_PREFIX/baz/testdir/file_3 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/baz/testdir/file_3 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 1 file
@@ -72,7 +72,7 @@ test_setup() {
 		Downloading missing manifests...
 		Limiting diagnose to the following file:
 		 - /foo/file_1
-		Removing extra files under $PATH_PREFIX/foo/file_1
+		Removing extra files under $ABS_TARGET_DIR/foo/file_1
 		Inspected 0 files
 		Calling post-update helper scripts
 		Repair successful
@@ -88,7 +88,7 @@ test_setup() {
 	# file/directory specified by the user. If a file was specified to be
 	# verified, but part of its path is missing or corrput, fix it anyway
 
-	sudo rm -rf "$PATH_PREFIX"/baz
+	sudo rm -rf "$ABS_TARGET_DIR"/baz
 
 	run sudo sh -c "$SWUPD repair $SWUPD_OPTS --file /baz/testdir/file_3"
 
@@ -102,7 +102,7 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $PATH_PREFIX/baz/testdir/file_3 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/baz/testdir/file_3 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
 		Inspected 1 file
@@ -134,12 +134,12 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $PATH_PREFIX/bar/bat -> fixed
-		 -> Missing file: $PATH_PREFIX/bar/bat/file_5 -> fixed
-		 -> Missing file: $PATH_PREFIX/bar/file_4 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/bar/bat -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/bar/bat/file_5 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/bar/file_4 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
-		 -> File that should be deleted: $PATH_PREFIX/bar/file_2 -> deleted
+		 -> File that should be deleted: $ABS_TARGET_DIR/bar/file_2 -> deleted
 		Inspected 5 files
 		  3 files were missing
 		    3 of 3 missing files were replaced
@@ -173,14 +173,14 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $PATH_PREFIX/bar/bat -> fixed
-		 -> Missing file: $PATH_PREFIX/bar/bat/file_5 -> fixed
-		 -> Missing file: $PATH_PREFIX/bar/file_4 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/bar/bat -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/bar/bat/file_5 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/bar/file_4 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
-		 -> File that should be deleted: $PATH_PREFIX/bar/file_2 -> deleted
-		Removing extra files under $PATH_PREFIX/bar
-		 -> Extra file: $PATH_PREFIX/bar/untracked_file2 -> deleted
+		 -> File that should be deleted: $ABS_TARGET_DIR/bar/file_2 -> deleted
+		Removing extra files under $ABS_TARGET_DIR/bar
+		 -> Extra file: $ABS_TARGET_DIR/bar/untracked_file2 -> deleted
 		Inspected 6 files
 		  3 files were missing
 		    3 of 3 missing files were replaced
@@ -213,16 +213,16 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $PATH_PREFIX/bar/bat -> fixed
-		 -> Missing file: $PATH_PREFIX/bar/bat/file_5 -> fixed
-		 -> Missing file: $PATH_PREFIX/bar/file_4 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/bar/bat -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/bar/bat/file_5 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/bar/file_4 -> fixed
 		Repairing corrupt files
 		Removing extraneous files
-		 -> File that should be deleted: $PATH_PREFIX/bar/file_2 -> deleted
-		Removing extra files under $PATH_PREFIX/usr
-		 -> Extra file: $PATH_PREFIX/usr/untracked_file3 -> deleted
-		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/versionurl -> deleted
-		 -> Extra file: $PATH_PREFIX/usr/share/defaults/swupd/contenturl -> deleted
+		 -> File that should be deleted: $ABS_TARGET_DIR/bar/file_2 -> deleted
+		Removing extra files under $ABS_TARGET_DIR/usr
+		 -> Extra file: $ABS_TARGET_DIR/usr/untracked_file3 -> deleted
+		 -> Extra file: $ABS_TARGET_DIR/usr/share/defaults/swupd/versionurl -> deleted
+		 -> Extra file: $ABS_TARGET_DIR/usr/share/defaults/swupd/contenturl -> deleted
 		Inspected 8 files
 		  3 files were missing
 		    3 of 3 missing files were replaced
@@ -244,8 +244,8 @@ test_setup() {
 	# look in the specified path and only for files that are part of the specified
 	# bundle
 
-	write_to_protected_file -a "$PATH_PREFIX"/usr/share/clear/bundles/os-core "corrupting the file"
-	write_to_protected_file -a "$PATH_PREFIX"/usr/share/clear/bundles/test-bundle1 "corrupting the file"
+	write_to_protected_file -a "$ABS_TARGET_DIR"/usr/share/clear/bundles/os-core "corrupting the file"
+	write_to_protected_file -a "$ABS_TARGET_DIR"/usr/share/clear/bundles/test-bundle1 "corrupting the file"
 
 	run sudo sh -c "$SWUPD repair $SWUPD_OPTS --bundle test-bundle1 --file /usr/share/clear/bundles"
 
@@ -262,8 +262,8 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
-		 -> Hash mismatch for file: $PATH_PREFIX/usr/share/clear/bundles/os-core -> fixed
-		 -> Hash mismatch for file: $PATH_PREFIX/usr/share/clear/bundles/test-bundle1 -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/usr/share/clear/bundles/os-core -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/usr/share/clear/bundles/test-bundle1 -> fixed
 		Removing extraneous files
 		Inspected 3 files
 		  2 files did not match

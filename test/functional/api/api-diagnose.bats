@@ -32,18 +32,18 @@ global_setup() {
 	# at version 20 so diagnose find issues
 	set_current_version "$TEST_NAME" 20
 	# adding an untracked file into /usr
-	sudo touch "$TARGETDIR"/usr/untracked_file3
+	sudo touch "$TARGET_DIR"/usr/untracked_file3
 
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS --picky --quiet"
 
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		$PATH_PREFIX/baz
-		$PATH_PREFIX/baz/file_3
-		$PATH_PREFIX/foo/file_1
-		$PATH_PREFIX/usr/lib/os-release
-		$PATH_PREFIX/bar/file_2
-		$PATH_PREFIX/usr/untracked_file3
+		$ABS_TARGET_DIR/baz
+		$ABS_TARGET_DIR/baz/file_3
+		$ABS_TARGET_DIR/foo/file_1
+		$ABS_TARGET_DIR/usr/lib/os-release
+		$ABS_TARGET_DIR/bar/file_2
+		$ABS_TARGET_DIR/usr/untracked_file3
 	EOM
 	)
 	assert_is_output "$expected_output"

@@ -7,15 +7,15 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 	create_version "$TEST_NAME" 100 10
 	update_bundle "$TEST_NAME" os-core --update /core
-	file_hash=$(get_hash_from_manifest "$WEBDIR"/100/Manifest.os-core /core)
+	file_hash=$(get_hash_from_manifest "$WEB_DIR"/100/Manifest.os-core /core)
 	# remove the /usr/bin/core file from the system
-	sudo rm -f "$TARGETDIR"/core
+	sudo rm -f "$TARGET_DIR"/core
 	# remove packs so fullfiles are used
-	sudo rm -rf "$WEBDIR"/100/pack-*
+	sudo rm -rf "$WEB_DIR"/100/pack-*
 	# modify the fullfile so it is corrupt
-	write_to_protected_file -a "$WEBDIR"/100/files/"$file_hash" "some extra stuff to break the hash"
-	sudo rm "$WEBDIR"/100/files/"$file_hash".tar
-	create_tar "$WEBDIR"/100/files/"$file_hash"
+	write_to_protected_file -a "$WEB_DIR"/100/files/"$file_hash" "some extra stuff to break the hash"
+	sudo rm "$WEB_DIR"/100/files/"$file_hash".tar
+	create_tar "$WEB_DIR"/100/files/"$file_hash"
 
 }
 
@@ -43,7 +43,7 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/core
+	assert_file_not_exists "$TARGET_DIR"/core
 
 }
 #WEIGHT=2

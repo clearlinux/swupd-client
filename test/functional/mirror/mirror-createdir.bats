@@ -22,14 +22,14 @@ global_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
-	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGET_DIR"/etc/swupd/mirror_contenturl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGET_DIR"/etc/swupd/mirror_versionurl)"
 
 }
 
 @test "MIR002: Setting a mirror when /etc/swupd already exist" {
 
-	sudo mkdir -p "$TARGETDIR"/etc/swupd
+	sudo mkdir -p "$TARGET_DIR"/etc/swupd
 
 	run sudo sh -c "$SWUPD mirror -s https://example.com/swupd-file $SWUPD_OPTS"
 
@@ -43,15 +43,15 @@ global_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
-	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGET_DIR"/etc/swupd/mirror_contenturl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGET_DIR"/etc/swupd/mirror_versionurl)"
 
 }
 
 @test "MIR003: Setting a mirror when /etc/swupd is a symlink to a directory" {
 
-	sudo mkdir "$TARGETDIR"/foo
-	sudo ln -s "$(realpath "$TARGETDIR"/foo)" "$TARGETDIR"/etc/swupd
+	sudo mkdir "$TARGET_DIR"/foo
+	sudo ln -s "$(realpath "$TARGET_DIR"/foo)" "$TARGET_DIR"/etc/swupd
 
 	run sudo sh -c "$SWUPD mirror -s https://example.com/swupd-file $SWUPD_OPTS"
 
@@ -66,9 +66,9 @@ global_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	! [[ -L "$TARGETDIR/etc/swupd" ]]
-	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
-	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
+	! [[ -L "$TARGET_DIR/etc/swupd" ]]
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGET_DIR"/etc/swupd/mirror_contenturl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGET_DIR"/etc/swupd/mirror_versionurl)"
 
 }
 #WEIGHT=2

@@ -20,11 +20,11 @@ test_setup() {
 test_teardown() {
 
 	# return the files to mutable state
-	if [ -e "$TARGETDIR"/usr/untracked_file ]; then
-		sudo chattr -i "$TARGETDIR"/usr/untracked_file
+	if [ -e "$TARGET_DIR"/usr/untracked_file ]; then
+		sudo chattr -i "$TARGET_DIR"/usr/untracked_file
 	fi
-	if [ -e "$TARGETDIR"/baz ]; then
-		sudo chattr -i "$TARGETDIR"/baz
+	if [ -e "$TARGET_DIR"/baz ]; then
+		sudo chattr -i "$TARGET_DIR"/baz
 	fi
 
 }
@@ -42,19 +42,19 @@ test_teardown() {
 
 	# add things to be repaired
 	set_current_version "$TEST_NAME" 20
-	sudo touch "$TARGETDIR"/usr/untracked_file
+	sudo touch "$TARGET_DIR"/usr/untracked_file
 
 	run sudo sh -c "$SWUPD repair $SWUPD_OPTS --picky --quiet"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		$PATH_PREFIX/baz -> fixed
-		$PATH_PREFIX/baz/bat -> fixed
-		$PATH_PREFIX/baz/bat/file_3 -> fixed
-		$PATH_PREFIX/foo/file_1 -> fixed
-		$PATH_PREFIX/usr/lib/os-release -> fixed
-		$PATH_PREFIX/bar/file_2 -> deleted
-		$PATH_PREFIX/usr/untracked_file -> deleted
+		$ABS_TARGET_DIR/baz -> fixed
+		$ABS_TARGET_DIR/baz/bat -> fixed
+		$ABS_TARGET_DIR/baz/bat/file_3 -> fixed
+		$ABS_TARGET_DIR/foo/file_1 -> fixed
+		$ABS_TARGET_DIR/usr/lib/os-release -> fixed
+		$ABS_TARGET_DIR/bar/file_2 -> deleted
+		$ABS_TARGET_DIR/usr/untracked_file -> deleted
 	EOM
 	)
 	assert_is_output --identical "$expected_output"

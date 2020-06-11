@@ -7,7 +7,7 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle -f /foo/test-file1,/bar/test-file2 "$TEST_NAME"
 	# remove a directory and file that are part of the bundle
-	sudo rm -rf "$TARGETDIR"/foo/test-file1
+	sudo rm -rf "$TARGET_DIR"/foo/test-file1
 
 }
 
@@ -29,8 +29,8 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/bar/test-file2
+	assert_file_not_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/bar/test-file2
 
 }
 #WEIGHT=2

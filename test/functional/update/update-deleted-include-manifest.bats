@@ -12,12 +12,12 @@ test_setup() {
 	create_bundle -n test-bundle2 -f /bar/testfile2 "$TEST_NAME"
 	create_version -p "$TEST_NAME" 100 10
 	update_bundle "$TEST_NAME" test-bundle1 --header-only
-	add_dependency_to_manifest "$WEBDIR"/100/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest "$WEB_DIR"/100/Manifest.test-bundle1 test-bundle2
 
 	# Delete the included manifest
-	sudo rm "$WEBDIR"/10/Manifest.test-bundle2
-	sudo rm "$WEBDIR"/10/pack-test-bundle2-from-0.tar
-	sudo rm "$WEBDIR"/10/Manifest.test-bundle2.tar
+	sudo rm "$WEB_DIR"/10/Manifest.test-bundle2
+	sudo rm "$WEB_DIR"/10/pack-test-bundle2-from-0.tar
+	sudo rm "$WEB_DIR"/10/Manifest.test-bundle2.tar
 
 }
 

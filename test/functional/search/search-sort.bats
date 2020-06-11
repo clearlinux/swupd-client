@@ -9,9 +9,9 @@ global_setup() {
 
 	create_test_environment "$TEST_NAME"
 
-	small=/small-file:"$(create_file "$WEBDIR"/10/files 1MB)"
-	medium=/medium-file:"$(create_file "$WEBDIR"/10/files 2MB)"
-	large=/large-file:"$(create_file "$WEBDIR"/10/files 3MB)"
+	small=/small-file:"$(create_file "$WEB_DIR"/10/files 1MB)"
+	medium=/medium-file:"$(create_file "$WEB_DIR"/10/files 2MB)"
+	large=/large-file:"$(create_file "$WEB_DIR"/10/files 3MB)"
 
 	create_bundle -n alfa-zulu -f /yankee/alfalfa,/alfaromeo/echo,/foo/quebec,/foo/alfa,/foo/delta,/bar/alfa,"$small" "$TEST_NAME"
 	create_bundle -n victor -f /yankee,/bar/alfa,/alfa/zulu,/papa,"$large" "$TEST_NAME"

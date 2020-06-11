@@ -19,18 +19,18 @@ test_setup() {
 
 	# let's add a line to the scripts for all binaries so we can tell if
 	# they were re-generated after the update
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1 "TEST_STRING"
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2 "TEST_STRING"
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3 "TEST_STRING"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1 "TEST_STRING"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2 "TEST_STRING"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3 "TEST_STRING"
 
 }
 
 @test "TPR082: Update a 3rd-party bundle that has exported binaries when the template has not changed" {
 
 	# pre-test checks
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
 
 	# If the template file didn't change then only the binary that was
 	# udpated should be re-generated
@@ -69,22 +69,22 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# post-test checks
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
 	assert_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
 	assert_in_output "TEST_STRING"
 
 	# make sure the template file exists in the system and is correct
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE"
-	template_file=$(sudo cat "$TARGETDIR"/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE")
-	template=$(echo -e "$SCRIPT_TEMPLATE")
+	assert_file_exists "$TARGET_DIR"/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME"
+	template_file=$(sudo cat "$TARGET_DIR"/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME")
+	template=$(echo -e "$TP_SCRIPT_TEMPLATE_CONTENT")
 	assert_equal "$template_file" "$template"
 
 }
@@ -92,12 +92,12 @@ test_setup() {
 @test "TPR083: Update a 3rd-party bundle that has exported binaries when there is no template" {
 
 	# pre-test checks
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
 
 	# delete the template from the system
-	sudo rm "$TARGETDIR"/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE"
+	sudo rm "$TARGET_DIR"/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME"
 
 	# If the template file is not found all binaries should be re-generated
 	# regardless of if they were updated or not, also the template file
@@ -143,22 +143,22 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# post-test checks
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
 	assert_not_in_output "TEST_STRING"
 
 	# make sure the template file exists in the system and is correct
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE"
-	template_file=$(sudo cat "$TARGETDIR"/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE")
-	template=$(echo -e "$SCRIPT_TEMPLATE")
+	assert_file_exists "$TARGET_DIR"/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME"
+	template_file=$(sudo cat "$TARGET_DIR"/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME")
+	template=$(echo -e "$TP_SCRIPT_TEMPLATE_CONTENT")
 	assert_equal "$template_file" "$template"
 
 }
@@ -166,12 +166,12 @@ test_setup() {
 @test "TPR084: Update a 3rd-party bundle that has exported binaries when the template has changed" {
 
 	# pre-test checks
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
 
 	# make a change to the template
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE" "random update"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME" "random update"
 
 	# If the template file is different than that in the swupd binary,
 	# all binaries should be re-generated regardless of if they were updated or not,
@@ -217,25 +217,25 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# post-test checks
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
 	assert_not_in_output "TEST_STRING"
 
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE"
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME"
 	assert_not_in_output "random update"
 
 	# make sure the template file exists in the system and is correct
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE"
-	template_file=$(sudo cat "$TARGETDIR"/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE")
-	template=$(echo -e "$SCRIPT_TEMPLATE")
+	assert_file_exists "$TARGET_DIR"/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME"
+	template_file=$(sudo cat "$TARGET_DIR"/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME")
+	template=$(echo -e "$TP_SCRIPT_TEMPLATE_CONTENT")
 	assert_equal "$template_file" "$template"
 
 }

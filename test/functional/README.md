@@ -242,11 +242,11 @@ SWUPD_OPTS="-S /home/user/swupd-client/add-boot-file_ADD014/testfs/state
 -p /home/user/swupd-client/add-boot-file_ADD014/testfs/target-dir -F staging
 -C /home/user/swupd-client/Swupd_Root.pem -I --no-progress"
 
-TEST_DIRNAME=/home/user/swupd-client/add-boot-file_ADD014
-PATH_PREFIX=/home/user/swupd-client/add-boot-file_ADD014/testfs/target-dir
-WEBDIR=add-boot-file_ADD014/web-dir
-TARGETDIR=add-boot-file_ADD014/testfs/target-dir
-STATEDIR=add-boot-file_ADD014/testfs/state
+ABS_TEST_DIR=/home/user/swupd-client/add-boot-file_ADD014
+ABS_TARGET_DIR=/home/user/swupd-client/add-boot-file_ADD014/testfs/target-dir
+WEB_DIR=add-boot-file_ADD014/web-dir
+TARGET_DIR=add-boot-file_ADD014/testfs/target-dir
+STATE_DIR=add-boot-file_ADD014/testfs/state
 
 # now that we have created the test environment, we can use the SWUPD_OPTS to
 # debug our swupd code using that environment
@@ -351,11 +351,11 @@ instead of letting the helper functions create a random file for you. This can b
 achieved by using the ':' character and specifying the file you want to use.
 For example:
 ```bash
-$ create_bundle -L -n test-bundle -f /foo/bar/test-file:"$WEBDIR"/10/files/"$hashed_name" my_env
+$ create_bundle -L -n test-bundle -f /foo/bar/test-file:"$WEB_DIR"/10/files/"$hashed_name" my_env
 ```
 This will create a bundle that has the file */foo/bar/test-file* in the manifest and
 will refer to the file specified by you. Note that it is your responsibility to copy
-that file to the appropriate directory first (*"$WEBDIR"/\<version\>/files*), to
+that file to the appropriate directory first (*"$WEB_DIR"/\<version\>/files*), to
 name it properly according to its hash, and to create a tar for that file.
 
 ### Using Multiple Versions

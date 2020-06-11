@@ -9,8 +9,8 @@ test_setup() {
 	update_bundle "$TEST_NAME" os-core --add /test-file
 	file_hash=$(get_hash_from_manifest "$TEST_NAME"/web-dir/100/Manifest.os-core /test-file)
 	# copy the file from the files directory to state/staged and modify it
-	sudo cp "$WEBDIR"/100/files/"$file_hash" "$STATEDIR_STAGED"
-	write_to_protected_file -a "$STATEDIR_STAGED"/"$file_hash" "extra string"
+	sudo cp "$WEB_DIR"/100/files/"$file_hash" "$ABS_STAGED_DIR"
+	write_to_protected_file -a "$ABS_STAGED_DIR"/"$file_hash" "extra string"
 
 }
 
@@ -43,7 +43,7 @@ test_setup() {
 	# no errors are printed for a mismatched hash
 	assert_is_output "$expected_output"
 	# the file exists on the filesystem (it does not exist before the test)
-	assert_file_exists "$TARGETDIR"/test-file
+	assert_file_exists "$TARGET_DIR"/test-file
 
 }
 #WEIGHT=2

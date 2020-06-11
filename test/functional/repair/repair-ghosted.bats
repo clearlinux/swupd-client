@@ -9,7 +9,7 @@ test_setup() {
 
 	create_test_environment -e "$TEST_NAME"
 	create_bundle -L -n os-core -f /foo "$TEST_NAME"
-	update_manifest "$WEBDIR"/10/Manifest.os-core file-status /foo .g..
+	update_manifest "$WEB_DIR"/10/Manifest.os-core file-status /foo .g..
 
 }
 
@@ -33,7 +33,7 @@ test_setup() {
 	assert_is_output "$expected_output"
 	# this should exist at the end, despite being marked as "ghosted" in the
 	# Manifest and treated as deleted for parts of swupd-client.
-	assert_file_exists "$TARGETDIR"/foo
+	assert_file_exists "$TARGET_DIR"/foo
 
 }
 #WEIGHT=2

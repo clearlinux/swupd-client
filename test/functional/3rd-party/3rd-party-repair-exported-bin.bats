@@ -12,26 +12,26 @@ test_setup() {
 	create_bundle -L -t -n test-bundle1 -f /foo/file_1,/usr/bin/binary_1,/bin/binary_2,/bin/binary_3 -u repo1 "$TEST_NAME"
 
 	# make a change to a file so we have somthing to repair
-	write_to_protected_file -a "$TPTARGETDIR"/foo/file_1 "corrupting the file"
-	write_to_protected_file -a "$TPTARGETDIR"/bin/binary_2 "corrupting the file"
+	write_to_protected_file -a "$TP_TARGET_DIR"/foo/file_1 "corrupting the file"
+	write_to_protected_file -a "$TP_TARGET_DIR"/bin/binary_2 "corrupting the file"
 
 	# add a line to the wrapper scripts for all binaries so we can tell
 	# if they were re-generated after the repair
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1 "TEST_STRING"
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2 "TEST_STRING"
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3 "TEST_STRING"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1 "TEST_STRING"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2 "TEST_STRING"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3 "TEST_STRING"
 
 }
 
 @test "TPR081: Repair a system that has a bundle with corrupt wrapper scripts from a 3rd-party repo" {
 
 	# pre-test checks
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
-	sudo grep -q "TEST_STRING" "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1 || exit 1
-	sudo grep -q "TEST_STRING" "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2 || exit 1
-	sudo grep -q "TEST_STRING" "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3 || exit 1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
+	sudo grep -q "TEST_STRING" "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1 || exit 1
+	sudo grep -q "TEST_STRING" "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2 || exit 1
+	sudo grep -q "TEST_STRING" "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3 || exit 1
 
 	# every time a user repairs a system all the wrapper scripts for
 	# binaries should be regenerated, not only those that were repaired
@@ -50,8 +50,8 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
-		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/repo1/bin/binary_2 -> fixed
-		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/repo1/foo/file_1 -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/repo1/bin/binary_2 -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/repo1/foo/file_1 -> fixed
 		Removing extraneous files
 		Inspected 20 files
 		  2 files did not match
@@ -64,12 +64,12 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
-	sudo grep -vq "TEST_STRING" "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1 || exit 1
-	sudo grep -vq "TEST_STRING" "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2 || exit 1
-	sudo grep -vq "TEST_STRING" "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3 || exit 1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
+	sudo grep -vq "TEST_STRING" "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1 || exit 1
+	sudo grep -vq "TEST_STRING" "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2 || exit 1
+	sudo grep -vq "TEST_STRING" "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3 || exit 1
 
 }
 #WEIGHT=5

@@ -14,7 +14,7 @@ test_setup() {
 
 @test "INS015: Download os-install content without installing" {
 
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH --download $TARGETDIR"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH --download $TARGET_DIR"
 
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
@@ -31,13 +31,13 @@ test_setup() {
 	)
 
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/core
+	assert_file_not_exists "$TARGET_DIR"/core
 
-	assert_file_exists "$STATEDIR_MANIFEST"/10/Manifest.MoM
-	assert_file_exists "$STATEDIR_MANIFEST"/10/Manifest.os-core
+	assert_file_exists "$ABS_MANIFEST_DIR"/10/Manifest.MoM
+	assert_file_exists "$ABS_MANIFEST_DIR"/10/Manifest.os-core
 
-	core_hash=$(get_hash_from_manifest "$STATEDIR_MANIFEST"/10/Manifest.os-core "/core")
-	assert_file_exists "$STATEDIR_STAGED"/"$core_hash"
+	core_hash=$(get_hash_from_manifest "$ABS_MANIFEST_DIR"/10/Manifest.os-core "/core")
+	assert_file_exists "$ABS_STAGED_DIR"/"$core_hash"
 
 }
 #WEIGHT=1

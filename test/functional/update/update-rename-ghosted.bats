@@ -10,8 +10,8 @@ test_setup() {
 	update_bundle "$TEST_NAME" test-bundle --rename-legacy /foo/test-file1:/foo/test-file1-renamed
 	update_bundle "$TEST_NAME" test-bundle --rename-legacy /bar/test-file2:/bar/test-file2-renamed
 	update_bundle "$TEST_NAME" test-bundle --update /test-file3
-	update_manifest "$WEBDIR"/20/Manifest.test-bundle file-status /foo/test-file1 .g.r
-	update_manifest "$WEBDIR"/20/Manifest.test-bundle file-status /bar/test-file2 .g.r
+	update_manifest "$WEB_DIR"/20/Manifest.test-bundle file-status /foo/test-file1 .g.r
+	update_manifest "$WEB_DIR"/20/Manifest.test-bundle file-status /bar/test-file2 .g.r
 
 }
 
@@ -43,10 +43,10 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 	# all the files should still exist, including the ghosted ones
-	assert_file_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/foo/test-file1-renamed
-	assert_file_exists "$TARGETDIR"/bar/test-file2
-	assert_file_exists "$TARGETDIR"/bar/test-file2-renamed
+	assert_file_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/foo/test-file1-renamed
+	assert_file_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_exists "$TARGET_DIR"/bar/test-file2-renamed
 
 }
 

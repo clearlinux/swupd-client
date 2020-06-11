@@ -12,13 +12,13 @@ global_setup() {
 
 	# use a web server for serving the content, this is necessary
 	# since the code behaves differently if the content is local (e.g. file://)
-	start_web_server -r -D "$TPWEBDIR"
+	start_web_server -r -D "$TP_WEB_DIR"
 
 }
 
 test_teardown() {
 
-	sudo rm -rf "$TARGETDIR"/etc/swupd
+	sudo rm -rf "$TARGET_DIR"/etc/swupd
 
 }
 
@@ -55,7 +55,7 @@ test_teardown() {
 	assert_in_output "$expected_output"
 	assert_in_output "Repository added successfully"
 
-	run sudo sh -c "cat $PATH_PREFIX/$THIRD_PARTY_DIR/repo.ini"
+	run sudo sh -c "cat $ABS_TARGET_DIR/$TP_ROOT_DIR/repo.ini"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		[my_repo]
@@ -63,7 +63,7 @@ test_teardown() {
 	EOM
 	)
 	assert_is_output --identical "$expected_output"
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/my_repo/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/my_repo/usr/lib/os-release
+	assert_file_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/my_repo/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/my_repo/usr/lib/os-release
 }
 #WEIGHT=4

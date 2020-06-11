@@ -15,8 +15,8 @@ test_setup() {
 	update_bundle "$TEST_NAME" test-bundle1 --add /bar/file_b3
 
 	create_delta_manifest test-bundle1 20 10
-	sudo mv "$WEBDIR"/20/Manifest-test-bundle1-delta-from-10 "$WEBDIR"/30/Manifest-test-bundle1-delta-from-10
-	write_to_protected_file -a "$WEBDIR"/20/Manifest-test-bundle1-delta-from-10 "Invalid delta"
+	sudo mv "$WEB_DIR"/20/Manifest-test-bundle1-delta-from-10 "$WEB_DIR"/30/Manifest-test-bundle1-delta-from-10
+	write_to_protected_file -a "$WEB_DIR"/20/Manifest-test-bundle1-delta-from-10 "Invalid delta"
 
 }
 

@@ -29,10 +29,10 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $TEST_DIRNAME/testfs/target-dir/usr/bin -> fixed
+		 -> Missing file: $ABS_TEST_DIR/testfs/target-dir/usr/bin -> fixed
 		Repairing corrupt files
-		 -> Hash mismatch for file: $TEST_DIRNAME/testfs/target-dir/usr/lib/os-release -> fixed
-		 -> Hash mismatch for file: $TEST_DIRNAME/testfs/target-dir/usr/share/defaults/swupd/format -> fixed
+		 -> Hash mismatch for file: $ABS_TEST_DIR/testfs/target-dir/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $ABS_TEST_DIR/testfs/target-dir/usr/share/defaults/swupd/format -> fixed
 		Removing extraneous files
 		Inspected 12 files
 		  1 file was missing

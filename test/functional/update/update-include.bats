@@ -20,15 +20,15 @@ test_setup() {
 	create_bundle -v 100 -n test-bundle6 -f /foo/testfile6 "$TEST_NAME"
 	create_bundle -v 100 -n test-bundle7 -f /foo/testfile7 "$TEST_NAME"
 	# add dependencies
-	add_dependency_to_manifest "$WEBDIR"/100/Manifest.test-bundle1 test-bundle3
-	add_dependency_to_manifest "$WEBDIR"/100/Manifest.test-bundle2 test-bundle7
-	add_dependency_to_manifest -p "$WEBDIR"/100/Manifest.test-bundle3 test-bundle2
-	add_dependency_to_manifest "$WEBDIR"/100/Manifest.test-bundle3 test-bundle4
-	add_dependency_to_manifest -p "$WEBDIR"/100/Manifest.test-bundle4 test-bundle5
-	add_dependency_to_manifest "$WEBDIR"/100/Manifest.test-bundle4 test-bundle6
-	add_dependency_to_manifest "$WEBDIR"/100/Manifest.test-bundle5 test-bundle2
-	add_dependency_to_manifest "$WEBDIR"/100/Manifest.test-bundle6 os-core
-	add_dependency_to_manifest "$WEBDIR"/100/Manifest.test-bundle7 os-core
+	add_dependency_to_manifest "$WEB_DIR"/100/Manifest.test-bundle1 test-bundle3
+	add_dependency_to_manifest "$WEB_DIR"/100/Manifest.test-bundle2 test-bundle7
+	add_dependency_to_manifest -p "$WEB_DIR"/100/Manifest.test-bundle3 test-bundle2
+	add_dependency_to_manifest "$WEB_DIR"/100/Manifest.test-bundle3 test-bundle4
+	add_dependency_to_manifest -p "$WEB_DIR"/100/Manifest.test-bundle4 test-bundle5
+	add_dependency_to_manifest "$WEB_DIR"/100/Manifest.test-bundle4 test-bundle6
+	add_dependency_to_manifest "$WEB_DIR"/100/Manifest.test-bundle5 test-bundle2
+	add_dependency_to_manifest "$WEB_DIR"/100/Manifest.test-bundle6 os-core
+	add_dependency_to_manifest "$WEB_DIR"/100/Manifest.test-bundle7 os-core
 
 
 }
@@ -67,14 +67,14 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 	# changed files
-	assert_file_exists "$TARGETDIR"/foo/testfile1
-	assert_file_exists "$TARGETDIR"/bar/testfile2
+	assert_file_exists "$TARGET_DIR"/foo/testfile1
+	assert_file_exists "$TARGET_DIR"/bar/testfile2
 	# new files
-	assert_file_exists "$TARGETDIR"/foo/testfile3
-	assert_file_exists "$TARGETDIR"/foo/testfile4
-	assert_file_exists "$TARGETDIR"/foo/testfile5
-	assert_file_exists "$TARGETDIR"/foo/testfile6
-	assert_file_exists "$TARGETDIR"/foo/testfile7
+	assert_file_exists "$TARGET_DIR"/foo/testfile3
+	assert_file_exists "$TARGET_DIR"/foo/testfile4
+	assert_file_exists "$TARGET_DIR"/foo/testfile5
+	assert_file_exists "$TARGET_DIR"/foo/testfile6
+	assert_file_exists "$TARGET_DIR"/foo/testfile7
 
 }
 #WEIGHT=12

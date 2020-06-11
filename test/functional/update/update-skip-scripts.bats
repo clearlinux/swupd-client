@@ -40,6 +40,6 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 	# The file should still be added
-	assert_file_exists "$TARGETDIR"/testfile
+	assert_file_exists "$TARGET_DIR"/testfile
 }
 #WEIGHT=3

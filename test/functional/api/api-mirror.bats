@@ -17,7 +17,7 @@ global_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		file://$TEST_DIRNAME/web-dir
+		file://$ABS_TEST_DIR/web-dir
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -32,7 +32,7 @@ global_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		file://$TEST_DIRNAME/web-dir
+		file://$ABS_TEST_DIR/web-dir
 		https://some.url
 	EOM
 	)

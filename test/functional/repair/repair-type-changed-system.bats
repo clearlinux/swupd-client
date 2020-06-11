@@ -41,73 +41,73 @@ test_setup() {
 	# Corrupted files could have a type different from the original
 	# and repair should be able to repair them.
 
-	sudo rm -rf "$TARGETDIR"/file_*
-	sudo rm -rf "$TARGETDIR"/dir_*
-	sudo rm -rf "$TARGETDIR"/symlink_*
-	sudo mkdir "$TARGETDIR"/other
-	sudo touch "$TARGETDIR"/other/my_file
+	sudo rm -rf "$TARGET_DIR"/file_*
+	sudo rm -rf "$TARGET_DIR"/dir_*
+	sudo rm -rf "$TARGET_DIR"/symlink_*
+	sudo mkdir "$TARGET_DIR"/other
+	sudo touch "$TARGET_DIR"/other/my_file
 
-	sudo ln -s "$TARGETDIR"/other "$TARGETDIR"/dir_to_symlink_dir
-	sudo ln -s "$TARGETDIR"/other/my_file "$TARGETDIR"/dir_to_symlink
-	sudo ln -s broken "$TARGETDIR"/dir_to_symlink_broken
-	sudo touch "$TARGETDIR"/dir_to_file
+	sudo ln -s "$TARGET_DIR"/other "$TARGET_DIR"/dir_to_symlink_dir
+	sudo ln -s "$TARGET_DIR"/other/my_file "$TARGET_DIR"/dir_to_symlink
+	sudo ln -s broken "$TARGET_DIR"/dir_to_symlink_broken
+	sudo touch "$TARGET_DIR"/dir_to_file
 
-	sudo mkdir -p "$TARGETDIR"/file_to_dir/dir
-	sudo touch "$TARGETDIR"/file_to_dir/dir/file
-	sudo ln -s "$TARGETDIR"/other "$TARGETDIR"/file_to_symlink_dir
-	sudo ln -s "$TARGETDIR"/other/my_file "$TARGETDIR"/file_to_symlink
-	sudo ln -s broken "$TARGETDIR"/file_to_symlink_broken
+	sudo mkdir -p "$TARGET_DIR"/file_to_dir/dir
+	sudo touch "$TARGET_DIR"/file_to_dir/dir/file
+	sudo ln -s "$TARGET_DIR"/other "$TARGET_DIR"/file_to_symlink_dir
+	sudo ln -s "$TARGET_DIR"/other/my_file "$TARGET_DIR"/file_to_symlink
+	sudo ln -s broken "$TARGET_DIR"/file_to_symlink_broken
 
-	sudo touch "$TARGETDIR"/symlink_to_file
-	sudo mkdir -p "$TARGETDIR"/symlink_to_dir/dir/
-	sudo touch "$TARGETDIR"/symlink_to_dir/dir/file
-	sudo ln -s "$TARGETDIR"/other "$TARGETDIR"/symlink_to_symlink
+	sudo touch "$TARGET_DIR"/symlink_to_file
+	sudo mkdir -p "$TARGET_DIR"/symlink_to_dir/dir/
+	sudo touch "$TARGET_DIR"/symlink_to_dir/dir/file
+	sudo ln -s "$TARGET_DIR"/other "$TARGET_DIR"/symlink_to_symlink
 
 	run sudo sh -c "$SWUPD repair $SWUPD_OPTS --quiet"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		$PATH_PREFIX/dir_removed -> fixed
-		$PATH_PREFIX/dir_to_file/test -> fixed
-		$PATH_PREFIX/dir_to_symlink/test -> fixed
-		$PATH_PREFIX/dir_to_symlink_broken/test -> fixed
-		$PATH_PREFIX/dir_to_symlink_dir/test -> fixed
-		$PATH_PREFIX/file_removed -> fixed
-		$PATH_PREFIX/file_to_dir -> fixed
-		$PATH_PREFIX/file_to_symlink -> fixed
-		$PATH_PREFIX/file_to_symlink_broken -> fixed
-		$PATH_PREFIX/file_to_symlink_dir -> fixed
-		$PATH_PREFIX/symlink_to_dir -> fixed
-		$PATH_PREFIX/symlink_to_file -> fixed
-		$PATH_PREFIX/symlink_to_symlink -> fixed
+		$ABS_TARGET_DIR/dir_removed -> fixed
+		$ABS_TARGET_DIR/dir_to_file/test -> fixed
+		$ABS_TARGET_DIR/dir_to_symlink/test -> fixed
+		$ABS_TARGET_DIR/dir_to_symlink_broken/test -> fixed
+		$ABS_TARGET_DIR/dir_to_symlink_dir/test -> fixed
+		$ABS_TARGET_DIR/file_removed -> fixed
+		$ABS_TARGET_DIR/file_to_dir -> fixed
+		$ABS_TARGET_DIR/file_to_symlink -> fixed
+		$ABS_TARGET_DIR/file_to_symlink_broken -> fixed
+		$ABS_TARGET_DIR/file_to_symlink_dir -> fixed
+		$ABS_TARGET_DIR/symlink_to_dir -> fixed
+		$ABS_TARGET_DIR/symlink_to_file -> fixed
+		$ABS_TARGET_DIR/symlink_to_symlink -> fixed
 	EOM
 	)
 	assert_is_output "$expected_output"
 
-	assert_dir_exists "$TARGETDIR"/other
-	assert_regular_file_exists "$TARGETDIR"/other/my_file
+	assert_dir_exists "$TARGET_DIR"/other
+	assert_regular_file_exists "$TARGET_DIR"/other/my_file
 
-	assert_dir_exists "$TARGETDIR"/dir_removed
-	assert_dir_exists "$TARGETDIR"/dir_to_file
-	assert_dir_exists "$TARGETDIR"/dir_to_symlink
-	assert_dir_exists "$TARGETDIR"/dir_to_symlink_dir
-	assert_dir_exists "$TARGETDIR"/dir_to_symlink_broken
+	assert_dir_exists "$TARGET_DIR"/dir_removed
+	assert_dir_exists "$TARGET_DIR"/dir_to_file
+	assert_dir_exists "$TARGET_DIR"/dir_to_symlink
+	assert_dir_exists "$TARGET_DIR"/dir_to_symlink_dir
+	assert_dir_exists "$TARGET_DIR"/dir_to_symlink_broken
 
-	assert_regular_file_exists "$TARGETDIR"/file_removed
-	assert_regular_file_exists "$TARGETDIR"/file_to_dir
-	assert_regular_file_exists "$TARGETDIR"/file_to_symlink
-	assert_regular_file_exists "$TARGETDIR"/file_to_symlink_dir
-	assert_regular_file_exists "$TARGETDIR"/file_to_symlink_broken
+	assert_regular_file_exists "$TARGET_DIR"/file_removed
+	assert_regular_file_exists "$TARGET_DIR"/file_to_dir
+	assert_regular_file_exists "$TARGET_DIR"/file_to_symlink
+	assert_regular_file_exists "$TARGET_DIR"/file_to_symlink_dir
+	assert_regular_file_exists "$TARGET_DIR"/file_to_symlink_broken
 
-	assert_symlink_exists "$TARGETDIR"/symlink_to_file
-	run stat --printf  "%N" "$TARGETDIR"/symlink_to_file
-	assert_is_output "'$TARGETDIR/symlink_to_file' -> 'broken'"
+	assert_symlink_exists "$TARGET_DIR"/symlink_to_file
+	run stat --printf  "%N" "$TARGET_DIR"/symlink_to_file
+	assert_is_output "'$TARGET_DIR/symlink_to_file' -> 'broken'"
 
-	assert_symlink_exists "$TARGETDIR"/symlink_to_dir
-	run stat --printf  "%N" "$TARGETDIR"/symlink_to_dir
-	assert_is_output "'$TARGETDIR/symlink_to_dir' -> 'broken'"
+	assert_symlink_exists "$TARGET_DIR"/symlink_to_dir
+	run stat --printf  "%N" "$TARGET_DIR"/symlink_to_dir
+	assert_is_output "'$TARGET_DIR/symlink_to_dir' -> 'broken'"
 
-	assert_symlink_exists "$TARGETDIR"/symlink_to_symlink
-	run stat --printf  "%N" "$TARGETDIR"/symlink_to_symlink
-	assert_is_output "'$TARGETDIR/symlink_to_symlink' -> 'broken'"
+	assert_symlink_exists "$TARGET_DIR"/symlink_to_symlink
+	run stat --printf  "%N" "$TARGET_DIR"/symlink_to_symlink
+	assert_is_output "'$TARGET_DIR/symlink_to_symlink' -> 'broken'"
 }
 #WEIGHT=6

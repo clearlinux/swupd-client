@@ -10,8 +10,8 @@ global_setup() {
 
 @test "MIR004: Try setting up a mirror when /etc/swupd is a file instead of a directory" {
 
-	sudo rm -rf "$TARGETDIR"/etc/swupd
-	sudo touch "$TARGETDIR"/etc/swupd
+	sudo rm -rf "$TARGET_DIR"/etc/swupd
+	sudo touch "$TARGET_DIR"/etc/swupd
 
 	run sudo sh -c "$SWUPD mirror -s https://example.com/swupd-file $SWUPD_OPTS"
 
@@ -27,9 +27,9 @@ global_setup() {
 
 @test "MIR005: Try setting up a mirror when /etc/swupd is a symlink to a file instead of a directory" {
 
-	sudo rm -rf "$TARGETDIR"/etc/swupd
-	sudo touch "$TARGETDIR"/foo
-	sudo ln -s "$(realpath "$TARGETDIR"/foo)" "$TARGETDIR"/etc/swupd
+	sudo rm -rf "$TARGET_DIR"/etc/swupd
+	sudo touch "$TARGET_DIR"/foo
+	sudo ln -s "$(realpath "$TARGET_DIR"/foo)" "$TARGET_DIR"/etc/swupd
 
 	run sudo sh -c "$SWUPD mirror -s https://example.com/swupd-file $SWUPD_OPTS"
 

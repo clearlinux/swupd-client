@@ -61,8 +61,8 @@ global_setup() {
 	# bundle-list with no options should list only installed bundles, there should
 	# be a way to distinguish those that are experimental
 
-	sudo mv "$STATEDIR_MANIFEST"/10/Manifest.MoM "$STATEDIR_MANIFEST"/10/Manifest.MoM.temp
-	sudo mv "$WEBDIR"/10/Manifest.MoM.tar "$WEBDIR"/10/Manifest.MoM.tar.temp
+	sudo mv "$ABS_MANIFEST_DIR"/10/Manifest.MoM "$ABS_MANIFEST_DIR"/10/Manifest.MoM.temp
+	sudo mv "$WEB_DIR"/10/Manifest.MoM.tar "$WEB_DIR"/10/Manifest.MoM.tar.temp
 
 	run sudo sh -c "$SWUPD bundle-list $SWUPD_OPTS"
 
@@ -78,8 +78,8 @@ global_setup() {
 	)
 	assert_in_output "$expected_output"
 
-	sudo mv "$STATEDIR_MANIFEST"/10/Manifest.MoM.temp "$STATEDIR_MANIFEST"/10/Manifest.MoM
-	sudo mv "$WEBDIR"/10/Manifest.MoM.tar.temp "$WEBDIR"/10/Manifest.MoM.tar
+	sudo mv "$ABS_MANIFEST_DIR"/10/Manifest.MoM.temp "$ABS_MANIFEST_DIR"/10/Manifest.MoM
+	sudo mv "$WEB_DIR"/10/Manifest.MoM.tar.temp "$WEB_DIR"/10/Manifest.MoM.tar
 
 }
 

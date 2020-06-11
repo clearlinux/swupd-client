@@ -19,7 +19,7 @@ global_setup() {
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle -f /usr/bin/test-file "$TEST_NAME"
 
-	sudo mkdir -p "$CLIENT_CERT_DIR"
+	sudo mkdir -p "$ABS_CLIENT_CERT_DIR"
 
 	# create client/server certificates
 	generate_certificate "$client_key" "$client_pub"
@@ -43,8 +43,8 @@ test_setup() {
 	fi
 
 	# create client certificate in expected directory
-	sudo cp "$client_key" "$CLIENT_CERT"
-	sudo sh -c "cat $client_pub >> $CLIENT_CERT"
+	sudo cp "$client_key" "$CLIENT_CERT_FILE"
+	sudo sh -c "cat $client_pub >> $CLIENT_CERT_FILE"
 }
 
 test_teardown() {
@@ -53,7 +53,7 @@ test_teardown() {
 		return
 	fi
 
-	sudo rm -f "$CLIENT_CERT"
+	sudo rm -f "$CLIENT_CERT_FILE"
 	remove_bundle -L "$TEST_NAME"/web-dir/10/Manifest.test-bundle
 	clean_state_dir "$TEST_NAME"
 }
@@ -63,13 +63,13 @@ test_teardown() {
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle"
 
 	assert_status_is 0
-	assert_file_exists "$TARGETDIR"/usr/bin/test-file
+	assert_file_exists "$TARGET_DIR"/usr/bin/test-file
 }
 
 @test "ADD024: Try adding bundle over HTTPS with no client certificate" {
 
 	# remove client certificate
-	sudo rm "$CLIENT_CERT"
+	sudo rm "$CLIENT_CERT_FILE"
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle --debug"
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
@@ -84,7 +84,7 @@ test_teardown() {
 @test "ADD025: Try adding bundle over HTTPS with an invalid client certificate" {
 
 	# make client certificate invalid
-	sudo sh -c "echo foo > $CLIENT_CERT"
+	sudo sh -c "echo foo > $CLIENT_CERT_FILE"
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle --debug"
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"

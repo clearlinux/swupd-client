@@ -17,33 +17,33 @@ test_setup() {
 	# ----- extra setup -----
 	# replace the original zero pack with one with one file missing
 	sudo mkdir "$TEST_NAME"/temp
-	sudo tar -C "$TEST_NAME"/temp -xf "$WEBDIR"/10/pack-test-bundle1-from-0.tar
+	sudo tar -C "$TEST_NAME"/temp -xf "$WEB_DIR"/10/pack-test-bundle1-from-0.tar
 	removed_file="$(find "$TEST_NAME"/temp/staged -type f -printf '%f' -quit)"
 	sudo rm "$TEST_NAME"/temp/staged/"$removed_file"
-	sudo rm "$WEBDIR"/10/pack-test-bundle1-from-0.tar
-	sudo tar -C "$TEST_NAME"/temp -cf "$WEBDIR"/10/pack-test-bundle1-from-0.tar staged
+	sudo rm "$WEB_DIR"/10/pack-test-bundle1-from-0.tar
+	sudo tar -C "$TEST_NAME"/temp -cf "$WEB_DIR"/10/pack-test-bundle1-from-0.tar staged
 	# -----------------------
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 
 	assert_status_is 0
 	# validate files are installed in target
-	assert_file_exists "$TARGETDIR"/file1
-	assert_file_exists "$TARGETDIR"/file2
-	assert_file_exists "$TARGETDIR"/file3
-	assert_file_exists "$TARGETDIR"/file4
-	assert_file_exists "$TARGETDIR"/file5
-	assert_file_exists "$TARGETDIR"/file6
-	assert_file_exists "$TARGETDIR"/file7
-	assert_file_exists "$TARGETDIR"/file8
-	assert_file_exists "$TARGETDIR"/file9
-	assert_file_exists "$TARGETDIR"/file10
-	assert_file_exists "$TARGETDIR"/file11
-	assert_file_exists "$TARGETDIR"/file12
+	assert_file_exists "$TARGET_DIR"/file1
+	assert_file_exists "$TARGET_DIR"/file2
+	assert_file_exists "$TARGET_DIR"/file3
+	assert_file_exists "$TARGET_DIR"/file4
+	assert_file_exists "$TARGET_DIR"/file5
+	assert_file_exists "$TARGET_DIR"/file6
+	assert_file_exists "$TARGET_DIR"/file7
+	assert_file_exists "$TARGET_DIR"/file8
+	assert_file_exists "$TARGET_DIR"/file9
+	assert_file_exists "$TARGET_DIR"/file10
+	assert_file_exists "$TARGET_DIR"/file11
+	assert_file_exists "$TARGET_DIR"/file12
 	# validate zero pack was downloaded
-	assert_file_exists "$STATEDIR_CACHE"/pack-test-bundle1-from-0-to-10.tar
+	assert_file_exists "$ABS_CACHE_DIR"/pack-test-bundle1-from-0-to-10.tar
 	# validate the file missing from the zero pack was downloaded
-	assert_file_exists "$STATEDIR_STAGED"/"$removed_file"
+	assert_file_exists "$ABS_STAGED_DIR"/"$removed_file"
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		Downloading packs for:
@@ -64,25 +64,25 @@ test_setup() {
 
 	# ----- extra setup -----
 	# remove the original zero pack
-	sudo rm "$WEBDIR"/10/pack-test-bundle1-from-0.tar
+	sudo rm "$WEB_DIR"/10/pack-test-bundle1-from-0.tar
 	# -----------------------
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 
 	assert_status_is 0
 	# validate files are installed in target
-	assert_file_exists "$TARGETDIR"/file1
-	assert_file_exists "$TARGETDIR"/file2
-	assert_file_exists "$TARGETDIR"/file3
-	assert_file_exists "$TARGETDIR"/file4
-	assert_file_exists "$TARGETDIR"/file5
-	assert_file_exists "$TARGETDIR"/file6
-	assert_file_exists "$TARGETDIR"/file7
-	assert_file_exists "$TARGETDIR"/file8
-	assert_file_exists "$TARGETDIR"/file9
-	assert_file_exists "$TARGETDIR"/file10
-	assert_file_exists "$TARGETDIR"/file11
-	assert_file_exists "$TARGETDIR"/file12
+	assert_file_exists "$TARGET_DIR"/file1
+	assert_file_exists "$TARGET_DIR"/file2
+	assert_file_exists "$TARGET_DIR"/file3
+	assert_file_exists "$TARGET_DIR"/file4
+	assert_file_exists "$TARGET_DIR"/file5
+	assert_file_exists "$TARGET_DIR"/file6
+	assert_file_exists "$TARGET_DIR"/file7
+	assert_file_exists "$TARGET_DIR"/file8
+	assert_file_exists "$TARGET_DIR"/file9
+	assert_file_exists "$TARGET_DIR"/file10
+	assert_file_exists "$TARGET_DIR"/file11
+	assert_file_exists "$TARGET_DIR"/file12
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		Downloading packs for:

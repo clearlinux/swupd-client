@@ -41,8 +41,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_symlink_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/foo/symlink
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/usr/share/clear/bundles/test-bundle1
+	assert_symlink_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo1/foo/symlink
+	assert_file_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo1/usr/share/clear/bundles/test-bundle1
 
 }
 #WEIGHT=5

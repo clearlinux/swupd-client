@@ -14,7 +14,7 @@ test_setup() {
 	create_version -p "$TEST_NAME" 100 10
 	update_bundle "$TEST_NAME" test-bundle --update /foo/bar
 
-	start_web_server -D "$WEBDIR" -d 100/pack-test-bundle-from-10.tar -s
+	start_web_server -D "$WEB_DIR" -d 100/pack-test-bundle-from-10.tar -s
 
 	# Set the web server as our upstream server
 	port=$(get_web_server_port "$TEST_NAME")
@@ -56,7 +56,7 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/foo/bar
+	assert_file_exists "$TARGET_DIR"/foo/bar
 
 }
 #WEIGHT=40

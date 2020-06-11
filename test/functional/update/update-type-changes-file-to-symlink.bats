@@ -43,10 +43,10 @@ test_setup() {
 	# this test covers the type change file -> symlink
 	# this test covers the type change directory -> symlink
 
-	assert_file_exists "$TARGETDIR"/file1
-	assert_dir_exists "$TARGETDIR"/dir1/dir2
-	assert_file_exists "$TARGETDIR"/dir1/dir2/file2
-	assert_file_exists "$TARGETDIR"/file3
+	assert_file_exists "$TARGET_DIR"/file1
+	assert_dir_exists "$TARGET_DIR"/dir1/dir2
+	assert_file_exists "$TARGET_DIR"/dir1/dir2/file2
+	assert_file_exists "$TARGET_DIR"/file3
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
@@ -75,11 +75,11 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	assert_symlink_exists "$TARGETDIR"/file1
-	assert_symlink_exists "$TARGETDIR"/dir1/dir2
-	assert_file_exists "$TARGETDIR"/dir1/dir2/file2
-	assert_file_exists "$TARGETDIR"/file3
-	assert_file_exists "$TARGETDIR"/file4
+	assert_symlink_exists "$TARGET_DIR"/file1
+	assert_symlink_exists "$TARGET_DIR"/dir1/dir2
+	assert_file_exists "$TARGET_DIR"/dir1/dir2/file2
+	assert_file_exists "$TARGET_DIR"/file3
+	assert_file_exists "$TARGET_DIR"/file4
 	show_target
 
 }

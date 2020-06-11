@@ -19,15 +19,15 @@ test_setup() {
 	create_bundle -n test-bundle -f /test-file "$TEST_NAME"
 
 	# Resign release with an expired key
-	sudo rm "$WEBDIR"/version/latest_version.sig
-	sudo rm "$WEBDIR"/version/formatstaging/latest.sig
-	sudo rm "$WEBDIR"/10/Manifest.MoM.sig
+	sudo rm "$WEB_DIR"/version/latest_version.sig
+	sudo rm "$WEB_DIR"/version/formatstaging/latest.sig
+	sudo rm "$WEB_DIR"/10/Manifest.MoM.sig
 
 	sudo systemctl stop systemd-timesyncd
 	DATE=$(date "+%Y%m%d %H:%M:%S")
 	sudo date "+%Y%m%d" -s "20000101" #go back to the past
 	sudo sh -c "openssl req -x509 -sha512 -days 1 -newkey rsa:4096  -keyout $TEST_NAME/root.key -out $TEST_NAME/root.pem -nodes -subj '/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=localhost'"
-	sudo sh -c "openssl smime -sign -binary -in $WEBDIR/10/Manifest.MoM -signer $TEST_NAME/root.pem -inkey $TEST_NAME/root.key -out $WEBDIR/10/Manifest.MoM.sig -outform DER"
+	sudo sh -c "openssl smime -sign -binary -in $WEB_DIR/10/Manifest.MoM -signer $TEST_NAME/root.pem -inkey $TEST_NAME/root.key -out $WEB_DIR/10/Manifest.MoM.sig -outform DER"
 	sudo date "+%Y%m%d %H:%M:%S" -s "$DATE"
 	sudo systemctl start systemd-timesyncd
 
@@ -46,7 +46,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/test-file
+	assert_file_not_exists "$TARGET_DIR"/test-file
 
 }
 #WEIGHT=4

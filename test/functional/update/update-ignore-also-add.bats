@@ -18,7 +18,7 @@ test_setup() {
 	update_bundle "$TEST_NAME" test-bundle2 --update /bar/testfile2
 
 	# add dependencies
-	add_dependency_to_manifest -o "$WEBDIR"/100/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest -o "$WEB_DIR"/100/Manifest.test-bundle1 test-bundle2
 
 }
 
@@ -49,8 +49,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/foo/testfile1
-	assert_file_not_exists "$TARGETDIR"/bar/testfile2
+	assert_file_exists "$TARGET_DIR"/foo/testfile1
+	assert_file_not_exists "$TARGET_DIR"/bar/testfile2
 
 }
 #WEIGHT=5

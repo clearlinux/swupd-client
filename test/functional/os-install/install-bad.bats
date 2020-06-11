@@ -10,7 +10,7 @@ test_setup() {
 	create_test_environment -e "$TEST_NAME" 10
 	create_bundle -n os-core -f /core "$TEST_NAME"
 	create_bundle -n test-bundle -f /file_1,/file_2 "$TEST_NAME"
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle os-core
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle os-core
 
 }
 
@@ -64,11 +64,11 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/core
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle
-	assert_file_exists "$TARGETDIR"/file_1
-	assert_file_exists "$TARGETDIR"/file_2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle
+	assert_file_exists "$TARGET_DIR"/file_1
+	assert_file_exists "$TARGET_DIR"/file_2
 
 }
 #WEIGHT=4

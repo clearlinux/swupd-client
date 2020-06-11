@@ -14,12 +14,12 @@ test_setup() {
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle"
 
 	assert_status_is 0
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle
-	assert_file_not_exists "$TARGETDIR"/usr/lib/kernel/testfile
-	assert_dir_not_exists "$TARGETDIR"/usr/lib/kernel
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle
+	assert_file_not_exists "$TARGET_DIR"/usr/lib/kernel/testfile
+	assert_dir_not_exists "$TARGET_DIR"/usr/lib/kernel
 	# these files should not be deleted because they are also part of os-core
-	assert_dir_exists "$TARGETDIR"/usr/lib
-	assert_dir_exists "$TARGETDIR"/usr/
+	assert_dir_exists "$TARGET_DIR"/usr/lib
+	assert_dir_exists "$TARGET_DIR"/usr/
 	expected_output=$(cat <<-EOM
 		The following bundles are being removed:
 		 - test-bundle

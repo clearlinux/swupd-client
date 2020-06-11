@@ -40,8 +40,8 @@ test_teardown() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
 
 }
 
@@ -60,8 +60,8 @@ test_teardown() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/bar/test-file2
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
 
 }
 
@@ -165,10 +165,10 @@ test_teardown() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/baz/test-file3
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/baz/test-file3
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
 
 }
 
@@ -188,8 +188,8 @@ test_teardown() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
 
 }
 
@@ -211,8 +211,8 @@ test_teardown() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/foo/test-file1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
 
 }
 

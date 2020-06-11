@@ -23,20 +23,20 @@ test_setup() {
 	update_bundle -p "$TEST_NAME" test-bundle1 --add    /usr/local/bin/binary_6     repo1
 	update_bundle -p "$TEST_NAME" test-bundle1 --delete /usr/bin/binary_1           repo1
 	update_bundle    "$TEST_NAME" test-bundle1 --rename /bin/binary_3:/bin/binary_7 repo1
-	add_dependency_to_manifest "$TPWEBDIR"/20/Manifest.test-bundle1 test-bundle3
+	add_dependency_to_manifest "$TP_WEB_DIR"/20/Manifest.test-bundle1 test-bundle3
 
 	# let's add a line to the script for binary_2 so we can tell if it was
 	# re-generated after the update
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2 "TEST_STRING"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2 "TEST_STRING"
 
 }
 
 @test "TPR059: Update a 3rd-party bundle that has exported binaries" {
 
 	# pre-test checks
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
 
 	# During an update, a bundle that contains binaries should have
 	# their scripts updated too
@@ -75,14 +75,14 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
-	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_4
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_5
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_6
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_7
-	sudo grep -vq "TEST_STRING" "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2 || exit 1
+	assert_file_not_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	assert_file_not_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
+	assert_file_not_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_4
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_5
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_6
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_7
+	sudo grep -vq "TEST_STRING" "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2 || exit 1
 
 }
 #WEIGHT=14

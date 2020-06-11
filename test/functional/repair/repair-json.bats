@@ -10,9 +10,9 @@ test_setup() {
 	create_test_environment -r "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /foo/test-file1,/bar/test-file2,/baz "$TEST_NAME"
 	create_bundle -n test-bundle2 -f /test-file3,/test-file4 "$TEST_NAME"
-	sudo rm -f "$TARGETDIR"/foo/test-file1
-	sudo rm -f "$TARGETDIR"/baz
-	sudo touch "$TARGETDIR"/usr/extraneous-file
+	sudo rm -f "$TARGET_DIR"/foo/test-file1
+	sudo rm -f "$TARGET_DIR"/baz
+	sudo touch "$TARGET_DIR"/usr/extraneous-file
 
 }
 
@@ -79,13 +79,13 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 10, "stepCompletion" : 5, "stepDescription" : "add_missing_files" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 10, "stepCompletion" : 11, "stepDescription" : "add_missing_files" },
 		{ "type" : "info", "msg" : " -> Missing file:" },
-		{ "type" : "info", "msg" : "$PATH_PREFIX/baz" },
+		{ "type" : "info", "msg" : "$ABS_TARGET_DIR/baz" },
 		{ "type" : "info", "msg" : " -> fixed" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 10, "stepCompletion" : 17, "stepDescription" : "add_missing_files" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 10, "stepCompletion" : 23, "stepDescription" : "add_missing_files" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 10, "stepCompletion" : 29, "stepDescription" : "add_missing_files" },
 		{ "type" : "info", "msg" : " -> Missing file:" },
-		{ "type" : "info", "msg" : "$PATH_PREFIX/foo/test-file1" },
+		{ "type" : "info", "msg" : "$ABS_TARGET_DIR/foo/test-file1" },
 		{ "type" : "info", "msg" : " -> fixed" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 10, "stepCompletion" : 35, "stepDescription" : "add_missing_files" },
 		{ "type" : "progress", "currentStep" : 6, "totalSteps" : 10, "stepCompletion" : 41, "stepDescription" : "add_missing_files" },
@@ -138,15 +138,15 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 8, "totalSteps" : 10, "stepCompletion" : 94, "stepDescription" : "remove_extraneous_files" },
 		{ "type" : "progress", "currentStep" : 8, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "remove_extraneous_files" },
 		{ "type" : "progress", "currentStep" : 9, "totalSteps" : 10, "stepCompletion" : -1, "stepDescription" : "remove_extra_files" },
-		{ "type" : "info", "msg" : "Removing extra files under $PATH_PREFIX/usr" },
+		{ "type" : "info", "msg" : "Removing extra files under $ABS_TARGET_DIR/usr" },
 		{ "type" : "info", "msg" : " -> Extra file:" },
-		{ "type" : "info", "msg" : "$PATH_PREFIX/usr/share/defaults/swupd/versionurl" },
+		{ "type" : "info", "msg" : "$ABS_TARGET_DIR/usr/share/defaults/swupd/versionurl" },
 		{ "type" : "info", "msg" : " -> deleted" },
 		{ "type" : "info", "msg" : " -> Extra file:" },
-		{ "type" : "info", "msg" : "$PATH_PREFIX/usr/share/defaults/swupd/contenturl" },
+		{ "type" : "info", "msg" : "$ABS_TARGET_DIR/usr/share/defaults/swupd/contenturl" },
 		{ "type" : "info", "msg" : " -> deleted" },
 		{ "type" : "info", "msg" : " -> Extra file:" },
-		{ "type" : "info", "msg" : "$PATH_PREFIX/usr/extraneous-file" },
+		{ "type" : "info", "msg" : "$ABS_TARGET_DIR/usr/extraneous-file" },
 		{ "type" : "info", "msg" : " -> deleted" },
 		{ "type" : "info", "msg" : "Inspected 20 files" },
 		{ "type" : "info", "msg" : "  2 files were missing" },
@@ -158,7 +158,7 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 9, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "remove_extra_files" },
 		{ "type" : "progress", "currentStep" : 10, "totalSteps" : 10, "stepCompletion" : -1, "stepDescription" : "run_postupdate_scripts" },
 		{ "type" : "info", "msg" : "Calling post-update helper scripts" },
-		{ "type" : "warning", "msg" : "helper script ($PATH_PREFIX/usr/bin/clr-boot-manager) not found, it will be skipped" },
+		{ "type" : "warning", "msg" : "helper script ($ABS_TARGET_DIR/usr/bin/clr-boot-manager) not found, it will be skipped" },
 		{ "type" : "info", "msg" : " Repair successful" },
 		{ "type" : "progress", "currentStep" : 10, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "run_postupdate_scripts" },
 		{ "type" : "end", "section" : "repair", "status" : 0 }

@@ -55,7 +55,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/new_file
+	assert_file_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo1/new_file
 
 }
 
@@ -116,7 +116,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/new_file
+	assert_file_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo1/new_file
 
 }
 

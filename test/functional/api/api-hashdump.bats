@@ -13,7 +13,7 @@ global_setup() {
 
 @test "API068: hashdump" {
 
-	run sudo sh -c "$SWUPD hashdump $TARGETDIR/etc/swupd --quiet"
+	run sudo sh -c "$SWUPD hashdump $TARGET_DIR/etc/swupd --quiet"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM

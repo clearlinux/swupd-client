@@ -7,7 +7,7 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle -f /foo/bar/baz/test-file "$TEST_NAME"
 	# remove the foo dir
-	sudo rm -rf "$TARGETDIR"/foo
+	sudo rm -rf "$TARGET_DIR"/foo
 	create_version "$TEST_NAME" 100 10
 	update_bundle "$TEST_NAME" test-bundle --update /foo/bar/baz/test-file
 
@@ -15,7 +15,7 @@ test_setup() {
 
 @test "UPD029: Update corrects a missing directory in the target system" {
 
-	assert_dir_not_exists "$TARGETDIR"/foo
+	assert_dir_not_exists "$TARGET_DIR"/foo
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
@@ -46,8 +46,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_dir_exists "$TARGETDIR"/foo/bar/baz
-	assert_file_exists "$TARGETDIR"/foo/bar/baz/test-file
+	assert_dir_exists "$TARGET_DIR"/foo/bar/baz
+	assert_file_exists "$TARGET_DIR"/foo/bar/baz/test-file
 
 }
 

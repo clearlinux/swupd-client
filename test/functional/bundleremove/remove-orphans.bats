@@ -13,8 +13,8 @@ test_setup() {
 	create_bundle -L    -n test-bundle3 -f /file3 "$TEST_NAME"
 	create_bundle -L    -n test-bundle4 -f /file4 "$TEST_NAME"
 	create_bundle -L    -n test-bundle5 -f /file5 "$TEST_NAME"
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle1 test-bundle2
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle4 test-bundle5
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle4 test-bundle5
 
 }
 

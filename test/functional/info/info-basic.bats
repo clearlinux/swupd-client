@@ -18,8 +18,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Distribution:      Swupd Test Distro
 		Installed version: 10 (format 1)
-		Version URL:       file://$TEST_DIRNAME/web-dir
-		Content URL:       file://$TEST_DIRNAME/web-dir
+		Version URL:       file://$ABS_TEST_DIR/web-dir
+		Content URL:       file://$ABS_TEST_DIR/web-dir
 	EOM
 	)
 
@@ -34,8 +34,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Distribution:      Swupd Test Distro
 		Installed version: 10
-		Version URL:       file://$TEST_DIRNAME/web-dir
-		Content URL:       file://$TEST_DIRNAME/web-dir
+		Version URL:       file://$ABS_TEST_DIR/web-dir
+		Content URL:       file://$ABS_TEST_DIR/web-dir
 	EOM
 	)
 

@@ -12,8 +12,8 @@ global_setup() {
 	create_bundle -e -n test-bundle2 -f /file_2 "$TEST_NAME"
 	create_bundle -n test-bundle3 -f /file_3 "$TEST_NAME"
 	create_bundle -n test-bundle4 -f /file_4 "$TEST_NAME"
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle2 test-bundle3
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle3 test-bundle4
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle2 test-bundle3
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle3 test-bundle4
 
 }
 

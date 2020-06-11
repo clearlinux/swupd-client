@@ -10,9 +10,9 @@ test_setup() {
 	create_test_environment -r "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /foo/test-file1,/bar/test-file2,/baz "$TEST_NAME"
 	create_bundle -n test-bundle2 -f /test-file3,/test-file4 "$TEST_NAME"
-	sudo rm -f "$TARGETDIR"/foo/test-file1
-	sudo rm -f "$TARGETDIR"/baz
-	sudo touch "$TARGETDIR"/usr/extraneous-file
+	sudo rm -f "$TARGET_DIR"/foo/test-file1
+	sudo rm -f "$TARGET_DIR"/baz
+	sudo touch "$TARGET_DIR"/usr/extraneous-file
 
 }
 
@@ -33,12 +33,12 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 4, "stepCompletion" : 5, "stepDescription" : "add_missing_files" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 4, "stepCompletion" : 11, "stepDescription" : "add_missing_files" },
 		{ "type" : "info", "msg" : " -> Missing file:" },
-		{ "type" : "info", "msg" : "$PATH_PREFIX/baz" },
+		{ "type" : "info", "msg" : "$ABS_TARGET_DIR/baz" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 4, "stepCompletion" : 17, "stepDescription" : "add_missing_files" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 4, "stepCompletion" : 23, "stepDescription" : "add_missing_files" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 4, "stepCompletion" : 29, "stepDescription" : "add_missing_files" },
 		{ "type" : "info", "msg" : " -> Missing file:" },
-		{ "type" : "info", "msg" : "$PATH_PREFIX/foo/test-file1" },
+		{ "type" : "info", "msg" : "$ABS_TARGET_DIR/foo/test-file1" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 4, "stepCompletion" : 35, "stepDescription" : "add_missing_files" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 4, "stepCompletion" : 41, "stepDescription" : "add_missing_files" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 4, "stepCompletion" : 47, "stepDescription" : "add_missing_files" },

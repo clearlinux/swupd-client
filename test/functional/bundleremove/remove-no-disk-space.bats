@@ -14,7 +14,7 @@ test_setup() {
 	create_bundle -L -n test-bundle -f /file_1 "$TEST_NAME"
 
 	# create the state version dirs ahead of time
-	sudo mkdir -p "$STATEDIR_MANIFEST"/10
+	sudo mkdir -p "$ABS_MANIFEST_DIR"/10
 
 }
 
@@ -30,8 +30,8 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/10/Manifest.MoM.tar'
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Failed to retrieve 10 MoM manifest
 		Error: Unable to download/verify 10 Manifest.MoM
 		Failed to remove bundle(s)
@@ -50,18 +50,18 @@ test_setup() {
 
 	# let's replace the Manifest tar from os-core with a much larger file that will exceed
 	# the available space on disk
-	sudo rm "$WEBDIR"/10/Manifest.os-core
-	sudo rm "$WEBDIR"/10/Manifest.os-core.tar
-	big_manifest=$(create_file "$WEBDIR"/10 15MB)
-	sudo mv "$big_manifest" "$WEBDIR"/10/Manifest.os-core
-	sudo mv "$big_manifest".tar "$WEBDIR"/10/Manifest.os-core.tar
+	sudo rm "$WEB_DIR"/10/Manifest.os-core
+	sudo rm "$WEB_DIR"/10/Manifest.os-core.tar
+	big_manifest=$(create_file "$WEB_DIR"/10 15MB)
+	sudo mv "$big_manifest" "$WEB_DIR"/10/Manifest.os-core
+	sudo mv "$big_manifest".tar "$WEB_DIR"/10/Manifest.os-core.tar
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle"
 
 	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
-		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.os-core.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/10/Manifest.os-core.tar'
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Failed to retrieve 10 os-core manifest
 		Error: Cannot load MoM sub-manifests
 		Failed to remove bundle(s)
@@ -78,18 +78,18 @@ test_setup() {
 
 	# let's replace the Manifest tar from the bundle with a much larger file that will exceed
 	# the available space on disk
-	sudo rm "$WEBDIR"/10/Manifest.test-bundle
-	sudo rm "$WEBDIR"/10/Manifest.test-bundle.tar
-	big_manifest=$(create_file "$WEBDIR"/10 15MB)
-	sudo mv "$big_manifest" "$WEBDIR"/10/Manifest.test-bundle
-	sudo mv "$big_manifest".tar "$WEBDIR"/10/Manifest.test-bundle.tar
+	sudo rm "$WEB_DIR"/10/Manifest.test-bundle
+	sudo rm "$WEB_DIR"/10/Manifest.test-bundle.tar
+	big_manifest=$(create_file "$WEB_DIR"/10 15MB)
+	sudo mv "$big_manifest" "$WEB_DIR"/10/Manifest.test-bundle
+	sudo mv "$big_manifest".tar "$WEB_DIR"/10/Manifest.test-bundle.tar
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle"
 
 	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
-		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/10/Manifest.test-bundle.tar'
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Failed to retrieve 10 test-bundle manifest
 		Error: Cannot load MoM sub-manifests
 		Failed to remove bundle(s)

@@ -15,9 +15,9 @@ test_setup() {
 
 	assert_status_is 0
 	# validate file is installed in target
-	assert_file_exists "$TARGETDIR"/foo
+	assert_file_exists "$TARGET_DIR"/foo
 	# validate zero pack was not downloaded
-	assert_file_not_exists "$STATEDIR"/pack-test-bundle1-from-0-to-10.tar
+	assert_file_not_exists "$STATE_DIR"/pack-test-bundle1-from-0-to-10.tar
 	expected_output=$(cat <<-EOM
 		Loading required manifests...
 		No packs need to be downloaded

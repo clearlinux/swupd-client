@@ -10,11 +10,11 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
 	# create a 3rd-party bundle that has a couple of binaries
-	bin_file1=$(create_file -x "$TPWEBDIR"/10/files)
+	bin_file1=$(create_file -x "$TP_WEB_DIR"/10/files)
 	create_bundle -n test-bundle1 -f /file1,/foo/file_2,/usr/bin/bin_file1:"$bin_file1",/bin/bin_file2 -u repo1 "$TEST_NAME"
 	create_bundle -n test-bundle2 -f /file3,/usr/bin/bin_file1:"$bin_file1"                            -u repo1 "$TEST_NAME"
 	# let's make test-bundle2 contain /bin/bin_file1 but not export it
-	update_manifest "$TPWEBDIR"/10/Manifest.test-bundle2 file-status /usr/bin/bin_file1 F...
+	update_manifest "$TP_WEB_DIR"/10/Manifest.test-bundle2 file-status /usr/bin/bin_file1 F...
 
 }
 
@@ -48,16 +48,16 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# the script files should have been generated for the exported files
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/bin_file1
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/bin_file2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/bin_file1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/bin_file2
 
 	# verify the content of the scripts is correct
-	run sudo sh -c "cat $TARGETDIR/$THIRD_PARTY_BIN_DIR/bin_file1"
+	run sudo sh -c "cat $TARGET_DIR/$TP_BIN_DIR/bin_file1"
 	expected_output=$(cat <<-EOM
 		#!/bin/bash
 		export PATH=.*
 		export LD_LIBRARY_PATH=.*
-		$PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/repo1/usr/bin/bin_file1 .*
+		$ABS_TARGET_DIR/$TP_BUNDLES_DIR/repo1/usr/bin/bin_file1 .*
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -69,8 +69,8 @@ test_setup() {
 	# If a 3rd-party bundle has binaries to be exported but the binary already exists
 	# in the target system, the bundle installation should be aborted
 
-	sudo mkdir -p "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"
-	sudo touch "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/bin_file1
+	sudo mkdir -p "$TARGET_DIR"/"$TP_BIN_DIR"
+	sudo touch "$TARGET_DIR"/"$TP_BIN_DIR"/bin_file1
 
 	run sudo sh -c "$SWUPD 3rd-party bundle-add $SWUPD_OPTS test-bundle1"
 
@@ -81,7 +81,7 @@ test_setup() {
 		Bundles added from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Loading required manifests...
 		Validating 3rd-party bundle binaries...
-		Error: There is already a binary called bin_file1 in $PATH_PREFIX/opt/3rd-party/bin
+		Error: There is already a binary called bin_file1 in $ABS_TARGET_DIR/opt/3rd-party/bin
 		Aborting bundle installation...
 		Failed to install 1 of 1 bundles
 	EOM
@@ -130,15 +130,15 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/bin_file1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/bin_file1
 
 	# verify the content of the scripts is correct
-	run sudo sh -c "cat $TARGETDIR/$THIRD_PARTY_BIN_DIR/bin_file1"
+	run sudo sh -c "cat $TARGET_DIR/$TP_BIN_DIR/bin_file1"
 	expected_output=$(cat <<-EOM
 		#!/bin/bash
 		export PATH=.*
 		export LD_LIBRARY_PATH=.*
-		$PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/repo1/usr/bin/bin_file1 .*
+		$ABS_TARGET_DIR/$TP_BUNDLES_DIR/repo1/usr/bin/bin_file1 .*
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
@@ -185,17 +185,17 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/bin_file1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/bin_file1
 
 	# verify the content of the scripts is correct
-	run sudo sh -c "cat $TARGETDIR/$THIRD_PARTY_BIN_DIR/bin_file1"
+	run sudo sh -c "cat $TARGET_DIR/$TP_BIN_DIR/bin_file1"
 	expected_output=$(cat <<-EOM
 		#!/bin/bash
 		export PATH=.*
 		export LD_LIBRARY_PATH=.*
 		export XDG_DATA_DIRS=.*
 		export XDG_CONFIG_DIRS=.*
-		$PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/repo1/usr/bin/bin_file1 .*
+		$ABS_TARGET_DIR/$TP_BUNDLES_DIR/repo1/usr/bin/bin_file1 .*
 	EOM
 	)
 	assert_regex_is_output "$expected_output"

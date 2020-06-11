@@ -26,13 +26,13 @@ test_setup(){
 @test "TPR008: Remove multiple repos" {
 
 	#remove at start of file
-	assert_dir_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/repo1
-	assert_dir_exists "$STATEDIR"/3rd-party/repo1
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_3
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_4
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_5
+	assert_dir_exists "$ABS_TARGET_DIR"/"$TP_BUNDLES_DIR"/repo1
+	assert_dir_exists "$STATE_DIR"/3rd-party/repo1
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/binary_3
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/binary_4
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/binary_5
 
 	run sudo sh -c "$SWUPD 3rd-party remove $SWUPD_OPTS repo2"
 	assert_status_is "$SWUPD_OK"
@@ -44,17 +44,17 @@ test_setup(){
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_dir_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/repo1
-	assert_dir_exists "$STATEDIR"/3rd-party/repo1
-	assert_dir_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/repo2
-	assert_dir_not_exists "$STATEDIR"/3rd-party/repo2
-	assert_dir_exists "$PATH_PREFIX"/"$THIRD_PARTY_BUNDLES_DIR"/repo3
-	assert_dir_exists "$STATEDIR"/3rd-party/repo3
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	assert_file_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	assert_file_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_3
-	assert_file_not_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_4
-	assert_file_exists "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/binary_5
+	assert_dir_exists "$ABS_TARGET_DIR"/"$TP_BUNDLES_DIR"/repo1
+	assert_dir_exists "$STATE_DIR"/3rd-party/repo1
+	assert_dir_not_exists "$ABS_TARGET_DIR"/"$TP_BUNDLES_DIR"/repo2
+	assert_dir_not_exists "$STATE_DIR"/3rd-party/repo2
+	assert_dir_exists "$ABS_TARGET_DIR"/"$TP_BUNDLES_DIR"/repo3
+	assert_dir_exists "$STATE_DIR"/3rd-party/repo3
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	assert_file_not_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	assert_file_not_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/binary_3
+	assert_file_not_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/binary_4
+	assert_file_exists "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/binary_5
 
 }
 #WEIGHT=12

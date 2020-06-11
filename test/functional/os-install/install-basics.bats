@@ -17,7 +17,7 @@ test_setup() {
 	# os-install will install a basic OS that has only os-core if nothing
 	# else is specified
 
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGETDIR"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH $TARGET_DIR"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -39,8 +39,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 
@@ -49,7 +49,7 @@ test_setup() {
 	# os-install will install a basic OS that has only os-core if nothing
 	# else is specified
 
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH --path $TARGETDIR"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH --path $TARGET_DIR"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
@@ -71,8 +71,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 
@@ -82,7 +82,7 @@ test_setup() {
 	# to be provided by either using the --path option or simply specifying
 	# it with no option, but not both
 
-	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH --path $TARGETDIR $TARGETDIR"
+	run sudo sh -c "$SWUPD os-install $SWUPD_OPTS_NO_PATH --path $TARGET_DIR $TARGET_DIR"
 
 	assert_status_is "$SWUPD_INVALID_OPTION"
 	expected_output=$(cat <<-EOM
@@ -90,8 +90,8 @@ test_setup() {
 	EOM
 	)
 	assert_in_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_not_exists "$TARGETDIR"/core
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_not_exists "$TARGET_DIR"/core
 
 }
 #WEIGHT=4

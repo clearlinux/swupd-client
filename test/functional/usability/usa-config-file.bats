@@ -137,7 +137,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS"
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		Checking for extra files under $TEST_DIRNAME/testfs/target-dir/usr
+		Checking for extra files under $ABS_TEST_DIR/testfs/target-dir/usr
 	EOM
 	)
 	assert_in_output "$expected_output"
@@ -175,7 +175,7 @@ test_setup() {
 	run sudo sh -c "$SWUPD diagnose $SWUPD_OPTS --picky-tree /usr/lib"
 	assert_status_is "$SWUPD_NO"
 	expected_output=$(cat <<-EOM
-		Checking for extra files under $TEST_DIRNAME/testfs/target-dir/usr/lib
+		Checking for extra files under $ABS_TEST_DIR/testfs/target-dir/usr/lib
 	EOM
 	)
 	assert_in_output "$expected_output"
@@ -194,8 +194,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Distribution:      Swupd Test Distro
 		Installed version: 10
-		Version URL:       file://$TEST_DIRNAME/web-dir
-		Content URL:       file://$TEST_DIRNAME/web-dir
+		Version URL:       file://$ABS_TEST_DIR/web-dir
+		Content URL:       file://$ABS_TEST_DIR/web-dir
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -216,8 +216,8 @@ test_setup() {
 		Warning: Unrecognized option 'invalid_option=true' from section [global] in the configuration file
 		Distribution:      Swupd Test Distro
 		Installed version: 10
-		Version URL:       file://$TEST_DIRNAME/web-dir
-		Content URL:       file://$TEST_DIRNAME/web-dir
+		Version URL:       file://$ABS_TEST_DIR/web-dir
+		Content URL:       file://$ABS_TEST_DIR/web-dir
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -244,7 +244,7 @@ test_setup() {
 		Checking for missing files
 		Checking for corrupt files
 		Checking for extraneous files
-		Checking for extra files under $TEST_DIRNAME/testfs/target-dir/usr
+		Checking for extra files under $ABS_TEST_DIR/testfs/target-dir/usr
 	EOM
 	)
 	assert_in_output "$expected_output"

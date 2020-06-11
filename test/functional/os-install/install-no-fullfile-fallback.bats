@@ -10,8 +10,8 @@ test_setup() {
 	create_test_environment -e "$TEST_NAME" 10
 	create_bundle -n os-core -f /core "$TEST_NAME"
 	# remove the zero packs and fullfiles
-	sudo rm "$WEBDIR"/10/pack-os-core-from-0.tar
-	sudo rm -rf "$WEBDIR"/10/files/*
+	sudo rm "$WEB_DIR"/10/pack-os-core-from-0.tar
+	sudo rm -rf "$WEB_DIR"/10/files/*
 
 }
 

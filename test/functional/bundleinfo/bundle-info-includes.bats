@@ -13,15 +13,15 @@ global_setup() {
 	create_bundle -n test-bundle3 -f /file_3 "$TEST_NAME"
 	create_bundle -n test-bundle4 -f /file_4 "$TEST_NAME"
 	# add test-bundle2 as a dependency of test-bundle1 and test-bundle3 as optional
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle1 test-bundle2
-	add_dependency_to_manifest -o "$WEBDIR"/10/Manifest.test-bundle1 test-bundle3
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest -o "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle3
 	# add test-bundle4 as a dependency of test-bundle2
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle2 test-bundle4
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle2 test-bundle4
 	# add one more dependency in a new version
 	create_version "$TEST_NAME" 20 10
 	update_bundle "$TEST_NAME" test-bundle1 --header-only
 	create_bundle -n test-bundle5 -f /file_5 "$TEST_NAME"
-	add_dependency_to_manifest "$WEBDIR"/20/Manifest.test-bundle1 test-bundle5
+	add_dependency_to_manifest "$WEB_DIR"/20/Manifest.test-bundle1 test-bundle5
 
 }
 

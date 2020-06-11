@@ -42,8 +42,8 @@ global_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_equal "http://invalid_server_for_swupd" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
-	assert_equal "http://invalid_server_for_swupd" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
+	assert_equal "http://invalid_server_for_swupd" "$(<"$TARGET_DIR"/etc/swupd/mirror_contenturl)"
+	assert_equal "http://invalid_server_for_swupd" "$(<"$TARGET_DIR"/etc/swupd/mirror_versionurl)"
 }
 
 @test "MIR009: swupd operations when http mirror is used without allow-insecure-http" {

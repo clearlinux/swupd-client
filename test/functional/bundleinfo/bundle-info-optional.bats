@@ -13,10 +13,10 @@ global_setup() {
 	create_bundle -n test-bundle3 -f /file_3 "$TEST_NAME"
 	create_bundle -n test-bundle4 -f /file_4 "$TEST_NAME"
 	create_bundle -n test-bundle5 -f /file_5 "$TEST_NAME"
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle1 test-bundle2
-	add_dependency_to_manifest -o "$WEBDIR"/10/Manifest.test-bundle1 test-bundle3
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle2 test-bundle4
-	add_dependency_to_manifest -o "$WEBDIR"/10/Manifest.test-bundle2 test-bundle5
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest -o "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle3
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle2 test-bundle4
+	add_dependency_to_manifest -o "$WEB_DIR"/10/Manifest.test-bundle2 test-bundle5
 }
 
 @test "BIN011: Show info about a bundle including its optional and non-optional dependencies" {
@@ -48,9 +48,9 @@ global_setup() {
 
 @test "BIN012: Show info about a bundle including its installed optional and non-optional dependencies" {
 
-	install_bundle "$WEBDIR"/10/Manifest.test-bundle1
-	install_bundle "$WEBDIR"/10/Manifest.test-bundle2
-	install_bundle "$WEBDIR"/10/Manifest.test-bundle5
+	install_bundle "$WEB_DIR"/10/Manifest.test-bundle1
+	install_bundle "$WEB_DIR"/10/Manifest.test-bundle2
+	install_bundle "$WEB_DIR"/10/Manifest.test-bundle5
 
 	run sudo sh -c "$SWUPD bundle-info $SWUPD_OPTS test-bundle1 --dependencies"
 

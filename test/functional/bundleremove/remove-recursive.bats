@@ -18,27 +18,27 @@ test_setup() {
 	create_bundle -L -t -n test-bundle6 -f /test-file6     "$TEST_NAME"
 	# test-bundle1 has 4 direct dependencies: os-core, test-bundle2,
 	# test-bundle4 (also-add), test-bundle6 (tracked)
-	add_dependency_to_manifest -p    "$WEBDIR"/10/Manifest.test-bundle1 os-core
-	add_dependency_to_manifest -p    "$WEBDIR"/10/Manifest.test-bundle1 test-bundle2
-	add_dependency_to_manifest -p -o "$WEBDIR"/10/Manifest.test-bundle1 test-bundle4
-	add_dependency_to_manifest       "$WEBDIR"/10/Manifest.test-bundle1 test-bundle6
+	add_dependency_to_manifest -p    "$WEB_DIR"/10/Manifest.test-bundle1 os-core
+	add_dependency_to_manifest -p    "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest -p -o "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle4
+	add_dependency_to_manifest       "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle6
 	# and 1 indirect dependency: test-bundle3
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle2 test-bundle3
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle2 test-bundle3
 	# test-bundle4 is a dependency of test-bundle1, but it is also a dependency
 	# test-bundle5 which is also installed
-	add_dependency_to_manifest "$WEBDIR"/10/Manifest.test-bundle5 test-bundle4
+	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle5 test-bundle4
 
 	# make sure all files do exist
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle4
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle5
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle6
-	assert_file_exists "$STATEDIR"/bundles/test-bundle1
-	assert_file_exists "$STATEDIR"/bundles/test-bundle6
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle4
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle5
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle6
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle1
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle6
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 
@@ -68,24 +68,24 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# bundles/files that should be deleted
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/foo/test-file1
-	assert_file_not_exists "$TARGETDIR"/bar/test-file2
-	assert_file_not_exists "$TARGETDIR"/bat/test-file3
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_not_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_not_exists "$TARGET_DIR"/bat/test-file3
 
 	# bundles/files that should not be deleted
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle4
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle5
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle6
-	assert_file_exists "$STATEDIR"/bundles/test-bundle6
-	assert_file_exists "$TARGETDIR"/baz/test-file4
-	assert_file_exists "$TARGETDIR"/test-file5
-	assert_file_exists "$TARGETDIR"/test-file6
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle4
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle5
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle6
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle6
+	assert_file_exists "$TARGET_DIR"/baz/test-file4
+	assert_file_exists "$TARGET_DIR"/test-file5
+	assert_file_exists "$TARGET_DIR"/test-file6
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 
@@ -116,24 +116,24 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# bundles/files that should be deleted
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle4
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle5
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/foo/test-file1
-	assert_file_not_exists "$TARGETDIR"/bar/test-file2
-	assert_file_not_exists "$TARGETDIR"/bat/test-file3
-	assert_file_not_exists "$TARGETDIR"/baz/test-file4
-	assert_file_not_exists "$TARGETDIR"/test-file5
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle4
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle5
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_not_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_not_exists "$TARGET_DIR"/bat/test-file3
+	assert_file_not_exists "$TARGET_DIR"/baz/test-file4
+	assert_file_not_exists "$TARGET_DIR"/test-file5
 
 	# bundles/files that should not be deleted
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle6
-	assert_file_exists "$STATEDIR"/bundles/test-bundle6
-	assert_file_exists "$TARGETDIR"/test-file6
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle6
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle6
+	assert_file_exists "$TARGET_DIR"/test-file6
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 
@@ -163,24 +163,24 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# bundles/files that should be deleted
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle4
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle5
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle6
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle6
-	assert_file_not_exists "$TARGETDIR"/foo/test-file1
-	assert_file_not_exists "$TARGETDIR"/bar/test-file2
-	assert_file_not_exists "$TARGETDIR"/bat/test-file3
-	assert_file_not_exists "$TARGETDIR"/baz/test-file4
-	assert_file_not_exists "$TARGETDIR"/test-file5
-	assert_file_not_exists "$TARGETDIR"/test-file6
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle4
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle5
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle6
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle1
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle6
+	assert_file_not_exists "$TARGET_DIR"/foo/test-file1
+	assert_file_not_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_not_exists "$TARGET_DIR"/bat/test-file3
+	assert_file_not_exists "$TARGET_DIR"/baz/test-file4
+	assert_file_not_exists "$TARGET_DIR"/test-file5
+	assert_file_not_exists "$TARGET_DIR"/test-file6
 
 	# bundles/files that should not be deleted
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 
@@ -188,7 +188,7 @@ test_setup() {
 
 	# when running bundle-remove --recursive, if the tracking directory is
 	# not found or empty, bundle-remove should assume everything is tracked
-	sudo rm -rf "$STATEDIR"/bundles
+	sudo rm -rf "$STATE_DIR"/bundles
 
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle1 --recursive"
 
@@ -205,24 +205,24 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# bundles/files that should be deleted
-	assert_file_not_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle1
-	assert_file_not_exists "$STATEDIR"/bundles/test-bundle1
-	assert_file_not_exists "$TARGETDIR"/foo/test-file1
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/foo/test-file1
 
 	# bundles/files that should not be deleted
-	assert_file_exists "$STATEDIR"/bundles/test-bundle6
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle2
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle3
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle4
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle5
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/test-bundle6
-	assert_file_exists "$TARGETDIR"/core
-	assert_file_exists "$TARGETDIR"/bar/test-file2
-	assert_file_exists "$TARGETDIR"/bat/test-file3
-	assert_file_exists "$TARGETDIR"/baz/test-file4
-	assert_file_exists "$TARGETDIR"/test-file5
-	assert_file_exists "$TARGETDIR"/test-file6
+	assert_file_exists "$STATE_DIR"/bundles/test-bundle6
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle3
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle4
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle5
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle6
+	assert_file_exists "$TARGET_DIR"/core
+	assert_file_exists "$TARGET_DIR"/bar/test-file2
+	assert_file_exists "$TARGET_DIR"/bat/test-file3
+	assert_file_exists "$TARGET_DIR"/baz/test-file4
+	assert_file_exists "$TARGET_DIR"/test-file5
+	assert_file_exists "$TARGET_DIR"/test-file6
 
 }
 #WEIGHT=29

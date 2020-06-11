@@ -27,7 +27,7 @@ test_setup() {
 
 	# Unusual link names
 	create_bundle -n test-bundle1 -l "/usr/links/'link1'",'/usr/links/"link2"','/usr/links/very_unusual_¹²³!@#$%^&*()_;[]{}\_link3','/usr/links/link:4' "$TEST_NAME"
-	add_dependency_to_manifest "$WEBDIR"/20/Manifest.os-core test-bundle1
+	add_dependency_to_manifest "$WEB_DIR"/20/Manifest.os-core test-bundle1
 
 }
 
@@ -62,24 +62,24 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_exists "$TARGETDIR""/usr/simple_file"
+	assert_file_exists "$TARGET_DIR""/usr/simple_file"
 
 	# Unusual dir names
-	assert_file_exists "$TARGETDIR""/usr/unusual_'dirname'/normal_file1"
-	assert_file_exists "$TARGETDIR"'/usr/unusual_"dirname"/normal_file2'
-	assert_file_exists "$TARGETDIR"'/usr/very_unusual_,¹²³!@#$%^&*()_;[]{}\`_name/normal_file3'
-	assert_file_exists "$TARGETDIR"'/usr/unusual:dirname/normal_file4'
+	assert_file_exists "$TARGET_DIR""/usr/unusual_'dirname'/normal_file1"
+	assert_file_exists "$TARGET_DIR"'/usr/unusual_"dirname"/normal_file2'
+	assert_file_exists "$TARGET_DIR"'/usr/very_unusual_,¹²³!@#$%^&*()_;[]{}\`_name/normal_file3'
+	assert_file_exists "$TARGET_DIR"'/usr/unusual:dirname/normal_file4'
 
 	# Unusual file names
-	assert_file_exists "$TARGETDIR""/usr/unusual_files/'file1'"
-	assert_file_exists "$TARGETDIR"'/usr/unusual_files/"file2"'
-	assert_file_exists "$TARGETDIR"'/usr/unusual_files/very_unusual_,¹²³!@#$%^&*()_;[]{}\_file3'
-	assert_file_exists "$TARGETDIR""/usr/unusual_files/file:4"
+	assert_file_exists "$TARGET_DIR""/usr/unusual_files/'file1'"
+	assert_file_exists "$TARGET_DIR"'/usr/unusual_files/"file2"'
+	assert_file_exists "$TARGET_DIR"'/usr/unusual_files/very_unusual_,¹²³!@#$%^&*()_;[]{}\_file3'
+	assert_file_exists "$TARGET_DIR""/usr/unusual_files/file:4"
 
 	# Unusual link names
-	assert_symlink_exists "$TARGETDIR""/usr/links/'link1'"
-	assert_symlink_exists "$TARGETDIR"'/usr/links/"link2"'
-	assert_symlink_exists "$TARGETDIR"'/usr/links/very_unusual_¹²³!@#$%^&*()_;[]{}\_link3'
-	assert_symlink_exists "$TARGETDIR""/usr/links/link:4"
+	assert_symlink_exists "$TARGET_DIR""/usr/links/'link1'"
+	assert_symlink_exists "$TARGET_DIR"'/usr/links/"link2"'
+	assert_symlink_exists "$TARGET_DIR"'/usr/links/very_unusual_¹²³!@#$%^&*()_;[]{}\_link3'
+	assert_symlink_exists "$TARGET_DIR""/usr/links/link:4"
 }
 #WEIGHT=10

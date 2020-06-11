@@ -23,12 +23,12 @@ test_setup() {
 	create_bundle -L -t -n test-bundle2 -f /baz/file_3 -u test-repo2 "$TEST_NAME"
 
 	# adding an untracked files into an untracked directory (/bat)
-	sudo mkdir "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/bat
-	sudo touch "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/bat/untracked_file1
+	sudo mkdir "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo1/bat
+	sudo touch "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo1/bat/untracked_file1
 	# adding an untracked file into tracked directory (/bar)
-	sudo touch "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo1/bar/untracked_file2
+	sudo touch "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo1/bar/untracked_file2
 	# adding an untracked file into /usr
-	sudo touch "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo2/usr/untracked_file3
+	sudo touch "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo2/usr/untracked_file3
 
 }
 
@@ -47,13 +47,13 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/baz -> fixed
-		 -> Missing file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/baz/file_3 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/baz -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/baz/file_3 -> fixed
 		Repairing corrupt files
-		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/foo/file_1 -> fixed
-		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/foo/file_1 -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/usr/lib/os-release -> fixed
 		Removing extraneous files
-		 -> File that should be deleted: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/bar/file_2 -> deleted
+		 -> File that should be deleted: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/bar/file_2 -> deleted
 		Inspected 19 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
@@ -122,7 +122,7 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
 		Repairing corrupt files
-		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/usr/lib/os-release -> fixed
 		Removing extraneous files
 		Inspected 17 files
 		  1 file did not match
@@ -152,14 +152,14 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/baz -> fixed
-		 -> Missing file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/baz/file_3 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/baz -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/baz/file_3 -> fixed
 		Repairing corrupt files
-		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/foo/file_1 -> fixed
-		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/foo/file_1 -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/usr/lib/os-release -> fixed
 		Removing extraneous files
-		 -> File that should be deleted: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/bar/file_2 -> deleted
-		Removing extra files under $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/usr
+		 -> File that should be deleted: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/bar/file_2 -> deleted
+		Removing extra files under $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/usr
 		Inspected 19 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
@@ -182,8 +182,8 @@ test_setup() {
 		Adding any missing files
 		Repairing corrupt files
 		Removing extraneous files
-		Removing extra files under $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo2/usr
-		 -> Extra file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo2/usr/untracked_file3 -> deleted
+		Removing extra files under $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo2/usr
+		 -> Extra file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo2/usr/untracked_file3 -> deleted
 		Inspected 16 files
 		  1 file found which should be deleted
 		    1 of 1 files were deleted
@@ -212,16 +212,16 @@ test_setup() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		 -> Missing file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/baz -> fixed
-		 -> Missing file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/baz/file_3 -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/baz -> fixed
+		 -> Missing file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/baz/file_3 -> fixed
 		Repairing corrupt files
-		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/foo/file_1 -> fixed
-		 -> Hash mismatch for file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/usr/lib/os-release -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/foo/file_1 -> fixed
+		 -> Hash mismatch for file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/usr/lib/os-release -> fixed
 		Removing extraneous files
-		 -> File that should be deleted: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/bar/file_2 -> deleted
-		Removing extra files under $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/bat
-		 -> Extra file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/bat/untracked_file1 -> deleted
-		 -> Extra file: $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo1/bat/ -> deleted
+		 -> File that should be deleted: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/bar/file_2 -> deleted
+		Removing extra files under $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/bat
+		 -> Extra file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/bat/untracked_file1 -> deleted
+		 -> Extra file: $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo1/bat/ -> deleted
 		Inspected 21 files
 		  2 files were missing
 		    2 of 2 missing files were replaced
@@ -244,7 +244,7 @@ test_setup() {
 		Adding any missing files
 		Repairing corrupt files
 		Removing extraneous files
-		Removing extra files under $PATH_PREFIX/$THIRD_PARTY_BUNDLES_DIR/test-repo2/bat
+		Removing extra files under $ABS_TARGET_DIR/$TP_BUNDLES_DIR/test-repo2/bat
 		Inspected 15 files
 		Calling post-update helper scripts
 		Regenerating 3rd-party bundle binaries...

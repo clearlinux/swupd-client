@@ -9,7 +9,7 @@ test_setup() {
 	create_bundle -n test-bundle2 -f /testfile2 "$TEST_NAME"
 	create_version -p "$TEST_NAME" 100 10
 	update_bundle "$TEST_NAME" test-bundle1 --update /testfile1
-	add_dependency_to_manifest "$WEBDIR"/100/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest "$WEB_DIR"/100/Manifest.test-bundle1 test-bundle2
 
 }
 
@@ -44,9 +44,9 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 	# changed files
-	assert_file_exists "$TARGETDIR"/testfile1
+	assert_file_exists "$TARGET_DIR"/testfile1
 	# new file
-	assert_file_exists "$TARGETDIR"/testfile2
+	assert_file_exists "$TARGET_DIR"/testfile2
 
 }
 

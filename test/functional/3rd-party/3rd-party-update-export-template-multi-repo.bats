@@ -20,28 +20,28 @@ test_setup() {
 	update_bundle "$TEST_NAME" test-bundle1 --update /bin/binary_2 repo1
 
 	# add an update to the current template file
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE" "\nA little update\n"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME" "\nA little update\n"
 
 	# let's add a line to the scripts for all binaries so we can tell if
 	# they were re-generated after the update
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1 "TEST_STRING"
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2 "TEST_STRING"
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3 "TEST_STRING"
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_4 "TEST_STRING"
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_5 "TEST_STRING"
-	write_to_protected_file -a "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_6 "TEST_STRING"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1 "TEST_STRING"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2 "TEST_STRING"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3 "TEST_STRING"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_BIN_DIR"/binary_4 "TEST_STRING"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_BIN_DIR"/binary_5 "TEST_STRING"
+	write_to_protected_file -a "$TARGET_DIR"/"$TP_BIN_DIR"/binary_6 "TEST_STRING"
 
 }
 
 @test "TPR085: Update 3rd-party repositories that have exported binaries when the template has changed" {
 
 	# pre-test checks
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_4
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_5
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_6
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_4
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_5
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_6
 
 	# If the template file is different than that in the swupd binary,
 	# all binaries should be re-generated regardless of if they were updated or not,
@@ -99,34 +99,34 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# post-test checks
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_4
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_4
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_4
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_4
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_5
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_5
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_5
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_5
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_6
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_6
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_6
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_6
 	assert_not_in_output "TEST_STRING"
 
 	# make sure the template file exists in the system and is correct
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE"
-	template_file=$(sudo cat "$TARGETDIR"/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE")
-	template=$(echo -e "$SCRIPT_TEMPLATE")
+	assert_file_exists "$TARGET_DIR"/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME"
+	template_file=$(sudo cat "$TARGET_DIR"/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME")
+	template=$(echo -e "$TP_SCRIPT_TEMPLATE_CONTENT")
 	assert_equal "$template_file" "$template"
 
 }
@@ -134,12 +134,12 @@ test_setup() {
 @test "TPR086: Update 3rd-party repository that has exported binaries when the template has changed using --repo" {
 
 	# pre-test checks
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_4
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_5
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_6
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_4
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_5
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_6
 
 	# If the template file is different than that in the swupd binary,
 	# all binaries should be re-generated for all repositories,
@@ -188,34 +188,34 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# post-test checks
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_1
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_1
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_2
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_2
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_3
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_3
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_4
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_4
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_4
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_4
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_5
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_5
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_5
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_5
 	assert_not_in_output "TEST_STRING"
 
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_6
-	run sudo cat "$TARGETDIR"/"$THIRD_PARTY_BIN_DIR"/binary_6
+	assert_file_exists "$TARGET_DIR"/"$TP_BIN_DIR"/binary_6
+	run sudo cat "$TARGET_DIR"/"$TP_BIN_DIR"/binary_6
 	assert_not_in_output "TEST_STRING"
 
 	# make sure the template file exists in the system and is correct
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE"
-	template_file=$(sudo cat "$TARGETDIR"/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE")
-	template=$(echo -e "$SCRIPT_TEMPLATE")
+	assert_file_exists "$TARGET_DIR"/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME"
+	template_file=$(sudo cat "$TARGET_DIR"/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME")
+	template=$(echo -e "$TP_SCRIPT_TEMPLATE_CONTENT")
 	assert_equal "$template_file" "$template"
 
 }

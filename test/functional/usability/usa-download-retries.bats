@@ -10,7 +10,7 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle -f /file_1 "$TEST_NAME"
 	# start a web server that will return status code 204 for all requests
-	start_web_server -r -D "$WEBDIR" -f 204
+	start_web_server -r -D "$WEB_DIR" -f 204
 	port=$(get_web_server_port "$TEST_NAME")
 	# set the versionurl and contenturl to point to the web server
 	set_upstream_server "$TEST_NAME" http://localhost:"$port"

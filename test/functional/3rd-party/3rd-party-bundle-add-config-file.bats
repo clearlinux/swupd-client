@@ -17,8 +17,8 @@ test_setup() {
 	create_bundle -n test-bundle3 -f /file_3     -u test-repo "$TEST_NAME"
 
 	# add test-bundle2 as a dependency of test-bundle1 and test-bundle3 as optional
-	add_dependency_to_manifest "$TPWEBDIR"/10/Manifest.test-bundle1 test-bundle2
-	add_dependency_to_manifest -o "$TPWEBDIR"/10/Manifest.test-bundle1 test-bundle3
+	add_dependency_to_manifest "$TP_WEB_DIR"/10/Manifest.test-bundle1 test-bundle2
+	add_dependency_to_manifest -o "$TP_WEB_DIR"/10/Manifest.test-bundle1 test-bundle3
 
 	create_config_file
 
@@ -57,16 +57,16 @@ test_setup() {
 	assert_is_output "$expected_output"
 
 	# test-bundle1 is installed and tracked
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo/usr/share/clear/bundles/test-bundle1
-	assert_file_exists "$TPSTATEDIR"/bundles/test-bundle1
+	assert_file_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo/usr/share/clear/bundles/test-bundle1
+	assert_file_exists "$TP_STATE_DIR"/bundles/test-bundle1
 
 	# test-bundle2 is installed but not tracked
-	assert_file_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo/usr/share/clear/bundles/test-bundle2
-	assert_file_not_exists "$TPSTATEDIR"/bundles/test-bundle2
+	assert_file_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo/usr/share/clear/bundles/test-bundle2
+	assert_file_not_exists "$TP_STATE_DIR"/bundles/test-bundle2
 
 	# test-bundle3 is not installed at all
-	assert_file_not_exists "$TARGETDIR"/"$THIRD_PARTY_BUNDLES_DIR"/test-repo/usr/share/clear/bundles/test-bundle3
-	assert_file_not_exists "$TPSTATEDIR"/bundles/test-bundle3
+	assert_file_not_exists "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo/usr/share/clear/bundles/test-bundle3
+	assert_file_not_exists "$TP_STATE_DIR"/bundles/test-bundle3
 
 }
 #WEIGHT=7

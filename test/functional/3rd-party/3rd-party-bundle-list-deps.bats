@@ -16,9 +16,9 @@ global_setup() {
 	create_bundle  -n test-bundle3 -f /baz/file_3 -u repo1 "$TEST_NAME"
 	create_bundle  -n test-bundle4 -f /file_4     -u repo1 "$TEST_NAME"
 	create_bundle  -n test-bundle5 -f /bat/file_5 -u repo1 "$TEST_NAME"
-	add_dependency_to_manifest "$TPWEBDIR"/10/Manifest.test-bundle2 test-bundle3
-	add_dependency_to_manifest "$TPWEBDIR"/10/Manifest.test-bundle3 test-bundle4
-	add_dependency_to_manifest "$TPWEBDIR"/10/Manifest.test-bundle2 test-bundle5
+	add_dependency_to_manifest "$TP_WEB_DIR"/10/Manifest.test-bundle2 test-bundle3
+	add_dependency_to_manifest "$TP_WEB_DIR"/10/Manifest.test-bundle3 test-bundle4
+	add_dependency_to_manifest "$TP_WEB_DIR"/10/Manifest.test-bundle2 test-bundle5
 
 }
 

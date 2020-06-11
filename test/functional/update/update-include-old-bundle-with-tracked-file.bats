@@ -13,7 +13,7 @@ test_setup() {
 	create_version -r "$TEST_NAME" 30 20
 	update_bundle "$TEST_NAME" test-bundle3 --add /tracked_file:"$TEST_NAME"/web-dir/10/files/"$tracked_file"
 	update_bundle "$TEST_NAME" test-bundle2 --header-only
-	add_dependency_to_manifest "$WEBDIR"/30/Manifest.test-bundle2 test-bundle1
+	add_dependency_to_manifest "$WEB_DIR"/30/Manifest.test-bundle2 test-bundle1
 	set_current_version "$TEST_NAME" 20
 
 }
@@ -47,10 +47,10 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/core
-	assert_file_exists "$TARGETDIR"/tracked_file
-	assert_file_exists "$TARGETDIR"/foo/ftb1
-	assert_file_exists "$TARGETDIR"/ftb3
+	assert_file_exists "$TARGET_DIR"/core
+	assert_file_exists "$TARGET_DIR"/tracked_file
+	assert_file_exists "$TARGET_DIR"/foo/ftb1
+	assert_file_exists "$TARGET_DIR"/ftb3
 
 }
 #WEIGHT=11

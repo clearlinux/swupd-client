@@ -10,18 +10,18 @@ test_setup() {
 	# bundles created with the testlib add all needed directories to the
 	# manifest by default, so we need to remove the directory from test-bundle1
 	# so its missing the path to the file.
-	remove_from_manifest "$WEBDIR"/10/Manifest.test-bundle1 /foo
-	remove_from_manifest "$WEBDIR"/10/Manifest.test-bundle1 /foo/bar
+	remove_from_manifest "$WEB_DIR"/10/Manifest.test-bundle1 /foo
+	remove_from_manifest "$WEB_DIR"/10/Manifest.test-bundle1 /foo/bar
 	# since test-bundle2 is already installed, both directories defined
 	# there already exist, so we need to delete one of the /foo/bar so it
 	# can be fixed using verify_fix_path
-	sudo rm -rf "$TARGETDIR"/foo/bar
+	sudo rm -rf "$TARGET_DIR"/foo/bar
 
 }
 
 @test "ADD022: When adding a bundle and a path is missing on the fs, bundle-add fixes it" {
 
-	assert_dir_not_exists "$TARGETDIR"/foo/bar
+	assert_dir_not_exists "$TARGET_DIR"/foo/bar
 
 	run sudo sh -c "$SWUPD bundle-add $SWUPD_OPTS test-bundle1"
 
@@ -37,7 +37,7 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/foo/bar/test-file1
+	assert_file_exists "$TARGET_DIR"/foo/bar/test-file1
 
 }
 #WEIGHT=3

@@ -21,14 +21,14 @@ test_setup() {
 
 @test "UPD061: Updating a system using mirror without latest signature" {
 
-	sudo rm "$MIRROR"/version/formatstaging/latest.sig
+	sudo rm "$ABS_MIRROR_DIR"/version/formatstaging/latest.sig
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Update started
 		Checking mirror status
-		Error: Signature for latest file (file://$TEST_ROOT_DIR/$MIRROR/version/formatstaging/latest) is missing
+		Error: Signature for latest file (file://$ABS_MIRROR_DIR/version/formatstaging/latest) is missing
 		Warning: the mirror version could not be determined
 		Removing mirror configuration
 		Preparing to update from 10 to 20
@@ -51,21 +51,21 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/file_2
-	assert_file_exists "$TARGETDIR"/file_3
+	assert_file_exists "$TARGET_DIR"/file_2
+	assert_file_exists "$TARGET_DIR"/file_3
 
 }
 
 @test "UPD062: Updating a system using mirror with invalid latest signature" {
 
-	write_to_protected_file "$MIRROR"/version/formatstaging/latest.sig "1234"
+	write_to_protected_file "$ABS_MIRROR_DIR"/version/formatstaging/latest.sig "1234"
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Update started
 		Checking mirror status
-		Error: Signature verification failed for URL: file://$TEST_ROOT_DIR/$MIRROR/version/formatstaging/latest
+		Error: Signature verification failed for URL: file://$ABS_MIRROR_DIR/version/formatstaging/latest
 		Warning: the mirror version could not be determined
 		Removing mirror configuration
 		Preparing to update from 10 to 20
@@ -88,8 +88,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/file_2
-	assert_file_exists "$TARGETDIR"/file_3
+	assert_file_exists "$TARGET_DIR"/file_2
+	assert_file_exists "$TARGET_DIR"/file_3
 
 }
 #WEIGHT=7

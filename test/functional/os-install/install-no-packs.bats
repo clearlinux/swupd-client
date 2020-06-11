@@ -10,7 +10,7 @@ test_setup() {
 	create_test_environment -e "$TEST_NAME" 10
 	create_bundle -n os-core -f /core "$TEST_NAME"
 	# remove the zero pack
-	sudo rm "$WEBDIR"/10/pack-os-core-from-0.tar
+	sudo rm "$WEB_DIR"/10/pack-os-core-from-0.tar
 
 }
 
@@ -42,8 +42,8 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/usr/share/clear/bundles/os-core
-	assert_file_exists "$TARGETDIR"/core
+	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/os-core
+	assert_file_exists "$TARGET_DIR"/core
 
 }
 #WEIGHT=2

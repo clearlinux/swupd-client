@@ -5,7 +5,7 @@ load "../testlib"
 test_setup() {
 
 	create_test_environment -e "$TEST_NAME"
-	sudo rm -rf "$WEBDIR"/version
+	sudo rm -rf "$WEB_DIR"/version
 
 }
 

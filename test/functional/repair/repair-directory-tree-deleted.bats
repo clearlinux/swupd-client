@@ -9,12 +9,12 @@ test_setup() {
 
 	create_test_environment -e "$TEST_NAME"
 	create_bundle -L -n os-core -f /testdir1/testdir2/testfile "$TEST_NAME"
-	update_manifest -p "$WEBDIR"/10/Manifest.os-core file-status /testdir1/testdir2/testfile .d..
-	update_manifest -p "$WEBDIR"/10/Manifest.os-core file-status /testdir1/testdir2 .d..
-	update_manifest -p "$WEBDIR"/10/Manifest.os-core file-status /testdir1 .d..
-	update_manifest -p "$WEBDIR"/10/Manifest.os-core file-hash /testdir1/testdir2/testfile "$ZERO_HASH"
-	update_manifest -p "$WEBDIR"/10/Manifest.os-core file-hash /testdir1/testdir2 "$ZERO_HASH"
-	update_manifest "$WEBDIR"/10/Manifest.os-core file-hash /testdir1 "$ZERO_HASH"
+	update_manifest -p "$WEB_DIR"/10/Manifest.os-core file-status /testdir1/testdir2/testfile .d..
+	update_manifest -p "$WEB_DIR"/10/Manifest.os-core file-status /testdir1/testdir2 .d..
+	update_manifest -p "$WEB_DIR"/10/Manifest.os-core file-status /testdir1 .d..
+	update_manifest -p "$WEB_DIR"/10/Manifest.os-core file-hash /testdir1/testdir2/testfile "$ZERO_HASH"
+	update_manifest -p "$WEB_DIR"/10/Manifest.os-core file-hash /testdir1/testdir2 "$ZERO_HASH"
+	update_manifest "$WEB_DIR"/10/Manifest.os-core file-hash /testdir1 "$ZERO_HASH"
 
 }
 
@@ -41,9 +41,9 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_dir_not_exists "$TARGETDIR"/testdir1
-	assert_dir_not_exists "$TARGETDIR"/testdir1/testdir2
-	assert_file_not_exists "$TARGETDIR"/testdir1/testdir2/testfile
+	assert_dir_not_exists "$TARGET_DIR"/testdir1
+	assert_dir_not_exists "$TARGET_DIR"/testdir1/testdir2
+	assert_file_not_exists "$TARGET_DIR"/testdir1/testdir2/testfile
 
 }
 #WEIGHT=12

@@ -24,8 +24,8 @@ global_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
-	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGET_DIR"/etc/swupd/mirror_contenturl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGET_DIR"/etc/swupd/mirror_versionurl)"
 
 	run sudo sh -c "$SWUPD mirror --unset $SWUPD_OPTS"
 	assert_status_is 0
@@ -34,14 +34,14 @@ global_setup() {
 		Mirror url configuration removed
 		Distribution:      Swupd Test Distro
 		Installed version: 10
-		Version URL:       file://$TEST_DIRNAME/web-dir
-		Content URL:       file://$TEST_DIRNAME/web-dir
+		Version URL:       file://$ABS_TEST_DIR/web-dir
+		Content URL:       file://$ABS_TEST_DIR/web-dir
 	EOM
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_contenturl
-	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_versionurl
+	assert_file_not_exists "$TARGET_DIR"/etc/swupd/mirror_contenturl
+	assert_file_not_exists "$TARGET_DIR"/etc/swupd/mirror_versionurl
 }
 
 @test "MIR012: Unsetting a mirror not set" {
@@ -53,14 +53,14 @@ global_setup() {
 		No mirror url configuration to remove
 		Distribution:      Swupd Test Distro
 		Installed version: 10
-		Version URL:       file://$TEST_DIRNAME/web-dir
-		Content URL:       file://$TEST_DIRNAME/web-dir
+		Version URL:       file://$ABS_TEST_DIR/web-dir
+		Content URL:       file://$ABS_TEST_DIR/web-dir
 	EOM
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_contenturl
-	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_versionurl
+	assert_file_not_exists "$TARGET_DIR"/etc/swupd/mirror_contenturl
+	assert_file_not_exists "$TARGET_DIR"/etc/swupd/mirror_versionurl
 }
 
 @test "MIR013: Set/Unset a full mirror with globals" {
@@ -76,8 +76,8 @@ global_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
-	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGET_DIR"/etc/swupd/mirror_contenturl)"
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGET_DIR"/etc/swupd/mirror_versionurl)"
 
 	run sudo sh -c "$SWUPD mirror --unset $SWUPD_OPTS"
 	assert_status_is 0
@@ -86,14 +86,14 @@ global_setup() {
 		Mirror url configuration removed
 		Distribution:      Swupd Test Distro
 		Installed version: 10
-		Version URL:       file://$TEST_DIRNAME/web-dir
-		Content URL:       file://$TEST_DIRNAME/web-dir
+		Version URL:       file://$ABS_TEST_DIR/web-dir
+		Content URL:       file://$ABS_TEST_DIR/web-dir
 	EOM
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_contenturl
-	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_versionurl
+	assert_file_not_exists "$TARGET_DIR"/etc/swupd/mirror_contenturl
+	assert_file_not_exists "$TARGET_DIR"/etc/swupd/mirror_versionurl
 }
 
 @test "MIR014: Set/Unset a content mirror with globals" {
@@ -104,13 +104,13 @@ global_setup() {
 		Mirror url set
 		Distribution:      Swupd Test Distro
 		Installed version: 10
-		Version URL:       file://$TEST_DIRNAME/web-dir
+		Version URL:       file://$ABS_TEST_DIR/web-dir
 		Content URL:       https://example.com/swupd-file
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_contenturl)"
-	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_versionurl
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGET_DIR"/etc/swupd/mirror_contenturl)"
+	assert_file_not_exists "$TARGET_DIR"/etc/swupd/mirror_versionurl
 
 	run sudo sh -c "$SWUPD mirror --unset $SWUPD_OPTS"
 	assert_status_is 0
@@ -119,14 +119,14 @@ global_setup() {
 		Mirror url configuration removed
 		Distribution:      Swupd Test Distro
 		Installed version: 10
-		Version URL:       file://$TEST_DIRNAME/web-dir
-		Content URL:       file://$TEST_DIRNAME/web-dir
+		Version URL:       file://$ABS_TEST_DIR/web-dir
+		Content URL:       file://$ABS_TEST_DIR/web-dir
 	EOM
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_contenturl
-	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_versionurl
+	assert_file_not_exists "$TARGET_DIR"/etc/swupd/mirror_contenturl
+	assert_file_not_exists "$TARGET_DIR"/etc/swupd/mirror_versionurl
 }
 
 @test "MIR015: Set/Unset a version mirror with globals" {
@@ -138,12 +138,12 @@ global_setup() {
 		Distribution:      Swupd Test Distro
 		Installed version: 10
 		Version URL:       https://example.com/swupd-file
-		Content URL:       file://$TEST_DIRNAME/web-dir
+		Content URL:       file://$ABS_TEST_DIR/web-dir
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_contenturl
-	assert_equal "https://example.com/swupd-file" "$(<"$TARGETDIR"/etc/swupd/mirror_versionurl)"
+	assert_file_not_exists "$TARGET_DIR"/etc/swupd/mirror_contenturl
+	assert_equal "https://example.com/swupd-file" "$(<"$TARGET_DIR"/etc/swupd/mirror_versionurl)"
 
 	run sudo sh -c "$SWUPD mirror --unset $SWUPD_OPTS"
 	assert_status_is 0
@@ -152,13 +152,13 @@ global_setup() {
 		Mirror url configuration removed
 		Distribution:      Swupd Test Distro
 		Installed version: 10
-		Version URL:       file://$TEST_DIRNAME/web-dir
-		Content URL:       file://$TEST_DIRNAME/web-dir
+		Version URL:       file://$ABS_TEST_DIR/web-dir
+		Content URL:       file://$ABS_TEST_DIR/web-dir
 	EOM
 	)
 	assert_is_output "$expected_output"
 
-	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_contenturl
-	assert_file_not_exists "$TARGETDIR"/etc/swupd/mirror_versionurl
+	assert_file_not_exists "$TARGET_DIR"/etc/swupd/mirror_contenturl
+	assert_file_not_exists "$TARGET_DIR"/etc/swupd/mirror_versionurl
 }
 #WEIGHT=2

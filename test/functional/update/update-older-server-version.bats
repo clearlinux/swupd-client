@@ -27,7 +27,7 @@ test_setup() {
 
 @test "UPD020: Try updating a system where there is no server version file available" {
 
-	sudo rm -rf "$WEBDIR"/version
+	sudo rm -rf "$WEB_DIR"/version
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
@@ -43,7 +43,7 @@ test_setup() {
 
 @test "UPD021: Try updating a system where there is no target version file available" {
 
-	sudo rm -rf "$TARGETDIR"/usr/lib/os-release
+	sudo rm -rf "$TARGET_DIR"/usr/lib/os-release
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 

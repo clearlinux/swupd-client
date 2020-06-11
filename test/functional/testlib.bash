@@ -1,50 +1,74 @@
 #!/usr/bin/bash
 
+# #############################
+# Testlib Environment Variables
+# #############################
+
 # Environment variables provided by BATS
+# --------------------------------------
 # $BATS_TEST_FILENAME is the fully expanded path to the Bats test file.
 # $BATS_TEST_DIRNAME is the directory in which the Bats test file is located.
 # $BATS_TEST_NAMES is an array of function names for each test case.
-# $BATS_TEST_NAME is the name of the function containing the current test case.
-# $BATS_TEST_DESCRIPTION is the description of the current test case.
+# $BATS_TEST_NAME is the name of the function containing the current test case (e.g. test_REM012-3a_test_description).
+# $BATS_TEST_DESCRIPTION is the description of the current test case (e.g. REM012: test description).
 # $BATS_TEST_NUMBER is the (1-based) index of the current test case in the test file.
 # $BATS_TMPDIR is the location to a directory that may be used to store temporary files.
 
-# global variables
-FUNC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export FUNC_DIR
-TEST_ROOT_DIR="$(pwd)"
-export TEST_ROOT_DIR
-TEST_FILENAME=$(basename "$BATS_TEST_FILENAME")
-export TEST_FILENAME
-export TEST_NAME=${TEST_FILENAME%.bats}
-export THEME_DIRNAME="$BATS_TEST_DIRNAME"
-export TEST_NAME_SHORT="$TEST_NAME"
-export SWUPD_DIR="$FUNC_DIR/../.."
+# Variables used to control test execution (have to be set by the user)
+# ---------------------------------------------------------------------
+# DEBUG_TEST
+# KEEP_ENV
+# ENV_ONLY
+# SHOW_TARGET
+
+# Relevant paths
+# --------------
+# path to /<swupd-client>/test/functional/<test_group>
+export ABS_TEST_THEME_DIR="$BATS_TEST_DIRNAME"
+# path to /<swupd-client>/test/functional
+ABS_FUNC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" ; export ABS_FUNC_DIR
+# path to /<swupd-cilent>
+export ABS_SWUPD_DIR="$ABS_FUNC_DIR/../.."
+# path to the current working directory
+ABS_TESTLIB_WD="$(pwd)" ; export ABS_TESTLIB_WD
+# path to the trusted key store path
+export ABS_CACERT_DIR="$ABS_SWUPD_DIR/swupd_test_certificates"
+
+# Current test information
+# ------------------------
+# name of the test file without path (e.g. my_test.bats)
+TEST_FILE_NAME=$(basename "$BATS_TEST_FILENAME") ; export TEST_FILE_NAME
+# name of the test file without extension (e.g. my_test)
+export TEST_NAME_SHORT=${TEST_FILE_NAME%.bats}
+# name identifier of the current test, this will vary depending of
+# if the test uses a global_setup or a test_setup, we first assume the test
+# is going to be used with a global_setup, if not the case, it will be redefined
+# during setup()
+export TEST_NAME="$TEST_NAME_SHORT"
 
 # 3rd-party variables
-export THIRD_PARTY_DIR="opt/3rd-party"
-export THIRD_PARTY_BUNDLES_DIR="$THIRD_PARTY_DIR/bundles"
-export THIRD_PARTY_BIN_DIR="$THIRD_PARTY_DIR/bin"
-export THIRD_PARTY_SCRIPT_TEMPLATE="script.template"
+# -------------------
+export TP_ROOT_DIR="opt/3rd-party"
+export TP_BUNDLES_DIR="$TP_ROOT_DIR/bundles"
+export TP_BIN_DIR="$TP_ROOT_DIR/bin"
+export TP_SCRIPT_TEMPLATE_FILE_NAME="script.template"
+export TP_SCRIPT_TEMPLATE_CONTENT="\
+#!/bin/bash\n\n\
+export PATH=%s:\$PATH\n\
+export LD_LIBRARY_PATH=%s:\$LD_LIBRARY_PATH\n\
+export XDG_DATA_DIRS=%s:\$XDG_DATA_DIRS\n\
+export XDG_CONFIG_DIRS=%s:\$XDG_CONFIG_DIRS\n\
+\n\
+%s \"\$@\"\n"
 
-# formatting variables
+# global constants
+# ----------------
+export ZERO_HASH="0000000000000000000000000000000000000000000000000000000000000000"
 export SPACE=" "
 export TAB="	"
 
-# detect where the swupd binary is
-if [ -e "$SWUPD" ]; then
-	# nothing to be done, variable already set up
-	export SWUPD
-elif [ -e "$SWUPD_DIR"/swupd ]; then
-	# using the path relative to the test dir
-	export SWUPD="$SWUPD_DIR"/swupd
-elif [ -e "$(pwd)"/swupd ]; then
-	# using the current path
-	SWUPD="$(pwd)"/swupd
-	export SWUPD
-fi
-
-# Exit codes
+# SWUPD exit codes
+# ----------------
 export SWUPD_OK=0
 export SWUPD_NO=1
 export SWUPD_REQUIRED_BUNDLE_ERROR=2  # a required bundle is missing or was attempted to be removed
@@ -84,16 +108,25 @@ export SWUPD_INVALID_BINARY=36  # binary to be executed is missing or invalid
 export SWUPD_INVALID_REPOSITORY=37  # the specified 3rd-party repository is invalid
 export SWUPD_INVALID_FILE=38  # file is missing or invalid
 
-# global constant
-export ZERO_HASH="0000000000000000000000000000000000000000000000000000000000000000"
-export SCRIPT_TEMPLATE="\
-#!/bin/bash\n\n\
-export PATH=%s:\$PATH\n\
-export LD_LIBRARY_PATH=%s:\$LD_LIBRARY_PATH\n\
-export XDG_DATA_DIRS=%s:\$XDG_DATA_DIRS\n\
-export XDG_CONFIG_DIRS=%s:\$XDG_CONFIG_DIRS\n\
-\n\
-%s \"\$@\"\n"
+# SWUPD binary
+# ------------
+# detect where the swupd binary is
+if [ -e "$SWUPD" ]; then
+	# nothing to be done, variable already set up
+	export SWUPD
+elif [ -e "$ABS_SWUPD_DIR"/swupd ]; then
+	# using the path relative to the test dir
+	export SWUPD="$ABS_SWUPD_DIR"/swupd
+elif [ -e "$(pwd)"/swupd ]; then
+	# using the current path
+	SWUPD="$(pwd)"/swupd
+	export SWUPD
+fi
+
+
+# #######################
+# Testlib Functions
+# #######################
 
 generate_random_content() { # swupd_function
 
@@ -196,7 +229,7 @@ create_trusted_cacert() { # swupd_function
 
 	# only one test can use the trusted certificate store at the same time to
 	# avoid certificate contamination from other tests and race conditions.
-	until mkdir "$CACERT_DIR"; do
+	until mkdir "$ABS_CACERT_DIR"; do
 		sleep 1
 		if [ "$counter" -eq "1000" ]; then
 			echo "Timeout: creating trusted certificate"
@@ -205,13 +238,13 @@ create_trusted_cacert() { # swupd_function
 		counter=$((counter + 1))
 	done
 
-	# only allow the test that create CACERT_DIR to erase it
-	echo '1' > "$CACERT_DIR/$TEST_NAME.lock"
+	# only allow the test that create ABS_CACERT_DIR to erase it
+	echo '1' > "$ABS_CACERT_DIR/$TEST_NAME.lock"
 
-	# the public key names in the CACERT_DIR must use the following format to
+	# the public key names in the ABS_CACERT_DIR must use the following format to
 	# be included by swupd in the trust store: <subject hash>.<number>
 	subj_hash=$(openssl x509 -subject_hash -noout -in "$cert_path")
-	ln -s "$cert_path" "$CACERT_DIR/$subj_hash.0"
+	ln -s "$cert_path" "$ABS_CACERT_DIR/$subj_hash.0"
 
 }
 
@@ -226,10 +259,10 @@ destroy_trusted_cacert() { # swupd_function
 	EOM
 	)" "$@"
 
-	# only the test that created CACERT_DIR can erase it which stops
-	# tests from erasing CACERT_DIR when they fail before creating it
-	if [ -f "$CACERT_DIR/$TEST_NAME.lock" ]; then
-		rm -rf "$CACERT_DIR"
+	# only the test that created ABS_CACERT_DIR can erase it which stops
+	# tests from erasing ABS_CACERT_DIR when they fail before creating it
+	if [ -f "$ABS_CACERT_DIR/$TEST_NAME.lock" ]; then
+		rm -rf "$ABS_CACERT_DIR"
 	fi
 
 }
@@ -270,7 +303,7 @@ show_target() { # swupd_function
 	EOM
 	)" "$@"
 
-	print "\n$(tree "$TARGETDIR")\n"
+	print "\n$(tree "$TARGET_DIR")\n"
 
 }
 
@@ -631,50 +664,52 @@ set_env_variables() { # swupd_function
 	testfs_path="$path"/"$env_name"/testfs
 
 	debug_msg "Exporting environment variables for $env_name"
+
 	# relevant relative paths
-	export WEBDIR="$env_name"/web-dir
-	debug_msg "WEBDIR: $WEBDIR"
-	export TARGETDIR="$env_name"/testfs/target-dir
-	debug_msg "TARGETDIR: $TARGETDIR"
-	export STATEDIR="$env_name"/testfs/state
-	debug_msg "STATEDIR: $STATEDIR"
+	export WEB_DIR="$env_name"/web-dir
+	debug_msg "WEB_DIR: $WEB_DIR"
+	export TARGET_DIR="$env_name"/testfs/target-dir
+	debug_msg "TARGET_DIR: $TARGET_DIR"
+	export STATE_DIR="$env_name"/testfs/state
+	debug_msg "STATE_DIR: $STATE_DIR"
 
 	# relevant absolute paths
-	export TEST_DIRNAME="$path"/"$env_name"
-	debug_msg "TEST_DIRNAME: $TEST_DIRNAME"
-	export PATH_PREFIX="$TEST_DIRNAME"/testfs/target-dir
-	debug_msg "PATH_PREFIX: $PATH_PREFIX"
-	export STATEDIR_ABS="$TEST_DIRNAME"/testfs/state
-	debug_msg "STATEDIR_ABS: $STATEDIR_ABS"
-	export STATEDIR_TRACKING="$STATEDIR_ABS"/bundles
-	debug_msg "STATEDIR_TRACKING: $STATEDIR_TRACKING"
+	export ABS_TEST_DIR="$path"/"$env_name"
+	debug_msg "ABS_TEST_DIR: $ABS_TEST_DIR"
+	export ABS_TARGET_DIR="$ABS_TEST_DIR"/testfs/target-dir
+	debug_msg "ABS_TARGET_DIR: $ABS_TARGET_DIR"
+	export ABS_STATE_DIR="$ABS_TEST_DIR"/testfs/state
+	debug_msg "ABS_STATE_DIR: $ABS_STATE_DIR"
+	export ABS_TRACKING_DIR="$ABS_STATE_DIR"/bundles
+	debug_msg "ABS_TRACKING_DIR: $ABS_TRACKING_DIR"
 	converted_url=file___"$(echo "$path" | tr / _)"_"$env_name"_web-dir
-	export STATEDIR_CACHE="$STATEDIR_ABS"/cache/"$converted_url"
-	debug_msg "STATEDIR_CACHE: $STATEDIR_CACHE"
-	export STATEDIR_DELTA="$STATEDIR_ABS"/cache/"$converted_url"/delta
-	debug_msg "STATEDIR_DELTA: $STATEDIR_DELTA"
-	export STATEDIR_DOWNLOAD="$STATEDIR_ABS"/cache/"$converted_url"/download
-	debug_msg "STATEDIR_DOWNLOAD: $STATEDIR_DOWNLOAD"
-	export STATEDIR_MANIFEST="$STATEDIR_ABS"/cache/"$converted_url"/manifest
-	debug_msg "STATEDIR_MANIFEST: $STATEDIR_MANIFEST"
-	export STATEDIR_STAGED="$STATEDIR_ABS"/cache/"$converted_url"/staged
-	debug_msg "STATEDIR_STAGED: $STATEDIR_STAGED"
-	export STATEDIR_TEMP="$STATEDIR_ABS"/cache/"$converted_url"/temp
-	debug_msg "STATEDIR_TEMP: $STATEDIR_TEMP"
+	export ABS_CACHE_DIR="$ABS_STATE_DIR"/cache/"$converted_url"
+	debug_msg "ABS_CACHE_DIR: $ABS_CACHE_DIR"
+	export ABS_DELTA_DIR="$ABS_STATE_DIR"/cache/"$converted_url"/delta
+	debug_msg "ABS_DELTA_DIR: $ABS_DELTA_DIR"
+	export ABS_DOWNLOAD_DIR="$ABS_STATE_DIR"/cache/"$converted_url"/download
+	debug_msg "ABS_DOWNLOAD_DIR: $ABS_DOWNLOAD_DIR"
+	export ABS_MANIFEST_DIR="$ABS_STATE_DIR"/cache/"$converted_url"/manifest
+	debug_msg "ABS_MANIFEST_DIR: $ABS_MANIFEST_DIR"
+	export ABS_STAGED_DIR="$ABS_STATE_DIR"/cache/"$converted_url"/staged
+	debug_msg "ABS_STAGED_DIR: $ABS_STAGED_DIR"
+	export ABS_TEMP_DIR="$ABS_STATE_DIR"/cache/"$converted_url"/temp
+	debug_msg "ABS_TEMP_DIR: $ABS_TEMP_DIR"
+	export ABS_CLIENT_CERT_DIR="$testfs_path/target-dir/etc/swupd"
+	debug_msg "ABS_CLIENT_CERT_DIR: $ABS_CLIENT_CERT_DIR"
 
 	# different options for swupd
-	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $TEST_DIRNAME/Swupd_Root.pem -I --no-progress"
-	export SWUPD_OPTS_PROGRESS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $TEST_DIRNAME/Swupd_Root.pem -I"
+	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $ABS_TEST_DIR/Swupd_Root.pem -I --no-progress"
+	export SWUPD_OPTS_PROGRESS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $ABS_TEST_DIR/Swupd_Root.pem -I"
 	export SWUPD_OPTS_KEEPCACHE="$SWUPD_OPTS --keepcache"
 	export SWUPD_OPTS_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -F staging -I --no-progress"
-	export SWUPD_OPTS_NO_FMT="-S $testfs_path/state -p $testfs_path/target-dir -C $TEST_DIRNAME/Swupd_Root.pem -I --no-progress"
+	export SWUPD_OPTS_NO_FMT="-S $testfs_path/state -p $testfs_path/target-dir -C $ABS_TEST_DIR/Swupd_Root.pem -I --no-progress"
 	export SWUPD_OPTS_NO_FMT_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -I --no-progress"
-	export SWUPD_OPTS_NO_PATH="-S $testfs_path/state -F staging -C $TEST_DIRNAME/Swupd_Root.pem -I --no-progress"
-	export SWUPD_OPTS_NO_STATE="-p $testfs_path/target-dir -F staging -C $TEST_DIRNAME/Swupd_Root.pem -I --no-progress"
+	export SWUPD_OPTS_NO_PATH="-S $testfs_path/state -F staging -C $ABS_TEST_DIR/Swupd_Root.pem -I --no-progress"
+	export SWUPD_OPTS_NO_STATE="-p $testfs_path/target-dir -F staging -C $ABS_TEST_DIR/Swupd_Root.pem -I --no-progress"
 
-	export CLIENT_CERT_DIR="$testfs_path/target-dir/etc/swupd"
-	export CLIENT_CERT="$CLIENT_CERT_DIR/client.pem"
-	export CACERT_DIR="$SWUPD_DIR/swupd_test_certificates" # trusted key store path
+	# path to relevant files
+	export CLIENT_CERT_FILE="$ABS_CLIENT_CERT_DIR/client.pem"
 	export PORT_FILE="$path/$env_name/port_file.txt" # stores web server port
 	export SERVER_PID_FILE="$path/$env_name/pid_file.txt" # stores web server pid
 
@@ -1525,8 +1560,8 @@ sign_manifest() { # swupd_function
 	validate_item "$manifest"
 
 	sudo openssl smime -sign -binary -in "$manifest" \
-	-signer "$TEST_DIRNAME"/Swupd_Root.pem \
-	-inkey "$TEST_DIRNAME"/private.pem \
+	-signer "$ABS_TEST_DIR"/Swupd_Root.pem \
+	-inkey "$ABS_TEST_DIR"/private.pem \
 	-outform DER -out "$(dirname "$manifest")"/Manifest.MoM.sig
 }
 
@@ -1547,8 +1582,8 @@ sign_version() { # swupd_function
 	validate_item "$version_file"
 
 	sudo openssl smime -sign -binary -in "$version_file" \
-		-signer "$TEST_DIRNAME"/Swupd_Root.pem \
-		-inkey "$TEST_DIRNAME"/private.pem \
+		-signer "$ABS_TEST_DIR"/Swupd_Root.pem \
+		-inkey "$ABS_TEST_DIR"/private.pem \
 		-outform DER -out "$version_file".sig
 
 }
@@ -1599,7 +1634,7 @@ set_current_version() { # swupd_function
 	validate_path "$env_name"
 
 	if [ -n "$repo_name" ]; then
-		os_release="$env_name"/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"/usr/lib/os-release
+		os_release="$env_name"/testfs/target-dir/"$TP_BUNDLES_DIR"/"$repo_name"/usr/lib/os-release
 	else
 		os_release="$env_name"/testfs/target-dir/usr/lib/os-release
 	fi
@@ -1668,60 +1703,60 @@ create_third_party_repo() { #swupd_function
 	debug_msg "Creating 3rd-party repo $repo_name..."
 
 	# create the state dir for the 3rd-party repo
-	TPSTATEDIR="$STATEDIR"/3rd-party/"$repo_name"
-	TPURL="$path"/"$env_name"/3rd-party/"$repo_name"
-	url=file___"$(echo "$TPURL" | tr / _)"
-	debug_msg "Creating a data/cache directory for repo $repo_name at $TPSTATEDIR..."
-	sudo mkdir -p "$TPSTATEDIR"/bundles
-	sudo mkdir -p "$TPSTATEDIR"/cache/"$url"/{staged,download,delta,manifest,temp}
+	TP_STATE_DIR="$STATE_DIR"/3rd-party/"$repo_name"
+	ABS_TP_URL="$path"/"$env_name"/3rd-party/"$repo_name"
+	url=file___"$(echo "$ABS_TP_URL" | tr / _)"
+	debug_msg "Creating a data/cache directory for repo $repo_name at $TP_STATE_DIR..."
+	sudo mkdir -p "$TP_STATE_DIR"/bundles
+	sudo mkdir -p "$TP_STATE_DIR"/cache/"$url"/{staged,download,delta,manifest,temp}
 
-	sudo chmod -R 0700 "$TPSTATEDIR"/cache/"$url"/staged
-	sudo chmod -R 0700 "$TPSTATEDIR"/cache/"$url"/download
-	sudo chmod -R 0700 "$TPSTATEDIR"/cache/"$url"/delta
-	sudo chmod -R 0700 "$TPSTATEDIR"/cache/"$url"/temp
-	sudo chmod -R 0755 "$TPSTATEDIR"/cache/"$url"/manifest
+	sudo chmod -R 0700 "$TP_STATE_DIR"/cache/"$url"/staged
+	sudo chmod -R 0700 "$TP_STATE_DIR"/cache/"$url"/download
+	sudo chmod -R 0700 "$TP_STATE_DIR"/cache/"$url"/delta
+	sudo chmod -R 0700 "$TP_STATE_DIR"/cache/"$url"/temp
+	sudo chmod -R 0755 "$TP_STATE_DIR"/cache/"$url"/manifest
 
 	# create the basic content for the 3rd-party repo
 	create_version -r "$env_name" "$version" 0 "$format" "$repo_name"
 	debug_msg "3rd-party repo $repo_name created successfully"
 
 	# relevant relative paths
-	export TPWEBDIR="$env_name"/3rd-party/"$repo_name"
-	debug_msg "3rd-party repo content dir: $TPWEBDIR"
-	export TPTARGETDIR="$env_name"/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
-	debug_msg "3rd-party repo target dir: $TPTARGETDIR"
-	export TPSTATEDIR
-	debug_msg "3rd-party repo state dir: $TPSTATEDIR"
+	export TP_WEB_DIR="$env_name"/3rd-party/"$repo_name"
+	debug_msg "3rd-party repo content dir: $TP_WEB_DIR"
+	export TP_TARGET_DIR="$env_name"/testfs/target-dir/"$TP_BUNDLES_DIR"/"$repo_name"
+	debug_msg "3rd-party repo target dir: $TP_TARGET_DIR"
+	export TP_STATE_DIR
+	debug_msg "3rd-party repo state dir: $TP_STATE_DIR"
 
 	# relevant absolute paths
-	export TPURL
-	debug_msg "3rd-party repo URL: $TPURL"
-	export TPSTATEDIR_ABS="$path"/"$TPSTATEDIR"
-	export TPSTATEDIR_TRACKING="$TPSTATEDIR_ABS"/bundles
-	debug_msg "3rd-party repo statedir tracking dir: $TPSTATEDIR_TRACKING"
-	export TPSTATEDIR_CACHE="$TPSTATEDIR_ABS"/cache/"$url"
-	debug_msg "3rd-party repo statedir cache dir: $TPSTATEDIR_CACHE"
-	export TPSTATEDIR_DELTA="$TPSTATEDIR_ABS"/cache/"$url"/delta
-	debug_msg "3rd-party repo statedir delta dir: $TPSTATEDIR_DELTA"
-	export TPSTATEDIR_DOWNLOAD="$TPSTATEDIR_ABS"/cache/"$url"/download
-	debug_msg "3rd-party repo statedir download dir: $TPSTATEDIR_DOWNLOAD"
-	export TPSTATEDIR_MANIFEST="$TPSTATEDIR_ABS"/cache/"$url"/manifest
-	debug_msg "3rd-party repo statedir manifest dir: $TPSTATEDIR_MANIFEST"
-	export TPSTATEDIR_STAGED="$TPSTATEDIR_ABS"/cache/"$url"/staged
-	debug_msg "3rd-party repo statedir staged dir: $TPSTATEDIR_STAGED"
-	export TPSTATEDIR_TEMP="$TPSTATEDIR_ABS"/cache/"$url"/temp
-	debug_msg "3rd-party repo statedir temp dir: $TPSTATEDIR_TEMP"
+	export ABS_TP_URL
+	debug_msg "3rd-party repo URL: $ABS_TP_URL"
+	export ABS_TP_STATE_DIR="$path"/"$TP_STATE_DIR"
+	export ABS_TP_TRACKING_DIR="$ABS_TP_STATE_DIR"/bundles
+	debug_msg "3rd-party repo statedir tracking dir: $ABS_TP_TRACKING_DIR"
+	export ABS_TP_CACHE_DIR="$ABS_TP_STATE_DIR"/cache/"$url"
+	debug_msg "3rd-party repo statedir cache dir: $ABS_TP_CACHE_DIR"
+	export ABS_TP_DELTA_DIR="$ABS_TP_STATE_DIR"/cache/"$url"/delta
+	debug_msg "3rd-party repo statedir delta dir: $ABS_TP_DELTA_DIR"
+	export ABS_TP_DOWNLOAD_DIR="$ABS_TP_STATE_DIR"/cache/"$url"/download
+	debug_msg "3rd-party repo statedir download dir: $ABS_TP_DOWNLOAD_DIR"
+	export ABS_TP_MANIFEST_DIR="$ABS_TP_STATE_DIR"/cache/"$url"/manifest
+	debug_msg "3rd-party repo statedir manifest dir: $ABS_TP_MANIFEST_DIR"
+	export ABS_TP_STAGED_DIR="$ABS_TP_STATE_DIR"/cache/"$url"/staged
+	debug_msg "3rd-party repo statedir staged dir: $ABS_TP_STAGED_DIR"
+	export ABS_TP_TEMP_DIR="$ABS_TP_STATE_DIR"/cache/"$url"/temp
+	debug_msg "3rd-party repo statedir temp dir: $ABS_TP_TEMP_DIR"
 
 	# if requested, add the new repo to the repo.ini file
 	# and the template file
-	sudo mkdir -p "$env_name"/testfs/target-dir/"$THIRD_PARTY_DIR"
+	sudo mkdir -p "$env_name"/testfs/target-dir/"$TP_ROOT_DIR"
 	if [ "$add" = true ]; then
 		{
 			printf '[%s]\n\n' "$repo_name"
-			printf 'URL=%s\n\n' "file://$TPURL"
+			printf 'URL=%s\n\n' "file://$ABS_TP_URL"
 			printf 'VERSION=%s\n\n' "$version"
-		} | sudo tee -a "$env_name"/testfs/target-dir/"$THIRD_PARTY_DIR"/repo.ini > /dev/null
-		write_to_protected_file "$env_name"/testfs/target-dir/"$THIRD_PARTY_DIR"/"$THIRD_PARTY_SCRIPT_TEMPLATE" "$SCRIPT_TEMPLATE"
+		} | sudo tee -a "$env_name"/testfs/target-dir/"$TP_ROOT_DIR"/repo.ini > /dev/null
+		write_to_protected_file "$env_name"/testfs/target-dir/"$TP_ROOT_DIR"/"$TP_SCRIPT_TEMPLATE_FILE_NAME" "$TP_SCRIPT_TEMPLATE_CONTENT"
 	fi
 
 	# every 3rd-party repo needs to have at least the special os-core bundle,
@@ -1730,23 +1765,23 @@ create_third_party_repo() { #swupd_function
 	# - Swupd_Root.pem
 	# - format
 	debug_msg "Adding bundle os-core to the 3rd-party repo..."
-	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$TEST_DIRNAME"/Swupd_Root.pem)
-	sudo cp -p "$TEST_DIRNAME"/Swupd_Root.pem "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
+	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$ABS_TEST_DIR"/Swupd_Root.pem)
+	sudo cp -p "$ABS_TEST_DIR"/Swupd_Root.pem "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
 	create_tar "$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
 	cert="$env_name"/3rd-party/"$repo_name"/"$version"/files/"$hashed_name"
 	if [ "$add" = true ]; then
-		create_bundle -L -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$cert",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
+		create_bundle -L -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE_FILE",/usr/share/clear/update-ca/Swupd_Root.pem:"$cert",/usr/share/defaults/swupd/format:"$FORMAT_FILE" -u "$repo_name" "$env_name"
 	else
-		create_bundle -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE",/usr/share/clear/update-ca/Swupd_Root.pem:"$cert",/usr/share/defaults/swupd/format:"$FORMAT" -u "$repo_name" "$env_name"
+		create_bundle -n os-core -v "$version" -f /usr/lib/os-release:"$OS_RELEASE_FILE",/usr/share/clear/update-ca/Swupd_Root.pem:"$cert",/usr/share/defaults/swupd/format:"$FORMAT_FILE" -u "$repo_name" "$env_name"
 	fi
 
 	if [ "$ENV_ONLY" = true ]; then
 		print "\nVariables for 3rd-party repo $repo_name:\n"
-		print "TPURL=$TPURL"
-		print "TPWEBDIR=$TPWEBDIR"
-		print "TPTARGETDIR=$TPTARGETDIR"
-		print "TPSTATEDIR=$TPSTATEDIR"
-		print "TPCACHEDIR=$TPSTATEDIR_CACHE\n"
+		print "ABS_TP_URL=$ABS_TP_URL"
+		print "TP_WEB_DIR=$TP_WEB_DIR"
+		print "TP_TARGET_DIR=$TP_TARGET_DIR"
+		print "TP_STATE_DIR=$TP_STATE_DIR"
+		print "ABS_TP_CACHE_DIR=$ABS_TP_CACHE_DIR\n"
 	fi
 
 }
@@ -1839,13 +1874,13 @@ create_version() { # swupd_function
 		hashed_name=$(sudo "$SWUPD" hashdump --quiet "$env_name"/"$content_dir"/"$version"/os-release)
 		sudo cp "$env_name"/"$content_dir"/"$version"/os-release "$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
 		create_tar "$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
-		OS_RELEASE="$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
-		export OS_RELEASE
+		OS_RELEASE_FILE="$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
+		export OS_RELEASE_FILE
 		hashed_name=$(sudo "$SWUPD" hashdump --quiet "$env_name"/"$content_dir"/"$version"/format)
 		sudo cp "$env_name"/"$content_dir"/"$version"/format "$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
 		create_tar "$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
-		FORMAT="$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
-		export FORMAT
+		FORMAT_FILE="$env_name"/"$content_dir"/"$version"/files/"$hashed_name"
+		export FORMAT_FILE
 	fi
 	# if the previous version is 0 then create a new MoM, otherwise copy the MoM
 	# from the previous version
@@ -1889,12 +1924,12 @@ create_version() { # swupd_function
 				if [ -n "$(get_hash_from_manifest "$env_name"/"$content_dir"/"$oldversion"/Manifest.os-core /usr/lib/os-release)" ]; then
 					remove_from_manifest -p "$env_name"/"$content_dir"/"$version"/Manifest.os-core /usr/lib/os-release
 				fi
-				update_bundle -p "$env_name" os-core --add /usr/lib/os-release:"$OS_RELEASE" "$repo_name"
+				update_bundle -p "$env_name" os-core --add /usr/lib/os-release:"$OS_RELEASE_FILE" "$repo_name"
 				if [ -n "$(get_hash_from_manifest "$env_name"/"$content_dir"/"$oldversion"/Manifest.os-core /usr/share/defaults/swupd/format)" ]; then
 					remove_from_manifest -p "$env_name"/"$content_dir"/"$version"/Manifest.os-core /usr/share/defaults/swupd/format
 				fi
 				# update without -p flag to refresh tar and MoM
-				update_bundle "$env_name" os-core --add /usr/share/defaults/swupd/format:"$FORMAT" "$repo_name"
+				update_bundle "$env_name" os-core --add /usr/share/defaults/swupd/format:"$FORMAT_FILE" "$repo_name"
 			fi
 		fi
 		debug_msg "MoM created successfully"
@@ -1972,7 +2007,7 @@ create_test_environment() { # swupd_function
 	set_env_variables "$env_name"
 
 	# Generate certificates
-	generate_certificate "$env_name"/private.pem "$env_name"/Swupd_Root.pem "$FUNC_DIR"/certattributes.cnf
+	generate_certificate "$env_name"/private.pem "$env_name"/Swupd_Root.pem "$ABS_FUNC_DIR"/certattributes.cnf
 
 	# Create version
 	if [ "$release_files" = true ]; then
@@ -2025,7 +2060,7 @@ create_test_environment() { # swupd_function
 		debug_msg "Adding bundle os-core to the test environment"
 		if [ "$release_files" = true ]; then
 			debug_msg "Including the release files in bundle os-core"
-			create_bundle -L -n os-core -v "$version" -d /usr/share/clear/bundles -f /core,/usr/lib/os-release:"$OS_RELEASE",/usr/share/defaults/swupd/format:"$FORMAT" "$env_name"
+			create_bundle -L -n os-core -v "$version" -d /usr/share/clear/bundles -f /core,/usr/lib/os-release:"$OS_RELEASE_FILE",/usr/share/defaults/swupd/format:"$FORMAT_FILE" "$env_name"
 		else
 			create_bundle -L -n os-core -v "$version" -f /core "$env_name"
 		fi
@@ -2126,14 +2161,14 @@ add_os_core_update_bundle() { # swupd_function
 	validate_path "$env_name"
 
 	# move the versionurl file to the content directory
-	versionurl_hash=$(sudo "$SWUPD" hashdump --quiet "$TARGETDIR"/usr/share/defaults/swupd/versionurl)
-	sudo cp "$TARGETDIR"/usr/share/defaults/swupd/versionurl "$WEBDIR"/10/files/"$versionurl_hash"
-	versionurl="$WEBDIR"/10/files/"$versionurl_hash"
+	versionurl_hash=$(sudo "$SWUPD" hashdump --quiet "$TARGET_DIR"/usr/share/defaults/swupd/versionurl)
+	sudo cp "$TARGET_DIR"/usr/share/defaults/swupd/versionurl "$WEB_DIR"/10/files/"$versionurl_hash"
+	versionurl="$WEB_DIR"/10/files/"$versionurl_hash"
 
 	# move the contenturl file to the content directory
-	contenturl_hash=$(sudo "$SWUPD" hashdump --quiet "$TARGETDIR"/usr/share/defaults/swupd/contenturl)
-	sudo cp "$TARGETDIR"/usr/share/defaults/swupd/contenturl "$WEBDIR"/10/files/"$contenturl_hash"
-	contenturl="$WEBDIR"/10/files/"$contenturl_hash"
+	contenturl_hash=$(sudo "$SWUPD" hashdump --quiet "$TARGET_DIR"/usr/share/defaults/swupd/contenturl)
+	sudo cp "$TARGET_DIR"/usr/share/defaults/swupd/contenturl "$WEB_DIR"/10/files/"$contenturl_hash"
+	contenturl="$WEB_DIR"/10/files/"$contenturl_hash"
 
 	# create the os-core-update bundle
 	create_bundle -L -n os-core-update -f /usr/share/defaults/swupd/versionurl:"$versionurl",/usr/share/defaults/swupd/contenturl:"$contenturl" "$env_name"
@@ -2306,18 +2341,16 @@ create_mirror() { # swupd_function
 	)" "$@"
 
 	local env_name=$1
-	local path
 	validate_param "$env_name"
-	path=$(dirname "$(realpath "$env_name")")
 
 	# create the mirror
 	sudo mkdir "$env_name"/mirror
 	sudo cp -r "$env_name"/web-dir "$env_name"/mirror
-	export MIRROR="$env_name"/mirror/web-dir
+	export ABS_MIRROR_DIR="$ABS_TESTLIB_WD"/"$env_name"/mirror/web-dir
 
 	# set the mirror in the target-dir
-	write_to_protected_file "$env_name"/testfs/target-dir/etc/swupd/mirror_versionurl "file://$path/$MIRROR"
-	write_to_protected_file "$env_name"/testfs/target-dir/etc/swupd/mirror_contenturl "file://$path/$MIRROR"
+	write_to_protected_file "$env_name"/testfs/target-dir/etc/swupd/mirror_versionurl "file://$ABS_MIRROR_DIR"
+	write_to_protected_file "$env_name"/testfs/target-dir/etc/swupd/mirror_contenturl "file://$ABS_MIRROR_DIR"
 
 }
 
@@ -2485,9 +2518,9 @@ start_web_server() { # swupd_function
 
 	# start web server and write port/pid numbers to their respective files
 	if [ -n "$PORT_FILE" ] && [ -n "$SERVER_PID_FILE" ]; then
-		sudo sh -c "python3 $FUNC_DIR/server.py $server_args --port-file $PORT_FILE --pid-file $SERVER_PID_FILE &"
+		sudo sh -c "python3 $ABS_FUNC_DIR/server.py $server_args --port-file $PORT_FILE --pid-file $SERVER_PID_FILE &"
 	else
-		sudo sh -c "python3 $FUNC_DIR/server.py $server_args &"
+		sudo sh -c "python3 $ABS_FUNC_DIR/server.py $server_args &"
 	fi
 
 	# make sure localhost is present in no_proxy settings
@@ -2713,7 +2746,7 @@ create_bundle() { # swupd_function
 	# if a 3rd-party repo was specified, the bundle should be created in there
 	if [ "$third_party" = true ]; then
 		state_path="$env_name"/testfs/state/3rd-party/"$repo_name"
-		target_path="$env_name"/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
+		target_path="$env_name"/testfs/target-dir/"$TP_BUNDLES_DIR"/"$repo_name"
 		content_dir=3rd-party/"$repo_name"
 	else
 		target_path="$env_name"/testfs/target-dir
@@ -2835,10 +2868,10 @@ create_bundle() { # swupd_function
 				if [ "$(dirname "$val")" = "/bin" ] || [ "$(dirname "$val")" = "/usr/bin" ] || [ "$(dirname "$val")" = "/usr/local/bin" ]; then
 					# if the bundle is from a 3rd-party repo and has binaries, they should
 					# be exported to /opt/3rd-party/bin
-					debug_msg "Exporting 3rd-party bundle binary $THIRD_PARTY_BIN_DIR/$(basename "$val")"
-					sudo mkdir -p "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"
-					sudo touch "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
-					sudo chmod +x "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
+					debug_msg "Exporting 3rd-party bundle binary $TP_BIN_DIR/$(basename "$val")"
+					sudo mkdir -p "$ABS_TARGET_DIR"/"$TP_BIN_DIR"
+					sudo touch "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/"$(basename "$val")"
+					sudo chmod +x "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/"$(basename "$val")"
 				fi
 			fi
 		fi
@@ -2947,10 +2980,10 @@ create_bundle() { # swupd_function
 				if [ "$(dirname "$val")" = "/bin" ] || [ "$(dirname "$val")" = "/usr/bin" ] || [ "$(dirname "$val")" = "/usr/local/bin" ]; then
 					# if the bundle is from a 3rd-party repo and has binaries, they should
 					# be exported to /opt/3rd-party/bin
-					debug_msg "Exporting 3rd-party bundle binary $THIRD_PARTY_BIN_DIR/$(basename "$val")"
-					sudo mkdir -p "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"
-					sudo touch "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
-					sudo chmod +x "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val")"
+					debug_msg "Exporting 3rd-party bundle binary $TP_BIN_DIR/$(basename "$val")"
+					sudo mkdir -p "$ABS_TARGET_DIR"/"$TP_BIN_DIR"
+					sudo touch "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/"$(basename "$val")"
+					sudo chmod +x "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/"$(basename "$val")"
 				fi
 			fi
 		fi
@@ -2967,10 +3000,10 @@ create_bundle() { # swupd_function
 					if [ "$(dirname "$val_link")" = "/bin" ] || [ "$(dirname "$val_link")" = "/usr/bin" ] || [ "$(dirname "$val_link")" = "/usr/local/bin" ]; then
 						# if the bundle is from a 3rd-party repo and has binaries, they should
 						# be exported to /opt/3rd-party/bin
-						debug_msg "Exporting 3rd-party bundle binary $THIRD_PARTY_BIN_DIR/$(basename "$val_link")"
-						sudo mkdir -p "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"
-						sudo touch "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val_link")"
-						sudo chmod +x "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val_link")"
+						debug_msg "Exporting 3rd-party bundle binary $TP_BIN_DIR/$(basename "$val_link")"
+						sudo mkdir -p "$ABS_TARGET_DIR"/"$TP_BIN_DIR"
+						sudo touch "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/"$(basename "$val_link")"
+						sudo chmod +x "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/"$(basename "$val_link")"
 					fi
 				fi
 			fi
@@ -3032,10 +3065,10 @@ create_bundle() { # swupd_function
 					if [ "$(dirname "$val_link")" = "/bin" ] || [ "$(dirname "$val_link")" = "/usr/bin" ] || [ "$(dirname "$val_link")" = "/usr/local/bin" ]; then
 						# if the bundle is from a 3rd-party repo and has binaries, they should
 						# be exported to /opt/3rd-party/bin
-						debug_msg "Exporting 3rd-party bundle binary $THIRD_PARTY_BIN_DIR/$(basename "$val_link")"
-						sudo mkdir -p "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"
-						sudo touch "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val_link")"
-						sudo chmod +x "$PATH_PREFIX"/"$THIRD_PARTY_BIN_DIR"/"$(basename "$val_link")"
+						debug_msg "Exporting 3rd-party bundle binary $TP_BIN_DIR/$(basename "$val_link")"
+						sudo mkdir -p "$ABS_TARGET_DIR"/"$TP_BIN_DIR"
+						sudo touch "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/"$(basename "$val_link")"
+						sudo chmod +x "$ABS_TARGET_DIR"/"$TP_BIN_DIR"/"$(basename "$val_link")"
 					fi
 				fi
 			fi
@@ -3524,7 +3557,7 @@ remove_bundle() { # swupd_function
 	if [ -z "$repo_name" ]; then
 		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir
 	else
-		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
+		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/"$TP_BUNDLES_DIR"/"$repo_name"
 	fi
 	version_path=$(dirname "$bundle_manifest")
 	manifest_file=$(basename "$bundle_manifest")
@@ -3585,7 +3618,7 @@ install_bundle() { # swupd_function
 	if [ -z "$repo_name" ]; then
 		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir
 	else
-		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/"$THIRD_PARTY_BUNDLES_DIR"/"$repo_name"
+		target_path=$(dirname "$bundle_manifest" | cut -d "/" -f1)/testfs/target-dir/"$TP_BUNDLES_DIR"/"$repo_name"
 	fi
 	files_path=$(dirname "$bundle_manifest")/files
 	manifest_file=$(basename "$bundle_manifest")
@@ -3913,7 +3946,7 @@ update_bundle() { # swupd_function
 
 		# calculate new contentsize
 		new_fsize=$(stat -c "%s" "$version_path"/files/"$new_fhash")
-		contentsize=$((contentsize + (new_fsize - fsize)))
+		contentsize=$((contentsize + "($new_fsize - $fsize)"))
 
 		# update the zero-pack with the new file (leave the old file, it doesn't matter)
 		add_to_pack "$bundle" "$version_path"/files/"$new_fhash"
@@ -4070,7 +4103,7 @@ create_delta_manifest() { # swupd_function
 	local version=$2
 	local from_version=$3
 
-	sudo bsdiff "$WEBDIR/$from_version/Manifest.$bundle" "$WEBDIR/$version/Manifest.$bundle" "$WEBDIR/$version/Manifest-$bundle-delta-from-$from_version" || [ "$?" = 1 ] && true
+	sudo bsdiff "$WEB_DIR/$from_version/Manifest.$bundle" "$WEB_DIR/$version/Manifest.$bundle" "$WEB_DIR/$version/Manifest-$bundle-delta-from-$from_version" || [ "$?" = 1 ] && true
 }
 
 add_to_pack() { # swupd_function
@@ -4374,7 +4407,7 @@ list_tests() { # swupd_function
 		group_id=${group_id^^}
 	fi
 
-	grep -rh --include="*.bats" "@test \"$group_id" "$FUNC_DIR" | sed "s/@test \"//" | sed "s/\" {.*//" | sort
+	grep -rh --include="*.bats" "@test \"$group_id" "$ABS_FUNC_DIR" | sed "s/@test \"//" | sed "s/\" {.*//" | sort
 
 }
 
@@ -4408,15 +4441,18 @@ print_stack() {
 
 setup() {
 
-	TESTLIB_WD="$(pwd)"
-	export TESTLIB_WD
-
 	print "\\n\\n\\n$sep"
 	print "$alt_sep"
 	print "$sep\\n"
 
 	debug_msg "Test file: $TEST_NAME.bats"
 	debug_msg "BATS test number: $BATS_TEST_NUMBER"
+
+	# the TEST_NAME identifier has to be unique for each test environment:
+	# - if the tests in a file use the global_setup, therefore they use only
+	#   one test enviroment then TEST_NAME = $TEST_NAME_SHORT
+	# - if the tests in a file use the test_setup meaning each one need its own
+	#   test environment then TEST_NAME = $TEST_NAME_SHORT + _ + <test_specific_id>
 
 	# run the global_setup only once
 	if [ "$BATS_TEST_NAME" = "${BATS_TEST_NAMES[0]}" ]; then
@@ -4462,7 +4498,7 @@ setup() {
 	fi
 
 	debug_msg "\\nTEST_NAME: $TEST_NAME"
-	debug_msg "Test path: $(pwd)/$TEST_NAME"
+	debug_msg "Test path: $ABS_TESTLIB_WD/$TEST_NAME"
 
 	# now run the test setup
 	debug_msg "\\nRunning test_setup..."
@@ -4486,19 +4522,19 @@ teardown() {
 
 	# make sure to go back to the original working directory if the user
 	# changed it during a test
-	if [ "$(pwd)" != "$TESTLIB_WD" ]; then
-		cd "$TESTLIB_WD" || terminate "there was an error going back to the original working directory"
+	if [ "$(pwd)" != "$ABS_TESTLIB_WD" ]; then
+		cd "$ABS_TESTLIB_WD" || terminate "there was an error going back to the original working directory"
 	fi
 
 	if [ "$ENV_ONLY" = true ]; then
 		print "Test environment created successfully"
 		print "\nTest variables:\n"
 		print "SWUPD_OPTS=\"$SWUPD_OPTS\"\n"
-		print "TEST_DIRNAME=$TEST_DIRNAME"
-		print "PATH_PREFIX=$PATH_PREFIX"
-		print "WEBDIR=$WEBDIR"
-		print "TARGETDIR=$TARGETDIR"
-		print "STATEDIR=$STATEDIR\n"
+		print "ABS_TEST_DIR=$ABS_TEST_DIR"
+		print "ABS_TARGET_DIR=$ABS_TARGET_DIR"
+		print "WEB_DIR=$WEB_DIR"
+		print "TARGET_DIR=$TARGET_DIR"
+		print "STATE_DIR=$STATE_DIR\n"
 		terminate "Test environment only"
 	fi
 
@@ -4613,12 +4649,12 @@ use_ignore_list() {
 		# - <functional_tests_directory>/<test_theme_directory>/<test_name>.ignore-list
 		# - <functional_tests_directory>/<test_theme_directory>/ignore-list
 		# - <functional_tests_directory>/ignore-list
-		if [ -f "$THEME_DIRNAME"/"$TEST_NAME_SHORT".ignore-list ]; then
-			ignore_list="$THEME_DIRNAME"/"$TEST_NAME_SHORT".ignore-list
-		elif [ -f "$THEME_DIRNAME"/ignore-list ]; then
-			ignore_list="$THEME_DIRNAME"/ignore-list
-		elif [ -f "$FUNC_DIR"/ignore-list ]; then
-			ignore_list="$FUNC_DIR"/ignore-list
+		if [ -f "$ABS_TEST_THEME_DIR"/"$TEST_NAME_SHORT".ignore-list ]; then
+			ignore_list="$ABS_TEST_THEME_DIR"/"$TEST_NAME_SHORT".ignore-list
+		elif [ -f "$ABS_TEST_THEME_DIR"/ignore-list ]; then
+			ignore_list="$ABS_TEST_THEME_DIR"/ignore-list
+		elif [ -f "$ABS_FUNC_DIR"/ignore-list ]; then
+			ignore_list="$ABS_FUNC_DIR"/ignore-list
 		fi
 		debug_msg "Filtering output using ignore file $ignore_list"
 		while IFS= read -r line; do
@@ -5024,8 +5060,8 @@ testlib() {
 	local funcs
 	local assertions
 
-	funcs=$(grep "$keyword.*() { [#] swupd_function" "$FUNC_DIR"/testlib.bash | cut -f1 -d "(")
-	assertions=$(grep "$keyword.*() { [#] assertion" "$FUNC_DIR"/testlib.bash | cut -f1 -d "(")
+	funcs=$(grep "$keyword.*() { [#] swupd_function" "$ABS_FUNC_DIR"/testlib.bash | cut -f1 -d "(")
+	assertions=$(grep "$keyword.*() { [#] assertion" "$ABS_FUNC_DIR"/testlib.bash | cut -f1 -d "(")
 
 	echo ""
 	if [ -n "$funcs" ]; then

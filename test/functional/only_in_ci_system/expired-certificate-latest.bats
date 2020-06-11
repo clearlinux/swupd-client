@@ -42,11 +42,11 @@ test_setup() {
 			openssl x509 -days 1 -req -in "$TEST_NAME/cert_latest.csr" -CA "$TEST_NAME/root.pem" -CAkey "$TEST_NAME/root.key" -set_serial 0x1 -out "$TEST_NAME/cert_latest.pem"
 
 			# Sign the MoM with intermediate MoM cert
-			openssl smime -sign -binary -in "$WEBDIR"/10/Manifest.MoM -signer "$TEST_NAME/cert_mom.pem" -inkey "$TEST_NAME/cert_mom.key" -out "$WEBDIR"/10/Manifest.MoM.sig -outform DER
-			openssl smime -sign -binary -in "$WEBDIR"/20/Manifest.MoM -signer "$TEST_NAME/cert_mom.pem" -inkey "$TEST_NAME/cert_mom.key" -out "$WEBDIR"/20/Manifest.MoM.sig -outform DER
+			openssl smime -sign -binary -in "$WEB_DIR"/10/Manifest.MoM -signer "$TEST_NAME/cert_mom.pem" -inkey "$TEST_NAME/cert_mom.key" -out "$WEB_DIR"/10/Manifest.MoM.sig -outform DER
+			openssl smime -sign -binary -in "$WEB_DIR"/20/Manifest.MoM -signer "$TEST_NAME/cert_mom.pem" -inkey "$TEST_NAME/cert_mom.key" -out "$WEB_DIR"/20/Manifest.MoM.sig -outform DER
 
 			# Sign the latest with cert_latest latest cert
-			openssl smime -sign -binary -in "$WEBDIR"/version/formatstaging/latest -signer "$TEST_NAME/cert_latest.pem" -inkey "$TEST_NAME/cert_latest.key" -out "$WEBDIR"/version/formatstaging/latest.sig -outform DER
+			openssl smime -sign -binary -in "$WEB_DIR"/version/formatstaging/latest -signer "$TEST_NAME/cert_latest.pem" -inkey "$TEST_NAME/cert_latest.key" -out "$WEB_DIR"/version/formatstaging/latest.sig -outform DER
 
 	EOM
 	)
@@ -87,6 +87,6 @@ test_setup() {
 	EOM
 	)
 	assert_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/file_2
+	assert_file_exists "$TARGET_DIR"/file_2
 
 }

@@ -7,7 +7,7 @@ test_setup() {
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle -f /usr/lib/kernel/testfile "$TEST_NAME"
 	# change the content of testfile so the hash doesn't match
-	write_to_protected_file -a "$TARGETDIR"/usr/lib/kernel/testfile "some new content"
+	write_to_protected_file -a "$TARGET_DIR"/usr/lib/kernel/testfile "some new content"
 
 }
 
@@ -29,7 +29,7 @@ test_setup() {
 	EOM
 	)
 	assert_regex_is_output "$expected_output"
-	assert_file_exists "$TARGETDIR"/usr/lib/kernel/testfile
+	assert_file_exists "$TARGET_DIR"/usr/lib/kernel/testfile
 
 }
 #WEIGHT=2

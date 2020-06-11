@@ -9,7 +9,7 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME"
 	# remove the formatstaging/latest
-	sudo rm -rf "$WEBDIR/version/formatstaging/latest"
+	sudo rm -rf "$WEB_DIR/version/formatstaging/latest"
 
 }
 

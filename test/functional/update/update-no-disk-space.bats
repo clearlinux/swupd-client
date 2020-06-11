@@ -17,12 +17,12 @@ test_setup() {
 
 	# create a file with a size of 20 MB and create an update
 	# for test-bundle that adds that file
-	file1=/test-file:"$(create_file "$WEBDIR"/20/files 20MB)"
+	file1=/test-file:"$(create_file "$WEB_DIR"/20/files 20MB)"
 	update_bundle "$TEST_NAME" test-bundle --add "$file1"
 
 	# create the state version dirs ahead of time
-	sudo mkdir -p "$STATEDIR_MANIFEST"/10
-	sudo mkdir -p "$STATEDIR_MANIFEST"/20
+	sudo mkdir -p "$ABS_MANIFEST_DIR"/10
+	sudo mkdir -p "$ABS_MANIFEST_DIR"/20
 
 }
 
@@ -40,8 +40,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Preparing to update from 10 to 20
-		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.MoM.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/10/Manifest.MoM.tar'
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Failed to retrieve 10 MoM manifest
 		Update failed
 	EOM
@@ -57,12 +57,12 @@ test_setup() {
 
 	# let's replace the bundle Manifest tar with a much larger file that will exceed
 	# the available space on disk
-	sudo rm "$WEBDIR"/20/Manifest.MoM
-	sudo rm "$WEBDIR"/20/Manifest.MoM.tar
-	fake_manifest=$(create_file "$WEBDIR"/20 15MB)
+	sudo rm "$WEB_DIR"/20/Manifest.MoM
+	sudo rm "$WEB_DIR"/20/Manifest.MoM.tar
+	fake_manifest=$(create_file "$WEB_DIR"/20 15MB)
 	manifest_name=$(basename "$fake_manifest")
-	sudo mv "$WEBDIR"/20/"$manifest_name" "$WEBDIR"/20/Manifest.MoM
-	sudo mv "$WEBDIR"/20/"$manifest_name".tar "$WEBDIR"/20/Manifest.MoM.tar
+	sudo mv "$WEB_DIR"/20/"$manifest_name" "$WEB_DIR"/20/Manifest.MoM
+	sudo mv "$WEB_DIR"/20/"$manifest_name".tar "$WEB_DIR"/20/Manifest.MoM.tar
 
 	run sudo sh -c "timeout 30 $SWUPD update $SWUPD_OPTS"
 
@@ -70,8 +70,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Preparing to update from 10 to 20
-		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.MoM.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/20/Manifest.MoM.tar'
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Failed to retrieve 20 MoM manifest
 		Update failed
 	EOM
@@ -87,12 +87,12 @@ test_setup() {
 
 	# let's replace the bundle Manifest tar with a much larger file that will exceed
 	# the available space on disk
-	sudo rm "$WEBDIR"/10/Manifest.test-bundle
-	sudo rm "$WEBDIR"/10/Manifest.test-bundle.tar
-	fake_manifest=$(create_file "$WEBDIR"/10 15MB)
+	sudo rm "$WEB_DIR"/10/Manifest.test-bundle
+	sudo rm "$WEB_DIR"/10/Manifest.test-bundle.tar
+	fake_manifest=$(create_file "$WEB_DIR"/10 15MB)
 	manifest_name=$(basename "$fake_manifest")
-	sudo mv "$WEBDIR"/10/"$manifest_name" "$WEBDIR"/10/Manifest.test-bundle
-	sudo mv "$WEBDIR"/10/"$manifest_name".tar "$WEBDIR"/10/Manifest.test-bundle.tar
+	sudo mv "$WEB_DIR"/10/"$manifest_name" "$WEB_DIR"/10/Manifest.test-bundle
+	sudo mv "$WEB_DIR"/10/"$manifest_name".tar "$WEB_DIR"/10/Manifest.test-bundle.tar
 
 	run sudo sh -c "timeout 30 $SWUPD update $SWUPD_OPTS"
 
@@ -100,8 +100,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Preparing to update from 10 to 20
-		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/10/Manifest.test-bundle.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/10/Manifest.test-bundle.tar'
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Failed to retrieve 10 test-bundle manifest
 		Error: Cannot load current MoM sub-manifests, exiting
 		Update failed
@@ -118,12 +118,12 @@ test_setup() {
 
 	# let's replace the bundle Manifest tar with a much larger file that will exceed
 	# the available space on disk
-	sudo rm "$WEBDIR"/20/Manifest.test-bundle
-	sudo rm "$WEBDIR"/20/Manifest.test-bundle.tar
-	fake_manifest=$(create_file "$WEBDIR"/20 15MB)
+	sudo rm "$WEB_DIR"/20/Manifest.test-bundle
+	sudo rm "$WEB_DIR"/20/Manifest.test-bundle.tar
+	fake_manifest=$(create_file "$WEB_DIR"/20 15MB)
 	manifest_name=$(basename "$fake_manifest")
-	sudo mv "$WEBDIR"/20/"$manifest_name" "$WEBDIR"/20/Manifest.test-bundle
-	sudo mv "$WEBDIR"/20/"$manifest_name".tar "$WEBDIR"/20/Manifest.test-bundle.tar
+	sudo mv "$WEB_DIR"/20/"$manifest_name" "$WEB_DIR"/20/Manifest.test-bundle
+	sudo mv "$WEB_DIR"/20/"$manifest_name".tar "$WEB_DIR"/20/Manifest.test-bundle.tar
 
 	run sudo sh -c "timeout 30 $SWUPD update $SWUPD_OPTS"
 
@@ -131,8 +131,8 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Preparing to update from 10 to 20
-		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/Manifest.test-bundle.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/20/Manifest.test-bundle.tar'
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Failed to retrieve 20 test-bundle manifest
 		Error: Unable to download manifest test-bundle version 20, exiting now
 		Update failed
@@ -147,7 +147,7 @@ test_setup() {
 	# When updating a system and we run out of disk space while downloading the
 	# bundle files we should not retry the download since it will fail for sure
 
-	file_hash=$(get_hash_from_manifest "$WEBDIR"/20/Manifest.test-bundle /test-file)
+	file_hash=$(get_hash_from_manifest "$WEB_DIR"/20/Manifest.test-bundle /test-file)
 
 	run sudo sh -c "timeout 30 $SWUPD update $SWUPD_OPTS"
 
@@ -160,8 +160,8 @@ test_setup() {
 	)
 	expected_output2=$(cat <<-EOM
 		 - test-bundle
-		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/pack-test-bundle-from-10.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/20/pack-test-bundle-from-10.tar'
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Finishing packs extraction...
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 1
@@ -172,8 +172,8 @@ test_setup() {
 		    deleted files     : 0
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
-		Error: Curl - Error downloading to local file - 'file://$TEST_DIRNAME/web-dir/20/files/$file_hash.tar'
-		Error: Curl - Check free space for $TEST_DIRNAME/testfs/state?
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/20/files/$file_hash.tar'
+		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Could not download all files, aborting update
 		Update failed
 	EOM

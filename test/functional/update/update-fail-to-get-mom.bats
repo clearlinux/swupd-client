@@ -12,7 +12,7 @@ test_setup() {
 @test "UPD009: Try updating a system where the 'from' MoM is not found" {
 
 	# remove the "from" mom
-	sudo rm -rf "$WEBDIR"/10/Manifest.MoM.tar
+	sudo rm -rf "$WEB_DIR"/10/Manifest.MoM.tar
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
@@ -31,7 +31,7 @@ test_setup() {
 @test "UPD010: Try updating a system where the 'to' MoM is not found" {
 
 	# remove the "to" mom
-	sudo rm -rf "$WEBDIR"/20/Manifest.MoM.tar
+	sudo rm -rf "$WEB_DIR"/20/Manifest.MoM.tar
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 

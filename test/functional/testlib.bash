@@ -901,6 +901,40 @@ set_env_variables_content() { # swupd_function
 
 }
 
+# shellcheck disable=SC2120
+set_env_variables_setup() { # swupd_function
+
+	show_help "$(cat <<-EOM
+		Exports the environment variables related to the test setup.
+
+		Usage:
+		    set_env_variables_setup
+	EOM
+	)" "$@"
+
+	# if a test environment with the short name of a test exists it means
+	# we are using a global environment
+	if is_global_environment; then
+		TEST_NAME="$TEST_NAME_SHORT"
+		debug_msg "Global environment, using TEST_NAME=$TEST_NAME"
+	else
+		# individual environments will be used for each test,
+		# we need to name the env differently for each test
+		# following this schema: "$TEST_NAME_SHORT + _ + <TEST_ID>
+		if ! [[ $BATS_TEST_DESCRIPTION =~ ^[a-zA-Z]{3}[0-9]{3}":"* ]]; then
+			terminate "Bad test, missing test ID: \"$BATS_TEST_DESCRIPTION\""
+		fi
+		TEST_NAME="$TEST_NAME_SHORT"_"${BATS_TEST_DESCRIPTION%:*}"
+		debug_msg "Local environment, using TEST_NAME=$TEST_NAME"
+	fi
+	ENVIRONMENT_FILE="$ABS_TESTLIB_WD"/"$TEST_NAME"/.env
+	debug_msg "Environment file, using ENVIRONMENT_FILE=$ENVIRONMENT_FILE"
+
+	debug_msg "TEST_NAME: $TEST_NAME"
+	debug_msg "Test path: $ABS_TESTLIB_WD/$TEST_NAME"
+
+}
+
 create_dir() { # swupd_function
 
 	show_help "$(cat <<-EOM
@@ -4581,78 +4615,80 @@ print_stack() {
 
 }
 
+is_global_environment() {
+
+	[ -d "$TEST_NAME_SHORT" ]
+}
+
 setup() {
 
 	print "\\n\\n\\n$sep"
 	print "$alt_sep"
 	print "$sep\\n"
 
-	debug_msg "Test file: $TEST_NAME.bats"
-	debug_msg "BATS test number: $BATS_TEST_NUMBER"
+	debug_msg "TEST_FILE_NAME: $TEST_FILE_NAME"
+	debug_msg "BATS_TEST_NUMBER: $BATS_TEST_NUMBER"
 
-	# the TEST_NAME identifier has to be unique for each test environment:
-	# - if the tests in a file use the global_setup, therefore they use only
-	#   one test enviroment then TEST_NAME = $TEST_NAME_SHORT
-	# - if the tests in a file use the test_setup meaning each one need its own
-	#   test environment then TEST_NAME = $TEST_NAME_SHORT + _ + <test_specific_id>
-
-	# run the global_setup only once
+	# this block will run only once regardless of how many tests are in the test file,
+	# so this block is useful to run things related to global_setup which should be run
+	# only once before all tests
 	if [ "$BATS_TEST_NAME" = "${BATS_TEST_NAMES[0]}" ]; then
 
-		# if a global environment exists at this point it means
-		# it was a leftover from a previous execution, remove it
-		if [ -d "$TEST_NAME" ]; then
-			debug_msg "\\nAn old test environment was found for this test: $TEST_NAME"
+		# if an old global environment is found, we need to remove it
+		if is_global_environment; then
+			debug_msg "\\nAn old test environment was found for this test: $TEST_NAME_SHORT"
 			debug_msg "Deleting it..."
-			destroy_test_environment --force "$TEST_NAME"
+			destroy_test_environment --force "$TEST_NAME_SHORT"
 		fi
 
 		debug_msg "\\nRunning global setup..."
 		global_setup
 		debug_msg "Global setup finished\\n"
 
-		# check if we created a test environment in the global_setup
-		if [ -d "$TEST_NAME" ]; then
-			sudo touch "$TEST_NAME"/.global_env
-			print "Global test environment created: $TEST_NAME"
+		if is_global_environment; then
+			print "Global test environment created: $TEST_NAME_SHORT"
 		fi
 
 	fi
 
-	if [ -e "$TEST_NAME"/.global_env ]; then
-		debug_msg "\\nSetting environment variables for the current test..."
-		set_env_variables "$TEST_NAME"
-	else
-		# individual environments will be used for each test,
-		# we need to name the env differently for each test
-		if ! [[ $BATS_TEST_DESCRIPTION =~ ^[a-zA-Z]{3}[0-9]{3}":"* ]]; then
-			terminate "Bad test, missing test ID: \"$BATS_TEST_DESCRIPTION\""
-		fi
-		TEST_NAME="$TEST_NAME"_"${BATS_TEST_DESCRIPTION%:*}"
-		ENVIRONMENT_FILE="$ABS_TESTLIB_WD"/"$TEST_NAME"/.env
+	# the TEST_NAME identifier has to be unique for each test environment:
+	# - if the tests in a file use the global_setup, therefore they use only
+	#   one test enviroment then TEST_NAME = $TEST_NAME_SHORT
+	# - if the tests in a file use the test_setup meaning each one need its own
+	#   test environment then TEST_NAME = $TEST_NAME_SHORT + _ + <test_id>
+	set_env_variables_setup
 
-		# if a local environment exists at this point it is a
-		# leftover from a previous execution, remove it
-		if [ -d "$TEST_NAME" ]; then
-			debug_msg "\\nAn old test environment was found for this test: $TEST_NAME"
-			debug_msg "Deleting it..."
-			destroy_test_environment --force "$TEST_NAME"
-		fi
+	# if a local environment exists at this point it is a leftover from a previous
+	# execution that used test_setup to create the environment.
+	# if that is the case, we need to remove it
+	if ! is_global_environment && [ -d "$TEST_NAME" ]; then
+		debug_msg "\\nAn old test environment was found for this test: $TEST_NAME"
+		debug_msg "Deleting it..."
+		destroy_test_environment --force "$TEST_NAME"
 	fi
 
-	debug_msg "\\nTEST_NAME: $TEST_NAME"
-	debug_msg "Test path: $ABS_TESTLIB_WD/$TEST_NAME"
-
-	# now run the test setup
-	debug_msg "\\nRunning test_setup..."
-	test_setup
-	debug_msg "Finished running test_setup"
-
-	# export the environment variables
+	# we need to export the env variables before running the test_setup and after
+	# since the user could have used a global_setup() and a test_setup() together
+	# in a test, in that case we need to have the env loaded before running the
+	# test_setup()
+	#
 	# ShellCheck won't be able to include sourced files from paths that are determined
 	# at runtime, this is not a problem in this case, the file has only env variables
 	# shellcheck source=/dev/null
 	if [ -f "$ENVIRONMENT_FILE" ]; then
+		debug_msg "\\nSetting environment variables pre-setup for the current test..."
+		source "$ENVIRONMENT_FILE"
+		debug_msg "Env variables exported"
+	fi
+
+	debug_msg "\\nRunning test_setup..."
+	test_setup
+	debug_msg "Finished running test_setup\\n"
+
+	# export the environment variables post-setup
+	# shellcheck source=/dev/null
+	if [ -f "$ENVIRONMENT_FILE" ]; then
+		debug_msg "\\nSetting environment variables post-setup for the current test..."
 		source "$ENVIRONMENT_FILE"
 		debug_msg "Env variables exported"
 	fi
@@ -4661,6 +4697,7 @@ setup() {
 		print "\nTarget system before the test:"
 		show_target
 	fi
+
 	if [ "$ENV_ONLY" = true ]; then
 		print "Test setup complete"
 		terminate "Test environment only"
@@ -4699,7 +4736,7 @@ teardown() {
 	# if the user wants to preserve the output and we are using an global environment
 	# we need to copy the state of the environment before starting the next test or
 	# the state will be overrriden
-	if [ "$KEEP_ENV" = true ] && [ -e "$TEST_NAME"/.global_env ] && [ -d "$TEST_NAME" ]; then
+	if [ "$KEEP_ENV" = true ] && is_global_environment; then
 		print "Saving a copy of the state dir in $TEST_NAME/state_${BATS_TEST_DESCRIPTION%:*}"
 		sudo cp -r "$TEST_NAME"/testfs/state "$TEST_NAME"/state_"${BATS_TEST_DESCRIPTION%:*}"
 	fi
@@ -4718,7 +4755,7 @@ teardown() {
 
 		destroy_test_environment "$TEST_NAME"
 
-	elif [ ! -e "$TEST_NAME"/.global_env ]; then
+	elif ! is_global_environment; then
 
 		destroy_test_environment "$TEST_NAME"
 

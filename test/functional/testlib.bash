@@ -45,6 +45,10 @@ export TEST_NAME_SHORT=${TEST_FILE_NAME%.bats}
 # is going to be used with a global_setup, if not the case, it will be redefined
 # during setup()
 export TEST_NAME="$TEST_NAME_SHORT"
+# file that stores the environment variables of the tests in the file
+# since the path to this file depends on TEST_NAME, its value may also be redefined
+# during setup()
+export ENVIRONMENT_FILE="$ABS_TESTLIB_WD"/"$TEST_NAME"/.env
 
 # 3rd-party variables
 # -------------------
@@ -656,78 +660,135 @@ set_env_variables() { # swupd_function
 	)" "$@"
 
 	local env_name=$1
-	local path
+	validate_path "$env_name"
+
 	local testfs_path
 	local converted_url
-	validate_path "$env_name"
-	path=$(dirname "$(realpath "$env_name")")
-	testfs_path="$path"/"$env_name"/testfs
+
+	testfs_path="$ABS_TESTLIB_WD"/"$env_name"/testfs
+	converted_url=file___"$(echo "$ABS_TESTLIB_WD" | tr / _)"_"$env_name"_web-dir
 
 	debug_msg "Exporting environment variables for $env_name"
 
 	# relevant relative paths
 	export WEB_DIR="$env_name"/web-dir
+	echo "export WEB_DIR=$WEB_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "WEB_DIR: $WEB_DIR"
+
 	export TARGET_DIR="$env_name"/testfs/target-dir
+	echo "export TARGET_DIR=$TARGET_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "TARGET_DIR: $TARGET_DIR"
+
 	export STATE_DIR="$env_name"/testfs/state
+	echo "export STATE_DIR=$STATE_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "STATE_DIR: $STATE_DIR"
+
 	export SWUPD_CONFIG_DIR="$env_name"/testconfig
+	echo "export SWUPD_CONFIG_DIR=$SWUPD_CONFIG_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "SWUPD_CONFIG_DIR: $SWUPD_CONFIG_DIR"
+
 	export SWUPD_CONFIG_FILE="$SWUPD_CONFIG_DIR"/config
+	echo "export SWUPD_CONFIG_FILE=$SWUPD_CONFIG_FILE" >> "$ENVIRONMENT_FILE"
 	debug_msg "SWUPD_CONFIG_FILE: $SWUPD_CONFIG_FILE"
 
 	# relevant absolute paths
-	export ABS_TEST_DIR="$path"/"$env_name"
+	export ABS_TEST_DIR="$ABS_TESTLIB_WD"/"$env_name"
+	echo "export ABS_TEST_DIR=$ABS_TEST_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_TEST_DIR: $ABS_TEST_DIR"
+
 	export ABS_TARGET_DIR="$ABS_TEST_DIR"/testfs/target-dir
+	echo "export ABS_TARGET_DIR=$ABS_TARGET_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_TARGET_DIR: $ABS_TARGET_DIR"
+
 	export ABS_STATE_DIR="$ABS_TEST_DIR"/testfs/state
+	echo "export ABS_STATE_DIR=$ABS_STATE_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_STATE_DIR: $ABS_STATE_DIR"
+
 	export ABS_TRACKING_DIR="$ABS_STATE_DIR"/bundles
+	echo "export ABS_TRACKING_DIR=$ABS_TRACKING_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_TRACKING_DIR: $ABS_TRACKING_DIR"
-	converted_url=file___"$(echo "$path" | tr / _)"_"$env_name"_web-dir
+
 	export ABS_CACHE_DIR="$ABS_STATE_DIR"/cache/"$converted_url"
+	echo "export ABS_CACHE_DIR=$ABS_CACHE_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_CACHE_DIR: $ABS_CACHE_DIR"
+
 	export ABS_DELTA_DIR="$ABS_STATE_DIR"/cache/"$converted_url"/delta
+	echo "export ABS_DELTA_DIR=$ABS_DELTA_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_DELTA_DIR: $ABS_DELTA_DIR"
+
 	export ABS_DOWNLOAD_DIR="$ABS_STATE_DIR"/cache/"$converted_url"/download
+	echo "export ABS_DOWNLOAD_DIR=$ABS_DOWNLOAD_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_DOWNLOAD_DIR: $ABS_DOWNLOAD_DIR"
+
 	export ABS_MANIFEST_DIR="$ABS_STATE_DIR"/cache/"$converted_url"/manifest
+	echo "export ABS_MANIFEST_DIR=$ABS_MANIFEST_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_MANIFEST_DIR: $ABS_MANIFEST_DIR"
+
 	export ABS_STAGED_DIR="$ABS_STATE_DIR"/cache/"$converted_url"/staged
+	echo "export ABS_STAGED_DIR=$ABS_STAGED_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_STAGED_DIR: $ABS_STAGED_DIR"
+
 	export ABS_TEMP_DIR="$ABS_STATE_DIR"/cache/"$converted_url"/temp
+	echo "export ABS_TEMP_DIR=$ABS_TEMP_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_TEMP_DIR: $ABS_TEMP_DIR"
+
 	export ABS_CLIENT_CERT_DIR="$testfs_path/target-dir/etc/swupd"
+	echo "export ABS_CLIENT_CERT_DIR=$ABS_CLIENT_CERT_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_CLIENT_CERT_DIR: $ABS_CLIENT_CERT_DIR"
+
 	export ABS_MIRROR_DIR="$ABS_TESTLIB_WD"/"$env_name"/mirror/web-dir
+	echo "export ABS_MIRROR_DIR=$ABS_MIRROR_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_MIRROR_DIR: $ABS_MIRROR_DIR"
+
 
 	# different options for swupd
 	export SWUPD_OPTS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $ABS_TEST_DIR/Swupd_Root.pem -I --no-progress"
+	echo "export SWUPD_OPTS=\"$SWUPD_OPTS\"" >> "$ENVIRONMENT_FILE"
+
 	export SWUPD_OPTS_PROGRESS="-S $testfs_path/state -p $testfs_path/target-dir -F staging -C $ABS_TEST_DIR/Swupd_Root.pem -I"
+	echo "export SWUPD_OPTS_PROGRESS=\"$SWUPD_OPTS_PROGRESS\"" >> "$ENVIRONMENT_FILE"
+
 	export SWUPD_OPTS_KEEPCACHE="$SWUPD_OPTS --keepcache"
+	echo "export SWUPD_OPTS_KEEPCACHE=\"$SWUPD_OPTS_KEEPCACHE\"" >> "$ENVIRONMENT_FILE"
+
 	export SWUPD_OPTS_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -F staging -I --no-progress"
+	echo "export SWUPD_OPTS_NO_CERT=\"$SWUPD_OPTS_NO_CERT\"" >> "$ENVIRONMENT_FILE"
+
 	export SWUPD_OPTS_NO_FMT="-S $testfs_path/state -p $testfs_path/target-dir -C $ABS_TEST_DIR/Swupd_Root.pem -I --no-progress"
+	echo "export SWUPD_OPTS_NO_FMT=\"$SWUPD_OPTS_NO_FMT\"" >> "$ENVIRONMENT_FILE"
+
 	export SWUPD_OPTS_NO_FMT_NO_CERT="-S $testfs_path/state -p $testfs_path/target-dir -I --no-progress"
+	echo "export SWUPD_OPTS_NO_FMT_NO_CERT=\"$SWUPD_OPTS_NO_FMT_NO_CERT\"" >> "$ENVIRONMENT_FILE"
+
 	export SWUPD_OPTS_NO_PATH="-S $testfs_path/state -F staging -C $ABS_TEST_DIR/Swupd_Root.pem -I --no-progress"
+	echo "export SWUPD_OPTS_NO_PATH=\"$SWUPD_OPTS_NO_PATH\"" >> "$ENVIRONMENT_FILE"
+
 	export SWUPD_OPTS_NO_STATE="-p $testfs_path/target-dir -F staging -C $ABS_TEST_DIR/Swupd_Root.pem -I --no-progress"
+	echo "export SWUPD_OPTS_NO_STATE=\"$SWUPD_OPTS_NO_STATE\"" >> "$ENVIRONMENT_FILE"
+
 
 	# path to relevant files
 	export CLIENT_CERT_FILE="$ABS_CLIENT_CERT_DIR/client.pem"
-	export PORT_FILE="$path/$env_name/port_file.txt" # stores web server port
-	export SERVER_PID_FILE="$path/$env_name/pid_file.txt" # stores web server pid
+	echo "export CLIENT_CERT_FILE=$CLIENT_CERT_FILE" >> "$ENVIRONMENT_FILE"
+
+	export PORT_FILE="$ABS_TESTLIB_WD/$env_name/port_file.txt" # stores web server port
+	echo "export PORT_FILE=$PORT_FILE" >> "$ENVIRONMENT_FILE"
+
+	export SERVER_PID_FILE="$ABS_TESTLIB_WD/$env_name/pid_file.txt" # stores web server pid
+	echo "export SERVER_PID_FILE=$SERVER_PID_FILE" >> "$ENVIRONMENT_FILE"
+
 
 	# Add environment variables for PORT and SERVER_PID when web server used
 	if [ -f "$PORT_FILE" ]; then
 		PORT=$(cat "$PORT_FILE")
 		export PORT
+		echo "export PORT=$PORT" >> "$ENVIRONMENT_FILE"
 	fi
 
 	if [ -f "$SERVER_PID_FILE" ]; then
 		SERVER_PID=$(cat "$SERVER_PID_FILE")
 		export SERVER_PID
+		echo "export SERVER_PID=$SERVER_PID" >> "$ENVIRONMENT_FILE"
 	fi
 
 }
@@ -760,30 +821,52 @@ set_env_variables_third_party() { # swupd_function
 
 	# relevant relative paths
 	export TP_STATE_DIR="$STATE_DIR"/3rd-party/"$repo_name"
+	echo "export TP_STATE_DIR=$TP_STATE_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "TP_STATE_DIR: $TP_STATE_DIR"
+
 	export TP_WEB_DIR="$env_name"/3rd-party/"$repo_name"
+	echo "export TP_WEB_DIR=$TP_WEB_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "TP_WEB_DIR: $TP_WEB_DIR"
+
 	export TP_TARGET_DIR="$env_name"/testfs/target-dir/"$TP_BUNDLES_DIR"/"$repo_name"
+	echo "export TP_TARGET_DIR=$TP_TARGET_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "TP_TARGET_DIR: $TP_TARGET_DIR"
 
 	# relevant absolute paths
 	export ABS_TP_URL="$url"
+	echo "export ABS_TP_URL=$ABS_TP_URL" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_TP_URL: $ABS_TP_URL"
+
 	export ABS_TP_STATE_DIR="$ABS_TESTLIB_WD"/"$TP_STATE_DIR"
+	echo "export ABS_TP_STATE_DIR=$ABS_TP_STATE_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_TP_STATE_DIR: $ABS_TP_STATE_DIR"
+
 	export ABS_TP_TRACKING_DIR="$ABS_TP_STATE_DIR"/bundles
+	echo "export ABS_TP_TRACKING_DIR=$ABS_TP_TRACKING_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_TP_TRACKING_DIR: $ABS_TP_TRACKING_DIR"
+
 	export ABS_TP_CACHE_DIR="$ABS_TP_STATE_DIR"/cache/"$converted_url"
+	echo "export ABS_TP_CACHE_DIR=$ABS_TP_CACHE_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_TP_CACHE_DIR: $ABS_TP_CACHE_DIR"
+
 	export ABS_TP_DELTA_DIR="$ABS_TP_STATE_DIR"/cache/"$converted_url"/delta
+	echo "export ABS_TP_DELTA_DIR=$ABS_TP_DELTA_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_TP_DELTA_DIR: $ABS_TP_DELTA_DIR"
+
 	export ABS_TP_DOWNLOAD_DIR="$ABS_TP_STATE_DIR"/cache/"$converted_url"/download
+	echo "export ABS_TP_DOWNLOAD_DIR=$ABS_TP_DOWNLOAD_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_TP_DOWNLOAD_DIR: $ABS_TP_DOWNLOAD_DIR"
+
 	export ABS_TP_MANIFEST_DIR="$ABS_TP_STATE_DIR"/cache/"$converted_url"/manifest
+	echo "export ABS_TP_MANIFEST_DIR=$ABS_TP_MANIFEST_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_TP_MANIFEST_DIR: $ABS_TP_MANIFEST_DIR"
+
 	export ABS_TP_STAGED_DIR="$ABS_TP_STATE_DIR"/cache/"$converted_url"/staged
+	echo "export ABS_TP_STAGED_DIR=$ABS_TP_STAGED_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_TP_STAGED_DIR: $ABS_TP_STAGED_DIR"
+
 	export ABS_TP_TEMP_DIR="$ABS_TP_STATE_DIR"/cache/"$converted_url"/temp
+	echo "export ABS_TP_TEMP_DIR=$ABS_TP_TEMP_DIR" >> "$ENVIRONMENT_FILE"
 	debug_msg "ABS_TP_TEMP_DIR: $ABS_TP_TEMP_DIR"
 
 }
@@ -810,9 +893,11 @@ set_env_variables_content() { # swupd_function
 
 	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$content_dir"/"$version"/os-release)
 	export OS_RELEASE_FILE="$content_dir"/"$version"/files/"$hashed_name"
+	echo "export OS_RELEASE_FILE=$OS_RELEASE_FILE" >> "$ENVIRONMENT_FILE"
 
 	hashed_name=$(sudo "$SWUPD" hashdump --quiet "$content_dir"/"$version"/format)
 	export FORMAT_FILE="$content_dir"/"$version"/files/"$hashed_name"
+	echo "export FORMAT_FILE=$FORMAT_FILE" >> "$ENVIRONMENT_FILE"
 
 }
 
@@ -2197,6 +2282,7 @@ destroy_test_environment() { # swupd_function
 	fi
 
 	sudo rm -rf "$env_name"
+
 	if [ ! -e "$env_name" ]; then
 		debug_msg "Environment $env_name deleted successfully"
 	else
@@ -4543,6 +4629,7 @@ setup() {
 			terminate "Bad test, missing test ID: \"$BATS_TEST_DESCRIPTION\""
 		fi
 		TEST_NAME="$TEST_NAME"_"${BATS_TEST_DESCRIPTION%:*}"
+		ENVIRONMENT_FILE="$ABS_TESTLIB_WD"/"$TEST_NAME"/.env
 
 		# if a local environment exists at this point it is a
 		# leftover from a previous execution, remove it
@@ -4560,6 +4647,15 @@ setup() {
 	debug_msg "\\nRunning test_setup..."
 	test_setup
 	debug_msg "Finished running test_setup"
+
+	# export the environment variables
+	# ShellCheck won't be able to include sourced files from paths that are determined
+	# at runtime, this is not a problem in this case, the file has only env variables
+	# shellcheck source=/dev/null
+	if [ -f "$ENVIRONMENT_FILE" ]; then
+		source "$ENVIRONMENT_FILE"
+		debug_msg "Env variables exported"
+	fi
 
 	if [ "$DEBUG_TEST" = true ] || [ "$SHOW_TARGET" = true ]; then
 		print "\nTarget system before the test:"

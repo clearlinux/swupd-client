@@ -379,7 +379,7 @@ diagnose
 -Y, --picky     Also list files which should not exist. Only files listed in the
          manifests should exist. By default swupd only looks for these
          files at ``/usr``, this path can be changed using ``--picky-tree``.
-         Some paths at ``\usr`` are skipped by default:
+         Some paths at ``/usr`` are skipped by default:
          ``/usr/lib/modules``, ``/usr/lib/kernel``, ``/usr/local``
          and ``/usr/src``. These paths can be changed using
          ``--picky-whitelist``.
@@ -443,7 +443,7 @@ repair
 -Y, --picky     Also removes files which should not exist. Only files listed
         in the manifests should exist. By default swupd only looks for these
         files at ``/usr``, this path can be changed using ``--picky-tree``.
-        Some paths at ``\usr`` are skipped by default:
+        Some paths at ``/usr`` are skipped by default:
         ``/usr/lib/modules``, ``/usr/lib/kernel``, ``/usr/local``
         and ``/usr/src``. These paths can be changed using
         ``--picky-whitelist``.

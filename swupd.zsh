@@ -254,7 +254,7 @@ local -a repair=(
   '(help -V --version)'{-V,--version=}'[Compare against version VER to repair]:version: _swupd_versiosn'
   '(help -x --force)'{-x,--force}'[Attempt to proceed even if non-critical errors found]'
   '(help -q --quick -Y --picky --extra-files-only)'{-q,--quick}'[Don`t compare hashes, only fix missing files]'
-  '(help -B --bundles -Y --picky --extra-files-only)'{-B,--bundles=}'[Forces swupd to only repair the specified BUNDLES]bundles: _swupd_installed_bundles -c'
+  '(help -B --bundles -Y --picky --extra-files-only)'{-B,--bundles=}'[Forces swupd to only repair the specified BUNDLES]:bundles: _swupd_installed_bundles -c'
   '(help -B --bundles -Y --picky -Y --picky --extra-files-only)'{-Y,--picky}'[Also remove files which should not exists]'
   '(help -X --picky-tree)'{-X,--picky-tree=}'[Changes the path where --picky and --extra-files-only look for extra files]:picky-tree: _files -/'
   '(help -w --picky-whitelist)'{-w,--picky-whitelist=}'[Directories that match the regex get skipped during --picky. Example: /usr/man|/usr/doc]'

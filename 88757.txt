@@ -1,0 +1,1 @@
+Do not show edit timer for supergroup admins

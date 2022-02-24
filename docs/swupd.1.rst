@@ -568,7 +568,7 @@ hashdump
 
          -  ``force``
 
-         Attempt to proceed with the removal of the repo even if non-critical
+         Attempt to proceed with the addition of the repo even if non-critical
          errors found.
 
     -  ``remove``

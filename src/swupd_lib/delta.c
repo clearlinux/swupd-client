@@ -79,18 +79,22 @@ static bool check_delta_filename(const char *delta_name, char *from, char *to)
 {
 	/* Delta files have the form [FROM_VERSION]-[TO_VERSION]-[FROM_HASH]-[TO_HASH]. */
 	const char *s = delta_name;
-
-	/* Ignore versions, deltas will be used based on their hashes only. */
-	for (int i = 0; i < 2; i++) {
-		s = strchr(s, '-');
-		if (!s) {
-			return false;
-		}
-		s++;
-	}
-
 	/* Note: SWUPD_HASH_LEN accounts for the NUL-terminator after the hash. */
 	const size_t hash_len = SWUPD_HASH_LEN - 1;
+
+	/* Ignore versions, deltas will be used based on their hashes only. */
+	/* As of September 2022, the server no longer puts the version prefix in place, but handle */
+	/* both cases */
+	if (str_len(s) > (hash_len * 2 + 1)) {
+		for (int i = 0; i < 2; i++) {
+			s = strchr(s, '-');
+			if (!s) {
+				return false;
+			}
+			s++;
+		}
+	}
+
 	if (str_len(s) != (hash_len * 2 + 1)) {
 		return false;
 	}

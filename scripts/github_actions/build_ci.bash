@@ -10,7 +10,6 @@ CORES=2
 sudo apt-get install python3-docutils
 sudo apt-get install check
 sudo apt-get install bats
-sudo ln -s /bin/systemctl /usr/bin/systemctl
 
 # Use rst2man from python3
 sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py

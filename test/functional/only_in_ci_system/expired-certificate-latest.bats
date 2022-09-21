@@ -23,7 +23,6 @@ test_setup() {
 	update_bundle "$TEST_NAME" test-bundle1 --add /file_2
 
 	# Reset date
-	sudo systemctl stop systemd-timesyncd
 	DATE=$(date "+%m%d")
 	YEAR=$(date "+%Y")
 	PREV_YEAR=$((YEAR - 1))
@@ -54,8 +53,6 @@ test_setup() {
 
 	# Restore date
 	sudo date "+%Y%m%d" -s "$YEAR$DATE"
-	sudo systemctl start systemd-timesyncd
-
 }
 
 @test "SIG026: Swupd update with expired latests certificate" {

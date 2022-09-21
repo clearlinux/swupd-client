@@ -82,14 +82,14 @@ test_setup() {
 
 	assert_status_is "$SWUPD_DISK_SPACE_ERROR"
 	expected_output=$(cat <<-EOM
-		Loading required manifests...
-		Error: Bundle too large by 12M
-		NOTE: currently, swupd only checks /usr/ (or the passed-in path with /usr/ appended) for available space
+		Loading required manifests\.\.\.
+		Error: Bundle too large by [0-9]+M
+		NOTE: currently, swupd only checks /usr/ \(or the passed-in path with /usr/ appended\) for available space
 		To skip this error and install anyways, add the --skip-diskspace-check flag to your command
 		Failed to install 1 of 1 bundles
 	EOM
 	)
-	assert_is_output "$expected_output"
+	assert_regex_is_output "$expected_output"
 
 }
 

@@ -16,11 +16,9 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME"
 
-	if [ ! -f /usr/share/clear/update-ca/Swupd_Root.pem ]; then
-		sudo mkdir -p /usr/share/clear/update-ca
-		sudo cp "$ABS_TEST_DIR"/Swupd_Root.pem /usr/share/clear/update-ca
-		export CERT_WAS_INSTALLED=1
-	fi
+	sudo rm -f /usr/share/clear/update-ca/Swupd_Root.pem
+	sudo mkdir -p /usr/share/clear/update-ca
+	sudo cp test/functional/only_in_ci_system/pemfile /usr/share/clear/update-ca/Swupd_Root.pem
 
 	create_third_party_repo "$TEST_NAME" 10 staging repo1
 	export repo1="$ABS_TP_URL"
@@ -33,9 +31,7 @@ test_teardown() {
 		return
 	fi
 
-	if [ -n "${CERT_WAS_INSTALLED}" ]; then
-		sudo rm usr/share/clear/update-ca/Swupd_Root.pem
-	fi
+	sudo rm -f /usr/share/clear/update-ca/Swupd_Root.pem
 
 }
 

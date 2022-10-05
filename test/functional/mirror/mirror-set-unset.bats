@@ -68,6 +68,7 @@ global_setup() {
 	run sudo sh -c "$SWUPD mirror --set -u https://example.com/swupd-file $SWUPD_OPTS"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Overriding version and content URLs with https://example.com/swupd-file
 		Mirror url set
 		Distribution:      Swupd Test Distro
 		Installed version: 10
@@ -101,6 +102,7 @@ global_setup() {
 	run sudo sh -c "$SWUPD mirror --set -c https://example.com/swupd-file $SWUPD_OPTS"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Overriding content URL with https://example.com/swupd-file
 		Mirror url set
 		Distribution:      Swupd Test Distro
 		Installed version: 10
@@ -134,6 +136,7 @@ global_setup() {
 	run sudo sh -c "$SWUPD mirror --set -v https://example.com/swupd-file $SWUPD_OPTS"
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
+		Overriding version URL with https://example.com/swupd-file
 		Mirror url set
 		Distribution:      Swupd Test Distro
 		Installed version: 10

@@ -97,7 +97,6 @@ bool signature_init(const char *certificate_path, const char *crl)
 	}
 
 	ERR_load_crypto_strings();
-	ERR_load_PKCS7_strings();
 	EVP_add_digest(EVP_sha256());
 
 	cert = get_cert_from_path(certificate_path);

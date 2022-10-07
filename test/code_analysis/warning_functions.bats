@@ -16,6 +16,8 @@
 	exceptions["dirname"]="sys.*"
 	exceptions["free"]="macros.h,verifytime.c,verifytime_main.c"
 	exceptions["calloc"]="macros.h,verifytime.c"
+	exceptions["strcmp"]="strings.h"
+	exceptions["strlen"]="strings.h"
 
 	local error=0
 	for func in $functions; do

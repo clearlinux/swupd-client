@@ -19,12 +19,12 @@ extern "C" {
 /**
  * Helper to use strnlen() instead of strlen.
  */
-#define str_len(_str) strnlen(_str, INT64_MAX)
+#define str_len(_str) strlen(_str)
 
 /**
  * helper to use strncmp() instead of strcmp
  */
-#define str_cmp(_str1, _str2) strncmp(_str1, _str2, INT64_MAX)
+#define str_cmp(_str1, _str2) strcmp(_str1, _str2)
 
 /**
  * Check if str starts with the prefix.

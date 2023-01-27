@@ -12,7 +12,7 @@ sudo apt-get install check
 sudo apt-get install bats
 
 # Use rst2man from python3
-sudo ln -s /usr/share/docutils/scripts/python3/rst2man /usr/bin/rst2man.py
+sudo ln -s /usr/bin/rst2man /usr/bin/rst2man.py
 
 # Build Swupd
 autoreconf --verbose --warnings=none --install --force

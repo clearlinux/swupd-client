@@ -27,7 +27,6 @@
 #include <unistd.h>
 
 #include "heuristics.h"
-#include "swupd.h"
 
 typedef int (*compare_fn_t)(const char *s1, const char *s2);
 typedef void (*apply_fn_t)(struct file *f);

@@ -10,6 +10,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "swupd.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

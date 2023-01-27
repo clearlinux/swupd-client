@@ -156,12 +156,14 @@ test_setup() {
 		Overriding version and content URLs with https://localhost
 		Installing OS version 10
 		Downloading missing manifests...
-		Error: Failed to connect to update server: https://localhost
+		Error: Failed to connect to update server: https://localhost/10/pack-os-core-from-0.tar
 		Possible solutions for this problem are:
 		.Check if your network connection is working
 		.Fix the system clock
 		.Run 'swupd info' to check if the urls are correct
 		.Check if the server SSL certificate is trusted by your system \\('clrtrust generate' may help\\)
+		Downloading packs for:
+		 - os-core
 		Error: zero pack downloads failed
 		Checking for corrupt files
 		Validate downloaded files

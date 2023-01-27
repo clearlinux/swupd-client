@@ -32,11 +32,8 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 8, "stepCompletion" : 0, "stepDescription" : "download_packs" },
 		{ "type" : "info", "msg" : "Downloading packs for:" },
 		{ "type" : "info", "msg" : " - test-bundle" },
-	EOM
-	)
-	expected_output2=$(cat <<-EOM
-		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "download_packs" },
 		{ "type" : "info", "msg" : "Finishing packs extraction..." },
+		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "download_packs" },
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 8, "stepCompletion" : -1, "stepDescription" : "extract_packs" },
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 8, "stepCompletion" : 100, "stepDescription" : "extract_packs" },
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 8, "stepCompletion" : 0, "stepDescription" : "validate_fullfiles" },
@@ -93,7 +90,6 @@ test_setup() {
 	EOM
 	)
 	assert_in_output "$expected_output1"
-	assert_in_output "$expected_output2"
 
 }
 #WEIGHT=3

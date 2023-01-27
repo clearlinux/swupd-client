@@ -37,11 +37,8 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 10, "stepCompletion" : 0, "stepDescription" : "download_packs" },
 		{ "type" : "info", "msg" : "Downloading packs for:" },
 		{ "type" : "info", "msg" : " - test-bundle" },
-	EOM
-	)
-	expected_output2=$(cat <<-EOM
-		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "download_packs" },
 		{ "type" : "info", "msg" : "Finishing packs extraction..." },
+		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "download_packs" },
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 10, "stepCompletion" : -1, "stepDescription" : "extract_packs" },
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "extract_packs" },
 		{ "type" : "progress", "currentStep" : 5, "totalSteps" : 10, "stepCompletion" : -1, "stepDescription" : "prepare_for_update" },
@@ -76,7 +73,7 @@ test_setup() {
 		{ "type" : "info", "msg" : "Calling post-update helper scripts" },
 	EOM
 	)
-	expected_output3=$(cat <<-EOM
+	expected_output2=$(cat <<-EOM
 		\{ "type" : "info", "msg" : "Update took ... seconds, 0 MB transferred" \},
 		\{ "type" : "info", "msg" : "Update successful - System updated from version 10 to version 20" \},
 		\{ "type" : "progress", "currentStep" : 10, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "run_postupdate_scripts" \},
@@ -85,8 +82,7 @@ test_setup() {
 	EOM
 	)
 	assert_in_output "$expected_output1"
-	assert_in_output "$expected_output2"
-	assert_regex_in_output "$expected_output3"
+	assert_regex_in_output "$expected_output2"
 
 }
 #WEIGHT=5

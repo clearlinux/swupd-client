@@ -27,7 +27,6 @@ test_setup() {
 		Downloading missing manifests...
 		Downloading packs for:
 		 - os-core
-		Finishing packs extraction...
 		Error: zero pack downloads failed
 		Checking for corrupt files
 		Validate downloaded files

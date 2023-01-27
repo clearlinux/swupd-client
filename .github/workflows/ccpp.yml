@@ -14,7 +14,7 @@ jobs:
 
     - name: cache-dependencies
       id: cache-swupd-deps
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: dependencies
         key: swupd-dependencies
@@ -63,7 +63,7 @@ jobs:
 
     - name: cache-dependencies
       id: cache-swupd-deps
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: dependencies
         key: swupd-dependencies
@@ -95,7 +95,7 @@ jobs:
 
     - name: cache-dependencies
       id: cache-swupd-deps
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: dependencies
         key: swupd-dependencies
@@ -127,7 +127,7 @@ jobs:
 
     - name: cache-dependencies
       id: cache-swupd-deps
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: dependencies
         key: swupd-dependencies
@@ -159,7 +159,7 @@ jobs:
 
     - name: cache-dependencies
       id: cache-swupd-deps
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: dependencies
         key: swupd-dependencies
@@ -191,7 +191,7 @@ jobs:
 
     - name: cache-dependencies
       id: cache-swupd-deps
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: dependencies
         key: swupd-dependencies
@@ -223,7 +223,7 @@ jobs:
 
     - name: cache-dependencies
       id: cache-swupd-deps
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: dependencies
         key: swupd-dependencies
@@ -255,7 +255,7 @@ jobs:
 
     - name: cache-dependencies
       id: cache-swupd-deps
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: dependencies
         key: swupd-dependencies
@@ -287,7 +287,7 @@ jobs:
 
     - name: cache-dependencies
       id: cache-swupd-deps
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: dependencies
         key: swupd-dependencies
@@ -319,7 +319,7 @@ jobs:
 
     - name: cache-dependencies
       id: cache-swupd-deps
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: dependencies
         key: swupd-dependencies
@@ -351,7 +351,7 @@ jobs:
 
     - name: cache-dependencies
       id: cache-swupd-deps
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: dependencies
         key: swupd-dependencies
@@ -381,7 +381,7 @@ jobs:
 
     - name: cache-dependencies
       id: cache-swupd-deps
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: dependencies
         key: swupd-dependencies

@@ -35,11 +35,9 @@ test_setup() {
 		Downloading packs for:
 		 - test-bundle
 		Error: Curl - File incompletely downloaded - '.*/100/pack-test-bundle-from-10.tar'
+		Waiting 10 seconds before retrying the download
+		Retry #1 downloading from .*/100/pack-test-bundle-from-10.tar
 		Finishing packs extraction...
-		Curl - Starting download retry #1 for .*/100/pack-test-bundle-from-10.tar
-		Curl - Resuming download for '.*/100/pack-test-bundle-from-10.tar'
-		Error: Curl - Range command not supported by server, download resume disabled - '.*/100/pack-test-bundle-from-10.tar'
-		Curl - Starting download retry #2 for .*/100/pack-test-bundle-from-10.tar
 		Statistics for going from version 10 to version 100:
 		    changed bundles   : 1
 		    new bundles       : 0

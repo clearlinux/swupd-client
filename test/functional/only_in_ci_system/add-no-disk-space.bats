@@ -130,18 +130,6 @@ test_setup() {
 		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
 		Error: Could not download some files from bundles, aborting bundle installation
 		Failed to install 1 of 1 bundles
 	EOM

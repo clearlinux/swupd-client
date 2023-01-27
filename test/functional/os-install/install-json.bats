@@ -31,11 +31,8 @@ test_setup() {
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 9, "stepCompletion" : 0, "stepDescription" : "download_packs" },
 		{ "type" : "info", "msg" : "Downloading packs for:" },
 		{ "type" : "info", "msg" : " - os-core" },
-	EOM
-	)
-	expected_output2=$(cat <<-EOM
-		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 9, "stepCompletion" : 100, "stepDescription" : "download_packs" },
 		{ "type" : "info", "msg" : "Finishing packs extraction..." },
+		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 9, "stepCompletion" : 100, "stepDescription" : "download_packs" },
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 9, "stepCompletion" : -1, "stepDescription" : "extract_packs" },
 		{ "type" : "progress", "currentStep" : 3, "totalSteps" : 9, "stepCompletion" : 100, "stepDescription" : "extract_packs" },
 		{ "type" : "progress", "currentStep" : 4, "totalSteps" : 9, "stepCompletion" : 0, "stepDescription" : "check_files_hash" },
@@ -61,13 +58,16 @@ test_setup() {
 		{ "type" : "info", "msg" : "    0 of 2 missing files were not installed" },
 		{ "type" : "progress", "currentStep" : 9, "totalSteps" : 9, "stepCompletion" : -1, "stepDescription" : "run_postupdate_scripts" },
 		{ "type" : "info", "msg" : "Calling post-update helper scripts" },
-		{ "type" : "warning", "msg" : "helper script ($ABS_TEST_DIR/testfs/target-dir/usr/bin/clr-boot-manager) not found, it will be skipped" },
+	EOM
+	)
+	expected_output2=$(cat <<-EOM
 		{ "type" : "info", "msg" : " Installation successful" },
 		{ "type" : "progress", "currentStep" : 9, "totalSteps" : 9, "stepCompletion" : 100, "stepDescription" : "run_postupdate_scripts" },
 		{ "type" : "end", "section" : "os-install", "status" : 0 }
 		]
 	EOM
 	)
+
 	assert_in_output "$expected_output1"
 	assert_in_output "$expected_output2"
 

@@ -76,73 +76,24 @@ static int finalize_pack_download(const char *module, int newversion, const char
 	return err;
 }
 
-static void download_free_data(void *data)
-{
-	struct pack_data *pack_data = data;
-
-	if (!data) {
-		return;
-	}
-
-	FREE(pack_data->url);
-	FREE(pack_data->filename);
-	FREE(pack_data);
-}
-
-static bool download_error(enum download_status status, void *data)
-{
-	struct pack_data *pack_data = data;
-
-	if (!data) {
-		return false;
-	}
-
-	if (status == DOWNLOAD_STATUS_NOT_FOUND) {
-
-		enum telemetry_severity level = TELEMETRY_LOW;
-
-		// Missing zero packs is a critical problem
-		if (pack_data->oldversion == 0) {
-			level = TELEMETRY_CRIT;
-		}
-		telemetry(level, "packmissing", "url=%s\n", pack_data->url);
-		return true;
-	}
-
-	return false;
-}
-
-static bool download_successful(void *data)
-{
-	struct pack_data *pack_data = data;
-
-	if (!pack_data) {
-		return false;
-	}
-
-	return finalize_pack_download(pack_data->module, pack_data->newversion, pack_data->filename) == 0;
-}
-
-static int download_pack(struct swupd_curl_parallel_handle *download_handle, int oldversion, int newversion, char *module)
+static int download_pack(int oldversion, int newversion, char *module)
 {
 	char *url = NULL;
 	char *filename;
+	int ret;
 
 	filename = statedir_get_delta_pack(module, oldversion, newversion);
 
-	struct pack_data *pack_data;
-
 	string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", globals.content_url, newversion, module, oldversion);
 
-	pack_data = malloc_or_die(sizeof(struct pack_data));
+	ret = swupd_curl_get_file(url, filename);
+	FREE(url);
+	if (!ret) {
+		ret = finalize_pack_download(module, newversion, filename);
+	}
+	FREE(filename);
 
-	pack_data->url = url;
-	pack_data->filename = filename;
-	pack_data->module = module;
-	pack_data->newversion = newversion;
-	pack_data->oldversion = oldversion;
-
-	return swupd_curl_parallel_download_enqueue(download_handle, url, filename, NULL, pack_data);
+	return ret;
 }
 
 static double packs_query_total_download_size(struct list *subs, struct manifest *mom)
@@ -224,7 +175,6 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	int err;
 	int list_length;
 	int complete = 0;
-	struct swupd_curl_parallel_handle *download_handle;
 	char *packs_size;
 
 	progress_next_step("download_packs", PROGRESS_BAR);
@@ -263,20 +213,9 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 		goto out;
 	}
 
-	/* we need to download some files, so set up curl */
-	download_handle = swupd_curl_parallel_download_start(get_max_xfer(MAX_XFER));
-	if (!download_handle) {
-		list_free_list(need_download);
-		ret = -1;
-		goto out;
-	}
-	swupd_curl_parallel_download_set_callbacks(download_handle, download_successful, download_error, download_free_data);
-
 	/* get size of the packs to download */
 	download_progress.total_download_size = packs_query_total_download_size(need_download, mom);
-	if (download_progress.total_download_size > 0) {
-		swupd_curl_parallel_download_set_progress_callback(download_handle, swupd_progress_callback, &download_progress);
-	} else {
+	if (download_progress.total_download_size <= 0) {
 		debug("Couldn't get the size of the packs to download, using number of packs instead\n");
 		download_progress.total_download_size = 0;
 	}
@@ -298,13 +237,12 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 		bundle = mom_search_bundle(mom, sub->component);
 		if (!bundle) {
 			debug("The manifest for bundle %s was not found in the MoM\n", sub->component);
-			swupd_curl_parallel_download_cancel(download_handle);
 
 			ret = -SWUPD_INVALID_BUNDLE;
 			goto out;
 		}
 
-		err = download_pack(download_handle, sub->oldversion, sub->version, sub->component);
+		err = download_pack(sub->oldversion, sub->version, sub->component);
 
 		/* fall back for progress reporting when the download size
 		 * could not be determined */
@@ -313,7 +251,6 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 			progress_report(complete, list_length);
 		}
 		if (err < 0 && required) {
-			swupd_curl_parallel_download_cancel(download_handle);
 			ret = err;
 			goto out;
 		}
@@ -322,9 +259,10 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	info("Finishing packs extraction...\n");
 
 	progress_next_step("extract_packs", PROGRESS_UNDEFINED);
-	return swupd_curl_parallel_download_end(download_handle, NULL);
+	return ret;
 
 out:
+	list_free_list(need_download);
 	progress_next_step("extract_packs", PROGRESS_UNDEFINED);
 	return ret;
 }

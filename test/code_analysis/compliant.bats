@@ -24,9 +24,9 @@ check_sort_makefile()
 		return "$status"
 	fi
 
-	run clang-format-10 -i -style=file src/*.[ch] src/lib/*.[ch]
+	run clang-format -i -style=file src/*.[ch] src/lib/*.[ch] src/3rd_party/*.[ch] src/cmds/*.[ch] src/swupd_lib/*.[ch] src/verifytime/*.[ch]
 	if [ "$status" -ne 0 ]; then
-		echo "clang-format-10 failed with status $status. Check if you have clang-format-10 installed"
+		echo "clang-format failed with status $status. Check if you have clang-format installed"
 		return "$status"
 	fi
 

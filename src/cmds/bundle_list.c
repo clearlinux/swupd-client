@@ -329,10 +329,10 @@ out:
 }
 
 /*
-* list_installable_bundles()
-* Parse the full manifest for the current version of the OS and print
-*   all available bundles.
-*/
+ * list_installable_bundles()
+ * Parse the full manifest for the current version of the OS and print
+ *   all available bundles.
+ */
 static enum swupd_code list_installable_bundles(int version)
 {
 	char *name;

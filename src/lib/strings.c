@@ -101,7 +101,7 @@ char *str_join(const char *separator, struct list *strings)
 		printed = snprintf(str, str_size, "%s%s",
 				   i == strings ? "" : separator, (char *)i->data);
 		if (printed < 0 || int_to_uint(printed) >= str_size) {
-			goto error; //shouldn't happen
+			goto error; // shouldn't happen
 		}
 		str_size -= int_to_uint(printed);
 		str += int_to_uint(printed);

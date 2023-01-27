@@ -38,9 +38,9 @@
 static int lock_fd = -1;
 
 /* Try to get a write lock region on the lock file. Returns:
-* >= 0 an fcntl region lock'd fd or exits with a positive error
-* code and a recommended course of action for user.
-*/
+ * >= 0 an fcntl region lock'd fd or exits with a positive error
+ * code and a recommended course of action for user.
+ */
 int p_lockfile(void)
 {
 	if (lock_fd > 0) {

@@ -392,7 +392,7 @@ int systemctl_daemon_reload(void)
 bool systemd_in_container(void)
 {
 	/* systemd-detect-virt -c does container detection only *
-         * The return code is zero if the system is in a container */
+	 * The return code is zero if the system is in a container */
 	return !run_command("/usr/bin/systemd-detect-virt", "-c", NULL);
 }
 
@@ -444,7 +444,7 @@ char *sys_path_join(const char *fmt, ...)
 	/* remove all duplicated PATH_SEPARATOR from the path */
 	for (i = j = 0; i < len; i++) {
 		if (path[i] == PATH_SEPARATOR && // Is separator and
-		    // Next is also a separator or
+						 // Next is also a separator or
 		    (path[i + 1] == PATH_SEPARATOR ||
 		     // Is a trailing separator, but not root
 		     (path[i + 1] == '\0' && j != 0))) {
@@ -758,8 +758,8 @@ struct list *sys_get_mounted_directories(void)
 		while (mnt != NULL) {
 			if (n == 4) {
 				/* The "4" assumes today's mountinfo form of:
-				* 16 36 0:3 / /proc rw,relatime master:7 - proc proc rw
-				* where the fifth field is the mountpoint. */
+				 * 16 36 0:3 / /proc rw,relatime master:7 - proc proc rw
+				 * where the fifth field is the mountpoint. */
 				if (str_cmp(mnt, "/") != 0) {
 					mounted = list_append_data(mounted, sys_path_join("%s", mnt));
 				}

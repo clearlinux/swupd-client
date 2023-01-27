@@ -15,8 +15,8 @@ enum swupd_code {
 	/** 0 success */
 	SWUPD_OK = 0,
 	/** 1 used by swupd to respond "No" in different situations:
-                                          - if used with check-update it means no update is available
-                                          - if used with autoupdate it means automatic updating is disabled */
+					  - if used with check-update it means no update is available
+					  - if used with autoupdate it means automatic updating is disabled */
 	SWUPD_NO,
 	/** 2 a required bundle is missing or was attempted to be removed */
 	SWUPD_REQUIRED_BUNDLE_ERROR,

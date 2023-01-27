@@ -17,8 +17,8 @@
  *
  */
 
-#include "swupd.h"
 #include "cmds/swupd_cmds.h"
+#include "swupd.h"
 
 #ifdef THIRDPARTY
 

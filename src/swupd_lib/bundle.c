@@ -29,14 +29,14 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "swupd_lib/alias.h"
 #include "swupd.h"
+#include "swupd_lib/alias.h"
 
 #define MODE_RW_O (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 
 /* Finds out whether bundle_name is installed bundle on
-*  current system.
-*/
+ *  current system.
+ */
 bool is_installed_bundle(const char *bundle_name)
 {
 	char *filename = NULL;

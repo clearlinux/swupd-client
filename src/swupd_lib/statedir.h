@@ -15,8 +15,8 @@ extern "C" {
 /* ******************** */
 
 /**
-  * @brief Gets the path to the bundle tracking directory in the datadir.
-  */
+ * @brief Gets the path to the bundle tracking directory in the datadir.
+ */
 char *statedir_get_tracking_dir(void);
 
 /**
@@ -43,7 +43,6 @@ char *statedir_get_swupd_lock(void);
  */
 char *statedir_get_version(void);
 
-
 /* ************* */
 /* Cache section */
 /* ************* */
@@ -59,8 +58,8 @@ char *statedir_get_cache_dir(void);
 char *statedir_get_cache_url_dir(void);
 
 /**
-  * @brief Gets the path to the delta directory in the cachedir.
-  */
+ * @brief Gets the path to the delta directory in the cachedir.
+ */
 char *statedir_get_delta_dir(void);
 
 /**
@@ -80,15 +79,15 @@ char *statedir_get_delta_pack_dir(void);
 char *statedir_get_delta_pack(char *bundle, int from_version, int to_version);
 
 /**
-  * @brief Gets the path to the download directory in the cachedir.
-  */
+ * @brief Gets the path to the download directory in the cachedir.
+ */
 char *statedir_get_download_dir(void);
 
 /**
-  * @brief Gets the path to a downloaded file in the cachedir.
-  * @param filename, the name of the file to get
-  */
-char *statedir_get_download_file(char * filename);
+ * @brief Gets the path to a downloaded file in the cachedir.
+ * @param filename, the name of the file to get
+ */
+char *statedir_get_download_file(char *filename);
 
 /**
  * @brief Gets the path to the directory where manifests are organized
@@ -132,8 +131,8 @@ char *statedir_get_manifest(int version, char *component);
 char *statedir_dup_get_manifest(int version, char *component);
 
 /**
-  * @brief Gets the path to the staged directory in the cachedir.
-  */
+ * @brief Gets the path to the staged directory in the cachedir.
+ */
 char *statedir_get_staged_dir(void);
 
 /**
@@ -178,8 +177,8 @@ char *statedir_get_manifest_tar(int version, char *component);
 char *statedir_get_manifest_with_hash(int version, char *component, char *manifest_hash);
 
 /**
-  * @brief Gets the path to the manifest delta directory in the cachedir.
-  */
+ * @brief Gets the path to the manifest delta directory in the cachedir.
+ */
 char *statedir_get_manifest_delta_dir(void);
 
 /**
@@ -230,7 +229,7 @@ char *statedir_get_temp_file(char *filename);
 /**
  * @brief Creates the required directories in the datadir and cachedir.
  *
-  * @param include_all If set to true, all directories normally used
+ * @param include_all If set to true, all directories normally used
  * for upstream content will be included in the statedir, otherwise
  * a subset that includes only directories used for 3rd-party repositories
  * will be created.

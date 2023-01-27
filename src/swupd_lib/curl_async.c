@@ -302,7 +302,7 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, si
 			file->callback = h->success_cb;
 			tp_task_schedule(h->thpool, (void *)success_callback_wrapper, (void *)file);
 		} else {
-			//Check if user can handle errors
+			// Check if user can handle errors
 			bool error_handled = h->error_cb && h->error_cb(file->status, file->data);
 			enum retry_strategy strategy = determine_strategy(file->status);
 
@@ -312,7 +312,7 @@ static int perform_curl_io_and_complete(struct swupd_curl_parallel_handle *h, si
 				file->cb_retval = true;
 				h->failed = list_prepend_data(h->failed, file);
 			} else {
-				//Download resume isn't supported. Disabling it for next try
+				// Download resume isn't supported. Disabling it for next try
 				if (file->status == DOWNLOAD_STATUS_RANGE_ERROR) {
 					h->resume_failed = true;
 				}
@@ -614,7 +614,7 @@ int swupd_curl_parallel_download_end(struct swupd_curl_parallel_handle *h, int *
 		// The multi-stack is now emptied.
 		perform_curl_io_and_complete(h, h->mcurl_size);
 
-		//Retry failed downloads
+		// Retry failed downloads
 		for (l = h->failed; l;) {
 			file = l->data;
 
@@ -624,7 +624,7 @@ int swupd_curl_parallel_download_end(struct swupd_curl_parallel_handle *h, int *
 
 				file->retries++;
 
-				//Remove item
+				// Remove item
 				if (l == h->failed) {
 					h->failed = l->next;
 				}

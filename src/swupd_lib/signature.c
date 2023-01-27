@@ -406,7 +406,7 @@ static int validate_certificate(X509 *cert, const char *certificate_path, const 
 	X509_LOOKUP *lookup = NULL;
 	X509_STORE_CTX *verify_ctx = NULL;
 
-	//TODO: Implement a chain verification when required
+	// TODO: Implement a chain verification when required
 
 	/* create the cert store and set the verify callback */
 	if (!(store = X509_STORE_new())) {

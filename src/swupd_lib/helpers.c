@@ -258,15 +258,15 @@ static bool adjust_system_time()
 }
 
 /* this function is intended to encapsulate the basic swupd
-* initializations for the majority of commands, that is:
-* 	- Make sure root is the user running the code
-* 	- Initialize globals
-*	- initialize mounted directories
-*	- Create necessary directories
-*	- Get the lock
-*	- Initialize curl
-*	- Initialize signature checking
-*/
+ * initializations for the majority of commands, that is:
+ * 	- Make sure root is the user running the code
+ * 	- Initialize globals
+ *	- initialize mounted directories
+ *	- Create necessary directories
+ *	- Get the lock
+ *	- Initialize curl
+ *	- Initialize signature checking
+ */
 enum swupd_code swupd_init(enum swupd_init_config config)
 {
 	enum swupd_code ret = SWUPD_OK;

@@ -468,7 +468,7 @@ static int remove_irrelevant_file(const char *filename, const struct stat *st, i
 	relevant_path = statedir_get_cache_url_dir();
 	ret = str_starts_with(filename, relevant_path);
 	FREE(relevant_path);
-	if (ret == 0){
+	if (ret == 0) {
 		return 0;
 	}
 
@@ -482,7 +482,7 @@ static int remove_irrelevant_file(const char *filename, const struct stat *st, i
 		}
 	}
 	stats.files_removed++;
-	stats.bytes_removed+=long_to_ulong(st->st_size);
+	stats.bytes_removed += long_to_ulong(st->st_size);
 
 	return 0;
 }
@@ -493,7 +493,7 @@ static int count_file(const char *filename, const struct stat *st, int type __at
 		print("%s\n", filename);
 	}
 	stats.files_removed++;
-	stats.bytes_removed+=long_to_ulong(st->st_size);
+	stats.bytes_removed += long_to_ulong(st->st_size);
 
 	return 0;
 }
@@ -534,7 +534,7 @@ static enum swupd_code remove_cache_directory(const char *dir)
 	enum swupd_code ret_code;
 	int ret;
 
-	if (!sys_is_dir(dir)){
+	if (!sys_is_dir(dir)) {
 		return SWUPD_OK;
 	}
 
@@ -678,13 +678,13 @@ enum swupd_code clean_cachedir(void)
 		}
 		ret_code = clean_staged_manifests(dir, options.dry_run, false);
 		FREE(dir);
-		if(ret_code) {
+		if (ret_code) {
 			return ret_code;
 		}
 
 		// remove all cache from other mirror URLs
 		ret_code = clean_irrelevant_cache();
-		if(ret_code) {
+		if (ret_code) {
 			return ret_code;
 		}
 	}

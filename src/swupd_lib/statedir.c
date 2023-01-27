@@ -62,7 +62,6 @@
 /* Permissions for a directory readable by users */
 #define WORLD_READABLE (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
 
-
 /* ******************** */
 /* Data (state) section */
 /* ******************** */
@@ -181,7 +180,7 @@ char *statedir_get_download_dir(void)
 	return dir;
 }
 
-char *statedir_get_download_file(char * filename)
+char *statedir_get_download_file(char *filename)
 {
 	char *url = get_url();
 	char *path = sys_path_join("%s/%s/%s/%s/%s", globals.cache_dir, CACHE_DIR, url, DOWNLOAD_DIR, filename);
@@ -273,7 +272,6 @@ char *statedir_get_manifest_delta(char *bundle, int from_version, int to_version
 	return path;
 }
 
-
 char *statedir_get_staged_dir(void)
 {
 	char *url = get_url();
@@ -286,7 +284,7 @@ char *statedir_get_staged_dir(void)
 static char *get_staged_file(char *state, char *file_hash)
 {
 	char *url = get_url();
-	char *path =  sys_path_join("%s/%s/%s/%s/%s", state, CACHE_DIR, url, STAGED_DIR, file_hash);
+	char *path = sys_path_join("%s/%s/%s/%s/%s", state, CACHE_DIR, url, STAGED_DIR, file_hash);
 	FREE(url);
 
 	return path;
@@ -337,7 +335,6 @@ char *statedir_get_temp_file(char *filename)
 
 	return path;
 }
-
 
 /* *************** */
 /* Setup functions */
@@ -478,7 +475,7 @@ int statedir_create_dirs(bool include_all)
 	return ret;
 }
 
-static bool set_state_path(char** state, char *path)
+static bool set_state_path(char **state, char *path)
 {
 	struct stat statbuf;
 	int ret;

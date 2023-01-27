@@ -331,7 +331,7 @@ static enum swupd_code install_dir(const char *fullfile_path, const char *target
 }
 
 /* Do the staging of new files into the filesystem */
-//TODO: "stage_single_file is currently not able to be run in parallel"
+// TODO: "stage_single_file is currently not able to be run in parallel"
 /* Consider adding a remove_leftovers() that runs in verify/fix in order to
  * allow this function to mkdtemp create folders for parallel build */
 static enum swupd_code stage_single_file(struct file *file, struct manifest *mom)

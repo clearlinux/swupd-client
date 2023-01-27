@@ -876,21 +876,21 @@ void remove_files_in_manifest_from_fs(struct manifest *m)
 }
 
 /* free all files found in m1 that happens to be
-*  duplicated on m2.
-*
-*  Is _mandatory_ to have both manifests files lists ordered by filename before
-*  calling this function.
-*
-*  This function frees (removes) all duplicated files matching those in m2 from
-*  m1, the resulting m1 file list will be unique respect to files
-*  contained on m2.
-*
-*  Although we can generate a third manifest containing the unique file list
-*  to be more simple in code, this approach pops out and free each duplicated
-*  from m1 in place, this means a gain on space and speed, since it does not
-*  need to allocate new manifest file list, and since it frees duplicates here,
-*  it does not need to free more elements later.
-*/
+ *  duplicated on m2.
+ *
+ *  Is _mandatory_ to have both manifests files lists ordered by filename before
+ *  calling this function.
+ *
+ *  This function frees (removes) all duplicated files matching those in m2 from
+ *  m1, the resulting m1 file list will be unique respect to files
+ *  contained on m2.
+ *
+ *  Although we can generate a third manifest containing the unique file list
+ *  to be more simple in code, this approach pops out and free each duplicated
+ *  from m1 in place, this means a gain on space and speed, since it does not
+ *  need to allocate new manifest file list, and since it frees duplicates here,
+ *  it does not need to free more elements later.
+ */
 void deduplicate_files_from_manifest(struct manifest **m1, struct manifest *m2)
 {
 	struct list *iter1, *iter2, *cur_file, *preserver = NULL;
@@ -1031,7 +1031,7 @@ int mom_get_manifests_list(struct manifest *mom, struct list **manifest_list, fi
 		manifest = load_manifest_file(mom, file, &err);
 		complete++;
 		if (!manifest) {
-			info("\n"); //Progress bar
+			info("\n"); // Progress bar
 			error("Cannot load %s manifest for version %i\n",
 			      file->filename, file->last_change);
 			last_error = err;

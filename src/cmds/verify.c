@@ -33,9 +33,9 @@
 #include <unistd.h>
 
 #include "swupd.h"
+#include "swupd_lib/heuristics.h"
 #include "swupd_lib/signature.h"
 #include "swupd_lib/target_root.h"
-#include "swupd_lib/heuristics.h"
 
 #define FLAG_EXTRA_FILES_ONLY 2000
 #define FLAG_FILE 2001
@@ -299,7 +299,7 @@ static int get_required_files(struct manifest *official_manifest, struct list *r
  * Only called when a file has failed to be fixed during a verify or install.
  * If a low-space warning has been printed, don't check again,
  * but just warn the user and return.
-*/
+ */
 static void check_warn_freespace(struct file *file)
 {
 	long fs_free;
@@ -611,7 +611,7 @@ static void remove_orphaned_files(struct list *files_to_verify, bool repair)
 				if (errno != ENOTEMPTY) {
 					print(" -> not deleted (%s)\n", strerror(errno));
 				} else {
-					//FIXME: Add force removal option?
+					// FIXME: Add force removal option?
 					print(" -> not deleted (not empty)\n");
 				}
 			} else {
@@ -922,7 +922,7 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 	bool invalid_bundle = false;
 
 	/* Unless we are installing a new bundle and the --skip-optional flag is not
-	* set we shoudn't include optional bundles to the bundle list */
+	 * set we shoudn't include optional bundles to the bundle list */
 	if (!cmdline_option_install || cmdline_option_skip_optional) {
 		globals.skip_optional_bundles = true;
 	}

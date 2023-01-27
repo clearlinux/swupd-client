@@ -26,7 +26,7 @@
 #include "swupd.h"
 
 /* hysteresis thresholds */
-//FIXME #562
+// FIXME #562
 #define MAX_XFER 15
 
 static int download_file(struct swupd_curl_parallel_handle *download_handle, struct file *file)

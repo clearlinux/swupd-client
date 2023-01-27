@@ -40,7 +40,7 @@
  * time. This value is set to 1 because of a bug that causes a dowload problem
  * when extrating a large file while other is being downloaded. Set this value
  * to a larger number, to be defined by tests, after bug is fixed.
-*/
+ */
 #define MAX_XFER 1
 
 struct pack_data {
@@ -307,7 +307,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 		err = download_pack(download_handle, sub->oldversion, sub->version, sub->component);
 
 		/* fall back for progress reporting when the download size
-		* could not be determined */
+		 * could not be determined */
 		if (download_progress.total_download_size == 0) {
 			complete++;
 			progress_report(complete, list_length);

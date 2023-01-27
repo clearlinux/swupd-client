@@ -14,19 +14,19 @@ extern "C" {
 #endif
 
 /**
-  * @brief Install files from 'files' into the system.
-  *
-  * @param files The list of files to be installed.
-  * @param mom MoM to be used to create missing directories
-  */
+ * @brief Install files from 'files' into the system.
+ *
+ * @param files The list of files to be installed.
+ * @param mom MoM to be used to create missing directories
+ */
 enum swupd_code target_root_install_files(struct list *files, struct manifest *mom);
 
 /**
-  * @brief Install a single file into the system.
-  *
-  * @param file The file to be installed
-  * @param mom MoM to be used to create missing directories
-  */
+ * @brief Install a single file into the system.
+ *
+ * @param file The file to be installed
+ * @param mom MoM to be used to create missing directories
+ */
 enum swupd_code target_root_install_single_file(struct file *file, struct manifest *mom);
 
 /**

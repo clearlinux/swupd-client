@@ -194,7 +194,7 @@ enum swupd_code compute_hash(struct file *file, char *filename)
 		hmac_sha256_for_string(file->hash,
 				       (const unsigned char *)key,
 				       key_len,
-				       SWUPD_HASH_DIRNAME); //Make independent of dirname
+				       SWUPD_HASH_DIRNAME); // Make independent of dirname
 		return SWUPD_OK;
 	}
 

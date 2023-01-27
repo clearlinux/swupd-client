@@ -144,7 +144,7 @@ enum swupd_code walk_tree(struct manifest *manifest, const char *start, bool fix
 	}
 
 	size_t skip_len = 0; /* Length of directory name we are skipping
-			   * could have used str_len(skip_dir), but speed! */
+			      * could have used str_len(skip_dir), but speed! */
 	/* list files/directories which are extra.
 	 * This is reverse so that files are removed before their parent dirs */
 	for (int i = nF - 1; i >= 0; i--) {

@@ -74,7 +74,7 @@ bool signature_verify_data(const void *data, size_t data_len, const void *sig_da
  *
  * Currently printing Issuer, Subject and the dump of the certificate data.
  * Init is not required to run this function.
-*
+ *
  * @param path the path to the certificate to be printed.
  */
 void signature_print_info(const char *path);

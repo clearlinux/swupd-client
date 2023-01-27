@@ -22,8 +22,8 @@
 #include <unistd.h>
 
 #include "3rd_party_repos.h"
-#include "swupd_lib/signature.h"
 #include "swupd.h"
+#include "swupd_lib/signature.h"
 
 #ifdef THIRDPARTY
 

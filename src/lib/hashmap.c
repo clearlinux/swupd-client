@@ -121,7 +121,7 @@ static struct list *hashmap_get_internal(struct hashmap *hashmap, const void *ke
 		if (hashmap->equal(key, i->data)) {
 			void *data = i->data;
 			if (remove) {
-				//If it's the first element of the list, update head
+				// If it's the first element of the list, update head
 				if (i == *items) {
 					*items = i->next;
 				}

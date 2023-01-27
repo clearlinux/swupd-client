@@ -26,8 +26,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "swupd.h"
 #include "heuristics.h"
+#include "swupd.h"
 
 typedef int (*compare_fn_t)(const char *s1, const char *s2);
 typedef void (*apply_fn_t)(struct file *f);
@@ -95,39 +95,39 @@ static int h_strcmp(const char *s1, const char *s2)
 
 static const struct rule heuristic_rules[] = {
 	// Boot Files
-	{"/boot/", h_starts_with, apply_boot, false },
-	{"/usr/lib/modules/", h_starts_with, apply_boot, false },
+	{ "/boot/", h_starts_with, apply_boot, false },
+	{ "/usr/lib/modules/", h_starts_with, apply_boot, false },
 
 	// State files
-	{"/data", h_starts_with, apply_state, false },
-	{"/dev/", h_starts_with, apply_state, false },
-	{"/home/", h_starts_with, apply_state, false },
-	{"/lost+found", h_starts_with, apply_state, false },
-	{"/proc/", h_starts_with, apply_state, false },
-	{"/root/", h_starts_with, apply_state, false },
-	{"/run/", h_starts_with, apply_state, false },
-	{"/sys/", h_starts_with, apply_state, false },
-	{"/tmp/", h_starts_with, apply_state, false },
-	{"/var/", h_starts_with, apply_state, false },
+	{ "/data", h_starts_with, apply_state, false },
+	{ "/dev/", h_starts_with, apply_state, false },
+	{ "/home/", h_starts_with, apply_state, false },
+	{ "/lost+found", h_starts_with, apply_state, false },
+	{ "/proc/", h_starts_with, apply_state, false },
+	{ "/root/", h_starts_with, apply_state, false },
+	{ "/run/", h_starts_with, apply_state, false },
+	{ "/sys/", h_starts_with, apply_state, false },
+	{ "/tmp/", h_starts_with, apply_state, false },
+	{ "/var/", h_starts_with, apply_state, false },
 
 	// Filtered state on /usr/src
-	{"/usr/src/", h_starts_with, apply_src_state, false },
+	{ "/usr/src/", h_starts_with, apply_src_state, false },
 
 	// Config files
-	{"/etc/", h_starts_with, apply_config, false },
+	{ "/etc/", h_starts_with, apply_config, false },
 
 	// Boot managers
-	{"/usr/bin/bootctl", h_strcmp, apply_bootmanager, false },
-	{"/usr/bin/clr-boot-manager", h_strcmp, apply_bootmanager, false },
-	{"/usr/bin/gummiboot", h_strcmp, apply_bootmanager, false },
-	{"/usr/lib/gummiboot", h_strcmp, apply_bootmanager, false },
-	{"/usr/share/syslinux/ldlinux.c32", h_strcmp, apply_bootmanager, false },
+	{ "/usr/bin/bootctl", h_strcmp, apply_bootmanager, false },
+	{ "/usr/bin/clr-boot-manager", h_strcmp, apply_bootmanager, false },
+	{ "/usr/bin/gummiboot", h_strcmp, apply_bootmanager, false },
+	{ "/usr/lib/gummiboot", h_strcmp, apply_bootmanager, false },
+	{ "/usr/share/syslinux/ldlinux.c32", h_strcmp, apply_bootmanager, false },
 
-	{"/usr/lib/kernel/", h_starts_with, apply_boot_and_bootmanager, false },
-	{"/usr/lib/systemd/boot", h_starts_with, apply_boot_and_bootmanager, false },
+	{ "/usr/lib/kernel/", h_starts_with, apply_boot_and_bootmanager, false },
+	{ "/usr/lib/systemd/boot", h_starts_with, apply_boot_and_bootmanager, false },
 
 	// Systemd
-	{"/usr/lib/systemd/systemd", h_strcmp, apply_systemd, false},
+	{ "/usr/lib/systemd/systemd", h_strcmp, apply_systemd, false },
 
 	{ 0 }
 };
@@ -151,7 +151,7 @@ static void check_ignore_file(struct file *file)
 
 static struct rule *dup_rule(const struct rule *r)
 {
-	struct rule * rule;
+	struct rule *rule;
 
 	rule = malloc_or_die(sizeof(struct rule));
 
@@ -162,7 +162,7 @@ static struct rule *dup_rule(const struct rule *r)
 
 static struct rule *create_rule(char *str, compare_fn_t cmp, apply_fn_t apply)
 {
-	struct rule * rule;
+	struct rule *rule;
 
 	rule = malloc_or_die(sizeof(struct rule));
 
@@ -194,7 +194,7 @@ static struct list *create_rules_from_mounted_dirs(void)
 			// sed s/^path_prefix/\//
 			filename = sys_path_join("/%s", iter->data + path_prefix_len);
 			rules = list_prepend_data(rules,
-				create_rule(filename, h_strcmp, apply_state));
+						  create_rule(filename, h_strcmp, apply_state));
 		}
 	}
 

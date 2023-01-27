@@ -45,6 +45,6 @@ void tp_complete(struct tp *tp);
  */
 int tp_get_num_threads(struct tp *tp);
 
-//TODO: Implement a tp_wait() function
+// TODO: Implement a tp_wait() function
 
 #endif

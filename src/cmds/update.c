@@ -32,9 +32,9 @@
 #include <unistd.h>
 
 #include "swupd.h"
+#include "swupd_lib/heuristics.h"
 #include "swupd_lib/signature.h"
 #include "swupd_lib/target_root.h"
-#include "swupd_lib/heuristics.h"
 
 #define FLAG_DOWNLOAD_ONLY 2000
 #define FLAG_UPDATE_SEARCH_FILE_INDEX 2001
@@ -80,7 +80,7 @@ bool update_get_option_download_only(void)
 static void save_swupd_binary_path()
 {
 	/* we need to resolve the whole path to swupd first, proc/self/exe
-		 * is a symbolic link to the executable that is running the current process */
+	 * is a symbolic link to the executable that is running the current process */
 	ssize_t path_length;
 	path_length = readlink("/proc/self/exe", swupd_binary, sizeof(swupd_binary));
 	if (path_length <= 0 || path_length >= LINE_MAX) {

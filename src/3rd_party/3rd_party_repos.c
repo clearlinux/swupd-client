@@ -18,8 +18,8 @@
  */
 
 #include "3rd_party_repos.h"
-#include "swupd_lib/signature.h"
 #include "swupd.h"
+#include "swupd_lib/signature.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -260,7 +260,7 @@ int third_party_remove_repo_directory(const char *repo_name)
 	int ret = 0;
 	int ret_code = 0;
 
-	//TODO: use a global function to get this value
+	// TODO: use a global function to get this value
 	repo_dir = get_repo_content_path(repo_name);
 	ret = sys_rm_recursive(repo_dir);
 	if (ret < 0 && ret != -ENOENT) {

@@ -94,7 +94,7 @@ struct tp *tp_start(int num_threads)
 
 	tp->num_threads = num_threads;
 	if (num_threads == 0) {
-		//We don't need to create threads
+		// We don't need to create threads
 		return tp;
 	}
 

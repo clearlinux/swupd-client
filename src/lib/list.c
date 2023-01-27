@@ -453,8 +453,8 @@ void *list_remove(void *item_to_remove, struct list **list, comparison_fn_t comp
 void list_move_item(void *item_to_move, struct list **list1, struct list **list2, comparison_fn_t comparison_fn)
 {
 	void *item;
-	//TODO: Improve eficience of this function. We are calling list_head()
-	//      on list1 for all iterations on while()
+	// TODO: Improve eficience of this function. We are calling list_head()
+	//       on list1 for all iterations on while()
 
 	item = list_remove(item_to_move, list1, comparison_fn);
 	while (item) {

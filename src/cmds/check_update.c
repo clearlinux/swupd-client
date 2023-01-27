@@ -36,7 +36,7 @@ static void print_help(void)
 	print("Checks whether an update is available and prints out the information if so\n\n");
 	print("Usage:\n");
 	print("   swupd check-update [OPTION...]\n\n");
-	//TODO: Add documentation explaining this command
+	// TODO: Add documentation explaining this command
 
 	global_print_help();
 }

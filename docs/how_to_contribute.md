@@ -6,7 +6,7 @@ Clear Linux OS is composed of many different open source software projects and w
 
 Before contributing, please review and abide by the [Code of Conduct](https://01.org/blogs/2018/intel-covenant-code).
 
-Ensure any contributions align with Clear Linux philosophies on [stateless](https://clearlinux.org/features/stateless) and [security](https://docs.01.org/clearlinux/latest/guides/clear/security.html).
+Ensure any contributions align with Clear Linux philosophies on [stateless](https://github.com/clearlinux/clear-linux-documentation/blob/master/source/guides/clear/stateless.rst) and [security](https://github.com/clearlinux/clear-linux-documentation/blob/master/source/guides/clear/security.rst).
 
 More information on general Clear Linux OS constribution guidelines on [distribution guide](https://github.com/clearlinux/distribution/blob/master/contributing.md)
 
@@ -16,7 +16,7 @@ Swupd is open for code contributions. Nevertheless, if you are planning to propo
 
 When your code is ready, open a pull request to have your patches reviewed. Patches are only going to be merged after being reviewed and approved by at least 2 maintainers (with some exceptions for trivial patches), all functional tests passes and enough tests are added to test the proposed functionality or bug fix. Make sure your [git user.name](https://help.github.com/en/articles/setting-your-username-in-git) and [git user.email](https://help.github.com/en/articles/setting-your-commit-email-address-in-git) are set correctly.
 
-You should also add tests to the feature or bug fix you are proposing. That's how we ensure we won't have software regressions or we won't break any functionality in the future. For more information about function tests, take a look at the [functional test documentation](test/functional/README.md).
+You should also add tests to the feature or bug fix you are proposing. That's how we ensure we won't have software regressions or we won't break any functionality in the future. For more information about function tests, take a look at the [functional test documentation](https://github.com/clearlinux/swupd-client/blob/master/test/functional/README.md).
 
 ## Error handling
 
@@ -68,10 +68,10 @@ Avoid extremely long lines. Don't use lines longer than 80~100 characters.
 
 When writing functions that return a code consider the following guidelines:
 
- - swupd should always exit with a [swupd code](src/swupd_exit_codes.h).
+ - swupd should always exit with a [swupd code](https://github.com/clearlinux/swupd-client/blob/master/src/swupd_exit_codes.h).
  - When a function returns a boolean state, prefer to explicitly return *true*/*false* instead of returning *0*/*1*.
  - Avoid using a *"catch all"* error in your code that would make harder debugging a failure.
- - Internally, swupd functions can return values other than a [swupd code](src/swupd_exit_codes.h) as long as those values are not propagated all the way to the end user.
+ - Internally, swupd functions can return values other than a [swupd code](https://github.com/clearlinux/swupd-client/blob/master/src/swupd_exit_codes.h) as long as those values are not propagated all the way to the end user.
    For example a function could return an error defined in any of these files:
    - /usr/include/asm-generic/errno-base.h
    - /usr/include/asm-generic/errno.h
@@ -79,6 +79,6 @@ When writing functions that return a code consider the following guidelines:
 
 ## Swupd generic library
 
-Library on [src/lib](src/lib) was created to group the implementation of
+Library on [src/lib](https://github.com/clearlinux/swupd-client/tree/master/src/lib) was created to group the implementation of
 generic data types, helpers and system interaction used by swupd, but without
 any swupd specific code or swupd.h dependency.

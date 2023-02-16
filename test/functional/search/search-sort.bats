@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment "$TEST_NAME"
 
@@ -16,6 +16,12 @@ global_setup() {
 	create_bundle -n alfa-zulu -f /yankee/alfalfa,/alfaromeo/echo,/foo/quebec,/foo/alfa,/foo/delta,/bar/alfa,"$small" "$TEST_NAME"
 	create_bundle -n victor -f /yankee,/bar/alfa,/alfa/zulu,/papa,"$large" "$TEST_NAME"
 	create_bundle -n alfa-charly -f /foxtrot,/tango/sierra,/kilo,"$medium" "$TEST_NAME"
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

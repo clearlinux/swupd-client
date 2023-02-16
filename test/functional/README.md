@@ -43,7 +43,7 @@ A new test script will be generated in the current directory.
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	# global setup
 
@@ -61,7 +61,7 @@ test_teardown() {
 	# destroy_test_environment "$TEST_NAME"
 }
 
-global_teardown() {
+teardown_file() {
 
 	# global cleanup
 
@@ -83,7 +83,7 @@ global_teardown() {
 }
 ```
 
-4. The global_setup() function contains commands that are run only once per test
+4. The setup_file() function contains commands that are run only once per test
 script, it runs before any test in the script is executed.
 
 5. The test_setup() function contains commands that should be executed before every
@@ -106,7 +106,7 @@ if this is the case you can go ahead and remove the local test_teardown definiti
 test script so the pre-defined one is used, if you have more specific cleanup needs you will
 need to overwrite the function.
 
-7. The global_teardown() function contains commands that are run only once per test
+7. The teardown_file() function contains commands that are run only once per test
 script, it runs once all tests in the scripts have finished.
 
 8. Every test within the test file starts with the @test identifier followed

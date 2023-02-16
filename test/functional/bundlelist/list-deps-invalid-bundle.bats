@@ -2,9 +2,15 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment "$TEST_NAME"
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment "$TEST_NAME" 10 1
 
@@ -22,6 +22,12 @@ global_setup() {
 	# add another 3rd-party repo that has nothing to get fixed
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo2
 	create_bundle -L -t -n test-bundle2 -f /baz/file_3 -u repo2 "$TEST_NAME"
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment "$TEST_NAME" 10 1
 
@@ -29,6 +29,12 @@ global_setup() {
 	sudo touch "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo1/bar/untracked_file2
 	# adding an untracked file into /usr
 	sudo touch "$TARGET_DIR"/"$TP_BUNDLES_DIR"/test-repo2/usr/untracked_file3
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

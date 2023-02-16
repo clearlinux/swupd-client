@@ -7,7 +7,7 @@ server_key="$PWD/$TEST_NAME"/server-key.pem
 client_pub="$PWD/$TEST_NAME"/client-pub.pem
 client_key="$PWD/$TEST_NAME"/client-key.pem
 
-global_setup() {
+setup_file() {
 
 	# Skip this test for local development because it takes a long time. To run this test locally,
 	# configure swupd with --with-fallback-capaths=<path to top level of repo>/swupd_test_certificates
@@ -35,6 +35,12 @@ global_setup() {
 	# Set the web server as our upstream server
 	port=$(get_web_server_port "$TEST_NAME")
 	set_upstream_server "$TEST_NAME" "https://localhost:$port/$TEST_NAME/web-dir"
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

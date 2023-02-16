@@ -609,8 +609,8 @@ copy_manifest() {
 	sudo tar --preserve-permissions -xf "$to_path"/pack-"$bundle"-from-0.tar --strip-components 1 --directory "$to_path"/files
 
 	# copy the tar file of each fullfile from a previous version
-	files=("$(ls -I "*.tar" "$to_path"/files)")
-	for bundle_file in ${files[*]}; do
+	mapfile -t files < <(ls -I "*.tar" "$to_path"/files)
+	for bundle_file in "${files[@]}"; do
 		if [ ! -e "$to_path"/files/"$bundle_file".tar ]; then
 			# find the existing tar in previous versions and copy
 			# it to the current directory
@@ -1139,8 +1139,7 @@ set_as_minversion() { # swupd_function
 	mom="$minversion_path"/Manifest.MoM
 
 	mapfile -t bundles < <(awk '/^M\.\.\./ { print $4 }' "$mom")
-	IFS=$'\n'
-	for bundle in ${bundles[*]}; do
+	for bundle in "${bundles[@]}"; do
 
 		# search for the latest manifest version for the bundle
 		manifest="$minversion_path"/Manifest."$bundle"
@@ -1159,8 +1158,8 @@ set_as_minversion() { # swupd_function
 			# extract the content of the zero pack in the files directory so we have
 			# all files available to create future delta packs
 			sudo tar --preserve-permissions -xf "$webdir_path"/"$minversion"/pack-"$bundle"-from-0.tar --strip-components 1 --directory "$webdir_path"/"$minversion"/files
-			files=("$(ls -I "*.tar" "$webdir_path"/"$minversion"/files)")
-			for bundle_file in ${files[*]}; do
+			mapfile -t files < <(ls -I "*.tar" "$webdir_path"/"$minversion"/files)
+			for bundle_file in "${files[@]}"; do
 				if [ ! -e "$webdir_path"/"$minversion"/files/"$bundle_file".tar ]; then
 					create_tar "$webdir_path"/"$minversion"/files/"$bundle_file"
 				fi
@@ -1175,7 +1174,6 @@ set_as_minversion() { # swupd_function
 		create_tar "$manifest"
 
 	done
-	unset IFS
 
 	# update the MoM
 	update_manifest "$mom" minversion "$minversion"
@@ -1642,10 +1640,9 @@ update_hashes_in_mom() { # swupd_function
 	validate_item "$manifest"
 	path=$(dirname "$manifest")
 
-	IFS=$'\n'
 	if [ "$(basename "$manifest")" = Manifest.MoM ]; then
-		bundles=("$(sudo cat "$manifest" | grep -x "M.\\.\\..*" | awk '{ print $4 }')")
-		for bundle in ${bundles[*]}; do
+		mapfile -t bundles < <(awk '/^M.\.\./ { print $4 }' "$manifest")
+		for bundle in "${bundles[@]}"; do
 			# if the hash of the manifest changed, update it
 			bundle_old_hash=$(get_hash_from_manifest "$manifest" "$bundle")
 			bundle_new_hash=$(sudo "$SWUPD" hashdump --quiet "$path"/Manifest."$bundle")
@@ -1664,7 +1661,6 @@ update_hashes_in_mom() { # swupd_function
 		echo "The provided manifest is not the MoM"
 		return 1
 	fi
-	unset IFS
 
 }
 
@@ -1735,14 +1731,12 @@ bump_format() { # swupd_function
 	update_manifest -p "$middle_version_path"/Manifest.os-core file-version /usr/share/defaults/swupd/format "$middle_version"
 
 	mapfile -t bundles < <(awk '/^M\.\.\./ { print $4 }' "$mom")
-	IFS=$'\n'
-	for bundle in ${bundles[*]}; do
+	for bundle in "${bundles[@]}"; do
 		manifest="$middle_version_path"/Manifest."$bundle"
 		update_manifest -p "$manifest" format "$format"
 		update_manifest -p "$manifest" version "$middle_version"
 		update_manifest "$manifest" previous "$version"
 	done
-	unset IFS
 	update_hashes_in_mom "$mom"
 
 	# update the minversion
@@ -4607,7 +4601,7 @@ print_stack() {
 
 	echo "An error occurred"
 	echo "Function stack (most recent on top):"
-	for func in ${FUNCNAME[*]}; do
+	for func in "${FUNCNAME[@]}"; do
 		if [ "$func" != "print_stack" ] && [ "$func" != "terminate" ]; then
 			echo -e "\\t$func"
 		fi

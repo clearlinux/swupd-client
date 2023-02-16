@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle-upstream -f /file_upstream "$TEST_NAME"
@@ -18,6 +18,12 @@ global_setup() {
 	create_third_party_repo -a "$TEST_NAME" 10 staging repo2
 	create_bundle    -n test-bundle1 -f /baz/file_1B -u repo2 "$TEST_NAME"
 	create_bundle -L -n test-bundle3 -f /baz/file_3  -u repo2 "$TEST_NAME"
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

@@ -2,11 +2,17 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle1 -f /foo "$TEST_NAME"
 	create_bundle -n test-bundle2 -f /foo "$TEST_NAME"
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

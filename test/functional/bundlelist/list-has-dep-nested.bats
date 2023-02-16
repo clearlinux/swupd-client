@@ -2,7 +2,7 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /foo "$TEST_NAME"
@@ -11,6 +11,12 @@ global_setup() {
 	# add bundle1 as dependencies of bundle2 and bundle 2 as dependency of bundle3
 	add_dependency_to_manifest "$TEST_NAME"/web-dir/10/Manifest.test-bundle2 test-bundle1
 	add_dependency_to_manifest "$TEST_NAME"/web-dir/10/Manifest.test-bundle3 test-bundle2
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

@@ -2,13 +2,19 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle       -n test-bundle1 -f /foo "$TEST_NAME"
 	create_bundle       -n test-bundle2 -f /bar "$TEST_NAME"
 	create_bundle -L    -n test-bundle3 -f /baz "$TEST_NAME"
 	create_bundle -L -t -n test-bundle4 -f /bat "$TEST_NAME"
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

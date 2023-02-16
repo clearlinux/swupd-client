@@ -5,10 +5,16 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment -e "$TEST_NAME" 10
 	create_bundle -n os-core -f /core "$TEST_NAME"
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment "$TEST_NAME" 10 1
 	create_third_party_repo -a "$TEST_NAME" 10 1 repo1
@@ -17,6 +17,12 @@ global_setup() {
 	create_bundle -L -t -n test-bundle4 -f /file_4 -u repo2 "$TEST_NAME"
 	create_bundle       -n test-bundle5 -f /file_5 -u repo2 "$TEST_NAME"
 	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle2
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

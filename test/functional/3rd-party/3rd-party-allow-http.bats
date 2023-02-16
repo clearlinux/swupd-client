@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment "$TEST_NAME"
 	create_third_party_repo "$TEST_NAME" 10 staging my_repo
@@ -13,6 +13,12 @@ global_setup() {
 	# use a web server for serving the content, this is necessary
 	# since the code behaves differently if the content is local (e.g. file://)
 	start_web_server -r -D "$TP_WEB_DIR"
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

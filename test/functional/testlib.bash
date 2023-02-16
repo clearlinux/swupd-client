@@ -40,10 +40,7 @@ export ABS_CACERT_DIR="$ABS_SWUPD_DIR/swupd_test_certificates"
 TEST_FILE_NAME=$(basename "$BATS_TEST_FILENAME") ; export TEST_FILE_NAME
 # name of the test file without extension (e.g. my_test)
 export TEST_NAME_SHORT=${TEST_FILE_NAME%.bats}
-# name identifier of the current test, this will vary depending of
-# if the test uses a global_setup or a test_setup, we first assume the test
-# is going to be used with a global_setup, if not the case, it will be redefined
-# during setup()
+# name identifier of the current test, it will be redefined during setup()
 export TEST_NAME="$TEST_NAME_SHORT"
 # file that stores the environment variables of the tests in the file
 # since the path to this file depends on TEST_NAME, its value may also be redefined
@@ -4438,7 +4435,7 @@ generate_test() { # swupd_function
 		printf '# Author: %s\n' "$git_name"
 		printf '# Email: %s\n\n' "$git_email"
 		printf 'load "../testlib"\n\n'
-		printf 'global_setup() {\n\n'
+		printf 'setup_file() {\n\n'
 		printf '\t# global setup\n\n'
 		printf '}\n\n'
 		printf 'test_setup() {\n\n'
@@ -4451,7 +4448,7 @@ generate_test() { # swupd_function
 		# shellcheck disable=SC2016
 		printf '\t# destroy_test_environment "$TEST_NAME"\n\n'
 		printf '}\n\n'
-		printf 'global_teardown() {\n\n'
+		printf 'teardown_file() {\n\n'
 		printf '\t# global cleanup\n\n'
 		printf '}\n\n'
 		printf '@test "%s: <test description>" {\n\n' "$id"
@@ -4623,31 +4620,7 @@ setup() {
 	debug_msg "TEST_FILE_NAME: $TEST_FILE_NAME"
 	debug_msg "BATS_TEST_NUMBER: $BATS_TEST_NUMBER"
 
-	# this block will run only once regardless of how many tests are in the test file,
-	# so this block is useful to run things related to global_setup which should be run
-	# only once before all tests
-	if [ "$BATS_TEST_NAME" = "${BATS_TEST_NAMES[0]}" ]; then
-
-		# if an old global environment is found, we need to remove it
-		if is_global_environment; then
-			debug_msg "\\nAn old test environment was found for this test: $TEST_NAME_SHORT"
-			debug_msg "Deleting it..."
-			destroy_test_environment --force "$TEST_NAME_SHORT"
-		fi
-
-		debug_msg "\\nRunning global setup..."
-		global_setup
-		debug_msg "Global setup finished\\n"
-
-		if is_global_environment; then
-			print "Global test environment created: $TEST_NAME_SHORT"
-		fi
-
-	fi
-
 	# the TEST_NAME identifier has to be unique for each test environment:
-	# - if the tests in a file use the global_setup, therefore they use only
-	#   one test enviroment then TEST_NAME = $TEST_NAME_SHORT
 	# - if the tests in a file use the test_setup meaning each one need its own
 	#   test environment then TEST_NAME = $TEST_NAME_SHORT + _ + <test_id>
 	set_env_variables_setup
@@ -4661,11 +4634,6 @@ setup() {
 		destroy_test_environment --force "$TEST_NAME"
 	fi
 
-	# we need to export the env variables before running the test_setup and after
-	# since the user could have used a global_setup() and a test_setup() together
-	# in a test, in that case we need to have the env loaded before running the
-	# test_setup()
-	#
 	# ShellCheck won't be able to include sourced files from paths that are determined
 	# at runtime, this is not a problem in this case, the file has only env variables
 	# shellcheck source=/dev/null
@@ -4726,7 +4694,6 @@ teardown() {
 		show_target
 	fi
 
-	local index
 	# if the user wants to preserve the output and we are using an global environment
 	# we need to copy the state of the environment before starting the next test or
 	# the state will be overrriden
@@ -4739,37 +4706,14 @@ teardown() {
 	test_teardown
 	debug_msg "Finished running test_teardown\\n"
 
-	# if the last test just ran, run the global teardown
-	index=$(( ${#BATS_TEST_NAMES[*]} - 1 ))
-	if [ "$BATS_TEST_NAME" = "${BATS_TEST_NAMES[$index]}" ]; then
-
-		debug_msg "\\nRunning global teardown..."
-		global_teardown
-		debug_msg "Global teardown finished\\n"
-
-		destroy_test_environment "$TEST_NAME"
-
-	elif ! is_global_environment; then
+	if ! is_global_environment; then
 
 		destroy_test_environment "$TEST_NAME"
 
 	fi
 
+
 	print "Test teardown complete."
-
-}
-
-global_setup() {
-
-	# if global_setup is not defined it will default to this one
-	debug_msg "No global setup was defined"
-
-}
-
-global_teardown() {
-
-	# if global_teardown is not defined it will default to this one
-	debug_msg "No global teardown was defined"
 
 }
 

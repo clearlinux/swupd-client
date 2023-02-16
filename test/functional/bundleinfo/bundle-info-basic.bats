@@ -6,7 +6,7 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -L -n test-bundle1 -f /file_1,/foo/file_2 "$TEST_NAME"
@@ -19,6 +19,12 @@ global_setup() {
 	# mark all installed bundles as tracked, to avoid this, let's add a dummy
 	# value to the tracking directory
 	sudo touch "$ABS_TRACKING_DIR"/dummy
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

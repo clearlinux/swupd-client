@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment -r "$TEST_NAME" 10 1
 	add_os_core_update_bundle "$TEST_NAME"
@@ -14,6 +14,12 @@ global_setup() {
 	update_bundle -p "$TEST_NAME" test-bundle1 --update /foo/file_1
 	update_bundle -p "$TEST_NAME" test-bundle1 --delete /bar/file_2
 	update_bundle "$TEST_NAME" test-bundle1 --add /baz/file_3
+
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
 
 }
 

@@ -5,7 +5,7 @@
 
 load "../testlib"
 
-global_setup() {
+setup_file() {
 
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle1 -f /file_1 "$TEST_NAME"
@@ -17,6 +17,12 @@ global_setup() {
 	add_dependency_to_manifest -o "$WEB_DIR"/10/Manifest.test-bundle1 test-bundle3
 	add_dependency_to_manifest "$WEB_DIR"/10/Manifest.test-bundle2 test-bundle4
 	add_dependency_to_manifest -o "$WEB_DIR"/10/Manifest.test-bundle2 test-bundle5
+}
+
+teardown_file() {
+
+	destroy_test_environment --force "$TEST_NAME"
+
 }
 
 @test "BIN011: Show info about a bundle including its optional and non-optional dependencies" {

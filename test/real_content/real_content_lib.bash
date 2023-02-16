@@ -2,8 +2,8 @@
 
 #TODO: Add test for crossing a format barrier
 
-# shellcheck disable=SC1090
-# SC1090: Can't follow non-constant source. Use a directive to specify location.
+# shellcheck disable=SC1091
+# SC1091: Not following, SC couldn't follow the dynamic path
 # We already process that file, so it's fine to ignore
 SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_PATH/../functional/testlib.bash"

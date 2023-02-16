@@ -4854,7 +4854,6 @@ use_ignore_list() {
 		done < "$ignore_list"
 	else
 		debug_msg "The use of ignore lists is disabled"
-		filtered_output="$filtered_output"
 	fi
 
 	echo "$filtered_output"

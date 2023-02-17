@@ -15,7 +15,11 @@ test_setup() {
 
 	# perform autoupdate disable
 	run sudo sh -c "$SWUPD autoupdate --disable $SWUPD_OPTS"
-	assert_status_is "$SWUPD_OK"
+	if [ "$(systemd-detect-virt)" = "docker" ] ; then
+		assert_status_is "$SWUPD_SUBPROCESS_ERROR"
+	else
+		assert_status_is "$SWUPD_OK"
+	fi
 	expected_output=$(cat <<-EOM
 		Warning: disabling automatic updates may take you out of compliance with your IT policy
 		Running systemctl to disable updates

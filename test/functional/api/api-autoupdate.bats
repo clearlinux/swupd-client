@@ -41,7 +41,11 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD autoupdate $SWUPD_OPTS --disable --quiet"
 
-	assert_status_is "$SWUPD_OK"
+	if [ "$(systemd-detect-virt)" = "docker" ] ; then
+		assert_status_is "$SWUPD_SUBPROCESS_ERROR"
+	else
+		assert_status_is "$SWUPD_OK"
+	fi
 	assert_output_is_empty
 	# check mask files don't exist
 	assert_symlink_exists "$ABS_TARGET_DIR"/etc/systemd/system/swupd-update.service

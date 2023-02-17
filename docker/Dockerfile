@@ -10,8 +10,12 @@
 #
 
 FROM clearlinux:latest
-ADD dockerrun.sh /dockerrun.sh
-ADD https://download.clearlinux.org/releases/13010/clear/Swupd_Root.pem /usr/share/clear/update-ca/Swupd_Root.pem
-RUN swupd update && swupd bundle-add os-core-update-dev sysadmin-basic os-testsuite c-basic
+RUN swupd bundle-add os-core-update-dev sysadmin-basic os-testsuite c-basic haskell-basic
+RUN pip install coverxygen && stack install ShellCheck && mv /root/.local/bin/shellcheck /usr/bin/
+RUN useradd tester && usermod -aG wheelnopw tester
+USER tester
+COPY . /build
+WORKDIR /build
 
-CMD ["/dockerrun.sh"]
+# Requires docker run with: --cap-add LINUX_IMMUTABLE
+CMD ["/build/docker/dockerrun.sh"]

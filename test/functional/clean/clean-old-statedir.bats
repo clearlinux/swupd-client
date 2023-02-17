@@ -32,7 +32,7 @@ test_setup() {
 
 	# 3rd-party has both, data and cache
 
-    # │
+	# │
 	# ├── 3rd-party
 	# │
 
@@ -106,31 +106,47 @@ test_setup() {
 	run sudo sh -c "$SWUPD clean $SWUPD_OPTS --dry-run"
 
 	assert_status_is "$SWUPD_OK"
+	assert_in_output "$ABS_DELTA_DIR"
+	assert_in_output "$ABS_DOWNLOAD_DIR"
+	assert_in_output "$ABS_STAGED_DIR"
+	assert_in_output "$ABS_TEMP_DIR"
+	assert_in_output "$ABS_STATE_DIR/pack-vim-from-32800-to-32900.tar"
+	assert_in_output "$ABS_STATE_DIR/Manifest-emacs-delta-from-32900-to-33000"
+	assert_in_output "$ABS_STATE_DIR/staged"
+	assert_in_output "$ABS_STATE_DIR/delta"
+	assert_in_output "$ABS_STATE_DIR/download"
+	assert_in_output "$ABS_STATE_DIR/32900"
+	assert_in_output "$ABS_STATE_DIR/33000"
+
 	expected_output=$(cat <<-EOM
-		$ABS_DELTA_DIR
-		$ABS_DOWNLOAD_DIR
-		$ABS_STAGED_DIR
-		$ABS_TEMP_DIR
-		$ABS_STATE_DIR/pack-vim-from-32800-to-32900.tar
-		$ABS_STATE_DIR/Manifest-emacs-delta-from-32900-to-33000
 		$ABS_STATE_DIR/staged/.*
 		$ABS_STATE_DIR/staged/.*
-		$ABS_STATE_DIR/staged
-		$ABS_STATE_DIR/delta
-		$ABS_STATE_DIR/download
+	EOM
+	)
+	assert_regex_in_output "$expected_output"
+
+	expected_output=$(cat <<-EOM
 		$ABS_STATE_DIR/32900/Manifest\\..*
 		$ABS_STATE_DIR/32900/Manifest\\..*
-		$ABS_STATE_DIR/32900
+	EOM
+	)
+	assert_regex_in_output "$expected_output"
+
+	expected_output=$(cat <<-EOM
 		$ABS_STATE_DIR/33000/Manifest\\..*
 		$ABS_STATE_DIR/33000/Manifest\\..*
 		$ABS_STATE_DIR/33000/Manifest\\..*
 		$ABS_STATE_DIR/33000/Manifest\\..*
-		$ABS_STATE_DIR/33000
+	EOM
+	)
+	assert_regex_in_output "$expected_output"
+
+	expected_output=$(cat <<-EOM
 		Would remove 19 files
 		Aproximatelly .* KB would be freed
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_in_output "$expected_output"
 
 	# non of the files should be removed since it was just a dry run
 	assert_file_exists "$MOM"

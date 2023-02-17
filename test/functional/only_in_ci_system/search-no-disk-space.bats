@@ -7,6 +7,10 @@ load "../testlib"
 
 test_setup() {
 
+	if [ -n "${SKIP_DISK_SPACE}" ]; then
+		skip "Skipping disk space test"
+	fi
+
 	# create a test environment with 10 MB of space
 	create_test_environment -s 3 "$TEST_NAME"
 

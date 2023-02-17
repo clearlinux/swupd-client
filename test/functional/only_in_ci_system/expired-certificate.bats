@@ -15,6 +15,10 @@ test_setup() {
 	if [ -z "${RUNNING_IN_CI}" ]; then
 		skip "Skipping slow test for local development, test only runs in CI"
 	fi
+	if [ -n "${SKIP_DATE_CHECK}" ]; then
+		skip "Skipping date test"
+	fi
+
 	create_test_environment "$TEST_NAME"
 	create_bundle -n test-bundle -f /test-file "$TEST_NAME"
 

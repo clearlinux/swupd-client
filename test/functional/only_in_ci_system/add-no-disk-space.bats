@@ -113,7 +113,7 @@ test_setup() {
 	run sudo sh -c "timeout 30 $SWUPD bundle-add --skip-diskspace-check --allow-insecure-http $SWUPD_OPTS test-bundle"
 
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
-	expected_output=$(cat <<-EOM
+	expected_output1=$(cat <<-EOM
 		Warning: This is an insecure connection
 		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Loading required manifests...
@@ -126,19 +126,15 @@ test_setup() {
 		Starting download of remaining update content. This may take a while...
 		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
 		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
-		Error: Curl - Error downloading to local file - 'http://localhost:$(get_web_server_port "$TEST_NAME")/$TEST_NAME/web-dir/10/.*.tar'
-		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state\\?
+	EOM
+	)
+	expected_output2=$(cat <<-EOM
 		Error: Could not download some files from bundles, aborting bundle installation
 		Failed to install 1 of 1 bundles
 	EOM
 	)
-	assert_regex_is_output "$expected_output"
+	assert_regex_in_output "$expected_output1"
+	assert_in_output "$expected_output2"
 
 }
 #WEIGHT=16

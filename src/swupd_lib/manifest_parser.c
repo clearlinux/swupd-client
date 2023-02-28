@@ -193,14 +193,6 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			file->is_experimental = 1;
 		}
 
-		if (line[2] == 'C') {
-			file->is_config = 1;
-		} else if (line[2] == 's') {
-			file->is_state = 1;
-		} else if (line[2] == 'b') {
-			file->is_boot = 1;
-		}
-
 		if (line[3] == 'r') {
 			/* rename flag is ignored */
 		} else if (line[3] == 'x') {

@@ -109,6 +109,13 @@ struct update_stat {
 /* +1 for null termination */
 #define SWUPD_HASH_LEN (DIGEST_LEN_SHA256 + 1)
 
+/* Can support 7 different levels */
+#define SSE_OPT 0x0
+#define V3_OPT 0x1
+#define V4_OPT 0x2
+
+#define MAX_OPT(opt) (opt) > 3
+
 struct file {
 	char *filename;
 	char hash[SWUPD_HASH_LEN];
@@ -131,6 +138,8 @@ struct file {
 	unsigned int is_experimental : 1;
 	unsigned int is_exported : 1;
 	unsigned int do_not_update : 1;
+
+	unsigned char opt_mask;
 
 	struct file *peer; /* same file in another manifest */
 	struct header *header;

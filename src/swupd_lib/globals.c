@@ -198,18 +198,28 @@ static void set_default_state_dir_cache(void)
 	globals.state_dir_cache = NULL;
 }
 
-static void set_default_cache_dir(void)
+static bool set_default_cache_dir(void)
 {
-	(void)statedir_set_cache_path(STATE_DIR);
+	if (!statedir_set_cache_path(STATE_DIR)) {
+		error("Unable to set default cache dir '%s'\n", STATE_DIR);
+		return false;
+	}
+
+	return true;
 }
 
-static void set_default_data_dir(void)
+static bool set_default_data_dir(void)
 {
+	bool ret;
 	char *default_data_dir = NULL;
 
 	default_data_dir = sys_path_join("%s/%s", globals.path_prefix, STATE_DIR);
-	(void)statedir_set_data_path(default_data_dir);
+	ret = statedir_set_data_path(default_data_dir);
+	if (!ret) {
+		error("Unable to set default data dir '%s'\n", default_data_dir);
+	}
 	FREE(default_data_dir);
+	return ret;
 }
 
 static bool set_format_string(char *format)
@@ -400,13 +410,17 @@ bool globals_init(void)
 	}
 
 	if (!globals.cache_dir) {
-		set_default_cache_dir();
+		if (!set_default_cache_dir()) {
+			return false;
+		}
 	}
 
 	// data_dir is relative to the path_prefix so ALWAYS has to run after
 	// initializing path_prefix
 	if (!globals.data_dir) {
-		set_default_data_dir();
+		if (!set_default_data_dir()) {
+			return false;
+		}
 	}
 
 	if (!globals.format_string && !set_default_format_string()) {

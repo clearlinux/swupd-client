@@ -318,9 +318,9 @@ static void print_remove_summary(int requested, int bad, int total_removed)
 		deps_removed = total_removed + bad - requested;
 		if (deps_removed > 0) {
 			if (cmdline_option_force) {
-				info("%i bundle%s\n", deps_removed, deps_removed > 1 ? "s that depended on the specified bundle(s) were removed" : " that depended on the specified bundle(s) was removed");
+				info("%ld bundle%s\n", deps_removed, deps_removed > 1 ? "s that depended on the specified bundle(s) were removed" : " that depended on the specified bundle(s) was removed");
 			} else {
-				info("%i bundle%s\n", deps_removed, deps_removed > 1 ? "s that were installed as a dependency were removed" : " that was installed as a dependency was removed");
+				info("%ld bundle%s\n", deps_removed, deps_removed > 1 ? "s that were installed as a dependency were removed" : " that was installed as a dependency was removed");
 			}
 		}
 	}

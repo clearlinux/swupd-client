@@ -99,7 +99,7 @@ static int get_sig_inmemory(char *url, struct curl_file_data *tmp_version_sig)
 	string_or_die(&sig_fname, "%s.sig", url);
 	file_size = swupd_curl_query_content_size(sig_fname);
 	if (file_size <= 0) {
-		debug("Failed to retrieve size for signature file: %s - assuming %d\n", sig_fname, default_sig_size);
+		debug("Failed to retrieve size for signature file: %s - assuming %lu\n", sig_fname, default_sig_size);
 		tmp_version_sig->capacity = default_sig_size;
 	} else {
 		tmp_version_sig->capacity = (size_t)file_size;

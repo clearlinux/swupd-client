@@ -109,12 +109,19 @@ struct update_stat {
 /* +1 for null termination */
 #define SWUPD_HASH_LEN (DIGEST_LEN_SHA256 + 1)
 
-/* Can support 7 different levels */
-#define SSE_OPT 0x0
-#define V3_OPT 0x1
-#define V4_OPT 0x2
+/* Any changes here must match mixer, requires format bump */
+#define SSE 0
+#define AVX2 1 << 0
+#define AVX512 1 << 1
 
-#define MAX_OPT(opt) (opt) > 3
+#define SSE_0 0x0
+#define SSE_1 0x1
+#define SSE_2 0x2
+#define SSE_3 0x3
+#define AVX2_1 0x4
+#define AVX2_3 0x5
+#define AVX512_2 0x6
+#define AVX512_3 0x7
 
 struct file {
 	char *filename;
@@ -140,6 +147,8 @@ struct file {
 	unsigned int do_not_update : 1;
 
 	unsigned char opt_mask;
+	unsigned char opt_level;
+	unsigned char available_levels;
 
 	struct file *peer; /* same file in another manifest */
 	struct header *header;

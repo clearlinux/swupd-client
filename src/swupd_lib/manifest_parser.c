@@ -50,6 +50,48 @@
 /* Changes to the OPTIMIZED_BITMASKS array require a format bump and corresponding mixer change */
 static unsigned char OPTIMIZED_BITMASKS[256] = { 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X3C, 0X0, 0X3D, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X3F, 0X0, 0X0, 0X0, 0X0, 0X0, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X39, 0X3A, 0X3B, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X19, 0X1A, 0X0, 0X1B, 0X1C, 0X1D, 0X1E, 0X1F, 0X20, 0X21, 0X22, 0X23, 0X24, 0X25, 0X26, 0X27, 0X28, 0X29, 0X2A, 0X2B, 0X2C, 0X2D, 0X2E, 0X2F, 0X30, 0X31, 0X0, 0X0, 0X0, 0X3E, 0X0, 0X0, 0X1, 0X0, 0X2, 0X3, 0X4, 0X5, 0X6, 0X7, 0X8, 0X9, 0XA, 0XB, 0XC, 0XD, 0XE, 0XF, 0X10, 0X11, 0X0, 0X12, 0X13, 0X14, 0X15, 0X16, 0X17, 0X18, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0 };
 
+int set_opts(struct file *file, unsigned char mask)
+{
+	file->opt_mask = mask;
+	switch (file->opt_mask) {
+	case SSE_0:
+		file->opt_level = SSE;
+		file->available_levels = SSE;
+		break;
+	case SSE_1:
+		file->opt_level = SSE;
+		file->available_levels = SSE | AVX2;
+		break;
+	case SSE_2:
+		file->opt_level = SSE;
+		file->available_levels = SSE | AVX512;
+		break;
+	case SSE_3:
+		file->opt_level = SSE;
+		file->available_levels = SSE | AVX2 | AVX512;
+		break;
+	case AVX2_1:
+		file->opt_level = AVX2;
+		file->available_levels = SSE | AVX2;
+		break;
+	case AVX2_3:
+		file->opt_level = AVX2;
+		file->available_levels = SSE | AVX2 | AVX512;
+		break;
+	case AVX512_2:
+		file->opt_level = AVX512;
+		file->available_levels = SSE | AVX512;
+		break;
+	case AVX512_3:
+		file->opt_level = AVX512;
+		file->available_levels = SSE | AVX2 | AVX512;
+		break;
+	default:
+		return -1;
+	}
+	return 0;
+}
+
 struct manifest *manifest_parse(const char *component, const char *filename, bool header_only)
 {
 	FILE *infile;
@@ -217,8 +259,11 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			file->is_experimental = 1;
 		}
 
-		file->opt_mask = OPTIMIZED_BITMASKS[(unsigned char)line[2]];
-		if (file->opt_mask != SSE_OPT) {
+		if (set_opts(file, OPTIMIZED_BITMASKS[(unsigned char)line[2]])) {
+			FREE(file);
+			continue;
+		}
+		if (file->opt_level != SSE) {
 			FREE(file);
 			continue;
 		}

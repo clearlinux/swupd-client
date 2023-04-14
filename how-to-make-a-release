@@ -1,5 +1,5 @@
 1) update configure.ac with new version
 2) commit and tag new version with configure.ac changes
 3) make dist && make distcheck
-4) push to github and upload dist tar
+4) push to mirror, github and upload dist tar
 

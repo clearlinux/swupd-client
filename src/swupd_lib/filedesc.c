@@ -98,7 +98,7 @@ static void dump_file_descriptor_leaks_int(int n, void *a)
 	char *filename;
 	char buffer[PATH_MAX + 1];
 	ssize_t size;
-	a = a; /* Silence warning */
+	a = a;		/* Silence warning */
 	if (FD_ISSET(n, &open_fds)) {
 		return; /* Was already open */
 	}

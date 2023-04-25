@@ -30,8 +30,8 @@
 #include <unistd.h>
 
 #include "lib/log.h"
-#include "swupd.h"
 #include "manifest.h"
+#include "swupd.h"
 
 /* These defines have to be different from the local options
  * so they don't interfere with each other */

@@ -11,6 +11,7 @@
  */
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "lib/timelist.h"
 
@@ -57,6 +58,7 @@ extern struct globals {
 	int skip_optional_bundles;
 	int update_server_port;
 	int user_interaction;
+	uint64_t opt_level_mask;
 	timelist *global_times;
 } globals;
 

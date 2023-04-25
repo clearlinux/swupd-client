@@ -17,14 +17,19 @@
  *
  */
 
+#include <cpuid.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "manifest.h"
 #include "swupd.h"
 
 #define MANIFEST_LINE_MAXLEN (PATH_MAX * 2)
 #define MANIFEST_HEADER "MANIFEST\t"
+
+const char AVX2_SKIP_FILE[] = "/etc/clear/elf-replace-avx2";
+const char AVX512_SKIP_FILE[] = "/etc/clear/elf-replace-avx512";
 
 /* Below generated with the following:
 
@@ -36,12 +41,12 @@
     ltr[0] = 0;
     ltr['b'] = ltr['s'] = ltr['C'] = 0;
 
-    printf("static unsigned char OPTIMIZED_BITMASKS[256] = { ");
+    printf("static unsigned char OPTIMIZED_BITMASKS[256] = {\n");
     for (int i = 0; i < 256; i++) {
 	if (i < 255) {
-		printf("0x%X, ", ltr[i]);
+		printf("0x%X,\n", ltr[i]);
 	} else {
-		printf("0x%X ", ltr[i]);
+		printf("0x%X\n", ltr[i]);
 	}
     }
     printf("};\n");
@@ -50,46 +55,143 @@
 /* Changes to the OPTIMIZED_BITMASKS array require a format bump and corresponding mixer change */
 static unsigned char OPTIMIZED_BITMASKS[256] = { 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X3C, 0X0, 0X3D, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X3F, 0X0, 0X0, 0X0, 0X0, 0X0, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X39, 0X3A, 0X3B, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X19, 0X1A, 0X0, 0X1B, 0X1C, 0X1D, 0X1E, 0X1F, 0X20, 0X21, 0X22, 0X23, 0X24, 0X25, 0X26, 0X27, 0X28, 0X29, 0X2A, 0X2B, 0X2C, 0X2D, 0X2E, 0X2F, 0X30, 0X31, 0X0, 0X0, 0X0, 0X3E, 0X0, 0X0, 0X1, 0X0, 0X2, 0X3, 0X4, 0X5, 0X6, 0X7, 0X8, 0X9, 0XA, 0XB, 0XC, 0XD, 0XE, 0XF, 0X10, 0X11, 0X0, 0X12, 0X13, 0X14, 0X15, 0X16, 0X17, 0X18, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0, 0X0 };
 
-int set_opts(struct file *file, unsigned char mask)
+/* Any changes to LOOKUP_OPTIMIZED_BITMASKS must match mixer,
+   requires format bump */
+static uint64_t LOOKUP_OPTIMIZED_BITMASKS[256] = {
+	[SSE_0] = (SSE << 8) | SSE,
+	[SSE_1] = (SSE << 8) | SSE | AVX2,
+	[SSE_2] = (SSE << 8) | SSE | AVX512,
+	[SSE_3] = (SSE << 8) | SSE | AVX2 | AVX512,
+	[AVX2_1] = (AVX2 << 8) | SSE | AVX2,
+	[AVX2_3] = (AVX2 << 8) | SSE | AVX2 | AVX512,
+	[AVX512_2] = (AVX512 << 8) | SSE | AVX512,
+	[AVX512_3] = (AVX512 << 8) | SSE | AVX2 | AVX512,
+};
+
+/* some CPUs support avx512 but it's not helpful for performance ... skip avx512 there */
+int avx512_is_unhelpful(void)
 {
-	file->opt_mask = mask;
-	switch (file->opt_mask) {
-	case SSE_0:
-		file->opt_level = SSE;
-		file->available_levels = SSE;
-		break;
-	case SSE_1:
-		file->opt_level = SSE;
-		file->available_levels = SSE | AVX2;
-		break;
-	case SSE_2:
-		file->opt_level = SSE;
-		file->available_levels = SSE | AVX512;
-		break;
-	case SSE_3:
-		file->opt_level = SSE;
-		file->available_levels = SSE | AVX2 | AVX512;
-		break;
-	case AVX2_1:
-		file->opt_level = AVX2;
-		file->available_levels = SSE | AVX2;
-		break;
-	case AVX2_3:
-		file->opt_level = AVX2;
-		file->available_levels = SSE | AVX2 | AVX512;
-		break;
-	case AVX512_2:
-		file->opt_level = AVX512;
-		file->available_levels = SSE | AVX512;
-		break;
-	case AVX512_3:
-		file->opt_level = AVX512;
-		file->available_levels = SSE | AVX2 | AVX512;
-		break;
-	default:
-		return -1;
+        uint32_t eax = 0, ebx = 0, ecx = 0, edx = 0;
+        uint32_t model;
+
+        /* currently only Intel cpus are on the list */
+        if (!__builtin_cpu_is("intel"))
+                return 0;
+
+        __cpuid(1, eax, ebx, ecx, edx);
+        model =  (eax >> 4) & 0xf;
+        model += ((eax >> (16-4)) & 0xf0);
+
+        /* tigerlake */
+        if (model == 0x8C) {
+                return 1;
+        }
+        if (model == 0x8D) {
+                return 1;
+        }
+
+        return 0;
+}
+
+uint64_t get_opt_level_mask(void)
+{
+	char *avx2_skip_file = NULL;
+	char *avx512_skip_file = NULL;
+	uint64_t opt_level_mask = 0;
+
+	avx2_skip_file = sys_path_join("%s/%s", globals.path_prefix, AVX2_SKIP_FILE);
+	avx512_skip_file = sys_path_join("%s/%s", globals.path_prefix, AVX512_SKIP_FILE);
+
+	if (__builtin_cpu_supports("avx512vl")) {
+		opt_level_mask = (AVX512 << 8) | AVX512 | AVX2 | SSE;
 	}
-	return 0;
+	else if (__builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma") ) {
+		opt_level_mask = (AVX2 << 8) | AVX2 | SSE;
+	} else {
+		/* SSE is zero but keep the same logic as others */
+		opt_level_mask = (SSE << 8) | SSE;
+	}
+
+	if (opt_level_mask & AVX512 && avx512_is_unhelpful()) {
+		/* Pretend we are AVX2 only */
+		opt_level_mask = (AVX2 << 8) | AVX2 | SSE;
+	}
+
+	if (access(avx512_skip_file, F_OK)) {
+		if ((opt_level_mask >> 8) & AVX512) {
+			/* Downgrade the entire system to AVX2 */
+			opt_level_mask = (AVX2 << 8) | AVX2 | SSE;
+		}
+	}
+
+	if (access(avx2_skip_file, F_OK)) {
+		if ((opt_level_mask >> 8) & AVX2) {
+			/* Downgrade the entire system to SSE */
+			opt_level_mask = (SSE << 8) | SSE;
+		} else {
+			/* Otherwise just remove AVX2 support from the flags */
+			opt_level_mask &= (uint64_t)~(1 << AVX2);
+		}
+	}
+
+	FREE(avx2_skip_file);
+	FREE(avx512_skip_file);
+
+	return opt_level_mask;
+}
+
+bool use_file(uint64_t file_mask, uint64_t sys_mask)
+{
+	/* Order is very intentional for these tests */
+	unsigned char file_options = file_mask & 255;
+	unsigned char sys_options = sys_mask & 255;
+
+	/* First SSE check is a slight performance optimization */
+	/* If the file only supports SSE, just use it */
+	if (file_options == SSE) {
+		return true;
+	}
+
+	/* This must be done seperately as SSE == 0 and so the mask tests
+	   after this won't detect SSE files matching */
+	/* If the system and file only have SSE in common, use SSE */
+	if ((sys_options & file_options) == SSE) {
+		if ((file_mask >> 8) == SSE) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/* Another check that is a slight performance optimization by
+	   checking a special case to return early.
+	   The SSE matching earlier is important as it would have been
+	   missed by this check. */
+	/* If the file isn't supported by the system don't use it */
+	if (!((file_mask >> 8) & sys_mask)) {
+		return false;
+	}
+
+	/* Look for the file with the system's highest supported optimization level */
+	for (int i = MAX_OPTIMIZED_BIT_POWER; i >= 0; i--) {
+		/* cur will eventually be non-zero as a previous check ensures that
+		   the condition of sys_options and file_options without any bits
+		   matching has already been handled */
+		unsigned char cur = (sys_options & (1 << i)) & (file_options & (1 << i));
+		if (cur) {
+			/* best match between sys and file, use it if this file has the
+			   current optimization level */
+			if (cur & (file_mask >> 8)) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+
+	/* It shouldn't be possible to get here but don't do evil just in case */
+	error("File optimization match failure\n");
+	return (sys_options & (file_mask >> 8)) != 0;
 }
 
 struct manifest *manifest_parse(const char *component, const char *filename, bool header_only)
@@ -216,6 +318,8 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 	/* empty line */
 	while (!feof(infile)) {
 		struct file *file;
+		uint64_t bitmask_translation;
+		uint64_t file_mask;
 
 		if (fgets(line, MANIFEST_LINE_MAXLEN, infile) == NULL) {
 			break;
@@ -259,14 +363,24 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 			file->is_experimental = 1;
 		}
 
-		if (set_opts(file, OPTIMIZED_BITMASKS[(unsigned char)line[2]])) {
+		bitmask_translation = OPTIMIZED_BITMASKS[(unsigned char)line[2]];
+		if (bitmask_translation > AVX512_3) {
+			error("Skipping unsupported file optimization level\n");
 			FREE(file);
 			continue;
 		}
-		if (file->opt_level != SSE) {
+		file_mask = LOOKUP_OPTIMIZED_BITMASKS[bitmask_translation];
+		if (str_cmp("/", globals.path_prefix) != 0) {
+			/* Don't use optimized binaries when prefix is set */
+			/* as the operation might not be for the host system */
+			/* so default to SSE for this case. */
+			globals.opt_level_mask = (SSE << 8) | SSE;
+		}
+		if (!use_file(file_mask, globals.opt_level_mask)) {
 			FREE(file);
 			continue;
 		}
+		file->opt_mask = file_mask;
 
 		if (line[3] == 'r') {
 			/* rename flag is ignored */

@@ -31,6 +31,7 @@
 
 #include "lib/log.h"
 #include "swupd.h"
+#include "manifest.h"
 
 /* These defines have to be different from the local options
  * so they don't interfere with each other */
@@ -51,6 +52,7 @@ struct globals globals = {
 	.max_retries = DEFAULT_MAX_RETRIES,
 	.retry_delay = DEFAULT_RETRY_DELAY,
 	.update_server_port = -1,
+	.opt_level_mask = 0,
 };
 
 struct globals_bkp globals_bkp;
@@ -450,6 +452,8 @@ bool globals_init(void)
 	if (verbose_time) {
 		globals.global_times = timelist_new();
 	}
+
+	globals.opt_level_mask = get_opt_level_mask();
 
 	/* backup the global variables that are likely to be modified by
 	 * some processed like when working with 3rd-party repositories

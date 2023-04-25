@@ -239,6 +239,9 @@ distclean-local:
 install-exec-hook:
 	perl $(top_srcdir)/scripts/findstatic.pl */*.o | grep -v Checking ||:
 
+format:
+	clang-format -i -style=file src/*.[ch] src/lib/*.[ch] src/3rd_party/*.[ch] src/cmds/*.[ch] src/swupd_lib/*.[ch] src/verifytime/*.[ch]
+
 compliant:
 	test/code_analysis/compliant.bats
 	test/functional/check_ids.bash

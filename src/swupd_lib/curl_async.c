@@ -79,10 +79,10 @@
 #define HASH_TO_KEY(hash) (HASH_VALUE(hash[0]) << 4 | HASH_VALUE(hash[1]))
 
 struct swupd_curl_parallel_handle {
-	int retry_delay;	     /* Retry delay */
-	size_t mcurl_size, max_xfer; /* hysteresis parameters */
+	int retry_delay;		    /* Retry delay */
+	size_t mcurl_size, max_xfer;	    /* hysteresis parameters */
 	bool resume_failed;
-	int last_retry; /* keep the largest retry number so far */
+	int last_retry;			    /* keep the largest retry number so far */
 
 	CURLM *mcurl;			    /* Curl handle */
 	struct list *failed;		    /* List of failed downloads */
@@ -108,8 +108,8 @@ struct multi_curl_file {
 	const char *hash;		/* Unique identifier of this file. */
 	swupd_curl_success_cb callback; /* Holds original success callback to be wrapped */
 
-	void *data;	/* user's data */
-	bool cb_retval; /* return value from callback */
+	void *data;			/* user's data */
+	bool cb_retval;			/* return value from callback */
 	struct file_progress *progress;
 };
 

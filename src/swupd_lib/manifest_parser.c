@@ -71,26 +71,27 @@ static uint64_t LOOKUP_OPTIMIZED_BITMASKS[256] = {
 /* some CPUs support avx512 but it's not helpful for performance ... skip avx512 there */
 int avx512_is_unhelpful(void)
 {
-        uint32_t eax = 0, ebx = 0, ecx = 0, edx = 0;
-        uint32_t model;
+	uint32_t eax = 0, ebx = 0, ecx = 0, edx = 0;
+	uint32_t model;
 
-        /* currently only Intel cpus are on the list */
-        if (!__builtin_cpu_is("intel"))
-                return 0;
+	/* currently only Intel cpus are on the list */
+	if (!__builtin_cpu_is("intel")) {
+		return 0;
+	}
 
-        __cpuid(1, eax, ebx, ecx, edx);
-        model =  (eax >> 4) & 0xf;
-        model += ((eax >> (16-4)) & 0xf0);
+	__cpuid(1, eax, ebx, ecx, edx);
+	model = (eax >> 4) & 0xf;
+	model += ((eax >> (16 - 4)) & 0xf0);
 
-        /* tigerlake */
-        if (model == 0x8C) {
-                return 1;
-        }
-        if (model == 0x8D) {
-                return 1;
-        }
+	/* tigerlake */
+	if (model == 0x8C) {
+		return 1;
+	}
+	if (model == 0x8D) {
+		return 1;
+	}
 
-        return 0;
+	return 0;
 }
 
 uint64_t get_opt_level_mask(void)
@@ -104,8 +105,7 @@ uint64_t get_opt_level_mask(void)
 
 	if (__builtin_cpu_supports("avx512vl")) {
 		opt_level_mask = (AVX512 << 8) | AVX512 | AVX2 | SSE;
-	}
-	else if (__builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma") ) {
+	} else if (__builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma")) {
 		opt_level_mask = (AVX2 << 8) | AVX2 | SSE;
 	} else {
 		/* SSE is zero but keep the same logic as others */
@@ -130,7 +130,7 @@ uint64_t get_opt_level_mask(void)
 			opt_level_mask = (SSE << 8) | SSE;
 		} else {
 			/* Otherwise just remove AVX2 support from the flags */
-			opt_level_mask &= (uint64_t)~(1 << AVX2);
+			opt_level_mask &= (uint64_t) ~(1 << AVX2);
 		}
 	}
 

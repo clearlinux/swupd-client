@@ -22,12 +22,12 @@ extern "C" {
 #define AVX2 1 << 0
 #define AVX512 1 << 1
 
-#define SSE_0    0
-#define SSE_1    1
-#define SSE_2    2
-#define SSE_3    3
-#define AVX2_1   4
-#define AVX2_3   5
+#define SSE_0 0
+#define SSE_1 1
+#define SSE_2 2
+#define SSE_3 3
+#define AVX2_1 4
+#define AVX2_3 5
 #define AVX512_2 6
 #define AVX512_3 7
 

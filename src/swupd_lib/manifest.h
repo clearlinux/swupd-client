@@ -17,6 +17,20 @@
 extern "C" {
 #endif
 
+#define MAX_OPTIMIZED_BIT_POWER 1
+#define SSE 0
+#define AVX2 1 << 0
+#define AVX512 1 << 1
+
+#define SSE_0    0
+#define SSE_1    1
+#define SSE_2    2
+#define SSE_3    3
+#define AVX2_1   4
+#define AVX2_3   5
+#define AVX512_2 6
+#define AVX512_3 7
+
 struct manifest {
 	// Header
 	int manifest_version;
@@ -34,6 +48,13 @@ struct manifest {
 	// Helper data
 	struct list *submanifests; /* struct manifest for subscribed manifests */
 };
+
+/**
+ * @brief Get the optimization mask for the current system.
+ *
+ * @returns The bitwise OR of the system optimization level and optimization levels supported by the sytem.
+ */
+uint64_t get_opt_level_mask(void);
 
 /**
  * @brief Parse manifest located on disk under 'filename' and set it's name to 'component'.

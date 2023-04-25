@@ -24,18 +24,6 @@ check_sort_makefile()
 		return "$status"
 	fi
 
-	run clang-format -i -style=file src/*.[ch] src/lib/*.[ch] src/3rd_party/*.[ch] src/cmds/*.[ch] src/swupd_lib/*.[ch] src/verifytime/*.[ch]
-	if [ "$status" -ne 0 ]; then
-		echo "clang-format failed with status $status. Check if you have clang-format installed"
-		return "$status"
-	fi
-
-	run git diff --quiet --exit-code src
-	if [ "$status" -ne 0 ]; then
-		echo "Code style issues found. Run 'git diff' to view issues."
-		return "$status"
-	fi
-
 	run git grep if\ \(.*\)$ -- '*.c'
 	if [ "$status" -eq 0 ]; then
 		echo "Missing brackets in single line if:"

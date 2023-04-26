@@ -112,19 +112,19 @@ uint64_t get_opt_level_mask(void)
 		opt_level_mask = (SSE << 8) | SSE;
 	}
 
-	if (opt_level_mask & AVX512 && avx512_is_unhelpful()) {
+	if ((opt_level_mask >> 8) & AVX512 && avx512_is_unhelpful()) {
 		/* Pretend we are AVX2 only */
 		opt_level_mask = (AVX2 << 8) | AVX2 | SSE;
 	}
 
-	if (access(avx512_skip_file, F_OK)) {
+	if (!access(avx512_skip_file, F_OK)) {
 		if ((opt_level_mask >> 8) & AVX512) {
 			/* Downgrade the entire system to AVX2 */
 			opt_level_mask = (AVX2 << 8) | AVX2 | SSE;
 		}
 	}
 
-	if (access(avx2_skip_file, F_OK)) {
+	if (!access(avx2_skip_file, F_OK)) {
 		if ((opt_level_mask >> 8) & AVX2) {
 			/* Downgrade the entire system to SSE */
 			opt_level_mask = (SSE << 8) | SSE;

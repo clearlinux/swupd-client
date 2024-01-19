@@ -66,6 +66,18 @@ static uint64_t LOOKUP_OPTIMIZED_BITMASKS[256] = {
 	[AVX2_3] = (AVX2 << 8) | SSE | AVX2 | AVX512,
 	[AVX512_2] = (AVX512 << 8) | SSE | AVX512,
 	[AVX512_3] = (AVX512 << 8) | SSE | AVX2 | AVX512,
+	[SSE_4] = (SSE << 8) | SSE | APX,
+	[SSE_5] = (SSE << 8) | SSE | AVX2 | APX,
+	[SSE_6] = (SSE << 8) | SSE | AVX512 | APX,
+	[SSE_7] = (SSE << 8) | SSE | AVX2 | AVX512 | APX,
+	[AVX2_5] = (AVX2 << 8) | SSE | AVX2 | APX,
+	[AVX2_7] = (AVX2 << 8) | SSE | AVX2 | AVX512 | APX,
+	[AVX512_6] = (AVX512 << 8) | SSE | AVX512 | APX,
+	[AVX512_7] = (AVX512 << 8) | SSE | AVX2 | AVX512 | APX,
+	[APX_4] = (APX << 8) | SSE | APX,
+	[APX_5] = (APX << 8) | SSE | AVX2 | APX,
+	[APX_6] = (APX << 8) | SSE | AVX512 | APX,
+	[APX_7] = (APX << 8) | SSE | AVX2 | AVX512 | APX,
 };
 
 /* some CPUs support avx512 but it's not helpful for performance ... skip avx512 there */
@@ -364,7 +376,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 		}
 
 		bitmask_translation = OPTIMIZED_BITMASKS[(unsigned char)line[2]];
-		if (bitmask_translation > AVX512_3) {
+		if (bitmask_translation > APX_7) {
 			error("Skipping unsupported file optimization level\n");
 			FREE(file);
 			continue;

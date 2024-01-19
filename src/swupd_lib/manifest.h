@@ -17,11 +17,20 @@
 extern "C" {
 #endif
 
-#define MAX_OPTIMIZED_BIT_POWER 1
+/* MAX_OPTIMIZED_BIT_POWER is an optimization for where to start looking for
+ * enabled instruction set support in the bitmask */
+#define MAX_OPTIMIZED_BIT_POWER 2
+
+/* SSE, etc are positions and values to check in the bitmask
+ * for if the instruction set is supported */
 #define SSE 0
 #define AVX2 1 << 0
 #define AVX512 1 << 1
+#define APX 1 << 2
 
+/* SSE_0, etc are the indexes to the LOOKUP_OPTIMIZED_BITMASKS array
+ * used to map a file's optimization level transmitted in the manifest.
+ * The numbering indicates the bits set in the actual mask. */
 #define SSE_0 0
 #define SSE_1 1
 #define SSE_2 2
@@ -30,6 +39,18 @@ extern "C" {
 #define AVX2_3 5
 #define AVX512_2 6
 #define AVX512_3 7
+#define SSE_4 8
+#define SSE_5 9
+#define SSE_6 10
+#define SSE_7 11
+#define AVX2_5 12
+#define AVX2_7 13
+#define AVX512_6 14
+#define AVX512_7 15
+#define APX_4 16
+#define APX_5 17
+#define APX_6 18
+#define APX_7 19
 
 struct manifest {
 	// Header

@@ -98,7 +98,7 @@ static void test_manifest_parse(uint64_t sys_mask, bool prefix)
 	// Check if parser can parse all different flags supported for the file list
 	manifest = manifest_parse_test("test", dir, "data/mom2", false);
 	check(manifest != NULL);
-	check(list_len(manifest->files) == 15);
+	check(list_len(manifest->files) == 19);
 	check(list_len(manifest->manifests) == 1);
 
 	validate_file(manifest->manifests, "m1", 10, 1, 0, 0, 0, 0, 0, 1, 0, 0, SSE);
@@ -119,14 +119,35 @@ static void test_manifest_parse(uint64_t sys_mask, bool prefix)
 		validate_file(manifest->files, "f13", 30, 13, 0, 0, 0, 0, 0, 0, 0, 0, (SSE << 8) | AVX2 | SSE);
 		validate_file(manifest->files, "f14", 30, 14, 0, 0, 0, 0, 0, 0, 0, 0, (SSE << 8) | AVX512 | SSE);
 		validate_file(manifest->files, "f15", 30, 15, 0, 0, 0, 0, 0, 0, 0, 0, (SSE << 8) | AVX512 | AVX2 | SSE);
+		validate_file(manifest->files, "f16", 30, 16, 0, 0, 0, 0, 0, 0, 0, 0, (SSE << 8) | APX | SSE);
+		validate_file(manifest->files, "f17", 30, 17, 0, 0, 0, 0, 0, 0, 0, 0, (SSE << 8) | APX | AVX2 | SSE);
+		validate_file(manifest->files, "f18", 30, 18, 0, 0, 0, 0, 0, 0, 0, 0, (SSE << 8) | APX | AVX512 | SSE);
+		validate_file(manifest->files, "f19", 30, 19, 0, 0, 0, 0, 0, 0, 0, 0, (SSE << 8) | APX | AVX512 | AVX2 | SSE);
 	} else if ((sys_mask >> 8) & AVX2) {
 		validate_file(manifest->files, "f13", 30, 113, 0, 0, 0, 0, 0, 0, 0, 0, (AVX2 << 8) | AVX2 | SSE);
 		validate_file(manifest->files, "f14", 30, 14, 0, 0, 0, 0, 0, 0, 0, 0, (SSE << 8) | AVX512 | SSE);
 		validate_file(manifest->files, "f15", 30, 115, 0, 0, 0, 0, 0, 0, 0, 0, (AVX2 << 8) | AVX512 | AVX2 | SSE);
+		validate_file(manifest->files, "f16", 30, 16, 0, 0, 0, 0, 0, 0, 0, 0, (SSE << 8) | APX | SSE);
+		validate_file(manifest->files, "f17", 30, 117, 0, 0, 0, 0, 0, 0, 0, 0, (AVX2 << 8) | APX | AVX2 | SSE);
+		validate_file(manifest->files, "f18", 30, 18, 0, 0, 0, 0, 0, 0, 0, 0, (SSE << 8) | APX | AVX512 | SSE);
+		validate_file(manifest->files, "f19", 30, 119, 0, 0, 0, 0, 0, 0, 0, 0, (AVX2 << 8) | APX | AVX512 | AVX2 | SSE);
+
+	} else if ((sys_mask >> 8) & AVX512) {
+		validate_file(manifest->files, "f13", 30, 113, 0, 0, 0, 0, 0, 0, 0, 0, (AVX2 << 8) | AVX2 | SSE);
+		validate_file(manifest->files, "f14", 30, 214, 0, 0, 0, 0, 0, 0, 0, 0, (AVX512 << 8) | AVX512 | SSE);
+		validate_file(manifest->files, "f15", 30, 215, 0, 0, 0, 0, 0, 0, 0, 0, (AVX512 << 8) | AVX512 | AVX2 | SSE);
+		validate_file(manifest->files, "f16", 30, 16, 0, 0, 0, 0, 0, 0, 0, 0, (SSE << 8) | APX | SSE);
+		validate_file(manifest->files, "f17", 30, 117, 0, 0, 0, 0, 0, 0, 0, 0, (AVX2 << 8) | APX | AVX2 | SSE);
+		validate_file(manifest->files, "f18", 30, 218, 0, 0, 0, 0, 0, 0, 0, 0, (AVX512 << 8) | APX | AVX512 | SSE);
+		validate_file(manifest->files, "f19", 30, 219, 0, 0, 0, 0, 0, 0, 0, 0, (AVX512 << 8) | APX | AVX512 | AVX2 | SSE);
 	} else {
 		validate_file(manifest->files, "f13", 30, 113, 0, 0, 0, 0, 0, 0, 0, 0, (AVX2 << 8) | AVX2 | SSE);
 		validate_file(manifest->files, "f14", 30, 214, 0, 0, 0, 0, 0, 0, 0, 0, (AVX512 << 8) | AVX512 | SSE);
 		validate_file(manifest->files, "f15", 30, 215, 0, 0, 0, 0, 0, 0, 0, 0, (AVX512 << 8) | AVX512 | AVX2 | SSE);
+		validate_file(manifest->files, "f16", 30, 416, 0, 0, 0, 0, 0, 0, 0, 0, (APX << 8) | APX | SSE);
+		validate_file(manifest->files, "f17", 30, 417, 0, 0, 0, 0, 0, 0, 0, 0, (APX << 8) | APX | AVX2 | SSE);
+		validate_file(manifest->files, "f18", 30, 418, 0, 0, 0, 0, 0, 0, 0, 0, (APX << 8) | APX | AVX512 | SSE);
+		validate_file(manifest->files, "f19", 30, 419, 0, 0, 0, 0, 0, 0, 0, 0, (APX << 8) | APX | AVX512 | AVX2 | SSE);
 	}
 
 	manifest_free(manifest);
@@ -146,7 +167,10 @@ static void test_manifest_parse(uint64_t sys_mask, bool prefix)
 
 int main()
 {
-	uint64_t sys_mask = (AVX512 << 8) | AVX512 | AVX2 | SSE;
+	uint64_t sys_mask = (APX << 8) | APX | AVX512 | AVX2 | SSE;
+	test_manifest_parse(sys_mask, false);
+	test_manifest_parse(sys_mask, true);
+	sys_mask = (AVX512 << 8) | AVX512 | AVX2 | SSE;
 	test_manifest_parse(sys_mask, false);
 	test_manifest_parse(sys_mask, true);
 	sys_mask = (AVX2 << 8) | AVX2 | SSE;

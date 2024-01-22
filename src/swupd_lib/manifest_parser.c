@@ -218,6 +218,7 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 	struct list *optional = NULL;
 	unsigned long long filecount = 0;
 	unsigned long long contentsize = 0;
+	static bool bad_opt_warned = false;
 
 	infile = fopen(filename, "rbm");
 	if (infile == NULL) {
@@ -377,7 +378,10 @@ struct manifest *manifest_parse(const char *component, const char *filename, boo
 
 		bitmask_translation = OPTIMIZED_BITMASKS[(unsigned char)line[2]];
 		if (bitmask_translation > APX_7) {
-			error("Skipping unsupported file optimization level\n");
+			if (!bad_opt_warned) {
+				bad_opt_warned = true;
+				error("Skipping unsupported file optimization level\n");
+			}
 			FREE(file);
 			continue;
 		}

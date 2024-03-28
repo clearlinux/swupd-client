@@ -848,33 +848,6 @@ void populate_file_struct(struct file *file, char *filename)
 	return;
 }
 
-/* Iterate m file list and remove from filesystem each file/directory */
-void remove_files_in_manifest_from_fs(struct manifest *m)
-{
-	struct list *iter = NULL;
-	struct file *file = NULL;
-	char *fullfile = NULL;
-	int count = list_len(m->files);
-
-	iter = list_head(m->files);
-	while (iter) {
-		file = iter->data;
-		iter = iter->next;
-		string_or_die(&fullfile, "%s/%s", globals.path_prefix, file->filename);
-		int err = sys_rm_recursive(fullfile);
-		if (err != 0 && err != -ENOENT) {
-			/* if an error is returned it means there was an issue deleting the
-			 * file or directory, in that case decrease the counter of deleted
-			 * files.
-			 * Note: If a file didn't exist it will still be counted as deleted,
-			 * this is a limitation */
-			count--;
-		}
-		FREE(fullfile);
-	}
-	info("Total deleted files: %i\n", count);
-}
-
 /* free all files found in m1 that happens to be
  *  duplicated on m2.
  *

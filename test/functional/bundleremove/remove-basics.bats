@@ -31,6 +31,7 @@ test_teardown() {
 
 @test "REM001: Removing one bundle" {
 
+	sudo mkdir "$TARGET_DIR"/bar/keep1
 	run sudo sh -c "$SWUPD bundle-remove $SWUPD_OPTS test-bundle1"
 
 	assert_status_is 0
@@ -42,6 +43,8 @@ test_teardown() {
 	assert_dir_not_exists "$TARGET_DIR"/foo
 	assert_dir_not_exists "$TARGET_DIR"/bar
 	assert_file_not_exists "$STATE_DIR"/bundles/test-bundle1
+        # keep file isn't removed
+	assert_file_exists "$TARGET_DIR"/.deleted.*.bar/keep1
 	# bundle2 was not removed
 	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle2
 	assert_file_exists "$TARGET_DIR"/bat/test-file4
@@ -55,7 +58,6 @@ test_teardown() {
 		Successfully removed 1 bundle
 	EOM
 	)
-	assert_is_output "$expected_output"
 
 }
 

@@ -47,12 +47,12 @@ test_teardown() {
 		Validate downloaded files
 		Starting download of remaining update content. This may take a while...
 		Adding any missing files
-		Error: Target has different file type but could not be removed: $ABS_TARGET_DIR/baz
+		Error: Target has different file type but could not be moved to backup location: $ABS_TARGET_DIR/baz
 		 -> Missing file: $ABS_TARGET_DIR/baz/bat -> not fixed
-		Error: Target has different file type but could not be removed: $ABS_TARGET_DIR/baz
+		Error: Target has different file type but could not be moved to backup location: $ABS_TARGET_DIR/baz
 		 -> Missing file: $ABS_TARGET_DIR/baz/bat/file_3 -> not fixed
 		Repairing corrupt files
-		Error: Target has different file type but could not be removed: $ABS_TARGET_DIR/baz
+		Error: Target has different file type but could not be moved to backup location: $ABS_TARGET_DIR/baz
 		 -> Hash mismatch for file: $ABS_TARGET_DIR/baz -> not fixed
 		 -> Hash mismatch for file: $ABS_TARGET_DIR/foo/file_1 -> fixed
 		 -> Hash mismatch for file: $ABS_TARGET_DIR/usr/lib/os-release -> fixed
@@ -83,11 +83,11 @@ test_teardown() {
 
 	assert_status_is_not "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Error: Target has different file type but could not be removed: $ABS_TARGET_DIR/baz
+		Error: Target has different file type but could not be moved to backup location: $ABS_TARGET_DIR/baz
 		$ABS_TARGET_DIR/baz/bat -> not fixed
-		Error: Target has different file type but could not be removed: $ABS_TARGET_DIR/baz
+		Error: Target has different file type but could not be moved to backup location: $ABS_TARGET_DIR/baz
 		$ABS_TARGET_DIR/baz/bat/file_3 -> not fixed
-		Error: Target has different file type but could not be removed: $ABS_TARGET_DIR/baz
+		Error: Target has different file type but could not be moved to backup location: $ABS_TARGET_DIR/baz
 		$ABS_TARGET_DIR/baz -> not fixed
 		$ABS_TARGET_DIR/foo/file_1 -> fixed
 		$ABS_TARGET_DIR/usr/lib/os-release -> fixed

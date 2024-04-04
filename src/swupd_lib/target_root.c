@@ -21,6 +21,7 @@
  *
  */
 
+#include <asm-generic/errno.h>
 #include <assert.h>
 #include <errno.h>
 #include <libgen.h>
@@ -29,6 +30,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "swupd.h"
@@ -36,6 +38,7 @@
 #include "xattrs.h"
 
 #define STAGE_FILE_PREFIX ".update."
+#define BACKUP_FILE_PREFIX ".deleted."
 
 static bool verify_fix_path(char *dir, struct manifest *mom);
 
@@ -330,6 +333,63 @@ static enum swupd_code install_dir(const char *fullfile_path, const char *target
 	return install_dir_using_tar(fullfile_path, target_file);
 }
 
+/* Backup target directory to a backup and timestamp prefixed name. */
+/* This function should only be used after the deletes are processed. */
+static enum swupd_code move_to_timestamp(const char *dirname)
+{
+	struct tm *timeinfo;
+	time_t now;
+	char time_str[50] = { 0 };
+	char *backup_dir = NULL;
+	int ret = SWUPD_OK;
+	char *target_basename;
+	char *dir = NULL;
+	char *target_dir = NULL;
+	char *target_path = NULL;
+
+	dir = sys_dirname(dirname);
+	target_basename = sys_basename(dirname);
+	target_path = sys_path_join("%s/%s", globals.path_prefix, dir);
+	target_dir = sys_path_join("%s/%s", globals.path_prefix, dirname);
+
+	time(&now);
+	timeinfo = localtime(&now);
+	if (!timeinfo) {
+		ret = SWUPD_TIME_UNKNOWN;
+		goto out;
+	}
+
+	strftime(time_str, sizeof(time_str), "%s", timeinfo);
+	backup_dir = sys_path_join("%s/%s%s.%s", target_path, BACKUP_FILE_PREFIX, time_str, target_basename);
+
+	/* It shouldn't be possible to have an already created backup_dir
+	   but just in case, try and remove it and error out if unable to. */
+	if (sys_file_exists(backup_dir)) {
+		ret = sys_rm_recursive(backup_dir);
+		if (ret != 0 && ret != -ENOENT) {
+			ret = SWUPD_COULDNT_REMOVE_FILE;
+			error("Failed to remove backup dir %s\n", backup_dir);
+			goto out;
+		}
+	}
+
+	ret = rename(target_dir, backup_dir);
+	if (ret != 0) {
+		ret = SWUPD_COULDNT_RENAME_DIR;
+		goto out;
+	}
+
+out:
+	FREE(dir);
+	FREE(target_dir);
+	FREE(target_path);
+
+	if (backup_dir) {
+		FREE(backup_dir);
+	}
+	return ret;
+}
+
 /* Do the staging of new files into the filesystem */
 // TODO: "stage_single_file is currently not able to be run in parallel"
 /* Consider adding a remove_leftovers() that runs in verify/fix in order to
@@ -389,11 +449,13 @@ static enum swupd_code stage_single_file(struct file *file, struct manifest *mom
 	if (file_type_changed(target_file, file)) {
 		// file type changed, move old out of the way for new
 		debug("The file type changed for file %s, removing old file\n", target_file);
-		ret = sys_rm_recursive(target_file);
+		ret = sys_rm(target_file);
 		if (ret != 0 && ret != -ENOENT) {
-			error("Target has different file type but could not be removed: %s\n", target_file);
-			ret = SWUPD_COULDNT_REMOVE_FILE;
-			goto out;
+			ret = move_to_timestamp(file->filename);
+			if (ret != 0) {
+				error("Target has different file type but could not be moved to backup location: %s\n", target_file);
+				goto out;
+			}
 		}
 	}
 
@@ -554,11 +616,11 @@ int rename_staged_file_to_final(struct file *file)
 		 * or we might end up deleting something else */
 		target_path = sys_dirname(target);
 		if (sys_path_is_absolute(target_path)) {
-			ret = sys_rm_recursive(target);
+			ret = sys_rm(target);
 
 			/* don't count missing ones as errors...
 			 * if somebody already deleted them for us then all is well */
-			if ((ret == -ENOENT) || (ret == -ENOTDIR)) {
+			if (ret == -ENOENT) {
 				ret = 0;
 			}
 		}
@@ -566,42 +628,12 @@ int rename_staged_file_to_final(struct file *file)
 	} else if (file->is_dir || file->is_ghosted) {
 		ret = 0;
 	} else {
-		/* If the file was previously a directory but no longer, then
-		 * we need to move it out of the way.
-		 * This should not happen because the server side complains
-		 * when creating update content that includes such a state
-		 * change.  But...you never know. */
-
-		if (sys_is_dir(target)) {
-			char *lostnfound;
-			char *base;
-
-			lostnfound = sys_path_join("%s/lost+found", globals.path_prefix);
-			ret = mkdir(lostnfound, S_IRWXU);
-			if ((ret != 0) && (errno != EEXIST)) {
-				FREE(lostnfound);
-				FREE(target);
-				return ret;
-			}
-			FREE(lostnfound);
-
-			base = sys_basename(file->filename);
-			lostnfound = sys_path_join("%s/lost+found/%s", globals.path_prefix, base);
-			/* this will fail if the directory was not already emptied */
-			ret = rename(target, lostnfound);
-			if (ret < 0 && errno != ENOTEMPTY && errno != EEXIST) {
-				error("failed to move %s to lost+found: %s\n",
-				      base, strerror(errno));
-			}
-			FREE(lostnfound);
-		} else {
-			ret = rename(file->staging, target);
-			if (ret < 0) {
-				error("failed to rename staged %s to final: %s\n",
-				      file->hash, strerror(errno));
-			}
-			unlink(file->staging);
+		ret = rename(file->staging, target);
+		if (ret < 0) {
+			error("failed to rename staged %s to final: %s\n",
+			      file->hash, strerror(errno));
 		}
+		unlink(file->staging);
 	}
 
 	FREE(target);
@@ -611,7 +643,8 @@ int rename_staged_file_to_final(struct file *file)
 static int rename_all_files_to_final(struct list *updates)
 {
 	int ret, update_errs = 0;
-	struct list *list;
+	struct list *dirs_to_remove = NULL;
+	struct list *list, *dirs_list;
 	int complete = 0;
 	int list_length = list_len(updates);
 
@@ -623,7 +656,9 @@ static int rename_all_files_to_final(struct list *updates)
 
 		if (!file->do_not_update) {
 			ret = rename_staged_file_to_final(file);
-			if (ret != 0) {
+			if (ret == -ENOTEMPTY) {
+				dirs_to_remove = list_prepend_data(dirs_to_remove, file);
+			} else if (ret != 0) {
 				update_errs++;
 			}
 		}
@@ -631,6 +666,25 @@ static int rename_all_files_to_final(struct list *updates)
 		complete++;
 		progress_report(list_length + complete, list_length * 2);
 	}
+
+	dirs_list = list_head(dirs_to_remove);
+	while (dirs_list) {
+		struct file *file;
+		file = dirs_list->data;
+		dirs_list = dirs_list->next;
+
+		ret = rename_staged_file_to_final(file);
+		if (ret != 0) {
+			ret = move_to_timestamp(file->filename);
+			if (ret != 0) {
+				error("Could not move file to backup location: %s\n", file->filename);
+			}
+		}
+		if (ret != 0) {
+			update_errs++;
+		}
+	}
+	list_free_list(dirs_to_remove);
 
 	return -update_errs;
 }
@@ -732,21 +786,30 @@ enum swupd_code target_root_install_files(struct list *files, struct manifest *m
 int target_root_remove_files(struct list *files)
 {
 	struct list *iter = NULL;
+	struct list *dirs_to_remove = NULL;
+	struct list *dirs_iter = NULL;
 	struct file *file = NULL;
 	char *fullfile = NULL;
 	int total = list_len(files);
 	int deleted = total;
 	int count = 0;
+	int ret;
 
 	iter = list_head(files);
 	while (iter) {
 		file = iter->data;
 		iter = iter->next;
 		fullfile = sys_path_join("%s/%s", globals.path_prefix, file->filename);
-		if (sys_rm_recursive(fullfile) == -1) {
-			/* if a -1 is returned it means there was an issue deleting the
-			 * file or directory, in that case decrease the counter of deleted
-			 * files.
+		ret = sys_rm(fullfile);
+		if (ret == -ENOTEMPTY) {
+			/* The directory couldn't be deleted right away so add it to
+			 * the directory specific remove list to try again, and update
+			 * count to indicate processing is still needed reporting. */
+			count--;
+			dirs_to_remove = list_prepend_data(dirs_to_remove, file);
+		} else if (ret != 0) {
+			/* There was an issue deleting the file or directory, in that
+			 * case decrease the counter of deleted files.
 			 * Note: If a file didn't exist it will still be counted as deleted,
 			 * this is a limitation */
 			deleted--;
@@ -755,6 +818,29 @@ int target_root_remove_files(struct list *files)
 		count++;
 		progress_report(count, total);
 	}
+
+	dirs_iter = list_head(dirs_to_remove);
+	while (dirs_iter) {
+		file = dirs_iter->data;
+		dirs_iter = dirs_iter->next;
+		fullfile = sys_path_join("%s/%s", globals.path_prefix, file->filename);
+		ret = sys_rm(fullfile);
+		if (ret == -ENOTEMPTY) {
+			ret = move_to_timestamp(file->filename);
+			if (ret != 0) {
+				/* As above, an issue was encountered deleting the directory, so
+				 * decrease the counter of deleted files. */
+				error("Could not move file to backup location: %s\n", file->filename);
+				deleted--;
+			}
+		} else if (ret != 0) {
+			deleted--;
+		}
+		FREE(fullfile);
+		count++;
+		progress_report(count, total);
+	}
+	list_free_list(dirs_to_remove);
 
 	return deleted;
 }

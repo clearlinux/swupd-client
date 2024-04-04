@@ -304,7 +304,7 @@ show_target() { # swupd_function
 	EOM
 	)" "$@"
 
-	print "\n$(tree "$TARGET_DIR")\n"
+	print "\n$(tree -a "$TARGET_DIR")\n"
 
 }
 
@@ -4050,7 +4050,7 @@ update_bundle() { # swupd_function
 			sudo sed -i "/\\t$filename$/s/./d/2" "$bundle_manifest"
 			sudo sed -i "/\\t$filename\\t/s/./d/2" "$bundle_manifest"
 			# remove the related file(s) from the version dir (if there)
-			sudo rm -f "$version_path"/files/"$fhash"
+			sudo rm -f "$version_path"/files/"$fhash" || sudo rmdir "$version_path"/files/"$fhash"
 			sudo rm -f "$version_path"/files/"$fhash".tar
 		else
 			# replace the second character of the line that matches with "g"

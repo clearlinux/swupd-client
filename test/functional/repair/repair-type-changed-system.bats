@@ -94,6 +94,7 @@ test_setup() {
 
 	assert_regular_file_exists "$TARGET_DIR"/file_removed
 	assert_regular_file_exists "$TARGET_DIR"/file_to_dir
+	assert_file_exists "$TARGET_DIR"/.deleted.*.symlink_to_dir/dir/file
 	assert_regular_file_exists "$TARGET_DIR"/file_to_symlink
 	assert_regular_file_exists "$TARGET_DIR"/file_to_symlink_dir
 	assert_regular_file_exists "$TARGET_DIR"/file_to_symlink_broken
@@ -105,6 +106,7 @@ test_setup() {
 	assert_symlink_exists "$TARGET_DIR"/symlink_to_dir
 	run stat --printf  "%N" "$TARGET_DIR"/symlink_to_dir
 	assert_is_output "'$TARGET_DIR/symlink_to_dir' -> 'broken'"
+	assert_file_exists "$TARGET_DIR"/.deleted.*.symlink_to_dir/dir/file
 
 	assert_symlink_exists "$TARGET_DIR"/symlink_to_symlink
 	run stat --printf  "%N" "$TARGET_DIR"/symlink_to_symlink

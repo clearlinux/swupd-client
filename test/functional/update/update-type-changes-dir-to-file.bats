@@ -44,6 +44,8 @@ test_setup() {
 	assert_file_exists "$TARGET_DIR"/file1
 	assert_file_exists "$TARGET_DIR"/common_file
 	assert_dir_exists "$TARGET_DIR"/dir1
+	sudo mkdir "$TARGET_DIR"/dir1/dir2
+	show_target
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
@@ -75,6 +77,7 @@ test_setup() {
 	assert_dir_exists "$TARGET_DIR"/file1
 	assert_dir_not_exists "$TARGET_DIR"/dir1
 	assert_file_exists "$TARGET_DIR"/dir1
+	assert_dir_exists "$TARGET_DIR"/.deleted.*.dir1/dir2
 	assert_file_exists "$TARGET_DIR"/common_file
 	show_target
 

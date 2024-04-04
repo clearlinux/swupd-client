@@ -26,7 +26,7 @@
 
 #ifdef SWUPD_TAR_SELINUX
 #define TAR_XATTR_ARGS "--xattrs --xattrs-include='*' --selinux"
-#else  /* SWUPD_TAR_SELINUX */
+#else /* SWUPD_TAR_SELINUX */
 #define TAR_XATTR_ARGS "--xattrs --xattrs-include='*'"
 #endif /* SWUPD_TAR_SELINUX */
 

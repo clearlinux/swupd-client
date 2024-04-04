@@ -456,6 +456,23 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 			return DOWNLOAD_STATUS_ERROR;
 		}
 	} else { /* download failed but let our caller do it */
+		long response = 0;
+		curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &response);
+		debug("Curl - process_curl_error_codes: curl_ret = %d, response = %ld\n", curl_ret, response);
+		switch (response) {
+		case 403:
+			debug("Curl - Download failed - forbidden (403) - '%s'\n", url);
+			return DOWNLOAD_STATUS_FORBIDDEN;
+		case 404:
+			debug("Curl - Download failed - file not found (404) - '%s'\n", url);
+			return DOWNLOAD_STATUS_NOT_FOUND;
+		case 416:
+			debug("Curl - Download failed - range not satisfiable (416) - '%s'\n", url);
+			return DOWNLOAD_STATUS_RANGE_NOT_SATISFIABLE;
+		default:
+			debug("Curl - Download failed: response (%ld) -  '%s'\n", response, url);
+		}
+
 		debug("Curl - process_curl_error_codes - curl_ret = %d\n", curl_ret);
 		switch (curl_ret) {
 		case CURLE_COULDNT_RESOLVE_PROXY:

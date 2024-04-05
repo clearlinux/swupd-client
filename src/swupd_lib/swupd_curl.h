@@ -6,8 +6,8 @@
  * @brief Wrapper to curl API calls.
  */
 
-#include "swupd_progress.h"
 #include <stdbool.h>
+#include <sys/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -80,7 +80,7 @@ void swupd_curl_cleanup(void);
 /**
  * @brief Query the file content size of 'url' without downloading the full file.
  */
-double swupd_curl_query_content_size(char *url);
+int64_t swupd_curl_query_content_size(char *url);
 
 /**
  * @brief Download @c url and save it in @c filename.

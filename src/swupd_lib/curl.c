@@ -291,10 +291,10 @@ static size_t dummy_write_cb(void UNUSED_PARAM *func, size_t size, size_t nmemb,
 	return (size_t)(size * nmemb);
 }
 
-double swupd_curl_query_content_size(char *url)
+int64_t swupd_curl_query_content_size(char *url)
 {
 	CURLcode curl_ret;
-	double content_size;
+	curl_off_t content_size;
 	long response = 0;
 
 	if (!swupd_curl_init(url)) {
@@ -353,7 +353,7 @@ double swupd_curl_query_content_size(char *url)
 		return -1;
 	}
 
-	curl_ret = curl_easy_getinfo(curl_main, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &content_size);
+	curl_ret = curl_easy_getinfo(curl_main, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &content_size);
 	if (curl_ret != CURLE_OK) {
 		return -1;
 	}

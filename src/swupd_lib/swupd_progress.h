@@ -17,7 +17,7 @@ extern "C" {
  */
 struct download_progress {
 	/** @brief total number of bytes to download. */
-	double total_download_size;
+	uint64_t total_download_size;
 	/** @brief total of bytes downloaded so far. */
 	long downloaded;
 };

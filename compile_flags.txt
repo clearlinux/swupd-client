@@ -1,0 +1,4 @@
+-Isrc
+-Isrc/lib
+-Isrc/swupd_lib
+

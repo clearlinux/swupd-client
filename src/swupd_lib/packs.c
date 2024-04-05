@@ -96,10 +96,10 @@ static int download_pack(int oldversion, int newversion, char *module)
 	return ret;
 }
 
-static double packs_query_total_download_size(struct list *subs, struct manifest *mom)
+static int64_t packs_query_total_download_size(struct list *subs, struct manifest *mom)
 {
-	double size = 0;
-	double total_size = 0;
+	int64_t size = 0;
+	int64_t total_size = 0;
 	struct sub *sub = NULL;
 	struct list *list = NULL;
 	struct file *bundle = NULL;
@@ -117,7 +117,7 @@ static double packs_query_total_download_size(struct list *subs, struct manifest
 
 		string_or_die(&url, "%s/%i/pack-%s-from-%i.tar", globals.content_url, sub->version, sub->component, sub->oldversion);
 		size = swupd_curl_query_content_size(url);
-		if (size != -1) {
+		if (size >= 0) {
 			total_size += size;
 		} else {
 			debug("The pack header for bundle %s could not be downloaded\n", sub->component);
@@ -172,6 +172,7 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	struct sub *sub = NULL;
 	struct file *bundle = NULL;
 	struct download_progress download_progress = { 0, 0 };
+	int64_t download_size;
 	int err;
 	int list_length;
 	int complete = 0;
@@ -214,15 +215,17 @@ int download_subscribed_packs(struct list *subs, struct manifest *mom, bool requ
 	}
 
 	/* get size of the packs to download */
-	download_progress.total_download_size = packs_query_total_download_size(need_download, mom);
-	if (download_progress.total_download_size <= 0) {
+	download_size = packs_query_total_download_size(need_download, mom);
+	if (download_size < 0) {
 		debug("Couldn't get the size of the packs to download, using number of packs instead\n");
 		download_progress.total_download_size = 0;
+	} else {
+		download_progress.total_download_size = (uint64_t)download_size;
 	}
 
 	/* show the packs size only if > 1 MB */
-	string_or_die(&packs_size, "(%.2lf MB) ", download_progress.total_download_size / 1000000);
-	info("Downloading packs %sfor:\n", (download_progress.total_download_size / 1000000) > 1 ? packs_size : "");
+	string_or_die(&packs_size, "(%.2lf MB) ", (double)download_progress.total_download_size / 1000000);
+	info("Downloading packs %sfor:\n", ((double)download_progress.total_download_size / 1000000) > 1 ? packs_size : "");
 	FREE(packs_size);
 	for (iter = list_head(need_download); iter; iter = iter->next) {
 		sub = iter->data;

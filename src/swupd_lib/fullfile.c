@@ -56,10 +56,10 @@ static bool download_successful(void *data)
 	return true;
 }
 
-static double fullfile_query_total_download_size(struct list *files)
+static int64_t fullfile_query_total_download_size(struct list *files)
 {
-	double size = 0;
-	double total_size = 0;
+	int64_t size = 0;
+	int64_t total_size = 0;
 	struct file *file = NULL;
 	struct list *list = NULL;
 	char *url = NULL;
@@ -70,7 +70,7 @@ static double fullfile_query_total_download_size(struct list *files)
 
 		string_or_die(&url, "%s/%i/files/%s.tar", globals.content_url, file->last_change, file->hash);
 		size = swupd_curl_query_content_size(url);
-		if (size > 0) {
+		if (size >= 0) {
 			total_size += size;
 		} else {
 			debug("The header for file %s could not be downloaded\n", file->filename);
@@ -84,7 +84,7 @@ static double fullfile_query_total_download_size(struct list *files)
 	}
 
 	debug("Number of files to download: %d\n", count);
-	debug("Total size of files to be downloaded: %.2lf MB\n", total_size / 1000000);
+	debug("Total size of files to be downloaded: %.2lf MB\n", (double)total_size / 1000000);
 	return total_size;
 }
 
@@ -183,6 +183,7 @@ int download_fullfiles(struct list *files, int *num_downloads)
 	list_length = list_len(need_download);
 	complete = 0;
 	if (list_length < MAX_FILES) {
+		int64_t download_size;
 		/* remove tar duplicates from the list first */
 		need_download = list_sort(need_download, cmp_file_hash);
 
@@ -191,8 +192,9 @@ int download_fullfiles(struct list *files, int *num_downloads)
 		 * <last_change>/files/<hash>.tar */
 		need_download = list_sorted_deduplicate(need_download, cmp_file_hash_last_change, NULL);
 
-		download_progress.total_download_size = fullfile_query_total_download_size(need_download);
-		if (download_progress.total_download_size > 0) {
+		download_size = fullfile_query_total_download_size(need_download);
+		if (download_size > 0) {
+			download_progress.total_download_size = (uint64_t)download_size;
 			/* enable the progress callback */
 			swupd_curl_parallel_download_set_progress_callback(download_handle, swupd_progress_callback, &download_progress);
 		} else {

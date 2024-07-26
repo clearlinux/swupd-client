@@ -26,6 +26,7 @@ AC_CHECK_LIB([pthread], [pthread_create])
 
 
 # Program checks
+AC_CHECK_PROGS(RST2MAN, rst2man rst2man.py)
 AC_CHECK_PROGS(TAR, tar)
 AC_DEFINE(_GNU_SOURCE, 1, [Use non standard gnu functions])
 

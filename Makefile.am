@@ -268,7 +268,7 @@ man: $(dist_man_MANS)
 
 .rst:
 	mkdir -p "$$(dirname $@)"
-	rst2man.py "$<" > "$@.tmp" && mv -f "$@.tmp" "$@"
+	$(RST2MAN) "$<" > "$@.tmp" && mv -f "$@.tmp" "$@"
 
 if ENABLE_TESTS
 

@@ -4823,6 +4823,38 @@ assert_status_is() { # assertion
 
 }
 
+assert_status_in() { # assertion
+
+	local expected_statuses="$*"
+	validate_param "$expected_statuses"
+
+	if [ -z "$status" ]; then
+		echo "The \$status environment variable is empty."
+		echo "Please make sure this assertion is used inside a BATS test after a 'run' command."
+		return 1
+	fi
+
+        local found=0
+	for expected_status in $expected_statuses; do
+		if [ "$status" -eq "$expected_status" ]; then
+			found=1
+			break
+		fi
+	done
+	if [ $found -eq 0 ]; then
+		print_assert_failure "Expected statuses: $expected_statuses\\nActual status: $status"
+		return 1
+	else
+		# if the assertion was successful show the output only if the user
+		# runs the test with the -t flag
+		echo -e "\\nCommand output:" >&3
+		echo "------------------------------------------------------------------" >&3
+		echo "$output" >&3
+		echo -e "------------------------------------------------------------------\\n" >&3
+	fi
+
+}
+
 assert_status_is_not() { # assertion
 
 	local not_expected_status=$1

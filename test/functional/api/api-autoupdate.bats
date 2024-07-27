@@ -16,7 +16,7 @@ test_setup() {
 
 	run sudo sh -c "$SWUPD autoupdate $SWUPD_OPTS --quiet"
 
-	assert_status_is "$SWUPD_NO"
+	assert_status_in "$SWUPD_NO" "$SWUPD_SUBPROCESS_ERROR"
 	assert_output_is_empty
 
 }

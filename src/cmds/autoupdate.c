@@ -156,14 +156,14 @@ enum swupd_code autoupdate_main(int argc, char **argv)
 		return SWUPD_OK;
 	} else {
 		int rc1, rc2;
-		const int STATUS_UNKNOWN = 4;
+		const int STATUS_UNKNOWN = 5;
 		rc1 = systemctl_cmd_path(globals.path_prefix, "is-enabled", "swupd-update.service", NULL);
 		rc2 = systemctl_cmd_path(globals.path_prefix, "is-active", "swupd-update.timer", NULL);
 		if (rc1 == SWUPD_OK && rc2 == SWUPD_OK) {
 			info("Enabled\n");
 			return SWUPD_OK;
 		} else if (rc1 >= STATUS_UNKNOWN || rc2 >= STATUS_UNKNOWN) {
-			/* systemctl returns 1,2, or 3 when program dead or not running */
+			/* systemctl returns 1,2,3, or 4 when program dead, not running or units not found */
 			error("Unable to determine autoupdate status\n");
 			return SWUPD_SUBPROCESS_ERROR;
 			// Swupd-service is unmasked, static but timer is inactive for --path

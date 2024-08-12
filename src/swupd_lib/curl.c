@@ -416,6 +416,7 @@ CURLcode swupd_download_file_close(CURLcode curl_ret, struct curl_file *file)
 enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 {
 	char *url;
+	int info_ret;
 	if (curl_easy_getinfo(curl_handle, CURLINFO_EFFECTIVE_URL, &url) != CURLE_OK) {
 		url = "<not available>";
 	}
@@ -430,8 +431,9 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 
 	if (curl_ret == CURLE_OK || curl_ret == CURLE_HTTP_RETURNED_ERROR) {
 		long response = 0;
-		if (curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &response) != CURLE_OK) {
-			response = -1; // Force error
+		if ((info_ret = curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &response)) != CURLE_OK) {
+			error("curl_easy_getinfo for response code failed: %s\n", curl_easy_strerror(info_ret));
+			return DOWNLOAD_STATUS_ERROR;
 		}
 		debug("Curl - process_curl_error_codes: curl_ret = %d, response = %ld\n", curl_ret, response);
 		/* curl command succeeded, download might've failed, let our caller handle */
@@ -457,7 +459,13 @@ enum download_status process_curl_error_codes(int curl_ret, CURL *curl_handle)
 		}
 	} else { /* download failed but let our caller do it */
 		long response = 0;
-		curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &response);
+		if ((info_ret = curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &response)) != CURLE_OK) {
+			error("curl_easy_getinfo for response code failed: %s\n", curl_easy_strerror(info_ret));
+			/* Set response as the switch below falls through for default.
+			 * Unsure if this is really needed or if we should just return
+			 * but we do display the curl_ret error as well. */
+			response = -1;
+		}
 		debug("Curl - process_curl_error_codes: curl_ret = %d, response = %ld\n", curl_ret, response);
 		switch (response) {
 		case 403:

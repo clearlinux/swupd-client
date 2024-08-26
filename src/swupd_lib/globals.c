@@ -551,7 +551,7 @@ static bool global_parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'u':
-		print("Overriding version and content URLs with %s\n", optarg);
+		warn("Overriding version and content URLs with %s\n", optarg);
 		set_version_url(optarg);
 		set_content_url(optarg);
 		return true;
@@ -563,11 +563,11 @@ static bool global_parse_opt(int opt, char *optarg)
 		}
 		return true;
 	case 'c':
-		print("Overriding content URL with %s\n", optarg);
+		warn("Overriding content URL with %s\n", optarg);
 		set_content_url(optarg);
 		return true;
 	case 'v':
-		print("Overriding version URL with %s\n", optarg);
+		warn("Overriding version URL with %s\n", optarg);
 		set_version_url(optarg);
 		return true;
 	case 'F':

@@ -160,8 +160,8 @@ test_setup() {
 	run sudo sh -c "$SWUPD info $SWUPD_OPTS -v https://anotherurl.com"
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Overriding version and content URLs with https://someurl.com
-		Overriding version URL with https://anotherurl.com
+		Warning: Overriding version and content URLs with https://someurl.com
+		Warning: Overriding version URL with https://anotherurl.com
 		Distribution:      Swupd Test Distro
 		Installed version: 10
 		Version URL:       https://anotherurl.com

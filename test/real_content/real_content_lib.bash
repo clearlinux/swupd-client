@@ -49,15 +49,15 @@ install_bundles() {
 	[ "$1" = "-r" ] && { CMD="verify --fix"; shift ; }
 
 	if [ -z "$BUNDLE_LIST" ]; then
-		run sudo sh -c "$SWUPD bundle-list --all $SWUPD_OPTS_SHORT --quiet"
+		run --separate-stderr sudo sh -c "$SWUPD bundle-list --all $SWUPD_OPTS_SHORT --quiet"
 		# shellcheck disable=SC2154
 		# SC2154: output is referenced but not assigned.
 		# the output variable is being assigned and exported by bats
 		BUNDLE_LIST=$(echo "$output" | tr '\n' ' ')
-		num_pkgs=$(echo "$output" | wc -l)
+		num_pkgs=${#lines[@]}
 
 		cur_version=$(grep VERSION_ID "${ROOT_DIR}/usr/lib/os-release" | cut -d = -f 2)
-		num_pkgs_mom=$(sh -c "curl ${URL}/$cur_version/Manifest.MoM 2>/dev/null | grep ^M\\\\. | wc -l")
+		num_pkgs_mom=$(sh -c "curl ${URL}/$cur_version/Manifest.MoM 2>/dev/null | grep -c ^M\\\\.")
 
 		if [ "$num_pkgs" -ne "$num_pkgs_mom" ]; then
 			print "Number of packages on bundle-list --all is $num_pkgs. Expected is $num_pkgs_mom:"
@@ -72,7 +72,7 @@ install_bundles() {
 	CUR_VER=$("$SWUPD" info $SWUPD_OPTS | grep "Installed version"|cut -d ':' -f 2)
 	BUNDLE_LIST="${BUNDLE_LIST// /,}"
 	run sudo sh -c "$SWUPD $CMD $SWUPD_OPTS -B $BUNDLE_LIST -V $CUR_VER"
-	print "Instalation completed"
+	print "Installation completed"
 
 	assert_status_is 0
 	verify_system

@@ -32,7 +32,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Overriding version and content URLs with https://localhost
+		Warning: Overriding version and content URLs with https://localhost
 		Installing OS version 10
 		Downloading missing manifests...
 		No packs need to be downloaded
@@ -63,7 +63,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MANIFEST"
 	expected_output=$(cat <<-EOM
-		Overriding version and content URLs with https://localhost
+		Warning: Overriding version and content URLs with https://localhost
 		Installing OS version 10
 		Downloading missing manifests...
 		Error: Failed to connect to update server: https://localhost/10/Manifest.os-core.tar
@@ -92,7 +92,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
-		Overriding version and content URLs with https://localhost
+		Warning: Overriding version and content URLs with https://localhost
 		Installing OS version 10
 		Error: Failed to connect to update server: https://localhost/10/Manifest.MoM.sig
 		Possible solutions for this problem are:
@@ -121,7 +121,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output=$(cat <<-EOM
-		Overriding version and content URLs with https://localhost
+		Warning: Overriding version and content URLs with https://localhost
 		Installing OS version 10
 		Downloading missing manifests...
 		No packs need to be downloaded
@@ -153,7 +153,7 @@ test_setup() {
 
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
-		Overriding version and content URLs with https://localhost
+		Warning: Overriding version and content URLs with https://localhost
 		Installing OS version 10
 		Downloading missing manifests...
 		Error: Failed to connect to update server: https://localhost/10/pack-os-core-from-0.tar

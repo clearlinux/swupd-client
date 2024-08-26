@@ -54,6 +54,8 @@ install_bundles() {
 		# SC2154: output is referenced but not assigned.
 		# the output variable is being assigned and exported by bats
 		BUNDLE_LIST=$(echo "$output" | tr '\n' ' ')
+
+		# shellcheck disable=SC2154 # ${lines[@]} is also assigned and exported by bats
 		num_pkgs=${#lines[@]}
 
 		cur_version=$(grep VERSION_ID "${ROOT_DIR}/usr/lib/os-release" | cut -d = -f 2)

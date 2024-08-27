@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.66])
-AC_INIT(swupd-client, 5.1.0, william.douglas@intel.com)
+AC_INIT(swupd-client, 5.1.1, william.douglas@intel.com)
 AM_PROG_AR
 LT_INIT
 AC_CONFIG_MACRO_DIR([m4])

@@ -5,6 +5,8 @@
 
 load "../testlib"
 
+SWUPD_ROOT_CERT=/usr/share/clear/update-ca/Swupd_Root.pem
+
 test_setup() {
 
 	# Skip this test for local development because we write the certificate on /
@@ -16,9 +18,11 @@ test_setup() {
 
 	create_test_environment "$TEST_NAME"
 
-	sudo rm -f /usr/share/clear/update-ca/Swupd_Root.pem
+	# Backup the original certificate
+	[[ -f ${SWUPD_ROOT_CERT} ]] &&
+		mv ${SWUPD_ROOT_CERT} ${SWUPD_ROOT_CERT}.orig
 	sudo mkdir -p /usr/share/clear/update-ca
-	sudo cp test/functional/only_in_ci_system/pemfile /usr/share/clear/update-ca/Swupd_Root.pem
+	sudo cp test/functional/only_in_ci_system/pemfile ${SWUPD_ROOT_CERT}
 
 	create_third_party_repo "$TEST_NAME" 10 staging repo1
 	export repo1="$ABS_TP_URL"
@@ -31,7 +35,10 @@ test_teardown() {
 		return
 	fi
 
-	sudo rm -f /usr/share/clear/update-ca/Swupd_Root.pem
+	sudo rm -f ${SWUPD_ROOT_CERT}
+	# Restore the original certificate
+	[[ -f ${SWUPD_ROOT_CERT}.orig ]] &&
+		mv ${SWUPD_ROOT_CERT}.orig ${SWUPD_ROOT_CERT}
 
 }
 

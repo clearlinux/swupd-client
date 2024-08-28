@@ -49,6 +49,8 @@ static X509 *get_cert_from_path(const char *certificate_path);
 
 static X509_STORE *store = NULL;
 static STACK_OF(X509) *x509_stack = NULL;
+static char *orig_cert = NULL;
+static char *alt_cert = NULL;
 
 static int verify_callback_ignore_expiration(int ok, X509_STORE_CTX *local_store)
 {
@@ -174,8 +176,7 @@ void signature_deinit(void)
 	CRYPTO_cleanup_all_ex_data();
 }
 
-bool signature_verify_data(const void *data, size_t data_len, const void *sig_data, size_t sig_data_len, enum signature_flags flags)
-
+static bool signature_verify_data_internal(const void *data, size_t data_len, const void *sig_data, size_t sig_data_len, enum signature_flags flags)
 {
 	bool result = false;
 	int ret;
@@ -262,6 +263,64 @@ error:
 	}
 	if (p7) {
 		PKCS7_free(p7);
+	}
+
+	return result;
+}
+
+static bool swap_certs(void)
+{
+	bool ret = true;
+
+	signature_deinit();
+	if (str_cmp(globals.cert_path, orig_cert) == 0) {
+		set_cert_path(alt_cert);
+	} else {
+		set_cert_path(orig_cert);
+	}
+	if (!signature_init(globals.cert_path, NULL)) {
+		ret = false;
+	}
+
+	return ret;
+}
+
+static bool use_alt_cert(void)
+{
+	bool ret = true;
+
+	if (!globals.cert_path) {
+		return false;
+	}
+
+	/* This function can be called multiple times and
+	 * is intended to be able to handle swapping back
+	 * and forth between main and alt cert files. */
+	if (!orig_cert && !alt_cert) {
+		orig_cert = strdup_or_die(globals.cert_path);
+		string_or_die(&alt_cert, "%s.alt", globals.cert_path);
+		if (sys_file_exists(alt_cert)) {
+			warn("Default cert failed, attempting to use alternative: %s\n", alt_cert);
+			ret = swap_certs();
+		} else {
+			FREE(alt_cert);
+			alt_cert = NULL;
+			ret = false;
+		}
+	} else if (!alt_cert) {
+		ret = false;
+	} else {
+		ret = swap_certs();
+	}
+
+	return ret;
+}
+
+bool signature_verify_data(const void *data, size_t data_len, const void *sig_data, size_t sig_data_len, enum signature_flags flags)
+{
+	bool result = signature_verify_data_internal(data, data_len, sig_data, sig_data_len, flags);
+	if (!result && use_alt_cert()) {
+		result = signature_verify_data_internal(data, data_len, sig_data, sig_data_len, flags);
 	}
 
 	return result;

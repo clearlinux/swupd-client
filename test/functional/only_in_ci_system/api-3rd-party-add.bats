@@ -20,7 +20,7 @@ test_setup() {
 
 	# Backup the original certificate
 	[[ -f ${SWUPD_ROOT_CERT} ]] &&
-		mv ${SWUPD_ROOT_CERT} ${SWUPD_ROOT_CERT}.orig
+		sudo mv ${SWUPD_ROOT_CERT} ${SWUPD_ROOT_CERT}.orig
 	sudo mkdir -p /usr/share/clear/update-ca
 	sudo cp test/functional/only_in_ci_system/pemfile ${SWUPD_ROOT_CERT}
 
@@ -38,7 +38,7 @@ test_teardown() {
 	sudo rm -f ${SWUPD_ROOT_CERT}
 	# Restore the original certificate
 	[[ -f ${SWUPD_ROOT_CERT}.orig ]] &&
-		mv ${SWUPD_ROOT_CERT}.orig ${SWUPD_ROOT_CERT}
+		sudo mv ${SWUPD_ROOT_CERT}.orig ${SWUPD_ROOT_CERT}
 
 }
 

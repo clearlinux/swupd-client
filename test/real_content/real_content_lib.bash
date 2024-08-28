@@ -140,8 +140,7 @@ test_setup() {
 	# Not enough versions to run the test
 	if [ -z "${VERSION[0]}" ] || [ -z "${VERSION[1]}" ]; then
 		# TODO: This is going to break on first release in a new format
-		print "We need at least 2 versions in format $FORMAT to continue with this test"
-		return 1
+		skip "We need at least 2 versions in format $FORMAT to continue with this test"
 	fi
 
 	ROOT_DIR="${BASE_DIR}/${TEST_NAME}"

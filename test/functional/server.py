@@ -266,16 +266,13 @@ if __name__ == "__main__":
 
     # configure ssl certificates
     if args.server_cert and args.server_key:
-        wrap_socket_args = {"certfile": args.server_cert,
-                            "keyfile": args.server_key,
-                            "server_side": True}
-
-        # add client certificate
+        wrap_socket_args = {"server_side": True}
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.load_cert_chain(args.server_cert, args.server_key)
         if args.client_cert:
-            wrap_socket_args.update({"ca_certs": args.client_cert,
-                                     "cert_reqs": ssl.CERT_REQUIRED})
-
-        httpd.socket = ssl.wrap_socket(httpd.socket, **wrap_socket_args)
+            context.load_verify_locations(cafile=args.client_cert)
+            context.verify_mode = ssl.CERT_REQUIRED
+        httpd.socket = context.wrap_socket(httpd.socket, **wrap_socket_args)
 
     # invalid certificate combination
     elif args.server_cert or args.server_key or args.client_cert:

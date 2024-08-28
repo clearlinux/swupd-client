@@ -37,6 +37,13 @@ setup_file() {
 
 teardown_file() {
 
+	# Skip this test for local development because it takes a long time. To run this test locally,
+	# configure swupd with --with-fallback-capaths=<path to top level of repo>/swupd_test_certificates
+	# and run: RUNNING_IN_CI=true make check
+	if [ -z "${RUNNING_IN_CI}" ]; then
+		return
+	fi
+
 	destroy_test_environment --force "$TEST_NAME"
 
 }

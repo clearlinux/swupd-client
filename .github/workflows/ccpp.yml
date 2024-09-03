@@ -432,57 +432,57 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4.1.7
       with:
          name: job-1
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4.1.7
       with:
          name: job-2
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4.1.7
       with:
          name: job-3
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4.1.7
       with:
          name: job-4
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4.1.7
       with:
          name: job-5
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4.1.7
       with:
          name: job-6
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4.1.7
       with:
          name: job-7
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4.1.7
       with:
          name: job-8
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4.1.7
       with:
          name: job-9
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4.1.7
       with:
          name: job-10
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4.1.7
       with:
          name: job-only-ci
          path: jobs/

@@ -10,7 +10,7 @@ jobs:
     name: Formatting Check
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Run clang-format style check
       uses: jidicula/clang-format-action@v4.11.0
       with:
@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: cache-dependencies
       id: cache-swupd-deps
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
@@ -72,7 +72,7 @@ jobs:
     env:
        JOB_NUMBER: 1
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: cache-dependencies
       id: cache-swupd-deps
@@ -89,7 +89,7 @@ jobs:
     - name: run check
       run:  scripts/github_actions/run_check.bash "$JOB_NUMBER" "$NUM_JOBS"
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: job-${{ env.JOB_NUMBER }}
         path: job-${{ env.JOB_NUMBER }}
@@ -104,7 +104,7 @@ jobs:
     env:
        JOB_NUMBER: 2
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: cache-dependencies
       id: cache-swupd-deps
@@ -121,7 +121,7 @@ jobs:
     - name: run check
       run:  scripts/github_actions/run_check.bash "$JOB_NUMBER" "$NUM_JOBS"
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: job-${{ env.JOB_NUMBER }}
         path: job-${{ env.JOB_NUMBER }}
@@ -136,7 +136,7 @@ jobs:
     env:
        JOB_NUMBER: 3
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: cache-dependencies
       id: cache-swupd-deps
@@ -153,7 +153,7 @@ jobs:
     - name: run check
       run:  scripts/github_actions/run_check.bash "$JOB_NUMBER" "$NUM_JOBS"
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: job-${{ env.JOB_NUMBER }}
         path: job-${{ env.JOB_NUMBER }}
@@ -168,7 +168,7 @@ jobs:
     env:
        JOB_NUMBER: 4
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
 
     - name: cache-dependencies
       id: cache-swupd-deps
@@ -185,7 +185,7 @@ jobs:
     - name: run check
       run:  scripts/github_actions/run_check.bash "$JOB_NUMBER" "$NUM_JOBS"
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: job-${{ env.JOB_NUMBER }}
         path: job-${{ env.JOB_NUMBER }}
@@ -200,7 +200,7 @@ jobs:
     env:
        JOB_NUMBER: 5
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: cache-dependencies
       id: cache-swupd-deps
@@ -217,7 +217,7 @@ jobs:
     - name: run check
       run:  scripts/github_actions/run_check.bash "$JOB_NUMBER" "$NUM_JOBS"
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: job-${{ env.JOB_NUMBER }}
         path: job-${{ env.JOB_NUMBER }}
@@ -232,7 +232,7 @@ jobs:
     env:
        JOB_NUMBER: 6
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: cache-dependencies
       id: cache-swupd-deps
@@ -249,7 +249,7 @@ jobs:
     - name: run check
       run:  scripts/github_actions/run_check.bash "$JOB_NUMBER" "$NUM_JOBS"
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: job-${{ env.JOB_NUMBER }}
         path: job-${{ env.JOB_NUMBER }}
@@ -264,7 +264,7 @@ jobs:
     env:
        JOB_NUMBER: 7
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: cache-dependencies
       id: cache-swupd-deps
@@ -281,7 +281,7 @@ jobs:
     - name: run check
       run:  scripts/github_actions/run_check.bash "$JOB_NUMBER" "$NUM_JOBS"
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: job-${{ env.JOB_NUMBER }}
         path: job-${{ env.JOB_NUMBER }}
@@ -296,7 +296,7 @@ jobs:
     env:
        JOB_NUMBER: 8
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: cache-dependencies
       id: cache-swupd-deps
@@ -313,7 +313,7 @@ jobs:
     - name: run check
       run:  scripts/github_actions/run_check.bash "$JOB_NUMBER" "$NUM_JOBS"
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: job-${{ env.JOB_NUMBER }}
         path: job-${{ env.JOB_NUMBER }}
@@ -328,7 +328,7 @@ jobs:
     env:
        JOB_NUMBER: 9
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: cache-dependencies
       id: cache-swupd-deps
@@ -345,7 +345,7 @@ jobs:
     - name: run check
       run:  scripts/github_actions/run_check.bash "$JOB_NUMBER" "$NUM_JOBS"
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: job-${{ env.JOB_NUMBER }}
         path: job-${{ env.JOB_NUMBER }}
@@ -360,7 +360,7 @@ jobs:
     env:
        JOB_NUMBER: 10
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: cache-dependencies
       id: cache-swupd-deps
@@ -377,7 +377,7 @@ jobs:
     - name: run check
       run:  scripts/github_actions/run_check.bash "$JOB_NUMBER" "$NUM_JOBS"
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: job-${{ env.JOB_NUMBER }}
         path: job-${{ env.JOB_NUMBER }}
@@ -390,7 +390,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: cache-dependencies
       id: cache-swupd-deps
@@ -417,7 +417,7 @@ jobs:
             env TESTS="$(echo $FILES)" make -e -j1 check
             echo "$FILES" >> job-only-ci
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: job-only-ci
         path: job-only-ci
@@ -430,59 +430,59 @@ jobs:
     runs-on: ubuntu-latest
     needs: [unit_and_style, api, test_job1, test_job2, test_job3, test_job4, test_job5, test_job6, test_job7, test_job8, test_job9, test_job10, test_only_ci]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4
       with:
          name: job-1
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4
       with:
          name: job-2
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4
       with:
          name: job-3
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4
       with:
          name: job-4
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4
       with:
          name: job-5
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4
       with:
          name: job-6
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4
       with:
          name: job-7
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4
       with:
          name: job-8
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4
       with:
          name: job-9
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4
       with:
          name: job-10
          path: jobs/
 
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v4
       with:
          name: job-only-ci
          path: jobs/

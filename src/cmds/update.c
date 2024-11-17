@@ -39,11 +39,13 @@
 #define FLAG_DOWNLOAD_ONLY 2000
 #define FLAG_UPDATE_SEARCH_FILE_INDEX 2001
 #define FLAG_UPDATE_3RD_PARTY 2002
+#define FLAG_INCREMENTAL 2003
 
 static int requested_version = -1;
 static bool download_only = false;
 static bool update_search_file_index = false;
 static bool keepcache = false;
+static bool cmdline_option_incremental = false;
 static char swupd_binary[LINE_MAX] = { 0 };
 
 #ifdef THIRDPARTY
@@ -142,11 +144,11 @@ int add_included_manifests(struct manifest *mom, struct list **subs)
 	return 0;
 }
 
-static enum swupd_code check_versions(int *current_version, int *server_version, int req_version, char *path_prefix)
+static enum swupd_code check_versions(int *current_version, int *server_version, int req_version, char *path_prefix, bool incremental)
 {
 	int ret;
 
-	ret = read_versions(current_version, server_version, path_prefix);
+	ret = read_versions(current_version, server_version, path_prefix, incremental);
 	if (ret != SWUPD_OK) {
 		return ret;
 	}
@@ -156,8 +158,12 @@ static enum swupd_code check_versions(int *current_version, int *server_version,
 	}
 	if (req_version != -1) {
 		if (req_version < *current_version) {
-			error("Requested version for update (%d) must be greater than current version (%d)\n",
-			      req_version, *current_version);
+			// This error message isn't valid if the
+			// system has gone through a format bump
+			if (!on_new_format()) {
+				error("Requested version for update (%d) must be greater than current version (%d)\n",
+				      req_version, *current_version);
+			}
 			return SWUPD_INVALID_OPTION;
 		}
 		if (req_version < *server_version) {
@@ -285,7 +291,7 @@ enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_
 
 	/* get versions */
 	timelist_timer_start(globals.global_times, "Get versions");
-	ret = check_versions(&current_version, &server_version, requested_version, globals.path_prefix);
+	ret = check_versions(&current_version, &server_version, requested_version, globals.path_prefix, cmdline_option_incremental);
 	if (ret != SWUPD_OK) {
 		goto clean_curl;
 	}
@@ -448,7 +454,17 @@ enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_
 		progress_next_step("run_postupdate_scripts", PROGRESS_UNDEFINED);
 
 		/* Determine if another update is needed so the scripts block */
-		int new_current_version = get_current_version(globals.path_prefix);
+		int new_current_version, new_server_version;
+		int versions_check = check_versions(&new_current_version, &new_server_version, requested_version, globals.path_prefix, false);
+		if (versions_check != SWUPD_OK) {
+			// update was fine, but we aren't seeing the new server version
+			// for some reason so don't set re_update on incremental
+			new_server_version = new_current_version;
+		}
+
+		if (cmdline_option_incremental && new_server_version > new_current_version) {
+			re_update = true;
+		}
 		if (on_new_format() && (requested_version == -1 || (requested_version > new_current_version))) {
 			re_update = true;
 		}
@@ -560,6 +576,7 @@ static const struct option prog_opts[] = {
 #ifdef THIRDPARTY
 	{ "3rd-party", no_argument, 0, FLAG_UPDATE_3RD_PARTY },
 #endif
+	{ "incremental", no_argument, 0, FLAG_INCREMENTAL },
 };
 
 static void print_help(void)
@@ -579,6 +596,7 @@ static void print_help(void)
 #ifdef THIRDPARTY
 	print("   --3rd-party             Also update content from 3rd-party repositories\n");
 #endif
+	print("   --incremental             Update to target by one release at a time instead of last release of each format\n");
 	print("\n");
 }
 
@@ -617,6 +635,9 @@ static bool parse_opt(int opt, char *optarg)
 		cmdline_option_3rd_party = optarg_to_bool(optarg);
 		return true;
 #endif
+	case FLAG_INCREMENTAL:
+		cmdline_option_incremental = optarg_to_bool(optarg);
+		return true;
 	default:
 		return false;
 	}
@@ -697,7 +718,7 @@ enum swupd_code update_main(int argc, char **argv)
 		ret = check_update();
 
 #ifdef THIRDPARTY
-		if (cmdline_option_3rd_party) {
+		if (cmdline_option_3rd_party && !cmdline_option_incremental) {
 			progress_finish_steps(ret);
 			info("\nChecking update status of content from 3rd-party repositories\n\n");
 			ret = third_party_execute_check_update();
@@ -707,7 +728,7 @@ enum swupd_code update_main(int argc, char **argv)
 		ret = execute_update();
 
 #ifdef THIRDPARTY
-		if (cmdline_option_3rd_party) {
+		if (cmdline_option_3rd_party && !cmdline_option_incremental) {
 			if (ret == SWUPD_OK) {
 				progress_finish_steps(ret);
 				info("\nUpdating content from 3rd-party repositories\n\n");

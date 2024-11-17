@@ -92,6 +92,7 @@ test_setup() {
 		No extra files need to be downloaded
 		Installing files...
 		Update was applied
+		Warning: THE SIGNATURE OF file://$ABS_TEST_DIR/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
 		Calling post-update helper scripts
 		Update successful - System updated from version 10 to version 20
 	EOM
@@ -127,6 +128,7 @@ test_setup() {
 		No extra files need to be downloaded
 		Installing files...
 		Update was applied
+		Warning: THE SIGNATURE OF file://$ABS_TEST_DIR/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
 		Calling post-update helper scripts
 		Update successful - System updated from version 10 to version 20
 	EOM

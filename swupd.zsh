@@ -199,6 +199,7 @@ local -a update=(
   '(-)'{-s,--status}'[Show current OS version and latest version available on server. Equivalent to "swupd check-update"]'
   '(help -s --status -k --keepcache)'{-k,--keepcache}'[Do not delete the swupd state directory content after updating the system]'
   '(help -s --status)--download[Download all content, but do not actually install the update]'
+  '(help -s --status)--incremental[Update to target by one release at a time instead of last release of each format]'
 )
 local update_official=(
   '(help -s --status)--update-search-file-index[Update the index used by search-file to speed up searches]'

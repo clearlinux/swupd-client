@@ -35,7 +35,7 @@
 int get_int_from_url(const char *url)
 {
 	int err, value;
-	char tmp_string[MAX_VERSION_STR_SIZE+1];
+	char tmp_string[MAX_VERSION_STR_SIZE + 1];
 	struct curl_file_data tmp_data = {
 		MAX_VERSION_STR_SIZE, 0,
 		tmp_string
@@ -147,11 +147,11 @@ out:
 	return ret;
 }
 
-static int get_version_from_url(char *url)
+static int get_version_from_url_inmemory(char *url)
 {
 	int ret = 0;
 	int err = 0;
-	char version_str[MAX_VERSION_STR_SIZE+1];
+	char version_str[MAX_VERSION_STR_SIZE + 1];
 	int sig_verified = 0;
 
 	/* struct for version data */
@@ -188,49 +188,154 @@ static int get_version_from_url(char *url)
 		}
 		return -SWUPD_ERROR_SIGNATURE_VERIFICATION;
 	}
+	return ret;
+}
+
+static int get_version_from_file(char *filename, int current_version)
+{
+	FILE *infile;
+	char *line = NULL;
+	// start as -EINVAL to report cases of an empty file
+	int next_version = -EINVAL;
+	int tmp_version = 0;
+	int err = 0;
+	size_t len = 0;
+	ssize_t read;
+
+	infile = fopen(filename, "r");
+	if (infile == NULL) {
+		return -EINVAL;
+	}
+
+	while ((read = getline(&line, &len, infile)) != -1) {
+		err = str_to_int(line, &tmp_version);
+		if (err) {
+			break;
+		}
+		if (current_version < 0) {
+			next_version = tmp_version;
+			break;
+		} else if (tmp_version <= current_version) {
+			// We did get a valid version so report it
+			// but it isn't usable for update
+			if (next_version < 0) {
+				next_version = tmp_version;
+			}
+			break;
+		}
+		next_version = tmp_version;
+	}
+
+	(void)fclose(infile);
+
+	if (line) {
+		FREE(line);
+	}
+
+	if (err) {
+		return err;
+	}
+	return next_version;
+}
+
+static int get_version_from_url(char *url, char *filename, int current_version)
+{
+	int ret = 0;
+	char *sig_filename;
+	char *sig_url;
+	char *download_file;
+	char *download_sig;
+
+	string_or_die(&sig_filename, "%s.sig", filename);
+	string_or_die(&sig_url, "%s.sig", url);
+	download_file = statedir_get_download_file(filename);
+	download_sig = statedir_get_download_file(sig_filename);
+	ret = swupd_curl_get_file(url, download_file);
+	if (ret) {
+		goto out;
+	}
+
+	/* Sig check */
+	if (globals.sigcheck && globals.sigcheck_latest) {
+		ret = swupd_curl_get_file(sig_url, download_sig);
+		if (ret) {
+			ret = -SWUPD_ERROR_SIGNATURE_VERIFICATION;
+			error("Signature for latest file (%s) is missing\n", url);
+			goto out;
+		}
+		if (!signature_verify(download_file, download_sig, SIGNATURE_IGNORE_EXPIRATION)) {
+			ret = -SWUPD_ERROR_SIGNATURE_VERIFICATION;
+			error("Signature verification failed for URL: %s\n", url);
+			goto out;
+		}
+	} else {
+		warn_nosigcheck(url);
+	}
+
+	ret = get_version_from_file(download_file, current_version);
+
+out:
+	FREE(sig_filename);
+	FREE(sig_url);
+	FREE(download_file);
+	FREE(download_sig);
 
 	return ret;
 }
 
 /* this function attempts to download the latest server version string file from
- * the preferred server to a memory buffer, returning either a negative integer
- * error code or >= 0 representing the server version
+ * the preferred server, returning either a negative integer error code or >= 0
+ * representing the server version
  *
  * if v_url is non-NULL the version at v_url is fetched. If v_url is NULL the
  * global version_url is used and the cached version may be used instead of
- * attempting to download the version string again. If v_url is the empty string
- * the global version_url is used and the cached version is ignored. */
-int get_latest_version(char *v_url)
+ * attempting to download the version string again (unless current_version is
+ * negative, indicating incremental and the version needs to be recalculated).
+ * If v_url is the empty string the global version_url is used and the cached
+ * version is ignored.
+ *
+ * if current_version >= 0 it is used to indicate the next version rather than
+ * the latest version should be returned. */
+static int get_version(char *v_url, int current_version)
 {
+	char *filename = "latest";
 	char *url = NULL;
 	int ret = 0;
 	static int cached_version = -1;
 
-	if (cached_version > 0 && v_url == NULL) {
+	if (cached_version > 0 && v_url == NULL && current_version < 0) {
 		return cached_version;
 	}
 
+	// TODO: why allow "" when we do NULL test above?
+	// maybe consolidate.
 	if (v_url == NULL || str_cmp(v_url, "") == 0) {
 		v_url = globals.version_url;
 	}
 
-	string_or_die(&url, "%s/version/format%s/latest", v_url, globals.format_string);
-	ret = get_version_from_url(url);
+	string_or_die(&url, "%s/version/format%s/%s", v_url, globals.format_string, filename);
+	ret = get_version_from_url(url, filename, current_version);
 	FREE(url);
 	cached_version = ret;
 
 	return ret;
 }
 
+int get_latest_version(char *v_url)
+{
+	return get_version(v_url, -1);
+}
+
 /* gets the latest version of the update content regardless of what format we
  * are currently in */
 int version_get_absolute_latest(void)
 {
+	char *filename = "latest_version";
 	char *url = NULL;
 	int ret;
 
-	string_or_die(&url, "%s/version/latest_version", globals.version_url);
-	ret = get_version_from_url(url);
+	string_or_die(&url, "%s/version/%s", globals.version_url, filename);
+	ret = get_version_from_url_inmemory(url);
 	FREE(url);
 
 	return ret;
@@ -329,15 +434,21 @@ bool get_distribution_string(char *path_prefix, char *dist)
 	return true;
 }
 
-enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix)
+enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix, bool incremental)
 {
 	*current_version = get_current_version(path_prefix);
-	*server_version = get_latest_version("");
 
 	if (*current_version < 0) {
 		error("Unable to determine current OS version\n");
 		return SWUPD_CURRENT_VERSION_UNKNOWN;
 	}
+
+	if (incremental) {
+		*server_version = get_version("", *current_version);
+	} else {
+		*server_version = get_latest_version("");
+	}
+
 	if (*server_version == -SWUPD_ERROR_SIGNATURE_VERIFICATION) {
 		error("Unable to determine the server version as signature verification failed\n");
 		return SWUPD_SIGNATURE_VERIFICATION_FAILED;

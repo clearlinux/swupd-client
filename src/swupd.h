@@ -167,7 +167,7 @@ extern enum swupd_code walk_tree(struct manifest *, const char *, bool, const re
 
 extern int get_latest_version(char *v_url);
 extern int get_int_from_url(const char *url);
-extern enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix);
+extern enum swupd_code read_versions(int *current_version, int *server_version, char *path_prefix, bool incremental);
 extern int get_current_version(char *path_prefix);
 extern bool get_distribution_string(char *path_prefix, char *dist);
 extern int get_current_format(void);

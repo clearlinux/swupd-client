@@ -30,23 +30,23 @@ test_setup() {
 
 }
 
-@test "UPD045: Updating a system with no disk space left (downloading the current MoM)" {
+@test "UPD045: Updating a system with no disk space left (fails to get the server version)" {
 
 	# When updating a system and we run out of disk space while downloading the
-	# MoMs we should not retry the download since it will fail for sure
+	# server version we should not retry the download since it will fail for sure
 
 	# fill up all the space in the disk
 	sudo dd if=/dev/zero of="$TEST_NAME"/testfs/dummy >& /dev/null || print "Using all space left in disk"
 
 	run sudo sh -c "timeout 30 $SWUPD update $SWUPD_OPTS"
 
-	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
+	assert_status_is "$SWUPD_SERVER_CONNECTION_ERROR"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
-		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/10/Manifest.MoM.tar'
-		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
-		Error: Failed to retrieve 10 MoM manifest
+		Error: Curl - Cannot close file '$ABS_CACHE_DIR/download/latest' after writing - 'No space left on device'
+		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/version/formatstaging/latest'
+		Error: Curl - Check free space for $ABS_STATE_DIR?
+		Error: Unable to determine the server version
 		Update failed
 	EOM
 	)

@@ -201,6 +201,8 @@ update
 --download      Do not perform an update, instead download all resources needed
         to perform the update, and exit.
 
+--incremental      Update to target by one release at a time instead of last release of each format
+
 --update-search-file-index  Update the index used by search-file to speed up
         searches. Don't enable this if you have download or space restrictions.
 

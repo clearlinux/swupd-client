@@ -35,7 +35,7 @@
 int get_int_from_url(const char *url)
 {
 	int err, value;
-	char tmp_string[MAX_VERSION_STR_SIZE];
+	char tmp_string[MAX_VERSION_STR_SIZE+1];
 	struct curl_file_data tmp_data = {
 		MAX_VERSION_STR_SIZE, 0,
 		tmp_string
@@ -149,10 +149,9 @@ out:
 
 static int get_version_from_url(char *url)
 {
-
 	int ret = 0;
 	int err = 0;
-	char version_str[MAX_VERSION_STR_SIZE];
+	char version_str[MAX_VERSION_STR_SIZE+1];
 	int sig_verified = 0;
 
 	/* struct for version data */

@@ -469,17 +469,18 @@ void link_manifests(struct manifest *m1, struct manifest *m2)
 			continue;
 		}
 		if (ret < 0) { /*  m1/file1 is before m2/file2 */
-			/* File is absent in m2, indicating that a format bump
-			 * happened, removing deleted file entries from the
-			 * previous format(s). Do not account the deleted file
-			 * in this case, since an update will not delete the
-			 * file.
-			 */
+			account_deleted_file();
 			list1 = list1->next;
 			continue;
 		} /* else ret > 0  m1/file1 is after m2/file2 */
 		list2 = list2->next;
 		account_new_file();
+	}
+
+	// Capture deleted files if they are at the tail end of the file list
+	while (list1) {
+		list1 = list1->next;
+		account_deleted_file();
 	}
 
 	// Capture new files if they are at the tail end of the file list
@@ -534,9 +535,10 @@ void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *su
 		}
 		if (ret < 0) { /*  m1/file1 is before m2/file2 */
 			/* A bundle manifest going missing from the MoM in the
-			 * latest version is a breaking change, only possible
-			 * during a format bump, so don't account for this
-			 * possibility in the stats. */
+			 * latest version is no longer a breaking change. */
+			if (!server && subbed1) {
+				account_deleted_bundle();
+			}
 			list1 = list1->next;
 			continue;
 		} /* else ret > 0  m1/file1 is after m2/file2 */
@@ -546,8 +548,14 @@ void link_submanifests(struct manifest *m1, struct manifest *m2, struct list *su
 		}
 	}
 
+	// Capture deleted bundles if they are at the tail end of the list
+	while (!server && list1) {
+		list1 = list1->next;
+		account_deleted_bundle();
+	}
+
 	// Capture new bundles if they are at the tail end of the list
-	while (list2) {
+	while (server && list2) {
 		file2 = list2->data;
 		list2 = list2->next;
 		bool subbed2 = component_subscribed(subs2, file2->filename);

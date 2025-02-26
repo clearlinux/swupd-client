@@ -270,6 +270,12 @@ static enum swupd_code show_included_bundles(char *bundle_name, int version)
 		goto out;
 	}
 
+	if (!mom_search_bundle(mom, bundle_name)) {
+		ret_code = SWUPD_INVALID_BUNDLE;
+		warn("Bundle \"%s\" is invalid, skipping it...\n", bundle_name);
+		goto out;
+	}
+
 	// add_subscriptions takes a list, so construct one with only bundle_name
 	bundles = list_prepend_data(bundles, bundle_name);
 	ret = add_subscriptions(bundles, &subs, mom, true, 0);

@@ -20,8 +20,6 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Diagnosing version 10
 		Downloading missing manifests...
-		Warning: Bundle "test-bundle2" is invalid, skipping it...
-		Warning: One or more installed bundles are not available at version 10
 		Checking for missing files
 		Checking for corrupt files
 		 -> Hash mismatch for file: $ABS_TARGET_DIR/usr/lib/os-release

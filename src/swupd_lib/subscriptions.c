@@ -202,8 +202,7 @@ static int recurse_subscriptions(struct list *bundles, struct list **subs, struc
 
 		file = mom_search_bundle(mom, bundle);
 		if (!file) {
-			warn("Bundle \"%s\" is invalid, skipping it...\n", bundle);
-			ret |= add_sub_BADNAME; /* Use this to get non-zero exit code */
+			// No longer add_sub_BADNAME with bundle deletes allowed
 			continue;
 		}
 

@@ -17,9 +17,7 @@ test_setup() {
 @test "UPD008: Updating a system where a bundle was removed in the newer version" {
 
 	# If a bundle happens to be removed from the content server (or mix) it means the
-	# bundle won't be in the MoM anymore, so the bundle in the system will look like an
-	# invalid bundle. If this happens, the user should be informed, and the update should
-	# continue.
+	# bundle won't be in the MoM anymore, this now indicates a bundle delete.
 
 	run sudo sh -c "$SWUPD update $SWUPD_OPTS"
 
@@ -27,18 +25,16 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Preparing to update from 10 to 20
-		Warning: Bundle "test-bundle1" is invalid, skipping it...
-		Warning: One or more installed bundles are no longer available at version 20
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
 		Statistics for going from version 10 to version 20:
 		    changed bundles   : 1
 		    new bundles       : 0
-		    deleted bundles   : 0
+		    deleted bundles   : 1
 		    changed files     : 2
 		    new files         : 0
-		    deleted files     : 0
+		    deleted files     : 2
 		Validate downloaded files
 		No extra files need to be downloaded
 		Installing files...
@@ -49,8 +45,8 @@ test_setup() {
 	)
 	assert_is_output "$expected_output"
 	# bundle should not be removed
-	assert_file_exists "$TARGET_DIR"/file_1
-	assert_file_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
+	assert_file_not_exists "$TARGET_DIR"/file_1
+	assert_file_not_exists "$TARGET_DIR"/usr/share/clear/bundles/test-bundle1
 
 }
 #WEIGHT=5

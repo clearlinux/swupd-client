@@ -10,6 +10,8 @@
 set -e
 CORES=2
 
+sudo apt install libbz2-dev liblzma-dev
+
 # If alread exists, reuse
 if [ -d dependencies ]; then
 	pushd dependencies

@@ -137,7 +137,7 @@ int add_included_manifests(struct manifest *mom, struct list **subs)
 	 * hit the Manifest delta path. */
 	ret = add_subscriptions(subbed, subs, mom, true, 0);
 	list_free_list(subbed);
-	if (ret & (add_sub_ERR | add_sub_BADNAME)) {
+	if (ret & add_sub_ERR) {
 		return ret;
 	}
 
@@ -213,16 +213,17 @@ static bool is_installed_and_verified(struct file *file)
 /* Find files which need updated based on differences in last_change.
    Should let further do_not_update policy be handled in the caller, but for
    now some hacky exclusions are done here. */
-static struct list *create_update_list(struct manifest *server)
+static struct list *create_update_list(struct manifest *current, struct manifest *server)
 {
 	struct list *output = NULL;
-	struct list *list;
+	struct file *file1, *file2;
+	struct list *list1, *list2;
 
-	list = list_head(server->files);
-	while (list) {
+	list2 = list_head(server->files);
+	while (list2) {
 		struct file *file;
-		file = list->data;
-		list = list->next;
+		file = list2->data;
+		list2 = list2->next;
 
 		/* Look for potential short circuit, if something has the same
 		 * flags and the same hash, then conclude they are the same. */
@@ -253,6 +254,35 @@ static struct list *create_update_list(struct manifest *server)
 			output = list_prepend_data(output, file);
 			continue;
 		}
+	}
+
+	list1 = list_head(current->files);
+	list2 = list_head(server->files);
+
+	while (list1 && list2) { /* m1/file1 matches m2/file2 */
+		int ret;
+		file1 = list1->data;
+		file2 = list2->data;
+
+		ret = str_cmp(file1->filename, file2->filename);
+		if (ret == 0) {
+			list1 = list1->next;
+			list2 = list2->next;
+		} else if (ret < 0) { /*  m1/file1 is before m2/file2 */
+			// modify the current manifest in place
+			file1->is_deleted = true;
+			output = list_prepend_data(output, file1);
+			list1 = list1->next;
+		} else { /* else ret > 0  m1/file1 is after m2/file2 */
+			list2 = list2->next;
+		}
+	}
+
+	while (list1) {
+		file1 = list1->data;
+		file1->is_deleted = true;
+		output = list_prepend_data(output, file1);
+		list1 = list1->next;
 	}
 
 	return output;
@@ -366,14 +396,8 @@ enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_
 	timelist_timer_start(globals.global_times, "Add included bundle manifests");
 	ret = add_included_manifests(server_manifest, &latest_subs);
 	if (ret) {
-		if (ret & add_sub_BADNAME) {
-			/* this means a bundle(s) was removed in a future version */
-			warn("One or more installed bundles are no longer available at version %d\n",
-			     server_version);
-		} else {
-			ret = SWUPD_RECURSE_MANIFEST;
-			goto clean_exit;
-		}
+		ret = SWUPD_RECURSE_MANIFEST;
+		goto clean_exit;
 	}
 	timelist_timer_stop(globals.global_times); // closing: Add included bundle manifests
 
@@ -415,7 +439,7 @@ enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_
 	/* some more housekeeping */
 	/* TODO: consider trying to do less sorting of manifests */
 	timelist_timer_start(globals.global_times, "Create update list");
-	updates = create_update_list(server_manifest);
+	updates = create_update_list(current_manifest, server_manifest);
 
 	print_statistics(current_version, server_version);
 	timelist_timer_stop(globals.global_times); // closing: Create update list

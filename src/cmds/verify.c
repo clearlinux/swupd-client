@@ -1029,6 +1029,16 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 	/* get the list of subscribed (installed) bundles */
 	read_subscriptions(&all_subs);
 	selected_subs = all_subs;
+	if (!cmdline_option_force) {
+		char *bundle_name = NULL;
+		for (iter = list_head(all_subs); iter; iter = iter->next) {
+			bundle_name = ((struct sub *)(iter->data))->component;
+			if (!mom_search_bundle(official_manifest, bundle_name)) {
+				invalid_bundle = true;
+				warn("Bundle \"%s\" is invalid, skipping it...\n", bundle_name);
+			}
+		}
+	}
 	if (cmdline_option_bundles) {
 		info("\n");
 		for (iter = list_head(cmdline_option_bundles); iter; iter = iter->next) {
@@ -1084,18 +1094,7 @@ enum swupd_code execute_verify_extra(extra_proc_fn_t post_verify_fn)
 	 * continue only if --force was used since the bundles could be removed */
 	if (ret || invalid_bundle) {
 		if ((ret & add_sub_BADNAME) || invalid_bundle) {
-			if (cmdline_option_force) {
-				if (cmdline_option_picky && cmdline_option_fix) {
-					warn("\nOne or more installed bundles that are not "
-					     "available at version %d will be removed\n",
-					     version);
-				} else if (cmdline_option_picky && !cmdline_option_fix) {
-					warn("\nOne or more installed bundles are not "
-					     "available at version %d\n",
-					     version);
-				}
-				ret = SWUPD_OK;
-			} else {
+			if (!cmdline_option_force) {
 				if (cmdline_option_install || cmdline_option_bundles) {
 					error("\nOne or more of the provided bundles are not available at version %d\n", version);
 					info("Please make sure the name of the provided bundles are correct, or use --force to override\n")

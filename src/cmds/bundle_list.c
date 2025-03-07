@@ -560,6 +560,7 @@ enum swupd_code bundle_list_main(int argc, char **argv)
 	ret = list_bundles();
 	if (ret == SWUPD_OK && cmdline_option_orphans) {
 		info("\nUse \"swupd bundle-add BUNDLE\" to no longer list BUNDLE and its dependencies as orphaned\n");
+		info("\nUse \"swupd bundle-remove --orphans\" to delete all orphaned bundles\n");
 	}
 
 	swupd_deinit();

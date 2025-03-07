@@ -41,6 +41,7 @@ teardown_file() {
 		 - test-bundle6
 		Total: 2
 		Use "swupd bundle-add BUNDLE" to no longer list BUNDLE and its dependencies as orphaned
+		Use "swupd bundle-remove --orphans" to delete all orphaned bundles
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -61,6 +62,7 @@ teardown_file() {
 		 - test-bundle6 (installed)
 		Total: 2
 		Use "swupd bundle-add BUNDLE" to no longer list BUNDLE and its dependencies as orphaned
+		Use "swupd bundle-remove --orphans" to delete all orphaned bundles
 	EOM
 	)
 	assert_is_output "$expected_output"
@@ -107,6 +109,7 @@ teardown_file() {
 		 - test-bundle6
 		Total: 3
 		Use "swupd bundle-add BUNDLE" to no longer list BUNDLE and its dependencies as orphaned
+		Use "swupd bundle-remove --orphans" to delete all orphaned bundles
 	EOM
 	)
 	assert_is_output "$expected_output"

@@ -133,7 +133,7 @@ test_setup() {
 			continue
 		fi
 
-		VERSION[$i]=$v
+		VERSION[i]=$v
 		i=$((i+1))
 	done
 

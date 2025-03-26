@@ -27,7 +27,7 @@ file="$1"
 if [[ "${file/*./}" == "bats" ]]; then
 	sed 's/^@.*/func() {/' "$file" |
 	sed 's/^load.*/source test\/functional\/testlib.bash/' |
-	shellcheck -s bash -x -e SC1008,SC2119 /dev/stdin
+	shellcheck -s bash -x -e SC1008,SC2119,SC2317 /dev/stdin
 else
 	shellcheck -x "$file" -e SC2119
 fi

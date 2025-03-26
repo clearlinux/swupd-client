@@ -1,8 +1,6 @@
 name: Shellcheck
 
-on:
-  push:
-    branches: [master]
+on: [push, pull_request]
 
 env:
   RUNNING_IN_CI: true

@@ -164,7 +164,11 @@ enum swupd_code check_update_main(int argc, char **argv)
 		return SWUPD_INVALID_OPTION;
 	}
 
-	ret = swupd_init(SWUPD_NO_ROOT);
+	if (log_get_level() >= LOG_INFO_VERBOSE) {
+		ret = swupd_init(SWUPD_ALL);
+	} else {
+		ret = swupd_init(SWUPD_NO_ROOT);
+	}
 	if (ret != SWUPD_OK) {
 		return ret;
 	}

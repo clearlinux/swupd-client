@@ -40,7 +40,7 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 100
+		Preparing to update from 10 to 100 (in format staging)
 		Downloading packs for:
 		 - test-bundle6
 		 - test-bundle5

@@ -75,7 +75,7 @@ teardown_file() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...

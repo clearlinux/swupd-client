@@ -37,7 +37,7 @@ test_setup() {
 		Checking mirror status
 		Warning: the mirror version (20) is too far behind upstream version (1000)
 		Removing mirror configuration
-		Preparing to update from 10 to 1000
+		Preparing to update from 10 to 1000 (in format staging)
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...

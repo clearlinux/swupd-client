@@ -20,7 +20,7 @@ test_setup() {
 
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Downloading packs for:
 		 - bundle1
 		 - os-core

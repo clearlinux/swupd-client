@@ -31,7 +31,7 @@ test_setup() {
 		Error: Signature for latest file (file://$ABS_MIRROR_DIR/version/formatstaging/latest) is missing
 		Warning: the mirror version could not be determined
 		Removing mirror configuration
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...
@@ -68,7 +68,7 @@ test_setup() {
 		Error: Signature verification failed for URL: file://$ABS_MIRROR_DIR/version/formatstaging/latest
 		Warning: the mirror version could not be determined
 		Removing mirror configuration
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...

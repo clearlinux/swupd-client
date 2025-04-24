@@ -35,7 +35,7 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...
@@ -68,7 +68,7 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 30
+		Preparing to update from 10 to 30 (in format staging)
 		Downloading packs for:
 		 - test-bundle1
 		 - test-bundle2
@@ -104,7 +104,7 @@ test_setup() {
 	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 30
+		Preparing to update from 10 to 30 (in format staging)
 		Error: Failed to retrieve 30 test-bundle2 manifest
 		Error: Unable to download manifest test-bundle2 version 30, exiting now
 		Update failed

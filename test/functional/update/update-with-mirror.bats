@@ -34,7 +34,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Checking mirror status
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...

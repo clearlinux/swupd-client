@@ -75,7 +75,7 @@ test_setup() {
 		Update started
 		Warning: The --nosigcheck flag was used and this compromises the system security
 		Warning: THE SIGNATURE OF file://$ABS_TEST_DIR/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Warning: THE SIGNATURE OF file://$ABS_TEST_DIR/web-dir/10/Manifest.MoM WILL NOT BE VERIFIED
 		Warning: THE SIGNATURE OF file://$ABS_TEST_DIR/web-dir/20/Manifest.MoM WILL NOT BE VERIFIED
 		Downloading packs for:
@@ -113,7 +113,7 @@ test_setup() {
 		Update started
 		Warning: The --nosigcheck-latest flag was used and this compromises the system security
 		Warning: THE SIGNATURE OF file://$ABS_TEST_DIR/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...
@@ -150,7 +150,7 @@ test_setup() {
 		Update started
 		Warning: The --nosigcheck-latest flag was used and this compromises the system security
 		Warning: THE SIGNATURE OF file://$ABS_TEST_DIR/web-dir/version/formatstaging/latest WILL NOT BE VERIFIED
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Warning: Signature check failed
 		Warning: Removing corrupt Manifest.MoM artifacts and re-downloading...
 		Warning: Signature check failed

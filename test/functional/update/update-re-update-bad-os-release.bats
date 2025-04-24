@@ -22,7 +22,7 @@ test_setup() {
 	assert_status_is "$SWUPD_CURRENT_VERSION_UNKNOWN"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format 1)
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...

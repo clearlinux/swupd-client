@@ -337,7 +337,7 @@ enum swupd_code execute_update_extra(extra_proc_fn_t post_update_fn, extra_proc_
 		goto clean_curl;
 	}
 
-	info("Preparing to update from %i to %i\n", current_version, server_version);
+	info("Preparing to update from %i to %i (in format %s)\n", current_version, server_version, globals.format_string);
 	timelist_timer_stop(globals.global_times); // closing: Get versions
 
 	/* housekeeping */

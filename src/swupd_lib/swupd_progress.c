@@ -1,7 +1,7 @@
 /*
  *   Software Updater - client side
  *
- *      Copyright © 2012-2019 Intel Corporation.
+ *      Copyright © 2012-2025 Intel Corporation.
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by

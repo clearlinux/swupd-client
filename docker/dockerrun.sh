@@ -2,7 +2,7 @@
 #
 # This file is part of swupd-client.
 #
-# Copyright © 2017 Intel Corporation
+# Copyright © 2017-2025 Intel Corporation
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

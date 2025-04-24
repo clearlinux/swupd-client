@@ -1,7 +1,7 @@
 /*
  *   Software Updater - client side
  *
- *      Copyright © 2015-2020 Intel Corporation.
+ *      Copyright © 2015-2025 Intel Corporation.
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -100,7 +100,7 @@ static void print_help(const char *name)
 static void copyright_header(void)
 {
 	print(PACKAGE " " VERSION "\n");
-	print("   Copyright (C) 2012-2019 Intel Corporation\n");
+	print("   Copyright (C) 2012-2025 Intel Corporation\n");
 	print("\n");
 }
 

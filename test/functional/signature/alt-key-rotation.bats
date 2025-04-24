@@ -50,7 +50,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 20 to 30
+		Preparing to update from 20 to 30 (in format 1)
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
@@ -78,7 +78,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Update started
 		Warning: Default cert failed, attempting to use alternative: .*alt
-		Preparing to update from 40 to 50
+		Preparing to update from 40 to 50 \(in format 2\)
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...

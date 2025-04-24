@@ -56,7 +56,7 @@ test_setup() {
 		_____________________________
 		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Downloading packs for:
 		 - os-core
 		 - test-bundle1
@@ -152,7 +152,7 @@ test_setup() {
 	expected_output=$(cat <<-EOM
 		Updates from a 3rd-party repository are forced to run with the --no-scripts flag for security reasons
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Downloading packs for:
 		 - os-core
 		 - test-bundle1

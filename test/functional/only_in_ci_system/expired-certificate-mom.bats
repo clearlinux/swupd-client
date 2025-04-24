@@ -68,7 +68,7 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Warning: Signature check failed
 		Warning: Removing corrupt Manifest.MoM artifacts and re-downloading...
 		Warning: Signature check failed

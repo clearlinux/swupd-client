@@ -56,7 +56,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 20 to 30
+		Preparing to update from 20 to 30 (in format 1)
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
@@ -83,7 +83,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 40 to 50
+		Preparing to update from 40 to 50 (in format 2)
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
@@ -117,7 +117,7 @@ test_setup() {
 	assert_status_is "$SWUPD_OK"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 20 to 30
+		Preparing to update from 20 to 30 (in format 1)
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
@@ -144,7 +144,7 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 40 to 50
+		Preparing to update from 40 to 50 (in format 2)
 		Warning: Signature check failed
 		Warning: Removing corrupt Manifest.MoM artifacts and re-downloading...
 		Warning: Signature check failed

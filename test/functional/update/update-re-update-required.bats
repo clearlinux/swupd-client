@@ -17,7 +17,7 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format 1)
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...
@@ -35,7 +35,7 @@ test_setup() {
 		Calling post-update helper scripts
 		Update successful - System updated from version 10 to version 20
 		Update started
-		Preparing to update from 30 to 40
+		Preparing to update from 30 to 40 (in format 2)
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...

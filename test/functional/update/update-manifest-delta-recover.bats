@@ -29,7 +29,7 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Downloading packs for:
 		 - test-bundle1
 		Finishing packs extraction...
@@ -61,7 +61,7 @@ test_setup() {
 	assert_status_is 0
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 30
+		Preparing to update from 10 to 30 (in format staging)
 		Warning: hash check failed for Manifest.test-bundle1 for version 30. Deleting it
 		Warning: Removing corrupt Manifest.test-bundle1 artifacts and re-downloading...
 		Downloading packs for:

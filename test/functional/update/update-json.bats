@@ -30,7 +30,7 @@ test_setup() {
 		{ "type" : "start", "section" : "update" },
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 10, "stepCompletion" : -1, "stepDescription" : "load_manifests" },
 		{ "type" : "info", "msg" : "Update started" },
-		{ "type" : "info", "msg" : "Preparing to update from 10 to 20" },
+		{ "type" : "info", "msg" : "Preparing to update from 10 to 20 (in format staging)" },
 		{ "type" : "progress", "currentStep" : 1, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "load_manifests" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 10, "stepCompletion" : -1, "stepDescription" : "run_preupdate_scripts" },
 		{ "type" : "progress", "currentStep" : 2, "totalSteps" : 10, "stepCompletion" : 100, "stepDescription" : "run_preupdate_scripts" },

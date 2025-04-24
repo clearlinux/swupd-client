@@ -112,7 +112,7 @@ test_setup() {
 		Checking mirror status
 		Warning: Upstream server http://localhost:$port/ not responding, cannot determine upstream version
 		Warning: Unable to determine if the mirror is up to date
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 \(in format staging\)
 		Downloading packs for:
 		 - os-core
 		Finishing packs extraction...

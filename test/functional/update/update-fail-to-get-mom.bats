@@ -19,7 +19,7 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 \(in format staging\)
 		Error: Failed to retrieve 10 MoM manifest
 		Update failed
 	EOM
@@ -38,7 +38,7 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 \(in format staging\)
 		Error: Failed to retrieve 20 MoM manifest
 		Update failed
 	EOM

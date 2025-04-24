@@ -73,7 +73,7 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_LOAD_MOM"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/20/Manifest.MoM.tar'
 		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Failed to retrieve 20 MoM manifest
@@ -103,7 +103,7 @@ test_setup() {
 	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/10/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Failed to retrieve 10 test-bundle manifest
@@ -134,7 +134,7 @@ test_setup() {
 	assert_status_is "$SWUPD_RECURSE_MANIFEST"
 	expected_output=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 (in format staging)
 		Error: Curl - Error downloading to local file - 'file://$ABS_TEST_DIR/web-dir/20/Manifest.test-bundle.tar'
 		Error: Curl - Check free space for $ABS_TEST_DIR/testfs/state?
 		Error: Failed to retrieve 20 test-bundle manifest
@@ -158,7 +158,7 @@ test_setup() {
 	assert_status_is "$SWUPD_COULDNT_DOWNLOAD_FILE"
 	expected_output1=$(cat <<-EOM
 		Update started
-		Preparing to update from 10 to 20
+		Preparing to update from 10 to 20 \(in format staging\)
 		Downloading packs \\(20.*\\) for:
 	EOM
 	)

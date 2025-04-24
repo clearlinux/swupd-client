@@ -31,7 +31,7 @@ test_setup() {
 		Warning: This is an insecure connection
 		The --allow-insecure-http flag was used, be aware that this poses a threat to the system
 		Update started
-		Preparing to update from 10 to 100
+		Preparing to update from 10 to 100 \(in format staging\)
 		Downloading packs for:
 		 - test-bundle
 		Error: Curl - File incompletely downloaded - '.*/100/pack-test-bundle-from-10.tar'

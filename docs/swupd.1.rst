@@ -6,7 +6,7 @@ swupd
 OS software update program
 --------------------------
 
-:Copyright: \(C) 2020 Intel Corporation, CC-BY-SA-3.0
+:Copyright: \(C) 2020-2025 Intel Corporation, CC-BY-SA-3.0
 :Manual section: 1
 
 

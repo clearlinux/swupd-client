@@ -6,7 +6,7 @@ swupd-update.timer
 Schedules periodical updates
 ----------------------------
 
-:Copyright: \(C) 2017 Intel Corporation, CC-BY-SA-3.0
+:Copyright: \(C) 2017-2025 Intel Corporation, CC-BY-SA-3.0
 :Manual section: 4
 
 

@@ -36,6 +36,7 @@
 #include <curl/curl.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -378,6 +379,7 @@ static size_t swupd_download_file_to_memory(void *ptr, size_t size, size_t nmemb
 
 CURLcode swupd_download_file_create(struct curl_file *file)
 {
+	mkdir_p(dirname(strdupa(file->path)));
 	file->fh = fopen(file->path, "w");
 	if (!file->fh) {
 		error("Curl - Cannot open file '%s' for writing - '%s'\n",
